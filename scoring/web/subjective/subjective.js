@@ -517,6 +517,13 @@
 		},
 
 		saveScore : function(score) {
+			if(score.deleted && !score.scoreOnServer) {
+				// don't bother saving scores not on the server that are deleted
+				// This should keep one judge from deleting another judge's scores
+				$.subjective.log("Ignoring deleted score not on the server");
+				return;
+			}
+			
 			var categoryScores = _allScores[_currentCategory.name];
 			if (null == categoryScores) {
 				categoryScores = {}

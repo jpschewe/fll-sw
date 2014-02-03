@@ -82,7 +82,8 @@ public class SubjectiveScoresServlet extends HttpServlet {
         rs = prep.executeQuery();
         while (rs.next()) {
           final SubjectiveScore score = new SubjectiveScore();
-
+          score.setScoreOnServer(true);
+          
           final String judge = rs.getString("Judge");
           final Map<Integer, SubjectiveScore> judgeScores;
           if (categoryScores.containsKey(judge)) {

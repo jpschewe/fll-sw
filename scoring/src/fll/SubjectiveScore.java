@@ -23,6 +23,17 @@ public class SubjectiveScore {
     mNote = null;
     mStandardSubScores = new HashMap<String, Double>();
     mEnumSubScores = new HashMap<String, String>();
+    mScoreOnServer = false;
+  }
+
+  private boolean mScoreOnServer;
+
+  public boolean getScoreOnServer() {
+    return mScoreOnServer;
+  }
+
+  public void setScoreOnServer(final boolean v) {
+    mScoreOnServer = v;
   }
 
   private boolean mNoShow;
