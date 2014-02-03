@@ -14,9 +14,8 @@ $(document).on(
 		"#choose-judging-group-page",
 		function(event) {
 
-			
 			$("#choose-judging-group_judging-groups").empty();
-			
+
 			var judgingGroups = $.subjective.getJudgingGroups();
 			$.each(judgingGroups, function(i, group) {
 				var button = $("<button class='ui-btn ui-corner-all'>" + group
@@ -40,8 +39,7 @@ $(document).on(
 		"pagebeforeshow",
 		"#choose-category-page",
 		function(event) {
-			$.subjective.log("refreshing choose-category page");
-
+			
 			$("#choose-category_categories").empty();
 
 			var categories = $.subjective.getSubjectiveCategories();
@@ -57,61 +55,68 @@ $(document).on(
 
 			var currentJudgingGroup = $.subjective.getCurrentJudgingGroup();
 			$("#choose-category_judging-group").text(currentJudgingGroup);
-			
+
 			$("#choose-category-page").trigger("create");
-			});
-
-
-$(document).on(
-		"pagebeforeshow",
-		"#choose-judge-page",
-		function(event) {
-			$.subjective.log("refreshing choose judge page");
-			
-			$("#choose-judge_new-judge-info").hide();
-
-			$("#choose-judge_judges").empty();
-			$("#choose-judge_judges").append(
-					"<input type='radio' name='judge' id='choose-judge_new-judge' value='new-judge'>");
-			$("#choose-judge_judges").append(
-					"<label for='choose-judge_new-judge'>New Judge</label>");
-			
-			var judges = $.subjective.getPossibleJudges();
-			$.each(judges, function(i, judge) {
-				$("#choose-judge_judges").append(
-						"<input type='radio' name='judge' id='choose-judge_" + judge.id
-								+ "' value='" + judge.id + "'>");
-				$("#choose-judge_judges").append(
-						"<label for='choose-judge_" + judge.id + "'>" + judge.id
-								+ "</label>");
-			});
-
-			var currentJudgingGroup = $.subjective.getCurrentJudgingGroup();
-			$("#choose-judge_judging-group").text(currentJudgingGroup);
-
-			var currentCategory = $.subjective.getCurrentCategory();
-			$("#choose-judge_category").text(currentCategory.title);
-
-			var currentJudge = $.subjective.getCurrentJudge();
-			if (null != currentJudge) {
-				$("input:radio[value=\"" + currentJudge.id + "\"]").prop(
-						'checked', true);
-			} else {
-				$("input:radio[value='new-judge']").prop('checked', true);
-				$("#choose-judge_new-judge-info").show();
-			}
-						
-			$("input[name=judge]:radio").change(function () {
-				var judgeID = $("input:radio[name='judge']:checked").val();
-				if ('new-judge' == judgeID) {
-					$("#choose-judge_new-judge-info").show();
-				} else {
-					$("#choose-judge_new-judge-info").hide();
-				}
-			});
-			
-			$("#choose-judge-page").trigger("create");
 		});
+
+$(document)
+		.on(
+				"pagebeforeshow",
+				"#choose-judge-page",
+				function(event) {
+
+					$("#choose-judge_new-judge-info").hide();
+
+					$("#choose-judge_judges").empty();
+					$("#choose-judge_judges")
+							.append(
+									"<input type='radio' name='judge' id='choose-judge_new-judge' value='new-judge'>");
+					$("#choose-judge_judges")
+							.append(
+									"<label for='choose-judge_new-judge'>New Judge</label>");
+
+					var judges = $.subjective.getPossibleJudges();
+					$.each(judges, function(i, judge) {
+						$("#choose-judge_judges").append(
+								"<input type='radio' name='judge' id='choose-judge_"
+										+ judge.id + "' value='" + judge.id
+										+ "'>");
+						$("#choose-judge_judges").append(
+								"<label for='choose-judge_" + judge.id + "'>"
+										+ judge.id + "</label>");
+					});
+
+					var currentJudgingGroup = $.subjective
+							.getCurrentJudgingGroup();
+					$("#choose-judge_judging-group").text(currentJudgingGroup);
+
+					var currentCategory = $.subjective.getCurrentCategory();
+					$("#choose-judge_category").text(currentCategory.title);
+
+					var currentJudge = $.subjective.getCurrentJudge();
+					if (null != currentJudge) {
+						$("input:radio[value=\"" + currentJudge.id + "\"]")
+								.prop('checked', true);
+					} else {
+						$("input:radio[value='new-judge']").prop('checked',
+								true);
+						$("#choose-judge_new-judge-info").show();
+					}
+
+					$("input[name=judge]:radio").change(
+							function() {
+								var judgeID = $(
+										"input:radio[name='judge']:checked")
+										.val();
+								if ('new-judge' == judgeID) {
+									$("#choose-judge_new-judge-info").show();
+								} else {
+									$("#choose-judge_new-judge-info").hide();
+								}
+							});
+
+					$("#choose-judge-page").trigger("create");
+				});
 
 $(document).on("pageinit", "#choose-judge-page", function(event) {
 
@@ -130,22 +135,20 @@ function setJudge() {
 			return;
 		}
 		judgeID = judgeID.toUpperCase();
-		
+
 		var phone = $("#choose-judge_new-judge-phone").val();
 		if (null == phone || "" == phone) {
 			alert("You must enter a phone nunmber");
 			return;
 		}
-		
+
 		$.subjective.addJudge(judgeID, phone);
 	}
-
 
 	$.subjective.setCurrentJudge(judgeID);
 
 	$.mobile.navigate("#teams-list-page");
 }
-
 
 function selectTeam(team) {
 	$.subjective.setCurrentTeam(team);
@@ -200,7 +203,8 @@ $(document).on("pagebeforeshow", "#teams-list-page", function(event) {
 function uploadScoresSuccess(result) {
 	populateTeams();
 
-	alert("Uploaded " + result.numModified + " scores. message: " + result.message);
+	alert("Uploaded " + result.numModified + " scores. message: "
+			+ result.message);
 }
 
 function uploadScoresFail(result) {
@@ -217,7 +221,8 @@ function uploadScoresFail(result) {
 }
 
 function uploadJudgesSuccess(result) {
-	$.subjective.log("Judges modified: " + result.numModifiedJudges + " new: " + result.numNewJudges);
+	$.subjective.log("Judges modified: " + result.numModifiedJudges + " new: "
+			+ result.numNewJudges);
 }
 
 function uploadJudgesFail(result) {
@@ -241,31 +246,35 @@ function loadScoresFail(message) {
 	alert("Failed to load scores from server: " + message);
 }
 
-$(document).on("pageinit", "#teams-list-page", function(event) {
-	$("#upload-scores-wait").hide();
+$(document).on(
+		"pageinit",
+		"#teams-list-page",
+		function(event) {
+			$("#upload-scores-wait").hide();
 
-	$("#nav-top").click(function() {
-		location.href = "index.html";
-	});
-	$("#nav-choose-judging-group").click(function() {
-		$.mobile.navigate("#choose-judge-page");
-	});
-	$("#nav-choose-category").click(function() {
-		$.mobile.navigate("#choose-category-page");
-	});
-	$("#nav-choose-judge").click(function() {
-		$.mobile.navigate("#choose-judge-page");
-	});
+			$("#nav-top").click(function() {
+				location.href = "index.html";
+			});
+			$("#nav-choose-judging-group").click(function() {
+				$.mobile.navigate("#choose-judge-page");
+			});
+			$("#nav-choose-category").click(function() {
+				$.mobile.navigate("#choose-category-page");
+			});
+			$("#nav-choose-judge").click(function() {
+				$.mobile.navigate("#choose-judge-page");
+			});
 
-	$("#upload-scores").click(function() {
-		$("#upload-scores-wait").show();
+			$("#upload-scores").click(
+					function() {
+						$("#upload-scores-wait").show();
 
-		$.subjective.uploadData(uploadScoresSuccess, uploadScoresFail,
-				uploadJudgesSuccess, uploadJudgesFail,
-				loadScoresSuccess, loadScoresFail);
-	});
-});
-
+						$.subjective.uploadData(uploadScoresSuccess,
+								uploadScoresFail, uploadJudgesSuccess,
+								uploadJudgesFail, loadScoresSuccess,
+								loadScoresFail);
+					});
+		});
 
 function createNewScore() {
 	score = new Object();
@@ -335,7 +344,8 @@ function createScoreRow(goal, subscore) {
 	rightBlock.append(rightContainer);
 
 	var scoreBlock = $("<div class=\"ui-block-a\"></div>");
-	var scoreSelect = $("<select id=\"enter-score_" + goal.name + "\"></select>");
+	var scoreSelect = $("<select id=\"enter-score_" + goal.name
+			+ "\"></select>");
 	scoreSelect.change(function() {
 		recomputeTotal();
 	});
@@ -369,9 +379,10 @@ function createScoreRow(goal, subscore) {
 
 		var scoreCopy = $.extend(true, {}, score);
 		saveToScoreObject(scoreCopy);
+		scoreCopy.deleted = false;
 		$.subjective.setTempScore(scoreCopy);
 		$.subjective.setCurrentGoal(goal);
-		location.href = "rubric.html";
+		$.mobile.navigate("#rubric-page");
 	});
 
 	row.append(rightContainer);
@@ -396,7 +407,6 @@ $(document).on("pagebeforeshow", "#enter-score-page", function(event) {
 		$("#enter-score-note-text").val("");
 	}
 
-	
 	$("#enter-score_score-content").empty();
 	$.each($.subjective.getCurrentCategory().goals, function(index, goal) {
 		if (goal.enumerated) {
@@ -406,6 +416,7 @@ $(document).on("pagebeforeshow", "#enter-score-page", function(event) {
 			if ($.subjective.isScoreCompleted(score)) {
 				subscore = score.standardSubScores[goal.name];
 			}
+			 
 			createScoreRow(goal, subscore);
 		}
 	});
@@ -415,7 +426,7 @@ $(document).on("pagebeforeshow", "#enter-score-page", function(event) {
 	// clear out temp state so that we don't get it again
 	$.subjective.setTempScore(null);
 	$.subjective.setCurrentGoal(null);
-	
+
 	$("#enter-score-page").trigger("create");
 });
 
@@ -472,6 +483,122 @@ $(document).on("pageinit", "#enter-score-page", function(event) {
 		$.subjective.saveScore(score);
 
 		$.mobile.navigate("#teams-list-page");
+	});
+
+});
+
+function setRubricScore(value) {
+	$("#rubric-score").val(value).selectmenu("refresh", true);
+}
+
+function rangeSort(a, b) {
+	if (a.min < b.min) {
+		return -1;
+	} else if (a.min > b.min) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+function populateRubric(goal) {
+	$("#rubric-content").empty();
+
+	var ranges = goal.rubric;
+	ranges.sort(rangeSort);
+
+	var ndGrid = $("<div class=\"ui-grid-a\"></div>");
+	var ndBlockA = $("<div class=\"ui-grid-a rubric-not-done\">Not Done</div>");
+	var ndBlockB = $("<div class=\"ui-grid-b\"></div>");
+	var ndButton = $("<button>Set</button>");
+	ndButton.click(function() {
+		setRubricScore(0);
+	});
+	ndBlockB.append(ndButton);
+	ndGrid.append(ndBlockA);
+	ndGrid.append(ndBlockB);
+	$("#rubric-content").append(ndGrid);
+
+	$.each(ranges, function(index, range) {
+		var titleDiv = $("<div class=\"rubric-title\">" + range.title + " ("
+				+ range.min + "-" + range.max + ")<div>");
+		$("#rubric-content").append(titleDiv);
+
+		var grid = $("<div class=\"ui-grid-a\"></div>");
+		var blockA = $("<div class=\"ui-grid-a\"></div>");
+		blockA.text(range.description);
+
+		var blockB = $("<div class=\"ui-grid-b\"></div>");
+		var button = $("<button>Set</button>");
+		button.click(function() {
+			var mid = Math.floor((range.min + range.max) / 2);
+			setRubricScore(mid);
+		});
+		blockB.append(button);
+
+		grid.append(blockA);
+		grid.append(blockB);
+		$("#rubric-content").append(grid);
+
+	});
+}
+
+$(document).on("pagebeforeshow", "#rubric-page", function(event) {
+	var goal = $.subjective.getCurrentGoal();
+
+	if (goal.scoreType == "INTEGER") {
+		for (var v = Number(goal.min); v <= Number(goal.max); ++v) {
+			var option = $("<option value=\"" + v + "\">" + v + "</option>");
+			$("#rubric-score").append(option);
+		}
+	} else {
+		alert("Non-integer goals are not supported: " + goal.name);
+	}
+
+	$("#rubric-category").text(goal.category);
+	$("#rubric-goal-title").text(goal.title);
+	$("#rubric-description").text(goal.description);
+
+	populateRubric(goal);
+
+	$("#rubric-page").trigger("create");
+});
+
+$(document).on(
+		"pageshow",
+		"#rubric-page",
+		function(event) {
+			var score = $.subjective.getTempScore();
+			var goal = $.subjective.getCurrentGoal();
+
+			var subscore;
+			if (goal.enumerated) {
+				subscore = null;
+				$.subjective.log("enumerated score: "
+						+ score.enumSubScores[goal.name]);
+			} else {
+				subscore = score.standardSubScores[goal.name];
+			}
+			setRubricScore(subscore);
+
+		});
+
+$(document).on("pageinit", "#rubric-page", function(event) {
+	$("#rubric-save-score").click(function() {
+		var score = $.subjective.getTempScore();
+		var goal = $.subjective.getCurrentGoal();
+		if (goal.enumerated) {
+			alert("Enumerated unsupported");
+		} else {
+			score.standardSubScores[goal.name] = $("#rubric-score").val();
+			$.subjective.setTempScore(score);
+			$.mobile.navigate("#enter-score-page");
+		}
+
+	});
+
+	$("#rubric-cancel-score").click(function() {
+		$.mobile.navigate("#enter-score-page");
 	});
 
 });
