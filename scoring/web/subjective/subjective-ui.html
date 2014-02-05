@@ -15,6 +15,20 @@
 <script type='text/javascript' src='subjective.js'></script>
 <script type='text/javascript' src='subjective-ui.js'></script>
 
+<style>
+.ui-grid-a>.ui-block-a.team-info {
+	width: 90%;
+}
+
+.ui-grid-a>.ui-block-b.score {
+	width: 10%;
+}
+
+.score.tie {
+	background-color: red;
+}
+</style>
+
 </head>
 
 <body>
@@ -27,13 +41,12 @@
 
   <div class="ui-content" role="main">
 
-<div id='choose-judging-group_judging-groups'></div>
+   <div id='choose-judging-group_judging-groups'></div>
 
   </div>
   <!-- /content -->
 
-  <div data-role="footer" data-position="fixed">
-  </div>
+  <div data-role="footer" data-position="fixed"></div>
   <!-- /footer -->
 
  </div>
@@ -49,19 +62,21 @@
 
   <div class="ui-content" role="main">
 
-<div id='choose-category_categories'></div>
+   <div id='choose-category_categories'></div>
 
   </div>
   <!-- /content -->
 
   <div data-role="footer" data-position="fixed">
-  <p>Judging Group: <span id='choose-category_judging-group'></span></p>
+   <p>
+    <span id='choose-category_judging-group'></span>
+   </p>
   </div>
   <!-- /footer -->
 
  </div>
  <!-- /page choose-category -->
- 
+
  <div data-role="page" id='choose-judge-page'>
 
   <div data-role="header">
@@ -71,7 +86,8 @@
 
   <div class="ui-content" role="main">
 
-   <p>Are you one of the known judges? If not, select 'New Judge' and enter your information.</p>
+   <p>Are you one of the known judges? If not, select 'New Judge'
+    and enter your information.</p>
 
    <div class="ui-field-contain">
     <fieldset id='choose-judge_judges' data-role="controlgroup">
@@ -79,11 +95,11 @@
    </div>
 
    <p id='choose-judge_new-judge-info'>
-   <input type='text' id='choose-judge_new-judge-name' data-clear-btn='true'
-    placeholder='Enter your name' /><br/> Phone number is required in
-    case we need to contact you<br/>
-   <input type='text' id='choose-judge_new-judge-phone' data-clear-btn='true'
-    placeholder='Enter your phone number' /><br/>
+    <input type='text' id='choose-judge_new-judge-name'
+     data-clear-btn='true' placeholder='Enter your name' /><br />
+    Phone number is required in case we need to contact you<br /> <input
+     type='text' id='choose-judge_new-judge-phone' data-clear-btn='true'
+     placeholder='Enter your phone number' /><br />
    </p>
 
    <button class='ui-btn ui-corner-all' id='choose-judge_judge-submit'>Submit</button>
@@ -93,7 +109,7 @@
 
   <div data-role="footer" data-position="fixed">
    <p>
-    Judging Group: <span id='choose-judge_judging-group'></span> - Category: <span
+    <span id='choose-judge_judging-group'></span> - <span
      id='choose-judge_category'></span>
    </p>
   </div>
@@ -101,7 +117,7 @@
 
  </div>
  <!-- /page choose-judge -->
- 
+
  <div data-role="page" id='teams-list-page'>
 
   <div data-role="header">
@@ -110,7 +126,7 @@
   <!-- /header -->
 
   <div class="ui-content" role="main">
-   <div id="upload-scores-wait"
+   <div id="teams-list_upload-scores-wait"
     style="position: absolute; top: 50%; left: 50%;">
     <img src="../extlib/images/ajax-loader.gif" /> Uploading Scores...
    </div>
@@ -121,33 +137,35 @@
   <!-- /content -->
 
   <div data-role="footer" data-position="fixed">
-   <a href="#nav-panel"
+   <a href="#teams-list_nav-panel"
     class="ui-btn ui-corner-all ui-shadow ui-btn-icon-notext ui-icon-gear ui-mini"></a>
 
-   Judging Group: <span id='teams-list_judging-group'></span> - Category: <span
-    id='teams-list_category'></span>
+   <span id='teams-list_judging-group'></span> - <span
+    id='teams-list_category'></span> - <span id='teams-list_judge'></span>
   </div>
   <!-- /footer -->
 
   <!-- side panel -->
-  <div data-role="panel" id="nav-panel" data-display="overlay">
+  <div data-role="panel" id="teams-list_nav-panel"
+   data-display="overlay">
    <ul data-role="listview">
     <li data-icon="delete"><a href="#" data-rel="close">Close</a></li>
-    <li><a id="nav-top">Top</a></li>
-    <li><a id="nav-choose-judging-group">Choose Judging
+    <li><a href="index.html">Top</a></li>
+    <li><a href="#choose-judging-group-page">Choose Judging
       Group</a></li>
-    <li><a id='nav-choose-category'>Choose Category</a></li>
-    <li><a id="nav-choose-judge">Choose Judge</a></li>
+    <li><a href="#choose-category-page">Choose Category</a></li>
+    <li><a href="#choose-judge-page">Choose Judge</a></li>
+    <li><a href="#score-summary-page">Score Summary</a>
    </ul>
    <br /> <br />
-   <button class="ui-btn ui-corner-all ui-shadow" id="upload-scores">Upload
-    Scores</button>
+   <button class="ui-btn ui-corner-all ui-shadow"
+    id="teams-list_upload-scores">Upload Scores</button>
   </div>
   <!-- end side panel -->
 
  </div>
  <!-- /page teams-list -->
- 
+
  <div data-role="page" id='enter-score-page'>
 
   <div data-role="header" data-position="fixed">
@@ -163,8 +181,8 @@
     </div>
 
     <div class="ui-block-a">
-     <a id="enter-score-note-button" href="#enter-score-note" data-rel="popup"
-      data-position-to="window"
+     <a id="enter-score-note-button" href="#enter-score-note"
+      data-rel="popup" data-position-to="window"
       class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-a">Edit
       Note</a>
     </div>
@@ -191,11 +209,13 @@
    <div class="ui-grid-c ui-responsive">
 
     <div class="ui-block-a">
-     <button id='enter-score_save-score' data-mini="true">Save Changes</button>
+     <button id='enter-score_save-score' data-mini="true">Save
+      Changes</button>
     </div>
 
     <div class="ui-block-b">
-     <button id='enter-score_cancel-score' data-mini="true">Cancel Changes</button>
+     <button id='enter-score_cancel-score' data-mini="true">Cancel
+      Changes</button>
     </div>
 
     <div class="ui-block-c">
@@ -203,7 +223,8 @@
     </div>
 
     <div class="ui-block-d">
-     <button id='enter-score_noshow-score' data-mini="true">No Show</button>
+     <button id='enter-score_noshow-score' data-mini="true">No
+      Show</button>
     </div>
 
    </div>
@@ -212,43 +233,42 @@
   <!-- /footer -->
 
 
-  <div id="enter-score-note" class="ui-content" data-role="popup" data-dismissible="false">
+  <div id="enter-score-note" class="ui-content" data-role="popup"
+   data-dismissible="false">
    <textarea id="enter-score-note-text" rows="20" cols="60"></textarea>
 
-     <a href="#" data-rel="back" id="enter-score-note-save"
-      class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b">Save</a>
+   <a href="#" data-rel="back" id="enter-score-note-save"
+    class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b">Save</a>
 
- </div>
+  </div>
 
  </div>
  <!-- end enter-score-page -->
- 
-  <div data-role="page" id='rubric-page'>
+
+ <div data-role="page" id='rubric-page'>
 
   <div data-role="header" data-position="fixed">
 
    <div class="ui-grid-a">
 
     <div class="ui-block-a">
-      <span id="rubric-category"></span>
+     <span id="rubric-category"></span>
     </div>
 
     <div class="ui-block-b">
-      <span id="rubric-goal-title"></span>
+     <span id="rubric-goal-title"></span>
     </div>
 
-    <div class="ui-block-a">
-     Score
-    </div>
+    <div class="ui-block-a">Score</div>
 
     <div class="ui-block-b">
-    <select id="rubric-score"></select>
+     <select id="rubric-score"></select>
     </div>
 
    </div>
    <!-- end grid -->
 
-<div id="rubric-description"></div>
+   <div id="rubric-description"></div>
 
   </div>
   <!-- /header -->
@@ -265,11 +285,13 @@
    <div class="ui-grid-a ui-responsive">
 
     <div class="ui-block-a">
-     <button id='rubric-save-score' data-mini="true">Save Changes</button>
+     <button id='rubric-save-score' data-mini="true">Save
+      Changes</button>
     </div>
 
     <div class="ui-block-b">
-     <button id='rubric-cancel-score' data-mini="true">Cancel Changes</button>
+     <button id='rubric-cancel-score' data-mini="true">Cancel
+      Changes</button>
     </div>
 
    </div>
@@ -279,7 +301,53 @@
 
  </div>
  <!-- end rubric-page -->
- 
- 
+
+ <div data-role="page" id="score-summary-page">
+
+  <div data-role="header">
+   <h1>Score Summary</h1>
+  </div>
+
+
+  <div class="ui-content" role="main">
+   <div id="score-summary_upload-scores-wait"
+    style="position: absolute; top: 50%; left: 50%;">
+    <img src="../extlib/images/ajax-loader.gif" /> Uploading Scores...
+   </div>
+
+   <div id='score-summary_content'></div>
+  </div>
+
+
+  <div data-role="footer" data-position="fixed">
+   <a href="#score-summary_nav-panel"
+    class="ui-btn ui-corner-all ui-shadow ui-btn-icon-notext ui-icon-gear ui-mini"></a>
+
+   <span id='score-summary_judging-group'></span> - <span
+    id='score-summary_category'></span> - <span id='score-summary_judge'></span>
+
+  </div>
+
+  <!-- side panel -->
+  <div data-role="panel" id="score-summary_nav-panel"
+   data-display="overlay">
+   <ul data-role="listview">
+    <li data-icon="delete"><a href="#" data-rel="close">Close</a></li>
+    <li><a href="index.html">Top</a></li>
+    <li><a href="#choose-judging-group-page">Choose Judging
+      Group</a></li>
+    <li><a href="#choose-category-page">Choose Category</a></li>
+    <li><a href="#choose-judge-page">Choose Judge</a></li>
+    <li><a href="#teams-list-page">Enter Scores</a></li>
+   </ul>
+   <br /> <br />
+   <button class="ui-btn ui-corner-all ui-shadow"
+    id="score-summary_upload-scores">Upload Scores</button>
+  </div>
+  <!-- end side panel -->
+
+ </div>
+ <!--  end score-summary-page -->
+
 </body>
 </html>

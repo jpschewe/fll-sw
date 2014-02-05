@@ -185,94 +185,85 @@ function populateTeams() {
 		});
 
 	});
+
+	$("#teams-list-page").trigger("create");
 }
 
 $(document).on("pagebeforeshow", "#teams-list-page", function(event) {
-
-	populateTeams();
-
 	var currentJudgingGroup = $.subjective.getCurrentJudgingGroup();
 	$("#teams-list_judging-group").text(currentJudgingGroup);
 
 	var currentCategory = $.subjective.getCurrentCategory();
 	$("#teams-list_category").text(currentCategory.title);
 
-	$("#teams-list-page").trigger("create");
+	var currentJudge = $.subjective.getCurrentJudge();
+	$("#teams-list_judge").text(currentJudge.id);
+
+	populateTeams();
 });
 
-function uploadScoresSuccess(result) {
-	populateTeams();
-
-	alert("Uploaded " + result.numModified + " scores. message: "
-			+ result.message);
-}
-
-function uploadScoresFail(result) {
-	populateTeams();
-
-	var message;
-	if (null == result) {
-		message = "Unknown server error";
-	} else {
-		message = result.message;
-	}
-
-	alert("Failed to upload scores: " + message);
-}
-
-function uploadJudgesSuccess(result) {
-	$.subjective.log("Judges modified: " + result.numModifiedJudges + " new: "
-			+ result.numNewJudges);
-}
-
-function uploadJudgesFail(result) {
-	var message;
-	if (null == result) {
-		message = "Unknown server error";
-	} else {
-		message = result.message;
-	}
-
-	alert("Failed to upload judges: " + message);
-}
-
-function loadScoresSuccess() {
-	$("#upload-scores-wait").hide();
-}
-
-function loadScoresFail(message) {
-	$("#upload-scores-wait").hide();
-
-	alert("Failed to load scores from server: " + message);
-}
+$(document).on("pageshow", "#teams-list-page", function(event) {
+	$("#teams-list_upload-scores-wait").hide();
+});
 
 $(document).on(
 		"pageinit",
 		"#teams-list-page",
 		function(event) {
-			$("#upload-scores-wait").hide();
-
-			$("#nav-top").click(function() {
-				location.href = "index.html";
-			});
-			$("#nav-choose-judging-group").click(function() {
-				$.mobile.navigate("#choose-judge-page");
-			});
-			$("#nav-choose-category").click(function() {
-				$.mobile.navigate("#choose-category-page");
-			});
-			$("#nav-choose-judge").click(function() {
-				$.mobile.navigate("#choose-judge-page");
-			});
-
-			$("#upload-scores").click(
+			$("#teams-list_upload-scores").click(
 					function() {
-						$("#upload-scores-wait").show();
+						$("#teams-list_upload-scores-wait").show();
 
-						$.subjective.uploadData(uploadScoresSuccess,
-								uploadScoresFail, uploadJudgesSuccess,
-								uploadJudgesFail, loadScoresSuccess,
-								loadScoresFail);
+						$.subjective.uploadData(function(result) {
+							// scoresSuccess
+							populateTeams();
+
+							alert("Uploaded " + result.numModified
+									+ " scores. message: " + result.message);
+						}, //
+						function(result) {
+							// scoresFail
+							populateTeams();
+
+							var message;
+							if (null == result) {
+								message = "Unknown server error";
+							} else {
+								message = result.message;
+							}
+
+							alert("Failed to upload scores: " + message);
+						}, //
+						function(result) {
+							// judgesSuccess
+							$.subjective.log("Judges modified: "
+									+ result.numModifiedJudges + " new: "
+									+ result.numNewJudges);
+						}
+
+						,//
+						function(result) {
+							// judgesFail
+							var message;
+							if (null == result) {
+								message = "Unknown server error";
+							} else {
+								message = result.message;
+							}
+
+							alert("Failed to upload judges: " + message);
+						}, //
+						function() {
+							// loadSuccess
+							$("#teams-list_upload-scores-wait").hide();
+						}, //
+						function(message) {
+							// loadFail
+							$("#teams-list_upload-scores-wait").hide();
+
+							alert("Failed to load scores from server: "
+									+ message);
+						});
 					});
 		});
 
@@ -604,3 +595,139 @@ $(document).on("pageinit", "#rubric-page", function(event) {
 	});
 
 });
+
+function populateScoreSummary() {
+	$("#score-summary_content").empty();
+
+	var teamScores = {};
+	var teamsWithScores = [];
+
+	var teams = $.subjective.getCurrentTeams();
+	$.each(teams, function(i, team) {
+		var score = $.subjective.getScore(team.teamNumber);
+		if ($.subjective.isScoreCompleted(score) && !score.noShow) {
+			teamsWithScores.push(team);
+
+			var computedScore = $.subjective.computeScore(score);
+			teamScores[team.teamNumber] = computedScore;
+		}
+	});
+
+	teamsWithScores.sort(function(a, b) {
+		var scoreA = teamScores[a.teamNumber];
+		var scoreB = teamScores[b.teamNumber];
+		return scoreA < scoreB ? 1 : scoreA > scoreB ? -1 : 0;
+	});
+
+	var rank = 0;
+	var rankOffset = 1;
+	var prevScore = null;
+	$.each(teamsWithScores, function(i, team) {
+		var computedScore = teamScores[team.teamNumber];
+
+		var teamRow = $("<div class=\"ui-grid-a ui-responsive\"></div>");
+
+		var teamBlock = $("<div class=\"ui-block-a team-info\">" + rank + " - #"
+				+ team.teamNumber + "  - " + team.teamName + "</div>");
+		teamRow.append(teamBlock);
+
+		var scoreBlock = $("<div class=\"ui-block-b score " + tieClass + "\">" + computedScore
+				+ "</div>");
+		teamRow.append(scoreBlock);
+		$("#score-summary_content").append(teamRow);
+
+
+		var score = $.subjective.getScore(team.teamNumber);
+		var noteRow;
+		if (null != score.note) {
+			noteRow = $("<div>" + score.note + "</div>");
+		} else {
+			noteRow = $("<div>No notes</div>");
+		}
+		$("#score-summary_content").append(noteRow);
+		$("#score-summary_content").append($("<hr/>"));
+
+		prevScore = computedScore;
+	});
+
+	$("#score-summary-page").trigger("create");
+}
+
+$(document).on("pagebeforeshow", "#score-summary-page", function(event) {
+
+	var currentJudgingGroup = $.subjective.getCurrentJudgingGroup();
+	$("#score-summary_judging-group").text(currentJudgingGroup);
+
+	var currentCategory = $.subjective.getCurrentCategory();
+	$("#score-summary_category").text(currentCategory.title);
+
+	var currentJudge = $.subjective.getCurrentJudge();
+	$("#score-summary_judge").text(currentJudge.id);
+
+	populateScoreSummary();
+});
+
+$(document).on("pageshow", "#score-summary-page", function(event) {
+	$("#score-summary_upload-scores-wait").hide();
+});
+
+$(document).on(
+		"pageinit",
+		"#score-summary-page",
+		function(event) {
+			$("#score-summary_upload-scores").click(
+					function() {
+						$("#score-summary_upload-scores-wait").show();
+
+						$.subjective.uploadData(function(result) {
+							// scoresSuccess
+							populateScoreSummary();
+
+							alert("Uploaded " + result.numModified
+									+ " scores. message: " + result.message);
+						}, //
+						function(result) {
+							// scoresFail
+							populateScoreSummary();
+
+							var message;
+							if (null == result) {
+								message = "Unknown server error";
+							} else {
+								message = result.message;
+							}
+
+							alert("Failed to upload scores: " + message);
+						}, //
+						function(result) {
+							// judgesSuccess
+							$.subjective.log("Judges modified: "
+									+ result.numModifiedJudges + " new: "
+									+ result.numNewJudges);
+						}
+
+						,//
+						function(result) {
+							// judgesFail
+							var message;
+							if (null == result) {
+								message = "Unknown server error";
+							} else {
+								message = result.message;
+							}
+
+							alert("Failed to upload judges: " + message);
+						}, //
+						function() {
+							// loadSuccess
+							$("#score-summary_upload-scores-wait").hide();
+						}, //
+						function(message) {
+							// loadFail
+							$("#score-summary_upload-scores-wait").hide();
+
+							alert("Failed to load scores from server: "
+									+ message);
+						});
+					});
+		});
