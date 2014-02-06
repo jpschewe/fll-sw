@@ -625,6 +625,26 @@ function populateScoreSummary() {
 	$.each(teamsWithScores, function(i, team) {
 		var computedScore = teamScores[team.teamNumber];
 
+		var prevScore = null;
+		if(i > 0) {
+			var prevTeam = teamsWithScores[i-1];
+			prevScore = teamScores[prevTeam.teamNumber];
+		}
+		
+		var nextScore = null;
+		if(i+1 < teamsWithScores.length) {
+			var nextTeam = teamsWithScores[i+1];
+			nextScore = teamScores[nextTeam.teamNumber];
+		}
+		
+		var tieClass = "";
+		if(prevScore == computedScore) {
+			tieClass = "tie";
+		}
+		if(nextScore == computedScore) {
+			tieClass = "tie";
+		}
+		
 		var teamRow = $("<div class=\"ui-grid-a ui-responsive\"></div>");
 
 		var teamBlock = $("<div class=\"ui-block-a team-info\">" + rank + " - #"
