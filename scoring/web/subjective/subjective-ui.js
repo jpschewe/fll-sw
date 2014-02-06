@@ -60,13 +60,15 @@ $(document).on(
 						function() {
 							// loadSuccess
 							populateChooseJudgingGroup();
-							$("#choose-judging-group_upload-scores-wait").hide();
+							$("#choose-judging-group_upload-scores-wait")
+									.hide();
 						}, //
 						function(message) {
 							// loadFail
 							populateChooseJudgingGroup();
 
-							$("#choose-judging-group_upload-scores-wait").hide();
+							$("#choose-judging-group_upload-scores-wait")
+									.hide();
 
 							alert("Failed to load scores from server: "
 									+ message);
@@ -91,9 +93,7 @@ function populateChooseJudgingGroup() {
 	$("#choose-judging-group-page").trigger("create");
 }
 
-$(document).on(
-		"pagebeforeshow",
-		"#choose-judging-group-page",
+$(document).on("pagebeforeshow", "#choose-judging-group-page",
 		populateChooseJudgingGroup);
 
 function selectCategory(category) {
@@ -172,8 +172,8 @@ function populateChooseCategory() {
 
 	var categories = $.subjective.getSubjectiveCategories();
 	$.each(categories, function(i, category) {
-		var button = $("<button class='ui-btn ui-corner-all'>"
-				+ category.title + "</button>");
+		var button = $("<button class='ui-btn ui-corner-all'>" + category.title
+				+ "</button>");
 		$("#choose-category_categories").append(button);
 		button.click(function() {
 			selectCategory(category);
@@ -187,9 +187,7 @@ function populateChooseCategory() {
 	$("#choose-category-page").trigger("create");
 }
 
-$(document).on(
-		"pagebeforeshow",
-		"#choose-category-page",
+$(document).on("pagebeforeshow", "#choose-category-page",
 		populateChooseCategory);
 
 $(document).on("pageshow", "#choose-judge-page", function(event) {
@@ -265,23 +263,20 @@ function populateChooseJudge() {
 	$("#choose-judge_judges")
 			.append(
 					"<input type='radio' name='judge' id='choose-judge_new-judge' value='new-judge'>");
-	$("#choose-judge_judges")
-			.append(
-					"<label for='choose-judge_new-judge'>New Judge</label>");
+	$("#choose-judge_judges").append(
+			"<label for='choose-judge_new-judge'>New Judge</label>");
 
 	var judges = $.subjective.getPossibleJudges();
 	$.each(judges, function(i, judge) {
 		$("#choose-judge_judges").append(
-				"<input type='radio' name='judge' id='choose-judge_"
-						+ judge.id + "' value='" + judge.id
-						+ "'>");
+				"<input type='radio' name='judge' id='choose-judge_" + judge.id
+						+ "' value='" + judge.id + "'>");
 		$("#choose-judge_judges").append(
-				"<label for='choose-judge_" + judge.id + "'>"
-						+ judge.id + "</label>");
+				"<label for='choose-judge_" + judge.id + "'>" + judge.id
+						+ "</label>");
 	});
 
-	var currentJudgingGroup = $.subjective
-			.getCurrentJudgingGroup();
+	var currentJudgingGroup = $.subjective.getCurrentJudgingGroup();
 	$("#choose-judge_judging-group").text(currentJudgingGroup);
 
 	var currentCategory = $.subjective.getCurrentCategory();
@@ -289,37 +284,29 @@ function populateChooseJudge() {
 
 	var currentJudge = $.subjective.getCurrentJudge();
 	if (null != currentJudge) {
-		$("input:radio[value=\"" + currentJudge.id + "\"]")
-				.prop('checked', true);
-	} else {
-		$("input:radio[value='new-judge']").prop('checked',
+		$("input:radio[value=\"" + currentJudge.id + "\"]").prop('checked',
 				true);
+	} else {
+		$("input:radio[value='new-judge']").prop('checked', true);
 		$("#choose-judge_new-judge-info").show();
 	}
 
-	$("input[name=judge]:radio").change(
-			function() {
-				var judgeID = $(
-						"input:radio[name='judge']:checked")
-						.val();
-				if ('new-judge' == judgeID) {
-					$("#choose-judge_new-judge-info").show();
-				} else {
-					$("#choose-judge_new-judge-info").hide();
-				}
-			});
+	$("input[name=judge]:radio").change(function() {
+		var judgeID = $("input:radio[name='judge']:checked").val();
+		if ('new-judge' == judgeID) {
+			$("#choose-judge_new-judge-info").show();
+		} else {
+			$("#choose-judge_new-judge-info").hide();
+		}
+	});
 
 	$("#choose-judge-page").trigger("create");
 }
 
-$(document)
-		.on(
-				"pagebeforeshow",
-				"#choose-judge-page",
-				function(event) {
-					$("#choose-judge_new-judge-info").hide();
-					populateChooseJudge();
-				});
+$(document).on("pagebeforeshow", "#choose-judge-page", function(event) {
+	$("#choose-judge_new-judge-info").hide();
+	populateChooseJudge();
+});
 
 $(document).on("pageinit", "#choose-judge-page", function(event) {
 
@@ -824,54 +811,67 @@ function populateScoreSummary() {
 
 	var rank = 0;
 	var rankOffset = 1;
-	var prevScore = null;
-	$.each(teamsWithScores, function(i, team) {
-		var computedScore = teamScores[team.teamNumber];
+	$
+			.each(
+					teamsWithScores,
+					function(i, team) {
+						var computedScore = teamScores[team.teamNumber];
 
-		var prevScore = null;
-		if(i > 0) {
-			var prevTeam = teamsWithScores[i-1];
-			prevScore = teamScores[prevTeam.teamNumber];
-		}
-		
-		var nextScore = null;
-		if(i+1 < teamsWithScores.length) {
-			var nextTeam = teamsWithScores[i+1];
-			nextScore = teamScores[nextTeam.teamNumber];
-		}
-		
-		var tieClass = "";
-		if(prevScore == computedScore) {
-			tieClass = "tie";
-		}
-		if(nextScore == computedScore) {
-			tieClass = "tie";
-		}
-		
-		var teamRow = $("<div class=\"ui-grid-a ui-responsive\"></div>");
+						var prevScore = null;
+						if (i > 0) {
+							var prevTeam = teamsWithScores[i - 1];
+							prevScore = teamScores[prevTeam.teamNumber];
+						}
 
-		var teamBlock = $("<div class=\"ui-block-a team-info\">" + rank + " - #"
-				+ team.teamNumber + "  - " + team.teamName + "</div>");
-		teamRow.append(teamBlock);
+						var nextScore = null;
+						if (i + 1 < teamsWithScores.length) {
+							var nextTeam = teamsWithScores[i + 1];
+							nextScore = teamScores[nextTeam.teamNumber];
+						}
 
-		var scoreBlock = $("<div class=\"ui-block-b score " + tieClass + "\">" + computedScore
-				+ "</div>");
-		teamRow.append(scoreBlock);
-		$("#score-summary_content").append(teamRow);
+						// determine tie for highlighting
+						var tieClass = "";
+						if (prevScore == computedScore) {
+							tieClass = "tie";
+						} else if (nextScore == computedScore) {
+							tieClass = "tie";
+						}
 
+						// determine rank
+						if (prevScore == computedScore) {
+							rankOffset = rankOffset + 1;
+						} else {
+							rank = rank + rankOffset;
+							rankOffset = 1;
+						}
 
-		var score = $.subjective.getScore(team.teamNumber);
-		var noteRow;
-		if (null != score.note) {
-			noteRow = $("<div>" + score.note + "</div>");
-		} else {
-			noteRow = $("<div>No notes</div>");
-		}
-		$("#score-summary_content").append(noteRow);
-		$("#score-summary_content").append($("<hr/>"));
+						var teamRow = $("<div class=\"ui-grid-a ui-responsive\"></div>");
 
-		prevScore = computedScore;
-	});
+						var teamBlock = $("<div class=\"ui-block-a team-info\">"
+								+ rank
+								+ " - #"
+								+ team.teamNumber
+								+ "  - "
+								+ team.teamName + "</div>");
+						teamRow.append(teamBlock);
+
+						var scoreBlock = $("<div class=\"ui-block-b score "
+								+ tieClass + "\">" + computedScore + "</div>");
+						teamRow.append(scoreBlock);
+						$("#score-summary_content").append(teamRow);
+
+						var score = $.subjective.getScore(team.teamNumber);
+						var noteRow;
+						if (null != score.note) {
+							noteRow = $("<div>" + score.note + "</div>");
+						} else {
+							noteRow = $("<div>No notes</div>");
+						}
+						$("#score-summary_content").append(noteRow);
+						$("#score-summary_content").append($("<hr/>"));
+
+						prevScore = computedScore;
+					});
 
 	$("#score-summary-page").trigger("create");
 }
