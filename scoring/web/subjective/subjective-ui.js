@@ -9,113 +9,316 @@ function selectJudgingGroup(group) {
 	$.mobile.navigate("#choose-category-page");
 }
 
+$(document).on("pageshow", "#choose-judging-group-page", function(event) {
+	$("#choose-judging-group_upload-scores-wait").hide();
+});
+
+$(document).on(
+		"pageinit",
+		"#choose-judging-group-page",
+		function(event) {
+			$("#choose-judging-group_upload-scores").click(
+					function() {
+						$("#choose-judging-group_upload-scores-wait").show();
+
+						$.subjective.uploadData(function(result) {
+							// scoresSuccess
+							alert("Uploaded " + result.numModified
+									+ " scores. message: " + result.message);
+						}, //
+						function(result) {
+							// scoresFail
+
+							var message;
+							if (null == result) {
+								message = "Unknown server error";
+							} else {
+								message = result.message;
+							}
+
+							alert("Failed to upload scores: " + message);
+						}, //
+						function(result) {
+							// judgesSuccess
+							$.subjective.log("Judges modified: "
+									+ result.numModifiedJudges + " new: "
+									+ result.numNewJudges);
+						}
+
+						,//
+						function(result) {
+							// judgesFail
+							var message;
+							if (null == result) {
+								message = "Unknown server error";
+							} else {
+								message = result.message;
+							}
+
+							alert("Failed to upload judges: " + message);
+						}, //
+						function() {
+							// loadSuccess
+							populateChooseJudgingGroup();
+							$("#choose-judging-group_upload-scores-wait").hide();
+						}, //
+						function(message) {
+							// loadFail
+							populateChooseJudgingGroup();
+
+							$("#choose-judging-group_upload-scores-wait").hide();
+
+							alert("Failed to load scores from server: "
+									+ message);
+						});
+					});
+		});
+
+function populateChooseJudgingGroup() {
+	$("#choose-judging-group_judging-groups").empty();
+
+	var judgingGroups = $.subjective.getJudgingGroups();
+	$.each(judgingGroups, function(i, group) {
+		var button = $("<button class='ui-btn ui-corner-all'>" + group
+				+ "</button>");
+		$("#choose-judging-group_judging-groups").append(button);
+		button.click(function() {
+			selectJudgingGroup(group);
+		});
+
+	});
+
+	$("#choose-judging-group-page").trigger("create");
+}
+
 $(document).on(
 		"pagebeforeshow",
 		"#choose-judging-group-page",
-		function(event) {
-
-			$("#choose-judging-group_judging-groups").empty();
-
-			var judgingGroups = $.subjective.getJudgingGroups();
-			$.each(judgingGroups, function(i, group) {
-				var button = $("<button class='ui-btn ui-corner-all'>" + group
-						+ "</button>");
-				$("#choose-judging-group_judging-groups").append(button);
-				button.click(function() {
-					selectJudgingGroup(group);
-				});
-
-			});
-
-			$("#choose-judging-group-page").trigger("create");
-		});
+		populateChooseJudgingGroup);
 
 function selectCategory(category) {
 	$.subjective.setCurrentCategory(category);
 	$.mobile.navigate("#choose-judge-page");
 }
 
+$(document).on("pageshow", "#choose-category-page", function(event) {
+	$("#choose-category_upload-scores-wait").hide();
+});
+
+$(document).on(
+		"pageinit",
+		"#teams-list-page",
+		function(event) {
+			$("#choose-category_upload-scores").click(
+					function() {
+						$("#choose-category_upload-scores-wait").show();
+
+						$.subjective.uploadData(function(result) {
+							// scoresSuccess
+							alert("Uploaded " + result.numModified
+									+ " scores. message: " + result.message);
+						}, //
+						function(result) {
+							// scoresFail
+
+							var message;
+							if (null == result) {
+								message = "Unknown server error";
+							} else {
+								message = result.message;
+							}
+
+							alert("Failed to upload scores: " + message);
+						}, //
+						function(result) {
+							// judgesSuccess
+							$.subjective.log("Judges modified: "
+									+ result.numModifiedJudges + " new: "
+									+ result.numNewJudges);
+						}
+
+						,//
+						function(result) {
+							// judgesFail
+							var message;
+							if (null == result) {
+								message = "Unknown server error";
+							} else {
+								message = result.message;
+							}
+
+							alert("Failed to upload judges: " + message);
+						}, //
+						function() {
+							// loadSuccess
+							populateChooseCategory();
+
+							$("#choose-category_upload-scores-wait").hide();
+						}, //
+						function(message) {
+							// loadFail
+							populateChooseCategory();
+
+							$("#choose-category_upload-scores-wait").hide();
+
+							alert("Failed to load scores from server: "
+									+ message);
+						});
+					});
+		});
+
+function populateChooseCategory() {
+	$("#choose-category_categories").empty();
+
+	var categories = $.subjective.getSubjectiveCategories();
+	$.each(categories, function(i, category) {
+		var button = $("<button class='ui-btn ui-corner-all'>"
+				+ category.title + "</button>");
+		$("#choose-category_categories").append(button);
+		button.click(function() {
+			selectCategory(category);
+		});
+		button.trigger("updateLayout");
+	});
+
+	var currentJudgingGroup = $.subjective.getCurrentJudgingGroup();
+	$("#choose-category_judging-group").text(currentJudgingGroup);
+
+	$("#choose-category-page").trigger("create");
+}
+
 $(document).on(
 		"pagebeforeshow",
 		"#choose-category-page",
+		populateChooseCategory);
+
+$(document).on("pageshow", "#choose-judge-page", function(event) {
+	$("#choose-judge_upload-scores-wait").hide();
+});
+
+$(document).on(
+		"pageinit",
+		"#choose-judge-page",
 		function(event) {
+			$("#choose-judge_upload-scores").click(
+					function() {
+						$("#choose-judge_upload-scores-wait").show();
 
-			$("#choose-category_categories").empty();
+						$.subjective.uploadData(function(result) {
+							// scoresSuccess
 
-			var categories = $.subjective.getSubjectiveCategories();
-			$.each(categories, function(i, category) {
-				var button = $("<button class='ui-btn ui-corner-all'>"
-						+ category.title + "</button>");
-				$("#choose-category_categories").append(button);
-				button.click(function() {
-					selectCategory(category);
-				});
-				button.trigger("updateLayout");
+							alert("Uploaded " + result.numModified
+									+ " scores. message: " + result.message);
+						}, //
+						function(result) {
+							// scoresFail
+
+							var message;
+							if (null == result) {
+								message = "Unknown server error";
+							} else {
+								message = result.message;
+							}
+
+							alert("Failed to upload scores: " + message);
+						}, //
+						function(result) {
+							// judgesSuccess
+							$.subjective.log("Judges modified: "
+									+ result.numModifiedJudges + " new: "
+									+ result.numNewJudges);
+						}
+
+						,//
+						function(result) {
+							// judgesFail
+							var message;
+							if (null == result) {
+								message = "Unknown server error";
+							} else {
+								message = result.message;
+							}
+
+							alert("Failed to upload judges: " + message);
+						}, //
+						function() {
+							// loadSuccess
+							populateChooseJudge();
+
+							$("#choose-judge_upload-scores-wait").hide();
+						}, //
+						function(message) {
+							// loadFail
+							populateChooseJudge();
+
+							$("#choose-judge_upload-scores-wait").hide();
+
+							alert("Failed to load scores from server: "
+									+ message);
+						});
+					});
+		});
+
+function populateChooseJudge() {
+
+	$("#choose-judge_judges").empty();
+	$("#choose-judge_judges")
+			.append(
+					"<input type='radio' name='judge' id='choose-judge_new-judge' value='new-judge'>");
+	$("#choose-judge_judges")
+			.append(
+					"<label for='choose-judge_new-judge'>New Judge</label>");
+
+	var judges = $.subjective.getPossibleJudges();
+	$.each(judges, function(i, judge) {
+		$("#choose-judge_judges").append(
+				"<input type='radio' name='judge' id='choose-judge_"
+						+ judge.id + "' value='" + judge.id
+						+ "'>");
+		$("#choose-judge_judges").append(
+				"<label for='choose-judge_" + judge.id + "'>"
+						+ judge.id + "</label>");
+	});
+
+	var currentJudgingGroup = $.subjective
+			.getCurrentJudgingGroup();
+	$("#choose-judge_judging-group").text(currentJudgingGroup);
+
+	var currentCategory = $.subjective.getCurrentCategory();
+	$("#choose-judge_category").text(currentCategory.title);
+
+	var currentJudge = $.subjective.getCurrentJudge();
+	if (null != currentJudge) {
+		$("input:radio[value=\"" + currentJudge.id + "\"]")
+				.prop('checked', true);
+	} else {
+		$("input:radio[value='new-judge']").prop('checked',
+				true);
+		$("#choose-judge_new-judge-info").show();
+	}
+
+	$("input[name=judge]:radio").change(
+			function() {
+				var judgeID = $(
+						"input:radio[name='judge']:checked")
+						.val();
+				if ('new-judge' == judgeID) {
+					$("#choose-judge_new-judge-info").show();
+				} else {
+					$("#choose-judge_new-judge-info").hide();
+				}
 			});
 
-			var currentJudgingGroup = $.subjective.getCurrentJudgingGroup();
-			$("#choose-category_judging-group").text(currentJudgingGroup);
-
-			$("#choose-category-page").trigger("create");
-		});
+	$("#choose-judge-page").trigger("create");
+}
 
 $(document)
 		.on(
 				"pagebeforeshow",
 				"#choose-judge-page",
 				function(event) {
-
 					$("#choose-judge_new-judge-info").hide();
-
-					$("#choose-judge_judges").empty();
-					$("#choose-judge_judges")
-							.append(
-									"<input type='radio' name='judge' id='choose-judge_new-judge' value='new-judge'>");
-					$("#choose-judge_judges")
-							.append(
-									"<label for='choose-judge_new-judge'>New Judge</label>");
-
-					var judges = $.subjective.getPossibleJudges();
-					$.each(judges, function(i, judge) {
-						$("#choose-judge_judges").append(
-								"<input type='radio' name='judge' id='choose-judge_"
-										+ judge.id + "' value='" + judge.id
-										+ "'>");
-						$("#choose-judge_judges").append(
-								"<label for='choose-judge_" + judge.id + "'>"
-										+ judge.id + "</label>");
-					});
-
-					var currentJudgingGroup = $.subjective
-							.getCurrentJudgingGroup();
-					$("#choose-judge_judging-group").text(currentJudgingGroup);
-
-					var currentCategory = $.subjective.getCurrentCategory();
-					$("#choose-judge_category").text(currentCategory.title);
-
-					var currentJudge = $.subjective.getCurrentJudge();
-					if (null != currentJudge) {
-						$("input:radio[value=\"" + currentJudge.id + "\"]")
-								.prop('checked', true);
-					} else {
-						$("input:radio[value='new-judge']").prop('checked',
-								true);
-						$("#choose-judge_new-judge-info").show();
-					}
-
-					$("input[name=judge]:radio").change(
-							function() {
-								var judgeID = $(
-										"input:radio[name='judge']:checked")
-										.val();
-								if ('new-judge' == judgeID) {
-									$("#choose-judge_new-judge-info").show();
-								} else {
-									$("#choose-judge_new-judge-info").hide();
-								}
-							});
-
-					$("#choose-judge-page").trigger("create");
+					populateChooseJudge();
 				});
 
 $(document).on("pageinit", "#choose-judge-page", function(event) {

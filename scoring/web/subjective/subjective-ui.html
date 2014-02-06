@@ -40,14 +40,35 @@
   <!-- /header -->
 
   <div class="ui-content" role="main">
+   <div id="choose-judging-group_upload-scores-wait"
+    style="position: absolute; top: 50%; left: 50%;">
+    <img src="../extlib/images/ajax-loader.gif" /> Uploading Scores...
+   </div>
 
    <div id='choose-judging-group_judging-groups'></div>
 
   </div>
   <!-- /content -->
 
-  <div data-role="footer" data-position="fixed"></div>
+  <div data-role="footer" data-position="fixed">
+     <a href="#choose-judging-group_nav-panel"
+    class="ui-btn ui-corner-all ui-shadow ui-btn-icon-notext ui-icon-gear ui-mini"></a>
+  
+  </div>
   <!-- /footer -->
+
+  <!-- side panel -->
+  <div data-role="panel" id="choose-judging-group_nav-panel"
+   data-display="overlay">
+   <ul data-role="listview">
+    <li data-icon="delete"><a href="#" data-rel="close">Close</a></li>
+    <li><a href="index.html">Top</a></li>
+   </ul>
+   <br /> <br />
+   <button class="ui-btn ui-corner-all ui-shadow"
+    id="choose-judging-group_upload-scores">Upload Scores</button>
+  </div>
+  <!-- end side panel -->
 
  </div>
  <!-- /page choose-judging-group -->
@@ -61,6 +82,10 @@
   <!-- /header -->
 
   <div class="ui-content" role="main">
+   <div id="choose-category_upload-scores-wait"
+    style="position: absolute; top: 50%; left: 50%;">
+    <img src="../extlib/images/ajax-loader.gif" /> Uploading Scores...
+   </div>
 
    <div id='choose-category_categories'></div>
 
@@ -68,11 +93,27 @@
   <!-- /content -->
 
   <div data-role="footer" data-position="fixed">
-   <p>
+      <a href="#choose-category_nav-panel"
+    class="ui-btn ui-corner-all ui-shadow ui-btn-icon-notext ui-icon-gear ui-mini"></a>   
+   
     <span id='choose-category_judging-group'></span>
-   </p>
   </div>
   <!-- /footer -->
+
+  <!-- side panel -->
+  <div data-role="panel" id="choose-category_nav-panel"
+   data-display="overlay">
+   <ul data-role="listview">
+    <li data-icon="delete"><a href="#" data-rel="close">Close</a></li>
+    <li><a href="index.html">Top</a></li>
+    <li><a href="#choose-judging-group-page">Choose Judging
+      Group</a></li>
+   </ul>
+   <br /> <br />
+   <button class="ui-btn ui-corner-all ui-shadow"
+    id="choose-category_upload-scores">Upload Scores</button>
+  </div>
+  <!-- end side panel -->
 
  </div>
  <!-- /page choose-category -->
@@ -85,6 +126,10 @@
   <!-- /header -->
 
   <div class="ui-content" role="main">
+   <div id="choose-judge_upload-scores-wait"
+    style="position: absolute; top: 50%; left: 50%;">
+    <img src="../extlib/images/ajax-loader.gif" /> Uploading Scores...
+   </div>
 
    <p>Are you one of the known judges? If not, select 'New Judge'
     and enter your information.</p>
@@ -108,12 +153,29 @@
   <!-- /content -->
 
   <div data-role="footer" data-position="fixed">
-   <p>
+     <a href="#choose-judge_nav-panel"
+    class="ui-btn ui-corner-all ui-shadow ui-btn-icon-notext ui-icon-gear ui-mini"></a>
+  
     <span id='choose-judge_judging-group'></span> - <span
      id='choose-judge_category'></span>
-   </p>
-  </div>
+   </div>
   <!-- /footer -->
+
+  <!-- side panel -->
+  <div data-role="panel" id="choose-judge_nav-panel"
+   data-display="overlay">
+   <ul data-role="listview">
+    <li data-icon="delete"><a href="#" data-rel="close">Close</a></li>
+    <li><a href="index.html">Top</a></li>
+    <li><a href="#choose-judging-group-page">Choose Judging
+      Group</a></li>
+    <li><a href="#choose-category-page">Choose Category</a></li>
+   </ul>
+   <br /> <br />
+   <button class="ui-btn ui-corner-all ui-shadow"
+    id="choose-judge_upload-scores">Upload Scores</button>
+  </div>
+  <!-- end side panel -->
 
  </div>
  <!-- /page choose-judge -->
