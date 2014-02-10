@@ -59,7 +59,7 @@ public class TournamentTeamsServlet extends HttpServlet {
           && pathInfo.length() > 1) {
         final String teamNumberStr = pathInfo.substring(1);
         try {
-          final int teamNumber = Integer.valueOf(teamNumberStr);
+          final int teamNumber = Integer.parseInt(teamNumberStr);
           LOGGER.info("Found team number: "
               + teamNumber);
           final TournamentTeam team = teamMap.get(teamNumber);
