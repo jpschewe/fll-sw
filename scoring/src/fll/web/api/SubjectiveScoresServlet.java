@@ -16,7 +16,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +36,7 @@ import org.apache.log4j.Logger;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import fll.JudgeInformation;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.SubjectiveScore;
 import fll.db.Queries;
 import fll.util.LogUtils;
@@ -55,6 +54,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns and category are dynamic")
   @Override
   protected final void doGet(final HttpServletRequest request,
                              final HttpServletResponse response) throws IOException, ServletException {
@@ -142,7 +142,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
 
   }
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns and category are dynamic")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns and category are dynamic")
   @Override
   protected final void doPost(final HttpServletRequest request,
                               final HttpServletResponse response) throws IOException, ServletException {
@@ -311,7 +311,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
   /**
    * Create the statement for inserting a score into category.
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns and category are dynamic")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns and category are dynamic")
   private PreparedStatement createInsertStatement(final Connection connection,
                                                   final ScoreCategory categoryDescription) throws SQLException {
     final List<AbstractGoal> goalDescriptions = categoryDescription.getGoals();
