@@ -48,6 +48,12 @@ function addRows(numRows) {
 		var id = $("<input type='text' name='id" + judgeIdx + "'>");
 		idCol.append(id);
 
+		var phoneCol = $("<td></td>");
+		row.append(phoneCol);
+		var phone = $("<input type='text' name='phone" + judgeIdx + "'>");
+		phoneCol.append(phone);
+
+		
 		var categoryCol = $("<td></td>");
 		row.append(categoryCol);
 		var category = $("<select name='cat" + judgeIdx + "'></select>");
