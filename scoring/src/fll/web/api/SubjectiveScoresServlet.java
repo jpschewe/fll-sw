@@ -16,6 +16,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,7 @@ import org.apache.log4j.Logger;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import fll.JudgeInformation;
 import fll.SubjectiveScore;
 import fll.db.Queries;
 import fll.util.LogUtils;
@@ -83,7 +85,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
         while (rs.next()) {
           final SubjectiveScore score = new SubjectiveScore();
           score.setScoreOnServer(true);
-          
+
           final String judge = rs.getString("Judge");
           final Map<Integer, SubjectiveScore> judgeScores;
           if (categoryScores.containsKey(judge)) {
@@ -172,8 +174,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
       final Reader reader = new StringReader(debugWriter.toString());
 
       final Map<String, Map<String, Map<Integer, SubjectiveScore>>> allScores = jsonMapper.readValue(reader,
-                                                                                                     new TypeReference<Map<String, Map<String, Map<Integer, SubjectiveScore>>>>() {
-                                                                                                     });
+                                                                                                     ScoresTypeInfo.INSTANCE);
       for (final Map.Entry<String, Map<String, Map<Integer, SubjectiveScore>>> catEntry : allScores.entrySet()) {
         final String category = catEntry.getKey();
         final ScoreCategory categoryDescription = challengeDescription.getSubjectiveCategoryByName(category);
@@ -362,5 +363,10 @@ public class SubjectiveScoresServlet extends HttpServlet {
       return mNumModified;
     }
 
+  }
+
+  private static final class ScoresTypeInfo extends
+      TypeReference<Map<String, Map<String, Map<Integer, SubjectiveScore>>>> {
+    public static final ScoresTypeInfo INSTANCE = new ScoresTypeInfo();
   }
 }
