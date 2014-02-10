@@ -77,6 +77,8 @@
 
 <li><a href="http://code.google.com/p/google-gson/">Gson</a> - <a href="Gson-license.txt">License</a></li>
 
+<li><a href="http://wiki.fasterxml.com/JacksonHome">Jackson JSON Processor</a> - <a href="apache-license-2.0.txt">License</a></li>
+
 <li><a href="https://github.com/flesler/jquery.scrollTo">jQuery ScrollTo</a> - <a href="jQuery-ScrollTo-LICENSE.txt">License</a></li>
 
 <li><a href="http://icepush.org/">ICEpush</a> - <a href="icepush-license.txt">License</a></li>

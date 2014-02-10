@@ -7,6 +7,17 @@
 package fll;
 
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.LinkedList;
+
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Judge information.
@@ -30,10 +41,19 @@ public final class JudgeInformation implements Serializable {
     return station;
   }
 
-  public JudgeInformation(final String id,
-                          final String category,
-                          final String station) {
+  private final String phone;
+
+  public String getPhone() {
+    return phone;
+  }
+
+  @JsonCreator
+  public JudgeInformation(@JsonProperty("id") final String id,
+                          @JsonProperty("phone") final String phone,
+                          @JsonProperty("category") final String category,
+                          @JsonProperty("station") final String station) {
     this.id = id;
+    this.phone = phone;
     this.category = category;
     this.station = station;
   }
@@ -56,5 +76,39 @@ public final class JudgeInformation implements Serializable {
     } else {
       return false;
     }
+  }
+
+  /**
+   * Get all judges stored for this tournament.
+   * 
+   * @param connection the database
+   * @param tournament tournament ID
+   * @return the judges
+   * @throws SQLException
+   */
+  public static Collection<JudgeInformation> getJudges(final Connection connection,
+                                                       final int tournament) throws SQLException {
+    Collection<JudgeInformation> judges = new LinkedList<JudgeInformation>();
+
+    ResultSet rs = null;
+    PreparedStatement stmt = null;
+    try {
+      stmt = connection.prepareStatement("SELECT id, phone, category, station FROM Judges WHERE Tournament = ?");
+      stmt.setInt(1, tournament);
+      rs = stmt.executeQuery();
+      while (rs.next()) {
+        final String id = rs.getString(1);
+        final String phone = rs.getString(2);
+        final String category = rs.getString(3);
+        final String station = rs.getString(4);
+        final JudgeInformation judge = new JudgeInformation(id, phone, category, station);
+        judges.add(judge);
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(stmt);
+    }
+
+    return judges;
   }
 }
