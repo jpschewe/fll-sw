@@ -65,7 +65,7 @@ public class TournamentsServlet extends HttpServlet {
           id = Queries.getCurrentTournament(connection);
         } else {
           try {
-            id = Integer.valueOf(tournamentStr);
+            id = Integer.parseInt(tournamentStr);
           } catch (final NumberFormatException e) {
             throw new RuntimeException("Error parsing tournament id "
                 + tournamentStr, e);
