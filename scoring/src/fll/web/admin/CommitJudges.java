@@ -97,7 +97,7 @@ public class CommitJudges extends BaseFLLServlet {
       prep = null;
 
       prep = connection.prepareStatement("INSERT INTO Judges (id, phone, category, station, Tournament) VALUES(?, ?, ?, ?, ?)");
-      prep.setInt(4, tournament);
+      prep.setInt(5, tournament);
 
       // can't put types inside a session
       @SuppressWarnings("unchecked")
