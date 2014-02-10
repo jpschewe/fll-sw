@@ -126,6 +126,9 @@
 
     <!-- used to create json out of objects -->
     <pathelement location="${dir.lib}/gson-2.2.4.jar" />
+    <pathelement location="${dir.lib}/jackson-annotations-2.2.3.jar" />
+    <pathelement location="${dir.lib}/jackson-core-2.2.3.jar" />
+    <pathelement location="${dir.lib}/jackson-databind-2.2.3.jar" />
 
     <!-- handles ajax pushes -->
     <pathelement location="${dir.lib}/icepush-2.0.0-alpha3.jar" />

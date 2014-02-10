@@ -11,9 +11,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -95,7 +93,7 @@ public class GatherJudgeInformation extends BaseFLLServlet {
         message.append("<p class='error'>Subjective scores have already been entered for this tournament, changing the judges may cause some scores to be deleted</p>");
       }
 
-      session.setAttribute(JUDGES_KEY, gatherJudges(connection, tournament));
+      session.setAttribute(JUDGES_KEY, JudgeInformation.getJudges(connection, tournament));
 
       session.setAttribute(STATIONS_KEY, gatherJudgingStations(connection, tournament));
 
@@ -152,31 +150,6 @@ public class GatherJudgeInformation extends BaseFLLServlet {
       categories.put(categoryName, categoryTitle);
     }
     return categories;
-  }
-
-  private Collection<JudgeInformation> gatherJudges(final Connection connection,
-                                                    final int tournament) throws SQLException {
-    Collection<JudgeInformation> judges = new LinkedList<JudgeInformation>();
-
-    ResultSet rs = null;
-    PreparedStatement stmt = null;
-    try {
-      stmt = connection.prepareStatement("SELECT id, category, station FROM Judges WHERE Tournament = ?");
-      stmt.setInt(1, tournament);
-      rs = stmt.executeQuery();
-      while (rs.next()) {
-        final String id = rs.getString(1);
-        final String category = rs.getString(2);
-        final String station = rs.getString(3);
-        final JudgeInformation judge = new JudgeInformation(id, category, station);
-        judges.add(judge);
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
-    }
-
-    return judges;
   }
 
 }

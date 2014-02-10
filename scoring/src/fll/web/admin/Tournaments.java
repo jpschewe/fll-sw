@@ -105,7 +105,8 @@ public final class Tournaments {
             final Tournament tournament = tournaments.next();
             final String nextName;
             if (null != tournament.getNextTournament()) {
-              nextName = tournament.getNextTournament().getName();
+              final Tournament next = Tournament.findTournamentByID(connection, tournament.getNextTournament());
+              nextName = next.getName();
             } else {
               nextName = null;
             }

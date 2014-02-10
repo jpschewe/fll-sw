@@ -117,7 +117,7 @@ public class ScheduleChecker {
     for (final Map.Entry<String, Map<Date, Set<TeamScheduleInfo>>> topEntry : allSubjective.entrySet()) {
 
       for (final Map.Entry<Date, Set<TeamScheduleInfo>> entry : topEntry.getValue().entrySet()) {
-        if (entry.getValue().size() > schedule.getJudges().size()) {
+        if (entry.getValue().size() > schedule.getJudgingGroups().size()) {
           final String message = String.format("There are too many teams in %s at %s", topEntry.getKey(),
                                                TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(entry.getKey()));
           violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, null,

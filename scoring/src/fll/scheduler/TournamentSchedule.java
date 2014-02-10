@@ -110,10 +110,6 @@ public class TournamentSchedule implements Serializable {
 
   public static final String DIVISION_HEADER = "Div";
 
-  public static final String RESEARCH_HEADER = "Research";
-
-  public static final String TECHNICAL_HEADER = "Technical";
-
   public static final String JUDGE_GROUP_HEADER = "Judging Group";
 
   public static final String BASE_PERF_HEADER = "Perf #";
@@ -195,10 +191,10 @@ public class TournamentSchedule implements Serializable {
     return Collections.unmodifiableSet(_divisions);
   }
 
-  private final HashSet<String> _judges = new HashSet<String>();
+  private final HashSet<String> _judgingGroups = new HashSet<String>();
 
-  public Set<String> getJudges() {
-    return Collections.unmodifiableSet(_judges);
+  public Set<String> getJudgingGroups() {
+    return Collections.unmodifiableSet(_judgingGroups);
   }
 
   private final LinkedList<TeamScheduleInfo> _schedule = new LinkedList<TeamScheduleInfo>();
@@ -398,6 +394,7 @@ public class TournamentSchedule implements Serializable {
         ti.setOrganization(team.getOrganization());
         ti.setTeamName(team.getTeamName());
 
+        cacheTeamScheduleInformation(ti);
         _schedule.add(ti);
       }
 
@@ -615,7 +612,7 @@ public class TournamentSchedule implements Serializable {
       addToMatches(ti, round);
     }
     _divisions.add(ti.getDivision());
-    _judges.add(ti.getJudgingStation());
+    _judgingGroups.add(ti.getJudgingStation());
   }
 
   /**
