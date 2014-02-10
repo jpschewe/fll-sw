@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html  manifest='subjective.appcache'>
+<html manifest='subjective.appcache'>
 <head>
 <title>Subjective Scoring</title>
 
@@ -16,16 +16,21 @@
 <script type='text/javascript' src='subjective-ui.js'></script>
 
 <style>
-.ui-grid-a>.ui-block-a.team-info {
-	width: 90%;
+.ui-grid-b>.ui-block-a.team-info {
+	width: 70%;
 }
 
-.ui-grid-a>.ui-block-b.score {
+.ui-grid-b>.ui-block-b.score {
 	width: 10%;
 }
 
-.score.tie {
+.ui-grid-b>.ui-block-c.edit {
+    width: 20%;
+}
+
+.tie {
 	background-color: red;
+	color: white;
 }
 </style>
 
@@ -51,9 +56,9 @@
   <!-- /content -->
 
   <div data-role="footer" data-position="fixed">
-     <a href="#choose-judging-group_nav-panel"
+   <a href="#choose-judging-group_nav-panel"
     class="ui-btn ui-corner-all ui-shadow ui-btn-icon-notext ui-icon-gear ui-mini"></a>
-  
+
   </div>
   <!-- /footer -->
 
@@ -93,10 +98,10 @@
   <!-- /content -->
 
   <div data-role="footer" data-position="fixed">
-      <a href="#choose-category_nav-panel"
-    class="ui-btn ui-corner-all ui-shadow ui-btn-icon-notext ui-icon-gear ui-mini"></a>   
-   
-    <span id='choose-category_judging-group'></span>
+   <a href="#choose-category_nav-panel"
+    class="ui-btn ui-corner-all ui-shadow ui-btn-icon-notext ui-icon-gear ui-mini"></a>
+
+   <span id='choose-category_judging-group'></span>
   </div>
   <!-- /footer -->
 
@@ -153,12 +158,12 @@
   <!-- /content -->
 
   <div data-role="footer" data-position="fixed">
-     <a href="#choose-judge_nav-panel"
+   <a href="#choose-judge_nav-panel"
     class="ui-btn ui-corner-all ui-shadow ui-btn-icon-notext ui-icon-gear ui-mini"></a>
-  
-    <span id='choose-judge_judging-group'></span> - <span
-     id='choose-judge_category'></span>
-   </div>
+
+   <span id='choose-judge_judging-group'></span> - <span
+    id='choose-judge_category'></span>
+  </div>
   <!-- /footer -->
 
   <!-- side panel -->
