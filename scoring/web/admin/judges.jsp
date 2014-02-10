@@ -61,10 +61,10 @@
      <td><input type='text' value="${judge.id}"
       name='id${loopStatus.count}' /></td>
 
-<!--  before phone ${loopStatus.cout} -->
+<!--  before phone ${loopStatus.count} -->
      <td><input type='text' value="${judge.phone }"
       name='phone${loopStatus.count}' /></td>
-<!--  after phone ${loopStatus.cout} -->
+<!--  after phone ${loopStatus.count} -->
 
      <td><select name='cat${loopStatus.count }'>
        <c:forEach items="${CATEGORIES}" var="cat">
