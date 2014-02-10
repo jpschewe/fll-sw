@@ -17,6 +17,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.db.Queries;
 import fll.db.TableInformation;
@@ -374,8 +375,9 @@ public class BracketData {
     PreparedStatement minRunNumberPrep = null;
     ResultSet minRunNumber = null;
     try {
-      minRunNumberPrep = pConnection.prepareStatement("select MIN(run_number) from PlayoffData WHERE event_division = ?");
+      minRunNumberPrep = pConnection.prepareStatement("select MIN(run_number) from PlayoffData WHERE event_division = ? AND Tournament = ?");
       minRunNumberPrep.setString(1, pDivision);
+      minRunNumberPrep.setInt(2, tournament);
       minRunNumber = minRunNumberPrep.executeQuery();
       if (minRunNumber.next()) {
         _baseRunNumber = minRunNumber.getInt(1) - 1;
@@ -724,7 +726,7 @@ public class BracketData {
    * @see TopRightCornerStyle
    * @return Properly formatted HTML \<td\>element for a bridge cell.
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "ICAST_IDIV_CAST_TO_DOUBLE" }, justification = "Double cast is OK as we are ok with the rounding")
+  @SuppressFBWarnings(value = { "ICAST_IDIV_CAST_TO_DOUBLE" }, justification = "Double cast is OK as we are ok with the rounding")
   public String getHtmlBridgeCell(final int row,
                                   final int round,
                                   final TopRightCornerStyle cs) {
@@ -1020,21 +1022,23 @@ public class BracketData {
           if (((TeamBracketCell) roundData.get(curArray[0])).getTeam().getTeamNumber() > 0
               && ((TeamBracketCell) roundData.get(curArray[1])).getTeam().getTeamNumber() > 0) {
 
+            if (!tAssignIt.hasNext()) {
+              tAssignIt = tables.iterator();
+            }
+            final String nextAssignA = tAssignIt.next();
             String tableA = ((TeamBracketCell) roundData.get(curArray[0])).getTable();
             if (null == tableA
                 || tableA.length() == 0) {
-              if (!tAssignIt.hasNext()) {
-                tAssignIt = tables.iterator();
-              }
-              tableA = tAssignIt.next();
+              tableA = nextAssignA;
             }
+            if (!tAssignIt.hasNext()) {
+              tAssignIt = tables.iterator();
+            }
+            final String nextAssignB = tAssignIt.next();
             String tableB = ((TeamBracketCell) roundData.get(curArray[1])).getTable();
             if (null == tableB
                 || tableB.length() == 0) {
-              if (!tAssignIt.hasNext()) {
-                tAssignIt = tables.iterator();
-              }
-              tableB = tAssignIt.next();
+              tableB = nextAssignB;
             }
 
             final TeamBracketCell topCell = (TeamBracketCell) roundData.get(curArray[0]);
@@ -1072,19 +1076,18 @@ public class BracketData {
    * 
    * @param connection connection to the database
    * @param currentTournament the current tournament
-   * @param runNumber the current run, used to get the score
+   * @param runNumber the current performance run, used to get the score
    * @param team team to get display string for
    * @param showScore if the score should be shown
    * @throws IllegalArgumentException if teamNumber is invalid
    * @throws SQLException on a database error
    */
-  public static String getDisplayString(final Connection connection,
-                                        final int currentTournament,
-                                        final int runNumber,
-                                        final Team team,
-                                        final boolean showScore,
-                                        final boolean showOnlyVerifiedScores) throws IllegalArgumentException,
-      SQLException {
+  private String getDisplayString(final Connection connection,
+                                  final int currentTournament,
+                                  final int runNumber,
+                                  final Team team,
+                                  final boolean showScore,
+                                  final boolean showOnlyVerifiedScores) throws IllegalArgumentException, SQLException {
     if (Team.BYE.equals(team)) {
       return "<font class='TeamName'>BYE</font>";
     } else if (Team.TIE.equals(team)) {
@@ -1093,17 +1096,25 @@ public class BracketData {
         || Team.NULL.equals(team)) {
       return "&nbsp;";
     } else {
+
       final StringBuffer sb = new StringBuffer();
       sb.append("<font class='TeamNumber'>#");
       sb.append(team.getTeamNumber());
       sb.append("</font>&nbsp;<font class='TeamName'>");
       sb.append(StringUtils.trimString(team.getTeamName(), Team.MAX_TEAM_NAME_LEN));
       sb.append("</font>");
+
+      final boolean performanceScoreExists = Queries.performanceScoreExists(connection, team, runNumber);
+      sb.append("<!-- performance score exists: "
+          + performanceScoreExists + " -->\n");
+
+      final boolean scoreVerified = Queries.isVerified(connection, currentTournament, team, runNumber);
+      sb.append("<!-- verified: "
+          + scoreVerified + " -->\n");
+
       if (showScore
-          && Queries.performanceScoreExists(connection, team, runNumber)
-          && (!showOnlyVerifiedScores || Queries.isVerified(connection, currentTournament, team, runNumber))
+          && performanceScoreExists && (!showOnlyVerifiedScores || scoreVerified)
           && !Playoff.isBye(connection, currentTournament, team, runNumber)) {
-        final boolean scoreVerified = Queries.isVerified(connection, currentTournament, team, runNumber);
         if (!scoreVerified) {
           sb.append("<span style='color:red'>");
         }

@@ -16,6 +16,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
@@ -40,7 +41,7 @@ public final class ScoreStandardization {
    *          privileges
    * @param tournament which tournament to summarize scores for
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Can't use variable param for column to set")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Can't use variable param for column to set")
   public static void summarizeScores(final Connection connection,
                                      final ChallengeDescription description,
                                      final int tournament) throws SQLException, ParseException {
@@ -146,7 +147,7 @@ public final class ScoreStandardization {
   /**
    * Populate the StandardizedScore column of each subjective table.
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Can't use variable for column name in update")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Can't use variable for column name in update")
   public static void standardizeSubjectiveScores(final Connection connection,
                                                  final ChallengeDescription description,
                                                  final int tournament) throws SQLException {
@@ -222,7 +223,7 @@ public final class ScoreStandardization {
    * @param tournament the tournament to add scores for
    * @throws SQLException on an error talking to the database
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Can't use variable for column name in select")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Can't use variable for column name in select")
   public static void updateTeamTotalScores(final Connection connection,
                                            final ChallengeDescription description,
                                            final int tournament) throws SQLException, ParseException {

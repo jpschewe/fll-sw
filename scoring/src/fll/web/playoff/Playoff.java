@@ -22,6 +22,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.db.Queries;
 import fll.util.FP;
@@ -587,7 +588,7 @@ public final class Playoff {
    *         yet
    * @throws SQLException
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate query from list of teams")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate query from list of teams")
   private static int getMaxPerformanceRound(final Connection connection,
                                             final int currentTournament,
                                             final List<Integer> teamNumbers) throws SQLException {
@@ -606,7 +607,7 @@ public final class Playoff {
       while (divisions.next()) {
         final String eventDivision = divisions.getString(1);
 
-        final int runNumber = getMaxPerformanceRound(connection, eventDivision);
+        final int runNumber = getMaxPerformanceRound(connection, currentTournament, eventDivision);
         if (-1 != runNumber) {
           maxRunNumber = Math.max(maxRunNumber, runNumber);
         }
@@ -629,14 +630,17 @@ public final class Playoff {
    *         division
    */
   public static int getMaxPerformanceRound(final Connection connection,
+                                           final int currentTournament,
                                            final String playoffDivision) throws SQLException {
     PreparedStatement maxPrep = null;
     ResultSet max = null;
     try {
       maxPrep = connection.prepareStatement("SELECT MAX(run_number) FROM PlayoffData WHERE" //
-          + " event_division = ?");
+          + " event_division = ? AND tournament = ?");
 
       maxPrep.setString(1, playoffDivision);
+      maxPrep.setInt(2,  currentTournament);
+      
       max = maxPrep.executeQuery();
       if (max.next()) {
         final int runNumber = max.getInt(1);
@@ -770,7 +774,7 @@ public final class Playoff {
    *          same time
    * @return null if no teams are involved in an unfinished playoff
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate query from list of teams")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate query from list of teams")
   public static String involvedInUnfinishedPlayoff(final Connection connection,
                                                    final int tournament,
                                                    final List<Integer> teamNumbers) throws SQLException {

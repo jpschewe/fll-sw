@@ -31,6 +31,7 @@ import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
@@ -81,7 +82,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
     }
   }
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table column, winner criteria determines sort")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table column, winner criteria determines sort")
   private void generateReport(final Connection connection,
                               final Document pdfDoc,
                               final ChallengeDescription challengeDescription,

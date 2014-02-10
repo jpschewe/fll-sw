@@ -24,6 +24,7 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.ScoreStandardization;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
@@ -43,7 +44,7 @@ public class SummarizePhase1 extends BaseFLLServlet {
   public static final String JUDGE_SUMMARY = "judgeSummary";
 
   @Override
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate table name from category")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate table name from category")
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,

@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.util.LogUtils;
 import fll.web.admin.DownloadSubjectiveData;
@@ -99,7 +100,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
   }
 
   @Override
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "DB_DUPLICATE_SWITCH_CLAUSES", justification = "Duplicate switch clauses causes this method to be consistent with the other methods and adds to clarity")
+  @SuppressFBWarnings(value = "DB_DUPLICATE_SWITCH_CLAUSES", justification = "Duplicate switch clauses causes this method to be consistent with the other methods and adds to clarity")
   public Class<?> getColumnClass(final int column) {
     switch (column) {
     case 0:
@@ -213,7 +214,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
   }
 
   @Override
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "DB_DUPLICATE_SWITCH_CLAUSES", justification = "Duplicate switch clauses causes this method to be consistent with the other methods and adds to clarity")
+  @SuppressFBWarnings(value = "DB_DUPLICATE_SWITCH_CLAUSES", justification = "Duplicate switch clauses causes this method to be consistent with the other methods and adds to clarity")
   public boolean isCellEditable(final int row,
                                 final int column) {
     switch (column) {

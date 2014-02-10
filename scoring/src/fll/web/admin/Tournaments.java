@@ -28,6 +28,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.GenerateDB;
@@ -123,7 +124,7 @@ public final class Tournaments {
           String nextName = request.getParameter("next"
               + row);
           while (null != keyStr) {
-            final int key = Integer.valueOf(keyStr);
+            final int key = Integer.parseInt(keyStr);
             generateRow(out, row, key, name, location, nextName);
 
             row++;
@@ -235,7 +236,7 @@ public final class Tournaments {
    * 
    * @return true if everything is ok, false otherwise and write message to out
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "XSS_REQUEST_PARAMETER_TO_JSP_WRITER", justification = "Need to write out the name specified as part of the error message")
+  @SuppressFBWarnings(value = "XSS_REQUEST_PARAMETER_TO_JSP_WRITER", justification = "Need to write out the name specified as part of the error message")
   private static boolean verifyData(final JspWriter out,
                                     final HttpServletRequest request) throws IOException {
     final Map<String, String> tournamentNames = new HashMap<String, String>();
@@ -315,7 +316,7 @@ public final class Tournaments {
     String location = request.getParameter("location"
         + row);
     while (null != keyStr) {
-      final int key = Integer.valueOf(keyStr);
+      final int key = Integer.parseInt(keyStr);
       if (NEW_TOURNAMENT_KEY == key) {
         if (null != name
             && !"".equals(name)) {
