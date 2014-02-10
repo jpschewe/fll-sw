@@ -33,6 +33,7 @@ import org.apache.log4j.Logger;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
 import fll.db.Queries;
 import fll.util.LogUtils;
@@ -75,6 +76,7 @@ public class JudgesServlet extends HttpServlet {
 
   }
 
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic table based upon categories")
   @Override
   protected final void doPost(final HttpServletRequest request,
                               final HttpServletResponse response) throws IOException, ServletException {
@@ -106,9 +108,7 @@ public class JudgesServlet extends HttpServlet {
 
       final Reader reader = new StringReader(debugWriter.toString());
 
-      final Collection<JudgeInformation> judges = jsonMapper.readValue(reader,
-                                                                       new TypeReference<Collection<JudgeInformation>>() {
-                                                                       });
+      final Collection<JudgeInformation> judges = jsonMapper.readValue(reader, JudgesTypeInformation.INSTANCE);
 
       final Collection<JudgeInformation> currentJudges = JudgeInformation.getJudges(connection, currentTournament);
 
@@ -199,4 +199,9 @@ public class JudgesServlet extends HttpServlet {
       return mNumModifiedJudges;
     }
   }
+
+  private static final class JudgesTypeInformation extends TypeReference<Collection<JudgeInformation>> {
+    public static final JudgesTypeInformation INSTANCE = new JudgesTypeInformation();
+  }
+
 }

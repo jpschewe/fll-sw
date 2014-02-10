@@ -545,6 +545,7 @@ public final class ImportDB {
     setDBVersion(connection, 10);
   }
 
+  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Table names come from category names")
   private static void upgrade10To11(final Connection connection) throws SQLException {
     Statement stmt = null;
     try {
