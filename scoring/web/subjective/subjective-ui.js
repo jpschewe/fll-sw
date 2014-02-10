@@ -343,6 +343,7 @@ function setJudge() {
 function selectTeam(team) {
 	$.subjective.setCurrentTeam(team);
 
+	$.subjective.setScoreEntryBackPage("#teams-list-page");
 	$.mobile.navigate("#enter-score-page");
 }
 
@@ -631,11 +632,11 @@ $(document).on("pageinit", "#enter-score-page", function(event) {
 
 		$.subjective.saveScore(score);
 
-		$.mobile.navigate("#teams-list-page");
+		$.mobile.navigate($.subjective.getScoreEntryBackPage());
 	});
 
 	$("#enter-score_cancel-score").click(function() {
-		$.mobile.navigate("#teams-list-page");
+		$.mobile.navigate($.subjective.getScoreEntryBackPage());
 	});
 
 	$("#enter-score_delete-score").click(function() {
@@ -650,7 +651,7 @@ $(document).on("pageinit", "#enter-score-page", function(event) {
 			score.deleted = true;
 			$.subjective.saveScore(score);
 
-			$.mobile.navigate("#teams-list-page");
+			$.mobile.navigate($.subjective.getScoreEntryBackPage());
 		}
 	});
 
@@ -665,7 +666,7 @@ $(document).on("pageinit", "#enter-score-page", function(event) {
 		score.deleted = false;
 		$.subjective.saveScore(score);
 
-		$.mobile.navigate("#teams-list-page");
+		$.mobile.navigate($.subjective.getScoreEntryBackPage());
 	});
 
 });
@@ -845,7 +846,7 @@ function populateScoreSummary() {
 							rankOffset = 1;
 						}
 
-						var teamRow = $("<div class=\"ui-grid-a ui-responsive\"></div>");
+						var teamRow = $("<div class=\"ui-grid-b ui-responsive\"></div>");
 
 						var teamBlock = $("<div class=\"ui-block-a team-info\">"
 								+ rank
@@ -858,6 +859,19 @@ function populateScoreSummary() {
 						var scoreBlock = $("<div class=\"ui-block-b score "
 								+ tieClass + "\">" + computedScore + "</div>");
 						teamRow.append(scoreBlock);
+
+						var editBlock = $("<div class=\"ui-block-c edit\"></div>");
+						var editButton = $("<button class=\"ui-btn ui-mini\">Edit</button>");
+						editBlock.append(editButton);						
+						teamRow.append(editBlock);
+						editButton.click(function() {
+							$.subjective.setCurrentTeam(team);
+
+							$.subjective.setScoreEntryBackPage("#score-summary-page");
+							$.mobile.navigate("#enter-score-page");
+						});
+						
+						
 						$("#score-summary_content").append(teamRow);
 
 						var score = $.subjective.getScore(team.teamNumber);

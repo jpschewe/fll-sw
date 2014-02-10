@@ -29,6 +29,7 @@
 	var _currentTeam;
 	var _tempScore;
 	var _currentGoal;
+	var _scoreEntryBackPage;
 	
 	function _init_variables() {
 		_subjectiveCategories = {};
@@ -44,6 +45,7 @@
 		_currentTeam = null;
 		_tempScore = null;
 		_currentGoal = null;
+		_scoreEntryBackPage = null;
 	}
 
 	function _loadFromDisk() {
@@ -114,6 +116,11 @@
 			_currentGoal = value;
 		}
 
+		value = $.jStorage.get(STORAGE_PREFIX + "_scoreEntryBackPage");
+		if (null != value) {
+			_scoreEntryBackPage = value;
+		}
+
 	}
 
 	function _save() {
@@ -132,6 +139,7 @@
 		$.jStorage.set(STORAGE_PREFIX + "_currentTeam", _currentTeam);
 		$.jStorage.set(STORAGE_PREFIX + "_tempScore", _tempScore);
 		$.jStorage.set(STORAGE_PREFIX + "_currentGoal", _currentGoal);
+		$.jStorage.set(STORAGE_PREFIX + "_scoreEntryBackPage", _scoreEntryBackPage);
 
 	}
 
@@ -768,9 +776,17 @@
 		
 		getCurrentGoal : function() {
 			return _currentGoal;
-		}
+		},
 
 
+		setScoreEntryBackPage : function(page) {
+			_scoreEntryBackPage = page;
+			_save();
+		},
+		getScoreEntryBackPage: function() {
+			return _scoreEntryBackPage;
+		},
+		
 	};
 
 	// ///// Load data //////////
