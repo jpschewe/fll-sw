@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * TeamScore implementation for a performance score in the database. Note that
@@ -162,7 +163,7 @@ public class DatabaseTeamScore extends TeamScore {
   /**
    * Create the result set.
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table")
   private ResultSet createResultSet(final Connection connection,
                                     final int tournament,
                                     final String categoryName) throws SQLException {

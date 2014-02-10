@@ -19,8 +19,8 @@ public class RubricRange implements Serializable {
 
   public RubricRange(final Element ele) {
     mTitle = ele.getAttribute("title");
-    mMin = Integer.valueOf(ele.getAttribute("min"));
-    mMax = Integer.valueOf(ele.getAttribute("max"));
+    mMin = Integer.parseInt(ele.getAttribute("min"));
+    mMax = Integer.parseInt(ele.getAttribute("max"));
 
     final Element descriptionEle = new NodelistElementCollectionAdapter(ele.getElementsByTagName("description")).next();
     mDescription = descriptionEle.getTextContent();
