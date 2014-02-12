@@ -35,12 +35,15 @@ public final class JsonUtilities {
   public static class BracketLeafResultSet {
     @SuppressFBWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Read in the javascript")
     public final TeamBracketCell leaf;
+    public TeamBracketCell getLeaf() { return this.leaf; }
 
     @SuppressFBWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Read in the javascript")
     public final double score;
+    public double getScore() { return score; }
 
     @SuppressFBWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Read in the javascript")
     public final String originator;
+    public String getOrigintor() { return originator; }
 
     public BracketLeafResultSet(final TeamBracketCell tbc,
                                 final double scr,
@@ -111,6 +114,10 @@ public final class JsonUtilities {
   public static class DisplayResponse {
     @SuppressFBWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Read in the javascript")
     public final String displayURL;
+
+    public String getDisplayURL() {
+      return this.displayURL;
+    }
 
     public DisplayResponse(final String displayURL) {
       this.displayURL = displayURL;
