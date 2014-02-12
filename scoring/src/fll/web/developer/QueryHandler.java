@@ -57,8 +57,10 @@ public class QueryHandler extends BaseFLLServlet {
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
-    final ResultData result = new ResultData();
-
+    final List<String> columnNames = new LinkedList<String>();
+    final List<Map<String, String>> data = new LinkedList<Map<String, String>>();
+    String error = null;
+    
     DataSource datasource = ApplicationAttributes.getDataSource(application);
     Statement stmt = null;
     ResultSet rs = null;
@@ -71,25 +73,26 @@ public class QueryHandler extends BaseFLLServlet {
 
       ResultSetMetaData meta = rs.getMetaData();
       for (int columnNum = 1; columnNum <= meta.getColumnCount(); ++columnNum) {
-        result.columnNames.add(meta.getColumnName(columnNum).toLowerCase());
+        columnNames.add(meta.getColumnName(columnNum).toLowerCase());
       }
       while (rs.next()) {
         final Map<String, String> row = new HashMap<String, String>();
-        for (final String columnName : result.columnNames) {
+        for (final String columnName : columnNames) {
           final String value = rs.getString(columnName);
           row.put(columnName, value);
         }
-        result.data.add(row);
+        data.add(row);
       }
 
     } catch (final SQLException e) {
-      result.error = e.getMessage();
+      error = e.getMessage();
       LOGGER.error("Exception doing developer query", e);
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(stmt);
       SQLFunctions.close(connection);
     }
+    final ResultData result = new ResultData(columnNames, data, error);
     final Gson gson = new Gson();
     final String resultJson = gson.toJson(result);
     response.setContentType("application/json");
@@ -102,15 +105,25 @@ public class QueryHandler extends BaseFLLServlet {
    * Object that comes back out of the servlet {@link QueryHandler}.
    */
   public static class ResultData {
+    public ResultData(final List<String> columnNames, final List<Map<String, String>> data, final String error) {
+      this.columnNames.addAll(columnNames);
+      this.data.addAll(data);
+      this.error = error;
+    }
+    
     /**
      * If there is an error, this will be non-null.
      */
     @SuppressFBWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Used in the web pages")
     public String error = null;
+    public String getError() { return error; }
 
     public final List<String> columnNames = new LinkedList<String>();
-
+    public List<String> getColumnNames() { return columnNames; }
+    
     public final List<Map<String, String>> data = new LinkedList<Map<String, String>>();
+    public List<Map<String, String>> getData() { return data; }
+    
   }
   
   
