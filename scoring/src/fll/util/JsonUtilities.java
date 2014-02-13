@@ -12,7 +12,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.Queries;
@@ -125,11 +127,15 @@ public final class JsonUtilities {
       throw new RuntimeException(e);
     }
     if (datalist.size() == 0) {
-      // Add some data, so gson's happy.
+      // Add some data, JSON is happy
       datalist.add(new BracketLeafResultSet());
     }
-    Gson gson = new Gson();
-    return gson.toJson(datalist);
+    try {
+      final ObjectMapper jsonMapper = new ObjectMapper();
+      return jsonMapper.writeValueAsString(datalist);
+    } catch (final JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public static class DisplayResponse {
@@ -140,12 +146,17 @@ public final class JsonUtilities {
       return this.displayURL;
     }
 
-    public DisplayResponse(final String displayURL) {
+    public DisplayResponse(@JsonProperty("displayURL") final String displayURL) {
       this.displayURL = displayURL;
     }
   }
 
   public static String generateDisplayResponse(final String displayURL) {
-    return new Gson().toJson(new DisplayResponse(displayURL));
+    try {
+      final ObjectMapper jsonMapper = new ObjectMapper();
+      return jsonMapper.writeValueAsString(new DisplayResponse(displayURL));
+    } catch (final JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
   }
 }
