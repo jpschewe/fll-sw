@@ -139,16 +139,16 @@ FONT.TIE {
   }
   displayStrings.getSpecialString = function (id, data, newest) {
       if (newest) {
-          return "<a name=\"newest\" id=\""+id+"-n\"></a><font class=\"TeamName\">" + displayStrings.parseTeamName(data._team._teamName) + "</font>";
+          return "<a name=\"newest\" id=\""+id+"-n\"></a><font class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</font>";
       } else {
-          return "<font class=\"TeamName\">" + displayStrings.parseTeamName(data._team._teamName) + "</font>";
+          return "<font class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</font>";
       }
   }
   displayStrings.getTeamNameString = function (id, data, newest) {
       if (newest) {
-          return "<a name=\"newest\" id=\""+id+"-n\"></a><font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + displayStrings.parseTeamName(data._team._teamName) + "</font>";
+          return "<a name=\"newest\" id=\""+id+"-n\"></a><font class=\"TeamNumber\">#" + data.team.teamNumber + "</font> <font class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</font>";
       } else {
-          return "<font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + displayStrings.parseTeamName(data._team._teamName) + "</font>";
+          return "<font class=\"TeamNumber\">#" + data.team.teamNumber + "</font> <font class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</font>";
       }
   }
   displayStrings.getTeamNameAndScoreString = function (id, data, scoreData, newest) {
@@ -156,9 +156,9 @@ FONT.TIE {
           scoreData += ".0";
       }
       if (newest) {
-          return "<a name=\"newest\" id=\""+id+"-n\"></a><font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + displayStrings.parseTeamName(data._team._teamName) + "</font><font class=\"TeamScore\"> Score: " + scoreData + "</font>";
+          return "<a name=\"newest\" id=\""+id+"-n\"></a><font class=\"TeamNumber\">#" + data.team.teamNumber + "</font> <font class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</font><font class=\"TeamScore\"> Score: " + scoreData + "</font>";
       } else {
-          return "<font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + displayStrings.parseTeamName(data._team._teamName) + "</font><font class=\"TeamScore\"> Score: " + scoreData + "</font>";
+          return "<font class=\"TeamNumber\">#" + data.team.teamNumber + "</font> <font class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</font><font class=\"TeamScore\"> Score: " + scoreData + "</font>";
       }
   }
 
@@ -182,8 +182,8 @@ FONT.TIE {
               if (mainData.refresh == "true") {
                   window.location.reload();
               }
-              if (data.leaf._team._teamNumber < 0) {
-                  if (data.leaf._team._teamNumber == -3) {
+              if (data.leaf.team.teamNumber < 0) {
+                  if (data.leaf.team.teamNumber == -3) {
                       return;
                   }
                   if ($("#" + lid).html() != displayStrings.getSpecialString(lid, data.leaf, false) && !foundNewest) {
@@ -196,7 +196,7 @@ FONT.TIE {
               } else if (lid.split("-")[1] != finalRound)/*Don't show final results!*/ { // /if team number meant a bye
                   var score;
                   //table label?
-                  placeTableLabel(lid, data.leaf._table, data.leaf._dbLine);
+                  placeTableLabel(lid, data.leaf.table, data.leaf.dbLine);
                   var scoreData = data.score;
                   if (scoreData >= 0) {
                       if ($("#" + lid).html() != displayStrings.getTeamNameAndScoreString(lid, data.leaf, scoreData, false) && !foundNewest) {
