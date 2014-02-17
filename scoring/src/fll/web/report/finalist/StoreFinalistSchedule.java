@@ -23,8 +23,8 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
@@ -75,8 +75,10 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
       }
 
       // decode JSON
-      Gson gson = new Gson();
-      final Collection<FinalistDBRow> rows = gson.fromJson(schedDataStr, FinalistDBRowDeserialize.INSTANCE.getType());
+      final ObjectMapper jsonMapper = new ObjectMapper();
+
+      final Collection<FinalistDBRow> rows = jsonMapper.readValue(schedDataStr,
+                                                                  FinalistScheduleTypeInformation.INSTANCE);
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Sched Data has "
             + rows.size() + " rows");
@@ -88,15 +90,15 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
         }
       }
 
-      final Collection<FinalistCategoryRow> categories = gson.fromJson(categoryDataStr,
-                                                                       FinalistCategoryRowDeserialize.INSTANCE.getType());
+      final Collection<FinalistCategoryRow> categories = jsonMapper.readValue(categoryDataStr,
+                                                                              FinalistCategoriesTypeInformation.INSTANCE);
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Category Data has "
             + rows.size() + " rows");
       }
       final Map<String, Boolean> categoryMap = new HashMap<String, Boolean>();
       for (final FinalistCategoryRow cat : categories) {
-        categoryMap.put(cat.getCategoryName(), cat.isPublic());
+        categoryMap.put(cat.getCategoryName(), cat.getIsPublic());
       }
 
       final FinalistSchedule schedule = new FinalistSchedule(tournament, division, categoryMap, rows);
@@ -116,11 +118,12 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
 
   }
 
-  private static final class FinalistDBRowDeserialize extends TypeToken<Collection<FinalistDBRow>> {
-    public static final FinalistDBRowDeserialize INSTANCE = new FinalistDBRowDeserialize();
+  private static final class FinalistScheduleTypeInformation extends TypeReference<Collection<FinalistDBRow>> {
+    public static final FinalistScheduleTypeInformation INSTANCE = new FinalistScheduleTypeInformation();
   }
 
-  private static final class FinalistCategoryRowDeserialize extends TypeToken<Collection<FinalistCategoryRow>> {
-    public static final FinalistCategoryRowDeserialize INSTANCE = new FinalistCategoryRowDeserialize();
+  private static final class FinalistCategoriesTypeInformation extends TypeReference<Collection<FinalistCategoryRow>> {
+    public static final FinalistCategoriesTypeInformation INSTANCE = new FinalistCategoriesTypeInformation();
   }
+
 }

@@ -26,7 +26,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Team;
 import fll.Tournament;
@@ -104,14 +105,16 @@ public class JsonBracketDataTests {
     // Ask for round 1 leaf 1
     int row = playoff.getBracketData().getRowNumberForLine(1, 3);
     query.put(row, 1);
-    final Gson gson = new Gson();
+    final ObjectMapper jsonMapper = new ObjectMapper();
+
     String jsonOut = JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(), playoff.getDescription()
                                                                                                   .getPerformance(),
                                                            playoff.getBracketData(), SHOW_ONLY_VERIFIED,
                                                            SHOW_FINAL_ROUNDS);
-    BracketLeafResultSet[] result = gson.fromJson(jsonOut, BracketLeafResultSet[].class);
+    List<BracketLeafResultSet> result = jsonMapper.readValue(jsonOut, BracketLeafResultSetTypeInformation.INSTANCE);
+    
     // assert score is -1, indicating no score
-    Assert.assertEquals(result[0].score, -1.0D, 0.0);
+    Assert.assertEquals(result.get(0).score, -1.0D, 0.0);
 
     // test to make sure 2 unverified scores for opposing teams produces no
     // result
@@ -125,8 +128,8 @@ public class JsonBracketDataTests {
     jsonOut = JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(), playoff.getDescription()
                                                                                            .getPerformance(),
                                                     playoff.getBracketData(), SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
-    result = gson.fromJson(jsonOut, BracketLeafResultSet[].class);
-    Assert.assertEquals(result[0].leaf.getTeam().getTeamNumber(), Team.NULL_TEAM_NUMBER);
+    result = jsonMapper.readValue(jsonOut, BracketLeafResultSetTypeInformation.INSTANCE);
+    Assert.assertEquals(result.get(0).leaf.getTeam().getTeamNumber(), Team.NULL_TEAM_NUMBER);
 
     // verify a score that has been entered as unverified and make sure we
     // get data from it
@@ -139,8 +142,8 @@ public class JsonBracketDataTests {
     jsonOut = JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(), playoff.getDescription()
                                                                                            .getPerformance(),
                                                     playoff.getBracketData(), SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
-    result = gson.fromJson(jsonOut, BracketLeafResultSet[].class);
-    Assert.assertEquals(result[0].score, 5D, 0.0);
+    result = jsonMapper.readValue(jsonOut, BracketLeafResultSetTypeInformation.INSTANCE);
+    Assert.assertEquals(result.get(0).score, 5D, 0.0);
 
     // advance 1 and 6 all the way to finals
     insertScore(playoff.getConnection(), 3, 1, true, 5D);
@@ -164,8 +167,8 @@ public class JsonBracketDataTests {
     jsonOut = JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(), playoff.getDescription()
                                                                                            .getPerformance(),
                                                     playoff.getBracketData(), SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
-    result = gson.fromJson(jsonOut, BracketLeafResultSet[].class);
-    Assert.assertEquals(result[0].score, -1.0D, 0.0);
+    result = jsonMapper.readValue(jsonOut, BracketLeafResultSetTypeInformation.INSTANCE);
+    Assert.assertEquals(result.get(0).score, -1.0D, 0.0);
 
     SQLFunctions.close(playoff.getConnection());
   }
@@ -278,4 +281,9 @@ public class JsonBracketDataTests {
     return new PlayoffContainer(connection, bd, description);
 
   }
+  
+  private static final class BracketLeafResultSetTypeInformation extends TypeReference<List<BracketLeafResultSet>> {
+    public static final BracketLeafResultSetTypeInformation INSTANCE = new BracketLeafResultSetTypeInformation();
+  }
+
 }
