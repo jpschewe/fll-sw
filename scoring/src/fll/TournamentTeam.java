@@ -10,6 +10,8 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
@@ -18,7 +20,12 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 @SuppressFBWarnings(value = { "EQ_DOESNT_OVERRIDE_EQUALS" }, justification = "Equality doesn't change in this subclass of Team")
 public class TournamentTeam extends Team {
 
-  public TournamentTeam(final int teamNumber, final String org, final String name, final String division, final String eventDivision, final String judgingStation) {
+  public TournamentTeam(@JsonProperty("teamNumber") final int teamNumber,
+                        @JsonProperty("organization") final String org,
+                        @JsonProperty("teamName") final String name,
+                        @JsonProperty("division") final String division,
+                        @JsonProperty("eventDivision") final String eventDivision,
+                        @JsonProperty("judgingStation") final String judgingStation) {
     super(teamNumber, org, name, division);
     _eventDivision = eventDivision;
     _judgingStation = judgingStation;
