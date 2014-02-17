@@ -62,7 +62,6 @@
 	<classpathentry kind="lib" path="scoring/lib/poi-3.9-20121203.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/poi-ooxml-3.9-20121203.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/poi-ooxml-schemas-3.9-20121203.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/gson-2.2.4.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/cobertura-2.0.2.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/hsqldb-2.3.0.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/jackson-annotations-2.2.3.jar">
