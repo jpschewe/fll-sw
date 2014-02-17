@@ -12,11 +12,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Comparator;
 
-import fll.db.GenerateDB;
-
 import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.util.StringUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import fll.db.GenerateDB;
 
 /**
  * The static state of a team. This does not include information about the team
@@ -84,10 +87,10 @@ public class Team implements Serializable {
     }
   };
 
-  public Team(final int teamNumber,
-              final String org,
-              final String name,
-              final String division) {
+  public Team(@JsonProperty("teamNumber") final int teamNumber,
+              @JsonProperty("organization") final String org,
+              @JsonProperty("teamName") final String name,
+              @JsonProperty("division") final String division) {
     _teamNumber = teamNumber;
     _organization = org;
     _teamName = name;
@@ -177,6 +180,7 @@ public class Team implements Serializable {
   /**
    * @return the team name shortened to {@link Team#MAX_TEAM_NAME_LEN}
    */
+  @JsonIgnore
   public String getTrimmedTeamName() {
     return StringUtils.trimString(getTeamName(), Team.MAX_TEAM_NAME_LEN);
   }
@@ -225,6 +229,7 @@ public class Team implements Serializable {
   /**
    * @return if this is an internal team
    */
+  @JsonIgnore
   public boolean isInternal() {
     return isInternalTeamNumber(getTeamNumber());
   }
