@@ -6,24 +6,29 @@
 
 package fll.web.report.finalist;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Mirrors javascript class in schedule.js. Variable names need to match the
+ * Mirrors javascript class in schedule.js. Property names need to match the
  * javascript/JSON.
  */
 final class FinalistCategoryRow {
-  @SuppressFBWarnings(value = { "UWF_UNWRITTEN_FIELD" }, justification = "Populated by JSON deserialization")
-  private String categoryName;
+
+  public FinalistCategoryRow(@JsonProperty("categoryName") final String categoryName,
+                             @JsonProperty("isPublic") final boolean isPublic) {
+    this.categoryName = categoryName;
+    this.isPublic = isPublic;
+  }
+
+  private final String categoryName;
 
   public String getCategoryName() {
     return categoryName;
   }
 
-  @SuppressFBWarnings(value = { "UWF_UNWRITTEN_FIELD" }, justification = "Populated by JSON deserialization")
-  private boolean isPublic;
+  private final boolean isPublic;
 
-  public boolean isPublic() {
+  public boolean getIsPublic() {
     return isPublic;
   }
 

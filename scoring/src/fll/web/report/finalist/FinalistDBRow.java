@@ -11,40 +11,44 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
- * Mirrors javascript class in schedule.js. Variable names need to match the
+ * Mirrors javascript class in schedule.js. Property names need to match the
  * javascript/JSON.
  */
 public final class FinalistDBRow implements Serializable {
 
-  public FinalistDBRow(final String categoryName,
-                       final int hour,
-                       final int minute,
-                       final int teamNumber) {
+  public FinalistDBRow(@JsonProperty("categoryName") final String categoryName,
+                       @JsonProperty("hour") final int hour,
+                       @JsonProperty("minute") final int minute,
+                       @JsonProperty("teamNumber") final int teamNumber) {
     this.categoryName = categoryName;
     this.hour = hour;
     this.minute = minute;
     this.teamNumber = teamNumber;
   }
 
-  private String categoryName;
+  private final String categoryName;
 
   public String getCategoryName() {
     return categoryName;
   }
 
-  private int hour;
+  private final int hour;
 
   public int getHour() {
     return hour;
   }
 
-  private int minute;
+  private final int minute;
 
   public int getMinute() {
     return minute;
   }
 
+  @JsonIgnore
   public Date getTime() {
     final Calendar cal = Calendar.getInstance();
     cal.set(Calendar.HOUR, getHour());
@@ -55,7 +59,7 @@ public final class FinalistDBRow implements Serializable {
     return cal.getTime();
   }
 
-  private int teamNumber;
+  private final int teamNumber;
 
   public int getTeamNumber() {
     return teamNumber;
