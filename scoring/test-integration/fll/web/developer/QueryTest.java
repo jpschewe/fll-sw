@@ -41,7 +41,7 @@ public class QueryTest {
 
     final String query = "SELECT * FROM Tournaments";
     final QueryHandler.ResultData result = WebTestUtils.executeServerQuery(query);
-    for (final String colName : result.columnNames) {
+    for (final String colName : result.getColumnNames()) {
       LOGGER.info(colName);
     }
   }

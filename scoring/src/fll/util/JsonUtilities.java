@@ -12,7 +12,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.Queries;
@@ -34,13 +36,37 @@ public final class JsonUtilities {
 
   public static class BracketLeafResultSet {
     @SuppressFBWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Read in the javascript")
-    public final TeamBracketCell leaf;
+    public TeamBracketCell leaf;
+
+    public TeamBracketCell getLeaf() {
+      return this.leaf;
+    }
+
+    public void setLeaf(final TeamBracketCell leaf) {
+      this.leaf = leaf;
+    }
 
     @SuppressFBWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Read in the javascript")
-    public final double score;
+    public double score;
+
+    public double getScore() {
+      return score;
+    }
+
+    public void setScore(final double score) {
+      this.score = score;
+    }
 
     @SuppressFBWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Read in the javascript")
-    public final String originator;
+    public String originator;
+
+    public String getOriginator() {
+      return originator;
+    }
+
+    public void setOriginator(final String v) {
+      this.originator = v;
+    }
 
     public BracketLeafResultSet(final TeamBracketCell tbc,
                                 final double scr,
@@ -101,23 +127,36 @@ public final class JsonUtilities {
       throw new RuntimeException(e);
     }
     if (datalist.size() == 0) {
-      // Add some data, so gson's happy.
+      // Add some data, JSON is happy
       datalist.add(new BracketLeafResultSet());
     }
-    Gson gson = new Gson();
-    return gson.toJson(datalist);
+    try {
+      final ObjectMapper jsonMapper = new ObjectMapper();
+      return jsonMapper.writeValueAsString(datalist);
+    } catch (final JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public static class DisplayResponse {
     @SuppressFBWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Read in the javascript")
     public final String displayURL;
 
-    public DisplayResponse(final String displayURL) {
+    public String getDisplayURL() {
+      return this.displayURL;
+    }
+
+    public DisplayResponse(@JsonProperty("displayURL") final String displayURL) {
       this.displayURL = displayURL;
     }
   }
 
   public static String generateDisplayResponse(final String displayURL) {
-    return new Gson().toJson(new DisplayResponse(displayURL));
+    try {
+      final ObjectMapper jsonMapper = new ObjectMapper();
+      return jsonMapper.writeValueAsString(new DisplayResponse(displayURL));
+    } catch (final JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
   }
 }
