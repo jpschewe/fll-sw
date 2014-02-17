@@ -16,7 +16,7 @@ import junit.framework.Assert;
 
 import org.xml.sax.SAXException;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
@@ -110,12 +110,13 @@ public final class WebTestUtils {
     final URL responseURL = response.getURL();
     final String address = responseURL.getPath();
     final boolean correctAddress;
-    if(address.contains("login.jsp")) {
+    if (address.contains("login.jsp")) {
       correctAddress = false;
     } else {
       correctAddress = true;
     }
-    Assert.assertTrue("Unexpected URL after login: " + address, correctAddress);
+    Assert.assertTrue("Unexpected URL after login: "
+        + address, correctAddress);
 
     return conversation;
   }
@@ -143,10 +144,10 @@ public final class WebTestUtils {
 
     final String responseData = response.getText();
 
-    final Gson gson = new Gson();
-    QueryHandler.ResultData result = gson.fromJson(responseData, QueryHandler.ResultData.class);
+    final ObjectMapper jsonMapper = new ObjectMapper();
+    QueryHandler.ResultData result = jsonMapper.readValue(responseData, QueryHandler.ResultData.class);
     Assert.assertNull("SQL Error: "
-        + result.error, result.error);
+        + result.getError(), result.getError());
 
     return result;
   }

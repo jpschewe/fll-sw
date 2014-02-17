@@ -7,6 +7,7 @@
 package fll.web.developer;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -29,7 +30,8 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
@@ -45,9 +47,9 @@ import fll.web.BaseFLLServlet;
 public class QueryHandler extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
-  
+
   /**
-   * Parameter that the query is expected to be in. 
+   * Parameter that the query is expected to be in.
    */
   public static final String QUERY_PARAMETER = "query";
 
@@ -60,7 +62,7 @@ public class QueryHandler extends BaseFLLServlet {
     final List<String> columnNames = new LinkedList<String>();
     final List<Map<String, String>> data = new LinkedList<Map<String, String>>();
     String error = null;
-    
+
     DataSource datasource = ApplicationAttributes.getDataSource(application);
     Statement stmt = null;
     ResultSet rs = null;
@@ -92,39 +94,50 @@ public class QueryHandler extends BaseFLLServlet {
       SQLFunctions.close(stmt);
       SQLFunctions.close(connection);
     }
-    final ResultData result = new ResultData(columnNames, data, error);
-    final Gson gson = new Gson();
-    final String resultJson = gson.toJson(result);
+
     response.setContentType("application/json");
     response.setCharacterEncoding(Utilities.DEFAULT_CHARSET.name());
-    response.getWriter().write(resultJson);
 
+    final ResultData result = new ResultData(columnNames, data, error);
+    final ObjectMapper jsonMapper = new ObjectMapper();
+    final Writer writer = response.getWriter();
+
+    jsonMapper.writeValue(writer, result);
   }
 
   /**
    * Object that comes back out of the servlet {@link QueryHandler}.
    */
   public static class ResultData {
-    public ResultData(final List<String> columnNames, final List<Map<String, String>> data, final String error) {
+    public ResultData(@JsonProperty("columnNames") final List<String> columnNames,
+                      @JsonProperty("data") final List<Map<String, String>> data,
+                      @JsonProperty("error") final String error) {
       this.columnNames.addAll(columnNames);
       this.data.addAll(data);
       this.error = error;
     }
-    
+
     /**
      * If there is an error, this will be non-null.
      */
-    @SuppressFBWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Used in the web pages")
-    public String error = null;
-    public String getError() { return error; }
+    private final String error;
 
-    public final List<String> columnNames = new LinkedList<String>();
-    public List<String> getColumnNames() { return columnNames; }
-    
-    public final List<Map<String, String>> data = new LinkedList<Map<String, String>>();
-    public List<Map<String, String>> getData() { return data; }
-    
+    public String getError() {
+      return error;
+    }
+
+    private final List<String> columnNames = new LinkedList<String>();
+
+    public List<String> getColumnNames() {
+      return columnNames;
+    }
+
+    private final List<Map<String, String>> data = new LinkedList<Map<String, String>>();
+
+    public List<Map<String, String>> getData() {
+      return data;
+    }
+
   }
-  
-  
+
 }

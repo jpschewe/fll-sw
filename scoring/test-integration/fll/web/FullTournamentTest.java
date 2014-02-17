@@ -519,7 +519,7 @@ public class FullTournamentTest {
     final QueryHandler.ResultData div1Result = WebTestUtils.executeServerQuery(div1Query);
 
     int rank = 0;
-    for (final Map<String, String> row : div1Result.data) {
+    for (final Map<String, String> row : div1Result.getData()) {
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("checkRankAndScores - row: "
             + row);
@@ -544,7 +544,7 @@ public class FullTournamentTest {
     final QueryHandler.ResultData div2Result = WebTestUtils.executeServerQuery(div2Query);
 
     rank = 0;
-    for (final Map<String, String> row : div2Result.data) {
+    for (final Map<String, String> row : div2Result.getData()) {
       final int teamNumber = Integer.parseInt(row.get("teamnumber"));
       Assert.assertEquals("Division II Ranking is incorrect for rank: "
           + rank, division2ExpectedRank[rank], teamNumber);
