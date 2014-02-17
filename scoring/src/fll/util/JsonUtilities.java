@@ -60,7 +60,7 @@ public final class JsonUtilities {
     @SuppressFBWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Read in the javascript")
     public String originator;
 
-    public String getOrigintor() {
+    public String getOriginator() {
       return originator;
     }
 
