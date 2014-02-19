@@ -26,11 +26,12 @@ if [ -n "${DEVEL_BUILD}" ]; then
     fi
 fi
 
-cd "${fllsw_root}"/scoring
-./ant.sh dist || fatal "Error building distribution"
 
 # get wiki documentation
-cd "${fllsw_root}"/scoring/dist/tomcat/webaps/fll-sw/wiki
+cd "${fllsw_root}"/scoring/docs
 "${fllsw_root}"/scoring/scripts/markdown-to-html.py *.md \
     || fatal "Error converting wiki documentation"
+
+cd "${fllsw_root}"/scoring
+./ant.sh dist || fatal "Error building distribution"
 
