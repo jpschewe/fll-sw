@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.util.FLLRuntimeException;
 
@@ -116,7 +117,7 @@ public class ScheduleChecker {
     for (final Map.Entry<String, Map<Date, Set<TeamScheduleInfo>>> topEntry : allSubjective.entrySet()) {
 
       for (final Map.Entry<Date, Set<TeamScheduleInfo>> entry : topEntry.getValue().entrySet()) {
-        if (entry.getValue().size() > schedule.getJudges().size()) {
+        if (entry.getValue().size() > schedule.getJudgingGroups().size()) {
           final String message = String.format("There are too many teams in %s at %s", topEntry.getKey(),
                                                TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(entry.getKey()));
           violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, null,
@@ -137,7 +138,7 @@ public class ScheduleChecker {
     }
   }
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "IM_BAD_CHECK_FOR_ODD", justification = "The size of a container cannot be negative")
+  @SuppressFBWarnings(value = "IM_BAD_CHECK_FOR_ODD", justification = "The size of a container cannot be negative")
   private void verifyTeam(final Collection<ConstraintViolation> violations,
                           final TeamScheduleInfo ti) {
     // Relationship between each subjective category

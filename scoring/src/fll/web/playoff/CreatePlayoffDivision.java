@@ -106,7 +106,7 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
         final String[] selectedTeams = request.getParameterValues("selected_team");
         final List<Integer> teamNumbers = new LinkedList<Integer>();
         for (final String teamStr : selectedTeams) {
-          final int num = Integer.valueOf(teamStr);
+          final int num = Integer.parseInt(teamStr);
           teamNumbers.add(num);
         }
 

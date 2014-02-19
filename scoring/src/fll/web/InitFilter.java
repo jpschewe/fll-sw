@@ -119,11 +119,15 @@ public class InitFilter implements Filter {
                 + "/playoff/scoregenbrackets.jsp") //
             || path.startsWith(contextPath
                 + "/playoff/adminbrackets.jsp") //
+            || path.startsWith(contextPath
+                + "/api") //
+            || path.startsWith(contextPath
+                + "/subjective") //
         || path.startsWith(contextPath
             + "/setup") //
         )) {
       if (path.startsWith(contextPath
-          + "/report/PublicFinalistSchedule")) {
+          + "/report/finalist/PublicFinalistDisplaySchedule")) {
         // this report is public
         return false;
       } else {
@@ -259,6 +263,8 @@ public class InitFilter implements Filter {
     }
   }
 
+  private static final Object initLock = new Object();
+
   /**
    * @param request
    * @param response
@@ -268,61 +274,67 @@ public class InitFilter implements Filter {
                                     final HttpServletResponse response,
                                     final HttpSession session,
                                     final ServletContext application) throws IOException, RuntimeException {
+
     try {
-      // set some default text
-      if (null == application.getAttribute(ApplicationAttributes.SCORE_PAGE_TEXT)) {
-        application.setAttribute(ApplicationAttributes.SCORE_PAGE_TEXT, "FLL");
-      }
 
-      initDataSource(application);
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
+      synchronized (initLock) {
 
-      // Initialize the connection
-      Connection connection = null;
-      try {
-        connection = datasource.getConnection();
-
-        // check if the database is initialized
-        final boolean dbinitialized = Utilities.testDatabaseInitialized(connection);
-        if (!dbinitialized) {
-          LOGGER.warn("Database not initialized, redirecting to setup");
-          session.setAttribute(SessionAttributes.MESSAGE,
-                               "<p class='error'>The database is not yet initialized. Please create the database.</p>");
-          response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
-              + "/setup/index.jsp"));
-          return false;
+        // set some default text
+        if (null == application.getAttribute(ApplicationAttributes.SCORE_PAGE_TEXT)) {
+          application.setAttribute(ApplicationAttributes.SCORE_PAGE_TEXT, "FLL");
         }
 
-        // load the challenge descriptor
-        if (null == ApplicationAttributes.getChallengeDocument(application)) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Loading challenge descriptor");
-          }
-          try {
-            final Document document = GlobalParameters.getChallengeDocument(connection);
-            if (null == document) {
-              LOGGER.warn("Could not find challenge descriptor");
-              session.setAttribute(SessionAttributes.MESSAGE,
-                                   "<p class='error'>Could not find xml challenge description in the database! Please create the database.</p>");
-              response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
-                  + "/setup/index.jsp"));
-              return false;
-            }
-            application.setAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT, document);
+        initDataSource(application);
+        final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
-            final ChallengeDescription challengeDescription = new ChallengeDescription(document.getDocumentElement());
-            application.setAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION, challengeDescription);
-          } catch (final FLLRuntimeException e) {
-            LOGGER.error("Error getting challenge document", e);
-            session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>"
-                + e.getMessage() + " Please create the database.</p>");
+        // Initialize the connection
+        Connection connection = null;
+        try {
+          connection = datasource.getConnection();
+
+          // check if the database is initialized
+          final boolean dbinitialized = Utilities.testDatabaseInitialized(connection);
+          if (!dbinitialized) {
+            LOGGER.warn("Database not initialized, redirecting to setup");
+            session.setAttribute(SessionAttributes.MESSAGE,
+                                 "<p class='error'>The database is not yet initialized. Please create the database.</p>");
             response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
                 + "/setup/index.jsp"));
             return false;
           }
+
+          // load the challenge descriptor
+          if (null == ApplicationAttributes.getChallengeDocument(application)) {
+            if (LOGGER.isDebugEnabled()) {
+              LOGGER.debug("Loading challenge descriptor");
+            }
+            try {
+              final Document document = GlobalParameters.getChallengeDocument(connection);
+              if (null == document) {
+                LOGGER.warn("Could not find challenge descriptor");
+                session.setAttribute(SessionAttributes.MESSAGE,
+                                     "<p class='error'>Could not find xml challenge description in the database! Please create the database.</p>");
+                response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
+                    + "/setup/index.jsp"));
+                return false;
+              }
+              application.setAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT, document);
+
+              final ChallengeDescription challengeDescription = new ChallengeDescription(document.getDocumentElement());
+              application.setAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION, challengeDescription);
+            } catch (final FLLRuntimeException e) {
+              LOGGER.error("Error getting challenge document", e);
+              session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>"
+                  + e.getMessage() + " Please create the database.</p>");
+              response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
+                  + "/setup/index.jsp"));
+              return false;
+            }
+          }
+        } finally {
+          SQLFunctions.close(connection);
         }
-      } finally {
-        SQLFunctions.close(connection);
+
       }
 
       // TODO ticket:87 allow static data to be cached

@@ -38,10 +38,12 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import au.com.bytecode.opencsv.CSVReader;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.TeamPropertyDifference.TeamProperty;
+import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.developer.importdb.ImportDBDump;
 import fll.web.developer.importdb.TournamentDifference;
@@ -219,7 +221,7 @@ public final class ImportDB {
       for (final Tournament sourceTournament : Tournament.getTournaments(memConnection)) {
         if (!GenerateDB.INTERNAL_TOURNAMENT_NAME.equals(sourceTournament.getName())
             && GenerateDB.INTERNAL_TOURNAMENT_ID != sourceTournament.getTournamentID()) {
-          createTournament(sourceTournament, destConnection);
+          createTournament(sourceTournament, memConnection, destConnection);
         }
       }
 
@@ -245,6 +247,7 @@ public final class ImportDB {
    * Recursively create a tournament and it's next tournament.
    */
   private static void createTournament(final Tournament sourceTournament,
+                                       final Connection sourceConnection,
                                        final Connection destConnection) throws SQLException {
     // add the tournament to the tournaments table if it doesn't already
     // exist
@@ -253,10 +256,10 @@ public final class ImportDB {
       if (null == sourceTournament.getNextTournament()) {
         Tournament.createTournament(destConnection, sourceTournament.getName(), sourceTournament.getLocation());
       } else {
-        createTournament(sourceTournament.getNextTournament(), destConnection);
-        final Tournament nextTournament = Tournament.findTournamentByName(destConnection,
-                                                                          sourceTournament.getNextTournament()
-                                                                                          .getName());
+        final Tournament sourceNext = Tournament.findTournamentByID(sourceConnection,
+                                                                    sourceTournament.getNextTournament());
+        createTournament(sourceNext, sourceConnection, destConnection);
+        final Tournament nextTournament = Tournament.findTournamentByName(destConnection, sourceNext.getName());
         Tournament.createTournament(destConnection, sourceTournament.getName(), sourceTournament.getLocation(),
                                     nextTournament.getTournamentID());
       }
@@ -309,6 +312,7 @@ public final class ImportDB {
    * @throws IOException if there is an error reading the zipfile
    * @throws SQLException if there is an error loading the data into the
    *           database
+   * @throws FLLRuntimeException if the database version in the dump is too new
    */
   public static Document loadDatabaseDump(final ZipInputStream zipfile,
                                           final Connection connection) throws IOException, SQLException {
@@ -354,6 +358,12 @@ public final class ImportDB {
       final Map<String, String> tableTypes = typeInfo.get(tablename);
 
       Utilities.loadCSVFile(connection, tablename, tableTypes, new StringReader(content));
+    }
+
+    int dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion > GenerateDB.DATABASE_VERSION) {
+      throw new FLLRuntimeException("Database dump too new. Current known database version : "
+          + GenerateDB.DATABASE_VERSION + " dump version: " + dbVersion);
     }
 
     upgradeDatabase(connection, challengeDocument);
@@ -474,29 +484,43 @@ public final class ImportDB {
    */
   private static void upgradeDatabase(final Connection connection,
                                       final Document challengeDocument) throws SQLException, IllegalArgumentException {
-    final int dbVersion = Queries.getDatabaseVersion(connection);
+    int dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 1) {
       upgrade0To1(connection, challengeDocument);
     }
+    dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 2) {
       upgrade1To2(connection);
     }
+    dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 6) {
       upgrade2To6(connection);
     }
+    dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 7) {
       upgrade6To7(connection);
     }
+    dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 8) {
       upgrade7To8(connection);
     }
+    dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 9) {
       upgrade8To9(connection);
     }
-    final int newVersion = Queries.getDatabaseVersion(connection);
-    if (newVersion < GenerateDB.DATABASE_VERSION) {
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 10) {
+      upgrade9To10(connection);
+    }
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 11) {
+      upgrade10To11(connection);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < GenerateDB.DATABASE_VERSION) {
       throw new RuntimeException("Internal error, database version not updated to current instead was: "
-          + newVersion);
+          + dbVersion);
     }
   }
 
@@ -513,6 +537,37 @@ public final class ImportDB {
     GenerateDB.createFinalistScheduleTables(connection, false);
 
     setDBVersion(connection, 9);
+  }
+
+  private static void upgrade9To10(final Connection connection) throws SQLException {
+    GenerateDB.createTableDivision(connection, false);
+
+    setDBVersion(connection, 10);
+  }
+
+  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Table names come from category names")
+  private static void upgrade10To11(final Connection connection) throws SQLException {
+    Statement stmt = null;
+    try {
+      stmt = connection.createStatement();
+      stmt.executeUpdate("ALTER TABLE Judges ADD COLUMN phone varchar(15) DEFAULT NULL");
+
+      stmt.executeUpdate("UPDATE Judges SET phone = '612-555-1212' WHERE phone IS NULL");
+
+      final Document document = GlobalParameters.getChallengeDocument(connection);
+      final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
+      for (final ScoreCategory categoryElement : description.getSubjectiveCategories()) {
+        final String tableName = categoryElement.getName();
+
+        stmt.executeUpdate("ALTER TABLE "
+            + tableName + " ADD COLUMN note longvarchar DEFAULT NULL");
+      }
+
+      setDBVersion(connection, 11);
+    } finally {
+      SQLFunctions.close(stmt);
+      stmt = null;
+    }
   }
 
   private static void upgrade2To6(final Connection connection) throws SQLException {
@@ -640,7 +695,7 @@ public final class ImportDB {
     }
   }
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic based upon tables in the database")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic based upon tables in the database")
   private static void upgrade0To1(final Connection connection,
                                   final Document challengeDocument) throws SQLException {
     Statement stmt = null;
@@ -801,7 +856,9 @@ public final class ImportDB {
     importSchedule(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
     importFinalistSchedule(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
-    
+
+    importTableDivision(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+
     // update score totals
     Queries.updateScoreTotals(description, destinationConnection, destTournamentID);
   }
@@ -999,7 +1056,47 @@ public final class ImportDB {
     }
   }
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic table based upon categories")
+  private static void importTableDivision(final Connection sourceConnection,
+                                          final Connection destinationConnection,
+                                          final int sourceTournamentID,
+                                          final int destTournamentID) throws SQLException {
+    PreparedStatement destPrep = null;
+    PreparedStatement sourcePrep = null;
+    ResultSet sourceRS = null;
+    try {
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Importing table_division");
+      }
+      destPrep = destinationConnection.prepareStatement("DELETE FROM table_division WHERE tournament = ?");
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+      SQLFunctions.close(destPrep);
+
+      sourcePrep = sourceConnection.prepareStatement("SELECT playoff_division, table_id"
+          + " FROM table_division WHERE tournament=?");
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep = destinationConnection.prepareStatement("INSERT INTO table_division (tournament, playoff_division, table_id) "
+          + "VALUES (?, ?, ?)");
+      destPrep.setInt(1, destTournamentID);
+      sourceRS = sourcePrep.executeQuery();
+      while (sourceRS.next()) {
+        for (int i = 1; i <= 2; i++) {
+          Object sourceObj = sourceRS.getObject(i);
+          if ("".equals(sourceObj)) {
+            sourceObj = null;
+          }
+          destPrep.setObject(i + 1, sourceObj);
+        }
+        destPrep.executeUpdate();
+      }
+    } finally {
+      SQLFunctions.close(sourceRS);
+      SQLFunctions.close(sourcePrep);
+      SQLFunctions.close(destPrep);
+    }
+  }
+
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic table based upon categories")
   private static void importSubjective(final Connection sourceConnection,
                                        final Connection destinationConnection,
                                        final int sourceTournamentID,
@@ -1026,7 +1123,7 @@ public final class ImportDB {
         columns.append(" TeamNumber,");
         columns.append(" NoShow,");
         final List<AbstractGoal> goals = categoryElement.getGoals();
-        int numColumns = 4;
+        int numColumns = 5;
         for (final AbstractGoal element : goals) {
           if (!element.isComputed()) {
             columns.append(" "
@@ -1034,6 +1131,7 @@ public final class ImportDB {
             ++numColumns;
           }
         }
+        columns.append(" note,");
         columns.append(" Judge");
 
         importCommon(columns, tableName, numColumns, destinationConnection, destTournamentID, sourceConnection,
@@ -1058,7 +1156,7 @@ public final class ImportDB {
    * @param sourceTournamentID
    * @throws SQLException
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic based upon goals and category")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic based upon goals and category")
   private static void importCommon(final StringBuilder columns,
                                    final String tableName,
                                    final int numColumns,
@@ -1109,7 +1207,7 @@ public final class ImportDB {
 
   }
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic table based upon category")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic table based upon category")
   private static void importPerformance(final Connection sourceConnection,
                                         final Connection destinationConnection,
                                         final int sourceTournamentID,
@@ -1213,16 +1311,17 @@ public final class ImportDB {
       destPrep.executeUpdate();
       SQLFunctions.close(destPrep);
 
-      destPrep = destinationConnection.prepareStatement("INSERT INTO Judges (id, category, station, Tournament) VALUES (?, ?, ?, ?)");
-      destPrep.setInt(4, destTournamentID);
+      destPrep = destinationConnection.prepareStatement("INSERT INTO Judges (id, category, station, phone, Tournament) VALUES (?, ?, ?, ?, ?)");
+      destPrep.setInt(5, destTournamentID);
 
-      sourcePrep = sourceConnection.prepareStatement("SELECT id, category, station FROM Judges WHERE Tournament = ?");
+      sourcePrep = sourceConnection.prepareStatement("SELECT id, category, station, phone FROM Judges WHERE Tournament = ?");
       sourcePrep.setInt(1, sourceTournamentID);
       sourceRS = sourcePrep.executeQuery();
       while (sourceRS.next()) {
         destPrep.setString(1, sourceRS.getString(1));
         destPrep.setString(2, sourceRS.getString(2));
         destPrep.setString(3, sourceRS.getString(3));
+        destPrep.setString(4, sourceRS.getString(4));
         destPrep.executeUpdate();
       }
     } finally {
@@ -1233,9 +1332,9 @@ public final class ImportDB {
   }
 
   private static void importFinalistSchedule(final Connection sourceConnection,
-                                   final Connection destinationConnection,
-                                   final int sourceTournamentID,
-                                   final int destTournamentID) throws SQLException {
+                                             final Connection destinationConnection,
+                                             final int sourceTournamentID,
+                                             final int destTournamentID) throws SQLException {
     PreparedStatement destPrep = null;
     PreparedStatement sourcePrep = null;
     ResultSet sourceRS = null;
@@ -1248,14 +1347,13 @@ public final class ImportDB {
       destPrep = destinationConnection.prepareStatement("DELETE FROM finalist_schedule WHERE tournament = ?");
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
-      SQLFunctions.close(destPrep);
 
+      SQLFunctions.close(destPrep);
       destPrep = destinationConnection.prepareStatement("DELETE FROM finalist_categories WHERE tournament = ?");
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
-      SQLFunctions.close(destPrep);
 
-      
+      SQLFunctions.close(destPrep);
       // insert categories next
       destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_categories (tournament, category, is_public) VALUES(?, ?, ?)");
       destPrep.setInt(1, destTournamentID);
@@ -1269,11 +1367,13 @@ public final class ImportDB {
         destPrep.executeUpdate();
       }
 
-           
+      SQLFunctions.close(destPrep);
       // insert schedule values last
       destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_schedule (tournament, category, judge_time, team_number) VALUES(?, ?, ?, ?)");
       destPrep.setInt(1, destTournamentID);
 
+      SQLFunctions.close(sourceRS);
+      SQLFunctions.close(sourcePrep);
       sourcePrep = sourceConnection.prepareStatement("SELECT category, judge_time, team_number FROM finalist_schedule WHERE tournament = ?");
       sourcePrep.setInt(1, sourceTournamentID);
       sourceRS = sourcePrep.executeQuery();
@@ -1289,7 +1389,7 @@ public final class ImportDB {
       SQLFunctions.close(destPrep);
     }
   }
-  
+
   /**
    * Check for differences between two tournaments in team information.
    * 

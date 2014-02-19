@@ -344,6 +344,9 @@ public class FullTournamentTest {
     selenium.findElement(By.name("id"
         + judgeIndex)).sendKeys(id);
 
+    selenium.findElement(By.name("phone"
+        + judgeIndex)).sendKeys("612-555-1212");
+
     final Select categorySelect = new Select(selenium.findElement(By.name("cat"
         + judgeIndex)));
     categorySelect.selectByValue(category);
@@ -381,7 +384,7 @@ public class FullTournamentTest {
 
       if ("All".equals(division)) {
 
-        final Select select = new Select(selenium.findElement(By.name("station1")));
+        final Select select = new Select(IntegrationTestUtils.findElement(selenium, By.name("station1"), 5));
         for (final WebElement option : select.getOptions()) {
           final String station = option.getText();
           assignJudge(id, category, station, judgeIndex);
@@ -522,7 +525,7 @@ public class FullTournamentTest {
             + row);
       }
 
-      final int teamNumber = Integer.valueOf(row.get("teamnumber"));
+      final int teamNumber = Integer.parseInt(row.get("teamnumber"));
       Assert.assertEquals("Division I Ranking is incorrect for rank: "
           + rank, division1ExpectedRank[rank], teamNumber);
       final double score = Double.valueOf(row.get("overallscore"));
@@ -542,7 +545,7 @@ public class FullTournamentTest {
 
     rank = 0;
     for (final Map<String, String> row : div2Result.data) {
-      final int teamNumber = Integer.valueOf(row.get("teamnumber"));
+      final int teamNumber = Integer.parseInt(row.get("teamnumber"));
       Assert.assertEquals("Division II Ranking is incorrect for rank: "
           + rank, division2ExpectedRank[rank], teamNumber);
       final double score = Double.valueOf(row.get("overallscore"));
@@ -638,7 +641,8 @@ public class FullTournamentTest {
       outputStream.close();
       zipStream.close();
 
-      final SubjectiveFrame subjective = new SubjectiveFrame(subjectiveZip);
+      final SubjectiveFrame subjective = new SubjectiveFrame();
+      subjective.load(subjectiveZip);
 
       // insert scores into zip
       for (final ScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
@@ -971,7 +975,7 @@ public class FullTournamentTest {
                     + name, formValue);
 
                 final int value = rs.getInt(name);
-                final int formValueInt = Integer.valueOf(formValue);
+                final int formValueInt = Integer.parseInt(formValue);
                 Assert.assertEquals("Wrong value for goal: "
                     + name, value, formValueInt);
               }
@@ -998,9 +1002,9 @@ public class FullTournamentTest {
 
         // check for errors
         // Gives trouble too often
-        //Assert.assertEquals(selectTeamPage, selenium.getCurrentUrl());
-        Assert.assertTrue("Error submitting form, not on select team page url: " + selenium.getCurrentUrl(),
-                          selenium.getPageSource().contains("Unverified Runs"));
+        // Assert.assertEquals(selectTeamPage, selenium.getCurrentUrl());
+        Assert.assertTrue("Error submitting form, not on select team page url: "
+            + selenium.getCurrentUrl(), selenium.getPageSource().contains("Unverified Runs"));
 
       } else {
         Assert.fail("Cannot find scores for "

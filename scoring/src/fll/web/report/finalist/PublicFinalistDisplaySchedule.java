@@ -44,7 +44,6 @@ public class PublicFinalistDisplaySchedule {
                                      final HttpSession session,
                                      final PageContext pageContext) {
     final String division = getDivision(request, session);
-    storeScroll(request, session);
 
     Connection connection = null;
     Statement stmt = null;
@@ -93,32 +92,6 @@ public class PublicFinalistDisplaySchedule {
     }
     session.setAttribute("division", division);
     return division;
-  }
-
-  /**
-   * Get the scroll value and store it in the session.
-   * 
-   * @param request
-   * @param session
-   * @return
-   */
-  private static void storeScroll(final HttpServletRequest request,
-                                  final HttpSession session) {
-    String scrollStr = request.getParameter("finalistScheduleScroll");
-    final boolean scroll;
-    if (null == scrollStr
-        || "".equals(scrollStr)) {
-      final Boolean value = SessionAttributes.getAttribute(session, "finalistScheduleScroll", Boolean.class);
-      if (null == value) {
-        scroll = false;
-      } else {
-        scroll = value;
-      }
-    } else {
-      scroll = Boolean.valueOf(scrollStr);
-    }
-    
-    session.setAttribute("finalistScheduleScroll", scroll);
   }
 
 }

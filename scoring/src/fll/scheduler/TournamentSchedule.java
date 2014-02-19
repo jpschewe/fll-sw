@@ -50,6 +50,7 @@ import javax.xml.validation.Validator;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.w3c.dom.Element;
@@ -108,10 +109,6 @@ public class TournamentSchedule implements Serializable {
   public static final String ORGANIZATION_HEADER = "Organization";
 
   public static final String DIVISION_HEADER = "Div";
-
-  public static final String RESEARCH_HEADER = "Research";
-
-  public static final String TECHNICAL_HEADER = "Technical";
 
   public static final String JUDGE_GROUP_HEADER = "Judging Group";
 
@@ -194,10 +191,10 @@ public class TournamentSchedule implements Serializable {
     return Collections.unmodifiableSet(_divisions);
   }
 
-  private final HashSet<String> _judges = new HashSet<String>();
+  private final HashSet<String> _judgingGroups = new HashSet<String>();
 
-  public Set<String> getJudges() {
-    return Collections.unmodifiableSet(_judges);
+  public Set<String> getJudgingGroups() {
+    return Collections.unmodifiableSet(_judgingGroups);
   }
 
   private final LinkedList<TeamScheduleInfo> _schedule = new LinkedList<TeamScheduleInfo>();
@@ -397,6 +394,7 @@ public class TournamentSchedule implements Serializable {
         ti.setOrganization(team.getOrganization());
         ti.setTeamName(team.getTeamName());
 
+        cacheTeamScheduleInformation(ti);
         _schedule.add(ti);
       }
 
@@ -614,7 +612,7 @@ public class TournamentSchedule implements Serializable {
       addToMatches(ti, round);
     }
     _divisions.add(ti.getDivision());
-    _judges.add(ti.getJudgingStation());
+    _judgingGroups.add(ti.getJudgingStation());
   }
 
   /**
@@ -674,33 +672,77 @@ public class TournamentSchedule implements Serializable {
   /**
    * Output the detailed schedule.
    * 
-   * @param output where to write the detailed schedule
+   * @param directory the directory to put the files in
+   * @param baseFilename the base filename
    * @throws DocumentException
    * @throws IOException
+   * @throws IllegalArgumentExcption if directory doesn't exist and can't be
+   *           created or exists and isn't a directory
    */
   public void outputDetailedSchedules(final SchedParams params,
-                                      final OutputStream output) throws DocumentException, IOException {
-    // print out detailed schedules
-    final Document detailedSchedules = PdfUtils.createPdfDoc(output, new SimpleFooterHandler());
-
-    for (final String subjectiveStation : subjectiveStations) {
-      outputSubjectiveScheduleByDivision(detailedSchedules, subjectiveStation);
-      detailedSchedules.add(Chunk.NEXTPAGE);
+                                      final File directory,
+                                      final String baseFilename) throws DocumentException, IOException {
+    if (!directory.exists()) {
+      if (!directory.mkdirs()) {
+        throw new IllegalArgumentException("Unable to create "
+            + directory.getAbsolutePath());
+      }
+    } else if (!directory.isDirectory()) {
+      throw new IllegalArgumentException(directory.getAbsolutePath()
+          + " exists, but isn't a directory");
     }
 
-    for (final String subjectiveStation : subjectiveStations) {
-      outputSubjectiveScheduleByTime(detailedSchedules, subjectiveStation);
-      detailedSchedules.add(Chunk.NEXTPAGE);
+    FileOutputStream pdfFos = null;
+    try {
+      final File byDivision = new File(directory, baseFilename
+          + "-subjective-by-division.pdf");
+
+      pdfFos = new FileOutputStream(byDivision);
+      final Document detailedSchedulesByDivision = PdfUtils.createPdfDoc(pdfFos, new SimpleFooterHandler());
+      for (final String subjectiveStation : subjectiveStations) {
+        outputSubjectiveScheduleByDivision(detailedSchedulesByDivision, subjectiveStation);
+        detailedSchedulesByDivision.add(Chunk.NEXTPAGE);
+      }
+      detailedSchedulesByDivision.close();
+      IOUtils.closeQuietly(pdfFos);
+      pdfFos = null;
+
+      final File byTime = new File(directory, baseFilename
+          + "-subjective-by-time.pdf");
+      pdfFos = new FileOutputStream(byTime);
+      final Document detailedSchedulesByTime = PdfUtils.createPdfDoc(pdfFos, new SimpleFooterHandler());
+      for (final String subjectiveStation : subjectiveStations) {
+        outputSubjectiveScheduleByTime(detailedSchedulesByTime, subjectiveStation);
+        detailedSchedulesByTime.add(Chunk.NEXTPAGE);
+      }
+      detailedSchedulesByTime.close();
+      IOUtils.closeQuietly(pdfFos);
+      pdfFos = null;
+
+      final File performance = new File(directory, baseFilename
+          + "-performance.pdf");
+      pdfFos = new FileOutputStream(performance);
+      final Document performanceDoc = PdfUtils.createPdfDoc(pdfFos, new SimpleFooterHandler());
+      outputPerformanceSchedule(performanceDoc);
+      performanceDoc.close();
+      IOUtils.closeQuietly(pdfFos);
+      pdfFos = null;
+
+      final File teamSchedules = new File(directory, baseFilename
+          + "-team-schedules.pdf");
+      pdfFos = new FileOutputStream(teamSchedules);
+      final Document teamDoc = PdfUtils.createPdfDoc(pdfFos, new SimpleFooterHandler());
+      for (final TeamScheduleInfo si : _schedule) {
+        outputTeamSchedule(params, teamDoc, si);
+        teamDoc.add(Chunk.NEXTPAGE);
+      }
+      teamDoc.close();
+      IOUtils.closeQuietly(pdfFos);
+      pdfFos = null;
+
+    } finally {
+      IOUtils.closeQuietly(pdfFos);
     }
-
-    outputPerformanceSchedule(detailedSchedules);
-
-    for (final TeamScheduleInfo si : _schedule) {
-      outputTeamSchedule(params, detailedSchedules, si);
-      detailedSchedules.add(Chunk.NEXTPAGE);
-    }
-
-    detailedSchedules.close();
   }
 
   private static final Font TEAM_TITLE_FONT = FontFactory.getFont(FontFactory.TIMES, 12, Font.BOLD);
@@ -781,7 +823,7 @@ public class TournamentSchedule implements Serializable {
 
       scoresheets.setTime(sheetIndex, performance.getTime());
       scoresheets.setTable(sheetIndex, String.format("%s %d", performance.getTable(), performance.getSide()));
-      scoresheets.setRound(sheetIndex, String.valueOf(round));
+      scoresheets.setRound(sheetIndex, String.valueOf(round + 1));
       scoresheets.setNumber(sheetIndex, si.getTeamNumber());
       scoresheets.setDivision(sheetIndex, si.getDivision());
       scoresheets.setName(sheetIndex, si.getTeamName());
@@ -896,7 +938,7 @@ public class TournamentSchedule implements Serializable {
   }
 
   private void outputSubjectiveScheduleByTime(final Document detailedSchedules,
-                                                  final String subjectiveStation) throws DocumentException {
+                                              final String subjectiveStation) throws DocumentException {
     final PdfPTable table = PdfUtils.createTable(6);
     table.setWidths(new float[] { 2, 1, 3, 3, 2, 2 });
 
@@ -1025,7 +1067,7 @@ public class TournamentSchedule implements Serializable {
       } else {
         return timeCompare;
       }
-    } 
+    }
   }
 
   /**

@@ -1,12 +1,60 @@
+Release 8.8
+-----------
+* 263 - Make it clear when specifying judging station vs. event division
+* 264 - Use the correct run number to check if a playoff round is verified before sending JSON back
+
+Release 8.6
+-----------
+* Fix table assignment during playoffs to ensure we don't trivally repeat tables
+* Import playoff table limits
+
+Release 8.6
+-----------
+* Properly sort no shows to the bottom of the list when computing rankings
+* Fix bug causing scores to not be displayed in playoff brackets when data from another tournament exists
+* Add back the ability to select which rounds to show on the scoresheet generation playoff brackets
+
+Release 8.5
+-----------
+* Fix display remote control so that it shows which finalist schedule is up
+* Allow the public to see the public finalist schedule without username and password
+* 26 - put No Shows in the reports
+* g3 - Allow one to store the subjective files uploaded if loglevel
+       DEBUG is enabled for fll.web.admin.UploadSubjectiveData
+* 238 - Make sure that the subjective application has a window so that
+        it shows up in the task bar before a file is loaded.
+
+Release 8.4
+-----------
+* 237 - Keep track of if allteams.jsp should scroll or not without using a session variable
+* 203 - Allow the user to limit which tables are used for the playoff brackets
+* 239 - add "label for" tag to enums, this allows one to click on the text next to an enum button
+* 235 - make commit button more obvious on the judges verification page
+* 234 - add some horizontal rules to the setup index
+* 240 - make sure the division is present on all playoff scoresheets
+* 241 - put the bracket number on the playoff scoresheets
+* 236 - write out detailed schedules to inidividual files
+* g1 - Find challenge descriptors inside of OneJar file for SchedulerUI distribution
+
+Release 8.3
+-----------
+* Make sure minimum performance score is respected for entries into the database and displays
+* Handle invalid scores properly in the subjective app
+* When printing the morning score sheets start count at round 1 rather than round 0
+
+Release 8.2
+-----------
 * 232 - Allow one to run all scheduling from the SchedulerUI
 * 233 - cleanup temp files created by the table optimizer
 * 230 - add the ability to print out the morning score sheets from the
         SchedulerUI
+
+Release 8.1
+-----------
 * minor rewording to 2013 challenge description
 
 Release 8.0
 -----------
-
 * 189 - Add a form to the error handler page to gather bug
         reporting information
 * 20 - Allow one to modify the flip rate of the top 10 through a global

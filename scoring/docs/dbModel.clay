@@ -175,6 +175,9 @@
 <column auto-increment="false" column-size="64" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7d5d" mandatory="true" name="station">
 <data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
 </column>
+<column auto-increment="false" column-size="15" decimal-digits="0" default-value="" id="5dd9504e:1435d92b423:-7fbb" mandatory="false" name="phone">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
 </column-list>
 <primary-key id="1f769f17:1248908e683:-7d63" name="PK_JUDGES">
 <primary-key-column name="id"/>
@@ -263,6 +266,9 @@
 </column>
 <column auto-increment="false" column-size="10" decimal-digits="0" default-value="" id="767c9c83:126ee2af6fe:-7fd5" mandatory="false" name="StandardizedScore">
 <data-type name="CHAR" selected-variant-pattern="CHAR(%n)"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="NULL" id="7062e26e:1439dc5569c:-7fbb" mandatory="false" name="note">
+<data-type name="LONGVARCHAR" selected-variant-pattern="LONGVARCHAR"/>
 </column>
 </column-list>
 <primary-key id="1f769f17:1248908e683:-7c13" name="PK_&lt;SUBJECTIVE CATEGORY&gt;">
@@ -499,6 +505,30 @@
 </foreign-key>
 </foreign-key-list>
 </table>
+<table id="5fb1930b:142af3d6432:-7fc2" name="table_division">
+<column-list>
+<column auto-increment="false" column-size="32" decimal-digits="0" default-value="" id="5fb1930b:142af3d6432:-7fbd" mandatory="true" name="playoff_division">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="5fb1930b:142af3d6432:-7f9c" mandatory="true" name="Tournament">
+<data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="5fb1930b:142af3d6432:-7f99" mandatory="true" name="PairID">
+<data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
+</column>
+</column-list>
+<primary-key id="5fb1930b:142af3d6432:-7fc1" name="PK_TABLE_DIVISION">
+<primary-key-column name="playoff_division"/>
+<primary-key-column name="Tournament"/>
+<primary-key-column name="PairID"/>
+</primary-key>
+<foreign-key-list>
+<foreign-key id="5fb1930b:142af3d6432:-7f9e" name="FK_table_division_1" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_TABLENAMES" referenced-table="tablenames" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
+<foreign-key-column column-name="Tournament" referenced-key-column-name="Tournament"/>
+<foreign-key-column column-name="PairID" referenced-key-column-name="PairID"/>
+</foreign-key>
+</foreign-key-list>
+</table>
 </table-list>
 </schema>
 </schema-list>
@@ -510,17 +540,18 @@
 <table-figure refid="1f769f17:1248908e683:-7ef3" x="1192" y="526"/>
 <table-figure height="97" refid="1f769f17:1248908e683:-7e39" width="182" x="1076" y="196"/>
 <table-figure refid="1f769f17:1248908e683:-7d6b" x="775" y="804"/>
-<table-figure refid="1f769f17:1248908e683:-7d64" x="416" y="474"/>
+<table-figure refid="1f769f17:1248908e683:-7d64" x="442" y="680"/>
 <table-figure refid="1f769f17:1248908e683:-7cf8" x="1502" y="975"/>
 <table-figure refid="1f769f17:1248908e683:-7c14" x="1200" y="291"/>
 <table-figure refid="1f769f17:1248908e683:-7b41" x="1320" y="822"/>
 <table-figure refid="7ad99991:125ecd3d8cf:-7f78" x="359" y="861"/>
 <table-figure refid="73daf36c:1292a0d6a87:-7fdb" x="404" y="5"/>
 <table-figure refid="73daf36c:1292a0d6a87:-7fc9" x="5" y="9"/>
-<table-figure refid="1b527d23:12fd1ad49f2:-7fd1" x="345" y="303"/>
-<table-figure refid="1b527d23:12fd1ad49f2:-7fc7" x="325" y="382"/>
+<table-figure refid="1b527d23:12fd1ad49f2:-7fd1" x="112" y="272"/>
+<table-figure refid="1b527d23:12fd1ad49f2:-7fc7" x="111" y="346"/>
 <table-figure refid="7637d490:13084efdedd:-7f9e" x="3" y="150"/>
 <table-figure refid="53c71eaf:13d4d04e085:-7fca" x="951" y="72"/>
 <table-figure refid="3ef5c978:13d55c84af2:-7fc5" x="746" y="122"/>
+<table-figure refid="5fb1930b:142af3d6432:-7fc2" x="118" y="459"/>
 </diagram>
 </clay-model>
