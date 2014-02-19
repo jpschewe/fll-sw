@@ -27,6 +27,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
 import fll.db.Queries;
 import fll.util.LogUtils;
@@ -76,7 +77,7 @@ public class CommitJudges extends BaseFLLServlet {
    * 
    * @param tournament the current tournament
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
   private static void commitData(final HttpSession session,
                                  final Connection connection,
                                  final int tournament) throws SQLException, IOException {
@@ -84,16 +85,9 @@ public class CommitJudges extends BaseFLLServlet {
     ResultSet rs = null;
     try {
       // save old judge information
+      Collection<JudgeInformation> oldJudges = JudgeInformation.getJudges(connection, tournament);
       final Set<JudgeInformation> oldJudgeInfo = new HashSet<JudgeInformation>();
-      prep = connection.prepareStatement("SELECT id, category, station FROM Judges WHERE Tournament = ?");
-      prep.setInt(1, tournament);
-      rs = prep.executeQuery();
-      while (rs.next()) {
-        final String id = rs.getString(1);
-        final String category = rs.getString(2);
-        final String station = rs.getString(3);
-        oldJudgeInfo.add(new JudgeInformation(id, category, station));
-      }
+      oldJudgeInfo.addAll(oldJudges);
 
       // delete old data in judges
       prep = connection.prepareStatement("DELETE FROM Judges where Tournament = ?");
@@ -102,8 +96,8 @@ public class CommitJudges extends BaseFLLServlet {
       SQLFunctions.close(prep);
       prep = null;
 
-      prep = connection.prepareStatement("INSERT INTO Judges (id, category, station, Tournament) VALUES(?, ?, ?, ?)");
-      prep.setInt(4, tournament);
+      prep = connection.prepareStatement("INSERT INTO Judges (id, phone, category, station, Tournament) VALUES(?, ?, ?, ?, ?)");
+      prep.setInt(5, tournament);
 
       // can't put types inside a session
       @SuppressWarnings("unchecked")
@@ -113,15 +107,17 @@ public class CommitJudges extends BaseFLLServlet {
 
       final Set<JudgeInformation> newJudgeInfo = new HashSet<JudgeInformation>();
       for (final JudgeInformation info : judges) {
-        if(LOGGER.isTraceEnabled()) {
-          LOGGER.trace("Doing insert for id: " + info.getId() + " category: " + info.getCategory() + " station: " + info.getStation());
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("Doing insert for id: "
+              + info.getId() + " category: " + info.getCategory() + " station: " + info.getStation());
         }
-        
+
         newJudgeInfo.add(info);
 
         prep.setString(1, info.getId());
-        prep.setString(2, info.getCategory());
-        prep.setString(3, info.getStation());
+        prep.setString(2, info.getPhone());
+        prep.setString(3, info.getCategory());
+        prep.setString(4, info.getStation());
         prep.executeUpdate();
       }
 

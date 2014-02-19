@@ -43,6 +43,9 @@ import fll.xml.ChallengeParser;
  */
 public class TournamentScheduleTest {
 
+  public static final String RESEARCH_HEADER = "Research";
+  public static final String TECHNICAL_HEADER = "Technical";
+
   @Before
   public void setUp() {
     LogUtils.initializeLogging();
@@ -127,8 +130,8 @@ public class TournamentScheduleTest {
       final ColumnInformation columnInfo = TournamentSchedule.findColumns(reader, new LinkedList<String>());
 
       final Collection<String> possibleSubjectiveHeaders = new LinkedList<String>();
-      possibleSubjectiveHeaders.add(TournamentSchedule.TECHNICAL_HEADER);
-      possibleSubjectiveHeaders.add(TournamentSchedule.RESEARCH_HEADER);
+      possibleSubjectiveHeaders.add(TournamentScheduleTest.TECHNICAL_HEADER);
+      possibleSubjectiveHeaders.add(TournamentScheduleTest.RESEARCH_HEADER);
       possibleSubjectiveHeaders.add("Presentation");
 
       // prompt for which headers are subjective

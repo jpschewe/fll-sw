@@ -129,7 +129,9 @@ public class SubjectiveFrameTest {
 
       final SubjectiveFrame frame = GuiActionRunner.execute(new GuiQuery<SubjectiveFrame>() {
         protected SubjectiveFrame executeInEDT() throws IOException {
-          return new SubjectiveFrame(subjectiveScores);
+          final SubjectiveFrame f = new SubjectiveFrame();
+          f.load(subjectiveScores);
+          return f;
         }
       });
       window = new FrameFixture(frame);

@@ -87,6 +87,11 @@ public class TableOptimizer {
 
     List<Integer> bestPermutation = null;
     int minWarnings = checker.verifySchedule().size();
+    if(minWarnings == 0) {
+      // already best score
+      return;
+    }
+    
     final List<List<Integer>> permutations = computePossibleOrderings(teams.size());
     for (final List<Integer> possibleValue : permutations) {
       applyPerformanceOrdering(teams, times, possibleValue);
@@ -116,6 +121,10 @@ public class TableOptimizer {
         }
         bestPermutation = possibleValue;
         minWarnings = newWarnings.size();
+        
+        if(minWarnings == 0) {
+          break;
+        }
       }
     }
 
@@ -289,8 +298,8 @@ public class TableOptimizer {
       // not bothering to get the schedule params as we're just tweaking table
       // assignments, which wont't be effected by the schedule params.
       final SchedParams params = new SchedParams(subjectiveStations, SchedParams.DEFAULT_PERFORMANCE_MINUTES,
-                                                 SchedParams.DEFAULT_CHANGETIME_MINUTES,
-                                                 SchedParams.DEFAULT_PERFORMANCE_CHANGETIME_MINUTES);
+                                                 SchedParams.MINIMUM_CHANGETIME_MINUTES,
+                                                 SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES);
       final List<String> subjectiveHeaders = new LinkedList<String>();
       for (final SubjectiveStation station : subjectiveStations) {
         subjectiveHeaders.add(station.getName());

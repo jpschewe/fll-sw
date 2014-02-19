@@ -22,6 +22,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.apache.log4j.Logger;
 
 import fll.Tournament;
+import fll.db.GenerateDB;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
@@ -119,7 +120,8 @@ public class CreateTournament extends BaseFLLServlet {
         + sourceTournament.getName() + "</p>");
 
     if (null != sourceTournament.getNextTournament()) {
-      final Tournament sourceNextTournament = sourceTournament.getNextTournament();
+      final int sourceNextId = sourceTournament.getNextTournament();
+      final Tournament sourceNextTournament = Tournament.findTournamentByID(sourceConnection, sourceNextId);
       final Tournament destNextTournament = Tournament.findTournamentByName(destConnection,
                                                                             sourceNextTournament.getName());
       if (null == destNextTournament) {

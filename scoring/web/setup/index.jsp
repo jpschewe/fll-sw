@@ -28,6 +28,7 @@
   <p>On this page you can setup the database used by the scoring
    software.</p>
 
+<hr/>
   <p>You can select a description that shipped with the software</p>
   <select id='description' name='description'>
    <c:forEach items="${descriptions}" var="description">
@@ -43,15 +44,15 @@
    onclick='return confirm("This will erase ALL scores in the database fll (if it already exists), are you sure?")' />
 
 
-
+<hr/>
   <p>Or provide your own challenge description file</p>
   <input type='file' size='32' name='xmldocument'><br /> <input
    type='submit' name='reinitializeDatabase' value='Upload Description'
    onclick='return confirm("This will erase ALL scores in the database fll (if it already exists), are you sure?")' />
 
 
-
-  <p>This will allow one to initialize the database based upon a
+<hr/>
+  <p>Or initialize the database based upon a
    previous database dump that was created using the download database
    link on the administration page.</p>
 

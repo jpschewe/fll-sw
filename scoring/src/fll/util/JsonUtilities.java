@@ -14,6 +14,7 @@ import java.util.Map;
 
 import com.google.gson.Gson;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.Queries;
 import fll.web.playoff.BracketData;
 import fll.web.playoff.BracketData.TeamBracketCell;
@@ -32,13 +33,13 @@ public final class JsonUtilities {
   }
 
   public static class BracketLeafResultSet {
-    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Read in the javascript")
+    @SuppressFBWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Read in the javascript")
     public final TeamBracketCell leaf;
 
-    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Read in the javascript")
+    @SuppressFBWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Read in the javascript")
     public final double score;
 
-    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Read in the javascript")
+    @SuppressFBWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Read in the javascript")
     public final String originator;
 
     public BracketLeafResultSet(final TeamBracketCell tbc,
@@ -85,10 +86,7 @@ public final class JsonUtilities {
           datalist.add(new BracketLeafResultSet(tbc, -2.0, entry.getKey()
               + "-" + playoffRound));
         } else if (!realScore
-            || !showOnlyVerifiedScores
-            || Queries.isVerified(connection, currentTournament, teamNumber,
-                                  Queries.getNumSeedingRounds(connection, currentTournament)
-                                      + entry.getValue())) {
+            || !showOnlyVerifiedScores || Queries.isVerified(connection, currentTournament, teamNumber, runNumber)) {
           if ((entry.getValue() == numPlayoffRounds && !showFinalsScores)
               || !realScore) {
             datalist.add(new BracketLeafResultSet(tbc, -1.0, entry.getKey()
@@ -111,7 +109,7 @@ public final class JsonUtilities {
   }
 
   public static class DisplayResponse {
-    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Read in the javascript")
+    @SuppressFBWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Read in the javascript")
     public final String displayURL;
 
     public DisplayResponse(final String displayURL) {

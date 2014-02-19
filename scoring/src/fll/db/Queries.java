@@ -15,6 +15,7 @@ import java.sql.Types;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,6 +36,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.CategoryRank;
 import fll.Team;
 import fll.TeamRanking;
@@ -70,7 +72,7 @@ public final class Queries {
    * Compute the score group for a team. Normally this comes from the schedule,
    * but it may need to be computed off of the judges.
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate table name from category")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate table name from category")
   public static String computeScoreGroupForTeam(final Connection connection,
                                                 final int tournament,
                                                 final String categoryName,
@@ -112,7 +114,7 @@ public final class Queries {
    * @return Score groups. Map is name of score group to collection of teams in
    *         that score group
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
   private static Map<String, Collection<Integer>> computeScoreGroups(final Connection connection,
                                                                      final int tournament,
                                                                      final String division,
@@ -208,30 +210,6 @@ public final class Queries {
       SQLFunctions.close(prep);
     }
     return tournamentTeams;
-  }
-
-  public static List<String[]> getTournamentTables(final Connection connection) throws SQLException {
-    final int currentTournament = getCurrentTournament(connection);
-
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    final List<String[]> tableList = new LinkedList<String[]>();
-    try {
-      prep = connection.prepareStatement("SELECT SideA,SideB FROM tablenames WHERE Tournament = ?");
-      prep.setInt(1, currentTournament);
-      rs = prep.executeQuery();
-      while (rs.next()) {
-        final String[] labels = new String[2];
-        labels[0] = rs.getString("SideA");
-        labels[1] = rs.getString("SideB");
-        tableList.add(labels);
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
-
-    return tableList;
   }
 
   /**
@@ -373,7 +351,7 @@ public final class Queries {
    * @param rankingMap
    * @throws SQLException
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate select statement")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate select statement")
   private static void determineSubjectiveRanking(final Connection connection,
                                                  final String ascDesc,
                                                  final int tournament,
@@ -413,7 +391,11 @@ public final class Queries {
                 + " WHERE FinalScores.TeamNumber IN ( " + teamSelect + ")" //
                 + " AND Teams.TeamNumber = FinalScores.TeamNumber" //
                 + " AND FinalScores.Tournament = ?" //
-                + " ORDER BY FinalScores." + categoryName + " " + ascDesc);
+                + " ORDER BY" //
+                + " CASE when FinalScores." + categoryName + " IS NULL THEN 1 ELSE 0 END ASC" //
+                + ",FinalScores." + categoryName + " " + ascDesc //
+                + ",Teams.TeamNumber");
+
             prep.setInt(1, tournament);
             rs = prep.executeQuery();
             final String rankingGroup = String.format("division %s judging group %s", division, sgEntry.getKey());
@@ -437,7 +419,7 @@ public final class Queries {
    * @param rankingMap
    * @throws SQLException
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to compute sort order")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to compute sort order")
   private static void determineOverallRanking(final Connection connection,
                                               final String ascDesc,
                                               final int tournament,
@@ -452,7 +434,10 @@ public final class Queries {
           + " AND FinalScores.Tournament = ?"//
           + " AND current_tournament_teams.event_division = ?" //
           + " AND current_tournament_teams.TeamNumber = Teams.TeamNumber" //
-          + " ORDER BY FinalScores.OverallScore " + ascDesc + ", Teams.TeamNumber");
+          + " ORDER BY" //
+          + " CASE when FinalScores.OverallScore IS NULL THEN 1 ELSE 0 END ASC" //
+          + ",FinalScores.OverallScore " + ascDesc //
+          + ",Teams.TeamNumber");
       prep.setInt(1, tournament);
       for (final String division : divisions) {
         prep.setString(2, division);
@@ -528,7 +513,7 @@ public final class Queries {
    * @param rankingMap
    * @throws SQLException
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to compute sort order")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to compute sort order")
   private static void determinePerformanceRanking(final Connection connection,
                                                   final String ascDesc,
                                                   final int tournament,
@@ -544,7 +529,10 @@ public final class Queries {
           + " AND FinalScores.Tournament = ?" //
           + " AND current_tournament_teams.event_division = ?" //
           + " AND current_tournament_teams.TeamNumber = Teams.TeamNumber"//
-          + " ORDER BY FinalScores.performance " + ascDesc + ", Teams.TeamNumber");
+          + " ORDER BY" //
+          + " CASE when FinalScores.performance IS NULL THEN 1 ELSE 0 END ASC" //
+          + ",FinalScores.performance " + ascDesc //
+          + ",Teams.TeamNumber");
 
       prep.setInt(1, tournament);
       for (final String division : divisions) {
@@ -654,7 +642,7 @@ public final class Queries {
    * @throws RuntimeException if a parameter is missing.
    * @throws ParseException if the team number cannot be parsed
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Goals determine columns")
+  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Goals determine columns")
   private static void insertPerformanceScore(final ChallengeDescription description,
                                              final Connection connection,
                                              final HttpServletRequest request) throws SQLException, ParseException,
@@ -791,7 +779,7 @@ public final class Queries {
    * @throws ParseException if the XML document is invalid.
    * @throws RuntimeException if a parameter is missing.
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate list of columns off the goals")
+  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate list of columns off the goals")
   private static int updatePerformanceScore(final ChallengeDescription description,
                                             final Connection connection,
                                             final HttpServletRequest request) throws SQLException, ParseException,
@@ -1028,7 +1016,7 @@ public final class Queries {
    * @throws RuntimeException if a parameter is missing or if the playoff meta
    *           data would become inconsistent due to the deletion.
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "OBL_UNSATISFIED_OBLIGATION", justification = "Bug in findbugs - ticket:2924739")
+  @SuppressFBWarnings(value = "OBL_UNSATISFIED_OBLIGATION", justification = "Bug in findbugs - ticket:2924739")
   public static void deletePerformanceScore(final Connection connection,
                                             final HttpServletRequest request) throws SQLException, RuntimeException,
       ParseException {
@@ -1286,7 +1274,7 @@ public final class Queries {
    * @throws SQLException on a database error
    * @throws RuntimeException if a team can't be found in tournamentTeams
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to pick view dynamically")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to pick view dynamically")
   public static List<Team> getTeamsNeedingSeedingRuns(final Connection connection,
                                                       final Map<Integer, ? extends Team> tournamentTeams,
                                                       final String division,
@@ -1373,7 +1361,7 @@ public final class Queries {
    * @throws SQLException on a database error
    * @throws RuntimeException if a team can't be found in tournamentTeams
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to choose ascending or descending order based upon winner criteria")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to choose ascending or descending order based upon winner criteria")
   public static List<Team> getPlayoffSeedingOrder(final Connection connection,
                                                   final WinnerType winnerCriteria,
                                                   final Collection<? extends Team> teams) throws SQLException,
@@ -1392,12 +1380,13 @@ public final class Queries {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      prep = connection.prepareStatement("SELECT performance_seeding_max.TeamNumber, performance_seeding_max.Score, RAND() as random"
+      prep = connection.prepareStatement("SELECT performance_seeding_max.TeamNumber, performance_seeding_max.Score as score, RAND() as random"
           + " FROM performance_seeding_max, current_tournament_teams" //
           + " WHERE performance_seeding_max.Tournament = ?" //
+          + " AND score IS NOT NULL" // exclude no shows
           + " AND performance_seeding_max.TeamNumber = current_tournament_teams.TeamNumber" //
           + " AND current_tournament_teams.TeamNumber IN ( " + teamNumbersStr + " )" //
-          + " ORDER BY performance_seeding_max.Score " + winnerCriteria.getSortString() //
+          + " ORDER BY score " + winnerCriteria.getSortString() //
           + ", performance_seeding_max.average " + winnerCriteria.getSortString() //
           + ", random");
       prep.setInt(1, currentTournament);
@@ -1494,7 +1483,7 @@ public final class Queries {
    * @param connection connection to database, needs delete privileges
    * @throws SQLException on an error talking to the database
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table")
   public static void deleteTeam(final int teamNumber,
                                 final ChallengeDescription description,
                                 final Connection connection) throws SQLException {
@@ -1589,7 +1578,7 @@ public final class Queries {
    * @param connection
    * @throws SQLException
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
   public static void updateSubjectiveScoreTotals(final ChallengeDescription description,
                                                  final Connection connection,
                                                  final int tournament) throws SQLException {
@@ -1614,7 +1603,12 @@ public final class Queries {
         while (rs.next()) {
           final int teamNumber = rs.getInt("TeamNumber");
           final TeamScore teamScore = new DatabaseTeamScore(teamNumber, rs);
-          final double computedTotal = subjectiveElement.evaluate(teamScore);
+          final double computedTotal;
+          if (teamScore.isNoShow()) {
+            computedTotal = Double.NaN;
+          } else {
+            computedTotal = subjectiveElement.evaluate(teamScore);
+          }
           if (Double.isNaN(computedTotal)) {
             updatePrep.setNull(1, Types.DOUBLE);
           } else {
@@ -1666,7 +1660,18 @@ public final class Queries {
           final int teamNumber = rs.getInt("TeamNumber");
           final int runNumber = rs.getInt("RunNumber");
           final TeamScore teamScore = new DatabaseTeamScore(teamNumber, runNumber, rs);
-          final double computedTotal = performanceElement.evaluate(teamScore);
+          final double computedTotal;
+          if (teamScore.isNoShow()) {
+            computedTotal = Double.NaN;
+          } else {
+            computedTotal = performanceElement.evaluate(teamScore);
+          }
+
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Updating performance score for "
+                + teamNumber + " run: " + runNumber + " total: " + computedTotal);
+          }
+
           if (!Double.isNaN(computedTotal)) {
             updatePrep.setDouble(1, Math.max(computedTotal, minimumPerformanceScore));
           } else {
@@ -1699,7 +1704,8 @@ public final class Queries {
 
     final int currentTournamentID = getTeamCurrentTournament(connection, teamNumber);
     final Tournament currentTournament = Tournament.findTournamentByID(connection, currentTournamentID);
-    if (null == currentTournament.getNextTournament()) {
+    final Integer nextTournamentID = currentTournament.getNextTournament();
+    if (null == nextTournamentID) {
       if (LOGGER.isInfoEnabled()) {
         LOGGER.info("advanceTeam - No next tournament exists for tournament: "
             + currentTournament.getName() + " team: " + teamNumber);
@@ -1710,7 +1716,7 @@ public final class Queries {
       try {
         prep = connection.prepareStatement("INSERT INTO TournamentTeams (TeamNumber, Tournament, event_division, judging_station) VALUES (?, ?, ?, ?)");
         prep.setInt(1, teamNumber);
-        prep.setInt(2, currentTournament.getNextTournament().getTournamentID());
+        prep.setInt(2, currentTournament.getNextTournament());
         prep.setString(3, getDivisionOfTeam(connection, teamNumber));
         prep.setString(4, getDivisionOfTeam(connection, teamNumber));
         prep.executeUpdate();
@@ -1870,7 +1876,7 @@ public final class Queries {
    * Delete all record of a team from a tournament. This includes the scores and
    * the TournamentTeams table.
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
   private static void deleteTeamFromTournamet(final Connection connection,
                                               final ChallengeDescription description,
                                               final int teamNumber,
@@ -1908,6 +1914,14 @@ public final class Queries {
       prep.setInt(2, currentTournament);
       prep.executeUpdate();
       SQLFunctions.close(prep);
+      
+      // delete from PlayoffData
+      prep = connection.prepareStatement("DELETE FROM PlayoffData WHERE Team = ? AND Tournament = ?");
+      prep.setInt(1, teamNumber);
+      prep.setInt(2, currentTournament);
+      prep.executeUpdate();
+      SQLFunctions.close(prep);
+      
 
     } finally {
       SQLFunctions.close(prep);
@@ -2392,8 +2406,7 @@ public final class Queries {
       if (rs.next()) {
         return rs.getBoolean("Verified");
       } else {
-        throw new RuntimeException("No score exists for tournament: "
-            + tournament + " teamNumber: " + teamNumber + " runNumber: " + runNumber);
+        return false;
       }
     } finally {
       SQLFunctions.close(rs);
@@ -2408,7 +2421,7 @@ public final class Queries {
    * @return 1 is tournament, 2 is teamNumber, 3 is runNumber
    * @throws SQLException
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "NP_LOAD_OF_KNOWN_NULL_VALUE" }, justification = "Findbugs bug 3477957")
+  @SuppressFBWarnings(value = { "NP_LOAD_OF_KNOWN_NULL_VALUE" }, justification = "Findbugs bug 3477957")
   private static PreparedStatement getScoreStatsPrep(final Connection connection) throws SQLException {
     PreparedStatement prep = null;
     try {
@@ -2600,30 +2613,6 @@ public final class Queries {
           + " WHERE Tournament= ?" //
           + " AND event_division= ?" //
           + " AND PlayoffRound=1");
-      prep.setInt(1, tournament);
-      prep.setString(2, division);
-      rs = prep.executeQuery();
-      if (rs.next()) {
-        return rs.getInt(1);
-      } else {
-        return 0;
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
-  }
-
-  public static int getTableAssignmentCount(final Connection connection,
-                                            final int tournament,
-                                            final String division) throws SQLException {
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = connection.prepareStatement("SELECT count(*) FROM PlayoffData" //
-          + " WHERE Tournament= ?" //
-          + " AND event_division= ?" //
-          + " AND AssignedTable IS NOT NULL");
       prep.setInt(1, tournament);
       prep.setString(2, division);
       rs = prep.executeQuery();
@@ -3066,14 +3055,15 @@ public final class Queries {
   /**
    * Remove a user.
    */
-  public static void removeUser(final Connection connection, final String user) throws SQLException {
+  public static void removeUser(final Connection connection,
+                                final String user) throws SQLException {
     PreparedStatement removeKeys = null;
     PreparedStatement removeUser = null;
     try {
       removeKeys = connection.prepareStatement("DELETE FROM valid_login where fll_user = ?");
       removeKeys.setString(1, user);
       removeKeys.executeUpdate();
-      
+
       removeUser = connection.prepareStatement("DELETE FROM fll_authentication where fll_user = ?");
       removeUser.setString(1, user);
       removeUser.executeUpdate();
@@ -3082,7 +3072,7 @@ public final class Queries {
       SQLFunctions.close(removeUser);
     }
   }
-  
+
   /**
    * Get the list of current users known to the system.
    */
@@ -3123,5 +3113,4 @@ public final class Queries {
     TournamentParameters.setIntTournamentParameter(connection, tournament, TournamentParameters.MAX_SCOREBOARD_ROUND,
                                                    value);
   }
-
 }

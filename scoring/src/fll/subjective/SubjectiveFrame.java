@@ -63,6 +63,7 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyledDocument;
 
 import net.mtu.eggplant.util.BasicFileFilter;
+import net.mtu.eggplant.util.gui.GraphicsUtils;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -70,6 +71,7 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
@@ -105,21 +107,11 @@ public final class SubjectiveFrame extends JFrame {
     }
 
     try {
-      final File file = chooseSubjectiveFile("Please choose the subjective data file");
-      try {
-        if (null != file) {
-          final SubjectiveFrame frame = new SubjectiveFrame(file);
-          frame.setVisible(true);
-        } else {
-          System.exit(0);
-        }
-      } catch (final IOException ioe) {
-        JOptionPane.showMessageDialog(null, "Error reading data file: "
-            + file.getAbsolutePath() + " - " + ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        LOGGER.fatal("Error reading datafile: "
-            + file.getAbsolutePath(), ioe);
-        System.exit(1);
-      }
+      final SubjectiveFrame frame = new SubjectiveFrame();
+      GraphicsUtils.centerWindow(frame);
+      frame.setVisible(true);
+      frame.promptForFile();
+
     } catch (final Throwable e) {
       JOptionPane.showMessageDialog(null, "Unexpected error: "
           + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -130,53 +122,12 @@ public final class SubjectiveFrame extends JFrame {
 
   /**
    * Create a window to edit subjective scores.
-   * 
-   * @param file where to read the data in from and where to save data to
    */
-  public SubjectiveFrame(final File file) throws IOException {
+  public SubjectiveFrame() {
     super("Subjective Score Entry");
-    _file = file;
 
     getContentPane().setLayout(new BorderLayout());
 
-    ZipFile zipfile = null;
-    try {
-      zipfile = new ZipFile(file);
-      final ZipEntry challengeEntry = zipfile.getEntry("challenge.xml");
-      if (null == challengeEntry) {
-        throw new FLLRuntimeException(
-                                      "Unable to find challenge descriptor in file, you probably choose the wrong file or it is corrupted");
-      }
-      final InputStream challengeStream = zipfile.getInputStream(challengeEntry);
-      _challengeDocument = ChallengeParser.parse(new InputStreamReader(challengeStream, Utilities.DEFAULT_CHARSET));
-      challengeStream.close();
-
-      _challengeDescription = new ChallengeDescription(_challengeDocument.getDocumentElement());
-
-      final ZipEntry scoreEntry = zipfile.getEntry("score.xml");
-      if (null == scoreEntry) {
-        throw new FLLRuntimeException(
-                                      "Unable to find score data in file, you probably choose the wrong file or it is corrupted");
-      }
-      final InputStream scoreStream = zipfile.getInputStream(scoreEntry);
-      _scoreDocument = XMLUtils.parseXMLDocument(scoreStream);
-      scoreStream.close();
-    } catch (final SAXParseException spe) {
-      final String errorMessage = String.format("Error parsing file line: %d column: %d%n Message: %s%n This may be caused by using the wrong version of the software attempting to parse a file that is not subjective data.",
-                                                spe.getLineNumber(), spe.getColumnNumber(), spe.getMessage());
-      throw new FLLRuntimeException(errorMessage, spe);
-    } catch (final SAXException se) {
-      final String errorMessage = "The subjective scores file was found to be invalid, check that you are parsing a subjective scores file and not something else";
-      throw new FLLRuntimeException(errorMessage, se);
-    } finally {
-      if (null != zipfile) {
-        try {
-          zipfile.close();
-        } catch (final IOException e) {
-          LOGGER.debug("Error closing zipfile", e);
-        }
-      }
-    }
     final JPanel topPanel = new JPanel();
     getContentPane().add(topPanel, BorderLayout.NORTH);
 
@@ -262,10 +213,6 @@ public final class SubjectiveFrame extends JFrame {
     tabbedPane = new JTabbedPane();
     getContentPane().add(tabbedPane, BorderLayout.CENTER);
 
-    for (final ScoreCategory subjectiveCategory : getChallengeDescription().getSubjectiveCategories()) {
-      createSubjectiveTable(tabbedPane, subjectiveCategory);
-    }
-
     addWindowListener(new WindowAdapter() {
       @Override
       public void windowClosing(final WindowEvent e) {
@@ -273,6 +220,84 @@ public final class SubjectiveFrame extends JFrame {
       }
     });
     setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+
+    pack();
+  }
+
+  /**
+   * Prompt the user for a file to load. Calls exit on error.
+   * 
+   * @throws IOException
+   */
+  @SuppressFBWarnings(value = "DM_EXIT", justification = "If no file is chosen we cannot continue")
+  public void promptForFile() throws IOException {
+    final File file = chooseSubjectiveFile("Please choose the subjective data file");
+    try {
+      if (null != file) {
+        load(file);
+      } else {
+        System.exit(0);
+      }
+    } catch (final IOException ioe) {
+      JOptionPane.showMessageDialog(null, "Error reading data file: "
+          + file.getAbsolutePath() + " - " + ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+      LOGGER.fatal("Error reading datafile: "
+          + file.getAbsolutePath(), ioe);
+      System.exit(1);
+    }
+  }
+
+  /**
+   * Load data. Meant for testing. Most users should use #promptForFile().
+   * 
+   * @param file where to read the data in from and where to save data to
+   * @throws IOException
+   */
+  public void load(final File file) throws IOException {
+    _file = file;
+
+    ZipFile zipfile = null;
+    try {
+      zipfile = new ZipFile(file);
+      final ZipEntry challengeEntry = zipfile.getEntry("challenge.xml");
+      if (null == challengeEntry) {
+        throw new FLLRuntimeException(
+                                      "Unable to find challenge descriptor in file, you probably choose the wrong file or it is corrupted");
+      }
+      final InputStream challengeStream = zipfile.getInputStream(challengeEntry);
+      _challengeDocument = ChallengeParser.parse(new InputStreamReader(challengeStream, Utilities.DEFAULT_CHARSET));
+      challengeStream.close();
+
+      _challengeDescription = new ChallengeDescription(_challengeDocument.getDocumentElement());
+
+      final ZipEntry scoreEntry = zipfile.getEntry("score.xml");
+      if (null == scoreEntry) {
+        throw new FLLRuntimeException(
+                                      "Unable to find score data in file, you probably choose the wrong file or it is corrupted");
+      }
+      final InputStream scoreStream = zipfile.getInputStream(scoreEntry);
+      _scoreDocument = XMLUtils.parseXMLDocument(scoreStream);
+      scoreStream.close();
+    } catch (final SAXParseException spe) {
+      final String errorMessage = String.format("Error parsing file line: %d column: %d%n Message: %s%n This may be caused by using the wrong version of the software attempting to parse a file that is not subjective data.",
+                                                spe.getLineNumber(), spe.getColumnNumber(), spe.getMessage());
+      throw new FLLRuntimeException(errorMessage, spe);
+    } catch (final SAXException se) {
+      final String errorMessage = "The subjective scores file was found to be invalid, check that you are parsing a subjective scores file and not something else";
+      throw new FLLRuntimeException(errorMessage, se);
+    } finally {
+      if (null != zipfile) {
+        try {
+          zipfile.close();
+        } catch (final IOException e) {
+          LOGGER.debug("Error closing zipfile", e);
+        }
+      }
+    }
+
+    for (final ScoreCategory subjectiveCategory : getChallengeDescription().getSubjectiveCategories()) {
+      createSubjectiveTable(tabbedPane, subjectiveCategory);
+    }
 
     // get the name and location of the tournament
     final Element top = _scoreDocument.getDocumentElement();
@@ -448,12 +473,12 @@ public final class SubjectiveFrame extends JFrame {
    * @param title the title on the chooser dialog
    * @return the file if accepted, null if canceled
    */
-  private static File chooseSubjectiveFile(final String title) {
+  private File chooseSubjectiveFile(final String title) {
     final File initialDirectory = getInitialDirectory();
     final JFileChooser fileChooser = new JFileChooser(initialDirectory);
     fileChooser.setDialogTitle(title);
     fileChooser.setFileFilter(new BasicFileFilter("FLL Subjective Data Files", "fll"));
-    final int state = fileChooser.showOpenDialog(null);
+    final int state = fileChooser.showOpenDialog(this);
     if (JFileChooser.APPROVE_OPTION == state) {
       final File file = fileChooser.getSelectedFile();
       setInitialDirectory(file);
@@ -467,7 +492,7 @@ public final class SubjectiveFrame extends JFrame {
    * Prompt the user with yes/no/cancel. Yes exits and saves, no exits without
    * saving and cancel doesn't quit.
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "DM_EXIT", justification = "This is the exit method for the application")
+  @SuppressFBWarnings(value = "DM_EXIT", justification = "This is the exit method for the application")
   /* package */void quit() {
     if (validateData()) {
 
@@ -502,7 +527,7 @@ public final class SubjectiveFrame extends JFrame {
    * 
    * @return true if everything is ok
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "SIC_INNER_SHOULD_BE_STATIC_ANON", justification = "Static inner class to replace anonomous listener isn't worth the confusion of finding the class definition")
+  @SuppressFBWarnings(value = "SIC_INNER_SHOULD_BE_STATIC_ANON", justification = "Static inner class to replace anonomous listener isn't worth the confusion of finding the class definition")
   private boolean validateData() {
     stopCellEditors();
 
@@ -521,8 +546,7 @@ public final class SubjectiveFrame extends JFrame {
           final Element subEle = SubjectiveUtils.getSubscoreElement(scoreElement, goalName);
           if (null != subEle) {
             final String value = subEle.getAttribute("value");
-            if (null != value
-                && !"".equals(value)) {
+            if (!value.isEmpty()) {
               numValues++;
             }
           }
@@ -678,21 +702,21 @@ public final class SubjectiveFrame extends JFrame {
     }
   }
 
-  private final File _file;
+  private File _file;
 
-  File getFile() {
+  private File getFile() {
     return _file;
   }
 
-  private final ChallengeDescription _challengeDescription;
+  private ChallengeDescription _challengeDescription;
 
   /* package */ChallengeDescription getChallengeDescription() {
     return _challengeDescription;
   }
 
-  private final Document _challengeDocument;
+  private Document _challengeDocument;
 
-  private final Document _scoreDocument;
+  private Document _scoreDocument;
 
   /* package */Document getScoreDocument() {
     return _scoreDocument;

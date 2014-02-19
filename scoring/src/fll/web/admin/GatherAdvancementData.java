@@ -32,6 +32,7 @@ import org.apache.log4j.Logger;
 import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
+import fll.db.GenerateDB;
 import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -116,7 +117,8 @@ public class GatherAdvancementData extends BaseFLLServlet {
         } else {
           advancingTeams.add(team);
           currentTournament.put(teamNum, current.getName());
-          nextTournament.put(teamNum, current.getNextTournament().getName());
+          final Tournament next = Tournament.findTournamentByID(connection, current.getNextTournament());
+          nextTournament.put(teamNum, next.getName());
         }
       }
 

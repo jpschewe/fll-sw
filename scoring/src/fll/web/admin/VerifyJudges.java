@@ -26,6 +26,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
 import fll.Utilities;
 import fll.db.Queries;
@@ -44,7 +45,7 @@ public class VerifyJudges extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "XSS_REQUEST_PARAMETER_TO_JSP_WRITER", justification = "Checking category name retrieved from request against valid category names")
+  @SuppressFBWarnings(value = "XSS_REQUEST_PARAMETER_TO_JSP_WRITER", justification = "Checking category name retrieved from request against valid category names")
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -82,15 +83,21 @@ public class VerifyJudges extends BaseFLLServlet {
       for (int row = 1; row <= numRows; ++row) {
         String id = request.getParameter("id"
             + row);
+        final String phone = request.getParameter("phone"
+            + row);
         final String category = request.getParameter("cat"
             + row);
         final String station = request.getParameter("station"
             + row);
         if (null != id) {
-          id = id.trim();
-          id = id.toUpperCase();
+          id = sanitizeJudgeId(id);
           if (id.length() > 0) {
-            final JudgeInformation judge = new JudgeInformation(id, category, station);
+            if (null == phone
+                || phone.trim().isEmpty()) {
+              error.append("You must specify a phone number for judge '"
+                  + id + "'<br/>");
+            }
+            final JudgeInformation judge = new JudgeInformation(id, phone, category, station);
             judges.add(judge);
           }
         }
@@ -139,6 +146,22 @@ public class VerifyJudges extends BaseFLLServlet {
       SQLFunctions.close(connection);
     }
 
+  }
+
+  /**
+   * Make sure that judge ID's don't contain characters that
+   * will give us problems.
+   */
+  private String sanitizeJudgeId(final String id) {
+    if (null == id) {
+      return null;
+    } else {
+      String fixed = id.trim();
+      fixed = fixed.toUpperCase();
+      fixed = fixed.replaceAll("\"", "_");
+      fixed = fixed.replaceAll("'", "_");
+      return fixed;
+    }
   }
 
 }

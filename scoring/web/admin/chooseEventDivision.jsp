@@ -11,7 +11,7 @@
 
 	<form method="POST" action="CommitEventDivision">
 		<p>Team ${teamNumber} is assigned to a tournament that is using
-			event divisions. You need to specify which event division this team
+			event divisions. You need to specify which <b>event division</b> this team
 			is to be in.</p>
 
 		<select name='event_division'>

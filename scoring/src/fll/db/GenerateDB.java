@@ -20,6 +20,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
@@ -38,7 +39,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 9;
+  public static final int DATABASE_VERSION = 11;
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -65,7 +66,7 @@ public final class GenerateDB {
    * @param document and XML document that describes a tournament
    * @param connection connection to the database to create the tables in
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
+  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
                                                              "OBL_UNSATISFIED_OBLIGATION" }, justification = "Need dynamic data for default values, Bug in findbugs - ticket:2924739")
   public static void generateDB(final Document document,
                                 final Connection connection) throws SQLException, UnsupportedEncodingException {
@@ -130,6 +131,8 @@ public final class GenerateDB {
           + "  CONSTRAINT tablenames_pk PRIMARY KEY (Tournament,PairID)" //
           + " ,CONSTRAINT tablenames_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" + ")");
 
+      createTableDivision(connection, true);
+      
       // table to hold head-to-head playoff meta-data
       stmt.executeUpdate("DROP TABLE IF EXISTS PlayoffData CASCADE");
       stmt.executeUpdate("CREATE TABLE PlayoffData ("
@@ -174,6 +177,7 @@ public final class GenerateDB {
           + "  category varchar(64) NOT NULL," //
           + "  Tournament INTEGER NOT NULL," //
           + "  station varchar(64) NOT NULL," //
+          + "  phone varchar(15) default NULL,"
           + "  CONSTRAINT judges_pk PRIMARY KEY (id,category,Tournament,station)"//
           + " ,CONSTRAINT judges_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" //
           + ")");
@@ -252,6 +256,7 @@ public final class GenerateDB {
           createStatement.append(" "
               + columnDefinition + ",");
         }
+        createStatement.append(" note longvarchar DEFAULT NULL,");
         createStatement.append(" ComputedTotal float DEFAULT NULL,");
         createStatement.append(" StandardizedScore float default NULL,");
         createStatement.append(" CONSTRAINT "
@@ -287,8 +292,8 @@ public final class GenerateDB {
       stmt.executeUpdate("CREATE VIEW performance_seeding_max AS "//
           + " SELECT TeamNumber, Tournament, Max(ComputedTotal) As Score, AVG(ComputedTotal) As average" //
           + " FROM Performance" //
-          + " WHERE NoShow = 0" //
-          + " AND RunNumber <= ("//
+          + " WHERE " //
+          + " RunNumber <= ("//
           // compute the run number for the current tournament
           + "   SELECT CONVERT(param_value, INTEGER) FROM tournament_parameters" //
           + "     WHERE param = 'SeedingRounds' AND tournament = ("
@@ -664,6 +669,31 @@ public final class GenerateDB {
     }
 
     return definition;
+  }
+
+  /* package */static void createTableDivision(final Connection connection,
+                                               final boolean createConstraints) throws SQLException {
+    Statement stmt = null;
+    try {
+      stmt = connection.createStatement();
+
+      stmt.executeUpdate("DROP TABLE IF EXISTS table_division CASCADE");
+      final StringBuilder sql = new StringBuilder();
+      sql.append("CREATE TABLE table_division (");
+      sql.append("  playoff_division VARCHAR(32) NOT NULL");
+      sql.append(" ,tournament INTEGER NOT NULL");
+      sql.append(" ,table_id INTEGER NOT NULL");
+      sql.append(" ,CONSTRAINT table_division_pk PRIMARY KEY (playoff_division, tournament, table_id)");
+      if (createConstraints) {
+        sql.append(" ,CONSTRAINT table_division_fk1 FOREIGN KEY(tournament, table_id) REFERENCES tablenames(tournament, PairID)");
+      }
+      sql.append(")");
+      stmt.executeUpdate(sql.toString());
+
+    } finally {
+      SQLFunctions.close(stmt);
+      stmt = null;
+    }
   }
 
   /**

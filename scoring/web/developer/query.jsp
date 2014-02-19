@@ -7,7 +7,7 @@
 <title>Developer Database Commands</title>
 
 <script type='text/javascript' src='../extlib/jquery-1.7.1.min.js'></script>
-<script type='text/javascript' src='../extlib/jquery.json-2.3.min.js'></script>
+<script type='text/javascript' src='../extlib/jquery.json-2.4.min.js'></script>
 <script type='text/javascript' src='query.js'></script>
 
 <style>

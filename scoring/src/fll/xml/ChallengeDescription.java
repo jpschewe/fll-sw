@@ -80,4 +80,17 @@ public class ChallengeDescription implements Serializable {
     return mSubjectiveCategories;
   }
 
+  /**
+   * @param name category name
+   * @return the category or null if not found
+   */
+  public ScoreCategory getSubjectiveCategoryByName(final String name) {
+    for (final ScoreCategory cat : mSubjectiveCategories) {
+      if (name.equals(cat.getName())) {
+        return cat;
+      }
+    }
+    return null;
+  }
+
 }
