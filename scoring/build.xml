@@ -473,6 +473,11 @@
 	</target>
 
 	<target name="dist.real" depends="compile,javadoc">
+		<!-- copy docs to the web -->
+		<copy todir="${dir.web}/wiki">
+			<fileset dir="${basedir}/docs" />
+		</copy>
+		
 		<!-- copy docs -->
 		<mkdir dir="${dir.dist}/docs" />
 		<copy todir="${dir.dist}/docs">
