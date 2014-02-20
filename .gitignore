@@ -11,3 +11,4 @@ scoring/web/sponsor_logos/*.jpg
 cobertura.ser
 .DS_Store
 *~
+.*.html
