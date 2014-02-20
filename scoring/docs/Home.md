@@ -36,7 +36,7 @@ Descriptions of the design
   * We made the application web-based as it's mostly just a bunch of forms without much need for user interaction and this makes it easy to use other devices for clients to enter scores in the future.
   * The software is web-based, but not internet-based because most of our sites do not have a readily accessible internet connection.
   * We are using the database     [HSQL](http://www.hsqldb.org/) because it is a pure Java SQL database that can be run in memory. This makes it easier to install the software as another installer doesn't need to be run. We started with Access and moved off of that because it's Microsoft only and we wanted a database that is more robust. MySQL was used after that as it runs on Windows and Linux, however it still needs a separate installer.
-  * For an explanation of how the scores are totaled up read [this document](http://fll-sw.sourceforge.net/ScoreExplaination.pdf)
+  * For an explanation of how the scores are totaled up read [this document](ScoreExplaination.pdf)
 
 Scheduling Software
 ===================
