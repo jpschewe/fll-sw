@@ -54,7 +54,7 @@ Don't fast forward master, always use `--no-ff` when merging into master. This w
 
 Ticket rules/guidelines
 ------------------------
-When you start work on a ticket, mark it as accepted. Don't work on someone else's accepted tickets unless you talk to them.
+When you start work on a ticket, assign it to yourself. Don't work on someone else's accepted tickets unless you talk to them.
 
 
 Wiki Editing
