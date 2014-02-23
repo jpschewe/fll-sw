@@ -74,7 +74,7 @@ There are two ways to get the database setup.  One is from scratch and one is fr
 
 From Scratch
 -------------
-Pick the appropriate [challenge descriptor](https://sourceforge.net/p/fll-sw/code/ci/master/tree/challenge-descriptors/) or write your own. Use the top part of the setup page and select this challenge descriptor. If you had previously setup the database with team information and you want that information to go away, check `Rebuild the whole database, including team data`. Then click `Initialize Database`. 
+Pick the appropriate [challenge descriptor](../src/fll/resources/challenge-descriptors/) or write your own. Use the top part of the setup page and select this challenge descriptor. If you had previously setup the database with team information and you want that information to go away, check `Rebuild the whole database, including team data`. Then click `Initialize Database`. 
 
 If it worked then you will return to the setup page with a nice message at the top, otherwise you'll get some nasty error. If you get an error, file a ticket with what's on the screen.
 
