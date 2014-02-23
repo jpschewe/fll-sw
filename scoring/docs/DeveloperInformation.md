@@ -9,8 +9,8 @@ Getting started as a developer
 
   1. Make sure you have Java 6 (or greater) installed
   1. Get the source code from git
-    * git clone git://git.code.sf.net/p/fll-sw/code (read-only)
-    * git clone ssh://<sourceforge username>@git.code.sf.net/p/fll-sw/code (read/write)
+    * git clone git@github.com:jpschewe/fll-sw (read-only)
+    * Or you can create a fork and then submit a pull request when you have changes to merge in
   1. Build by changing to the fll-sw directory and running `./ant.sh`
   1. You can start tomcat with `./ant.sh tomcat.start`
   1. You can stop tomcat with `./ant.sh tomcat.stop`, the target `tomcat.reload` can be useful when working on servlet code.
