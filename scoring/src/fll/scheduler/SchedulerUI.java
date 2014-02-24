@@ -308,7 +308,7 @@ public class SchedulerUI extends JFrame {
 
     @Override
     public void actionPerformed(final ActionEvent ae) {
-      final String startingDirectory = PREFS.get(STARTING_DIRECTORY_PREF, null);
+      final String startingDirectory = PREFS.get(DESCRIPTION_STARTING_DIRECTORY_PREF, null);
 
       final JFileChooser fileChooser = new JFileChooser();
       final FileFilter filter = new BasicFileFilter("FLL Schedule Description (properties)",
@@ -321,7 +321,7 @@ public class SchedulerUI extends JFrame {
       final int returnVal = fileChooser.showOpenDialog(SchedulerUI.this);
       if (returnVal == JFileChooser.APPROVE_OPTION) {
         final File currentDirectory = fileChooser.getCurrentDirectory();
-        PREFS.put(STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
+        PREFS.put(DESCRIPTION_STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
 
         final File selectedFile = fileChooser.getSelectedFile();
         if (null != selectedFile
@@ -758,7 +758,7 @@ public class SchedulerUI extends JFrame {
 
     @Override
     public void actionPerformed(final ActionEvent ae) {
-      final String startingDirectory = PREFS.get(STARTING_DIRECTORY_PREF, null);
+      final String startingDirectory = PREFS.get(SCHEDULE_STARTING_DIRECTORY_PREF, null);
 
       final JFileChooser fileChooser = new JFileChooser();
       final FileFilter filter = new BasicFileFilter("FLL Schedule (xls, xlsx, csv)", new String[] { "xls", "xslx",
@@ -771,7 +771,7 @@ public class SchedulerUI extends JFrame {
       final int returnVal = fileChooser.showOpenDialog(SchedulerUI.this);
       if (returnVal == JFileChooser.APPROVE_OPTION) {
         final File currentDirectory = fileChooser.getCurrentDirectory();
-        PREFS.put(STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
+        PREFS.put(SCHEDULE_STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
 
         final File selectedFile = fileChooser.getSelectedFile();
         if (null != selectedFile
@@ -812,7 +812,8 @@ public class SchedulerUI extends JFrame {
 
   private static final Preferences PREFS = Preferences.userNodeForPackage(TournamentSchedule.class);
 
-  private static final String STARTING_DIRECTORY_PREF = "startingDirectory";
+  private static final String SCHEDULE_STARTING_DIRECTORY_PREF = "scheduleStartingDirectory";
+  private static final String DESCRIPTION_STARTING_DIRECTORY_PREF = "descriptionStartingDirectory";
 
   @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This calss isn't going to be serialized")
   private TournamentSchedule mScheduleData;
