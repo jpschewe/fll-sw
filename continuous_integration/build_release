@@ -14,10 +14,6 @@ fi
 fllsw_root="${mydir}"/..
 
 
-#clean up from previous run
-cd "${fllsw_root}"
-git clean -xdf || fatal "Error cleaning workspace"
-
 if [ -n "${DEVEL_BUILD}" ]; then
     if [ "${DEVEL_BUILD}" = "1" ]; then
         # setup version identifier
