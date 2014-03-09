@@ -344,7 +344,13 @@
 		 * @return list of judging groups
 		 */
 		getJudgingGroups : function() {
-			return _schedule.judgingGroups;
+			var retval = [];
+			$.each(_teams, function(index, team) {
+				if(-1 == $.inArray(team.judgingStation, retval)) {
+					retval.push(team.judgingStation);
+				} 
+			});
+			return retval;
 		},
 
 		/**
