@@ -30,7 +30,7 @@
 	var _tempScore;
 	var _currentGoal;
 	var _scoreEntryBackPage;
-	
+
 	function _init_variables() {
 		_subjectiveCategories = {};
 		_tournament = null;
@@ -110,7 +110,7 @@
 		if (null != value) {
 			_tempScore = value;
 		}
-		
+
 		value = $.jStorage.get(STORAGE_PREFIX + "_currentGoal");
 		if (null != value) {
 			_currentGoal = value;
@@ -139,7 +139,8 @@
 		$.jStorage.set(STORAGE_PREFIX + "_currentTeam", _currentTeam);
 		$.jStorage.set(STORAGE_PREFIX + "_tempScore", _tempScore);
 		$.jStorage.set(STORAGE_PREFIX + "_currentGoal", _currentGoal);
-		$.jStorage.set(STORAGE_PREFIX + "_scoreEntryBackPage", _scoreEntryBackPage);
+		$.jStorage.set(STORAGE_PREFIX + "_scoreEntryBackPage",
+				_scoreEntryBackPage);
 
 	}
 
@@ -248,7 +249,7 @@
 		 *            server
 		 */
 		loadFromServer : function(doneCallback, failCallback, clearVariables) {
-			if(clearVariables) {
+			if (clearVariables) {
 				_init_variables();
 			}
 
@@ -268,7 +269,7 @@
 			}).fail(function() {
 				failCallback();
 			});
-		},		
+		},
 
 		/**
 		 * @return list of subjective categories
@@ -346,9 +347,9 @@
 		getJudgingGroups : function() {
 			var retval = [];
 			$.each(_teams, function(index, team) {
-				if(-1 == $.inArray(team.judgingStation, retval)) {
+				if (-1 == $.inArray(team.judgingStation, retval)) {
 					retval.push(team.judgingStation);
-				} 
+				}
 			});
 			return retval;
 		},
@@ -423,7 +424,7 @@
 			return _currentJudge;
 		},
 
-		addJudge: function(judgeID, phone) {
+		addJudge : function(judgeID, phone) {
 			var foundJudge = null;
 			$.each(_judges, function(index, judge) {
 				if (judge.station == _currentJudgingGroup
@@ -481,7 +482,15 @@
 				} else {
 					var timeA = $.subjective.getScheduledTime(a.teamNumber);
 					var timeB = $.subjective.getScheduledTime(b.teamNumber);
-					return timeA < timeB ? -1 : timeA > timeB ? 1 : 0;
+					if (null == timeA && null == timeB) {
+						return 0;
+					} else if (null == timeA) {
+						return -1;
+					} else if (null == timeB) {
+						return 1;
+					} else {
+						return timeA < timeB ? -1 : timeA > timeB ? 1 : 0;
+					}
 				}
 			});
 			return retval;
@@ -531,13 +540,14 @@
 		},
 
 		saveScore : function(score) {
-			if(score.deleted && !score.scoreOnServer) {
+			if (score.deleted && !score.scoreOnServer) {
 				// don't bother saving scores not on the server that are deleted
-				// This should keep one judge from deleting another judge's scores
+				// This should keep one judge from deleting another judge's
+				// scores
 				$.subjective.log("Ignoring deleted score not on the server");
 				return;
 			}
-			
+
 			var categoryScores = _allScores[_currentCategory.name];
 			if (null == categoryScores) {
 				categoryScores = {}
@@ -590,7 +600,7 @@
 		 * 
 		 * @param teamNumber
 		 *            number of the team to find
-		 * @return Date
+		 * @return Date or null if there is no schedule information for the team
 		 */
 		getScheduledTime : function(teamNumber) {
 			var cachedDate = _teamTimeCache[teamNumber];
@@ -602,7 +612,7 @@
 			var schedInfo = $.subjective.getSchedInfoForTeam(teamNumber);
 			if (null == schedInfo) {
 				_log("No schedinfo for " + teamNumber);
-				retval = new Date(0);
+				retval = null;
 			} else {
 				var timeStr = null;
 				$
@@ -668,7 +678,7 @@
 		 *            on failure, may be null
 		 * @return the promise from the AJAX function
 		 */
-		uploadScores : function(doneCallback, failCallback) {			
+		uploadScores : function(doneCallback, failCallback) {
 			return $.post("../api/SubjectiveScores", $.toJSON(_allScores),
 					function(result) {
 						if (result.success) {
@@ -680,7 +690,7 @@
 				failCallback(result);
 			});
 		},
-		
+
 		/**
 		 * Upload judges to the server calling the appropriate callback.
 		 * 
@@ -691,20 +701,19 @@
 		 *            failure, may be null
 		 * @return the promise from the AJAX function
 		 */
-		uploadJudges : function(doneCallback, failCallback) {	
-			return $.post("../api/Judges", $.toJSON(_judges),
-					function(result) {
+		uploadJudges : function(doneCallback, failCallback) {
+			return $.post("../api/Judges", $.toJSON(_judges), function(result) {
 				$.subjective.log("uploading judges success");
-						if (result.success) {
-							doneCallback(result);
-						} else {
-							failCallback(result);
-						}
-					}, 'json').fail(function(result) {
+				if (result.success) {
+					doneCallback(result);
+				} else {
+					failCallback(result);
+				}
+			}, 'json').fail(function(result) {
 				failCallback(result);
 			});
 		},
-		
+
 		/**
 		 * Upload all data to the server
 		 * 
@@ -727,20 +736,19 @@
 		 *            called after all uploads and failed load of data (string
 		 *            message)
 		 */
-		uploadData : function(scoresSuccess, scoresFail,
-				judgesSuccess, judgesFail,
-				loadSuccess, loadFail) {
+		uploadData : function(scoresSuccess, scoresFail, judgesSuccess,
+				judgesFail, loadSuccess, loadFail) {
 			var waitList = []
 			waitList.push($.subjective.uploadScores(scoresSuccess, scoresFail));
 			waitList.push($.subjective.uploadJudges(judgesSuccess, judgesFail));
 
-			$.when.apply($, waitList).done(function() {				
+			$.when.apply($, waitList).done(function() {
 				$.subjective.loadFromServer(function() {
 					loadSuccess();
 				}, function() {
 					loadFail("Error getting updated scores");
 				}, false);
-				
+
 			});
 		},
 
@@ -760,7 +768,7 @@
 			});
 			return modified;
 		},
-		
+
 		/**
 		 * Save a score to be retrieved later. Only one temp score can be saved
 		 * at a time. This is meant to store a score object to be retrieved
@@ -770,29 +778,28 @@
 			_tempScore = score;
 			_save();
 		},
-		
+
 		getTempScore : function() {
 			return _tempScore;
 		},
-		
+
 		setCurrentGoal : function(goal) {
 			_currentGoal = goal;
 			_save();
 		},
-		
+
 		getCurrentGoal : function() {
 			return _currentGoal;
 		},
-
 
 		setScoreEntryBackPage : function(page) {
 			_scoreEntryBackPage = page;
 			_save();
 		},
-		getScoreEntryBackPage: function() {
+		getScoreEntryBackPage : function() {
 			return _scoreEntryBackPage;
 		},
-		
+
 	};
 
 	// ///// Load data //////////
