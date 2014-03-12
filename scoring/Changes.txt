@@ -1,9 +1,14 @@
+Release 8.9
+-----------
+* Add HTML version of the subjective application
+* Add challenge description for REC 2014
+
 Release 8.8
 -----------
 * 263 - Make it clear when specifying judging station vs. event division
 * 264 - Use the correct run number to check if a playoff round is verified before sending JSON back
 
-Release 8.6
+Release 8.7
 -----------
 * Fix table assignment during playoffs to ensure we don't trivally repeat tables
 * Import playoff table limits
