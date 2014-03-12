@@ -556,7 +556,7 @@ public final class UploadTeams extends BaseFLLServlet {
       stmt.executeUpdate("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division, judging_station) SELECT "
           + dummyTournamentID + ", Teams.TeamNumber, Teams.Division, Teams.Division FROM Teams");
 
-      if (null != tournamentColumn) {
+      if (null != tournamentColumn && !tournamentColumn.isEmpty()) {
         rs = stmt.executeQuery("SELECT "
             + teamNumberColumn + ", " + tournamentColumn + " FROM FilteredTeams");
         while (rs.next()) {
