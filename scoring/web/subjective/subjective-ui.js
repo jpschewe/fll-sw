@@ -352,7 +352,10 @@ function populateTeams() {
 	var teams = $.subjective.getCurrentTeams();
 	$.each(teams, function(i, team) {
 		var time = $.subjective.getScheduledTime(team.teamNumber);
-		var timeStr = time.getHours() + ":" + time.getMinutes();
+		var timeStr = null;
+		if (null != time) {
+			timeStr = time.getHours() + ":" + time.getMinutes();
+		}
 
 		var scoreStr;
 		var score = $.subjective.getScore(team.teamNumber);
@@ -364,11 +367,19 @@ function populateTeams() {
 			var computedScore = $.subjective.computeScore(score);
 			scoreStr = computedScore;
 		}
-		var button = $("<button class='ui-btn ui-corner-all'>" + timeStr //
-				+ " " + team.teamNumber //
-				+ " " + team.teamName //
-				+ " " + team.organization //
-				+ " " + scoreStr //
+
+		var label = "";
+		if (null != timeStr) {
+			label = label + timeStr;
+		}
+		label = label + " " + team.teamNumber;
+		label = label + " " + team.teamName;
+		if (null != team.organization) {
+			label = label + " " + team.organization;
+		}
+		label = label + " " + scoreStr;
+		var button = $("<button class='ui-btn ui-corner-all'>" //
+				+ label //
 				+ "</button>");
 		$("#teams-list_teams").append(button);
 		button.click(function() {
@@ -862,16 +873,17 @@ function populateScoreSummary() {
 
 						var editBlock = $("<div class=\"ui-block-c edit\"></div>");
 						var editButton = $("<button class=\"ui-btn ui-mini\">Edit</button>");
-						editBlock.append(editButton);						
+						editBlock.append(editButton);
 						teamRow.append(editBlock);
-						editButton.click(function() {
-							$.subjective.setCurrentTeam(team);
+						editButton
+								.click(function() {
+									$.subjective.setCurrentTeam(team);
 
-							$.subjective.setScoreEntryBackPage("#score-summary-page");
-							$.mobile.navigate("#enter-score-page");
-						});
-						
-						
+									$.subjective
+											.setScoreEntryBackPage("#score-summary-page");
+									$.mobile.navigate("#enter-score-page");
+								});
+
 						$("#score-summary_content").append(teamRow);
 
 						var score = $.subjective.getScore(team.teamNumber);
