@@ -13,6 +13,10 @@ fi
 
 fllsw_root="${mydir}"/..
 
+cd "${WORKSPACE}"
+git_branch=$(git show -s --pretty=%d HEAD | awk -F, '{print $2}' | awk -F')' '{print $1}')
+git_version=$(git describe --always)
+log "BRANCH: ${git_branch} GIT_VERSION: ${git_version}"
 
 if [ -n "${DEVEL_BUILD}" ]; then
     if [ "${DEVEL_BUILD}" = "1" ]; then
@@ -21,6 +25,7 @@ if [ -n "${DEVEL_BUILD}" ]; then
         echo "app.version=devel-${BUILD_ID}" > override.properties
     fi
 fi
+
 
 
 # get wiki documentation
