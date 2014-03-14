@@ -481,11 +481,6 @@ public class TournamentSchedule implements Serializable {
       }
     }
 
-    if (perfRounds.isEmpty()) {
-      throw new FLLRuntimeException("No performance rounds found in the header: "
-          + Arrays.asList(line));
-    }
-
     /*
      * check that the values start at 1, are contiguous, and that the
      * corresponding table header exists
