@@ -890,16 +890,16 @@ public final class ImportDB {
       SQLFunctions.close(destPrep);
       destPrep = null;
 
-      sourcePrep = sourceConnection.prepareStatement("SELECT team_number, judging_station, presentation, technical" //
+      sourcePrep = sourceConnection.prepareStatement("SELECT team_number, judging_station" //
           + " FROM schedule WHERE tournament=?");
       sourcePrep.setInt(1, sourceTournamentID);
       destPrep = destinationConnection.prepareStatement("INSERT INTO schedule" //
-          + " (tournament, team_number, judging_station, presentation, technical)" //
-          + " VALUES (?, ?, ?, ?, ?)");
+          + " (tournament, team_number, judging_station)" //
+          + " VALUES (?, ?, ?)");
       destPrep.setInt(1, destTournamentID);
       sourceRS = sourcePrep.executeQuery();
       while (sourceRS.next()) {
-        for (int i = 1; i <= 4; i++) {
+        for (int i = 1; i <= 2; i++) {
           Object sourceObj = sourceRS.getObject(i);
           if ("".equals(sourceObj)) {
             sourceObj = null;
