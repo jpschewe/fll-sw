@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -574,6 +575,7 @@ public final class ImportDB {
     Statement stmt = null;
     ResultSet rs = null;
     PreparedStatement prep = null;
+    ResultSet metaData = null;
     try {
       stmt = connection.createStatement();
       stmt.executeUpdate("DROP TABLE IF EXISTS sched_subjective CASCADE");
@@ -588,25 +590,29 @@ public final class ImportDB {
       sql.append(")");
       stmt.executeUpdate(sql.toString());
 
-      // migrate subjective times over
-      prep = connection.prepareStatement("INSERT INTO sched_subjective" //
-          + " (tournament, team_number, name, subj_time)" //
-          + " VALUES(?, ?, ?, ?)");
-      rs = stmt.executeQuery("SELECT tournament, team_number, presentation, technical FROM schedule");
-      while (rs.next()) {
-        final int tournament = rs.getInt(1);
-        final int team = rs.getInt(2);
-        final Time presentation = rs.getTime(3);
-        final Time technical = rs.getTime(4);
-        prep.setInt(1, tournament);
-        prep.setInt(2, team);
-        prep.setString(3, "Technical");
-        prep.setTime(4, technical);
-        prep.executeUpdate();
+      // migrate subjective times over if they are there
+      final DatabaseMetaData md = connection.getMetaData();
+      metaData = md.getColumns(null, null, "schedule", "presentation");
+      if (metaData.next()) {
+        prep = connection.prepareStatement("INSERT INTO sched_subjective" //
+            + " (tournament, team_number, name, subj_time)" //
+            + " VALUES(?, ?, ?, ?)");
+        rs = stmt.executeQuery("SELECT tournament, team_number, presentation, technical FROM schedule");
+        while (rs.next()) {
+          final int tournament = rs.getInt(1);
+          final int team = rs.getInt(2);
+          final Time presentation = rs.getTime(3);
+          final Time technical = rs.getTime(4);
+          prep.setInt(1, tournament);
+          prep.setInt(2, team);
+          prep.setString(3, "Technical");
+          prep.setTime(4, technical);
+          prep.executeUpdate();
 
-        prep.setString(3, "Research");
-        prep.setTime(4, presentation);
-        prep.executeUpdate();
+          prep.setString(3, "Research");
+          prep.setTime(4, presentation);
+          prep.executeUpdate();
+        }
       }
 
       setDBVersion(connection, 6);
