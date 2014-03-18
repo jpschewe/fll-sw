@@ -4,11 +4,13 @@ This is the home of the Minnesota FIRST Lego League (FLL) software. This softwar
 
 Where Used
 ==========
-Partners known to be running the software include
+Here is a list of tournaments that have used the software over the years.
 
-  * Minnesota
-  * Illinois
-  * San Paulo, Brazil
+  * [Minnesota First Lego League](http://hightechkids.org/programs/mn-first-lego-league-grades-4-9) (2001 - Present)
+  * [Minnesota Renewable Energy Challenge](http://hightechkids.org/programs/mn-renewable-energy-challenge-4-12-grade) (2012 - Present)
+  * GEMs/GISE drag race (2009)
+  * Illinois (before 2005)
+  * San Paulo, Brazil (before 2005)
 
 If you are using the software for your tournaments, please let me know
 at jpschewe@mtu.net so that I can you add to this list.
