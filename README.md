@@ -1,6 +1,6 @@
 FLL Software
 ============
-This is the home of the Minnesota FIRST Lego League (FLL) software. This software has been written by individuals in Minnesota and has been used extensively there. This software is configurable for other tournaments as well. It has been used to score drag race tournaments in Minnesota as well.
+This is the home of the Minnesota FIRST Lego League (FLL) software. This software has been written by individuals in Minnesota and has been used extensively there. This software is configurable for other tournaments as well.
 
 Where Used
 ==========
