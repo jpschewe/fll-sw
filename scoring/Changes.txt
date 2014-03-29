@@ -1,3 +1,7 @@
+Release 8.10
+-----------
+* Add challenge description for Anoka 2014
+
 Release 8.9
 -----------
 * Add HTML version of the subjective application
