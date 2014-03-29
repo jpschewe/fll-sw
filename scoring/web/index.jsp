@@ -35,8 +35,6 @@ pageContext.setAttribute("urls", WebUtils.getAllURLs(request));
 
   <li><a href="wiki/InstructionsForRunningTheSoftware.html">Instructions (from Wiki)</a></li>
 
-      <li><a href="wiki/Home.html">Wiki Documentation</a></li>
-
       <li><a href="scoreEntry/select_team.jsp">Score Entry</a></li>
 
       <li><a href='scoreboard/index.jsp'>Scoreboard</a></li>
