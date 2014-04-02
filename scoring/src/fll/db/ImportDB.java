@@ -19,6 +19,7 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -367,7 +368,7 @@ public final class ImportDB {
           + GenerateDB.DATABASE_VERSION + " dump version: " + dbVersion);
     }
 
-    upgradeDatabase(connection, challengeDocument);
+    upgradeDatabase(connection, challengeDocument, description);
 
     return challengeDocument;
   }
@@ -479,12 +480,16 @@ public final class ImportDB {
    * we're only fixing up column names and the data in the column.
    * 
    * @param connection the database to upgrade
+   * @param challengeDocument the XML document specifying the challenge
+   * @param description a developer friendly version of challengeDocument
    * @throws SQLException on an error
    * @throws IllegalArgumentException if the database cannot be upgraded for
    *           some reason
    */
   private static void upgradeDatabase(final Connection connection,
-                                      final Document challengeDocument) throws SQLException, IllegalArgumentException {
+                                      final Document challengeDocument,
+                                      final ChallengeDescription description) throws SQLException,
+      IllegalArgumentException {
     int dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 1) {
       upgrade0To1(connection, challengeDocument);
@@ -516,6 +521,10 @@ public final class ImportDB {
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 11) {
       upgrade10To11(connection);
+    }
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 12) {
+      upgrade11To12(connection, description);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
@@ -568,6 +577,110 @@ public final class ImportDB {
     } finally {
       SQLFunctions.close(stmt);
       stmt = null;
+    }
+  }
+
+  /**
+   * @param category the category to match
+   * @param scheduleColumns the schedule columns
+   * @return the column name or null if no mapping can be found
+   */
+  private static String findScheduleColumnForCategory(final ScoreCategory category,
+                                                      final Collection<String> scheduleColumns) {
+
+    // first see if there is an exact match to the name or title
+    for (final String scheduleColumn : scheduleColumns) {
+      if (category.getName().equals(scheduleColumn)) {
+        return scheduleColumn;
+      } else if (category.getTitle().equals(scheduleColumn)) {
+        return scheduleColumn;
+      }
+    }
+
+    if (category.getName().contains("programming")
+        || category.getName().contains("design")) {
+      // look for Design
+      for (final String scheduleColumn : scheduleColumns) {
+        if ("Design".equals(scheduleColumn)) {
+          return scheduleColumn;
+        }
+      }
+    }
+
+    // no mapping
+    return null;
+  }
+
+  /**
+   * Add mapping between schedule columns and subjective categories.
+   * 
+   * @param connection
+   * @throws SQLException
+   */
+  private static void upgrade11To12(final Connection connection,
+                                    final ChallengeDescription description) throws SQLException {
+    if (LOG.isTraceEnabled()) {
+      LOG.trace("Upgrading database from 11 to 12");
+    }
+
+    PreparedStatement getTournaments = null;
+    ResultSet tournaments = null;
+    PreparedStatement insert = null;
+    PreparedStatement getSubjectiveStations = null;
+    ResultSet stations = null;
+    try {
+
+      GenerateDB.createSubjectiveCategoryScheduleColumnMappingTables(connection);
+
+      insert = connection.prepareStatement("INSERT INTO category_schedule_column " //
+          + " (tournament, category, schedule_column)" //
+          + " VALUES (?, ?, ?)");
+
+      getTournaments = connection.prepareStatement("SELECT tournament_id from Tournaments");
+      tournaments = getTournaments.executeQuery();
+      while (tournaments.next()) {
+        final int tournament = tournaments.getInt(1);
+
+        insert.setInt(1, tournament);
+
+        // get schedule columns
+        getSubjectiveStations = connection.prepareStatement("SELECT DISTINCT name from sched_subjective WHERE tournament = ?");
+        getSubjectiveStations.setInt(1, tournament);
+        final Collection<String> scheduleColumns = new LinkedList<String>();
+        stations = getSubjectiveStations.executeQuery();
+        while (stations.next()) {
+          final String name = stations.getString(1);
+          scheduleColumns.add(name);
+        }
+
+        if (LOG.isTraceEnabled()) {
+          LOG.trace(String.format("Tournament %d has %s schedule columns", tournament, scheduleColumns.toString()));
+        }
+
+        for (final ScoreCategory category : description.getSubjectiveCategories()) {
+          final String column = findScheduleColumnForCategory(category, scheduleColumns);
+
+          if (LOG.isTraceEnabled()) {
+            LOG.trace(String.format("Category %s maps to column %s", category.getName(), column));
+          }
+
+          if (null != column) {
+            insert.setString(2, category.getName());
+            insert.setString(3, column);
+            insert.executeUpdate();
+          }
+
+        } // foreach category
+
+      } // foreach tournament
+
+      setDBVersion(connection, 12);
+    } finally {
+      SQLFunctions.close(stations);
+      SQLFunctions.close(getSubjectiveStations);
+      SQLFunctions.close(insert);
+      SQLFunctions.close(tournaments);
+      SQLFunctions.close(getTournaments);
     }
   }
 
@@ -865,6 +978,8 @@ public final class ImportDB {
 
     importTableDivision(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
+    importCategoryScheduleMapping(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+
     // update score totals
     Queries.updateScoreTotals(description, destinationConnection, destTournamentID);
   }
@@ -978,6 +1093,46 @@ public final class ImportDB {
       sourcePrep = null;
       SQLFunctions.close(destPrep);
       destPrep = null;
+    }
+  }
+
+  private static void importCategoryScheduleMapping(final Connection sourceConnection,
+                                                    final Connection destinationConnection,
+                                                    final int sourceTournamentID,
+                                                    final int destTournamentID) throws SQLException {
+    PreparedStatement destPrep = null;
+    PreparedStatement sourcePrep = null;
+    ResultSet sourceRS = null;
+    try {
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Importing table_division");
+      }
+      destPrep = destinationConnection.prepareStatement("DELETE FROM category_schedule_column WHERE tournament = ?");
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+      SQLFunctions.close(destPrep);
+
+      sourcePrep = sourceConnection.prepareStatement("SELECT category, schedule_column"
+          + " FROM category_schedule_column WHERE tournament = ?");
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep = destinationConnection.prepareStatement("INSERT INTO category_schedule_column (tournament, category, schedule_column) "
+          + "VALUES (?, ?, ?)");
+      destPrep.setInt(1, destTournamentID);
+      sourceRS = sourcePrep.executeQuery();
+      while (sourceRS.next()) {
+        for (int i = 1; i <= 2; i++) {
+          Object sourceObj = sourceRS.getObject(i);
+          if ("".equals(sourceObj)) {
+            sourceObj = null;
+          }
+          destPrep.setObject(i + 1, sourceObj);
+        }
+        destPrep.executeUpdate();
+      }
+    } finally {
+      SQLFunctions.close(sourceRS);
+      SQLFunctions.close(sourcePrep);
+      SQLFunctions.close(destPrep);
     }
   }
 
