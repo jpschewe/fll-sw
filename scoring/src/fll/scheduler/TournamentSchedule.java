@@ -481,11 +481,6 @@ public class TournamentSchedule implements Serializable {
       }
     }
 
-    if (perfRounds.isEmpty()) {
-      throw new FLLRuntimeException("No performance rounds found in the header: "
-          + Arrays.asList(line));
-    }
-
     /*
      * check that the values start at 1, are contiguous, and that the
      * corresponding table header exists
@@ -1129,8 +1124,11 @@ public class TournamentSchedule implements Serializable {
       output.format("Subjective latest start for judging station %s: %s%n", station,
                     OUTPUT_DATE_FORMAT.get().format(maxSubjectiveTimes.get(station)));
     }
-    output.format("Earliest performance start: %s%n", OUTPUT_DATE_FORMAT.get().format(minPerf));
-    output.format("Latest performance start: %s%n", OUTPUT_DATE_FORMAT.get().format(maxPerf));
+    if (null != minPerf
+        && null != maxPerf) {
+      output.format("Earliest performance start: %s%n", OUTPUT_DATE_FORMAT.get().format(minPerf));
+      output.format("Latest performance start: %s%n", OUTPUT_DATE_FORMAT.get().format(maxPerf));
+    }
     return output.toString();
   }
 

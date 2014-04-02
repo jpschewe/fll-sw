@@ -717,8 +717,6 @@ public final class GenerateDB {
       sql.append("  tournament INTEGER NOT NULL");
       sql.append(" ,team_number INTEGER NOT NULL");
       sql.append(" ,judging_station LONGVARCHAR NOT NULL");
-      sql.append(" ,presentation TIME");
-      sql.append(" ,technical TIME");
       sql.append(" ,CONSTRAINT schedule_pk PRIMARY KEY (tournament, team_number)");
       if (createConstraints) {
         sql.append(" ,CONSTRAINT schedule_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
