@@ -10,9 +10,11 @@ td {
 td.center {
 	text-align: center;
 }
+
 td.left {
 	text-align: left;
 }
+
 td.right {
 	text-align: right;
 }
@@ -22,3 +24,14 @@ body {
 	color: #ffffff;
 	font-family: 'Arial' font-size :   3;
 }
+
+.truncate {
+    width: 100%;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+table {
+    table-layout: fixed
+    }

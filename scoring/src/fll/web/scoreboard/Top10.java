@@ -21,13 +21,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.StringUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import fll.Team;
 import fll.Utilities;
 import fll.db.GlobalParameters;
 import fll.db.Queries;
@@ -94,12 +92,22 @@ public class Top10 extends BaseFLLServlet {
       formatter.format("<html>");
       formatter.format("<head>");
       formatter.format("<link rel='stylesheet' type='text/css' href='score_style.css' />");
-      formatter.format("<meta http-equiv='refresh' content='%d' />", GlobalParameters.getIntGlobalParameter(connection, GlobalParameters.DIVISION_FLIP_RATE));
+      formatter.format("<meta http-equiv='refresh' content='%d' />",
+                       GlobalParameters.getIntGlobalParameter(connection, GlobalParameters.DIVISION_FLIP_RATE));
       formatter.format("</head>");
 
       formatter.format("<body>");
       formatter.format("<center>");
       formatter.format("<table border='1' cellpadding='0' cellspacing='0' width='98%%'>");
+
+      formatter.format("<colgroup>");
+      formatter.format("<col width='50px' />");
+      formatter.format("<col width='75px' />");
+      formatter.format("<col />");
+      formatter.format("<col />");
+      formatter.format("<col width='70px' />");
+      formatter.format("</colgroup>");
+
       if (!divisions.isEmpty()) {
         formatter.format("<tr>");
         int numColumns = 5;
@@ -142,18 +150,21 @@ public class Top10 extends BaseFLLServlet {
           }
 
           formatter.format("<tr>");
-          formatter.format("<td class='center' width='7%%'><b>%d</b></td>", rank);
-          formatter.format("<td class='right' width='10%%'><b>%d</b></td>", rs.getInt("TeamNumber"));
+          formatter.format("<td class='center'><b>%d</b></td>", rank);
+          formatter.format("<td class='right'><b>%d</b></td>", rs.getInt("TeamNumber"));
           String teamName = rs.getString("TeamName");
-          teamName = null == teamName ? "&nbsp;" : StringUtils.trimString(teamName, Team.MAX_TEAM_NAME_LEN);
-          formatter.format("<td class='left' width='28%%'><b>%s</b></td>", teamName);
+          if (null == teamName) {
+            teamName = "&nbsp;";
+          }
+          formatter.format("<td class='left' width='28%%'><div class='truncate'><b>%s</b></div></td>", teamName);
           if (showOrg) {
             String organization = rs.getString("Organization");
-            organization = null == organization ? "&nbsp;" : StringUtils.trimString(organization, MAX_ORG_NAME);
-            formatter.format("<td class='left'><b>%s</b></td>", organization);
+            if (null == organization) {
+              organization = "&nbsp;";
+            }
+            formatter.format("<td class='left truncate'><b>%s</b></td>", organization);
           }
-          formatter.format("<td class='right' width='8%%'><b>%s</b></td>",
-                           Utilities.NUMBER_FORMAT_INSTANCE.format(score));
+          formatter.format("<td class='right'><b>%s</b></td>", Utilities.NUMBER_FORMAT_INSTANCE.format(score));
 
           formatter.format("</tr>");
 

@@ -20,12 +20,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.StringUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
-import fll.Team;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.util.LogUtils;
@@ -68,6 +66,17 @@ public class Last8 extends BaseFLLServlet {
       formatter.format("<body>");
       formatter.format("<center>");
       formatter.format("<table border='1' cellpadding='0' cellspacing='0' width='98%%'>");
+      
+      formatter.format("<colgroup>");
+      formatter.format("<col width='75px' />");
+      formatter.format("<col />");
+      if (showOrg) {
+      formatter.format("<col />");
+      }
+      formatter.format("<col width='100px' />");
+      formatter.format("<col width='75px' />");
+      formatter.format("</colgroup>");
+
       formatter.format("<tr>");
       int numColumns = 5;
       if (!showOrg) {
@@ -97,18 +106,22 @@ public class Last8 extends BaseFLLServlet {
 
       while (rs.next()) {
         formatter.format("<tr>");
-        formatter.format("<td class='left' width='10%%'><b>%d</b></td>", rs.getInt("TeamNumber"));
+        formatter.format("<td class='left'><b>%d</b></td>", rs.getInt("TeamNumber"));
         String teamName = rs.getString("TeamName");
-        teamName = null == teamName ? "&nbsp;" : StringUtils.trimString(teamName, Team.MAX_TEAM_NAME_LEN);
-        formatter.format("<td class='left' width='28%%'><b>%s</b></td>", teamName);
+        if (null == teamName) {
+          teamName = "&nbsp;";
+        }
+        formatter.format("<td class='left truncate'><b>%s</b></td>", teamName);
         if (showOrg) {
           String organization = rs.getString("Organization");
-          organization = null == organization ? "&nbsp;" : StringUtils.trimString(organization, Top10.MAX_ORG_NAME);
-          formatter.format("<td class='left'><b>%s</b></td>", organization);
+          if (null == organization) {
+            organization = "&nbsp;";
+          }
+          formatter.format("<td class='left truncate'><b>%s</b></td>", organization);
         }
-        formatter.format("<td class='right' width='5%%'><b>%s</b></td>", rs.getString("event_division"));
+        formatter.format("<td class='right truncate'><b>%s</b></td>", rs.getString("event_division"));
 
-        formatter.format("<td class='right' width='8%%'><b>");
+        formatter.format("<td class='right'><b>");
         if (rs.getBoolean("NoShow")) {
           formatter.format("No Show");
         } else if (rs.getBoolean("Bye")) {
