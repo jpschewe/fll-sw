@@ -2,6 +2,9 @@ Installing Java
 ===============
 All of the fll-sw software is written in Java. This means that it will run on any computer with Java installed without any other steps. However this does mean that you need to have Java installed. Below are instructions that will get you going in Windows and Linux. For Mac it's typically included, you just need to run Software Update to ensure that you have the latest version.
 
+Supported Versions of Java:
+  * Java 7.x/1.7.x (1.8 is not yet supported)
+
 JDK
 -----
 The JDK is required to run and build Java applications. This is required for some special Java applications like the server software for fll-sw.
