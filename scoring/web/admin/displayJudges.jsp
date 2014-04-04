@@ -36,7 +36,8 @@ $(document).ready(function() {
  <%-- clear out the message, so that we don't see it again --%>
  <c:remove var="message" />
 
-<p>Please verify that these judges look correct and then commit the changes.</p>
+<p>Please verify that these judges look correct and then commit the changes. 
+If changes need to be made to the judges, press the back button.</p>
 
  <table border='1' id='data'>
   <tr>
