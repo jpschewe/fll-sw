@@ -78,6 +78,13 @@ public class InitFilter implements Filter {
           LOGGER.debug("Returning after initialize did redirect");
           return;
         }
+
+        // keep browser from caching any content
+        httpResponse.setHeader("Cache-Control", "no-store"); // HTTP 1.1
+        httpResponse.setHeader("Pragma", "no-cache"); // HTTP 1.0
+        httpResponse.setDateHeader("Expires", 0); // prevents caching at the
+                                                  // proxy server
+
       }
 
       if (needsSecurity) {
@@ -336,14 +343,6 @@ public class InitFilter implements Filter {
         }
 
       }
-
-      // TODO ticket:87 allow static data to be cached
-
-      // keep browser from caching any content
-      response.setHeader("Cache-Control", "no-store"); // HTTP 1.1
-      response.setHeader("Pragma", "no-cache"); // HTTP 1.0
-      response.setDateHeader("Expires", 0); // prevents caching at the proxy
-      // server
 
       return true;
     } catch (final SQLException e) {
