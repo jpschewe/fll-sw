@@ -46,13 +46,10 @@ public class CategorizedScores extends BaseFLLServlet {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
-
     final WinnerType winnerCriteria = challengeDescription.getWinner();
 
     final Formatter writer = new Formatter(response.getWriter());
     writer.format("<html><body>");
-    writer.format("<h1>FLL Categorized Scores</h1>");
-    writer.format("<hr/>");
 
     // cache the subjective categories title->dbname
     final Map<String, String> subjectiveCategories = new HashMap<String, String>();
@@ -69,6 +66,12 @@ public class CategorizedScores extends BaseFLLServlet {
     Connection connection = null;
     try {
       connection = datasource.getConnection();
+
+      final String tournamentName = Queries.getCurrentTournamentName(connection);
+
+      writer.format("<h1>%s - %s: Categorized Scores</h1>", challengeDescription.getTitle(), tournamentName);
+      writer.format("<hr/>");
+
 
       final int currentTournament = Queries.getCurrentTournament(connection);
 

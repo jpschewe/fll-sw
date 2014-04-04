@@ -51,9 +51,7 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
 
     final PrintWriter writer = response.getWriter();
     writer.write("<html><body>");
-    writer.write("<h1>FLL Categorized Score Summary by judge</h1>");
-    writer.write("<hr/>");
-
+    
     // cache the subjective categories title->dbname
     final Map<String, String> subjectiveCategories = new HashMap<String, String>();
     for (final ScoreCategory subjectiveElement : challengeDescription.getSubjectiveCategories()) {
@@ -71,6 +69,11 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
       connection = datasource.getConnection();
 
       final int currentTournament = Queries.getCurrentTournament(connection);
+      final String tournamentName = Queries.getCurrentTournamentName(connection);
+      
+      writer.format("<h1>%s - %s: Categorized Score Summary by judge</h1>", challengeDescription.getTitle(), tournamentName);
+      writer.write("<hr/>");
+
 
       // foreach division
       for (final String division : Queries.getEventDivisions(connection)) {
@@ -131,7 +134,7 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
 
               writer.write("<tr>");
               writer.write("<td>");
-              writer.write(teamNum);
+              writer.write(String.valueOf(teamNum));
               writer.write("</td>");
               writer.write("<td>");
               if (null == org) {
