@@ -74,6 +74,7 @@ import org.xml.sax.SAXParseException;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.util.FLLRuntimeException;
+import fll.util.GuiExceptionHandler;
 import fll.util.LogUtils;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
@@ -91,6 +92,8 @@ public final class SubjectiveFrame extends JFrame {
 
   public static void main(final String[] args) {
     LogUtils.initializeLogging();
+
+    Thread.setDefaultUncaughtExceptionHandler(new GuiExceptionHandler());
 
     // Use cross platform look and feel so that things look right all of the
     // time
