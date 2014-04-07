@@ -77,6 +77,7 @@ import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
 import fll.util.FLLRuntimeException;
+import fll.util.GuiExceptionHandler;
 import fll.util.LogUtils;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
@@ -88,6 +89,8 @@ public class SchedulerUI extends JFrame {
 
   public static void main(final String[] args) {
     LogUtils.initializeLogging();
+
+    Thread.setDefaultUncaughtExceptionHandler(new GuiExceptionHandler());
 
     // Use cross platform look and feel so that things look right all of the
     // time
@@ -240,12 +243,12 @@ public class SchedulerUI extends JFrame {
 
         // this causes mSchedParams, mScheduleData and mScheduleFile to be set
         final File solutionFile = solver.getBestSchedule();
-        if(null == solutionFile) {
+        if (null == solutionFile) {
           JOptionPane.showMessageDialog(SchedulerUI.this, "No valid schedule found", "Error Running Scheduler",
                                         JOptionPane.ERROR_MESSAGE);
           return;
         }
-        
+
         loadScheduleFile(solutionFile, subjectiveStations);
 
         final TableOptimizer optimizer = new TableOptimizer(mSchedParams, mScheduleData,
@@ -813,6 +816,7 @@ public class SchedulerUI extends JFrame {
   private static final Preferences PREFS = Preferences.userNodeForPackage(TournamentSchedule.class);
 
   private static final String SCHEDULE_STARTING_DIRECTORY_PREF = "scheduleStartingDirectory";
+
   private static final String DESCRIPTION_STARTING_DIRECTORY_PREF = "descriptionStartingDirectory";
 
   @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This calss isn't going to be serialized")
