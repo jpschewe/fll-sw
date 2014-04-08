@@ -13,10 +13,13 @@ import java.io.Reader;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.servlet.jsp.PageContext;
+
+import net.mtu.eggplant.util.ComparisonUtils;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -43,7 +46,6 @@ public class SetupIndex {
 
     final List<DescriptionInfo> descriptions = DescriptionInfo.getAllKnownChallengeDescriptionInfo();
 
-    Collections.sort(descriptions);
     pageContext.setAttribute("descriptions", descriptions);
   }
 
@@ -52,6 +54,11 @@ public class SetupIndex {
    */
   public static final class DescriptionInfo implements Comparable<DescriptionInfo> {
 
+    /**
+     * Get some information about the known challenge descriptions.
+     * 
+     * @return list sorted by name and then revision
+     */
     public static List<DescriptionInfo> getAllKnownChallengeDescriptionInfo() {
       final List<DescriptionInfo> descriptions = new LinkedList<DescriptionInfo>();
 
@@ -71,6 +78,8 @@ public class SetupIndex {
               + url.toString(), e);
         }
       }
+
+      Collections.sort(descriptions);
 
       return descriptions;
     }
@@ -107,7 +116,19 @@ public class SetupIndex {
       } else if (this == other) {
         return 0;
       } else {
-        return getTitle().compareTo(other.getTitle());
+
+        final String oneTitle = getTitle();
+        final String twoTitle = other.getTitle();
+        final String oneRevision = getRevision();
+        final String twoRevision = other.getRevision();
+
+        final int titleCompare = ComparisonUtils.compareStrings(oneTitle, twoTitle);
+        if (0 == titleCompare) {
+          return ComparisonUtils.compareStrings(oneRevision, twoRevision);
+        } else {
+          return titleCompare;
+        }
+
       }
     }
 
@@ -131,4 +152,38 @@ public class SetupIndex {
     }
 
   }
+
+  private static final class SortByName implements Comparator<DescriptionInfo> {
+    public static final SortByName INSTANCE = new SortByName();
+    
+    /**
+     * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+     */
+    @Override
+    public int compare(final DescriptionInfo one,
+                       final DescriptionInfo two) {
+      if (null == one
+          && null == two) {
+        return 0;
+      } else if (null == one) {
+        return -1;
+      } else if (null == two) {
+        return 1;
+      } else {
+        final String oneTitle = one.getTitle();
+        final String twoTitle = two.getTitle();
+        final String oneRevision = one.getRevision();
+        final String twoRevision = two.getRevision();
+
+        final int titleCompare = ComparisonUtils.compareStrings(oneTitle, twoTitle);
+        if (0 == titleCompare) {
+          return ComparisonUtils.compareStrings(oneRevision, twoRevision);
+        } else {
+          return titleCompare;
+        }
+      }
+    }
+
+  }
+
 }
