@@ -12,6 +12,8 @@ import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * Display exception information in a dialog and then exit when the dialog is
  * closed.
@@ -30,6 +32,7 @@ public class GuiExceptionHandler implements UncaughtExceptionHandler {
    *      java.lang.Throwable)
    */
   @Override
+  @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "We want the application to exit after an error")
   public void uncaughtException(final Thread t,
                                 final Throwable ex) {
     final String message = String.format("Unexpected error on thread %s: %s", t.getName(), ex.getMessage());
