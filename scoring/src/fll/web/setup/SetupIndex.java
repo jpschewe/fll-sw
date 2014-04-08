@@ -13,7 +13,6 @@ import java.io.Reader;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -149,39 +148,6 @@ public class SetupIndex {
     @Override
     public int hashCode() {
       return getTitle().hashCode();
-    }
-
-  }
-
-  private static final class SortByName implements Comparator<DescriptionInfo> {
-    public static final SortByName INSTANCE = new SortByName();
-    
-    /**
-     * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-     */
-    @Override
-    public int compare(final DescriptionInfo one,
-                       final DescriptionInfo two) {
-      if (null == one
-          && null == two) {
-        return 0;
-      } else if (null == one) {
-        return -1;
-      } else if (null == two) {
-        return 1;
-      } else {
-        final String oneTitle = one.getTitle();
-        final String twoTitle = two.getTitle();
-        final String oneRevision = one.getRevision();
-        final String twoRevision = two.getRevision();
-
-        final int titleCompare = ComparisonUtils.compareStrings(oneTitle, twoTitle);
-        if (0 == titleCompare) {
-          return ComparisonUtils.compareStrings(oneRevision, twoRevision);
-        } else {
-          return titleCompare;
-        }
-      }
     }
 
   }
