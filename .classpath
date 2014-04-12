@@ -59,9 +59,6 @@
 	<classpathentry kind="lib" path="scoring/lib/xmlunit-1.4.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/itext-xtra-5.4.2.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/itextpdf-5.4.2.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/poi-3.9-20121203.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/poi-ooxml-3.9-20121203.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/poi-ooxml-schemas-3.9-20121203.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/cobertura-2.0.2.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/hsqldb-2.3.0.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/jackson-annotations-2.2.3.jar">
@@ -79,5 +76,10 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/fll-sw/scoring/lib/jackson-databind-2.2.3-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="scoring/lib/poi-3.10-FINAL-20140208.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/commons-logging-1.1.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/poi-ooxml-3.10-FINAL-20140208.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/poi-ooxml-schemas-3.10-FINAL-20140208.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/dom4j-1.6.1.jar"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>
