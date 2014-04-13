@@ -1,13 +1,11 @@
-Latest Development Releases
-===========================
+# Latest Development Releases
 
 If you want to test out the latest code you can do so by [downloading the most recent automated packaged development release](http://mtu.net/jenkins/job/fll-sw-devel-release/). These are built automatically by our continuous integration system. They are a good place to see what features are coming up in the next release and a relatively easy way for people to test if a bug has been fixed as they'd like it.
 
 
-Getting started as a developer
-==============================
+# Getting started as a developer
 
-  1. Make sure you have Java 6 (or greater) installed
+  1. Make sure you have Java 7 (or greater) installed
   1. Get the source code from git
     * git clone git@github.com:jpschewe/fll-sw (read-only)
     * Or you can create a fork and then submit a pull request when you have changes to merge in
@@ -22,8 +20,7 @@ If you're new to git read at least the first 3 chapters of [http://progit.org/bo
 
 
 
-GIT rules/guidelines
----------------------
+## GIT rules/guidelines
 
 Do all development on a branch other than master. Branches named "feature.XXX" or "ticket.XXX" are preferred. Where "XXX" can be anything, but typically has the number of the ticket that you're working on in it and some short description of what you're doing. Example usage:
 
@@ -52,32 +49,31 @@ Don't fast forward master, always use `--no-ff` when merging into master. This w
 
 
 
-Ticket rules/guidelines
-------------------------
-When you start work on a ticket, assign it to yourself. Don't work on someone else's accepted tickets unless you talk to them.
+## Ticket rules/guidelines
+When you start work on a ticket, assign it to yourself. Don't work on someone else's assigned tickets unless you talk to them.
 
 
-Wiki Editing
-------------
+## Wiki Editing
 Please stick to [standard markdown syntax](http://daringfireball.net/projects/markdown/syntax) as much as possible. This is because we package a copy of the wiki in the release and the processor only handles standard markdown plus basic linking.
 
 
-Using Eclipse
--------------
+## Using Eclipse
 
   1. [Download Eclipse](http://www.eclipse.org/downloads/). Get the Jave EE developer edition.
   1. Tell Eclipse to import an existing project and point it to the root of the git checkout
 
 
-Viewing the database diagram
-----------------------------
+### Viewing the database diagram
 
 There is a database diagram in scoring/docs/dbModel.clay. You can view this with the [Clay Mark II plugin for Eclipse](http://www.azzurri.jp/en/clay/index.html). The free version is all I'm using, so you can just download it by adding the following update site to your Eclipse installation: http://www.azzurri.co.jp/eclipse/plugins/
 
 
+### Using Ant in Eclipse
 
-References to Documentation
----------------------------
+Most ant targets will work out of the box once you tell Eclipse about our ant build file. However if you want to run the test.report target you'll get an error about the style sheet. Using the instructions at http://help.eclipse.org/juno/index.jsp?topic=%2Forg.eclipse.platform.doc.user%2Ftasks%2Ftasks-ant-version.htm you can point Eclipse at scoring/tools/ant as the Ant Home variable and then the test.report target works. This setting is for the workspace, so you'll want to make sure you're workspace is only used for fll-sw. 
+
+
+## References to Documentation
 
   * [Java](http://download.oracle.com/javase/6/docs/api/index.html)
   * [Java Servlet API](http://download.oracle.com/docs/cd/E17802_01/products/products/servlet/2.5/docs/servlet-2_5-mr2/index.html)
@@ -85,8 +81,7 @@ References to Documentation
 
 
 
-Making a release
-=================
+# Making a release
 
   1. Get the latest code from git
   1. Create a tag with `git tag -s <tag name>`
@@ -96,13 +91,13 @@ Making a release
   1. Push the tag with `git push origin <tag name>`
   1. Use Jenkins to run the `fll-release` job and get the resulting archive from there
     * Contact Jon Schewe if you don't have access to create releases
-  1. Create a new release on SF
-    1. Use the file manager to upload the archive file
-    1. Set the information about the files
-      * Make sure that all operating systems are selected so that this becomes the default download
+  1. Create a new release on GitHub
+    1. Paste the changes since the last release into the release notes
+    1. Upload the file created in Jenkins
 
-Misc Notes
-===========
+
+# Misc Notes
+
 
   * [Vendor Branches](VendorBranches.md)
   * [Long Term Plans](LongTermPlans.md)
