@@ -1,3 +1,4 @@
+* 33 - upgrade to poi 3.10 and include dom4j, this allows xlsx files to work
 * 8 - always sort the challenge descriptions by title
 * 7 - report errors to the user in the scheduler app and the subjective app
 * SF.140 - change title on categorized score reports to include tournament name and title
