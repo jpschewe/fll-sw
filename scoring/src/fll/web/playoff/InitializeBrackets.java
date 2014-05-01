@@ -88,19 +88,28 @@ public class InitializeBrackets extends BaseFLLServlet {
       }
       data.setDivision(divisionStr);
 
+      final Boolean sessionEnableThird = SessionAttributes.getAttribute(session, "enableThird", Boolean.class);
       final boolean enableThird;
-      final String thirdFourthPlaceBrackets = request.getParameter("enableThird");
-      if (null == thirdFourthPlaceBrackets) {
-        enableThird = false;
+      if (null == sessionEnableThird) {
+        final String thirdFourthPlaceBrackets = request.getParameter("enableThird");
+        if (null == thirdFourthPlaceBrackets) {
+          enableThird = false;
+        } else {
+          enableThird = true;
+        }
       } else {
-        enableThird = true;
+        enableThird = sessionEnableThird;
       }
 
       if (null == divisionStr) {
         message.append("<p class='error'>No division specified.</p>");
       } else if (PlayoffIndex.CREATE_NEW_PLAYOFF_DIVISION.equals(divisionStr)) {
+        session.setAttribute("enableThird", enableThird);
+
         redirect = "create_playoff_division.jsp";
       } else {
+        // clean out for the next time
+        session.removeAttribute("enableThird");
 
         if (Queries.isPlayoffDataInitialized(connection, divisionStr)) {
           message.append("<p class='warning'>Playoffs have already been initialized for division "
