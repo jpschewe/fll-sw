@@ -47,6 +47,10 @@ public class PlayoffIndex extends BaseFLLServlet {
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
+    
+    // clear out variables that will be used later
+    session.removeAttribute("enableThird");
+
     final StringBuilder message = new StringBuilder();
     final String existingMessage = SessionAttributes.getMessage(session);
     if (null != existingMessage) {
