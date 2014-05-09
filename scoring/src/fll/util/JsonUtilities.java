@@ -84,7 +84,8 @@ public final class JsonUtilities {
     }
   }
 
-  public static String generateJsonBracketInfo(final Map<Integer, Integer> ids,
+  public static String generateJsonBracketInfo(final String division,
+                                               final Map<Integer, Integer> ids,
                                                final Connection connection,
                                                final PerformanceScoreCategory perf,
                                                final BracketData bracketData,
@@ -102,7 +103,7 @@ public final class JsonUtilities {
         }
         final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
         final int teamNumber = tbc.getTeam().getTeamNumber();
-        final int runNumber = Playoff.getRunNumber(connection, teamNumber, playoffRound);
+        final int runNumber = Playoff.getRunNumber(connection, division, teamNumber, playoffRound);
         final TeamScore teamScore = new DatabaseTeamScore("Performance", currentTournament, teamNumber, runNumber,
                                                           connection);
         final double computedTeamScore = perf.evaluate(teamScore);
