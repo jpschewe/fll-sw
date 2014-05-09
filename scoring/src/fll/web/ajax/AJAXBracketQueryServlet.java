@@ -92,7 +92,7 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
     final boolean showFinalsScores = false;
     response.reset();
     response.setContentType("application/json");
-    writer.print(JsonUtilities.generateJsonBracketInfo(pairedMap, connection, description.getPerformance(), bd,
+    writer.print(JsonUtilities.generateJsonBracketInfo(division, pairedMap, connection, description.getPerformance(), bd,
                                                        showOnlyVerifiedScores, showFinalsScores));
   }
 

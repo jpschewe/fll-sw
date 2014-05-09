@@ -1007,6 +1007,7 @@ public final class Playoff {
    * @throws SQLException
    */
   public static int getRunNumber(final Connection connection,
+                                 final String division,
                                  final int teamNumber,
                                  final int playoffRound) throws SQLException {
     final int tournament = Queries.getCurrentTournament(connection);
@@ -1015,11 +1016,13 @@ public final class Playoff {
     try {
       prep = connection.prepareStatement("SELECT run_number FROM PlayoffData" //
           + " WHERE Tournament = ?" //
+          + " AND event_division = ?"
           + " AND PlayoffRound = ?" //
           + " AND Team = ?");
       prep.setInt(1, tournament);
-      prep.setInt(2, playoffRound);
-      prep.setInt(3, teamNumber);
+      prep.setString(2, division);
+      prep.setInt(3, playoffRound);
+      prep.setInt(4, teamNumber);
       rs = prep.executeQuery();
       if (rs.next()) {
         final int runNumber = rs.getInt(1);

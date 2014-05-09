@@ -131,6 +131,8 @@ public class ScoresheetGenerator {
         m_time[i] = null;
       }
     } else {
+      final String division = request.getParameter("division");
+      
       // called with specific sheets to print
       final int numMatches = Integer.parseInt(numMatchesStr);
       final boolean[] checkedMatches = new boolean[numMatches + 1]; // ignore
@@ -186,7 +188,7 @@ public class ScoresheetGenerator {
             m_table[j] = request.getParameter("tableA"
                 + i);
 
-            final int performanceRunA = Playoff.getRunNumber(connection, teamA.getTeamNumber(), iRound);
+            final int performanceRunA = Playoff.getRunNumber(connection, division, teamA.getTeamNumber(), iRound);
             final String divA = Playoff.getPlayoffDivision(connection, teamA.getTeamNumber(), performanceRunA);
             m_division[j] = divA;
             final int bracketA = Playoff.getBracketNumber(connection, teamA.getTeamNumber(), performanceRunA);
@@ -213,7 +215,7 @@ public class ScoresheetGenerator {
             m_table[j] = request.getParameter("tableB"
                 + i);
 
-            final int performanceRunB = Playoff.getRunNumber(connection, teamB.getTeamNumber(), iRound);
+            final int performanceRunB = Playoff.getRunNumber(connection, division, teamB.getTeamNumber(), iRound);
             final String divB = Playoff.getPlayoffDivision(connection, teamB.getTeamNumber(), performanceRunB);
             m_division[j] = divB;
             final int bracketB = Playoff.getBracketNumber(connection, teamB.getTeamNumber(), performanceRunB);
