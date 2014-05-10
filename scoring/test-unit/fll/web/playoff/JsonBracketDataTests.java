@@ -63,7 +63,8 @@ public class JsonBracketDataTests {
     // shouldn't be able to access out of context rounds
     Map<Integer, Integer> query = new HashMap<Integer, Integer>();
     query.put(4, 1);
-    Assert.assertEquals("{\"refresh\":\"true\"}", JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(),
+    Assert.assertEquals("{\"refresh\":\"true\"}", JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query,
+                                                                                        playoff.getConnection(),
                                                                                         playoff.getDescription()
                                                                                                .getPerformance(),
                                                                                         playoff.getBracketData(),
@@ -107,12 +108,12 @@ public class JsonBracketDataTests {
     query.put(row, 1);
     final ObjectMapper jsonMapper = new ObjectMapper();
 
-    String jsonOut = JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(), playoff.getDescription()
-                                                                                                  .getPerformance(),
+    String jsonOut = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, playoff.getConnection(),
+                                                           playoff.getDescription().getPerformance(),
                                                            playoff.getBracketData(), SHOW_ONLY_VERIFIED,
                                                            SHOW_FINAL_ROUNDS);
     List<BracketLeafResultSet> result = jsonMapper.readValue(jsonOut, BracketLeafResultSetTypeInformation.INSTANCE);
-    
+
     // assert score is -1, indicating no score
     Assert.assertEquals(result.get(0).score, -1.0D, 0.0);
 
@@ -125,8 +126,8 @@ public class JsonBracketDataTests {
     // ask for round we just entered score for
     row = playoff.getBracketData().getRowNumberForLine(2, 2);
     query.put(row, 2);
-    jsonOut = JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(), playoff.getDescription()
-                                                                                           .getPerformance(),
+    jsonOut = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, playoff.getConnection(), playoff.getDescription()
+                                                                                                     .getPerformance(),
                                                     playoff.getBracketData(), SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
     result = jsonMapper.readValue(jsonOut, BracketLeafResultSetTypeInformation.INSTANCE);
     Assert.assertEquals(result.get(0).leaf.getTeam().getTeamNumber(), Team.NULL_TEAM_NUMBER);
@@ -139,8 +140,8 @@ public class JsonBracketDataTests {
 
     row = playoff.getBracketData().getRowNumberForLine(1, 3);
     query.put(row, 1);
-    jsonOut = JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(), playoff.getDescription()
-                                                                                           .getPerformance(),
+    jsonOut = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, playoff.getConnection(), playoff.getDescription()
+                                                                                                     .getPerformance(),
                                                     playoff.getBracketData(), SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
     result = jsonMapper.readValue(jsonOut, BracketLeafResultSetTypeInformation.INSTANCE);
     Assert.assertEquals(result.get(0).score, 5D, 0.0);
@@ -164,8 +165,8 @@ public class JsonBracketDataTests {
     final int finalsRound = playoff.getBracketData().getFinalsRound();
     row = playoff.getBracketData().getRowNumberForLine(finalsRound + 1, 1);
     query.put(row, finalsRound + 1);
-    jsonOut = JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(), playoff.getDescription()
-                                                                                           .getPerformance(),
+    jsonOut = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, playoff.getConnection(), playoff.getDescription()
+                                                                                                     .getPerformance(),
                                                     playoff.getBracketData(), SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
     result = jsonMapper.readValue(jsonOut, BracketLeafResultSetTypeInformation.INSTANCE);
     Assert.assertEquals(result.get(0).score, -1.0D, 0.0);
@@ -211,18 +212,26 @@ public class JsonBracketDataTests {
   }
 
   private class PlayoffContainer {
-    private Connection c = null;
+    private final Connection c;
 
-    private BracketData bd = null;
+    private final BracketData bd;
 
-    private ChallengeDescription desc = null;
+    private final ChallengeDescription desc;
+
+    private final String division;
 
     public PlayoffContainer(final Connection con,
                             final BracketData brackets,
-                            final ChallengeDescription description) {
+                            final ChallengeDescription description,
+                            final String division) {
       c = con;
       bd = brackets;
       desc = description;
+      this.division = division;
+    }
+
+    public String getDivision() {
+      return division;
     }
 
     public ChallengeDescription getDescription() {
@@ -278,10 +287,10 @@ public class JsonBracketDataTests {
     final boolean onlyVerifiedScores = true;
     final BracketData bd = new BracketData(connection, div, firstRound, lastRound, rowsPerTeam, showFinals,
                                            onlyVerifiedScores);
-    return new PlayoffContainer(connection, bd, description);
+    return new PlayoffContainer(connection, bd, description, div);
 
   }
-  
+
   private static final class BracketLeafResultSetTypeInformation extends TypeReference<List<BracketLeafResultSet>> {
     public static final BracketLeafResultSetTypeInformation INSTANCE = new BracketLeafResultSetTypeInformation();
   }
