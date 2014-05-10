@@ -163,8 +163,7 @@ FONT.TIE {
   }
 
   var ajaxList;
-  var ajaxArray;
-
+  
   function iterate() {
       foundNewest = false;
       $("a[name=newest]").remove();

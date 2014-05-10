@@ -88,8 +88,10 @@ public class TestAJAXBrackets {
       // init brackets
       IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
           + "playoff");
+      
+      final String division = "1";
 
-      IntegrationTestUtils.initializePlayoffsForDivision(selenium, "1");
+      IntegrationTestUtils.initializePlayoffsForDivision(selenium, division);
 
       // open brackets
       final WebWindow bracketsWindow = new WebWindow(selenium, TestUtils.URL_ROOT
@@ -107,6 +109,7 @@ public class TestAJAXBrackets {
       final WebConversation wc = new WebConversation();
       final PostMethodWebRequest tableLabels = new PostMethodWebRequest(TestUtils.URL_ROOT
           + "playoff/ScoresheetServlet");
+      tableLabels.setParameter("division", division);
       tableLabels.setParameter("numMatches", "2");
       tableLabels.setParameter("print1", "1");
       tableLabels.setParameter("teamA1", "1");

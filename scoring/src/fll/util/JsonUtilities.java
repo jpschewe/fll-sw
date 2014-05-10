@@ -84,7 +84,8 @@ public final class JsonUtilities {
     }
   }
 
-  public static String generateJsonBracketInfo(final Map<Integer, Integer> ids,
+  public static String generateJsonBracketInfo(final String division,
+                                               final Map<Integer, Integer> ids,
                                                final Connection connection,
                                                final PerformanceScoreCategory perf,
                                                final BracketData bracketData,
@@ -94,14 +95,15 @@ public final class JsonUtilities {
     try {
       final int currentTournament = Queries.getCurrentTournament(connection);
       for (Map.Entry<Integer, Integer> entry : ids.entrySet()) {
+        final int row = entry.getKey();
         final int playoffRound = entry.getValue();
-        final TeamBracketCell tbc = (TeamBracketCell) bracketData.getData(playoffRound, entry.getKey());
+        final TeamBracketCell tbc = (TeamBracketCell) bracketData.getData(playoffRound, row);
         if (tbc == null) {
           return "{\"refresh\":\"true\"}";
         }
         final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
         final int teamNumber = tbc.getTeam().getTeamNumber();
-        final int runNumber = Playoff.getRunNumber(connection, teamNumber, playoffRound);
+        final int runNumber = Playoff.getRunNumber(connection, division, teamNumber, playoffRound);
         final TeamScore teamScore = new DatabaseTeamScore("Performance", currentTournament, teamNumber, runNumber,
                                                           connection);
         final double computedTeamScore = perf.evaluate(teamScore);
@@ -109,17 +111,17 @@ public final class JsonUtilities {
         final boolean noShow = Queries.isNoShow(connection, currentTournament, tbc.getTeam().getTeamNumber(), runNumber);
         // Sane request checks
         if (noShow) {
-          datalist.add(new BracketLeafResultSet(tbc, -2.0, entry.getKey()
+          datalist.add(new BracketLeafResultSet(tbc, -2.0, row
               + "-" + playoffRound));
         } else if (!realScore
             || !showOnlyVerifiedScores || Queries.isVerified(connection, currentTournament, teamNumber, runNumber)) {
-          if ((entry.getValue() == numPlayoffRounds && !showFinalsScores)
+          if ((playoffRound == numPlayoffRounds && !showFinalsScores)
               || !realScore) {
-            datalist.add(new BracketLeafResultSet(tbc, -1.0, entry.getKey()
-                + "-" + entry.getValue()));
+            datalist.add(new BracketLeafResultSet(tbc, -1.0, row
+                + "-" + playoffRound));
           } else {
-            datalist.add(new BracketLeafResultSet(tbc, computedTeamScore, entry.getKey()
-                + "-" + entry.getValue()));
+            datalist.add(new BracketLeafResultSet(tbc, computedTeamScore, row
+                + "-" + playoffRound));
           }
         }
       }
