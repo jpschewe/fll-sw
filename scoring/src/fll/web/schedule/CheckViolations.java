@@ -111,7 +111,7 @@ public class CheckViolations extends BaseFLLServlet {
         subjectiveHeaders.add(station.getName());
       }
       final TournamentSchedule schedule = new TournamentSchedule(name, stream, sheetName, subjectiveHeaders);
-      session.setAttribute("uploadSchedule_schedule", schedule);
+      session.setAttribute(UploadSchedule.SCHEDULE_KEY, schedule);
 
       final int tournamentID = Queries.getCurrentTournament(connection);
       final Collection<ConstraintViolation> violations = schedule.compareWithDatabase(connection, tournamentID);

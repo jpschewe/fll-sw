@@ -39,6 +39,8 @@ public class UploadSchedule extends BaseFLLServlet {
 
   public static final String SCHEDULE_KEY = "uploadSchedule_schedule";
   
+  public static final String MAPPINGS_KEY = "uploadSchedule_mappings";
+  
   /**
    * Clear out session variables used by the schedule upload workflow.
    */
@@ -48,6 +50,7 @@ public class UploadSchedule extends BaseFLLServlet {
     session.removeAttribute("uploadSchedule_schedule");
     session.removeAttribute("uploadSchedule_violations");
     session.removeAttribute(SCHEDULE_KEY);
+    session.removeAttribute(MAPPINGS_KEY);
     session.removeAttribute(GatherEventDivisionChanges.EVENT_DIVISION_INFO_KEY);
     session.removeAttribute("sheetName");
     session.removeAttribute("sheetNames");
