@@ -11,7 +11,9 @@ import java.io.Serializable;
 import fll.Utilities;
 
 /**
- * Represents a subjective station.
+ * This is general information for a particular judging station.
+ * A {@link SubjectiveTime} the use of a {@link SubjectiveStation} at a
+ * particular point in time.
  */
 public final class SubjectiveStation implements Serializable {
   public SubjectiveStation(final String name,

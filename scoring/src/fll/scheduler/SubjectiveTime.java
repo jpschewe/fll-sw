@@ -10,9 +10,16 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Represents a subjective judging time.
+ * Represents a subjective judging time from the schedule.
  */
 public final class SubjectiveTime implements Serializable {
+  
+  /**
+   * 
+   * @param name name of the column in the schedule
+   * @param time the time
+   * @param category the subjective category this maps to
+   */
   public SubjectiveTime(final String name,
                         final Date time) {
     this.name = name;
