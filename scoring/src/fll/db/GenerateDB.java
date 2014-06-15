@@ -39,7 +39,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 11;
+  public static final int DATABASE_VERSION = 12;
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -66,8 +66,7 @@ public final class GenerateDB {
    * @param document and XML document that describes a tournament
    * @param connection connection to the database to create the tables in
    */
-  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
-                                                             "OBL_UNSATISFIED_OBLIGATION" }, justification = "Need dynamic data for default values, Bug in findbugs - ticket:2924739")
+  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE", "OBL_UNSATISFIED_OBLIGATION" }, justification = "Need dynamic data for default values, Bug in findbugs - ticket:2924739")
   public static void generateDB(final Document document,
                                 final Connection connection) throws SQLException, UnsupportedEncodingException {
 
@@ -132,7 +131,7 @@ public final class GenerateDB {
           + " ,CONSTRAINT tablenames_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" + ")");
 
       createTableDivision(connection, true);
-      
+
       // table to hold head-to-head playoff meta-data
       stmt.executeUpdate("DROP TABLE IF EXISTS PlayoffData CASCADE");
       stmt.executeUpdate("CREATE TABLE PlayoffData ("
@@ -168,6 +167,8 @@ public final class GenerateDB {
 
       createScheduleTables(connection, true);
 
+      createSubjectiveCategoryScheduleColumnMappingTables(connection);
+      
       createFinalistScheduleTables(connection, true);
 
       // Table structure for table 'Judges'
@@ -177,8 +178,7 @@ public final class GenerateDB {
           + "  category varchar(64) NOT NULL," //
           + "  Tournament INTEGER NOT NULL," //
           + "  station varchar(64) NOT NULL," //
-          + "  phone varchar(15) default NULL,"
-          + "  CONSTRAINT judges_pk PRIMARY KEY (id,category,Tournament,station)"//
+          + "  phone varchar(15) default NULL," + "  CONSTRAINT judges_pk PRIMARY KEY (id,category,Tournament,station)"//
           + " ,CONSTRAINT judges_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" //
           + ")");
 
@@ -700,8 +700,6 @@ public final class GenerateDB {
    * Create tables for schedule data
    * 
    * @param connection
-   * @param forceRebuild
-   * @param tables
    * @param createConstraints if false, don't create foreign key constraints
    * @throws SQLException
    */
@@ -754,6 +752,35 @@ public final class GenerateDB {
       }
       subjectiveSql.append(")");
       stmt.executeUpdate(subjectiveSql.toString());
+
+    } finally {
+      SQLFunctions.close(stmt);
+      stmt = null;
+    }
+  }
+
+  /**
+   * Create tables for mapping schedule columns (schedule columns)
+   * to subjective categories.
+   * 
+   * @param connection
+   * @throws SQLException
+   */
+  /* package */static void createSubjectiveCategoryScheduleColumnMappingTables(final Connection connection)
+      throws SQLException {
+    Statement stmt = null;
+    try {
+      stmt = connection.createStatement();
+
+      stmt.executeUpdate("DROP TABLE IF EXISTS category_schedule_column CASCADE");
+      final StringBuilder sql = new StringBuilder();
+      sql.append("CREATE TABLE category_schedule_column (");
+      sql.append("  tournament INTEGER NOT NULL");
+      sql.append(" ,category LONGVARCHAR NOT NULL");
+      sql.append(" ,schedule_column LONGVARCHAR NOT NULL");
+      sql.append(" ,CONSTRAINT category_schedule_column_pk PRIMARY KEY (tournament, category)");
+      sql.append(")");
+      stmt.executeUpdate(sql.toString());
 
     } finally {
       SQLFunctions.close(stmt);
