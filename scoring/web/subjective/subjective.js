@@ -30,6 +30,7 @@
 	var _tempScore;
 	var _currentGoal;
 	var _scoreEntryBackPage;
+	var _categoryColumnMapping;
 
 	function _init_variables() {
 		_subjectiveCategories = {};
@@ -46,6 +47,7 @@
 		_tempScore = null;
 		_currentGoal = null;
 		_scoreEntryBackPage = null;
+		_categoryColumnMapping = null;
 	}
 
 	function _loadFromDisk() {
@@ -121,6 +123,10 @@
 			_scoreEntryBackPage = value;
 		}
 
+		value = $.jStorage.get(STORAGE_PREFIX + "_categoryColumnMapping");
+		if (null != value) {
+			_categoryColumnMapping = value;
+		}
 	}
 
 	function _save() {
@@ -141,6 +147,8 @@
 		$.jStorage.set(STORAGE_PREFIX + "_currentGoal", _currentGoal);
 		$.jStorage.set(STORAGE_PREFIX + "_scoreEntryBackPage",
 				_scoreEntryBackPage);
+		$.jStorage.set(STORAGE_PREFIX + "_categoryColumnMapping",
+				_categoryColumnMapping);
 
 	}
 
@@ -226,6 +234,13 @@
 						});
 	}
 
+	function _loadCategoryColumnMapping() {
+		_categoryColumnMapping = {};
+		return $.getJSON("../api/CategoryScheduleMapping", function(data) {
+			_categoryColumnMapping = data;
+		});
+	}
+
 	// //////////////////////// PUBLIC INTERFACE /////////////////////////
 	$.subjective = {
 
@@ -262,6 +277,7 @@
 			waitList.push(_loadSchedule());
 			waitList.push(_loadJudges());
 			waitList.push(_loadAllScores());
+			waitList.push(_loadCategoryColumnMapping())
 
 			$.when.apply($, waitList).done(function() {
 				_save();
@@ -595,6 +611,21 @@
 		},
 
 		/**
+		 * Get the schedule column for the specified category name.
+		 */
+		getScheduleColumnForCategory : function(categoryName) {
+			var column = null;
+
+			$.each(_categoryColumnMapping, function(index, mapping) {
+				if (mapping.categoryName == categoryName) {
+					column = mapping.scheduleColumn;
+				}
+			});
+
+			return column;
+		},
+
+		/**
 		 * Get the scheduled time for the specified team for the current
 		 * category. If there is no schedule, this returns the Date(0).
 		 * 
@@ -615,33 +646,12 @@
 				retval = null;
 			} else {
 				var timeStr = null;
-				$
-						.each(
-								schedInfo.subjectiveTimes,
-								function(index, value) {
-									// FIXME need a non-hardcoded mapping
-									// between schedule
-									// stations and category names
-									var found = false;
-									if ("Project" == value.name) {
-										if ("project" == _currentCategory.name) {
-											found = true;
-										}
-									} else if ("Design" == value.name) {
-										if ("robot_design" == _currentCategory.name) {
-											found = true;
-										} else if ("robot_programming" == _currentCategory.name) {
-											found = true;
-										}
-									} else if ("Core Values" == value.name) {
-										if ("core_values" == _currentCategory.name) {
-											found = true;
-										}
-									}
-									if (found) {
-										timeStr = value.time;
-									}
-								});
+				var column = $.subjective.getScheduleColumnForCategory(_currentCategory.name);
+				$.each(schedInfo.subjectiveTimes, function(index, value) {
+					if (value.name == column) {
+						timeStr = value.time;
+					}
+				});
 				if (null == timeStr) {
 					_log("No time found for " + teamNumber);
 					retval = new Date(0);
