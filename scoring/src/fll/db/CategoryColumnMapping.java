@@ -29,7 +29,7 @@ public class CategoryColumnMapping implements Serializable {
 
   private final String mCategoryName;
 
-  public String getCategoryname() {
+  public String getCategoryName() {
     return mCategoryName;
   }
 
@@ -57,7 +57,7 @@ public class CategoryColumnMapping implements Serializable {
           + " VALUES(?, ?, ?)");
       insert.setInt(1, tournamentId);
       for (final CategoryColumnMapping mapping : categoryColumnMappings) {
-        insert.setString(2, mapping.getCategoryname());
+        insert.setString(2, mapping.getCategoryName());
         insert.setString(3, mapping.getScheduleColumn());
         insert.executeUpdate();
       }
