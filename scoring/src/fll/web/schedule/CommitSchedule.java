@@ -9,6 +9,7 @@ package fll.web.schedule;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -23,6 +24,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.apache.log4j.Logger;
 
 import fll.db.Queries;
+import fll.db.CategoryColumnMapping;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
@@ -59,6 +61,14 @@ public class CommitSchedule extends BaseFLLServlet {
       schedule.storeSchedule(connection, tournamentID);
 
       assignJudgingStations(connection, tournamentID, schedule);
+
+      // J2EE doesn't have things typed yet
+      @SuppressWarnings("unchecked")
+      final Collection<CategoryColumnMapping> categoryColumnMappings = SessionAttributes.getAttribute(session,
+                                                                                                                        UploadSchedule.MAPPINGS_KEY,
+                                                                                                                        Collection.class);
+
+      CategoryColumnMapping.store(connection, tournamentID, categoryColumnMappings);
 
       session.setAttribute(SessionAttributes.MESSAGE, "<p>Schedule successfully stored in the database</p>");
       WebUtils.sendRedirect(application, response, "/admin/index.jsp");

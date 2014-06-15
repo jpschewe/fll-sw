@@ -1,0 +1,43 @@
+digraph UploadSchedule {
+
+admin_index_jsp -> UploadSchedule [label="upload spreadsheet"];
+
+UploadSchedule -> CheckScheduleExists;
+
+CheckScheduleExists -> promptForOverwrite_jsp [label="if schedule exists"];
+
+promptForOverwrite_jsp -> GetSheetNames [label="if overwrite"];
+promptForOverwrite_jsp -> admin_index_jsp [label="if no overwrite"];
+
+CheckScheduleExists -> GetSheetNames;
+
+GetSheetNames -> admin_index_jsp [label="if no sheets found"];
+GetSheetNames -> CheckViolations [label="if 1 sheet found or specified sheet in session"];
+GetSheetNames -> promptForSheetName_jsp [label="if 2+ sheets found"];
+
+promptForSheetName_jsp -> ProcessSelectedSheet;
+ProcessSelectedSheet -> GetSheetNames;
+
+CheckViolations -> promptForEventDivisions_jsp [label="if no violations"];
+CheckViolations -> displayHardViolations_jsp [label="if hard violations found"];
+CheckViolations -> displaySoftViolations_jsp [label="if no hard violations"];
+
+CheckViolations -> chooseSubjectiveHeaders_jsp [label="if subjective stations not specified and unused schedule columns"];
+chooseSubjectiveHeaders_jsp -> ProcessSubjectiveHeaders;
+ProcessSubjectiveHeaders -> CheckViolations;
+
+displayHardViolations_jsp -> admin_index_jsp;
+
+displaySoftViolations_jsp -> promptForEventDivisions_jsp [label="if ok"];
+displaySoftViolations_jsp -> admin_index_jsp [label="if not ok"];
+
+promptForEventDivisions_jsp -> GatherEventDivisionChanges [label="if set event divisions"];
+promptForEventDivisions_jsp -> CommitSchedule;
+
+GatherEventDivisionChanges -> displayEventDivisionConfirmation_jsp;
+
+displayEventDivisionConfirmation_jsp -> CommitEventDivisions [label="if ok to make changes"];
+displayEventDivisionConfirmation_jsp -> CommitSchedule [label="if skip changes"];
+CommitEventDivisions -> CommitSchedule
+
+}
