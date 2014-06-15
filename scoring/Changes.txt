@@ -1,3 +1,4 @@
+* 280 - Add mapping between schedule columns and category names
 * 20 - Make sure the division is checked in the AJAX playoff bracket code
 * 23 - pass 3rd/4th place parameter on when creating a new division 
 * 33 - upgrade to poi 3.10 and include dom4j, this allows xlsx files to work
