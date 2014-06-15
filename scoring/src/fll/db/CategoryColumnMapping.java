@@ -71,8 +71,8 @@ public class CategoryColumnMapping implements Serializable {
   /**
    * Load a set of mappings for a tournament from the database.
    */
-  public Collection<CategoryColumnMapping> load(final Connection connection,
-                                                final int tournamentId) throws SQLException {
+  public static Collection<CategoryColumnMapping> load(final Connection connection,
+                                                       final int tournamentId) throws SQLException {
     final Collection<CategoryColumnMapping> mappings = new LinkedList<CategoryColumnMapping>();
 
     PreparedStatement get = null;
