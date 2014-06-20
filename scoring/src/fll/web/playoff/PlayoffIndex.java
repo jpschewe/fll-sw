@@ -11,15 +11,18 @@ import java.sql.SQLException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
+import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
+import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
+import fll.web.admin.Tables;
 
 /**
  * Populate context for playoff index page.
@@ -36,7 +39,8 @@ public class PlayoffIndex {
   public static final String SESSION_DATA = "playoff_data";
 
   public static void populateContext(final ServletContext application,
-                                     final HttpSession session) {
+                                     final HttpSession session,
+                                     final PageContext pageContext) {
 
     // clear out variables that will be used later
     session.removeAttribute("enableThird");
@@ -52,8 +56,13 @@ public class PlayoffIndex {
     try {
       connection = datasource.getConnection();
 
+      final int currentTournamentID = Queries.getCurrentTournament(connection);
+
       final PlayoffSessionData data = new PlayoffSessionData(connection);
       session.setAttribute(SESSION_DATA, data);
+
+      final boolean tablesAssigned = Tables.tablesAssigned(connection, currentTournamentID);
+      pageContext.setAttribute("tablesAssigned", tablesAssigned);
 
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
