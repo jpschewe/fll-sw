@@ -1,7 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%
-  fll.web.playoff.PlayoffIndex.populateContext(application, session);
+  fll.web.playoff.PlayoffIndex.populateContext(application, session, pageContext);
 %>
 
 <html>
@@ -56,10 +56,19 @@
 
   <c:if test="${not empty playoff_data.existingDivisions }">
 
-
    <%-- scoresheet generation --%>
    <li>
     <form name='printable' action='scoregenbrackets.jsp' method='get'>
+    
+   <c:if test="${not tablesAssigned }">
+    <p class='warning'>
+     Tables are not not assigned. Entering into the scoresheet
+     generating brackets at this point will have undesired results. You
+     should visit the <a href='<c:url value="/admin/tables.jsp"/>'>table
+      assignment page</a>.
+    </p>
+   </c:if>
+    
      <b>Scoresheet Generation Brackets</b><br />
 
      <%-- division --%>
