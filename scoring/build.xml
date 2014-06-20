@@ -118,7 +118,7 @@
     <pathelement location="${dir.lib}/xmlbeans-2.3.0.jar" />
     <pathelement location="${dir.lib}/commons-logging-1.1.jar" />
     <pathelement location="${dir.lib}/dom4j-1.6.1.jar" />
-    
+
     <!-- findbugs annotations -->
     <pathelement location="${dir.lib.findbugs}/annotations.jar" />
     <pathelement location="${dir.lib.findbugs}/jsr305.jar" />
@@ -478,10 +478,10 @@
   </target>
 
   <target name="dist.real" depends="compile,javadoc">
-		<!-- copy docs to the web -->
-		<copy todir="${dir.web}/wiki">
-			<fileset dir="${basedir}/docs" />
-		</copy>
+    <!-- copy docs to the web -->
+    <copy todir="${dir.web}/wiki">
+      <fileset dir="${basedir}/docs" />
+    </copy>
 
     <!-- copy docs -->
     <mkdir dir="${dir.dist}/docs" />
@@ -742,6 +742,21 @@
       <arg value="test-unit" />
       <arg value="web" />
     </exec>
+  </target>
+
+  <target name="doc.workflow.generate" description="Generate the workflow documents">
+    <apply executable="dot"
+      dest="${basedir}/docs/workflows"
+      >
+      <arg value="-Tpdf" />
+      <arg value="-O" />
+      
+      <fileset dir="${basedir}/docs/workflows">
+        <include name="*.dot" />
+      </fileset>
+
+      <mapper type="glob" from="*.dot" to="*.dot.pdf" />
+    </apply>
   </target>
 
   <target name="tomcat.check-logs" description="Check for errors in the tomcat logs">
