@@ -6,7 +6,6 @@
 
 package fll.web.admin;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,10 +14,6 @@ import java.sql.Statement;
 import java.util.List;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
@@ -31,23 +26,18 @@ import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
-import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.xml.ChallengeDescription;
 
 /**
- * Index page for admin.
+ * Populate context for admin index.
  */
-@WebServlet("/admin/index.jsp")
-public class AdminIndex extends BaseFLLServlet {
+public class AdminIndex {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  @Override
-  protected void processRequest(final HttpServletRequest request,
-                                final HttpServletResponse response,
-                                final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+  public static void populateContext(final ServletContext application,
+                                     final HttpSession session) {
     final StringBuilder message = new StringBuilder();
     final String existingMessage = SessionAttributes.getMessage(session);
     if (null != existingMessage) {
@@ -114,10 +104,7 @@ public class AdminIndex extends BaseFLLServlet {
       SQLFunctions.close(connection);
     }
 
-    session.setAttribute("servletLoaded", true);
-
     session.setAttribute(SessionAttributes.MESSAGE, message.toString());
-    response.sendRedirect(response.encodeRedirectURL("admin-index.jsp"));
   }
 
 }
