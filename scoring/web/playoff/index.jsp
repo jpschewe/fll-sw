@@ -1,9 +1,8 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<c:if test="${not servletLoaded }">
- <c:redirect url="index.jsp" />
-</c:if>
-<c:remove var="servletLoaded" />
+<%
+  fll.web.playoff.PlayoffIndex.populateContext(application, session);
+%>
 
 <html>
 <head>

@@ -6,15 +6,10 @@
 
 package fll.web.playoff;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
@@ -24,30 +19,25 @@ import org.apache.log4j.Logger;
 
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
-import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
 /**
- * Index page for playoffs.
+ * Populate context for playoff index page.
  */
-@WebServlet("/playoff/index.jsp")
-public class PlayoffIndex extends BaseFLLServlet {
+public class PlayoffIndex {
 
   private static final Logger LOGGER = LogUtils.getLogger();
-  
+
   public static final String CREATE_NEW_PLAYOFF_DIVISION = "Create Playoff Division...";
-  
+
   /**
    * Instance of {@link PlayoffSessionData} is stored here.
    */
   public static final String SESSION_DATA = "playoff_data";
 
-  @Override
-  protected void processRequest(final HttpServletRequest request,
-                                final HttpServletResponse response,
-                                final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
-    
+  public static void populateContext(final ServletContext application,
+                                     final HttpSession session) {
+
     // clear out variables that will be used later
     session.removeAttribute("enableThird");
 
@@ -56,14 +46,14 @@ public class PlayoffIndex extends BaseFLLServlet {
     if (null != existingMessage) {
       message.append(existingMessage);
     }
-    
+
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     try {
       connection = datasource.getConnection();
 
       final PlayoffSessionData data = new PlayoffSessionData(connection);
-      session.setAttribute(SESSION_DATA, data);      
+      session.setAttribute(SESSION_DATA, data);
 
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
@@ -74,10 +64,7 @@ public class PlayoffIndex extends BaseFLLServlet {
       SQLFunctions.close(connection);
     }
 
-    session.setAttribute("servletLoaded", true);
-
     session.setAttribute(SessionAttributes.MESSAGE, message.toString());
-    response.sendRedirect(response.encodeRedirectURL("playoff-index.jsp"));
   }
 
 }
