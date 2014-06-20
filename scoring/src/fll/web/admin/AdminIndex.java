@@ -81,14 +81,7 @@ public class AdminIndex {
 
       session.setAttribute("judgesAssigned", Queries.isJudgesProperlyAssigned(connection, challengeDescription));
 
-      boolean tablesAssigned = false;
-      prep = connection.prepareStatement("SELECT COUNT(*) FROM tablenames WHERE Tournament = ?");
-      prep.setInt(1, currentTournamentID);
-      rs2 = prep.executeQuery();
-      while (rs2.next()) {
-        final int count = rs2.getInt(1);
-        tablesAssigned = count > 0;
-      }
+      final boolean tablesAssigned = Tables.tablesAssigned(connection, currentTournamentID);
       session.setAttribute("tablesAssigned", tablesAssigned);
 
     } catch (final SQLException sqle) {

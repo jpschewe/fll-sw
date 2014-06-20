@@ -246,4 +246,34 @@ public final class Tables {
     return null;
   }
 
+  /**
+   * Check if tables are assigned for the specified tournament.
+   * 
+   * @param connection database connection
+   * @param tournamentID tournament ID
+   * @return true if the tables have been assigned
+   * @throws SQLException
+   */
+  static public boolean tablesAssigned(final Connection connection,
+                                       final int tournamentID) throws SQLException {
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      boolean tablesAssigned = false;
+
+      prep = connection.prepareStatement("SELECT COUNT(*) FROM tablenames WHERE Tournament = ?");
+      prep.setInt(1, tournamentID);
+      rs = prep.executeQuery();
+      while (rs.next()) {
+        final int count = rs.getInt(1);
+        tablesAssigned = count > 0;
+      }
+      return tablesAssigned;
+
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+  }
+
 }
