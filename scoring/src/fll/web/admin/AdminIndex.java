@@ -15,6 +15,7 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
+import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
@@ -37,7 +38,8 @@ public class AdminIndex {
   private static final Logger LOGGER = LogUtils.getLogger();
 
   public static void populateContext(final ServletContext application,
-                                     final HttpSession session) {
+                                     final HttpSession session,
+                                     final PageContext pageContext) {
     final StringBuilder message = new StringBuilder();
     final String existingMessage = SessionAttributes.getMessage(session);
     if (null != existingMessage) {
@@ -57,16 +59,16 @@ public class AdminIndex {
       stmt = connection.createStatement();
 
       final int currentTournamentID = Queries.getCurrentTournament(connection);
-      session.setAttribute("currentTournamentID", currentTournamentID);
+      pageContext.setAttribute("currentTournamentID", currentTournamentID);
 
-      session.setAttribute("playoffsInitialized",
+      pageContext.setAttribute("playoffsInitialized",
                            Queries.isPlayoffDataInitialized(connection, Queries.getCurrentTournament(connection)));
 
       final int numSeedingRounds = Queries.getNumSeedingRounds(connection, currentTournamentID);
-      session.setAttribute("numSeedingRounds", numSeedingRounds);
+      pageContext.setAttribute("numSeedingRounds", numSeedingRounds);
 
       final List<Tournament> tournaments = Tournament.getTournaments(connection);
-      session.setAttribute("tournaments", tournaments);
+      pageContext.setAttribute("tournaments", tournaments);
 
       boolean teamsUploaded = false;
       rs = stmt.executeQuery("SELECT COUNT(*) FROM Teams WHERE TeamNumber >= 0");
@@ -74,15 +76,15 @@ public class AdminIndex {
         final int count = rs.getInt(1);
         teamsUploaded = count > 0;
       }
-      session.setAttribute("teamsUploaded", teamsUploaded);
+      pageContext.setAttribute("teamsUploaded", teamsUploaded);
 
-      session.setAttribute("scheduleUploaded",
+      pageContext.setAttribute("scheduleUploaded",
                            TournamentSchedule.scheduleExistsInDatabase(connection, currentTournamentID));
 
-      session.setAttribute("judgesAssigned", Queries.isJudgesProperlyAssigned(connection, challengeDescription));
+      pageContext.setAttribute("judgesAssigned", Queries.isJudgesProperlyAssigned(connection, challengeDescription));
 
       final boolean tablesAssigned = Tables.tablesAssigned(connection, currentTournamentID);
-      session.setAttribute("tablesAssigned", tablesAssigned);
+      pageContext.setAttribute("tablesAssigned", tablesAssigned);
 
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
