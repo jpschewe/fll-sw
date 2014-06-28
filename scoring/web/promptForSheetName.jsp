@@ -12,7 +12,7 @@
     <form action='ProcessSelectedSheet' method='post'>
     <ul>
     <c:forEach items="${sheetNames }" var="sheetName">
-      <li><input type='radio' name='sheetName' value='${sheetName}' /> ${sheetName }</li>
+      <li><input type='radio' name='sheetName' id='${sheetName}' value='${sheetName}' /> <label for='${sheetName}'>${sheetName }</label></li>
     </c:forEach>
         </ul>
     <input type="submit"/>
