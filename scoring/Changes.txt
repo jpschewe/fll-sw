@@ -1,3 +1,4 @@
+* 259 - upgrade jquery to 1.11.1 and related libraries
 * 9 - allow one to click on the labels or the radio button when selecting a sheet within a spreadsheet
 * 19 - Remind users to assign tables before printing playoff scoresheets
 * 280 - Add mapping between schedule columns and category names

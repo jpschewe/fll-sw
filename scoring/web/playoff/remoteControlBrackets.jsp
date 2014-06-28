@@ -118,8 +118,8 @@ FONT.TIE {
 }
 </style>
 <script type="text/javascript" src="<c:url value='/playoff/code.icepush'/>"></script>
-<script type="text/javascript" src="<c:url value='/extlib/jquery-1.7.1.min.js'/>"></script>
-<script type="text/javascript" src="<c:url value='/extlib/jquery.scrollTo-1.4.7-min.js'/>"></script>
+<script type="text/javascript" src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
+<script type="text/javascript" src="<c:url value='/extlib/jquery.scrollTo-1.4.12.min.js'/>"></script>
 <script type="text/javascript">
   var ajaxURL = '<c:url value="/ajax/"/>';
   var currentRound = <%=playoffRoundNumber-1%>;
