@@ -59,8 +59,9 @@ public class CategoryScheduleMappingServlet extends HttpServlet {
 
       final Collection<CategoryColumnMapping> mappings = CategoryColumnMapping.load(connection, currentTournament);
 
-      jsonMapper.writeValue(writer, mappings);
+      jsonMapper.writeValue(writer, mappings);      
     } catch (final SQLException e) {
+      LOGGER.fatal("Database Exception", e);
       throw new RuntimeException(e);
     } finally {
       SQLFunctions.close(connection);
