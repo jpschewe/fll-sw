@@ -1,20 +1,20 @@
 CACHE MANIFEST
 # version @TODAY@
 
-../extlib/jquery-1.7.1.min.js
-../extlib/jquery.json-2.4.min.js
-../extlib/jstorage.js
+../extlib/jquery-1.11.1.min.js
+../extlib/jquery.json-2.5-pre.min.js
+../extlib/jstorage-0.4.11.min.js
 
-../extlib/jquery.mobile.structure-1.4.0.css
-../extlib/jquery.mobile.icons-1.4.0.css
-../extlib/jquery.mobile-1.4.0.min.css
-../extlib/jquery.mobile.external-png-1.4.0.css
-../extlib/jquery.mobile.inline-png-1.4.0.css
-../extlib/jquery.mobile.icons-1.4.0.min.css
-../extlib/jquery.mobile.theme-1.4.0.css
-../extlib/jquery.mobile-1.4.0.js
-../extlib/jquery.mobile-1.4.0.min.map
-../extlib/jquery.mobile-1.4.0.min.js
+../extlib/jquery.mobile.structure-1.4.2.css
+../extlib/jquery.mobile.icons-1.4.2.css
+../extlib/jquery.mobile-1.4.2.min.css
+../extlib/jquery.mobile.external-png-1.4.2.css
+../extlib/jquery.mobile.inline-png-1.4.2.css
+../extlib/jquery.mobile.icons-1.4.2.min.css
+../extlib/jquery.mobile.theme-1.4.2.css
+../extlib/jquery.mobile-1.4.2.js
+../extlib/jquery.mobile-1.4.2.min.map
+../extlib/jquery.mobile-1.4.2.min.js
 ../extlib/images/ajax-loader.gif
 ../extlib/images/icons-svg/refresh-white.svg
 ../extlib/images/icons-svg/carat-u-white.svg
@@ -216,13 +216,13 @@ CACHE MANIFEST
 ../extlib/images/icons-png/power-black.png
 ../extlib/images/icons-png/plus-white.png
 ../extlib/images/icons-png/check-black.png
-../extlib/jquery.mobile.structure-1.4.0.min.css
-../extlib/jquery.mobile.inline-png-1.4.0.min.css
-../extlib/jquery.mobile.inline-svg-1.4.0.css
-../extlib/jquery.mobile.theme-1.4.0.min.css
-../extlib/jquery.mobile.inline-svg-1.4.0.min.css
-../extlib/jquery.mobile.external-png-1.4.0.min.css
-../extlib/jquery.mobile-1.4.0.css
+../extlib/jquery.mobile.structure-1.4.2.min.css
+../extlib/jquery.mobile.inline-png-1.4.2.min.css
+../extlib/jquery.mobile.inline-svg-1.4.2.css
+../extlib/jquery.mobile.theme-1.4.2.min.css
+../extlib/jquery.mobile.inline-svg-1.4.2.min.css
+../extlib/jquery.mobile.external-png-1.4.2.min.css
+../extlib/jquery.mobile-1.4.2.css
 
 
 subjective.js

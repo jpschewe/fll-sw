@@ -13,7 +13,7 @@
 		}
     </style>
     <script type="text/javascript" src="<c:url value='/playoff/code.icepush'/>"></script>
-    <script type="text/javascript" src="<c:url value='/extlib/jquery-1.7.1.min.js'/>"></script>
+    <script type="text/javascript" src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
     <icep:register group="playoffs" callback="function(){$('#title').attr('src', function(i, val){return val;});}"/>
     <!-- js to reload a frame from http://stackoverflow.com/a/4249946/506326 -->
   </head>
