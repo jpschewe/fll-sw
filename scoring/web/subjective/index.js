@@ -26,10 +26,10 @@ function loadData() {
 						+ "<br/>");
 
 		promptForJudgingGroup();
-	}, function() {
+	}, function(message) {
 		$("#wait").hide();
 
-		alert("Error getting data from server");
+		alert("Error getting data from server: " + message);
 	});
 }
 
