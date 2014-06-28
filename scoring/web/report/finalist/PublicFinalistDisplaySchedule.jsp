@@ -12,7 +12,7 @@
 <title>Reporting</title>
 
 <script type='text/javascript'
-	src="<c:url value='/extlib/jquery-1.7.1.min.js'/>"></script>
+	src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
 
 <style>
 BODY {
