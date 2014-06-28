@@ -271,19 +271,52 @@
 			_log("Loading from server");
 
 			var waitList = []
-			waitList.push(_loadSubjectiveCategories());
-			waitList.push(_loadTournament());
-			waitList.push(_loadTeams());
-			waitList.push(_loadSchedule());
-			waitList.push(_loadJudges());
-			waitList.push(_loadAllScores());
-			waitList.push(_loadCategoryColumnMapping())
+			
+			var subjectiveCategoriesPromise = _loadSubjectiveCategories(); 
+			subjectiveCategoriesPromise.fail(function() {
+				failCallback("Subjective Categories");
+			});
+			waitList.push(subjectiveCategoriesPromise);
+			
+			var tournamentPromise = _loadTournament();
+			tournamentPromise.fail(function() {
+				failCallback("Tournament");
+			});
+			waitList.push(tournamentPromise);
+			
+			var teamsPromise = _loadTeams();
+			teamsPromise.fail(function() {
+				failCallback("Teams");
+			});
+			waitList.push(teamsPromise);
+			
+			var schedulePromise = _loadSchedule();
+			schedulePromise.fail(function() {
+				failCallback("Schedule");
+			});
+			waitList.push(schedulePromise);
+			
+			var judgesPromise = _loadJudges();
+			judgesPromise.fail(function() {
+				failCallback("Judges Categories");
+			});
+			waitList.push(judgesPromise);
+			
+			var allScoresPromise = _loadAllScores();
+			allScoresPromise.fail(function() {
+				failCallback("All Scores");
+			});
+			waitList.push(allScoresPromise);
+			
+			var categoryMappingPromise = _loadCategoryColumnMapping();
+			categoryMappingPromise.fail(function() {
+				failCallback("Category Mapping");
+			});
+			waitList.push(categoryMappingPromise);
 
 			$.when.apply($, waitList).done(function() {
 				_save();
 				doneCallback();
-			}).fail(function() {
-				failCallback();
 			});
 		},
 
