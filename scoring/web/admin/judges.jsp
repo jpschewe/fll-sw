@@ -7,7 +7,7 @@
 <link rel="stylesheet" type="text/css"
  href="<c:url value='/style/style.jsp'/>" />
 
-<script type='text/javascript' src='../extlib/jquery-1.7.1.min.js'></script>
+<script type='text/javascript' src='../extlib/jquery-1.11.1.min.js'></script>
 
 <script type='text/javascript'>
 	

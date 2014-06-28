@@ -13,7 +13,7 @@
    .dark_bg  {font-size:10pt; font-weight:bold; background-color:black; color:#e0e0e0; }
   </style>
 <script type="text/javascript" src="<c:url value='/playoff/code.icepush'/>"></script>
-<script type="text/javascript" src="<c:url value='/extlib/jquery-1.7.1.min.js'/>"></script>
+<script type="text/javascript" src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
 <script type='text/javascript'>
 
 function editFlagBoxClicked() {

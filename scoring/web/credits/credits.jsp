@@ -71,7 +71,7 @@
  
 <li><a href="http://jquery.com/">jQuery</a> - <a href="jQuery-license.txt">License</a></li>
 
-<li><a href="http://code.google.com/p/jquery-json/">jQuery-json</a> - <a href="jquery.json.license.txt">License</a></li>
+<li><a href="https://github.com/Krinkle/jquery-json">jQuery-json</a> - <a href="jquery.json.license.txt">License</a></li>
 
 <li><a href="http://www.jstorage.info/">jStorage</a> - <a href="jstorage.license.txt">License</a></li>
 
