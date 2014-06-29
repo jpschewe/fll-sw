@@ -477,9 +477,9 @@
     <antcall target="dist.real" />
   </target>
 
-  <target name="dist.real" depends="compile,javadoc">
+  <target name="dist.real" depends="compile,javadoc,doc.workflow.generate,doc.wiki.render">
     <!-- copy docs to the web -->
-    <copy todir="${dir.web}/wiki">
+    <copy todir="${dir.web}/documentation">
       <fileset dir="${basedir}/docs" />
     </copy>
 
@@ -745,18 +745,30 @@
   </target>
 
   <target name="doc.workflow.generate" description="Generate the workflow documents">
-    <apply executable="dot"
-      dest="${basedir}/docs/workflows"
-      >
+    <apply executable="dot" dest="${basedir}/docs/workflows">
       <arg value="-Tpdf" />
       <arg value="-O" />
-      
+
       <fileset dir="${basedir}/docs/workflows">
         <include name="*.dot" />
       </fileset>
 
       <mapper type="glob" from="*.dot" to="*.dot.pdf" />
     </apply>
+  </target>
+
+  <target name="doc.wiki.render" description="Convert the wiki documentation from markdown to html">
+    <apply executable="python" dest="${basedir}/docs">
+      <arg value="${basedir}/scripts/markdown-to-html.py" />
+
+      <fileset dir="${basedir}/docs/">
+        <include name="*.md" />
+      </fileset>
+
+      <mapper type="glob" from="*.md" to="*.pdf" />
+
+    </apply>
+
   </target>
 
   <target name="tomcat.check-logs" description="Check for errors in the tomcat logs">
