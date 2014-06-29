@@ -479,7 +479,7 @@
 
   <target name="dist.real" depends="compile,javadoc">
     <!-- copy docs to the web -->
-    <copy todir="${dir.web}/wiki">
+    <copy todir="${dir.web}/documentation">
       <fileset dir="${basedir}/docs" />
     </copy>
 
@@ -758,7 +758,7 @@
       <mapper type="glob" from="*.dot" to="*.dot.pdf" />
     </apply>
   </target>
-
+  
   <target name="tomcat.check-logs" description="Check for errors in the tomcat logs">
     <fileset id="matches" dir="${dir.tomcat}/logs">
       <patternset id="files">

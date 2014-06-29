@@ -33,7 +33,7 @@ pageContext.setAttribute("urls", WebUtils.getAllURLs(request));
 
   <li><a href="public">Public landing page</a></li>
 
-  <li><a href="wiki/InstructionsForRunningTheSoftware.html">Instructions (from Wiki)</a></li>
+  <li><a href="documentation/index.html">Documentation</a></li>
 
       <li><a href="scoreEntry/select_team.jsp">Score Entry</a></li>
 
