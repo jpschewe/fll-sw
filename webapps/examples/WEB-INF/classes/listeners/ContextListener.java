@@ -31,9 +31,7 @@ import javax.servlet.ServletContextListener;
  * associated with our servlet context.
  *
  * @author Craig R. McClanahan
- * @version $Id: ContextListener.java 982399 2010-08-04 20:52:23Z markt $
  */
-
 public final class ContextListener
     implements ServletContextAttributeListener, ServletContextListener {
 

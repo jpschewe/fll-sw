@@ -33,8 +33,8 @@ public class EchoAttributesTag
     extends SimpleTagSupport
     implements DynamicAttributes
 {
-    private ArrayList<String> keys = new ArrayList<String>();
-    private ArrayList<Object> values = new ArrayList<Object>();
+    private final ArrayList<String> keys = new ArrayList<>();
+    private final ArrayList<Object> values = new ArrayList<>();
 
     @Override
     public void doTag() throws JspException, IOException {

@@ -22,8 +22,8 @@ import javax.servlet.http.HttpServletRequest;
 
 public class TableBean {
 
-    Hashtable<String, Entries> table;
-    JspCalendar JspCal;
+    final Hashtable<String, Entries> table;
+    final JspCalendar JspCal;
     Entries entries;
     String date;
     String name = null;
@@ -31,7 +31,7 @@ public class TableBean {
     boolean processError = false;
 
     public TableBean() {
-        this.table = new Hashtable<String, Entries>(10);
+        this.table = new Hashtable<>(10);
         this.JspCal = new JspCalendar();
         this.date = JspCal.getCurrentDate();
     }

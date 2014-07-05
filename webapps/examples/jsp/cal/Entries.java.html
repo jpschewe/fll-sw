@@ -1,5 +1,4 @@
-<html><body><pre>
-/*
+<!DOCTYPE html><html><head><meta charset="UTF-8" /><title>Source Code</title></head><body><pre>/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -23,13 +22,13 @@ import javax.servlet.http.HttpServletRequest;
 
 public class Entries {
 
-    private Hashtable&lt;String, Entry> entries;
+    private final Hashtable&lt;String, Entry> entries;
     private static final String[] time = { "8am", "9am", "10am", "11am",
             "12pm", "1pm", "2pm", "3pm", "4pm", "5pm", "6pm", "7pm", "8pm" };
     public static final int rows = 12;
 
     public Entries() {
-        entries = new Hashtable&lt;String, Entry>(rows);
+        entries = new Hashtable&lt;>(rows);
         for (int i = 0; i &lt; rows; i++) {
             entries.put(time[i], new Entry(time[i]));
         }

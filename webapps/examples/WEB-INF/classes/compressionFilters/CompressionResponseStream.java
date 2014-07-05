@@ -18,11 +18,11 @@ package compressionFilters;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.zip.GZIPOutputStream;
 
 import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
-
+import javax.servlet.WriteListener;
 
 /**
  * Implementation of <b>ServletOutputStream</b> that works with
@@ -30,28 +30,25 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Amy Roh
  * @author Dmitri Valdin
- * @version $Id: CompressionResponseStream.java 987920 2010-08-22 15:34:34Z markt $
  */
-
-public class CompressionResponseStream
-    extends ServletOutputStream {
-
+public class CompressionResponseStream extends ServletOutputStream {
 
     // ----------------------------------------------------------- Constructors
-
 
     /**
      * Construct a servlet output stream associated with the specified Response.
      *
-     * @param response The associated response
+     * @param responseWrapper The associated response wrapper
+     * @param originalOutput the output stream
      */
-    public CompressionResponseStream(HttpServletResponse response) throws IOException{
+    public CompressionResponseStream(
+            CompressionServletResponseWrapper responseWrapper,
+            ServletOutputStream originalOutput) {
 
         super();
         closed = false;
-        this.response = response;
-        this.output = response.getOutputStream();
-
+        this.response = responseWrapper;
+        this.output = originalOutput;
     }
 
 
@@ -63,6 +60,16 @@ public class CompressionResponseStream
      * Users can configure in web.xml to set it to fit their needs.
      */
     protected int compressionThreshold = 0;
+
+    /**
+     * The compression buffer size to avoid chunking
+     */
+    protected int compressionBuffer = 0;
+
+    /**
+     * The mime types to compress
+     */
+    protected String[] compressionMimeTypes = {"text/html", "text/xml", "text/plain"};
 
     /**
      * Debug level
@@ -90,20 +97,14 @@ public class CompressionResponseStream
     protected boolean closed = false;
 
     /**
-     * The content length past which we will not write, or -1 if there is
-     * no defined content length.
-     */
-    protected int length = -1;
-
-    /**
      * The response with which this servlet output stream is associated.
      */
-    protected HttpServletResponse response = null;
+    protected final CompressionServletResponseWrapper response;
 
     /**
-     * The underlying servket output stream to which we should write data.
+     * The underlying servlet output stream to which we should write data.
      */
-    protected ServletOutputStream output = null;
+    protected final ServletOutputStream output;
 
 
     // --------------------------------------------------------- Public Methods
@@ -119,11 +120,32 @@ public class CompressionResponseStream
     /**
      * Set the compressionThreshold number and create buffer for this size
      */
-    protected void setBuffer(int threshold) {
-        compressionThreshold = threshold;
-        buffer = new byte[compressionThreshold];
+    protected void setCompressionThreshold(int compressionThreshold) {
+        this.compressionThreshold = compressionThreshold;
+        buffer = new byte[this.compressionThreshold];
         if (debug > 1) {
-            System.out.println("buffer is set to "+compressionThreshold);
+            System.out.println("compressionThreshold is set to "+ this.compressionThreshold);
+        }
+    }
+
+    /**
+     * The compression buffer size to avoid chunking
+     */
+    protected void setCompressionBuffer(int compressionBuffer) {
+        this.compressionBuffer = compressionBuffer;
+        if (debug > 1) {
+            System.out.println("compressionBuffer is set to "+ this.compressionBuffer);
+        }
+    }
+
+    /**
+     * Set supported mime types
+     */
+    public void setCompressionMimeTypes(String[] compressionMimeTypes) {
+        this.compressionMimeTypes = compressionMimeTypes;
+        if (debug > 1) {
+            System.out.println("compressionMimeTypes is set to " +
+                    Arrays.toString(this.compressionMimeTypes));
         }
     }
 
@@ -238,6 +260,27 @@ public class CompressionResponseStream
     }
 
 
+
+    /**
+     * TODO SERVLET 3.1
+     */
+    @Override
+    public boolean isReady() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+
+    /**
+     * TODO SERVLET 3.1
+     */
+    @Override
+    public void setWriteListener(WriteListener listener) {
+        // TODO Auto-generated method stub
+
+    }
+
+
     /**
      * Write <code>len</code> bytes from the specified byte array, starting
      * at the specified offset, to our output stream.
@@ -301,22 +344,53 @@ public class CompressionResponseStream
             if (debug > 1) {
                 System.out.println("new GZIPOutputStream");
             }
+
+            boolean alreadyCompressed = false;
+            String contentEncoding = response.getHeader("Content-Encoding");
+            if (contentEncoding != null) {
+                if (contentEncoding.contains("gzip")) {
+                    alreadyCompressed = true;
+                    if (debug > 0) {
+                        System.out.println("content is already compressed");
+                    }
+                } else {
+                    if (debug > 0) {
+                        System.out.println("content is not compressed yet");
+                    }
+                }
+            }
+
+            boolean compressibleMimeType = false;
+            // Check for compatible MIME-TYPE
+            if (compressionMimeTypes != null) {
+                if (startsWithStringArray(compressionMimeTypes, response.getContentType())) {
+                    compressibleMimeType = true;
+                    if (debug > 0) {
+                        System.out.println("mime type " + response.getContentType() + " is compressible");
+                    }
+                } else {
+                    if (debug > 0) {
+                        System.out.println("mime type " + response.getContentType() + " is not compressible");
+                    }
+                }
+            }
+
             if (response.isCommitted()) {
                 if (debug > 1)
                     System.out.print("Response already committed. Using original output stream");
                 gzipstream = output;
+            } else if (alreadyCompressed) {
+                if (debug > 1)
+                    System.out.print("Response already compressed. Using original output stream");
+                gzipstream = output;
+            } else if (!compressibleMimeType) {
+                if (debug > 1)
+                    System.out.print("Response mime type is not compressible. Using original output stream");
+                gzipstream = output;
             } else {
                 response.addHeader("Content-Encoding", "gzip");
-                String vary = response.getHeader("Vary");
-                if (vary == null) {
-                    // Add a new Vary header
-                    response.setHeader("Vary", "Accept-Encoding");
-                } else if (vary.equals("*")) {
-                    // No action required
-                } else {
-                    // Merge into current header
-                    response.setHeader("Vary", vary + ",Accept-Encoding");
-                }
+                response.setContentLength(-1);  // don't use any preset content-length as it will be wrong after gzipping
+                response.setBufferSize(compressionBuffer);
                 gzipstream = new GZIPOutputStream(output);
             }
         }
@@ -337,4 +411,20 @@ public class CompressionResponseStream
 
     }
 
+    /**
+     * Checks if any entry in the string array starts with the specified value
+     *
+     * @param sArray the StringArray
+     * @param value string
+     */
+    private boolean startsWithStringArray(String sArray[], String value) {
+        if (value == null)
+           return false;
+        for (int i = 0; i < sArray.length; i++) {
+            if (value.startsWith(sArray[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

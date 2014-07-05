@@ -14,20 +14,20 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-/* $Id: RequestHeaderExample.java 1200123 2011-11-10 04:03:27Z kkolinko $
- *
- */
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Enumeration;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
+import util.CookieFilter;
 import util.HTMLFilter;
 
 /**
@@ -48,16 +48,17 @@ public class RequestHeaderExample extends HttpServlet {
         throws IOException, ServletException
     {
         response.setContentType("text/html");
+        response.setCharacterEncoding("UTF-8");
 
         PrintWriter out = response.getWriter();
-        out.println("<html>");
-        out.println("<body bgcolor=\"white\">");
+        out.println("<!DOCTYPE html><html>");
         out.println("<head>");
+        out.println("<meta charset=\"UTF-8\" />");
 
         String title = RB.getString("requestheader.title");
         out.println("<title>" + title + "</title>");
         out.println("</head>");
-        out.println("<body>");
+        out.println("<body bgcolor=\"white\">");
 
         // all links relative
 
@@ -81,7 +82,16 @@ public class RequestHeaderExample extends HttpServlet {
             out.println("<tr><td bgcolor=\"#CCCCCC\">");
             out.println(HTMLFilter.filter(headerName));
             out.println("</td><td>");
-            out.println(HTMLFilter.filter(headerValue));
+            if (headerName.toLowerCase(Locale.ENGLISH).contains("cookie")) {
+                HttpSession session = request.getSession(false);
+                String sessionId = null;
+                if (session != null) {
+                    sessionId = session.getId();
+                }
+                out.println(HTMLFilter.filter(CookieFilter.filter(headerValue, sessionId)));
+            } else {
+                out.println(HTMLFilter.filter(headerValue));
+            }
             out.println("</td></tr>");
         }
         out.println("</table>");

@@ -1,5 +1,4 @@
-<html><body><pre>
-/*
+<!DOCTYPE html><html><head><meta charset="UTF-8" /><title>Source Code</title></head><body><pre>/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -23,8 +22,8 @@ import javax.servlet.http.HttpServletRequest;
 
 public class TableBean {
 
-    Hashtable&lt;String, Entries> table;
-    JspCalendar JspCal;
+    final Hashtable&lt;String, Entries> table;
+    final JspCalendar JspCal;
     Entries entries;
     String date;
     String name = null;
@@ -32,7 +31,7 @@ public class TableBean {
     boolean processError = false;
 
     public TableBean() {
-        this.table = new Hashtable&lt;String, Entries>(10);
+        this.table = new Hashtable&lt;>(10);
         this.JspCal = new JspCalendar();
         this.date = JspCal.getCurrentDate();
     }

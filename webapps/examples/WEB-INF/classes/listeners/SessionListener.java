@@ -31,9 +31,7 @@ import javax.servlet.http.HttpSessionListener;
  * with our servlet context.
  *
  * @author Craig R. McClanahan
- * @version $Id: SessionListener.java 1200123 2011-11-10 04:03:27Z kkolinko $
  */
-
 public final class SessionListener implements ServletContextListener,
         HttpSessionAttributeListener, HttpSessionListener {
 

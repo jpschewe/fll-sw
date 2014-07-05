@@ -1,4 +1,4 @@
-<html><body><pre>
+<!DOCTYPE html><html><head><meta charset="UTF-8" /><title>Source Code</title></head><body><pre>&lt;?xml version="1.0" encoding="UTF-8"?>
 &lt;!--
   Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
@@ -15,17 +15,18 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-&lt;tags:xhtmlbasic xmlns:tags="urn:jsptagdir:/WEB-INF/tags"
-                 xmlns:jsp="http://java.sun.com/JSP/Page"
-                 xmlns:fmt="http://java.sun.com/jsp/jstl/fmt"
-                 xmlns="http://www.w3.org/1999/xhtml">
-  &lt;jsp:directive.page contentType="text/html" />
+&lt;html xmlns:jsp="http://java.sun.com/JSP/Page"
+      xmlns:fmt="http://java.sun.com/jsp/jstl/fmt"
+      xmlns="http://www.w3.org/1999/xhtml">
+  &lt;jsp:output doctype-root-element="html"
+              doctype-public="-//W3C//DTD XHTML Basic 1.0//EN"
+              doctype-system="http://www.w3.org/TR/xhtml-basic/xhtml-basic10.dtd"/>
+  &lt;jsp:directive.page contentType="application/xhtml+xml" />
   &lt;head>
     &lt;title>JSPX - XHTML Basic Example&lt;/title>
   &lt;/head>
   &lt;body>
     &lt;h1>JSPX - XHTML Basic Example&lt;/h1>
-    &lt;hr/>
     This example illustrates how to use JSPX to produce an XHTML basic
     document suitable for use with mobile phones, televisions,
     PDAs, vending machines, pagers, car navigation systems,
@@ -36,13 +37,13 @@
     required &amp;amp;lt;jsp:root&amp;amp;gt; to be the root element of the document.
     This is no longer the case in JSP 2.0.
     &lt;p/>
-    This particular example uses a tag file to produce the DOCTYPE and
+    This particular example uses
     namespace declarations to make the output of this page a valid XHTML
-    Basic document.
+    document.
     &lt;p/>
     Just to prove this is live, here's some dynamic content:
     &lt;jsp:useBean id="now" class="java.util.Date" />
     &lt;fmt:formatDate value="${now}" pattern="MMMM d, yyyy, H:mm:ss"/>
   &lt;/body>
-&lt;/tags:xhtmlbasic>
+&lt;/html>
 </pre></body></html>

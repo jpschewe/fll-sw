@@ -14,9 +14,6 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-/* $Id: SessionExample.java 1200123 2011-11-10 04:03:27Z kkolinko $
- *
- */
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -50,16 +47,18 @@ public class SessionExample extends HttpServlet {
         throws IOException, ServletException
     {
         response.setContentType("text/html");
+        response.setCharacterEncoding("UTF-8");
 
         PrintWriter out = response.getWriter();
-        out.println("<html>");
-        out.println("<body bgcolor=\"white\">");
+        out.println("<!DOCTYPE html><html>");
         out.println("<head>");
+        out.println("<meta charset=\"UTF-8\" />");
+
 
         String title = RB.getString("sessions.title");
         out.println("<title>" + title + "</title>");
         out.println("</head>");
-        out.println("<body>");
+        out.println("<body bgcolor=\"white\">");
 
         // img stuff not req'd for source code html showing
         // relative links everywhere!
@@ -130,11 +129,8 @@ public class SessionExample extends HttpServlet {
         out.println("</form>");
 
         out.print("<p><a href=\"");
-        out.print(response.encodeURL("SessionExample?dataname=foo&datavalue=bar"));
+        out.print(HTMLFilter.filter(response.encodeURL("SessionExample?dataname=foo&datavalue=bar")));
         out.println("\" >URL encoded </a>");
-
-        out.println("</body>");
-        out.println("</html>");
 
         out.println("</body>");
         out.println("</html>");
