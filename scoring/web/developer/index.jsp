@@ -8,51 +8,60 @@
 </head>
 
 <body>
-<h1>Developer
-Commands</h1>
+ <h1>Developer Commands</h1>
 
-<p><font color='red'><b>This page is intended for
-developers only. If you don't know what you're doing, LEAVE THIS PAGE!</b></font></p>
+ <p>
+  <font color='red'><b>This page is intended for developers
+    only. If you don't know what you're doing, LEAVE THIS PAGE!</b></font>
+ </p>
 
-${message}
+ ${message}
 
-<%-- clear out the message, so that we don't see it again --%>
-<c:remove var="message" />
+ <%-- clear out the message, so that we don't see it again --%>
+ <c:remove var="message" />
 
-<c:set var="redirect_url" scope="session">
- <c:url value="/developer/index.jsp" />
-</c:set>
+ <c:set var="redirect_url" scope="session">
+  <c:url value="/developer/index.jsp" />
+ </c:set>
 
-<ul>
+ <ul>
 
- <li><a href="query.jsp">Do SQL queries and updates</a></li>
+  <li><a href="query.jsp">Do SQL queries and updates</a></li>
 
-<li>
- <form id='import' action='importdb/ImportDBDump' method='post'
-  enctype='multipart/form-data'>
+  <li>
+   <form id='import' action='importdb/ImportDBDump' method='post'
+    enctype='multipart/form-data'>
 
- <p>Import data from a database dump into the current database.</p>
- <input type='file' size='32' name='dbdump'/> <input
-  type='submit' name='importdb' value='Import Database' /></form>
-</li>
+    <p>Import data from a database dump into the current database.</p>
+    <input type='file' size='32' name='dbdump' /> <input type='submit'
+     name='importdb' value='Import Database' />
+   </form>
+  </li>
 
-<li>
+  <li>
 
-<form id='replace-descriptor' action='ReplaceChallengeDescriptor' 
-method='post' enctype='multipart/form-data'>
-<p>Replace the current challenge descriptor. Will succeed if there
-are no changes to the structure of the database.<br/>
-<input type='file' size='32' name='xmldoc'/>
-<input type='submit' value='Submit'/> 
-</p>
-</form>
-</li>
+   <form id='replace-descriptor' action='ReplaceChallengeDescriptor'
+    method='post' enctype='multipart/form-data'>
+    <p>
+     Replace the current challenge descriptor. Will succeed if there are
+     no changes to the structure of the database.<br /> <input
+      type='file' size='32' name='xmldoc' /> <input type='submit'
+      value='Submit' />
+    </p>
+   </form>
+  </li>
 
- <li>inside.test: <%=System.getProperty("inside.test")%> -- <%=Boolean.getBoolean("inside.test")%></li>
+  <li>inside.test: <%=System.getProperty("inside.test")%> -- <%=Boolean.getBoolean("inside.test")%></li>
 
- <li>Database is located at: ${database}</li>
-      
- 
+  <li>Java Version: <%=System.getProperty("java.version")%></li>
+  <li>Java Vendor: <%=System.getProperty("java.vendor")%></li>
+  <li>OS Name: <%=System.getProperty("os.name")%></li>
+  <li>OS Achitecture: <%=System.getProperty("os.arch")%></li>
+  <li>OS Version: <%=System.getProperty("os.version")%></li>
+  <li>Servlet API: <%=application.getMajorVersion()%>.<%=application.getMinorVersion()%></li>
+
+  <li>Servlet container: <%=application.getServerInfo()%></li>
+
  </ul>
 
 

@@ -72,6 +72,16 @@ public class GatherBugReport extends BaseFLLServlet {
         zipOut.write(description.getBytes(Utilities.DEFAULT_CHARSET));
       }
 
+      zipOut.putNextEntry(new ZipEntry("server_info.txt"));
+      zipOut.write(String.format("Java version: %s%nJava vendor: %s%nOS Name: %s%nOS Arch: %s%nOS Version: %s%nServlet API: %d.%d%nServlet container: %s%n",
+                                 System.getProperty("java.vendor"),//
+                                 System.getProperty("java.version"), //
+                                 System.getProperty("os.name"),//
+                                 System.getProperty("os.arch"),//
+                                 System.getProperty("os.version"),//
+                                 application.getMajorVersion(), application.getMinorVersion(), //
+                                 application.getServerInfo()).getBytes(Utilities.DEFAULT_CHARSET));
+
       addDatabase(zipOut, connection, challengeDocument);
       addLogFiles(zipOut, application);
 
@@ -114,7 +124,7 @@ public class GatherBugReport extends BaseFLLServlet {
       IOUtils.copy(fis, zipOut);
       fis.close();
 
-      if(!temp.delete()) {
+      if (!temp.delete()) {
         temp.deleteOnExit();
       }
 
