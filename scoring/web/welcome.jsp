@@ -7,7 +7,7 @@
 
 <%
 //All logos shall be located under sponsor_logos in the fll web folder.
-String imagePath = application.getRealPath("sponsor_logos");
+String imagePath = application.getRealPath("/sponsor_logos");
 File[] directories = {new  File(imagePath)};
 SortedSet<String> logoFiles = new TreeSet<String>();
 Utilities.buildGraphicFileList("", directories, logoFiles);

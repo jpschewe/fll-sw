@@ -18,8 +18,6 @@ rem ---------------------------------------------------------------------------
 rem Set JAVA_HOME or JRE_HOME if not already set, ensure any provided settings
 rem are valid and consistent with the selected start-up options and set up the
 rem endorsed directory.
-rem
-rem $Id: setclasspath.bat 1202062 2011-11-15 06:50:02Z mturk $
 rem ---------------------------------------------------------------------------
 
 rem Make sure prerequisite environment variables are set

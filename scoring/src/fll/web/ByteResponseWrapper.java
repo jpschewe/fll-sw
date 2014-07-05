@@ -13,8 +13,11 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
+
+import fll.util.FLLRuntimeException;
 
 /**
  * Wrapper class for a response that stores everything in a local buffer to be
@@ -117,6 +120,19 @@ public class ByteResponseWrapper extends HttpServletResponseWrapper {
     @Override
     public void write(final int i) throws IOException {
       os.write(i);
+    }
+
+    @Override
+    public boolean isReady() {
+      return true;
+    }
+
+    /**
+     * Not supported.
+     */
+    @Override
+    public void setWriteListener(final WriteListener arg0) {
+      throw new FLLRuntimeException("Async I/O not supported by the wrapper");      
     }
 
   }
