@@ -1,13 +1,6 @@
-scoring/build
-scoring/tmp
 scheduling/blank-schedules/*.pdf
-scoring/fll.log
 fll.log*
-scoring/dist
-scoring/web/wiki/*
-scoring/override.properties
 *.log*
-scoring/web/sponsor_logos/*.jpg
 cobertura.ser
 .DS_Store
 *~
