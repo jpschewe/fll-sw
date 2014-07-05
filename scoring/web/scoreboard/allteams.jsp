@@ -40,7 +40,7 @@ final Connection connection = datasource.getConnection();
 
 <%
   //All logos shall be located under sponsor_logos in the fll web folder.
-String imagePath = application.getRealPath("sponsor_logos");
+String imagePath = application.getRealPath("/sponsor_logos");
 File[] directories = {new  File(imagePath)};
 List<String> logoFiles = new ArrayList<String>();
 Utilities.buildGraphicFileList("", directories, logoFiles);
