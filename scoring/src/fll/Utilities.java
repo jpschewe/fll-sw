@@ -397,15 +397,23 @@ public final class Utilities {
     }
   };
 
-  public static void buildGraphicFileList(final String p,
-                                          final File[] d,
-                                          final Collection<String> f) {
+  /**
+   * Build a list of file found in the specified directories. This 
+   * method will search recursively.
+   * 
+   * @param prefix prefix path, this should be "" initially
+   * @param directories directories to look in
+   * @param output the list of image files (output parameter)
+   */
+  public static void buildGraphicFileList(final String prefix,
+                                          final File[] directories,
+                                          final Collection<String> output) {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("buildGraphicFileList("
-          + p + "," + Arrays.toString(d) + "," + f.toString() + ")");
+          + prefix + "," + Arrays.toString(directories) + "," + output.toString() + ")");
     }
-    for (final File element : d) {
-      final String np = (p.length() == 0 ? p : p
+    for (final File element : directories) {
+      final String np = (prefix.length() == 0 ? prefix : prefix
           + "/")
           + element.getName();
       final String[] files = element.list(GRAPHICS_FILTER);
@@ -416,7 +424,7 @@ public final class Utilities {
         }
         java.util.Arrays.sort(files);
         for (final String file : files) {
-          f.add(np
+          output.add(np
               + "/" + file);
         }
       } else {
@@ -429,14 +437,14 @@ public final class Utilities {
               + Arrays.toString(dirs));
         }
         java.util.Arrays.sort(dirs);
-        buildGraphicFileList(np, dirs, f);
+        buildGraphicFileList(np, dirs, output);
       } else {
         LOGGER.debug("dirs: null");
       }
     }
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("f: "
-          + f.toString());
+          + output.toString());
     }
   }
 
