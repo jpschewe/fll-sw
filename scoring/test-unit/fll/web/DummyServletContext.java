@@ -455,4 +455,12 @@ public class DummyServletContext implements ServletContext {
       IllegalArgumentException {
   }
 
+  /**
+   * @see javax.servlet.ServletContext#getVirtualServerName()
+   */
+  @Override
+  public String getVirtualServerName() {
+    return "Dummy";
+  }
+
 }
