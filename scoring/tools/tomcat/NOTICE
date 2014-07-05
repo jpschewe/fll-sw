@@ -1,7 +1,7 @@
 Apache Tomcat
-Copyright 1999-2012 The Apache Software Foundation
+Copyright 1999-2014 The Apache Software Foundation
 
-This product includes software developed by
+This product includes software developed at
 The Apache Software Foundation (http://www.apache.org/).
 
 The Windows Installer is built with the Nullsoft
@@ -29,8 +29,17 @@ The original XML Schemas for Java EE Deployment Descriptors:
  - javaee_6.xsd
  - javaee_web_services_1_3.xsd
  - javaee_web_services_client_1_3.xsd
+ - jsp_2_2.xsd
  - web-app_3_0.xsd
  - web-common_3_0.xsd
  - web-fragment_3_0.xsd
- - jsp_2_2.xsd
-may be obtained from http://java.sun.com/xml/ns/javaee/
+ - javaee_7.xsd
+ - javaee_web_services_1_4.xsd
+ - javaee_web_services_client_1_4.xsd
+ - jsp_2_3.xsd
+ - web-app_3_1.xsd
+ - web-common_3_1.xsd
+ - web-fragment_3_1.xsd
+
+may be obtained from:
+http://www.oracle.com/webfolder/technetwork/jsc/xml/ns/javaee/index.html

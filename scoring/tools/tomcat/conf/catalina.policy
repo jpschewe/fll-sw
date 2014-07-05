@@ -14,7 +14,7 @@
 // limitations under the License.
 
 // ============================================================================
-// catalina.policy - Security Policy Permissions for Tomcat 7
+// catalina.policy - Security Policy Permissions for Tomcat
 //
 // This file contains a default set of security policies to be enforced (by the
 // JVM) when Catalina is executed with the "-security" option.  In addition
@@ -23,8 +23,6 @@
 //
 // * Read access to the web application's document root directory
 // * Read, write and delete access to the web application's working directory
-//
-// $Id: catalina.policy 1220297 2011-12-17 22:55:28Z markt $
 // ============================================================================
 
 
@@ -80,15 +78,17 @@ grant codeBase "file:${catalina.home}/bin/tomcat-juli.jar" {
         permission java.lang.RuntimePermission "getClassLoader";
         permission java.lang.RuntimePermission "setContextClassLoader";
 
+        permission java.lang.management.ManagementPermission "monitor";
+
         permission java.util.logging.LoggingPermission "control";
 
         permission java.util.PropertyPermission "java.util.logging.config.class", "read";
         permission java.util.PropertyPermission "java.util.logging.config.file", "read";
+        permission java.util.PropertyPermission "org.apache.juli.AsyncLoggerPollInterval", "read";
+        permission java.util.PropertyPermission "org.apache.juli.AsyncMaxRecordCount", "read";
+        permission java.util.PropertyPermission "org.apache.juli.AsyncOverflowDropType", "read";
+        permission java.util.PropertyPermission "org.apache.juli.ClassLoaderLogManager.debug", "read";
         permission java.util.PropertyPermission "catalina.base", "read";
-        permission java.util.PropertyPermission
-         "org.apache.juli.logging.UserDataHelper.CONFIG", "read";
-        permission java.util.PropertyPermission
-         "org.apache.juli.logging.UserDataHelper.SUPPRESSION_TIME", "read";
 
         // Note: To enable per context logging configuration, permit read access to
         // the appropriate file. Be sure that the logging configuration is
@@ -125,7 +125,7 @@ grant codeBase "file:${catalina.home}/lib/-" {
 
 // These permissions are granted by default to all web applications
 // In addition, a web application will be given a read FilePermission
-// and JndiPermission for all files and directories in its document root.
+// for all files and directories in its document root.
 grant {
     // Required for JNDI lookup of named JDBC DataSource's and
     // javamail named MimePart DataSource used to send mail
@@ -188,6 +188,10 @@ grant {
 
     // Applications using Comet need to be able to access this package
     permission java.lang.RuntimePermission "accessClassInPackage.org.apache.catalina.comet";
+
+    // Applications using WebSocket need to be able to access these packages
+    permission java.lang.RuntimePermission "accessClassInPackage.org.apache.tomcat.websocket";
+    permission java.lang.RuntimePermission "accessClassInPackage.org.apache.tomcat.websocket.server";
 };
 
 

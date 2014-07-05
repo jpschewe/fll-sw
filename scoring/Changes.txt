@@ -1,3 +1,4 @@
+* 36 - upgrade to Tomcat 8.0.9
 * 293 - build workflow documentation as part of a release
 * 28 - report to the user which step failed when loading data in the subjective web app
 * 259 - upgrade jquery to 1.11.1 and related libraries
