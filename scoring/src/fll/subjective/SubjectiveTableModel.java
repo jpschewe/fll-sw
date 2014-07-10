@@ -6,7 +6,9 @@
 package fll.subjective;
 
 import java.text.ParseException;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -20,6 +22,10 @@ import org.w3c.dom.Element;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
+import fll.db.CategoryColumnMapping;
+import fll.scheduler.SubjectiveTime;
+import fll.scheduler.TeamScheduleInfo;
+import fll.scheduler.TournamentSchedule;
 import fll.util.LogUtils;
 import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.AbstractGoal;
@@ -35,22 +41,36 @@ public final class SubjectiveTableModel extends AbstractTableModel {
 
   private static final Logger LOG = LogUtils.getLogger();
 
-  public static final int NUM_COLUMNS_LEFT_OF_SCORES = 5;
+  public static final int BASE_NUM_COLUMNS_LEFT_OF_SCORES = 5;
+
+  public int getNumColumnsLeftOfScores() {
+    if (null != _schedule) {
+      return BASE_NUM_COLUMNS_LEFT_OF_SCORES + 1;
+    } else {
+      return BASE_NUM_COLUMNS_LEFT_OF_SCORES;
+    }
+  }
 
   /**
    * @param scoreDocument XML document that represents the teams that are being
    *          scored along with the judges and the current set of scores
    */
   public SubjectiveTableModel(final Document scoreDocument,
-                              final ScoreCategory subjectiveCategory) {
+                              final ScoreCategory subjectiveCategory,
+                              final TournamentSchedule schedule,
+                              final Collection<CategoryColumnMapping> scheduleColumnMappings) {
     _scoreDocument = scoreDocument;
     _subjectiveCategory = subjectiveCategory;
+    if (null != scheduleColumnMappings) {
+      _scheduleColumnMappings.addAll(scheduleColumnMappings);
+    }
     _goals = new LinkedList<AbstractGoal>(_subjectiveCategory.getGoals());
     final List<Element> scoreElements = getScoreElements(_scoreDocument, _subjectiveCategory.getName());
     _scoreElements = new Element[scoreElements.size()];
     for (int i = 0; i < scoreElements.size(); i++) {
       _scoreElements[i] = scoreElements.get(i);
     }
+    _schedule = schedule;
   }
 
   /**
@@ -85,16 +105,20 @@ public final class SubjectiveTableModel extends AbstractTableModel {
       return "Judging Station";
     case 4:
       return "Judge";
+    case 5:
+      if (null != _schedule) {
+        return "Time";
+      }
     default:
       if (column == getNumGoals()
-          + NUM_COLUMNS_LEFT_OF_SCORES) {
+          + getNumColumnsLeftOfScores()) {
         return "No Show";
       } else if (column == getNumGoals()
-          + NUM_COLUMNS_LEFT_OF_SCORES + 1) {
+          + getNumColumnsLeftOfScores() + 1) {
         return "Total Score";
       } else {
         return getGoalDescription(column
-            - NUM_COLUMNS_LEFT_OF_SCORES).getTitle();
+            - getNumColumnsLeftOfScores()).getTitle();
       }
     }
   }
@@ -113,18 +137,22 @@ public final class SubjectiveTableModel extends AbstractTableModel {
       return String.class;
     case 4:
       return String.class;
+    case 5:
+      if (null != _schedule) {
+        return Date.class;
+      }
     default:
       if (column == getNumGoals()
-          + NUM_COLUMNS_LEFT_OF_SCORES) {
+          + getNumColumnsLeftOfScores()) {
         // No Show
         return Boolean.class;
       } else if (column == getNumGoals()
-          + NUM_COLUMNS_LEFT_OF_SCORES + 1) {
+          + getNumColumnsLeftOfScores() + 1) {
         // Total Score
         return Double.class;
       } else {
         final AbstractGoal goal = getGoalDescription(column
-            - NUM_COLUMNS_LEFT_OF_SCORES);
+            - getNumColumnsLeftOfScores());
         if (goal.isEnumerated()) {
           return String.class;
         } else if (goal.isComputed()) {
@@ -141,7 +169,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
   }
 
   public int getColumnCount() {
-    return NUM_COLUMNS_LEFT_OF_SCORES
+    return getNumColumnsLeftOfScores()
         + getNumGoals() + 2;
   }
 
@@ -149,10 +177,11 @@ public final class SubjectiveTableModel extends AbstractTableModel {
                            final int column) {
     try {
       final Element scoreEle = getScoreElement(row);
+      final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(scoreEle.getAttribute("teamNumber")).intValue();
       switch (column) {
       case 0:
         if (scoreEle.hasAttribute("teamNumber")) {
-          return Utilities.NUMBER_FORMAT_INSTANCE.parse(scoreEle.getAttribute("teamNumber")).intValue();
+          return teamNumber;
         } else {
           return null;
         }
@@ -168,12 +197,20 @@ public final class SubjectiveTableModel extends AbstractTableModel {
         return scoreEle.getAttribute("judging_station");
       case 4:
         return scoreEle.getAttribute("judge");
+      case 5:
+        if (null != _schedule) {
+          final TeamScheduleInfo schedInfo = _schedule.getSchedInfoForTeam(teamNumber);
+          final String categoryName = _subjectiveCategory.getName();
+          final String schedColumn = getSchedColumnForCategory(categoryName);
+          final SubjectiveTime subjTime = schedInfo.getSubjectiveTimeByName(schedColumn);
+          return subjTime.getTime();
+        }
       default:
         if (column == getNumGoals()
-            + NUM_COLUMNS_LEFT_OF_SCORES) {
+            + getNumColumnsLeftOfScores()) {
           return Boolean.valueOf(scoreEle.getAttribute("NoShow"));
         } else if (column == getNumGoals()
-            + NUM_COLUMNS_LEFT_OF_SCORES + 1) {
+            + getNumColumnsLeftOfScores() + 1) {
           if (Boolean.valueOf(scoreEle.getAttribute("NoShow"))) {
             return 0;
           } else {
@@ -183,7 +220,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
           }
         } else {
           final AbstractGoal goalDescription = getGoalDescription(column
-              - NUM_COLUMNS_LEFT_OF_SCORES);
+              - getNumColumnsLeftOfScores());
           final String goalName = goalDescription.getName();
           // the order really matters here because a computed goal will never
           // have an entry in scoreEle
@@ -197,19 +234,38 @@ public final class SubjectiveTableModel extends AbstractTableModel {
           } else {
             final double score = getTeamScore(row).getRawScore(goalName);
             final ScoreType scoreType = XMLUtils.getScoreType(scoreEle);
-            if(Double.isNaN(score)) {
+            if (Double.isNaN(score)) {
               return null;
-            }
-            else if (ScoreType.FLOAT == scoreType) {
+            } else if (ScoreType.FLOAT == scoreType) {
               return score;
             } else {
-              return (int)score;
+              return (int) score;
             }
           }
         }
       }
     } catch (final ParseException pe) {
       throw new RuntimeException("Error in challenge.xml!!! Unparsable number", pe);
+    }
+  }
+
+  /**
+   * Find the schedule column name for the category name.
+   * 
+   * @param categoryName subjective category name
+   * @return the column name or null if not found
+   */
+  private String getSchedColumnForCategory(final String categoryName) {
+    if (null == _schedule
+        || _scheduleColumnMappings.isEmpty()) {
+      return null;
+    } else {
+      for (final CategoryColumnMapping mapping : _scheduleColumnMappings) {
+        if (mapping.getCategoryName().equals(categoryName)) {
+          return mapping.getScheduleColumn();
+        }
+      }
+      return null;
     }
   }
 
@@ -233,13 +289,17 @@ public final class SubjectiveTableModel extends AbstractTableModel {
     case 4:
       // Judge
       return false;
+    case 5:
+      if (null != _schedule) {
+        return false;
+      }
     default:
       if (column == getNumGoals()
-          + NUM_COLUMNS_LEFT_OF_SCORES) {
+          + getNumColumnsLeftOfScores()) {
         // No Show
         return true;
       } else if (column == getNumGoals()
-          + NUM_COLUMNS_LEFT_OF_SCORES + 1) {
+          + getNumColumnsLeftOfScores() + 1) {
         // Total Score
         return false;
       } else {
@@ -250,7 +310,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
         }
 
         final AbstractGoal goalDescription = getGoalDescription(column
-            - NUM_COLUMNS_LEFT_OF_SCORES);
+            - getNumColumnsLeftOfScores());
         if (goalDescription.isComputed()) {
           return false;
         } else {
@@ -279,7 +339,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
     final Element element = getScoreElement(row);
 
     if (column == getNumGoals()
-        + NUM_COLUMNS_LEFT_OF_SCORES) {
+        + getNumColumnsLeftOfScores()) {
       // No Show
       if (value instanceof Boolean) {
         element.setAttributeNS(null, "NoShow", value.toString());
@@ -292,7 +352,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
           // delete all scores for that team
           for (int i = 0; i < getNumGoals(); i++) {
             setValueAt(null, row, i
-                + NUM_COLUMNS_LEFT_OF_SCORES);
+                + getNumColumnsLeftOfScores());
           }
         }
       } else {
@@ -305,7 +365,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
       error = true;
     } else {
       final AbstractGoal goalDescription = getGoalDescription(column
-          - NUM_COLUMNS_LEFT_OF_SCORES);
+          - getNumColumnsLeftOfScores());
       final String goalName = goalDescription.getName();
       // support deleting a value
       if (null == value
@@ -394,7 +454,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
       final AbstractGoal goal = getGoalDescription(i);
       if (goal.isComputed()) {
         fireTableCellUpdated(row, i
-            + NUM_COLUMNS_LEFT_OF_SCORES);
+            + getNumColumnsLeftOfScores());
       }
     }
   }
@@ -484,5 +544,9 @@ public final class SubjectiveTableModel extends AbstractTableModel {
     }
     return -1;
   }
+
+  private final TournamentSchedule _schedule;
+
+  private final Collection<CategoryColumnMapping> _scheduleColumnMappings = new LinkedList<CategoryColumnMapping>();
 
 }

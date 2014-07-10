@@ -131,20 +131,20 @@ public class SubjectiveScoresTest {
 
       
       // create subjective table model for the category we're going to edit
-      final SubjectiveTableModel tableModel = new SubjectiveTableModel(scoreDocument, scoreCategory);
+      final SubjectiveTableModel tableModel = new SubjectiveTableModel(scoreDocument, scoreCategory, null, null);
 
       
       // enter scores for a team and category
       final int row = 0;
       for(int goalIdx=0; goalIdx < tableModel.getNumGoals(); ++goalIdx) {
-        final int column = goalIdx + SubjectiveTableModel.NUM_COLUMNS_LEFT_OF_SCORES;
+        final int column = goalIdx + tableModel.getNumColumnsLeftOfScores();
         tableModel.setValueAt(5, row, column);
       }
 
       
       // delete the scores for a team and category
       for(int goalIdx=0; goalIdx < tableModel.getNumGoals(); ++goalIdx) {
-        final int column = goalIdx + SubjectiveTableModel.NUM_COLUMNS_LEFT_OF_SCORES;
+        final int column = goalIdx + tableModel.getNumColumnsLeftOfScores();
         tableModel.setValueAt(null, row, column);
       }
 
