@@ -7,6 +7,7 @@ package fll.web.admin;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -16,6 +17,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -46,7 +48,9 @@ import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
+import fll.db.CategoryColumnMapping;
 import fll.db.Queries;
+import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
@@ -69,6 +73,26 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
 
   public static final String SUBSCORE_NODE_NAME = "subscore";
 
+  /**
+   * Name of schedule in the zip file.
+   */
+  public static final String SCHEDULE_ENTRY_NAME = "schedule.ser";
+
+  /**
+   * Name of entry for the schedule column mappings in the zip file.
+   */
+  public static final String MAPPING_ENTRY_NAME = "mappings.ser";
+
+  /**
+   * Name of challenge description in the zip file.
+   */
+  public static final String CHALLENGE_ENTRY_NAME = "challenge.xml";
+
+  /**
+   * Name of the score entry in the zip file.
+   */
+  public static final String SCORE_ENTRY_NAME = "score.xml";
+
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -79,11 +103,24 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
       connection = datasource.getConnection();
       final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
+
+      final int currentTournament = Queries.getCurrentTournament(connection);
+      final TournamentSchedule schedule;
+      if (TournamentSchedule.scheduleExistsInDatabase(connection, currentTournament)) {
+        schedule = new TournamentSchedule(connection, currentTournament);
+      } else {
+        schedule = null;
+      }
+
+      final Collection<CategoryColumnMapping> scheduleColumnMappings = CategoryColumnMapping.load(connection,
+                                                                                                  currentTournament);
+
       if (Queries.isJudgesProperlyAssigned(connection, challengeDescription)) {
         response.reset();
         response.setContentType("application/zip");
         response.setHeader("Content-Disposition", "filename=subjective-data.fll");
-        writeSubjectiveScores(connection, challengeDocument, challengeDescription, response.getOutputStream());
+        writeSubjectiveData(connection, challengeDocument, challengeDescription, schedule, scheduleColumnMappings,
+                            response.getOutputStream());
       } else {
         response.reset();
         response.setContentType("text/plain");
@@ -201,17 +238,37 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
    * @param stream where to write the scores file
    * @throws IOException
    */
-  public static void writeSubjectiveScores(final Connection connection,
-                                           final Document challengeDocument,
-                                           final ChallengeDescription challengeDescription,
-                                           final OutputStream stream) throws IOException, SQLException {
+  public static void writeSubjectiveData(final Connection connection,
+                                         final Document challengeDocument,
+                                         final ChallengeDescription challengeDescription,
+                                         final TournamentSchedule schedule,
+                                         final Collection<CategoryColumnMapping> scheduleColumnMappings,
+                                         final OutputStream stream) throws IOException, SQLException {
     final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection);
     final int tournament = Queries.getCurrentTournament(connection);
 
     final ZipOutputStream zipOut = new ZipOutputStream(stream);
+
+    // write the raw files before creating the writer wrapper
+    if (null != schedule) {
+      zipOut.putNextEntry(new ZipEntry(SCHEDULE_ENTRY_NAME));
+      final ObjectOutputStream scheduleOut = new ObjectOutputStream(zipOut);
+      scheduleOut.writeObject(schedule);
+      zipOut.closeEntry();
+    }
+
+    if (null != scheduleColumnMappings) {
+      zipOut.putNextEntry(new ZipEntry(MAPPING_ENTRY_NAME));
+      final ObjectOutputStream scheduleOut = new ObjectOutputStream(zipOut);
+      // convert to LinkedList to be sure that it's serializable
+      scheduleOut.writeObject(new LinkedList<CategoryColumnMapping>(scheduleColumnMappings));
+      zipOut.closeEntry();
+    }
+
+    // write text files with writer
     final Writer writer = new OutputStreamWriter(zipOut, Utilities.DEFAULT_CHARSET);
 
-    zipOut.putNextEntry(new ZipEntry("challenge.xml"));
+    zipOut.putNextEntry(new ZipEntry(CHALLENGE_ENTRY_NAME));
     XMLUtils.writeXML(challengeDocument, writer, Utilities.DEFAULT_CHARSET.name());
     zipOut.closeEntry();
 
@@ -224,7 +281,7 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
       throw new FLLInternalException("Subjective XML document is invalid", e);
     }
 
-    zipOut.putNextEntry(new ZipEntry("score.xml"));
+    zipOut.putNextEntry(new ZipEntry(SCORE_ENTRY_NAME));
     XMLUtils.writeXML(scoreDocument, writer, Utilities.DEFAULT_CHARSET.name());
     zipOut.closeEntry();
 

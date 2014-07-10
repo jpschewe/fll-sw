@@ -7,6 +7,7 @@ package fll.subjective;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -21,9 +22,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -55,6 +58,7 @@ import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
@@ -73,9 +77,13 @@ import org.xml.sax.SAXParseException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
+import fll.db.CategoryColumnMapping;
+import fll.scheduler.TournamentSchedule;
+import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.GuiExceptionHandler;
 import fll.util.LogUtils;
+import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
@@ -262,7 +270,8 @@ public final class SubjectiveFrame extends JFrame {
     ZipFile zipfile = null;
     try {
       zipfile = new ZipFile(file);
-      final ZipEntry challengeEntry = zipfile.getEntry("challenge.xml");
+
+      final ZipEntry challengeEntry = zipfile.getEntry(DownloadSubjectiveData.CHALLENGE_ENTRY_NAME);
       if (null == challengeEntry) {
         throw new FLLRuntimeException(
                                       "Unable to find challenge descriptor in file, you probably choose the wrong file or it is corrupted");
@@ -273,7 +282,7 @@ public final class SubjectiveFrame extends JFrame {
 
       _challengeDescription = new ChallengeDescription(_challengeDocument.getDocumentElement());
 
-      final ZipEntry scoreEntry = zipfile.getEntry("score.xml");
+      final ZipEntry scoreEntry = zipfile.getEntry(DownloadSubjectiveData.SCORE_ENTRY_NAME);
       if (null == scoreEntry) {
         throw new FLLRuntimeException(
                                       "Unable to find score data in file, you probably choose the wrong file or it is corrupted");
@@ -281,6 +290,29 @@ public final class SubjectiveFrame extends JFrame {
       final InputStream scoreStream = zipfile.getInputStream(scoreEntry);
       _scoreDocument = XMLUtils.parseXMLDocument(scoreStream);
       scoreStream.close();
+
+      final ZipEntry scheduleEntry = zipfile.getEntry(DownloadSubjectiveData.SCHEDULE_ENTRY_NAME);
+      if (null != scheduleEntry) {
+        final ObjectInputStream scheduleStream = new ObjectInputStream(zipfile.getInputStream(scheduleEntry));
+        _schedule = (TournamentSchedule) scheduleStream.readObject();
+      } else {
+        _schedule = null;
+      }
+
+      final ZipEntry mappingEntry = zipfile.getEntry(DownloadSubjectiveData.MAPPING_ENTRY_NAME);
+      if (null != mappingEntry) {
+        final ObjectInputStream mappingStream = new ObjectInputStream(zipfile.getInputStream(mappingEntry));
+        // ObjectStream isn't type safe
+        @SuppressWarnings("unchecked")
+        final Collection<CategoryColumnMapping> mappings = (Collection<CategoryColumnMapping>) mappingStream.readObject();
+
+        _scheduleColumnMappings = mappings;
+      } else {
+        _scheduleColumnMappings = null;
+      }
+
+    } catch (final ClassNotFoundException e) {
+      throw new FLLInternalException("Internal error loading schedule from data file", e);
     } catch (final SAXParseException spe) {
       final String errorMessage = String.format("Error parsing file line: %d column: %d%n Message: %s%n This may be caused by using the wrong version of the software attempting to parse a file that is not subjective data.",
                                                 spe.getLineNumber(), spe.getColumnNumber(), spe.getMessage());
@@ -317,8 +349,10 @@ public final class SubjectiveFrame extends JFrame {
 
   private void createSubjectiveTable(final JTabbedPane tabbedPane,
                                      final ScoreCategory subjectiveCategory) {
-    final SubjectiveTableModel tableModel = new SubjectiveTableModel(_scoreDocument, subjectiveCategory);
+    final SubjectiveTableModel tableModel = new SubjectiveTableModel(_scoreDocument, subjectiveCategory, _schedule,
+                                                                     _scheduleColumnMappings);
     final JTable table = new JTable(tableModel);
+    table.setDefaultRenderer(Date.class, DateRenderer.INSTANCE);
 
     // Make grid lines black (needed for Mac)
     table.setGridColor(Color.BLACK);
@@ -339,7 +373,7 @@ public final class SubjectiveFrame extends JFrame {
     int goalIndex = 0;
     for (final AbstractGoal goal : subjectiveCategory.getGoals()) {
       final TableColumn column = table.getColumnModel().getColumn(goalIndex
-          + SubjectiveTableModel.NUM_COLUMNS_LEFT_OF_SCORES);
+          + tableModel.getNumColumnsLeftOfScores());
       if (goal.isEnumerated()) {
         final Vector<String> posValues = new Vector<String>();
         posValues.add("");
@@ -725,6 +759,10 @@ public final class SubjectiveFrame extends JFrame {
     return _scoreDocument;
   }
 
+  private TournamentSchedule _schedule;
+
+  private Collection<CategoryColumnMapping> _scheduleColumnMappings;
+
   private final JTabbedPane tabbedPane;
 
   JTabbedPane getTabbedPane() {
@@ -744,6 +782,26 @@ public final class SubjectiveFrame extends JFrame {
     public void setText(final String str) {
       super.setText(str);
       selectAll();
+    }
+  }
+
+  private static final class DateRenderer extends DefaultTableCellRenderer {
+    public static final DateRenderer INSTANCE = new DateRenderer();
+
+    @Override
+    public Component getTableCellRendererComponent(final JTable table,
+                                                   final Object value,
+                                                   final boolean isSelected,
+                                                   final boolean hasFocus,
+                                                   final int row,
+                                                   final int column) {
+      if (value instanceof Date) {
+        final Date d = (Date) value;
+        final String str = TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(d);
+        return super.getTableCellRendererComponent(table, str, isSelected, hasFocus, row, column);
+      } else {
+        return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+      }
     }
   }
 }
