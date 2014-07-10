@@ -124,7 +124,9 @@ public class SubjectiveFrameTest {
       subjectiveScores = File.createTempFile("testStartupState", ".fll");
       final FileOutputStream fileStream = new FileOutputStream(subjectiveScores);
       final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
-      DownloadSubjectiveData.writeSubjectiveScores(connection, document, description, fileStream);
+      // If the schedule gets added, then make sure that the column offset in
+      // testBackspaceClears gets modified
+      DownloadSubjectiveData.writeSubjectiveData(connection, document, description, null, null, fileStream);
       fileStream.close();
 
       final SubjectiveFrame frame = GuiActionRunner.execute(new GuiQuery<SubjectiveFrame>() {
@@ -312,8 +314,9 @@ public class SubjectiveFrameTest {
       final TableCell teamCell = table.cell("306");
       final int numSubCategories = 5;
       for (int column = 0; column < numSubCategories; ++column) {
+        // no schedule, so base num columns is good
         final TableCell dataCell = TableCell.row(teamCell.row).column(teamCell.column
-            + SubjectiveTableModel.NUM_COLUMNS_LEFT_OF_SCORES + column);
+            + SubjectiveTableModel.BASE_NUM_COLUMNS_LEFT_OF_SCORES + column);
         table.click(dataCell, MouseButton.LEFT_BUTTON);
         table.pressAndReleaseKey(KeyPressInfo.keyCode(KeyEvent.VK_BACK_SPACE));
         table.pressAndReleaseKey(KeyPressInfo.keyCode(KeyEvent.VK_TAB));

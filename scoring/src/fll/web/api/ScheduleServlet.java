@@ -52,9 +52,14 @@ public class ScheduleServlet extends HttpServlet {
       final PrintWriter writer = response.getWriter();
 
       final int currentTournament = Queries.getCurrentTournament(connection);
-      final TournamentSchedule schedule = new TournamentSchedule(connection, currentTournament);
+      if (TournamentSchedule.scheduleExistsInDatabase(connection, currentTournament)) {
+        final TournamentSchedule schedule = new TournamentSchedule(connection, currentTournament);
 
-      jsonMapper.writeValue(writer, schedule);
+        jsonMapper.writeValue(writer, schedule);
+      } else {
+        jsonMapper.writeValue(writer, "");
+      }
+
     } catch (final SQLException e) {
       throw new RuntimeException(e);
     } finally {
