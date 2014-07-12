@@ -74,7 +74,7 @@ public abstract class CellFileReader implements Closeable {
           LOGGER.warn("Empty file");
           return new CSVCellReader(file);
         }
-        if (firstLine.indexOf("\t") != -1) {
+        if (firstLine.indexOf('\t') != -1) {
           return new CSVCellReader(file, '\t');
         } else {
           return new CSVCellReader(file);

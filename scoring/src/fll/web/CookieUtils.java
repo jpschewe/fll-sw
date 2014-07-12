@@ -43,7 +43,7 @@ public final class CookieUtils {
                                        final HttpServletRequest request,
                                        final HttpServletResponse response) {
     final String hostHeader = request.getHeader("host");
-    final int colonIndex = hostHeader.indexOf(":");
+    final int colonIndex = hostHeader.indexOf(':');
     final String domain;
     if (-1 != colonIndex) {
       domain = hostHeader.substring(0, colonIndex);

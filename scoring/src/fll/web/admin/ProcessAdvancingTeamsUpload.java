@@ -139,7 +139,7 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
           LOGGER.error("Empty file");
           return Collections.emptyList();
         }
-        if (firstLine.indexOf("\t") != -1) {
+        if (firstLine.indexOf('\t') != -1) {
           reader = new CSVCellReader(file, '\t');
         } else {
           reader = new CSVCellReader(file);
