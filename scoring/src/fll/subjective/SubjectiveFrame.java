@@ -69,6 +69,7 @@ import javax.swing.text.StyledDocument;
 import net.mtu.eggplant.util.BasicFileFilter;
 import net.mtu.eggplant.util.gui.GraphicsUtils;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -293,20 +294,29 @@ public final class SubjectiveFrame extends JFrame {
 
       final ZipEntry scheduleEntry = zipfile.getEntry(DownloadSubjectiveData.SCHEDULE_ENTRY_NAME);
       if (null != scheduleEntry) {
-        final ObjectInputStream scheduleStream = new ObjectInputStream(zipfile.getInputStream(scheduleEntry));
-        _schedule = (TournamentSchedule) scheduleStream.readObject();
+        ObjectInputStream scheduleStream = null;
+        try {
+          scheduleStream = new ObjectInputStream(zipfile.getInputStream(scheduleEntry));
+          _schedule = (TournamentSchedule) scheduleStream.readObject();
+        } finally {
+          IOUtils.closeQuietly(scheduleStream);
+        }
       } else {
         _schedule = null;
       }
 
       final ZipEntry mappingEntry = zipfile.getEntry(DownloadSubjectiveData.MAPPING_ENTRY_NAME);
       if (null != mappingEntry) {
-        final ObjectInputStream mappingStream = new ObjectInputStream(zipfile.getInputStream(mappingEntry));
-        // ObjectStream isn't type safe
-        @SuppressWarnings("unchecked")
-        final Collection<CategoryColumnMapping> mappings = (Collection<CategoryColumnMapping>) mappingStream.readObject();
-
-        _scheduleColumnMappings = mappings;
+        ObjectInputStream mappingStream = null;
+        try {
+          mappingStream = new ObjectInputStream(zipfile.getInputStream(mappingEntry));
+          // ObjectStream isn't type safe
+          @SuppressWarnings("unchecked")
+          final Collection<CategoryColumnMapping> mappings = (Collection<CategoryColumnMapping>) mappingStream.readObject();
+          _scheduleColumnMappings = mappings;
+        } finally {
+          IOUtils.closeQuietly(mappingStream);
+        }
       } else {
         _scheduleColumnMappings = null;
       }
