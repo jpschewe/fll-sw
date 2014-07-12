@@ -579,18 +579,6 @@ public final class UploadTeams extends BaseFLLServlet {
 
   /**
    * Create a string that's a valid column name.
-   * <ul>
-   * <li>Replace '#' with '_'</li>
-   * <li>Replace ' ' with '_'</li>
-   * <li>Replace '/' with '_'</li>
-   * <li>Replace '-' with '_'</li>
-   * <li>Replace ',' with '_'</li>
-   * <li>Replace null or empty string with EMPTYHEADER1 where number increments
-   * each time found</li>
-   * <li>Replace '?' with '_'</li>
-   * <li>Replace the string 'constraint' with 'CONSTRAINT_'</li>
-   * <li>Replace ':' with '_'</li>
-   * <li>Replace '&' with '_'</li>
    * </ul>
    */
   private static String sanitizeColumnName(final String str) {
@@ -611,6 +599,6 @@ public final class UploadTeams extends BaseFLLServlet {
 
   private static int _emptyHeaderCount = 0;
 
-  private static final Pattern ILLEGAL_CHAR_PATTERN = Pattern.compile("[ #?/\\-,:&.]");
+  private static final Pattern ILLEGAL_CHAR_PATTERN = Pattern.compile("[^A-Za-z0-9_]");
 
 }
