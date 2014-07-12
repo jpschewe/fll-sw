@@ -78,10 +78,13 @@ Most ant targets will work out of the box once you tell Eclipse about our ant bu
 
 ## References to Documentation
 
-  * [Java](http://download.oracle.com/javase/6/docs/api/index.html)
-  * [Java Servlet API](http://download.oracle.com/docs/cd/E17802_01/products/products/servlet/2.5/docs/servlet-2_5-mr2/index.html)
+  * [Java](http://download.oracle.com/javase/7/docs/api/index.html)
+  * [Tomcat API - 8](http://tomcat.apache.org/tomcat-8.0-doc/api/index.html)
+  * [EL - 3.0](http://docs.oracle.com/javaee/7/api/javax/el/package-summary.html)
+  * [Servlet - 3.1](http://docs.oracle.com/javaee/7/api/javax/servlet/package-summary.html)
+  * [JSP - 2.3](http://docs.oracle.com/javaee/7/api/javax/servlet/jsp/package-summary.html)
+  * [WebsSocket - 1.0](http://docs.oracle.com/javaee/7/api/javax/websocket/package-summary.html)
   * [JSTL - core tag library](http://download.oracle.com/docs/cd/E17802_01/products/products/jsp/jstl/1.1/docs/tlddocs/index.html)
-
 
 
 # Making a release
