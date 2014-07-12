@@ -47,8 +47,6 @@ pageContext.setAttribute("urls", WebUtils.getAllURLs(request));
 
       <li><a href='display.jsp'>Big Screen Display</a>  Follow this link on the computer that's used to display scores with the projector.</li>
 
-      <li><a href="subjective-app.jar">Subjective Scoring Application</a> (Executable Jar file) - run with "java -jar subjective-app.jar"</li>
-      
       <li><a href="subjective/index.html">Subjective Web application</a></li>
 
       <li><a href='playoff/ScoresheetServlet'>Blank scoresheet for printing (PDF format)</a></li>

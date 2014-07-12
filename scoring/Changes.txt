@@ -1,3 +1,4 @@
+* 209 - Put subjective application and webapp links on the admin page
 * 176 - Handle parenthesis in column names for uploaded spreadsheets
 * 236 - Add schedule information to the Java subjective application for sorting
 * 36 - upgrade to Tomcat 8.0.9

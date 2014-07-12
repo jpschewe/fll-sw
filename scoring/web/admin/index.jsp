@@ -188,10 +188,23 @@
   <li><a href='<c:url value="select_team.jsp"/>'>Edit team data</a></li>
 
 
-  <li><a href="subjective-data.fll">Download the datafile for
-    subjective score entry.</a> Should be downloaded after each subjective
-   score upload to lessen chance of data loss due to overwrite.</li>
+  <li><a href='remoteControl.jsp'>Remote control of display</a></li>
 
+  <li><h3>Subjective Scoring</h3>
+   <ul>
+    <li><a href="subjective-data.fll">Download the datafile for
+      subjective score entry.</a> Should be downloaded after each subjective
+     score upload to lessen chance of data loss due to overwrite.</li>
+
+    <li><a href='<c:url value="/subjective-app.jar"/>'>Subjective
+      Scoring Application</a> (Executable Jar file) - run with "java -jar
+     subjective-app.jar"</li>
+
+    <li><a href='<c:url value="/subjective/index.html"/>'>Subjective
+      Web application</a></li>
+
+
+   </ul></li>
 
   <li>
    <form name='uploadSubjective'
@@ -204,7 +217,6 @@
   </li>
 
 
-  <li><a href='remoteControl.jsp'>Remote control of display</a></li>
  </ol>
 
  <h2>After the tournament</h2>
