@@ -25,7 +25,8 @@ You can find more examples in our [previous datafiles](../../scheduling/datafile
 
 ### Schedule tab
 
-The schedule tab is used to open a schedule file (CSV or spreadsheet) and view 
+The schedule tab is used to open a schedule file (CSV or spreadsheet) and
+it's details and any problems with it.
 
 Once you have loaded the schedule in via the open icon or from the description tab, you will see problems highlighted in red and yellow. The details of the problems will be shown at the bottom of the screen. If you haven't changed any times and you started with one of our blank schedules, you should not have any problems highlighted.
 
