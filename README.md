@@ -44,7 +44,7 @@ Scheduling Software
 ===================
 In 2008 I started taking over the scheduling of the regional tournaments in Minnesota. So I took the constraints that had previously been used to determine schedules and wrote them down so that I could write some software to help me with this task. This software is available as part of FLL-SW. 
 
-Details on the scheduler are available at (scoring/docs/scheduler.md).
+[Details on the scheduler are available](scoring/docs/scheduler.md).
 
 Future plans
 ============
