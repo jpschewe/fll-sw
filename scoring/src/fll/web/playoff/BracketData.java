@@ -168,7 +168,7 @@ public class BracketData {
                                      final Team teamB,
                                      final int rowsSpanned) {
       super();
-      _allTables = allTables;
+      _allTables.addAll(allTables);
       _label = label;
       _matchNum = matchNum;
       _printed = printed;
@@ -189,7 +189,7 @@ public class BracketData {
 
     private boolean _printed;
 
-    private List<String> _allTables;
+    private final List<String> _allTables = new LinkedList<String>();
 
     private int _matchNum;
 
@@ -199,10 +199,6 @@ public class BracketData {
 
     public List<String> getAllTables() {
       return _allTables;
-    }
-
-    public void setAllTables(final List<String> allTables) {
-      _allTables = allTables;
     }
 
     public String getLabel() {
