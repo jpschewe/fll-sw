@@ -158,7 +158,7 @@ public class BracketData {
    * checkbox and info.
    */
   public static class ScoreSheetFormBracketCell extends BracketDataType {
-    public ScoreSheetFormBracketCell(final List<String> allTables,
+    public ScoreSheetFormBracketCell(final List<TableInformation> allTables,
                                      final String label,
                                      final int matchNum,
                                      final boolean printed,
@@ -189,7 +189,7 @@ public class BracketData {
 
     private boolean _printed;
 
-    private final List<String> _allTables = new LinkedList<String>();
+    private final List<TableInformation> _allTables = new LinkedList<TableInformation>();
 
     private int _matchNum;
 
@@ -197,7 +197,7 @@ public class BracketData {
 
     private Team _teamB;
 
-    public List<String> getAllTables() {
+    public List<TableInformation> getAllTables() {
       return _allTables;
     }
 
@@ -648,29 +648,43 @@ public class BracketData {
         sb.append("<td align='right'>Table A: </td>");
         sb.append("<td align='left'><select name='tableA"
             + myD.getMatchNum() + "' size='1'>");
-        Iterator<String> myit = myD.getAllTables().iterator();
-        while (myit.hasNext()) {
-          final String optStr = myit.next();
+
+        final List<TableInformation> tableInfo = myD.getAllTables();
+        for (final TableInformation info : tableInfo) {
           sb.append("<option");
-          if (optStr.equals(myD.getTableA())) {
+          if (info.getSideA().equals(myD.getTableA())) {
             sb.append(" selected");
           }
           sb.append(">"
-              + optStr + "</option>");
+              + info.getSideA() + "</option>");
+
+          sb.append("<option");
+          if (info.getSideB().equals(myD.getTableA())) {
+            sb.append(" selected");
+          }
+          sb.append(">"
+              + info.getSideB() + "</option>");
         }
         sb.append("</select></td></tr>");
+
         sb.append("<tr><td align='right'>Table B: </td>");
         sb.append("<td align='left'><select name='tableB"
             + myD.getMatchNum() + "' size='1'>");
-        myit = myD.getAllTables().iterator();
-        while (myit.hasNext()) {
-          final String optStr = myit.next();
+
+        for (final TableInformation info : tableInfo) {
           sb.append("<option");
-          if (optStr.equals(myD.getTableB())) {
+          if (info.getSideA().equals(myD.getTableB())) {
             sb.append(" selected");
           }
           sb.append(">"
-              + optStr + "</option>");
+              + info.getSideA() + "</option>");
+
+          sb.append("<option");
+          if (info.getSideB().equals(myD.getTableB())) {
+            sb.append(" selected");
+          }
+          sb.append(">"
+              + info.getSideB() + "</option>");
         }
         sb.append("</select></td></tr></table></td>");
       } else {
@@ -971,14 +985,7 @@ public class BracketData {
       tournamentTables.add(new TableInformation(0, "Table 1", "Table 2", true));
     }
 
-    final List<String> tables = new LinkedList<String>();
-    for (final TableInformation info : tournamentTables) {
-      if (info.getUse()) {
-        tables.add(info.getSideA());
-        tables.add(info.getSideB());
-      }
-    }
-    Iterator<String> tAssignIt = tables.iterator();
+    Iterator<TableInformation> tAssignIt = tournamentTables.iterator();
 
     // Build the cells...
     int matchNum = 1;
@@ -1019,30 +1026,57 @@ public class BracketData {
               && ((TeamBracketCell) roundData.get(curArray[1])).getTeam().getTeamNumber() > 0) {
 
             if (!tAssignIt.hasNext()) {
-              tAssignIt = tables.iterator();
+              tAssignIt = tournamentTables.iterator();
             }
-            final String nextAssignA = tAssignIt.next();
-            String tableA = ((TeamBracketCell) roundData.get(curArray[0])).getTable();
-            if (null == tableA
-                || tableA.length() == 0) {
-              tableA = nextAssignA;
-            }
-            if (!tAssignIt.hasNext()) {
-              tAssignIt = tables.iterator();
-            }
-            final String nextAssignB = tAssignIt.next();
-            String tableB = ((TeamBracketCell) roundData.get(curArray[1])).getTable();
-            if (null == tableB
-                || tableB.length() == 0) {
-              tableB = nextAssignB;
+
+            final String storedTableA = ((TeamBracketCell) roundData.get(curArray[0])).getTable();
+            final String storedTableB = ((TeamBracketCell) roundData.get(curArray[1])).getTable();
+
+            final String tableA;
+            final String tableB;
+            if (null == storedTableA
+                && null != storedTableB) {
+              tableB = storedTableB;
+
+              final TableInformation info = TableInformation.getTableInformationForTableSide(tournamentTables,
+                                                                                             storedTableB);
+              if (info.getSideA().equals(storedTableB)) {
+                tableA = info.getSideB();
+              } else {
+                tableA = info.getSideA();
+              }
+            } else if (null != storedTableA
+                && null == storedTableB) {
+              tableA = storedTableA;
+
+              final TableInformation info = TableInformation.getTableInformationForTableSide(tournamentTables,
+                                                                                             storedTableB);
+              if (info.getSideA().equals(storedTableA)) {
+                tableB = info.getSideB();
+              } else {
+                tableB = info.getSideA();
+              }
+            } else if (null != storedTableA
+                && null != storedTableB) {
+              tableA = storedTableA;
+              tableB = storedTableB;
+            } else {
+              // assign both
+              if (!tAssignIt.hasNext()) {
+                tAssignIt = tournamentTables.iterator();
+              }
+              final TableInformation info = tAssignIt.next();
+              tableA = info.getSideA();
+              tableB = info.getSideB();
             }
 
             final TeamBracketCell topCell = (TeamBracketCell) roundData.get(curArray[0]);
             final TeamBracketCell bottomCell = (TeamBracketCell) roundData.get(curArray[1]);
             roundData.put(curArray[0] + 1,
-                          new ScoreSheetFormBracketCell(tables, bracketLabel, matchNum++, topCell.getPrinted()
-                              && bottomCell.getPrinted(), tableA, tableB, topCell.getTeam(), bottomCell.getTeam(),
-                                                        curArray[1].intValue()
+                          new ScoreSheetFormBracketCell(tournamentTables, bracketLabel, matchNum++,
+                                                        topCell.getPrinted()
+                                                            && bottomCell.getPrinted(), tableA, tableB,
+                                                        topCell.getTeam(), bottomCell.getTeam(), curArray[1].intValue()
                                                             - curArray[0].intValue() - 1));
             // Put placeholders for the rows that are to be spanned over
             for (int j = curArray[0].intValue() + 2; j < curArray[1].intValue(); j++) {
