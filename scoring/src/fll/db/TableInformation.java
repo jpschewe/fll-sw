@@ -60,7 +60,6 @@ public final class TableInformation implements Serializable {
     return mId;
   }
 
-
   private static List<Integer> getTablesForDivision(final Connection connection,
                                                     final int tournament,
                                                     final String division) throws SQLException {
@@ -128,5 +127,23 @@ public final class TableInformation implements Serializable {
 
     return tableInfo;
   }
-  
+
+  /**
+   * Given a table side, find the table information that matches.
+   * 
+   * @param tableInfo the list of all table information to look in
+   * @param tableSide the table side to match
+   * @return the table information or null
+   */
+  public static TableInformation getTableInformationForTableSide(final List<TableInformation> tableInfo,
+                                                                 final String tableSide) {
+    for (final TableInformation info : tableInfo) {
+      if (info.getSideA().equals(tableSide)
+          || info.getSideB().equals(tableSide)) {
+        return info;
+      }
+    }
+    return null;
+  }
+
 }
