@@ -646,47 +646,29 @@ public class BracketData {
             + myD.getMatchNum() + "' value='" + round + "'/>");
         sb.append("</td>");
         sb.append("<td align='right'>Table A: </td>");
-        sb.append("<td align='left'><select name='tableA"
-            + myD.getMatchNum() + "' size='1'>");
+        sb.append("<td align='left'>");
 
         final List<TableInformation> tableInfo = myD.getAllTables();
-        for (final TableInformation info : tableInfo) {
-          sb.append("<option");
-          if (info.getSideA().equals(myD.getTableA())) {
-            sb.append(" selected");
-          }
-          sb.append(">"
-              + info.getSideA() + "</option>");
 
-          sb.append("<option");
-          if (info.getSideB().equals(myD.getTableA())) {
-            sb.append(" selected");
-          }
-          sb.append(">"
-              + info.getSideB() + "</option>");
-        }
-        sb.append("</select></td></tr>");
+        final String tableASelect = "tableA"
+            + myD.getMatchNum();
+        final String tableAAssigned = myD.getTableA();
+
+        outputTableSelect(sb, tableASelect, tableAAssigned, tableInfo);
+
+        sb.append("</td></tr>");
 
         sb.append("<tr><td align='right'>Table B: </td>");
-        sb.append("<td align='left'><select name='tableB"
-            + myD.getMatchNum() + "' size='1'>");
+        sb.append("<td align='left'>");
 
-        for (final TableInformation info : tableInfo) {
-          sb.append("<option");
-          if (info.getSideA().equals(myD.getTableB())) {
-            sb.append(" selected");
-          }
-          sb.append(">"
-              + info.getSideA() + "</option>");
+        final String tableBSelect = "tableB"
+            + myD.getMatchNum();
+        final String tableBAssigned = myD.getTableB();
 
-          sb.append("<option");
-          if (info.getSideB().equals(myD.getTableB())) {
-            sb.append(" selected");
-          }
-          sb.append(">"
-              + info.getSideB() + "</option>");
-        }
-        sb.append("</select></td></tr></table></td>");
+        outputTableSelect(sb, tableBSelect, tableBAssigned, tableInfo);
+        sb.append("</td></tr>");
+
+        sb.append("</table></td>");
       } else {
         // this block is not typically invoked because we use a BracketLabelCell
         // in addBracketLabelsAndScoreGenFormElements when one of the teams is
@@ -706,6 +688,61 @@ public class BracketData {
     }
 
     return sb.toString();
+  }
+
+  public String outputTableSyncFunctions() {
+    final StringBuilder sb = new StringBuilder();
+
+    for (int round = getFirstRound(); round <= getLastRound(); round++) {
+      final SortedMap<Integer, BracketDataType> roundData = _bracketData.get(round);
+
+      if (roundData != null) {
+        for (int row = 1; row <= getNumRows(); row++) {
+          final BracketDataType d = roundData.get(row);
+          if (d instanceof ScoreSheetFormBracketCell) {
+            final ScoreSheetFormBracketCell myD = (ScoreSheetFormBracketCell) d;
+
+            if (myD.getTeamA().getTeamNumber() > 0
+                && myD.getTeamB().getTeamNumber() > 0) {
+
+              final int match = myD.getMatchNum();
+
+              sb.append(String.format("$(\"#tableA%d\").change(function() { matchTables($(\"#tableA%d\"), $(\"#tableB%d\")); });%n",
+                                      match, match, match));
+              sb.append(String.format("$(\"#tableB%d\").change(function() { matchTables($(\"#tableB%d\"), $(\"#tableA%d\")); });%n",
+                                      match, match, match));
+            } // 2 valid teams
+          } // ScoreSheet bracket cell
+        } // foreach row
+      } // valid round data
+    } // foreach round
+
+    return sb.toString();
+  }
+
+  private void outputTableSelect(final StringBuffer sb,
+                                 final String select,
+                                 final String assigned,
+                                 final List<TableInformation> tableInfo) {
+    sb.append("<select name='"
+        + select + "' id='" + select + "' size='1'>");
+
+    for (final TableInformation info : tableInfo) {
+      sb.append("<option");
+      if (info.getSideA().equals(assigned)) {
+        sb.append(" selected");
+      }
+      sb.append(">"
+          + info.getSideA() + "</option>");
+
+      sb.append("<option");
+      if (info.getSideB().equals(assigned)) {
+        sb.append(" selected");
+      }
+      sb.append(">"
+          + info.getSideB() + "</option>");
+    }
+    sb.append("</select>");
   }
 
   /**

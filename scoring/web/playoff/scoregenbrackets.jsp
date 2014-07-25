@@ -8,28 +8,36 @@
 <%@ page import="javax.sql.DataSource"%>
 <%@ page import="org.w3c.dom.Document"%>
 
+<script type='text/javascript' src='../extlib/jquery-1.11.1.min.js'></script>
+
 <%
-  fll.web.playoff.ScoregenBrackets.populateContext(application, request, pageContext);
+  fll.web.playoff.ScoregenBrackets.populateContext(application,
+					request, pageContext);
 %>
 
 <%
   /*
-   Parameters:
-   division - String for the division
-   */
-  final DataSource datasource = ApplicationAttributes.getDataSource(application);
-  final Connection connection = datasource.getConnection();
-  final int currentTournament = Queries.getCurrentTournament(connection);
+							 Parameters:
+							 division - String for the division
+			 */
+			final DataSource datasource = ApplicationAttributes
+					.getDataSource(application);
+			final Connection connection = datasource.getConnection();
+			final int currentTournament = Queries
+					.getCurrentTournament(connection);
 
-  final String divisionStr = (String)pageContext.getAttribute("division");
-  
-  final int firstRound = (Integer)request.getAttribute("firstRound");
-  final int lastRound = (Integer)request.getAttribute("lastRound");  
+			final String divisionStr = (String) pageContext
+					.getAttribute("division");
 
-  final BracketData bracketInfo = new BracketData(connection, divisionStr, firstRound, lastRound, 4, true, false);
+			final int firstRound = (Integer) request.getAttribute("firstRound");
+			final int lastRound = (Integer) request.getAttribute("lastRound");
 
-  final int numMatches = bracketInfo.addBracketLabelsAndScoreGenFormElements(connection, currentTournament,
-                                                                             divisionStr);
+			final BracketData bracketInfo = new BracketData(connection,
+					divisionStr, firstRound, lastRound, 4, true, false);
+
+			final int numMatches = bracketInfo
+					.addBracketLabelsAndScoreGenFormElements(connection,
+							currentTournament, divisionStr);
 %>
 
 <html>
@@ -37,7 +45,7 @@
 <link rel="stylesheet" type="text/css"
  href="<c:url value='/style/style.jsp'/>" />
 <title>Playoff Brackets - Division: ${division}</title>
-</head>
+
 <style type='text/css'>
 TD.Leaf {
 	font-family: Arial;
@@ -82,10 +90,36 @@ FONT.TIE {
 }
 </style>
 
+<script type='text/javascript'>
+	function matchTables(selectChanged, selectMatch) {
+
+		<c:forEach items="${tableInfo}" var="info">
+
+		if (selectChanged.val() == "${info.sideA}") {
+			if (selectMatch.val() != "${info.sideB}") {
+				selectMatch.val("${info.sideB}");
+			}
+			return;
+		} else if (selectChanged.val() == "${info.sideB}") {
+			if (selectMatch.val() != "${info.sideA}") {
+				selectMatch.val("${info.sideA}");
+			}
+			return;
+		}
+
+		</c:forEach>
+	}
+
+	$(document).ready(function() {
+<%=bracketInfo.outputTableSyncFunctions()%>
+	});
+</script>
+
+</head>
+
+
 <body>
- <h2>
-  Playoff Brackets Division:
-  ${division }</h2>
+ <h2>Playoff Brackets Division: ${division }</h2>
  <p>
   <a href="index.jsp">Return to Playoff menu</a>
  </p>
@@ -117,8 +151,8 @@ FONT.TIE {
 
  <form name='printScoreSheets' method='post' action='ScoresheetServlet'
   target='_new'>
-  <input type='hidden' name='division' value='<%=divisionStr%>' />
-  <input type='hidden' name='numMatches' value='<%=numMatches%>' /> <input
+  <input type='hidden' name='division' value='<%=divisionStr%>' /> <input
+   type='hidden' name='numMatches' value='<%=numMatches%>' /> <input
    type='submit' value='Print scoresheets' /> - <b>Print the
    scoresheets for the brackets that have their boxes checked.</b>
 
