@@ -60,7 +60,7 @@ final BracketData bracketInfo =
 for(int i = 1; i < lastColumn; i++) {
   bracketInfo.addBracketLabels(i);
 }
-bracketInfo.addStaticTableLabels(connection, currentTournament, divisionStr);
+bracketInfo.addStaticTableLabels();
 %>
 
 <html>
@@ -82,20 +82,10 @@ bracketInfo.addStaticTableLabels(connection, currentTournament, divisionStr);
   </style>
 
   <body>
-    <h2>Playoff Brackets Division: <%=divisionStr%></h2>
-    <table align='center' width='100%' border='0' cellpadding='3' cellspacing='0'>
-    <%=bracketInfo.getHtmlHeaderRow()%>
-<%  for(int rowIndex = 1; rowIndex <= bracketInfo.getNumRows(); rowIndex++) { %>
-        <tr>
 
-<%    // Get each cell. Insert bridge cells between columns.
-      for(int i = bracketInfo.getFirstRound(); i < bracketInfo.getLastRound(); i++) { %>
-          <%=bracketInfo.getHtmlCell(connection, currentTournament, rowIndex, i)%>
-          <%=bracketInfo.getHtmlBridgeCell(rowIndex,i,BracketData.TopRightCornerStyle.MEET_BOTTOM_OF_CELL)%>
-<%    } %>
-          <%=bracketInfo.getHtmlCell(connection, currentTournament, rowIndex, bracketInfo.getLastRound())%>
-        </tr>
-<%  } %>
-    </table>    
+    <h2>Playoff Brackets Division: <%=divisionStr%></h2>
+
+    <%=bracketInfo.outputBrackets(BracketData.TopRightCornerStyle.MEET_BOTTOM_OF_CELL) %>
+
   </body>
 </html>

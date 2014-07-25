@@ -17,8 +17,8 @@
 
 <%
   /*
-							 Parameters:
-							 division - String for the division
+											 Parameters:
+											 division - String for the division
 			 */
 			final DataSource datasource = ApplicationAttributes
 					.getDataSource(application);
@@ -157,29 +157,8 @@ FONT.TIE {
    scoresheets for the brackets that have their boxes checked.</b>
 
 
-  <table align='center' width='100%' border='0' cellpadding='3'
-   cellspacing='0'>
-   <%=bracketInfo.getHtmlHeaderRow()%>
-   <%
-     for (int rowIndex = 1; rowIndex <= bracketInfo.getNumRows(); rowIndex++) {
-   %>
-   <tr>
+  <%=bracketInfo.outputBrackets(BracketData.TopRightCornerStyle.MEET_BOTTOM_OF_CELL)%>
 
-    <%
-      // Get each cell. Insert bridge cells between columns.
-        for (int i = bracketInfo.getFirstRound(); i < bracketInfo.getLastRound(); i++) {
-    %>
-    <%=bracketInfo.getHtmlCell(connection, currentTournament, rowIndex, i)%>
-    <%=bracketInfo.getHtmlBridgeCell(rowIndex, i, BracketData.TopRightCornerStyle.MEET_BOTTOM_OF_CELL)%>
-    <%
-      }
-    %>
-    <%=bracketInfo.getHtmlCell(connection, currentTournament, rowIndex, bracketInfo.getLastRound())%>
-   </tr>
-   <%
-     }
-   %>
-  </table>
   <p>
    <a href="index.jsp">Return to Playoff menu</a>
   </p>
