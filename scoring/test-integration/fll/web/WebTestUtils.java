@@ -17,6 +17,16 @@ import junit.framework.Assert;
 import org.xml.sax.SAXException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gargoylesoftware.htmlunit.JavaScriptPage;
+import com.gargoylesoftware.htmlunit.Page;
+import com.gargoylesoftware.htmlunit.TextPage;
+import com.gargoylesoftware.htmlunit.UnexpectedPage;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlForm;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.html.HtmlPasswordInput;
+import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
+import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
@@ -40,15 +50,15 @@ public final class WebTestUtils {
    * Load a page and return the response. If there is an HttpException, call
    * {@link Assert#fail(String)} with a reasonable message.
    */
-  public static WebResponse loadPage(final WebConversation conversation,
-                                     final WebRequest request) throws IOException, SAXException {
+  public static WebResponse loadPageOld(final WebConversation conversation,
+                                        final WebRequest request) throws IOException, SAXException {
     final boolean exceptionOnError = conversation.getExceptionsThrownOnErrorStatus();
     conversation.setExceptionsThrownOnErrorStatus(false);
     try {
       final WebResponse response = conversation.getResponse(request);
 
       // check response code here and fail with useful message
-      checkForServerError(response);
+      checkForServerErrorOld(response);
 
       return response;
     } finally {
@@ -57,7 +67,24 @@ public final class WebTestUtils {
     }
   }
 
-  private static void checkForServerError(final WebResponse response) throws IOException {
+  public static Page loadPage(final WebClient conversation,
+                              final com.gargoylesoftware.htmlunit.WebRequest request) throws IOException, SAXException {
+    final boolean exceptionOnError = conversation.getOptions().isThrowExceptionOnFailingStatusCode();
+    conversation.getOptions().setThrowExceptionOnFailingStatusCode(false);
+    try {
+      final Page response = conversation.getPage(request);
+
+      // check response code here and fail with useful message
+      checkForServerError(response);
+
+      return response;
+    } finally {
+      // restore value
+      conversation.getOptions().setThrowExceptionOnFailingStatusCode(exceptionOnError);
+    }
+  }
+
+  private static void checkForServerErrorOld(final WebResponse response) throws IOException {
     final int code = response.getResponseCode();
     final boolean error;
     if (response.getResponseCode() == HttpURLConnection.HTTP_INTERNAL_ERROR) {
@@ -83,6 +110,45 @@ public final class WebTestUtils {
 
   }
 
+  private static void checkForServerError(final Page page) throws IOException {
+    final com.gargoylesoftware.htmlunit.WebResponse response = page.getWebResponse();
+    final int code = response.getStatusCode();
+    final boolean error;
+    if (code >= 400) {
+      error = true;
+    } else {
+      error = false;
+    }
+    if (error) {
+      final String responseMessage = response.getStatusMessage();
+      final String text = getPageSource(page);
+      final File output = File.createTempFile("server-error", ".html", new File("screenshots"));
+      final FileWriter writer = new FileWriter(output);
+      writer.write(text);
+      writer.close();
+      Assert.fail("Error loading page: "
+          + page.getUrl() + " code: " + code + " message: " + responseMessage + " Contents of error page written to: "
+          + output.getAbsolutePath());
+    }
+
+  }
+
+  /**
+   * Get source of any page type.
+   */
+  public static String getPageSource(final Page page) {
+    if (page instanceof HtmlPage) {
+      return ((HtmlPage) page).asXml();
+    } else if (page instanceof JavaScriptPage) {
+      return ((JavaScriptPage) page).getContent();
+    } else if (page instanceof TextPage) {
+      return ((TextPage) page).getContent();
+    } else {
+      // page instanceof UnexpectedPage
+      return ((UnexpectedPage) page).getWebResponse().getContentAsString();
+    }
+  }
+
   /**
    * Create a new web conversation that is logged in.
    * 
@@ -90,7 +156,7 @@ public final class WebTestUtils {
    * @throws SAXException
    * @throws IOException
    */
-  public static WebConversation getConversation() throws IOException, SAXException {
+  public static WebConversation getConversationOld() throws IOException, SAXException {
     final WebConversation conversation = new WebConversation();
 
     // always login first
@@ -121,16 +187,51 @@ public final class WebTestUtils {
     return conversation;
   }
 
+  public static WebClient getConversation() throws IOException, SAXException {
+    final WebClient conversation = new WebClient();
+
+    // always login first
+    HtmlPage response = conversation.getPage(TestUtils.URL_ROOT
+        + "login.jsp");
+    // Assert.assertTrue("Received non-HTML response from web server",
+    // response.isHTML());
+
+    HtmlForm form = response.getFormByName("login");
+    Assert.assertNotNull("Cannot find login form", form);
+
+    final HtmlTextInput userTextField = form.getInputByName("user");
+    userTextField.setValueAttribute(IntegrationTestUtils.TEST_USERNAME);
+
+    final HtmlPasswordInput passTextField = form.getInputByName("pass");
+    passTextField.setValueAttribute(IntegrationTestUtils.TEST_PASSWORD);
+
+    final HtmlSubmitInput button = form.getInputByName("submit_login");
+    response = button.click();
+
+    final URL responseURL = response.getUrl();
+    final String address = responseURL.getPath();
+    final boolean correctAddress;
+    if (address.contains("login.jsp")) {
+      correctAddress = false;
+    } else {
+      correctAddress = true;
+    }
+    Assert.assertTrue("Unexpected URL after login: "
+        + address, correctAddress);
+
+    return conversation;
+  }
+
   /**
    * Submit a query to developer/QueryHandler, parse the JSON and return it.
    */
   public static QueryHandler.ResultData executeServerQuery(final String query) throws IOException, SAXException {
-    final WebConversation conversation = getConversation();
+    final WebConversation conversation = getConversationOld();
     final WebRequest request = new PostMethodWebRequest(TestUtils.URL_ROOT
         + "developer/QueryHandler");
     request.setParameter(QueryHandler.QUERY_PARAMETER, query);
 
-    final WebResponse response = loadPage(conversation, request);
+    final WebResponse response = loadPageOld(conversation, request);
     final String contentType = response.getContentType();
     if (!"application/json".equals(contentType)) {
       final String text = response.getText();
