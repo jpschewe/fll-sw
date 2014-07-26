@@ -596,6 +596,7 @@ public class BracketData {
     if (roundData == null) {
       sb.append("<td>ERROR: No data for round "
           + round + ".</td>");
+      return;
     }
 
     final BracketDataType d = roundData.get(row);
@@ -1121,7 +1122,7 @@ public class BracketData {
               tableA = storedTableA;
 
               final TableInformation info = TableInformation.getTableInformationForTableSide(tournamentTables,
-                                                                                             storedTableB);
+                                                                                             storedTableA);
               if (info.getSideA().equals(storedTableA)) {
                 tableB = info.getSideB();
               } else {
