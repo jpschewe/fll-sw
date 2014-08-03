@@ -40,7 +40,6 @@ import org.openqa.selenium.support.ui.Select;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import com.gargoylesoftware.htmlunit.BinaryPage;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
