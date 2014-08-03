@@ -22,9 +22,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.Select;
 import org.xml.sax.SAXException;
 
-import com.meterware.httpunit.PostMethodWebRequest;
-import com.meterware.httpunit.WebConversation;
-
 import fll.TestUtils;
 import fll.db.GenerateDB;
 import fll.util.LogUtils;
@@ -88,7 +85,7 @@ public class TestAJAXBrackets {
       // init brackets
       IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
           + "playoff");
-      
+
       final String division = "1";
 
       IntegrationTestUtils.initializePlayoffsForDivision(selenium, division);
@@ -105,20 +102,15 @@ public class TestAJAXBrackets {
       // selenium.runScript("var timerRan = false;setTimeout('timerRan=true;', 5000);");
       // selenium.waitForCondition("window.timerRan", JS_EVAL_TIMEOUT);
 
-      // Use HTTPUnit to assign table labels instead of selenium
-      final WebConversation wc = new WebConversation();
-      final PostMethodWebRequest tableLabels = new PostMethodWebRequest(TestUtils.URL_ROOT
-          + "playoff/ScoresheetServlet");
-      tableLabels.setParameter("division", division);
-      tableLabels.setParameter("numMatches", "2");
-      tableLabels.setParameter("print1", "1");
-      tableLabels.setParameter("teamA1", "1");
-      tableLabels.setParameter("teamB1", "2");
-      tableLabels.setParameter("round1", "1");
-      tableLabels.setParameter("tableA1", "Blue 1");
-      tableLabels.setParameter("tableB1", "Table 2");
-      wc.getResponse(tableLabels);
-
+      // assign tables for the scoresheets
+      final WebWindow scoresheetWindow = new WebWindow(selenium, TestUtils.URL_ROOT
+          + "playoff/scoregenbrackets.jsp?division=" + division + "&firstRound=1&lastRound=7");
+      selenium.switchTo().window(scoresheetWindow.getWindowHandle());
+      selenium.findElement(By.name("print1")).click();
+      selenium.findElement(By.name("tableA1")).sendKeys("Blue 1");
+      selenium.findElement(By.name("tableB1")).sendKeys("Table 2");
+      selenium.findElement(By.id("print_scoresheets")).click();
+      
       // check for a blue cell
       selenium.switchTo().window(bracketsWindow.getWindowHandle());
       // TODO: I can't find a way selenium is
@@ -187,10 +179,6 @@ public class TestAJAXBrackets {
           + scoreTextAfter + "'", scoreTextAfter.contains("Score:"));
 
     } catch (final IOException e) {
-      LOGGER.fatal(e, e);
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final SAXException e) {
       LOGGER.fatal(e, e);
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
