@@ -72,7 +72,7 @@
      <b>Scoresheet Generation Brackets</b><br />
 
      <%-- division --%>
-     Select Division: <select name='division'>
+     Select Division: <select id='printable.division' name='division'>
       <c:forEach items="${playoff_data.existingDivisions }"
        var="division">
        <option value='${division}'>${division}</option>
