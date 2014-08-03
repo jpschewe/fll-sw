@@ -153,7 +153,7 @@ FONT.TIE {
   target='_new'>
   <input type='hidden' name='division' value='<%=divisionStr%>' /> <input
    type='hidden' name='numMatches' value='<%=numMatches%>' /> <input
-   type='submit' value='Print scoresheets' /> - <b>Print the
+   type='submit' value='Print scoresheets' id='print_scoresheets' /> - <b>Print the
    scoresheets for the brackets that have their boxes checked.</b>
 
 
