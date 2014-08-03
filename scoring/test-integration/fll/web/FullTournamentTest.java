@@ -645,7 +645,8 @@ public class FullTournamentTest {
             + WebTestUtils.getPageSource(response));
       }
       Assert.assertEquals("application/zip", contentType);
-      final InputStream zipStream = ((BinaryPage) response).getInputStream();
+      
+      final InputStream zipStream = response.getWebResponse().getContentAsStream();
       final FileOutputStream outputStream = new FileOutputStream(subjectiveZip);
       final byte[] buffer = new byte[512];
       int bytesRead = 0;
