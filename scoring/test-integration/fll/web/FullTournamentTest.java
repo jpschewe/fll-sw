@@ -42,19 +42,14 @@ import org.xml.sax.SAXException;
 
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.HtmlCheckBoxInput;
+import com.gargoylesoftware.htmlunit.html.HtmlFileInput;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlOption;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlSelect;
 import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
-import com.meterware.httpunit.Button;
-import com.meterware.httpunit.GetMethodWebRequest;
-import com.meterware.httpunit.UploadFileSpec;
-import com.meterware.httpunit.WebConversation;
-import com.meterware.httpunit.WebForm;
-import com.meterware.httpunit.WebRequest;
-import com.meterware.httpunit.WebResponse;
 
 import fll.TestUtils;
 import fll.Utilities;
@@ -219,8 +214,6 @@ public class FullTournamentTest {
         if (runNumber > numSeedingRounds
             && runNumber != maxRuns) {
           for (final String division : divisions) {
-            LOGGER.info("Printing scoresheets round: "
-                + runNumber + " division '" + division + "'");
             printPlayoffScoresheets(division);
           }
         }
@@ -489,22 +482,22 @@ public class FullTournamentTest {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "report/CategoryScoresByJudge");
 
-    // PDF reports need to be done with httpunit
-    final WebConversation conversation = WebTestUtils.getConversationOld();
-    WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
-        + "report/finalComputedScores.pdf");
-    WebResponse response = WebTestUtils.loadPageOld(conversation, request);
-    Assert.assertEquals("application/pdf", response.getContentType());
+    // PDF reports can't be done with selenium
+    final WebClient conversation = WebTestUtils.getConversation();
+    WebRequest request = new WebRequest(new URL(TestUtils.URL_ROOT
+        + "report/finalComputedScores.pdf"));
+    Page response = WebTestUtils.loadPage(conversation, request);
+    Assert.assertEquals("application/pdf", response.getWebResponse().getContentType());
 
-    request = new GetMethodWebRequest(TestUtils.URL_ROOT
-        + "report/CategoryScoresByScoreGroup");
-    response = WebTestUtils.loadPageOld(conversation, request);
-    Assert.assertEquals("application/pdf", response.getContentType());
+    request = new WebRequest(new URL(TestUtils.URL_ROOT
+        + "report/CategoryScoresByScoreGroup"));
+    response = WebTestUtils.loadPage(conversation, request);
+    Assert.assertEquals("application/pdf", response.getWebResponse().getContentType());
 
-    request = new GetMethodWebRequest(TestUtils.URL_ROOT
-        + "report/PlayoffReport");
-    response = WebTestUtils.loadPageOld(conversation, request);
-    Assert.assertEquals("application/pdf", response.getContentType());
+    request = new WebRequest(new URL(TestUtils.URL_ROOT
+        + "report/PlayoffReport"));
+    response = WebTestUtils.loadPage(conversation, request);
+    Assert.assertEquals("application/pdf", response.getWebResponse().getContentType());
 
   }
 
@@ -578,11 +571,8 @@ public class FullTournamentTest {
       InterruptedException, SAXException {
     final WebClient conversation = WebTestUtils.getConversation();
 
-    final Page indexResponse = WebTestUtils.loadPage(conversation,
-                                                     new com.gargoylesoftware.htmlunit.WebRequest(
-                                                                                                  new URL(
-                                                                                                          TestUtils.URL_ROOT
-                                                                                                              + "playoff/index.jsp")));
+    final Page indexResponse = WebTestUtils.loadPage(conversation, new WebRequest(new URL(TestUtils.URL_ROOT
+        + "playoff/index.jsp")));
     Assert.assertTrue(indexResponse.isHtmlPage());
     final HtmlPage indexHtml = (HtmlPage) indexResponse;
 
@@ -591,12 +581,13 @@ public class FullTournamentTest {
     Assert.assertNotNull("printable form not found", form);
 
     final String formSource = WebTestUtils.getPageSource(form.getPage());
-    LOGGER.info("Form source: " + formSource);
+    LOGGER.info("Form source: "
+        + formSource);
 
     // set division
     final HtmlSelect divisionSelect = indexHtml.getHtmlElementById("printable.division");
     final HtmlOption divisionOption = divisionSelect.getOptionByValue(division);
-    divisionSelect.setSelectedAttribute(divisionOption, true);    
+    divisionSelect.setSelectedAttribute(divisionOption, true);
 
     // click 'Display Brackets'
     final HtmlSubmitInput displayBrackets = form.getInputByValue("Display Brackets");
@@ -641,19 +632,20 @@ public class FullTournamentTest {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      final WebConversation conversation = WebTestUtils.getConversationOld();
+      final WebClient conversation = WebTestUtils.getConversation();
 
       // download subjective zip
-      WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
-          + "admin/subjective-data.fll");
-      WebResponse response = WebTestUtils.loadPageOld(conversation, request);
-      final String contentType = response.getContentType();
+      WebRequest request = new WebRequest(new URL(TestUtils.URL_ROOT
+          + "admin/subjective-data.fll"));
+      Page response = WebTestUtils.loadPage(conversation, request);
+      final String contentType = response.getWebResponse().getContentType();
       if (!"application/zip".equals(contentType)) {
         LOGGER.error("Got non-zip content: "
-            + response.getText());
+            + WebTestUtils.getPageSource(response));
       }
       Assert.assertEquals("application/zip", contentType);
-      final InputStream zipStream = response.getInputStream();
+      
+      final InputStream zipStream = response.getWebResponse().getContentAsStream();
       final FileOutputStream outputStream = new FileOutputStream(subjectiveZip);
       final byte[] buffer = new byte[512];
       int bytesRead = 0;
@@ -737,60 +729,26 @@ public class FullTournamentTest {
       subjective.save();
 
       // upload scores
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT
-          + "admin/index.jsp");
-      response = WebTestUtils.loadPageOld(conversation, request);
-      Assert.assertTrue(response.isHTML());
-      final WebForm form = response.getFormWithName("uploadSubjective");
-      request = form.getRequest();
-      final UploadFileSpec subjectiveUpload = new UploadFileSpec(subjectiveZip);
-      form.setParameter("subjectiveFile", new UploadFileSpec[] { subjectiveUpload });
-      response = WebTestUtils.loadPageOld(conversation, request);
-      Assert.assertTrue(response.isHTML());
-      Assert.assertNotNull(response.getElementWithID("success"));
+      request = new WebRequest(new URL(TestUtils.URL_ROOT
+          + "admin/index.jsp"));
+      response = WebTestUtils.loadPage(conversation, request);
+      Assert.assertTrue(response.isHtmlPage());
+      final HtmlForm uploadForm = ((HtmlPage) response).getFormByName("uploadSubjective");
+
+      final HtmlFileInput uploadFile = uploadForm.getInputByName("subjectiveFile");
+      uploadFile.setValueAttribute(subjectiveZip.getAbsolutePath());
+
+      final HtmlSubmitInput button = uploadForm.getInputByValue("Upload");
+      request = uploadForm.getWebRequest(button);
+
+      response = WebTestUtils.loadPage(conversation, request);
+      Assert.assertTrue(response.isHtmlPage());
+
+      Assert.assertNotNull(((HtmlPage) response).getElementById("success"));
+
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
-    }
-  }
-
-  /**
-   * Set a score element that may need button presses to be
-   * incremented/decremented.
-   * 
-   * @param form the form
-   * @param name the name of the element
-   * @param value the value to set the score element to
-   * @throws IOException if there is an error writing to the form
-   * @throws ParseException if there is an error parsing the default value of
-   *           the form element as a number
-   * @throws SAXException
-   */
-  public static void setFormScoreElement(final WebForm form,
-                                         final String name,
-                                         final int value) throws IOException, ParseException, SAXException {
-    // must be a number
-    final double defaultValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(form.getParameterValue(name)).doubleValue();
-    final double difference = value
-        - defaultValue;
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("Need to increment/decrement "
-          + name + " " + difference);
-    }
-    final Button button;
-    if (difference > 0) {
-      button = form.getButtonWithID("inc_"
-          + name + "_1");
-    } else {
-      button = form.getButtonWithID("dec_"
-          + name + "_-1");
-    }
-    if (null == button) {
-      throw new RuntimeException("Cannot find button for increment/decrement of "
-          + name + "button: " + button);
-    }
-    for (int val = 0; val < Math.abs(difference); ++val) {
-      button.click();
     }
   }
 
