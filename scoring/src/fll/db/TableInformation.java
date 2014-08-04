@@ -91,7 +91,7 @@ public final class TableInformation implements Serializable {
    * @param connection
    * @param tournament
    * @param division
-   * @return
+   * @return Tables listed by least used first
    */
   public static List<TableInformation> getTournamentTableInformation(final Connection connection,
                                                                      final int tournament,
@@ -102,9 +102,14 @@ public final class TableInformation implements Serializable {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      prep = connection.prepareStatement("SELECT PairID, SideA, SideB FROM tablenames" //
-          + " WHERE Tournament = ?" //
-      );
+      prep = connection.prepareStatement("select tablenames.PairID, tablenames.SideA, tablenames.SideB, COUNT(tablenames.PairID) as c"//
+          + " FROM PlayoffData, tablenames" //
+          + " WHERE PlayoffData.Tournament = ?" //
+          + " AND PlayoffData.Tournament = tablenames.Tournament" //
+          + " AND AssignedTable IS NOT NULL" //
+          + " AND (PlayoffData.AssignedTable = tablenames.SideA OR PlayoffData.AssignedTable = tablenames.SideB)"//
+          + " GROUP BY tablenames.PairID, tablenames.SideA, tablenames.SideB" //
+          + " ORDER BY c");
       prep.setInt(1, tournament);
 
       rs = prep.executeQuery();
