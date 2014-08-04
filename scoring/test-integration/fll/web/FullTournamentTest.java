@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -39,13 +40,16 @@ import org.openqa.selenium.support.ui.Select;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import com.meterware.httpunit.Button;
-import com.meterware.httpunit.GetMethodWebRequest;
-import com.meterware.httpunit.UploadFileSpec;
-import com.meterware.httpunit.WebConversation;
-import com.meterware.httpunit.WebForm;
-import com.meterware.httpunit.WebRequest;
-import com.meterware.httpunit.WebResponse;
+import com.gargoylesoftware.htmlunit.Page;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebRequest;
+import com.gargoylesoftware.htmlunit.html.HtmlCheckBoxInput;
+import com.gargoylesoftware.htmlunit.html.HtmlFileInput;
+import com.gargoylesoftware.htmlunit.html.HtmlForm;
+import com.gargoylesoftware.htmlunit.html.HtmlOption;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.html.HtmlSelect;
+import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
 
 import fll.TestUtils;
 import fll.Utilities;
@@ -210,8 +214,6 @@ public class FullTournamentTest {
         if (runNumber > numSeedingRounds
             && runNumber != maxRuns) {
           for (final String division : divisions) {
-            LOGGER.info("Printing scoresheets round: "
-                + runNumber + " division '" + division + "'");
             printPlayoffScoresheets(division);
           }
         }
@@ -480,22 +482,22 @@ public class FullTournamentTest {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "report/CategoryScoresByJudge");
 
-    // PDF reports need to be done with httpunit
-    final WebConversation conversation = WebTestUtils.getConversation();
-    WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
-        + "report/finalComputedScores.pdf");
-    WebResponse response = WebTestUtils.loadPage(conversation, request);
-    Assert.assertEquals("application/pdf", response.getContentType());
+    // PDF reports can't be done with selenium
+    final WebClient conversation = WebTestUtils.getConversation();
+    WebRequest request = new WebRequest(new URL(TestUtils.URL_ROOT
+        + "report/finalComputedScores.pdf"));
+    Page response = WebTestUtils.loadPage(conversation, request);
+    Assert.assertEquals("application/pdf", response.getWebResponse().getContentType());
 
-    request = new GetMethodWebRequest(TestUtils.URL_ROOT
-        + "report/CategoryScoresByScoreGroup");
+    request = new WebRequest(new URL(TestUtils.URL_ROOT
+        + "report/CategoryScoresByScoreGroup"));
     response = WebTestUtils.loadPage(conversation, request);
-    Assert.assertEquals("application/pdf", response.getContentType());
+    Assert.assertEquals("application/pdf", response.getWebResponse().getContentType());
 
-    request = new GetMethodWebRequest(TestUtils.URL_ROOT
-        + "report/PlayoffReport");
+    request = new WebRequest(new URL(TestUtils.URL_ROOT
+        + "report/PlayoffReport"));
     response = WebTestUtils.loadPage(conversation, request);
-    Assert.assertEquals("application/pdf", response.getContentType());
+    Assert.assertEquals("application/pdf", response.getWebResponse().getContentType());
 
   }
 
@@ -567,37 +569,48 @@ public class FullTournamentTest {
    */
   private static void printPlayoffScoresheets(final String division) throws MalformedURLException, IOException,
       InterruptedException, SAXException {
-    final WebConversation conversation = WebTestUtils.getConversation();
-    WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
-        + "playoff/index.jsp");
-    WebResponse response = WebTestUtils.loadPage(conversation, request);
-    Assert.assertTrue(response.isHTML());
+    final WebClient conversation = WebTestUtils.getConversation();
+
+    final Page indexResponse = WebTestUtils.loadPage(conversation, new WebRequest(new URL(TestUtils.URL_ROOT
+        + "playoff/index.jsp")));
+    Assert.assertTrue(indexResponse.isHtmlPage());
+    final HtmlPage indexHtml = (HtmlPage) indexResponse;
 
     // find form named 'printable'
-    WebForm form = response.getFormWithName("printable");
+    HtmlForm form = indexHtml.getFormByName("printable");
     Assert.assertNotNull("printable form not found", form);
 
-    request = form.getRequest();
+    final String formSource = WebTestUtils.getPageSource(form.getPage());
+    LOGGER.info("Form source: "
+        + formSource);
 
     // set division
-    request.setParameter("division", division);
+    final HtmlSelect divisionSelect = indexHtml.getHtmlElementById("printable.division");
+    final HtmlOption divisionOption = divisionSelect.getOptionByValue(division);
+    divisionSelect.setSelectedAttribute(divisionOption, true);
 
     // click 'Display Brackets'
-    response = WebTestUtils.loadPage(conversation, request);
-    Assert.assertTrue(response.isHTML());
+    final HtmlSubmitInput displayBrackets = form.getInputByValue("Display Brackets");
+    final com.gargoylesoftware.htmlunit.WebRequest displayBracketsRequest = form.getWebRequest(displayBrackets);
+    final Page displayResponse = WebTestUtils.loadPage(conversation, displayBracketsRequest);
+
+    Assert.assertTrue(displayResponse.isHtmlPage());
+    final HtmlPage displayHtml = (HtmlPage) displayResponse;
 
     // find form named 'printScoreSheets'
-    form = response.getFormWithName("printScoreSheets");
+    form = displayHtml.getFormByName("printScoreSheets");
     Assert.assertNotNull("printScoreSheets form not found", form);
 
-    form.setCheckbox("print1", true);
+    final HtmlCheckBoxInput printCheck = form.getInputByName("print1");
+    printCheck.setChecked(true);
 
     // click 'Print scoresheets'
-    request = form.getRequest();
-    response = WebTestUtils.loadPage(conversation, request);
+    final HtmlSubmitInput print = form.getInputByValue("Print scoresheets");
+    final com.gargoylesoftware.htmlunit.WebRequest printRequest = form.getWebRequest(print);
+    final Page printResponse = WebTestUtils.loadPage(conversation, printRequest);
 
     // check that result is PDF
-    Assert.assertEquals("application/pdf", response.getContentType());
+    Assert.assertEquals("application/pdf", printResponse.getWebResponse().getContentType());
 
   }
 
@@ -619,19 +632,20 @@ public class FullTournamentTest {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      final WebConversation conversation = WebTestUtils.getConversation();
+      final WebClient conversation = WebTestUtils.getConversation();
 
       // download subjective zip
-      WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
-          + "admin/subjective-data.fll");
-      WebResponse response = WebTestUtils.loadPage(conversation, request);
-      final String contentType = response.getContentType();
+      WebRequest request = new WebRequest(new URL(TestUtils.URL_ROOT
+          + "admin/subjective-data.fll"));
+      Page response = WebTestUtils.loadPage(conversation, request);
+      final String contentType = response.getWebResponse().getContentType();
       if (!"application/zip".equals(contentType)) {
         LOGGER.error("Got non-zip content: "
-            + response.getText());
+            + WebTestUtils.getPageSource(response));
       }
       Assert.assertEquals("application/zip", contentType);
-      final InputStream zipStream = response.getInputStream();
+      
+      final InputStream zipStream = response.getWebResponse().getContentAsStream();
       final FileOutputStream outputStream = new FileOutputStream(subjectiveZip);
       final byte[] buffer = new byte[512];
       int bytesRead = 0;
@@ -715,60 +729,26 @@ public class FullTournamentTest {
       subjective.save();
 
       // upload scores
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT
-          + "admin/index.jsp");
+      request = new WebRequest(new URL(TestUtils.URL_ROOT
+          + "admin/index.jsp"));
       response = WebTestUtils.loadPage(conversation, request);
-      Assert.assertTrue(response.isHTML());
-      final WebForm form = response.getFormWithName("uploadSubjective");
-      request = form.getRequest();
-      final UploadFileSpec subjectiveUpload = new UploadFileSpec(subjectiveZip);
-      form.setParameter("subjectiveFile", new UploadFileSpec[] { subjectiveUpload });
+      Assert.assertTrue(response.isHtmlPage());
+      final HtmlForm uploadForm = ((HtmlPage) response).getFormByName("uploadSubjective");
+
+      final HtmlFileInput uploadFile = uploadForm.getInputByName("subjectiveFile");
+      uploadFile.setValueAttribute(subjectiveZip.getAbsolutePath());
+
+      final HtmlSubmitInput button = uploadForm.getInputByValue("Upload");
+      request = uploadForm.getWebRequest(button);
+
       response = WebTestUtils.loadPage(conversation, request);
-      Assert.assertTrue(response.isHTML());
-      Assert.assertNotNull(response.getElementWithID("success"));
+      Assert.assertTrue(response.isHtmlPage());
+
+      Assert.assertNotNull(((HtmlPage) response).getElementById("success"));
+
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
-    }
-  }
-
-  /**
-   * Set a score element that may need button presses to be
-   * incremented/decremented.
-   * 
-   * @param form the form
-   * @param name the name of the element
-   * @param value the value to set the score element to
-   * @throws IOException if there is an error writing to the form
-   * @throws ParseException if there is an error parsing the default value of
-   *           the form element as a number
-   * @throws SAXException
-   */
-  public static void setFormScoreElement(final WebForm form,
-                                         final String name,
-                                         final int value) throws IOException, ParseException, SAXException {
-    // must be a number
-    final double defaultValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(form.getParameterValue(name)).doubleValue();
-    final double difference = value
-        - defaultValue;
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("Need to increment/decrement "
-          + name + " " + difference);
-    }
-    final Button button;
-    if (difference > 0) {
-      button = form.getButtonWithID("inc_"
-          + name + "_1");
-    } else {
-      button = form.getButtonWithID("dec_"
-          + name + "_-1");
-    }
-    if (null == button) {
-      throw new RuntimeException("Cannot find button for increment/decrement of "
-          + name + "button: " + button);
-    }
-    for (int val = 0; val < Math.abs(difference); ++val) {
-      button.click();
     }
   }
 
