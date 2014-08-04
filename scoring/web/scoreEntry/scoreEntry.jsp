@@ -111,7 +111,7 @@ function replaceText(sId, sText) {
   var el;
   if(document.getElementById
      && (el = document.getElementById(sId))) {
-     if(el.hasChildNodes) { // check for support for has child nodes, which isn't in httpunit, although using selenium to test this now
+     if(el.hasChildNodes) { // check for support for has child nodes
       while (el.hasChildNodes()) {
         el.removeChild(el.lastChild);
       }

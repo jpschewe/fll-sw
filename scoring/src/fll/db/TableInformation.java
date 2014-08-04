@@ -60,7 +60,6 @@ public final class TableInformation implements Serializable {
     return mId;
   }
 
-
   private static List<Integer> getTablesForDivision(final Connection connection,
                                                     final int tournament,
                                                     final String division) throws SQLException {
@@ -92,7 +91,7 @@ public final class TableInformation implements Serializable {
    * @param connection
    * @param tournament
    * @param division
-   * @return
+   * @return Tables listed by least used first
    */
   public static List<TableInformation> getTournamentTableInformation(final Connection connection,
                                                                      final int tournament,
@@ -103,9 +102,14 @@ public final class TableInformation implements Serializable {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      prep = connection.prepareStatement("SELECT PairID, SideA, SideB FROM tablenames" //
-          + " WHERE Tournament = ?" //
-      );
+      prep = connection.prepareStatement("select tablenames.PairID, tablenames.SideA, tablenames.SideB, COUNT(tablenames.PairID) as c"//
+          + " FROM PlayoffData, tablenames" //
+          + " WHERE PlayoffData.Tournament = ?" //
+          + " AND PlayoffData.Tournament = tablenames.Tournament" //
+          + " AND AssignedTable IS NOT NULL" //
+          + " AND (PlayoffData.AssignedTable = tablenames.SideA OR PlayoffData.AssignedTable = tablenames.SideB)"//
+          + " GROUP BY tablenames.PairID, tablenames.SideA, tablenames.SideB" //
+          + " ORDER BY c");
       prep.setInt(1, tournament);
 
       rs = prep.executeQuery();
@@ -128,5 +132,23 @@ public final class TableInformation implements Serializable {
 
     return tableInfo;
   }
-  
+
+  /**
+   * Given a table side, find the table information that matches.
+   * 
+   * @param tableInfo the list of all table information to look in
+   * @param tableSide the table side to match
+   * @return the table information or null
+   */
+  public static TableInformation getTableInformationForTableSide(final List<TableInformation> tableInfo,
+                                                                 final String tableSide) {
+    for (final TableInformation info : tableInfo) {
+      if (info.getSideA().equals(tableSide)
+          || info.getSideB().equals(tableSide)) {
+        return info;
+      }
+    }
+    return null;
+  }
+
 }

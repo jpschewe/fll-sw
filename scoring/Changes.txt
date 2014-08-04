@@ -1,3 +1,7 @@
+* 298/299 - Switch from HttpUnit to HtmlUnit for better javascript support in tests
+* 5 - Improvements to playoff score sheet generation pages
+      * Keep table assignments in sync
+      * Move scriplet into pure Java code for ease of maintenance
 * 294 - Upgrade to FindBugs 3.0.0
 * 209 - Put subjective application and webapp links on the admin page
 * 176 - Handle parenthesis in column names for uploaded spreadsheets

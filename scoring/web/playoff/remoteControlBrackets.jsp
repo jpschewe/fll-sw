@@ -23,15 +23,15 @@
 
   final String divisionKey = "playoffDivision";
   final String roundNumberKey = "playoffRoundNumber";
-  final String displayName = (String)session.getAttribute("displayName");
+  final String displayName = SessionAttributes.getAttribute(session, "displayName", String.class);
 
   final String sessionDivision;
   final Number sessionRoundNumber;
   if (null != displayName) {
-    sessionDivision = (String) application.getAttribute(displayName
-        + "_" + divisionKey);
-    sessionRoundNumber = (Number) application.getAttribute(displayName
-        + "_" + roundNumberKey);
+    sessionDivision = ApplicationAttributes.getAttribute(application, displayName
+        + "_" + divisionKey, String.class);
+    sessionRoundNumber = ApplicationAttributes.getAttribute(application, displayName
+        + "_" + roundNumberKey, Number.class);
   } else {
     sessionDivision = null;
     sessionRoundNumber = null;
@@ -48,7 +48,7 @@
       throw new RuntimeException("No division specified and no divisions in the database!");
     }
   } else {
-    division = (String) application.getAttribute(divisionKey);
+    division = ApplicationAttributes.getAttribute(application, divisionKey, String.class);
   }
 
   final int playoffRoundNumber;
@@ -57,7 +57,7 @@
   } else if (null == application.getAttribute(roundNumberKey)) {
     playoffRoundNumber = 1;
   } else {
-    playoffRoundNumber = ((Number) application.getAttribute(roundNumberKey)).intValue();
+    playoffRoundNumber = ApplicationAttributes.getAttribute(application, roundNumberKey, Number.class).intValue();
   }
 
   final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection, division);
@@ -65,7 +65,10 @@
   final BracketData bracketInfo = new BracketData(connection, division, playoffRoundNumber, playoffRoundNumber + 2, 4, false, true);
 
   bracketInfo.addBracketLabels(playoffRoundNumber);
-  bracketInfo.addStaticTableLabels(connection, currentTournament, division);
+  bracketInfo.addStaticTableLabels();
+  
+  pageContext.setAttribute("playoffRoundNumber", playoffRoundNumber);
+  pageContext.setAttribute("numPlayoffRounds", numPlayoffRounds);
 %>
 
 <html>
@@ -336,30 +339,12 @@ FONT.TIE {
 <br/>
 <br/>
 <br/>
-<table align='center' width='100%' border='0' cellpadding='3' cellspacing='0'>
- <%
-   if (playoffRoundNumber <= numPlayoffRounds) {
 
-     for (int rowIndex = 1; rowIndex <= bracketInfo.getNumRows(); rowIndex++) {
- %>
- <tr>
-  <%
-    // Get each cell. Insert bridge cells between columns.
-        for (int i = bracketInfo.getFirstRound(); i < bracketInfo.getLastRound(); i++) {
-  %>
-  <%=bracketInfo.getHtmlCell(connection, currentTournament, rowIndex, i)%>
-  <%=bracketInfo.getHtmlBridgeCell(rowIndex, i, BracketData.TopRightCornerStyle.MEET_TOP_OF_CELL)%>
-  <%
-    }
-  %>
-  <%=bracketInfo.getHtmlCell(connection, currentTournament, rowIndex, bracketInfo.getLastRound())%>
- </tr>
- <%
-   }
-   }//end if we have more than 2 teams
- %>
-</table>
-<span id="bottom">&nbsp;</span>
+  <c:if test="${playoffRoundNumber <= numPlayoffRounds }">
+   <%=bracketInfo.outputBrackets(BracketData.TopRightCornerStyle.MEET_TOP_OF_CELL)%>
+  </c:if>
+  
+  <span id="bottom">&nbsp;</span>
 </div>
 
 
