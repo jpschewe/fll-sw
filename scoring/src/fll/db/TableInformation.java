@@ -109,7 +109,7 @@ public final class TableInformation implements Serializable {
           + " AND AssignedTable IS NOT NULL" //
           + " AND (PlayoffData.AssignedTable = tablenames.SideA OR PlayoffData.AssignedTable = tablenames.SideB)"//
           + " GROUP BY tablenames.PairID, tablenames.SideA, tablenames.SideB" //
-          + " ORDER BY c");
+          + " ORDER BY c, tableNames.PairID");
       prep.setInt(1, tournament);
 
       rs = prep.executeQuery();
