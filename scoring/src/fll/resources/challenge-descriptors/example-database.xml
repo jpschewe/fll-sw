@@ -1,88 +1,89 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fll title="Sample Database - used to generate schema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd">
+ xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd">
 
-	<Performance minimumScore="0" weight="1.0">
-		<goal initialValue="0" max="1" min="0" multiplier="40" name="standard_count"
-			title="Standard goal with count and multiplier"></goal>
+ <Performance minimumScore="0" weight="1.0">
+  <goal initialValue="0" max="1" min="0" multiplier="40"
+   name="aaa_example_count" title="Standard goal with count and multiplier"></goal>
 
-		<goal initialValue="0" max="1" min="0" multiplier="30" name="standard_boolean"
-			title="Standard boolean goal"></goal>
+  <goal initialValue="0" max="1" min="0" multiplier="30"
+   name="aaa_example_boolean" title="Standard boolean goal"></goal>
 
-		<goal initialValue="0" max="1" min="0" multiplier="1"
-			name="standard_enum" title="Enumerated goal">
-			<value score="35" title="In Base" value="in_base"></value>
-			<value score="25" title="Off Ship" value="off_ship"></value>
-			<value score="0" title="No" value="no"></value>
-		</goal>
+  <goal initialValue="0" max="1" min="0" multiplier="1"
+   name="aaa_example_enum" title="Enumerated goal">
+   <value score="35" title="In Base" value="in_base"></value>
+   <value score="25" title="Off Ship" value="off_ship"></value>
+   <value score="0" title="No" value="no"></value>
+  </goal>
 
-		<goal name="robot_type" title="Robot Type" multiplier="0"
-			initialValue="1">
-			<value score="1" title="RCX" value="rcx" />
-			<value score="2" title="NXT" value="nxt" />
-		</goal>
+  <goal name="bbb_example_robot_type" title="Robot Type"
+   multiplier="0" initialValue="1">
+   <value score="1" title="RCX" value="rcx" />
+   <value score="2" title="NXT" value="nxt" />
+  </goal>
 
-		<computedGoal name="computed" title="Test computed goal">
-			<variable name="subtotal">
-				<term goal="standard_count" scoreType="computed" />
-				<term goal="standard_boolean" scoreType="computed" />
-				<term goal="standard_enum" scoreType="computed" />
-			</variable>
-			<switch>
-				<case>
-					<enumCondition>
-						<left>
-							<goalRef goal="robot_type" />
-						</left>
-						<equal-to />
-						<right>
-							<stringConstant value="rcx" />
-						</right>
-					</enumCondition>
-					<switch>
-						<case>
-							<condition>
-								<left>
-									<variableRef variable="subtotal" />
-								</left>
-								<less-than /> <!-- any inequality -->
-								<right>
-									<constant value="300" />
-								</right>
-							</condition>
-							<result>
-								<term goal="standard_count" scoreType="computed" />
-								<term goal="standard_boolean" scoreType="computed" />
-								<term goal="standard_enum" scoreType="computed" />
-								<constant value="60" />
-							</result>
-						</case>
-						<default> <!-- default case is required, the default just has a result -->
-							<constant value="240" />
-							<term coefficient="0.4" goal="standard_count" scoreType="computed" />
-							<term coefficient="0.4" goal="standard_boolean" scoreType="computed" />
-							<term coefficient="0.4" goal="standard_enum" scoreType="computed" />
-						</default>
-					</switch>
-				</case>
-				<default>
-					<constant value="0" />
-				</default>
-			</switch>
-		</computedGoal>
+  <computedGoal name="bbb_computed" title="Test computed goal">
+   <variable name="subtotal">
+    <term goal="aaa_example_count" scoreType="computed" />
+    <term goal="aaa_example_boolean" scoreType="computed" />
+    <term goal="aaa_example_enum" scoreType="computed" />
+   </variable>
+   <switch>
+    <case>
+     <enumCondition>
+      <left>
+       <goalRef goal="bbb_example_robot_type" />
+      </left>
+      <equal-to />
+      <right>
+       <stringConstant value="rcx" />
+      </right>
+     </enumCondition>
+     <switch>
+      <case>
+       <condition>
+        <left>
+         <variableRef variable="subtotal" />
+        </left>
+        <less-than /> <!-- any inequality -->
+        <right>
+         <constant value="300" />
+        </right>
+       </condition>
+       <result>
+        <term goal="aaa_example_count" scoreType="computed" />
+        <term goal="aaa_example_boolean" scoreType="computed" />
+        <term goal="aaa_example_enum" scoreType="computed" />
+        <constant value="60" />
+       </result>
+      </case>
+      <default> <!-- default case is required, the default just has a result -->
+       <constant value="240" />
+       <term coefficient="0.4" goal="aaa_example_count" scoreType="computed" />
+       <term coefficient="0.4" goal="aaa_example_boolean"
+        scoreType="computed" />
+       <term coefficient="0.4" goal="aaa_example_enum" scoreType="computed" />
+      </default>
+     </switch>
+    </case>
+    <default>
+     <constant value="0" />
+    </default>
+   </switch>
+  </computedGoal>
 
-		<tiebreaker>
-			<test winner="HIGH">
-				<term goal="standard_count" scoreType="raw" />
-			</test>
-		</tiebreaker>
+  <tiebreaker>
+   <test winner="HIGH">
+    <term goal="aaa_example_count" scoreType="raw" />
+   </test>
+  </tiebreaker>
 
-	</Performance>
+ </Performance>
 
- <subjectiveCategory name="subjective_category" title="Example subjective category"
-  weight="0.5">
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="durability"
-   title="Durability" category="Mechanical Design">
+ <subjectiveCategory name="aaa_example_subjective_category"
+  title="Example subjective category" weight="0.5">
+  <goal initialValue="0" max="12" min="0" multiplier="1"
+   name="aaa_example_goal" title="Durability" category="Mechanical Design">
    <description>Evidence of structural integrity; ability to withstand
     rigors of competition
    </description>
@@ -114,116 +115,9 @@
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1"
-   name="mechanical_efficiency" title="Mechanical Efficiency" category="Mechanical Design">
-   <description>Economic use of parts and time; easy to repair and
-    modify
-    Components work together
-   </description>
-   <rubric>
-    <range title="Beginning" min="1" max="3">
-     <description>Excessive parts or time to repair/modify
-      Robot lacks critical design components: works, stays together,
-      efficient part use
-      Few components work together, belong together
-     </description>
-    </range>
-    <range title="Developing" min="4" max="6">
-     <description>Inefficient parts or time to repair/modify
-      Robot lacks some critical design components: works, stays together,
-      efficient parts use
-      Some components work or belong together
-     </description>
-    </range>
-    <range title="Accomplished" min="7" max="9">
-     <description>Appropriate use of parts and time to repair/modify
-      Robot lacks few critical design components: works, stays together,
-      efficient parts use
-      Most components work and belong together
-     </description>
-    </range>
-    <range title="Exemplary" min="10" max="12">
-     <description>Streamlined use of parts and time to repair/modify
-      Robot is elegant, complete.
-      All components work together and look like they belong together.
-     </description>
-    </range>
-   </rubric>
-  </goal>
 
   <goal initialValue="0" max="12" min="0" multiplier="1"
-   name="mechanization" title="Mechanization" category="Mechanical Design">
-   <description>Ability of robot mechanisms to move or act with
-    appropriate speed, strength and accuracy for intended tasks
-    (propulsion and execution)
-   </description>
-   <rubric>
-    <range title="Beginning" min="1" max="3">
-     <description>Imbalance of speed, strength and accuracy on most
-      tasks
-      Difficulty going same distance repeatedly, turns inaccurate or inconsistent
-      Too fast for accuracy, too slow to complete mission
-     </description>
-    </range>
-    <range title="Developing" min="4" max="6">
-     <description>Imbalance of speed, strength and accuracy on some
-      tasks.
-      Goes defined distances and turns sometimes.
-      Somewhat too fast for accuracy, or too slow to complete mission
-     </description>
-    </range>
-    <range title="Accomplished" min="7" max="9">
-     <description>Appropriate balance of speed, strength and accuracy on
-      most tasks.
-      Goes defined distance and turns reasonable accurately and
-      consistently. Good speed balance.
-     </description>
-    </range>
-    <range title="Exemplary" min="10" max="12">
-     <description>Appropriate balance of speed, strength and accuracy on
-      every task.
-      Goes defined distance and turns accurately, efficiently and
-      consistently.
-      Adjusts speed for optimum control.
-     </description>
-    </range>
-   </rubric>
-  </goal>
-
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="attachments"
-   title="Attachments and Sensors" category="MN Design">
-   <description>Attachments and Sensors, if used, are an integrated part
-    of the design, they are used appropriately and achieve consistent
-    results.
-   </description>
-   <rubric>
-    <range title="Beginning" min="1" max="3">
-     <description>Sensors used incorrectly, Weak or poorly designed
-      attachments, difficult to add/remove.
-     </description>
-    </range>
-    <range title="Developing" min="4" max="6">
-     <description>Sensor use inconsistent. Not modular or consistent
-      attachments, attachments awkward to add/remove. Not repeatable.
-     </description>
-    </range>
-    <range title="Accomplished" min="7" max="9">
-     <description>Sensors used appropriately. Attachments somewhat
-      modular and work as expected. Easy to add/remove. Somewhat
-      repeatable.
-     </description>
-    </range>
-    <range title="Exemplary" min="10" max="12">
-     <description>Sensor use precise and repeatable. Attachments modular
-      and work as expected, repeatedly. They look like they belong to
-      the robot.
-     </description>
-    </range>
-   </rubric>
-  </goal>
-
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="kids_work"
-   title="Kids Did the Work" category="MN Design">
+   name="aaa_example_goal2" title="Kids Did the Work" category="MN Design">
    <description>Appropriate balance between team responsibility and
     coach guidance
    </description>
@@ -250,105 +144,6 @@
      <description>Team independence with minimal coach guidance.
       Thorough understanding of robot structure, underlying design,
       strategy and technology.
-     </description>
-    </range>
-   </rubric>
-  </goal>
-
-  <goal initialValue="0" max="12" min="0" multiplier="1"
-   name="design_process" title="Design Process" category="Strategy and Innovation">
-   <description>Ability to develop and explain improvement cycles where
-    alternatives are considered and narrowed, selections tested, design
-    improved.
-   </description>
-   <rubric>
-    <range title="Beginning" min="1" max="3">
-     <description>Disorganized AND poorly explained improvement cycles.
-      Uses standard design. No design process (concept build test
-      refine)
-     </description>
-    </range>
-    <range title="Developing" min="4" max="6">
-     <description>Disorganized OR poorly explained improvement cycles.
-      Some forethought in initial design. Refinement of robot not well
-      communicated.
-     </description>
-    </range>
-    <range title="Accomplished" min="7" max="9">
-     <description>Systematic and well-explained improvement cycle. Basic
-      understanding of design process, evidence of concept planning,
-      building, testing, refining
-     </description>
-    </range>
-    <range title="Exemplary" min="10" max="12">
-     <description>Systematic, well-explained and well-documented
-      improvement cycle. Good communication of complete design process.
-     </description>
-    </range>
-   </rubric>
-  </goal>
-
-  <goal initialValue="0" max="12" min="0" multiplier="1"
-   name="mission_strategy" title="Mission Strategy" category="Strategy and Innovations">
-   <description>Ability to clearly define and describe the team’s game
-    strategy.
-   </description>
-   <rubric>
-    <range title="Beginning" min="1" max="3">
-     <description>No clear goals AND no clear strategy. Strategy based
-      only on ease of task – no combined missions or maximizing
-      time/effort.
-     </description>
-    </range>
-    <range title="Developing" min="4" max="6">
-     <description>No clear goals OR no clear strategy. Strategy based on
-      ease of tasks, few risks. Some consideration or
-      time/efforts/points.
-     </description>
-    </range>
-    <range title="Accomplished" min="7" max="9">
-     <description>Clear strategy to accomplish the team’s well defined
-      goals. Effective strategic planning, combining of missions,
-      routes, attachments.
-     </description>
-    </range>
-    <range title="Exemplary" min="10" max="12">
-     <description>Clear strategy to accomplish most/all game missions
-      and team goals. Excellent/innovative strategy, combining missions,
-      routes, points.
-     </description>
-    </range>
-   </rubric>
-  </goal>
-
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="innovation"
-   title="Innovation" category="Strategy and Innovations">
-   <description>Creation of new, unique or unexpected features (in
-    design, programming, strategy or applications) that are beneficial
-    in performing the tasks.
-   </description>
-   <rubric>
-    <range title="Beginning" min="1" max="3">
-     <description>Original features with no added value or potential.
-      Design, drive, structure are standard. Expected sensor use only.
-     </description>
-    </range>
-    <range title="Developing" min="4" max="6">
-     <description>Original features with some added value or potential.
-      Either design creative, unique use of drive train or structure, or
-      unique mission strategy.
-     </description>
-    </range>
-    <range title="Accomplished" min="7" max="9">
-     <description>Original features with the potential to add
-      significant value. More than one unique design, drive train,
-      structure, or mission strategy.
-     </description>
-    </range>
-    <range title="Exemplary" min="10" max="12">
-     <description>Original features that add significant value.
-      Extremely unique/creative design, drive train, structure and/or
-      mission strategy.
      </description>
     </range>
    </rubric>
