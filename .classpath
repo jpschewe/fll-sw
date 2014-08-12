@@ -82,5 +82,6 @@
 	<classpathentry kind="lib" path="scoring/lib/test/serializer-2.7.1.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/selenium-java-2.42.2.jar" sourcepath="scoring/lib/test/selenium-java-2.42.2-srcs.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/selenium-server-standalone-2.42.2.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/schemaSpy_5.0.0.jar" sourcepath="scoring/lib/schemaSpy_5.0.0.source.jar"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>
