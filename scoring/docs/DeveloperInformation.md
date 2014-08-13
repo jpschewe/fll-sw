@@ -68,8 +68,7 @@ Please stick to [standard markdown syntax](http://daringfireball.net/projects/ma
 
 ### Viewing the database diagram
 
-There is a database diagram in scoring/docs/dbModel.clay. You can view this with the [Clay Mark II plugin for Eclipse](http://www.azzurri.jp/en/clay/index.html). The free version is all I'm using, so you can just download it by adding the following update site to your Eclipse installation: http://www.azzurri.co.jp/eclipse/plugins/
-
+After running the ant target doc.database-diagram the database diagram can be found in docs/database-diagram/index.html.
 
 ### Using Ant in Eclipse
 
