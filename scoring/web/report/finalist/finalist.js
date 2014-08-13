@@ -218,11 +218,6 @@
 			return null != visited && -1 != visited.indexOf(category.catId);
 		},
 
-		setNumTeamsAutoSelected : function(num) {
-			_numTeamsAutoSelected = num;
-			_save();
-		},
-
 		getNumTeamsAutoSelected : function() {
 			return _numTeamsAutoSelected;
 		},
