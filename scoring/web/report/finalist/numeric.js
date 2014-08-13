@@ -87,6 +87,15 @@ $(document)
 
 					var currentDivision = $.finalist.getCurrentDivision();
 
+					var roomEle = $("#room");
+					roomEle.change(function() {
+						var roomNumber = roomEle.val();
+						$.finalist.setRoom(currentCategory, currentDivision,
+								roomNumber);
+					});
+					roomEle.val($.finalist.getRoom(currentCategory,
+							currentDivision));
+
 					// note that this category has been visited so that it
 					// doesn't get initialized again
 					$.finalist.setCategoryVisited(currentCategory,
