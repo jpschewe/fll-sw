@@ -481,7 +481,9 @@
     <antcall target="dist.real" />
   </target>
 
-  <target name="dist.real" depends="compile,javadoc,doc.workflow.generate,doc.wiki.render,doc.database-diagram">
+  <target name="docs" depends="javadoc,doc.workflow.generate,doc.wiki.render,doc.database-diagram" description="Generate all documentation"/>
+  
+  <target name="dist.real" depends="compile,docs">
     <!-- copy docs to the web -->
     <copy todir="${dir.web}/documentation">
       <fileset dir="${basedir}/docs" />
@@ -802,7 +804,7 @@
     <antcall target="clean" />
     <antcall target="cpd.xml" />
     <antcall target="sloccount" />
-    <antcall target="javadoc" />
+    <antcall target="docs" />
     <antcall target="findbugs" />
     <antcall target="test.all" />
     <antcall target="tomcat.check-logs" />
