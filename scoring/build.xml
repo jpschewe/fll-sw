@@ -556,7 +556,7 @@
   -->
   <target name="javadoc" description="Create Javadoc API documentation">
 
-    <mkdir dir="${dir.dist}/docs/api" />
+    <mkdir dir="${basedir}/docs/api" />
     <javadoc sourcepath="src" windowtitle="${app.name}" destdir="${dir.dist}/docs/api" packagenames="fll.*" use="true" splitindex="true" breakiterator="yes">
       <tag name="test" scope="all" description="tests" />
       <tag name="pre" scope="constructors,methods" description="PreConditions" />
