@@ -136,6 +136,9 @@
 
     <pathelement location="${dir.lib}/commons-io-2.4.jar" />
 
+    <!-- writing out database diagrams -->
+    <pathelement location="${dir.lib}/schemaSpy_5.0.0.jar" />
+
     <path refid="cobertura.classpath" />
 
   </path>
@@ -352,8 +355,8 @@
 
   <import file="${dir.tomcat.src}/bin/catalina-tasks.xml" />
   <target name="generate.jsp" depends="prepare" description="Generate Java sources for JSP files" unless="jsp.notRequired">
-    <mkdir dir="${dir.src.jsp}"/>
-    
+    <mkdir dir="${dir.src.jsp}" />
+
     <jasper validateXml="false" uriroot="${dir.web}" webXmlFragment="${dir.src.jsp}/generated_web.xml" outputDir="${dir.src.jsp}" />
 
     <touch file="${dir.src.jsp}/.timestamp" />
@@ -478,7 +481,11 @@
     <antcall target="dist.real" />
   </target>
 
-  <target name="dist.real" depends="compile,javadoc,doc.workflow.generate,doc.wiki.render">
+  <target name="docs" depends="javadoc,doc.workflow.generate,doc.wiki.render,doc.database-diagram" description="Generate all documentation">
+    <copy todir="${basedir}/docs" file="${basedir}/web/documentation/index.html" />
+  </target>
+
+  <target name="dist.real" depends="compile,docs">
     <!-- copy docs to the web -->
     <copy todir="${dir.web}/documentation">
       <fileset dir="${basedir}/docs" />
@@ -553,8 +560,8 @@
   -->
   <target name="javadoc" description="Create Javadoc API documentation">
 
-    <mkdir dir="${dir.dist}/docs/api" />
-    <javadoc sourcepath="src" windowtitle="${app.name}" destdir="${dir.dist}/docs/api" packagenames="fll.*" use="true" splitindex="true" breakiterator="yes">
+    <mkdir dir="${basedir}/docs/api" />
+    <javadoc sourcepath="src" windowtitle="${app.name}" destdir="${basedir}/docs/api" packagenames="fll.*" use="true" splitindex="true" breakiterator="yes">
       <tag name="test" scope="all" description="tests" />
       <tag name="pre" scope="constructors,methods" description="PreConditions" />
       <tag name="post" scope="constructors,methods" description="PostConditions" />
@@ -772,6 +779,13 @@
 
   </target>
 
+  <target name="doc.database-diagram" description="Generate database diagram" depends="compile">
+    <!-- need fork set to true otherwise the classloader inside SchemaSpy doesn't see the database drive -->
+    <java classname="fll.db.GenerateDatabaseDiagram" taskname="SchemaSpy" classpathref="application.classpath" fork="true" failonerror="true">
+      <arg line="${basedir}/docs/database-diagram" />
+    </java>
+  </target>
+
   <target name="tomcat.check-logs" description="Check for errors in the tomcat logs">
     <fileset id="matches" dir="${dir.tomcat}/logs">
       <patternset id="files">
@@ -792,7 +806,7 @@
     <antcall target="clean" />
     <antcall target="cpd.xml" />
     <antcall target="sloccount" />
-    <antcall target="javadoc" />
+    <antcall target="docs" />
     <antcall target="findbugs" />
     <antcall target="test.all" />
     <antcall target="tomcat.check-logs" />
