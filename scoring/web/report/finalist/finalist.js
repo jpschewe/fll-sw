@@ -179,8 +179,9 @@
 		this.name = name;
 		this.numeric = numeric;
 		this.catId = category_id;
-		this.teams = [];
+		this.teams = []; // all teams reguardless of division
 		this.isPublic = true;
+		this.room = {}; // division -> room
 
 		_categories[this.catId] = this;
 		_save();
@@ -257,6 +258,18 @@
 
 		getDivisionByIndex : function(divIndex) {
 			return _divisions[divIndex];
+		},
+
+		/**
+		 * Get the room for the specified category and division.
+		 */
+		getRoom : function(category, division) {
+			return category.room[division];
+		},
+
+		setRoom : function(category, division, room) {
+			category.room[division] = room;
+			_save();
 		},
 
 		/**
