@@ -481,8 +481,10 @@
     <antcall target="dist.real" />
   </target>
 
-  <target name="docs" depends="javadoc,doc.workflow.generate,doc.wiki.render,doc.database-diagram" description="Generate all documentation"/>
-  
+  <target name="docs" depends="javadoc,doc.workflow.generate,doc.wiki.render,doc.database-diagram" description="Generate all documentation">
+    <copy todir="${basedir}/docs" file="${basedir}/web/documentation/index.html" />
+  </target>
+
   <target name="dist.real" depends="compile,docs">
     <!-- copy docs to the web -->
     <copy todir="${dir.web}/documentation">
@@ -559,7 +561,7 @@
   <target name="javadoc" description="Create Javadoc API documentation">
 
     <mkdir dir="${basedir}/docs/api" />
-    <javadoc sourcepath="src" windowtitle="${app.name}" destdir="${dir.dist}/docs/api" packagenames="fll.*" use="true" splitindex="true" breakiterator="yes">
+    <javadoc sourcepath="src" windowtitle="${app.name}" destdir="${basedir}/docs/api" packagenames="fll.*" use="true" splitindex="true" breakiterator="yes">
       <tag name="test" scope="all" description="tests" />
       <tag name="pre" scope="constructors,methods" description="PreConditions" />
       <tag name="post" scope="constructors,methods" description="PostConditions" />
