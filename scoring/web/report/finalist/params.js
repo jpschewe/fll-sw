@@ -10,6 +10,8 @@ $(document).ready(
 
 			$("#divisions").empty();
 
+			var teams = $.finalist.getAllTeams();
+
 			$.each($.finalist.getDivisions(), function(i, division) {
 				var selected = "";
 				if (division == $.finalist.getCurrentDivision()) {
@@ -18,7 +20,17 @@ $(document).ready(
 				var divisionOption = $("<option value='" + i + "'" + selected
 						+ ">" + division + "</option>");
 				$("#divisions").append(divisionOption);
-			});
+
+				// initialize categories with the auto selected teams
+				var scoreGroups = $.finalist.getScoreGroups(teams, division);
+
+				$.each($.finalist.getNumericCategories(),
+						function(i, category) {
+							$.finalist.initializeTeamsInCategory(division,
+									category, teams, scoreGroups);
+						});// foreach numeric category
+			}); // foreach division
+
 			$.finalist.setCurrentDivision($.finalist.getDivisionByIndex($(
 					"#divisions").val()));
 
