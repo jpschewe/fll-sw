@@ -481,7 +481,7 @@
     <antcall target="dist.real" />
   </target>
 
-  <target name="dist.real" depends="compile,javadoc,doc.workflow.generate,doc.wiki.render">
+  <target name="dist.real" depends="compile,javadoc,doc.workflow.generate,doc.wiki.render,doc.database-diagram">
     <!-- copy docs to the web -->
     <copy todir="${dir.web}/documentation">
       <fileset dir="${basedir}/docs" />
