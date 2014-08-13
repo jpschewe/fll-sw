@@ -4,42 +4,6 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
-function initializeTeamsInCategory(currentCategory, teams, scoreGroups) {
-	var checkedEnoughTeams = false;
-	var prevScores = {};
-	$.each(teams,
-			function(i, team) {
-				if ($.finalist.isTeamInDivision(team, $.finalist
-						.getCurrentDivision())) {
-					if (!checkedEnoughTeams) {
-						var group = team.judgingStation;
-						prevScore = prevScores[group];
-						curScore = $.finalist.getCategoryScore(team,
-								currentCategory);
-						if (prevScore == undefined) {
-							$.finalist.addTeamToCategory(currentCategory,
-									team.num);
-						} else if (scoreGroups[group] > 0) {
-							if (Math.abs(prevScore - curScore) < 1) {
-								$.finalist.addTeamToCategory(currentCategory,
-										team.num);
-							} else {
-								scoreGroups[group] = scoreGroups[group] - 1;
-
-								checkedEnoughTeams = true;
-								$.each(scoreGroups, function(key, value) {
-									if (value > 0) {
-										checkedEnoughTeams = false;
-									}
-								});
-							}
-						}
-						prevScores[group] = curScore;
-					} // checked enough teams
-				} // if current division
-			}); // foreach team
-}
-
 function getNumFinalistsId(team) {
 	return "num_finalists_" + team.num;
 }
@@ -123,8 +87,8 @@ $(document)
 
 					var currentDivision = $.finalist.getCurrentDivision();
 
-					var previouslyVisited = $.finalist.isCategoryVisited(
-							currentCategory, currentDivision);
+					// note that this category has been visited so that it
+					// doesn't get initialized again
 					$.finalist.setCategoryVisited(currentCategory,
 							currentDivision);
 
@@ -135,50 +99,7 @@ $(document)
 					$("#data").append(headerRow);
 
 					var teams = $.finalist.getAllTeams();
-					// sort with highest score first
-					teams
-							.sort(function(a, b) {
-								if (currentCategory.name != $.finalist.CHAMPIONSHIP_NAME) {
-									// sort by score group first
-									var aGroup = a.judgingStation;
-									var bGroup = b.judgingStation;
-									if (aGroup < bGroup) {
-										return -1;
-									} else if (aGroup > bGroup) {
-										return 1;
-									}
-									// fall through to score check
-								}
-								var aScore = $.finalist.getCategoryScore(a,
-										currentCategory);
-								var bScore = $.finalist.getCategoryScore(b,
-										currentCategory);
-								if (aScore == bScore) {
-									return 0;
-								} else if (aScore < bScore) {
-									return 1;
-								} else {
-									return -1;
-								}
-							});
-
-					// compute the set of all score groups
-					var scoreGroups = {};
-					$.each(teams,
-							function(i, team) {
-								if ($.finalist.isTeamInDivision(team,
-										currentDivision)) {
-									var group = team.judgingStation;
-									scoreGroups[group] = $.finalist
-											.getNumTeamsAutoSelected();
-								}
-							});
-
-					if (!previouslyVisited) {
-						// initialize teams in category
-						initializeTeamsInCategory(currentCategory, teams,
-								scoreGroups);
-					}
+					$.finalist.sortTeamsByCategory(teams, currentCategory);
 
 					createTeamTable(teams, currentDivision, currentCategory);
 
