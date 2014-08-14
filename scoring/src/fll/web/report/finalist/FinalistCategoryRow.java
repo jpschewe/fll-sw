@@ -15,9 +15,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 final class FinalistCategoryRow {
 
   public FinalistCategoryRow(@JsonProperty("categoryName") final String categoryName,
-                             @JsonProperty("isPublic") final boolean isPublic) {
+                             @JsonProperty("isPublic") final boolean isPublic,
+                             @JsonProperty("room") final String room) {
     this.categoryName = categoryName;
     this.isPublic = isPublic;
+    this.room = room;
   }
 
   private final String categoryName;
@@ -30,6 +32,12 @@ final class FinalistCategoryRow {
 
   public boolean getIsPublic() {
     return isPublic;
+  }
+
+  private final String room;
+
+  public String getRoom() {
+    return room;
   }
 
 }

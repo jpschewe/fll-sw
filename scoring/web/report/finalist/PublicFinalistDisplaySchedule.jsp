@@ -1,18 +1,18 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%
-	fll.web.report.finalist.PublicFinalistDisplaySchedule
-			.populateContext(request, application, session, pageContext);
+  fll.web.report.finalist.PublicFinalistDisplaySchedule
+					.populateContext(request, application, session, pageContext);
 %>
 
 <html>
 <head>
 <link rel="stylesheet" type="text/css"
-	href="<c:url value='/style/base.css'/>" />
+ href="<c:url value='/style/base.css'/>" />
 <title>Reporting</title>
 
 <script type='text/javascript'
-	src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
+ src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
 
 <style>
 BODY {
@@ -35,25 +35,33 @@ BODY {
 </head>
 
 <body>
-	${message}
-	<%-- clear out the message, so that we don't see it again --%>
-	<c:remove var="message" />
+ ${message}
+ <%-- clear out the message, so that we don't see it again --%>
+ <c:remove var="message" />
 
-	<h1>Finalist Schedule for Division: ${division }</h1>
+ <h1>Finalist Schedule for Division: ${division }</h1>
 
-	<c:forEach items="${publicCategories }" var="category">
-		<h2>Category: ${category }</h2>
-		<c:forEach items="${publicSchedules[category] }" var="schedRow">
-			<div>
-				<c:set var="team" value="${allTeams[schedRow.teamNumber] }" />
+ <c:forEach items="${publicCategories }" var="category">
+  <c:choose>
+   <c:when test="${empty rooms[category] }">
+    <h2>Category: ${category }</h2>
+   </c:when>
+   <c:otherwise>
+    <h2>Category: ${category } Room: ${rooms[category] }</h2>
+   </c:otherwise>
+  </c:choose>
 
-				<span><fmt:formatDate value="${schedRow.time }" type="time"
-						pattern="hh:mm" /></span> - ${team.teamNumber } - ${team.teamName } -
-				${team.organization }
-			</div>
-		</c:forEach>
+  <c:forEach items="${publicSchedules[category] }" var="schedRow">
+   <div>
+    <c:set var="team" value="${allTeams[schedRow.teamNumber] }" />
 
-	</c:forEach>
+    <span><fmt:formatDate value="${schedRow.time }" type="time"
+      pattern="hh:mm" /></span> - ${team.teamNumber } - ${team.teamName } -
+    ${team.organization }
+   </div>
+  </c:forEach>
+
+ </c:forEach>
 
 </body>
 </html>
