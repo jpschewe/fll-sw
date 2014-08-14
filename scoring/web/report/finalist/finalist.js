@@ -179,8 +179,9 @@
 		this.name = name;
 		this.numeric = numeric;
 		this.catId = category_id;
-		this.teams = [];
+		this.teams = []; // all teams reguardless of division
 		this.isPublic = true;
+		this.room = {}; // division -> room
 
 		_categories[this.catId] = this;
 		_save();
@@ -216,11 +217,6 @@
 		isCategoryVisited : function(category, division) {
 			var visited = _categoriesVisited[division];
 			return null != visited && -1 != visited.indexOf(category.catId);
-		},
-
-		setNumTeamsAutoSelected : function(num) {
-			_numTeamsAutoSelected = num;
-			_save();
 		},
 
 		getNumTeamsAutoSelected : function() {
@@ -262,6 +258,18 @@
 
 		getDivisionByIndex : function(divIndex) {
 			return _divisions[divIndex];
+		},
+
+		/**
+		 * Get the room for the specified category and division.
+		 */
+		getRoom : function(category, division) {
+			return category.room[division];
+		},
+
+		setRoom : function(category, division, room) {
+			category.room[division] = room;
+			_save();
 		},
 
 		/**
@@ -327,6 +335,99 @@
 				teams.push(val);
 			});
 			return teams;
+		},
+
+		/**
+		 * compute the set of all score groups in the specified division.
+		 * 
+		 * @return map of score group to number of teams to auto select
+		 */
+		getScoreGroups : function(teams, currentDivision) {
+			var scoreGroups = {};
+			$.each(teams, function(i, team) {
+				if ($.finalist.isTeamInDivision(team, currentDivision)) {
+					var group = team.judgingStation;
+					scoreGroups[group] = $.finalist.getNumTeamsAutoSelected();
+				}
+			});
+			return scoreGroups;
+		},
+
+		/**
+		 * Sort teams first by score group (unless this is the championship
+		 * category), then sort by score in the specified category.
+		 */
+		sortTeamsByCategory : function(teams, currentCategory) {
+			teams.sort(function(a, b) {
+				if (currentCategory.name != $.finalist.CHAMPIONSHIP_NAME) {
+					// sort by score group first
+					var aGroup = a.judgingStation;
+					var bGroup = b.judgingStation;
+					if (aGroup < bGroup) {
+						return -1;
+					} else if (aGroup > bGroup) {
+						return 1;
+					}
+					// fall through to score check
+				}
+				var aScore = $.finalist.getCategoryScore(a, currentCategory);
+				var bScore = $.finalist.getCategoryScore(b, currentCategory);
+				if (aScore == bScore) {
+					return 0;
+				} else if (aScore < bScore) {
+					return 1;
+				} else {
+					return -1;
+				}
+			});
+		},
+
+		/**
+		 * Initialize the teams in the specified numeric category if it has not
+		 * been visited yet.
+		 */
+		initializeTeamsInCategory : function(currentDivision, currentCategory,
+				teams, scoreGroups) {
+			var previouslyVisited = $.finalist.isCategoryVisited(
+					currentCategory, currentDivision);
+			if (previouslyVisited) {
+				// don't mess with existing values
+				return;
+			}
+
+			$.finalist.clearTeamsInCategory(currentCategory, currentDivision);
+			var checkedEnoughTeams = false;
+			var prevScores = {};
+			$.finalist.sortTeamsByCategory(teams, currentCategory);
+			$.each(teams, function(i, team) {
+				if ($.finalist.isTeamInDivision(team, currentDivision)) {
+					if (!checkedEnoughTeams) {
+						var group = team.judgingStation;
+						prevScore = prevScores[group];
+						curScore = $.finalist.getCategoryScore(team,
+								currentCategory);
+						if (prevScore == undefined) {
+							$.finalist.addTeamToCategory(currentCategory,
+									team.num);
+						} else if (scoreGroups[group] > 0) {
+							if (Math.abs(prevScore - curScore) < 1) {
+								$.finalist.addTeamToCategory(currentCategory,
+										team.num);
+							} else {
+								scoreGroups[group] = scoreGroups[group] - 1;
+
+								checkedEnoughTeams = true;
+								$.each(scoreGroups, function(key, value) {
+									if (value > 0) {
+										checkedEnoughTeams = false;
+									}
+								});
+							}
+						}
+						prevScores[group] = curScore;
+					} // checked enough teams
+				} // if current division
+			}); // foreach team
 		},
 
 		/**
@@ -483,8 +584,18 @@
 			return -1 != category.teams.indexOf(teamNum);
 		},
 
-		clearTeamsInCategory : function(category) {
-			category.teams = [];
+		clearTeamsInCategory : function(category, division) {
+			var toRemove = [];
+			$.each(category.teams, function(index, teamNum) {
+				var team = $.finalist.lookupTeam(teamNum);
+				if ($.finalist.isTeamInDivision(team, division)) {
+					toRemove.push(teamNum);
+				}
+			});
+
+			$.each(toRemove, function(index, teamNum) {
+				$.finalist.removeTeamFromCategory(category, teamNum);
+			});
 			_save();
 		},
 
@@ -512,12 +623,12 @@
 			});
 			return found;
 		},
-		
+
 		setCategoryPublic : function(category, value) {
 			category.isPublic = value;
 			_save();
 		},
-		
+
 		isCategoryPublic : function(category) {
 			return category.isPublic;
 		},
@@ -533,7 +644,8 @@
 			$.each($.finalist.getAllCategories(), function(i, category) {
 				$.each(category.teams, function(j, teamNum) {
 					var team = $.finalist.lookupTeam(teamNum);
-					if ($.finalist.isTeamInDivision(team, $.finalist.getCurrentDivision())) {
+					if ($.finalist.isTeamInDivision(team, $.finalist
+							.getCurrentDivision())) {
 						if (null == finalistsCount[teamNum]) {
 							finalistsCount[teamNum] = [];
 						}

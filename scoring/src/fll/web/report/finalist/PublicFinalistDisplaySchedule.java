@@ -66,6 +66,7 @@ public class PublicFinalistDisplaySchedule {
       }
       pageContext.setAttribute("publicCategories", publicCategories);
       pageContext.setAttribute("publicSchedules", publicSchedules);
+      pageContext.setAttribute("rooms", schedule.getRooms());
 
       final Map<Integer, TournamentTeam> allTeams = Queries.getTournamentTeams(connection, tournament);
       pageContext.setAttribute("allTeams", allTeams);

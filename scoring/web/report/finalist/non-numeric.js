@@ -17,7 +17,8 @@ $(document).ready(
 				var addedTeam = false;
 				$.each(category.teams, function(j, teamNum) {
 					var team = $.finalist.lookupTeam(teamNum);
-					if ($.finalist.isTeamInDivision(team, $.finalist.getCurrentDivision())) {
+					if ($.finalist.isTeamInDivision(team, $.finalist
+							.getCurrentDivision())) {
 						addedTeam = true;
 						var teamIdx = addTeam(category);
 						populateTeamInformation(category, teamIdx, team);
@@ -45,7 +46,7 @@ function addCategoryElement(category) {
 	catEle.append(nameEle);
 	nameEle.change(function() {
 		var newName = nameEle.val();
-		if(null == newName || "" == newName) {
+		if (null == newName || "" == newName) {
 			alert("All categories must have non-empty names");
 			nameEle.val(category.name);
 		}
@@ -56,6 +57,16 @@ function addCategoryElement(category) {
 		}
 	});
 	nameEle.val(category.name);
+
+	catEle.append("Room number: ");
+	var roomEle = $("<input type='text' id='room_" + category.catId + "'/>");
+	catEle.append(roomEle);
+	roomEle.change(function() {
+		var roomNumber = roomEle.val();
+		$.finalist.setRoom(category, $.finalist.getCurrentDivision(),
+				roomNumber);
+	});
+	roomEle.val($.finalist.getRoom(category, $.finalist.getCurrentDivision()));
 
 	var teamList = $("<ul id='category_" + category.catId + "'></ul>");
 	catEle.append(teamList);
@@ -107,7 +118,8 @@ function populateTeamInformation(category, teamIdx, team) {
 	$("#" + teamNumId(category.catId, teamIdx)).data('oldVal', team.num);
 	$("#" + teamNameId(category.catId, teamIdx)).val(team.name);
 	$("#" + teamOrgId(category.catId, teamIdx)).val(team.org);
-	$("#" + teamJudgingStationId(category.catId, teamIdx)).val(team.judgingStation);
+	$("#" + teamJudgingStationId(category.catId, teamIdx)).val(
+			team.judgingStation);
 }
 
 /**
@@ -154,8 +166,8 @@ function addTeam(category) {
 			+ "' readonly/>");
 	teamEle.append(orgEle);
 
-	var judgingStationEle = $("<input id='" + teamJudgingStationId(category.catId, teamIdx)
-			+ "' readonly/>");
+	var judgingStationEle = $("<input id='"
+			+ teamJudgingStationId(category.catId, teamIdx) + "' readonly/>");
 	teamEle.append(judgingStationEle);
 
 	return teamIdx;
