@@ -1,3 +1,4 @@
+* 97 - add room numbers to finalist schedules
 * 26 - Generate database diagram for developers
 * 298/299 - Switch from HttpUnit to HtmlUnit for better javascript support in tests
 * 5 - Improvements to playoff score sheet generation pages
