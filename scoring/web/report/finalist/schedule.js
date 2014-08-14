@@ -41,9 +41,10 @@ function FinalistDBRow(categoryName, hour, minute, teamNumber) {
  * Used for packaging up and sending to the server to put in the database. Needs
  * to match fll.web.report.finalist.FinalistCategoryRow.
  */
-function FinalistCategoryRow(categoryName, isPublic) {
+function FinalistCategoryRow(categoryName, isPublic, room) {
 	this.categoryName = categoryName;
 	this.isPublic = isPublic;
+	this.room = room;
 }
 
 $(document).ready(
@@ -105,7 +106,7 @@ $(document).ready(
 			var categoryRows = [];
 			$.each($.finalist.getAllCategories(), function(i, category) {
 				var cat = new FinalistCategoryRow(category.name,
-						category.isPublic);
+						category.isPublic, $.finalist.getRoom(category, currentDivision));
 				categoryRows.push(cat);
 			}); // foreach category
 			$('#category_data').val($.toJSON(categoryRows));
