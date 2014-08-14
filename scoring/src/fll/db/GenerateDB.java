@@ -168,7 +168,7 @@ public final class GenerateDB {
       createScheduleTables(connection, true);
 
       createSubjectiveCategoryScheduleColumnMappingTables(connection);
-      
+
       createFinalistScheduleTables(connection, true);
 
       // Table structure for table 'Judges'
@@ -352,6 +352,7 @@ public final class GenerateDB {
       sql.append(" ,category LONGVARCHAR NOT NULL");
       sql.append(" ,is_public BOOLEAN NOT NULL");
       sql.append(" ,division VARCHAR(32) NOT NULL");
+      sql.append(" ,room VARCHAR(32) DEFAULT NULL");
       sql.append(" ,CONSTRAINT finalist_categories_pk PRIMARY KEY (tournament, category, division)");
       if (createConstraints) {
         sql.append(" ,CONSTRAINT finalist_categories_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");

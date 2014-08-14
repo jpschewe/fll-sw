@@ -89,10 +89,11 @@ abstract public class AbstractFinalistSchedule extends BaseFLLServlet {
 
       document.addTitle("Finalist Schedule");
 
+      final Map<String, String> rooms = schedule.getRooms();
       for (final Map.Entry<String, Boolean> entry : schedule.getCategories().entrySet()) {
         if (showPrivate
             || entry.getValue()) {
-          createCategoryPage(document, connection, entry.getKey(), schedule);
+          createCategoryPage(document, connection, entry.getKey(), rooms.get(entry.getKey()), schedule);
         }
       }
 
@@ -133,6 +134,7 @@ abstract public class AbstractFinalistSchedule extends BaseFLLServlet {
   private void createCategoryPage(final Document document,
                                   final Connection connection,
                                   final String category,
+                                  final String room,
                                   final FinalistSchedule schedule) throws DocumentException, SQLException {
     // header name
     final Paragraph para = new Paragraph();
@@ -140,6 +142,10 @@ abstract public class AbstractFinalistSchedule extends BaseFLLServlet {
 
     para.add(new Chunk(String.format("Finalist schedule for %s", category), TITLE_FONT));
     para.add(Chunk.NEWLINE);
+    if (null != room
+        && !"".equals(room)) {
+      para.add(new Chunk(String.format("Room: %s", room), TITLE_FONT));
+    }
     document.add(para);
 
     final PdfPTable schedTable = new PdfPTable(new float[] { 12.5f, 12.5f, 37.5f, 37.5f });

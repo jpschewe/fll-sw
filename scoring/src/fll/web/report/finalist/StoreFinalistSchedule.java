@@ -10,8 +10,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -96,12 +94,8 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
         LOGGER.trace("Category Data has "
             + rows.size() + " rows");
       }
-      final Map<String, Boolean> categoryMap = new HashMap<String, Boolean>();
-      for (final FinalistCategoryRow cat : categories) {
-        categoryMap.put(cat.getCategoryName(), cat.getIsPublic());
-      }
 
-      final FinalistSchedule schedule = new FinalistSchedule(tournament, division, categoryMap, rows);
+      final FinalistSchedule schedule = new FinalistSchedule(tournament, division, categories, rows);
       schedule.store(connection);
 
       message.append("<p id='success'>Finalist schedule saved to the database</p>");

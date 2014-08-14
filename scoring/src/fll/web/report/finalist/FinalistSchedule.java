@@ -39,12 +39,16 @@ public class FinalistSchedule implements Serializable {
    */
   public FinalistSchedule(final int tournament,
                           final String division,
-                          final Map<String, Boolean> categories,
+                          final Collection<FinalistCategoryRow> categories,
                           final Collection<FinalistDBRow> schedule) {
     this.mTournament = tournament;
     this.mDivision = division;
-    this.mCategories = Collections.unmodifiableMap(new HashMap<String, Boolean>(categories));
     this.mSchedule = Collections.unmodifiableCollection(new LinkedList<FinalistDBRow>(schedule));
+
+    for (final FinalistCategoryRow row : categories) {
+      mCategories.put(row.getCategoryName(), row.getIsPublic());
+      mRooms.put(row.getCategoryName(), row.getRoom());
+    }
   }
 
   /**
@@ -56,7 +60,6 @@ public class FinalistSchedule implements Serializable {
   public FinalistSchedule(final Connection connection,
                           final int tournament,
                           final String division) throws SQLException {
-    final Map<String, Boolean> newCategories = new HashMap<String, Boolean>();
     final Collection<FinalistDBRow> newSchedule = new LinkedList<FinalistDBRow>();
     mTournament = tournament;
     mDivision = division;
@@ -66,14 +69,16 @@ public class FinalistSchedule implements Serializable {
     PreparedStatement getSchedule = null;
     ResultSet schedule = null;
     try {
-      getCategories = connection.prepareStatement("SELECT category, is_public FROM finalist_categories WHERE tournament = ? AND division = ?");
+      getCategories = connection.prepareStatement("SELECT category, is_public, room FROM finalist_categories WHERE tournament = ? AND division = ?");
       getCategories.setInt(1, mTournament);
       getCategories.setString(2, mDivision);
       categories = getCategories.executeQuery();
       while (categories.next()) {
         final String name = categories.getString(1);
         final boolean isPublic = categories.getBoolean(2);
-        newCategories.put(name, isPublic);
+        final String room = categories.getString(3);
+        mCategories.put(name, isPublic);
+        mRooms.put(name, room);
       }
 
       getSchedule = connection.prepareStatement("SELECT category, judge_time, team_number FROM finalist_schedule WHERE tournament = ? AND division = ?");
@@ -95,7 +100,6 @@ public class FinalistSchedule implements Serializable {
         newSchedule.add(row);
       }
 
-      mCategories = Collections.unmodifiableMap(newCategories);
       mSchedule = Collections.unmodifiableCollection(newSchedule);
 
     } finally {
@@ -106,15 +110,26 @@ public class FinalistSchedule implements Serializable {
     }
   }
 
-  private final Map<String, Boolean> mCategories;
+  private final Map<String, Boolean> mCategories = new HashMap<String, Boolean>();
 
   /**
-   * Unmodifiable version of the categories.
+   * Unmodifiable version of the categories and which ones are public.
    * 
    * @return key=category name, value=is public
    */
   public Map<String, Boolean> getCategories() {
     return Collections.unmodifiableMap(mCategories);
+  }
+
+  private final Map<String, String> mRooms = new HashMap<String, String>();
+
+  /**
+   * Unmodifiable version of the rooms for each category.
+   * 
+   * @return key=category name, value=room
+   */
+  public Map<String, String> getRooms() {
+    return Collections.unmodifiableMap(mRooms);
   }
 
   private final Collection<FinalistDBRow> mSchedule;
@@ -170,13 +185,14 @@ public class FinalistSchedule implements Serializable {
       deleteCategoriesPrep.setString(2, getDivision());
       deleteCategoriesPrep.executeUpdate();
 
-      insertCategoriesPrep = connection.prepareStatement("INSERT INTO finalist_categories (tournament, division, category, is_public) VALUES(?, ?, ?, ?)");
+      insertCategoriesPrep = connection.prepareStatement("INSERT INTO finalist_categories (tournament, division, category, is_public, room) VALUES(?, ?, ?, ?, ?)");
       insertCategoriesPrep.setInt(1, getTournament());
       insertCategoriesPrep.setString(2, getDivision());
 
       for (final Map.Entry<String, Boolean> entry : mCategories.entrySet()) {
         insertCategoriesPrep.setString(3, entry.getKey());
         insertCategoriesPrep.setBoolean(4, entry.getValue());
+        insertCategoriesPrep.setString(5, mRooms.get(entry.getKey()));
         insertCategoriesPrep.executeUpdate();
       }
 
