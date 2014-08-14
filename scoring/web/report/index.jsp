@@ -1,6 +1,8 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<% fll.web.report.ReportIndex.populateContext(application, pageContext); %>
+<%
+  fll.web.report.ReportIndex.populateContext(application, pageContext);
+%>
 
 <html>
 <head>
@@ -49,8 +51,8 @@
      <c:forEach var="division" items="${finalistDivisions }">
       <option value='${division }'>${division }</option>
      </c:forEach>
-    </select> <input type='submit' value='Private Finalist Schedule (PDF)' /> This
-    displays the finalist schedule for all categories.
+    </select> <input type='submit' value='Private Finalist Schedule (PDF)' />
+    This displays the finalist schedule for all categories.
    </form>
   </li>
 
@@ -60,22 +62,26 @@
      <c:forEach var="division" items="${finalistDivisions }">
       <option value='${division }'>${division }</option>
      </c:forEach>
-    </select> <input type='submit' value='Public Finalist Schedule (PDF)' /> This
-    displays the finalist schedule for public categories.
+    </select> <input type='submit' value='Public Finalist Schedule (PDF)' />
+    This displays the finalist schedule for public categories.
    </form>
   </li>
 
   <li>
-   <form ACTION='finalist/PublicFinalistDisplaySchedule.jsp' METHOD='POST'>
+   <form ACTION='finalist/PublicFinalistDisplaySchedule.jsp'
+    METHOD='POST'>
     <select name='division'>
      <c:forEach var="division" items="${finalistDivisions }">
       <option value='${division }'>${division }</option>
      </c:forEach>
-    </select> <input type='submit' value='Public Finalist Schedule (HTML)' /> This
-    displays the finalist schedule for public categories. This should be used 
-    on the big screen display.
+    </select> <input type='submit' value='Public Finalist Schedule (HTML)' />
+    This displays the finalist schedule for public categories. This
+    should be used on the big screen display.
    </form>
   </li>
+
+  <li><a href="finalist/TeamFinalistSchedule">Finalist Schedule
+    for each team</a></li>
 
   <li><a href="RankingReport">Ranking Report for teams</a>. This is
    printed at the end of the day and each team gets their page.</li>
@@ -104,8 +110,7 @@
     Show performance scores for team <select name='TeamNumber'>
      <c:forEach items="${tournamentTeams}" var="team">
       <option value='<c:out value="${team.teamNumber}"/>'>
-       <c:out value="${team.teamNumber}" />
-       -
+       <c:out value="${team.teamNumber}" /> -
        <c:out value="${team.teamName}" />
       </option>
      </c:forEach>
