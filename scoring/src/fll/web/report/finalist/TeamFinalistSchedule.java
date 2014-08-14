@@ -3,13 +3,14 @@
  * HighTechKids is on the web at: http://www.hightechkids.org
  * This code is released under GPL; see LICENSE.txt for details.
  */
-package fll.web.report;
+package fll.web.report.finalist;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.DateFormat;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
@@ -43,8 +44,6 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfPageEventHelper;
 import com.itextpdf.text.pdf.PdfWriter;
 
-import fll.CategoryRank;
-import fll.TeamRanking;
 import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.util.LogUtils;
@@ -53,16 +52,16 @@ import fll.web.BaseFLLServlet;
 import fll.xml.ChallengeDescription;
 
 /**
+ * Generate a PDF with one page per team any finalist schedule.
+ * 
  * @author jpschewe
  */
-@WebServlet("/report/RankingReport")
-public class RankingReport extends BaseFLLServlet {
+@WebServlet("/report/finalist/TeamFinalistSchedule")
+public class TeamFinalistSchedule extends BaseFLLServlet {
 
   private static final Logger LOG = LogUtils.getLogger();
 
-  private static final Font RANK_TITLE_FONT = FontFactory.getFont(FontFactory.HELVETICA, 10, Font.BOLD);
-
-  private static final Font RANK_VALUE_FONT = FontFactory.getFont(FontFactory.HELVETICA, 10, Font.NORMAL);
+  private static final Font VALUE_FONT = FontFactory.getFont(FontFactory.HELVETICA, 10, Font.NORMAL);
 
   private static final Font TITLE_FONT = FontFactory.getFont(FontFactory.TIMES, 12, Font.BOLD);
 
@@ -92,58 +91,72 @@ public class RankingReport extends BaseFLLServlet {
       document.addTitle("Ranking Report");
 
       // add content
-      final Map<Integer, TeamRanking> teamRankings = Queries.getTeamRankings(connection, challengeDescription);
-      final List<Integer> teamNumbers = new LinkedList<Integer>(teamRankings.keySet());
+      final int currentTournament = Queries.getCurrentTournament(connection);
+
+      final Collection<String> divisions = FinalistSchedule.getAllDivisions(connection, currentTournament);
+      final Collection<FinalistSchedule> schedules = new LinkedList<FinalistSchedule>();
+      for (final String division : divisions) {
+        final FinalistSchedule schedule = new FinalistSchedule(connection, currentTournament, division);
+        schedules.add(schedule);
+      }
+
+      final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection, currentTournament);
+      final List<Integer> teamNumbers = new LinkedList<Integer>(tournamentTeams.keySet());
       Collections.sort(teamNumbers);
-      final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection);
 
       for (final int teamNum : teamNumbers) {
         final TournamentTeam team = tournamentTeams.get(teamNum);
-        final Paragraph para = new Paragraph();
-        para.add(Chunk.NEWLINE);
-        para.add(new Chunk("Ranks for Team "
-            + teamNum, TITLE_FONT));
-        para.add(Chunk.NEWLINE);
-        para.add(new Chunk(team.getTeamName()
-            + " / " + team.getOrganization(), TITLE_FONT));
-        para.add(Chunk.NEWLINE);
-        para.add(new Chunk("Division: "
-            + team.getEventDivision(), TITLE_FONT));
-        para.add(Chunk.NEWLINE);
-        para.add(new Chunk(
-                           "Each team is ranked in each category in the judging group and division they were judged in. Performance and Overall score are ranked by division only. Teams may have the same rank if they were tied.",
-                           RANK_VALUE_FONT));
-        para.add(Chunk.NEWLINE);
-        para.add(Chunk.NEWLINE);
-        final TeamRanking teamRanks = teamRankings.get(teamNum);
 
-        final List<String> categories = teamRanks.getCategories();
-        Collections.sort(categories);
-        
-        // pull out Overall first
-        if (categories.contains(CategoryRank.OVERALL_CATEGORY_NAME)) {
-          final String category = CategoryRank.OVERALL_CATEGORY_NAME;
-          outputCategory(para, teamRanks, category);
-        }
-        para.add(Chunk.NEWLINE);
+        for (final FinalistSchedule schedule : schedules) {
+          final List<FinalistDBRow> finalistTimes = schedule.getScheduleForTeam(teamNum);
+          final Map<String, String> rooms = schedule.getRooms();
 
-        // pull out performance next
-        if (categories.contains(CategoryRank.PERFORMANCE_CATEGORY_NAME)) {
-          final String category = CategoryRank.PERFORMANCE_CATEGORY_NAME;
-          outputCategory(para, teamRanks, category);
-        }
-        para.add(Chunk.NEWLINE);
+          if (!finalistTimes.isEmpty()) {
 
-        for (final String category : categories) {
-          if (!CategoryRank.PERFORMANCE_CATEGORY_NAME.equals(category)
-              && !CategoryRank.OVERALL_CATEGORY_NAME.equals(category)) {
-            outputCategory(para, teamRanks, category);
-          }
-        }
-        
-        document.add(para);
-        document.add(Chunk.NEXTPAGE);
-      }
+            final Paragraph para = new Paragraph();
+            para.add(Chunk.NEWLINE);
+            para.add(new Chunk("Finalist times for Team "
+                + teamNum, TITLE_FONT));
+            para.add(Chunk.NEWLINE);
+            para.add(new Chunk(team.getTeamName()
+                + " / " + team.getOrganization(), TITLE_FONT));
+            para.add(Chunk.NEWLINE);
+            para.add(new Chunk("Division: "
+                + team.getEventDivision(), TITLE_FONT));
+            para.add(Chunk.NEWLINE);
+            para.add(Chunk.NEWLINE);
+
+            final PdfPTable table = new PdfPTable(3);
+            // table.getDefaultCell().setBorder(0);
+            table.setWidthPercentage(100);
+
+            table.addCell(new Phrase(new Chunk("Time", HEADER_FONT)));
+            table.addCell(new Phrase(new Chunk("Room", HEADER_FONT)));
+            table.addCell(new Phrase(new Chunk("Category", HEADER_FONT)));
+
+            for (final FinalistDBRow row : finalistTimes) {
+              final String categoryName = row.getCategoryName();
+              String room = rooms.get(categoryName);
+              if (null == room) {
+                room = "";
+              }
+
+              table.addCell(new Phrase(String.format("%d:%02d", row.getHour(), row.getMinute()), VALUE_FONT));
+              table.addCell(new Phrase(new Chunk(room, VALUE_FONT)));
+              table.addCell(new Phrase(new Chunk(categoryName, VALUE_FONT)));
+
+            } // foreach row
+
+            para.add(table);
+            
+            document.add(para);
+            document.add(Chunk.NEXTPAGE);
+
+          } // non-empty list of teams
+
+        } // foreach schedule
+
+      } // foreach team
 
       document.close();
 
@@ -153,7 +166,7 @@ public class RankingReport extends BaseFLLServlet {
       response.setHeader("Pragma", "public");
       // setting the content type
       response.setContentType("application/pdf");
-      response.setHeader("Content-Disposition", "filename=rankingReport.pdf");
+      response.setHeader("Content-Disposition", "filename=teamFinalistSchedule.pdf");
       // the content length is needed for MSIE!!!
       response.setContentLength(baos.size());
       // write ByteArrayOutputStream to the ServletOutputStream
@@ -170,24 +183,6 @@ public class RankingReport extends BaseFLLServlet {
     } finally {
       SQLFunctions.close(connection);
     }
-  }
-
-  private void outputCategory(final Paragraph para,
-                              final TeamRanking teamRanks,
-                              final String category) {
-    para.add(new Chunk(category
-        + ": ", RANK_TITLE_FONT));
-
-    final CategoryRank catRank = teamRanks.getRankForCategory(category);
-
-    final int rank = catRank.getRank();
-    if (CategoryRank.NO_SHOW_RANK == rank) {
-      para.add(new Chunk("No Show", RANK_VALUE_FONT));
-    } else {
-      para.add(new Chunk(String.format("%d out of %d teams in %s", rank, catRank.getNumTeams(), catRank.getGroup()),
-                         RANK_VALUE_FONT));
-    }
-    para.add(Chunk.NEWLINE);
   }
 
   /**
@@ -214,7 +209,7 @@ public class RankingReport extends BaseFLLServlet {
       final PdfPTable header = new PdfPTable(2);
       final Phrase p = new Phrase();
       final Chunk ck = new Chunk(_challengeTitle
-          + "\nFinal Computed Rankings", HEADER_FONT);
+          + "\nFinalist Callback Schedule", HEADER_FONT);
       p.add(ck);
       header.getDefaultCell().setBorderWidth(0);
       header.addCell(p);

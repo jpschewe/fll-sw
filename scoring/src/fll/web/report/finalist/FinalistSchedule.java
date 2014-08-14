@@ -150,6 +150,22 @@ public class FinalistSchedule implements Serializable {
     return result;
   }
 
+  /**
+   * The schedule time slots for the specified team.
+   * 
+   * @return list sorted by time
+   */
+  public List<FinalistDBRow> getScheduleForTeam(final int teamNumber) {
+    final List<FinalistDBRow> result = new LinkedList<FinalistDBRow>();
+    for (final FinalistDBRow row : mSchedule) {
+      if (row.getTeamNumber() == teamNumber) {
+        result.add(row);
+      }
+    }
+    Collections.sort(result, FinalistDBRow.TIME_SORT_INSTANCE);
+    return result;
+  }
+
   private final int mTournament;
 
   public int getTournament() {
