@@ -6,10 +6,10 @@
 
 String.repeat = function(chr, count) {
 	var str = "";
-	for ( var x = 0; x < count; x++) {
+	for (var x = 0; x < count; x++) {
 		str += chr;
 	}
-	
+
 	return str;
 };
 
@@ -27,8 +27,8 @@ String.prototype.padL = function(width, pad) {
 };
 
 /**
- * Used for packaging up and sending to the server to put in the database.
- * Needs to match fll.web.report.finalist.FinalistDBRow.
+ * Used for packaging up and sending to the server to put in the database. Needs
+ * to match fll.web.report.finalist.FinalistDBRow.
  */
 function FinalistDBRow(categoryName, hour, minute, teamNumber) {
 	this.categoryName = categoryName;
@@ -38,8 +38,8 @@ function FinalistDBRow(categoryName, hour, minute, teamNumber) {
 }
 
 /**
- * Used for packaging up and sending to the server to put in the database.
- * Needs to match fll.web.report.finalist.FinalistCategoryRow.
+ * Used for packaging up and sending to the server to put in the database. Needs
+ * to match fll.web.report.finalist.FinalistCategoryRow.
  */
 function FinalistCategoryRow(categoryName, isPublic) {
 	this.categoryName = categoryName;
@@ -48,7 +48,8 @@ function FinalistCategoryRow(categoryName, isPublic) {
 
 $(document).ready(
 		function() {
-			$("#division").text($.finalist.getCurrentDivision());
+			var currentDivision = $.finalist.getCurrentDivision();
+			$("#division").text(currentDivision);
 
 			// output header
 			var headerRow = $("<tr></tr>");
@@ -56,15 +57,22 @@ $(document).ready(
 
 			headerRow.append($("<th>Time Slot</th>"));
 			$.each($.finalist.getAllCategories(), function(i, category) {
-				var header = $("<th>" + category.name + "</th>");
+				var room = $.finalist.getRoom(category, currentDivision);
+				var header;
+				if (room == undefined || "" == room) {
+					header = $("<th>" + category.name + "</th>");
+				} else {
+					header = $("<th>" + category.name + "<br/>Room: " + room
+							+ "</th>");
+				}
 				headerRow.append(header);
 			});
 
 			var duration = $.finalist.getDuration();
 			var time = $.finalist.getStartTime();
 			var schedule = $.finalist.scheduleFinalists();
-			
-			var schedRows = [];			
+
+			var schedRows = [];
 			$.each(schedule, function(i, slot) {
 				var row = $("<tr></tr>");
 				$("#schedule").append(row);
@@ -73,37 +81,35 @@ $(document).ready(
 						+ ":" + time.getMinutes().toString().padL(2, "0")
 						+ "</td>"));
 
-				$.each($.finalist.getAllCategories(),
-						function(i, category) {
-							var teamNum = slot.categories[category.catId];
-							if (teamNum == null) {
-								row.append($("<td>&nbsp;</td>"));
-							} else {
-								var team = $.finalist.lookupTeam(teamNum);
-								var group = team.judgingStation;
-								row.append($("<td>" + teamNum + " - "
-										+ team.name + " (" + group + ")</td>"));
-								
-								var dbrow = new FinalistDBRow(category.name, time.getHours(), time.getMinutes(), teamNum);
-								schedRows.push(dbrow);
-							}
-						}); // foreach category
+				$.each($.finalist.getAllCategories(), function(i, category) {
+					var teamNum = slot.categories[category.catId];
+					if (teamNum == null) {
+						row.append($("<td>&nbsp;</td>"));
+					} else {
+						var team = $.finalist.lookupTeam(teamNum);
+						var group = team.judgingStation;
+						row.append($("<td>" + teamNum + " - " + team.name
+								+ " (" + group + ")</td>"));
+
+						var dbrow = new FinalistDBRow(category.name, time
+								.getHours(), time.getMinutes(), teamNum);
+						schedRows.push(dbrow);
+					}
+				}); // foreach category
 
 				time.setTime(time.getTime() + (duration * 60 * 1000));
 			}); // foreach timeslot
 
 			$('#sched_data').val($.toJSON(schedRows));
 
-			
 			var categoryRows = [];
-			$.each($.finalist.getAllCategories(),
-					function(i, category) {
-						var cat = new FinalistCategoryRow(category.name, category.isPublic);
-						categoryRows.push(cat);
-					}); // foreach category
+			$.each($.finalist.getAllCategories(), function(i, category) {
+				var cat = new FinalistCategoryRow(category.name,
+						category.isPublic);
+				categoryRows.push(cat);
+			}); // foreach category
 			$('#category_data').val($.toJSON(categoryRows));
-			$('#division_data').val($.finalist.getCurrentDivision());
-			
-			
+			$('#division_data').val(currentDivision);
+
 			$.finalist.displayNavbar();
 		});
