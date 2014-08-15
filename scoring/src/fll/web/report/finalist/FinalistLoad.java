@@ -104,7 +104,7 @@ public class FinalistLoad {
       }
 
       for (final String playoffDivision : Playoff.getPlayoffDivisions(connection, tournament)) {
-        output.format("$.finalist.addDivision(%s);%n", WebUtils.quoteJavascriptString(playoffDivision));
+        output.format("$.finalist.addPlayoffDivision(%s);%n", WebUtils.quoteJavascriptString(playoffDivision));
       }
 
     } finally {

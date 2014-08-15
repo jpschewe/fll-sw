@@ -26,6 +26,11 @@
 	var _duration;
 	var _categoriesVisited;
 	var _currentCategoryId; // category to display with numeric.html
+	var _playoffDivisions;
+	var _playoffStartHour;
+	var _playoffStartMinute;
+	var _playoffEndHour;
+	var _playoffEndMinute;
 
 	function _init_variables() {
 		_teams = {};
@@ -39,6 +44,11 @@
 		_duration = 20;
 		_categoriesVisited = {};
 		_currentCategory = null;
+		_playoffDivisions = [];
+		_playoffStartHour = {};
+		_playoffStartMinute = {};
+		_playoffEndHour = {};
+		_playoffEndMinute = {};
 	}
 
 	/**
@@ -59,6 +69,12 @@
 				_categoriesVisited);
 		$.jStorage.set(STORAGE_PREFIX + "_currentCategoryId",
 				_currentCategoryId);
+		$.jStorage.set(STORAGE_PREFIX + "_playoffDivisions", _playoffDivisions);
+		$.jStorage.set(STORAGE_PREFIX + "_playoffStartHour", _playoffStartHour);
+		$.jStorage.set(STORAGE_PREFIX + "_playoffStartMinute",
+				_playoffStartMinute);
+		$.jStorage.set(STORAGE_PREFIX + "_playoffEndHour", _playoffEndHour);
+		$.jStorage.set(STORAGE_PREFIX + "_playoffEndMinute", _playoffEndMinute);
 	}
 
 	/**
@@ -110,6 +126,27 @@
 		value = $.jStorage.get(STORAGE_PREFIX + "_currentCategoryId");
 		if (null != value) {
 			_currentCategoryId = value;
+		}
+		value = $.jStorage.get(STORAGE_PREFIX + "_playoffDivisions");
+		if (null != value) {
+			_playoffDivisions = value;
+		}
+
+		value = $.jStorage.get(STORAGE_PREFIX + "_playoffStartHour");
+		if (null != value) {
+			_playoffStartHour = value;
+		}
+		value = $.jStorage.get(STORAGE_PREFIX + "_playoffStartMinute");
+		if (null != value) {
+			_playoffStartMinute = value;
+		}
+		value = $.jStorage.get(STORAGE_PREFIX + "_playoffEndHour");
+		if (null != value) {
+			_playoffEndHour = value;
+		}
+		value = $.jStorage.get(STORAGE_PREFIX + "_playoffEndMinute");
+		if (null != value) {
+			_playoffEndMinute = value;
 		}
 	}
 
@@ -260,6 +297,105 @@
 
 		getDivisionByIndex : function(divIndex) {
 			return _divisions[divIndex];
+		},
+
+		/**
+		 * Add a playoff division to the list of known divisions. If the
+		 * division already exists it is not added.
+		 */
+		addPlayoffDivision : function(division) {
+			if (-1 == $.inArray(division, _playoffDivisions)) {
+				_playoffDivisions.push(division);
+				$.finalist.setPlayoffStartHour(division, undefined);
+				$.finalist.setPlayoffStartMinute(division, undefined);
+				$.finalist.setPlayoffEndHour(division, undefined);
+				$.finalist.setPlayoffEndMinute(division, undefined);
+			}
+			_save();
+		},
+
+		getPlayoffDivisions : function() {
+			return _playoffDivisions;
+		},
+
+		getPlayoffDivisionByIndex : function(divIndex) {
+			return _playoffDivisions[divIndex];
+		},
+
+		/**
+		 * Integer or undefined.
+		 */
+		getPlayoffStartHour : function(division) {
+			return _playoffStartHour[division];
+		},
+		setPlayoffStartHour : function(division, hour) {
+			_playoffStartHour[division] = hour;
+			_save();
+		},
+
+		/**
+		 * Integer or undefined.
+		 */
+		getPlayoffStartMinute : function(division) {
+			return _playoffStartMinute[division];
+		},
+		setPlayoffStartMinute : function(division, minute) {
+			_playoffStartMinute[division] = minute;
+			_save();
+		},
+
+		/**
+		 * Date or undefined.
+		 */
+		getPlayoffStartTime : function(division) {
+			var hour = $.finalist.getPlayoffStartHour(division);
+			var minute = $.finalist.getPlayoffStartMinute(division);
+			if (hour != undefined && minute != undefined) {
+				var time = new Date();
+				time.setHours(hour);
+				time.setMinutes(minute);
+				return time;
+			} else {
+				return undefined;
+			}
+		},
+
+		/**
+		 * Integer or undefined.
+		 */
+		getPlayoffEndHour : function(division) {
+			return _playoffEndHour[division];
+		},
+		setPlayoffEndHour : function(division, hour) {
+			_playoffEndHour[division] = hour;
+			_save();
+		},
+
+		/**
+		 * Integer or undefined.
+		 */
+		getPlayoffEndMinute : function(division) {
+			return _playoffEndMinute[division];
+		},
+		setPlayoffEndMinute : function(division, minute) {
+			_playoffEndMinute[division] = minute;
+			_save();
+		},
+
+		/**
+		 * Date or undefined.
+		 */
+		getPlayoffEndTime : function(division) {
+			var hour = $.finalist.getPlayoffEndHour(division);
+			var minute = $.finalist.getPlayoffEndMinute(division);
+			if (hour != undefined && minute != undefined) {
+				var time = new Date();
+				time.setHours(hour);
+				time.setMinutes(minute);
+				return time;
+			} else {
+				return undefined;
+			}
 		},
 
 		/**
@@ -683,7 +819,8 @@
 			var schedule = [];
 			var nextTime = $.finalist.getStartTime();
 			var slotDuration = $.finalist.getDuration();
-			$.finalist.log("Next timeslot starts at " + nextTime + " duration is " + slotDuration);
+			$.finalist.log("Next timeslot starts at " + nextTime
+					+ " duration is " + slotDuration);
 			$.each(sortedTeams, function(i, teamNum) {
 				var teamCategories = finalistsCount[teamNum];
 				$.each(teamCategories, function(j, category) {
@@ -703,8 +840,9 @@
 					if (!scheduled) {
 						var newSlot = new Timeslot(nextTime);
 						schedule.push(newSlot);
-						
-						nextTime.setTime(nextTime.getTime() + (slotDuration * 60 * 1000));
+
+						nextTime.setTime(nextTime.getTime()
+								+ (slotDuration * 60 * 1000));
 
 						$.finalist.addTeamToTimeslot(newSlot, category.catId,
 								teamNum);
