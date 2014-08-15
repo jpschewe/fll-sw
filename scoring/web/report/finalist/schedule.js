@@ -69,8 +69,6 @@ $(document).ready(
 				headerRow.append(header);
 			});
 
-			var duration = $.finalist.getDuration();
-			var time = $.finalist.getStartTime();
 			var schedule = $.finalist.scheduleFinalists();
 
 			var schedRows = [];
@@ -78,8 +76,8 @@ $(document).ready(
 				var row = $("<tr></tr>");
 				$("#schedule").append(row);
 
-				row.append($("<td>" + time.getHours().toString().padL(2, "0")
-						+ ":" + time.getMinutes().toString().padL(2, "0")
+				row.append($("<td>" + slot.time.getHours().toString().padL(2, "0")
+						+ ":" + slot.time.getMinutes().toString().padL(2, "0")
 						+ "</td>"));
 
 				$.each($.finalist.getAllCategories(), function(i, category) {
@@ -92,13 +90,12 @@ $(document).ready(
 						row.append($("<td>" + teamNum + " - " + team.name
 								+ " (" + group + ")</td>"));
 
-						var dbrow = new FinalistDBRow(category.name, time
-								.getHours(), time.getMinutes(), teamNum);
+						var dbrow = new FinalistDBRow(category.name, slot.time
+								.getHours(), slot.time.getMinutes(), teamNum);
 						schedRows.push(dbrow);
 					}
 				}); // foreach category
 
-				time.setTime(time.getTime() + (duration * 60 * 1000));
 			}); // foreach timeslot
 
 			$('#sched_data').val($.toJSON(schedRows));

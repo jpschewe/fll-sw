@@ -190,8 +190,10 @@
 	/**
 	 * Schedule timeslot.
 	 */
-	function Timeslot() {
+	function Timeslot(time) {
 		this.categories = {};
+		this.time = new Date();
+		this.time.setTime(time.getTime());
 	}
 
 	// //////////////////////// PUBLIC INTERFACE /////////////////////////
@@ -677,8 +679,11 @@
 				}
 			});
 
-			// list of Timeslots
+			// list of Timeslots in time order
 			var schedule = [];
+			var nextTime = $.finalist.getStartTime();
+			var slotDuration = $.finalist.getDuration();
+			$.finalist.log("Next timeslot starts at " + nextTime + " duration is " + slotDuration);
 			$.each(sortedTeams, function(i, teamNum) {
 				var teamCategories = finalistsCount[teamNum];
 				$.each(teamCategories, function(j, category) {
@@ -696,8 +701,11 @@
 								}
 							}); // foreach timeslot
 					if (!scheduled) {
-						var newSlot = new Timeslot();
+						var newSlot = new Timeslot(nextTime);
 						schedule.push(newSlot);
+						
+						nextTime.setTime(nextTime.getTime() + (slotDuration * 60 * 1000));
+
 						$.finalist.addTeamToTimeslot(newSlot, category.catId,
 								teamNum);
 					}
