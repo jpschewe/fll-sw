@@ -69,7 +69,7 @@ public class FinalistLoad {
                   WebUtils.quoteJavascriptString(team.getEventDivision()));
 
     for (final String playoffDivision : Playoff.getPlayoffDivisionsForTeam(connection, team.getTeamNumber())) {
-      output.format("$.finalist.addTeamToDivision(%s, %s);%n", teamVarName,
+      output.format("$.finalist.addTeamToPlayoffDivision(%s, %s);%n", teamVarName,
                     WebUtils.quoteJavascriptString(playoffDivision));
     }
   }

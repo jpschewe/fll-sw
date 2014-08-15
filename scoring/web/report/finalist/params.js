@@ -5,17 +5,16 @@
  */
 
 function setTimeField(field, value) {
-	if (value == undefined) {
+	if (-1 == value) {
 		field.val("");
 	} else {
-		$.finalist.log("Setting field " + field + " to " + value);
 		field.val(value);
 	}
 }
 
 function populateHeadToHeadTimes() {
 	$("#head_head_times").empty();
-	
+
 	$
 			.each(
 					$.finalist.getPlayoffDivisions(),
@@ -24,11 +23,10 @@ function populateHeadToHeadTimes() {
 								+ index + "' size='2' maxlength='2'/>");
 						startHourElement.change(function() {
 							var hour = parseInt($(this).val(), 10);
-							if (hour == undefined || hour == "") {
-								$.finalist.setPlayoffStartHour(division,
-										undefined);
-							} else if (isNaN(hour)) {
-								alert("Hour must be an integer");
+							if (!/\S/.test($(this).val())) {
+								$.finalist.setPlayoffStartHour(division, -1);
+							} else if (isNaN(hour) || hour < 0 || hour > 23) {
+								alert("Hour must be a positive integer [0 - 23]");
 								setTimeField($(this), $.finalist
 										.getPlayoffStartHour(division));
 							} else {
@@ -42,11 +40,10 @@ function populateHeadToHeadTimes() {
 								+ index + "' size='2' maxlength='2'/>");
 						startMinuteElement.change(function() {
 							var value = parseInt($(this).val(), 10);
-							if (value == undefined || value == "") {
-								$.finalist.setPlayoffStartMinute(division,
-										undefined);
-							} else if (isNaN(value)) {
-								alert("Minute must be an integer");
+							if (!/\S/.test($(this).val())) {
+								$.finalist.setPlayoffStartMinute(division, -1);
+							} else if (isNaN(value) || value < 0 || value > 59) {
+								alert("Minute must be a positive integer [0 - 59]");
 								setTimeField($(this), $.finalist
 										.getPlayoffStartMinute(division));
 							} else {
@@ -61,11 +58,10 @@ function populateHeadToHeadTimes() {
 								+ index + "' size='2' maxlength='2'/>");
 						endHourElement.change(function() {
 							var hour = parseInt($(this).val(), 10);
-							if (hour == undefined || hour == "") {
-								$.finalist.setPlayoffEndHour(division,
-										undefined);
-							} else if (isNaN(hour)) {
-								alert("Hour must be an integer");
+							if (!/\S/.test($(this).val())) {
+								$.finalist.setPlayoffEndHour(division, -1);
+							} else if (isNaN(hour) || hour < 0 || hour > 23) {
+								alert("Hour must be a positive integer [0 - 23]");
 								setTimeField($(this), $.finalist
 										.getPlayoffEndHour(division));
 							} else {
@@ -80,11 +76,11 @@ function populateHeadToHeadTimes() {
 						endMinuteElement
 								.change(function() {
 									var value = parseInt($(this).val(), 10);
-									if (value == undefined || value == "") {
+									if (!/\S/.test($(this).val())) {
 										$.finalist.setPlayoffEndMinute(
-												division, undefined);
-									} else if (isNaN(value)) {
-										alert("Minute must be an integer");
+												division, -1);
+									} else if (isNaN(value) || value < 0 || value > 59) {
+										alert("Minute must be an integer [0 - 59]");
 										setTimeField($(this), $.finalist
 												.getPlayoffEndMinute(division));
 									} else {
@@ -96,8 +92,8 @@ function populateHeadToHeadTimes() {
 								.getPlayoffEndMinute(division));
 
 						var paragraph = $("<p></p>");
-						paragraph.append(
-								"<b>Playoff times " + division + "</b><br/>");
+						paragraph.append("<b>Playoff times " + division
+								+ "</b><br/>");
 						paragraph.append("Start: ");
 						paragraph.append(startHourElement);
 						paragraph.append(" : ");
@@ -110,7 +106,7 @@ function populateHeadToHeadTimes() {
 						paragraph.append(endMinuteElement);
 						paragraph.append("<br/>");
 						$("#head_head_times").append(paragraph);
-						
+
 					});
 
 }
