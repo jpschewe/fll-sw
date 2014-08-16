@@ -4,6 +4,113 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
+function setTimeField(field, value) {
+	if (-1 == value) {
+		field.val("");
+	} else {
+		field.val(value);
+	}
+}
+
+function populateHeadToHeadTimes() {
+	$("#head_head_times").empty();
+
+	$
+			.each(
+					$.finalist.getPlayoffDivisions(),
+					function(index, division) {
+						var startHourElement = $("<input type='text' id='start_hour_"
+								+ index + "' size='2' maxlength='2'/>");
+						startHourElement.change(function() {
+							var hour = parseInt($(this).val(), 10);
+							if (!/\S/.test($(this).val())) {
+								$.finalist.setPlayoffStartHour(division, -1);
+							} else if (isNaN(hour) || hour < 0 || hour > 23) {
+								alert("Hour must be a positive integer [0 - 23]");
+								setTimeField($(this), $.finalist
+										.getPlayoffStartHour(division));
+							} else {
+								$.finalist.setPlayoffStartHour(division, hour);
+							}
+						});
+						setTimeField(startHourElement, $.finalist
+								.getPlayoffStartHour(division));
+
+						var startMinuteElement = $("<input type='text' id='start_minute_"
+								+ index + "' size='2' maxlength='2'/>");
+						startMinuteElement.change(function() {
+							var value = parseInt($(this).val(), 10);
+							if (!/\S/.test($(this).val())) {
+								$.finalist.setPlayoffStartMinute(division, -1);
+							} else if (isNaN(value) || value < 0 || value > 59) {
+								alert("Minute must be a positive integer [0 - 59]");
+								setTimeField($(this), $.finalist
+										.getPlayoffStartMinute(division));
+							} else {
+								$.finalist.setPlayoffStartMinute(division,
+										value);
+							}
+						});
+						setTimeField(startMinuteElement, $.finalist
+								.getPlayoffStartMinute(division));
+
+						var endHourElement = $("<input type='text' id='end_hour_"
+								+ index + "' size='2' maxlength='2'/>");
+						endHourElement.change(function() {
+							var hour = parseInt($(this).val(), 10);
+							if (!/\S/.test($(this).val())) {
+								$.finalist.setPlayoffEndHour(division, -1);
+							} else if (isNaN(hour) || hour < 0 || hour > 23) {
+								alert("Hour must be a positive integer [0 - 23]");
+								setTimeField($(this), $.finalist
+										.getPlayoffEndHour(division));
+							} else {
+								$.finalist.setPlayoffEndHour(division, hour);
+							}
+						});
+						setTimeField(endHourElement, $.finalist
+								.getPlayoffEndHour(division));
+
+						var endMinuteElement = $("<input type='text' id='end_minute_"
+								+ index + "' size='2' maxlength='2'/>");
+						endMinuteElement
+								.change(function() {
+									var value = parseInt($(this).val(), 10);
+									if (!/\S/.test($(this).val())) {
+										$.finalist.setPlayoffEndMinute(
+												division, -1);
+									} else if (isNaN(value) || value < 0 || value > 59) {
+										alert("Minute must be an integer [0 - 59]");
+										setTimeField($(this), $.finalist
+												.getPlayoffEndMinute(division));
+									} else {
+										$.finalist.setPlayoffEndMinute(
+												division, value);
+									}
+								});
+						setTimeField(endMinuteElement, $.finalist
+								.getPlayoffEndMinute(division));
+
+						var paragraph = $("<p></p>");
+						paragraph.append("<b>Playoff times " + division
+								+ "</b><br/>");
+						paragraph.append("Start: ");
+						paragraph.append(startHourElement);
+						paragraph.append(" : ");
+						paragraph.append(startMinuteElement);
+						paragraph.append("<br/>");
+
+						paragraph.append("End: ");
+						paragraph.append(endHourElement);
+						paragraph.append(" : ");
+						paragraph.append(endMinuteElement);
+						paragraph.append("<br/>");
+						$("#head_head_times").append(paragraph);
+
+					});
+
+}
+
 $(document).ready(
 		function() {
 			$.finalist.setupAppCache();
@@ -11,7 +118,6 @@ $(document).ready(
 			$("#divisions").empty();
 
 			var teams = $.finalist.getAllTeams();
-
 			$.each($.finalist.getDivisions(), function(i, division) {
 				var selected = "";
 				if (division == $.finalist.getCurrentDivision()) {
@@ -73,6 +179,8 @@ $(document).ready(
 				var div = $.finalist.getDivisionByIndex(divIndex);
 				$.finalist.setCurrentDivision(div);
 			});
+
+			populateHeadToHeadTimes();
 
 			$.finalist.displayNavbar();
 
