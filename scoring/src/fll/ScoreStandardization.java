@@ -114,10 +114,11 @@ public final class ScoreStandardization {
               + " ( SELECT " //
               + "   Avg(StandardizedScore)" //
               + "   FROM " + catName //
-              + "   WHERE Tournament = ?" //
-              + "   AND StandardizedScore IS NOT NULL" //
+              + "   WHERE StandardizedScore IS NOT NULL" //
               + "   AND FinalScores.TeamNumber = " + catName + ".TeamNumber" //
-              + "   GROUP BY TeamNumber )");
+              + "   AND FinalScores.Tournament = " + catName + ".Tournament" //
+              + "   GROUP BY TeamNumber )" //
+              + " WHERE Tournament = ?");
           updatePrep.setInt(1, tournament);
           updatePrep.executeUpdate();
         }
