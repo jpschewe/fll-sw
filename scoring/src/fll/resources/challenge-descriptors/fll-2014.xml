@@ -106,7 +106,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".10000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".10000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -120,7 +120,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".11000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".11000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -134,7 +134,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".12000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".12000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -148,7 +148,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".13000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".13000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -162,7 +162,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".14000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".14000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -176,7 +176,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".15000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".15000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -190,7 +190,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".16000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".16000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -204,7 +204,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".17000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".17000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -218,7 +218,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".18000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".18000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -232,7 +232,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".19000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".19000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -246,7 +246,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".20000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".20000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -260,7 +260,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".21000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".21000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -274,7 +274,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".22000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".22000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -288,7 +288,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".23000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".23000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -302,7 +302,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".24000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".24000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -316,7 +316,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".25000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".25000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -330,7 +330,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".26000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".26000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -344,7 +344,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".27000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".27000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -358,7 +358,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".28000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".28000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -372,7 +372,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".29000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".29000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -386,7 +386,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".30000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".30000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -400,7 +400,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".31000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".31000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -414,7 +414,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".32000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".32000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -428,7 +428,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".33000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".33000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -442,7 +442,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".34000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".34000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -456,7 +456,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".35000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".35000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -470,7 +470,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".36000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".36000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -484,7 +484,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".37000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".37000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -498,7 +498,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".38000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".38000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -512,7 +512,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".39000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".39000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -526,7 +526,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".40000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".40000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -540,7 +540,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".41000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".41000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -554,7 +554,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".42000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".42000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -568,7 +568,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".43000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".43000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -582,7 +582,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".44000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".44000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -596,7 +596,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".45000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".45000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -610,7 +610,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".46000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".46000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -624,7 +624,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".47000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".47000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -638,7 +638,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".48000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".48000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -652,7 +652,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".49000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".49000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -666,7 +666,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".50000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".50000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -680,7 +680,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".51000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".51000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -694,7 +694,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".52000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".52000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -708,7 +708,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".53000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".53000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -722,7 +722,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".54000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".54000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -736,7 +736,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".55000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".55000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -750,7 +750,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".56000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".56000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -764,7 +764,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".57000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".57000000000000000000" floatingPoint="round" />
        </result>
       </case>
 <case>
@@ -778,7 +778,7 @@
         </right>
        </condition>
        <result>
-<variableRef variable="base_score" coefficient=".58000000000000000000" floatingPoint="decimal" />
+<variableRef variable="base_score" coefficient=".58000000000000000000" floatingPoint="round" />
        </result>
       </case>
 
