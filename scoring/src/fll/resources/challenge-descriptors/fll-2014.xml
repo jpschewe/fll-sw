@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<fll title="2014 MN FIRST LEGO League Tournament" revision="1">
- <Performance minimumScore="0" weight="1.0">
+<fll title="2014 MN FIRST LEGO League Tournament" revision="2">
+ <Performance minimumScore="0" weight="0">
 
-  <goal name="opening_doors" title="Opening Doors" multiplier="15" />
+  <goal name="opening_doors" title="Open Door" multiplier="15" />
 
-  <goal name="cloud_access" title="Cloud Access" multiplier="30" />
+  <goal name="cloud_access" title="Cloud - SD card Up" multiplier="30" />
 
-  <goal name="community_learning" title="Community Learning"
+  <goal name="community_learning" title="Loop Removed from Community"
    multiplier="25" />
 
   <goal name="robotics_competition" title="Robotics Competition">
@@ -15,15 +15,15 @@
    <value score="0" title="None" value="none" />
   </goal>
 
-  <goal name="senses" title="Using the Right Senses" multiplier="40" />
+  <goal name="senses" title="Loop Removed from Right Senses" multiplier="40" />
 
-  <goal name="thinking" title="Thinking Outside the Box">
+  <goal name="thinking" title="Think Outside the Box">
    <value score="40" title="Idea Out, Bulb Up" value="bulb_up" />
    <value score="25" title="Idea Out, Bulb Down" value="bulb_down" />
    <value score="0" title="None" value="none" />
   </goal>
 
-  <goal name="robot_communications" title="Robot Communications"
+  <goal name="robot_communications" title="Communications Slider Pulled"
    multiplier="40" />
 
   <goal name="search_engine" title="Search Engine">
@@ -44,7 +44,7 @@
    <value score="0" title="None" value="none" />
   </goal>
 
-  <goal name="adapting" title="Adapting to Changing Conditions"
+  <goal name="adapting" title="Rotated Changing Conditions"
    multiplier="15" />
 
   <goal name="apprenticeship" title="Apprenticeship">
@@ -53,7 +53,7 @@
    <value score="0" title="None" value="none" />
   </goal>
 
-  <goal name="engagement" title="Yellow section is moved South"
+  <goal name="engagement" title="Yellow Pinwheel is moved South"
    multiplier="20" />
 
   <goal name="pinwheel_turns" title="Pinwheel Turns" multiplier="0"
@@ -796,7 +796,7 @@
 
   </computedGoal>
 
-  <goal name="learning" title="Project-Based Learning" multiplier="10"
+  <goal name="learning" title="Loops on Scale" multiplier="10"
    max="8" />
   <computedGoal name="learning_first_ring" title="Bonus for First Ring">
    <switch>
@@ -820,7 +820,7 @@
    </switch>
   </computedGoal>
 
-  <goal name="penalty" title="Robot, Sprawl, or Junk Penalty"
+  <goal name="penalty" title="Robot Touch, Sprawl, Junk Penalty"
    multiplier="-10" max="8" />
 
   <tiebreaker>
