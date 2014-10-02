@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fll title="Computed goal references computed goal" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd">
+
+ <Performance minimumScore="0" weight="1.0">
+
+  <goal initialValue="0" max="8" min="0" multiplier="5" name="crates_base"
+   title="Crates in Base"></goal>
+
+  <goal initialValue="0" max="8" min="0" multiplier="2" name="crates"
+   title="Crates Elsewhere on Table"></goal>
+
+
+  <computedGoal name="computed1" title="computed1">
+   <switch>
+    <case>
+     <condition>
+      <left>
+       <term goal="crates_base" scoreType="raw" />
+      </left>
+      <equal-to />
+      <right>
+       <constant value="0" />
+      </right>
+     </condition>
+     <result>
+      <constant value="10" />
+     </result>
+    </case>
+    <default>
+     <constant value="40" />
+    </default>
+   </switch>
+  </computedGoal>
+
+
+  <computedGoal name="computed2" title="computed2">
+   <switch>
+    <case>
+     <condition>
+      <left>
+       <term goal="crates_base" scoreType="raw" />
+      </left>
+      <equal-to />
+      <right>
+       <constant value="10" />
+      </right>
+     </condition>
+     <result>
+      <constant value="10" />
+     </result>
+    </case>
+    <default>
+     <constant value="40" />
+     <term goal="computed1" scoreType="computed" coefficient="5" />
+    </default>
+   </switch>
+  </computedGoal>
+
+
+  <tiebreaker>
+   <test winner="HIGH">
+    <term goal="crates_base" scoreType="computed" />
+   </test>
+   <test winner="HIGH">
+    <term goal="crates" scoreType="computed" />
+   </test>
+  </tiebreaker>
+
+ </Performance>
+
+</fll>
