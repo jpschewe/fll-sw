@@ -129,17 +129,17 @@ public final class ChallengeParser {
 
       return document;
     } catch (final SAXParseException spe) {
-      throw new RuntimeException(
+      throw new ChallengeXMLException(
                                  String.format("Error parsing file line: %d column: %d%n Message: %s%n This may be caused by using the wrong version of the software or an improperly formatted challenge descriptor or attempting to parse a file that is not a challenge descriptor.",
                                                spe.getLineNumber(), spe.getColumnNumber(), spe.getMessage()), spe);
     } catch (final SAXException se) {
-      throw new RuntimeException(
+      throw new ChallengeXMLException(
                                  "The challenge descriptor was found to be invalid, check that you are parsing a challenge descriptor file and not something else",
                                  se);
     } catch (final ParseException pe) {
-      throw new RuntimeException(pe);
+      throw new ChallengeXMLException(pe);
     } catch (final IOException e) {
-      throw new RuntimeException(e);
+      throw new ChallengeXMLException(e);
     }
   }
 
@@ -153,7 +153,7 @@ public final class ChallengeParser {
   private static void validateDocument(final Document document) throws ParseException {
     final Element rootElement = document.getDocumentElement();
     if (!"fll".equals(rootElement.getTagName())) {
-      throw new RuntimeException("Not a fll challenge description file");
+      throw new ChallengeXMLException("Not a fll challenge description file");
     }
 
     for (final Element childNode : new NodelistElementCollectionAdapter(rootElement.getChildNodes())) {
@@ -179,7 +179,7 @@ public final class ChallengeParser {
               }
             }
             if (!foundMatch) {
-              throw new RuntimeException(
+              throw new InvalidInitialValue(
                                          String.format("Initial value for %s(%f) does not match the score of any value element within the goal",
                                                        name, initialValue));
             }
@@ -188,11 +188,11 @@ public final class ChallengeParser {
             final double min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).doubleValue();
             final double max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).doubleValue();
             if (FP.lessThan(initialValue, min, INITIAL_VALUE_TOLERANCE)) {
-              throw new RuntimeException(String.format("Initial value for %s(%f) is less than min(%f)", name,
+              throw new InvalidInitialValue(String.format("Initial value for %s(%f) is less than min(%f)", name,
                                                        initialValue, min));
             }
             if (FP.greaterThan(initialValue, max, INITIAL_VALUE_TOLERANCE)) {
-              throw new RuntimeException(String.format("Initial value for %s(%f) is greater than max(%f)", name,
+              throw new InvalidInitialValue(String.format("Initial value for %s(%f) is greater than max(%f)", name,
                                                        initialValue, max));
             }
           }
@@ -212,7 +212,7 @@ public final class ChallengeParser {
             final String referencedGoalName = goalRefElement.getAttribute("goal");
             final Element referencedGoalElement = simpleGoals.get(referencedGoalName);
             if (!XMLUtils.isEnumeratedGoal(referencedGoalElement)) {
-              throw new RuntimeException("Computed goal '"
+              throw new InvalidEnumCondition("Computed goal '"
                   + computedGoalElement.getAttribute("name") + "' has a goalRef element that references goal '"
                   + referencedGoalName + " " + referencedGoalElement + "' which is not an enumerated goal");
             }

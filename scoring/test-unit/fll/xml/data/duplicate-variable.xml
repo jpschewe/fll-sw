@@ -71,7 +71,7 @@
 				<term goal="pipeline" scoreType="computed" />
 				<term goal="shipping_container" scoreType="computed" />
 				<term goal="crates_base" scoreType="computed" />
-				<term goal="crates" scoreTYpe="computed" />
+				<term goal="crates" scoreType="computed" />
 			</variable>
 			<variable name="subtotal"> <!--  duplicate variable name should fail -->
 				<term goal="pump_station" scoreType="computed" />
