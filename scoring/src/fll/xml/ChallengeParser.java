@@ -11,9 +11,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
@@ -158,10 +162,10 @@ public final class ChallengeParser {
         final Element childElement = childNode;
 
         // get all nodes named goal at any level under category element
-        final Map<String, Element> goals = new HashMap<String, Element>();
+        final Map<String, Element> simpleGoals = new HashMap<String, Element>();
         for (final Element element : new NodelistElementCollectionAdapter(childElement.getElementsByTagName("goal"))) {
           final String name = element.getAttribute("name");
-          goals.put(name, element);
+          simpleGoals.put(name, element);
 
           // check initial values
           final double initialValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("initialValue"))
@@ -192,58 +196,111 @@ public final class ChallengeParser {
                                                        initialValue, max));
             }
           }
-        }
+        } // foreach goal
 
         // for all computedGoals
+        final Map<String, Element> computedGoals = new HashMap<String, Element>();
         for (final Element computedGoalElement : new NodelistElementCollectionAdapter(
                                                                                       childElement.getElementsByTagName("computedGoal"))) {
+          final String name = computedGoalElement.getAttribute("name");
+          computedGoals.put(name, computedGoalElement);
 
-          // for all termElements
-          for (final Element termElement : new NodelistElementCollectionAdapter(
-                                                                                computedGoalElement.getElementsByTagName("term"))) {
-
-            // check that the computed goal only references goals
-            final String referencedGoalName = termElement.getAttribute("goal");
-            if (!goals.containsKey(referencedGoalName)) {
-              throw new RuntimeException("Computed goal '"
-                  + computedGoalElement.getAttribute("name") + "' references goal '" + referencedGoalName
-                  + "' which is not a standard goal");
-            }
-          }
-
-          // for all goalRef elements
           for (final Element goalRefElement : new NodelistElementCollectionAdapter(
                                                                                    computedGoalElement.getElementsByTagName("goalRef"))) {
 
             // can't reference a non-enum goal with goalRef in enumCond
             final String referencedGoalName = goalRefElement.getAttribute("goal");
-            final Element referencedGoalElement = goals.get(referencedGoalName);
+            final Element referencedGoalElement = simpleGoals.get(referencedGoalName);
             if (!XMLUtils.isEnumeratedGoal(referencedGoalElement)) {
               throw new RuntimeException("Computed goal '"
                   + computedGoalElement.getAttribute("name") + "' has a goalRef element that references goal '"
                   + referencedGoalName + " " + referencedGoalElement + "' which is not an enumerated goal");
             }
-          }
+          } // foreach goalRef element
 
         } // end foreach computed goal
 
-        // for all terms
+        // computed and non-computed goals
+        final Map<String, Element> allGoals = new HashMap<String, Element>();
+        allGoals.putAll(simpleGoals);
+        allGoals.putAll(computedGoals);
+
+        checkForCircularDependencies(computedGoals);
+
         for (final Element termElement : new NodelistElementCollectionAdapter(childElement.getElementsByTagName("term"))) {
           final String goalValueType = termElement.getAttribute("scoreType");
           final String referencedGoalName = termElement.getAttribute("goal");
-          final Element referencedGoalElement = goals.get(referencedGoalName);
-          // can't use the raw score of an enum inside a polynomial term
-          if ("raw".equals(goalValueType)
+          final Element referencedGoalElement = allGoals.get(referencedGoalName);
+          if (null != referencedGoalElement
+              && "raw".equals(goalValueType)
               && (XMLUtils.isEnumeratedGoal(referencedGoalElement) || XMLUtils.isComputedGoal(referencedGoalElement))) {
-            throw new RuntimeException(
-                                       "Cannot use the raw score from an enumerated or computed goal in a polynomial term.  Referenced goal '"
-                                           + referencedGoalName + "'");
+            // can't use the raw score of an enum inside a polynomial term
+            throw new IllegalScoreTypeUseException(
+                                                "Cannot use the raw score from an enumerated or computed goal in a polynomial term.  Referenced goal '"
+                                                    + referencedGoalName + "'");
           }
-        }
+        } // foreach term
 
       } // end if child node (performance or subjective)
     } // end foreach child node
   } // end validateDocument
+
+  /**
+   * @param computedGoals
+   */
+  private static void checkForCircularDependencies(final Map<String, Element> computedGoals) {
+    for (Map.Entry<String, Element> entry : computedGoals.entrySet()) {
+      final String thisGoal = entry.getKey();
+
+      final Set<String> visited = new HashSet<String>();
+      final List<String> toVisit = new LinkedList<String>();
+
+      toVisit.addAll(getImmediateComputedGoalDependencies(entry.getValue()));
+      while (!toVisit.isEmpty()) {
+        final String dep = toVisit.remove(0);
+        if (dep.equals(thisGoal)) {
+          throw new CircularComputedGoalException("'"
+              + thisGoal + "' has a circular dependency");
+        }
+
+        if (visited.add(dep)) {
+
+          final Set<String> immediateDependencies = getImmediateComputedGoalDependencies(computedGoals.get(dep));
+          for (final String idep : immediateDependencies) {
+            if (!visited.contains(idep)) {
+              toVisit.add(idep);
+            }
+          }
+        }
+
+      } // while !toVisit.isEmpty
+
+    } // foreach computed goal
+  }
+
+  /**
+   * Find all immediate dependencies of the specified computed goal element.
+   * 
+   * @param computedGoalElement the element for the computed goal, if null and
+   *          empty set is returned
+   * @return the set of dependencies, will return the names of all goals
+   *         referenced
+   */
+  private static Set<String> getImmediateComputedGoalDependencies(final Element computedGoalElement) {
+    if (null == computedGoalElement) {
+      return Collections.emptySet();
+    } else {
+      final Set<String> dependencies = new HashSet<String>();
+      for (final Element termElement : new NodelistElementCollectionAdapter(
+                                                                            computedGoalElement.getElementsByTagName("term"))) {
+
+        // check that the computed goal only references goals
+        final String referencedGoalName = termElement.getAttribute("goal");
+        dependencies.add(referencedGoalName);
+      }
+      return dependencies;
+    }
+  }
 
   public static String compareStructure(final Document curDoc,
                                         final Document newDoc) {
