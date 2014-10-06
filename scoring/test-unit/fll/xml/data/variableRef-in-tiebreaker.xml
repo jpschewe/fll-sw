@@ -108,7 +108,7 @@
 
 		<tiebreaker>
 			<test winner="HIGH">
-				<term goal="crates_base" />
+				<term goal="crates_base" scoreType="computed" />
 				<variableRef variable="foo" /> <!-- not allowed here -->
 			</test>
 		</tiebreaker>
