@@ -387,4 +387,30 @@ public class ChallengeParserTest {
     }
   }
 
+  /**
+   * Check that computed goals referencing computed goals is OK.
+   */
+  @Test
+  public void testComputedGoalReference() {
+    final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/computed-goal-reference.xml");
+    Assert.assertNotNull(stream);
+    ChallengeParser.parse(new InputStreamReader(stream));
+  }
+
+  /**
+   * Check that computed goals with circular reference are not allowed.
+   */
+  @Test
+  public void testCircularComputedGoalReference() {
+    boolean exception = false;
+    try {
+      final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/computed-goal-circular-reference.xml");
+      Assert.assertNotNull(stream);
+      ChallengeParser.parse(new InputStreamReader(stream));
+    } catch (final CircularComputedGoalException e) {
+      exception = true;
+    }
+    Assert.assertTrue("Expected an exception due to circular references.", exception);
+  }
+
 }
