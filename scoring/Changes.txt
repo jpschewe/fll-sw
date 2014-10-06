@@ -1,3 +1,4 @@
+* Create specific exceptions for errors in challenge parsing
 * 301 - allow computed goals to depend on computed goals
 * 287 - schedule finalists by division rather than score group
 * 284 - add finalist schedule for each team
