@@ -46,16 +46,17 @@
  <xsd:element name="Performance">
   <xsd:complexType>
    <xsd:sequence>
-     <xsd:sequence maxOccurs="unbounded">
-       
-       <xsd:sequence minOccurs="0" maxOccurs="unbounded">
-	 <xsd:element ref="goal" minOccurs="0" maxOccurs="unbounded" />
-	 <xsd:element ref="computedGoal" minOccurs="0"
-		      maxOccurs="unbounded" />
-	 <xsd:element ref="restriction" minOccurs="0" maxOccurs="unbounded" />
-       </xsd:sequence>
-       
-       <xsd:element ref="tiebreaker" minOccurs="0" maxOccurs="1" />
+    <xsd:sequence maxOccurs="unbounded">
+
+     <xsd:sequence minOccurs="0" maxOccurs="unbounded">
+      <xsd:element ref="goal" minOccurs="0" maxOccurs="unbounded" />
+      <xsd:element ref="computedGoal" minOccurs="0"
+       maxOccurs="unbounded" />
+      <xsd:element ref="restriction" minOccurs="0"
+       maxOccurs="unbounded" />
+     </xsd:sequence>
+
+     <xsd:element ref="tiebreaker" minOccurs="0" maxOccurs="1" />
     </xsd:sequence>
    </xsd:sequence>
    <xsd:attribute name="minimumScore" type="xsd:decimal"
@@ -87,7 +88,7 @@
    <xsd:field xpath="@name" />
   </xsd:key>
   <xsd:keyref name="performanceGoalRef" refer="performanceGoalKey">
-   <xsd:selector xpath=".//term|.//goalRef" />
+   <xsd:selector xpath=".//term|.//enumGoalRef" />
    <xsd:field xpath="@goal" />
   </xsd:keyref>
  </xsd:element>
@@ -124,7 +125,7 @@
    <xsd:field xpath="@name" />
   </xsd:key>
   <xsd:keyref name="subjectiveGoalRef" refer="subjectiveGoalKey">
-   <xsd:selector xpath=".//term|.//goalRef" />
+   <xsd:selector xpath=".//term|.//enumGoalRef" />
    <xsd:field xpath="@goal" />
   </xsd:keyref>
  </xsd:element>
@@ -387,13 +388,20 @@
   </xsd:annotation>
   <xsd:sequence minOccurs="0" maxOccurs="unbounded">
    <xsd:element ref="term" minOccurs="0" maxOccurs="unbounded" />
-   <xsd:element name="constant" minOccurs="0" maxOccurs="unbounded">
-    <xsd:complexType>
-     <xsd:attribute name="value" type="xsd:decimal" />
-    </xsd:complexType>
-   </xsd:element>
+   <xsd:element ref="constant" minOccurs="0" maxOccurs="unbounded" />
   </xsd:sequence>
  </xsd:complexType>
+
+ <xsd:element name="constant">
+  <xsd:annotation>
+   <xsd:documentation>
+    A simple floating point number.
+   </xsd:documentation>
+  </xsd:annotation>
+  <xsd:complexType>
+   <xsd:attribute name="value" type="xsd:decimal" />
+  </xsd:complexType>
+ </xsd:element>
 
  <xsd:complexType name="polynomialWithVariables">
   <xsd:annotation>
@@ -432,12 +440,12 @@
    <xsd:sequence>
     <xsd:element name="description" minOccurs="0" maxOccurs="1"
      type="xsd:string" />
-   
+
     <xsd:element ref="variable" minOccurs="0" maxOccurs="unbounded" />
     <xsd:element ref="switch" />
    </xsd:sequence>
    <xsd:attribute name="name" type="databaseName" use="required" />
-   <xsd:attribute name="title" type="xsd:string" use="required" />   
+   <xsd:attribute name="title" type="xsd:string" use="required" />
   </xsd:complexType>
   <xsd:key name="variableKey">
    <xsd:annotation>
@@ -534,20 +542,24 @@
   </xsd:annotation>
   <xsd:complexType>
    <xsd:sequence>
-    <xsd:element name="left" type="stringOrGoalRef" />
+    <xsd:element name="left" type="stringOrEnumGoalRef" />
     <xsd:choice>
      <xsd:element name="equal-to" />
      <xsd:element name="not-equal-to" />
     </xsd:choice>
-    <xsd:element name="right" type="stringOrGoalRef" />
+    <xsd:element name="right" type="stringOrEnumGoalRef" />
    </xsd:sequence>
   </xsd:complexType>
  </xsd:element>
 
- <xsd:complexType name="stringOrGoalRef">
+ <xsd:complexType name="stringOrEnumGoalRef">
   <xsd:sequence>
    <xsd:choice>
-    <xsd:element name="goalRef">
+    <xsd:element name="enumGoalRef">
+     <xsd:annotation>
+      <xsd:documentation>Reference an enumerated goal where the value will be used as a string.
+      </xsd:documentation>
+     </xsd:annotation>
      <xsd:complexType>
       <xsd:attribute name="goal" type="databaseName" use="required" />
      </xsd:complexType>

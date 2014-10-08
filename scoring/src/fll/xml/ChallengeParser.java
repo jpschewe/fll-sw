@@ -206,14 +206,14 @@ public final class ChallengeParser {
           computedGoals.put(name, computedGoalElement);
 
           for (final Element goalRefElement : new NodelistElementCollectionAdapter(
-                                                                                   computedGoalElement.getElementsByTagName("goalRef"))) {
+                                                                                   computedGoalElement.getElementsByTagName("enumGoalRef"))) {
 
             // can't reference a non-enum goal with goalRef in enumCond
             final String referencedGoalName = goalRefElement.getAttribute("goal");
             final Element referencedGoalElement = simpleGoals.get(referencedGoalName);
             if (!XMLUtils.isEnumeratedGoal(referencedGoalElement)) {
               throw new InvalidEnumCondition("Computed goal '"
-                  + computedGoalElement.getAttribute("name") + "' has a goalRef element that references goal '"
+                  + computedGoalElement.getAttribute("name") + "' has an enumGoalRef element that references goal '"
                   + referencedGoalName + " " + referencedGoalElement + "' which is not an enumerated goal");
             }
           } // foreach goalRef element

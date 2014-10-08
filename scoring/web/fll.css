@@ -51,7 +51,7 @@ stringConstant:before {
 	content: "'" attr(value) "'";
 }
 
-goalRef:before {
+enumGoalRef:before {
 	content: attr(goal);
 }
 
