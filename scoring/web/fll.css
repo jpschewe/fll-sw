@@ -152,19 +152,10 @@ subjectiveCategory:before {
   font-weight: bold;
 }
 
-term[coefficient]:before {
-	content:  attr(coefficient) " x " attr(scoreType) "(" attr(goal);
-}
 
 term:before {
-	content: attr(scoreType) "(" attr(goal);
+	content:  attr(floatingPointType) "(";
 }
-
-
-term:after {
-	content: ")";
-}
-
 
 term:not(:last-child):after {
   content: ") + ";
@@ -178,18 +169,27 @@ result * {
 	display: inline;
 }
 
+
+goalRef:before {
+    content: attr(scoreType) "(" attr(goal) ")";
+}
+
+goalRef:not(:last-child):after {
+    content: " x ";
+}
+
 constant:before {
 	content: attr(value);
 }
-constant:not(:last-child):before {
-	content: attr(value) " + ";
+constant:not(:last-child):after {
+	content: " x ";
 }
 
 variableRef:before {
-	content: attr(coefficient) " x " attr(variable);
+	content: attr(variable);
 }
-variableRef:not(:last-child):before {
-	content: attr(coefficient) " x " attr(variable) " + ";
+variableRef:not(:last-child):after {
+	content: " x ";
 }
 
 variable:before {
