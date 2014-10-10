@@ -88,7 +88,7 @@
    <xsd:field xpath="@name" />
   </xsd:key>
   <xsd:keyref name="performanceGoalRef" refer="performanceGoalKey">
-   <xsd:selector xpath=".//term|.//enumGoalRef" />
+   <xsd:selector xpath=".//goalRef|.//enumGoalRef" />
    <xsd:field xpath="@goal" />
   </xsd:keyref>
  </xsd:element>
@@ -125,7 +125,7 @@
    <xsd:field xpath="@name" />
   </xsd:key>
   <xsd:keyref name="subjectiveGoalRef" refer="subjectiveGoalKey">
-   <xsd:selector xpath=".//term|.//enumGoalRef" />
+   <xsd:selector xpath=".//goalRef|.//enumGoalRef" />
    <xsd:field xpath="@goal" />
   </xsd:keyref>
  </xsd:element>

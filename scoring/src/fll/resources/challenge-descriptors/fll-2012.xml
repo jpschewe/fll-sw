@@ -1,71 +1,61 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <fll title="2012 MN FIRST LEGO League Tournament" revision="Rev: 6">
 
  <Performance minimumScore="0" weight="1.0">
-  <goal name="wood_working" title="Chair - Wood Working"
-   initialValue="0">
-   <value score="25" title="Under table" value="under" />
-   <value score="15" title="In base" value="base" />
-   <value score="0" title="None" value="none" />
+  <goal name="wood_working" title="Chair - Wood Working" initialValue="0">
+   <value score="25" title="Under table" value="under"/>
+   <value score="15" title="In base" value="base"/>
+   <value score="0" title="None" value="none"/>
   </goal>
 
-  <goal name="medicine" title="Green Medicine in Base" multiplier="25" />
+  <goal name="medicine" title="Green Medicine in Base" multiplier="25"/>
 
-  <goal name="service_animal" title="Service Animal in Base"
-   multiplier="20" />
+  <goal name="service_animal" title="Service Animal in Base" multiplier="20"/>
 
-  <goal name="bowling" title="Bowling Pins Down" multiplier="0"
-   max="6" />
+  <goal name="bowling" title="Bowling Pins Down" multiplier="0" max="6"/>
   <computedGoal name="bowling_score" title="Bowling Pins Score">
    <switch>
     <case>
      <condition>
       <left>
-       <term scoreType="raw" goal="bowling" />
+       <term><goalRef goal="bowling" scoreType="raw"/></term>
       </left>
-      <equal-to />
+      <equal-to/>
       <right>
-       <constant value="6" />
+       <term><constant value="6"/></term>
       </right>
      </condition>
      <result>
-      <term scoreType="raw" coefficient="10" goal="bowling" />
+      <term><constant value="10"/><goalRef goal="bowling" scoreType="raw"/></term>
      </result>
     </case>
     <default>
-     <term scoreType="raw" coefficient="7" goal="bowling" />
+     <term><constant value="7"/><goalRef goal="bowling" scoreType="raw"/></term>
     </default>
    </switch>
   </computedGoal>
 
-  <goal name="strength_exercise" title="Raised Weight Location"
-   initialValue="0">
-   <value score="25" title="High" value="high" />
-   <value score="15" title="Low" value="low" />
-   <value score="0" title="Below" value="below" />
+  <goal name="strength_exercise" title="Raised Weight Location" initialValue="0">
+   <value score="25" title="High" value="high"/>
+   <value score="15" title="Low" value="low"/>
+   <value score="0" title="Below" value="below"/>
   </goal>
 
-  <goal name="stove" title="All Burners Black" multiplier="25" />
+  <goal name="stove" title="All Burners Black" multiplier="25"/>
 
-  <goal name="gardening" title="Plants in Garden" multiplier="25" />
+  <goal name="gardening" title="Plants in Garden" multiplier="25"/>
 
-  <goal name="video_call" title="Video Call Flags Up" multiplier="20"
-   max="2" />
+  <goal name="video_call" title="Video Call Flags Up" multiplier="20" max="2"/>
 
-  <goal name="blue_quilting" title="Blue Quilts Touching"
-   multiplier="15" max="2" />
+  <goal name="blue_quilting" title="Blue Quilts Touching" multiplier="15" max="2"/>
 
-  <goal name="orange_quilting" title="Orange Quilts Touching"
-   multiplier="30" max="2" />
+  <goal name="orange_quilting" title="Orange Quilts Touching" multiplier="30" max="2"/>
 
-  <goal name="robot_spins" title="Robot Spins (tick marks)"
-   multiplier="0" max="100" min="0" />
+  <goal name="robot_spins" title="Robot Spins (tick marks)" multiplier="0" max="100" min="0"/>
     
-  <goal name="touch_penalties" title="Touch Penalties (tick marks)"
-   multiplier="0" max="100" min="0" initialValue="0" />
+  <goal name="touch_penalties" title="Touch Penalties (tick marks)" multiplier="0" max="100" min="0" initialValue="0"/>
     
-    <goal name="net_cardio_position" title="Net Cardio Position (Robot forward Spins minus Touch Penalties)"
-      multiplier="0" max="36" min="-12" initialValue="0"/>
+    <goal name="net_cardio_position" title="Net Cardio Position (Robot forward Spins minus Touch Penalties)" multiplier="0" max="36" min="-12" initialValue="0"/>
 
   <!-- On the Challenge's image of the Pointer Position, it shows major and 
    minor portions. The major portions are indicated by a physical LEGO light, 
@@ -91,81 +81,78 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    the 10 point bonus. -->
   <computedGoal name="cardio_progression" title="Cardio Progression">
    <variable name="progression_scale_1">
-        <constant value="12"/>
-   <term scoreType="raw" goal="net_cardio_position" coefficient="1" />
+        <term><constant value="12"/></term>
+   <term><constant value="1"/><goalRef goal="net_cardio_position" scoreType="raw"/></term>
    </variable>
    <variable name="progression_scale_1_max_points">
-    <constant value="120" />
+    <term><constant value="120"/></term>
    </variable>
    <variable name="progression_scale_2">
-        <constant value="12"/>
-   <term scoreType="raw" goal="net_cardio_position" coefficient="1" />
-    <constant value="-24" />
+        <term><constant value="12"/></term>
+   <term><constant value="1"/><goalRef goal="net_cardio_position" scoreType="raw"/></term>
+    <term><constant value="-24"/></term>
    </variable>
    <variable name="progression_scale_2_max_points">
-    <constant value="166" />
+    <term><constant value="166"/></term>
    </variable>
    <variable name="progression_scale_3">
-        <constant value="12"/>
-   <term scoreType="raw" goal="net_cardio_position" coefficient="1" />
-    <constant value="-36" />
+        <term><constant value="12"/></term>
+   <term><constant value="1"/><goalRef goal="net_cardio_position" scoreType="raw"/></term>
+    <term><constant value="-36"/></term>
    </variable>
    <variable name="bonus">
-    <constant value="10" />
+    <term><constant value="10"/></term>
    </variable>
    <variable name="offset">
-    <constant value="-60" />
+    <term><constant value="-60"/></term>
    </variable>
    <switch>
     <case>
      <condition>
       <left>
-       <variableRef variable="progression_scale_1" />
+       <term><variableRef variable="progression_scale_1"/></term>
       </left>
-      <less-than-or-equal />
+      <less-than-or-equal/>
       <right>
-       <constant value="24" />
+       <term><constant value="24"/></term>
       </right>
      </condition>
      <result>
-      <variableRef variable="progression_scale_1"
-       coefficient="5" />
-      <variableRef variable="offset" />
+      <term><constant value="5"/><variableRef variable="progression_scale_1"/></term>
+      <term><variableRef variable="offset"/></term>
      </result>
     </case>
     <case>
      <condition>
       <left>
-       <variableRef variable="progression_scale_1" />
+       <term><variableRef variable="progression_scale_1"/></term>
       </left>
-      <less-than-or-equal />
+      <less-than-or-equal/>
       <right>
-       <constant value="30" />
+       <term><constant value="30"/></term>
       </right>
      </condition>
      <result>
-      <variableRef variable="progression_scale_2"
-       coefficient="3" />
-      <variableRef variable="offset" />
-      <variableRef variable="progression_scale_1_max_points" />
+      <term><constant value="3"/><variableRef variable="progression_scale_2"/></term>
+      <term><variableRef variable="offset"/></term>
+      <term><variableRef variable="progression_scale_1_max_points"/></term>
      </result>
     </case>
     <case>
      <condition>
       <left>
-       <variableRef variable="progression_scale_1" />
+       <term><variableRef variable="progression_scale_1"/></term>
       </left>
-      <less-than-or-equal />
+      <less-than-or-equal/>
       <right>
-       <constant value="36" />
+       <term><constant value="36"/></term>
       </right>
      </condition>
      <result>
-      <variableRef variable="progression_scale_2"
-       coefficient="3" />
-      <variableRef variable="offset" />
-      <variableRef variable="progression_scale_1_max_points" />
-      <variableRef variable="bonus" />
+      <term><constant value="3"/><variableRef variable="progression_scale_2"/></term>
+      <term><variableRef variable="offset"/></term>
+      <term><variableRef variable="progression_scale_1_max_points"/></term>
+      <term><variableRef variable="bonus"/></term>
       <!-- at this point, a 10 point bonus appears, although the progression 
        is identical. -->
      </result>
@@ -173,62 +160,56 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
     <case>
      <condition>
       <left>
-       <variableRef variable="progression_scale_1" />
+       <term><variableRef variable="progression_scale_1"/></term>
       </left>
-      <less-than-or-equal />
+      <less-than-or-equal/>
       <right>
-       <constant value="48" />
+       <term><constant value="48"/></term>
       </right>
      </condition>
      <result>
-      <variableRef variable="progression_scale_3"
-       coefficient="1" />
-      <variableRef variable="offset" />
-      <variableRef variable="progression_scale_2_max_points" />
+      <term><constant value="1"/><variableRef variable="progression_scale_3"/></term>
+      <term><variableRef variable="offset"/></term>
+      <term><variableRef variable="progression_scale_2_max_points"/></term>
      </result>
     </case>
     <default>
-     <constant value="-1" />
+     <term><constant value="-1"/></term>
     </default>
    </switch>
   </computedGoal>
 
-  <goal name="flexibility" title="Yellow Loops in Base" multiplier="20"
-   max="2" />
+  <goal name="flexibility" title="Yellow Loops in Base" multiplier="20" max="2"/>
 
-  <goal name="transitions" title="Ending Bridge Position"
-   initialValue="0">
-   <value score="65" title="Balanced" value="balanced" />
-   <value score="45" title="Tilted" value="tilted" />
-   <value score="0" title="None" value="none" />
+  <goal name="transitions" title="Ending Bridge Position" initialValue="0">
+   <value score="65" title="Balanced" value="balanced"/>
+   <value score="45" title="Tilted" value="tilted"/>
+   <value score="0" title="None" value="none"/>
   </goal>
 
-  <goal name="similarity" title="Both Pointers are Paralell"
-   multiplier="45" />
+  <goal name="similarity" title="Both Pointers are Paralell" multiplier="45"/>
 
-  <goal name="ball_game_balls" title="Total Balls on Rack"
-   multiplier="10" max="7" initialValue="7" />
+  <goal name="ball_game_balls" title="Total Balls on Rack" multiplier="10" max="7" initialValue="7"/>
 
-  <goal name="ball_game_center_ball" title="Team's Ball in Center"
-   multiplier="60" />
+  <goal name="ball_game_center_ball" title="Team's Ball in Center" multiplier="60"/>
 
 
   <tiebreaker>
-   <test winner='HIGH'>
-    <term goal='blue_quilting' scoreType='computed' />
-    <term goal='orange_quilting' scoreType='computed' />
+   <test winner="HIGH">
+    <term><goalRef goal="blue_quilting" scoreType="computed"/></term>
+    <term><goalRef goal="orange_quilting" scoreType="computed"/></term>
    </test>
 
-   <test winner='HIGH'>
-    <term goal='bowling' scoreType='raw' />
+   <test winner="HIGH">
+    <term><goalRef goal="bowling" scoreType="raw"/></term>
    </test>
 
-   <test winner='HIGH'>
-    <term goal='flexibility' scoreType='computed' />
+   <test winner="HIGH">
+    <term><goalRef goal="flexibility" scoreType="computed"/></term>
    </test>
 
-   <test winner='HIGH'>
-    <term goal='cardio_progression' scoreType='computed' />
+   <test winner="HIGH">
+    <term><goalRef goal="cardio_progression" scoreType="computed"/></term>
    </test>
 
   </tiebreaker>
@@ -236,10 +217,8 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
  </Performance>
 
 
- <subjectiveCategory name="robot_design" title="Robot Design - Design"
-  weight="0.5">
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="durability"
-   title="Durability" category="Mechanical Design">
+ <subjectiveCategory name="robot_design" title="Robot Design - Design" weight="0.5">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="durability" title="Durability" category="Mechanical Design">
    <description>Evidence of structural integrity; ability to withstand
     rigors of competition
    </description>
@@ -271,8 +250,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1"
-   name="mechanical_efficiency" title="Mechanical Efficiency" category="Mechanical Design">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="mechanical_efficiency" title="Mechanical Efficiency" category="Mechanical Design">
    <description>Economic use of parts and time; easy to repair and
     modify
     Components work together
@@ -308,8 +286,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1"
-   name="mechanization" title="Mechanization" category="Mechanical Design">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="mechanization" title="Mechanization" category="Mechanical Design">
    <description>Ability of robot mechanisms to move or act with
     appropriate speed, strength and accuracy for intended tasks
     (propulsion and execution)
@@ -347,8 +324,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="attachments"
-   title="Attachments and Sensors" category="MN Design">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="attachments" title="Attachments and Sensors" category="MN Design">
    <description>Attachments and Sensors, if used, are an integrated part
     of the design, they are used appropriately and achieve consistent
     results.
@@ -379,8 +355,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="kids_work"
-   title="Kids Did the Work" category="MN Design">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="kids_work" title="Kids Did the Work" category="MN Design">
    <description>Appropriate balance between team responsibility and
     coach guidance
    </description>
@@ -412,8 +387,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1"
-   name="design_process" title="Design Process" category="Strategy and Innovations">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="design_process" title="Design Process" category="Strategy and Innovations">
    <description>Ability to develop and explain improvement cycles where
     alternatives are considered and narrowed, selections tested, design
     improved.
@@ -445,8 +419,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1"
-   name="mission_strategy" title="Mission Strategy" category="Strategy and Innovations">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="mission_strategy" title="Mission Strategy" category="Strategy and Innovations">
    <description>Ability to clearly define and describe the team’s game
     strategy.
    </description>
@@ -478,8 +451,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="innovation"
-   title="Innovation" category="Strategy and Innovations">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="innovation" title="Innovation" category="Strategy and Innovations">
    <description>Creation of new, unique or unexpected features (in
     design, programming, strategy or applications) that are beneficial
     in performing the tasks.
@@ -513,11 +485,8 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
 
  </subjectiveCategory>
 
- <subjectiveCategory name="project" title="Project"
-  weight="1.0">
-  <goal initialValue="0" max="12" min="0" multiplier="1"
-   name="problem_identification" title="Problem Identification"
-   category="Research">
+ <subjectiveCategory name="project" title="Project" weight="1.0">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="problem_identification" title="Problem Identification" category="Research">
    <description>Clear definition of the problem being studied
    </description>
    <rubric>
@@ -547,8 +516,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1"
-   name="sources_information" title="Sources of Information" category="Research">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="sources_information" title="Sources of Information" category="Research">
    <description>Types (e.g. books, magazines, websites, reports and
     other resources) and number of quality source cited, including
     professions in the field
@@ -579,8 +547,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1"
-   name="problem_analysis" title="Problem Analysis" category="Research">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="problem_analysis" title="Problem Analysis" category="Research">
    <description>Depth to which the problem was studied and analyzed by
     the team
    </description>
@@ -612,8 +579,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="review"
-   title="Review Existing Solutions" category="Research">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="review" title="Review Existing Solutions" category="Research">
    <description>Extent to which existing theories and solutions were
     analyzed by the team, including an effort to verify the originality
     of the team’s solution
@@ -644,8 +610,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1"
-   name="team_solution" title="Team Solution" category="Innovative Solution">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="team_solution" title="Team Solution" category="Innovative Solution">
    <description>Clear explanation of the proposed solution
    </description>
    <rubric>
@@ -675,8 +640,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="innovation"
-   title="Innovation" category="Innovative Solution">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="innovation" title="Innovation" category="Innovative Solution">
    <description>Degree to which the team’s solution makes life better by
     improving existing options, developing a new application of existing
     ideas, or solving the problem in a completely new way
@@ -708,8 +672,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1"
-   name="implementation" title="Implementation" category="Innovative Solution">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="implementation" title="Implementation" category="Innovative Solution">
    <description>Consideration of factors for implementation (cost, easy
     of manufacturing, etc.)
    </description>
@@ -734,8 +697,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="sharing"
-   title="Sharing" category="Presentation">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="sharing" title="Sharing" category="Presentation">
    <description>Degree to which the team shared their Project before the
     tournament with others who might benefit from the team’s efforts
    </description>
@@ -766,8 +728,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="creativity"
-   title="Creativity" category="Presentation">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="creativity" title="Creativity" category="Presentation">
    <description>Imagination used to develop and delivery the
     presentation
    </description>
@@ -795,9 +756,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1"
-   name="presentation_effectiveness" title="Presentation Effectiveness"
-   category="Presentation">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="presentation_effectiveness" title="Presentation Effectiveness" category="Presentation">
    <description>Message delivery and organization of the presentation
    </description>
    <rubric>
@@ -827,11 +786,9 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
  </subjectiveCategory>
 
 
- <subjectiveCategory name="core_values" title="Core Values"
-  weight="1.0">
+ <subjectiveCategory name="core_values" title="Core Values" weight="1.0">
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="discovery"
-   title="Discovery" category="Inspiration">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="discovery" title="Discovery" category="Inspiration">
    <description>Balanced emphasis on all three aspects (Robot, Project,
     Core Values) of FLL; it’s not just about winning awards
    </description>
@@ -869,8 +826,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="team_spirit"
-   title="Team Spirit" category="Inspiration">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="team_spirit" title="Team Spirit" category="Inspiration">
    <description>Enthusiastic and fun expression of the team identity
    </description>
    <rubric>
@@ -899,8 +855,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="integration"
-   title="Integration" category="Inspiration">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="integration" title="Integration" category="Inspiration">
    <description>Application of FLL values and skills outside FLL
     (ability to describe current and potential examples from daily life
    </description>
@@ -935,8 +890,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1"
-   name="effectiveness" title="Effectiveness" category="Teamwork">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="effectiveness" title="Effectiveness" category="Teamwork">
    <description>Problem solving and decision making processes help team
     achieve their goals
    </description>
@@ -968,8 +922,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="efficiency"
-   title="Efficiency" category="Teamwork">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="efficiency" title="Efficiency" category="Teamwork">
    <description>Resources used relative to what the team accomplishes
     (time management, distribution of roles, responsibilities)
    </description>
@@ -998,8 +951,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="kids_work"
-   title="Kids Do the Work" category="Teamwork">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="kids_work" title="Kids Do the Work" category="Teamwork">
    <description>Appropriate balance between team responsibility and
     coach guidance
    </description>
@@ -1030,8 +982,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="inclusion"
-   title="Inclusion" category="Gracious Professionalism">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="inclusion" title="Inclusion" category="Gracious Professionalism">
    <description>Consideration and appreciation for the contributions
     (ideas and skills) of all team members, with balanced involvement
    </description>
@@ -1063,8 +1014,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="respect"
-   title="Respect" category="Gracious Professionalism">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="respect" title="Respect" category="Gracious Professionalism">
    <description>Team members act and speak with integrity so others feel
     valued—especially when solving problems or resolving conflicts
    </description>
@@ -1089,8 +1039,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="coopertition"
-   title="Coopertition" category="Gracious Professionalism">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="coopertition" title="Coopertition" category="Gracious Professionalism">
    <description>Team competes in the spirit of friendly competition and
     cooperates with others
    </description>
@@ -1123,10 +1072,8 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
  </subjectiveCategory>
 
 
- <subjectiveCategory name="robot_programming"
-  title="Robot Design - Programming" weight="0.5">
-  <goal initialValue="0" max="12" min="0" multiplier="1"
-   name="code_structure" title="Code Structure and Reuse" category="MN Programming">
+ <subjectiveCategory name="robot_programming" title="Robot Design - Programming" weight="0.5">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="code_structure" title="Code Structure and Reuse" category="MN Programming">
    <description>Programs show proper use of variables, loops,
     subroutines and there is an understanding of code reuse.
    </description>
@@ -1154,8 +1101,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="kids_work"
-   title="Kids Did the Work" category="MN Programming">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="kids_work" title="Kids Did the Work" category="MN Programming">
    <description>Appropriate balance between team responsibility and
     coach guidance
    </description>
@@ -1189,8 +1135,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="quality"
-   title="Programming Quality" category="Programming">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="quality" title="Programming Quality" category="Programming">
    <description>Programs are appropriate for the intended purpose and
     achieve consistent results, assuming no mechanical faults
    </description>
@@ -1218,8 +1163,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="efficiency"
-   title="Programming Efficiency" category="Programming">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="efficiency" title="Programming Efficiency" category="Programming">
    <description>Programs are modular, streamlined and understandable
    </description>
    <rubric>
@@ -1249,8 +1193,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="automation"
-   title="Automation/Navigation" category="Programming">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="automation" title="Automation/Navigation" category="Programming">
    <description>Ability of the robot to move or act as intended using
     mechanical and/or sensor feedback (with minimal reliance on team
     intervention and/or program timing.
@@ -1281,8 +1224,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1"
-   name="design_process" title="Design Process" category="Strategy and Innovations">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="design_process" title="Design Process" category="Strategy and Innovations">
    <description>Ability to develop and explain improvement cycles where
     alternatives are considered and narrowed, selections tested, design
     improved.
@@ -1314,8 +1256,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1"
-   name="mission_strategy" title="Mission Strategy" category="Strategy and Innovations">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="mission_strategy" title="Mission Strategy" category="Strategy and Innovations">
    <description>Ability to clearly define and describe the team’s game
     strategy.
    </description>
@@ -1347,8 +1288,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="innovation"
-   title="Innovation" category="Strategy and Innovations">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="innovation" title="Innovation" category="Strategy and Innovations">
    <description>Creation of new, unique or unexpected features (in
     design, programming, strategy or applications) that are beneficial
     in performing the tasks.

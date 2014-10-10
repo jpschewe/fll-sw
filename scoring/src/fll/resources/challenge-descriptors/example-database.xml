@@ -1,89 +1,81 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<fll title="Sample Database - used to generate schema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd">
+<?xml version="1.0"?>
+<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" title="Sample Database - used to generate schema" xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd">
 
  <Performance minimumScore="0" weight="1.0">
-  <goal initialValue="0" max="1" min="0" multiplier="40"
-   name="aaa_example_count" title="Standard goal with count and multiplier"></goal>
+  <goal initialValue="0" max="1" min="0" multiplier="40" name="aaa_example_count" title="Standard goal with count and multiplier"/>
 
-  <goal initialValue="0" max="1" min="0" multiplier="30"
-   name="aaa_example_boolean" title="Standard boolean goal"></goal>
+  <goal initialValue="0" max="1" min="0" multiplier="30" name="aaa_example_boolean" title="Standard boolean goal"/>
 
-  <goal initialValue="0" max="1" min="0" multiplier="1"
-   name="aaa_example_enum" title="Enumerated goal">
-   <value score="35" title="In Base" value="in_base"></value>
-   <value score="25" title="Off Ship" value="off_ship"></value>
-   <value score="0" title="No" value="no"></value>
+  <goal initialValue="0" max="1" min="0" multiplier="1" name="aaa_example_enum" title="Enumerated goal">
+   <value score="35" title="In Base" value="in_base"/>
+   <value score="25" title="Off Ship" value="off_ship"/>
+   <value score="0" title="No" value="no"/>
   </goal>
 
-  <goal name="bbb_example_robot_type" title="Robot Type"
-   multiplier="0" initialValue="1">
-   <value score="1" title="RCX" value="rcx" />
-   <value score="2" title="NXT" value="nxt" />
+  <goal name="bbb_example_robot_type" title="Robot Type" multiplier="0" initialValue="1">
+   <value score="1" title="RCX" value="rcx"/>
+   <value score="2" title="NXT" value="nxt"/>
   </goal>
 
   <computedGoal name="bbb_computed" title="Test computed goal">
    <variable name="subtotal">
-    <term goal="aaa_example_count" scoreType="computed" />
-    <term goal="aaa_example_boolean" scoreType="computed" />
-    <term goal="aaa_example_enum" scoreType="computed" />
+    <term><goalRef goal="aaa_example_count" scoreType="computed"/></term>
+    <term><goalRef goal="aaa_example_boolean" scoreType="computed"/></term>
+    <term><goalRef goal="aaa_example_enum" scoreType="computed"/></term>
    </variable>
    <switch>
     <case>
      <enumCondition>
       <left>
-       <goalRef goal="bbb_example_robot_type" />
+       <enumGoalRef goal="bbb_example_robot_type"/>
       </left>
-      <equal-to />
+      <equal-to/>
       <right>
-       <stringConstant value="rcx" />
+       <stringConstant value="rcx"/>
       </right>
      </enumCondition>
      <switch>
       <case>
        <condition>
         <left>
-         <variableRef variable="subtotal" />
+         <term><variableRef variable="subtotal"/></term>
         </left>
-        <less-than /> <!-- any inequality -->
+        <less-than/> <!-- any inequality -->
         <right>
-         <constant value="300" />
+         <term><constant value="300"/></term>
         </right>
        </condition>
        <result>
-        <term goal="aaa_example_count" scoreType="computed" />
-        <term goal="aaa_example_boolean" scoreType="computed" />
-        <term goal="aaa_example_enum" scoreType="computed" />
-        <constant value="60" />
+        <term><goalRef goal="aaa_example_count" scoreType="computed"/></term>
+        <term><goalRef goal="aaa_example_boolean" scoreType="computed"/></term>
+        <term><goalRef goal="aaa_example_enum" scoreType="computed"/></term>
+        <term><constant value="60"/></term>
        </result>
       </case>
       <default> <!-- default case is required, the default just has a result -->
-       <constant value="240" />
-       <term coefficient="0.4" goal="aaa_example_count" scoreType="computed" />
-       <term coefficient="0.4" goal="aaa_example_boolean"
-        scoreType="computed" />
-       <term coefficient="0.4" goal="aaa_example_enum" scoreType="computed" />
+       <term><constant value="240"/></term>
+       <term><constant value="0.4"/><goalRef goal="aaa_example_count" scoreType="computed"/></term>
+       <term><constant value="0.4"/><goalRef goal="aaa_example_boolean" scoreType="computed"/></term>
+       <term><constant value="0.4"/><goalRef goal="aaa_example_enum" scoreType="computed"/></term>
       </default>
      </switch>
     </case>
     <default>
-     <constant value="0" />
+     <term><constant value="0"/></term>
     </default>
    </switch>
   </computedGoal>
 
   <tiebreaker>
    <test winner="HIGH">
-    <term goal="aaa_example_count" scoreType="raw" />
+    <term><goalRef goal="aaa_example_count" scoreType="raw"/></term>
    </test>
   </tiebreaker>
 
  </Performance>
 
- <subjectiveCategory name="aaa_example_subjective_category"
-  title="Example subjective category" weight="0.5">
-  <goal initialValue="0" max="12" min="0" multiplier="1"
-   name="aaa_example_goal" title="Durability" category="Mechanical Design">
+ <subjectiveCategory name="aaa_example_subjective_category" title="Example subjective category" weight="0.5">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="aaa_example_goal" title="Durability" category="Mechanical Design">
    <description>Evidence of structural integrity; ability to withstand
     rigors of competition
    </description>
@@ -116,8 +108,7 @@
   </goal>
 
 
-  <goal initialValue="0" max="12" min="0" multiplier="1"
-   name="aaa_example_goal2" title="Kids Did the Work" category="MN Design">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="aaa_example_goal2" title="Kids Did the Work" category="MN Design">
    <description>Appropriate balance between team responsibility and
     coach guidance
    </description>

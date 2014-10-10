@@ -24,20 +24,22 @@ public class BasicPolynomial implements Evaluatable, Serializable {
 
   public BasicPolynomial(final Element ele,
                          final GoalScope goalScope) {
+    this(ele, goalScope, null);
+  }
+
+  /**
+   * Only to be called from {@link ComplexPolynomial}.
+   */
+  protected BasicPolynomial(final Element ele,
+                            final GoalScope goalScope,
+                            final VariableScope variableScope) {
 
     final List<Term> terms = new LinkedList<Term>();
     for (final Element termEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName("term"))) {
-      final Term term = new Term(termEle, goalScope);
+      final Term term = new Term(termEle, goalScope, variableScope);
       terms.add(term);
     }
     mTerms = Collections.unmodifiableList(terms);
-
-    double constant = 0;
-    for (final Element constantEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName("constant"))) {
-      final double value = Double.valueOf(constantEle.getAttribute("value"));
-      constant += value;
-    }
-    mConstant = constant;
   }
 
   private final List<Term> mTerms;
@@ -46,19 +48,13 @@ public class BasicPolynomial implements Evaluatable, Serializable {
     return mTerms;
   }
 
-  private final double mConstant;
-
-  public double getConstant() {
-    return mConstant;
-  }
-
   @Override
   public double evaluate(final TeamScore teamScore) {
-    if(!teamScore.scoreExists()) {
+    if (!teamScore.scoreExists()) {
       return Double.NaN;
     }
 
-    double score = getConstant();
+    double score = 0;
     for (final Term t : getTerms()) {
       final double val = t.evaluate(teamScore);
       score += val;
