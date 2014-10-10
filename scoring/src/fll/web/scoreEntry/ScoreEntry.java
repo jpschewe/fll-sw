@@ -48,6 +48,7 @@ import fll.xml.EnumConditionStatement;
 import fll.xml.EnumeratedValue;
 import fll.xml.FloatingPointType;
 import fll.xml.Goal;
+import fll.xml.GoalRef;
 import fll.xml.GoalScoreType;
 import fll.xml.InequalityComparison;
 import fll.xml.PerformanceScoreCategory;
@@ -56,7 +57,7 @@ import fll.xml.ScoreType;
 import fll.xml.SwitchStatement;
 import fll.xml.Term;
 import fll.xml.Variable;
-import fll.xml.VariableTerm;
+import fll.xml.VariableRef;
 
 /**
  * Java code used in scoreEntry.jsp.
@@ -375,8 +376,10 @@ public final class ScoreEntry {
   private static Set<String> getGoalsInRestriction(final Restriction restrictEle) {
     final Set<String> goals = new HashSet<String>();
     for (final Term termEle : restrictEle.getTerms()) {
-      final String goalName = termEle.getGoal().getName();
-      goals.add(goalName);
+      for (final GoalRef goal : termEle.getGoals()) {
+        final String goalName = goal.getGoalName();
+        goals.add(goalName);
+      }
     }
     return goals;
   }
@@ -695,10 +698,11 @@ public final class ScoreEntry {
       writer.println("      <tr>");
       writer.println("        <td>");
       writer.println("          <input type='radio' name='"
-          + goalName + "' value='" + value + "' id='" + id + "' ' onclick='"
-          + getSetMethodName(goalName) + "(\"" + value + "\")'>");
+          + goalName + "' value='" + value + "' id='" + id + "' ' onclick='" + getSetMethodName(goalName) + "(\""
+          + value + "\")'>");
       writer.println("        </td>");
-      writer.println("        <td><label for='" + id + "'/>");
+      writer.println("        <td><label for='"
+          + id + "'/>");
       writer.println("          "
           + valueTitle);
       writer.println("        </td>");
@@ -802,7 +806,7 @@ public final class ScoreEntry {
     formatter.format("function %s() {%n", getComputedMethodName(goalName));
 
     for (final Variable var : compGoal.getVariables()) {
-      final String varName = getComputedGoalLocalVarName(var);
+      final String varName = getComputedGoalLocalVarName(var.getName());
       final String varValue = polyToString(var);
       formatter.format("var %s = %s;%n", varName, varValue);
     }
@@ -816,10 +820,10 @@ public final class ScoreEntry {
 
   /**
    * Get the name of a local variable inside a computed goal function that
-   * stores the specified variable value
+   * stores the specified variable value.
    */
-  private static String getComputedGoalLocalVarName(final Variable var) {
-    return var.getName();
+  private static String getComputedGoalLocalVarName(final String varname) {
+    return varname;
   }
 
   private static void generateSwitch(final Formatter formatter,
@@ -869,49 +873,54 @@ public final class ScoreEntry {
    * Convert a polynomial to a string. Handles both {@link BasicPolynomial} and
    * {@link ComplexPolynomial}.
    * 
-   * @param ele the polynomial
+   * @param poly the polynomial
    * @return the string that represents the polynomial
    * @throws ParseException
    */
-  private static String polyToString(final BasicPolynomial ele) throws ParseException {
+  private static String polyToString(final BasicPolynomial poly) throws ParseException {
     final Formatter formatter = new Formatter();
 
-    formatter.format("%f", ele.getConstant());
-
-    for (final Term childEle : ele.getTerms()) {
-      formatter.format(" + ");
-
-      final String goal = childEle.getGoal().getName();
-      final double coefficient = childEle.getCoefficient();
-      final GoalScoreType scoreType = childEle.getScoreType();
-      final String varName;
-      switch (scoreType) {
-      case RAW:
-        varName = getVarNameForRawScore(goal);
-        break;
-      case COMPUTED:
-        varName = getVarNameForComputedScore(goal);
-        break;
-      default:
-        throw new RuntimeException("Expected 'raw' or 'computed', but found: "
-            + scoreType);
-      }
-      final String value = String.format("%f * %s", coefficient, varName);
-      final FloatingPointType floatingPoint = childEle.getFloatingPoint();
-      formatter.format("%s", applyFloatingPoint(value, floatingPoint));
-    }
-
-    if (ele instanceof ComplexPolynomial) {
-      final ComplexPolynomial complex = (ComplexPolynomial) ele;
-      for (final VariableTerm childEle : complex.getVariableTerms()) {
+    boolean first = true;
+    for (final Term term : poly.getTerms()) {
+      if (!first) {
         formatter.format(" + ");
-        final double coefficient = childEle.getCoefficient();
-        final String variable = getComputedGoalLocalVarName(childEle.getVariable());
-        final FloatingPointType floatingPoint = childEle.getFloatingPoint();
-        final String value = String.format("%f * %s", coefficient, variable);
-        formatter.format("%s", applyFloatingPoint(value, floatingPoint));
+      } else {
+        first = false;
       }
+
+      final double coefficient = term.getCoefficient();
+
+      final Formatter termFormatter = new Formatter();
+      termFormatter.format("%f", coefficient);
+
+      for (final GoalRef goalRef : term.getGoals()) {
+        final String goal = goalRef.getGoalName();
+        final GoalScoreType scoreType = goalRef.getScoreType();
+        final String varName;
+        switch (scoreType) {
+        case RAW:
+          varName = getVarNameForRawScore(goal);
+          break;
+        case COMPUTED:
+          varName = getVarNameForComputedScore(goal);
+          break;
+        default:
+          throw new RuntimeException("Expected 'raw' or 'computed', but found: "
+              + scoreType);
+        }
+        termFormatter.format("* %s", varName);
+      }
+
+      for (final VariableRef varRef : term.getVariables()) {
+        final String var = varRef.getVariableName();
+        final String varName = getComputedGoalLocalVarName(var);
+        termFormatter.format("* %s", varName);
+      }
+
+      final FloatingPointType floatingPoint = term.getFloatingPoint();
+      formatter.format("%s", applyFloatingPoint(termFormatter.toString(), floatingPoint));
     }
+
     return formatter.toString();
   }
 

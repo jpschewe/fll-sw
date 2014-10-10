@@ -227,7 +227,7 @@ public final class ChallengeParser {
 
         checkForCircularDependencies(computedGoals);
 
-        for (final Element termElement : new NodelistElementCollectionAdapter(childElement.getElementsByTagName("term"))) {
+        for (final Element termElement : new NodelistElementCollectionAdapter(childElement.getElementsByTagName("goalRef"))) {
           final String goalValueType = termElement.getAttribute("scoreType");
           final String referencedGoalName = termElement.getAttribute("goal");
           final Element referencedGoalElement = allGoals.get(referencedGoalName);
@@ -292,7 +292,7 @@ public final class ChallengeParser {
     } else {
       final Set<String> dependencies = new HashSet<String>();
       for (final Element termElement : new NodelistElementCollectionAdapter(
-                                                                            computedGoalElement.getElementsByTagName("term"))) {
+                                                                            computedGoalElement.getElementsByTagName("goalRef"))) {
 
         // check that the computed goal only references goals
         final String referencedGoalName = termElement.getAttribute("goal");
