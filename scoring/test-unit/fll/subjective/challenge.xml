@@ -1,5 +1,9 @@
 <?xml version="1.0"?>
-<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" bracketSort="SEEDING" revision="$Rev: 351 $" title="FLL 2008 Challenge: Climate Connections" winner="HIGH" xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd">
+<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+bracketSort="SEEDING" revision="$Rev: 351 $" title="FLL 2008 Challenge:
+Climate Connections" winner="HIGH"
+xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd"
+schemaVersion="1">
  <Performance minimumScore="0" weight="1.0">
   <goal initialValue="0" max="4" min="0" multiplier="5" name="bury_carbon_dioxide" scoreType="INTEGER" title="Carbon Dioxide in Underground Reservoir"/>
   <goal initialValue="0" max="8" min="0" multiplier="5" name="construct_levees_red" scoreType="INTEGER" title="Upright Levees touching RED Shore"/>
