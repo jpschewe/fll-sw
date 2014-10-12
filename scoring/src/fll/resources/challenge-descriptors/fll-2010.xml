@@ -1,5 +1,8 @@
 <?xml version="1.0"?>
-<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" title="2010 MN FIRST LEGO League Tournament" xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd" revision="Rev: 5">
+<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" title="2010
+MN FIRST LEGO League Tournament"
+xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd"
+revision="Rev: 5" schemaVersion="1">
 
   <Performance minimumScore="0" weight="1.0">
 

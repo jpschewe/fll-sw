@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
-<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd" title="FLL 2003 Challenge: Mission Mars">
+<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd"
+title="FLL 2003 Challenge: Mission Mars" schemaVersion="1">
 
 	<Performance weight="1.0">
 

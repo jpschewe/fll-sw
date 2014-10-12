@@ -8,6 +8,7 @@
     <xsd:element ref="subjectiveCategory" minOccurs="0"
      maxOccurs="unbounded" />
    </xsd:sequence>
+   <xsd:attribute name="schemaVersion" type="xsd:integer" use="required" />
    <xsd:attribute name="title" type="xsd:string" use="required" />
    <xsd:attribute name="revision" type="xsd:string" use="optional" />
    <xsd:attribute name="bracketSort" type="bracketSortType"

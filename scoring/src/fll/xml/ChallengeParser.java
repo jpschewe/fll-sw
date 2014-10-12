@@ -10,6 +10,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,16 +22,28 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
+import net.mtu.eggplant.io.IOUtils;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
@@ -116,13 +130,24 @@ public final class ChallengeParser {
    */
   public static Document parse(final Reader stream) {
     try {
+      String content = IOUtils.readIntoString(stream);
+
+      final int schemaVersion = determineSchemaVersion(content);
+      if (schemaVersion == 0) {
+        content = transform0To1(content);
+      } else if (schemaVersion > 1
+          || schemaVersion < 0) {
+        throw new ChallengeXMLException("Schema version not known: "
+            + schemaVersion);
+      }
+
       final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
       final SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
       final Source schemaFile = new StreamSource(classLoader.getResourceAsStream("fll/resources/fll.xsd"));
       final Schema schema = factory.newSchema(schemaFile);
 
-      final Document document = XMLUtils.parse(stream, schema);
+      final Document document = XMLUtils.parse(new StringReader(content), schema);
 
       // challenge descriptor specific checks
       validateDocument(document);
@@ -130,17 +155,76 @@ public final class ChallengeParser {
       return document;
     } catch (final SAXParseException spe) {
       throw new ChallengeXMLException(
-                                 String.format("Error parsing file line: %d column: %d%n Message: %s%n This may be caused by using the wrong version of the software or an improperly formatted challenge descriptor or attempting to parse a file that is not a challenge descriptor.",
-                                               spe.getLineNumber(), spe.getColumnNumber(), spe.getMessage()), spe);
+                                      String.format("Error parsing file line: %d column: %d%n Message: %s%n This may be caused by using the wrong version of the software or an improperly formatted challenge descriptor or attempting to parse a file that is not a challenge descriptor.",
+                                                    spe.getLineNumber(), spe.getColumnNumber(), spe.getMessage()), spe);
     } catch (final SAXException se) {
       throw new ChallengeXMLException(
-                                 "The challenge descriptor was found to be invalid, check that you are parsing a challenge descriptor file and not something else",
-                                 se);
+                                      "The challenge descriptor was found to be invalid, check that you are parsing a challenge descriptor file and not something else",
+                                      se);
     } catch (final ParseException pe) {
       throw new ChallengeXMLException(pe);
     } catch (final IOException e) {
       throw new ChallengeXMLException(e);
     }
+  }
+
+  /**
+   * Convert from version 0 to version 1 of the schema.
+   * 
+   * @param content
+   * @return
+   */
+  private static String transform0To1(final String content) {
+    try {
+      final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+
+      final Source stylesheet = new StreamSource(
+                                                 classLoader.getResourceAsStream("fll/resources/schema0-to-schema1.xsl"));
+
+      final Document oldDocument = parseXMLDocument(new StringReader(content));
+
+      // Use a Transformer for output
+      final TransformerFactory tFactory = TransformerFactory.newInstance();
+      final Transformer transformer = tFactory.newTransformer(stylesheet);
+
+      final DOMSource source = new DOMSource(oldDocument);
+      final StringWriter outputWriter = new StringWriter();
+      final StreamResult result = new StreamResult(outputWriter);
+      transformer.transform(source, result);
+
+      return outputWriter.toString();
+    } catch (final IOException e) {
+      throw new ChallengeXMLException("Error transforming description", e);
+    } catch (final SAXException e) {
+      throw new ChallengeXMLException("Error transforming description", e);
+    } catch (final TransformerConfigurationException e) {
+      throw new ChallengeXMLException("Error creating transformer", e);
+    } catch (final TransformerException e) {
+      throw new ChallengeXMLException("Error transforming description", e);
+    }
+  }
+
+  /**
+   * Determine the version of the schema used in the XML document.
+   * 
+   * @param content
+   * @return
+   * @throws IOException
+   * @throws SAXException
+   */
+  private static int determineSchemaVersion(final String content) throws SAXException, IOException {
+    final Document document = parseXMLDocument(new StringReader(content));
+    final Element rootElement = document.getDocumentElement();
+    if (!"fll".equals(rootElement.getTagName())) {
+      throw new ChallengeXMLException("Not a fll challenge description file");
+    }
+
+    if (rootElement.hasAttribute("schemaVersion")) {
+      return Integer.valueOf(rootElement.getAttribute("schemaVersion"));
+    } else {
+      return 0;
+    }
+
   }
 
   /**
@@ -180,8 +264,8 @@ public final class ChallengeParser {
             }
             if (!foundMatch) {
               throw new InvalidInitialValue(
-                                         String.format("Initial value for %s(%f) does not match the score of any value element within the goal",
-                                                       name, initialValue));
+                                            String.format("Initial value for %s(%f) does not match the score of any value element within the goal",
+                                                          name, initialValue));
             }
 
           } else {
@@ -189,11 +273,11 @@ public final class ChallengeParser {
             final double max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).doubleValue();
             if (FP.lessThan(initialValue, min, INITIAL_VALUE_TOLERANCE)) {
               throw new InvalidInitialValue(String.format("Initial value for %s(%f) is less than min(%f)", name,
-                                                       initialValue, min));
+                                                          initialValue, min));
             }
             if (FP.greaterThan(initialValue, max, INITIAL_VALUE_TOLERANCE)) {
               throw new InvalidInitialValue(String.format("Initial value for %s(%f) is greater than max(%f)", name,
-                                                       initialValue, max));
+                                                          initialValue, max));
             }
           }
         } // foreach goal
@@ -227,7 +311,8 @@ public final class ChallengeParser {
 
         checkForCircularDependencies(computedGoals);
 
-        for (final Element termElement : new NodelistElementCollectionAdapter(childElement.getElementsByTagName("goalRef"))) {
+        for (final Element termElement : new NodelistElementCollectionAdapter(
+                                                                              childElement.getElementsByTagName("goalRef"))) {
           final String goalValueType = termElement.getAttribute("scoreType");
           final String referencedGoalName = termElement.getAttribute("goal");
           final Element referencedGoalElement = allGoals.get(referencedGoalName);
@@ -236,8 +321,8 @@ public final class ChallengeParser {
               && (XMLUtils.isEnumeratedGoal(referencedGoalElement) || XMLUtils.isComputedGoal(referencedGoalElement))) {
             // can't use the raw score of an enum inside a polynomial term
             throw new IllegalScoreTypeUseException(
-                                                "Cannot use the raw score from an enumerated or computed goal in a polynomial term.  Referenced goal '"
-                                                    + referencedGoalName + "'");
+                                                   "Cannot use the raw score from an enumerated or computed goal in a polynomial term.  Referenced goal '"
+                                                       + referencedGoalName + "'");
           }
         } // foreach term
 
@@ -400,6 +485,47 @@ public final class ChallengeParser {
     }
 
     return goalDefs;
+  }
+
+  /**
+   * Parse xmlDoc an XML document. Just does basic parsing, no validity checks.
+   * Does not close the stream after parsing. Warnings are output to the logger
+   * for this class.
+   * TODO: move this to JonsInfra.
+   * 
+   * @throws IOException if there is an error reading the stream
+   * @throws SAXException if the document is found to be invalid
+   * @throws RuntimeException if there is an error configuring the XML parser,
+   *           this shouldn't happen
+   */
+  private static Document parseXMLDocument(final Reader xmlDocStream) throws SAXException, IOException {
+    try {
+      final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      factory.setNamespaceAware(true);
+      factory.setIgnoringComments(true);
+      factory.setIgnoringElementContentWhitespace(true);
+
+      final DocumentBuilder parser = factory.newDocumentBuilder();
+      parser.setErrorHandler(new ErrorHandler() {
+        public void error(final SAXParseException spe) throws SAXParseException {
+          throw spe;
+        }
+
+        public void fatalError(final SAXParseException spe) throws SAXParseException {
+          throw spe;
+        }
+
+        public void warning(final SAXParseException spe) throws SAXParseException {
+          LOG.error(spe.getMessage());
+        }
+      });
+
+      final String content = IOUtils.readIntoString(xmlDocStream);
+      final Document document = parser.parse(new InputSource(new StringReader(content)));
+      return document;
+    } catch (final ParserConfigurationException pce) {
+      throw new RuntimeException("Error configuring the XML parser", pce);
+    }
   }
 
 }

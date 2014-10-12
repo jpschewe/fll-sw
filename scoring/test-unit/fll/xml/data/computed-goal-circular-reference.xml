@@ -1,5 +1,9 @@
 <?xml version="1.0"?>
-<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" title="Computed goal references computed goal references original computed goal" xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd">
+<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+title="Computed goal references computed goal references original
+computed goal"
+xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd"
+schemaVersion="1">
 
  <Performance minimumScore="0" weight="1.0">
 
