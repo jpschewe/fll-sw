@@ -26,7 +26,7 @@ public class EnumConditionStatement extends AbstractConditionStatement {
 
     final Element leftEle = new NodelistElementCollectionAdapter(ele.getElementsByTagName("left")).next();
     final NodelistElementCollectionAdapter leftEles = new NodelistElementCollectionAdapter(
-                                                                                           leftEle.getElementsByTagName("goalRef"));
+                                                                                           leftEle.getElementsByTagName("enumGoalRef"));
     if (leftEles.hasNext()) {
       final Element e = leftEles.next();
       mLeftGoalName = e.getAttribute("goal");
@@ -39,7 +39,7 @@ public class EnumConditionStatement extends AbstractConditionStatement {
 
     final Element rightEle = new NodelistElementCollectionAdapter(ele.getElementsByTagName("right")).next();
     final NodelistElementCollectionAdapter rightEles = new NodelistElementCollectionAdapter(
-                                                                                            rightEle.getElementsByTagName("goalRef"));
+                                                                                            rightEle.getElementsByTagName("enumGoalRef"));
     if (rightEles.hasNext()) {
       final Element e = rightEles.next();
       mRightGoalName = e.getAttribute("goal");

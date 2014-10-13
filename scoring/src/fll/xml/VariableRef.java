@@ -6,21 +6,24 @@
 
 package fll.xml;
 
+import java.io.Serializable;
+
 import org.w3c.dom.Element;
 
 import fll.web.playoff.TeamScore;
 
-public class VariableTerm extends AbstractTerm {
+public class VariableRef implements Evaluatable, Serializable {
 
-  public VariableTerm(final Element ele,
-                      final VariableScope scope) {
-    super(ele);
-
+  public VariableRef(final Element ele,
+                     final VariableScope scope) {
     mVariableName = ele.getAttribute("variable");
     mVariableScope = scope;
   }
 
   private final String mVariableName;
+  public String getVariableName() {
+    return mVariableName;
+  }
 
   private final VariableScope mVariableScope;
 
@@ -30,9 +33,7 @@ public class VariableTerm extends AbstractTerm {
 
   @Override
   public double evaluate(final TeamScore teamScore) {
-    final double value = getCoefficient()
-        * getVariable().evaluate(teamScore);
-    return applyFloatingPointType(value);
+    return getVariable().evaluate(teamScore);
   }
 
 }

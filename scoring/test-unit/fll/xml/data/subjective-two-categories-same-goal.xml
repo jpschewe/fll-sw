@@ -1,99 +1,72 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<fll title="Two categories with the same goal name, should succeed"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd">
+<?xml version="1.0"?>
+<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" title="Two
+categories with the same goal name, should succeed"
+xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd"
+schemaVersion="1">
 
 	<Performance minimumScore="0" weight="1.0">
 
-		<goal initialValue="0" max="1" min="0" multiplier="40" name="pump_station"
-			title="Protect the Pump Station"></goal>
+		<goal initialValue="0" max="1" min="0" multiplier="40" name="pump_station" title="Protect the Pump Station"/>
 
-		<goal initialValue="0" max="1" min="0" multiplier="30" name="flags"
-			title="Transect Flags: Any Flags"></goal>
+		<goal initialValue="0" max="1" min="0" multiplier="30" name="flags" title="Transect Flags: Any Flags"/>
 
-		<goal initialValue="0" max="3" min="0" multiplier="15" name="flags_rows"
-			title="Transect Flags: Number of Rows"></goal>
+		<goal initialValue="0" max="3" min="0" multiplier="15" name="flags_rows" title="Transect Flags: Number of Rows"/>
 
 		<!--
 			want to know the type of robot, but can't change the score, so set
 			the multiplier to 0
 		-->
-		<goal name="robot_type" title="Robot Type" multiplier="0"
-			initialValue="1">
-			<value score="1" title="RCX" value="rcx" />
-			<value score="2" title="NXT" value="nxt" />
+		<goal name="robot_type" title="Robot Type" multiplier="0" initialValue="1">
+			<value score="1" title="RCX" value="rcx"/>
+			<value score="2" title="NXT" value="nxt"/>
 		</goal>
 
 		<tiebreaker>
 			<test winner="HIGH">
-				<term goal="flags_rows" scoreType="computed" />
+				<term><goalRef goal="flags_rows" scoreType="computed"/></term>
 			</test>
 			<test winner="HIGH">
-				<term goal="flags" scoreType="computed" />
+				<term><goalRef goal="flags" scoreType="computed"/></term>
 			</test>
 			<test winner="HIGH">
-				<term goal="pump_station" scoreType="computed" />
+				<term><goalRef goal="pump_station" scoreType="computed"/></term>
 			</test>
 		</tiebreaker>
 
 	</Performance>
 
-	<subjectiveCategory name="teamwork" title="Teamwork"
-		weight="1.0">
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="roles"
-			title="Roles and Responsibilities"></goal>
-		<goal initialValue="0" max="20" min="1" multiplier="1"
-			name="professionalism" title="Gracious Professionalism"></goal>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="dynamics"
-			title="Problem Solving &amp; Team Dynamics &amp; Communications"></goal>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="confidence"
-			title="Confidence &amp; Enthusiasm"></goal>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="fll_values"
-			title="FLL Values"></goal>
+	<subjectiveCategory name="teamwork" title="Teamwork" weight="1.0">
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="roles" title="Roles and Responsibilities"/>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="professionalism" title="Gracious Professionalism"/>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="dynamics" title="Problem Solving &amp; Team Dynamics &amp; Communications"/>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="confidence" title="Confidence &amp; Enthusiasm"/>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="fll_values" title="FLL Values"/>
 	</subjectiveCategory>
 
 
-	<subjectiveCategory name="robustdesign" title="Robust Design"
-		weight="0.5">
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="strategy"
-			title="Strategy, Process, Problem Solving"></goal>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="locomotion"
-			title="Locomotion and Navigation"></goal>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="design_kids"
-			title="Kids Did the Work"></goal>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="structural"
-			title="Structural"></goal>
-		<goal initialValue="0" max="20" min="1" multiplier="1"
-			name="overall_design" title="Overall Design"></goal>
+	<subjectiveCategory name="robustdesign" title="Robust Design" weight="0.5">
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="strategy" title="Strategy, Process, Problem Solving"/>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="locomotion" title="Locomotion and Navigation"/>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="design_kids" title="Kids Did the Work"/>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="structural" title="Structural"/>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="overall_design" title="Overall Design"/>
 	</subjectiveCategory>
 
 
-	<subjectiveCategory name="programming" title="Robust Programming"
-		weight="0.5">
-		<goal initialValue="0" max="20" min="1" multiplier="1"
-			name="useoflanguage" title="Use of Language"></goal>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="modularity"
-			title="Modularity/Abstraction"></goal>
-		<goal initialValue="0" max="20" min="1" multiplier="1"
-			name="sensorcontrol" title="Sensor Control"></goal>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="design"
-			title="Design"></goal>
-		<goal initialValue="0" max="20" min="1" multiplier="1"
-			name="programming_kids" title="Kids Did the Work"></goal>
+	<subjectiveCategory name="programming" title="Robust Programming" weight="0.5">
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="useoflanguage" title="Use of Language"/>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="modularity" title="Modularity/Abstraction"/>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="sensorcontrol" title="Sensor Control"/>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="design" title="Design"/>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="programming_kids" title="Kids Did the Work"/>
 	</subjectiveCategory>
 
-	<subjectiveCategory name="research"
-		title="Research Project Assessment" weight="1.0">
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="questions"
-			title="Questions, Language Use"></goal>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="completeness"
-			title="Completeness, Teamwork"></goal>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="background"
-			title="Background, Data, and Graphics"></goal>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="analysis"
-			title="Analysis and Conclusions"></goal>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="style"
-			title="Style"></goal>
+	<subjectiveCategory name="research" title="Research Project Assessment" weight="1.0">
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="questions" title="Questions, Language Use"/>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="completeness" title="Completeness, Teamwork"/>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="background" title="Background, Data, and Graphics"/>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="analysis" title="Analysis and Conclusions"/>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="style" title="Style"/>
 	</subjectiveCategory>
 
 

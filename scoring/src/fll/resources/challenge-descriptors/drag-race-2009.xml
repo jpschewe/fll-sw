@@ -1,11 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<fll title="Science of Speed: 2009"
- bracketSort="ALPHA_TEAM"
-  winner='LOW'
- revision="Rev: 351"
- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd"
- >
+<?xml version="1.0"?>
+<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+title="Science of Speed: 2009" bracketSort="ALPHA_TEAM" winner="LOW"
+revision="Rev: 351"
+xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd"
+schemaVersion="1">
 
   <Performance minimumScore="-20" weight="1.0">
 
@@ -13,8 +11,8 @@
   
   <tiebreaker>
   <!-- should be empty, but not allowed by the schema -->
-   <test winner='LOW'>
-     <term goal='time' scoreType='computed'/>
+   <test winner="LOW">
+     <term><goalRef goal="time" scoreType="computed"/></term>
    </test>
   </tiebreaker>
 

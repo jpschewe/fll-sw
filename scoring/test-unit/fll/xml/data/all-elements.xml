@@ -1,168 +1,156 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<fll title="All elements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd">
+<?xml version="1.0"?>
+<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" title="All
+elements"
+xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd"
+schemaVersion="1">
 
 	<Performance minimumScore="0" weight="1.0">
 		<!-- comment here at the top -->
-		<goal initialValue="0" max="1" min="0" multiplier="40" name="pump_station"
-			title="Protect the Pump Station"></goal>
+		<goal initialValue="0" max="1" min="0" multiplier="40" name="pump_station" title="Protect the Pump Station"/>
 
 		<!-- comment in the middle -->
-		<goal initialValue="0" max="1" min="0" multiplier="30" name="flags"
-			title="Transect Flags: Any Flags"></goal>
+		<goal initialValue="0" max="1" min="0" multiplier="30" name="flags" title="Transect Flags: Any Flags"/>
 
-		<goal initialValue="0" max="3" min="0" multiplier="15" name="flags_rows"
-			title="Transect Flags: Number of Rows"></goal>
+		<goal initialValue="0" max="3" min="0" multiplier="15" name="flags_rows" title="Transect Flags: Number of Rows"/>
 
-		<goal initialValue="0" max="1" min="0" multiplier="1"
-			name="archaeological" title="Archaeological Artifacts">
-			<value score="35" title="In Base" value="in_base"></value>
-			<value score="25" title="Off Ship" value="off_ship"></value>
-			<value score="0" title="No" value="no"></value>
+		<goal initialValue="0" max="1" min="0" multiplier="1" name="archaeological" title="Archaeological Artifacts">
+			<value score="35" title="In Base" value="in_base"/>
+			<value score="25" title="Off Ship" value="off_ship"/>
+			<value score="0" title="No" value="no"/>
 		</goal>
 
 
-		<goal initialValue="0" max="1" min="0" multiplier="25" name="dolphin"
-			title="Release Dolphin"></goal>
+		<goal initialValue="0" max="1" min="0" multiplier="25" name="dolphin" title="Release Dolphin"/>
 
-		<goal initialValue="0" max="1" min="0" multiplier="35"
-			name="sample_species" title="Sample Species (Grey Fish Only)"></goal>
+		<goal initialValue="0" max="1" min="0" multiplier="35" name="sample_species" title="Sample Species (Grey Fish Only)"/>
 
-		<goal initialValue="0" max="1" min="0" multiplier="1" name="submarine"
-			title="Deploy The Submarine">
-			<value score="40" title="Yes Upright" value="upright"></value>
-			<value score="35" title="Yes Not Upright" value="yes"></value>
-			<value score="0" title="No" value="no"></value>
+		<goal initialValue="0" max="1" min="0" multiplier="1" name="submarine" title="Deploy The Submarine">
+			<value score="40" title="Yes Upright" value="upright"/>
+			<value score="35" title="Yes Not Upright" value="yes"/>
+			<value score="0" title="No" value="no"/>
 		</goal>
 
 
-		<goal initialValue="0" max="1" min="0" multiplier="40"
-			name="artifical_reef" title="Artifical Reef"></goal>
+		<goal initialValue="0" max="1" min="0" multiplier="40" name="artifical_reef" title="Artifical Reef"/>
 
-		<goal initialValue="0" max="1" min="0" multiplier="40" name="pipeline"
-			title="Service The Pipeline"></goal>
+		<goal initialValue="0" max="1" min="0" multiplier="40" name="pipeline" title="Service The Pipeline"/>
 
-		<goal initialValue="0" max="1" min="0" multiplier="30"
-			name="shipping_container" title="Shipping Container at Base"></goal>
+		<goal initialValue="0" max="1" min="0" multiplier="30" name="shipping_container" title="Shipping Container at Base"/>
 
-		<goal initialValue="0" max="8" min="0" multiplier="5" name="crates_base"
-			title="Crates in Base"></goal>
+		<goal initialValue="0" max="8" min="0" multiplier="5" name="crates_base" title="Crates in Base"/>
 
-		<goal initialValue="0" max="8" min="0" multiplier="2" name="crates"
-			title="Crates Elsewhere on Table"></goal>
+		<goal initialValue="0" max="8" min="0" multiplier="2" name="crates" title="Crates Elsewhere on Table"/>
 
-		<goal name="robot_type" title="Robot Type" multiplier="0"
-			initialValue="1">
-			<value score="1" title="RCX" value="rcx" />
-			<value score="2" title="NXT" value="nxt" />
+		<goal name="robot_type" title="Robot Type" multiplier="0" initialValue="1">
+			<value score="1" title="RCX" value="rcx"/>
+			<value score="2" title="NXT" value="nxt"/>
 		</goal>
 
 
 		<computedGoal name="computed" title="Test computed goal">
 			<variable name="subtotal">
-				<term goal="pump_station" scoreType="computed" />
-				<term goal="flags" scoreType="computed" />
-				<term goal="flags_rows" scoreType="computed" />
-				<term goal="archaeological" scoreType="computed" />
-				<term goal="dolphin" scoreType="computed" />
-				<term goal="sample_species" scoreType="computed" />
-				<term goal="submarine" scoreType="computed" />
-				<term goal="artifical_reef" scoreType="computed" />
-				<term goal="pipeline" scoreType="computed" />
-				<term goal="shipping_container" scoreType="computed" />
-				<term goal="crates_base" scoreType="computed" />
-				<term goal="crates" scoreType="computed" />
+				<term><goalRef goal="pump_station" scoreType="computed"/></term>
+				<term><goalRef goal="flags" scoreType="computed"/></term>
+				<term><goalRef goal="flags_rows" scoreType="computed"/></term>
+				<term><goalRef goal="archaeological" scoreType="computed"/></term>
+				<term><goalRef goal="dolphin" scoreType="computed"/></term>
+				<term><goalRef goal="sample_species" scoreType="computed"/></term>
+				<term><goalRef goal="submarine" scoreType="computed"/></term>
+				<term><goalRef goal="artifical_reef" scoreType="computed"/></term>
+				<term><goalRef goal="pipeline" scoreType="computed"/></term>
+				<term><goalRef goal="shipping_container" scoreType="computed"/></term>
+				<term><goalRef goal="crates_base" scoreType="computed"/></term>
+				<term><goalRef goal="crates" scoreType="computed"/></term>
 			</variable>
 			<switch>
 				<case>
 					<enumCondition>
 						<left>
-							<goalRef goal="robot_type" />
+							<enumGoalRef goal="robot_type"/>
 						</left>
-						<equal-to />
+						<equal-to/>
 						<right>
-							<stringConstant value="rcx" />
+							<stringConstant value="rcx"/>
 						</right>
 					</enumCondition>
 					<switch>
 						<case>
 							<condition>
 								<left>
-									<variableRef variable="subtotal" />
+									<term><variableRef variable="subtotal"/></term>
 								</left>
-								<less-than /> <!-- any inequality -->
+								<less-than/> <!-- any inequality -->
 								<right>
-									<constant value="300" />
+									<term><constant value="300"/></term>
 								</right>
 							</condition>
 							<result>
-								<term goal="pump_station" scoreType="computed" />
-								<term goal="flags" scoreType="computed" />
-								<term goal="flags_rows" scoreType="computed" />
-								<constant value="60" />
+								<term><goalRef goal="pump_station" scoreType="computed"/></term>
+								<term><goalRef goal="flags" scoreType="computed"/></term>
+								<term><goalRef goal="flags_rows" scoreType="computed"/></term>
+								<term><constant value="60"/></term>
 							</result>
 						</case>
 						<default> <!-- default case is required, the default just has a result -->
-							<constant value="240" />
-							<term coefficient="0.4" goal="pump_station" scoreType="computed" />
-							<term coefficient="0.4" goal="flags" scoreType="computed" />
-							<term coefficient="0.4" goal="flags_rows" scoreType="computed" />
+							<term><constant value="240"/></term>
+							<term><constant value="0.4"/><goalRef goal="pump_station" scoreType="computed"/></term>
+							<term><constant value="0.4"/><goalRef goal="flags" scoreType="computed"/></term>
+							<term><constant value="0.4"/><goalRef goal="flags_rows" scoreType="computed"/></term>
 						</default>
 					</switch>
 				</case>
 				<default>
-					<constant value="0" />
+					<term><constant value="0"/></term>
 				</default>
 			</switch>
 		</computedGoal>
 
-		<restriction lowerBound="0"
-			message="There are a maximum of 8 crates on the table" upperBound="8">
-			<term coefficient="1" goal="crates_base" scoreType="raw" />
-			<term coefficient="1" goal="crates" scoreType="raw" />
-			<constant value="1" />
+		<restriction lowerBound="0" message="There are a maximum of 8 crates on the table" upperBound="8">
+			<term><constant value="1"/><goalRef goal="crates_base" scoreType="raw"/></term>
+			<term><constant value="1"/><goalRef goal="crates" scoreType="raw"/></term>
+			<term><constant value="1"/></term>
 		</restriction>
 
 		<tiebreaker>
 			<test winner="HIGH">
-				<term goal="crates_base" scoreType="raw" />
+				<term><goalRef goal="crates_base" scoreType="raw"/></term>
 			</test>
 			<test winner="HIGH">
-				<term goal="crates" scoreType="raw" />
+				<term><goalRef goal="crates" scoreType="raw"/></term>
 			</test>
 			<test winner="HIGH">
-				<term goal="dolphin" scoreType="raw" />
+				<term><goalRef goal="dolphin" scoreType="raw"/></term>
 			</test>
 			<test winner="HIGH">
-				<term goal="flags_rows" scoreType="raw" />
+				<term><goalRef goal="flags_rows" scoreType="raw"/></term>
 			</test>
 			<test winner="HIGH">
-				<term goal="flags" scoreType="raw" />
+				<term><goalRef goal="flags" scoreType="raw"/></term>
 			</test>
 			<test winner="HIGH">
-				<term goal="submarine" scoreType="computed" />
+				<term><goalRef goal="submarine" scoreType="computed"/></term>
 			</test>
 			<test winner="HIGH">
-				<term goal="archaeological" scoreType="computed" />
+				<term><goalRef goal="archaeological" scoreType="computed"/></term>
 			</test>
 			<test winner="HIGH">
-				<term goal="shipping_container" scoreType="raw" />
+				<term><goalRef goal="shipping_container" scoreType="raw"/></term>
 			</test>
 			<test winner="HIGH">
-				<term goal="pump_station" scoreType="raw" />
+				<term><goalRef goal="pump_station" scoreType="raw"/></term>
 			</test>
 			<test winner="HIGH">
-				<term goal="pipeline" scoreType="raw" />
+				<term><goalRef goal="pipeline" scoreType="raw"/></term>
 			</test>
 			<test winner="HIGH">
-				<term goal="sample_species" scoreType="raw" />
+				<term><goalRef goal="sample_species" scoreType="raw"/></term>
 			</test>
 			<test winner="HIGH">
-				<term goal="artifical_reef" scoreType="raw" />
+				<term><goalRef goal="artifical_reef" scoreType="raw"/></term>
 			</test>
 			<test winner="HIGH">
-				<term goal="computed" scoreType="computed" />
-				<constant value="10" />
+				<term><goalRef goal="computed" scoreType="computed"/></term>
+				<term><constant value="10"/></term>
 			</test>
 		</tiebreaker>
 
@@ -170,10 +158,8 @@
 
 
 
- <subjectiveCategory name="robot_design" title="Robot Design"
-  weight="0.5">
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="durability"
-   title="Durability" category="Mechanical Design">
+ <subjectiveCategory name="robot_design" title="Robot Design" weight="0.5">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="durability" title="Durability" category="Mechanical Design">
    <description>Evidence of structural integrity; ability to withstand
     rigors of competition
    </description>
@@ -205,8 +191,7 @@
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1"
-   name="mechanical_efficiency" title="Mechanical Efficiency" category="Mechanical Design">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="mechanical_efficiency" title="Mechanical Efficiency" category="Mechanical Design">
    <description>Economic use of parts and time; easy to repair and
     modify
     Components work together
@@ -242,8 +227,7 @@
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1"
-   name="mechanization" title="Mechanization" category="Mechanical Design">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="mechanization" title="Mechanization" category="Mechanical Design">
    <description>Ability of robot mechanisms to move or act with
     appropriate speed, strength and accuracy for intended tasks
     (propulsion and execution)
@@ -281,8 +265,7 @@
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="attachments"
-   title="Attachments and Sensors" category="MN Design">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="attachments" title="Attachments and Sensors" category="MN Design">
    <description>Attachments and Sensors, if used, are an integrated part
     of the design, they are used appropriately and achieve consistent
     results.
@@ -313,8 +296,7 @@
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="kids_work"
-   title="Kids Did the Work" category="MN Design">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="kids_work" title="Kids Did the Work" category="MN Design">
    <description>Appropriate balance between team responsibility and
     coach guidance
    </description>
@@ -346,8 +328,7 @@
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1"
-   name="design_process" title="Design Process" category="Strategy and Innovation">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="design_process" title="Design Process" category="Strategy and Innovation">
    <description>Ability to develop and explain improvement cycles where
     alternatives are considered and narrowed, selections tested, design
     improved.
@@ -379,8 +360,7 @@
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1"
-   name="mission_strategy" title="Mission Strategy" category="Strategy and Innovations">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="mission_strategy" title="Mission Strategy" category="Strategy and Innovations">
    <description>Ability to clearly define and describe the team’s game
     strategy.
    </description>
@@ -412,8 +392,7 @@
    </rubric>
   </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="innovation"
-   title="Innovation" category="Strategy and Innovations">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="innovation" title="Innovation" category="Strategy and Innovations">
    <description>Creation of new, unique or unexpected features (in
     design, programming, strategy or applications) that are beneficial
     in performing the tasks.
@@ -448,32 +427,20 @@
  </subjectiveCategory>
 
 
-	<subjectiveCategory name="programming" title="Robust Programming"
-		weight="0.5">
-		<goal initialValue="0" max="20" min="1" multiplier="1"
-			name="useoflanguage" title="Use of Language"></goal>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="modularity"
-			title="Modularity/Abstraction"></goal>
-		<goal initialValue="0" max="20" min="1" multiplier="1"
-			name="sensorcontrol" title="Sensor Control"></goal>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="design"
-			title="Design"></goal>
-		<goal initialValue="0" max="20" min="1" multiplier="1"
-			name="programming_kids" title="Kids Did the Work"></goal>
+	<subjectiveCategory name="programming" title="Robust Programming" weight="0.5">
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="useoflanguage" title="Use of Language"/>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="modularity" title="Modularity/Abstraction"/>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="sensorcontrol" title="Sensor Control"/>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="design" title="Design"/>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="programming_kids" title="Kids Did the Work"/>
 	</subjectiveCategory>
 
-	<subjectiveCategory name="research"
-		title="Research Project Assessment" weight="1.0">
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="questions"
-			title="Questions, Language Use"></goal>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="completeness"
-			title="Completeness, Teamwork"></goal>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="background"
-			title="Background, Data, and Graphics"></goal>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="analysis"
-			title="Analysis and Conclusions"></goal>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="style"
-			title="Style"></goal>
+	<subjectiveCategory name="research" title="Research Project Assessment" weight="1.0">
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="questions" title="Questions, Language Use"/>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="completeness" title="Completeness, Teamwork"/>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="background" title="Background, Data, and Graphics"/>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="analysis" title="Analysis and Conclusions"/>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="style" title="Style"/>
 	</subjectiveCategory>
 
 
