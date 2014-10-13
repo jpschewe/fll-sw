@@ -1,16 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<fll
- title="Computed goal references computed goal references original computed goal"
- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd">
+<?xml version="1.0"?>
+<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+title="Computed goal references computed goal references original
+computed goal"
+xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd"
+schemaVersion="1">
 
  <Performance minimumScore="0" weight="1.0">
 
-  <goal initialValue="0" max="8" min="0" multiplier="5" name="crates_base"
-   title="Crates in Base"></goal>
+  <goal initialValue="0" max="8" min="0" multiplier="5" name="crates_base" title="Crates in Base"/>
 
-  <goal initialValue="0" max="8" min="0" multiplier="2" name="crates"
-   title="Crates Elsewhere on Table"></goal>
+  <goal initialValue="0" max="8" min="0" multiplier="2" name="crates" title="Crates Elsewhere on Table"/>
 
 
   <computedGoal name="computed1" title="computed1">
@@ -18,20 +17,20 @@
     <case>
      <condition>
       <left>
-       <term goal="crates_base" scoreType="raw" />
+       <term><goalRef goal="crates_base" scoreType="raw"/></term>
       </left>
-      <equal-to />
+      <equal-to/>
       <right>
-       <constant value="0" />
+       <term><constant value="0"/></term>
       </right>
      </condition>
      <result>
-      <constant value="10" />
+      <term><constant value="10"/></term>
      </result>
     </case>
     <default>
-     <constant value="40" />
-     <term goal="computed2" scoreType="computed" coefficient="5" />
+     <term><constant value="40"/></term>
+     <term><constant value="5"/><goalRef goal="computed2" scoreType="computed"/></term>
     </default>
    </switch>
   </computedGoal>
@@ -42,20 +41,20 @@
     <case>
      <condition>
       <left>
-       <term goal="crates_base" scoreType="raw" />
+       <term><goalRef goal="crates_base" scoreType="raw"/></term>
       </left>
-      <equal-to />
+      <equal-to/>
       <right>
-       <constant value="10" />
+       <term><constant value="10"/></term>
       </right>
      </condition>
      <result>
-      <constant value="10" />
+      <term><constant value="10"/></term>
      </result>
     </case>
     <default>
-     <constant value="40" />
-     <term goal="computed1" scoreType="computed" coefficient="5" />
+     <term><constant value="40"/></term>
+     <term><constant value="5"/><goalRef goal="computed1" scoreType="computed"/></term>
     </default>
    </switch>
   </computedGoal>
@@ -63,10 +62,10 @@
 
   <tiebreaker>
    <test winner="HIGH">
-    <term goal="crates_base" scoreType="computed" />
+    <term><goalRef goal="crates_base" scoreType="computed"/></term>
    </test>
    <test winner="HIGH">
-    <term goal="crates" scoreType="computed" />
+    <term><goalRef goal="crates" scoreType="computed"/></term>
    </test>
   </tiebreaker>
 

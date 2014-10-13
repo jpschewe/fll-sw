@@ -1,38 +1,35 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<fll title="Science of Speed: 2008" bracketSort="ALPHA_TEAM"
-	revision="$Rev: 351 $" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd">
+<?xml version="1.0"?>
+<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+title="Science of Speed: 2008" bracketSort="ALPHA_TEAM" revision="$Rev:
+351 $"
+xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd"
+schemaVersion="1">
 
 	<Performance minimumScore="-20" weight="1.0">
 
-		<goal name="seconds" title="Seconds" multiplier="0" max="10" />
-		<goal name="tenths" title="Tenths" multiplier="0" max="10" />
-		<goal name="hundredths" title="Hundreths" multiplier="0" max="10" />
-		<goal name="thousandths" title="Thousandths" multiplier="0" max="10" />
+		<goal name="seconds" title="Seconds" multiplier="0" max="10"/>
+		<goal name="tenths" title="Tenths" multiplier="0" max="10"/>
+		<goal name="hundredths" title="Hundreths" multiplier="0" max="10"/>
+		<goal name="thousandths" title="Thousandths" multiplier="0" max="10"/>
 
 		<!--
 			compute the score for the software, this is the time times -1 so that
 			a higher score is good
 		-->
-		<computedGoal name="score"
-			title="Score for software (will be negative)">
+		<computedGoal name="score" title="Score for software (will be negative)">
 			<switch>
 				<default>
-					<term coefficient="-1" goal="seconds" scoreType="raw"
-						floatingPoint="decimal" />
-					<term coefficient="-0.1" goal="tenths" scoreType="raw"
-						floatingPoint="decimal" />
-					<term coefficient="-0.01" goal="hundredths" scoreType="raw"
-						floatingPoint="decimal" />
-					<term coefficient="-0.001" goal="thousandths" scoreType="raw"
-						floatingPoint="decimal" />
+					<term floatingPoint="decimal"><constant value="-1"/><goalRef goal="seconds" scoreType="raw"/></term>
+					<term floatingPoint="decimal"><constant value="-0.1"/><goalRef goal="tenths" scoreType="raw"/></term>
+					<term floatingPoint="decimal"><constant value="-0.01"/><goalRef goal="hundredths" scoreType="raw"/></term>
+					<term floatingPoint="decimal"><constant value="-0.001"/><goalRef goal="thousandths" scoreType="raw"/></term>
 				</default>
 			</switch>
 		</computedGoal>
 
 		<tiebreaker>
-			<test winner='HIGH'>
-				<term goal='score' scoreType='computed' />
+			<test winner="HIGH">
+				<term><goalRef goal="score" scoreType="computed"/></term>
 			</test>
 		</tiebreaker>
 
