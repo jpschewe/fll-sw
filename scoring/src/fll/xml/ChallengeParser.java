@@ -220,7 +220,7 @@ public final class ChallengeParser {
     }
 
     if (rootElement.hasAttribute("schemaVersion")) {
-      return Integer.valueOf(rootElement.getAttribute("schemaVersion"));
+      return Integer.parseInt(rootElement.getAttribute("schemaVersion"));
     } else {
       return 0;
     }
