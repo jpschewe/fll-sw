@@ -917,11 +917,11 @@ public final class ScoreEntry {
         termFormatter.format("* %s", varName);
       }
 
-      final FloatingPointType floatingPoint = term.getFloatingPoint();
-      formatter.format("%s", applyFloatingPoint(termFormatter.toString(), floatingPoint));
+      formatter.format("%s", termFormatter.toString());
     }
 
-    return formatter.toString();
+    final FloatingPointType floatingPoint = poly.getFloatingPoint();
+    return applyFloatingPoint(formatter.toString(), floatingPoint);
   }
 
   /**

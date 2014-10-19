@@ -75,7 +75,7 @@ public class Term extends AbstractTerm {
           * variable.evaluate(teamScore);
     }
 
-    return applyFloatingPointType(value);
+    return value;
   }
 
 }
