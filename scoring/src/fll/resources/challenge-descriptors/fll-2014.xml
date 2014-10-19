@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<fll title="2014 MN FIRST LEGO League Tournament" revision="3" schemaVersion="1">
+<fll title="2014 MN FIRST LEGO League Tournament" revision="3"
+ schemaVersion="1">
  <Performance minimumScore="0" weight="0">
 
   <goal name="opening_doors" title="Open Door" multiplier="15" />
@@ -95,7 +96,7 @@
    multiplier="-10" max="8" />
 
 
-<!--  must be last so that it's the last method called -->
+  <!-- must be last so that it's the last method called -->
   <computedGoal name="bonus" title="Bonus">
    <variable name="base_score">
     <term>
@@ -175,13 +176,17 @@
      <condition>
       <left>
        <term>
+        <constant value="100" />
         <goalRef goal="engagement" scoreType="raw" />
        </term>
+       <term>
+        <goalRef goal="pinwheel_turns" scoreType="raw" />
+       </term>
       </left>
-      <greater-than />
+      <greater-than-or-equal />
       <right>
        <term>
-        <constant value="0" />
+        <constant value="101" />
        </term>
       </right>
      </condition>
@@ -203,10 +208,15 @@
 
   <tiebreaker>
 
-   <!-- FIXME needs implementation -->
    <test winner="HIGH">
     <term>
      <goalRef goal="learning" scoreType="raw" />
+    </term>
+   </test>
+
+   <test winner="HIGH">
+    <term>
+     <goalRef goal="thinking" scoreType="computed" />
     </term>
    </test>
 
