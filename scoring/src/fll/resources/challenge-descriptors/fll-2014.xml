@@ -160,11 +160,11 @@
     </term>
    </variable>
 
-   <variable name="multiplier">
-    <term floatingPoint="decimal">
+   <variable name="multiplier" floatingPoint="decimal">
+    <term>
      <constant value="0.09" />
     </term>
-    <term floatingPoint="decimal">
+    <term>
      <constant value="0.01" />
      <goalRef goal="pinwheel_turns" scoreType="raw" />
     </term>
@@ -185,8 +185,8 @@
        </term>
       </right>
      </condition>
-     <result>
-      <term floatingPoint="round">
+     <result floatingPoint="round">
+      <term>
        <variableRef variable="multiplier" />
        <variableRef variable="base_score" />
       </term>
