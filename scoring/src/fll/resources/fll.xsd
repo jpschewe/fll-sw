@@ -319,8 +319,6 @@
    <xsd:element name="goalRef" type="goalRef" minOccurs="0"
     maxOccurs="unbounded" />
   </xsd:sequence>
-  <xsd:attribute name="floatingPoint" type="floatingPointType"
-   default="truncate" />
  </xsd:complexType>
 
  <xsd:complexType name="termWithVariables">
@@ -424,6 +422,8 @@
    <xsd:element name="term" type="term" minOccurs="0"
     maxOccurs="unbounded" />
   </xsd:sequence>
+    <xsd:attribute name="floatingPoint" type="floatingPointType"
+   default="truncate" />
  </xsd:complexType>
 
  <xsd:complexType name="polynomialWithVariables">
@@ -436,6 +436,8 @@
    <xsd:element name="term" type="termWithVariables"
     minOccurs="0" maxOccurs="unbounded" />
   </xsd:sequence>
+    <xsd:attribute name="floatingPoint" type="floatingPointType"
+   default="truncate" />  
  </xsd:complexType>
 
  <xsd:complexType name="constant">
