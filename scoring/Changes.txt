@@ -1,3 +1,5 @@
+Release 9.0
+-----------
 * Create specific exceptions for errors in challenge parsing
 * 301 - allow computed goals to depend on computed goals
 * 287 - schedule finalists by division rather than score group
