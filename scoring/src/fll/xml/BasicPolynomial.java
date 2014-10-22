@@ -15,6 +15,7 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.w3c.dom.Element;
 
+import fll.util.FLLInternalException;
 import fll.web.playoff.TeamScore;
 
 /**
@@ -40,6 +41,27 @@ public class BasicPolynomial implements Evaluatable, Serializable {
       terms.add(term);
     }
     mTerms = Collections.unmodifiableList(terms);
+    mFloatingPoint = FloatingPointType.fromString(ele.getAttribute("floatingPoint"));
+  }
+
+  private final FloatingPointType mFloatingPoint;
+
+  public FloatingPointType getFloatingPoint() {
+    return mFloatingPoint;
+  }
+
+  protected final double applyFloatingPointType(final double value) {
+    switch (getFloatingPoint()) {
+    case DECIMAL:
+      return value;
+    case ROUND:
+      return Math.round(value);
+    case TRUNCATE:
+      return (double) ((long) value);
+    default:
+      throw new FLLInternalException("Unknown floating point type: "
+          + getFloatingPoint());
+    }
   }
 
   private final List<Term> mTerms;
@@ -59,7 +81,7 @@ public class BasicPolynomial implements Evaluatable, Serializable {
       final double val = t.evaluate(teamScore);
       score += val;
     }
-    return score;
+    return applyFloatingPointType(score);
   }
 
 }

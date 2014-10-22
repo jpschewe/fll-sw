@@ -26,12 +26,6 @@
   <!-- make term have children -->
   <xsl:template match="term">
     <term>
-      <xsl:if test="@floatingPoint">
-	<xsl:attribute name="floatingPoint">
-	  <xsl:value-of select="@floatingPoint"/>
-	</xsl:attribute>
-      </xsl:if>
-      
       <xsl:if test="@coefficient">
 	<constant value="{@coefficient}"/>
       </xsl:if>
@@ -52,13 +46,7 @@
 
   <!-- transform variableRef -->
   <xsl:template match="variableRef">
-    <term>
-      <xsl:if test="@floatingPoint">
-	<xsl:attribute name="floatingPoint">
-	  <xsl:value-of select="@floatingPoint"/>
-	</xsl:attribute>
-      </xsl:if>
-      
+    <term>     
       <xsl:if test="@coefficient">
 	<constant value="{@coefficient}"/>
       </xsl:if>
