@@ -1,3 +1,5 @@
+* Upgrade to jquery mobile 1.4.5
+
 Release 9.0
 -----------
 * Create specific exceptions for errors in challenge parsing
