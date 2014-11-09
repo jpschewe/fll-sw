@@ -1,3 +1,4 @@
+* Upgrade to jquery mobile 1.4.5
 * 307 - Print warning instead of error if not all judges are assigned
 
 Release 9.0
