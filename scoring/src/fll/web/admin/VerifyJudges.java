@@ -65,6 +65,7 @@ public class VerifyJudges extends BaseFLLServlet {
 
       // keep track of any errors
       final StringBuilder error = new StringBuilder();
+      final StringBuilder warning = new StringBuilder();
 
       // populate a hash where key is category name and value is an empty
       // Set. Use set so there are no duplicates
@@ -118,8 +119,9 @@ public class VerifyJudges extends BaseFLLServlet {
           }
 
           if (!found) {
-            error.append("You must specify at least one judge for category '"
-                + categoryName + "' at judging station '" + jstation + "'<br/>");
+            warning.append("You should specify at least one judge for category '"
+                + categoryName + "' at judging station '" + jstation
+                + "'<br/> This is OK if some judges will be entered through the web application.");
           }
 
         }
@@ -129,10 +131,25 @@ public class VerifyJudges extends BaseFLLServlet {
       session.setAttribute(GatherJudgeInformation.JUDGES_KEY, judges);
 
       if (error.length() > 0) {
-        session.setAttribute(SessionAttributes.MESSAGE, "<p class='error' id='error'>"
-            + error.toString() + "</p>");
+        final StringBuilder message = new StringBuilder();
+        message.append("<p class='error' id='error'>");
+        message.append(error);
+        message.append("</p>");
+        if (warning.length() > 0) {
+          message.append("<p class='warning' id='warning'>");
+          message.append(warning);
+          message.append("</p>");
+        }
+        session.setAttribute(SessionAttributes.MESSAGE, message.toString());
         response.sendRedirect(response.encodeRedirectURL("judges.jsp"));
       } else {
+        if (warning.length() > 0) {
+          final StringBuilder message = new StringBuilder();
+          message.append("<p class='warning' id='warning'>");
+          message.append(warning);
+          message.append("</p>");
+          session.setAttribute(SessionAttributes.MESSAGE, message.toString());
+        }
         response.sendRedirect(response.encodeRedirectURL("displayJudges.jsp"));
       }
 
