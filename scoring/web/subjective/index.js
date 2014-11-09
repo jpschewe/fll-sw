@@ -82,8 +82,26 @@ function checkTournament() {
 					});
 }
 
-function serverLoadPage() {
+function checkServerStatus() {
+	$.mobile.loading("show");
 
+	var img = document.body.appendChild(document.createElement("img"));
+	img.onload = function() {
+		$.mobile.loading("hide");
+
+		$.subjective.log("Server is online");
+		serverLoadPage();
+	};
+	img.onerror = function() {
+		$.mobile.loading("hide");
+
+		$.subjective.log("Server is offline");
+		promptForJudgingGroup();
+	};
+	img.src = "../images/blank.gif";
+}
+
+function serverLoadPage() {
 	$("#index-page_choose_clear").hide();
 
 	$("#index-page_clear").click(function() {
@@ -104,5 +122,5 @@ $(document).on("pagebeforeshow", "#index-page", function() {
 });
 
 $(document).on("pageshow", "#index-page", function(event) {
-	serverLoadPage();
+	checkServerStatus();
 });
