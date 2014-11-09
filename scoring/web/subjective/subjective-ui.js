@@ -924,7 +924,9 @@ $(document).on(
 		function(event) {
 			$("#score-summary_upload-scores").click(
 					function() {
-						$.mobile.loading("show", text: "Uploading Scores...");
+						$.mobile.loading("show", {
+							text : "Uploading Scores..."
+						});
 
 						$.subjective.uploadData(function(result) {
 							// scoresSuccess
