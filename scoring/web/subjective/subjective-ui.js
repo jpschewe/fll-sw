@@ -10,7 +10,7 @@ function selectJudgingGroup(group) {
 }
 
 $(document).on("pageshow", "#choose-judging-group-page", function(event) {
-	$("#choose-judging-group_upload-scores-wait").hide();
+	$.mobile.loading("hide");
 });
 
 $(document).on(
@@ -19,7 +19,7 @@ $(document).on(
 		function(event) {
 			$("#choose-judging-group_upload-scores").click(
 					function() {
-						$("#choose-judging-group_upload-scores-wait").show();
+						$.mobile.loading("show");
 
 						$.subjective.uploadData(function(result) {
 							// scoresSuccess
@@ -60,15 +60,13 @@ $(document).on(
 						function() {
 							// loadSuccess
 							populateChooseJudgingGroup();
-							$("#choose-judging-group_upload-scores-wait")
-									.hide();
+							$.mobile.loading("hide");
 						}, //
 						function(message) {
 							// loadFail
 							populateChooseJudgingGroup();
 
-							$("#choose-judging-group_upload-scores-wait")
-									.hide();
+							$.mobile.loading("hide");
 
 							alert("Failed to load scores from server: "
 									+ message);
@@ -102,7 +100,7 @@ function selectCategory(category) {
 }
 
 $(document).on("pageshow", "#choose-category-page", function(event) {
-	$("#choose-category_upload-scores-wait").hide();
+	$.mobile.loading("hide");
 });
 
 $(document).on(
@@ -111,7 +109,7 @@ $(document).on(
 		function(event) {
 			$("#choose-category_upload-scores").click(
 					function() {
-						$("#choose-category_upload-scores-wait").show();
+						$.mobile.loading("show");
 
 						$.subjective.uploadData(function(result) {
 							// scoresSuccess
@@ -153,13 +151,13 @@ $(document).on(
 							// loadSuccess
 							populateChooseCategory();
 
-							$("#choose-category_upload-scores-wait").hide();
+							$.mobile.loading("hide");
 						}, //
 						function(message) {
 							// loadFail
 							populateChooseCategory();
 
-							$("#choose-category_upload-scores-wait").hide();
+							$.mobile.loading("hide");
 
 							alert("Failed to load scores from server: "
 									+ message);
@@ -191,7 +189,7 @@ $(document).on("pagebeforeshow", "#choose-category-page",
 		populateChooseCategory);
 
 $(document).on("pageshow", "#choose-judge-page", function(event) {
-	$("#choose-judge_upload-scores-wait").hide();
+	$.mobile.loading("hide");
 });
 
 $(document).on(
@@ -200,7 +198,7 @@ $(document).on(
 		function(event) {
 			$("#choose-judge_upload-scores").click(
 					function() {
-						$("#choose-judge_upload-scores-wait").show();
+						$.mobile.loading("show");
 
 						$.subjective.uploadData(function(result) {
 							// scoresSuccess
@@ -243,13 +241,13 @@ $(document).on(
 							// loadSuccess
 							populateChooseJudge();
 
-							$("#choose-judge_upload-scores-wait").hide();
+							$.mobile.loading("hide");
 						}, //
 						function(message) {
 							// loadFail
 							populateChooseJudge();
 
-							$("#choose-judge_upload-scores-wait").hide();
+							$.mobile.loading("hide");
 
 							alert("Failed to load scores from server: "
 									+ message);
@@ -405,7 +403,7 @@ $(document).on("pagebeforeshow", "#teams-list-page", function(event) {
 });
 
 $(document).on("pageshow", "#teams-list-page", function(event) {
-	$("#teams-list_upload-scores-wait").hide();
+	$.mobile.loading("hide");
 });
 
 $(document).on(
@@ -414,7 +412,7 @@ $(document).on(
 		function(event) {
 			$("#teams-list_upload-scores").click(
 					function() {
-						$("#teams-list_upload-scores-wait").show();
+						$.mobile.loading("show");
 
 						$.subjective.uploadData(function(result) {
 							// scoresSuccess
@@ -457,11 +455,11 @@ $(document).on(
 						}, //
 						function() {
 							// loadSuccess
-							$("#teams-list_upload-scores-wait").hide();
+							$.mobile.loading("hide");
 						}, //
 						function(message) {
 							// loadFail
-							$("#teams-list_upload-scores-wait").hide();
+							$.mobile.loading("hide");
 
 							alert("Failed to load scores from server: "
 									+ message);
@@ -917,7 +915,7 @@ $(document).on("pagebeforeshow", "#score-summary-page", function(event) {
 });
 
 $(document).on("pageshow", "#score-summary-page", function(event) {
-	$("#score-summary_upload-scores-wait").hide();
+	$.mobile.loading("hide");
 });
 
 $(document).on(
@@ -926,7 +924,7 @@ $(document).on(
 		function(event) {
 			$("#score-summary_upload-scores").click(
 					function() {
-						$("#score-summary_upload-scores-wait").show();
+						$.mobile.loading("show", text: "Uploading Scores...");
 
 						$.subjective.uploadData(function(result) {
 							// scoresSuccess
@@ -969,11 +967,11 @@ $(document).on(
 						}, //
 						function() {
 							// loadSuccess
-							$("#score-summary_upload-scores-wait").hide();
+							$.mobile.loading("hide");
 						}, //
 						function(message) {
 							// loadFail
-							$("#score-summary_upload-scores-wait").hide();
+							$.mobile.loading("hide");
 
 							alert("Failed to load scores from server: "
 									+ message);
