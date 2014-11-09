@@ -42,7 +42,7 @@ function checkStoredData() {
 
 function promptForJudgingGroup() {
 	location.href = "subjective-ui.html";
-	//$.mobile.navigate("subjective-ui.html#choose-judging-group-page");
+	// $.mobile.navigate("subjective-ui.html#choose-judging-group-page");
 }
 
 function promptForReload() {
@@ -82,12 +82,7 @@ function checkTournament() {
 					});
 }
 
-$(document).on("pagebeforeshow", "#index-page", function() {
-	$.subjective.log("before page show index-page");
-	$("#index-page_messages").empty();
-});
-
-$(document).on("pageshow", "#index-page", function(event) {
+function serverLoadPage() {
 
 	$("#index-page_choose_clear").hide();
 
@@ -101,5 +96,13 @@ $(document).on("pageshow", "#index-page", function(event) {
 	});
 
 	checkStoredData();
+}
 
+$(document).on("pagebeforeshow", "#index-page", function() {
+	$.subjective.log("before page show index-page");
+	$("#index-page_messages").empty();
+});
+
+$(document).on("pageshow", "#index-page", function(event) {
+	serverLoadPage();
 });
