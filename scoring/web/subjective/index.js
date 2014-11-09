@@ -81,6 +81,10 @@ function checkTournament() {
 					});
 }
 
+$(document).on("pagebeforeshow", "#index-page", function() {
+	$("#messages").empty();
+});
+
 $(document).on("pageshow", "#index-page", function(event) {
 
 	$("#choose_clear").hide();
