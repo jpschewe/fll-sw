@@ -1,3 +1,5 @@
+* 307 - Print warning instead of error if not all judges are assigned
+
 Release 9.0
 -----------
 * Create specific exceptions for errors in challenge parsing
