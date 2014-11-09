@@ -9,10 +9,6 @@ function selectJudgingGroup(group) {
 	$.mobile.navigate("#choose-category-page");
 }
 
-$(document).on("pageshow", "#choose-judging-group-page", function(event) {
-	$.mobile.loading("hide");
-});
-
 $(document).on(
 		"pageinit",
 		"#choose-judging-group-page",
