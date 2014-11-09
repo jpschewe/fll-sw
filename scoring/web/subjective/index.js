@@ -12,7 +12,6 @@ function loadData() {
 
 		$.mobile.loading("hide");
 		$("#choose_clear").hide();
-		// location.href = "params.html";
 
 		if (0 == subjectiveCategories.length) {
 			alert("No subjective data loaded from server");
