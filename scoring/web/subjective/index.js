@@ -84,20 +84,23 @@ function checkTournament() {
 function checkServerStatus() {
 	$.mobile.loading("show");
 
-	var img = document.body.appendChild(document.createElement("img"));
-	img.onload = function() {
-		$.mobile.loading("hide");
+	$.subjective.log("Checking server status");
+	$.ajax({
+		url : "../images/blank.gif",
+		type : "GET",
+		cache : false,
+		timeout : 1000,
+		success : function(response) {
+			$.subjective.log("server online");
+			serverLoadPage();
+		},
+		error : function(x, t, m) {
+			$.subjective.log("server offline");
 
-		$.subjective.log("Server is online");
-		serverLoadPage();
-	};
-	img.onerror = function() {
-		$.mobile.loading("hide");
+			promptForJudgingGroup();
+		}
+	});
 
-		$.subjective.log("Server is offline");
-		promptForJudgingGroup();
-	};
-	img.src = "../images/blank.gif";
 }
 
 function serverLoadPage() {
@@ -117,12 +120,12 @@ function serverLoadPage() {
 
 $(document).on("pagebeforeshow", "#index-page", function() {
 	$.subjective.log("before page show index-page");
-	
+
 	$("#index-page_messages").empty();
 });
 
 $(document).on("pageshow", "#index-page", function(event) {
 	$.subjective.log("pageshow index-page");
-	
+
 	checkServerStatus();
 });
