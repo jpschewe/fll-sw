@@ -1,3 +1,5 @@
+Release 9.1
+-----------
 * 305 - top page in subjective app now works offline
 * Upgrade to jquery mobile 1.4.5
 * 307 - Print warning instead of error if not all judges are assigned
