@@ -41,8 +41,7 @@ function checkStoredData() {
 }
 
 function promptForJudgingGroup() {
-	location.href = "subjective-ui.html";
-	// $.mobile.navigate("subjective-ui.html#choose-judging-group-page");
+	$.mobile.navigate("#choose-judging-group-page");
 }
 
 function promptForReload() {
@@ -118,9 +117,12 @@ function serverLoadPage() {
 
 $(document).on("pagebeforeshow", "#index-page", function() {
 	$.subjective.log("before page show index-page");
+	
 	$("#index-page_messages").empty();
 });
 
 $(document).on("pageshow", "#index-page", function(event) {
+	$.subjective.log("pageshow index-page");
+	
 	checkServerStatus();
 });
