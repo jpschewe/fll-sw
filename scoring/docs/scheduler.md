@@ -21,7 +21,7 @@ In the bin directory you will find an application `SchedulerUI`. This applicatio
 
 The description tab is used to load and edit a file with schedule parameters. The edited file can be saved with the disk icon. The lightbulb icon runs the scheduler and table optimizer on the resulting schedule and then loads it in the schedule tab.
 
-You can find more examples in our [previous datafiles](../../scheduling/datafiles). You can start with one of these and modify them.
+You can find more examples in our [previous datafiles](../../scheduling/blank-schedules). Look for the properties files. You can start with one of these and modify them.
 
 ### Schedule tab
 
