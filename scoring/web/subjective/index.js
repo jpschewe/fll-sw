@@ -5,12 +5,12 @@
  */
 
 function loadData() {
-	$("#wait").show();
+	$.mobile.loading("show");
 
 	$.subjective.loadFromServer(function() {
 		subjectiveCategories = $.subjective.getSubjectiveCategories();
 
-		$("#wait").hide();
+		$.mobile.loading("hide");
 		$("#choose_clear").hide();
 		// location.href = "params.html";
 
@@ -27,7 +27,7 @@ function loadData() {
 
 		promptForJudgingGroup();
 	}, function(message) {
-		$("#wait").hide();
+		$.mobile.loading("hide");
 
 		alert("Error getting data from server: " + message);
 	});
@@ -50,9 +50,9 @@ function promptForReload() {
 }
 
 function reloadData() {
-	if($.subjective.checkForModifiedScores()) {
+	if ($.subjective.checkForModifiedScores()) {
 		var answer = confirm("You have modified scores, this will remove them. Are you sure?")
-		if(!answer) {
+		if (!answer) {
 			return;
 		}
 	}
@@ -61,11 +61,12 @@ function reloadData() {
 }
 
 function checkTournament() {
-	$("#wait").show();
+	$.mobile.loading("show");
+
 	$.subjective
 			.getServerTournament(
 					function(serverTournament) {
-						$("#wait").hide();
+						$.mobile.loading("hide");
 
 						var storedTournament = $.subjective.getTournament();
 						if (null == storedTournament) {
@@ -81,9 +82,8 @@ function checkTournament() {
 					});
 }
 
-$(document).on("pageinit", "#index-page", function(event) {
+$(document).on("pageshow", "#index-page", function(event) {
 
-	$("#wait").hide();
 	$("#choose_clear").hide();
 
 	$("#clear").click(function() {
