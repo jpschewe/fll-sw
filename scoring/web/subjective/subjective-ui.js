@@ -13,6 +13,8 @@ $(document).on(
 		"pageinit",
 		"#choose-judging-group-page",
 		function(event) {
+			$.subjective.log("choose judging group pageinit");
+			
 			$("#choose-judging-group_upload-scores").click(
 					function() {
 						$.mobile.loading("show");
@@ -71,6 +73,8 @@ $(document).on(
 		});
 
 function populateChooseJudgingGroup() {
+	$.subjective.log("choose judging group populate");
+	
 	$("#choose-judging-group_judging-groups").empty();
 
 	var judgingGroups = $.subjective.getJudgingGroups();
