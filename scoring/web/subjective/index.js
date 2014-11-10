@@ -11,17 +11,16 @@ function loadData() {
 		subjectiveCategories = $.subjective.getSubjectiveCategories();
 
 		$.mobile.loading("hide");
-		$("#choose_clear").hide();
-		// location.href = "params.html";
+		$("#index-page_choose_clear").hide();
 
 		if (0 == subjectiveCategories.length) {
 			alert("No subjective data loaded from server");
 		} else {
-			$("#messages").append(
+			$("#index-page_messages").append(
 					"Loaded " + subjectiveCategories.length
 							+ " categories from the server<br/>");
 		}
-		$("#messages").append(
+		$("#index-page_messages").append(
 				"Current tournament is " + $.subjective.getTournament().name
 						+ "<br/>");
 
@@ -42,11 +41,11 @@ function checkStoredData() {
 }
 
 function promptForJudgingGroup() {
-	location.href = "subjective-ui.html";
+	$.mobile.navigate("#choose-judging-group-page");
 }
 
 function promptForReload() {
-	$("#choose_clear").show();
+	$("#index-page_choose_clear").show();
 }
 
 function reloadData() {
@@ -82,19 +81,51 @@ function checkTournament() {
 					});
 }
 
-$(document).on("pageshow", "#index-page", function(event) {
+function checkServerStatus() {
+	$.mobile.loading("show");
 
-	$("#choose_clear").hide();
+	$.subjective.log("Checking server status");
+	$.ajax({
+		url : "../images/blank.gif",
+		type : "GET",
+		cache : false,
+		timeout : 1000,
+		success : function(response) {
+			$.subjective.log("server online");
+			serverLoadPage();
+		},
+		error : function(x, t, m) {
+			$.subjective.log("server offline");
 
-	$("#clear").click(function() {
-		$("#choose_clear").hide();
+			promptForJudgingGroup();
+		}
+	});
+
+}
+
+function serverLoadPage() {
+	$("#index-page_choose_clear").hide();
+
+	$("#index-page_clear").click(function() {
+		$("#index-page_choose_clear").hide();
 		reloadData();
 	});
-	$("#keep").click(function() {
-		$("#choose_clear").hide();
+	$("#index-page_keep").click(function() {
+		$("#index-page_choose_clear").hide();
 		promptForJudgingGroup();
 	});
 
 	checkStoredData();
+}
 
+$(document).on("pagebeforeshow", "#index-page", function() {
+	$.subjective.log("before page show index-page");
+
+	$("#index-page_messages").empty();
+});
+
+$(document).on("pageshow", "#index-page", function(event) {
+	$.subjective.log("pageshow index-page");
+
+	checkServerStatus();
 });

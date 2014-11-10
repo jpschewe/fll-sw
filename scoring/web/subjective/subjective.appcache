@@ -230,7 +230,6 @@ subjective.js
 index.html
 index.js
 
-subjective-ui.html
 subjective-ui.js
 
 # allow network resources to load from a cached page
