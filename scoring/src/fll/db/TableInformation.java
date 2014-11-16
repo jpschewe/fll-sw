@@ -11,8 +11,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -99,24 +103,22 @@ public final class TableInformation implements Serializable {
     final List<Integer> tableIdsForDivision = getTablesForDivision(connection, tournament, division);
 
     final List<TableInformation> tableInfo = new LinkedList<TableInformation>();
+    PreparedStatement getAllTables = null;
+    ResultSet allTables = null;
     PreparedStatement prep = null;
     ResultSet rs = null;
+    final Map<Integer, Integer> tableUsage = new HashMap<Integer, Integer>();
     try {
-      prep = connection.prepareStatement("select tablenames.PairID, tablenames.SideA, tablenames.SideB, COUNT(tablenames.PairID) as c"//
-          + " FROM PlayoffData, tablenames" //
-          + " WHERE PlayoffData.Tournament = ?" //
-          + " AND PlayoffData.Tournament = tablenames.Tournament" //
-          + " AND AssignedTable IS NOT NULL" //
-          + " AND (PlayoffData.AssignedTable = tablenames.SideA OR PlayoffData.AssignedTable = tablenames.SideB)"//
-          + " GROUP BY tablenames.PairID, tablenames.SideA, tablenames.SideB" //
-          + " ORDER BY c, tableNames.PairID");
-      prep.setInt(1, tournament);
-
-      rs = prep.executeQuery();
-      while (rs.next()) {
-        final int pairId = rs.getInt(1);
-        final String sideA = rs.getString(2);
-        final String sideB = rs.getString(3);
+      // get all tables
+      getAllTables = connection.prepareStatement("select tablenames.PairID, tablenames.SideA, tablenames.SideB" //
+          + " FROM tablenames" //
+          + " WHERE tablenames.Tournament = ?");
+      getAllTables.setInt(1, tournament);
+      allTables = getAllTables.executeQuery();
+      while (allTables.next()) {
+        final int pairId = allTables.getInt(1);
+        final String sideA = allTables.getString(2);
+        final String sideB = allTables.getString(3);
 
         final boolean use = tableIdsForDivision.isEmpty()
             || tableIdsForDivision.contains(pairId);
@@ -124,6 +126,45 @@ public final class TableInformation implements Serializable {
         final TableInformation info = new TableInformation(pairId, sideA, sideB, use);
         tableInfo.add(info);
       }
+
+      // sort by the usage
+      prep = connection.prepareStatement("select tablenames.PairID, COUNT(tablenames.PairID) as c"//
+          + " FROM PlayoffData, tablenames" //
+          + " WHERE PlayoffData.Tournament = ?" //
+          + " AND PlayoffData.Tournament = tablenames.Tournament" //
+          + " AND AssignedTable IS NOT NULL" //
+          + " AND (PlayoffData.AssignedTable = tablenames.SideA OR PlayoffData.AssignedTable = tablenames.SideB)"//
+          + " GROUP BY tablenames.PairID");
+      prep.setInt(1, tournament);
+
+      // get table usage
+      rs = prep.executeQuery();
+      while (rs.next()) {
+        final int pairId = rs.getInt(1);
+        final int count = rs.getInt(2);
+        tableUsage.put(pairId, count);
+      }
+
+      // sort by table usage
+      Collections.sort(tableInfo, new Comparator<TableInformation>() {
+        @Override
+        public int compare(final TableInformation one,
+                           final TableInformation two) {
+          final Integer oneUse = tableUsage.get(one.getId());
+          final Integer twoUse = tableUsage.get(two.getId());
+          if (null == oneUse
+              && null == twoUse) {
+            return 0;
+          } else if (null == oneUse) {
+            return -1;
+          } else if (null == twoUse) {
+            return 1;
+          } else {
+            return oneUse.compareTo(twoUse);
+          }
+        }
+
+      });
 
     } finally {
       SQLFunctions.close(rs);
