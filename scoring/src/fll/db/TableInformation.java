@@ -167,6 +167,8 @@ public final class TableInformation implements Serializable {
       });
 
     } finally {
+      SQLFunctions.close(allTables);
+      SQLFunctions.close(getAllTables);
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
     }
