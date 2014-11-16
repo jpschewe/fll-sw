@@ -1,3 +1,4 @@
+* 315 - fix playoff table assignment algorithm for initial data.
 * 317 - format times with 2 digits in the subjective application
 
 Release 9.1
