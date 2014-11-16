@@ -1,3 +1,4 @@
+* 318 - use a double for the total score on a no show, allows sorting on the total score column
 * 317 - format times with 2 digits in the subjective application
 
 Release 9.1
