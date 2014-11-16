@@ -14,7 +14,7 @@ $(document).on(
 		"#choose-judging-group-page",
 		function(event) {
 			$.subjective.log("choose judging group pageinit");
-			
+
 			$("#choose-judging-group_upload-scores").click(
 					function() {
 						$.mobile.loading("show");
@@ -74,7 +74,7 @@ $(document).on(
 
 function populateChooseJudgingGroup() {
 	$.subjective.log("choose judging group populate");
-	
+
 	$("#choose-judging-group_judging-groups").empty();
 
 	var judgingGroups = $.subjective.getJudgingGroups();
@@ -352,7 +352,8 @@ function populateTeams() {
 		var time = $.subjective.getScheduledTime(team.teamNumber);
 		var timeStr = null;
 		if (null != time) {
-			timeStr = time.getHours() + ":" + time.getMinutes();
+			timeStr = time.getHours().toString().padL(2, "0") + ":"
+					+ time.getMinutes().toString().padL(2, "0");
 		}
 
 		var scoreStr;

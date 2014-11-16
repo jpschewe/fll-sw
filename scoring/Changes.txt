@@ -1,3 +1,5 @@
+* 317 - format times with 2 digits in the subjective application
+
 Release 9.1
 -----------
 * 305 - top page in subjective app now works offline
