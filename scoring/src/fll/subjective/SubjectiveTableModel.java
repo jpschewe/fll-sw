@@ -212,7 +212,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
         } else if (column == getNumGoals()
             + getNumColumnsLeftOfScores() + 1) {
           if (Boolean.valueOf(scoreEle.getAttribute("NoShow"))) {
-            return 0;
+            return (double)0;
           } else {
             // compute total score
             final double newTotalScore = _subjectiveCategory.evaluate(getTeamScore(row));
