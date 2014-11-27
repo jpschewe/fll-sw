@@ -264,8 +264,13 @@ function populateChooseJudge() {
 	$("#choose-judge_judges").append(
 			"<label for='choose-judge_new-judge'>New Judge</label>");
 
+	var currentJudge = $.subjective.getCurrentJudge();
+    var currentJudgeValid = false;
 	var judges = $.subjective.getPossibleJudges();
 	$.each(judges, function(i, judge) {
+		if(null != currentJudge && currentJudge.id == judge.id) {
+			currentJudgeValid = true;
+		}
 		$("#choose-judge_judges").append(
 				"<input type='radio' name='judge' id='choose-judge_" + judge.id
 						+ "' value='" + judge.id + "'>");
@@ -273,6 +278,9 @@ function populateChooseJudge() {
 				"<label for='choose-judge_" + judge.id + "'>" + judge.id
 						+ "</label>");
 	});
+	if(!currentJudgeValid) {
+		currentJudge = null;
+	}
 
 	var currentJudgingGroup = $.subjective.getCurrentJudgingGroup();
 	$("#choose-judge_judging-group").text(currentJudgingGroup);
@@ -280,7 +288,6 @@ function populateChooseJudge() {
 	var currentCategory = $.subjective.getCurrentCategory();
 	$("#choose-judge_category").text(currentCategory.title);
 
-	var currentJudge = $.subjective.getCurrentJudge();
 	if (null != currentJudge) {
 		$("input:radio[value=\"" + currentJudge.id + "\"]").prop('checked',
 				true);
@@ -318,19 +325,19 @@ function setJudge() {
 	var judgeID = $("input:radio[name='judge']:checked").val();
 	if ('new-judge' == judgeID) {
 		judgeID = $("#choose-judge_new-judge-name").val();
-		if (null == judgeID || "" == judgeID) {
+		if (null == judgeID || "" == judgeID.trim()) {
 			alert("You must enter a name");
 			return;
 		}
-		judgeID = judgeID.toUpperCase();
+		judgeID = judgeID.trim().toUpperCase();
 
 		var phone = $("#choose-judge_new-judge-phone").val();
-		if (null == phone || "" == phone) {
+		if (null == phone || "" == phone.trim()) {
 			alert("You must enter a phone nunmber");
 			return;
 		}
 
-		$.subjective.addJudge(judgeID, phone);
+		$.subjective.addJudge(judgeID, phone.trim());
 	}
 
 	$.subjective.setCurrentJudge(judgeID);
