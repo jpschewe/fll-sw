@@ -813,7 +813,7 @@ function populateScoreSummary() {
 	var teams = $.subjective.getCurrentTeams();
 	$.each(teams, function(i, team) {
 		var score = $.subjective.getScore(team.teamNumber);
-		if ($.subjective.isScoreCompleted(score) && !score.noShow) {
+		if ($.subjective.isScoreCompleted(score)) {
 			teamsWithScores.push(team);
 
 			var computedScore = $.subjective.computeScore(score);
@@ -873,8 +873,19 @@ function populateScoreSummary() {
 								+ team.teamName + "</div>");
 						teamRow.append(teamBlock);
 
+						var score = $.subjective.getScore(team.teamNumber); 
+						var scoreText;
+						if(null == score) {
+							scoreText = "";
+						}
+						else if(score.noShow) {
+							scoreText = "No Show";
+						} else {
+							scoreText = computedScore;
+						}
+
 						var scoreBlock = $("<div class=\"ui-block-b score "
-								+ tieClass + "\">" + computedScore + "</div>");
+								+ tieClass + "\">" + scoreText + "</div>");
 						teamRow.append(scoreBlock);
 
 						var editBlock = $("<div class=\"ui-block-c edit\"></div>");
