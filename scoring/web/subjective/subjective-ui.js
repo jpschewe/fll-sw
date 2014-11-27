@@ -318,19 +318,19 @@ function setJudge() {
 	var judgeID = $("input:radio[name='judge']:checked").val();
 	if ('new-judge' == judgeID) {
 		judgeID = $("#choose-judge_new-judge-name").val();
-		if (null == judgeID || "" == judgeID) {
+		if (null == judgeID || "" == judgeID.trim()) {
 			alert("You must enter a name");
 			return;
 		}
-		judgeID = judgeID.toUpperCase();
+		judgeID = judgeID.trim().toUpperCase();
 
 		var phone = $("#choose-judge_new-judge-phone").val();
-		if (null == phone || "" == phone) {
+		if (null == phone || "" == phone.trim()) {
 			alert("You must enter a phone nunmber");
 			return;
 		}
 
-		$.subjective.addJudge(judgeID, phone);
+		$.subjective.addJudge(judgeID, phone.trim());
 	}
 
 	$.subjective.setCurrentJudge(judgeID);
