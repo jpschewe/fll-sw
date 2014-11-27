@@ -1,3 +1,5 @@
+* 324 - display no shows in the subjective web application score summary
+* 325 - make sure a judge is always specified in the subjective web application
 * 315 - fix playoff table assignment algorithm for initial data.
 * 318 - use a double for the total score on a no show, allows sorting on the total score column
 * 317 - format times with 2 digits in the subjective application
