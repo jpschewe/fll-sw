@@ -1,3 +1,5 @@
+* 11 - remove extra jar files from application classpaths
+
 Release 9.3
 -----------
 * 322 - Don't put No Show teams in the playoffs
