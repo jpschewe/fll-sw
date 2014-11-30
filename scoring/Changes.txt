@@ -1,3 +1,4 @@
+* 322 - Don't put No Show teams in the playoffs
 * Reworked some pages to make it clear what is needed at a regional vs. state tournament
 * 320 - make root tomcat application redirect to fll-sw
 * 324 - display no shows in the subjective web application score summary
