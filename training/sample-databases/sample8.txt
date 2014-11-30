@@ -1,0 +1,8 @@
+The sample8 files are for a sample tournament that has 8 teams. The databases were created using
+ the 2014 FLL challenge description. 
+ - sample8-teams.xls was used to load the teams into the database.
+ - sample8-schedule.xls is the schedule that is loaded.
+ - sample8-initial.flldb is the database with teams loaded and schedule loaded. This is typically what someone 
+     would get if provided a database to run a tournament.
+- sample8-tables_judges.flldb builds on the initial database and has the judges and table labels assigned.
+- sample8-morning_finished.flldb all morning performance scores and subjective scores have been entered
