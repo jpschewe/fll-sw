@@ -116,29 +116,31 @@ public class InitializeBrackets extends BaseFLLServlet {
               + divisionStr + ".</p>");
         } else {
           final List<String> eventDivisions = Queries.getEventDivisions(connection, currentTournamentID);
+          final List<? extends Team> teams;
+
           if (eventDivisions.contains(divisionStr)) {
             final Map<Integer, TournamentTeam> tournamentTeams = data.getTournamentTeams();
-            final List<TournamentTeam> teams = new ArrayList<TournamentTeam>(tournamentTeams.values());
-            TournamentTeam.filterTeamsToEventDivision(teams, divisionStr);
-
-            Playoff.initializeBrackets(connection, challengeDescription, divisionStr, enableThird, teams);
+            final List<TournamentTeam> tempTeams = new ArrayList<TournamentTeam>(tournamentTeams.values());
+            TournamentTeam.filterTeamsToEventDivision(tempTeams, divisionStr);
+            teams = tempTeams;
           } else {
             // assume new playoff division
-
-            final List<Team> teams = data.getDivisionTeams();
-            final List<Integer> teamNumbers = new LinkedList<Integer>();
-            for (final Team t : teams) {
-              teamNumbers.add(t.getTeamNumber());
-            }
-
-            final String errors = Playoff.involvedInUnfinishedPlayoff(connection, currentTournamentID, teamNumbers);
-            if (null != errors) {
-              message.append(errors);
-            } else {
-
-              Playoff.initializeBrackets(connection, challengeDescription, divisionStr, enableThird, teams);
-            }
+            teams = data.getDivisionTeams();
           }
+
+          final List<Integer> teamNumbers = new LinkedList<Integer>();
+          for (final Team t : teams) {
+            teamNumbers.add(t.getTeamNumber());
+          }
+
+          final String errors = Playoff.involvedInUnfinishedPlayoff(connection, currentTournamentID, teamNumbers);
+          if (null != errors) {
+            message.append(errors);
+          } else {
+
+            Playoff.initializeBrackets(connection, challengeDescription, divisionStr, enableThird, teams);
+          }
+
           message.append("<p>Playoffs have been successfully initialized for division "
               + divisionStr + ".</p>");
         }

@@ -681,8 +681,12 @@ public final class Queries {
         + currentTournament);
 
     columns.append(", ComputedTotal");
-    values.append(", "
-        + performanceElement.evaluate(teamScore));
+    if (teamScore.isNoShow()) {
+      values.append(", NULL");
+    } else {
+      values.append(", "
+          + performanceElement.evaluate(teamScore));
+    }
 
     columns.append(", RunNumber");
     values.append(", "
@@ -815,8 +819,12 @@ public final class Queries {
     sql.append("NoShow = "
         + noShow);
 
-    sql.append(", ComputedTotal = "
-        + performanceElement.evaluate(teamScore));
+    if (teamScore.isNoShow()) {
+      sql.append(", ComputedTotal = NULL");
+    } else {
+      sql.append(", ComputedTotal = "
+          + performanceElement.evaluate(teamScore));
+    }
 
     // now do each goal
     for (final AbstractGoal element : performanceElement.getGoals()) {
@@ -1913,14 +1921,13 @@ public final class Queries {
       prep.setInt(2, currentTournament);
       prep.executeUpdate();
       SQLFunctions.close(prep);
-      
+
       // delete from PlayoffData
       prep = connection.prepareStatement("DELETE FROM PlayoffData WHERE Team = ? AND Tournament = ?");
       prep.setInt(1, teamNumber);
       prep.setInt(2, currentTournament);
       prep.executeUpdate();
       SQLFunctions.close(prep);
-      
 
     } finally {
       SQLFunctions.close(prep);

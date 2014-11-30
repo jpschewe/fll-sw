@@ -60,11 +60,12 @@ public class PerformanceScoreCategory extends ScoreCategory {
   public double getMinimumScore() {
     return mMinimumScore;
   }
-  
+
   @Override
   public double evaluate(final TeamScore teamScore) {
     final double score = super.evaluate(teamScore);
-    if(score < mMinimumScore) {
+    if (score < mMinimumScore
+        && !teamScore.isNoShow()) {
       return mMinimumScore;
     } else {
       return score;
