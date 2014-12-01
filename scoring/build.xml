@@ -139,11 +139,11 @@
     <!-- writing out database diagrams -->
     <pathelement location="${dir.lib}/schemaSpy_5.0.0.jar" />
 
-    <path refid="cobertura.classpath" />
-
   </path>
 
   <path id="application.classpath">
+    <path refid="cobertura.classpath" />
+
     <path refid="base.classpath" />
 
     <pathelement location="${dir.classes}" />
