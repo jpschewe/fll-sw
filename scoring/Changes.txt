@@ -1,3 +1,4 @@
+* 15 - make wording clear when no teams are missing seeding rounds before playoffs
 * 11 - remove extra jar files from application classpaths
 
 Release 9.3
