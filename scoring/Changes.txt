@@ -1,3 +1,4 @@
+* 35 - make the top 10 show as many scores as will fit 
 * 15 - make wording clear when no teams are missing seeding rounds before playoffs
 * 11 - remove extra jar files from application classpaths
 
