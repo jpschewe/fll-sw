@@ -114,7 +114,7 @@ public class Top10 extends BaseFLLServlet {
         if (!showOrg) {
           --numColumns;
         }
-        formatter.format("<th colspan='%d' bgcolor='%s'>Top Ten Performance Scores: Division %s</th>", numColumns,
+        formatter.format("<th colspan='%d' bgcolor='%s'>Top Performance Scores: Division %s</th>", numColumns,
                          Queries.getColorForDivisionIndex(divisionIndex), divisions.get(divisionIndex));
         formatter.format("</tr>");
 
@@ -134,7 +134,7 @@ public class Top10 extends BaseFLLServlet {
             + " WHERE Teams.TeamNumber = current_tournament_teams.TeamNumber" //
             + " AND current_tournament_teams.event_division = ?"
             + " ORDER BY T2.MaxOfComputedScore "
-            + winnerCriteria.getSortString() + " LIMIT 10");
+            + winnerCriteria.getSortString());
         prep.setInt(1, currentTournament);
         prep.setInt(2, maxScoreboardRound);
         prep.setString(3, divisions.get(divisionIndex));
