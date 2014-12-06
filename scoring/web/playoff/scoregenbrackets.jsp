@@ -44,7 +44,7 @@
 <head>
 <link rel="stylesheet" type="text/css"
  href="<c:url value='/style/style.jsp'/>" />
-<title>Playoff Brackets - Division: ${division}</title>
+<title>${division} Playoff Brackets</title>
 
 <style type='text/css'>
 TD.Leaf {
