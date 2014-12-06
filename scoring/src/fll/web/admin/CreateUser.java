@@ -9,6 +9,7 @@ package fll.web.admin;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
@@ -43,7 +44,9 @@ public class CreateUser extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
 
-    PreparedStatement prep = null;
+    PreparedStatement addUser = null;
+    PreparedStatement checkUser = null;
+    ResultSet rs = null;
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     try {
@@ -67,11 +70,21 @@ public class CreateUser extends BaseFLLServlet {
         return;
       }
 
+      checkUser = connection.prepareStatement("SELECT fll_user FROM fll_authentication WHERE fll_user = ?");
+      checkUser.setString(1, user);
+      rs = checkUser.executeQuery();
+      if (rs.next()) {
+        session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>Username '"
+            + user + "' already exists.</p>");
+        response.sendRedirect(response.encodeRedirectURL("createUsername.jsp"));
+        return;
+      }
+
       final String hashedPass = DigestUtils.md5Hex(pass);
-      prep = connection.prepareStatement("INSERT INTO fll_authentication (fll_user, fll_pass) VALUES(?, ?)");
-      prep.setString(1, user);
-      prep.setString(2, hashedPass);
-      prep.executeUpdate();
+      addUser = connection.prepareStatement("INSERT INTO fll_authentication (fll_user, fll_pass) VALUES(?, ?)");
+      addUser.setString(1, user);
+      addUser.setString(2, hashedPass);
+      addUser.executeUpdate();
 
       session.setAttribute(SessionAttributes.MESSAGE, "<p id='success-create-user'>Successfully created user '"
           + user + "'</p>");
@@ -88,7 +101,9 @@ public class CreateUser extends BaseFLLServlet {
     } catch (final SQLException e) {
       throw new RuntimeException(e);
     } finally {
-      SQLFunctions.close(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(checkUser);
+      SQLFunctions.close(addUser);
       SQLFunctions.close(connection);
     }
 
