@@ -560,9 +560,6 @@ public final class ImportDB {
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
-      stmt.executeUpdate("ALTER TABLE Judges ADD COLUMN phone varchar(15) DEFAULT NULL");
-
-      stmt.executeUpdate("UPDATE Judges SET phone = '612-555-1212' WHERE phone IS NULL");
 
       final Document document = GlobalParameters.getChallengeDocument(connection);
       final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
@@ -1472,17 +1469,16 @@ public final class ImportDB {
       destPrep.executeUpdate();
       SQLFunctions.close(destPrep);
 
-      destPrep = destinationConnection.prepareStatement("INSERT INTO Judges (id, category, station, phone, Tournament) VALUES (?, ?, ?, ?, ?)");
-      destPrep.setInt(5, destTournamentID);
+      destPrep = destinationConnection.prepareStatement("INSERT INTO Judges (id, category, station, Tournament) VALUES (?, ?, ?, ?)");
+      destPrep.setInt(4, destTournamentID);
 
-      sourcePrep = sourceConnection.prepareStatement("SELECT id, category, station, phone FROM Judges WHERE Tournament = ?");
+      sourcePrep = sourceConnection.prepareStatement("SELECT id, category, station FROM Judges WHERE Tournament = ?");
       sourcePrep.setInt(1, sourceTournamentID);
       sourceRS = sourcePrep.executeQuery();
       while (sourceRS.next()) {
         destPrep.setString(1, sourceRS.getString(1));
         destPrep.setString(2, sourceRS.getString(2));
         destPrep.setString(3, sourceRS.getString(3));
-        destPrep.setString(4, sourceRS.getString(4));
         destPrep.executeUpdate();
       }
     } finally {

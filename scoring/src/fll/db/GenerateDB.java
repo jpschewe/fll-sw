@@ -178,7 +178,7 @@ public final class GenerateDB {
           + "  category varchar(64) NOT NULL," //
           + "  Tournament INTEGER NOT NULL," //
           + "  station varchar(64) NOT NULL," //
-          + "  phone varchar(15) default NULL," + "  CONSTRAINT judges_pk PRIMARY KEY (id,category,Tournament,station)"//
+          + "  CONSTRAINT judges_pk PRIMARY KEY (id,category,Tournament,station)"//
           + " ,CONSTRAINT judges_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" //
           + ")");
 

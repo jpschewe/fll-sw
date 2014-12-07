@@ -88,11 +88,9 @@ public class JudgesServlet extends HttpServlet {
     final ServletContext application = getServletContext();
 
     int numNewJudges = 0;
-    int numModifiedJudges = 0;
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     PreparedStatement insertJudge = null;
-    PreparedStatement updateJudge = null;
     try {
       connection = datasource.getConnection();
 
@@ -112,10 +110,7 @@ public class JudgesServlet extends HttpServlet {
 
       final Collection<JudgeInformation> currentJudges = JudgeInformation.getJudges(connection, currentTournament);
 
-      updateJudge = connection.prepareStatement("UPDATE Judges SET phone = ? WHERE id = ? AND category = ? AND Tournament = ? AND station = ?");
-      updateJudge.setInt(4, currentTournament);
-
-      insertJudge = connection.prepareStatement("INSERT INTO Judges (id, category, Tournament, station, phone) VALUES (?, ?, ?, ?, ?)");
+      insertJudge = connection.prepareStatement("INSERT INTO Judges (id, category, Tournament, station) VALUES (?, ?, ?, ?)");
       insertJudge.setInt(3, currentTournament);
 
       for (final JudgeInformation judge : judges) {
@@ -127,38 +122,26 @@ public class JudgesServlet extends HttpServlet {
           }
         }
 
-        if (null != found) {
-          if (!ComparisonUtils.safeEquals(judge.getPhone(), found.getPhone())) {
-            updateJudge.setString(1, judge.getPhone());
-            updateJudge.setString(2, judge.getId());
-            updateJudge.setString(3, judge.getCategory());
-            updateJudge.setString(5, judge.getStation());
-            updateJudge.executeUpdate();
-            ++numModifiedJudges;
-          }
-        } else {
+        if (null == found) {
           insertJudge.setString(1, judge.getId());
           insertJudge.setString(2, judge.getCategory());
           insertJudge.setString(4, judge.getStation());
-          insertJudge.setString(5, judge.getPhone());
           insertJudge.executeUpdate();
           ++numNewJudges;
         }
       }
 
-      final UploadResult result = new UploadResult(true, "Successfully uploaded judges", numNewJudges,
-                                                   numModifiedJudges);
+      final UploadResult result = new UploadResult(true, "Successfully uploaded judges", numNewJudges);
       response.reset();
       jsonMapper.writeValue(writer, result);
 
     } catch (final SQLException e) {
-      final UploadResult result = new UploadResult(false, e.getMessage(), numNewJudges, numModifiedJudges);
+      final UploadResult result = new UploadResult(false, e.getMessage(), numNewJudges);
       jsonMapper.writeValue(writer, result);
 
       throw new RuntimeException(e);
     } finally {
       SQLFunctions.close(insertJudge);
-      SQLFunctions.close(updateJudge);
       SQLFunctions.close(connection);
     }
 
@@ -167,12 +150,10 @@ public class JudgesServlet extends HttpServlet {
   public static final class UploadResult {
     public UploadResult(final boolean success,
                         final String message,
-                        final int numNewJudges,
-                        final int numModifiedJudges) {
+                        final int numNewJudges) {
       mSuccess = success;
       mMessage = message;
       mNumNewJudges = numNewJudges;
-      mNumModifiedJudges = numModifiedJudges;
     }
 
     private final boolean mSuccess;
@@ -193,11 +174,6 @@ public class JudgesServlet extends HttpServlet {
       return mNumNewJudges;
     }
 
-    private final int mNumModifiedJudges;
-
-    public int getNumModifiedJudges() {
-      return mNumModifiedJudges;
-    }
   }
 
   private static final class JudgesTypeInformation extends TypeReference<Collection<JudgeInformation>> {
