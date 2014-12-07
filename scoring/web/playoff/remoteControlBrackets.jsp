@@ -198,7 +198,7 @@ FONT.TIE {
               } else if (lid.split("-")[1] != finalRound)/*Don't show final results!*/ { // /if team number meant a bye
                   var score;
                   //table label?
-                  placeTableLabel(lid, data.leaf.table, data.leaf.dbLine);
+                  placeTableLabel(lid, data.leaf.table, data.leaf.dbline);
                   var scoreData = data.score;
                   if (scoreData >= 0) {
                       if ($("#" + lid).html() != displayStrings.getTeamNameAndScoreString(lid, data.leaf, scoreData, false) && !foundNewest) {
