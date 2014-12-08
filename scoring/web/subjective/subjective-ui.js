@@ -331,13 +331,7 @@ function setJudge() {
 		}
 		judgeID = judgeID.trim().toUpperCase();
 
-		var phone = $("#choose-judge_new-judge-phone").val();
-		if (null == phone || "" == phone.trim()) {
-			alert("You must enter a phone nunmber");
-			return;
-		}
-
-		$.subjective.addJudge(judgeID, phone.trim());
+		$.subjective.addJudge(judgeID);
 	}
 
 	$.subjective.setCurrentJudge(judgeID);
