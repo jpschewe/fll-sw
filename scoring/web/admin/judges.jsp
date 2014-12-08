@@ -49,7 +49,6 @@
   <table border='1' id='data'>
    <tr>
     <th>ID</th>
-    <th>Phone</th>
     <th>Category</th>
     <th>Judging Station</th>
    </tr>
@@ -60,11 +59,6 @@
 
      <td><input type='text' value="${judge.id}"
       name='id${loopStatus.count}' /></td>
-
-<!--  before phone ${loopStatus.count} -->
-     <td><input type='text' value="${judge.phone }"
-      name='phone${loopStatus.count}' /></td>
-<!--  after phone ${loopStatus.count} -->
 
      <td><select name='cat${loopStatus.count }'>
        <c:forEach items="${CATEGORIES}" var="cat">

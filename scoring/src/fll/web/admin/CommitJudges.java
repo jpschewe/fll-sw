@@ -96,8 +96,8 @@ public class CommitJudges extends BaseFLLServlet {
       SQLFunctions.close(prep);
       prep = null;
 
-      prep = connection.prepareStatement("INSERT INTO Judges (id, phone, category, station, Tournament) VALUES(?, ?, ?, ?, ?)");
-      prep.setInt(5, tournament);
+      prep = connection.prepareStatement("INSERT INTO Judges (id, category, station, Tournament) VALUES(?, ?, ?, ?)");
+      prep.setInt(4, tournament);
 
       // can't put types inside a session
       @SuppressWarnings("unchecked")
@@ -115,9 +115,8 @@ public class CommitJudges extends BaseFLLServlet {
         newJudgeInfo.add(info);
 
         prep.setString(1, info.getId());
-        prep.setString(2, info.getPhone());
-        prep.setString(3, info.getCategory());
-        prep.setString(4, info.getStation());
+        prep.setString(2, info.getCategory());
+        prep.setString(3, info.getStation());
         prep.executeUpdate();
       }
 
