@@ -41,19 +41,11 @@ public final class JudgeInformation implements Serializable {
     return station;
   }
 
-  private final String phone;
-
-  public String getPhone() {
-    return phone;
-  }
-
   @JsonCreator
   public JudgeInformation(@JsonProperty("id") final String id,
-                          @JsonProperty("phone") final String phone,
                           @JsonProperty("category") final String category,
                           @JsonProperty("station") final String station) {
     this.id = id;
-    this.phone = phone;
     this.category = category;
     this.station = station;
   }
@@ -93,15 +85,14 @@ public final class JudgeInformation implements Serializable {
     ResultSet rs = null;
     PreparedStatement stmt = null;
     try {
-      stmt = connection.prepareStatement("SELECT id, phone, category, station FROM Judges WHERE Tournament = ?");
+      stmt = connection.prepareStatement("SELECT id, category, station FROM Judges WHERE Tournament = ?");
       stmt.setInt(1, tournament);
       rs = stmt.executeQuery();
       while (rs.next()) {
         final String id = rs.getString(1);
-        final String phone = rs.getString(2);
-        final String category = rs.getString(3);
-        final String station = rs.getString(4);
-        final JudgeInformation judge = new JudgeInformation(id, phone, category, station);
+        final String category = rs.getString(2);
+        final String station = rs.getString(3);
+        final JudgeInformation judge = new JudgeInformation(id, category, station);
         judges.add(judge);
       }
     } finally {

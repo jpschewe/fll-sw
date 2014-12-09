@@ -478,7 +478,7 @@
 			return _currentJudge;
 		},
 
-		addJudge : function(judgeID, phone) {
+		addJudge : function(judgeID) {
 			var foundJudge = null;
 			$.each(_judges, function(index, judge) {
 				if (judge.station == _currentJudgingGroup
@@ -492,7 +492,6 @@
 				judge.id = judgeID;
 				judge.category = _currentCategory.name;
 				judge.station = _currentJudgingGroup;
-				judge.phone = phone;
 			}
 			_judges.push(judge);
 			_save();
