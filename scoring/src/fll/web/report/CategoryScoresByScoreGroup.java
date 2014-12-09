@@ -112,12 +112,14 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
                 + " Teams.TeamNumber, Teams.TeamName, Teams.Organization, FinalScores." + catName //
                 + " FROM Teams, FinalScores" //
                 + " WHERE FinalScores.Tournament = ?" //
-                + " AND FinalScores.TeamNumber = Teams.TeamNumber" + " AND FinalScores.TeamNumber IN (" //
+                + " AND FinalScores.TeamNumber = Teams.TeamNumber" //
+                + " AND FinalScores.TeamNumber IN (" //
                 + "   SELECT TeamNumber FROM TournamentTeams"//
                 + "   WHERE Tournament = ?" //
                 + "   AND event_division = ?" //
                 + "   AND judging_station = ?)" //
                 + " ORDER BY " + catName + " " + winnerCriteria.getSortString() //
+                + " NULLS LAST" //
             );
             prep.setInt(1, tournament.getTournamentID());
             prep.setInt(2, tournament.getTournamentID());
