@@ -135,6 +135,10 @@ public class InitFilter implements Filter {
           + "/report/finalist/PublicFinalistDisplaySchedule")) {
         // this report is public
         return false;
+      } else if (path.startsWith(contextPath
+          + "/api/CheckAuth")) {
+        // checking the authentication doesn't require security
+        return false;
       } else {
         LOGGER.debug("Returning true from needsSecurity");
         return true;
