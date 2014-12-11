@@ -1,3 +1,4 @@
+* 333 - redirect to authentication page from subjective app when not authenticated
 * 331 - sort no shows last in scores by judging station report
 * 336 - Modify writeup for what to do with ties
 * 329 - Remove phone number from judge information

@@ -785,17 +785,27 @@
 		 */
 		uploadData : function(scoresSuccess, scoresFail, judgesSuccess,
 				judgesFail, loadSuccess, loadFail) {
-			var waitList = []
-			waitList.push($.subjective.uploadScores(scoresSuccess, scoresFail));
-			waitList.push($.subjective.uploadJudges(judgesSuccess, judgesFail));
+			
+			$.getJSON("../api/CheckAuth", function(data) {
+				$.subjective.log("data: " + $.toJSON(data));
 
-			$.when.apply($, waitList).done(function() {
-				$.subjective.loadFromServer(function() {
-					loadSuccess();
-				}, function() {
-					loadFail("Error getting updated scores");
-				}, false);
+				if (data.authenticated) {
 
+					var waitList = []
+					waitList.push($.subjective.uploadScores(scoresSuccess, scoresFail));
+					waitList.push($.subjective.uploadJudges(judgesSuccess, judgesFail));
+
+					$.when.apply($, waitList).done(function() {
+						$.subjective.loadFromServer(function() {
+							loadSuccess();
+						}, function() {
+							loadFail("Error getting updated scores");
+						}, false);
+
+					});
+				} else {
+					location.href = "auth.html";
+				}
 			});
 		},
 
