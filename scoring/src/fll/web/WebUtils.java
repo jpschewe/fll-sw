@@ -9,6 +9,8 @@ package fll.web;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -19,9 +21,15 @@ import java.util.regex.Pattern;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
+
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import fll.db.Queries;
+import fll.util.FLLRuntimeException;
 
 /**
  * Some utilities for dealing with the web.
@@ -112,12 +120,12 @@ public final class WebUtils {
     final Collection<String> ips = new LinkedList<String>();
     for (final InetAddress address : getAllIPs()) {
       String addr = address.getHostAddress();
-      
-      // remove IPv6 zone information 
+
+      // remove IPv6 zone information
       if (addr.contains("%")) {
         addr = addr.substring(0, addr.indexOf('%'));
       }
-      
+
       ips.add(addr);
     }
     return ips;
@@ -167,6 +175,72 @@ public final class WebUtils {
     } else {
       final Matcher escapeMatcher = WebUtils.needsEscape.matcher(str);
       return '"' + escapeMatcher.replaceAll("\\\\$0") + '"';
+    }
+  }
+
+  /**
+   * Check if the web request is authenticated.
+   * If the connection is from localhost it's
+   * allowed.
+   * 
+   * @param request the web request
+   * @param application the application context
+   * @return true if authenticated, false otherwise
+   */
+  public static boolean checkAuthenticated(final HttpServletRequest request,
+                                           final ServletContext application) {
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+
+    // check request against all interfaces
+    String requestAddress = request.getRemoteAddr();
+
+    // remove zone from IPv6 addresses
+    final int zoneIndex = requestAddress.indexOf('%');
+    if (-1 != zoneIndex) {
+      requestAddress = requestAddress.substring(0, zoneIndex);
+    }
+
+    final Collection<String> localIps = getAllIPStrings();
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Local IPs: "
+          + localIps + " requestAddress: " + requestAddress);
+    }
+    if (localIps.contains(requestAddress)) {
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Returning true from checkAUthenticated for connection from own ip, "
+            + requestAddress);
+      }
+      return true;
+    }
+
+    if (null == datasource) {
+      throw new FLLRuntimeException(
+                                    "Database is not initialized and security is required, you must initialize the database from localhost");
+    }
+
+    Connection connection = null;
+    try {
+      connection = datasource.getConnection();
+
+      if (Queries.isAuthenticationEmpty(connection)) {
+        LOGGER.debug("Returning true from checkAuthenticated for empty auth");
+        return true;
+      }
+
+      final Collection<String> loginKeys = CookieUtils.findLoginKey(request);
+      final String user = Queries.checkValidLogin(connection, loginKeys);
+      if (null != user) {
+        LOGGER.debug("Returning true from checkSecurity for valid login: "
+            + loginKeys + " user: " + user);
+        return true;
+      } else {
+        LOGGER.debug("Returning false from checkAuthenticated");
+        return false;
+      }
+    } catch (final SQLException e) {
+      throw new RuntimeException(e);
+    } finally {
+      SQLFunctions.close(connection);
     }
   }
 
