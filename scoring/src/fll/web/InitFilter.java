@@ -8,7 +8,6 @@ package fll.web;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collection;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -30,7 +29,6 @@ import org.w3c.dom.Document;
 
 import fll.Utilities;
 import fll.db.GlobalParameters;
-import fll.db.Queries;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.xml.ChallengeDescription;
@@ -137,6 +135,10 @@ public class InitFilter implements Filter {
           + "/report/finalist/PublicFinalistDisplaySchedule")) {
         // this report is public
         return false;
+      } else if (path.startsWith(contextPath
+          + "/api/CheckAuth")) {
+        // checking the authentication doesn't require security
+        return false;
       } else {
         LOGGER.debug("Returning true from needsSecurity");
         return true;
@@ -192,61 +194,14 @@ public class InitFilter implements Filter {
                                 final ServletContext application,
                                 final HttpSession session) throws IOException {
 
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
-
-    // check request against all interfaces
-    String requestAddress = request.getRemoteAddr();
-
-    // remove zone from IPv6 addresses
-    final int zoneIndex = requestAddress.indexOf('%');
-    if (-1 != zoneIndex) {
-      requestAddress = requestAddress.substring(0, zoneIndex);
-    }
-
-    final Collection<String> localIps = WebUtils.getAllIPStrings();
-    if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("Local IPs: "
-          + localIps + " requestAddress: " + requestAddress);
-    }
-    if (localIps.contains(requestAddress)) {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Returning true from checkSecurity for connection from own ip, "
-            + requestAddress);
-      }
+    if (WebUtils.checkAuthenticated(request, application)) {
       return true;
-    }
-
-    if (null == datasource) {
-      throw new FLLRuntimeException(
-                                    "Database is not initialized and security is required, you must initialize the database from localhost");
-    }
-
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
-
-      if (Queries.isAuthenticationEmpty(connection)) {
-        LOGGER.debug("Returning true from checkSecurity for empty auth");
-        return true;
-      }
-
-      final Collection<String> loginKeys = CookieUtils.findLoginKey(request);
-      final String user = Queries.checkValidLogin(connection, loginKeys);
-      if (null != user) {
-        LOGGER.debug("Returning true from checkSecurity for valid login: "
-            + loginKeys + " user: " + user);
-        return true;
-      } else {
-        session.setAttribute(SessionAttributes.REDIRECT_URL, request.getRequestURI());
-        response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
-            + "/login.jsp"));
-        LOGGER.debug("Returning false from checkSecurity");
-        return false;
-      }
-    } catch (final SQLException e) {
-      throw new RuntimeException(e);
-    } finally {
-      SQLFunctions.close(connection);
+    } else {
+      session.setAttribute(SessionAttributes.REDIRECT_URL, request.getRequestURI());
+      response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
+          + "/login.jsp"));
+      LOGGER.debug("Returning false from checkSecurity");
+      return false;
     }
   }
 

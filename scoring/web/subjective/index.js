@@ -106,16 +106,25 @@ function checkServerStatus() {
 function serverLoadPage() {
 	$("#index-page_choose_clear").hide();
 
-	$("#index-page_clear").click(function() {
-		$("#index-page_choose_clear").hide();
-		reloadData();
-	});
-	$("#index-page_keep").click(function() {
-		$("#index-page_choose_clear").hide();
-		promptForJudgingGroup();
+	$.getJSON("../api/CheckAuth", function(data) {
+		$.subjective.log("data: " + $.toJSON(data));
+
+		if (data.authenticated) {
+			$("#index-page_clear").click(function() {
+				$("#index-page_choose_clear").hide();
+				reloadData();
+			});
+			$("#index-page_keep").click(function() {
+				$("#index-page_choose_clear").hide();
+				promptForJudgingGroup();
+			});
+
+			checkStoredData();
+		} else {
+			location.href = "auth.html";
+		}
 	});
 
-	checkStoredData();
 }
 
 $(document).on("pagebeforeshow", "#index-page", function() {
