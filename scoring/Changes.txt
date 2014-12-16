@@ -1,3 +1,5 @@
+* 346 - add link to non-scrolling playoffs from playoff index
+
 Release 9.4
 -----------
 * 333 - redirect to authentication page from subjective app when not authenticated
