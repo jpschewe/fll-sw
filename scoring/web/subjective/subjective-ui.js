@@ -362,23 +362,23 @@ function populateTeams() {
 		if (!$.subjective.isScoreCompleted(score)) {
 			scoreStr = "";
 		} else if (score.noShow) {
-			scoreStr = "No Show";
+			scoreStr = " - No Show";
 		} else {
 			var computedScore = $.subjective.computeScore(score);
-			scoreStr = computedScore;
+			scoreStr = " - Score: " + computedScore;
 		}
 
 		var label = "";
 		if (null != timeStr) {
 			label = label + timeStr;
 		}
-		label = label + " " + team.teamNumber;
-		label = label + " " + team.teamName;
+		label = label + scoreStr;
+		label = label + " - " + team.teamNumber;
+		label = label + " - " + team.teamName;
 		if (null != team.organization) {
-			label = label + " " + team.organization;
+			label = label + " - " + team.organization;
 		}
-		label = label + " " + scoreStr;
-		var button = $("<button class='ui-btn ui-corner-all'>" //
+		var button = $("<button class='ui-btn ui-corner-all text-left'>" //
 				+ label //
 				+ "</button>");
 		$("#teams-list_teams").append(button);
