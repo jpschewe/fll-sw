@@ -59,6 +59,7 @@ public class Last8 extends BaseFLLServlet {
 
       formatter.format("<html>");
       formatter.format("<head>");
+      formatter.format("<link rel='stylesheet' type='text/css' href='../style/style.jsp' />");
       formatter.format("<link rel='stylesheet' type='text/css' href='score_style.css' />");
       formatter.format("<meta http-equiv='refresh' content='30' />");
       formatter.format("</head>");

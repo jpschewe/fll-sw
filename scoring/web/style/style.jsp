@@ -40,4 +40,11 @@ BODY {
   font-weight: bold;
 }
   
+
+.truncate {
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
   
