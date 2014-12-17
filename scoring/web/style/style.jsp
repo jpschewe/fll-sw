@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
 
 BODY { 
-  background: url(<c:url value="/images/bricks1.gif"/>) white;
+  background: #FFFCFF;
   margin-top: 4;
 }
 
