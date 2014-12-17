@@ -59,16 +59,16 @@
    <%-- scoresheet generation --%>
    <li>
     <form name='printable' action='scoregenbrackets.jsp' method='get'>
-    
-   <c:if test="${not tablesAssigned }">
-    <p class='warning'>
-     Tables are not not assigned. Entering into the scoresheet
-     generating brackets at this point will have undesired results. You
-     should visit the <a href='<c:url value="/admin/tables.jsp"/>'>table
-      assignment page</a>.
-    </p>
-   </c:if>
-    
+
+     <c:if test="${not tablesAssigned }">
+      <p class='warning'>
+       Tables are not not assigned. Entering into the scoresheet
+       generating brackets at this point will have undesired results.
+       You should visit the <a href='<c:url value="/admin/tables.jsp"/>'>table
+        assignment page</a>.
+      </p>
+     </c:if>
+
      <b>Scoresheet Generation Brackets</b><br />
 
      <%-- division --%>
@@ -156,15 +156,32 @@
    </li>
 
 
-   <li><b>Scrolling Brackets</b> (as on big screen display)<br />
-    <a href="remoteMain.jsp">Display brackets</a><br /> Division and
-    round must be selected from the big screen display <a
+  </c:if>
+  <!-- if playoff divisions not empty -->
+
+ </ol>
+
+ <c:if test="${not empty playoff_data.existingDivisions }">
+
+  <h2>Other useful pages</h2>
+  <ul>
+
+
+   <li><a href="remoteMain.jsp">Scrolling Brackets</a> (as on big
+    screen display)<br /> Division and round must be selected from the
+    big screen display <a
     href="<c:url value='/admin/remoteControl.jsp'/>">remote control</a>
     page.</li>
 
-  </c:if>
-  <!-- if playoff divisions not empty -->
- </ol>
+   <li><a href="remoteControlBrackets.jsp?scroll=false">Non-Scrolling
+     Brackets</a> (as on big screen display)<br /> Division and round must
+    be selected from the big screen display <a
+    href="<c:url value='/admin/remoteControl.jsp'/>">remote control</a>
+    page.</li>
+
+  </ul>
+ </c:if>
+ <!-- if playoff divisions not empty -->
 
 
 </body>
