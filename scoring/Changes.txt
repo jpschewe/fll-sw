@@ -1,3 +1,4 @@
+* 332 - pass parameters from limit tables servlet back to scoresheet generation page
 * 346 - add link to non-scrolling playoffs from playoff index
 
 Release 9.4
