@@ -1,3 +1,4 @@
+* 348 - add a page break after each judging station in the category scores by judging station report
 * 332 - pass parameters from limit tables servlet back to scoresheet generation page
 * 346 - add link to non-scrolling playoffs from playoff index
 
