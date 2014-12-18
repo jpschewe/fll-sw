@@ -10,15 +10,16 @@
 
 <script type='text/javascript' src='../extlib/jquery-1.11.1.min.js'></script>
 
-/*
-    Parameters:
-    division - String for the division
-    firstRound - Integer first round to display
-    lastRond - Integer last round to display
-*/
 
 <%
-  fll.web.playoff.ScoregenBrackets.populateContext(application,
+/*
+Parameters:
+division - String for the division
+firstRound - Integer first round to display
+lastRond - Integer last round to display
+*/
+
+fll.web.playoff.ScoregenBrackets.populateContext(application,
 					request, pageContext);
 %>
 
