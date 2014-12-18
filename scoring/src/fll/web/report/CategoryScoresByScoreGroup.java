@@ -27,7 +27,6 @@ import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 
@@ -102,32 +101,35 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
         final String catName = catElement.getName();
         final String catTitle = catElement.getTitle();
 
+        prep = connection.prepareStatement("SELECT "//
+            + " Teams.TeamNumber, Teams.TeamName, Teams.Organization, FinalScores." + catName //
+            + " FROM Teams, FinalScores" //
+            + " WHERE FinalScores.Tournament = ?" //
+            + " AND FinalScores.TeamNumber = Teams.TeamNumber" //
+            + " AND FinalScores.TeamNumber IN (" //
+            + "   SELECT TeamNumber FROM TournamentTeams"//
+            + "   WHERE Tournament = ?" //
+            + "   AND event_division = ?" //
+            + "   AND judging_station = ?)" //
+            + " ORDER BY " + catName + " " + winnerCriteria.getSortString() //
+            + " NULLS LAST" //
+        );
+        prep.setInt(1, tournament.getTournamentID());
+        prep.setInt(2, tournament.getTournamentID());
+
         for (final String division : eventDivisions) {
           for (final String judgingStation : judgingStations) {
             final PdfPTable table = PdfUtils.createTable(4);
 
             createHeader(table, challengeTitle, catTitle, division, judgingStation, tournament);
-
-            prep = connection.prepareStatement("SELECT "//
-                + " Teams.TeamNumber, Teams.TeamName, Teams.Organization, FinalScores." + catName //
-                + " FROM Teams, FinalScores" //
-                + " WHERE FinalScores.Tournament = ?" //
-                + " AND FinalScores.TeamNumber = Teams.TeamNumber" //
-                + " AND FinalScores.TeamNumber IN (" //
-                + "   SELECT TeamNumber FROM TournamentTeams"//
-                + "   WHERE Tournament = ?" //
-                + "   AND event_division = ?" //
-                + "   AND judging_station = ?)" //
-                + " ORDER BY " + catName + " " + winnerCriteria.getSortString() //
-                + " NULLS LAST" //
-            );
-            prep.setInt(1, tournament.getTournamentID());
-            prep.setInt(2, tournament.getTournamentID());
             prep.setString(3, division);
             prep.setString(4, judgingStation);
 
+            boolean haveData = false;
             rs = prep.executeQuery();
             while (rs.next()) {
+              haveData = true;
+
               table.addCell(PdfUtils.createCell(String.valueOf(rs.getInt(1))));
               table.addCell(PdfUtils.createCell(rs.getString(2)));
               table.addCell(PdfUtils.createCell(rs.getString(3)));
@@ -142,12 +144,18 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
               }
             }
 
-            pdfDoc.add(table);
+            if (haveData) {
+              table.keepRowsTogether(0);
+              pdfDoc.add(table);
 
-            pdfDoc.add(new Paragraph(Chunk.NEWLINE));
+              pdfDoc.add(Chunk.NEXTPAGE);
+            }
 
           } // foreach station
         } // foreach division
+
+        SQLFunctions.close(prep);
+        prep = null;
       } // foreach category
 
     } finally {
