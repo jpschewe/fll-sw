@@ -132,6 +132,10 @@
    checking the winners of each category when there is only 1 judge for
    each team in a category.</li>
 
+  <li><a href="PerformanceScoreDump">CSV file containing
+    seeding round performance scores</a>. This is useful to manually
+   determine awards for most consistent or most improved robot
+   performance.</li>
 
  </ul>
 
