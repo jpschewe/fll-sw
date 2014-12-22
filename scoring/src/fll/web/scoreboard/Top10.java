@@ -91,6 +91,7 @@ public class Top10 extends BaseFLLServlet {
 
       formatter.format("<html>");
       formatter.format("<head>");
+      formatter.format("<link rel='stylesheet' type='text/css' href='../style/style.jsp' />");
       formatter.format("<link rel='stylesheet' type='text/css' href='score_style.css' />");
       formatter.format("<meta http-equiv='refresh' content='%d' />",
                        GlobalParameters.getIntGlobalParameter(connection, GlobalParameters.DIVISION_FLIP_RATE));
