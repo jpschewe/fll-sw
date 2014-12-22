@@ -1,3 +1,4 @@
+* 349 - Add note about performance times to team schedule and put multiple schedules on 1 page
 * 338 - Add CSV dump of all seeding performance scores
 * 348 - add a page break after each judging station in the category scores by judging station report
 * 332 - pass parameters from limit tables servlet back to scoresheet generation page
