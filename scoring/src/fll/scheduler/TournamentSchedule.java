@@ -793,6 +793,10 @@ public class TournamentSchedule implements Serializable {
 
     para.add(Chunk.NEWLINE);
     para.add(new Chunk(
+                       "Performance rounds must start on time, and will start without you. Please ensure your team arrives at least 5 minutes ahead of scheduled time, and checks in."));
+
+    para.add(Chunk.NEWLINE);
+    para.add(new Chunk(
                        "Note that there may be more judging and a head to head round after this judging, please see the main tournament schedule for these details.",
                        TEAM_HEADER_FONT));
     detailedSchedules.add(para);
