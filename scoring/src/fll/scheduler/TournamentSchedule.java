@@ -729,7 +729,6 @@ public class TournamentSchedule implements Serializable {
       final Document teamDoc = PdfUtils.createPdfDoc(pdfFos, new SimpleFooterHandler());
       for (final TeamScheduleInfo si : _schedule) {
         outputTeamSchedule(params, teamDoc, si);
-        teamDoc.add(Chunk.NEXTPAGE);
       }
       teamDoc.close();
       IOUtils.closeQuietly(pdfFos);
@@ -793,12 +792,18 @@ public class TournamentSchedule implements Serializable {
 
     para.add(Chunk.NEWLINE);
     para.add(new Chunk(
-                       "Performance rounds must start on time, and will start without you. Please ensure your team arrives at least 5 minutes ahead of scheduled time, and checks in."));
+                       "Performance rounds must start on time, and will start without you. Please ensure your team arrives at least 5 minutes ahead of scheduled time, and checks in.",
+                       TEAM_HEADER_FONT));
 
     para.add(Chunk.NEWLINE);
     para.add(new Chunk(
                        "Note that there may be more judging and a head to head round after this judging, please see the main tournament schedule for these details.",
                        TEAM_HEADER_FONT));
+    para.add(Chunk.NEWLINE);
+    para.add(Chunk.NEWLINE);
+    para.add(Chunk.NEWLINE);
+
+    para.setKeepTogether(true);
     detailedSchedules.add(para);
   }
 
