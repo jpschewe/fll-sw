@@ -1,0 +1,13 @@
+digraph UploadSpreadsheet {
+
+page -> UploadSpreadsheet [label="parameter uploadRedirect"];
+
+UploadSpreadsheet -> promptForSheetName_jsp [label="if multiple sheets"];
+
+UploadSpreadsheet -> uploadRedirect [label="if single sheet or CSV"];
+
+promptForSheetName_jsp -> ProcessSelectedSheet;
+
+ProcessSelectedSheet -> uploadRedirect;
+
+}
