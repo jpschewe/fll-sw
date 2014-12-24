@@ -30,6 +30,10 @@ if(null == errorMessage || "".equals(errorMessage)) {
   <body>
     <h1>Team Column Selection</h1>
 
+ ${message}
+ <%-- clear out the message, so that we don't see it again --%>
+ <c:remove var="message" />
+
     <p>Do not use the forward and back buttons!  Use the supplied links/buttons.</p>
 
     <p>Select which columns in your data correspond to the ones the database
