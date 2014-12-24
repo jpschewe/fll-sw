@@ -38,6 +38,10 @@ if(null == session.getAttribute("columnSelectOptions")) {
   <body>
     <h1>Filter Teams</h1>
 
+ ${message}
+ <%-- clear out the message, so that we don't see it again --%>
+ <c:remove var="message" />
+
     <p>There are <%=UploadTeams.applyFilters(connection, request)%> teams currently
     selected.  Do not use the forward and back buttons!  Use the supplied
     links/buttons.</p>
