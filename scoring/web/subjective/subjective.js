@@ -12,11 +12,10 @@
 		throw new Error("jStorage needs to be loaded!");
 	}
 
-
 	if (!window.applicationCache) {
 		alert("Your browser doesn't support application caching. This app cannot be run offline");
 	}
-	
+
 	var STORAGE_PREFIX = "fll.subjective.";
 
 	// //////////////////////// PRIVATE INTERFACE ////////////////////////
@@ -276,43 +275,43 @@
 			_log("Loading from server");
 
 			var waitList = []
-			
-			var subjectiveCategoriesPromise = _loadSubjectiveCategories(); 
+
+			var subjectiveCategoriesPromise = _loadSubjectiveCategories();
 			subjectiveCategoriesPromise.fail(function() {
 				failCallback("Subjective Categories");
 			});
 			waitList.push(subjectiveCategoriesPromise);
-			
+
 			var tournamentPromise = _loadTournament();
 			tournamentPromise.fail(function() {
 				failCallback("Tournament");
 			});
 			waitList.push(tournamentPromise);
-			
+
 			var teamsPromise = _loadTeams();
 			teamsPromise.fail(function() {
 				failCallback("Teams");
 			});
 			waitList.push(teamsPromise);
-			
+
 			var schedulePromise = _loadSchedule();
 			schedulePromise.fail(function() {
 				failCallback("Schedule");
 			});
 			waitList.push(schedulePromise);
-			
+
 			var judgesPromise = _loadJudges();
 			judgesPromise.fail(function() {
 				failCallback("Judges Categories");
 			});
 			waitList.push(judgesPromise);
-			
+
 			var allScoresPromise = _loadAllScores();
 			allScoresPromise.fail(function() {
 				failCallback("All Scores");
 			});
 			waitList.push(allScoresPromise);
-			
+
 			var categoryMappingPromise = _loadCategoryColumnMapping();
 			categoryMappingPromise.fail(function() {
 				failCallback("Category Mapping");
@@ -683,7 +682,8 @@
 				retval = null;
 			} else {
 				var timeStr = null;
-				var column = $.subjective.getScheduleColumnForCategory(_currentCategory.name);
+				var column = $.subjective
+						.getScheduleColumnForCategory(_currentCategory.name);
 				$.each(schedInfo.subjectiveTimes, function(index, value) {
 					if (value.name == column) {
 						timeStr = value.time;
@@ -785,28 +785,66 @@
 		 */
 		uploadData : function(scoresSuccess, scoresFail, judgesSuccess,
 				judgesFail, loadSuccess, loadFail) {
-			
-			$.getJSON("../api/CheckAuth", function(data) {
-				$.subjective.log("data: " + $.toJSON(data));
 
-				if (data.authenticated) {
+			$
+					.getJSON(
+							"../api/CheckAuth",
+							function(data) {
+								$.subjective.log("data: " + $.toJSON(data));
 
-					var waitList = []
-					waitList.push($.subjective.uploadScores(scoresSuccess, scoresFail));
-					waitList.push($.subjective.uploadJudges(judgesSuccess, judgesFail));
+								if (data.authenticated) {
+									$.subjective
+											.getServerTournament(function(
+													serverTournament) {
+												var storedTournament = $.subjective
+														.getTournament();
+												if (null == storedTournament) {
+													loadFail("Internal error, no saved tournament");
+												} else if (storedTournament.name != serverTournament.name
+														|| storedTournament.tournamentID != serverTournament.tournamentID) {
+													loadFail("Tournament mismatch local: "
+															+ storedTournament.name
+															+ "("
+															+ storedTournament.tournamentID
+															+ ")"
+															+ " server: "
+															+ serverTournament.name
+															+ "("
+															+ serverTournament.tournamentID
+															+ ")");
+												} else {
+													var waitList = []
+													waitList
+															.push($.subjective
+																	.uploadScores(
+																			scoresSuccess,
+																			scoresFail));
+													waitList
+															.push($.subjective
+																	.uploadJudges(
+																			judgesSuccess,
+																			judgesFail));
 
-					$.when.apply($, waitList).done(function() {
-						$.subjective.loadFromServer(function() {
-							loadSuccess();
-						}, function() {
-							loadFail("Error getting updated scores");
-						}, false);
-
-					});
-				} else {
-					location.href = "auth.html";
-				}
-			});
+													$.when
+															.apply($, waitList)
+															.done(
+																	function() {
+																		$.subjective
+																				.loadFromServer(
+																						function() {
+																							loadSuccess();
+																						},
+																						function() {
+																							loadFail("Error getting updated scores");
+																						},
+																						false);
+																	});
+												}
+											});
+								} else {
+									location.href = "auth.html";
+								}
+							});
 		},
 
 		/**
