@@ -12,6 +12,8 @@ teamColumnSelection_jsp -> verifyTeams_jsp;
 
 verifyTeams_jsp -> teamColumnSelection_jsp [label="missing column selections"];
 
+verifyTeams_jsp -> filterTeams_jsp [label="duplicate teams found"];
+
 verifyTeams_jsp -> index_jsp [label="succcess, assign tournament teams"];
 
 }
