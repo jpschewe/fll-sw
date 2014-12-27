@@ -39,9 +39,8 @@
     comma separated or an Excel file (xls and xslx supported). The
     filter functionality provided here is very basic and has very
     limited feedback. It's suggested that you edit the input file before
-    upload to contain only the teams for your tournament(s). <b>This
-     removes any existing teams from the database along with their
-     scores.</b> <a href='javascript:display("UploadTeamsHelp")'>[help]</a>
+    upload to contain only the teams for your tournament(s). <a
+     href='javascript:display("UploadTeamsHelp")'>[help]</a>
     <div id='UploadTeamsHelp' class='help' style='display: none'>
      Each column of the input file needs to matched against the required
      data for teams. This information includes: team number, team name,
