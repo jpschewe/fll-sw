@@ -31,12 +31,10 @@ import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.GenerateDB;
@@ -47,8 +45,6 @@ import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
-import fll.xml.ChallengeDescription;
-import fll.xml.ScoreCategory;
 
 /**
  * Java code for uploading team data to the database. Called from
@@ -360,9 +356,9 @@ public final class UploadTeams extends BaseFLLServlet {
    * Verify the team information. Used with verifyTeams.jsp
    * <ul>
    * <li>Make sure that the column for TeamNumber is specified</li>
-   * <li>Make sure that the TeamNumbers are unique - just use count</li>
-   * <li>Delete all rows from the Teams table</li>
-   * <li>Copy the teams into the Teams table</li>
+   * <li>Make sure that the TeamNumbers are unique</li>
+   * <li>Insert the new teams into the Teams table</li>
+   * <li>update tournament teams table</li>
    * </ul>
    * 
    * @param connection connection with admin priviliges to DB
@@ -381,11 +377,8 @@ public final class UploadTeams extends BaseFLLServlet {
   public static boolean verifyTeams(final Connection connection,
                                     final HttpServletRequest request,
                                     final HttpServletResponse response,
-                                    final ServletContext application,
                                     final HttpSession session,
                                     final JspWriter out) throws SQLException, IOException {
-    final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
-
     final String teamNumberColumn = request.getParameter("TeamNumber");
     if (null == teamNumberColumn
         || "".equals(teamNumberColumn)) {
@@ -396,6 +389,7 @@ public final class UploadTeams extends BaseFLLServlet {
     }
 
     final String tournamentColumn = request.getParameter("tournament");
+    final StringBuilder message = new StringBuilder();
 
     Statement stmt = null;
     ResultSet rs = null;
@@ -429,37 +423,11 @@ public final class UploadTeams extends BaseFLLServlet {
         }
       }
 
-      // clean out some data first
-      prep = connection.prepareStatement("DELETE FROM TournamentTeams");
-      prep.executeUpdate();
-      prep = connection.prepareStatement("DELETE FROM PlayoffData");
-      prep.executeUpdate();
-      prep = connection.prepareStatement("DELETE FROM Performance");
-      prep.executeUpdate();
-      prep = connection.prepareStatement("DELETE FROM FinalScores");
-      prep.executeUpdate();
-
-      for (final ScoreCategory categoryElement : description.getSubjectiveCategories()) {
-        final String tableName = categoryElement.getName();
-        prep = connection.prepareStatement("DELETE FROM "
-            + tableName);
-        prep.executeUpdate();
+      if (!verifyNoDuplicateTeamNumbers(connection, message, teamNumberColumn)) {
+        session.setAttribute(SessionAttributes.MESSAGE, message);
+        response.sendRedirect(response.encodeRedirectURL("filterTeams.jsp"));
+        return false;
       }
-
-      prep = connection.prepareStatement("DELETE FROM sched_subjective");
-      prep.executeUpdate();
-      prep = connection.prepareStatement("DELETE FROM sched_perf_rounds");
-      prep.executeUpdate();
-      prep = connection.prepareStatement("DELETE FROM schedule");
-      prep.executeUpdate();
-
-      final List<String> internalTeams = new LinkedList<String>();
-      internalTeams.add(String.valueOf(Team.BYE.getTeamNumber()));
-      internalTeams.add(String.valueOf(Team.TIE.getTeamNumber()));
-      internalTeams.add(String.valueOf(Team.NULL.getTeamNumber()));
-      prep = connection.prepareStatement("DELETE FROM Teams WHERE TeamNumber NOT IN ( "
-          + StringUtils.join(internalTeams, ",") + " )");
-      prep.executeUpdate();
 
       // now copy the data over converting the team number to an integer
       final String selectSQL = "SELECT "
@@ -532,30 +500,91 @@ public final class UploadTeams extends BaseFLLServlet {
       SQLFunctions.close(prep);
     }
 
-    setTournamentTeams(connection, teamNumberColumn, tournamentColumn);
+    updateTournamentTeams(connection, teamNumberColumn, tournamentColumn);
 
     return true;
   }
 
+  /**
+   * Check if there are any team numbers in FilteredTeams that are in Teams.
+   * 
+   * @param connection
+   * @param message
+   * @return true if no problems, false otherwise (message will be updated)
+   * @throws SQLException
+   */
+  private static boolean verifyNoDuplicateTeamNumbers(final Connection connection,
+                                                      final StringBuilder message,
+                                                      final String teamNumberColumn) throws SQLException {
+    Statement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = connection.createStatement();
+      rs = stmt.executeQuery("SELECT Teams.TeamNumber" //
+          + " FROM Teams, FilteredTeams" //
+          + " WHERE FilteredTeams." + teamNumberColumn + " = Teams.TeamNumber");
+
+      final StringBuilder teams = new StringBuilder();
+      boolean first = true;
+      while (rs.next()) {
+        if (!first) {
+          teams.append(", ");
+        } else {
+          first = false;
+        }
+
+        final int team = rs.getInt(1);
+        teams.append(team);
+      }
+
+      if (!first) {
+        // found duplicates
+        message.append("<p class='error'>The following teams are already in the database, please remove them from your spreadsheet and try again: "
+            + teams.toString() + "</p>");
+        return false;
+      } else {
+        return true;
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(stmt);
+    }
+  }
+
+  /**
+   * Update TournamentTeams table with newly inserted teams.
+   * 
+   * @param connection database connection
+   * @param teamNumberColumn which column in FilteredTeams contains the team
+   *          number
+   * @param tournamentColumn which column in FilteredTeams contains the
+   *          tournament
+   * @throws SQLException
+   */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
                                "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate the list of columns for FilteredTeams table, Can't use PreparedStatement for constant value to select when inserting dummy tournament id")
-  static private void setTournamentTeams(final Connection connection,
-                                         final String teamNumberColumn,
-                                         final String tournamentColumn) throws SQLException {
+  static private void updateTournamentTeams(final Connection connection,
+                                            final String teamNumberColumn,
+                                            final String tournamentColumn) throws SQLException {
     Statement stmt = null;
     PreparedStatement selectPrep = null;
     ResultSet rs = null;
     try {
       stmt = connection.createStatement();
-      // put all teams in the DUMMY tournament by default and make the event
+
+      // put all new teams in the DUMMY tournament by default and make the event
       // division the same as the team division
-      stmt.executeUpdate("DELETE FROM TournamentTeams");
       final Tournament dummyTournament = Tournament.findTournamentByName(connection, GenerateDB.DUMMY_TOURNAMENT_NAME);
       final int dummyTournamentID = dummyTournament.getTournamentID();
-      stmt.executeUpdate("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division, judging_station) SELECT "
-          + dummyTournamentID + ", Teams.TeamNumber, Teams.Division, Teams.Division FROM Teams");
+      stmt.executeUpdate("INSERT INTO TournamentTeams " //
+          + " (Tournament, TeamNumber, event_division, judging_station)" // "
+          + " SELECT " + dummyTournamentID + ", Teams.TeamNumber, Teams.Division, Teams.Division" //
+          + " FROM Teams, FilteredTeams" //
+          + "   WHERE Teams.TeamNumber = FilteredTeams." + teamNumberColumn);
 
-      if (null != tournamentColumn && !tournamentColumn.isEmpty()) {
+      // if a tournament is specified for the new data, set it
+      if (null != tournamentColumn
+          && !tournamentColumn.isEmpty()) {
         rs = stmt.executeQuery("SELECT "
             + teamNumberColumn + ", " + tournamentColumn + " FROM FilteredTeams");
         while (rs.next()) {
