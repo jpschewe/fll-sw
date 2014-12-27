@@ -1,3 +1,4 @@
+* 337 - don't try to upload subjective scores from the web application if the tournament doesn't match
 * 349 - Add note about performance times to team schedule and put multiple schedules on 1 page
 * 338 - Add CSV dump of all seeding performance scores
 * 348 - add a page break after each judging station in the category scores by judging station report
