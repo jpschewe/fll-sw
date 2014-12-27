@@ -100,7 +100,7 @@ public final class UploadTeams extends BaseFLLServlet {
         }
       }
     }
-    session.setAttribute("message", message.toString());
+    session.setAttribute(SessionAttributes.MESSAGE, message.toString());
     response.sendRedirect(response.encodeRedirectURL("filterTeams.jsp"));
 
   }
@@ -390,8 +390,7 @@ public final class UploadTeams extends BaseFLLServlet {
     if (null == teamNumberColumn
         || "".equals(teamNumberColumn)) {
       // Error, redirect back to teamColumnSelection.jsp with error message
-      // FIXME use standard message type when upload servlet is modified
-      session.setAttribute("errorMessage", "You must specify a column for TeamNumber");
+      session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>You must specify a column for TeamNumber</p>");
       response.sendRedirect(response.encodeRedirectURL("teamColumnSelection.jsp"));
       return false;
     }
