@@ -39,13 +39,13 @@ public class FinalistSchedule implements Serializable {
    */
   public FinalistSchedule(final int tournament,
                           final String division,
-                          final Collection<FinalistCategoryRow> categories,
+                          final Collection<FinalistCategory> categories,
                           final Collection<FinalistDBRow> schedule) {
     this.mTournament = tournament;
     this.mDivision = division;
     this.mSchedule = Collections.unmodifiableCollection(new LinkedList<FinalistDBRow>(schedule));
 
-    for (final FinalistCategoryRow row : categories) {
+    for (final FinalistCategory row : categories) {
       mCategories.put(row.getCategoryName(), row.getIsPublic());
       mRooms.put(row.getCategoryName(), row.getRoom());
     }

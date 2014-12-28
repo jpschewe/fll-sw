@@ -88,7 +88,7 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
         }
       }
 
-      final Collection<FinalistCategoryRow> categories = jsonMapper.readValue(categoryDataStr,
+      final Collection<FinalistCategory> categories = jsonMapper.readValue(categoryDataStr,
                                                                               FinalistCategoriesTypeInformation.INSTANCE);
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Category Data has "
@@ -116,7 +116,7 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
     public static final FinalistScheduleTypeInformation INSTANCE = new FinalistScheduleTypeInformation();
   }
 
-  private static final class FinalistCategoriesTypeInformation extends TypeReference<Collection<FinalistCategoryRow>> {
+  private static final class FinalistCategoriesTypeInformation extends TypeReference<Collection<FinalistCategory>> {
     public static final FinalistCategoriesTypeInformation INSTANCE = new FinalistCategoriesTypeInformation();
   }
 
