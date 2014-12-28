@@ -526,6 +526,10 @@ public final class ImportDB {
     if (dbVersion < 12) {
       upgrade11To12(connection, description);
     }
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 13) {
+      upgrade12To13(connection, description);
+    }
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < GenerateDB.DATABASE_VERSION) {
@@ -606,6 +610,74 @@ public final class ImportDB {
 
     // no mapping
     return null;
+  }
+
+  /**
+   * Add subjective_nominees table and make sure that it's consistent with
+   * finalist_categories.
+   * 
+   * @param connection
+   * @throws SQLException
+   */
+  private static void upgrade12To13(final Connection connection,
+                                    final ChallengeDescription description) throws SQLException {
+    if (LOG.isTraceEnabled()) {
+      LOG.trace("Upgrading database from 12 to 13");
+    }
+
+    final Set<String> challengeSubjectiveCategories = new HashSet<>();
+    for (final ScoreCategory cat : description.getSubjectiveCategories()) {
+      challengeSubjectiveCategories.add(cat.getTitle());
+    }
+
+    PreparedStatement getTournaments = null;
+    ResultSet tournaments = null;
+    PreparedStatement insert = null;
+    PreparedStatement getFinalistSchedule = null;
+    ResultSet scheduleRows = null;
+    try {
+      GenerateDB.createSubjectiveNomineesTables(connection, false);
+
+      insert = connection.prepareStatement("INSERT INTO subjective_nominees " //
+          + " (tournament, category, team_number)" //
+          + " VALUES (?, ?, ?)");
+
+      getTournaments = connection.prepareStatement("SELECT tournament_id from Tournaments");
+
+      getFinalistSchedule = connection.prepareStatement("SELECT DISTINCT category, team_number " //
+          + " FROM finalist_schedule" //
+          + " WHERE tournament = ?");
+
+      tournaments = getTournaments.executeQuery();
+      while (tournaments.next()) {
+        final int tournament = tournaments.getInt(1);
+        insert.setInt(1, tournament);
+        getFinalistSchedule.setInt(1, tournament);
+
+        scheduleRows = getFinalistSchedule.executeQuery();
+        while (scheduleRows.next()) {
+          final String categoryTitle = scheduleRows.getString(1);
+          final int team = scheduleRows.getInt(2);
+
+          if (!challengeSubjectiveCategories.contains(categoryTitle)) {
+            insert.setString(2, categoryTitle);
+            insert.setInt(3, team);
+            insert.executeUpdate();
+          }
+        }
+
+        SQLFunctions.close(scheduleRows);
+        scheduleRows = null;
+      }
+
+    } finally {
+      SQLFunctions.close(tournaments);
+      SQLFunctions.close(getTournaments);
+      SQLFunctions.close(insert);
+      SQLFunctions.close(scheduleRows);
+      SQLFunctions.close(getFinalistSchedule);
+    }
+
   }
 
   /**
@@ -968,6 +1040,8 @@ public final class ImportDB {
     importTableNames(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
     importPlayoffData(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+
+    importSubjectiveNominees(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
     importSchedule(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
@@ -1481,6 +1555,44 @@ public final class ImportDB {
         destPrep.setString(3, sourceRS.getString(3));
         destPrep.executeUpdate();
       }
+    } finally {
+      SQLFunctions.close(sourceRS);
+      SQLFunctions.close(sourcePrep);
+      SQLFunctions.close(destPrep);
+    }
+  }
+
+  private static void importSubjectiveNominees(final Connection sourceConnection,
+                                               final Connection destinationConnection,
+                                               final int sourceTournamentID,
+                                               final int destTournamentID) throws SQLException {
+    PreparedStatement destPrep = null;
+    PreparedStatement sourcePrep = null;
+    ResultSet sourceRS = null;
+    try {
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Importing subjective nominees");
+      }
+
+      // do drops first
+      destPrep = destinationConnection.prepareStatement("DELETE FROM subjective_nominees WHERE tournament = ?");
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+      SQLFunctions.close(destPrep);
+
+      // insert
+      destPrep = destinationConnection.prepareStatement("INSERT INTO subjective_nominees (tournament, category, team_number) VALUES(?, ?, ?)");
+      destPrep.setInt(1, destTournamentID);
+
+      sourcePrep = sourceConnection.prepareStatement("SELECT category, team_number FROM subjective_nominees WHERE tournament = ?");
+      sourcePrep.setInt(1, sourceTournamentID);
+      sourceRS = sourcePrep.executeQuery();
+      while (sourceRS.next()) {
+        destPrep.setString(2, sourceRS.getString(1));
+        destPrep.setInt(3, sourceRS.getInt(2));
+        destPrep.executeUpdate();
+      }
+
     } finally {
       SQLFunctions.close(sourceRS);
       SQLFunctions.close(sourcePrep);
