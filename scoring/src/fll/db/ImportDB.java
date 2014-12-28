@@ -1512,32 +1512,35 @@ public final class ImportDB {
 
       SQLFunctions.close(destPrep);
       // insert categories next
-      destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_categories (tournament, category, is_public) VALUES(?, ?, ?)");
+      destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_categories (tournament, category, is_public, division, room) VALUES(?, ?, ?, ?, ?)");
       destPrep.setInt(1, destTournamentID);
 
-      sourcePrep = sourceConnection.prepareStatement("SELECT category, is_public FROM finalist_categories WHERE tournament = ?");
+      sourcePrep = sourceConnection.prepareStatement("SELECT category, is_public, division, room FROM finalist_categories WHERE tournament = ?");
       sourcePrep.setInt(1, sourceTournamentID);
       sourceRS = sourcePrep.executeQuery();
       while (sourceRS.next()) {
         destPrep.setString(2, sourceRS.getString(1));
         destPrep.setBoolean(3, sourceRS.getBoolean(2));
+        destPrep.setString(4, sourceRS.getString(3));
+        destPrep.setString(5, sourceRS.getString(4));
         destPrep.executeUpdate();
       }
 
       SQLFunctions.close(destPrep);
       // insert schedule values last
-      destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_schedule (tournament, category, judge_time, team_number) VALUES(?, ?, ?, ?)");
+      destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_schedule (tournament, category, judge_time, team_number, division) VALUES(?, ?, ?, ?, ?)");
       destPrep.setInt(1, destTournamentID);
 
       SQLFunctions.close(sourceRS);
       SQLFunctions.close(sourcePrep);
-      sourcePrep = sourceConnection.prepareStatement("SELECT category, judge_time, team_number FROM finalist_schedule WHERE tournament = ?");
+      sourcePrep = sourceConnection.prepareStatement("SELECT category, judge_time, team_number, division FROM finalist_schedule WHERE tournament = ?");
       sourcePrep.setInt(1, sourceTournamentID);
       sourceRS = sourcePrep.executeQuery();
       while (sourceRS.next()) {
         destPrep.setString(2, sourceRS.getString(1));
         destPrep.setTime(3, sourceRS.getTime(2));
         destPrep.setInt(4, sourceRS.getInt(3));
+        destPrep.setString(5, sourceRS.getString(4));
         destPrep.executeUpdate();
       }
     } finally {
