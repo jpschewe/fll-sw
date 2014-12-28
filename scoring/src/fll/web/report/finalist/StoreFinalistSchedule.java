@@ -29,6 +29,7 @@ import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.xml.ChallengeDescription;
 
 /**
  * 
@@ -50,6 +51,8 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
     try {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
+
+      final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
 
       final int tournament = Queries.getCurrentTournament(connection);
 
@@ -89,14 +92,14 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
       }
 
       final Collection<FinalistCategory> categories = jsonMapper.readValue(categoryDataStr,
-                                                                              FinalistCategoriesTypeInformation.INSTANCE);
+                                                                           FinalistCategoriesTypeInformation.INSTANCE);
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Category Data has "
             + rows.size() + " rows");
       }
 
       final FinalistSchedule schedule = new FinalistSchedule(tournament, division, categories, rows);
-      schedule.store(connection);
+      schedule.store(connection, description);
 
       message.append("<p id='success'>Finalist schedule saved to the database</p>");
 
