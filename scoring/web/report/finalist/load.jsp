@@ -34,6 +34,9 @@
 					true);
 		}
 <%FinalistLoad.outputCategoryScores(out, application);%>
+
+<%FinalistLoad.outputNominees(out, application);%>
+
 	$.finalist.setTournament(_loadingTournament);
 	}
 
