@@ -615,6 +615,7 @@ public final class ImportDB {
   /**
    * Add non_numeric_nominees table and make sure that it's consistent with
    * finalist_categories.
+   * Add room to finalist_categories table.
    * 
    * @param connection
    * @throws SQLException
@@ -635,7 +636,19 @@ public final class ImportDB {
     PreparedStatement insert = null;
     PreparedStatement getFinalistSchedule = null;
     ResultSet scheduleRows = null;
+    Statement stmt = null;
+    ResultSet metaData = null;
     try {
+      stmt = connection.createStatement();
+
+      // need to check if the column exists as some version 12 databases got
+      // created with the column
+      final DatabaseMetaData md = connection.getMetaData();
+      metaData = md.getColumns(null, null, "finalist_categories", "room");
+      if (!metaData.next()) {
+        stmt.executeUpdate("ALTER TABLE finalist_categories ADD COLUMN room VARCHAR(32) DEFAULT NULL");
+      }
+
       GenerateDB.createNonNumericNomineesTables(connection, false);
 
       insert = connection.prepareStatement("INSERT INTO non_numeric_nominees " //
@@ -671,6 +684,8 @@ public final class ImportDB {
       }
 
     } finally {
+      SQLFunctions.close(metaData);
+      SQLFunctions.close(stmt);
       SQLFunctions.close(tournaments);
       SQLFunctions.close(getTournaments);
       SQLFunctions.close(insert);
