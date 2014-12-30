@@ -4,6 +4,13 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
+function handleDivisionChange() {
+	var divIndex = $("#divisions").val();
+	var div = $.finalist.getDivisionByIndex(divIndex);
+	$.finalist.setCurrentDivision(div);
+	updatePage();
+}
+
 function getNumFinalistsId(team) {
 	return "num_finalists_" + team.num;
 }
@@ -129,11 +136,9 @@ $(document).ready(
 				$("#divisions").append(divisionOption);
 			}); // foreach division
 			$("#divisions").change(function() {
-				var divIndex = $(this).val();
-				var div = $.finalist.getDivisionByIndex(divIndex);
-				$.finalist.setCurrentDivision(div);
-				updatePage();
+				handleDivisionChange();
 			});
+			handleDivisionChange();
 
 			updatePage();
 
