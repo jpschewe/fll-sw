@@ -72,47 +72,70 @@ function createTeamTable(teams, currentDivision, currentCategory) {
 	}); // build data for each team
 }
 
-$(document)
-		.ready(
-				function() {
-					var categoryId = $.finalist.getCurrentCategoryId();
-					var currentCategory = $.finalist
-							.getCategoryById(categoryId);
-					if (null == currentCategory) {
-						alert("Invalid category ID found: " + categoryId);
-						return;
-					}
+function updatePage() {
+	var categoryId = $.finalist.getCurrentCategoryId();
+	var currentCategory = $.finalist.getCategoryById(categoryId);
+	if (null == currentCategory) {
+		alert("Invalid category ID found: " + categoryId);
+		return;
+	}
 
-					$("#category-name").text(currentCategory.name);
+	// note that this category has been visited so that it
+	// doesn't get initialized again
+	$.finalist.setCategoryVisited(currentCategory, $.finalist
+			.getCurrentDivision());
 
-					var currentDivision = $.finalist.getCurrentDivision();
+	$("#data").empty();
 
-					var roomEle = $("#room");
-					roomEle.change(function() {
-						var roomNumber = roomEle.val();
-						$.finalist.setRoom(currentCategory, currentDivision,
-								roomNumber);
-					});
-					roomEle.val($.finalist.getRoom(currentCategory,
-							currentDivision));
+	var headerRow = $("<tr><th>Finalist?</th><th>Score Group</th><th>Team #</th><th>Team Name</th><th>Score</th><th>Num Categories</th></tr>");
+	$("#data").append(headerRow);
 
-					// note that this category has been visited so that it
-					// doesn't get initialized again
-					$.finalist.setCategoryVisited(currentCategory,
-							currentDivision);
+	var teams = $.finalist.getAllTeams();
+	$.finalist.sortTeamsByCategory(teams, currentCategory);
 
-					$("#division").text(currentDivision);
-					$("#data").empty();
+	createTeamTable(teams, $.finalist.getCurrentDivision(), currentCategory);
 
-					var headerRow = $("<tr><th>Finalist?</th><th>Score Group</th><th>Team #</th><th>Team Name</th><th>Score</th><th>Num Categories</th></tr>");
-					$("#data").append(headerRow);
+	initializeFinalistCounts(teams);
+}
 
-					var teams = $.finalist.getAllTeams();
-					$.finalist.sortTeamsByCategory(teams, currentCategory);
+$(document).ready(
+		function() {
+			var categoryId = $.finalist.getCurrentCategoryId();
+			var currentCategory = $.finalist.getCategoryById(categoryId);
+			if (null == currentCategory) {
+				alert("Invalid category ID found: " + categoryId);
+				return;
+			}
 
-					createTeamTable(teams, currentDivision, currentCategory);
+			$("#category-name").text(currentCategory.name);
 
-					initializeFinalistCounts(teams);
+			var roomEle = $("#room");
+			roomEle.change(function() {
+				var roomNumber = roomEle.val();
+				$.finalist.setRoom(currentCategory, $.finalist
+						.getCurrentDivision(), roomNumber);
+			});
+			roomEle.val($.finalist.getRoom(currentCategory, $.finalist
+					.getCurrentDivision()));
 
-					$.finalist.displayNavbar();
-				}); // end ready function
+			$("#divisions").empty();
+			$.each($.finalist.getDivisions(), function(i, division) {
+				var selected = "";
+				if (division == $.finalist.getCurrentDivision()) {
+					selected = " selected ";
+				}
+				var divisionOption = $("<option value='" + i + "'" + selected
+						+ ">" + division + "</option>");
+				$("#divisions").append(divisionOption);
+			}); // foreach division
+			$("#divisions").change(function() {
+				var divIndex = $(this).val();
+				var div = $.finalist.getDivisionByIndex(divIndex);
+				$.finalist.setCurrentDivision(div);
+				updatePage();
+			});
+
+			updatePage();
+
+			$.finalist.displayNavbar();
+		}); // end ready function
