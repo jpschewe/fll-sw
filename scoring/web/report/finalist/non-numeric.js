@@ -4,6 +4,13 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
+function handleDivisionChange() {
+	var divIndex = $("#divisions").val();
+	var div = $.finalist.getDivisionByIndex(divIndex);
+	$.finalist.setCurrentDivision(div);
+	updateTeams();
+}
+
 $(document).ready(
 		function() {
 
@@ -18,11 +25,9 @@ $(document).ready(
 				$("#divisions").append(divisionOption);
 			}); // foreach division
 			$("#divisions").change(function() {
-				var divIndex = $(this).val();
-				var div = $.finalist.getDivisionByIndex(divIndex);
-				$.finalist.setCurrentDivision(div);
-				updateTeams();
+				handleDivisionChange();
 			});
+			handleDivisionChange();
 
 			updateTeams();
 

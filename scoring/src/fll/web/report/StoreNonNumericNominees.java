@@ -4,7 +4,7 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
-package fll.web.report.finalist;
+package fll.web.report;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -32,10 +32,10 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 
 /**
- * Store the data from the finalist scheduling.
+ * Store the data from the non-numeric nominees page.
  */
-@WebServlet("/report/finalist/StoreFinalistSchedule")
-public class StoreFinalistSchedule extends BaseFLLServlet {
+@WebServlet("/report/StoreNonNumericNominees")
+public class StoreNonNumericNominees extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -55,24 +55,6 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
       final int tournament = Queries.getCurrentTournament(connection);
 
       // get parameters
-      final String schedDataStr = request.getParameter("sched_data");
-      if (null == schedDataStr
-          || "".equals(schedDataStr)) {
-        throw new FLLRuntimeException("Parameter 'sched_data' cannot be null");
-      }
-
-      final String categoryDataStr = request.getParameter("category_data");
-      if (null == categoryDataStr
-          || "".equals(categoryDataStr)) {
-        throw new FLLRuntimeException("Parameter 'category_data' cannot be null");
-      }
-
-      final String division = request.getParameter("division_data");
-      if (null == division
-          || "".equals(division)) {
-        throw new FLLRuntimeException("Parameter 'division_data' cannot be null");
-      }
-
       final String nomineesStr = request.getParameter("non-numeric-nominees_data");
       if (null == nomineesStr
           || "".equals(nomineesStr)) {
@@ -82,53 +64,24 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
       // decode JSON
       final ObjectMapper jsonMapper = new ObjectMapper();
 
-      final Collection<FinalistDBRow> rows = jsonMapper.readValue(schedDataStr,
-                                                                  FinalistScheduleTypeInformation.INSTANCE);
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("Sched Data has "
-            + rows.size() + " rows");
-        for (final FinalistDBRow row : rows) {
-          LOGGER.trace("row category: "
-              + row.getCategoryName() + " time: " + row.getTime() + " team: " + row.getTeamNumber());
-        }
-      }
-
-      final Collection<FinalistCategory> categories = jsonMapper.readValue(categoryDataStr,
-                                                                           FinalistCategoriesTypeInformation.INSTANCE);
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("Category Data has "
-            + rows.size() + " rows");
-      }
-
-      final FinalistSchedule schedule = new FinalistSchedule(tournament, division, categories, rows);
-      schedule.store(connection);
-
       final Collection<NonNumericNominees> nominees = jsonMapper.readValue(nomineesStr,
                                                                            NonNumericNomineesTypeInformation.INSTANCE);
       for (final NonNumericNominees nominee : nominees) {
         nominee.store(connection, tournament);
       }
 
-      message.append("<p id='success'>Finalist schedule saved to the database</p>");
+      message.append("<p id='success'>Non-numeric nominees saved to the database</p>");
 
     } catch (final SQLException e) {
-      message.append("<p class='error'>Error saving finalist schedule into the database: "
+      message.append("<p class='error'>Error saving non-numeric nominees into the database: "
           + e.getMessage() + "</p>");
       LOGGER.error(e, e);
       throw new RuntimeException("Error saving subjective data into the database", e);
     }
 
     session.setAttribute("message", message.toString());
-    response.sendRedirect(response.encodeRedirectURL("schedule-saved.jsp"));
+    response.sendRedirect(response.encodeRedirectURL("non-numeric-nominees.jsp"));
 
-  }
-
-  private static final class FinalistScheduleTypeInformation extends TypeReference<Collection<FinalistDBRow>> {
-    public static final FinalistScheduleTypeInformation INSTANCE = new FinalistScheduleTypeInformation();
-  }
-
-  private static final class FinalistCategoriesTypeInformation extends TypeReference<Collection<FinalistCategory>> {
-    public static final FinalistCategoriesTypeInformation INSTANCE = new FinalistCategoriesTypeInformation();
   }
 
   private static final class NonNumericNomineesTypeInformation extends TypeReference<Collection<NonNumericNominees>> {
