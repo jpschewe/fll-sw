@@ -259,9 +259,6 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
       if (null != src) {
         final URL jar = src.getLocation();
 
-        LOGGER.info("Jar for code source: "
-            + jar.toString());
-
         JarInputStream zip = null;
         try {
           zip = new JarInputStream(jar.openStream());
