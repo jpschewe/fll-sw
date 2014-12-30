@@ -547,7 +547,7 @@
 		 * Initialize the teams in the specified numeric category if it has not
 		 * been visited yet.
 		 */
-		initializeTeamsInCategory : function(currentDivision, currentCategory,
+		initializeTeamsInNumericCategory : function(currentDivision, currentCategory,
 				teams, scoreGroups) {
 			var previouslyVisited = $.finalist.isCategoryVisited(
 					currentCategory, currentDivision);
