@@ -87,9 +87,7 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Sched Data has "
             + rows.size() + " rows");
-      }
-      for (final FinalistDBRow row : rows) {
-        if (LOGGER.isTraceEnabled()) {
+        for (final FinalistDBRow row : rows) {
           LOGGER.trace("row category: "
               + row.getCategoryName() + " time: " + row.getTime() + " team: " + row.getTeamNumber());
         }
