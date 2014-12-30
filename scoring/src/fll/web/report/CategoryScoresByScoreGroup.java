@@ -35,6 +35,7 @@ import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
+import fll.util.LogUtils;
 import fll.util.PdfUtils;
 import fll.util.SimpleFooterHandler;
 import fll.web.ApplicationAttributes;
@@ -130,9 +131,15 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
             while (rs.next()) {
               haveData = true;
 
-              table.addCell(PdfUtils.createCell(String.valueOf(rs.getInt(1))));
-              table.addCell(PdfUtils.createCell(rs.getString(2)));
-              table.addCell(PdfUtils.createCell(rs.getString(3)));
+              LogUtils.getLogger().info("team number: "
+                  + rs.getInt(1));
+              final int teamNumber = rs.getInt(1);
+              final String teamName = rs.getString(2);
+              final String organization = rs.getString(3);
+
+              table.addCell(PdfUtils.createCell(String.valueOf(teamNumber)));
+              table.addCell(PdfUtils.createCell(null == teamName ? "" : teamName));
+              table.addCell(PdfUtils.createCell(null == organization ? "" : organization));
               double score = rs.getDouble(4);
               if (rs.wasNull()) {
                 score = Double.NaN;
