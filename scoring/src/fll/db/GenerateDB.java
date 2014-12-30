@@ -169,7 +169,7 @@ public final class GenerateDB {
 
       createSubjectiveCategoryScheduleColumnMappingTables(connection);
 
-      createSubjectiveNomineesTables(connection, true);
+      createNonNumericNomineesTables(connection, true);
       
       createFinalistScheduleTables(connection, true);
 
@@ -332,22 +332,22 @@ public final class GenerateDB {
 
   }
 
-  /*package*/ static void createSubjectiveNomineesTables(final Connection connection, final boolean createConstraints) throws SQLException {
+  /*package*/ static void createNonNumericNomineesTables(final Connection connection, final boolean createConstraints) throws SQLException {
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
       
-      stmt.executeUpdate("DROP TABLE IF EXISTS subjective_nominees CASCADE");
+      stmt.executeUpdate("DROP TABLE IF EXISTS non_numeric_nominees CASCADE");
       
       final StringBuilder sql = new StringBuilder();
-      sql.append("CREATE TABLE subjective_nominees (");
+      sql.append("CREATE TABLE non_numeric_nominees (");
       sql.append("  tournament INTEGER NOT NULL");
       sql.append(" ,category LONGVARCHAR NOT NULL");
       sql.append(" ,team_number INTEGER NOT NULL");
-      sql.append(" ,CONSTRAINT subjective_nominees_pk PRIMARY KEY (tournament, category, team_number)");
+      sql.append(" ,CONSTRAINT non_numeric_nominees_pk PRIMARY KEY (tournament, category, team_number)");
       if (createConstraints) {
-        sql.append(" ,CONSTRAINT subjective_nominees_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
-        sql.append(" ,CONSTRAINT subjective_nominees_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
+        sql.append(" ,CONSTRAINT non_numeric_nominees_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
+        sql.append(" ,CONSTRAINT non_numeric_nominees_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
       }
       sql.append(")");
       stmt.executeUpdate(sql.toString());

@@ -21,7 +21,7 @@ import javax.sql.DataSource;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import fll.TournamentTeam;
 import fll.db.Queries;
-import fll.db.SubjectiveNominees;
+import fll.db.NonNumericNominees;
 import fll.web.ApplicationAttributes;
 import fll.web.WebUtils;
 import fll.web.playoff.Playoff;
@@ -174,7 +174,7 @@ public class FinalistLoad {
       final Formatter output = new Formatter(writer);
 
       int varIndex = 0;
-      for (final String category : SubjectiveNominees.getCategories(connection, tournament)) {
+      for (final String category : NonNumericNominees.getCategories(connection, tournament)) {
         if (!challengeSubjectiveCategories.contains(category)) {
           final String categoryVar = "categoryVar"
               + varIndex;
@@ -184,7 +184,7 @@ public class FinalistLoad {
           output.format("  %s = $.finalist.addCategory(\"%s\", false);%n", categoryVar, category);
           output.format("}%n");
 
-          for (final int teamNumber : SubjectiveNominees.getNominees(connection, tournament, category)) {
+          for (final int teamNumber : NonNumericNominees.getNominees(connection, tournament, category)) {
             output.format("$.finalist.addTeamToCategory(%s, %d);%n", categoryVar, teamNumber);
           }
         }

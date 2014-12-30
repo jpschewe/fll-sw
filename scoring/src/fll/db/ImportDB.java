@@ -613,7 +613,7 @@ public final class ImportDB {
   }
 
   /**
-   * Add subjective_nominees table and make sure that it's consistent with
+   * Add non_numeric_nominees table and make sure that it's consistent with
    * finalist_categories.
    * 
    * @param connection
@@ -636,9 +636,9 @@ public final class ImportDB {
     PreparedStatement getFinalistSchedule = null;
     ResultSet scheduleRows = null;
     try {
-      GenerateDB.createSubjectiveNomineesTables(connection, false);
+      GenerateDB.createNonNumericNomineesTables(connection, false);
 
-      insert = connection.prepareStatement("INSERT INTO subjective_nominees " //
+      insert = connection.prepareStatement("INSERT INTO non_numeric_nominees " //
           + " (tournament, category, team_number)" //
           + " VALUES (?, ?, ?)");
 
@@ -1575,16 +1575,16 @@ public final class ImportDB {
       }
 
       // do drops first
-      destPrep = destinationConnection.prepareStatement("DELETE FROM subjective_nominees WHERE tournament = ?");
+      destPrep = destinationConnection.prepareStatement("DELETE FROM non_numeric_nominees WHERE tournament = ?");
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
       SQLFunctions.close(destPrep);
 
       // insert
-      destPrep = destinationConnection.prepareStatement("INSERT INTO subjective_nominees (tournament, category, team_number) VALUES(?, ?, ?)");
+      destPrep = destinationConnection.prepareStatement("INSERT INTO non_numeric_nominees (tournament, category, team_number) VALUES(?, ?, ?)");
       destPrep.setInt(1, destTournamentID);
 
-      sourcePrep = sourceConnection.prepareStatement("SELECT category, team_number FROM subjective_nominees WHERE tournament = ?");
+      sourcePrep = sourceConnection.prepareStatement("SELECT category, team_number FROM non_numeric_nominees WHERE tournament = ?");
       sourcePrep.setInt(1, sourceTournamentID);
       sourceRS = sourcePrep.executeQuery();
       while (sourceRS.next()) {

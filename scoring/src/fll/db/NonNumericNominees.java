@@ -16,11 +16,11 @@ import java.util.Set;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
- * Keep track of subjective nominees.
+ * Keep track of non-numeric subjective nominees.
  * The subjective categories defined here are those that are not listed in the
  * challenge descriptor.
  */
-public class SubjectiveNominees {
+public class NonNumericNominees {
 
   /**
    * Clear the nominees for the specified category at the tournament.
@@ -35,7 +35,7 @@ public class SubjectiveNominees {
                                    final String category) throws SQLException {
     PreparedStatement delete = null;
     try {
-      delete = connection.prepareStatement("DELETE FROM subjective_nominees"//
+      delete = connection.prepareStatement("DELETE FROM non_numeric_nominees"//
           + " WHERE tournament = ?"//
           + " AND category = ?");
       delete.setInt(1, tournamentId);
@@ -63,13 +63,13 @@ public class SubjectiveNominees {
     try {
       connection.setAutoCommit(false);
 
-      check = connection.prepareStatement("SELECT team_number FROM subjective_nominees" //
+      check = connection.prepareStatement("SELECT team_number FROM non_numeric_nominees" //
           + " WHERE tournament = ?" + "   AND category = ?" + "   AND team_number = ?");
       check.setInt(1, tournamentId);
       check.setString(2, category);
       check.setInt(3, teamNumber);
 
-      insert = connection.prepareStatement("INSERT INTO subjective_nominees" //
+      insert = connection.prepareStatement("INSERT INTO non_numeric_nominees" //
           + " (tournament, category, team_number) VALUES(?, ?, ?)");
       insert.setInt(1, tournamentId);
       insert.setString(2, category);
@@ -101,7 +101,7 @@ public class SubjectiveNominees {
     PreparedStatement get = null;
     ResultSet rs = null;
     try {
-      get = connection.prepareStatement("SELECT DISTINCT category FROM subjective_nominees WHERE tournament = ?");
+      get = connection.prepareStatement("SELECT DISTINCT category FROM non_numeric_nominees WHERE tournament = ?");
       get.setInt(1, tournamentId);
       rs = get.executeQuery();
       while (rs.next()) {
@@ -127,7 +127,7 @@ public class SubjectiveNominees {
     PreparedStatement get = null;
     ResultSet rs = null;
     try {
-      get = connection.prepareStatement("SELECT DISTINCT team_number FROM subjective_nominees"
+      get = connection.prepareStatement("SELECT DISTINCT team_number FROM non_numeric_nominees"
           + " WHERE tournament = ?" //
           + " AND category = ?");
       get.setInt(1, tournamentId);
