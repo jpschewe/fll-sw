@@ -25,7 +25,7 @@ import java.util.Set;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import fll.db.Queries;
-import fll.db.SubjectiveNominees;
+import fll.db.NonNumericNominees;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreCategory;
 
@@ -200,7 +200,7 @@ public class FinalistSchedule implements Serializable {
     // clear out subjective nominees that we are going to insert
     for (final String category : mCategories.keySet()) {
       if (!challengeSubjectiveCategories.contains(category)) {
-        SubjectiveNominees.clearNominees(connection, getTournament(), category);
+        NonNumericNominees.clearNominees(connection, getTournament(), category);
       }
     }
 
@@ -240,7 +240,7 @@ public class FinalistSchedule implements Serializable {
         insertSchedPrep.executeUpdate();
 
         if (!challengeSubjectiveCategories.contains(row.getCategoryName())) {
-          SubjectiveNominees.addNominee(connection, getTournament(), row.getCategoryName(), row.getTeamNumber());
+          NonNumericNominees.addNominee(connection, getTournament(), row.getCategoryName(), row.getTeamNumber());
         }
 
       }
