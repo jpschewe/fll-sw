@@ -1,29 +1,8 @@
 /*
- * Copyright (c) 2012INSciTE.  All rights reserved
+ * Copyright (c) 2012 INSciTE.  All rights reserved
  * INSciTE is on the web at: http://www.hightechkids.org
  * This code is released under GPL; see LICENSE.txt for details.
  */
-
-/**
- * Used for packaging up and sending to the server to put in the database. Needs
- * to match fll.web.report.finalist.FinalistDBRow.
- */
-function FinalistDBRow(categoryName, hour, minute, teamNumber) {
-	this.categoryName = categoryName;
-	this.hour = hour;
-	this.minute = minute;
-	this.teamNumber = teamNumber;
-}
-
-/**
- * Used for packaging up and sending to the server to put in the database. Needs
- * to match fll.web.report.finalist.FinalistCategory.
- */
-function FinalistCategory(categoryName, isPublic, room) {
-	this.categoryName = categoryName;
-	this.isPublic = isPublic;
-	this.room = room;
-}
 
 $(document).ready(
 		function() {
@@ -54,8 +33,9 @@ $(document).ready(
 				var row = $("<tr></tr>");
 				$("#schedule").append(row);
 
-				row.append($("<td>" + slot.time.getHours().toString().padL(2, "0")
-						+ ":" + slot.time.getMinutes().toString().padL(2, "0")
+				row.append($("<td>"
+						+ slot.time.getHours().toString().padL(2, "0") + ":"
+						+ slot.time.getMinutes().toString().padL(2, "0")
 						+ "</td>"));
 
 				$.each($.finalist.getAllCategories(), function(i, category) {
@@ -81,11 +61,24 @@ $(document).ready(
 			var categoryRows = [];
 			$.each($.finalist.getAllCategories(), function(i, category) {
 				var cat = new FinalistCategory(category.name,
-						category.isPublic, $.finalist.getRoom(category, currentDivision));
+						category.isPublic, $.finalist.getRoom(category,
+								currentDivision));
 				categoryRows.push(cat);
 			}); // foreach category
 			$('#category_data').val($.toJSON(categoryRows));
 			$('#division_data').val(currentDivision);
+
+			var nonNumericNominees = [];
+			$.each($.finalist.getNonNumericCategories(), function(i, category) {
+				var teamNumbers = [];
+				$.each(category.teams, function(j, team) {
+					teamNumbers.push(team);
+				}); // foreach team
+				var nominees = new NonNumericNominees(category.name,
+						teamNumbers);
+				nonNumericNominees.push(nominees);
+			}); // foreach category
+			$('#non-numeric-nominees_data').val($.toJSON(nonNumericNominees));
 
 			$.finalist.displayNavbar();
 		});

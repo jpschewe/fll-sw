@@ -24,12 +24,12 @@ import org.apache.log4j.Logger;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import fll.db.NonNumericNominees;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
-import fll.xml.ChallengeDescription;
 
 /**
  * 
@@ -52,8 +52,6 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
 
-      final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
-
       final int tournament = Queries.getCurrentTournament(connection);
 
       // get parameters
@@ -73,6 +71,12 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
       if (null == division
           || "".equals(division)) {
         throw new FLLRuntimeException("Parameter 'division_data' cannot be null");
+      }
+
+      final String nomineesStr = request.getParameter("non-numeric-nominees_data");
+      if (null == nomineesStr
+          || "".equals(nomineesStr)) {
+        throw new FLLRuntimeException("Parameter 'non-numeric-nominees_data' cannot be null");
       }
 
       // decode JSON
@@ -99,7 +103,13 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
       }
 
       final FinalistSchedule schedule = new FinalistSchedule(tournament, division, categories, rows);
-      schedule.store(connection, description);
+      schedule.store(connection);
+
+      final Collection<NonNumericNominees> nominees = jsonMapper.readValue(nomineesStr,
+                                                                           NonNumericNomineesTypeInformation.INSTANCE);
+      for (final NonNumericNominees nominee : nominees) {
+        nominee.store(connection, tournament);
+      }
 
       message.append("<p id='success'>Finalist schedule saved to the database</p>");
 
@@ -121,6 +131,10 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
 
   private static final class FinalistCategoriesTypeInformation extends TypeReference<Collection<FinalistCategory>> {
     public static final FinalistCategoriesTypeInformation INSTANCE = new FinalistCategoriesTypeInformation();
+  }
+
+  private static final class NonNumericNomineesTypeInformation extends TypeReference<Collection<NonNumericNominees>> {
+    public static final NonNumericNomineesTypeInformation INSTANCE = new NonNumericNomineesTypeInformation();
   }
 
 }

@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Class that represents a category in the finalist schedule.
- * Mirrors javascript class in schedule.js. Property names need to match the
+ * Mirrors javascript class in fll-objects.js. Property names need to match the
  * javascript/JSON.
  */
 final class FinalistCategory {
