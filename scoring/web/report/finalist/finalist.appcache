@@ -6,6 +6,8 @@ CACHE MANIFEST
 ../../extlib/jstorage-0.4.11.min.js
 ../../extlib/string-functions.js
 
+../../js/fll-objects.js
+
 finalist.js
 
 params.html

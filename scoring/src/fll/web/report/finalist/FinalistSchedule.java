@@ -17,17 +17,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import fll.db.Queries;
-import fll.db.NonNumericNominees;
-import fll.xml.ChallengeDescription;
-import fll.xml.ScoreCategory;
 
 /**
  * The schedule for finalist judging.
@@ -190,19 +185,7 @@ public class FinalistSchedule implements Serializable {
    * @param connection
    * @throws SQLException
    */
-  public void store(final Connection connection,
-                    final ChallengeDescription description) throws SQLException {
-    final Set<String> challengeSubjectiveCategories = new HashSet<>();
-    for (final ScoreCategory cat : description.getSubjectiveCategories()) {
-      challengeSubjectiveCategories.add(cat.getTitle());
-    }
-
-    // clear out subjective nominees that we are going to insert
-    for (final String category : mCategories.keySet()) {
-      if (!challengeSubjectiveCategories.contains(category)) {
-        NonNumericNominees.clearNominees(connection, getTournament(), category);
-      }
-    }
+  public void store(final Connection connection) throws SQLException {
 
     PreparedStatement deleteCategoriesPrep = null;
     PreparedStatement insertCategoriesPrep = null;
@@ -238,11 +221,6 @@ public class FinalistSchedule implements Serializable {
         insertSchedPrep.setTime(4, Queries.dateToTime(row.getTime()));
         insertSchedPrep.setInt(5, row.getTeamNumber());
         insertSchedPrep.executeUpdate();
-
-        if (!challengeSubjectiveCategories.contains(row.getCategoryName())) {
-          NonNumericNominees.addNominee(connection, getTournament(), row.getCategoryName(), row.getTeamNumber());
-        }
-
       }
 
     } finally {

@@ -12,16 +12,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Formatter;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import fll.TournamentTeam;
-import fll.db.Queries;
 import fll.db.NonNumericNominees;
+import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.WebUtils;
 import fll.web.playoff.Playoff;
@@ -156,37 +154,29 @@ public class FinalistLoad {
    * schedule
    * web application.
    */
-  public static void outputNominees(final Writer writer,
-                                    final ServletContext application) throws SQLException {
+  public static void outputNonNumericNominees(final Writer writer,
+                                              final ServletContext application) throws SQLException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     try {
 
       connection = datasource.getConnection();
-      final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
-
-      final Set<String> challengeSubjectiveCategories = new HashSet<>();
-      for (final ScoreCategory cat : description.getSubjectiveCategories()) {
-        challengeSubjectiveCategories.add(cat.getTitle());
-      }
 
       final int tournament = Queries.getCurrentTournament(connection);
       final Formatter output = new Formatter(writer);
 
       int varIndex = 0;
       for (final String category : NonNumericNominees.getCategories(connection, tournament)) {
-        if (!challengeSubjectiveCategories.contains(category)) {
-          final String categoryVar = "categoryVar"
-              + varIndex;
+        final String categoryVar = "categoryVar"
+            + varIndex;
 
-          output.format("var %s = $.finalist.getCategoryByName(\"%s\");%n", categoryVar, category);
-          output.format("if (null == %s) {%n", categoryVar);
-          output.format("  %s = $.finalist.addCategory(\"%s\", false);%n", categoryVar, category);
-          output.format("}%n");
+        output.format("var %s = $.finalist.getCategoryByName(\"%s\");%n", categoryVar, category);
+        output.format("if (null == %s) {%n", categoryVar);
+        output.format("  %s = $.finalist.addCategory(\"%s\", false);%n", categoryVar, category);
+        output.format("}%n");
 
-          for (final int teamNumber : NonNumericNominees.getNominees(connection, tournament, category)) {
-            output.format("$.finalist.addTeamToCategory(%s, %d);%n", categoryVar, teamNumber);
-          }
+        for (final int teamNumber : NonNumericNominees.getNominees(connection, tournament, category)) {
+          output.format("$.finalist.addTeamToCategory(%s, %d);%n", categoryVar, teamNumber);
         }
       }
 

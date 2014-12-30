@@ -10,17 +10,63 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Keep track of non-numeric subjective nominees.
  * The subjective categories defined here are those that are not listed in the
  * challenge descriptor.
+ * Each instance represents a category and the teams in that category.
+ * Mirrors javascript class in fll-objects.js. Property names need to match the
+ * javascript/JSON.
  */
 public class NonNumericNominees {
+
+  public NonNumericNominees(@JsonProperty("categoryName") final String categoryName,
+                            @JsonProperty("teamNumbers") final Collection<Integer> teamNumbers) {
+    mCategoryName = categoryName;
+    mTeamNumbers = new HashSet<>(teamNumbers);
+  }
+
+  private final String mCategoryName;
+
+  /**
+   * Name of the category for these nominees.
+   */
+  public String getCategoryName() {
+    return mCategoryName;
+  }
+
+  private final Set<Integer> mTeamNumbers;
+
+  /**
+   * Store this instance in the database. This replaces any nominees
+   * for the category.
+   * 
+   * @param connection database connection
+   * @throws SQLException
+   */
+  public void store(final Connection connection,
+                    final int tournamentId) throws SQLException {
+    clearNominees(connection, tournamentId, mCategoryName);
+    addNominees(connection, tournamentId, mCategoryName, mTeamNumbers);
+  }
+
+  /**
+   * Numbers of the teams that are the nominees.
+   * 
+   * @return read-only set
+   */
+  public Set<Integer> getTeamNumbers() {
+    return Collections.unmodifiableSet(mTeamNumbers);
+  }
 
   /**
    * Clear the nominees for the specified category at the tournament.
@@ -56,6 +102,19 @@ public class NonNumericNominees {
                                 final int tournamentId,
                                 final String category,
                                 final int teamNumber) throws SQLException {
+    addNominees(connection, tournamentId, category, Collections.singleton(teamNumber));
+  }
+
+  /**
+   * Add a set of nominees to the database. If the nominee already exsts, there
+   * is no error.
+   * 
+   * @throws SQLException
+   */
+  public static void addNominees(final Connection connection,
+                                 final int tournamentId,
+                                 final String category,
+                                 final Set<Integer> teamNumbers) throws SQLException {
     PreparedStatement check = null;
     ResultSet checkResult = null;
     PreparedStatement insert = null;
@@ -64,20 +123,25 @@ public class NonNumericNominees {
       connection.setAutoCommit(false);
 
       check = connection.prepareStatement("SELECT team_number FROM non_numeric_nominees" //
-          + " WHERE tournament = ?" + "   AND category = ?" + "   AND team_number = ?");
+          + " WHERE tournament = ?" //
+          + "   AND category = ?" //
+          + "   AND team_number = ?");
       check.setInt(1, tournamentId);
       check.setString(2, category);
-      check.setInt(3, teamNumber);
 
       insert = connection.prepareStatement("INSERT INTO non_numeric_nominees" //
           + " (tournament, category, team_number) VALUES(?, ?, ?)");
       insert.setInt(1, tournamentId);
       insert.setString(2, category);
-      insert.setInt(3, teamNumber);
 
-      checkResult = check.executeQuery();
-      if (!checkResult.next()) {
-        insert.executeUpdate();
+      for (final int teamNumber : teamNumbers) {
+        check.setInt(3, teamNumber);
+        insert.setInt(3, teamNumber);
+
+        checkResult = check.executeQuery();
+        if (!checkResult.next()) {
+          insert.executeUpdate();
+        }
       }
 
       connection.commit();
