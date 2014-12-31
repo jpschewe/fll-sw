@@ -1,8 +1,11 @@
-#!/bin/bash
+#!/bin/sh
 
-# commented out as it's providing some bad JSP libraries
-#ant --noconfig -lib lib -lib lib/ant -lib lib/test $*
-#ant --noconfig $*
+debug() { ! "${log_debug-false}" || log "DEBUG: $*" >&2; }
+log() { printf '%s\n' "$*"; }
+warn() { log "WARNING: $*" >&2; }
+error() { log "ERROR: $*" >&2; }
+fatal() { error "$*"; exit 1; }
+try() { "$@" || fatal "'$@' failed"; }
 
 # unset some variables to ensure that we don't have problems with an existing tomcat
 unset JASPER_HOME
@@ -22,15 +25,7 @@ unset ANT_HOME
 #export ANT_OPTS
 
 # Get the current working directory of this script
-MYDIR=$(cd ${0%/*} && builtin pwd)
-
-### this may not be portable:
-#pushd . > /dev/null 2>&1
-#mypath=`dirname $0`
-#cd "${mypath}"
-#mypath=`pwd`
-#cd "${mypath}"
-#popd > /dev/null 2>&1
+MYDIR=$(cd "$(dirname "$0")" && pwd -L) || fatal "Unable to determine script directory"
 
 # Run _our_ ant, properly passing all arguments
-exec ${MYDIR}/tools/ant/bin/ant --noconfig "$@"
+exec "${MYDIR}"/tools/ant/bin/ant --noconfig "$@"
