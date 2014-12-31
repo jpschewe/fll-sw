@@ -132,7 +132,7 @@ $(document).ready(
 
 				$.each($.finalist.getNumericCategories(),
 						function(i, category) {
-							$.finalist.initializeTeamsInCategory(division,
+							$.finalist.initializeTeamsInNumericCategory(division,
 									category, teams, scoreGroups);
 						});// foreach numeric category
 			}); // foreach division
