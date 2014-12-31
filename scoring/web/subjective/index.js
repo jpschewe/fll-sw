@@ -83,7 +83,7 @@ function checkTournament() {
 
 function checkServerStatus() {
 	$.mobile.loading("show");
-
+	
 	$.subjective.log("Checking server status");
 	$.ajax({
 		url : "../images/blank.gif",
@@ -131,6 +131,8 @@ $(document).on("pagebeforeshow", "#index-page", function() {
 	$.subjective.log("before page show index-page");
 
 	$("#index-page_messages").empty();
+	
+	displayTournamentName($("#index-page_tournament"));
 });
 
 $(document).on("pageshow", "#index-page", function(event) {
