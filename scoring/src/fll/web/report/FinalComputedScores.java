@@ -255,8 +255,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
       teamsRS = teamPrep.executeQuery();
 
       scorePrep = connection.prepareStatement("SELECT score FROM performance_seeding_max"
-          + " WHERE TeamNumber = ?  AND Tournament = ?");
-      scorePrep.setInt(2, tournament.getTournamentID());
+          + " WHERE TeamNumber = ?");
 
       while (teamsRS.next()) {
         final int teamNumber = teamsRS.getInt(3);
