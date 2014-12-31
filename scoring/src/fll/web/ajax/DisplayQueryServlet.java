@@ -7,6 +7,7 @@
 package fll.web.ajax;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
@@ -17,11 +18,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.util.FLLInternalException;
-import fll.util.JsonUtilities;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.web.DisplayNames;
 import fll.web.SessionAttributes;
 
 /**
@@ -38,23 +43,36 @@ public class DisplayQueryServlet extends BaseFLLServlet {
     final String localDisplayURL;
     final String displayName = SessionAttributes.getAttribute(session, "displayName", String.class);
     if (displayName != null) {
-      String myDisplayPage = ApplicationAttributes.getAttribute(application, displayName
+      // update last seen time
+      DisplayNames.appendDisplayName(application, displayName);
+
+      final String myDisplayPage = ApplicationAttributes.getAttribute(application, displayName
           + "_displayPage", String.class);
-      String myDisplayURL = ApplicationAttributes.getAttribute(application, displayName
+      final String myDisplayURL = ApplicationAttributes.getAttribute(application, displayName
           + "_displayURL", String.class);
-      localDisplayPage = myDisplayPage != null ? myDisplayPage : ApplicationAttributes.getAttribute(application,
-                                                                                                    "displayPage",
-                                                                                                    String.class);
+
+      localDisplayPage = myDisplayPage != null ? myDisplayPage
+          : ApplicationAttributes.getAttribute(application, ApplicationAttributes.DISPLAY_PAGE, String.class);
+
       localDisplayURL = myDisplayURL != null ? myDisplayURL : ApplicationAttributes.getAttribute(application,
                                                                                                  "displayURL",
                                                                                                  String.class);
     } else {
-      localDisplayPage = ApplicationAttributes.getAttribute(application, "displayPage", String.class);
+      localDisplayPage = ApplicationAttributes.getAttribute(application, ApplicationAttributes.DISPLAY_PAGE,
+                                                            String.class);
       localDisplayURL = ApplicationAttributes.getAttribute(application, "displayURL", String.class);
     }
-    response.getWriter().print(JsonUtilities.generateDisplayResponse(pickURL(request, localDisplayPage,
-                                                                                   localDisplayURL, application,
-                                                                                   session)));
+
+    final String url = pickURL(request, localDisplayPage, localDisplayURL, application, session);
+    final DisplayResponse displayResponse = new DisplayResponse(url);
+
+    final ObjectMapper jsonMapper = new ObjectMapper();
+
+    response.reset();
+    response.setContentType("application/json");
+    final PrintWriter writer = response.getWriter();
+
+    jsonMapper.writeValue(writer, displayResponse);
   }
 
   /**
@@ -106,6 +124,22 @@ public class DisplayQueryServlet extends BaseFLLServlet {
     } else {
       return contextPath
           + "/welcome.jsp";
+    }
+  }
+
+  /**
+   * Response to the query servlet.
+   */
+  public static class DisplayResponse {
+    @SuppressFBWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Read in the javascript")
+    public final String displayURL;
+
+    public String getDisplayURL() {
+      return this.displayURL;
+    }
+
+    public DisplayResponse(@JsonProperty("displayURL") final String displayURL) {
+      this.displayURL = displayURL;
     }
   }
 }

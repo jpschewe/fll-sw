@@ -1,6 +1,6 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<%@ page import="fll.Utilities"%>
+<%@ page import="fll.web.DisplayNames"%>
 
 
 <html>
@@ -53,14 +53,7 @@
 	};
 
 	function update() {
-		$.ajax({
-			url : "<c:url value='/ajax/DisplayQuery'/>",
-			dataType : "json",
-			cache : false,
-			beforeSend : function(xhr) {
-				xhr.overrideMimeType('text/plain');
-			}
-		}).done(function(data) {
+		$.getJSON("<c:url value='/ajax/DisplayQuery'/>", function(data) {
 			pollSuccess(data.displayURL);
 		}).fail(function(data) {
 			pollFailure();
@@ -79,16 +72,14 @@
 
 <body>
 
- <h1>
-  Big Screen Display Control page
- </h1>
+ <h1>Big Screen Display Control page</h1>
 
  <c:if test="${not empty param.name}">
   <c:set var="displayName" scope="session">
     ${param.name}
   </c:set>
   <%
-    Utilities.appendDisplayName(application, request.getParameter("name"));
+    DisplayNames.appendDisplayName(application, request.getParameter("name"));
   %>
   <p>Display set to ${param.name}</p>
  </c:if>

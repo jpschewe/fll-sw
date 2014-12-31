@@ -12,7 +12,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -140,25 +139,4 @@ public final class JsonUtilities {
     }
   }
 
-  public static class DisplayResponse {
-    @SuppressFBWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Read in the javascript")
-    public final String displayURL;
-
-    public String getDisplayURL() {
-      return this.displayURL;
-    }
-
-    public DisplayResponse(@JsonProperty("displayURL") final String displayURL) {
-      this.displayURL = displayURL;
-    }
-  }
-
-  public static String generateDisplayResponse(final String displayURL) {
-    try {
-      final ObjectMapper jsonMapper = new ObjectMapper();
-      return jsonMapper.writeValueAsString(new DisplayResponse(displayURL));
-    } catch (final JsonProcessingException e) {
-      throw new RuntimeException(e);
-    }
-  }
 }
