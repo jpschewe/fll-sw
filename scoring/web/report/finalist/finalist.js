@@ -314,6 +314,7 @@
 		addPlayoffDivision : function(division) {
 			if (-1 == $.inArray(division, _playoffDivisions)) {
 				_playoffDivisions.push(division);
+
 				$.finalist.setPlayoffStartHour(division, -1);
 				$.finalist.setPlayoffStartMinute(division, -1);
 				$.finalist.setPlayoffEndHour(division, -1);
@@ -449,7 +450,7 @@
 		 *            a string
 		 */
 		addTeamToPlayoffDivision : function(team, division) {
-			if (-1 == $.inArray(division, team._playoffDivisions)) {
+			if (-1 == $.inArray(division, team.playoffDivisions)) {
 				team.playoffDivisions.push(division);
 			}
 		},
@@ -547,7 +548,7 @@
 		 * Initialize the teams in the specified numeric category if it has not
 		 * been visited yet.
 		 */
-		initializeTeamsInCategory : function(currentDivision, currentCategory,
+		initializeTeamsInNumericCategory : function(currentDivision, currentCategory,
 				teams, scoreGroups) {
 			var previouslyVisited = $.finalist.isCategoryVisited(
 					currentCategory, currentDivision);

@@ -22,7 +22,6 @@ import javax.servlet.http.HttpSession;
 
 import fll.db.CategoryColumnMapping;
 import fll.scheduler.SubjectiveStation;
-import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
