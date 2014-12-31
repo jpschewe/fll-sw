@@ -75,6 +75,8 @@ $(document).on(
 function populateChooseJudgingGroup() {
 	$.subjective.log("choose judging group populate");
 
+	displayTournamentName($("#choose-judging-group_tournament"));
+
 	$("#choose-judging-group_judging-groups").empty();
 
 	var judgingGroups = $.subjective.getJudgingGroups();
@@ -168,6 +170,8 @@ $(document).on(
 function populateChooseCategory() {
 	$("#choose-category_categories").empty();
 
+	displayTournamentName($("#choose-category_tournament"));
+
 	var categories = $.subjective.getSubjectiveCategories();
 	$.each(categories, function(i, category) {
 		var button = $("<button class='ui-btn ui-corner-all'>" + category.title
@@ -256,6 +260,7 @@ $(document).on(
 		});
 
 function populateChooseJudge() {
+	displayTournamentName($("#choose-judge_tournament"));
 
 	$("#choose-judge_judges").empty();
 	$("#choose-judge_judges")
@@ -265,10 +270,10 @@ function populateChooseJudge() {
 			"<label for='choose-judge_new-judge'>New Judge</label>");
 
 	var currentJudge = $.subjective.getCurrentJudge();
-    var currentJudgeValid = false;
+	var currentJudgeValid = false;
 	var judges = $.subjective.getPossibleJudges();
 	$.each(judges, function(i, judge) {
-		if(null != currentJudge && currentJudge.id == judge.id) {
+		if (null != currentJudge && currentJudge.id == judge.id) {
 			currentJudgeValid = true;
 		}
 		$("#choose-judge_judges").append(
@@ -278,7 +283,7 @@ function populateChooseJudge() {
 				"<label for='choose-judge_" + judge.id + "'>" + judge.id
 						+ "</label>");
 	});
-	if(!currentJudgeValid) {
+	if (!currentJudgeValid) {
 		currentJudge = null;
 	}
 
@@ -400,6 +405,8 @@ $(document).on("pagebeforeshow", "#teams-list-page", function(event) {
 
 	var currentJudge = $.subjective.getCurrentJudge();
 	$("#teams-list_judge").text(currentJudge.id);
+
+	displayTournamentName($("#teams-list_tournament"));
 
 	populateTeams();
 });
@@ -584,6 +591,7 @@ function createScoreRow(goal, subscore) {
 }
 
 $(document).on("pagebeforeshow", "#enter-score-page", function(event) {
+
 	var currentTeam = $.subjective.getCurrentTeam();
 	$("#enter-score_team-number").text(currentTeam.teamNumber);
 	$("#enter-score_team-name").text(currentTeam.teamName);
@@ -739,6 +747,7 @@ function populateRubric(goal) {
 }
 
 $(document).on("pagebeforeshow", "#rubric-page", function(event) {
+
 	var goal = $.subjective.getCurrentGoal();
 
 	if (goal.scoreType == "INTEGER") {
@@ -867,12 +876,11 @@ function populateScoreSummary() {
 								+ team.teamName + "</div>");
 						teamRow.append(teamBlock);
 
-						var score = $.subjective.getScore(team.teamNumber); 
+						var score = $.subjective.getScore(team.teamNumber);
 						var scoreText;
-						if(null == score) {
+						if (null == score) {
 							scoreText = "";
-						}
-						else if(score.noShow) {
+						} else if (score.noShow) {
 							scoreText = "No Show";
 						} else {
 							scoreText = computedScore;
@@ -914,6 +922,7 @@ function populateScoreSummary() {
 }
 
 $(document).on("pagebeforeshow", "#score-summary-page", function(event) {
+	displayTournamentName($("#score-summary_tournament"));
 
 	var currentJudgingGroup = $.subjective.getCurrentJudgingGroup();
 	$("#score-summary_judging-group").text(currentJudgingGroup);
@@ -993,3 +1002,14 @@ $(document).on(
 						});
 					});
 		});
+
+function displayTournamentName(displayElement) {
+	var tournament = $.subjective.getTournament();
+	var tournamentName;
+	if (null == tournament) {
+		tournamentName = "None";
+	} else {
+		tournamentName = tournament.name;
+	}
+	displayElement.text("Tournament: " + tournamentName);
+}
