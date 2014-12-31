@@ -644,8 +644,28 @@ public final class ImportDB {
       // need to check if the column exists as some version 12 databases got
       // created with the column
       final DatabaseMetaData md = connection.getMetaData();
-      metaData = md.getColumns(null, null, "finalist_categories", "room");
-      if (!metaData.next()) {
+      boolean foundRoomColumn = false;
+      metaData = md.getColumns(null, null, "FINALIST_CATEGORIES", "%");
+      while (metaData.next()) {
+        final String column = metaData.getString("COLUMN_NAME");
+        if ("room".equalsIgnoreCase(column)) {
+          foundRoomColumn = true;
+        }
+      }
+      SQLFunctions.close(metaData);
+      metaData = null;
+
+      metaData = md.getColumns(null, null, "finalist_categories", "%");
+      while (metaData.next()) {
+        final String column = metaData.getString("COLUMN_NAME");
+        if ("room".equalsIgnoreCase(column)) {
+          foundRoomColumn = true;
+        }
+      }
+      SQLFunctions.close(metaData);
+      metaData = null;
+
+      if (!foundRoomColumn) {
         stmt.executeUpdate("ALTER TABLE finalist_categories ADD COLUMN room VARCHAR(32) DEFAULT NULL");
       }
 
@@ -789,8 +809,33 @@ public final class ImportDB {
 
       // migrate subjective times over if they are there
       final DatabaseMetaData md = connection.getMetaData();
-      metaData = md.getColumns(null, null, "schedule", "presentation");
-      if (metaData.next()) {
+      boolean foundPresentationColumn = false;
+      metaData = md.getColumns(null, null, "schedule", "%");
+      while (metaData.next()) {
+        final String column = metaData.getString("COLUMN_NAME");
+        if ("presentation".equalsIgnoreCase(column)) {
+          foundPresentationColumn = true;
+        }
+      }
+      SQLFunctions.close(metaData);
+      metaData = null;
+
+      metaData = md.getColumns(null, null, "SCHEDULE", "%");
+      while (metaData.next()) {
+        final String column = metaData.getString("COLUMN_NAME");
+        if ("presentation".equalsIgnoreCase(column)) {
+          foundPresentationColumn = true;
+        }
+      }
+      metaData = md.getColumns(null, null, "schedule", "%");
+      while (metaData.next()) {
+        final String column = metaData.getString("COLUMN_NAME");
+        if ("presentation".equalsIgnoreCase(column)) {
+          foundPresentationColumn = true;
+        }
+      }
+
+      if (foundPresentationColumn) {
         prep = connection.prepareStatement("INSERT INTO sched_subjective" //
             + " (tournament, team_number, name, subj_time)" //
             + " VALUES(?, ?, ?, ?)");
