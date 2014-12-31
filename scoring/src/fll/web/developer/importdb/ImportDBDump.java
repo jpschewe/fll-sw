@@ -67,7 +67,7 @@ public class ImportDBDump extends BaseFLLServlet {
 
         final String databaseName = "dbimport"
             + String.valueOf(getNextDBCount());
-        // TODO ticket:88 should figure out how to clean up this database
+        // TODO issue:123 should figure out how to clean up this database
         final DataSource importDataSource = Utilities.createMemoryDataSource(databaseName)
             ;
 

@@ -71,20 +71,16 @@ public final class ScoreStandardization {
       insertPrep = connection.prepareStatement("INSERT INTO FinalScores "//
           + " ( TeamNumber, Tournament, performance ) " //
           + " SELECT TeamNumber" //
-          + ", Tournament" //
+          + ", " + tournament //
           + ", ((Score - ?) * ?) + ? "//
-          + " FROM performance_seeding_max" //
-          + " WHERE Tournament = ?");
+          + " FROM performance_seeding_max");
       insertPrep.setDouble(3, mean);
-      insertPrep.setInt(4, tournament);
 
       selectPrep = connection.prepareStatement("SELECT " //
           + " Avg(Score) AS sg_mean," //
           + " Count(Score) AS sg_count," //
           + " stddev_pop(Score) AS sg_stdev" //
-          + " FROM performance_seeding_max"//
-          + " WHERE Tournament = ?");
-      selectPrep.setInt(1, tournament);
+          + " FROM performance_seeding_max");
       rs = selectPrep.executeQuery();
       if (rs.next()) {
         final int sgCount = rs.getInt(2);
@@ -326,7 +322,7 @@ public final class ScoreStandardization {
     // SQLFunctions.closeResultSet(rs2);
     // SQLFuctions.closeStatement(stmt);
     // }
-    // TODO ticket:84 need some better error reporting here. See the Access VB
+    // TODO issue:119 need some better error reporting here. See the Access VB
     // code.
     // I'm not sure the best way to select from a ResultSet...
     return null;
