@@ -388,12 +388,14 @@
     </copy>
   </target>
 
+  <target name="reload" description="alias for tomcat.reload" depends="tomcat.reload" />
   <target name="tomcat.reload" description="Load new code into tomcat">
     <antcall target="tomcat.stop" />
     <antcall target="compile" />
     <antcall target="tomcat.start" />
   </target>
 
+  <target name="start" description="alias for tomcat.start" depends="tomcat.start" />
   <target name="tomcat.start" depends="tomcat.expand" description="start up tomcat">
     <echo message="Starting tomcat" />
     <run-tomcat operation="start" spawn="true" />
@@ -405,6 +407,7 @@
     <fail message="Access to timed out to http://localhost:9080/ " if="fll-sw.timeout" />
   </target>
 
+  <target name="stop" description="alias for tomcat.stop" depends="tomcat.stop" />
   <target name="tomcat.stop" depends="tomcat.expand" description="shut down tomcat">
     <echo message="Shutting down tomcat" />
     <run-tomcat operation="stop" spawn="false" />

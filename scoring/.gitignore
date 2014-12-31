@@ -1,3 +1,5 @@
+.ant-targets-build.xml
+ant
 sloccount.sc
 build
 tmp
