@@ -1778,7 +1778,7 @@ public final class ImportDB {
       }
     }
 
-    // TODO ticket:81 check documents
+    // TODO issue:116 check documents
 
     return differencesFound;
   }

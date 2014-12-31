@@ -185,9 +185,6 @@ public class FullTournamentTest {
 
         if (runNumber > numSeedingRounds) {
           if (!initializedPlayoff) {
-            // TODO ticket:83 make sure to check the result of checking the
-            // seeding rounds
-
             // initialize the playoff brackets with playoff/index.jsp form
             for (final String division : divisions) {
               LOGGER.info("Initializing playoff brackets for division "

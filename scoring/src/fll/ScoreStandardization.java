@@ -322,7 +322,7 @@ public final class ScoreStandardization {
     // SQLFunctions.closeResultSet(rs2);
     // SQLFuctions.closeStatement(stmt);
     // }
-    // TODO ticket:84 need some better error reporting here. See the Access VB
+    // TODO issue:119 need some better error reporting here. See the Access VB
     // code.
     // I'm not sure the best way to select from a ResultSet...
     return null;
