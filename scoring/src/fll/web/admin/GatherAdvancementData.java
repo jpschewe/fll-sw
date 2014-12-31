@@ -32,7 +32,6 @@ import org.apache.log4j.Logger;
 import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
-import fll.db.GenerateDB;
 import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;

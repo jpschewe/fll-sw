@@ -34,6 +34,9 @@
 					true);
 		}
 <%FinalistLoad.outputCategoryScores(out, application);%>
+
+<%FinalistLoad.outputNonNumericNominees(out, application);%>
+
 	$.finalist.setTournament(_loadingTournament);
 	}
 
