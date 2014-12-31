@@ -113,7 +113,6 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
             + "   AND event_division = ?" //
             + "   AND judging_station = ?)" //
             + " ORDER BY " + catName + " " + winnerCriteria.getSortString() //
-            + " NULLS LAST" //
         );
         prep.setInt(1, tournament.getTournamentID());
         prep.setInt(2, tournament.getTournamentID());
