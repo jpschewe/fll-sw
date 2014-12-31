@@ -282,7 +282,12 @@ public class GreedySolver {
       throw new FLLRuntimeException("No ']' found in subj_minutes: '"
           + subjDurationStr + "'");
     }
-    final String[] subjDurs = subjDurationStr.substring(lbracket + 1, rbracket).split(",");
+    final String[] subjDurs;
+    if (lbracket + 1 == rbracket) {
+      subjDurs = new String[0];
+    } else {
+      subjDurs = subjDurationStr.substring(lbracket + 1, rbracket).split(",");
+    }
     if (subjDurs.length != numSubjectiveStations) {
       throw new FLLRuntimeException("Number of subjective stations not consistent with subj_minutes array size");
     }
