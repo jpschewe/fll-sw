@@ -71,20 +71,16 @@ public final class ScoreStandardization {
       insertPrep = connection.prepareStatement("INSERT INTO FinalScores "//
           + " ( TeamNumber, Tournament, performance ) " //
           + " SELECT TeamNumber" //
-          + ", Tournament" //
+          + ", " + tournament //
           + ", ((Score - ?) * ?) + ? "//
-          + " FROM performance_seeding_max" //
-          + " WHERE Tournament = ?");
+          + " FROM performance_seeding_max");
       insertPrep.setDouble(3, mean);
-      insertPrep.setInt(4, tournament);
 
       selectPrep = connection.prepareStatement("SELECT " //
           + " Avg(Score) AS sg_mean," //
           + " Count(Score) AS sg_count," //
           + " stddev_pop(Score) AS sg_stdev" //
-          + " FROM performance_seeding_max"//
-          + " WHERE Tournament = ?");
-      selectPrep.setInt(1, tournament);
+          + " FROM performance_seeding_max");
       rs = selectPrep.executeQuery();
       if (rs.next()) {
         final int sgCount = rs.getInt(2);
