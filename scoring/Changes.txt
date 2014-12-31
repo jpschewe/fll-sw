@@ -1,3 +1,4 @@
+* 289 - add the ability to store non-numeric/"subjective" award winners in the database
 * 230 - team upload now only adds teams without removing any existing information
 * 337 - don't try to upload subjective scores from the web application if the tournament doesn't match
 * 349 - Add note about performance times to team schedule and put multiple schedules on 1 page

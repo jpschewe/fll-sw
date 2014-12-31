@@ -4,31 +4,32 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
+function handleDivisionChange() {
+	var divIndex = $("#divisions").val();
+	var div = $.finalist.getDivisionByIndex(divIndex);
+	$.finalist.setCurrentDivision(div);
+	updateTeams();
+}
+
 $(document).ready(
 		function() {
-			$("#division").text($.finalist.getCurrentDivision());
 
-			$("#categories").empty();
-
-			$.each($.finalist.getNonNumericCategories(), function(i, category) {
-				addCategoryElement(category);
-				addedCategory = true;
-
-				var addedTeam = false;
-				$.each(category.teams, function(j, teamNum) {
-					var team = $.finalist.lookupTeam(teamNum);
-					if ($.finalist.isTeamInDivision(team, $.finalist
-							.getCurrentDivision())) {
-						addedTeam = true;
-						var teamIdx = addTeam(category);
-						populateTeamInformation(category, teamIdx, team);
-					}
-
-				});
-				if (!addedTeam) {
-					addTeam(category);
+			$("#divisions").empty();
+			$.each($.finalist.getDivisions(), function(i, division) {
+				var selected = "";
+				if (division == $.finalist.getCurrentDivision()) {
+					selected = " selected ";
 				}
+				var divisionOption = $("<option value='" + i + "'" + selected
+						+ ">" + division + "</option>");
+				$("#divisions").append(divisionOption);
+			}); // foreach division
+			$("#divisions").change(function() {
+				handleDivisionChange();
 			});
+			handleDivisionChange();
+
+			updateTeams();
 
 			$("#add-category").click(function() {
 				addCategory();
@@ -36,6 +37,29 @@ $(document).ready(
 
 			$.finalist.displayNavbar();
 		}); // end ready function
+
+function updateTeams() {
+	$("#categories").empty();
+	$.each($.finalist.getNonNumericCategories(), function(i, category) {
+		addCategoryElement(category);
+		addedCategory = true;
+
+		var addedTeam = false;
+		$.each(category.teams, function(j, teamNum) {
+			var team = $.finalist.lookupTeam(teamNum);
+			if ($.finalist.isTeamInDivision(team, $.finalist
+					.getCurrentDivision())) {
+				addedTeam = true;
+				var teamIdx = addTeam(category);
+				populateTeamInformation(category, teamIdx, team);
+			}
+
+		});
+		if (!addedTeam) {
+			addTeam(category);
+		}
+	});
+}
 
 function addCategoryElement(category) {
 	var catEle = $("<li></li>");

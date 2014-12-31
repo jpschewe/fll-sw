@@ -39,6 +39,12 @@
   <li><a href="PlayoffReport">Winners of each playoff bracket</a>.
    This is useful for the awards ceremony.</li>
 
+  <li><a href="non-numeric-nominees.jsp">Enter non-numeric
+    nominees</a>. This is used to enter the teams that are up for
+   consideration for the non-scored subjective categories. This
+   information transfers over to the finalist scheduling web
+   application. This is also used in the awards scripts report.</li>
+
  </ol>
 
 

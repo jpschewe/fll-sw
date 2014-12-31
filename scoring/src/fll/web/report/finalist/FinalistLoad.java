@@ -18,6 +18,7 @@ import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import fll.TournamentTeam;
+import fll.db.NonNumericNominees;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.WebUtils;
@@ -145,6 +146,42 @@ public class FinalistLoad {
       output.format("if (null == %s) {%n", catVarName);
       output.format("  %s = $.finalist.addCategory(%s, true);%n", catVarName, quotedCatTitle);
       output.format("}%n");
+    }
+  }
+
+  /**
+   * Output javascript to load the subjective nominees into the finalist
+   * schedule
+   * web application.
+   */
+  public static void outputNonNumericNominees(final Writer writer,
+                                              final ServletContext application) throws SQLException {
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    Connection connection = null;
+    try {
+
+      connection = datasource.getConnection();
+
+      final int tournament = Queries.getCurrentTournament(connection);
+      final Formatter output = new Formatter(writer);
+
+      int varIndex = 0;
+      for (final String category : NonNumericNominees.getCategories(connection, tournament)) {
+        final String categoryVar = "categoryVar"
+            + varIndex;
+
+        output.format("var %s = $.finalist.getCategoryByName(\"%s\");%n", categoryVar, category);
+        output.format("if (null == %s) {%n", categoryVar);
+        output.format("  %s = $.finalist.addCategory(\"%s\", false);%n", categoryVar, category);
+        output.format("}%n");
+
+        for (final int teamNumber : NonNumericNominees.getNominees(connection, tournament, category)) {
+          output.format("$.finalist.addTeamToCategory(%s, %d);%n", categoryVar, teamNumber);
+        }
+      }
+
+    } finally {
+      SQLFunctions.close(connection);
     }
   }
 
