@@ -513,6 +513,7 @@ public final class UploadTeams extends BaseFLLServlet {
    * @return true if no problems, false otherwise (message will be updated)
    * @throws SQLException
    */
+  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate name of teamNumberColumn")
   private static boolean verifyNoDuplicateTeamNumbers(final Connection connection,
                                                       final StringBuilder message,
                                                       final String teamNumberColumn) throws SQLException {
