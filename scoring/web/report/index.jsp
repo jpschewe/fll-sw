@@ -24,9 +24,9 @@
    needs to be executed before any reports can be generated. You will be
    returned to this page if there are no errors summarizing scores.</li>
 
-  <li><a href='finalComputedScores.pdf'>Final Computed Scores</a>.
-   This is the report that the head judge will want to determine which
-   teams advance to the next tournament.</li>
+  <li><a href='getPerformancePercentage.jsp'>Final Computed
+    Scores</a>. This is the report that the head judge will want to
+   determine which teams advance to the next tournament.</li>
 
   <li><a href="CategoryScoresByScoreGroup">Categorized Scores
     by Judging Station</a>. This displays the scaled scores for each

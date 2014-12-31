@@ -285,6 +285,40 @@ public final class Queries {
   }
 
   /**
+   * Get the list of team numbers that are in the specified event division.
+   * 
+   * @param connection
+   * @param tournament
+   * @param division
+   * @return
+   * @throws SQLException
+   */
+  public static Set<Integer> getTeamNumbersInEventDivision(final Connection connection,
+                                                           final int tournament,
+                                                           final String division) throws SQLException {
+    final Set<Integer> teamNumbers = new HashSet<>();
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT TeamNumber FROM TournamentTeams" //
+          + " WHERE Tournament = ?" //
+          + " AND event_division = ?");
+      prep.setInt(1, tournament);
+      prep.setString(2, division);
+      rs = prep.executeQuery();
+      while (rs.next()) {
+        final int teamNumber = rs.getInt(1);
+        teamNumbers.add(teamNumber);
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+
+    return teamNumbers;
+  }
+
+  /**
    * Get the list of judging stations for the specified tournament as a List of
    * Strings.
    * 
