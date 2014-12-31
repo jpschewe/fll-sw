@@ -66,7 +66,8 @@ public final class DisplayNames {
   }
 
   /**
-   * Delete a named display. It will reppear if the display is still active.
+   * Delete a named display. It will reappear if the display is still active.
+   * Also cleans up the related application attributes.
    */
   public static void deleteNamedDisplay(final ServletContext application,
                                         final String name) {
@@ -78,6 +79,18 @@ public final class DisplayNames {
     if (null != displayNames) {
       displayNames.remove(name);
       application.setAttribute(ApplicationAttributes.DISPLAY_NAMES, displayNames);
+
+      application.removeAttribute(name
+          + "_displayPage");
+      application.removeAttribute(name
+          + "_displayURL");
+      application.removeAttribute(name
+          + "_playoffRoundNumber");
+      application.removeAttribute(name
+          + "_playoffDivision");
+      application.removeAttribute(name
+          + "_finalistDivision");
+
     }
   }
 

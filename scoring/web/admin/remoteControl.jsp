@@ -1,7 +1,8 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%
-  fll.web.admin.RemoteControl.populateContext(application, pageContext);
+  fll.web.admin.RemoteControl.populateContext(application,
+					pageContext);
 %>
 
 <html>
@@ -68,7 +69,20 @@ END DEBUG --%>
     <th>Default</th>
     <c:if test="${not empty displayNames}">
      <c:forEach items="${displayNames}" var="displayName">
-      <th>${displayName.key} - seen @ <fmt:formatDate value="${displayName.value }" type="TIME" timeStyle="short"/></th>
+      <th>${displayName.key}- seen @ <fmt:formatDate
+        value="${displayName.value }" type="TIME" timeStyle="short" /></th>
+     </c:forEach>
+    </c:if>
+   </tr>
+
+   <tr>
+    <th>Delete Named Display</th>
+    <td>&nbsp;</td>
+    <c:if test="${not empty displayNames}">
+     <c:forEach items="${displayNames}" var="displayName">
+      <c:set var="displayPageKey" value="${displayName.key}_displayPage" />
+      <td><input type="checkbox" name="${displayName.key }_delete" />
+      </td>
      </c:forEach>
     </c:if>
    </tr>
