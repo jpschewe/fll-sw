@@ -19,6 +19,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +51,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlOption;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlSelect;
 import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
+import com.gargoylesoftware.htmlunit.util.NameValuePair;
 
 import fll.TestUtils;
 import fll.Utilities;
@@ -479,7 +481,9 @@ public class FullTournamentTest {
     // PDF reports can't be done with selenium
     final WebClient conversation = WebTestUtils.getConversation();
     WebRequest request = new WebRequest(new URL(TestUtils.URL_ROOT
-        + "report/finalComputedScores.pdf"));
+        + "report/FinalComputedScores"));
+    request.setRequestParameters(Collections.singletonList(new NameValuePair("percentage", "40")));
+
     Page response = WebTestUtils.loadPage(conversation, request);
     Assert.assertEquals("application/pdf", response.getWebResponse().getContentType());
 
@@ -638,7 +642,7 @@ public class FullTournamentTest {
             + WebTestUtils.getPageSource(response));
       }
       Assert.assertEquals("application/zip", contentType);
-      
+
       final InputStream zipStream = response.getWebResponse().getContentAsStream();
       final FileOutputStream outputStream = new FileOutputStream(subjectiveZip);
       final byte[] buffer = new byte[512];
