@@ -170,7 +170,7 @@ public final class GenerateDB {
       createSubjectiveCategoryScheduleColumnMappingTables(connection);
 
       createNonNumericNomineesTables(connection, true);
-      
+
       createFinalistScheduleTables(connection, true);
 
       // Table structure for table 'Judges'
@@ -292,16 +292,23 @@ public final class GenerateDB {
       // max seeding round score for the current tournament
       stmt.executeUpdate("DROP VIEW IF EXISTS performance_seeding_max");
       stmt.executeUpdate("CREATE VIEW performance_seeding_max AS "//
-          + " SELECT TeamNumber, Tournament, Max(ComputedTotal) As Score, AVG(ComputedTotal) As average" //
+          + " SELECT TeamNumber, Max(ComputedTotal) As Score, AVG(ComputedTotal) As average" //
           + " FROM Performance" //
           + " WHERE " //
-          + " RunNumber <= ("//
+          + " tournament IN "
+          + " (SELECT CONVERT(param_value, INTEGER) " // " +
+          + "      FROM global_parameters " //
+          + "      WHERE param = '" + GlobalParameters.CURRENT_TOURNAMENT
+          + "'"//
+          + "  )"
+          + " AND RunNumber <= ("//
           // compute the run number for the current tournament
           + "   SELECT CONVERT(param_value, INTEGER) FROM tournament_parameters" //
           + "     WHERE param = 'SeedingRounds' AND tournament = ("
           + "       SELECT MAX(tournament) FROM tournament_parameters"//
           + "         WHERE param = 'SeedingRounds'"//
-          + "           AND ( tournament = -1 OR tournament = ("//
+          // -1 is to use the default if no value has been set for this specific tournament
+          + "           AND ( tournament = -1 OR tournament IN ("//
           // current tournament
           + "             SELECT CONVERT(param_value, INTEGER) FROM global_parameters"//
           + "               WHERE  param = '" + GlobalParameters.CURRENT_TOURNAMENT + "'  )"//
@@ -332,13 +339,14 @@ public final class GenerateDB {
 
   }
 
-  /*package*/ static void createNonNumericNomineesTables(final Connection connection, final boolean createConstraints) throws SQLException {
+  /* package */static void createNonNumericNomineesTables(final Connection connection,
+                                                          final boolean createConstraints) throws SQLException {
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
-      
+
       stmt.executeUpdate("DROP TABLE IF EXISTS non_numeric_nominees CASCADE");
-      
+
       final StringBuilder sql = new StringBuilder();
       sql.append("CREATE TABLE non_numeric_nominees (");
       sql.append("  tournament INTEGER NOT NULL");
@@ -351,12 +359,12 @@ public final class GenerateDB {
       }
       sql.append(")");
       stmt.executeUpdate(sql.toString());
-      
+
     } finally {
       SQLFunctions.close(stmt);
     }
   }
-  
+
   /**
    * Create finalist schedule tables.
    * 
