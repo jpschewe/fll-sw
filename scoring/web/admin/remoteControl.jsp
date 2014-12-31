@@ -68,7 +68,7 @@ END DEBUG --%>
     <th>Default</th>
     <c:if test="${not empty displayNames}">
      <c:forEach items="${displayNames}" var="displayName">
-      <th>${displayName}</th>
+      <th>${displayName.key} - seen @ <fmt:formatDate value="${displayName.value }" type="TIME" timeStyle="short"/></th>
      </c:forEach>
     </c:if>
    </tr>
@@ -78,14 +78,14 @@ END DEBUG --%>
     <td>&nbsp;</td>
     <c:if test="${not empty displayNames}">
      <c:forEach items="${displayNames}" var="displayName">
-      <c:set var="displayPageKey" value="${displayName}_displayPage" />
+      <c:set var="displayPageKey" value="${displayName.key}_displayPage" />
       <td><c:choose>
         <c:when test="${empty applicationScope[displayPageKey]}">
-         <input type='radio' name="${displayName}_remotePage"
+         <input type='radio' name="${displayName.key}_remotePage"
           value='default' checked />
         </c:when>
         <c:otherwise>
-         <input type='radio' name="${displayName}_remotePage"
+         <input type='radio' name="${displayName.key}_remotePage"
           value='default' />
         </c:otherwise>
        </c:choose></td>

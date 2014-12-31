@@ -7,7 +7,7 @@
 package fll.web.admin;
 
 import java.io.IOException;
-import java.util.Collection;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -19,8 +19,8 @@ import javax.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
 import org.icepush.PushContext;
 
-import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.web.DisplayNames;
 import fll.web.SessionAttributes;
 
 @WebServlet("/admin/RemoteControlPost")
@@ -33,10 +33,7 @@ public class RemoteControlPost extends BaseFLLServlet {
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
-    @SuppressWarnings("unchecked")
-    final Collection<String> displayNames = (Collection<String>) ApplicationAttributes.getAttribute(application,
-                                                                                                    "displayNames",
-                                                                                                    Collection.class);
+    final Set<String> displayNames = DisplayNames.getDisplayNames(application);
 
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("remotePage "
@@ -68,7 +65,7 @@ public class RemoteControlPost extends BaseFLLServlet {
                   + "_playoffRoundNumber"));
         }
       }
-    }
+    } // if trace enabled
 
     // default display
     final String slideIntervalStr = request.getParameter("slideInterval");
