@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # Based on the script used to start ant.  Original copyright:
 # Copyright (c) 2001-2002 The Apache Software Foundation.  All rights reserved.
@@ -8,6 +8,14 @@ mypath=`dirname $0`
 cd "${mypath}"
 mypath="${PWD}"
 cd "${OPWD}"
+debug() { ! "${log_debug-false}" || log "DEBUG: $*" >&2; }
+log() { printf '%s\n' "$*"; }
+warn() { log "WARNING: $*" >&2; }
+error() { log "ERROR: $*" >&2; }
+fatal() { error "$*"; exit 1; }
+try() { "$@" || fatal "'$@' failed"; }
+
+mypath=$(cd "$(dirname "$0")" && pwd -L) || fatal "Unable to determine script directory"
 
 if [ -e ${mypath}/setenv.sh ]; then
   . ${mypath}/setenv.sh
