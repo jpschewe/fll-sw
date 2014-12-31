@@ -7,7 +7,9 @@
 package fll.web.admin;
 
 import java.io.IOException;
-import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -19,8 +21,8 @@ import javax.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
 import org.icepush.PushContext;
 
-import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.web.DisplayNames;
 import fll.web.SessionAttributes;
 
 @WebServlet("/admin/RemoteControlPost")
@@ -33,10 +35,7 @@ public class RemoteControlPost extends BaseFLLServlet {
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
-    @SuppressWarnings("unchecked")
-    final Collection<String> displayNames = (Collection<String>) ApplicationAttributes.getAttribute(application,
-                                                                                                    "displayNames",
-                                                                                                    Collection.class);
+    final Set<String> displayNames = DisplayNames.getDisplayNames(application);
 
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("remotePage "
@@ -66,9 +65,12 @@ public class RemoteControlPost extends BaseFLLServlet {
           LOGGER.trace("\tplayoffRoundNumber "
               + request.getParameter(displayName
                   + "_playoffRoundNumber"));
+          LOGGER.trace("\tdelete? "
+              + request.getParameter(displayName
+                  + "_delete"));
         }
       }
-    }
+    } // if trace enabled
 
     // default display
     final String slideIntervalStr = request.getParameter("slideInterval");
@@ -87,8 +89,13 @@ public class RemoteControlPost extends BaseFLLServlet {
 
     // named displays
     if (null != displayNames) {
+
+      final List<String> toDelete = new LinkedList<>();
       for (final String displayName : displayNames) {
-        if ("default".equals(request.getParameter(displayName
+        if (null != request.getParameter(displayName
+            + "_delete")) {
+          toDelete.add(displayName);
+        } else if ("default".equals(request.getParameter(displayName
             + "_remotePage"))) {
           application.removeAttribute(displayName
               + "_displayPage");
@@ -120,8 +127,13 @@ public class RemoteControlPost extends BaseFLLServlet {
               + "_finalistDivision", request.getParameter(displayName
               + "_finalistDivision"));
         }
+      } // foreach display
+
+      for (final String displayName : toDelete) {
+        DisplayNames.deleteNamedDisplay(application, displayName);
       }
-    }
+
+    } // if non-null display names
 
     PushContext pc = PushContext.getInstance(application);
     pc.push("playoffs");
