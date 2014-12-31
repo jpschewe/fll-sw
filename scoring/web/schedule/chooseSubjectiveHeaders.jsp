@@ -42,7 +42,7 @@
      <tr>
       <th>${subjHeader}</th>
 
-      <!--  TODO ticket:94 need to validate that this is a number -->
+      <!--  TODO issue:129 need to validate that this is a number -->
       <td><input type="text" name="${loopStatus.index}:duration"
        value="${default_duration}" /></td>
 
