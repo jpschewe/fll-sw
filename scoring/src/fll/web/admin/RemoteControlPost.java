@@ -7,6 +7,8 @@
 package fll.web.admin;
 
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -63,6 +65,9 @@ public class RemoteControlPost extends BaseFLLServlet {
           LOGGER.trace("\tplayoffRoundNumber "
               + request.getParameter(displayName
                   + "_playoffRoundNumber"));
+          LOGGER.trace("\tdelete? "
+              + request.getParameter(displayName
+                  + "_delete"));
         }
       }
     } // if trace enabled
@@ -84,8 +89,13 @@ public class RemoteControlPost extends BaseFLLServlet {
 
     // named displays
     if (null != displayNames) {
+
+      final List<String> toDelete = new LinkedList<>();
       for (final String displayName : displayNames) {
-        if ("default".equals(request.getParameter(displayName
+        if (null != request.getParameter(displayName
+            + "_delete")) {
+          toDelete.add(displayName);
+        } else if ("default".equals(request.getParameter(displayName
             + "_remotePage"))) {
           application.removeAttribute(displayName
               + "_displayPage");
@@ -117,8 +127,13 @@ public class RemoteControlPost extends BaseFLLServlet {
               + "_finalistDivision", request.getParameter(displayName
               + "_finalistDivision"));
         }
+      } // foreach display
+
+      for (final String displayName : toDelete) {
+        DisplayNames.deleteNamedDisplay(application, displayName);
       }
-    }
+
+    } // if non-null display names
 
     PushContext pc = PushContext.getInstance(application);
     pc.push("playoffs");
