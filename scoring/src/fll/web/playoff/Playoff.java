@@ -367,6 +367,10 @@ public final class Playoff {
   /**
    * Initialize the database portion of the playoff brackets. The current
    * tournament is assumed to be the tournament to initialize.
+   * <p>
+   * Make sure that the teams listed here are not involved in any unfinished
+   * playoffs, otherwise there will be problems.
+   * </p>
    * 
    * @param connection the connection
    * @param division the playoff division that the specified teams are in
@@ -742,8 +746,8 @@ public final class Playoff {
   }
 
   /**
-   * Get the run number for a given playoff bracket.
-   * This run number specifies the winner of the playoff bracket.
+   * Get the max run number for a given playoff division.
+   * This run number specifies the winner of the playoff division.
    * 
    * @return the run max run number or -1 if not found
    */
