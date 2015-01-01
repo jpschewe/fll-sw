@@ -1,3 +1,6 @@
+* 114 - Add the ability to uninitialize a playoff division
+* 14 - add the ability to print the schedules from the web 
+* 339 - Highlight teams that are in the top X% of performance scores
 * 12 - add the ability to delete named displays from the display remote control 
 * 289 - add the ability to store non-numeric/"subjective" award winners in the database
 * 230 - team upload now only adds teams without removing any existing information
