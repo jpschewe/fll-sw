@@ -60,7 +60,7 @@ public class FooterFilter implements Filter {
 
       final String contentType = wrapper.getContentType();
       if (wrapper.isStringUsed()) {
-        if (contentType.startsWith("text/html")) {
+        if (null != contentType && contentType.startsWith("text/html")) {
           final String url = httpRequest.getRequestURI();
 
           final String origStr = wrapper.getString();
