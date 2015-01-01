@@ -687,56 +687,100 @@ public class TournamentSchedule implements Serializable {
           + " exists, but isn't a directory");
     }
 
-    FileOutputStream pdfFos = null;
+    OutputStream pdfFos = null;
     try {
       final File byDivision = new File(directory, baseFilename
           + "-subjective-by-division.pdf");
 
       pdfFos = new FileOutputStream(byDivision);
-      final Document detailedSchedulesByDivision = PdfUtils.createPdfDoc(pdfFos, new SimpleFooterHandler());
-      for (final String subjectiveStation : subjectiveStations) {
-        outputSubjectiveScheduleByDivision(detailedSchedulesByDivision, subjectiveStation);
-        detailedSchedulesByDivision.add(Chunk.NEXTPAGE);
-      }
-      detailedSchedulesByDivision.close();
+      outputSubjectiveSchedulesByJudgingStation(pdfFos);
       IOUtils.closeQuietly(pdfFos);
       pdfFos = null;
 
       final File byTime = new File(directory, baseFilename
           + "-subjective-by-time.pdf");
       pdfFos = new FileOutputStream(byTime);
-      final Document detailedSchedulesByTime = PdfUtils.createPdfDoc(pdfFos, new SimpleFooterHandler());
-      for (final String subjectiveStation : subjectiveStations) {
-        outputSubjectiveScheduleByTime(detailedSchedulesByTime, subjectiveStation);
-        detailedSchedulesByTime.add(Chunk.NEXTPAGE);
-      }
-      detailedSchedulesByTime.close();
+      outputSubjectiveSchedulesByTime(pdfFos);
       IOUtils.closeQuietly(pdfFos);
       pdfFos = null;
 
       final File performance = new File(directory, baseFilename
           + "-performance.pdf");
       pdfFos = new FileOutputStream(performance);
-      final Document performanceDoc = PdfUtils.createPdfDoc(pdfFos, new SimpleFooterHandler());
-      outputPerformanceSchedule(performanceDoc);
-      performanceDoc.close();
+      outputPerformanceScheduleByTime(pdfFos);
       IOUtils.closeQuietly(pdfFos);
       pdfFos = null;
 
       final File teamSchedules = new File(directory, baseFilename
           + "-team-schedules.pdf");
       pdfFos = new FileOutputStream(teamSchedules);
-      final Document teamDoc = PdfUtils.createPdfDoc(pdfFos, new SimpleFooterHandler());
-      for (final TeamScheduleInfo si : _schedule) {
-        outputTeamSchedule(params, teamDoc, si);
-      }
-      teamDoc.close();
+      outputTeamSchedules(params, pdfFos);
       IOUtils.closeQuietly(pdfFos);
       pdfFos = null;
 
     } finally {
       IOUtils.closeQuietly(pdfFos);
     }
+  }
+
+  /**
+   * Output the schedule for each team.
+   * 
+   * @param params schedule parameters
+   * @param pdfFos where to write the schedule
+   * @throws DocumentException
+   */
+  public void outputTeamSchedules(final SchedParams params,
+                                  OutputStream pdfFos) throws DocumentException {
+    final Document teamDoc = PdfUtils.createPdfDoc(pdfFos, new SimpleFooterHandler());
+    for (final TeamScheduleInfo si : _schedule) {
+      outputTeamSchedule(params, teamDoc, si);
+    }
+    teamDoc.close();
+  }
+
+  /**
+   * Output the performance schedule, sorted by time.
+   * 
+   * @param pdfFos where to write the schedule
+   * @throws DocumentException
+   */
+  public void outputPerformanceScheduleByTime(OutputStream pdfFos) throws DocumentException {
+    final Document performanceDoc = PdfUtils.createPdfDoc(pdfFos, new SimpleFooterHandler());
+    outputPerformanceSchedule(performanceDoc);
+    performanceDoc.close();
+  }
+
+  /**
+   * Output the subjective schedules with a table for each category and sorted
+   * by time.
+   * 
+   * @param pdfFos where to write the schedule
+   * @throws DocumentException
+   */
+  public void outputSubjectiveSchedulesByTime(OutputStream pdfFos) throws DocumentException {
+    final Document detailedSchedulesByTime = PdfUtils.createPdfDoc(pdfFos, new SimpleFooterHandler());
+    for (final String subjectiveStation : subjectiveStations) {
+      outputSubjectiveScheduleByTime(detailedSchedulesByTime, subjectiveStation);
+      detailedSchedulesByTime.add(Chunk.NEXTPAGE);
+    }
+    detailedSchedulesByTime.close();
+  }
+
+  /**
+   * Output the subjective schedules with a table for each category and sorted
+   * by judging station, then by time.
+   * 
+   * @param pdfFos where to output the schedule
+   * @throws DocumentException
+   */
+  public void outputSubjectiveSchedulesByJudgingStation(OutputStream pdfFos) throws DocumentException {
+    final Document detailedSchedulesByDivision = PdfUtils.createPdfDoc(pdfFos, new SimpleFooterHandler());
+    for (final String subjectiveStation : subjectiveStations) {
+      outputSubjectiveScheduleByDivision(detailedSchedulesByDivision, subjectiveStation);
+      detailedSchedulesByDivision.add(Chunk.NEXTPAGE);
+    }
+    detailedSchedulesByDivision.close();
   }
 
   private static final Font TEAM_TITLE_FONT = FontFactory.getFont(FontFactory.TIMES, 12, Font.BOLD);
