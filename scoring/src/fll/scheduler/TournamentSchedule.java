@@ -395,7 +395,6 @@ public class TournamentSchedule implements Serializable {
         ti.setTeamName(team.getTeamName());
 
         cacheTeamScheduleInformation(ti);
-        _schedule.add(ti);
       }
 
     } finally {
@@ -595,11 +594,24 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
+   * Add a team to the schedule. Check that the team isn't already in the
+   * schedule.
+   */
+  private void addToSchedule(final TeamScheduleInfo ti) {
+    if (!_schedule.contains(ti)) {
+      _schedule.add(ti);
+    } else {
+      LOGGER.warn("Attempting to add the same team to the schedule twice: "
+          + ti.getTeamNumber());
+    }
+  }
+
+  /**
    * Populate internal caches with the data from this newly created
    * {@link TeamScheduleInfo}.
    */
   private void cacheTeamScheduleInformation(final TeamScheduleInfo ti) {
-    _schedule.add(ti);
+    addToSchedule(ti);
 
     // keep track of some meta information
     for (int round = 0; round < getNumberOfRounds(); ++round) {
