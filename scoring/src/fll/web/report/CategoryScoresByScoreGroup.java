@@ -67,7 +67,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=categoryScoresByJudgingStation.pdf");
 
-      final Document pdfDoc = PdfUtils.createPdfDoc(response.getOutputStream(), new SimpleFooterHandler());
+      final Document pdfDoc = PdfUtils.createPortraitPdfDoc(response.getOutputStream(), new SimpleFooterHandler());
 
       generateReport(connection, pdfDoc, challengeDescription, tournament);
 
