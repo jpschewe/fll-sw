@@ -395,7 +395,6 @@ public class TournamentSchedule implements Serializable {
         ti.setTeamName(team.getTeamName());
 
         cacheTeamScheduleInformation(ti);
-        _schedule.add(ti);
       }
 
     } finally {
@@ -595,11 +594,24 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
+   * Add a team to the schedule. Check that the team isn't already in the
+   * schedule.
+   */
+  private void addToSchedule(final TeamScheduleInfo ti) {
+    if (!_schedule.contains(ti)) {
+      _schedule.add(ti);
+    } else {
+      LOGGER.warn("Attempting to add the same team to the schedule twice: "
+          + ti.getTeamNumber());
+    }
+  }
+
+  /**
    * Populate internal caches with the data from this newly created
    * {@link TeamScheduleInfo}.
    */
   private void cacheTeamScheduleInformation(final TeamScheduleInfo ti) {
-    _schedule.add(ti);
+    addToSchedule(ti);
 
     // keep track of some meta information
     for (int round = 0; round < getNumberOfRounds(); ++round) {
@@ -687,56 +699,181 @@ public class TournamentSchedule implements Serializable {
           + " exists, but isn't a directory");
     }
 
-    FileOutputStream pdfFos = null;
+    OutputStream pdfFos = null;
     try {
       final File byDivision = new File(directory, baseFilename
           + "-subjective-by-division.pdf");
 
       pdfFos = new FileOutputStream(byDivision);
-      final Document detailedSchedulesByDivision = PdfUtils.createPdfDoc(pdfFos, new SimpleFooterHandler());
-      for (final String subjectiveStation : subjectiveStations) {
-        outputSubjectiveScheduleByDivision(detailedSchedulesByDivision, subjectiveStation);
-        detailedSchedulesByDivision.add(Chunk.NEXTPAGE);
-      }
-      detailedSchedulesByDivision.close();
+      outputSubjectiveSchedulesByJudgingStation(pdfFos);
       IOUtils.closeQuietly(pdfFos);
       pdfFos = null;
 
       final File byTime = new File(directory, baseFilename
           + "-subjective-by-time.pdf");
       pdfFos = new FileOutputStream(byTime);
-      final Document detailedSchedulesByTime = PdfUtils.createPdfDoc(pdfFos, new SimpleFooterHandler());
-      for (final String subjectiveStation : subjectiveStations) {
-        outputSubjectiveScheduleByTime(detailedSchedulesByTime, subjectiveStation);
-        detailedSchedulesByTime.add(Chunk.NEXTPAGE);
-      }
-      detailedSchedulesByTime.close();
+      outputSubjectiveSchedulesByTime(pdfFos);
       IOUtils.closeQuietly(pdfFos);
       pdfFos = null;
 
       final File performance = new File(directory, baseFilename
           + "-performance.pdf");
       pdfFos = new FileOutputStream(performance);
-      final Document performanceDoc = PdfUtils.createPdfDoc(pdfFos, new SimpleFooterHandler());
-      outputPerformanceSchedule(performanceDoc);
-      performanceDoc.close();
+      outputPerformanceScheduleByTime(pdfFos);
       IOUtils.closeQuietly(pdfFos);
       pdfFos = null;
 
       final File teamSchedules = new File(directory, baseFilename
           + "-team-schedules.pdf");
       pdfFos = new FileOutputStream(teamSchedules);
-      final Document teamDoc = PdfUtils.createPdfDoc(pdfFos, new SimpleFooterHandler());
-      for (final TeamScheduleInfo si : _schedule) {
-        outputTeamSchedule(params, teamDoc, si);
-      }
-      teamDoc.close();
+      outputTeamSchedules(params, pdfFos);
       IOUtils.closeQuietly(pdfFos);
       pdfFos = null;
 
     } finally {
       IOUtils.closeQuietly(pdfFos);
     }
+  }
+
+  /**
+   * Output the schedule for each team.
+   * 
+   * @param params schedule parameters
+   * @param pdfFos where to write the schedule
+   * @throws DocumentException
+   */
+  public void outputTeamSchedules(final SchedParams params,
+                                  final OutputStream pdfFos) throws DocumentException {
+    final Document teamDoc = PdfUtils.createPortraitPdfDoc(pdfFos, new SimpleFooterHandler());
+    for (final TeamScheduleInfo si : _schedule) {
+      outputTeamSchedule(params, teamDoc, si);
+    }
+    teamDoc.close();
+  }
+
+  /**
+   * Output the performance schedule, sorted by time.
+   * 
+   * @param pdfFos where to write the schedule
+   * @throws DocumentException
+   */
+  public void outputPerformanceScheduleByTime(final OutputStream pdfFos) throws DocumentException {
+    final Document performanceDoc = PdfUtils.createPortraitPdfDoc(pdfFos, new SimpleFooterHandler());
+    outputPerformanceSchedule(performanceDoc);
+    performanceDoc.close();
+  }
+
+  /**
+   * Output the subjective schedules with a table for each category and sorted
+   * by time.
+   * 
+   * @param pdfFos where to write the schedule
+   * @throws DocumentException
+   */
+  public void outputSubjectiveSchedulesByTime(final OutputStream pdfFos) throws DocumentException {
+    final Document detailedSchedulesByTime = PdfUtils.createPortraitPdfDoc(pdfFos, new SimpleFooterHandler());
+    for (final String subjectiveStation : subjectiveStations) {
+      outputSubjectiveScheduleByTime(detailedSchedulesByTime, subjectiveStation);
+      detailedSchedulesByTime.add(Chunk.NEXTPAGE);
+    }
+    detailedSchedulesByTime.close();
+  }
+
+  /**
+   * Output the subjective schedules with a table for each category and sorted
+   * by judging station, then by time.
+   * 
+   * @param pdfFos where to output the schedule
+   * @throws DocumentException
+   */
+  public void outputSubjectiveSchedulesByJudgingStation(final OutputStream pdfFos) throws DocumentException {
+    final Document detailedSchedulesByDivision = PdfUtils.createPortraitPdfDoc(pdfFos, new SimpleFooterHandler());
+    for (final String subjectiveStation : subjectiveStations) {
+      outputSubjectiveScheduleByDivision(detailedSchedulesByDivision, subjectiveStation);
+      detailedSchedulesByDivision.add(Chunk.NEXTPAGE);
+    }
+    detailedSchedulesByDivision.close();
+  }
+
+  /**
+   * Output the schedule sorted by team number. This schedule looks much like
+   * the input spreadsheet.
+   * 
+   * @param stream where to write the schedule
+   * @throws DocumentException
+   */
+  public void outputScheduleByTeam(final OutputStream stream) throws DocumentException {
+    final Document pdf = PdfUtils.createLandscapePdfDoc(stream, new SimpleFooterHandler());
+
+    final int numColumns = 4
+        + subjectiveStations.size() + getNumberOfRounds() * 2;
+    final PdfPTable table = PdfUtils.createTable(numColumns);
+    final float[] columnWidths = new float[numColumns];
+    int idx = 0;
+    columnWidths[idx] = 2; // team number
+    ++idx;
+    columnWidths[idx] = 3; // team name
+    ++idx;
+    columnWidths[idx] = 3; // organization
+    ++idx;
+    columnWidths[idx] = 2; // judging group
+    ++idx;
+    for (int i = 0; i < subjectiveStations.size(); ++i) {
+      columnWidths[idx] = 2; // time
+      ++idx;
+    }
+    for (int i = 0; i < getNumberOfRounds(); ++i) {
+      columnWidths[idx] = 2; // time
+      ++idx;
+      columnWidths[idx] = 2; // table
+      ++idx;
+    }
+    table.setWidths(columnWidths);
+
+    final PdfPCell tournamentCell = PdfUtils.createHeaderCell("Tournament: "
+        + getName());
+    tournamentCell.setColspan(numColumns);
+
+    table.addCell(tournamentCell);
+
+    table.addCell(PdfUtils.createHeaderCell(TEAM_NUMBER_HEADER));
+    table.addCell(PdfUtils.createHeaderCell(TEAM_NAME_HEADER));
+    table.addCell(PdfUtils.createHeaderCell(ORGANIZATION_HEADER));
+    table.addCell(PdfUtils.createHeaderCell(JUDGE_GROUP_HEADER));
+    for (final String subjectiveStation : subjectiveStations) {
+      table.addCell(PdfUtils.createHeaderCell(subjectiveStation));
+    }
+    for (int round = 0; round < getNumberOfRounds(); ++round) {
+      table.addCell(PdfUtils.createHeaderCell(String.format(PERF_HEADER_FORMAT, round + 1)));
+      table.addCell(PdfUtils.createHeaderCell(String.format(TABLE_HEADER_FORMAT, round + 1)));
+    }
+    table.setHeaderRows(2);
+
+    Collections.sort(_schedule, ComparatorByTeam.INSTANCE);
+    for (final TeamScheduleInfo si : _schedule) {
+      table.addCell(PdfUtils.createCell(String.valueOf(si.getTeamNumber())));
+      table.addCell(PdfUtils.createCell(si.getTeamName()));
+      table.addCell(PdfUtils.createCell(si.getOrganization()));
+      table.addCell(PdfUtils.createCell(si.getJudgingStation()));
+
+      for (final String subjectiveStation : subjectiveStations) {
+        table.addCell(PdfUtils.createCell(OUTPUT_DATE_FORMAT.get().format(si.getSubjectiveTimeByName(subjectiveStation)
+                                                                            .getTime())));
+      }
+
+      for (int round = 0; round < getNumberOfRounds(); ++round) {
+        final PerformanceTime perf = si.getPerf(round);
+
+        table.addCell(PdfUtils.createCell(OUTPUT_DATE_FORMAT.get().format(perf.getTime())));
+
+        table.addCell(PdfUtils.createCell(String.format("%s %s", perf.getTable(), perf.getSide())));
+      }
+
+    }
+
+    pdf.add(table);
+
+    pdf.close();
   }
 
   private static final Font TEAM_TITLE_FONT = FontFactory.getFont(FontFactory.TIMES, 12, Font.BOLD);
@@ -860,8 +997,8 @@ public class TournamentSchedule implements Serializable {
 
     table.addCell(PdfUtils.createHeaderCell(TEAM_NUMBER_HEADER));
     table.addCell(PdfUtils.createHeaderCell(DIVISION_HEADER));
-    table.addCell(PdfUtils.createHeaderCell("School or Organization"));
-    table.addCell(PdfUtils.createHeaderCell("Team Name"));
+    table.addCell(PdfUtils.createHeaderCell(ORGANIZATION_HEADER));
+    table.addCell(PdfUtils.createHeaderCell(TEAM_NAME_HEADER));
     table.addCell(PdfUtils.createHeaderCell("Time"));
     table.addCell(PdfUtils.createHeaderCell("Table"));
     table.addCell(PdfUtils.createHeaderCell("Round"));
@@ -920,8 +1057,8 @@ public class TournamentSchedule implements Serializable {
 
     table.addCell(PdfUtils.createHeaderCell(TEAM_NUMBER_HEADER));
     table.addCell(PdfUtils.createHeaderCell(DIVISION_HEADER));
-    table.addCell(PdfUtils.createHeaderCell("School or Organization"));
-    table.addCell(PdfUtils.createHeaderCell("Team Name"));
+    table.addCell(PdfUtils.createHeaderCell(ORGANIZATION_HEADER));
+    table.addCell(PdfUtils.createHeaderCell(TEAM_NAME_HEADER));
     table.addCell(PdfUtils.createHeaderCell(subjectiveStation));
     table.addCell(PdfUtils.createHeaderCell(JUDGE_GROUP_HEADER));
     table.setHeaderRows(2);
@@ -953,8 +1090,8 @@ public class TournamentSchedule implements Serializable {
 
     table.addCell(PdfUtils.createHeaderCell(TEAM_NUMBER_HEADER));
     table.addCell(PdfUtils.createHeaderCell(DIVISION_HEADER));
-    table.addCell(PdfUtils.createHeaderCell("School or Organization"));
-    table.addCell(PdfUtils.createHeaderCell("Team Name"));
+    table.addCell(PdfUtils.createHeaderCell(ORGANIZATION_HEADER));
+    table.addCell(PdfUtils.createHeaderCell(TEAM_NAME_HEADER));
     table.addCell(PdfUtils.createHeaderCell(subjectiveStation));
     table.addCell(PdfUtils.createHeaderCell(JUDGE_GROUP_HEADER));
     table.setHeaderRows(2);
@@ -1071,6 +1208,23 @@ public class TournamentSchedule implements Serializable {
       } else {
         return timeCompare;
       }
+    }
+  }
+
+  /**
+   * Comparator for for sorting by team number.
+   */
+  private static class ComparatorByTeam implements Comparator<TeamScheduleInfo>, Serializable {
+
+    public static final ComparatorByTeam INSTANCE = new ComparatorByTeam();
+
+    private ComparatorByTeam() {
+    }
+
+    public int compare(final TeamScheduleInfo one,
+                       final TeamScheduleInfo two) {
+
+      return Integer.compare(one.getTeamNumber(), two.getTeamNumber());
     }
   }
 
