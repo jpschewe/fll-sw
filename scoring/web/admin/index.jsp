@@ -154,6 +154,8 @@
       </form> <c:if test="${scheduleUploaded }">
         <!--  downloads for the schedule -->
         <ul>
+          <li><a href="ScheduleByTeam">Full schedule sorted by
+              team</a></li>
           <li><a href="SubjectiveScheduleByJudgingStation">Subjective
               schedule sorted by judging station, then time</a></li>
           <li><a href="SubjectiveScheduleByTime">Subjective

@@ -22,7 +22,6 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfPageEvent;
 import com.itextpdf.text.pdf.PdfWriter;
 
-
 /**
  * Utilities for dealing with PDFs.
  */
@@ -49,7 +48,7 @@ public final class PdfUtils {
     final Chunk chunk = new Chunk(text);
     chunk.getFont().setStyle(Font.BOLD);
     final PdfPCell cell = createBasicCell(chunk);
-  
+
     return cell;
   }
 
@@ -85,22 +84,46 @@ public final class PdfUtils {
   }
 
   /**
-   * Create a simple PDF document using letter orientation.
+   * Create a simple PDF document using portrait letter orientation.
    * The document is opened by this method.
    */
-  public static Document createPdfDoc(final OutputStream out,
-                                final PdfPageEvent pageHandler) throws DocumentException {
+  public static Document createPortraitPdfDoc(final OutputStream out,
+                                              final PdfPageEvent pageHandler) throws DocumentException {
     final Document pdfDoc = new Document(PageSize.LETTER);
+    commonPdfDocCreate(out, pageHandler, pdfDoc);
+
+    return pdfDoc;
+  }
+
+  /**
+   * Create a simple PDF document using landscape letter orientation.
+   * The document is opened by this method.
+   */
+  public static Document createLandscapePdfDoc(final OutputStream out,
+                                               final PdfPageEvent pageHandler) throws DocumentException {
+    final Document pdfDoc = new Document(PageSize.LETTER.rotate());
+    commonPdfDocCreate(out, pageHandler, pdfDoc);
+
+    return pdfDoc;
+  }
+
+  /**
+   * Common code for document creation. Sets margins and page event handler.
+   * This method opens the document.
+   * 
+   * @throws DocumentException
+   */
+  private static void commonPdfDocCreate(final OutputStream out,
+                                         final PdfPageEvent pageHandler,
+                                         final Document pdfDoc) throws DocumentException {
     final PdfWriter writer = PdfWriter.getInstance(pdfDoc, out);
     writer.setPageEvent(pageHandler);
-  
+
     // Measurements are always in points (72 per inch) - This sets up 1/2 inch
     // margins
     pdfDoc.setMargins(0.5f * 72, 0.5f * 72, 0.5f * 72, 0.5f * 72);
-    
+
     pdfDoc.open();
-    
-    return pdfDoc;
   }
-  
+
 }
