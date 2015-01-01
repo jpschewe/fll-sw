@@ -85,7 +85,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           || percentageStr.trim().equals("")) {
         percentageHurdle = 100;
       } else {
-        percentageHurdle = Integer.valueOf(percentageStr);
+        percentageHurdle = Integer.parseInt(percentageStr);
       }
       final double performanceHurdle = percentageHurdle / 100.0;
 
@@ -119,6 +119,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
    * @return the set of teams that have a good enough performance score
    * @throws SQLException
    */
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Winner criteria determines the sort")
   private Set<Integer> determineTeamsMeetingPerformanceHurdle(final double performanceHurdle,
                                                               final Connection connection,
                                                               final int tournament,
