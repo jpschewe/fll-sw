@@ -607,6 +607,8 @@ public final class Playoff {
       while (divisions.next()) {
         final String eventDivision = divisions.getString(1);
 
+        // find max run number for ANY team in the specified division, not
+        // necessarily those in our list
         final int runNumber = getMaxPerformanceRound(connection, currentTournament, eventDivision);
         if (-1 != runNumber) {
           maxRunNumber = Math.max(maxRunNumber, runNumber);
@@ -639,8 +641,8 @@ public final class Playoff {
           + " event_division = ? AND tournament = ?");
 
       maxPrep.setString(1, playoffDivision);
-      maxPrep.setInt(2,  currentTournament);
-      
+      maxPrep.setInt(2, currentTournament);
+
       max = maxPrep.executeQuery();
       if (max.next()) {
         final int runNumber = max.getInt(1);
@@ -1016,8 +1018,7 @@ public final class Playoff {
     try {
       prep = connection.prepareStatement("SELECT run_number FROM PlayoffData" //
           + " WHERE Tournament = ?" //
-          + " AND event_division = ?"
-          + " AND PlayoffRound = ?" //
+          + " AND event_division = ?" + " AND PlayoffRound = ?" //
           + " AND Team = ?");
       prep.setInt(1, tournament);
       prep.setString(2, division);
