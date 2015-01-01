@@ -205,7 +205,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
     try {
       // This creates our new PDF document and declares it to be in portrait
       // orientation
-      final Document pdfDoc = PdfUtils.createPdfDoc(out, pageHandler);
+      final Document pdfDoc = PdfUtils.createPortraitPdfDoc(out, pageHandler);
 
       final List<ScoreCategory> subjectiveCategories = challengeDescription.getSubjectiveCategories();
 
