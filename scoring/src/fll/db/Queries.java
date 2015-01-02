@@ -855,6 +855,8 @@ public final class Queries {
 
     sql.append("NoShow = "
         + noShow);
+    
+    sql.append(", TIMESTAMP = CURRENT_TIMESTAMP");
 
     if (teamScore.isNoShow()) {
       sql.append(", ComputedTotal = NULL");
