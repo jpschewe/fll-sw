@@ -226,6 +226,8 @@ public final class ScoreStandardization {
                                            final int tournament) throws SQLException, ParseException {
     final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection, tournament);
 
+    final Tournament currentTournament = Tournament.findTournamentByID(connection, tournament);
+
     PreparedStatement update = null;
     ResultSet rs = null;
     PreparedStatement perfSelect = null;
@@ -281,6 +283,8 @@ public final class ScoreStandardization {
         update.setInt(3, teamNumber);
         update.executeUpdate();
       }
+
+      currentTournament.recordScoreSummariesUpdated(connection);
 
     } finally {
       SQLFunctions.close(rs);

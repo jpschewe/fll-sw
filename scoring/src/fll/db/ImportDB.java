@@ -220,6 +220,7 @@ public final class ImportDB {
       destPrep = null;
 
       // load all of the tournaments
+      // don't worry about bringing the times over, this way they will all be null and this will force score summarization
       for (final Tournament sourceTournament : Tournament.getTournaments(memConnection)) {
         if (!GenerateDB.INTERNAL_TOURNAMENT_NAME.equals(sourceTournament.getName())
             && GenerateDB.INTERNAL_TOURNAMENT_ID != sourceTournament.getTournamentID()) {
@@ -530,6 +531,10 @@ public final class ImportDB {
     if (dbVersion < 13) {
       upgrade12To13(connection, description);
     }
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 14) {
+      upgrade13To14(connection);
+    }
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < GenerateDB.DATABASE_VERSION) {
@@ -610,6 +615,28 @@ public final class ImportDB {
 
     // no mapping
     return null;
+  }
+
+  /**
+   * Adds time columns to tournaments table.
+   */
+  private static void upgrade13To14(final Connection connection) throws SQLException {
+    if (LOG.isTraceEnabled()) {
+      LOG.trace("Upgrading database from 13 to 14");
+    }
+
+    Statement stmt = null;
+    try {
+      stmt = connection.createStatement();
+
+      stmt.executeUpdate("ALTER TABLE Tournaments ADD COLUMN subjective_modified TIMESTAMP DEFAULT NULL");
+      stmt.executeUpdate("ALTER TABLE Tournaments ADD COLUMN performance_seeding_modified TIMESTAMP DEFAULT NULL");
+      stmt.executeUpdate("ALTER TABLE Tournaments ADD COLUMN summary_computed TIMESTAMP DEFAULT NULL");
+      
+      setDBVersion(connection, 14);
+    } finally {
+      SQLFunctions.close(stmt);
+    }
   }
 
   /**
@@ -703,6 +730,7 @@ public final class ImportDB {
         scheduleRows = null;
       }
 
+      setDBVersion(connection, 13);
     } finally {
       SQLFunctions.close(metaData);
       SQLFunctions.close(stmt);
@@ -1089,6 +1117,8 @@ public final class ImportDB {
     final Tournament destTournament = Tournament.findTournamentByName(destinationConnection, tournamentName);
     final int destTournamentID = destTournament.getTournamentID();
 
+    // Tournaments table isn't imported as it's expected to already be populated with the tournament
+    
     importJudges(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
     importTournamentTeams(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
