@@ -220,7 +220,8 @@ public final class ImportDB {
       destPrep = null;
 
       // load all of the tournaments
-      // don't worry about bringing the times over, this way they will all be null and this will force score summarization
+      // don't worry about bringing the times over, this way they will all be
+      // null and this will force score summarization
       for (final Tournament sourceTournament : Tournament.getTournaments(memConnection)) {
         if (!GenerateDB.INTERNAL_TOURNAMENT_NAME.equals(sourceTournament.getName())
             && GenerateDB.INTERNAL_TOURNAMENT_ID != sourceTournament.getTournamentID()) {
@@ -629,13 +630,64 @@ public final class ImportDB {
     try {
       stmt = connection.createStatement();
 
-      stmt.executeUpdate("ALTER TABLE Tournaments ADD COLUMN subjective_modified TIMESTAMP DEFAULT NULL");
-      stmt.executeUpdate("ALTER TABLE Tournaments ADD COLUMN performance_seeding_modified TIMESTAMP DEFAULT NULL");
-      stmt.executeUpdate("ALTER TABLE Tournaments ADD COLUMN summary_computed TIMESTAMP DEFAULT NULL");
-      
+      // need to check for columns as version 0 databases will automatically get
+      // these columns created
+      if (!checkForColumnInTable(connection, "Tournaments", "subjective_modified")) {
+        stmt.executeUpdate("ALTER TABLE Tournaments ADD COLUMN subjective_modified TIMESTAMP DEFAULT NULL");
+      }
+      if (!checkForColumnInTable(connection, "Tournaments", "performance_seeding_modified")) {
+        stmt.executeUpdate("ALTER TABLE Tournaments ADD COLUMN performance_seeding_modified TIMESTAMP DEFAULT NULL");
+      }
+      if (!checkForColumnInTable(connection, "Tournaments", "summary_computed")) {
+        stmt.executeUpdate("ALTER TABLE Tournaments ADD COLUMN summary_computed TIMESTAMP DEFAULT NULL");
+      }
+
       setDBVersion(connection, 14);
     } finally {
       SQLFunctions.close(stmt);
+    }
+  }
+
+  /**
+   * Check for a column in a table. This checks table names both upper and lower
+   * case.
+   * This also checks column names ignoring case.
+   * 
+   * @param connection database connection
+   * @param table the table to find
+   * @param column the column to find
+   * @return true if the column was found
+   */
+  private static boolean checkForColumnInTable(final Connection connection,
+                                               final String table,
+                                               final String column) throws SQLException {
+    ResultSet metaData = null;
+    try {
+      final DatabaseMetaData md = connection.getMetaData();
+
+      metaData = md.getColumns(null, null, table.toUpperCase(), "%");
+      while (metaData.next()) {
+        final String needle = metaData.getString("COLUMN_NAME");
+        if (column.equalsIgnoreCase(needle)) {
+          return true;
+        }
+      }
+      SQLFunctions.close(metaData);
+      metaData = null;
+
+      metaData = md.getColumns(null, null, table.toLowerCase(), "%");
+      while (metaData.next()) {
+        final String needle = metaData.getString("COLUMN_NAME");
+        if (column.equalsIgnoreCase(needle)) {
+          return true;
+        }
+      }
+      SQLFunctions.close(metaData);
+      metaData = null;
+
+      return false;
+    } finally {
+      SQLFunctions.close(metaData);
     }
   }
 
@@ -664,35 +716,12 @@ public final class ImportDB {
     PreparedStatement getFinalistSchedule = null;
     ResultSet scheduleRows = null;
     Statement stmt = null;
-    ResultSet metaData = null;
     try {
       stmt = connection.createStatement();
 
       // need to check if the column exists as some version 12 databases got
       // created with the column
-      final DatabaseMetaData md = connection.getMetaData();
-      boolean foundRoomColumn = false;
-      metaData = md.getColumns(null, null, "FINALIST_CATEGORIES", "%");
-      while (metaData.next()) {
-        final String column = metaData.getString("COLUMN_NAME");
-        if ("room".equalsIgnoreCase(column)) {
-          foundRoomColumn = true;
-        }
-      }
-      SQLFunctions.close(metaData);
-      metaData = null;
-
-      metaData = md.getColumns(null, null, "finalist_categories", "%");
-      while (metaData.next()) {
-        final String column = metaData.getString("COLUMN_NAME");
-        if ("room".equalsIgnoreCase(column)) {
-          foundRoomColumn = true;
-        }
-      }
-      SQLFunctions.close(metaData);
-      metaData = null;
-
-      if (!foundRoomColumn) {
+      if (!checkForColumnInTable(connection, "finalist_categories", "room")) {
         stmt.executeUpdate("ALTER TABLE finalist_categories ADD COLUMN room VARCHAR(32) DEFAULT NULL");
       }
 
@@ -732,7 +761,6 @@ public final class ImportDB {
 
       setDBVersion(connection, 13);
     } finally {
-      SQLFunctions.close(metaData);
       SQLFunctions.close(stmt);
       SQLFunctions.close(tournaments);
       SQLFunctions.close(getTournaments);
@@ -820,7 +848,6 @@ public final class ImportDB {
     Statement stmt = null;
     ResultSet rs = null;
     PreparedStatement prep = null;
-    ResultSet metaData = null;
     try {
       stmt = connection.createStatement();
       stmt.executeUpdate("DROP TABLE IF EXISTS sched_subjective CASCADE");
@@ -836,32 +863,7 @@ public final class ImportDB {
       stmt.executeUpdate(sql.toString());
 
       // migrate subjective times over if they are there
-      final DatabaseMetaData md = connection.getMetaData();
-      boolean foundPresentationColumn = false;
-      metaData = md.getColumns(null, null, "schedule", "%");
-      while (metaData.next()) {
-        final String column = metaData.getString("COLUMN_NAME");
-        if ("presentation".equalsIgnoreCase(column)) {
-          foundPresentationColumn = true;
-        }
-      }
-      SQLFunctions.close(metaData);
-      metaData = null;
-
-      metaData = md.getColumns(null, null, "SCHEDULE", "%");
-      while (metaData.next()) {
-        final String column = metaData.getString("COLUMN_NAME");
-        if ("presentation".equalsIgnoreCase(column)) {
-          foundPresentationColumn = true;
-        }
-      }
-      metaData = md.getColumns(null, null, "schedule", "%");
-      while (metaData.next()) {
-        final String column = metaData.getString("COLUMN_NAME");
-        if ("presentation".equalsIgnoreCase(column)) {
-          foundPresentationColumn = true;
-        }
-      }
+      boolean foundPresentationColumn = checkForColumnInTable(connection, "schedule", "presentation");
 
       if (foundPresentationColumn) {
         prep = connection.prepareStatement("INSERT INTO sched_subjective" //
@@ -1117,8 +1119,9 @@ public final class ImportDB {
     final Tournament destTournament = Tournament.findTournamentByName(destinationConnection, tournamentName);
     final int destTournamentID = destTournament.getTournamentID();
 
-    // Tournaments table isn't imported as it's expected to already be populated with the tournament
-    
+    // Tournaments table isn't imported as it's expected to already be populated
+    // with the tournament
+
     importJudges(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
     importTournamentTeams(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
