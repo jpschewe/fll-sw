@@ -11,13 +11,18 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
+
+import org.apache.log4j.Logger;
+
 import fll.db.GenerateDB;
+import fll.util.LogUtils;
 
 /**
  * The representation of a tournament. If someone changes the database, this
@@ -25,6 +30,8 @@ import fll.db.GenerateDB;
  * object was created.
  */
 public final class Tournament implements Serializable {
+
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   private Tournament(final int tournamentID,
                      final String name,
@@ -296,17 +303,26 @@ public final class Tournament implements Serializable {
       prep.setInt(1, getTournamentID());
       rs = prep.executeQuery();
       if (rs.next()) {
-        Date performanceSeedingModified = rs.getDate(1);
+        Timestamp performanceSeedingModified = rs.getTimestamp(1);
         if (rs.wasNull()) {
           performanceSeedingModified = null;
         }
-        Date subjectiveModified = rs.getDate(2);
+        Timestamp subjectiveModified = rs.getTimestamp(2);
         if (rs.wasNull()) {
           subjectiveModified = null;
         }
-        Date summaryComputed = rs.getDate(3);
+        Timestamp summaryComputed = rs.getTimestamp(3);
         if (rs.wasNull()) {
           summaryComputed = null;
+        }
+
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("performance: "
+              + performanceSeedingModified);
+          LOGGER.trace("subjective: "
+              + subjectiveModified);
+          LOGGER.trace("summary: "
+              + summaryComputed);
         }
 
         if (null == summaryComputed) {
