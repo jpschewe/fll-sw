@@ -243,7 +243,7 @@ public final class ScoreStandardization {
       final PerformanceScoreCategory performanceElement = description.getPerformance();
       final double performanceWeight = performanceElement.getWeight();
       perfSelect = connection.prepareStatement("SELECT performance * "
-          + performanceWeight + " FROM FinalScores WHERE TOurnament = ? AND TeamNumber = ?");
+          + performanceWeight + " FROM FinalScores WHERE Tournament = ? AND TeamNumber = ?");
       perfSelect.setInt(1, tournament);
 
       update = connection.prepareStatement("UPDATE FinalScores SET OverallScore = ? WHERE Tournament = ? AND TeamNumber = ?");
