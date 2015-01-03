@@ -38,6 +38,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.SubjectiveScore;
+import fll.Tournament;
 import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -283,6 +284,9 @@ public class SubjectiveScoresServlet extends HttpServlet {
         insertPrep = null;
 
       } // foreach category
+
+      final Tournament tournament = Tournament.findTournamentByID(connection, currentTournament);
+      tournament.recordSubjectiveModified(connection);
 
       final UploadResult result = new UploadResult(true, "Successfully uploaded scores", numModified);
       response.reset();

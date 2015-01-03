@@ -1,3 +1,4 @@
+* 351 - Detect when the summarized scores are out of date
 * 114 - Add the ability to uninitialize a playoff division
 * 14 - add the ability to print the schedules from the web 
 * 339 - Highlight teams that are in the top X% of performance scores
