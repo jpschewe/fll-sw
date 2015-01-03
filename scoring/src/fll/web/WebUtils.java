@@ -9,6 +9,7 @@ package fll.web;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -192,25 +193,28 @@ public final class WebUtils {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
     // check request against all interfaces
-    String requestAddress = request.getRemoteAddr();
+    String requestAddressStr = request.getRemoteAddr();
 
     // remove zone from IPv6 addresses
-    final int zoneIndex = requestAddress.indexOf('%');
+    final int zoneIndex = requestAddressStr.indexOf('%');
     if (-1 != zoneIndex) {
-      requestAddress = requestAddress.substring(0, zoneIndex);
+      requestAddressStr = requestAddressStr.substring(0, zoneIndex);
     }
 
-    final Collection<String> localIps = getAllIPStrings();
-    if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("Local IPs: "
-          + localIps + " requestAddress: " + requestAddress);
-    }
-    if (localIps.contains(requestAddress)) {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Returning true from checkAUthenticated for connection from own ip, "
-            + requestAddress);
+    try {
+      final InetAddress requestAddress = InetAddress.getByName(requestAddressStr);
+      if (requestAddress.isLoopbackAddress()) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Returning true from checkAuthenticated for connection from local ip: "
+              + requestAddressStr);
+        }
+        return true;
       }
-      return true;
+    } catch (final UnknownHostException e) {
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Error converting request address string to address: "
+            + requestAddressStr, e);
+      }
     }
 
     if (null == datasource) {
