@@ -194,7 +194,7 @@
               end="${playoff_data.numPlayoffRounds+1 }"
               var="numRounds">
               <c:choose>
-                <c:when test="${numRounds == numPlayoffRounds+1 }">
+                <c:when test="${numRounds == playoff_data.numPlayoffRounds+1 }">
                   <option
                     value='${numRounds }'
                     selected>${numRounds }</option>
