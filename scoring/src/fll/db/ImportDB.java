@@ -682,9 +682,6 @@ public final class ImportDB {
           return true;
         }
       }
-      SQLFunctions.close(metaData);
-      metaData = null;
-
       return false;
     } finally {
       SQLFunctions.close(metaData);
