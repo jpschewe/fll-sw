@@ -226,6 +226,8 @@ public final class ScoreStandardization {
                                            final int tournament) throws SQLException, ParseException {
     final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection, tournament);
 
+    final Tournament currentTournament = Tournament.findTournamentByID(connection, tournament);
+
     PreparedStatement update = null;
     ResultSet rs = null;
     PreparedStatement perfSelect = null;
@@ -243,7 +245,7 @@ public final class ScoreStandardization {
       final PerformanceScoreCategory performanceElement = description.getPerformance();
       final double performanceWeight = performanceElement.getWeight();
       perfSelect = connection.prepareStatement("SELECT performance * "
-          + performanceWeight + " FROM FinalScores WHERE TOurnament = ? AND TeamNumber = ?");
+          + performanceWeight + " FROM FinalScores WHERE Tournament = ? AND TeamNumber = ?");
       perfSelect.setInt(1, tournament);
 
       update = connection.prepareStatement("UPDATE FinalScores SET OverallScore = ? WHERE Tournament = ? AND TeamNumber = ?");
@@ -281,6 +283,8 @@ public final class ScoreStandardization {
         update.setInt(3, teamNumber);
         update.executeUpdate();
       }
+
+      currentTournament.recordScoreSummariesUpdated(connection);
 
     } finally {
       SQLFunctions.close(rs);

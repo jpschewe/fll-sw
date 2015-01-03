@@ -11,12 +11,18 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
+
+import org.apache.log4j.Logger;
+
 import fll.db.GenerateDB;
+import fll.util.LogUtils;
 
 /**
  * The representation of a tournament. If someone changes the database, this
@@ -25,7 +31,12 @@ import fll.db.GenerateDB;
  */
 public final class Tournament implements Serializable {
 
-  private Tournament(final int tournamentID, final String name, final String location, final Integer nextTournamentId) {
+  private static final Logger LOGGER = LogUtils.getLogger();
+
+  private Tournament(final int tournamentID,
+                     final String name,
+                     final String location,
+                     final Integer nextTournamentId) {
     this.tournamentID = tournamentID;
     this.name = name;
     this.location = location;
@@ -64,8 +75,10 @@ public final class Tournament implements Serializable {
   /**
    * Create a tournament with a next tournament.
    */
-  public static void createTournament(final Connection connection, final String tournamentName, final String location, final int nextTournamentID)
-      throws SQLException {
+  public static void createTournament(final Connection connection,
+                                      final String tournamentName,
+                                      final String location,
+                                      final int nextTournamentID) throws SQLException {
     PreparedStatement prep = null;
     try {
       prep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location, NextTournament) VALUES (?, ?, ?)");
@@ -81,7 +94,9 @@ public final class Tournament implements Serializable {
   /**
    * Create a tournament without a next tournament.
    */
-  public static void createTournament(final Connection connection, final String tournamentName, final String location) throws SQLException {
+  public static void createTournament(final Connection connection,
+                                      final String tournamentName,
+                                      final String location) throws SQLException {
     PreparedStatement prep = null;
     try {
       prep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location) VALUES (?, ?)");
@@ -96,7 +111,9 @@ public final class Tournament implements Serializable {
   /**
    * Set the next tournament for the specified tournament.
    */
-  public static void setNextTournament(final Connection connection, final String tournamentName, final String nextName) throws SQLException {
+  public static void setNextTournament(final Connection connection,
+                                       final String tournamentName,
+                                       final String nextName) throws SQLException {
     PreparedStatement setNext = null;
     try {
       setNext = connection.prepareStatement("UPDATE Tournaments SET NextTournament = ? WHERE Name = ?");
@@ -105,7 +122,7 @@ public final class Tournament implements Serializable {
           || "".equals(nextName.trim())) {
         setNext.setNull(1, Types.INTEGER);
       } else {
-        final Tournament next = findTournamentByName(connection, nextName);        
+        final Tournament next = findTournamentByName(connection, nextName);
         setNext.setInt(1, next.getTournamentID());
       }
       setNext.executeUpdate();
@@ -134,7 +151,7 @@ public final class Tournament implements Serializable {
         final String location = rs.getString(3);
         final int nextTournamentID = rs.getInt(4);
         final Integer nextTournament;
-        if(rs.wasNull()) {
+        if (rs.wasNull()) {
           nextTournament = null;
         } else {
           nextTournament = nextTournamentID;
@@ -158,7 +175,8 @@ public final class Tournament implements Serializable {
    * @return the Tournament, or null if it cannot be found
    * @throws SQLException
    */
-  public static Tournament findTournamentByName(final Connection connection, final String name) throws SQLException {
+  public static Tournament findTournamentByName(final Connection connection,
+                                                final String name) throws SQLException {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
@@ -193,7 +211,8 @@ public final class Tournament implements Serializable {
    * @return the Tournament, or null if it cannot be found
    * @throws SQLException
    */
-  public static Tournament findTournamentByID(final Connection connection, final int tournamentID) throws SQLException {
+  public static Tournament findTournamentByID(final Connection connection,
+                                              final int tournamentID) throws SQLException {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
@@ -263,6 +282,130 @@ public final class Tournament implements Serializable {
 
   @Override
   public String toString() {
-    return getName() + "(" + getTournamentID() + ") - " + getLocation();
+    return getName()
+        + "(" + getTournamentID() + ") - " + getLocation();
   }
+
+  /**
+   * Check if this tournament needs the score summarization code to run.
+   * 
+   * @param tournamentID the tournament to check
+   * @return true if an update is needed
+   * @throws SQLException
+   */
+  public boolean checkTournamentNeedsSummaryUpdate(final Connection connection) throws SQLException {
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT performance_seeding_modified, subjective_modified, summary_computed" //
+          + " FROM Tournaments" //
+          + " WHERE tournament_id = ?");
+      prep.setInt(1, getTournamentID());
+      rs = prep.executeQuery();
+      if (rs.next()) {
+        Timestamp performanceSeedingModified = rs.getTimestamp(1);
+        if (rs.wasNull()) {
+          performanceSeedingModified = null;
+        }
+        Timestamp subjectiveModified = rs.getTimestamp(2);
+        if (rs.wasNull()) {
+          subjectiveModified = null;
+        }
+        Timestamp summaryComputed = rs.getTimestamp(3);
+        if (rs.wasNull()) {
+          summaryComputed = null;
+        }
+
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("performance: "
+              + performanceSeedingModified);
+          LOGGER.trace("subjective: "
+              + subjectiveModified);
+          LOGGER.trace("summary: "
+              + summaryComputed);
+        }
+
+        if (null == summaryComputed) {
+          // never computed
+          return true;
+        } else if (null == performanceSeedingModified
+            && null == subjectiveModified) {
+          // computed and nothing has changed
+          return false;
+        } else if (null == performanceSeedingModified) {
+          // subjective may have changed and have computed
+          return summaryComputed.before(subjectiveModified);
+        } else if (null == subjectiveModified) {
+          return summaryComputed.before(performanceSeedingModified);
+        } else {
+          // nothing is null
+          return summaryComputed.before(subjectiveModified)
+              || summaryComputed.before(performanceSeedingModified);
+        }
+
+      } else {
+        return true;
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+  }
+
+  /**
+   * Note that the performance seeding rounds have been modified for this
+   * tournament.
+   * 
+   * @throws SQLException
+   */
+  public void recordPerformanceSeedingModified(final Connection connection) throws SQLException {
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("UPDATE Tournaments" //
+          + " SET performance_seeding_modified = CURRENT_TIMESTAMP" //
+          + " WHERE tournament_id = ?");
+      prep.setInt(1, getTournamentID());
+      prep.executeUpdate();
+    } finally {
+      SQLFunctions.close(prep);
+    }
+  }
+
+  /**
+   * Note that the subjective scores have been modified for this
+   * tournament.
+   * 
+   * @throws SQLException
+   */
+  public void recordSubjectiveModified(final Connection connection) throws SQLException {
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("UPDATE Tournaments" //
+          + " SET subjective_modified = CURRENT_TIMESTAMP" //
+          + " WHERE tournament_id = ?");
+      prep.setInt(1, getTournamentID());
+      prep.executeUpdate();
+    } finally {
+      SQLFunctions.close(prep);
+    }
+  }
+
+  /**
+   * Note that the summarized scores have been computed for this tournament.
+   * 
+   * @throws SQLException
+   */
+  public void recordScoreSummariesUpdated(final Connection connection) throws SQLException {
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("UPDATE Tournaments" //
+          + " SET summary_computed = CURRENT_TIMESTAMP" //
+          + " WHERE tournament_id = ?");
+      prep.setInt(1, getTournamentID());
+      prep.executeUpdate();
+    } finally {
+      SQLFunctions.close(prep);
+    }
+  }
+
 }

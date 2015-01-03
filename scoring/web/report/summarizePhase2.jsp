@@ -7,51 +7,54 @@
 <%@ page import="fll.web.ApplicationAttributes"%>
 <%@ page import="fll.web.SessionAttributes"%>
 <%@ page import="javax.sql.DataSource"%>
+<%@ page import="fll.web.report.PromptSummarizeScores"%>
+<%@ page import="fll.web.WebUtils"%>
 
 <%
-	final ChallengeDescription description = ApplicationAttributes
-			.getChallengeDescription(application);
-	final DataSource datasource = ApplicationAttributes
-			.getDataSource(application);
-	final Connection connection = datasource.getConnection();
-	final int currentTournament = Queries
-			.getCurrentTournament(connection);
+  final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
+  final DataSource datasource = ApplicationAttributes.getDataSource(application);
+  final Connection connection = datasource.getConnection();
+  final int currentTournament = Queries.getCurrentTournament(connection);
 
-	ScoreStandardization.updateTeamTotalScores(connection, description,
-			currentTournament);
-	final String errorMsg = ScoreStandardization
-			.checkDataConsistency(connection);
+  ScoreStandardization.updateTeamTotalScores(connection, description, currentTournament);
+  final String errorMsg = ScoreStandardization.checkDataConsistency(connection);
+  pageContext.setAttribute("errorMsg", errorMsg);
+
+  final String url = SessionAttributes.getAttribute(session, PromptSummarizeScores.SUMMARY_REDIRECT_KEY,
+                                                    String.class);
+  if (null != url) {
+    WebUtils.sendRedirect(application, response, url);
+    return;
+  }
 %>
 
 <html>
 <head>
-<link rel="stylesheet" type="text/css"
-	href="<c:url value='/style/style.jsp'/>" />
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="<c:url value='/style/style.jsp'/>" />
 <title>Summarize Scores</title>
 </head>
 
 <body>
-	<h1>Summarize Scores</h1>
+  <h1>Summarize Scores</h1>
 
-	<%
-		if (null == errorMsg) {
-	%>
-	<a href="index.jsp">Normally you'd be redirected here</a>
-	<%
-		session.setAttribute(SessionAttributes.MESSAGE,
-					"<p id='success'><i>Successfully summarized scores</i></p>");
-			response.sendRedirect(response.encodeRedirectURL("index.jsp"));
-	%>
-	<%
-		} else {
-	%>
-	<p>
-		<font color='red'><%=errorMsg%></font>
-	</p>
-	<%
-		}
-	%>
-
+  <c:choose>
+    <c:when test="${empty errorMsg }">
+      <c:set
+        var="message"
+        scope="session">
+        <p id='success'>
+          <i>Successfully summarized scores</i>
+        </p>
+      </c:set>
+      <c:redirect url="index.jsp"></c:redirect>
+    </c:when>
+    <c:otherwise>
+      <font class='error'>${errorMsg}</font>
+    </c:otherwise>
+  </c:choose>
 
 </body>
 </html>

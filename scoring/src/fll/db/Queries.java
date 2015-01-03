@@ -659,7 +659,6 @@ public final class Queries {
       if (rowsUpdated < 1) {
         insertPerformanceScore(description, connection, request);
       }
-
       connection.commit();
     } finally {
       connection.setTransactionIsolation(oldTransactionIsolation);
@@ -681,6 +680,7 @@ public final class Queries {
                                              final HttpServletRequest request) throws SQLException, ParseException,
       RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
+    final Tournament tournament = Tournament.findTournamentByID(connection, currentTournament);
 
     final WinnerType winnerCriteria = description.getWinner();
     final PerformanceScoreCategory performanceElement = description.getPerformance();
@@ -776,6 +776,8 @@ public final class Queries {
       }
       updatePlayoffScore(connection, request, currentTournament, winnerCriteria, performanceElement, tiebreakerElement,
                          teamNumber, runNumber, teamScore);
+    } else {
+      tournament.recordPerformanceSeedingModified(connection);
     }
   }
 
@@ -822,6 +824,7 @@ public final class Queries {
                                             final HttpServletRequest request) throws SQLException, ParseException,
       RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
+    final Tournament tournament = Tournament.findTournamentByID(connection, currentTournament);
 
     final WinnerType winnerCriteria = description.getWinner();
     final PerformanceScoreCategory performanceElement = description.getPerformance();
@@ -852,6 +855,8 @@ public final class Queries {
 
     sql.append("NoShow = "
         + noShow);
+    
+    sql.append(", TIMESTAMP = CURRENT_TIMESTAMP");
 
     if (teamScore.isNoShow()) {
       sql.append(", ComputedTotal = NULL");
@@ -910,6 +915,8 @@ public final class Queries {
         }
         updatePlayoffScore(connection, request, currentTournament, winnerCriteria, performanceElement,
                            tiebreakerElement, teamNumber, runNumber, teamScore);
+      } else {
+        tournament.recordPerformanceSeedingModified(connection);
       }
     }
 
@@ -1617,9 +1624,9 @@ public final class Queries {
    * @throws SQLException
    */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
-  public static void updateSubjectiveScoreTotals(final ChallengeDescription description,
-                                                 final Connection connection,
-                                                 final int tournament) throws SQLException {
+  private static void updateSubjectiveScoreTotals(final ChallengeDescription description,
+                                                  final Connection connection,
+                                                  final int tournament) throws SQLException {
     PreparedStatement updatePrep = null;
     PreparedStatement selectPrep = null;
     ResultSet rs = null;
@@ -1676,9 +1683,9 @@ public final class Queries {
    * @param tournament the tournament to update scores for.
    * @throws SQLException
    */
-  public static void updatePerformanceScoreTotals(final ChallengeDescription description,
-                                                  final Connection connection,
-                                                  final int tournament) throws SQLException {
+  private static void updatePerformanceScoreTotals(final ChallengeDescription description,
+                                                   final Connection connection,
+                                                   final int tournament) throws SQLException {
     PreparedStatement updatePrep = null;
     PreparedStatement selectPrep = null;
     ResultSet rs = null;
@@ -2876,6 +2883,14 @@ public final class Queries {
     }
   }
 
+  /**
+   * Set the name and location of a tournament.
+   * 
+   * @param tournamentID which tournament to modify
+   * @param name new name
+   * @param location new location
+   * @throws SQLException
+   */
   public static void updateTournament(final Connection connection,
                                       final int tournamentID,
                                       final String name,
