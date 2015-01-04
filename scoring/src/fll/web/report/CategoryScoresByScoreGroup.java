@@ -56,6 +56,11 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
+    if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session,
+                                                    "/report/CategoryScoresByScoreGroup")) {
+      return;
+    }
+
     Connection connection = null;
     try {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);

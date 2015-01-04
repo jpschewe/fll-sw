@@ -43,6 +43,9 @@ public class CategorizedScores extends BaseFLLServlet {
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
+    if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session, "/report/CategorizedScores")) {
+      return;
+    }
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
@@ -71,7 +74,6 @@ public class CategorizedScores extends BaseFLLServlet {
 
       writer.format("<h1>%s - %s: Categorized Scores</h1>", challengeDescription.getTitle(), tournamentName);
       writer.format("<hr/>");
-
 
       final int currentTournament = Queries.getCurrentTournament(connection);
 

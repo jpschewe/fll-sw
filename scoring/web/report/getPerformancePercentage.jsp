@@ -1,8 +1,9 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<%@ page import="fll.web.report.GetPerformancePercentage"%>
+<%@ page import="fll.web.report.PromptSummarizeScores"%>
 <%
-  if (GetPerformancePercentage.checkIfSummaryUpdated(response, application, session)) {
+  if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session,
+                                                  "/report/getPerformancePercentage.jsp")) {
     return;
   }
 %>

@@ -72,6 +72,9 @@ public class RankingReport extends BaseFLLServlet {
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
+    if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session, "/report/RankingReport")) {
+      return;
+    }
 
     Connection connection = null;
     try {
@@ -119,7 +122,7 @@ public class RankingReport extends BaseFLLServlet {
 
         final List<String> categories = teamRanks.getCategories();
         Collections.sort(categories);
-        
+
         // pull out Overall first
         if (categories.contains(CategoryRank.OVERALL_CATEGORY_NAME)) {
           final String category = CategoryRank.OVERALL_CATEGORY_NAME;
@@ -140,7 +143,7 @@ public class RankingReport extends BaseFLLServlet {
             outputCategory(para, teamRanks, category);
           }
         }
-        
+
         document.add(para);
         document.add(Chunk.NEXTPAGE);
       }
