@@ -43,6 +43,9 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
+    if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session, "/report/CategoryScoresByJudge")) {
+      return;
+    }
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
@@ -51,7 +54,7 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
 
     final PrintWriter writer = response.getWriter();
     writer.write("<html><body>");
-    
+
     // cache the subjective categories title->dbname
     final Map<String, String> subjectiveCategories = new HashMap<String, String>();
     for (final ScoreCategory subjectiveElement : challengeDescription.getSubjectiveCategories()) {
@@ -70,10 +73,10 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
 
       final int currentTournament = Queries.getCurrentTournament(connection);
       final String tournamentName = Queries.getCurrentTournamentName(connection);
-      
-      writer.format("<h1>%s - %s: Categorized Score Summary by judge</h1>", challengeDescription.getTitle(), tournamentName);
-      writer.write("<hr/>");
 
+      writer.format("<h1>%s - %s: Categorized Score Summary by judge</h1>", challengeDescription.getTitle(),
+                    tournamentName);
+      writer.write("<hr/>");
 
       // foreach division
       for (final String division : Queries.getEventDivisions(connection)) {
