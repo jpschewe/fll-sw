@@ -1,3 +1,5 @@
+Release 9.5
+-----------
 * 263 - Only allow connections from loopback interface to not require a password
 * 351 - Detect when the summarized scores are out of date
 * 114 - Add the ability to uninitialize a playoff division
