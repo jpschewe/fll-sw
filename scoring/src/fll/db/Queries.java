@@ -769,13 +769,14 @@ public final class Queries {
 
     // Perform updates to the playoff data table if in playoff rounds.
     final int numSeedingRounds = getNumSeedingRounds(connection, currentTournament);
-    if ((runNumber > numSeedingRounds)
-        && "1".equals(request.getParameter("Verified"))) {
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("Updating playoff score from insert");
+    if (runNumber > numSeedingRounds) {
+      if ("1".equals(request.getParameter("Verified"))) {
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("Updating playoff score from insert");
+        }
+        updatePlayoffScore(connection, request, currentTournament, winnerCriteria, performanceElement,
+                           tiebreakerElement, teamNumber, runNumber, teamScore);
       }
-      updatePlayoffScore(connection, request, currentTournament, winnerCriteria, performanceElement, tiebreakerElement,
-                         teamNumber, runNumber, teamScore);
     } else {
       tournament.recordPerformanceSeedingModified(connection);
     }
@@ -855,7 +856,7 @@ public final class Queries {
 
     sql.append("NoShow = "
         + noShow);
-    
+
     sql.append(", TIMESTAMP = CURRENT_TIMESTAMP");
 
     if (teamScore.isNoShow()) {
