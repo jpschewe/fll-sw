@@ -1,3 +1,4 @@
+* 361 - correct problem finding java on unix systems without JAVA_HOME set
 * 358 - correct bug on the remote control page with named displays
 
 Release 9.5
