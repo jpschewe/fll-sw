@@ -44,7 +44,7 @@ public class DisplayQueryServlet extends BaseFLLServlet {
     final String displayName = SessionAttributes.getAttribute(session, "displayName", String.class);
     if (displayName != null) {
       // update last seen time
-      DisplayNames.appendDisplayName(application, displayName);
+      DisplayNames.appendDisplayName(application, session, displayName);
 
       final String myDisplayPage = ApplicationAttributes.getAttribute(application, displayName
           + "_displayPage", String.class);
