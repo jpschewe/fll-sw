@@ -11,8 +11,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpSession;
 
 /**
  * Keep track of the named displays.
@@ -24,12 +27,46 @@ public final class DisplayNames {
   }
 
   /**
+   * Create a string that's a valid HTML name.
+   */
+  private static String sanitizeDisplayName(final String str) {
+    if (null == str
+        || "".equals(str)) {
+      return null;
+    } else {
+      String ret = str;
+      final Matcher illegalCharMatcher = ILLEGAL_CHAR_PATTERN.matcher(ret);
+      ret = illegalCharMatcher.replaceAll("_");
+
+      return ret;
+    }
+  }
+
+  private static final Pattern ILLEGAL_CHAR_PATTERN = Pattern.compile("[^A-Za-z0-9_-]");
+
+  /**
    * Add a display name to the list of known displays.
    * This sets the current time as the last seen time. So this method can also
    * be used to update the last seen time.
+   * 
+   * @param application used to track the list of all display names
+   * @param session used to store the display name for the page to see. Variable
+   *          is "displayName".
+   *          This name will be a legal HTML identifier.
+   * @param name the name to set for the display, may be different from what is
+   *          stored
    */
   public static void appendDisplayName(final ServletContext application,
+                                       final HttpSession session,
                                        final String name) {
+    session.removeAttribute("displayName");
+
+    final String sanitized = sanitizeDisplayName(name);
+    if (null == sanitized) {
+      // nothing to store
+      return;
+    }
+    session.setAttribute("displayName", sanitized);
 
     synchronized (DisplayNames.class) {
       // ServletContext isn't type safe
@@ -40,7 +77,7 @@ public final class DisplayNames {
       if (null == displayNames) {
         displayNames = new HashMap<>();
       }
-      displayNames.put(name, new Date());
+      displayNames.put(sanitized, new Date());
       application.setAttribute(ApplicationAttributes.DISPLAY_NAMES, displayNames);
     }
   }
