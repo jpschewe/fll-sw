@@ -80,10 +80,20 @@ public class SummarizePhase1 {
           }
         }
 
-        getActual = connection.prepareStatement("SELECT COUNT(*) FROM "
-            + category + " WHERE tournament = ? AND Judge = ? AND ( ComputedTotal IS NOT NULL OR NoShow = true )");
+        getActual = connection.prepareStatement("SELECT COUNT(*)" //
+            + " FROM " + category //
+            + " WHERE tournament = ?" //
+            + " AND Judge = ?" //
+            + " AND ( ComputedTotal IS NOT NULL OR NoShow = true )"//
+            + " AND TeamNumber IN (" //
+            + "  SELECT TeamNumber FROM TournamentTeams" //
+            + "    WHERE Tournament = ?" //
+            + "    AND judging_station = ?" //
+            + ")");
         getActual.setInt(1, tournament);
         getActual.setString(2, judge);
+        getActual.setInt(3, tournament);
+        getActual.setString(4, station);
         actual = getActual.executeQuery();
         int numActual = -1;
         if (actual.next()) {
