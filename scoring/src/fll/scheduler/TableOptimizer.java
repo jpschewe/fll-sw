@@ -76,6 +76,56 @@ public class TableOptimizer {
     return null != violation.getPerformance();
   }
 
+  /**
+   * Compute score for the current schedule. The lowest score is best.
+   */
+  private int computeScheduleScore() {
+    final int numWarnings = checker.verifySchedule().size();
+
+    final int tableUseScore = computeTableUseScore();
+
+    return numWarnings
+        * 1000 + tableUseScore;
+  }
+
+  /**
+   * Compute the table use score. This is the difference between the minimum
+   * number of times any table is used and the maximum number of times any table
+   * is used. This should even out the table use.
+   * 
+   * @return score, lower is better
+   */
+  private int computeTableUseScore() {
+    final Map<String, Integer> tableUse = new HashMap<>();
+    for (final TeamScheduleInfo ti : this.schedule.getSchedule()) {
+      for (int round = 0; round < ti.getNumberOfRounds(); ++round) {
+        final String tableColor = ti.getPerfTableColor(round);
+        int count;
+        if (tableUse.containsKey(tableColor)) {
+          count = tableUse.get(tableColor);
+        } else {
+          count = 0;
+        }
+        ++count;
+        tableUse.put(tableColor, count);
+      } // foreach round
+    } // foreach team
+
+    int minUse = Integer.MAX_VALUE;
+    int maxUse = 0;
+    for (Map.Entry<String, Integer> entry : tableUse.entrySet()) {
+      minUse = Math.min(minUse, entry.getValue());
+      maxUse = Math.max(maxUse, entry.getValue());
+    } // foreach table
+
+    if (0 == maxUse) {
+      return 0;
+    } else {
+      return maxUse
+          - minUse;
+    }
+  }
+
   private void computeBestTableOrdering(final List<Integer> teams,
                                         final List<PerformanceTime> times) {
     if (teams.size() != times.size()) {
@@ -86,31 +136,31 @@ public class TableOptimizer {
     }
 
     List<Integer> bestPermutation = null;
-    int minWarnings = checker.verifySchedule().size();
-    if(minWarnings == 0) {
+    int bestScore = computeScheduleScore();
+    if (bestScore == 0) {
       // already best score
       return;
     }
-    
+
     final List<List<Integer>> permutations = computePossibleOrderings(teams.size());
     for (final List<Integer> possibleValue : permutations) {
       applyPerformanceOrdering(teams, times, possibleValue);
 
       // check for better value
-      final List<ConstraintViolation> newWarnings = checker.verifySchedule();
+      final int score = computeScheduleScore();
       if (null == bestPermutation
-          || newWarnings.size() < minWarnings) {
-        if (newWarnings.size() < minWarnings) {
+          || score < bestScore) {
+        if (score < bestScore) {
           try {
             final File outputFile = new File(basedir, String.format("%s-opt-%d.csv", schedule.getName(), numSolutions));
-            LOGGER.info(String.format("Found better schedule (%d -> %d), writing to: %s", minWarnings,
-                                      newWarnings.size(), outputFile.getAbsolutePath()));
+            LOGGER.info(String.format("Found better schedule (%d -> %d), writing to: %s", bestScore, score,
+                                      outputFile.getAbsolutePath()));
             schedule.writeToCSV(outputFile);
 
             ++numSolutions;
 
             if (null != mBestScheduleOutputFile) {
-              if(!mBestScheduleOutputFile.delete()) {
+              if (!mBestScheduleOutputFile.delete()) {
                 mBestScheduleOutputFile.deleteOnExit();
               }
             }
@@ -120,9 +170,9 @@ public class TableOptimizer {
           }
         }
         bestPermutation = possibleValue;
-        minWarnings = newWarnings.size();
-        
-        if(minWarnings == 0) {
+        bestScore = score;
+
+        if (bestScore == 0) {
           break;
         }
       }
@@ -390,6 +440,7 @@ public class TableOptimizer {
       }
 
       final Set<Date> perfTimes = gatherPerformanceTimes(teamViolations);
+      //final Set<Date> perfTimes = gatherPerformanceTimes();
       for (final Date time : perfTimes) {
         final List<Integer> teams = new ArrayList<Integer>();
         final List<PerformanceTime> times = new ArrayList<PerformanceTime>();
@@ -407,7 +458,11 @@ public class TableOptimizer {
       }
 
       teamViolations = pickTeamWithMostViolations();
-    }
-  }
+    } // while team violations   
+    
+    // FIXME find all times that the tables aren't full
+    
+
+  } // end optimize
 
 }
