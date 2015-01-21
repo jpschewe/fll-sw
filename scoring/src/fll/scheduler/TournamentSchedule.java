@@ -898,6 +898,9 @@ public class TournamentSchedule implements Serializable {
                        TEAM_TITLE_FONT));
     para.add(Chunk.NEWLINE);
 
+    para.add(new Chunk(String.format("Organization: %s", si.getOrganization()), TEAM_TITLE_FONT));
+    para.add(Chunk.NEWLINE);
+
     para.add(new Chunk("Division: ", TEAM_HEADER_FONT));
     para.add(new Chunk(si.getDivision(), TEAM_VALUE_FONT));
     para.add(Chunk.NEWLINE);
