@@ -1,3 +1,5 @@
+* 367 - Properly display summary for judge assigned to 2 judging groups
+
 Release 9.6
 -----------
 * 361 - correct problem finding java on unix systems without JAVA_HOME set
