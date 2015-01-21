@@ -744,6 +744,7 @@ public class TournamentSchedule implements Serializable {
    */
   public void outputTeamSchedules(final SchedParams params,
                                   final OutputStream pdfFos) throws DocumentException {
+    Collections.sort(_schedule, ComparatorByTeam.INSTANCE);
     final Document teamDoc = PdfUtils.createPortraitPdfDoc(pdfFos, new SimpleFooterHandler());
     for (final TeamScheduleInfo si : _schedule) {
       outputTeamSchedule(params, teamDoc, si);
