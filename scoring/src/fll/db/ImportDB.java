@@ -1118,6 +1118,8 @@ public final class ImportDB {
 
     // Tournaments table isn't imported as it's expected to already be populated
     // with the tournament
+    
+    importTournamentParameters(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
     importJudges(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
@@ -1608,6 +1610,41 @@ public final class ImportDB {
           destPrep.setString(4, actualJudgingStation);
           destPrep.executeUpdate();
         }
+      }
+    } finally {
+      SQLFunctions.close(sourceRS);
+      SQLFunctions.close(sourcePrep);
+      SQLFunctions.close(destPrep);
+    }
+  }
+
+  private static void importTournamentParameters(final Connection sourceConnection,
+                                   final Connection destinationConnection,
+                                   final int sourceTournamentID,
+                                   final int destTournamentID) throws SQLException {
+    PreparedStatement destPrep = null;
+    PreparedStatement sourcePrep = null;
+    ResultSet sourceRS = null;
+    try {
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Importing tournament_parameters");
+      }
+
+      destPrep = destinationConnection.prepareStatement("DELETE FROM tournament_parameters WHERE Tournament = ?");
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+      SQLFunctions.close(destPrep);
+
+      destPrep = destinationConnection.prepareStatement("INSERT INTO tournament_parameters (param, param_value, tournament) VALUES (?, ?, ?)");
+      destPrep.setInt(3, destTournamentID);
+
+      sourcePrep = sourceConnection.prepareStatement("SELECT param, param_value FROM tournament_parameters WHERE tournament = ?");
+      sourcePrep.setInt(1, sourceTournamentID);
+      sourceRS = sourcePrep.executeQuery();
+      while (sourceRS.next()) {
+        destPrep.setString(1, sourceRS.getString(1));
+        destPrep.setString(2, sourceRS.getString(2));
+        destPrep.executeUpdate();
       }
     } finally {
       SQLFunctions.close(sourceRS);
