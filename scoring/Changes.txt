@@ -1,3 +1,5 @@
+* 363 - handle more than 6 logos on the welcome page
+
 Release 9.6
 -----------
 * 361 - correct problem finding java on unix systems without JAVA_HOME set
