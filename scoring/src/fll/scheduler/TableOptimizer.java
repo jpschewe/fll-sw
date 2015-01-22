@@ -67,11 +67,6 @@ public class TableOptimizer {
 
   private final ScheduleChecker checker;
 
-  /**
-   * Teams that we've already optimized so we shouldn't try again.
-   */
-  private final Set<Integer> optimizedTeams = new HashSet<Integer>();
-
   private static boolean isPerformanceViolation(final ConstraintViolation violation) {
     return null != violation.getPerformance();
   }
@@ -254,7 +249,7 @@ public class TableOptimizer {
     return perfTimes;
   }
 
-  private List<ConstraintViolation> pickTeamWithMostViolations() {
+  private List<ConstraintViolation> pickTeamWithMostViolations(final Set<Integer> optimizedTeams) {
     final List<ConstraintViolation> violations = checker.verifySchedule();
     // team->violations
     final Map<Integer, List<ConstraintViolation>> teamViolations = new HashMap<Integer, List<ConstraintViolation>>();
@@ -434,7 +429,9 @@ public class TableOptimizer {
   }
 
   public void optimize() {
-    List<ConstraintViolation> teamViolations = pickTeamWithMostViolations();
+    final Set<Integer> optimizedTeams = new HashSet<Integer>();
+
+    List<ConstraintViolation> teamViolations = pickTeamWithMostViolations(optimizedTeams);
     while (!teamViolations.isEmpty()) {
       final int team = teamViolations.get(0).getTeam();
       optimizedTeams.add(team);
@@ -447,7 +444,7 @@ public class TableOptimizer {
       final Set<Date> perfTimes = gatherPerformanceTimes(teamViolations);
       optimize(perfTimes);
 
-      teamViolations = pickTeamWithMostViolations();
+      teamViolations = pickTeamWithMostViolations(optimizedTeams);
     } // while team violations
 
     final Set<Date> perfTimes = findNonFullTableTimes();
