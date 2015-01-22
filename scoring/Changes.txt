@@ -1,5 +1,6 @@
 * Sort team schedules by team number
 * 370 - Add organization to team schedule
+* 367 - Properly display summary for judge assigned to 2 judging groups
 
 Release 9.6
 -----------
