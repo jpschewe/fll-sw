@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<fll title="2014 MN FIRST LEGO League Tournament" revision="3"
+<fll title="2014 MN FIRST LEGO League Tournament" revision="4"
  schemaVersion="1">
  <Performance minimumScore="0" weight="0">
 
@@ -58,7 +58,7 @@
   <goal name="engagement" title="Yellow Pinwheel is moved South"
    multiplier="20" />
 
-  <goal name="pinwheel_turns" title="Pinwheel Turns" multiplier="0"
+  <goal name="pinwheel_turns" title="Pinwheel Turns (number of quarter turns)" multiplier="0"
    max="49" />
 
   <goal name="learning" title="Loops on Scale" multiplier="10" max="8" />
