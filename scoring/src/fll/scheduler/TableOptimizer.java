@@ -41,7 +41,7 @@ import fll.util.LogUtils;
  * used. No times will be changed.
  */
 public class TableOptimizer {
- 
+
   private static final Logger LOGGER = LogUtils.getLogger();
 
   private static final String SCHED_FILE_OPTION = "s";
@@ -123,7 +123,7 @@ public class TableOptimizer {
   }
 
   /**
-   * Compute the best table ordering for a set of teams at the 
+   * Compute the best table ordering for a set of teams at the
    * specified time.
    */
   private void computeBestTableOrdering(final List<Integer> teams,
@@ -197,7 +197,7 @@ public class TableOptimizer {
     }
   }
 
-  private List<List<Integer>> computePossibleOrderings(final int numElements) {
+  static private List<List<Integer>> computePossibleOrderings(final int numElements) {
     final List<Integer> allElements = new ArrayList<Integer>();
     for (int i = 0; i < numElements; ++i) {
       allElements.add(i);
@@ -211,10 +211,18 @@ public class TableOptimizer {
     return possibleValues;
   }
 
-  private void permutate(final int arrayCount,
-                         final List<Integer> elements,
-                         final List<Integer> order,
-                         final List<List<Integer>> permutations) {
+  /**
+   * Compute all permutations of elements.
+   * 
+   * @param arrayCount
+   * @param elements the elements to compute permutations of
+   * @param order
+   * @param permutations the resulting permutations
+   */
+  static private void permutate(final int arrayCount,
+                                final List<Integer> elements,
+                                final List<Integer> order,
+                                final List<List<Integer>> permutations) {
     if (elements.isEmpty()) {
       throw new IllegalArgumentException("Cannot permutate 0 elements");
     }
@@ -238,6 +246,9 @@ public class TableOptimizer {
     }
   }
 
+  /**
+   * Gather up all performance times in the specified list of violations.
+   */
   private Set<Date> gatherPerformanceTimes(final Collection<ConstraintViolation> violations) {
     final Set<Date> perfTimes = new HashSet<Date>();
     for (final ConstraintViolation violation : violations) {
@@ -249,6 +260,9 @@ public class TableOptimizer {
     return perfTimes;
   }
 
+  /**
+   * Pick team with most violations and isn't in the set of optimizedTeams.
+   */
   private List<ConstraintViolation> pickTeamWithMostViolations(final Set<Integer> optimizedTeams) {
     final List<ConstraintViolation> violations = checker.verifySchedule();
     // team->violations
