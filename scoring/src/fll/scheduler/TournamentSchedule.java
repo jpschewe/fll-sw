@@ -744,6 +744,7 @@ public class TournamentSchedule implements Serializable {
    */
   public void outputTeamSchedules(final SchedParams params,
                                   final OutputStream pdfFos) throws DocumentException {
+    Collections.sort(_schedule, ComparatorByTeam.INSTANCE);
     final Document teamDoc = PdfUtils.createPortraitPdfDoc(pdfFos, new SimpleFooterHandler());
     for (final TeamScheduleInfo si : _schedule) {
       outputTeamSchedule(params, teamDoc, si);
@@ -896,6 +897,9 @@ public class TournamentSchedule implements Serializable {
     final Paragraph para = new Paragraph();
     para.add(new Chunk(String.format("Detailed schedule for Team #%d - %s", si.getTeamNumber(), si.getTeamName()),
                        TEAM_TITLE_FONT));
+    para.add(Chunk.NEWLINE);
+
+    para.add(new Chunk(String.format("Organization: %s", si.getOrganization()), TEAM_TITLE_FONT));
     para.add(Chunk.NEWLINE);
 
     para.add(new Chunk("Division: ", TEAM_HEADER_FONT));
