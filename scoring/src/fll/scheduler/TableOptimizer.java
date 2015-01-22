@@ -41,7 +41,7 @@ import fll.util.LogUtils;
  * used. No times will be changed.
  */
 public class TableOptimizer {
-
+ 
   private static final Logger LOGGER = LogUtils.getLogger();
 
   private static final String SCHED_FILE_OPTION = "s";
@@ -84,6 +84,7 @@ public class TableOptimizer {
 
     final int tableUseScore = computeTableUseScore();
 
+    // warnings is most important, then table use
     return numWarnings
         * 1000 + tableUseScore;
   }
@@ -126,6 +127,10 @@ public class TableOptimizer {
     }
   }
 
+  /**
+   * Compute the best table ordering for a set of teams at the 
+   * specified time.
+   */
   private void computeBestTableOrdering(final List<Integer> teams,
                                         final List<PerformanceTime> times) {
     if (teams.size() != times.size()) {
@@ -440,29 +445,68 @@ public class TableOptimizer {
       }
 
       final Set<Date> perfTimes = gatherPerformanceTimes(teamViolations);
-      //final Set<Date> perfTimes = gatherPerformanceTimes();
-      for (final Date time : perfTimes) {
-        final List<Integer> teams = new ArrayList<Integer>();
-        final List<PerformanceTime> times = new ArrayList<PerformanceTime>();
-
-        for (final TeamScheduleInfo si : schedule.getSchedule()) {
-          for (int round = 0; round < schedule.getNumberOfRounds(); ++round) {
-            final PerformanceTime pt = si.getPerf(round);
-            if (time.equals(pt.getTime())) {
-              teams.add(si.getTeamNumber());
-              times.add(pt);
-            }
-          }
-        }
-        computeBestTableOrdering(teams, times);
-      }
+      optimize(perfTimes);
 
       teamViolations = pickTeamWithMostViolations();
-    } // while team violations   
-    
-    // FIXME find all times that the tables aren't full
-    
+    } // while team violations
 
-  } // end optimize
+    final Set<Date> perfTimes = findNonFullTableTimes();
+    optimize(perfTimes);
+
+  }
+
+  /**
+   * Find all times in the schedule where the number of teams
+   * competing doesn't equal the number of tables available.
+   */
+  private Set<Date> findNonFullTableTimes() {
+    final Map<Date, Integer> perfCounts = new HashMap<>();
+    for (final TeamScheduleInfo ti : this.schedule.getSchedule()) {
+      for (int round = 0; round < ti.getNumberOfRounds(); ++round) {
+        final Date time = ti.getPerfTime(round);
+        int count = 0;
+        if (perfCounts.containsKey(time)) {
+          count = perfCounts.get(time);
+        }
+        ++count;
+        perfCounts.put(time, count);
+      }
+    }
+
+    final Set<Date> perfTimes = new HashSet<>();
+
+    // 2 teams on each table at a given time
+    final int expectedTableUse = this.schedule.getTableColors().size() * 2;
+    for (final Map.Entry<Date, Integer> entry : perfCounts.entrySet()) {
+      if (entry.getValue() < expectedTableUse) {
+        perfTimes.add(entry.getKey());
+      }
+    }
+
+    return perfTimes;
+  }
+
+  /**
+   * Optimize the table use at the specified times.
+   * 
+   * @param perfTimes
+   */
+  private void optimize(final Set<Date> perfTimes) {
+    for (final Date time : perfTimes) {
+      final List<Integer> teams = new ArrayList<Integer>();
+      final List<PerformanceTime> times = new ArrayList<PerformanceTime>();
+
+      for (final TeamScheduleInfo si : schedule.getSchedule()) {
+        for (int round = 0; round < schedule.getNumberOfRounds(); ++round) {
+          final PerformanceTime pt = si.getPerf(round);
+          if (time.equals(pt.getTime())) {
+            teams.add(si.getTeamNumber());
+            times.add(pt);
+          }
+        }
+      } // foreach schedule item
+      computeBestTableOrdering(teams, times);
+    } // foreach time
+  }
 
 }
