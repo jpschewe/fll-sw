@@ -1,6 +1,7 @@
 * Sort team schedules by team number
 * 370 - Add organization to team schedule
 * 362 - import tournament parameters table
+* 363 - handle more than 6 logos on the welcome page
 * 367 - Properly display summary for judge assigned to 2 judging groups
 
 Release 9.6
