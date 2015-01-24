@@ -17,7 +17,7 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
   /**
    * @param time the time
    * @param table the table color
-   * @param side the table side
+   * @param side the table side, zero based
    */
   public PerformanceTime(final Date time,
                          final String table,
@@ -35,6 +35,9 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
 
   private final int side;
 
+  /**
+   * Zero based side number
+   */
   public int getSide() {
     return side;
   }
