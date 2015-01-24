@@ -142,7 +142,7 @@ public class TableOptimizer {
       return;
     }
 
-    final List<List<Integer>> permutations = computePossibleOrderings(teams.size());
+    final List<List<Integer>> permutations = permutate(teams.size());
     for (final List<Integer> possibleValue : permutations) {
       applyPerformanceOrdering(teams, times, possibleValue);
 
@@ -197,22 +197,31 @@ public class TableOptimizer {
     }
   }
 
-  static private List<List<Integer>> computePossibleOrderings(final int numElements) {
-    final List<Integer> allElements = new ArrayList<Integer>();
+  /**
+   * Compute permutations of the integers [0, numElements]
+   * 
+   * @param numElements how many elements to be permuted
+   * @return all possible orderings
+   */
+  static public List<List<Integer>> permutate(final int numElements) {
+    final List<Integer> allElements = new ArrayList<>();
     for (int i = 0; i < numElements; ++i) {
       allElements.add(i);
     }
-    final List<List<Integer>> possibleValues = new LinkedList<List<Integer>>();
-    final List<Integer> order = new ArrayList<Integer>(numElements);
+    
+    final List<Integer> order = new ArrayList<>(numElements);
     for (int i = 0; i < numElements; ++i) {
       order.add(i);
     }
-    permutate(numElements, allElements, order, possibleValues);
-    return possibleValues;
+    
+    final List<List<Integer>> permutations = new LinkedList<>();
+    permutate(numElements, allElements, order, permutations);
+    return permutations;
   }
 
   /**
-   * Compute all permutations of elements.
+   * Recursive function that computes permutations. To 
+   * be called from {@see #permutate(int)}.
    * 
    * @param arrayCount
    * @param elements the elements to compute permutations of
