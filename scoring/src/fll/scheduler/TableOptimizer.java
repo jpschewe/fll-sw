@@ -135,6 +135,8 @@ public class TableOptimizer {
   /**
    * Compute the best table ordering for a set of teams at the
    * specified time.
+   * 
+   * @return best score found
    */
   private void computeBestTableOrdering(final List<Integer> teams,
                                         final Date time,
@@ -144,11 +146,7 @@ public class TableOptimizer {
     }
 
     Map<PerformanceTime, Integer> bestPermutation = null;
-    int bestScore = computeScheduleScore();
-    if (bestScore == 0) {
-      // already best score
-      return;
-    }
+    int bestScore = ;
 
     final List<Map<PerformanceTime, Integer>> possibleValues = computePossibleValues(teams, time, tables);
     for (final Map<PerformanceTime, Integer> possibleValue : possibleValues) {
