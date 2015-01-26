@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,6 +36,7 @@ import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
 import fll.util.FLLInternalException;
+import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 
 /**
@@ -58,17 +58,11 @@ public class TableOptimizer {
   private File mBestScheduleOutputFile = null;
 
   /**
-   * The list of all permutations of assigning a full set of
-   * teams to the tables. The inner list has size numTables * 2.
+   * List of table colors from the schedule. Each list inside the list is a
+   * group of tables that are scheduled together.
+   * If not alternating tables then the outer list will have a length of 1.
    */
-  private final List<List<Integer>> possibleTableOrderings;
-
-  /**
-   * List of table colors from the schedule. Stored here
-   * so that there is no possibility of the order changing while
-   * the optimization is being run.
-   */
-  private final List<String> tableColors;
+  private final List<List<String>> tableGroups;
 
   /**
    * The best schedule found so far. Starts out at null and
@@ -143,7 +137,8 @@ public class TableOptimizer {
    * specified time.
    */
   private void computeBestTableOrdering(final List<Integer> teams,
-                                        final Date time) {
+                                        final Date time,
+                                        final List<String> tables) {
     if (teams.isEmpty()) {
       throw new IllegalArgumentException("Must have some teams to check");
     }
@@ -155,7 +150,7 @@ public class TableOptimizer {
       return;
     }
 
-    final List<Map<PerformanceTime, Integer>> possibleValues = computePossibleValues(teams, time);
+    final List<Map<PerformanceTime, Integer>> possibleValues = computePossibleValues(teams, time, tables);
     for (final Map<PerformanceTime, Integer> possibleValue : possibleValues) {
       applyPerformanceOrdering(possibleValue);
 
@@ -208,24 +203,26 @@ public class TableOptimizer {
    *         number
    */
   private List<Map<PerformanceTime, Integer>> computePossibleValues(final List<Integer> teams,
-                                                                    final Date time) {
+                                                                    final Date time,
+                                                                    final List<String> tables) {
     final List<Map<PerformanceTime, Integer>> possibleValues = new LinkedList<>();
 
     final boolean oddNumberOfTeams = Utilities.isOdd(teams.size());
 
-    for (final List<Integer> ordering : this.possibleTableOrderings) {
-      if (ordering.size() != this.tableColors.size() * 2) {
+    final List<List<Integer>> possibleTableOrderings = permutate(tables.size() * 2);
+    for (final List<Integer> ordering : possibleTableOrderings) {
+      if (ordering.size() != tables.size() * 2) {
         throw new FLLInternalException(
                                        String.format("All possible orderings must be twice the number of tables. ordering.size: %d tableColors: %d",
-                                                     ordering.size(), this.tableColors.size()));
+                                                     ordering.size(), tables.size()));
       }
 
       boolean validToHaveNullTeam = oddNumberOfTeams;
 
       // convert to valid ordering
       final Map<PerformanceTime, Integer> assignments = new HashMap<>();
-      for (int tableColorIndex = 0; tableColorIndex < this.tableColors.size(); ++tableColorIndex) {
-        final String tableColor = this.tableColors.get(tableColorIndex);
+      for (int tableColorIndex = 0; tableColorIndex < tables.size(); ++tableColorIndex) {
+        final String tableColor = tables.get(tableColorIndex);
 
         // check in pairs to make sure we have a valid table assignment
         final int side1 = 1;
@@ -525,9 +522,115 @@ public class TableOptimizer {
   }
 
   /**
+   * Compute map of tables at each time.
+   * 
+   * @param schedule the schedule to work with
+   * @return key=time, value=tables used at this time
+   */
+  private static Map<Date, Set<String>> gatherTablesAtTime(final TournamentSchedule schedule) {
+    final Map<Date, Set<String>> tablesAtTime = new HashMap<>();
+
+    for (int round = 0; round < schedule.getNumberOfRounds(); ++round) {
+      for (final TeamScheduleInfo si : schedule.getSchedule()) {
+        final PerformanceTime perf = si.getPerf(round);
+
+        Set<String> tables;
+        if (tablesAtTime.containsKey(perf.getTime())) {
+          tables = tablesAtTime.get(perf.getTime());
+        } else {
+          tables = new HashSet<>();
+        }
+        tables.add(perf.getTable());
+        tablesAtTime.put(perf.getTime(), tables);
+      }
+    }
+
+    return tablesAtTime;
+  }
+
+  /**
+   * Check if any elements in set2 are in set1.
+   */
+  private static boolean containsAny(final Collection<String> set1,
+                                     final Collection<String> set2) {
+    for (final String needle : set2) {
+      if (set1.contains(needle)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Walk over the schedule and figure out how tables are grouped. If the
+   * schedule uses alternating tables the returned list will have more than 1
+   * element.
+   */
+  private static List<List<String>> determineTableGroups(final TournamentSchedule schedule) {
+    final Map<Date, Set<String>> tablesAtTime = gatherTablesAtTime(schedule);
+
+    final List<Set<String>> tableGroups = new ArrayList<>();
+    for (final Map.Entry<Date, Set<String>> entry : tablesAtTime.entrySet()) {
+      final Set<String> toFind = entry.getValue();
+
+      boolean found = false;
+      for (int i = 0; i < tableGroups.size()
+          && !found; ++i) {
+        final Set<String> group = tableGroups.get(i);
+        if (containsAny(group, toFind)) {
+          group.addAll(toFind);
+          found = true;
+        }
+      } // foreach known table group
+
+      if (!found) {
+        // create new grouping
+        tableGroups.add(toFind);
+      }
+    } // foreach group of tables in the schedule
+
+    // consolidate the existing groups
+    final List<List<String>> finalGroups = new ArrayList<>();
+    if (tableGroups.size() > 1) {
+      final List<String> firstGroup = new ArrayList<>(tableGroups.remove(0));
+      finalGroups.add(firstGroup);
+
+      while (!tableGroups.isEmpty()) {
+        final List<String> toFind = new ArrayList<>(tableGroups.remove(0));
+
+        boolean found = false;
+        for (int i = 0; i < finalGroups.size()
+            && !found; ++i) {
+          final List<String> group = finalGroups.get(i);
+          if (containsAny(group, toFind)) {
+            group.addAll(toFind);
+            found = true;
+          }
+        } // foreach known table group
+
+        if (!found) {
+          // create new grouping
+          finalGroups.add(toFind);
+        }
+      }
+
+    } else {
+      for (final Set<String> group : tableGroups) {
+        finalGroups.add(new ArrayList<String>(group));
+      }
+    }
+    return finalGroups;
+
+  }
+
+  /**
    * @param params the schedule parameters
    * @param schedule the schedule to optimize (will be modified)
    * @param basedir the directory to store better schedules in
+   * @param tableColors the colors of the tables, if alternating tables, this is
+   *          only half of the tables
+   * @param tableColorsAlternate if alternating tables, this is the second half
+   *          of the tables, otherwise this is empty
    * @throws IllegalArgumentException if the schedule has hard constraint
    *           violations
    */
@@ -537,8 +640,11 @@ public class TableOptimizer {
     this.schedule = schedule;
     this.basedir = basedir;
     this.checker = new ScheduleChecker(params, schedule);
-    this.tableColors = new ArrayList<>(this.schedule.getTableColors());
-    this.possibleTableOrderings = Collections.unmodifiableList(permutate(this.tableColors.size() * 2));
+    this.tableGroups = determineTableGroups(schedule);
+    
+    if(tableGroups.isEmpty()) {
+      throw new FLLInternalException("Something went wrong. Table groups list is empty");
+    }
 
     final List<ConstraintViolation> violations = checker.verifySchedule();
     for (final ConstraintViolation v : violations) {
@@ -617,15 +723,34 @@ public class TableOptimizer {
     for (final Date time : perfTimes) {
       final List<Integer> teams = new ArrayList<Integer>();
 
+      List<String> tables = null;
       for (final TeamScheduleInfo si : schedule.getSchedule()) {
         for (int round = 0; round < schedule.getNumberOfRounds(); ++round) {
           final PerformanceTime pt = si.getPerf(round);
           if (time.equals(pt.getTime())) {
             teams.add(si.getTeamNumber());
+
+            // choose the tables to use for assignments
+            if (null == tables) {
+              for (int i = 0; null == tables
+                  && i < tableGroups.size(); ++i) {
+                final List<String> group = this.tableGroups.get(i);
+                if (group.contains(pt.getTable())) {
+                  tables = group;
+                }
+              }
+              if (null == tables) {
+                throw new FLLRuntimeException("Cannot find table group for "
+                    + pt.getTable());
+              }
+            }
+
           }
         }
       } // foreach schedule item
-      computeBestTableOrdering(teams, time);
+
+      computeBestTableOrdering(teams, time, tables);
+
     } // foreach time
   }
 
