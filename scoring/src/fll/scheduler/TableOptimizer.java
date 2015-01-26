@@ -57,6 +57,10 @@ public class TableOptimizer {
 
   private File mBestScheduleOutputFile = null;
 
+  private Map<PerformanceTime, Integer> bestPermutation = null;
+
+  private int bestScore;
+
   /**
    * List of table colors from the schedule. Each list inside the list is a
    * group of tables that are scheduled together.
@@ -133,6 +137,27 @@ public class TableOptimizer {
   }
 
   /**
+   * Get the current table assignments for the specified time so that
+   * they can be re-applied if needed.
+   * 
+   * @return key=table info, value=team number
+   */
+  private Map<PerformanceTime, Integer> getCurrentTableAssignments(final Date time) {
+    final Map<PerformanceTime, Integer> assignments = new HashMap<>();
+
+    for (final TeamScheduleInfo si : this.schedule.getSchedule()) {
+      for (int round = 0; round < this.schedule.getNumberOfRounds(); ++round) {
+        final PerformanceTime pt = si.getPerf(round);
+        if (time.equals(pt.getTime())) {
+          assignments.put(pt, si.getTeamNumber());
+        }
+      }
+    }
+
+    return assignments;
+  }
+
+  /**
    * Compute the best table ordering for a set of teams at the
    * specified time.
    * 
@@ -145,8 +170,10 @@ public class TableOptimizer {
       throw new IllegalArgumentException("Must have some teams to check");
     }
 
-    Map<PerformanceTime, Integer> bestPermutation = null;
-    int bestScore = ;
+    if (null == bestPermutation) {
+      bestPermutation = getCurrentTableAssignments(time);
+      bestScore = computeScheduleScore();
+    }
 
     final List<Map<PerformanceTime, Integer>> possibleValues = computePossibleValues(teams, time, tables);
     for (final Map<PerformanceTime, Integer> possibleValue : possibleValues) {
@@ -154,27 +181,25 @@ public class TableOptimizer {
 
       // check for better value
       final int score = computeScheduleScore();
-      if (null == bestPermutation
-          || score < bestScore) {
-        if (score < bestScore) {
-          try {
-            final File outputFile = new File(basedir, String.format("%s-opt-%d.csv", schedule.getName(), numSolutions));
-            LOGGER.info(String.format("Found better schedule (%d -> %d), writing to: %s", bestScore, score,
-                                      outputFile.getAbsolutePath()));
-            schedule.writeToCSV(outputFile);
+      if (score < bestScore) {
+        try {
+          final File outputFile = new File(basedir, String.format("%s-opt-%d.csv", schedule.getName(), numSolutions));
+          LOGGER.info(String.format("Found better schedule (%d -> %d), writing to: %s", bestScore, score,
+                                    outputFile.getAbsolutePath()));
+          schedule.writeToCSV(outputFile);
 
-            ++numSolutions;
+          ++numSolutions;
 
-            if (null != mBestScheduleOutputFile) {
-              if (!mBestScheduleOutputFile.delete()) {
-                mBestScheduleOutputFile.deleteOnExit();
-              }
+          if (null != mBestScheduleOutputFile) {
+            if (!mBestScheduleOutputFile.delete()) {
+              mBestScheduleOutputFile.deleteOnExit();
             }
-            mBestScheduleOutputFile = outputFile;
-          } catch (final IOException e) {
-            throw new RuntimeException(e);
           }
+          mBestScheduleOutputFile = outputFile;
+        } catch (final IOException e) {
+          throw new RuntimeException(e);
         }
+
         bestPermutation = possibleValue;
         bestScore = score;
 
@@ -182,10 +207,6 @@ public class TableOptimizer {
           break;
         }
       }
-    }
-
-    if (null == bestPermutation) {
-      throw new RuntimeException("Internal error, bestPermutation should not be null here");
     }
 
     // assign the best value
@@ -639,8 +660,8 @@ public class TableOptimizer {
     this.basedir = basedir;
     this.checker = new ScheduleChecker(params, schedule);
     this.tableGroups = determineTableGroups(schedule);
-    
-    if(tableGroups.isEmpty()) {
+
+    if (tableGroups.isEmpty()) {
       throw new FLLInternalException("Something went wrong. Table groups list is empty");
     }
 
