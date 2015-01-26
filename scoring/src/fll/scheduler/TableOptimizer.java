@@ -680,6 +680,7 @@ public class TableOptimizer {
 
   public void optimize() {
     final Set<Integer> optimizedTeams = new HashSet<Integer>();
+    final Set<Date> optimizedTimes = new HashSet<>();
 
     List<ConstraintViolation> teamViolations = pickTeamWithMostViolations(optimizedTeams);
     while (!teamViolations.isEmpty()) {
@@ -694,11 +695,18 @@ public class TableOptimizer {
       final Set<Date> perfTimes = gatherPerformanceTimes(teamViolations);
       optimize(perfTimes);
 
+      optimizedTimes.addAll(perfTimes);
+
       teamViolations = pickTeamWithMostViolations(optimizedTeams);
     } // while team violations
 
+    // optimize non-full table times if we haven't already touched them while
+    // optimizing teams
     final Set<Date> perfTimes = findNonFullTableTimes();
-    optimize(perfTimes);
+    perfTimes.removeAll(optimizedTimes);
+    if (!perfTimes.isEmpty()) {
+      optimize(perfTimes);
+    }
 
   }
 
@@ -708,9 +716,22 @@ public class TableOptimizer {
    */
   private Set<Date> findNonFullTableTimes() {
     final Map<Date, Integer> perfCounts = new HashMap<>();
+    final Map<Date, List<String>> perfTables = new HashMap<>();
     for (final TeamScheduleInfo ti : this.schedule.getSchedule()) {
       for (int round = 0; round < ti.getNumberOfRounds(); ++round) {
-        final Date time = ti.getPerfTime(round);
+        final PerformanceTime pt = ti.getPerf(round);
+        final Date time = pt.getTime();
+
+        List<String> tables = perfTables.get(time);
+        for (int i = 0; null == tables
+            && i < tableGroups.size(); ++i) {
+          final List<String> group = this.tableGroups.get(i);
+          if (group.contains(pt.getTable())) {
+            tables = group;
+          }
+        }
+        perfTables.put(time, tables);
+
         int count = 0;
         if (perfCounts.containsKey(time)) {
           count = perfCounts.get(time);
@@ -722,11 +743,21 @@ public class TableOptimizer {
 
     final Set<Date> perfTimes = new HashSet<>();
 
-    // 2 teams on each table at a given time
-    final int expectedTableUse = this.schedule.getTableColors().size() * 2;
     for (final Map.Entry<Date, Integer> entry : perfCounts.entrySet()) {
-      if (entry.getValue() < expectedTableUse) {
-        perfTimes.add(entry.getKey());
+      final Date time = entry.getKey();
+      final int useCount = entry.getValue();
+
+      final List<String> tables = perfTables.get(time);
+      if (tables.isEmpty()) {
+        throw new FLLInternalException("No tables found at time: "
+            + TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(time));
+      }
+
+      // 2 teams on each table at a given time
+      final int expectedTableUse = tables.size() * 2;
+
+      if (useCount < expectedTableUse) {
+        perfTimes.add(time);
       }
     }
 
