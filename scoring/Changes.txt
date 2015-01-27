@@ -1,3 +1,5 @@
+Release 9.7
+-----------
 * 359 - table optimizer takes into account empty tables now as well
 * Sort team schedules by team number
 * 370 - Add organization to team schedule
