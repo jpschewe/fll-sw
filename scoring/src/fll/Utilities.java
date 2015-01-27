@@ -535,4 +535,24 @@ public final class Utilities {
     return Integer.parseInt(value.trim());
   }
 
+  /**
+   * Check if a number is even.
+   * 
+   * @param number the number to check
+   * @return true if the number is even
+   */
+  public static boolean isEven(final int number) {
+    return number % 2 == 0;
+  }
+
+  /**
+   * Check if a number is odd.
+   * 
+   * @param number the number to check
+   * @return true if the number is odd
+   */
+  public static boolean isOdd(final int number) {
+    return !isEven(number);
+  }
+
 }
