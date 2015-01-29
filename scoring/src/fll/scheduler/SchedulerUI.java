@@ -764,7 +764,7 @@ public class SchedulerUI extends JFrame {
       final String startingDirectory = PREFS.get(SCHEDULE_STARTING_DIRECTORY_PREF, null);
 
       final JFileChooser fileChooser = new JFileChooser();
-      final FileFilter filter = new BasicFileFilter("FLL Schedule (xls, xlsx, csv)", new String[] { "xls", "xslx",
+      final FileFilter filter = new BasicFileFilter("FLL Schedule (xls, xlsx, csv)", new String[] { "xls", "xlsx",
                                                                                                    "csv" });
       fileChooser.setFileFilter(filter);
       if (null != startingDirectory) {

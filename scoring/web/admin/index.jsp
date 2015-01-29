@@ -41,7 +41,7 @@
           <span class='bold'>[DONE] </span>
         </c:if>
         Upload the datafile for teams. This file can be tab separated or
-        comma separated or an Excel file (xls and xslx supported). The
+        comma separated or an Excel file (xls and xlsx supported). The
         filter functionality provided here is very basic and has very
         limited feedback. It's suggested that you edit the input file
         before upload to contain only the teams for your tournament(s).
