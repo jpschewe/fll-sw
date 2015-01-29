@@ -13,6 +13,7 @@ import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -115,13 +116,20 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
                                                 final String sheetName,
                                                 final String teamNumberColumnName) throws SQLException, IOException,
       ParseException, InvalidFormatException {
+    
+    if(LOGGER.isTraceEnabled()) {
+      LOGGER.trace("File name: " + file.getName());
+    }
+    
     final CellFileReader reader;
-    if (file.getName().endsWith(".xls")
-        || file.getName().endsWith(".xslx")) {
+    if (ExcelCellReader.isExcelFile(file)) {
       FileInputStream fis = null;
       try {
         fis = new FileInputStream(file);
         reader = new ExcelCellReader(fis, sheetName);
+        if(LOGGER.isTraceEnabled()) {
+          LOGGER.trace("Created excel reader");
+        }
       } finally {
         if (null != fis) {
           fis.close();
@@ -141,8 +149,14 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
         }
         if (firstLine.indexOf('\t') != -1) {
           reader = new CSVCellReader(file, '\t');
+          if(LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Created csv tab reader");
+          }
         } else {
           reader = new CSVCellReader(file);
+          if(LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Created csv comma reader");
+          }
         }
       } finally {
         breader.close();
@@ -153,6 +167,12 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
     String[] columnNames = reader.readNext();
     while (columnNames.length < 1) {
       columnNames = reader.readNext();
+    }
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Column names size: "
+          + columnNames.length //
+          + " names: " + Arrays.asList(columnNames).toString() //
+          + " teamNumber column: " + teamNumberColumnName);
     }
 
     int teamNumColumnIdx = 0;
