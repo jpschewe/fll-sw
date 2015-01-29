@@ -1,3 +1,5 @@
+* 377 - correctly identify Excel files by extension
+
 Release 9.7
 -----------
 * 359 - table optimizer takes into account empty tables now as well
