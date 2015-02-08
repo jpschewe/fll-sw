@@ -126,8 +126,10 @@ public final class Queries {
       prep = connection.prepareStatement("SELECT DISTINCT Judges.station"
           + " FROM " + categoryName + ", Judges" //
           + " WHERE TeamNumber = ?" //
-          + " AND Tournament = ?" //
-          + " AND Judges.id = " + categoryName + ".Judge" + " AND ComputedTotal IS NOT NULL");
+          + " AND Judges.Tournament = ?" //
+          + " AND Judges.id = " + categoryName + ".Judge" //
+          + " AND Judges.Tournament = " + categoryName + ".Tournament" //
+          + " AND ComputedTotal IS NOT NULL");
       prep.setInt(2, tournament);
 
       // foreach team, put the team in a score group
