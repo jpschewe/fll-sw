@@ -1,3 +1,4 @@
+* 380 - generate correct tanking report when there are multiple tournaments in the same database
 * 377 - correctly identify Excel files by extension
 
 Release 9.7
