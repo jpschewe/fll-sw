@@ -129,8 +129,10 @@ public final class Queries {
           + " AND Judges.Tournament = ?" //
           + " AND Judges.id = " + categoryName + ".Judge" //
           + " AND Judges.Tournament = " + categoryName + ".Tournament" //
+          + " AND Judges.category = ?" //
           + " AND ComputedTotal IS NOT NULL");
       prep.setInt(2, tournament);
+      prep.setString(3, categoryName);
 
       // foreach team, put the team in a score group
       for (final TournamentTeam team : Queries.getTournamentTeams(connection).values()) {
