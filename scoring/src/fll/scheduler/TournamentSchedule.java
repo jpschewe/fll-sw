@@ -1640,7 +1640,7 @@ public class TournamentSchedule implements Serializable {
             + si.getTeamNumber() + " is in schedule, but not in database"));
       }
 
-      if (null == si.getJudgingStation()) {
+      if (si.getJudgingStation().isEmpty()) {
         violations.add(new ConstraintViolation(true, si.getTeamNumber(), null, null, null, "Team "
             + si.getTeamNumber() + " has no judging station specified"));
       }
