@@ -492,12 +492,18 @@
     <!-- copy docs to the web -->
     <copy todir="${dir.web}/documentation">
       <fileset dir="${basedir}/docs" />
+      <fileset dir="${basedir}/..">
+        <include name="LICENSE" />
+      </fileset>
     </copy>
 
     <!-- copy docs -->
     <mkdir dir="${dir.dist}/docs" />
     <copy todir="${dir.dist}/docs">
       <fileset dir="${basedir}/docs" />
+      <fileset dir="${basedir}/..">
+        <include name="LICENSE" />
+      </fileset>
     </copy>
     <copy todir="${dir.dist}/docs" file="Changes.txt" />
 
