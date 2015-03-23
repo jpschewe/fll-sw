@@ -162,13 +162,13 @@ test:before {
 }
 
 Performance:before {
-	content: "Performance weight: " attr(weight);
+	content: "Performance - weight: " attr(weight);
 	font-size: 120%;
 	font-weight: bold;
 }
 
 subjectiveCategory:before {
-	content: attr(title) " weight: " attr(weight);
+	content: attr(title) " - weight: " attr(weight);
 	font-size: 120%;
 	font-weight: bold;
 }
