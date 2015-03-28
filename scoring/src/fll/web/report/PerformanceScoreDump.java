@@ -27,6 +27,7 @@ import org.apache.commons.io.IOUtils;
 import au.com.bytecode.opencsv.CSVWriter;
 import fll.Utilities;
 import fll.db.Queries;
+import fll.db.TournamentParameters;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 
@@ -80,7 +81,7 @@ public class PerformanceScoreDump extends BaseFLLServlet {
     PreparedStatement getScores = null;
     ResultSet scores = null;
     try {
-      final int numSeedingRounds = Queries.getNumSeedingRounds(connection, tournamentID);
+      final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournamentID);
 
       getScores = connection.prepareStatement("SELECT Teams.TeamName, Performance.TeamNumber, Performance.RunNumber, Performance.ComputedTotal"//
           + " FROM Teams, Performance" //

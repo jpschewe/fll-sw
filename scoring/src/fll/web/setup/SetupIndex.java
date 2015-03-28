@@ -66,7 +66,7 @@ public class SetupIndex {
         try {
           final InputStream stream = url.openStream();
           final Reader reader = new InputStreamReader(stream, Utilities.DEFAULT_CHARSET);
-          final Document document = ChallengeParser.parse(reader);
+          final Document document = ChallengeParser.parse(reader).getDocument();
           reader.close();
           final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
 

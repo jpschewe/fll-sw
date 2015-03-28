@@ -45,7 +45,7 @@ public class ScoreTest {
 
   private PerformanceScoreCategory loadDocumentAndGetPerformanceElemnt(final InputStream stream) {
     Assert.assertNotNull(stream);
-    final Document document = ChallengeParser.parse(new InputStreamReader(stream));
+    final Document document = ChallengeParser.parse(new InputStreamReader(stream)).getDocument();
     Assert.assertNotNull(document);
     final ChallengeDescription desc = new ChallengeDescription(document.getDocumentElement());
     final PerformanceScoreCategory performanceElement = desc.getPerformance();

@@ -772,7 +772,7 @@ public final class Queries {
     }
 
     // Perform updates to the playoff data table if in playoff rounds.
-    final int numSeedingRounds = getNumSeedingRounds(connection, currentTournament);
+    final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournament);
     if (runNumber > numSeedingRounds) {
       if ("1".equals(request.getParameter("Verified"))) {
         if (LOGGER.isTraceEnabled()) {
@@ -913,7 +913,7 @@ public final class Queries {
 
     if (numRowsUpdated > 0) {
       // Check if we need to update the PlayoffData table
-      final int numSeedingRounds = getNumSeedingRounds(connection, currentTournament);
+      final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournament);
       if (runNumber > numSeedingRounds) {
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("Updating playoff score from updatePerformanceScore");
@@ -1086,7 +1086,7 @@ public final class Queries {
       throw new RuntimeException("Missing parameter: RunNumber");
     }
     final int irunNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(runNumber).intValue();
-    final int numSeedingRounds = getNumSeedingRounds(connection, currentTournament);
+    final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournament);
 
     // Check if we need to update the PlayoffData table
     PreparedStatement prep = null;
@@ -1349,7 +1349,7 @@ public final class Queries {
         prep = connection.prepareStatement("SELECT TeamNumber,Count(*) FROM "
             + view + " WHERE Tournament = ? GROUP BY TeamNumber" + " HAVING Count(*) < ?");
         prep.setInt(1, currentTournament);
-        prep.setInt(2, getNumSeedingRounds(connection, currentTournament));
+        prep.setInt(2, TournamentParameters.getNumSeedingRounds(connection, currentTournament));
       } else {
         prep = connection.prepareStatement("SELECT "
             + view + ".TeamNumber,Count(" + view + ".TeamNumber) FROM " + view + ",current_tournament_teams WHERE "
@@ -1359,7 +1359,7 @@ public final class Queries {
             + ".TeamNumber) < ?");
         prep.setString(1, division);
         prep.setInt(2, currentTournament);
-        prep.setInt(3, getNumSeedingRounds(connection, currentTournament));
+        prep.setInt(3, TournamentParameters.getNumSeedingRounds(connection, currentTournament));
       }
 
       rs = prep.executeQuery();
@@ -1456,30 +1456,6 @@ public final class Queries {
       SQLFunctions.close(prep);
     }
     return retval;
-  }
-
-  /**
-   * Get the number of seeding rounds from the database.
-   * 
-   * @return the number of seeding rounds
-   * @throws SQLException on a database error
-   */
-  public static int getNumSeedingRounds(final Connection connection,
-                                        final int tournament) throws SQLException {
-    return TournamentParameters.getIntTournamentParameter(connection, tournament, TournamentParameters.SEEDING_ROUNDS);
-  }
-
-  /**
-   * Set the number of seeding rounds.
-   * 
-   * @param connection the connection
-   * @param newSeedingRounds the new value of seeding rounds
-   */
-  public static void setNumSeedingRounds(final Connection connection,
-                                         final int tournament,
-                                         final int newSeedingRounds) throws SQLException {
-    TournamentParameters.setIntTournamentParameter(connection, tournament, TournamentParameters.SEEDING_ROUNDS,
-                                                   newSeedingRounds);
   }
 
   /**
@@ -3149,25 +3125,5 @@ public final class Queries {
       SQLFunctions.close(stmt);
     }
     return users;
-  }
-
-  /**
-   * Get the maximum performance round number to display on the scoreboard
-   * pages.
-   */
-  public static int getMaxScoreboardPerformanceRound(final Connection connection,
-                                                     final int tournament) throws SQLException {
-    return TournamentParameters.getIntTournamentParameter(connection, tournament,
-                                                          TournamentParameters.MAX_SCOREBOARD_ROUND);
-  }
-
-  /**
-   * @see #getMaxScoreboardPerformanceRound(Connection, int)
-   */
-  public static void setMaxScorebaordPerformanceRound(final Connection connection,
-                                                      final int tournament,
-                                                      final int value) throws SQLException {
-    TournamentParameters.setIntTournamentParameter(connection, tournament, TournamentParameters.MAX_SCOREBOARD_ROUND,
-                                                   value);
   }
 }

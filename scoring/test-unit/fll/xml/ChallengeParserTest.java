@@ -85,8 +85,7 @@ public class ChallengeParserTest {
   public void testAllElements() {
     final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/all-elements.xml");
     Assert.assertNotNull(stream);
-    final Document document = ChallengeParser.parse(new InputStreamReader(stream));
-    Assert.assertNotNull(document);
+    ChallengeParser.parse(new InputStreamReader(stream));
   }
 
   /**
@@ -186,8 +185,7 @@ public class ChallengeParserTest {
   public void testSubjectiveSameGoal() {
     final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/subjective-two-categories-same-goal.xml");
     Assert.assertNotNull(stream);
-    final Document document = ChallengeParser.parse(new InputStreamReader(stream));
-    Assert.assertNotNull(document);
+    ChallengeParser.parse(new InputStreamReader(stream));
   }
 
   /**
@@ -389,8 +387,7 @@ public class ChallengeParserTest {
 
       final InputStream stream = u.openStream();
       final Reader reader = new InputStreamReader(stream, Utilities.DEFAULT_CHARSET);
-      final Document document = ChallengeParser.parse(reader);
-      Assert.assertNotNull(document);
+      final Document document = ChallengeParser.parse(reader).getDocument();
       reader.close();
       new ChallengeDescription(document.getDocumentElement());
     }

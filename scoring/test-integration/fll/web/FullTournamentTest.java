@@ -68,6 +68,7 @@ import fll.xml.ChallengeParser;
 import fll.xml.Goal;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreCategory;
+import fll.xml.ChallengeParser.ChallengeParseResult;
 
 /**
  * Test a full tournament.
@@ -173,8 +174,9 @@ public class FullTournamentTest {
       SQLFunctions.close(prep);
       prep = null;
 
-      final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(
-                                                                                     FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")));
+      final ChallengeParseResult result  = ChallengeParser.parse(new InputStreamReader(
+                                                                                       FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")));
+      final Document challengeDocument = result.getDocument();
       Assert.assertNotNull(challengeDocument);
       final ChallengeDescription description = new ChallengeDescription(challengeDocument.getDocumentElement());
       final PerformanceScoreCategory performanceElement = description.getPerformance();

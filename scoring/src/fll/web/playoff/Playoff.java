@@ -425,7 +425,7 @@ public final class Playoff {
     // for the teams
     final int baseRunNumber;
     if (0 == maxRoundForTeams) {
-      baseRunNumber = Queries.getNumSeedingRounds(connection, currentTournament);
+      baseRunNumber = TournamentParameters.getNumSeedingRounds(connection, currentTournament);
     } else {
       baseRunNumber = maxRoundForTeams;
     }

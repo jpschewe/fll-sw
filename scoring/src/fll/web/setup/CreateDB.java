@@ -31,6 +31,7 @@ import org.w3c.dom.Document;
 import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.db.ImportDB;
+import fll.db.TournamentParameters;
 import fll.util.FLLInternalException;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -38,6 +39,7 @@ import fll.web.BaseFLLServlet;
 import fll.web.InitFilter;
 import fll.web.UploadProcessor;
 import fll.xml.ChallengeParser;
+import fll.xml.ChallengeParser.ChallengeParseResult;
 
 /**
  * Create a new database either from an xml descriptor or from a database dump.
@@ -68,10 +70,15 @@ public class CreateDB extends BaseFLLServlet {
         final String description = (String) request.getAttribute("description");
         try {
           final URL descriptionURL = new URL(description);
-          final Document document = ChallengeParser.parse(new InputStreamReader(descriptionURL.openStream(),
-                                                                                Utilities.DEFAULT_CHARSET));
+          final ChallengeParseResult result = ChallengeParser.parse(new InputStreamReader(descriptionURL.openStream(),
+                                                                                          Utilities.DEFAULT_CHARSET));
+          final Document document = result.getDocument();
 
           GenerateDB.generateDB(document, connection);
+
+          if (null != result.getLegacyBracketSort()) {
+            TournamentParameters.setDefaultBracketSort(connection, result.getLegacyBracketSort());
+          }
 
           application.removeAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
 
@@ -91,10 +98,15 @@ public class CreateDB extends BaseFLLServlet {
           message.append("<p class='error'>XML description document not specified</p>");
           redirect = "/setup";
         } else {
-          final Document document = ChallengeParser.parse(new InputStreamReader(xmlFileItem.getInputStream(),
-                                                                                Utilities.DEFAULT_CHARSET));
+          final ChallengeParseResult result = ChallengeParser.parse(new InputStreamReader(xmlFileItem.getInputStream(),
+                                                                                          Utilities.DEFAULT_CHARSET));
+          final Document document = result.getDocument();
 
           GenerateDB.generateDB(document, connection);
+
+          if (null != result.getLegacyBracketSort()) {
+            TournamentParameters.setDefaultBracketSort(connection, result.getLegacyBracketSort());
+          }
 
           application.removeAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
 

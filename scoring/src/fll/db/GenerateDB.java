@@ -606,8 +606,8 @@ public final class GenerateDB {
         globalInsert.executeUpdate();
       }
 
-      Queries.setNumSeedingRounds(connection, INTERNAL_TOURNAMENT_ID, TournamentParameters.SEEDING_ROUNDS_DEFAULT);
-      Queries.setMaxScorebaordPerformanceRound(connection, INTERNAL_TOURNAMENT_ID,
+      TournamentParameters.setNumSeedingRounds(connection, INTERNAL_TOURNAMENT_ID, TournamentParameters.SEEDING_ROUNDS_DEFAULT);
+      TournamentParameters.setMaxScoreboardPerformanceRound(connection, INTERNAL_TOURNAMENT_ID,
                                                TournamentParameters.MAX_SCOREBOARD_ROUND_DEFAULT);
     } finally {
       SQLFunctions.close(globalInsert);

@@ -158,7 +158,7 @@ public final class GlobalParameters {
       prep = getGlobalParameterStmt(connection, CHALLENGE_DOCUMENT);
       rs = prep.executeQuery();
       if (rs.next()) {
-        return ChallengeParser.parse(new InputStreamReader(rs.getAsciiStream(1), Utilities.DEFAULT_CHARSET));
+        return ChallengeParser.parse(new InputStreamReader(rs.getAsciiStream(1), Utilities.DEFAULT_CHARSET)).getDocument();
       } else {
         throw new FLLRuntimeException("Could not find challenge document in database");
       }

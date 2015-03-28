@@ -29,6 +29,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.db.GlobalParameters;
 import fll.db.Queries;
+import fll.db.TournamentParameters;
 import fll.util.FP;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -73,7 +74,7 @@ public class Top10 extends BaseFLLServlet {
       connection = datasource.getConnection();
 
       final int currentTournament = Queries.getCurrentTournament(connection);
-      final int maxScoreboardRound = Queries.getMaxScoreboardPerformanceRound(connection, currentTournament);
+      final int maxScoreboardRound = TournamentParameters.getMaxScoreboardPerformanceRound(connection, currentTournament);
 
       final Integer divisionIndexObj = SessionAttributes.getAttribute(session, "divisionIndex", Integer.class);
       int divisionIndex;

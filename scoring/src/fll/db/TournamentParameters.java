@@ -48,8 +48,8 @@ public final class TournamentParameters {
    * @param paramName
    * @throws SQLException
    */
-  public static double getDoubleTournamentParameterDefault(final Connection connection,
-                                                           final String paramName) throws SQLException {
+  private static double getDoubleTournamentParameterDefault(final Connection connection,
+                                                            final String paramName) throws SQLException {
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
@@ -79,9 +79,9 @@ public final class TournamentParameters {
    * @param paramName
    * @throws SQLException
    */
-  public static int getIntTournamentParameter(final Connection connection,
-                                              final int tournament,
-                                              final String paramName) throws SQLException {
+  private static int getIntTournamentParameter(final Connection connection,
+                                               final int tournament,
+                                               final String paramName) throws SQLException {
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
@@ -111,8 +111,8 @@ public final class TournamentParameters {
    * @param paramName
    * @throws SQLException
    */
-  public static int getIntTournamentParameterDefault(final Connection connection,
-                                                     final String paramName) throws SQLException {
+  private static int getIntTournamentParameterDefault(final Connection connection,
+                                                      final String paramName) throws SQLException {
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
@@ -171,9 +171,9 @@ public final class TournamentParameters {
    * @throws IllegalArgumentException if the tournament is the internal
    *           tournament
    */
-  public static void unsetTournamentParameter(final Connection connection,
-                                              final int tournament,
-                                              final String paramName) throws SQLException {
+  private static void unsetParameter(final Connection connection,
+                                     final int tournament,
+                                     final String paramName) throws SQLException {
     if (tournament == GenerateDB.INTERNAL_TOURNAMENT_ID) {
       throw new IllegalArgumentException("Cannot unset a value for the internal tournament");
     }
@@ -189,16 +189,16 @@ public final class TournamentParameters {
     }
   }
 
-  public static void setDoubleDefaultParameter(final Connection connection,
-                                               final String paramName,
-                                               final double paramValue) throws SQLException {
-    setDoubleTournamentParameter(connection, GenerateDB.INTERNAL_TOURNAMENT_ID, paramName, paramValue);
+  private static void setDoubleParameterDefault(final Connection connection,
+                                                final String paramName,
+                                                final double paramValue) throws SQLException {
+    setDoubleParameter(connection, GenerateDB.INTERNAL_TOURNAMENT_ID, paramName, paramValue);
   }
 
-  public static void setDoubleTournamentParameter(final Connection connection,
-                                                  final int tournament,
-                                                  final String paramName,
-                                                  final double paramValue) throws SQLException {
+  private static void setDoubleParameter(final Connection connection,
+                                         final int tournament,
+                                         final String paramName,
+                                         final double paramValue) throws SQLException {
     final boolean paramExists = tournamentParameterValueExists(connection, tournament, paramName);
     PreparedStatement prep = null;
     try {
@@ -217,16 +217,16 @@ public final class TournamentParameters {
     }
   }
 
-  public static void setIntDefaultParameter(final Connection connection,
-                                            final String paramName,
-                                            final int paramValue) throws SQLException {
-    setIntTournamentParameter(connection, GenerateDB.INTERNAL_TOURNAMENT_ID, paramName, paramValue);
+  private static void setIntParameterDefault(final Connection connection,
+                                             final String paramName,
+                                             final int paramValue) throws SQLException {
+    setIntParameter(connection, GenerateDB.INTERNAL_TOURNAMENT_ID, paramName, paramValue);
   }
 
-  public static void setIntTournamentParameter(final Connection connection,
-                                               final int tournament,
-                                               final String paramName,
-                                               final int paramValue) throws SQLException {
+  private static void setIntParameter(final Connection connection,
+                                      final int tournament,
+                                      final String paramName,
+                                      final int paramValue) throws SQLException {
     final boolean paramExists = tournamentParameterValueExists(connection, tournament, paramName);
     PreparedStatement prep = null;
     try {
@@ -252,9 +252,9 @@ public final class TournamentParameters {
    * @param paramName
    * @throws SQLException
    */
-  public static double getDoubleTournamentParameter(final Connection connection,
-                                                    final int tournament,
-                                                    final String paramName) throws SQLException {
+  private static double getDoubleTournamentParameter(final Connection connection,
+                                                     final int tournament,
+                                                     final String paramName) throws SQLException {
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
@@ -338,6 +338,83 @@ public final class TournamentParameters {
     } finally {
       SQLFunctions.close(prep);
     }
+  }
+
+  public static void unsetBracketSort(final Connection connection,
+                                      final int tournament) throws SQLException {
+    unsetParameter(connection, tournament, BRACKET_SORT);
+  }
+
+  /**
+   * Get the number of seeding rounds from the database.
+   * 
+   * @return the number of seeding rounds
+   * @throws SQLException on a database error
+   */
+  public static int getNumSeedingRounds(final Connection connection,
+                                        final int tournament) throws SQLException {
+    return getIntTournamentParameter(connection, tournament, SEEDING_ROUNDS);
+  }
+
+  /**
+   * Get default numbers of seeding rounds for the database.
+   */
+  public static int getDefaultNumSeedRounds(final Connection connection) throws SQLException {
+    return getIntTournamentParameterDefault(connection, SEEDING_ROUNDS);
+  }
+
+  /**
+   * Set the number of seeding rounds.
+   * 
+   * @param connection the connection
+   * @param newSeedingRounds the new value of seeding rounds
+   */
+  public static void setNumSeedingRounds(final Connection connection,
+                                         final int tournament,
+                                         final int newSeedingRounds) throws SQLException {
+    setIntParameter(connection, tournament, SEEDING_ROUNDS, newSeedingRounds);
+  }
+
+  public static void unsetNumSeedingRounds(final Connection connection,
+                                           final int tournament) throws SQLException {
+    unsetParameter(connection, tournament, SEEDING_ROUNDS);
+  }
+
+  public static void setDefaultNumSeedingRounds(final Connection connection,
+                                                final int newSeedingRounds) throws SQLException {
+    setIntParameterDefault(connection, SEEDING_ROUNDS, newSeedingRounds);
+  }
+
+  /**
+   * Get the maximum performance round number to display on the scoreboard
+   * pages.
+   */
+  public static int getMaxScoreboardPerformanceRound(final Connection connection,
+                                                     final int tournament) throws SQLException {
+    return getIntTournamentParameter(connection, tournament, MAX_SCOREBOARD_ROUND);
+  }
+
+  /**
+   * @see #getMaxScoreboardPerformanceRound(Connection, int)
+   */
+  public static void setMaxScoreboardPerformanceRound(final Connection connection,
+                                                      final int tournament,
+                                                      final int value) throws SQLException {
+    setIntParameter(connection, tournament, MAX_SCOREBOARD_ROUND, value);
+  }
+
+  public static void unsetMaxScoreboardPerformanceRound(final Connection connection,
+                                                        final int tournament) throws SQLException {
+    unsetParameter(connection, tournament, MAX_SCOREBOARD_ROUND);
+  }
+
+  public static int getDefaultMaxScoreboardPerformanceRound(final Connection connection) throws SQLException {
+    return getIntTournamentParameterDefault(connection, MAX_SCOREBOARD_ROUND);
+  }
+
+  public static void setDefaultMaxScoreboardPerformanceRound(final Connection connection,
+                                                             final int value) throws SQLException {
+    setIntParameterDefault(connection, MAX_SCOREBOARD_ROUND, value);
   }
 
 }
