@@ -65,11 +65,9 @@ revision="1" schemaVersion="1">
   <subjectiveCategory name="solar_fountain" title="Solar Fountain" weight="0.03">
     <goal initialValue="0" max="10" min="0" multiplier="1" name="creativity" title="Creativity">
     </goal>
-    <goal initialValue="0" max="5" min="0" multiplier="1" name="materials" title="Materials">
-    </goal>
-    <goal initialValue="0" max="5" min="0" multiplier="1" name="circuit_design" title="Circuit Design">
-    </goal>
     <goal initialValue="0" max="10" min="0" multiplier="1" name="height" title="How high were you able to make the water move?">
+    </goal>
+    <goal initialValue="0" max="5" min="0" multiplier="1" name="materials" title="Materials">
     </goal>
   </subjectiveCategory>
   
