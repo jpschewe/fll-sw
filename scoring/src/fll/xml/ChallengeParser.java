@@ -8,6 +8,7 @@ package fll.xml;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
@@ -113,6 +114,8 @@ public final class ChallengeParser {
    */
   public static final double INITIAL_VALUE_TOLERANCE = 1E-4;
 
+  public static final int CURRENT_SCHEMA_VERSION = 2;
+
   private ChallengeParser() {
     // no instances
   }
@@ -132,13 +135,23 @@ public final class ChallengeParser {
 
       final BracketSortType legacyBracketSort = getBracketSort(content);
 
-      final int schemaVersion = determineSchemaVersion(content);
+      int schemaVersion = determineSchemaVersion(content);
       if (schemaVersion == 0) {
         content = transform0To1(content);
-      } else if (schemaVersion > 1
-          || schemaVersion < 0) {
+      } else if (schemaVersion < 0) {
         throw new ChallengeXMLException("Schema version not known: "
             + schemaVersion);
+      }
+
+      schemaVersion = determineSchemaVersion(content);
+      if (schemaVersion == 1) {
+        content = transform1To2(content);
+      }
+
+      schemaVersion = determineSchemaVersion(content);
+      if (schemaVersion != CURRENT_SCHEMA_VERSION) {
+        throw new ChallengeXMLException("Error upgrading document, should have version "
+            + CURRENT_SCHEMA_VERSION + ", but is " + schemaVersion);
       }
 
       final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -168,18 +181,10 @@ public final class ChallengeParser {
     }
   }
 
-  /**
-   * Convert from version 0 to version 1 of the schema.
-   * 
-   * @param content
-   * @return
-   */
-  private static String transform0To1(final String content) {
+  private static String applyTransform(final String content,
+                                       final InputStream transform) {
     try {
-      final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-
-      final Source stylesheet = new StreamSource(
-                                                 classLoader.getResourceAsStream("fll/resources/schema0-to-schema1.xsl"));
+      final Source stylesheet = new StreamSource(transform);
 
       final Document oldDocument = parseXMLDocument(new StringReader(content));
 
@@ -202,6 +207,25 @@ public final class ChallengeParser {
     } catch (final TransformerException e) {
       throw new ChallengeXMLException("Error transforming description", e);
     }
+
+  }
+
+  /**
+   * Convert from version 0 to version 1 of the schema.
+   * 
+   * @param content
+   * @return
+   */
+  private static String transform0To1(final String content) {
+    final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+
+    return applyTransform(content, classLoader.getResourceAsStream("fll/resources/schema0-to-schema1.xsl"));
+  }
+
+  private static String transform1To2(final String content) {
+    final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+
+    return applyTransform(content, classLoader.getResourceAsStream("fll/resources/schema1-to-schema2.xsl"));
   }
 
   /**
