@@ -62,7 +62,7 @@ public class BracketSortTest {
       // load in data/alpha-team-sort.xml
       final InputStream challengeDocIS = BracketSortTest.class.getResourceAsStream("data/alpha-team-sort.xml");
       Assert.assertNotNull(challengeDocIS);
-      final Document document = ChallengeParser.parse(new InputStreamReader(challengeDocIS));
+      final Document document = ChallengeParser.parse(new InputStreamReader(challengeDocIS)).getDocument();
       Assert.assertNotNull(document);
 
       final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());

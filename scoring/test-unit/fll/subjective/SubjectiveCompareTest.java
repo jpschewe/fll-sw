@@ -22,6 +22,7 @@ import fll.util.LogUtils;
 import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;
+
 /**
  * Test comparing subjective score documents.
  */
@@ -32,10 +33,10 @@ public class SubjectiveCompareTest {
   @Before
   public void setUp() {
     LogUtils.initializeLogging();
-    
+
     final InputStream stream = SubjectiveCompareTest.class.getResourceAsStream("challenge.xml");
     Assert.assertNotNull(stream);
-    challengeDocument = ChallengeParser.parse(new InputStreamReader(stream));
+    challengeDocument = ChallengeParser.parse(new InputStreamReader(stream)).getDocument();
   }
 
   @After
@@ -48,21 +49,24 @@ public class SubjectiveCompareTest {
     Assert.assertNotNull(scoreStream);
     final Document scoreDocument = XMLUtils.parseXMLDocument(scoreStream);
     Assert.assertNotNull(scoreDocument);
-    
+
     DownloadSubjectiveData.validateXML(scoreDocument);
-    
+
     return scoreDocument;
   }
 
   /**
    * Compare a document to itself and make sure there are no differences.
-   * @throws SAXException 
-   * @throws IOException 
+   * 
+   * @throws SAXException
+   * @throws IOException
    */
   @Test
   public void simpleTestWithNoDifferences() throws SAXException, IOException {
     final Document scoreDocument = loadDocument("master-score.xml");
-    final Collection<SubjectiveScoreDifference> diffs = SubjectiveUtils.compareScoreDocuments(challengeDocument, scoreDocument, scoreDocument);
+    final Collection<SubjectiveScoreDifference> diffs = SubjectiveUtils.compareScoreDocuments(challengeDocument,
+                                                                                              scoreDocument,
+                                                                                              scoreDocument);
     Assert.assertNotNull(diffs);
     Assert.assertTrue("Should not be any differences", diffs.isEmpty());
   }
@@ -71,13 +75,15 @@ public class SubjectiveCompareTest {
    * Basic difference test. One difference.
    * 
    * @throws SAXException
-   * @throws IOException 
+   * @throws IOException
    */
   @Test
   public void simpleTestWithOneDifference() throws SAXException, IOException {
     final Document masterDocument = loadDocument("master-score.xml");
     final Document compareDocument = loadDocument("single-diff.xml");
-    final Collection<SubjectiveScoreDifference> diffs = SubjectiveUtils.compareScoreDocuments(challengeDocument, masterDocument, compareDocument);
+    final Collection<SubjectiveScoreDifference> diffs = SubjectiveUtils.compareScoreDocuments(challengeDocument,
+                                                                                              masterDocument,
+                                                                                              compareDocument);
     Assert.assertNotNull(diffs);
     Assert.assertEquals("There be exactly 1 difference: "
         + diffs, 1, diffs.size());

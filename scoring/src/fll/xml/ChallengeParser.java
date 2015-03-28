@@ -95,11 +95,8 @@ public final class ChallengeParser {
     }
     try {
       final Reader input = new InputStreamReader(new FileInputStream(challengeFile), Utilities.DEFAULT_CHARSET);
-      final Document challengeDocument = ChallengeParser.parse(input);
-      if (null == challengeDocument) {
-        LOG.fatal("Error parsing challenge descriptor");
-        System.exit(1);
-      }
+      final ChallengeParseResult result = ChallengeParser.parse(input);
+      final Document challengeDocument = result.getDocument();
 
       final ChallengeDescription description = new ChallengeDescription(challengeDocument.getDocumentElement());
 
@@ -126,11 +123,14 @@ public final class ChallengeParser {
    * reading.
    * 
    * @param stream a stream containing document
-   * @return the challengeDocument, null on an error
+   * @return not null
+   * @throws ChallengeXMLException on error
    */
-  public static Document parse(final Reader stream) {
+  public static ChallengeParseResult parse(final Reader stream) throws ChallengeXMLException {
     try {
       String content = IOUtils.readIntoString(stream);
+
+      final BracketSortType legacyBracketSort = getBracketSort(content);
 
       final int schemaVersion = determineSchemaVersion(content);
       if (schemaVersion == 0) {
@@ -152,7 +152,7 @@ public final class ChallengeParser {
       // challenge descriptor specific checks
       validateDocument(document);
 
-      return document;
+      return new ChallengeParseResult(document, legacyBracketSort);
     } catch (final SAXParseException spe) {
       throw new ChallengeXMLException(
                                       String.format("Error parsing file line: %d column: %d%n Message: %s%n This may be caused by using the wrong version of the software or an improperly formatted challenge descriptor or attempting to parse a file that is not a challenge descriptor.",
@@ -224,7 +224,33 @@ public final class ChallengeParser {
     } else {
       return 0;
     }
+  }
 
+  /**
+   * If the bracket sort parameter is in this descriptor, return it.
+   * 
+   * @param content the content of the XML file
+   * @return the sort or null
+   */
+  private static BracketSortType getBracketSort(final String content) throws SAXException, IOException {
+    final Document document = parseXMLDocument(new StringReader(content));
+    final Element rootElement = document.getDocumentElement();
+    if (!"fll".equals(rootElement.getTagName())) {
+      throw new ChallengeXMLException("Not a fll challenge description file");
+    }
+
+    if (rootElement.hasAttribute("bracketSort")) {
+      final String str = rootElement.getAttribute("bracketSort");
+      try {
+        return BracketSortType.valueOf(str);
+      } catch (final IllegalArgumentException e) {
+        LOG.error("Cannot convert "
+            + str + " to bracket sort type, ignoring");
+        return null;
+      }
+    } else {
+      return null;
+    }
   }
 
   /**
@@ -528,4 +554,34 @@ public final class ChallengeParser {
     }
   }
 
+  /**
+   * The result of parsing a challenge descriptor XML document.
+   */
+  public static class ChallengeParseResult {
+    public ChallengeParseResult(final Document document,
+                                final BracketSortType bracketSort) {
+      mDocument = document;
+      mBracketSort = bracketSort;
+    }
+
+    private final Document mDocument;
+
+    public Document getDocument() {
+      return mDocument;
+    }
+
+    private final BracketSortType mBracketSort;
+
+    /**
+     * For older documents this may have a value. For new documents this
+     * should be null. If this value is not null, it should be put into the
+     * tournament_parameters table in the database.
+     * 
+     * @return the value or null
+     */
+    public BracketSortType getLegacyBracketSort() {
+      return mBracketSort;
+    }
+
+  }
 }

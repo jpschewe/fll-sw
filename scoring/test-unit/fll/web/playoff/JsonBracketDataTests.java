@@ -34,11 +34,13 @@ import fll.Tournament;
 import fll.TournamentTeam;
 import fll.db.GenerateDB;
 import fll.db.Queries;
+import fll.db.TournamentParameters;
 import fll.util.JsonUtilities;
 import fll.util.JsonUtilities.BracketLeafResultSet;
 import fll.util.LogUtils;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
+import fll.xml.ChallengeParser.ChallengeParseResult;
 
 /**
  * Basic tests on the JsonBracketData object.
@@ -256,7 +258,8 @@ public class JsonBracketDataTests {
     // load up basic descriptor
     final InputStream challengeDocIS = JsonBracketDataTests.class.getResourceAsStream("data/basic-brackets-json.xml");
     Assert.assertNotNull(challengeDocIS);
-    final Document document = ChallengeParser.parse(new InputStreamReader(challengeDocIS));
+    final ChallengeParseResult result = ChallengeParser.parse(new InputStreamReader(challengeDocIS));
+    final Document document = result.getDocument();
     Assert.assertNotNull(document);
 
     final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
@@ -266,9 +269,13 @@ public class JsonBracketDataTests {
     connection = DriverManager.getConnection("jdbc:hsqldb:mem:flldb-testJsonBrackets");
     GenerateDB.generateDB(document, connection);
 
+    final int tournament = 2;
+    if(null != result.getLegacyBracketSort()) {
+      TournamentParameters.setBracketSort(connection, tournament, result.getLegacyBracketSort());
+    }
     Tournament.createTournament(connection, "Playoff Test Tournament", "Test");
-    Queries.setCurrentTournament(connection, 2); // 2 is tournament ID
-    Queries.setNumSeedingRounds(connection, 2, 0); // random bracket sort
+    Queries.setCurrentTournament(connection, tournament); // 2 is tournament ID
+    TournamentParameters.setNumSeedingRounds(connection, 2, 0);
     // make teams
     for (int i = 0; i < teamNames.length; ++i) {
       Assert.assertNull(Queries.addTeam(connection, i + 1, teamNames[i], "htk", div, 2));

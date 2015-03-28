@@ -21,6 +21,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.db.Queries;
 import fll.db.TableInformation;
+import fll.db.TournamentParameters;
 import fll.util.LogUtils;
 
 /**
@@ -387,7 +388,7 @@ public class BracketData {
       if (minRunNumber.next()) {
         _baseRunNumber = minRunNumber.getInt(1) - 1;
       } else {
-        _baseRunNumber = Queries.getNumSeedingRounds(_connection, _currentTournament);
+        _baseRunNumber = TournamentParameters.getNumSeedingRounds(_connection, _currentTournament);
       }
 
       stmt = _connection.prepareStatement("SELECT PlayoffRound,LineNumber,Team,AssignedTable,Printed" //
