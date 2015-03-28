@@ -1,3 +1,4 @@
+* 172 - make bracket sort be a tournament parameter instead of a challenge descriptor attribute
 * 381 - handle missing information in TeamScheduleInfo
 * 380 - generate correct tanking report when there are multiple tournaments in the same database
 * 377 - correctly identify Excel files by extension
