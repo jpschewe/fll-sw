@@ -39,7 +39,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 14;
+  public static final int DATABASE_VERSION = 15;
 
   private static final Logger LOGGER = LogUtils.getLogger();
 

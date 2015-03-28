@@ -536,6 +536,10 @@ public final class ImportDB {
     if (dbVersion < 14) {
       upgrade13To14(connection);
     }
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 15) {
+      upgrade14To15(connection);
+    }
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < GenerateDB.DATABASE_VERSION) {
@@ -648,6 +652,17 @@ public final class ImportDB {
     }
   }
 
+  /**
+   * Add bracket sort default value.
+   */
+  private static void upgrade14To15(final Connection connection) throws SQLException {
+    if(LOG.isTraceEnabled()) {
+      LOG.trace("Upgrading database from 14 to 15");
+    }
+    
+    TournamentParameters.setDefaultBracketSort(connection, TournamentParameters.BRACKET_SORT_DEFAULT);
+  }
+  
   /**
    * Check for a column in a table. This checks table names both upper and lower
    * case.
