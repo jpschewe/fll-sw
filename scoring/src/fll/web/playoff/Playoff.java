@@ -25,6 +25,7 @@ import org.apache.log4j.Logger;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.db.Queries;
+import fll.db.TournamentParameters;
 import fll.util.FP;
 import fll.util.LogUtils;
 import fll.xml.BracketSortType;
@@ -393,7 +394,7 @@ public final class Playoff {
     }
     final int currentTournament = Queries.getCurrentTournament(connection);
 
-    final BracketSortType bracketSort = challengeDescription.getBracketSort();
+    final BracketSortType bracketSort = TournamentParameters.getBracketSort(connection, currentTournament);
     final WinnerType winnerCriteria = challengeDescription.getWinner();
 
     // Initialize currentRound to contain a full bracket setup (i.e. playoff

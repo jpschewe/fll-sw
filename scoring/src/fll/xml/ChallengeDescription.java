@@ -29,7 +29,6 @@ public class ChallengeDescription implements Serializable {
   public ChallengeDescription(final Element ele) {
     mTitle = ele.getAttribute("title");
     mRevision = ele.getAttribute("revision");
-    mBracketSort = XMLUtils.getBracketSort(ele);
     mWinner = XMLUtils.getWinnerCriteria(ele);
 
     final Element performanceElement = (Element) ele.getElementsByTagName("Performance").item(0);
@@ -41,7 +40,6 @@ public class ChallengeDescription implements Serializable {
       subjCats.add(subj);
     }
     mSubjectiveCategories = Collections.unmodifiableList(subjCats);
-
   }
 
   private final String mTitle;
@@ -54,12 +52,6 @@ public class ChallengeDescription implements Serializable {
 
   public String getRevision() {
     return mRevision;
-  }
-
-  private final BracketSortType mBracketSort;
-
-  public BracketSortType getBracketSort() {
-    return mBracketSort;
   }
 
   private final WinnerType mWinner;
