@@ -417,4 +417,22 @@ public final class TournamentParameters {
     setIntParameterDefault(connection, MAX_SCOREBOARD_ROUND, value);
   }
 
+  /**
+   * Check if a default value for the specified parameter exists.
+   * This is to be used when upgrading databases.
+   */
+  public static boolean defaultParameterExists(final Connection connection,
+                                               final String paramName) throws SQLException {
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = TournamentParameters.getTournamentParameterStmt(connection, GenerateDB.INTERNAL_TOURNAMENT_ID, paramName);
+      rs = prep.executeQuery();
+      return rs.next();
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+  }
+
 }
