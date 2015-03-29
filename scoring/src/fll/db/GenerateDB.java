@@ -567,7 +567,8 @@ public final class GenerateDB {
   }
 
   /**
-   * Put the default parameters in the database if they don't already exist.
+   * Put the default parameters (global and tournament) in the database if they
+   * don't already exist.
    */
   /* package */static void setDefaultParameters(final Connection connection) throws SQLException {
     createInternalTournament(connection);
@@ -575,6 +576,7 @@ public final class GenerateDB {
     PreparedStatement globalInsert = null;
     boolean check;
     try {
+      // Global Parameters
       globalInsert = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
 
       check = GlobalParameters.globalParameterExists(connection, GlobalParameters.CURRENT_TOURNAMENT);
@@ -606,9 +608,20 @@ public final class GenerateDB {
         globalInsert.executeUpdate();
       }
 
-      TournamentParameters.setNumSeedingRounds(connection, INTERNAL_TOURNAMENT_ID, TournamentParameters.SEEDING_ROUNDS_DEFAULT);
-      TournamentParameters.setMaxScoreboardPerformanceRound(connection, INTERNAL_TOURNAMENT_ID,
-                                               TournamentParameters.MAX_SCOREBOARD_ROUND_DEFAULT);
+      // Tournament Parameters
+      if (!TournamentParameters.defaultParameterExists(connection, TournamentParameters.SEEDING_ROUNDS)) {
+        TournamentParameters.setDefaultNumSeedingRounds(connection, TournamentParameters.SEEDING_ROUNDS_DEFAULT);
+      }
+
+      if (!TournamentParameters.defaultParameterExists(connection, TournamentParameters.MAX_SCOREBOARD_ROUND)) {
+        TournamentParameters.setDefaultMaxScoreboardPerformanceRound(connection,
+                                                                     TournamentParameters.MAX_SCOREBOARD_ROUND_DEFAULT);
+      }
+
+      if (!TournamentParameters.defaultParameterExists(connection, TournamentParameters.BRACKET_SORT)) {
+        TournamentParameters.setDefaultBracketSort(connection, TournamentParameters.BRACKET_SORT_DEFAULT);
+      }
+
     } finally {
       SQLFunctions.close(globalInsert);
     }

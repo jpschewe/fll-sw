@@ -504,6 +504,10 @@ public final class ImportDB {
     if (dbVersion < 1) {
       upgrade0To1(connection, challengeDocument);
     }
+    
+    // tournament parameters existed after version 1
+    GenerateDB.setDefaultParameters(connection);
+
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 2) {
       upgrade1To2(connection);
@@ -1087,8 +1091,6 @@ public final class ImportDB {
 
       // create new tournament parameters table
       GenerateDB.tournamentParameters(connection);
-
-      GenerateDB.setDefaultParameters(connection);
 
       // set the version to 1 - this will have been set while creating
       // global_parameters, but we need to force it to 1 for later upgrade
