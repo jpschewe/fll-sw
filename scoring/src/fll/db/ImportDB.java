@@ -669,6 +669,8 @@ public final class ImportDB {
     }
 
     TournamentParameters.setDefaultBracketSort(connection, TournamentParameters.BRACKET_SORT_DEFAULT);
+    
+    setDBVersion(connection, 15);
   }
 
   /**
