@@ -203,12 +203,12 @@ public final class TournamentParameters {
     PreparedStatement prep = null;
     try {
       if (!paramExists) {
-        prep = connection.prepareStatement("INSERT INTO tournament_parameters (param, param_value, tournament) VALUES (?, ?, ?)");
+        prep = connection.prepareStatement("INSERT INTO tournament_parameters (param_value, param, tournament) VALUES (?, ?, ?)");
       } else {
         prep = connection.prepareStatement("UPDATE tournament_parameters SET param_value = ? WHERE param = ? AND tournament = ?");
       }
-      prep.setString(1, paramName);
-      prep.setDouble(2, paramValue);
+      prep.setDouble(1, paramValue);
+      prep.setString(2, paramName);
       prep.setInt(3, tournament);
 
       prep.executeUpdate();
@@ -326,12 +326,12 @@ public final class TournamentParameters {
     PreparedStatement prep = null;
     try {
       if (!paramExists) {
-        prep = connection.prepareStatement("INSERT INTO tournament_parameters (param, param_value, tournament) VALUES (?, ?, ?)");
+        prep = connection.prepareStatement("INSERT INTO tournament_parameters (param_value, param, tournament) VALUES (?, ?, ?)");
       } else {
         prep = connection.prepareStatement("UPDATE tournament_parameters SET param_value = ? WHERE param = ? AND tournament = ?");
       }
-      prep.setString(1, BRACKET_SORT);
-      prep.setString(2, paramValue.name());
+      prep.setString(1, paramValue.name());
+      prep.setString(2, BRACKET_SORT);
       prep.setInt(3, tournament);
 
       prep.executeUpdate();
