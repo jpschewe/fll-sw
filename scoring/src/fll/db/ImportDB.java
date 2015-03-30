@@ -374,11 +374,13 @@ public final class ImportDB {
           + GenerateDB.DATABASE_VERSION + " dump version: " + dbVersion);
     }
 
+    upgradeDatabase(connection, challengeResult.getDocument(), description);
+
+
+    // needs to happen after the upgrade to be sure that the tables exist
     if (null != challengeResult.getLegacyBracketSort()) {
       TournamentParameters.setDefaultBracketSort(connection, challengeResult.getLegacyBracketSort());
     }
-
-    upgradeDatabase(connection, challengeResult.getDocument(), description);
 
     return challengeResult.getDocument();
   }
