@@ -270,12 +270,12 @@ public class JsonBracketDataTests {
     GenerateDB.generateDB(document, connection);
 
     final int tournament = 2;
+    Tournament.createTournament(connection, "Playoff Test Tournament", "Test");
+    Queries.setCurrentTournament(connection, tournament); // 2 is tournament ID
+    TournamentParameters.setNumSeedingRounds(connection, tournament, 0);
     if(null != result.getLegacyBracketSort()) {
       TournamentParameters.setBracketSort(connection, tournament, result.getLegacyBracketSort());
     }
-    Tournament.createTournament(connection, "Playoff Test Tournament", "Test");
-    Queries.setCurrentTournament(connection, tournament); // 2 is tournament ID
-    TournamentParameters.setNumSeedingRounds(connection, 2, 0);
     // make teams
     for (int i = 0; i < teamNames.length; ++i) {
       Assert.assertNull(Queries.addTeam(connection, i + 1, teamNames[i], "htk", div, 2));
