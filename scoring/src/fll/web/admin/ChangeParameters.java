@@ -88,18 +88,16 @@ public class ChangeParameters extends BaseFLLServlet {
                                   final HttpServletRequest request,
                                   final List<Tournament> tournaments) throws SQLException {
     final int defaultNumRounds = Integer.parseInt(request.getParameter("seeding_rounds_default"));
-    TournamentParameters.setIntDefaultParameter(connection, TournamentParameters.SEEDING_ROUNDS, defaultNumRounds);
+    TournamentParameters.setDefaultNumSeedingRounds(connection, defaultNumRounds);
 
     for (final Tournament tournament : tournaments) {
       final String str = request.getParameter("seeding_rounds_"
           + tournament.getTournamentID());
       if ("default".equals(str)) {
-        TournamentParameters.unsetTournamentParameter(connection, tournament.getTournamentID(),
-                                                      TournamentParameters.SEEDING_ROUNDS);
+        TournamentParameters.unsetNumSeedingRounds(connection, tournament.getTournamentID());
       } else {
         final int value = Integer.parseInt(str);
-        TournamentParameters.setIntTournamentParameter(connection, tournament.getTournamentID(),
-                                                       TournamentParameters.SEEDING_ROUNDS, value);
+        TournamentParameters.setNumSeedingRounds(connection, tournament.getTournamentID(), value);
       }
     }
   }
@@ -108,18 +106,16 @@ public class ChangeParameters extends BaseFLLServlet {
                                        final HttpServletRequest request,
                                        final List<Tournament> tournaments) throws SQLException {
     final int defaultNumRounds = Integer.parseInt(request.getParameter("max_scoreboard_round_default"));
-    TournamentParameters.setIntDefaultParameter(connection, TournamentParameters.MAX_SCOREBOARD_ROUND, defaultNumRounds);
+    TournamentParameters.setDefaultMaxScoreboardPerformanceRound(connection, defaultNumRounds);
 
     for (final Tournament tournament : tournaments) {
       final String str = request.getParameter("max_scoreboard_round_"
           + tournament.getTournamentID());
       if ("default".equals(str)) {
-        TournamentParameters.unsetTournamentParameter(connection, tournament.getTournamentID(),
-                                                      TournamentParameters.MAX_SCOREBOARD_ROUND);
+        TournamentParameters.unsetMaxScoreboardPerformanceRound(connection, tournament.getTournamentID());
       } else {
         final int value = Integer.parseInt(str);
-        TournamentParameters.setIntTournamentParameter(connection, tournament.getTournamentID(),
-                                                       TournamentParameters.MAX_SCOREBOARD_ROUND, value);
+        TournamentParameters.setMaxScoreboardPerformanceRound(connection, tournament.getTournamentID(), value);
       }
     }
   }

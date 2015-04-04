@@ -49,6 +49,7 @@ public class InitializeBrackets extends BaseFLLServlet {
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
+    
     final StringBuilder message = new StringBuilder();
     final String existingMessage = SessionAttributes.getMessage(session);
     if (null != existingMessage) {
@@ -74,54 +75,22 @@ public class InitializeBrackets extends BaseFLLServlet {
       final Tournament currentTournament = data.getCurrentTournament();
       final int currentTournamentID = currentTournament.getTournamentID();
 
-      final String divisionStr;
-      final String divParam = request.getParameter("division");
-      if (null == divParam
-          || "".equals(divParam)) {
-        divisionStr = data.getDivision();
-      } else {
-        divisionStr = divParam;
-      }
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("division: '"
-            + divisionStr + "'");
-      }
-      data.setDivision(divisionStr);
-
-      final Boolean sessionEnableThird = SessionAttributes.getAttribute(session, "enableThird", Boolean.class);
-      final boolean enableThird;
-      if (null == sessionEnableThird) {
-        final String thirdFourthPlaceBrackets = request.getParameter("enableThird");
-        if (null == thirdFourthPlaceBrackets) {
-          enableThird = false;
-        } else {
-          enableThird = true;
-        }
-      } else {
-        enableThird = sessionEnableThird;
-      }
-
-      if (null == divisionStr) {
+      if (null == data.getDivision()) {
         message.append("<p class='error'>No division specified.</p>");
-      } else if (PlayoffIndex.CREATE_NEW_PLAYOFF_DIVISION.equals(divisionStr)) {
-        session.setAttribute("enableThird", enableThird);
-
+      } else if (PlayoffIndex.CREATE_NEW_PLAYOFF_DIVISION.equals(data.getDivision())) {
         redirect = "create_playoff_division.jsp";
       } else {
-        // clean out for the next time
-        session.removeAttribute("enableThird");
-
-        if (Queries.isPlayoffDataInitialized(connection, divisionStr)) {
+        if (Queries.isPlayoffDataInitialized(connection, data.getDivision())) {
           message.append("<p class='warning'>Playoffs have already been initialized for division "
-              + divisionStr + ".</p>");
+              + data.getDivision() + ".</p>");
         } else {
           final List<String> eventDivisions = Queries.getEventDivisions(connection, currentTournamentID);
           final List<? extends Team> teams;
 
-          if (eventDivisions.contains(divisionStr)) {
+          if (eventDivisions.contains(data.getDivision())) {
             final Map<Integer, TournamentTeam> tournamentTeams = data.getTournamentTeams();
             final List<TournamentTeam> tempTeams = new ArrayList<TournamentTeam>(tournamentTeams.values());
-            TournamentTeam.filterTeamsToEventDivision(tempTeams, divisionStr);
+            TournamentTeam.filterTeamsToEventDivision(tempTeams, data.getDivision());
             teams = tempTeams;
           } else {
             // assume new playoff division
@@ -138,11 +107,12 @@ public class InitializeBrackets extends BaseFLLServlet {
             message.append(errors);
           } else {
 
-            Playoff.initializeBrackets(connection, challengeDescription, divisionStr, enableThird, teams);
+            Playoff.initializeBrackets(connection, challengeDescription, data.getDivision(), 
+                                       data.getEnableThird(), teams, data.getSort());
           }
 
           message.append("<p>Playoffs have been successfully initialized for division "
-              + divisionStr + ".</p>");
+              + data.getDivision() + ".</p>");
         }
       }
 

@@ -89,7 +89,7 @@ public class BracketSortTest {
 
       final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection);
 
-      final BracketSortType bracketSort = description.getBracketSort();
+      final BracketSortType bracketSort = BracketSortType.ALPHA_TEAM;
       final WinnerType winnerCriteria = description.getWinner();
 
       final List<TournamentTeam> teams = new ArrayList<TournamentTeam>(tournamentTeams.values());

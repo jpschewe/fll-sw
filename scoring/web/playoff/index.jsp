@@ -57,7 +57,7 @@
       completed.<br />
       <form
         name='initialize'
-        action='InitializeBrackets'
+        action='StorePlayoffParameters'
         method='POST'>
         Select Division: <select
           id='initialize-division'

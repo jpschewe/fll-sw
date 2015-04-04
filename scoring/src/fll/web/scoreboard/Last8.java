@@ -26,6 +26,7 @@ import org.apache.log4j.Logger;
 
 import fll.Utilities;
 import fll.db.Queries;
+import fll.db.TournamentParameters;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
@@ -55,7 +56,7 @@ public class Last8 extends BaseFLLServlet {
       connection = datasource.getConnection();
 
       final int currentTournament = Queries.getCurrentTournament(connection);
-      final int maxScoreboardRound = Queries.getMaxScoreboardPerformanceRound(connection, currentTournament);
+      final int maxScoreboardRound = TournamentParameters.getMaxScoreboardPerformanceRound(connection, currentTournament);
 
       formatter.format("<html>");
       formatter.format("<head>");

@@ -61,30 +61,26 @@ public class GatherParameterInformation extends BaseFLLServlet {
       session.setAttribute("tournaments", tournaments);
 
       session.setAttribute("numSeedingRounds_default",
-                           TournamentParameters.getIntTournamentParameterDefault(connection,
-                                                                                 TournamentParameters.SEEDING_ROUNDS));
+                           TournamentParameters.getDefaultNumSeedRounds(connection));
       final Map<Integer, Integer> numSeedingRounds = new HashMap<Integer, Integer>();
       for (final Tournament tournament : tournaments) {
         if (TournamentParameters.tournamentParameterValueExists(connection, tournament.getTournamentID(),
                                                                 TournamentParameters.SEEDING_ROUNDS)) {
           numSeedingRounds.put(tournament.getTournamentID(),
-                               TournamentParameters.getIntTournamentParameter(connection, tournament.getTournamentID(),
-                                                                              TournamentParameters.SEEDING_ROUNDS));
+                               TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID()));
         }
       }
       session.setAttribute("numSeedingRounds", numSeedingRounds);
 
       session.setAttribute("maxScoreboardRound_default",
-                           TournamentParameters.getIntTournamentParameterDefault(connection,
-                                                                                 TournamentParameters.MAX_SCOREBOARD_ROUND));
+                           TournamentParameters.getDefaultMaxScoreboardPerformanceRound(connection));
       final Map<Integer, Integer> maxScoreboardRound = new HashMap<Integer, Integer>();
       for (final Tournament tournament : tournaments) {
         if (TournamentParameters.tournamentParameterValueExists(connection, tournament.getTournamentID(),
                                                                 TournamentParameters.MAX_SCOREBOARD_ROUND)) {
           maxScoreboardRound.put(tournament.getTournamentID(),
-                                 TournamentParameters.getIntTournamentParameter(connection,
-                                                                                tournament.getTournamentID(),
-                                                                                TournamentParameters.MAX_SCOREBOARD_ROUND));
+                                 TournamentParameters.getMaxScoreboardPerformanceRound(connection,
+                                                                                tournament.getTournamentID()));
         }
       }
       session.setAttribute("maxScoreboardRound", maxScoreboardRound);

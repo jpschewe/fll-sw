@@ -25,6 +25,7 @@ import org.apache.log4j.Logger;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.db.Queries;
+import fll.db.TournamentParameters;
 import fll.util.FP;
 import fll.util.LogUtils;
 import fll.xml.BracketSortType;
@@ -385,7 +386,8 @@ public final class Playoff {
                                         final ChallengeDescription challengeDescription,
                                         final String division,
                                         final boolean enableThird,
-                                        final List<? extends Team> teams) throws SQLException {
+                                        final List<? extends Team> teams,
+                                        final BracketSortType bracketSort) throws SQLException {
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("initializing brackets for division: "
@@ -393,7 +395,6 @@ public final class Playoff {
     }
     final int currentTournament = Queries.getCurrentTournament(connection);
 
-    final BracketSortType bracketSort = challengeDescription.getBracketSort();
     final WinnerType winnerCriteria = challengeDescription.getWinner();
 
     // Initialize currentRound to contain a full bracket setup (i.e. playoff
@@ -424,7 +425,7 @@ public final class Playoff {
     // for the teams
     final int baseRunNumber;
     if (0 == maxRoundForTeams) {
-      baseRunNumber = Queries.getNumSeedingRounds(connection, currentTournament);
+      baseRunNumber = TournamentParameters.getNumSeedingRounds(connection, currentTournament);
     } else {
       baseRunNumber = maxRoundForTeams;
     }
