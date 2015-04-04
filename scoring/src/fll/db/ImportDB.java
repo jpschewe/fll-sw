@@ -312,6 +312,7 @@ public final class ImportDB {
    * </p>
    * 
    * @param zipfile the database dump
+   * @param connection where to store the data
    * @return the challenge document
    * @throws IOException if there is an error reading the zipfile
    * @throws SQLException if there is an error loading the data into the
@@ -320,7 +321,7 @@ public final class ImportDB {
    */
   public static Document loadDatabaseDump(final ZipInputStream zipfile,
                                           final Connection connection) throws IOException, SQLException {
-    Document challengeDocument = null;
+    Document challengeResult = null;
 
     final Map<String, Map<String, String>> typeInfo = new HashMap<String, Map<String, String>>();
     ZipEntry entry;
@@ -329,7 +330,7 @@ public final class ImportDB {
       final String name = entry.getName();
       if ("challenge.xml".equals(name)) {
         final Reader reader = new InputStreamReader(zipfile, Utilities.DEFAULT_CHARSET);
-        challengeDocument = ChallengeParser.parse(reader);
+        challengeResult = ChallengeParser.parse(reader);
       } else if (name.endsWith(".csv")) {
         final String tablename = name.substring(0, name.indexOf(".csv")).toLowerCase();
         final Reader reader = new InputStreamReader(zipfile, Utilities.DEFAULT_CHARSET);
@@ -347,11 +348,11 @@ public final class ImportDB {
       zipfile.closeEntry();
     }
 
-    if (null == challengeDocument) {
+    if (null == challengeResult) {
       throw new RuntimeException("Cannot find challenge document in the zipfile");
     }
 
-    final ChallengeDescription description = new ChallengeDescription(challengeDocument.getDocumentElement());
+    final ChallengeDescription description = new ChallengeDescription(challengeResult.getDocumentElement());
     if (typeInfo.isEmpty()) {
       // before types were added, assume version 0 types
       createVersion0TypeInfo(typeInfo, description);
@@ -370,9 +371,9 @@ public final class ImportDB {
           + GenerateDB.DATABASE_VERSION + " dump version: " + dbVersion);
     }
 
-    upgradeDatabase(connection, challengeDocument, description);
+    upgradeDatabase(connection, challengeResult, description);
 
-    return challengeDocument;
+    return challengeResult;
   }
 
   /**
@@ -496,6 +497,10 @@ public final class ImportDB {
     if (dbVersion < 1) {
       upgrade0To1(connection, challengeDocument);
     }
+
+    // tournament parameters existed after version 1
+    GenerateDB.setDefaultParameters(connection);
+
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 2) {
       upgrade1To2(connection);
@@ -907,7 +912,7 @@ public final class ImportDB {
 
       final List<Tournament> tournaments = Tournament.getTournaments(connection);
       for (final Tournament tournament : tournaments) {
-        final int seedingRounds = Queries.getNumSeedingRounds(connection, tournament.getTournamentID());
+        final int seedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID());
 
         prep = connection.prepareStatement("UPDATE PlayoffData SET run_number = ? + PlayoffRound");
         prep.setInt(1, seedingRounds);
@@ -1063,8 +1068,6 @@ public final class ImportDB {
       // create new tournament parameters table
       GenerateDB.tournamentParameters(connection);
 
-      GenerateDB.setDefaultParameters(connection);
-
       // set the version to 1 - this will have been set while creating
       // global_parameters, but we need to force it to 1 for later upgrade
       // functions to not be confused
@@ -1118,7 +1121,7 @@ public final class ImportDB {
 
     // Tournaments table isn't imported as it's expected to already be populated
     // with the tournament
-    
+
     importTournamentParameters(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
     importJudges(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
@@ -1619,38 +1622,21 @@ public final class ImportDB {
   }
 
   private static void importTournamentParameters(final Connection sourceConnection,
-                                   final Connection destinationConnection,
-                                   final int sourceTournamentID,
-                                   final int destTournamentID) throws SQLException {
-    PreparedStatement destPrep = null;
-    PreparedStatement sourcePrep = null;
-    ResultSet sourceRS = null;
-    try {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Importing tournament_parameters");
-      }
-
-      destPrep = destinationConnection.prepareStatement("DELETE FROM tournament_parameters WHERE Tournament = ?");
-      destPrep.setInt(1, destTournamentID);
-      destPrep.executeUpdate();
-      SQLFunctions.close(destPrep);
-
-      destPrep = destinationConnection.prepareStatement("INSERT INTO tournament_parameters (param, param_value, tournament) VALUES (?, ?, ?)");
-      destPrep.setInt(3, destTournamentID);
-
-      sourcePrep = sourceConnection.prepareStatement("SELECT param, param_value FROM tournament_parameters WHERE tournament = ?");
-      sourcePrep.setInt(1, sourceTournamentID);
-      sourceRS = sourcePrep.executeQuery();
-      while (sourceRS.next()) {
-        destPrep.setString(1, sourceRS.getString(1));
-        destPrep.setString(2, sourceRS.getString(2));
-        destPrep.executeUpdate();
-      }
-    } finally {
-      SQLFunctions.close(sourceRS);
-      SQLFunctions.close(sourcePrep);
-      SQLFunctions.close(destPrep);
+                                                 final Connection destinationConnection,
+                                                 final int sourceTournamentID,
+                                                 final int destTournamentID) throws SQLException {
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Importing tournament_parameters");
     }
+
+    // use the "get" methods rather than generic SQL query to ensure that the
+    // default value is picked up in case the default value has been changed
+    final int seedingRounds = TournamentParameters.getNumSeedingRounds(sourceConnection, sourceTournamentID);
+    final int maxPerScoreboardPerformanceRound = TournamentParameters.getMaxScoreboardPerformanceRound(sourceConnection,
+                                                                                                       sourceTournamentID);
+    TournamentParameters.setNumSeedingRounds(destinationConnection, destTournamentID, seedingRounds);
+    TournamentParameters.setMaxScoreboardPerformanceRound(destinationConnection, destTournamentID,
+                                                          maxPerScoreboardPerformanceRound);
   }
 
   private static void importJudges(final Connection sourceConnection,

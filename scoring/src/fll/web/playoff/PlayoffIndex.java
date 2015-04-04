@@ -42,9 +42,6 @@ public class PlayoffIndex {
                                      final HttpSession session,
                                      final PageContext pageContext) {
 
-    // clear out variables that will be used later
-    session.removeAttribute("enableThird");
-
     final StringBuilder message = new StringBuilder();
     final String existingMessage = SessionAttributes.getMessage(session);
     if (null != existingMessage) {

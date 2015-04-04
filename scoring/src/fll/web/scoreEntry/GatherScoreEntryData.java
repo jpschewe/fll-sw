@@ -26,6 +26,7 @@ import fll.Team;
 import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.Queries;
+import fll.db.TournamentParameters;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -72,7 +73,7 @@ public class GatherScoreEntryData extends BaseFLLServlet {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
       final int tournament = Queries.getCurrentTournament(connection);
-      final int numSeedingRounds = Queries.getNumSeedingRounds(connection, tournament);
+      final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament);
       final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection);
       if (!tournamentTeams.containsKey(Integer.valueOf(teamNumber))) {
         throw new RuntimeException("Selected team number is not valid: "

@@ -34,9 +34,11 @@ import fll.Tournament;
 import fll.TournamentTeam;
 import fll.db.GenerateDB;
 import fll.db.Queries;
+import fll.db.TournamentParameters;
 import fll.util.JsonUtilities;
 import fll.util.JsonUtilities.BracketLeafResultSet;
 import fll.util.LogUtils;
+import fll.xml.BracketSortType;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 
@@ -266,9 +268,10 @@ public class JsonBracketDataTests {
     connection = DriverManager.getConnection("jdbc:hsqldb:mem:flldb-testJsonBrackets");
     GenerateDB.generateDB(document, connection);
 
+    final int tournament = 2;
     Tournament.createTournament(connection, "Playoff Test Tournament", "Test");
-    Queries.setCurrentTournament(connection, 2); // 2 is tournament ID
-    Queries.setNumSeedingRounds(connection, 2, 0); // random bracket sort
+    Queries.setCurrentTournament(connection, tournament); // 2 is tournament ID
+    TournamentParameters.setNumSeedingRounds(connection, tournament, 0);
     // make teams
     for (int i = 0; i < teamNames.length; ++i) {
       Assert.assertNull(Queries.addTeam(connection, i + 1, teamNames[i], "htk", div, 2));
@@ -278,7 +281,7 @@ public class JsonBracketDataTests {
     final List<TournamentTeam> teams = new ArrayList<TournamentTeam>(tournamentTeams.values());
     TournamentTeam.filterTeamsToEventDivision(teams, div);
 
-    Playoff.initializeBrackets(connection, description, div, false, teams);
+    Playoff.initializeBrackets(connection, description, div, false, teams, BracketSortType.ALPHA_TEAM);
 
     final int firstRound = 1;
     final int lastRound = 4;

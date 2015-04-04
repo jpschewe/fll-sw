@@ -96,5 +96,4 @@ public class ReplaceChallengeDescriptor extends BaseFLLServlet {
     response.sendRedirect(response.encodeRedirectURL("index.jsp"));
 
   }
-
 }

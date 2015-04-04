@@ -18,6 +18,7 @@ import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.db.Queries;
+import fll.xml.BracketSortType;
 
 /**
  * Session data for working with the playoffs.
@@ -35,6 +36,28 @@ public final class PlayoffSessionData implements Serializable {
 
     mInitDivisions = new LinkedList<String>(mEventDivisions);
     mInitDivisions.add(PlayoffIndex.CREATE_NEW_PLAYOFF_DIVISION);
+
+    mSort = null;
+  }
+
+  private boolean mEnableThird = false;
+
+  public boolean getEnableThird() {
+    return mEnableThird;
+  }
+
+  public void setEnableThird(boolean v) {
+    mEnableThird = v;
+  }
+
+  private BracketSortType mSort;
+
+  public BracketSortType getSort() {
+    return mSort;
+  }
+
+  public void setSort(final BracketSortType sort) {
+    mSort = sort;
   }
 
   private final Map<Integer, TournamentTeam> mTournamentTeams;

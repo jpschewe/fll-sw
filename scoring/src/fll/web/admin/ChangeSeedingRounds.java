@@ -22,6 +22,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.apache.log4j.Logger;
 
 import fll.db.Queries;
+import fll.db.TournamentParameters;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
@@ -56,7 +57,7 @@ public class ChangeSeedingRounds extends BaseFLLServlet {
           if (newSeedingRounds < 0) {
             message.append("<p class='error'>Cannot have negative number of seeding rounds</p>");
           } else {
-            Queries.setNumSeedingRounds(connection, tournament, newSeedingRounds);
+            TournamentParameters.setNumSeedingRounds(connection, tournament, newSeedingRounds);
             message.append(String.format("<p id='success'><i>Changed number of seeing rounds to %s</i></p>",
                                          newSeedingRounds));
           }

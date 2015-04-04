@@ -173,8 +173,8 @@ public class FullTournamentTest {
       SQLFunctions.close(prep);
       prep = null;
 
-      final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(
-                                                                                     FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")));
+      final Document challengeDocument  = ChallengeParser.parse(new InputStreamReader(
+                                                                                       FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")));
       Assert.assertNotNull(challengeDocument);
       final ChallengeDescription description = new ChallengeDescription(challengeDocument.getDocumentElement());
       final PerformanceScoreCategory performanceElement = description.getPerformance();
