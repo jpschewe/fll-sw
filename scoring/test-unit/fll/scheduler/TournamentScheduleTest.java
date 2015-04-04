@@ -60,7 +60,7 @@ public class TournamentScheduleTest {
     try {
       final InputStream stream = TournamentScheduleTest.class.getResourceAsStream("/fll/db/data/challenge-test.xml");
       Assert.assertNotNull(stream);
-      final Document document = ChallengeParser.parse(new InputStreamReader(stream)).getDocument();
+      final Document document = ChallengeParser.parse(new InputStreamReader(stream));
 
       memConnection = DriverManager.getConnection(url);
 
@@ -85,7 +85,7 @@ public class TournamentScheduleTest {
     try {
       final InputStream stream = TournamentScheduleTest.class.getResourceAsStream("/fll/db/data/challenge-test.xml");
       Assert.assertNotNull(stream);
-      final Document document = ChallengeParser.parse(new InputStreamReader(stream)).getDocument();
+      final Document document = ChallengeParser.parse(new InputStreamReader(stream));
 
       memConnection = DriverManager.getConnection(url);
 
@@ -171,7 +171,7 @@ public class TournamentScheduleTest {
     try {
       final InputStream stream = TournamentScheduleTest.class.getResourceAsStream("/fll/db/data/challenge-test.xml");
       Assert.assertNotNull(stream);
-      final Document document = ChallengeParser.parse(new InputStreamReader(stream)).getDocument();
+      final Document document = ChallengeParser.parse(new InputStreamReader(stream));
 
       memConnection = DriverManager.getConnection(url);
 

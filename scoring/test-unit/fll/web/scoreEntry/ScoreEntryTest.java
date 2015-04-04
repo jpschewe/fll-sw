@@ -39,13 +39,13 @@ public class ScoreEntryTest {
       if (ApplicationAttributes.CHALLENGE_DOCUMENT.equals(attr)) {
         final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/all-elements.xml");
         Assert.assertNotNull(stream);
-        final Document document = ChallengeParser.parse(new InputStreamReader(stream)).getDocument();
+        final Document document = ChallengeParser.parse(new InputStreamReader(stream));
         Assert.assertNotNull(document);
         return document;
       } else if (ApplicationAttributes.CHALLENGE_DESCRIPTION.equals(attr)) {
         final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/all-elements.xml");
         Assert.assertNotNull(stream);
-        final Document document = ChallengeParser.parse(new InputStreamReader(stream)).getDocument();
+        final Document document = ChallengeParser.parse(new InputStreamReader(stream));
         Assert.assertNotNull(document);
         return new ChallengeDescription(document.getDocumentElement());
       } else {

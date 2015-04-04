@@ -47,7 +47,7 @@ public class GenerateDBTest {
   public void testCreateDB() throws SQLException, IOException {
     final InputStream stream = GenerateDBTest.class.getResourceAsStream("data/challenge-test.xml");
     Assert.assertNotNull(stream);
-    final Document document = ChallengeParser.parse(new InputStreamReader(stream)).getDocument();
+    final Document document = ChallengeParser.parse(new InputStreamReader(stream));
     Assert.assertNotNull(document);
 
     final File tempFile = File.createTempFile("flltest", null);

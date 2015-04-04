@@ -17,7 +17,6 @@ import org.apache.log4j.Logger;
 
 import fll.util.FLLInternalException;
 import fll.util.LogUtils;
-import fll.xml.BracketSortType;
 
 /**
  * Constants for the tournament parameters in the database.
@@ -34,10 +33,6 @@ public final class TournamentParameters {
   public static final String MAX_SCOREBOARD_ROUND = "MaxScoreboardRound";
 
   public static final int MAX_SCOREBOARD_ROUND_DEFAULT = SEEDING_ROUNDS_DEFAULT;
-
-  public static final String BRACKET_SORT = "BracketSort";
-
-  public static final BracketSortType BRACKET_SORT_DEFAULT = BracketSortType.SEEDING;
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -292,57 +287,6 @@ public final class TournamentParameters {
       SQLFunctions.close(prep);
       throw e;
     }
-  }
-
-  public static BracketSortType getBracketSort(final Connection connection,
-                                               final int tournament) throws SQLException {
-    ResultSet rs = null;
-    PreparedStatement prep = null;
-    try {
-      prep = TournamentParameters.getTournamentParameterStmt(connection, tournament, BRACKET_SORT);
-      rs = prep.executeQuery();
-      if (rs.next()) {
-        final String str = rs.getString(1);
-        return BracketSortType.valueOf(str);
-      } else {
-        throw new FLLInternalException("There is no default value for tournament parameter: "
-            + BRACKET_SORT);
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
-  }
-
-  public static void setDefaultBracketSort(final Connection connection,
-                                           final BracketSortType paramValue) throws SQLException {
-    setBracketSort(connection, GenerateDB.INTERNAL_TOURNAMENT_ID, paramValue);
-  }
-
-  public static void setBracketSort(final Connection connection,
-                                    final int tournament,
-                                    final BracketSortType paramValue) throws SQLException {
-    final boolean paramExists = tournamentParameterValueExists(connection, tournament, BRACKET_SORT);
-    PreparedStatement prep = null;
-    try {
-      if (!paramExists) {
-        prep = connection.prepareStatement("INSERT INTO tournament_parameters (param_value, param, tournament) VALUES (?, ?, ?)");
-      } else {
-        prep = connection.prepareStatement("UPDATE tournament_parameters SET param_value = ? WHERE param = ? AND tournament = ?");
-      }
-      prep.setString(1, paramValue.name());
-      prep.setString(2, BRACKET_SORT);
-      prep.setInt(3, tournament);
-
-      prep.executeUpdate();
-    } finally {
-      SQLFunctions.close(prep);
-    }
-  }
-
-  public static void unsetBracketSort(final Connection connection,
-                                      final int tournament) throws SQLException {
-    unsetParameter(connection, tournament, BRACKET_SORT);
   }
 
   /**

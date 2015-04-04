@@ -36,7 +36,7 @@ public class SubjectiveCompareTest {
 
     final InputStream stream = SubjectiveCompareTest.class.getResourceAsStream("challenge.xml");
     Assert.assertNotNull(stream);
-    challengeDocument = ChallengeParser.parse(new InputStreamReader(stream)).getDocument();
+    challengeDocument = ChallengeParser.parse(new InputStreamReader(stream));
   }
 
   @After

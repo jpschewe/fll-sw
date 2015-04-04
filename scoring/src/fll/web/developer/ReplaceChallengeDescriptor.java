@@ -63,7 +63,7 @@ public class ReplaceChallengeDescriptor extends BaseFLLServlet {
       final FileItem xmlFileItem = (FileItem) request.getAttribute("xmldoc");
 
       final Document newDoc = ChallengeParser.parse(new InputStreamReader(xmlFileItem.getInputStream(),
-                                                                          Utilities.DEFAULT_CHARSET)).getDocument();
+                                                                          Utilities.DEFAULT_CHARSET));
 
       final String compareMessage = ChallengeParser.compareStructure(curDoc, newDoc);
       if (null == compareMessage) {
@@ -96,5 +96,4 @@ public class ReplaceChallengeDescriptor extends BaseFLLServlet {
     response.sendRedirect(response.encodeRedirectURL("index.jsp"));
 
   }
-
 }

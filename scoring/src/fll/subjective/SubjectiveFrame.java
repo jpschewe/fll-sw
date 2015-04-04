@@ -278,7 +278,7 @@ public final class SubjectiveFrame extends JFrame {
                                       "Unable to find challenge descriptor in file, you probably choose the wrong file or it is corrupted");
       }
       final InputStream challengeStream = zipfile.getInputStream(challengeEntry);
-      _challengeDocument = ChallengeParser.parse(new InputStreamReader(challengeStream, Utilities.DEFAULT_CHARSET)).getDocument();
+      _challengeDocument = ChallengeParser.parse(new InputStreamReader(challengeStream, Utilities.DEFAULT_CHARSET));
       challengeStream.close();
 
       _challengeDescription = new ChallengeDescription(_challengeDocument.getDocumentElement());
