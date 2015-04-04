@@ -96,13 +96,13 @@ public class DescriptorComparisonTest {
     final InputStream curDocStream = DescriptorComparisonTest.class.getResourceAsStream(curDocRes);
     Assert.assertNotNull("Could not find '"
         + curDocRes + "'", curDocStream);
-    final Document curDoc = ChallengeParser.parse(new InputStreamReader(curDocStream)).getDocument();
+    final Document curDoc = ChallengeParser.parse(new InputStreamReader(curDocStream));
     Assert.assertNotNull("Error parsing '"
         + curDocRes + "'", curDoc);
     final InputStream newDocStream = DescriptorComparisonTest.class.getResourceAsStream(newDocRes);
     Assert.assertNotNull("Could not find '"
         + newDocRes + "'", newDocStream);
-    final Document newDoc = ChallengeParser.parse(new InputStreamReader(newDocStream)).getDocument();
+    final Document newDoc = ChallengeParser.parse(new InputStreamReader(newDocStream));
     Assert.assertNotNull("Error parsing '"
         + newDocRes + "'", newDoc);
 

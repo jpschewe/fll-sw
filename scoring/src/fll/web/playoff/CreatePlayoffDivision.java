@@ -124,6 +124,8 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
         }
 
         data.setDivisionTeams(teams);
+        
+        session.setAttribute(PlayoffIndex.SESSION_DATA, data);
 
         redirect = "InitializeBrackets";
       }

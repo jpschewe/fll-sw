@@ -62,7 +62,7 @@ public class GenerateDatabaseDiagram {
 
       final InputStream stream = challengeUrl.openStream();
       final Reader reader = new InputStreamReader(stream, Utilities.DEFAULT_CHARSET);
-      final Document document = ChallengeParser.parse(reader).getDocument();
+      final Document document = ChallengeParser.parse(reader);
 
       GenerateDB.generateDB(document, connection);
 

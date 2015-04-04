@@ -576,7 +576,7 @@ public class SchedulerUI extends JFrame {
             final Reader descriptorReader = new InputStreamReader(descriptorLocation.openStream(),
                                                                   Utilities.DEFAULT_CHARSET);
 
-            final Document document = ChallengeParser.parse(descriptorReader).getDocument();
+            final Document document = ChallengeParser.parse(descriptorReader);
             final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
 
             final File scoresheetFile = new File(directory, baseFilename

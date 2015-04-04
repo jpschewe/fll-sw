@@ -386,7 +386,8 @@ public final class Playoff {
                                         final ChallengeDescription challengeDescription,
                                         final String division,
                                         final boolean enableThird,
-                                        final List<? extends Team> teams) throws SQLException {
+                                        final List<? extends Team> teams,
+                                        final BracketSortType bracketSort) throws SQLException {
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("initializing brackets for division: "
@@ -394,7 +395,6 @@ public final class Playoff {
     }
     final int currentTournament = Queries.getCurrentTournament(connection);
 
-    final BracketSortType bracketSort = TournamentParameters.getBracketSort(connection, currentTournament);
     final WinnerType winnerCriteria = challengeDescription.getWinner();
 
     // Initialize currentRound to contain a full bracket setup (i.e. playoff

@@ -387,7 +387,7 @@ public class ChallengeParserTest {
 
       final InputStream stream = u.openStream();
       final Reader reader = new InputStreamReader(stream, Utilities.DEFAULT_CHARSET);
-      final Document document = ChallengeParser.parse(reader).getDocument();
+      final Document document = ChallengeParser.parse(reader);
       reader.close();
       new ChallengeDescription(document.getDocumentElement());
     }

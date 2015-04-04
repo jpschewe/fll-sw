@@ -39,7 +39,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 15;
+  public static final int DATABASE_VERSION = 14;
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -616,10 +616,6 @@ public final class GenerateDB {
       if (!TournamentParameters.defaultParameterExists(connection, TournamentParameters.MAX_SCOREBOARD_ROUND)) {
         TournamentParameters.setDefaultMaxScoreboardPerformanceRound(connection,
                                                                      TournamentParameters.MAX_SCOREBOARD_ROUND_DEFAULT);
-      }
-
-      if (!TournamentParameters.defaultParameterExists(connection, TournamentParameters.BRACKET_SORT)) {
-        TournamentParameters.setDefaultBracketSort(connection, TournamentParameters.BRACKET_SORT_DEFAULT);
       }
 
     } finally {

@@ -50,10 +50,8 @@ import fll.util.LogUtils;
 import fll.web.developer.importdb.ImportDBDump;
 import fll.web.developer.importdb.TournamentDifference;
 import fll.xml.AbstractGoal;
-import fll.xml.BracketSortType;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
-import fll.xml.ChallengeParser.ChallengeParseResult;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreCategory;
 import fll.xml.XMLUtils;
@@ -323,7 +321,7 @@ public final class ImportDB {
    */
   public static Document loadDatabaseDump(final ZipInputStream zipfile,
                                           final Connection connection) throws IOException, SQLException {
-    ChallengeParseResult challengeResult = null;
+    Document challengeResult = null;
 
     final Map<String, Map<String, String>> typeInfo = new HashMap<String, Map<String, String>>();
     ZipEntry entry;
@@ -354,8 +352,7 @@ public final class ImportDB {
       throw new RuntimeException("Cannot find challenge document in the zipfile");
     }
 
-    final ChallengeDescription description = new ChallengeDescription(challengeResult.getDocument()
-                                                                                     .getDocumentElement());
+    final ChallengeDescription description = new ChallengeDescription(challengeResult.getDocumentElement());
     if (typeInfo.isEmpty()) {
       // before types were added, assume version 0 types
       createVersion0TypeInfo(typeInfo, description);
@@ -374,15 +371,9 @@ public final class ImportDB {
           + GenerateDB.DATABASE_VERSION + " dump version: " + dbVersion);
     }
 
-    upgradeDatabase(connection, challengeResult.getDocument(), description);
+    upgradeDatabase(connection, challengeResult, description);
 
-
-    // needs to happen after the upgrade to be sure that the tables exist
-    if (null != challengeResult.getLegacyBracketSort()) {
-      TournamentParameters.setDefaultBracketSort(connection, challengeResult.getLegacyBracketSort());
-    }
-
-    return challengeResult.getDocument();
+    return challengeResult;
   }
 
   /**
@@ -506,7 +497,7 @@ public final class ImportDB {
     if (dbVersion < 1) {
       upgrade0To1(connection, challengeDocument);
     }
-    
+
     // tournament parameters existed after version 1
     GenerateDB.setDefaultParameters(connection);
 
@@ -549,10 +540,6 @@ public final class ImportDB {
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 14) {
       upgrade13To14(connection);
-    }
-    dbVersion = Queries.getDatabaseVersion(connection);
-    if (dbVersion < 15) {
-      upgrade14To15(connection);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
@@ -664,19 +651,6 @@ public final class ImportDB {
     } finally {
       SQLFunctions.close(stmt);
     }
-  }
-
-  /**
-   * Add bracket sort default value.
-   */
-  private static void upgrade14To15(final Connection connection) throws SQLException {
-    if (LOG.isTraceEnabled()) {
-      LOG.trace("Upgrading database from 14 to 15");
-    }
-
-    TournamentParameters.setDefaultBracketSort(connection, TournamentParameters.BRACKET_SORT_DEFAULT);
-    
-    setDBVersion(connection, 15);
   }
 
   /**
@@ -1660,12 +1634,9 @@ public final class ImportDB {
     final int seedingRounds = TournamentParameters.getNumSeedingRounds(sourceConnection, sourceTournamentID);
     final int maxPerScoreboardPerformanceRound = TournamentParameters.getMaxScoreboardPerformanceRound(sourceConnection,
                                                                                                        sourceTournamentID);
-    final BracketSortType bracketSort = TournamentParameters.getBracketSort(sourceConnection, sourceTournamentID);
-
     TournamentParameters.setNumSeedingRounds(destinationConnection, destTournamentID, seedingRounds);
     TournamentParameters.setMaxScoreboardPerformanceRound(destinationConnection, destTournamentID,
                                                           maxPerScoreboardPerformanceRound);
-    TournamentParameters.setBracketSort(destinationConnection, destTournamentID, bracketSort);
   }
 
   private static void importJudges(final Connection sourceConnection,
