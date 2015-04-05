@@ -28,6 +28,7 @@ import org.openqa.selenium.support.ui.Select;
 
 import fll.TestUtils;
 import fll.util.LogUtils;
+import fll.xml.BracketSortType;
 
 /**
  * Some utilities for integration tests.
@@ -405,6 +406,11 @@ public final class IntegrationTestUtils {
     selenium.findElement(By.id("initialize_brackets")).click();
     Assert.assertFalse("Error loading page", isElementPresent(selenium, By.id("exception-handler")));
 
+    final Select sort = new Select(selenium.findElement(By.id("sort")));
+    sort.selectByValue(BracketSortType.SEEDING.name());
+    selenium.findElement(By.id("submit")).click();
+    Assert.assertFalse("Error loading page", isElementPresent(selenium, By.id("exception-handler")));
+    
   }
 
   /**
