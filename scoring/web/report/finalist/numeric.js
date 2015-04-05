@@ -41,7 +41,7 @@ function createTeamTable(teams, currentDivision, currentCategory) {
 			finalistCheck.change(function() {
 				var finalistDisplay = $("#" + getNumFinalistsId(team));
 				var numFinalists = parseInt(finalistDisplay.text(), 10);
-				if ($(this).attr("checked") == undefined) {
+				if ($(this).prop("checked")) {
 					$.finalist
 							.removeTeamFromCategory(currentCategory, team.num);
 					numFinalists = numFinalists - 1;
