@@ -398,6 +398,12 @@ public final class IntegrationTestUtils {
 
   public static void initializePlayoffsForDivision(final WebDriver selenium,
                                                    final String division) throws IOException {
+    initializePlayoffsForDivision(selenium, division, BracketSortType.SEEDING);
+  }
+
+  public static void initializePlayoffsForDivision(final WebDriver selenium,
+                                                   final String division,
+                                                   final BracketSortType bracketSort) throws IOException {
     loadPage(selenium, TestUtils.URL_ROOT
         + "playoff");
 
@@ -407,10 +413,10 @@ public final class IntegrationTestUtils {
     Assert.assertFalse("Error loading page", isElementPresent(selenium, By.id("exception-handler")));
 
     final Select sort = new Select(selenium.findElement(By.id("sort")));
-    sort.selectByValue(BracketSortType.SEEDING.name());
+    sort.selectByValue(bracketSort.name());
     selenium.findElement(By.id("submit")).click();
     Assert.assertFalse("Error loading page", isElementPresent(selenium, By.id("exception-handler")));
-    
+
   }
 
   /**
