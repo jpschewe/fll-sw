@@ -46,7 +46,7 @@
 
 <hr/>
   <p>Or provide your own challenge description file</p>
-  <input type='file' size='32' name='xmldocument'><br /> <input
+  <input type='file' size='32' name='xmldocument'> <input
    type='submit' name='reinitializeDatabase' value='Upload Description'
    onclick='return confirm("This will erase ALL scores in the database fll (if it already exists), are you sure?")' />
 

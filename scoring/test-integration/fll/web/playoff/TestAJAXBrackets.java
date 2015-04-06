@@ -27,6 +27,7 @@ import fll.db.GenerateDB;
 import fll.util.LogUtils;
 import fll.web.IntegrationTestUtils;
 import fll.web.WebWindow;
+import fll.xml.BracketSortType;
 
 /**
  * Test the AJAX Brackets
@@ -88,7 +89,7 @@ public class TestAJAXBrackets {
 
       final String division = "1";
 
-      IntegrationTestUtils.initializePlayoffsForDivision(selenium, division);
+      IntegrationTestUtils.initializePlayoffsForDivision(selenium, division, BracketSortType.ALPHA_TEAM);
 
       // open brackets
       final WebWindow bracketsWindow = new WebWindow(selenium, TestUtils.URL_ROOT
