@@ -21,10 +21,10 @@ function addCategoryElement(category) {
 
 	var checkbox = $("<input type='checkbox'/>");
 	checkbox.change(function() {
-		if ($(this).attr("checked") == undefined) {
-			$.finalist.setCategoryPublic(category, false);
-		} else {
+		if ($(this).prop("checked")) {
 			$.finalist.setCategoryPublic(category, true);
+		} else {
+			$.finalist.setCategoryPublic(category, false);
 		}
 	});
 	if($.finalist.isCategoryPublic(category)) {
