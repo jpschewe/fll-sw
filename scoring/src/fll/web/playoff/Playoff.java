@@ -26,6 +26,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
+import fll.util.FLLRuntimeException;
 import fll.util.FP;
 import fll.util.LogUtils;
 import fll.xml.BracketSortType;
@@ -91,6 +92,13 @@ public final class Playoff {
       });
     } else {
       // standard seeding
+      final int tournament = Queries.getCurrentTournament(connection);
+      final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament);
+      if (numSeedingRounds < 1) {
+        throw new FLLRuntimeException(
+                                      "Cannot initialize playoff brackets using scores from seeding rounds when the number of seeing rounds is less than 1");
+      }
+
       seedingOrder = Queries.getPlayoffSeedingOrder(connection, winnerCriteria, teams);
     }
 
