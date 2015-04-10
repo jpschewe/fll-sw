@@ -239,6 +239,8 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
+   * Read the tournament schedule from a spreadsheet.
+   * 
    * @param name the name of the tournament
    * @param stream how to access the spreadsheet
    * @param sheetName the name of the worksheet the data is on
@@ -527,14 +529,15 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
-   * Get the column number or throw {@link FLLRuntimeException} if the column it
+   * Get the column number or throw {@link MissingColumnException} if the column
+   * it
    * not found.
    */
   private static int getColumnForHeader(final String[] line,
-                                        final String header) {
+                                        final String header) throws MissingColumnException {
     final Integer column = columnForHeader(line, header);
     if (null == column) {
-      throw new FLLRuntimeException("Unable to find header '"
+      throw new MissingColumnException("Unable to find header '"
           + header + "' in " + Arrays.asList(line));
     } else {
       return column;
@@ -555,11 +558,19 @@ public class TournamentSchedule implements Serializable {
     remainingHeaders.remove(ORGANIZATION_HEADER);
     final int teamNameColumn = getColumnForHeader(line, TEAM_NAME_HEADER);
     remainingHeaders.remove(TEAM_NAME_HEADER);
-    final int divisionColumn = getColumnForHeader(line, DIVISION_HEADER);
-    remainingHeaders.remove(DIVISION_HEADER);
 
     final int judgeGroupColumn = getColumnForHeader(line, JUDGE_GROUP_HEADER);
     remainingHeaders.remove(JUDGE_GROUP_HEADER);
+
+    int divisionColumn;
+    try {
+      divisionColumn = getColumnForHeader(line, DIVISION_HEADER);
+      remainingHeaders.remove(DIVISION_HEADER);
+    } catch (final MissingColumnException e) {
+      // if no division column, use the judging group
+      divisionColumn = judgeGroupColumn;
+    }
+
     for (int round = 0; round < numPerfRounds; ++round) {
       final String perfHeader = String.format(PERF_HEADER_FORMAT, (round + 1));
       final String perfTableHeader = String.format(TABLE_HEADER_FORMAT, (round + 1));
@@ -1955,4 +1966,11 @@ public class TournamentSchedule implements Serializable {
     final Writer writer = new OutputStreamWriter(new FileOutputStream(outputFile), Utilities.DEFAULT_CHARSET);
     writeToCSV(writer);
   }
+
+  public static class MissingColumnException extends FLLRuntimeException {
+    public MissingColumnException(final String message) {
+      super(message);
+    }
+  }
+
 }
