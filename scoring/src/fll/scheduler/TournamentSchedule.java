@@ -239,6 +239,8 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
+   * Read the tournament schedule from a spreadsheet.
+   * 
    * @param name the name of the tournament
    * @param stream how to access the spreadsheet
    * @param sheetName the name of the worksheet the data is on
@@ -527,14 +529,15 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
-   * Get the column number or throw {@link FLLRuntimeException} if the column it
+   * Get the column number or throw {@link MissingColumnException} if the column
+   * it
    * not found.
    */
   private static int getColumnForHeader(final String[] line,
-                                        final String header) {
+                                        final String header) throws MissingColumnException {
     final Integer column = columnForHeader(line, header);
     if (null == column) {
-      throw new FLLRuntimeException("Unable to find header '"
+      throw new MissingColumnException("Unable to find header '"
           + header + "' in " + Arrays.asList(line));
     } else {
       return column;
@@ -555,11 +558,33 @@ public class TournamentSchedule implements Serializable {
     remainingHeaders.remove(ORGANIZATION_HEADER);
     final int teamNameColumn = getColumnForHeader(line, TEAM_NAME_HEADER);
     remainingHeaders.remove(TEAM_NAME_HEADER);
-    final int divisionColumn = getColumnForHeader(line, DIVISION_HEADER);
-    remainingHeaders.remove(DIVISION_HEADER);
 
-    final int judgeGroupColumn = getColumnForHeader(line, JUDGE_GROUP_HEADER);
-    remainingHeaders.remove(JUDGE_GROUP_HEADER);
+    int judgeGroupColumn = -1;
+    try {
+      judgeGroupColumn = getColumnForHeader(line, JUDGE_GROUP_HEADER);
+      remainingHeaders.remove(JUDGE_GROUP_HEADER);
+    } catch (final MissingColumnException e) {
+      judgeGroupColumn = -1;
+    }
+
+    int divisionColumn = -1;
+    try {
+      divisionColumn = getColumnForHeader(line, DIVISION_HEADER);
+      remainingHeaders.remove(DIVISION_HEADER);
+    } catch (final MissingColumnException e) {
+      divisionColumn = -1;
+    }
+
+    // Need one of judge group column or division column
+    if (-1 == judgeGroupColumn
+        && -1 == divisionColumn) {
+      throw new MissingColumnException("Must have judging station column or division column");
+    } else if (-1 == judgeGroupColumn) {
+      judgeGroupColumn = divisionColumn;
+    } else if (-1 == divisionColumn) {
+      divisionColumn = judgeGroupColumn;
+    }
+
     for (int round = 0; round < numPerfRounds; ++round) {
       final String perfHeader = String.format(PERF_HEADER_FORMAT, (round + 1));
       final String perfTableHeader = String.format(TABLE_HEADER_FORMAT, (round + 1));
@@ -806,7 +831,7 @@ public class TournamentSchedule implements Serializable {
   public void outputScheduleByTeam(final OutputStream stream) throws DocumentException {
     final Document pdf = PdfUtils.createLandscapePdfDoc(stream, new SimpleFooterHandler());
 
-    final int numColumns = 4
+    final int numColumns = 5
         + subjectiveStations.size() + getNumberOfRounds() * 2;
     final PdfPTable table = PdfUtils.createTable(numColumns);
     final float[] columnWidths = new float[numColumns];
@@ -818,6 +843,8 @@ public class TournamentSchedule implements Serializable {
     columnWidths[idx] = 3; // organization
     ++idx;
     columnWidths[idx] = 2; // judging group
+    ++idx;
+    columnWidths[idx] = 2; // division
     ++idx;
     for (int i = 0; i < subjectiveStations.size(); ++i) {
       columnWidths[idx] = 2; // time
@@ -841,6 +868,7 @@ public class TournamentSchedule implements Serializable {
     table.addCell(PdfUtils.createHeaderCell(TEAM_NAME_HEADER));
     table.addCell(PdfUtils.createHeaderCell(ORGANIZATION_HEADER));
     table.addCell(PdfUtils.createHeaderCell(JUDGE_GROUP_HEADER));
+    table.addCell(PdfUtils.createHeaderCell(DIVISION_HEADER));
     for (final String subjectiveStation : subjectiveStations) {
       table.addCell(PdfUtils.createHeaderCell(subjectiveStation));
     }
@@ -856,6 +884,7 @@ public class TournamentSchedule implements Serializable {
       table.addCell(PdfUtils.createCell(si.getTeamName()));
       table.addCell(PdfUtils.createCell(si.getOrganization()));
       table.addCell(PdfUtils.createCell(si.getJudgingStation()));
+      table.addCell(PdfUtils.createCell(si.getDivision()));
 
       for (final String subjectiveStation : subjectiveStations) {
         table.addCell(PdfUtils.createCell(OUTPUT_DATE_FORMAT.get().format(si.getSubjectiveTimeByName(subjectiveStation)
@@ -1955,4 +1984,11 @@ public class TournamentSchedule implements Serializable {
     final Writer writer = new OutputStreamWriter(new FileOutputStream(outputFile), Utilities.DEFAULT_CHARSET);
     writeToCSV(writer);
   }
+
+  public static class MissingColumnException extends FLLRuntimeException {
+    public MissingColumnException(final String message) {
+      super(message);
+    }
+  }
+
 }

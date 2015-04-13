@@ -63,8 +63,7 @@ public class SetupIndex {
 
       final Collection<URL> urls = XMLUtils.getAllKnownChallengeDescriptorURLs();
       for (final URL url : urls) {
-        try {
-          final InputStream stream = url.openStream();
+        try(final InputStream stream = url.openStream()) {
           final Reader reader = new InputStreamReader(stream, Utilities.DEFAULT_CHARSET);
           final Document document = ChallengeParser.parse(reader);
           reader.close();
