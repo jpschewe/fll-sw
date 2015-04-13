@@ -559,15 +559,29 @@ public class TournamentSchedule implements Serializable {
     final int teamNameColumn = getColumnForHeader(line, TEAM_NAME_HEADER);
     remainingHeaders.remove(TEAM_NAME_HEADER);
 
-    final int judgeGroupColumn = getColumnForHeader(line, JUDGE_GROUP_HEADER);
-    remainingHeaders.remove(JUDGE_GROUP_HEADER);
+    int judgeGroupColumn = -1;
+    try {
+      judgeGroupColumn = getColumnForHeader(line, JUDGE_GROUP_HEADER);
+      remainingHeaders.remove(JUDGE_GROUP_HEADER);
+    } catch (final MissingColumnException e) {
+      judgeGroupColumn = -1;
+    }
 
-    int divisionColumn;
+    int divisionColumn = -1;
     try {
       divisionColumn = getColumnForHeader(line, DIVISION_HEADER);
       remainingHeaders.remove(DIVISION_HEADER);
     } catch (final MissingColumnException e) {
-      // if no division column, use the judging group
+      divisionColumn = -1;
+    }
+
+    // Need one of judge group column or division column
+    if (-1 == judgeGroupColumn
+        && -1 == divisionColumn) {
+      throw new MissingColumnException("Must have judging station column or division column");
+    } else if (-1 == judgeGroupColumn) {
+      judgeGroupColumn = divisionColumn;
+    } else if (-1 == divisionColumn) {
       divisionColumn = judgeGroupColumn;
     }
 
