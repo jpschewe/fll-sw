@@ -49,7 +49,7 @@ public class ChooseBracketSort extends BaseFLLServlet {
 
     final String sortStr = request.getParameter("sort");
     if (null == sortStr
-        || "" == sortStr) {
+        || "".equals(sortStr)) {
       throw new FLLRuntimeException("Missing parameter 'sort'");
     }
 
