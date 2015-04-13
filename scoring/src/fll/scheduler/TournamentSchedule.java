@@ -831,7 +831,7 @@ public class TournamentSchedule implements Serializable {
   public void outputScheduleByTeam(final OutputStream stream) throws DocumentException {
     final Document pdf = PdfUtils.createLandscapePdfDoc(stream, new SimpleFooterHandler());
 
-    final int numColumns = 4
+    final int numColumns = 5
         + subjectiveStations.size() + getNumberOfRounds() * 2;
     final PdfPTable table = PdfUtils.createTable(numColumns);
     final float[] columnWidths = new float[numColumns];
@@ -843,6 +843,8 @@ public class TournamentSchedule implements Serializable {
     columnWidths[idx] = 3; // organization
     ++idx;
     columnWidths[idx] = 2; // judging group
+    ++idx;
+    columnWidths[idx] = 2; // division
     ++idx;
     for (int i = 0; i < subjectiveStations.size(); ++i) {
       columnWidths[idx] = 2; // time
@@ -866,6 +868,7 @@ public class TournamentSchedule implements Serializable {
     table.addCell(PdfUtils.createHeaderCell(TEAM_NAME_HEADER));
     table.addCell(PdfUtils.createHeaderCell(ORGANIZATION_HEADER));
     table.addCell(PdfUtils.createHeaderCell(JUDGE_GROUP_HEADER));
+    table.addCell(PdfUtils.createHeaderCell(DIVISION_HEADER));
     for (final String subjectiveStation : subjectiveStations) {
       table.addCell(PdfUtils.createHeaderCell(subjectiveStation));
     }
@@ -881,6 +884,7 @@ public class TournamentSchedule implements Serializable {
       table.addCell(PdfUtils.createCell(si.getTeamName()));
       table.addCell(PdfUtils.createCell(si.getOrganization()));
       table.addCell(PdfUtils.createCell(si.getJudgingStation()));
+      table.addCell(PdfUtils.createCell(si.getDivision()));
 
       for (final String subjectiveStation : subjectiveStations) {
         table.addCell(PdfUtils.createCell(OUTPUT_DATE_FORMAT.get().format(si.getSubjectiveTimeByName(subjectiveStation)
