@@ -102,7 +102,7 @@ public final class ChallengeParser {
 
       LOG.info("Title: "
           + description.getTitle());
-    } catch (final Exception e) {
+    } catch (final Throwable e) {
       LOG.fatal(e, e);
       System.exit(1);
     }
