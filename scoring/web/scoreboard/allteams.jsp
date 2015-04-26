@@ -31,6 +31,7 @@ final Connection connection = datasource.getConnection();
   + " WHERE verified_performance.Tournament = ?"
   + "   AND current_tournament_teams.TeamNumber = Teams.TeamNumber"
   + "   AND Teams.TeamNumber = verified_performance.TeamNumber"
+  + "   AND verified_performance.Bye = False"
   + "   AND verified_performance.RunNumber <= ?"
   + " ORDER BY Teams.Organization, Teams.TeamNumber, verified_performance.RunNumber");
   prep.setInt(1, currentTournament);
