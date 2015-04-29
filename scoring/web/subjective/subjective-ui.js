@@ -15,6 +15,8 @@ $(document).on(
     function(event) {
       $.subjective.log("choose judging group pageinit");
 
+      $("#choose-judging-group_version").text($.subjective.getVersion());
+      
       $("#choose-judging-group_upload-scores").click(
           function() {
             $.mobile.loading("show");
@@ -105,8 +107,10 @@ $(document).on("pageshow", "#choose-category-page", function(event) {
 
 $(document).on(
     "pageinit",
-    "#teams-list-page",
+    "#choose-category-page",
     function(event) {
+      $("#choose-category_version").text($.subjective.getVersion());
+
       $("#choose-category_upload-scores").click(
           function() {
             $.mobile.loading("show");
@@ -196,6 +200,8 @@ $(document).on(
     "pageinit",
     "#choose-judge-page",
     function(event) {
+      $("#choose-judge_version").text($.subjective.getVersion());
+
       $("#choose-judge_upload-scores").click(
           function() {
             $.mobile.loading("show");
@@ -411,6 +417,8 @@ $(document).on(
     "pageinit",
     "#teams-list-page",
     function(event) {
+      $("#teams-list_version").text($.subjective.getVersion());
+
       $("#teams-list_upload-scores").click(
           function() {
             $.mobile.loading("show");
@@ -920,6 +928,8 @@ $(document).on(
     "pageinit",
     "#score-summary-page",
     function(event) {
+      $("#score-summary_version").text($.subjective.getVersion());
+
       $("#score-summary_upload-scores").click(
           function() {
             $.mobile.loading("show", {
