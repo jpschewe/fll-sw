@@ -611,6 +611,7 @@
     <copy todir="${dir.web}" overwrite="true">
       <fileset dir="web">
         <include name="**/*.appcache" />
+        <include name="**/subjective.js" />
       </fileset>
       <filterset>
         <filter token="APP-VERSION" value="${app.version.long}" />
