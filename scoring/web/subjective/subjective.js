@@ -268,7 +268,7 @@
         if (serverVersion != webappVersion) {
           var appCache = window.applicationCache;
           appCache.update();
-          if (appCache.status = appCache.UPDATEREADY) {
+          if (appCache.status == appCache.UPDATEREADY) {
             appCache.swapCache();
           }
           if (confirm("Version mismatch webapp: " + webappVersion + " server: "
