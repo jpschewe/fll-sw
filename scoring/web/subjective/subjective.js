@@ -255,28 +255,39 @@
     },
 
     /**
-     * Check the server version against the webapp version. This runs
-     * asynchronously and prompts the user to reload if the version is
-     * different.
+     * Check the server version against the webapp version and prompt the user
+     * to reload if the version is different. Calls doneCallback() when finished
+     * checking the server version.
      */
-    checkServerVersion : function() {
+    checkServerVersion : function(doneCallback) {
+      var serverVersion = null;
+
       // failure is ignored as that likely means that the browser is offline
-      $.getJSON("../api/Version", function(serverVersion) {
-        var webappVersion = $.subjective.getVersion();
-        $.subjective.log("Version webapp: " + webappVersion + " server: "
-            + serverVersion);
-        if (serverVersion != webappVersion) {
-          var appCache = window.applicationCache;
-          appCache.update();
-          if (appCache.status == appCache.UPDATEREADY) {
-            appCache.swapCache();
-          }
-          if (confirm("Version mismatch webapp: " + webappVersion + " server: "
-              + serverVersion + ". Would you like to reload?")) {
-            window.location.reload();
-          }
-        }
-      });
+      $
+          .getJSON(
+              "../api/Version",
+              function(data) {
+                serverVersion = data;
+
+                $.subjective.log("Version webapp: " + webappVersion
+                    + " server: " + serverVersion);
+
+                var webappVersion = $.subjective.getVersion();
+                if (null != serverVersion && serverVersion != webappVersion) {
+                  var appCache = window.applicationCache;
+                  appCache.update();
+                  if (appCache.status == appCache.UPDATEREADY) {
+                    appCache.swapCache();
+                  }
+                  if (confirm("Version mismatch webapp: " + webappVersion
+                      + " server: " + serverVersion
+                      + ". Would you like to reload?")) {
+                    window.location.reload();
+                  } else {
+                    doneCallback();
+                  }
+                }
+              }).fail(doneCallback);
     },
 
     /**
