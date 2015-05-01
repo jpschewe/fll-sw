@@ -814,8 +814,6 @@
           .getJSON(
               "../api/CheckAuth",
               function(data) {
-                $.subjective.log("data: " + $.toJSON(data));
-
                 if (data.authenticated) {
                   $.subjective
                       .getServerTournament(function(serverTournament) {
