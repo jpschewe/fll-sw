@@ -263,11 +263,18 @@
       // failure is ignored as that likely means that the browser is offline
       $.getJSON("../api/Version", function(serverVersion) {
         var webappVersion = $.subjective.getVersion();
-        $.subjective.log("Version webapp: " + webappVersion
-            + " server: " + serverVersion);
+        $.subjective.log("Version webapp: " + webappVersion + " server: "
+            + serverVersion);
         if (serverVersion != webappVersion) {
-          $.subjective.log("Version mismatch webapp: " + webappVersion
-              + " server: " + serverVersion);
+          var appCache = window.applicationCache;
+          appCache.update();
+          if (appCache.status = appCache.UPDATEREADY) {
+            appCache.swapCache();
+          }
+          if (confirm("Version mismatch webapp: " + webappVersion + " server: "
+              + serverVersion + ". Would you like to reload?")) {
+            window.location.reload();
+          }
         }
       });
     },
