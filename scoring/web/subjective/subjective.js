@@ -255,6 +255,24 @@
     },
 
     /**
+     * Check the server version against the webapp version. This runs
+     * asynchronously and prompts the user to reload if the version is
+     * different.
+     */
+    checkServerVersion : function() {
+      // failure is ignored as that likely means that the browser is offline
+      $.getJSON("../api/Version", function(serverVersion) {
+        var webappVersion = $.subjective.getVersion();
+        $.subjective.log("Version webapp: " + webappVersion
+            + " server: " + serverVersion);
+        if (serverVersion != webappVersion) {
+          $.subjective.log("Version mismatch webapp: " + webappVersion
+              + " server: " + serverVersion);
+        }
+      });
+    },
+
+    /**
      * Clear all data from local storage.
      */
     clearAllData : function() {
