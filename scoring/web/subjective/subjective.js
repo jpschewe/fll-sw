@@ -243,6 +243,57 @@
   $.subjective = {
 
     /**
+     * @return the version of the software deployed
+     */
+    getVersion : function() {
+      var version = "@APP-VERSION@";
+      if (version.indexOf("APP-VERSION") > -1) {
+        return "devel";
+      } else {
+        return version;
+      }
+    },
+
+    /**
+     * Check the server version against the webapp version and prompt the user
+     * to reload if the version is different. Calls doneCallback() when finished
+     * checking the server version.
+     */
+    checkServerVersion : function(doneCallback) {
+      var serverVersion = null;
+
+      // failure is ignored as that likely means that the browser is offline
+      $
+          .getJSON(
+              "../api/Version",
+              function(data) {
+                serverVersion = data;
+
+                var webappVersion = $.subjective.getVersion();
+
+                $.subjective.log("Version webapp: " + webappVersion
+                    + " server: " + serverVersion);
+
+                if (null != serverVersion && serverVersion != webappVersion) {
+                  var appCache = window.applicationCache;
+                  appCache.update();
+                  if (appCache.status == appCache.UPDATEREADY) {
+                    appCache.swapCache();
+                  }
+                  if (confirm("Version mismatch webapp: " + webappVersion
+                      + " server: " + serverVersion
+                      + ". Would you like to reload?")) {
+                    window.location.reload();
+                  } else {
+                    doneCallback();
+                  }
+                } else {
+                  doneCallback();
+                }
+              }).fail(doneCallback);
+    },
+
+    /**
      * Clear all data from local storage.
      */
     clearAllData : function() {
@@ -777,8 +828,6 @@
           .getJSON(
               "../api/CheckAuth",
               function(data) {
-                $.subjective.log("data: " + $.toJSON(data));
-
                 if (data.authenticated) {
                   $.subjective
                       .getServerTournament(function(serverTournament) {
