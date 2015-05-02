@@ -269,10 +269,11 @@
               function(data) {
                 serverVersion = data;
 
+                var webappVersion = $.subjective.getVersion();
+
                 $.subjective.log("Version webapp: " + webappVersion
                     + " server: " + serverVersion);
 
-                var webappVersion = $.subjective.getVersion();
                 if (null != serverVersion && serverVersion != webappVersion) {
                   var appCache = window.applicationCache;
                   appCache.update();
@@ -286,6 +287,8 @@
                   } else {
                     doneCallback();
                   }
+                } else {
+                  doneCallback();
                 }
               }).fail(doneCallback);
     },
