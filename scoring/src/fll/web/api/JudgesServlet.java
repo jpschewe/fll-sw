@@ -40,7 +40,7 @@ import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 
 /**
- * GET: {judge}
+ * GET: {judges}
  * POST: expects the data from GET and returns UploadResult
  */
 @WebServlet("/api/Judges/*")

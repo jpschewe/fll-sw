@@ -1,3 +1,4 @@
+* 383 - Add subjective webapp version to the sidebar
 * 309 - support schedules without the division column, just use the judging group column instead
 * 172 - make bracket sort be specified when initializing the brackets of a challenge descriptor attribute
 * 381 - handle missing information in TeamScheduleInfo
