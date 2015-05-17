@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -145,42 +146,47 @@ public class PlayoffReport extends BaseFLLServlet {
       if (maxRun < 1) {
         para.add("Cannot determine max run number for this division. This is an internal error");
       } else {
-        teamPrep = connection.prepareStatement("SELECT Teams.TeamNumber, Teams.TeamName, Teams.Organization FROM PlayoffData, Teams" //
+        teamPrep = connection.prepareStatement("SELECT Teams.TeamNumber, Teams.TeamName, Teams.Organization" //
+            + " FROM PlayoffData, Teams" //
             + " WHERE PlayoffData.Tournament = ?" //
-            + " AND PlayoffData.event_division = ?" + " AND PlayoffData.run_number = ?" //
-            + " AND Teams.TeamNumber = PlayoffData.team");
+            + " AND PlayoffData.event_division = ?" //
+            + " AND PlayoffData.run_number = ?" //
+            + " AND Teams.TeamNumber = PlayoffData.team"//
+            + " ORDER BY PlayoffData.linenumber" //
+        );
         teamPrep.setInt(1, tournament.getTournamentID());
         teamPrep.setString(2, division);
 
-        scorePrep = connection.prepareStatement("SELECT ComputedTotal FROM Performance" //
+        scorePrep = connection.prepareStatement("SELECT ComputedTotal" //
+            + " FROM Performance" //
             + " WHERE Tournament = ?" //
-            + " AND RunNumber = ?"//
             + " AND TeamNumber = ?" //
+            + " AND RunNumber = ?"//
         );
-        scorePrep.setInt(1, tournament.getTournamentID());
 
-        // figure out the last 2 teams
+        // figure out the last teams
+        final List<String> lastTeams = new LinkedList<>();
+
         teamPrep.setInt(3, maxRun - 1);
-        scorePrep.setInt(2, maxRun - 1);
+        scorePrep.setInt(1, tournament.getTournamentID());
+        scorePrep.setInt(3, maxRun - 1);
         teamResult = teamPrep.executeQuery();
         while (teamResult.next()) {
           final int teamNumber = teamResult.getInt(1);
           final String teamName = teamResult.getString(2);
           final String organization = teamResult.getString(3);
 
-          scorePrep.setInt(3, teamNumber);
+          scorePrep.setInt(2, teamNumber);
           scoreResult = scorePrep.executeQuery();
           final String scoreStr;
           if (scoreResult.next()) {
-            final double score = scoreResult.getDouble(1);
-            scoreStr = Utilities.NUMBER_FORMAT_INSTANCE.format(score);
+            scoreStr = Utilities.NUMBER_FORMAT_INSTANCE.format(scoreResult.getDouble(1));
           } else {
-            scoreStr = "Unknown";
+            scoreStr = "unknown";
           }
 
-          para.add(String.format("Team %d from %s - %s with a score of %s", teamNumber, organization, teamName,
-                                 scoreStr));
-          para.add(Chunk.NEWLINE);
+          lastTeams.add(String.format("Team %d from %s - %s with a score of %s", teamNumber, organization, teamName,
+                                      scoreStr));
 
           SQLFunctions.close(scoreResult);
           scoreResult = null;
@@ -188,27 +194,44 @@ public class PlayoffReport extends BaseFLLServlet {
         SQLFunctions.close(teamResult);
         teamResult = null;
 
-        // show the winner
+        // determine the winners
+        int lastTeamsIndex = 0;
         teamPrep.setInt(3, maxRun);
         teamResult = teamPrep.executeQuery();
-        if (teamResult.next()) {
+        while (teamResult.next()) {
           final int teamNumber = teamResult.getInt(1);
           final String teamName = teamResult.getString(2);
 
-          para.add(String.format("The winner is team %d - %s", teamNumber, teamName));
-        } else {
-          para.add("The winner has not been determined yet");
-        }
-        para.add(Chunk.NEWLINE);
+          para.add(String.format("Competing for places %d and %d", lastTeamsIndex + 1, lastTeamsIndex + 2));
+          para.add(Chunk.NEWLINE);
+          if (lastTeamsIndex < lastTeams.size()) {
+            para.add(lastTeams.get(lastTeamsIndex));
+          } else {
+            para.add("Internal error, unknown team competing");
+          }
+          para.add(Chunk.NEWLINE);
+          ++lastTeamsIndex;
 
+          if (lastTeamsIndex < lastTeams.size()) {
+            para.add(lastTeams.get(lastTeamsIndex));
+          } else {
+            para.add("Internal error, unknown team competing");
+          }
+          para.add(Chunk.NEWLINE);
+          ++lastTeamsIndex;
+
+          para.add(String.format("The winner is team %d - %s", teamNumber, teamName));
+          para.add(Chunk.NEWLINE);
+          para.add(Chunk.NEWLINE);
+        }
       }
 
       return para;
     } finally {
       SQLFunctions.close(teamResult);
       SQLFunctions.close(teamPrep);
-      SQLFunctions.close(scorePrep);
       SQLFunctions.close(scoreResult);
+      SQLFunctions.close(scorePrep);
     }
   }
 
