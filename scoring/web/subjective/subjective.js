@@ -498,12 +498,16 @@
 
     setCurrentJudge : function(judgeId) {
       var foundJudge = null;
-      $.each(_judges, function(index, judge) {
-        if (judge.station == _currentJudgingGroup
-            && judge.category == _currentCategory.name && judge.id == judgeId) {
-          foundJudge = judge;
-        }
-      });
+      if (null != _judges) {
+        $.each(_judges,
+            function(index, judge) {
+              if (judge.station == _currentJudgingGroup
+                  && judge.category == _currentCategory.name
+                  && judge.id == judgeId) {
+                foundJudge = judge;
+              }
+            });
+      }
       if (null == foundJudge) {
         foundJudge = new Object();
         foundJudge.id = judgeId;
@@ -522,12 +526,16 @@
 
     addJudge : function(judgeID) {
       var foundJudge = null;
-      $.each(_judges, function(index, judge) {
-        if (judge.station == _currentJudgingGroup
-            && judge.category == _currentCategory.name && judge.id == judgeID) {
-          foundJudge = judge;
-        }
-      });
+      if (null != _judges) {
+        $.each(_judges,
+            function(index, judge) {
+              if (judge.station == _currentJudgingGroup
+                  && judge.category == _currentCategory.name
+                  && judge.id == judgeID) {
+                foundJudge = judge;
+              }
+            });
+      }
       if (null == foundJudge) {
         var judge = new Object();
         judge.id = judgeID;
