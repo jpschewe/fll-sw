@@ -365,18 +365,18 @@ function populateTeams() {
     if (!$.subjective.isScoreCompleted(score)) {
       scoreStr = "";
     } else if (score.noShow) {
-      scoreStr = " - No Show";
+      scoreStr = "No Show - ";
     } else {
       var computedScore = $.subjective.computeScore(score);
-      scoreStr = " - Score: " + computedScore;
+      scoreStr = "Score: " + computedScore + " - ";
     }
 
     var label = "";
     if (null != timeStr) {
-      label = label + timeStr;
+      label = label + timeStr + " - ";
     }
     label = label + scoreStr;
-    label = label + " - " + team.teamNumber;
+    label = label + team.teamNumber;
     label = label + " - " + team.teamName;
     if (null != team.organization) {
       label = label + " - " + team.organization;
