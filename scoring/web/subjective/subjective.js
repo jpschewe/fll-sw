@@ -184,7 +184,9 @@
     _schedule = null;
 
     return $.getJSON("../api/Schedule", function(data) {
-      _schedule = data;
+      if (null != data && data != "") {
+        _schedule = data;
+      }
     });
   }
 
