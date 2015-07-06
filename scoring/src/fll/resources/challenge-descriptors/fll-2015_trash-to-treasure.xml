@@ -362,7 +362,7 @@
       name="mission_strategy"
       title="Mission Strategy"
       category="Strategy and Innovations">
-      <description>Ability to clearly define and describe the team’s
+      <description>Ability to clearly define and describe the team's
         game
         strategy.
       </description>
@@ -372,7 +372,7 @@
           min="1"
           max="3"
           shortDescription="No clear goals AND no clear strategy">
-          <description>Strategy based only on ease of task – no combined
+          <description>Strategy based only on ease of task - no combined
             missions or maximizing time/effort.
           </description>
         </range>
@@ -389,7 +389,7 @@
           title="Accomplished"
           min="7"
           max="9"
-          shortDescription="Clear strategy to accomplish the team’s well defined goals">
+          shortDescription="Clear strategy to accomplish the team's well defined goals">
           <description>Effective strategic planning, combining of
             missions, routes, attachments.
           </description>
@@ -481,7 +481,7 @@
           min="1"
           max="3"
           shortDescription="Unclear, few details">
-          <description>Doesn’t relate to FLL theme, no understanding of
+          <description>Doesn't relate to FLL theme, no understanding of
             technical terms.
           </description>
         </range>
@@ -500,7 +500,7 @@
           max="9"
           shortDescription="Mostly clear, detailed">
           <description>Relates fairly well to the FLL theme, understand
-            of technical terms, but didn’t explain them all clearly.
+            of technical terms, but didn't explain them all clearly.
           </description>
         </range>
         <range
@@ -625,7 +625,7 @@
       <description>Extent to which existing theories and solutions were
         analyzed by the team, including an effort to verify the
         originality
-        of the team’s solution
+        of the team's solution
       </description>
       <rubric>
         <range
@@ -726,7 +726,7 @@
       name="innovation"
       title="Innovation"
       category="Innovative Solution">
-      <description>Degree to which the team’s solution makes life better
+      <description>Degree to which the team's solution makes life better
         by
         improving existing options, developing a new application of
         existing
@@ -820,7 +820,7 @@
       category="Presentation">
       <description>Degree to which the team shared their Project before
         the
-        tournament with others who might benefit from the team’s
+        tournament with others who might benefit from the team's
         efforts
       </description>
       <rubric>
@@ -975,7 +975,7 @@
       title="Discovery"
       category="Inspiration">
       <description>Balanced emphasis on all three aspects (Robot,
-        Project, Core Values) of FLL; it’s not just about winning awards
+        Project, Core Values) of FLL; it's not just about winning awards
       </description>
       <rubric>
         <range
@@ -984,7 +984,7 @@
           max="3"
           shortDescription="Emphasis on only one aspect; others neglected">
           <description>Problems identified, but steps not taken to
-            solve. Team doesn’t mention new skills acquired.
+            solve. Team doesn't mention new skills acquired.
           </description>
         </range>
         <range
@@ -1375,7 +1375,7 @@
           min="1"
           max="3"
           shortDescription="Not evident with majority of team members">
-          <description>Members don’t help each other. Confrontation is
+          <description>Members don't help each other. Confrontation is
             evident.
           </description>
         </range>
@@ -1625,7 +1625,7 @@
           min="1"
           max="3"
           shortDescription="Frequent team intervention to aim AND retrieve robot">
-          <description>Sensors inappropriately used, and didn’t provide
+          <description>Sensors inappropriately used, and didn't provide
             any help.
           </description>
         </range>
@@ -1719,7 +1719,7 @@
       name="mission_strategy"
       title="Mission Strategy"
       category="Strategy and Innovations">
-      <description>Ability to clearly define and describe the team’s
+      <description>Ability to clearly define and describe the team's
         game
         strategy.
       </description>
@@ -1746,7 +1746,7 @@
           title="Accomplished"
           min="7"
           max="9"
-          shortDescription="Clear strategy to accomplish the team’s well defined goals">
+          shortDescription="Clear strategy to accomplish the team's well defined goals">
           <description>Effective strategic planning, combining of
             missions, routes, attachments, code.
           </description>
