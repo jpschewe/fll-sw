@@ -726,7 +726,7 @@ function populateRubric(goal) {
 
     var grid = $("<div class=\"ui-grid-a\"></div>");
     var blockA = $("<div class=\"ui-grid-a\"></div>");
-    blockA.text(range.description);
+    blockA.text(range.fullDescription);
 
     var blockB = $("<div class=\"ui-grid-b\"></div>");
     var button = $("<button>Set</button>");
