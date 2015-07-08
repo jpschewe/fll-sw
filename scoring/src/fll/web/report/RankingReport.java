@@ -145,6 +145,13 @@ public class RankingReport extends BaseFLLServlet {
         }
 
         document.add(para);
+
+        final Paragraph definitionPara = new Paragraph();
+        definitionPara.add(Chunk.NEWLINE);
+        definitionPara.add(new Chunk(
+                                     "Quartile 1 is the bottom 25% of teams, quartile 2 is up to 50%, quartile 3 is up to 75% and quartile 4 is the top 25% of teams."));
+        document.add(definitionPara);
+
         document.add(Chunk.NEXTPAGE);
       }
 
@@ -187,10 +194,24 @@ public class RankingReport extends BaseFLLServlet {
     if (CategoryRank.NO_SHOW_RANK == rank) {
       para.add(new Chunk("No Show", RANK_VALUE_FONT));
     } else {
-      para.add(new Chunk(String.format("%d out of %d teams in %s", rank, catRank.getNumTeams(), catRank.getGroup()),
+      final double percentage = (double) rank
+          / catRank.getNumTeams();
+      para.add(new Chunk(String.format("%s in %s", convertPercentageToQuartile(percentage), catRank.getGroup()),
                          RANK_VALUE_FONT));
     }
     para.add(Chunk.NEWLINE);
+  }
+
+  private static String convertPercentageToQuartile(final double percentage) {
+    if (percentage <= 0.25) {
+      return "Quartile 1";
+    } else if (percentage <= 0.5) {
+      return "Quartile 2";
+    } else if (percentage <= 0.75) {
+      return "Quartile 3";
+    } else {
+      return "Quartile 4";
+    }
   }
 
   /**

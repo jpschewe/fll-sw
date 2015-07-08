@@ -1,3 +1,4 @@
+* 387 - Show quartiles rather than actual ranks in the ranking report
 * 391 - Add shortDescription attribute to rubric range
 * 392 - Propertly support no schedule in the subjective web app
 * 393 - Properly handle no judges in the subjective web app
