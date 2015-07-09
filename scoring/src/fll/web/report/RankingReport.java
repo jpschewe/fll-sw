@@ -149,7 +149,7 @@ public class RankingReport extends BaseFLLServlet {
         final Paragraph definitionPara = new Paragraph();
         definitionPara.add(Chunk.NEWLINE);
         definitionPara.add(new Chunk(
-                                     "Quartile 1 is the bottom 25% of teams, quartile 2 is up to 50%, quartile 3 is up to 75% and quartile 4 is the top 25% of teams."));
+                                     "The 1st quartile is the top 25% of teams, 2nd quartile is the next 25%, quartiles 3 and 4 are the following 25% groupings of teams."));
         document.add(definitionPara);
 
         document.add(Chunk.NEXTPAGE);
