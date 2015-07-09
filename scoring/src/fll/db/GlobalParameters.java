@@ -42,6 +42,29 @@ public final class GlobalParameters {
 
   public static final int DIVISION_FLIP_RATE_DEFAULT = 30;
 
+  public static final String RANKING_REPORT_USE_QUARTILES = "RankingReportUseQuartiles";
+
+  public static final boolean RANKING_REPORT_USE_QUARTILES_DEFAULT = true;
+
+  /**
+   * Should the ranking report show quartiles or actual ranks?
+   * 
+   * @return true to use quartiles
+   * @throws SQLException
+   */
+  public static boolean getUseQuartilesInRankingReport(final Connection connection) throws SQLException {
+    if (!globalParameterExists(connection, RANKING_REPORT_USE_QUARTILES)) {
+      return RANKING_REPORT_USE_QUARTILES_DEFAULT;
+    } else {
+      return getBooleanGlobalParameter(connection, RANKING_REPORT_USE_QUARTILES);
+    }
+  }
+
+  public static void setUseQuartilesInRankingReport(final Connection connection,
+                                             boolean value) throws SQLException {
+    setBooleanGlobalParameter(connection, RANKING_REPORT_USE_QUARTILES, value);
+  }
+
   private GlobalParameters() {
     // no instances
   }
@@ -218,6 +241,53 @@ public final class GlobalParameters {
         prep = connection.prepareStatement("UPDATE global_parameters SET param_value = ? WHERE param = ?");
       }
       prep.setInt(1, paramValue);
+      prep.setString(2, paramName);
+      prep.executeUpdate();
+    } finally {
+      SQLFunctions.close(prep);
+    }
+  }
+
+  /**
+   * Get a global parameter from the database that is a boolean.
+   * 
+   * @param connection the database connection
+   * @param parameter the parameter name
+   * @return the value
+   * @throws SQLException
+   * @throws IllegalArgumentException if the parameter cannot be found
+   */
+  public static boolean getBooleanGlobalParameter(final Connection connection,
+                                                  final String parameter) throws SQLException {
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = getGlobalParameterStmt(connection, parameter);
+      rs = prep.executeQuery();
+      if (rs.next()) {
+        return rs.getBoolean(1);
+      } else {
+        throw new IllegalArgumentException("Can't find '"
+            + parameter + "' in global_parameters");
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+  }
+
+  public static void setBooleanGlobalParameter(final Connection connection,
+                                               final String paramName,
+                                               final boolean paramValue) throws SQLException {
+    final boolean exists = globalParameterExists(connection, paramName);
+    PreparedStatement prep = null;
+    try {
+      if (!exists) {
+        prep = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
+      } else {
+        prep = connection.prepareStatement("UPDATE global_parameters SET param_value = ? WHERE param = ?");
+      }
+      prep.setBoolean(1, paramValue);
       prep.setString(2, paramName);
       prep.executeUpdate();
     } finally {

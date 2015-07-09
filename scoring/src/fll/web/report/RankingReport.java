@@ -46,6 +46,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 import fll.CategoryRank;
 import fll.TeamRanking;
 import fll.TournamentTeam;
+import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -68,6 +69,8 @@ public class RankingReport extends BaseFLLServlet {
 
   private static final Font HEADER_FONT = TITLE_FONT;
 
+  private boolean mUseQuartiles;
+
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -80,6 +83,8 @@ public class RankingReport extends BaseFLLServlet {
     try {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
+
+      mUseQuartiles = GlobalParameters.getUseQuartilesInRankingReport(connection);
 
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
@@ -196,8 +201,13 @@ public class RankingReport extends BaseFLLServlet {
     } else {
       final double percentage = (double) rank
           / catRank.getNumTeams();
-      para.add(new Chunk(String.format("%s in %s", convertPercentageToQuartile(percentage), catRank.getGroup()),
-                         RANK_VALUE_FONT));
+      if (mUseQuartiles) {
+        para.add(new Chunk(String.format("%s in %s", convertPercentageToQuartile(percentage), catRank.getGroup()),
+                           RANK_VALUE_FONT));
+      } else {
+        para.add(new Chunk(String.format("%d out of %d teams in %s", rank, catRank.getNumTeams(), catRank.getGroup()),
+                           RANK_VALUE_FONT));
+      }
     }
     para.add(Chunk.NEWLINE);
   }
