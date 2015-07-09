@@ -1,11 +1,9 @@
+<%@page import="fll.web.admin.GatherParameterInformation"%>
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%@ page import="fll.db.TournamentParameters"%>
 
-<c:if test="${not servletLoaded }">
-	<c:redirect url="GatherParameterInformation" />
-</c:if>
-<c:remove var="servletLoaded" />
+<% GatherParameterInformation.populateContext(application, pageContext); %>
 
 <html>
 <head>
@@ -259,9 +257,33 @@
                             <a href='javascript:hide("DivisionFlipRateHelp")'>[hide]</a>
                         </div>
                     </th>
-                    <td><input type='text' value="${divisionFlipRate}"
-                        id='divisionFlipRate' name='divisionFlipRate'/></td>
+                    <td><input type='text' value="${gDivisionFlipRate}"
+                        id='gDivisionFlipRate' name='gDivisionFlipRate'/></td>
                 </tr>
+                
+                <tr>
+                <th>Ranking report displays quartiles</th>
+                <td>
+                
+                <c:choose>
+                <c:when test="${gUseQuartiles }">
+                <input type='radio' name='gUseQuartiles' id='gUseQuartiles_yes' value='true' checked/>
+                <label for='gUseQuartiles_yes'>Yes</label>
+
+                <input type='radio' name='gUseQuartiles' id='gUseQuartiles_no' value='false'/>
+                <label for='gUseQuartiles_no'>No</label>
+                </c:when>
+                <c:otherwise>
+                <input type='radio' name='gUseQuartiles' id='gUseQuartiles_yes' value='true'/>
+                <label for='gUseQuartiles_yes'>Yes</label>
+
+                <input type='radio' name='gUseQuartiles' id='gUseQuartiles_no' value='false' checked/>
+                <label for='gUseQuartiles_no'>No</label>                
+                </c:otherwise>
+                </c:choose>
+                </td>
+                </tr>
+                
 
 			</table>
 
