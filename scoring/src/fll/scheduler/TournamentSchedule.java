@@ -6,6 +6,7 @@
 package fll.scheduler;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,12 +68,16 @@ import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.Queries;
+import fll.documents.writers.ChallengeXMLParser;
+import fll.documents.writers.SubjectiveConstants;
+import fll.documents.writers.SubjectivePdfManager;
 import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
@@ -694,6 +699,7 @@ public class TournamentSchedule implements Serializable {
 
       pdfFos = new FileOutputStream(byDivision);
       final Document detailedSchedulesByDivision = PdfUtils.createPdfDoc(pdfFos, new SimpleFooterHandler());
+      //Create new subjectivePdf Document here -- MTS
       for (final String subjectiveStation : subjectiveStations) {
         outputSubjectiveScheduleByDivision(detailedSchedulesByDivision, subjectiveStation);
         detailedSchedulesByDivision.add(Chunk.NEXTPAGE);
@@ -796,6 +802,40 @@ public class TournamentSchedule implements Serializable {
                        "Note that there may be more judging and a head to head round after this judging, please see the main tournament schedule for these details.",
                        TEAM_HEADER_FONT));
     detailedSchedules.add(para);
+  }
+  
+  public void outputSubjectiveSheets(final String dir, String baseFileName) {
+    SubjectivePdfManager pdfManager = new SubjectivePdfManager();   
+    ChallengeXMLParser parser = new ChallengeXMLParser();
+    
+    String[] subjects = {SubjectiveConstants.PROJECT_NAME, SubjectiveConstants.CORE_VALUES_NAME, SubjectiveConstants.ROBOT_DESIGN_NAME, SubjectiveConstants.PROGRAMMING_NAME};
+    
+    //get the xml sucked in
+    parser.parseXMLDocument("C:\\eclipse_4.4.2\\gitfll-sw\\scoring\\src\\fll\\resources\\challenge-descriptors\\fll-2014.xml");
+    
+    //setup the sheets from the sucked in xml
+    for (String subject : subjects) {
+      pdfManager.setSheetElement(parser.createSubjectiveSheetElement(subject));
+      
+      //This document will be all of the subjective pdf sheets in a single file.
+      com.itextpdf.text.Document pdf = SubjectivePdfManager.writer.createStandardDocument();
+  
+      try {
+        PdfWriter.getInstance(pdf, new FileOutputStream(dir + File.separator + baseFileName + "_SubjectiveSheets-" + subject + ".pdf"));
+        System.out.println("Writing to: " + dir);
+      } catch (FileNotFoundException | DocumentException e) {
+        e.printStackTrace(System.err);
+      }
+  
+      pdf.open();
+      
+      //Go thru all of the team schedules and put them all into a pdf
+      for (final TeamScheduleInfo teamInfo : _schedule) {
+        pdfManager.writeTeamSubjectivePdf(pdf, teamInfo, subject);
+      }
+      
+      pdf.close();
+    }
   }
 
   public void outputPerformanceSheets(final OutputStream output,
@@ -923,8 +963,7 @@ public class TournamentSchedule implements Serializable {
       table.addCell(PdfUtils.createCell(si.getDivision()));
       table.addCell(PdfUtils.createCell(si.getOrganization()));
       table.addCell(PdfUtils.createCell(si.getTeamName()));
-      table.addCell(PdfUtils.createCell(OUTPUT_DATE_FORMAT.get().format(si.getSubjectiveTimeByName(subjectiveStation)
-                                                                          .getTime())));
+      table.addCell(PdfUtils.createCell(OUTPUT_DATE_FORMAT.get().format(si.getSubjectiveTimeByName(subjectiveStation).getTime())));
       table.addCell(PdfUtils.createCell(si.getJudgingStation()));
     }
 
