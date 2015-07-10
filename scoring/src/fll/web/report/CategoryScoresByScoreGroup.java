@@ -27,7 +27,6 @@ import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 
@@ -36,6 +35,7 @@ import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
+import fll.util.LogUtils;
 import fll.util.PdfUtils;
 import fll.util.SimpleFooterHandler;
 import fll.web.ApplicationAttributes;
@@ -56,6 +56,11 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
+    if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session,
+                                                    "/report/CategoryScoresByScoreGroup")) {
+      return;
+    }
+
     Connection connection = null;
     try {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -67,7 +72,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=categoryScoresByJudgingStation.pdf");
 
-      final Document pdfDoc = PdfUtils.createPdfDoc(response.getOutputStream(), new SimpleFooterHandler());
+      final Document pdfDoc = PdfUtils.createPortraitPdfDoc(response.getOutputStream(), new SimpleFooterHandler());
 
       generateReport(connection, pdfDoc, challengeDescription, tournament);
 
@@ -102,33 +107,43 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
         final String catName = catElement.getName();
         final String catTitle = catElement.getTitle();
 
+        prep = connection.prepareStatement("SELECT "//
+            + " Teams.TeamNumber, Teams.TeamName, Teams.Organization, FinalScores." + catName //
+            + " FROM Teams, FinalScores" //
+            + " WHERE FinalScores.Tournament = ?" //
+            + " AND FinalScores.TeamNumber = Teams.TeamNumber" //
+            + " AND FinalScores.TeamNumber IN (" //
+            + "   SELECT TeamNumber FROM TournamentTeams"//
+            + "   WHERE Tournament = ?" //
+            + "   AND event_division = ?" //
+            + "   AND judging_station = ?)" //
+            + " ORDER BY " + catName + " " + winnerCriteria.getSortString() //
+        );
+        prep.setInt(1, tournament.getTournamentID());
+        prep.setInt(2, tournament.getTournamentID());
+
         for (final String division : eventDivisions) {
           for (final String judgingStation : judgingStations) {
             final PdfPTable table = PdfUtils.createTable(4);
 
             createHeader(table, challengeTitle, catTitle, division, judgingStation, tournament);
-
-            prep = connection.prepareStatement("SELECT "//
-                + " Teams.TeamNumber, Teams.TeamName, Teams.Organization, FinalScores." + catName //
-                + " FROM Teams, FinalScores" //
-                + " WHERE FinalScores.Tournament = ?" //
-                + " AND FinalScores.TeamNumber = Teams.TeamNumber" + " AND FinalScores.TeamNumber IN (" //
-                + "   SELECT TeamNumber FROM TournamentTeams"//
-                + "   WHERE Tournament = ?" //
-                + "   AND event_division = ?" //
-                + "   AND judging_station = ?)" //
-                + " ORDER BY " + catName + " " + winnerCriteria.getSortString() //
-            );
-            prep.setInt(1, tournament.getTournamentID());
-            prep.setInt(2, tournament.getTournamentID());
             prep.setString(3, division);
             prep.setString(4, judgingStation);
 
+            boolean haveData = false;
             rs = prep.executeQuery();
             while (rs.next()) {
-              table.addCell(PdfUtils.createCell(String.valueOf(rs.getInt(1))));
-              table.addCell(PdfUtils.createCell(rs.getString(2)));
-              table.addCell(PdfUtils.createCell(rs.getString(3)));
+              haveData = true;
+
+              LogUtils.getLogger().info("team number: "
+                  + rs.getInt(1));
+              final int teamNumber = rs.getInt(1);
+              final String teamName = rs.getString(2);
+              final String organization = rs.getString(3);
+
+              table.addCell(PdfUtils.createCell(String.valueOf(teamNumber)));
+              table.addCell(PdfUtils.createCell(null == teamName ? "" : teamName));
+              table.addCell(PdfUtils.createCell(null == organization ? "" : organization));
               double score = rs.getDouble(4);
               if (rs.wasNull()) {
                 score = Double.NaN;
@@ -140,12 +155,18 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
               }
             }
 
-            pdfDoc.add(table);
+            if (haveData) {
+              table.keepRowsTogether(0);
+              pdfDoc.add(table);
 
-            pdfDoc.add(new Paragraph(Chunk.NEWLINE));
+              pdfDoc.add(Chunk.NEXTPAGE);
+            }
 
           } // foreach station
         } // foreach division
+
+        SQLFunctions.close(prep);
+        prep = null;
       } // foreach category
 
     } finally {

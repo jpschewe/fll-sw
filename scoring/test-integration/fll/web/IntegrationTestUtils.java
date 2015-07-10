@@ -28,6 +28,7 @@ import org.openqa.selenium.support.ui.Select;
 
 import fll.TestUtils;
 import fll.util.LogUtils;
+import fll.xml.BracketSortType;
 
 /**
  * Some utilities for integration tests.
@@ -397,12 +398,23 @@ public final class IntegrationTestUtils {
 
   public static void initializePlayoffsForDivision(final WebDriver selenium,
                                                    final String division) throws IOException {
+    initializePlayoffsForDivision(selenium, division, BracketSortType.SEEDING);
+  }
+
+  public static void initializePlayoffsForDivision(final WebDriver selenium,
+                                                   final String division,
+                                                   final BracketSortType bracketSort) throws IOException {
     loadPage(selenium, TestUtils.URL_ROOT
         + "playoff");
 
     final Select initDiv = new Select(selenium.findElement(By.id("initialize-division")));
     initDiv.selectByValue(division);
     selenium.findElement(By.id("initialize_brackets")).click();
+    Assert.assertFalse("Error loading page", isElementPresent(selenium, By.id("exception-handler")));
+
+    final Select sort = new Select(selenium.findElement(By.id("sort")));
+    sort.selectByValue(bracketSort.name());
+    selenium.findElement(By.id("submit")).click();
     Assert.assertFalse("Error loading page", isElementPresent(selenium, By.id("exception-handler")));
 
   }

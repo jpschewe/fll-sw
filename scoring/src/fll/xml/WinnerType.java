@@ -12,27 +12,32 @@ package fll.xml;
  */
 public enum WinnerType {
   HIGH("MAX", "DESC"), LOW("MIN", "ASC");
-  
+
   private final String mMinMaxString;
+
   private final String mSortString;
-  
-  private WinnerType(final String minMaxString, final String sortString) {
+
+  private WinnerType(final String minMaxString,
+                     final String sortString) {
     mMinMaxString = minMaxString;
     mSortString = sortString;
   }
+
   /**
-   * 
    * @return string for the SQL function that gets the right score (MAX or MIN).
    */
   public String getMinMaxString() {
     return mMinMaxString;
   }
-  
+
   /**
+   * Sort string for SQL ORDER BY clause. This sorts the "best" teams to the
+   * top. Null is always last.
    * 
    * @return SQL ASC or DESC
    */
   public String getSortString() {
-    return mSortString;
+    return mSortString
+        + " NULLS LAST";
   }
 }

@@ -10,16 +10,20 @@
 
 <script type='text/javascript' src='../extlib/jquery-1.11.1.min.js'></script>
 
+
 <%
-  fll.web.playoff.ScoregenBrackets.populateContext(application,
+/*
+Parameters:
+division - String for the division
+firstRound - Integer first round to display
+lastRond - Integer last round to display
+*/
+
+fll.web.playoff.ScoregenBrackets.populateContext(application,
 					request, pageContext);
 %>
 
 <%
-  /*
-											 Parameters:
-											 division - String for the division
-			 */
 			final DataSource datasource = ApplicationAttributes
 					.getDataSource(application);
 			final Connection connection = datasource.getConnection();
@@ -44,7 +48,7 @@
 <head>
 <link rel="stylesheet" type="text/css"
  href="<c:url value='/style/style.jsp'/>" />
-<title>Playoff Brackets - Division: ${division}</title>
+<title>${division} Playoff Brackets</title>
 
 <style type='text/css'>
 TD.Leaf {
@@ -127,6 +131,8 @@ FONT.TIE {
   You can limit which tables teams are automatically assigned to.<br />
 
   <input type='hidden' name='division' value='${division }' />
+  <input type='hidden' name='firstRound' value='${firstRound }' />
+  <input type='hidden' name='lastRound' value='${lastRound }' />
 
   <c:forEach items="${tableInfo}" var="info">
 

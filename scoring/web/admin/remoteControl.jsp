@@ -1,7 +1,8 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%
-  fll.web.admin.RemoteControl.populateContext(application, pageContext);
+  fll.web.admin.RemoteControl.populateContext(application,
+					pageContext);
 %>
 
 <html>
@@ -36,12 +37,12 @@
 <li>playoffRoundNumber - ${applicationScope.playoffRoundNumber }</li>
     <c:if test="${not empty displayNames}">
       <c:forEach items="${displayNames}" var="displayName">
-  <c:set var="displayPageKey" value="${displayName}_displayPage" />
-  <c:set var="displayURLKey" value="${displayName}_displayURL" />
-                <c:set var="playoffDivisionKey" value="${displayName}_playoffDivision" />
-              <c:set var="playoffRoundNumberKey" value="${displayName}_playoffRoundNumber" />
+  <c:set var="displayPageKey" value="${displayName.key}_displayPage" />
+  <c:set var="displayURLKey" value="${displayName.key}_displayURL" />
+                <c:set var="playoffDivisionKey" value="${displayName.key}_playoffDivision" />
+              <c:set var="playoffRoundNumberKey" value="${displayName.key}_playoffRoundNumber" />
   
-<li>Display - ${displayName}
+<li>Display - ${displayName.key}
 <ul>
 <li>displayPage - ${applicationScope[displayPageKey]}</li>
 <li>displayURL - ${applicationScope[displayURLKey] }</li>
@@ -68,7 +69,20 @@ END DEBUG --%>
     <th>Default</th>
     <c:if test="${not empty displayNames}">
      <c:forEach items="${displayNames}" var="displayName">
-      <th>${displayName}</th>
+      <th>${displayName.key}- seen @ <fmt:formatDate
+        value="${displayName.value }" type="TIME" timeStyle="short" /></th>
+     </c:forEach>
+    </c:if>
+   </tr>
+
+   <tr>
+    <th>Delete Named Display</th>
+    <td>&nbsp;</td>
+    <c:if test="${not empty displayNames}">
+     <c:forEach items="${displayNames}" var="displayName">
+      <c:set var="displayPageKey" value="${displayName.key}_displayPage" />
+      <td><input type="checkbox" name="${displayName.key }_delete" />
+      </td>
      </c:forEach>
     </c:if>
    </tr>
@@ -78,14 +92,14 @@ END DEBUG --%>
     <td>&nbsp;</td>
     <c:if test="${not empty displayNames}">
      <c:forEach items="${displayNames}" var="displayName">
-      <c:set var="displayPageKey" value="${displayName}_displayPage" />
+      <c:set var="displayPageKey" value="${displayName.key}_displayPage" />
       <td><c:choose>
         <c:when test="${empty applicationScope[displayPageKey]}">
-         <input type='radio' name="${displayName}_remotePage"
+         <input type='radio' name="${displayName.key}_remotePage"
           value='default' checked />
         </c:when>
         <c:otherwise>
-         <input type='radio' name="${displayName}_remotePage"
+         <input type='radio' name="${displayName.key}_remotePage"
           value='default' />
         </c:otherwise>
        </c:choose></td>
@@ -105,13 +119,13 @@ END DEBUG --%>
     <c:if test="${not empty displayNames}">
      <c:forEach items="${displayNames}" var="displayName">
       <td><c:set var="displayPageKey"
-        value="${displayName}_displayPage" /> <c:choose>
+        value="${displayName.key}_displayPage" /> <c:choose>
         <c:when test="${applicationScope[displayPageKey] == 'welcome'}">
-         <input type='radio' name="${displayName}_remotePage"
+         <input type='radio' name="${displayName.key}_remotePage"
           value='welcome' checked />
         </c:when>
         <c:otherwise>
-         <input type='radio' name="${displayName}_remotePage"
+         <input type='radio' name="${displayName.key}_remotePage"
           value='welcome' />
         </c:otherwise>
        </c:choose></td>
@@ -133,14 +147,14 @@ END DEBUG --%>
     <c:if test="${not empty displayNames}">
      <c:forEach items="${displayNames}" var="displayName">
       <td><c:set var="displayPageKey"
-        value="${displayName}_displayPage" /> <c:choose>
+        value="${displayName.key}_displayPage" /> <c:choose>
         <c:when
          test="${applicationScope[displayPageKey] == 'scoreboard'}">
-         <input type='radio' name="${displayName}_remotePage"
+         <input type='radio' name="${displayName.key}_remotePage"
           value='scoreboard' checked />
         </c:when>
         <c:otherwise>
-         <input type='radio' name="${displayName}_remotePage"
+         <input type='radio' name="${displayName.key}_remotePage"
           value='scoreboard' />
         </c:otherwise>
        </c:choose></td>
@@ -165,14 +179,14 @@ END DEBUG --%>
     <c:if test="${not empty displayNames}">
      <c:forEach items="${displayNames}" var="displayName">
       <td><c:set var="displayPageKey"
-        value="${displayName}_displayPage" /> <c:choose>
+        value="${displayName.key}_displayPage" /> <c:choose>
         <c:when
          test="${applicationScope[displayPageKey] == 'slideshow'}">
-         <input type='radio' name="${displayName}_remotePage"
+         <input type='radio' name="${displayName.key}_remotePage"
           value='slideshow' checked />
         </c:when>
         <c:otherwise>
-         <input type='radio' name="${displayName}_remotePage"
+         <input type='radio' name="${displayName.key}_remotePage"
           value='slideshow' />
         </c:otherwise>
        </c:choose></td>
@@ -219,19 +233,19 @@ END DEBUG --%>
     <c:if test="${not empty displayNames}">
      <c:forEach items="${displayNames}" var="displayName">
       <td><c:set var="displayPageKey"
-        value="${displayName}_displayPage" /> <c:set
-        var="playoffDivisionKey" value="${displayName}_playoffDivision" />
+        value="${displayName.key}_displayPage" /> <c:set
+        var="playoffDivisionKey" value="${displayName.key}_playoffDivision" />
        <c:set var="playoffRoundNumberKey"
-        value="${displayName}_playoffRoundNumber" /> <c:choose>
+        value="${displayName.key}_playoffRoundNumber" /> <c:choose>
         <c:when test="${applicationScope[displayPageKey] == 'playoffs'}">
-         <input type='radio' name="${displayName}_remotePage"
+         <input type='radio' name="${displayName.key}_remotePage"
           value='playoffs' checked />
         </c:when>
         <c:otherwise>
-         <input type='radio' name="${displayName}_remotePage"
+         <input type='radio' name="${displayName.key}_remotePage"
           value='playoffs' />
         </c:otherwise>
-       </c:choose> Division: <select name='${displayName}_playoffDivision'>
+       </c:choose> Division: <select name='${displayName.key}_playoffDivision'>
         <c:forEach items="${divisions}" var="division">
          <c:choose>
           <c:when
@@ -244,7 +258,7 @@ END DEBUG --%>
          </c:choose>
         </c:forEach>
       </select> <br /> Playoff Round: <select
-       name='${displayName}_playoffRoundNumber'>
+       name='${displayName.key}_playoffRoundNumber'>
         <c:forEach begin="1" end="${numPlayoffRounds}" var="numRounds">
          <c:choose>
           <c:when
@@ -292,20 +306,20 @@ END DEBUG --%>
     <c:if test="${not empty displayNames}">
      <c:forEach items="${displayNames}" var="displayName">
       <td><c:set var="displayPageKey"
-        value="${displayName}_displayPage" /> <c:set
+        value="${displayName.key}_displayPage" /> <c:set
         var="finalistDivisionKey"
-        value="${displayName}_finalistDivision" /> <c:choose>
+        value="${displayName.key}_finalistDivision" /> <c:choose>
         <c:when
          test="${applicationScope[displayPageKey] == 'finalistSchedule'}">
-         <input type='radio' name="${displayName}_remotePage"
+         <input type='radio' name="${displayName.key}_remotePage"
           value='finalistSchedule' checked />
         </c:when>
         <c:otherwise>
-         <input type='radio' name="${displayName}_remotePage"
+         <input type='radio' name="${displayName.key}_remotePage"
           value='finalistSchedule' />
         </c:otherwise>
 
-       </c:choose> Division: <select name='${displayName}_finalistDivision'>
+       </c:choose> Division: <select name='${displayName.key}_finalistDivision'>
 
         <c:forEach items="${finalistDivisions}" var="fdiv">
          <c:choose>
@@ -345,16 +359,16 @@ END DEBUG --%>
     <c:if test="${not empty displayNames}">
      <c:forEach items="${displayNames}" var="displayName">
       <td><c:set var="displayPageKey"
-        value="${displayName}_displayPage" /> <c:choose>
+        value="${displayName.key}_displayPage" /> <c:choose>
         <c:when test="${applicationScope[displayPageKey] == 'special'}">
-         <input type='radio' name="${displayName}_remotePage"
+         <input type='radio' name="${displayName.key}_remotePage"
           value='special' checked />
         </c:when>
         <c:otherwise>
-         <input type='radio' name="${displayName}_remotePage"
+         <input type='radio' name="${displayName.key}_remotePage"
           value='special' />
         </c:otherwise>
-       </c:choose> <input type='text' name='${displayName}_remoteURL'
+       </c:choose> <input type='text' name='${displayName.key}_remoteURL'
        value="${applicationScope.displayURL}"></td>
      </c:forEach>
     </c:if>

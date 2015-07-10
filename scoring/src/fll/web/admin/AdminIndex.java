@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 
 import fll.Tournament;
 import fll.db.Queries;
+import fll.db.TournamentParameters;
 import fll.scheduler.TournamentSchedule;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -64,7 +65,7 @@ public class AdminIndex {
       pageContext.setAttribute("playoffsInitialized",
                            Queries.isPlayoffDataInitialized(connection, Queries.getCurrentTournament(connection)));
 
-      final int numSeedingRounds = Queries.getNumSeedingRounds(connection, currentTournamentID);
+      final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournamentID);
       pageContext.setAttribute("numSeedingRounds", numSeedingRounds);
 
       final List<Tournament> tournaments = Tournament.getTournaments(connection);

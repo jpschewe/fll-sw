@@ -15,13 +15,14 @@
 <%@ page import="fll.db.Queries"%>
 <%@ page import="fll.web.SessionAttributes"%>
 <%@ page import="fll.web.ApplicationAttributes"%>
+<%@ page import="fll.db.TournamentParameters" %>
 
 
 <%
   final DataSource datasource = ApplicationAttributes.getDataSource(application);
 final Connection connection = datasource.getConnection();
   final int currentTournament = Queries.getCurrentTournament(connection);
-  final int maxScoreboardRound = Queries.getMaxScoreboardPerformanceRound(connection, currentTournament);
+  final int maxScoreboardRound = TournamentParameters.getMaxScoreboardPerformanceRound(connection, currentTournament);
 
 
   final PreparedStatement prep = connection.prepareStatement("SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName, current_tournament_teams.event_division,"
@@ -30,6 +31,7 @@ final Connection connection = datasource.getConnection();
   + " WHERE verified_performance.Tournament = ?"
   + "   AND current_tournament_teams.TeamNumber = Teams.TeamNumber"
   + "   AND Teams.TeamNumber = verified_performance.TeamNumber"
+  + "   AND verified_performance.Bye = False"
   + "   AND verified_performance.RunNumber <= ?"
   + " ORDER BY Teams.Organization, Teams.TeamNumber, verified_performance.RunNumber");
   prep.setInt(1, currentTournament);

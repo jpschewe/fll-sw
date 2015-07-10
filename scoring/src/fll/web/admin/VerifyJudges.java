@@ -84,8 +84,6 @@ public class VerifyJudges extends BaseFLLServlet {
       for (int row = 1; row <= numRows; ++row) {
         String id = request.getParameter("id"
             + row);
-        final String phone = request.getParameter("phone"
-            + row);
         final String category = request.getParameter("cat"
             + row);
         final String station = request.getParameter("station"
@@ -93,12 +91,7 @@ public class VerifyJudges extends BaseFLLServlet {
         if (null != id) {
           id = sanitizeJudgeId(id);
           if (id.length() > 0) {
-            if (null == phone
-                || phone.trim().isEmpty()) {
-              error.append("You must specify a phone number for judge '"
-                  + id + "'<br/>");
-            }
-            final JudgeInformation judge = new JudgeInformation(id, phone, category, station);
+            final JudgeInformation judge = new JudgeInformation(id, category, station);
             judges.add(judge);
           }
         }

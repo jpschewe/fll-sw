@@ -123,10 +123,14 @@ public final class TeamScheduleInfo implements Serializable {
   }
 
   /**
-   * @return the teamName
+   * @return the teamName, never null
    */
   public String getTeamName() {
-    return teamName;
+    if (null == teamName) {
+      return "";
+    } else {
+      return teamName;
+    }
   }
 
   /**
@@ -137,10 +141,14 @@ public final class TeamScheduleInfo implements Serializable {
   }
 
   /**
-   * @return the organization
+   * @return the organization, never null
    */
   public String getOrganization() {
-    return organization;
+    if (null == organization) {
+      return "";
+    } else {
+      return organization;
+    }
   }
 
   /**
@@ -151,10 +159,14 @@ public final class TeamScheduleInfo implements Serializable {
   }
 
   /**
-   * @return the division
+   * @return the division, never null
    */
   public String getDivision() {
-    return division;
+    if (null == division) {
+      return "";
+    } else {
+      return division;
+    }
   }
 
   /**
@@ -165,10 +177,14 @@ public final class TeamScheduleInfo implements Serializable {
   }
 
   /**
-   * @return the judging station
+   * @return the judging station, never null
    */
   public String getJudgingStation() {
-    return judgingStation;
+    if (null == judgingStation) {
+      return "";
+    } else {
+      return judgingStation;
+    }
   }
 
   public int getNumberOfRounds() {

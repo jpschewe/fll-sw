@@ -1,3 +1,67 @@
+* 387 - Show quartiles rather than actual ranks in the ranking report
+* 391 - Add shortDescription attribute to rubric range
+* 392 - Properly support no schedule in the subjective web app
+* 393 - Properly handle no judges in the subjective web app
+* 383 - Add subjective webapp version to the sidebar
+* 309 - support schedules without the division column, just use the judging group column instead
+* 172 - make bracket sort be specified when initializing the brackets of a challenge descriptor attribute
+* 381 - handle missing information in TeamScheduleInfo
+* 380 - generate correct tanking report when there are multiple tournaments in the same database
+* 377 - correctly identify Excel files by extension
+
+Release 9.7
+-----------
+* 359 - table optimizer takes into account empty tables now as well
+* Sort team schedules by team number
+* 370 - Add organization to team schedule
+* 362 - import tournament parameters table
+* 363 - handle more than 6 logos on the welcome page
+* 367 - Properly display summary for judge assigned to 2 judging groups
+
+Release 9.6
+-----------
+* 361 - correct problem finding java on unix systems without JAVA_HOME set
+* 358 - correct bug on the remote control page with named displays
+
+Release 9.5
+-----------
+* 263 - Only allow connections from loopback interface to not require a password
+* 351 - Detect when the summarized scores are out of date
+* 114 - Add the ability to uninitialize a playoff division
+* 14 - add the ability to print the schedules from the web 
+* 339 - Highlight teams that are in the top X% of performance scores
+* 12 - add the ability to delete named displays from the display remote control 
+* 289 - add the ability to store non-numeric/"subjective" award winners in the database
+* 230 - team upload now only adds teams without removing any existing information
+* 337 - don't try to upload subjective scores from the web application if the tournament doesn't match
+* 349 - Add note about performance times to team schedule and put multiple schedules on 1 page
+* 338 - Add CSV dump of all seeding performance scores
+* 348 - add a page break after each judging station in the category scores by judging station report
+* 332 - pass parameters from limit tables servlet back to scoresheet generation page
+* 346 - add link to non-scrolling playoffs from playoff index
+
+Release 9.4
+-----------
+* 333 - redirect to authentication page from subjective app when not authenticated
+* 331 - sort no shows last in scores by judging station report
+* 336 - Modify writeup for what to do with ties
+* 329 - Remove phone number from judge information
+* 16 - put division first in playoff bracket page titles
+* 17 - check for duplicate user before adding
+* 35 - make the top 10 show as many scores as will fit 
+* 15 - make wording clear when no teams are missing seeding rounds before playoffs
+* 11 - remove extra jar files from application classpaths
+
+Release 9.3
+-----------
+* 322 - Don't put No Show teams in the playoffs
+* Reworked some pages to make it clear what is needed at a regional vs. state tournament
+* 320 - make root tomcat application redirect to fll-sw
+* 324 - display no shows in the subjective web application score summary
+* 325 - make sure a judge is always specified in the subjective web application
+
+Release 9.2
+-----------
 * 315 - fix playoff table assignment algorithm for initial data.
 * 318 - use a double for the total score on a no show, allows sorting on the total score column
 * 317 - format times with 2 digits in the subjective application

@@ -26,12 +26,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
-import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
@@ -44,7 +41,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.ImportDB;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
-import fll.web.ApplicationAttributes;
 
 /**
  * Some handy utilities.
@@ -398,7 +394,7 @@ public final class Utilities {
   };
 
   /**
-   * Build a list of file found in the specified directories. This 
+   * Build a list of file found in the specified directories. This
    * method will search recursively.
    * 
    * @param prefix prefix path, this should be "" initially
@@ -446,30 +442,6 @@ public final class Utilities {
       LOGGER.debug("f: "
           + output.toString());
     }
-  }
-
-  /**
-   * Application attribute to hold names of all displays. Type is Set<String>
-   */
-  public static final String DISPLAY_NAMES_KEY = "displayNames";
-
-  /**
-   * Add a display name to the list of known displays. Synchronized to avoid
-   * race conditions.
-   * 
-   * @param application
-   * @param name
-   */
-  public static synchronized void appendDisplayName(final ServletContext application,
-                                                    final String name) {
-    // ServletContext isn't type safe
-    @SuppressWarnings("unchecked")
-    Set<String> displayNames = ApplicationAttributes.getAttribute(application, DISPLAY_NAMES_KEY, Set.class);
-    if (null == displayNames) {
-      displayNames = new HashSet<String>();
-    }
-    displayNames.add(name);
-    application.setAttribute(DISPLAY_NAMES_KEY, displayNames);
   }
 
   /**
@@ -561,6 +533,26 @@ public final class Utilities {
           + property + "' doesn't have a value");
     }
     return Integer.parseInt(value.trim());
+  }
+
+  /**
+   * Check if a number is even.
+   * 
+   * @param number the number to check
+   * @return true if the number is even
+   */
+  public static boolean isEven(final int number) {
+    return number % 2 == 0;
+  }
+
+  /**
+   * Check if a number is odd.
+   * 
+   * @param number the number to check
+   * @return true if the number is odd
+   */
+  public static boolean isOdd(final int number) {
+    return !isEven(number);
   }
 
 }

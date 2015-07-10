@@ -89,23 +89,6 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
   }
 
   /**
-   * Get the bracket sort type from the element. If the attribute doesn't
-   * exist, then return {@link BracketSortType#SEEDING}.
-   */
-  public static BracketSortType getBracketSort(final Element root) {
-    if (root.hasAttribute("bracketSort")) {
-      final String sortStr = root.getAttribute("bracketSort");
-      if (sortStr.isEmpty()) {
-        return BracketSortType.SEEDING;
-      } else {
-        return Enum.valueOf(BracketSortType.class, sortStr);
-      }
-    } else {
-      return BracketSortType.SEEDING;
-    }
-  }
-
-  /**
    * Get the winner criteria for a particular element.
    */
   public static WinnerType getWinnerCriteria(final Element element) {
@@ -258,9 +241,6 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
       final CodeSource src = XMLUtils.class.getProtectionDomain().getCodeSource();
       if (null != src) {
         final URL jar = src.getLocation();
-
-        LOGGER.info("Jar for code source: "
-            + jar.toString());
 
         JarInputStream zip = null;
         try {

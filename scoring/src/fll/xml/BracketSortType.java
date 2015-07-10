@@ -7,16 +7,16 @@ package fll.xml;
  */
 public enum BracketSortType {
 
-  /**
-   * Use the best score from the seeding rounds.
-   */
-  SEEDING,
-  /**
-   * Sort alphabetically on team name.
-   */
-  ALPHA_TEAM,
-  /**
-   * Use a random assignment.
-   */
-  RANDOM;
+  SEEDING("Use the best score from the seeding rounds"), ALPHA_TEAM("Sort alphabetically on team name"), RANDOM(
+      "Use random assignment");
+
+  private BracketSortType(final String description) {
+    mDescription = description;
+  }
+
+  private final String mDescription;
+
+  public String getDescription() {
+    return mDescription;
+  }
 }

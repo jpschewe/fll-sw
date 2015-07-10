@@ -9,14 +9,15 @@ package fll.web.report.finalist;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Mirrors javascript class in schedule.js. Property names need to match the
+ * Class that represents a category in the finalist schedule.
+ * Mirrors javascript class in fll-objects.js. Property names need to match the
  * javascript/JSON.
  */
-final class FinalistCategoryRow {
+final class FinalistCategory {
 
-  public FinalistCategoryRow(@JsonProperty("categoryName") final String categoryName,
-                             @JsonProperty("isPublic") final boolean isPublic,
-                             @JsonProperty("room") final String room) {
+  public FinalistCategory(@JsonProperty("categoryName") final String categoryName,
+                          @JsonProperty("isPublic") final boolean isPublic,
+                          @JsonProperty("room") final String room) {
     this.categoryName = categoryName;
     this.isPublic = isPublic;
     this.room = room;

@@ -66,7 +66,7 @@ bracketInfo.addStaticTableLabels();
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title>Playoff Brackets - Division: <%=divisionStr%></title>
+    <title><%=divisionStr%> Printable Brackets</title>
   </head>
   <style type='text/css'>
       TD.Leaf {font-family:Arial;border-bottom: solid}
