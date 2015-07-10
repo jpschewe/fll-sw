@@ -25,6 +25,8 @@ import org.apache.log4j.Logger;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.db.Queries;
+import fll.db.TournamentParameters;
+import fll.util.FLLRuntimeException;
 import fll.util.FP;
 import fll.util.LogUtils;
 import fll.xml.BracketSortType;
@@ -90,6 +92,13 @@ public final class Playoff {
       });
     } else {
       // standard seeding
+      final int tournament = Queries.getCurrentTournament(connection);
+      final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament);
+      if (numSeedingRounds < 1) {
+        throw new FLLRuntimeException(
+                                      "Cannot initialize playoff brackets using scores from seeding rounds when the number of seeing rounds is less than 1");
+      }
+
       seedingOrder = Queries.getPlayoffSeedingOrder(connection, winnerCriteria, teams);
     }
 
@@ -367,6 +376,10 @@ public final class Playoff {
   /**
    * Initialize the database portion of the playoff brackets. The current
    * tournament is assumed to be the tournament to initialize.
+   * <p>
+   * Make sure that the teams listed here are not involved in any unfinished
+   * playoffs, otherwise there will be problems.
+   * </p>
    * 
    * @param connection the connection
    * @param division the playoff division that the specified teams are in
@@ -381,7 +394,8 @@ public final class Playoff {
                                         final ChallengeDescription challengeDescription,
                                         final String division,
                                         final boolean enableThird,
-                                        final List<? extends Team> teams) throws SQLException {
+                                        final List<? extends Team> teams,
+                                        final BracketSortType bracketSort) throws SQLException {
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("initializing brackets for division: "
@@ -389,7 +403,6 @@ public final class Playoff {
     }
     final int currentTournament = Queries.getCurrentTournament(connection);
 
-    final BracketSortType bracketSort = challengeDescription.getBracketSort();
     final WinnerType winnerCriteria = challengeDescription.getWinner();
 
     // Initialize currentRound to contain a full bracket setup (i.e. playoff
@@ -420,7 +433,7 @@ public final class Playoff {
     // for the teams
     final int baseRunNumber;
     if (0 == maxRoundForTeams) {
-      baseRunNumber = Queries.getNumSeedingRounds(connection, currentTournament);
+      baseRunNumber = TournamentParameters.getNumSeedingRounds(connection, currentTournament);
     } else {
       baseRunNumber = maxRoundForTeams;
     }
@@ -607,6 +620,8 @@ public final class Playoff {
       while (divisions.next()) {
         final String eventDivision = divisions.getString(1);
 
+        // find max run number for ANY team in the specified division, not
+        // necessarily those in our list
         final int runNumber = getMaxPerformanceRound(connection, currentTournament, eventDivision);
         if (-1 != runNumber) {
           maxRunNumber = Math.max(maxRunNumber, runNumber);
@@ -639,8 +654,8 @@ public final class Playoff {
           + " event_division = ? AND tournament = ?");
 
       maxPrep.setString(1, playoffDivision);
-      maxPrep.setInt(2,  currentTournament);
-      
+      maxPrep.setInt(2, currentTournament);
+
       max = maxPrep.executeQuery();
       if (max.next()) {
         final int runNumber = max.getInt(1);
@@ -740,8 +755,8 @@ public final class Playoff {
   }
 
   /**
-   * Get the run number for a given playoff bracket.
-   * This run number specifies the winner of the playoff bracket.
+   * Get the max run number for a given playoff division.
+   * This run number specifies the winner of the playoff division.
    * 
    * @return the run max run number or -1 if not found
    */
@@ -1016,8 +1031,7 @@ public final class Playoff {
     try {
       prep = connection.prepareStatement("SELECT run_number FROM PlayoffData" //
           + " WHERE Tournament = ?" //
-          + " AND event_division = ?"
-          + " AND PlayoffRound = ?" //
+          + " AND event_division = ?" + " AND PlayoffRound = ?" //
           + " AND Team = ?");
       prep.setInt(1, tournament);
       prep.setString(2, division);

@@ -28,6 +28,13 @@ public final class ApplicationAttributes {
    */
   public static final String DATASOURCE = "datasource";
 
+  /**
+   * Application attribute to hold names of all displays. Type is
+   * Map&lt;String, Date&gt;. Key is the name of the display, the value
+   * is when the display was last seen.
+   */
+  public static final String DISPLAY_NAMES = "displayNames";
+
   private ApplicationAttributes() {
     // no instances
   }

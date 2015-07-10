@@ -126,9 +126,13 @@ public final class Queries {
       prep = connection.prepareStatement("SELECT DISTINCT Judges.station"
           + " FROM " + categoryName + ", Judges" //
           + " WHERE TeamNumber = ?" //
-          + " AND Tournament = ?" //
-          + " AND Judges.id = " + categoryName + ".Judge" + " AND ComputedTotal IS NOT NULL");
+          + " AND Judges.Tournament = ?" //
+          + " AND Judges.id = " + categoryName + ".Judge" //
+          + " AND Judges.Tournament = " + categoryName + ".Tournament" //
+          + " AND Judges.category = ?" //
+          + " AND ComputedTotal IS NOT NULL");
       prep.setInt(2, tournament);
+      prep.setString(3, categoryName);
 
       // foreach team, put the team in a score group
       for (final TournamentTeam team : Queries.getTournamentTeams(connection).values()) {
@@ -282,6 +286,40 @@ public final class Queries {
       SQLFunctions.close(prep);
     }
     return list;
+  }
+
+  /**
+   * Get the list of team numbers that are in the specified event division.
+   * 
+   * @param connection
+   * @param tournament
+   * @param division
+   * @return
+   * @throws SQLException
+   */
+  public static Set<Integer> getTeamNumbersInEventDivision(final Connection connection,
+                                                           final int tournament,
+                                                           final String division) throws SQLException {
+    final Set<Integer> teamNumbers = new HashSet<>();
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT TeamNumber FROM TournamentTeams" //
+          + " WHERE Tournament = ?" //
+          + " AND event_division = ?");
+      prep.setInt(1, tournament);
+      prep.setString(2, division);
+      rs = prep.executeQuery();
+      while (rs.next()) {
+        final int teamNumber = rs.getInt(1);
+        teamNumbers.add(teamNumber);
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+
+    return teamNumbers;
   }
 
   /**
@@ -625,7 +663,6 @@ public final class Queries {
       if (rowsUpdated < 1) {
         insertPerformanceScore(description, connection, request);
       }
-
       connection.commit();
     } finally {
       connection.setTransactionIsolation(oldTransactionIsolation);
@@ -647,6 +684,7 @@ public final class Queries {
                                              final HttpServletRequest request) throws SQLException, ParseException,
       RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
+    final Tournament tournament = Tournament.findTournamentByID(connection, currentTournament);
 
     final WinnerType winnerCriteria = description.getWinner();
     final PerformanceScoreCategory performanceElement = description.getPerformance();
@@ -681,8 +719,12 @@ public final class Queries {
         + currentTournament);
 
     columns.append(", ComputedTotal");
-    values.append(", "
-        + performanceElement.evaluate(teamScore));
+    if (teamScore.isNoShow()) {
+      values.append(", NULL");
+    } else {
+      values.append(", "
+          + performanceElement.evaluate(teamScore));
+    }
 
     columns.append(", RunNumber");
     values.append(", "
@@ -730,14 +772,17 @@ public final class Queries {
     }
 
     // Perform updates to the playoff data table if in playoff rounds.
-    final int numSeedingRounds = getNumSeedingRounds(connection, currentTournament);
-    if ((runNumber > numSeedingRounds)
-        && "1".equals(request.getParameter("Verified"))) {
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("Updating playoff score from insert");
+    final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournament);
+    if (runNumber > numSeedingRounds) {
+      if ("1".equals(request.getParameter("Verified"))) {
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("Updating playoff score from insert");
+        }
+        updatePlayoffScore(connection, request, currentTournament, winnerCriteria, performanceElement,
+                           tiebreakerElement, teamNumber, runNumber, teamScore);
       }
-      updatePlayoffScore(connection, request, currentTournament, winnerCriteria, performanceElement, tiebreakerElement,
-                         teamNumber, runNumber, teamScore);
+    } else {
+      tournament.recordPerformanceSeedingModified(connection);
     }
   }
 
@@ -784,6 +829,7 @@ public final class Queries {
                                             final HttpServletRequest request) throws SQLException, ParseException,
       RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
+    final Tournament tournament = Tournament.findTournamentByID(connection, currentTournament);
 
     final WinnerType winnerCriteria = description.getWinner();
     final PerformanceScoreCategory performanceElement = description.getPerformance();
@@ -815,8 +861,14 @@ public final class Queries {
     sql.append("NoShow = "
         + noShow);
 
-    sql.append(", ComputedTotal = "
-        + performanceElement.evaluate(teamScore));
+    sql.append(", TIMESTAMP = CURRENT_TIMESTAMP");
+
+    if (teamScore.isNoShow()) {
+      sql.append(", ComputedTotal = NULL");
+    } else {
+      sql.append(", ComputedTotal = "
+          + performanceElement.evaluate(teamScore));
+    }
 
     // now do each goal
     for (final AbstractGoal element : performanceElement.getGoals()) {
@@ -861,13 +913,15 @@ public final class Queries {
 
     if (numRowsUpdated > 0) {
       // Check if we need to update the PlayoffData table
-      final int numSeedingRounds = getNumSeedingRounds(connection, currentTournament);
+      final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournament);
       if (runNumber > numSeedingRounds) {
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("Updating playoff score from updatePerformanceScore");
         }
         updatePlayoffScore(connection, request, currentTournament, winnerCriteria, performanceElement,
                            tiebreakerElement, teamNumber, runNumber, teamScore);
+      } else {
+        tournament.recordPerformanceSeedingModified(connection);
       }
     }
 
@@ -1032,7 +1086,7 @@ public final class Queries {
       throw new RuntimeException("Missing parameter: RunNumber");
     }
     final int irunNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(runNumber).intValue();
-    final int numSeedingRounds = getNumSeedingRounds(connection, currentTournament);
+    final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournament);
 
     // Check if we need to update the PlayoffData table
     PreparedStatement prep = null;
@@ -1295,7 +1349,7 @@ public final class Queries {
         prep = connection.prepareStatement("SELECT TeamNumber,Count(*) FROM "
             + view + " WHERE Tournament = ? GROUP BY TeamNumber" + " HAVING Count(*) < ?");
         prep.setInt(1, currentTournament);
-        prep.setInt(2, getNumSeedingRounds(connection, currentTournament));
+        prep.setInt(2, TournamentParameters.getNumSeedingRounds(connection, currentTournament));
       } else {
         prep = connection.prepareStatement("SELECT "
             + view + ".TeamNumber,Count(" + view + ".TeamNumber) FROM " + view + ",current_tournament_teams WHERE "
@@ -1305,7 +1359,7 @@ public final class Queries {
             + ".TeamNumber) < ?");
         prep.setString(1, division);
         prep.setInt(2, currentTournament);
-        prep.setInt(3, getNumSeedingRounds(connection, currentTournament));
+        prep.setInt(3, TournamentParameters.getNumSeedingRounds(connection, currentTournament));
       }
 
       rs = prep.executeQuery();
@@ -1374,21 +1428,18 @@ public final class Queries {
     final String teamNumbersStr = StringUtils.join(teamNumbers, ",");
 
     final List<Team> retval = new ArrayList<Team>();
-    final int currentTournament = getCurrentTournament(connection);
 
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
       prep = connection.prepareStatement("SELECT performance_seeding_max.TeamNumber, performance_seeding_max.Score as score, RAND() as random"
           + " FROM performance_seeding_max, current_tournament_teams" //
-          + " WHERE performance_seeding_max.Tournament = ?" //
-          + " AND score IS NOT NULL" // exclude no shows
+          + " WHERE score IS NOT NULL" // exclude no shows
           + " AND performance_seeding_max.TeamNumber = current_tournament_teams.TeamNumber" //
           + " AND current_tournament_teams.TeamNumber IN ( " + teamNumbersStr + " )" //
           + " ORDER BY score " + winnerCriteria.getSortString() //
           + ", performance_seeding_max.average " + winnerCriteria.getSortString() //
           + ", random");
-      prep.setInt(1, currentTournament);
 
       rs = prep.executeQuery();
       while (rs.next()) {
@@ -1405,30 +1456,6 @@ public final class Queries {
       SQLFunctions.close(prep);
     }
     return retval;
-  }
-
-  /**
-   * Get the number of seeding rounds from the database.
-   * 
-   * @return the number of seeding rounds
-   * @throws SQLException on a database error
-   */
-  public static int getNumSeedingRounds(final Connection connection,
-                                        final int tournament) throws SQLException {
-    return TournamentParameters.getIntTournamentParameter(connection, tournament, TournamentParameters.SEEDING_ROUNDS);
-  }
-
-  /**
-   * Set the number of seeding rounds.
-   * 
-   * @param connection the connection
-   * @param newSeedingRounds the new value of seeding rounds
-   */
-  public static void setNumSeedingRounds(final Connection connection,
-                                         final int tournament,
-                                         final int newSeedingRounds) throws SQLException {
-    TournamentParameters.setIntTournamentParameter(connection, tournament, TournamentParameters.SEEDING_ROUNDS,
-                                                   newSeedingRounds);
   }
 
   /**
@@ -1578,9 +1605,9 @@ public final class Queries {
    * @throws SQLException
    */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
-  public static void updateSubjectiveScoreTotals(final ChallengeDescription description,
-                                                 final Connection connection,
-                                                 final int tournament) throws SQLException {
+  private static void updateSubjectiveScoreTotals(final ChallengeDescription description,
+                                                  final Connection connection,
+                                                  final int tournament) throws SQLException {
     PreparedStatement updatePrep = null;
     PreparedStatement selectPrep = null;
     ResultSet rs = null;
@@ -1637,9 +1664,9 @@ public final class Queries {
    * @param tournament the tournament to update scores for.
    * @throws SQLException
    */
-  public static void updatePerformanceScoreTotals(final ChallengeDescription description,
-                                                  final Connection connection,
-                                                  final int tournament) throws SQLException {
+  private static void updatePerformanceScoreTotals(final ChallengeDescription description,
+                                                   final Connection connection,
+                                                   final int tournament) throws SQLException {
     PreparedStatement updatePrep = null;
     PreparedStatement selectPrep = null;
     ResultSet rs = null;
@@ -1913,14 +1940,13 @@ public final class Queries {
       prep.setInt(2, currentTournament);
       prep.executeUpdate();
       SQLFunctions.close(prep);
-      
+
       // delete from PlayoffData
       prep = connection.prepareStatement("DELETE FROM PlayoffData WHERE Team = ? AND Tournament = ?");
       prep.setInt(1, teamNumber);
       prep.setInt(2, currentTournament);
       prep.executeUpdate();
       SQLFunctions.close(prep);
-      
 
     } finally {
       SQLFunctions.close(prep);
@@ -2838,6 +2864,14 @@ public final class Queries {
     }
   }
 
+  /**
+   * Set the name and location of a tournament.
+   * 
+   * @param tournamentID which tournament to modify
+   * @param name new name
+   * @param location new location
+   * @throws SQLException
+   */
   public static void updateTournament(final Connection connection,
                                       final int tournamentID,
                                       final String name,
@@ -3091,25 +3125,5 @@ public final class Queries {
       SQLFunctions.close(stmt);
     }
     return users;
-  }
-
-  /**
-   * Get the maximum performance round number to display on the scoreboard
-   * pages.
-   */
-  public static int getMaxScoreboardPerformanceRound(final Connection connection,
-                                                     final int tournament) throws SQLException {
-    return TournamentParameters.getIntTournamentParameter(connection, tournament,
-                                                          TournamentParameters.MAX_SCOREBOARD_ROUND);
-  }
-
-  /**
-   * @see #getMaxScoreboardPerformanceRound(Connection, int)
-   */
-  public static void setMaxScorebaordPerformanceRound(final Connection connection,
-                                                      final int tournament,
-                                                      final int value) throws SQLException {
-    TournamentParameters.setIntTournamentParameter(connection, tournament, TournamentParameters.MAX_SCOREBOARD_ROUND,
-                                                   value);
   }
 }

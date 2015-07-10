@@ -46,6 +46,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 import fll.CategoryRank;
 import fll.TeamRanking;
 import fll.TournamentTeam;
+import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -68,15 +69,22 @@ public class RankingReport extends BaseFLLServlet {
 
   private static final Font HEADER_FONT = TITLE_FONT;
 
+  private boolean mUseQuartiles;
+
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
+    if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session, "/report/RankingReport")) {
+      return;
+    }
 
     Connection connection = null;
     try {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
+
+      mUseQuartiles = GlobalParameters.getUseQuartilesInRankingReport(connection);
 
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
@@ -119,7 +127,7 @@ public class RankingReport extends BaseFLLServlet {
 
         final List<String> categories = teamRanks.getCategories();
         Collections.sort(categories);
-        
+
         // pull out Overall first
         if (categories.contains(CategoryRank.OVERALL_CATEGORY_NAME)) {
           final String category = CategoryRank.OVERALL_CATEGORY_NAME;
@@ -140,8 +148,15 @@ public class RankingReport extends BaseFLLServlet {
             outputCategory(para, teamRanks, category);
           }
         }
-        
+
         document.add(para);
+
+        final Paragraph definitionPara = new Paragraph();
+        definitionPara.add(Chunk.NEWLINE);
+        definitionPara.add(new Chunk(
+                                     "The 1st quartile is the top 25% of teams, 2nd quartile is the next 25%, quartiles 3 and 4 are the following 25% groupings of teams."));
+        document.add(definitionPara);
+
         document.add(Chunk.NEXTPAGE);
       }
 
@@ -184,10 +199,29 @@ public class RankingReport extends BaseFLLServlet {
     if (CategoryRank.NO_SHOW_RANK == rank) {
       para.add(new Chunk("No Show", RANK_VALUE_FONT));
     } else {
-      para.add(new Chunk(String.format("%d out of %d teams in %s", rank, catRank.getNumTeams(), catRank.getGroup()),
-                         RANK_VALUE_FONT));
+      final double percentage = (double) rank
+          / catRank.getNumTeams();
+      if (mUseQuartiles) {
+        para.add(new Chunk(String.format("%s in %s", convertPercentageToQuartile(percentage), catRank.getGroup()),
+                           RANK_VALUE_FONT));
+      } else {
+        para.add(new Chunk(String.format("%d out of %d teams in %s", rank, catRank.getNumTeams(), catRank.getGroup()),
+                           RANK_VALUE_FONT));
+      }
     }
     para.add(Chunk.NEWLINE);
+  }
+
+  private static String convertPercentageToQuartile(final double percentage) {
+    if (percentage <= 0.25) {
+      return "Quartile 1";
+    } else if (percentage <= 0.5) {
+      return "Quartile 2";
+    } else if (percentage <= 0.75) {
+      return "Quartile 3";
+    } else {
+      return "Quartile 4";
+    }
   }
 
   /**

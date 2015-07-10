@@ -6,7 +6,6 @@
 
 package fll.web.admin;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -14,43 +13,22 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
-
-import org.apache.log4j.Logger;
-
 import fll.Tournament;
 import fll.db.GlobalParameters;
 import fll.db.TournamentParameters;
-import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
-import fll.web.BaseFLLServlet;
-import fll.web.SessionAttributes;
 
 /**
  * Gather parameter information for edit_all_parameters.jsp.
  */
-@WebServlet("/admin/GatherParameterInformation")
-public class GatherParameterInformation extends BaseFLLServlet {
+public class GatherParameterInformation {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
-
-  @Override
-  protected void processRequest(final HttpServletRequest request,
-                                final HttpServletResponse response,
-                                final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
-    final StringBuilder message = new StringBuilder();
-    final String existingMessage = SessionAttributes.getMessage(session);
-    if (null != existingMessage) {
-      message.append(existingMessage);
-    }
+  public static void populateContext(final ServletContext application,
+                                     final PageContext pageContext) throws SQLException {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
@@ -58,58 +36,46 @@ public class GatherParameterInformation extends BaseFLLServlet {
       connection = datasource.getConnection();
 
       final List<Tournament> tournaments = Tournament.getTournaments(connection);
-      session.setAttribute("tournaments", tournaments);
+      pageContext.setAttribute("tournaments", tournaments);
 
-      session.setAttribute("numSeedingRounds_default",
-                           TournamentParameters.getIntTournamentParameterDefault(connection,
-                                                                                 TournamentParameters.SEEDING_ROUNDS));
+      pageContext.setAttribute("numSeedingRounds_default", TournamentParameters.getDefaultNumSeedRounds(connection));
       final Map<Integer, Integer> numSeedingRounds = new HashMap<Integer, Integer>();
       for (final Tournament tournament : tournaments) {
         if (TournamentParameters.tournamentParameterValueExists(connection, tournament.getTournamentID(),
                                                                 TournamentParameters.SEEDING_ROUNDS)) {
           numSeedingRounds.put(tournament.getTournamentID(),
-                               TournamentParameters.getIntTournamentParameter(connection, tournament.getTournamentID(),
-                                                                              TournamentParameters.SEEDING_ROUNDS));
+                               TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID()));
         }
       }
-      session.setAttribute("numSeedingRounds", numSeedingRounds);
+      pageContext.setAttribute("numSeedingRounds", numSeedingRounds);
 
-      session.setAttribute("maxScoreboardRound_default",
-                           TournamentParameters.getIntTournamentParameterDefault(connection,
-                                                                                 TournamentParameters.MAX_SCOREBOARD_ROUND));
+      pageContext.setAttribute("maxScoreboardRound_default",
+                               TournamentParameters.getDefaultMaxScoreboardPerformanceRound(connection));
       final Map<Integer, Integer> maxScoreboardRound = new HashMap<Integer, Integer>();
       for (final Tournament tournament : tournaments) {
         if (TournamentParameters.tournamentParameterValueExists(connection, tournament.getTournamentID(),
                                                                 TournamentParameters.MAX_SCOREBOARD_ROUND)) {
           maxScoreboardRound.put(tournament.getTournamentID(),
-                                 TournamentParameters.getIntTournamentParameter(connection,
-                                                                                tournament.getTournamentID(),
-                                                                                TournamentParameters.MAX_SCOREBOARD_ROUND));
+                                 TournamentParameters.getMaxScoreboardPerformanceRound(connection,
+                                                                                       tournament.getTournamentID()));
         }
       }
-      session.setAttribute("maxScoreboardRound", maxScoreboardRound);
+      pageContext.setAttribute("maxScoreboardRound", maxScoreboardRound);
 
-      session.setAttribute("gStandardizedMean",
-                           GlobalParameters.getDoubleGlobalParameter(connection, GlobalParameters.STANDARDIZED_MEAN));
+      pageContext.setAttribute("gStandardizedMean",
+                               GlobalParameters.getDoubleGlobalParameter(connection, GlobalParameters.STANDARDIZED_MEAN));
 
-      session.setAttribute("gStandardizedSigma",
-                           GlobalParameters.getDoubleGlobalParameter(connection, GlobalParameters.STANDARDIZED_SIGMA));
+      pageContext.setAttribute("gStandardizedSigma",
+                               GlobalParameters.getDoubleGlobalParameter(connection,
+                                                                         GlobalParameters.STANDARDIZED_SIGMA));
 
-      session.setAttribute("divisionFlipRate",
-                           GlobalParameters.getIntGlobalParameter(connection, GlobalParameters.DIVISION_FLIP_RATE));
-
-    } catch (final SQLException sqle) {
-      message.append("<p class='error'>Error talking to the database: "
-          + sqle.getMessage() + "</p>");
-      LOGGER.error(sqle, sqle);
-      throw new RuntimeException("Error saving team data into the database", sqle);
+      pageContext.setAttribute("gDivisionFlipRate",
+                               GlobalParameters.getIntGlobalParameter(connection, GlobalParameters.DIVISION_FLIP_RATE));
+      
+      pageContext.setAttribute("gUseQuartiles", GlobalParameters.getUseQuartilesInRankingReport(connection));
+      
     } finally {
       SQLFunctions.close(connection);
     }
-
-    session.setAttribute("servletLoaded", true);
-
-    session.setAttribute(SessionAttributes.MESSAGE, message.toString());
-    response.sendRedirect(response.encodeRedirectURL("edit_all_parameters.jsp"));
   }
 }

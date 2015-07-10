@@ -1,0 +1,42 @@
+digraph MergeDatabase {
+
+developer_index_jsp -> ImportDBDump [label="Import Database"];
+
+ImportDBDump -> selectTournament_jsp;
+ImportDBDump -> developer_index_jsp [label="Incompatible challenge descriptors"];
+
+selectTournament_jsp -> CheckTournamentExists;
+
+CheckTournamentExists -> promptCreateTournament_jsp [label="Tournament doesn't exist"];
+CheckTournamentExists -> FindMissingTeams;
+
+promptCreateTournament_jsp -> CreateTournament;
+
+CreateTournament -> selectTournament_jsp [label="Yes, creation error"];
+CreateTournament -> CheckTournamentExists [label="Yes, success"];
+CreateTournament -> selectTournament_jsp [label="No"];
+
+FindMissingTeams -> CheckTeamInfo [label="All teams exists"];
+FindMissingTeams -> promptCreateMissingTeams_jsp [label="Missing teams"];
+
+promptCreateMissingteams_jsp -> AddMissingTeams;
+
+AddMissingTeams -> CheckTeamInfo;
+
+CheckTeamInfo -> CheckTournamentTeams [label="No differences"];
+CheckTeamInfo -> resolveTeamInfoDifferences_jsp [label="Differences found"];
+
+resolveTeamInfoDifferences_jsp -> CommitTeamChanges;
+
+CommitTeamChanges -> CheckTeamInfo;
+
+CheckTournamentTeams -> ExecuteImport [label="No differences"];
+CheckTournamentTeams -> resolveTournamentDifferences_jsp [label="Differences found"];
+
+resolveTournamentDifferences_jsp -> CommitTournamentChanges;
+
+CommitTournamentChanges -> CheckTournamentTeams;
+
+ExecuteImport -> selectTournament_jsp;
+
+}

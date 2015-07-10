@@ -22,8 +22,28 @@ public class RubricRange implements Serializable {
     mMin = Integer.parseInt(ele.getAttribute("min"));
     mMax = Integer.parseInt(ele.getAttribute("max"));
 
-    final Element descriptionEle = new NodelistElementCollectionAdapter(ele.getElementsByTagName("description")).next();
-    mDescription = descriptionEle.getTextContent();
+    final NodelistElementCollectionAdapter descriptions = new NodelistElementCollectionAdapter(
+                                                                                               ele.getElementsByTagName("description"));
+    if (descriptions.hasNext()) {
+      final Element descriptionEle = descriptions.next();
+      mDescription = removeExtraWhitespace(descriptionEle.getTextContent());
+    } else {
+      mDescription = null;
+    }
+
+    mShortDescription = ele.getAttribute("shortDescription");
+  }
+
+  private static String removeExtraWhitespace(final String str) {
+    if (null == str) {
+      return str;
+    }
+
+    String result = str.trim();
+    result = result.replace('\r', ' ');
+    result = result.replace('\n', ' ');
+    result = result.replaceAll("\\s+", " ");
+    return result;
   }
 
   private final String mTitle;
@@ -34,8 +54,50 @@ public class RubricRange implements Serializable {
 
   private final String mDescription;
 
+  /**
+   * The long description, may be null.
+   * Extra whitespace is removed. All line endings
+   * are removed.
+   */
   public String getDescription() {
     return mDescription;
+  }
+
+  private final String mShortDescription;
+
+  /**
+   * Short description, typically 1 line. May be null.
+   */
+  public String getShortDescription() {
+    return mShortDescription;
+  }
+
+  /**
+   * Combine short description and description.
+   * If short description doesn't end with a punctuation,
+   * add a period. Handles null description.
+   */
+  public String getFullDescription() {
+    final StringBuilder sb = new StringBuilder();
+    final String shortDescription = getShortDescription().trim();
+
+    if (null != shortDescription && !shortDescription.isEmpty()) {
+      sb.append(shortDescription);
+      if (!shortDescription.endsWith(".")
+          && !shortDescription.endsWith("!") && !shortDescription.endsWith("?")) {
+        sb.append(".");
+      }
+    }
+
+    final String description = getDescription();
+    if (null != description) {
+      if (sb.length() > 0) {
+        sb.append(" ");
+      }
+      sb.append(description.trim());
+    }
+
+    return sb.toString();
   }
 
   private final int mMin;

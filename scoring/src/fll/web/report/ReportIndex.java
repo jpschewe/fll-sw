@@ -13,6 +13,7 @@ import java.sql.Statement;
 import java.util.Collection;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
@@ -37,7 +38,13 @@ public class ReportIndex {
    * @param pageContext page context, information is put in here
    */
   public static void populateContext(final ServletContext application,
+                                     final HttpSession session,
                                      final PageContext pageContext) {
+
+    // clear out some variables
+    session.removeAttribute(PromptSummarizeScores.SUMMARY_REDIRECT_KEY);
+    session.removeAttribute(PromptSummarizeScores.SUMMARY_CHECKED_KEY);
+
     Connection connection = null;
     Statement stmt = null;
     ResultSet rs = null;

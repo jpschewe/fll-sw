@@ -2,7 +2,7 @@
 <fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" title="Sample
 Database - used to generate schema"
 xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd"
-schemaVersion="1">
+schemaVersion="2">
 
  <Performance minimumScore="0" weight="1.0">
   <goal initialValue="0" max="1" min="0" multiplier="40" name="aaa_example_count" title="Standard goal with count and multiplier"/>

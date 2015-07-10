@@ -244,6 +244,8 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
+   * Read the tournament schedule from a spreadsheet.
+   * 
    * @param name the name of the tournament
    * @param stream how to access the spreadsheet
    * @param sheetName the name of the worksheet the data is on
@@ -400,7 +402,6 @@ public class TournamentSchedule implements Serializable {
         ti.setTeamName(team.getTeamName());
 
         cacheTeamScheduleInformation(ti);
-        _schedule.add(ti);
       }
 
     } finally {
@@ -533,14 +534,15 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
-   * Get the column number or throw {@link FLLRuntimeException} if the column it
+   * Get the column number or throw {@link MissingColumnException} if the column
+   * it
    * not found.
    */
   private static int getColumnForHeader(final String[] line,
-                                        final String header) {
+                                        final String header) throws MissingColumnException {
     final Integer column = columnForHeader(line, header);
     if (null == column) {
-      throw new FLLRuntimeException("Unable to find header '"
+      throw new MissingColumnException("Unable to find header '"
           + header + "' in " + Arrays.asList(line));
     } else {
       return column;
@@ -561,11 +563,33 @@ public class TournamentSchedule implements Serializable {
     remainingHeaders.remove(ORGANIZATION_HEADER);
     final int teamNameColumn = getColumnForHeader(line, TEAM_NAME_HEADER);
     remainingHeaders.remove(TEAM_NAME_HEADER);
-    final int divisionColumn = getColumnForHeader(line, DIVISION_HEADER);
-    remainingHeaders.remove(DIVISION_HEADER);
 
-    final int judgeGroupColumn = getColumnForHeader(line, JUDGE_GROUP_HEADER);
-    remainingHeaders.remove(JUDGE_GROUP_HEADER);
+    int judgeGroupColumn = -1;
+    try {
+      judgeGroupColumn = getColumnForHeader(line, JUDGE_GROUP_HEADER);
+      remainingHeaders.remove(JUDGE_GROUP_HEADER);
+    } catch (final MissingColumnException e) {
+      judgeGroupColumn = -1;
+    }
+
+    int divisionColumn = -1;
+    try {
+      divisionColumn = getColumnForHeader(line, DIVISION_HEADER);
+      remainingHeaders.remove(DIVISION_HEADER);
+    } catch (final MissingColumnException e) {
+      divisionColumn = -1;
+    }
+
+    // Need one of judge group column or division column
+    if (-1 == judgeGroupColumn
+        && -1 == divisionColumn) {
+      throw new MissingColumnException("Must have judging station column or division column");
+    } else if (-1 == judgeGroupColumn) {
+      judgeGroupColumn = divisionColumn;
+    } else if (-1 == divisionColumn) {
+      divisionColumn = judgeGroupColumn;
+    }
+
     for (int round = 0; round < numPerfRounds; ++round) {
       final String perfHeader = String.format(PERF_HEADER_FORMAT, (round + 1));
       final String perfTableHeader = String.format(TABLE_HEADER_FORMAT, (round + 1));
@@ -600,11 +624,24 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
+   * Add a team to the schedule. Check that the team isn't already in the
+   * schedule.
+   */
+  private void addToSchedule(final TeamScheduleInfo ti) {
+    if (!_schedule.contains(ti)) {
+      _schedule.add(ti);
+    } else {
+      LOGGER.warn("Attempting to add the same team to the schedule twice: "
+          + ti.getTeamNumber());
+    }
+  }
+
+  /**
    * Populate internal caches with the data from this newly created
    * {@link TeamScheduleInfo}.
    */
   private void cacheTeamScheduleInformation(final TeamScheduleInfo ti) {
-    _schedule.add(ti);
+    addToSchedule(ti);
 
     // keep track of some meta information
     for (int round = 0; round < getNumberOfRounds(); ++round) {
@@ -692,58 +729,186 @@ public class TournamentSchedule implements Serializable {
           + " exists, but isn't a directory");
     }
 
-    FileOutputStream pdfFos = null;
+    OutputStream pdfFos = null;
     try {
       final File byDivision = new File(directory, baseFilename
           + "-subjective-by-division.pdf");
 
       pdfFos = new FileOutputStream(byDivision);
-      final Document detailedSchedulesByDivision = PdfUtils.createPdfDoc(pdfFos, new SimpleFooterHandler());
-      //Create new subjectivePdf Document here -- MTS
-      for (final String subjectiveStation : subjectiveStations) {
-        outputSubjectiveScheduleByDivision(detailedSchedulesByDivision, subjectiveStation);
-        detailedSchedulesByDivision.add(Chunk.NEXTPAGE);
-      }
-      detailedSchedulesByDivision.close();
+      outputSubjectiveSchedulesByJudgingStation(pdfFos);
       IOUtils.closeQuietly(pdfFos);
       pdfFos = null;
 
       final File byTime = new File(directory, baseFilename
           + "-subjective-by-time.pdf");
       pdfFos = new FileOutputStream(byTime);
-      final Document detailedSchedulesByTime = PdfUtils.createPdfDoc(pdfFos, new SimpleFooterHandler());
-      for (final String subjectiveStation : subjectiveStations) {
-        outputSubjectiveScheduleByTime(detailedSchedulesByTime, subjectiveStation);
-        detailedSchedulesByTime.add(Chunk.NEXTPAGE);
-      }
-      detailedSchedulesByTime.close();
+      outputSubjectiveSchedulesByTime(pdfFos);
       IOUtils.closeQuietly(pdfFos);
       pdfFos = null;
 
       final File performance = new File(directory, baseFilename
           + "-performance.pdf");
       pdfFos = new FileOutputStream(performance);
-      final Document performanceDoc = PdfUtils.createPdfDoc(pdfFos, new SimpleFooterHandler());
-      outputPerformanceSchedule(performanceDoc);
-      performanceDoc.close();
+      outputPerformanceScheduleByTime(pdfFos);
       IOUtils.closeQuietly(pdfFos);
       pdfFos = null;
 
       final File teamSchedules = new File(directory, baseFilename
           + "-team-schedules.pdf");
       pdfFos = new FileOutputStream(teamSchedules);
-      final Document teamDoc = PdfUtils.createPdfDoc(pdfFos, new SimpleFooterHandler());
-      for (final TeamScheduleInfo si : _schedule) {
-        outputTeamSchedule(params, teamDoc, si);
-        teamDoc.add(Chunk.NEXTPAGE);
-      }
-      teamDoc.close();
+      outputTeamSchedules(params, pdfFos);
       IOUtils.closeQuietly(pdfFos);
       pdfFos = null;
 
     } finally {
       IOUtils.closeQuietly(pdfFos);
     }
+  }
+
+  /**
+   * Output the schedule for each team.
+   * 
+   * @param params schedule parameters
+   * @param pdfFos where to write the schedule
+   * @throws DocumentException
+   */
+  public void outputTeamSchedules(final SchedParams params,
+                                  final OutputStream pdfFos) throws DocumentException {
+    Collections.sort(_schedule, ComparatorByTeam.INSTANCE);
+    final Document teamDoc = PdfUtils.createPortraitPdfDoc(pdfFos, new SimpleFooterHandler());
+    for (final TeamScheduleInfo si : _schedule) {
+      outputTeamSchedule(params, teamDoc, si);
+    }
+    teamDoc.close();
+  }
+
+  /**
+   * Output the performance schedule, sorted by time.
+   * 
+   * @param pdfFos where to write the schedule
+   * @throws DocumentException
+   */
+  public void outputPerformanceScheduleByTime(final OutputStream pdfFos) throws DocumentException {
+    final Document performanceDoc = PdfUtils.createPortraitPdfDoc(pdfFos, new SimpleFooterHandler());
+    outputPerformanceSchedule(performanceDoc);
+    performanceDoc.close();
+  }
+
+  /**
+   * Output the subjective schedules with a table for each category and sorted
+   * by time.
+   * 
+   * @param pdfFos where to write the schedule
+   * @throws DocumentException
+   */
+  public void outputSubjectiveSchedulesByTime(final OutputStream pdfFos) throws DocumentException {
+    final Document detailedSchedulesByTime = PdfUtils.createPortraitPdfDoc(pdfFos, new SimpleFooterHandler());
+    for (final String subjectiveStation : subjectiveStations) {
+      outputSubjectiveScheduleByTime(detailedSchedulesByTime, subjectiveStation);
+      detailedSchedulesByTime.add(Chunk.NEXTPAGE);
+    }
+    detailedSchedulesByTime.close();
+  }
+
+  /**
+   * Output the subjective schedules with a table for each category and sorted
+   * by judging station, then by time.
+   * 
+   * @param pdfFos where to output the schedule
+   * @throws DocumentException
+   */
+  public void outputSubjectiveSchedulesByJudgingStation(final OutputStream pdfFos) throws DocumentException {
+    final Document detailedSchedulesByDivision = PdfUtils.createPortraitPdfDoc(pdfFos, new SimpleFooterHandler());
+    for (final String subjectiveStation : subjectiveStations) {
+      outputSubjectiveScheduleByDivision(detailedSchedulesByDivision, subjectiveStation);
+      detailedSchedulesByDivision.add(Chunk.NEXTPAGE);
+    }
+    detailedSchedulesByDivision.close();
+  }
+
+  /**
+   * Output the schedule sorted by team number. This schedule looks much like
+   * the input spreadsheet.
+   * 
+   * @param stream where to write the schedule
+   * @throws DocumentException
+   */
+  public void outputScheduleByTeam(final OutputStream stream) throws DocumentException {
+    final Document pdf = PdfUtils.createLandscapePdfDoc(stream, new SimpleFooterHandler());
+
+    final int numColumns = 5
+        + subjectiveStations.size() + getNumberOfRounds() * 2;
+    final PdfPTable table = PdfUtils.createTable(numColumns);
+    final float[] columnWidths = new float[numColumns];
+    int idx = 0;
+    columnWidths[idx] = 2; // team number
+    ++idx;
+    columnWidths[idx] = 3; // team name
+    ++idx;
+    columnWidths[idx] = 3; // organization
+    ++idx;
+    columnWidths[idx] = 2; // judging group
+    ++idx;
+    columnWidths[idx] = 2; // division
+    ++idx;
+    for (int i = 0; i < subjectiveStations.size(); ++i) {
+      columnWidths[idx] = 2; // time
+      ++idx;
+    }
+    for (int i = 0; i < getNumberOfRounds(); ++i) {
+      columnWidths[idx] = 2; // time
+      ++idx;
+      columnWidths[idx] = 2; // table
+      ++idx;
+    }
+    table.setWidths(columnWidths);
+
+    final PdfPCell tournamentCell = PdfUtils.createHeaderCell("Tournament: "
+        + getName());
+    tournamentCell.setColspan(numColumns);
+
+    table.addCell(tournamentCell);
+
+    table.addCell(PdfUtils.createHeaderCell(TEAM_NUMBER_HEADER));
+    table.addCell(PdfUtils.createHeaderCell(TEAM_NAME_HEADER));
+    table.addCell(PdfUtils.createHeaderCell(ORGANIZATION_HEADER));
+    table.addCell(PdfUtils.createHeaderCell(JUDGE_GROUP_HEADER));
+    table.addCell(PdfUtils.createHeaderCell(DIVISION_HEADER));
+    for (final String subjectiveStation : subjectiveStations) {
+      table.addCell(PdfUtils.createHeaderCell(subjectiveStation));
+    }
+    for (int round = 0; round < getNumberOfRounds(); ++round) {
+      table.addCell(PdfUtils.createHeaderCell(String.format(PERF_HEADER_FORMAT, round + 1)));
+      table.addCell(PdfUtils.createHeaderCell(String.format(TABLE_HEADER_FORMAT, round + 1)));
+    }
+    table.setHeaderRows(2);
+
+    Collections.sort(_schedule, ComparatorByTeam.INSTANCE);
+    for (final TeamScheduleInfo si : _schedule) {
+      table.addCell(PdfUtils.createCell(String.valueOf(si.getTeamNumber())));
+      table.addCell(PdfUtils.createCell(si.getTeamName()));
+      table.addCell(PdfUtils.createCell(si.getOrganization()));
+      table.addCell(PdfUtils.createCell(si.getJudgingStation()));
+      table.addCell(PdfUtils.createCell(si.getDivision()));
+
+      for (final String subjectiveStation : subjectiveStations) {
+        table.addCell(PdfUtils.createCell(OUTPUT_DATE_FORMAT.get().format(si.getSubjectiveTimeByName(subjectiveStation)
+                                                                            .getTime())));
+      }
+
+      for (int round = 0; round < getNumberOfRounds(); ++round) {
+        final PerformanceTime perf = si.getPerf(round);
+
+        table.addCell(PdfUtils.createCell(OUTPUT_DATE_FORMAT.get().format(perf.getTime())));
+
+        table.addCell(PdfUtils.createCell(String.format("%s %s", perf.getTable(), perf.getSide())));
+      }
+
+    }
+
+    pdf.add(table);
+
+    pdf.close();
   }
 
   private static final Font TEAM_TITLE_FONT = FontFactory.getFont(FontFactory.TIMES, 12, Font.BOLD);
@@ -766,6 +931,9 @@ public class TournamentSchedule implements Serializable {
     final Paragraph para = new Paragraph();
     para.add(new Chunk(String.format("Detailed schedule for Team #%d - %s", si.getTeamNumber(), si.getTeamName()),
                        TEAM_TITLE_FONT));
+    para.add(Chunk.NEWLINE);
+
+    para.add(new Chunk(String.format("Organization: %s", si.getOrganization()), TEAM_TITLE_FONT));
     para.add(Chunk.NEWLINE);
 
     para.add(new Chunk("Division: ", TEAM_HEADER_FONT));
@@ -799,8 +967,18 @@ public class TournamentSchedule implements Serializable {
 
     para.add(Chunk.NEWLINE);
     para.add(new Chunk(
+                       "Performance rounds must start on time, and will start without you. Please ensure your team arrives at least 5 minutes ahead of scheduled time, and checks in.",
+                       TEAM_HEADER_FONT));
+
+    para.add(Chunk.NEWLINE);
+    para.add(new Chunk(
                        "Note that there may be more judging and a head to head round after this judging, please see the main tournament schedule for these details.",
                        TEAM_HEADER_FONT));
+    para.add(Chunk.NEWLINE);
+    para.add(Chunk.NEWLINE);
+    para.add(Chunk.NEWLINE);
+
+    para.setKeepTogether(true);
     detailedSchedules.add(para);
   }
   
@@ -891,8 +1069,8 @@ public class TournamentSchedule implements Serializable {
 
     table.addCell(PdfUtils.createHeaderCell(TEAM_NUMBER_HEADER));
     table.addCell(PdfUtils.createHeaderCell(DIVISION_HEADER));
-    table.addCell(PdfUtils.createHeaderCell("School or Organization"));
-    table.addCell(PdfUtils.createHeaderCell("Team Name"));
+    table.addCell(PdfUtils.createHeaderCell(ORGANIZATION_HEADER));
+    table.addCell(PdfUtils.createHeaderCell(TEAM_NAME_HEADER));
     table.addCell(PdfUtils.createHeaderCell("Time"));
     table.addCell(PdfUtils.createHeaderCell("Table"));
     table.addCell(PdfUtils.createHeaderCell("Round"));
@@ -951,8 +1129,8 @@ public class TournamentSchedule implements Serializable {
 
     table.addCell(PdfUtils.createHeaderCell(TEAM_NUMBER_HEADER));
     table.addCell(PdfUtils.createHeaderCell(DIVISION_HEADER));
-    table.addCell(PdfUtils.createHeaderCell("School or Organization"));
-    table.addCell(PdfUtils.createHeaderCell("Team Name"));
+    table.addCell(PdfUtils.createHeaderCell(ORGANIZATION_HEADER));
+    table.addCell(PdfUtils.createHeaderCell(TEAM_NAME_HEADER));
     table.addCell(PdfUtils.createHeaderCell(subjectiveStation));
     table.addCell(PdfUtils.createHeaderCell(JUDGE_GROUP_HEADER));
     table.setHeaderRows(2);
@@ -983,8 +1161,8 @@ public class TournamentSchedule implements Serializable {
 
     table.addCell(PdfUtils.createHeaderCell(TEAM_NUMBER_HEADER));
     table.addCell(PdfUtils.createHeaderCell(DIVISION_HEADER));
-    table.addCell(PdfUtils.createHeaderCell("School or Organization"));
-    table.addCell(PdfUtils.createHeaderCell("Team Name"));
+    table.addCell(PdfUtils.createHeaderCell(ORGANIZATION_HEADER));
+    table.addCell(PdfUtils.createHeaderCell(TEAM_NAME_HEADER));
     table.addCell(PdfUtils.createHeaderCell(subjectiveStation));
     table.addCell(PdfUtils.createHeaderCell(JUDGE_GROUP_HEADER));
     table.setHeaderRows(2);
@@ -1101,6 +1279,23 @@ public class TournamentSchedule implements Serializable {
       } else {
         return timeCompare;
       }
+    }
+  }
+
+  /**
+   * Comparator for for sorting by team number.
+   */
+  private static class ComparatorByTeam implements Comparator<TeamScheduleInfo>, Serializable {
+
+    public static final ComparatorByTeam INSTANCE = new ComparatorByTeam();
+
+    private ComparatorByTeam() {
+    }
+
+    public int compare(final TeamScheduleInfo one,
+                       final TeamScheduleInfo two) {
+
+      return Integer.compare(one.getTeamNumber(), two.getTeamNumber());
     }
   }
 
@@ -1512,7 +1707,7 @@ public class TournamentSchedule implements Serializable {
             + si.getTeamNumber() + " is in schedule, but not in database"));
       }
 
-      if (null == si.getJudgingStation()) {
+      if (si.getJudgingStation().isEmpty()) {
         violations.add(new ConstraintViolation(true, si.getTeamNumber(), null, null, null, "Team "
             + si.getTeamNumber() + " has no judging station specified"));
       }
@@ -1827,4 +2022,11 @@ public class TournamentSchedule implements Serializable {
     final Writer writer = new OutputStreamWriter(new FileOutputStream(outputFile), Utilities.DEFAULT_CHARSET);
     writeToCSV(writer);
   }
+
+  public static class MissingColumnException extends FLLRuntimeException {
+    public MissingColumnException(final String message) {
+      super(message);
+    }
+  }
+
 }

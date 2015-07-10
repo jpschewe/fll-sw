@@ -57,7 +57,7 @@ public class ScheduleServlet extends HttpServlet {
 
         jsonMapper.writeValue(writer, schedule);
       } else {
-        jsonMapper.writeValue(writer, "");
+        jsonMapper.writeValue(writer, null);
       }
 
     } catch (final SQLException e) {

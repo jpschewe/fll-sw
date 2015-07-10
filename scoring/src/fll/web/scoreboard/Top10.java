@@ -29,6 +29,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.db.GlobalParameters;
 import fll.db.Queries;
+import fll.db.TournamentParameters;
 import fll.util.FP;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -73,7 +74,7 @@ public class Top10 extends BaseFLLServlet {
       connection = datasource.getConnection();
 
       final int currentTournament = Queries.getCurrentTournament(connection);
-      final int maxScoreboardRound = Queries.getMaxScoreboardPerformanceRound(connection, currentTournament);
+      final int maxScoreboardRound = TournamentParameters.getMaxScoreboardPerformanceRound(connection, currentTournament);
 
       final Integer divisionIndexObj = SessionAttributes.getAttribute(session, "divisionIndex", Integer.class);
       int divisionIndex;
@@ -91,6 +92,7 @@ public class Top10 extends BaseFLLServlet {
 
       formatter.format("<html>");
       formatter.format("<head>");
+      formatter.format("<link rel='stylesheet' type='text/css' href='../style/style.jsp' />");
       formatter.format("<link rel='stylesheet' type='text/css' href='score_style.css' />");
       formatter.format("<meta http-equiv='refresh' content='%d' />",
                        GlobalParameters.getIntGlobalParameter(connection, GlobalParameters.DIVISION_FLIP_RATE));
@@ -114,7 +116,7 @@ public class Top10 extends BaseFLLServlet {
         if (!showOrg) {
           --numColumns;
         }
-        formatter.format("<th colspan='%d' bgcolor='%s'>Top Ten Performance Scores: Division %s</th>", numColumns,
+        formatter.format("<th colspan='%d' bgcolor='%s'>Top Performance Scores: Division %s</th>", numColumns,
                          Queries.getColorForDivisionIndex(divisionIndex), divisions.get(divisionIndex));
         formatter.format("</tr>");
 
@@ -134,7 +136,7 @@ public class Top10 extends BaseFLLServlet {
             + " WHERE Teams.TeamNumber = current_tournament_teams.TeamNumber" //
             + " AND current_tournament_teams.event_division = ?"
             + " ORDER BY T2.MaxOfComputedScore "
-            + winnerCriteria.getSortString() + " LIMIT 10");
+            + winnerCriteria.getSortString());
         prep.setInt(1, currentTournament);
         prep.setInt(2, maxScoreboardRound);
         prep.setString(3, divisions.get(divisionIndex));

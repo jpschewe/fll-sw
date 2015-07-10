@@ -44,6 +44,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.subjective.SubjectiveUtils;
@@ -255,7 +256,8 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
       removeNullRows(currentTournament, connection, categoryName, categoryElement);
     }
 
-    Queries.updateSubjectiveScoreTotals(challengeDescription, connection, currentTournament);
+    final Tournament tournament = Tournament.findTournamentByID(connection,currentTournament);
+    tournament.recordSubjectiveModified(connection);
   }
 
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns are dynamic")

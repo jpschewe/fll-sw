@@ -1,0 +1,21 @@
+digraph initialize_playoff_bracket {
+
+playoff_index_jsp -> StorePlayoffParameters [label="Initialize Brackets"];
+
+StorePlayoffParameters -> choose_bracket_sort_jsp;
+
+choose_bracket_sort_jsp -> ChooseBracketSort;
+
+ChooseBracketSort -> InitializeBrackets;
+
+InitializeBrackets -> playoff_index_jsp [label="initialize existing division"];
+
+InitializeBrackets -> create_playoff_division_jsp [label="Create new division"];
+
+create_playoff_division_jsp -> CreatePlayoffDivision;
+
+CreatePlayoffDivision -> create_playoff_division_jsp [label="no name, matches existing division name"];
+
+CreatePlayoffDivision -> InitializeBrackets [label="created division"];
+
+}

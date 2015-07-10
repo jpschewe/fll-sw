@@ -69,8 +69,8 @@ public class CreateDB extends BaseFLLServlet {
         try {
           final URL descriptionURL = new URL(description);
           final Document document = ChallengeParser.parse(new InputStreamReader(descriptionURL.openStream(),
-                                                                                Utilities.DEFAULT_CHARSET));
-
+                                                                                          Utilities.DEFAULT_CHARSET));
+          
           GenerateDB.generateDB(document, connection);
 
           application.removeAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
@@ -92,7 +92,7 @@ public class CreateDB extends BaseFLLServlet {
           redirect = "/setup";
         } else {
           final Document document = ChallengeParser.parse(new InputStreamReader(xmlFileItem.getInputStream(),
-                                                                                Utilities.DEFAULT_CHARSET));
+                                                                                          Utilities.DEFAULT_CHARSET));
 
           GenerateDB.generateDB(document, connection);
 

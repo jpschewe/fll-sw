@@ -90,7 +90,8 @@ public final class SubjectiveUtils {
 
       final InputStream compareChallengeStream = compareZipfile.getInputStream(compareZipfile.getEntry("challenge.xml"));
       final Document compareChallengeDoc = ChallengeParser.parse(new InputStreamReader(compareChallengeStream,
-                                                                                       Utilities.DEFAULT_CHARSET));
+                                                                                       Utilities.DEFAULT_CHARSET))
+;
       compareChallengeStream.close();
 
       compareZipfile.close();

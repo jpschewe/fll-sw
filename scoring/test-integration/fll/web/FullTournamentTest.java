@@ -19,6 +19,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +51,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlOption;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlSelect;
 import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
+import com.gargoylesoftware.htmlunit.util.NameValuePair;
 
 import fll.TestUtils;
 import fll.Utilities;
@@ -171,8 +173,8 @@ public class FullTournamentTest {
       SQLFunctions.close(prep);
       prep = null;
 
-      final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(
-                                                                                     FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")));
+      final Document challengeDocument  = ChallengeParser.parse(new InputStreamReader(
+                                                                                       FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")));
       Assert.assertNotNull(challengeDocument);
       final ChallengeDescription description = new ChallengeDescription(challengeDocument.getDocumentElement());
       final PerformanceScoreCategory performanceElement = description.getPerformance();
@@ -185,9 +187,6 @@ public class FullTournamentTest {
 
         if (runNumber > numSeedingRounds) {
           if (!initializedPlayoff) {
-            // TODO ticket:83 make sure to check the result of checking the
-            // seeding rounds
-
             // initialize the playoff brackets with playoff/index.jsp form
             for (final String division : divisions) {
               LOGGER.info("Initializing playoff brackets for division "
@@ -346,9 +345,6 @@ public class FullTournamentTest {
     selenium.findElement(By.name("id"
         + judgeIndex)).sendKeys(id);
 
-    selenium.findElement(By.name("phone"
-        + judgeIndex)).sendKeys("612-555-1212");
-
     final Select categorySelect = new Select(selenium.findElement(By.name("cat"
         + judgeIndex)));
     categorySelect.selectByValue(category);
@@ -466,7 +462,7 @@ public class FullTournamentTest {
   private void computeFinalScores() throws IOException {
     // compute final scores
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-        + "report/SummarizePhase1");
+        + "report/summarizePhase1.jsp");
 
     selenium.findElement(By.id("continue")).click();
 
@@ -485,7 +481,9 @@ public class FullTournamentTest {
     // PDF reports can't be done with selenium
     final WebClient conversation = WebTestUtils.getConversation();
     WebRequest request = new WebRequest(new URL(TestUtils.URL_ROOT
-        + "report/finalComputedScores.pdf"));
+        + "report/FinalComputedScores"));
+    request.setRequestParameters(Collections.singletonList(new NameValuePair("percentage", "40")));
+
     Page response = WebTestUtils.loadPage(conversation, request);
     Assert.assertEquals("application/pdf", response.getWebResponse().getContentType());
 
@@ -644,7 +642,7 @@ public class FullTournamentTest {
             + WebTestUtils.getPageSource(response));
       }
       Assert.assertEquals("application/zip", contentType);
-      
+
       final InputStream zipStream = response.getWebResponse().getContentAsStream();
       final FileOutputStream outputStream = new FileOutputStream(subjectiveZip);
       final byte[] buffer = new byte[512];

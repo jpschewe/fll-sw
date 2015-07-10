@@ -1,6 +1,6 @@
 digraph UploadSchedule {
 
-admin_index_jsp -> UploadSchedule [label="upload spreadsheet"];
+admin_index_jsp -> UploadSchedule [label="uploadSpreadsheet"];
 
 UploadSchedule -> CheckScheduleExists;
 

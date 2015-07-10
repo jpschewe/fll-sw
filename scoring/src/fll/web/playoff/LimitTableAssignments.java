@@ -58,6 +58,14 @@ public class LimitTableAssignments extends BaseFLLServlet {
       if (null == division) {
         throw new FLLRuntimeException("Division parameter cannot be null");
       }
+      final String firstRound = request.getParameter("firstRound");
+      if (null == firstRound) {
+        throw new FLLRuntimeException("firstRound parameter cannot be null");
+      }
+      final String lastRound = request.getParameter("lastRound");
+      if (null == lastRound) {
+        throw new FLLRuntimeException("lastRound parameter cannot be null");
+      }
 
       delete = connection.prepareStatement("DELETE FROM table_division" //
           + " WHERE tournament = ?" //
@@ -79,12 +87,14 @@ public class LimitTableAssignments extends BaseFLLServlet {
         }
       }
 
-      request.setAttribute("division", division);
-      request.getRequestDispatcher("scoregenbrackets.jsp").forward(request, response);
-
-      response.sendRedirect(response.encodeRedirectURL(String.format("scoregenbrackets.jsp?division=%s",
+      response.sendRedirect(response.encodeRedirectURL(String.format("scoregenbrackets.jsp?division=%s&firstRound=%s&lastRound=%s",
                                                                      URLEncoder.encode(division,
-                                                                                       Utilities.DEFAULT_CHARSET.name()))));
+                                                                                       Utilities.DEFAULT_CHARSET.name()),//
+                                                                     URLEncoder.encode(firstRound,
+                                                                                       Utilities.DEFAULT_CHARSET.name()),//
+                                                                     URLEncoder.encode(lastRound,
+                                                                                       Utilities.DEFAULT_CHARSET.name())//
+      )));
 
     } catch (final SQLException e) {
       final String errorMessage = "There was an error talking to the database";
