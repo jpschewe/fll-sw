@@ -588,7 +588,28 @@ public class SchedulerUI extends JFrame {
             JOptionPane.showMessageDialog(SchedulerUI.this, "Scoresheets written '"
                 + scoresheetFile.getAbsolutePath() + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
           }
+        }
 
+        final int answer2 = JOptionPane.showConfirmDialog(SchedulerUI.this,
+                                                          "Would you like to write the subjective PDF sheets?",
+                                                          "Print Scoresheets?", JOptionPane.YES_NO_OPTION);
+        if (JOptionPane.YES_OPTION == answer2) {
+          /*
+           * final ChooseChallengeDescriptor dialog = new
+           * ChooseChallengeDescriptor(SchedulerUI.this);
+           * dialog.setLocationRelativeTo(SchedulerUI.this);
+           * dialog.setVisible(true);
+           * final URL descriptorLocation = dialog.getSelectedDescription();
+           * if (null != descriptorLocation) {
+           * final Reader descriptorReader = new
+           * InputStreamReader(descriptorLocation.openStream(),
+           * Utilities.DEFAULT_CHARSET);
+           * 
+           * final Document document = ChallengeParser.parse(descriptorReader);
+           * final ChallengeDescription description = new
+           * ChallengeDescription(document.getDocumentElement());
+           */
+          getScheduleData().outputSubjectiveSheets(directory.getAbsolutePath(), baseFilename);
         }
 
       } catch (final DocumentException e) {
