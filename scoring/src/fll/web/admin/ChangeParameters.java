@@ -68,7 +68,10 @@ public class ChangeParameters extends BaseFLLServlet {
                                                 Double.valueOf(request.getParameter("gStandardizedSigma")));
 
       GlobalParameters.setDoubleGlobalParameter(connection, GlobalParameters.DIVISION_FLIP_RATE,
-                                                Double.valueOf(request.getParameter("divisionFlipRate")));
+                                                Double.valueOf(request.getParameter("gDivisionFlipRate")));
+
+      GlobalParameters.setUseQuartilesInRankingReport(connection,
+                                                      Boolean.valueOf(request.getParameter("gUseQuartiles")));
 
       message.append("<p id='success'>Parameters saved</p>");
     } catch (final SQLException sqle) {
