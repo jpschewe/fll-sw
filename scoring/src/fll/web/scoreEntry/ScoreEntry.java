@@ -275,8 +275,8 @@ public final class ScoreEntry {
                              value.toUpperCase());
           } // foreach value
           formatter.format("}%n");
-        } else if (0 == min
-            && 1 == max) {
+        } else if (FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE)
+            && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
           // set the radio button to match the gbl variable
           formatter.format("if(%s == 0) {%n", rawVarName);
           formatter.format("  document.scoreEntry.%s[1].checked = true%n", name);
@@ -553,8 +553,8 @@ public final class ScoreEntry {
 
     // count
     writer.println("  <td align='right'>");
-    if (0 == min
-        && 1 == max) {
+    if (FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE)
+        && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
       writer.println("    <input type='text' name='"
           + name + "_radioValue' size='3' align='right' readonly tabindex='-1'>");
     } else {
