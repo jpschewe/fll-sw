@@ -63,14 +63,14 @@ public class SetupIndex {
 
       final Collection<URL> urls = XMLUtils.getAllKnownChallengeDescriptorURLs();
       for (final URL url : urls) {
-        try(final InputStream stream = url.openStream()) {
-          final Reader reader = new InputStreamReader(stream, Utilities.DEFAULT_CHARSET);
-          final Document document = ChallengeParser.parse(reader);
-          reader.close();
-          final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
+        try (final InputStream stream = url.openStream()) {
+          try (final Reader reader = new InputStreamReader(stream, Utilities.DEFAULT_CHARSET)) {
+            final Document document = ChallengeParser.parse(reader);
 
-          descriptions.add(new DescriptionInfo(url, description));
+            final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
 
+            descriptions.add(new DescriptionInfo(url, description));
+          }
         } catch (final IOException e) {
           LOGGER.error("Error reading description: "
               + url.toString(), e);
