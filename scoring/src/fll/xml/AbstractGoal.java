@@ -7,6 +7,9 @@
 package fll.xml;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.w3c.dom.Element;
@@ -67,7 +70,20 @@ public abstract class AbstractGoal implements Serializable {
 
   public abstract boolean isEnumerated();
 
+  /**
+   * Read-only list of the values.
+   */
   public abstract List<EnumeratedValue> getValues();
+
+  /**
+   * Get the enumerated values from the goal and sort them for display.
+   * This ensures that all usages have the elements in the same order.
+   */
+  public List<EnumeratedValue> getSortedValues() {
+    final List<EnumeratedValue> values = new LinkedList<>(getValues());
+    Collections.sort(values, EnumeratedValueLowestFirst.INSTANCE);
+    return values;
+  }
 
   public abstract ScoreType getScoreType();
 
@@ -87,4 +103,22 @@ public abstract class AbstractGoal implements Serializable {
     }
   }
 
+  private static final class EnumeratedValueLowestFirst implements Comparator<EnumeratedValue> {
+    public static final EnumeratedValueLowestFirst INSTANCE = new EnumeratedValueLowestFirst();
+
+    private EnumeratedValueLowestFirst() {
+    }
+
+    public int compare(final EnumeratedValue one,
+                       final EnumeratedValue two) {
+      if (one.getScore() < two.getScore()) {
+        return -1;
+      } else if (one.getScore() > two.getScore()) {
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+  }
+  
 }
