@@ -79,10 +79,10 @@ public class RubricRange implements Serializable {
    */
   public String getFullDescription() {
     final StringBuilder sb = new StringBuilder();
-    final String shortDescription = getShortDescription().trim();
+    final String shortDescription = getShortDescription();
 
-    if (null != shortDescription && !shortDescription.isEmpty()) {
-      sb.append(shortDescription);
+    if (null != shortDescription && !shortDescription.trim().isEmpty()) {
+      sb.append(shortDescription.trim());
       if (!shortDescription.endsWith(".")
           && !shortDescription.endsWith("!") && !shortDescription.endsWith("?")) {
         sb.append(".");
