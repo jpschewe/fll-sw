@@ -220,11 +220,11 @@ public final class ScoreEntry {
     final PerformanceScoreCategory performanceElement = description.getPerformance();
 
     // output the assignments of each element
-    for (final AbstractGoal element : performanceElement.getGoals()) {
-      if (element.isComputed()) {
+    for (final AbstractGoal agoal : performanceElement.getGoals()) {
+      if (agoal.isComputed()) {
         // output calls to the computed goal methods
 
-        final String goalName = element.getName();
+        final String goalName = agoal.getName();
         final String computedVarName = getVarNameForComputedScore(goalName);
         formatter.format("%s();%n", getComputedMethodName(goalName));
 
@@ -234,7 +234,7 @@ public final class ScoreEntry {
         formatter.format("%n");
 
       } else {
-        final Goal goal = (Goal) element;
+        final Goal goal = (Goal) agoal;
         final String name = goal.getName();
         final double multiplier = goal.getMultiplier();
         final double min = goal.getMin();
@@ -257,7 +257,7 @@ public final class ScoreEntry {
 
         if (goal.isEnumerated()) {
           // enumerated
-          final List<EnumeratedValue> posValues = element.getValues();
+          final List<EnumeratedValue> posValues = agoal.getSortedValues();
           for (int valueIdx = 0; valueIdx < posValues.size(); valueIdx++) {
             final EnumeratedValue valueEle = posValues.get(valueIdx);
 
@@ -279,10 +279,11 @@ public final class ScoreEntry {
             && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
           // set the radio button to match the gbl variable
           formatter.format("if(%s == 0) {%n", rawVarName);
-          formatter.format("  document.scoreEntry.%s[1].checked = true%n", name);
+          // 0/1 needs to match the order of the buttons generated in generateYesNoButtons
+          formatter.format("  document.scoreEntry.%s[0].checked = true%n", name);
           formatter.format("  document.scoreEntry.%s_radioValue.value = 'NO'%n", name);
           formatter.format("} else {%n");
-          formatter.format("  document.scoreEntry.%s[0].checked = true%n", name);
+          formatter.format("  document.scoreEntry.%s[1].checked = true%n", name);
           formatter.format("  document.scoreEntry.%s_radioValue.value = 'YES'%n", name);
           formatter.format("}%n");
           formatter.format("%s = %s * %s;%n", computedVarName, rawVarName, multiplier);
@@ -400,7 +401,7 @@ public final class ScoreEntry {
         final double initialValue = goal.getInitialValue();
         if (goal.isEnumerated()) {
           // find score that matches initialValue or is min
-          final List<EnumeratedValue> values = goal.getValues();
+          final List<EnumeratedValue> values = goal.getSortedValues();
           boolean found = false;
           for (final EnumeratedValue valueEle : values) {
             final String value = valueEle.getValue();
@@ -595,16 +596,20 @@ public final class ScoreEntry {
   private static void generateYesNoButtons(final String name,
                                            final JspWriter writer) throws IOException {
     // generate radio buttons with calls to set<name>
+    
+    // order of yes/no buttons needs to match order in generateRefreshBody
     writer.println("        <td>");
-    writer.println("          <input type='radio' id='"
-        + name + "_yes' name='" + name + "' value='1' onclick='" + getSetMethodName(name) + "(1)'>");
-    writer.println("          <label for='"
-        + name + "_yes'>Yes</label>");
-    writer.println("          &nbsp;&nbsp;");
     writer.println("          <input type='radio' id='"
         + name + "_no' name='" + name + "' value='0' onclick='" + getSetMethodName(name) + "(0)'>");
     writer.println("          <label for='"
         + name + "_no'>No</label>");
+
+    writer.println("          &nbsp;&nbsp;");
+
+    writer.println("          <input type='radio' id='"
+        + name + "_yes' name='" + name + "' value='1' onclick='" + getSetMethodName(name) + "(1)'>");
+    writer.println("          <label for='"
+        + name + "_yes'>Yes</label>");
     writer.println("        </td>");
   }
 
@@ -649,7 +654,7 @@ public final class ScoreEntry {
               // enumerated
               final String storedValue = rs.getString(name);
               boolean found = false;
-              for (final EnumeratedValue valueElement : goal.getValues()) {
+              for (final EnumeratedValue valueElement : goal.getSortedValues()) {
                 final String value = valueElement.getValue();
                 if (value.equals(storedValue)) {
                   writer.println("  "
@@ -685,13 +690,13 @@ public final class ScoreEntry {
       SQLFunctions.close(connection);
     }
   }
-
+  
   private static void generateEnumeratedGoalButtons(final AbstractGoal goal,
                                                     final String goalName,
                                                     final JspWriter writer) throws IOException, ParseException {
     writer.println("    <table border='0' cellpadding='0' cellspacing='0' width='100%'>");
 
-    for (final EnumeratedValue valueEle : goal.getValues()) {
+    for (final EnumeratedValue valueEle : goal.getSortedValues()) {
       final String valueTitle = valueEle.getTitle();
       final String value = valueEle.getValue();
       final String id = getIDForEnumRadio(goalName, value);

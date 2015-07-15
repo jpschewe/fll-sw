@@ -551,7 +551,7 @@ public class ScoresheetGenerator {
         if (goal.isEnumerated()) {
           // replace spaces with "no-break" spaces
           boolean first = true;
-          for (final EnumeratedValue value : goal.getValues()) {
+          for (final EnumeratedValue value : goal.getSortedValues()) {
             if (!first) {
               choices.append(" /"
                   + NON_BREAKING_SPACE);
@@ -565,7 +565,8 @@ public class ScoresheetGenerator {
         } else {
           if (FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE)
               && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
-            final Paragraph q = new Paragraph("YES / NO", COURIER_10PT_NORMAL);
+            // order of yes/no needs to match ScoreEntry.generateYesNoButtons
+            final Paragraph q = new Paragraph("NO / YES", COURIER_10PT_NORMAL);
             m_goalValue[realI].addElement(q);
 
           } else {

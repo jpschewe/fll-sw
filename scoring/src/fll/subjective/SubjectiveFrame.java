@@ -387,7 +387,7 @@ public final class SubjectiveFrame extends JFrame {
       if (goal.isEnumerated()) {
         final Vector<String> posValues = new Vector<String>();
         posValues.add("");
-        for (final EnumeratedValue posValue : goal.getValues()) {
+        for (final EnumeratedValue posValue : goal.getSortedValues()) {
           posValues.add(posValue.getTitle());
         }
 
