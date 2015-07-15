@@ -6,6 +6,7 @@
 
 package fll.scheduler;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -23,6 +24,9 @@ import java.util.List;
 import junit.framework.Assert;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.SuffixFileFilter;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,6 +48,7 @@ import fll.xml.ChallengeParser;
 public class TournamentScheduleTest {
 
   public static final String RESEARCH_HEADER = "Research";
+
   public static final String TECHNICAL_HEADER = "Technical";
 
   @Before
@@ -226,8 +231,19 @@ public class TournamentScheduleTest {
     Assert.assertEquals(str24, str12);
   }
 
-  public TournamentSchedule loadSchedule(final URL path,
-                                         final Collection<String> possibleSubjectiveHeaders) throws IOException,
+  /**
+   * Load a schedule.
+   * 
+   * @param path Where to load from
+   * @param possibleSubjectiveHeaders the subjective entry headers to look for
+   * @return the loaded schedule
+   * @throws IOException
+   * @throws InvalidFormatException
+   * @throws ParseException
+   * @throws ScheduleParseException
+   */
+  private TournamentSchedule loadSchedule(final URL path,
+                                          final Collection<String> possibleSubjectiveHeaders) throws IOException,
       InvalidFormatException, ParseException, ScheduleParseException {
     InputStream scheduleStream = path.openStream();
     final List<String> sheetNames = ExcelCellReader.getAllSheetNames(scheduleStream);
@@ -255,6 +271,51 @@ public class TournamentScheduleTest {
     scheduleStream.close();
 
     return schedule;
+
+  }
+
+  /**
+   * Test loading all schedules in the repository.
+   * This depends on being able to find the schedules.
+   * The test assumes that it is executing from the base build directory or the
+   * root of the repository.
+   * All schedule files that end in '.xls' will be loaded.
+   * 
+   * @throws ScheduleParseException
+   * @throws ParseException
+   * @throws IOException
+   * @throws InvalidFormatException
+   */
+  @Test
+  public void testLoadAllSchedules() throws InvalidFormatException, IOException, ParseException, ScheduleParseException {
+    File baseScheduleDir = new File("../../scheduling/blank-schedules");
+    if (!baseScheduleDir.exists()) {
+      baseScheduleDir = new File("scheduling/blank-schedules");
+    }
+    Assert.assertTrue("Can't find schedules in "
+        + baseScheduleDir.getAbsolutePath(), baseScheduleDir.exists());
+
+    Assert.assertTrue("Schedules path isn't a directory: "
+        + baseScheduleDir.getAbsolutePath(), baseScheduleDir.isDirectory());
+
+    final Collection<File> schedules = FileUtils.listFiles(baseScheduleDir, new SuffixFileFilter(".xls"),
+                                                           TrueFileFilter.INSTANCE);
+    Assert.assertTrue("Didn't find any schedules", !schedules.isEmpty());
+
+    final Collection<String> possibleSubjectiveHeaders = new LinkedList<String>();
+    possibleSubjectiveHeaders.add("Core Values");
+    possibleSubjectiveHeaders.add("Design");
+    possibleSubjectiveHeaders.add("Project");
+
+    for (final File file : schedules) {
+      final URL resource = file.toURI().toURL();
+      final TournamentSchedule schedule = loadSchedule(resource, possibleSubjectiveHeaders);
+      
+      // make sure there are some schedule entries
+      Assert.assertTrue("No entries for schedule: " + file.getName(), !schedule.getSchedule().isEmpty());
+      Assert.assertTrue("No division for schedule: " + file.getName(), !schedule.getDivisions().isEmpty());
+      Assert.assertTrue("No judging groups for schedule: " + file.getName(), !schedule.getJudgingGroups().isEmpty());
+    }
 
   }
 
