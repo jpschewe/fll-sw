@@ -1,3 +1,4 @@
+* 334 - Display the lowest scoring element first in the score sheets 
 * 374 - Check all saved schedules with a unit test to make sure they all load
 * 387 - Show quartiles rather than actual ranks in the ranking report
 * 391 - Add shortDescription attribute to rubric range
