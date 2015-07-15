@@ -69,8 +69,6 @@ public class RankingReport extends BaseFLLServlet {
 
   private static final Font HEADER_FONT = TITLE_FONT;
 
-  private boolean mUseQuartiles;
-
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -84,7 +82,7 @@ public class RankingReport extends BaseFLLServlet {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
 
-      mUseQuartiles = GlobalParameters.getUseQuartilesInRankingReport(connection);
+      final boolean useQuartiles = GlobalParameters.getUseQuartilesInRankingReport(connection);
 
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
@@ -131,21 +129,21 @@ public class RankingReport extends BaseFLLServlet {
         // pull out Overall first
         if (categories.contains(CategoryRank.OVERALL_CATEGORY_NAME)) {
           final String category = CategoryRank.OVERALL_CATEGORY_NAME;
-          outputCategory(para, teamRanks, category);
+          outputCategory(para, teamRanks, category, useQuartiles);
         }
         para.add(Chunk.NEWLINE);
 
         // pull out performance next
         if (categories.contains(CategoryRank.PERFORMANCE_CATEGORY_NAME)) {
           final String category = CategoryRank.PERFORMANCE_CATEGORY_NAME;
-          outputCategory(para, teamRanks, category);
+          outputCategory(para, teamRanks, category, useQuartiles);
         }
         para.add(Chunk.NEWLINE);
 
         for (final String category : categories) {
           if (!CategoryRank.PERFORMANCE_CATEGORY_NAME.equals(category)
               && !CategoryRank.OVERALL_CATEGORY_NAME.equals(category)) {
-            outputCategory(para, teamRanks, category);
+            outputCategory(para, teamRanks, category, useQuartiles);
           }
         }
 
@@ -189,7 +187,8 @@ public class RankingReport extends BaseFLLServlet {
 
   private void outputCategory(final Paragraph para,
                               final TeamRanking teamRanks,
-                              final String category) {
+                              final String category,
+                              boolean useQuartiles) {
     para.add(new Chunk(category
         + ": ", RANK_TITLE_FONT));
 
@@ -201,7 +200,7 @@ public class RankingReport extends BaseFLLServlet {
     } else {
       final double percentage = (double) rank
           / catRank.getNumTeams();
-      if (mUseQuartiles) {
+      if (useQuartiles) {
         para.add(new Chunk(String.format("%s in %s", convertPercentageToQuartile(percentage), catRank.getGroup()),
                            RANK_VALUE_FONT));
       } else {
