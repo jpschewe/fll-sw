@@ -304,9 +304,10 @@ public final class ScoreEntry {
 
     // set the radio buttons for score verification
     formatter.format("if(Verified == 0) {%n");
-    formatter.format("  document.scoreEntry.Verified[1].checked = true%n"); // NO
+    // order of elements needs to match generateYesNoButtons
+    formatter.format("  document.scoreEntry.Verified[0].checked = true%n"); // NO
     formatter.format("} else {%n");
-    formatter.format("  document.scoreEntry.Verified[0].checked = true%n"); // YES
+    formatter.format("  document.scoreEntry.Verified[1].checked = true%n"); // YES
     formatter.format("}%n");
 
     if (LOG.isTraceEnabled()) {
