@@ -126,6 +126,19 @@ public class DatabaseTeamScore extends TeamScore {
     }
   }
 
+  @Override
+  public boolean isBye() {
+    if (!scoreExists()) {
+      return false;
+    } else {
+      try {
+        return getResultSet().getBoolean("Bye");
+      } catch (final SQLException sqle) {
+        throw new RuntimeException(sqle);
+      }
+    }
+  }
+
   /**
    * @see fll.web.playoff.TeamScore#scoreExists()
    */

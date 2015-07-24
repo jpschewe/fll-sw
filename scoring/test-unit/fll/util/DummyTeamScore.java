@@ -72,6 +72,11 @@ public class DummyTeamScore extends TeamScore {
   public boolean isNoShow() {
     return false;
   }
+  
+  @Override
+  public boolean isBye() {
+    return false;
+  }
 
   /*
    * (non-Javadoc)
