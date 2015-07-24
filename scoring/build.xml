@@ -80,6 +80,9 @@
       <include name="lib/*.jar" />
     </fileset>
     <pathelement location="${dir.lib}/log4j-1.2.17.jar" />
+    <pathelement location="${dir.lib}/slf4j-api-1.7.5.jar" />
+    <!-- use tomcat's servlet api.jar -->
+    <pathelement location="${dir.tomcat.src}/lib/servlet-api.jar" />
   </path>
   <taskdef classpathref="cobertura.classpath" resource="tasks.properties" />
 
@@ -183,6 +186,9 @@
     <mkdir dir="${dir.coverage}" />
 
     <cobertura-instrument datafile="${dir.coverage}/cobertura.ser">
+      <auxClasspath>
+        <path refid="compile.classpath" />
+      </auxClasspath>
       <fileset dir="${dir.classes}">
         <include name="**/*.class" />
       </fileset>
