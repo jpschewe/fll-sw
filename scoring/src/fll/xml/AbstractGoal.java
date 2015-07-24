@@ -103,7 +103,7 @@ public abstract class AbstractGoal implements Serializable {
     }
   }
 
-  private static final class EnumeratedValueLowestFirst implements Comparator<EnumeratedValue> {
+  private static final class EnumeratedValueLowestFirst implements Comparator<EnumeratedValue>, Serializable {
     public static final EnumeratedValueLowestFirst INSTANCE = new EnumeratedValueLowestFirst();
 
     private EnumeratedValueLowestFirst() {
