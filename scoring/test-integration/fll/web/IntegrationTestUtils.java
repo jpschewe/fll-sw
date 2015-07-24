@@ -459,7 +459,7 @@ public final class IntegrationTestUtils {
                                             final int newValue) throws NoSuchElementException, IOException {
     try {
       IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-          + "admin/index.jsp");
+          + "admin/edit_all_parameters.jsp");
       final Select seedingRoundsSelection = new Select(selenium.findElement(By.name("seeding_rounds_"
           + tournamentId)));
       seedingRoundsSelection.selectByValue(Integer.toString(newValue));
