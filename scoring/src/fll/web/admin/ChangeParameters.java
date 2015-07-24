@@ -25,6 +25,7 @@ import org.apache.log4j.Logger;
 
 import fll.Tournament;
 import fll.db.GlobalParameters;
+import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -57,7 +58,7 @@ public class ChangeParameters extends BaseFLLServlet {
 
       final List<Tournament> tournaments = Tournament.getTournaments(connection);
 
-      storeSeedingRounds(connection, request, tournaments);
+      storeSeedingRounds(connection, request, tournaments, message);
 
       storeMaxScoreboardRound(connection, request, tournaments);
 
@@ -73,7 +74,9 @@ public class ChangeParameters extends BaseFLLServlet {
       GlobalParameters.setUseQuartilesInRankingReport(connection,
                                                       Boolean.valueOf(request.getParameter("gUseQuartiles")));
 
-      message.append("<p id='success'>Parameters saved</p>");
+      if (message.length() == 0) {
+        message.append("<p id='success'>Parameters saved</p>");
+      }
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
           + sqle.getMessage() + "</p>");
@@ -84,23 +87,44 @@ public class ChangeParameters extends BaseFLLServlet {
     }
 
     session.setAttribute(SessionAttributes.MESSAGE, message.toString());
-    response.sendRedirect(response.encodeRedirectURL("index.jsp"));
+    response.sendRedirect(response.encodeRedirectURL("edit_all_parameters.jsp"));
   }
 
   private void storeSeedingRounds(final Connection connection,
                                   final HttpServletRequest request,
-                                  final List<Tournament> tournaments) throws SQLException {
+                                  final List<Tournament> tournaments,
+                                  final StringBuilder message) throws SQLException {
     final int defaultNumRounds = Integer.parseInt(request.getParameter("seeding_rounds_default"));
     TournamentParameters.setDefaultNumSeedingRounds(connection, defaultNumRounds);
 
     for (final Tournament tournament : tournaments) {
+      // determine if the seeding rounds needs to change
+      final boolean valueSet = TournamentParameters.isNumSeedingRoundsSet(connection, tournament.getTournamentID());
+      final int currentValue = TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID());
+
       final String str = request.getParameter("seeding_rounds_"
           + tournament.getTournamentID());
       if ("default".equals(str)) {
-        TournamentParameters.unsetNumSeedingRounds(connection, tournament.getTournamentID());
+
+        if (valueSet) {
+          if (Queries.isPlayoffDataInitialized(connection, tournament.getTournamentID())) {
+            message.append("<p class='error'>You cannot change the number of seeding rounds once the playoffs are initialized. Tournament: "
+                + tournament.getName() + "</p>");
+          } else {
+            TournamentParameters.unsetNumSeedingRounds(connection, tournament.getTournamentID());
+          }
+        }
       } else {
         final int value = Integer.parseInt(str);
-        TournamentParameters.setNumSeedingRounds(connection, tournament.getTournamentID(), value);
+        if (!valueSet
+            || value != currentValue) {
+          if (Queries.isPlayoffDataInitialized(connection, tournament.getTournamentID())) {
+            message.append("<p class='error'>You cannot change the number of seeding rounds once the playoffs are initialized. Tournament: "
+                + tournament.getName() + "</p>");
+          } else {
+            TournamentParameters.setNumSeedingRounds(connection, tournament.getTournamentID(), value);
+          }
+        }
       }
     }
   }
