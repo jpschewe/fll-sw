@@ -27,6 +27,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.Select;
 
 import fll.TestUtils;
+import fll.util.FLLInternalException;
 import fll.util.LogUtils;
 import fll.xml.BracketSortType;
 
@@ -443,6 +444,70 @@ public final class IntegrationTestUtils {
     }
 
     return e;
+  }
+
+  /**
+   * Change the number of seeding rounds for the specified tournament.
+   * 
+   * @param selenium
+   * @param newValue
+   * @throws NoSuchElementException if there was a problem changing the value
+   * @throws IOException if there is an error talking to selenium
+   */
+  public static void changeNumSeedingRounds(final WebDriver selenium,
+                                            final int tournamentId,
+                                            final int newValue) throws NoSuchElementException, IOException {
+    try {
+      IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+          + "admin/index.jsp");
+      final Select seedingRoundsSelection = new Select(selenium.findElement(By.name("seeding_rounds_"
+          + tournamentId)));
+      seedingRoundsSelection.selectByValue(Integer.toString(newValue));
+      selenium.findElement(By.id("submit")).click();
+
+      selenium.findElement(By.id("success"));
+    } catch (final AssertionError e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final RuntimeException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final IOException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    }
+  }
+
+  /**
+   * Get the id of the current tournament
+   * 
+   * @throws IOException
+   */
+  public static int getCurrentTournamentId(final WebDriver selenium) throws IOException {
+    try {
+      loadPage(selenium, TestUtils.URL_ROOT
+          + "admin/index.jsp");
+
+      final WebElement currentTournament = selenium.findElement(By.id("currentTournamentSelect"));
+
+      final Select currentTournamentSel = new Select(currentTournament);
+      for (final WebElement option : currentTournamentSel.getOptions()) {
+        if (option.isSelected()) {
+          final String idStr = option.getAttribute("value");
+          return Integer.valueOf(idStr);
+        }
+      }
+      throw new FLLInternalException("Cannot find default tournament");
+    } catch (final AssertionError e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final RuntimeException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final IOException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    }
   }
 
 }
