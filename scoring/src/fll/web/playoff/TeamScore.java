@@ -25,8 +25,10 @@ public abstract class TeamScore {
     this(teamNumber, NON_PERFORMANCE_RUN_NUMBER);
   }
 
-  /*
+  /**
    * Create a performance TeamScore for the specified team and run number.
+   * 
+   * @param runNumber 1-based run number
    */
   public TeamScore(final int teamNumber,
                    final int runNumber) {
@@ -69,6 +71,8 @@ public abstract class TeamScore {
 
   /**
    * What run do these scores apply to?
+   * This is a 1-based number. It will be {@link #NON_PERFORMANCE_RUN_NUMBER} if
+   * this is not a performance score.
    * 
    * @return the run for the scores
    */
