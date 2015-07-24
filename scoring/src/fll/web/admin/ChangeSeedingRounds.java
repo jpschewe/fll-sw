@@ -29,6 +29,8 @@ import fll.web.BaseFLLServlet;
 
 /**
  * Change the number of seeding rounds.
+ * This should be removed, however TestAJAXBrackets and TestPlayoffs need to be
+ * modified first to use the generic edit parameters page before this can go away.
  */
 @WebServlet("/admin/ChangeSeedingRounds")
 public class ChangeSeedingRounds extends BaseFLLServlet {

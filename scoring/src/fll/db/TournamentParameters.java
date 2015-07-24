@@ -204,6 +204,15 @@ public final class TournamentParameters {
   }
 
   /**
+   * @return true if there is a tournament specific value
+   * @throws SQLException on a database error
+   */
+  public static boolean isNumSeedingRoundsSet(final Connection connection,
+                                              final int tournament) throws SQLException {
+    return tournamentParameterValueExists(connection, tournament, SEEDING_ROUNDS);
+  }
+
+  /**
    * Get the number of seeding rounds from the database.
    * 
    * @return the number of seeding rounds
