@@ -78,10 +78,8 @@ public class TestAJAXBrackets {
       selenium.findElement(By.name("SideB0")).sendKeys("Table 2");
       selenium.findElement(By.id("finished")).click();
 
-      // change num seeding rounds
-      final Select seedingRoundsSelection = new Select(selenium.findElement(By.name("seedingRounds")));
-      seedingRoundsSelection.selectByValue("0");
-      selenium.findElement(By.name("changeSeedingRounds")).click();
+      final int tournamentId = IntegrationTestUtils.getCurrentTournamentId(selenium);
+      IntegrationTestUtils.changeNumSeedingRounds(selenium, tournamentId, 0);
 
       // init brackets
       IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
@@ -111,7 +109,7 @@ public class TestAJAXBrackets {
       selenium.findElement(By.name("tableA1")).sendKeys("Blue 1");
       selenium.findElement(By.name("tableB1")).sendKeys("Table 2");
       selenium.findElement(By.id("print_scoresheets")).click();
-      
+
       // check for a blue cell
       selenium.switchTo().window(bracketsWindow.getWindowHandle());
       // TODO: I can't find a way selenium is
