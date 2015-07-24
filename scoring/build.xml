@@ -183,6 +183,9 @@
     <mkdir dir="${dir.coverage}" />
 
     <cobertura-instrument datafile="${dir.coverage}/cobertura.ser">
+      <auxClasspath>
+        <path refid="compile.classpath" />
+      </auxClasspath>
       <fileset dir="${dir.classes}">
         <include name="**/*.class" />
       </fileset>
