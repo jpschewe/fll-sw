@@ -182,7 +182,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
       table.addCell(new Phrase(goalTitle.toString(), HEADER_FONT));
 
       for (final TeamScore score : scores) {
-        if (score.isBye()
+        if (!score.scoreExists() || score.isBye()
             || score.isNoShow()) {
           table.addCell("");
         } else {
@@ -228,7 +228,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
           } else {
             table.addCell(new Phrase(cellStr.toString(), SCORE_FONT));
           }
-        } // non-bye, non-no show
+        } // exists, non-bye, non-no show
 
       } // foreach score
     } // foreach goal
@@ -237,7 +237,10 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     table.addCell(new Phrase("Total", HEADER_FONT));
     final double bestTotalScore = bestTotalScore(performance, scores);
     for (final TeamScore score : scores) {
-      if (score.isBye()) {
+      if(!score.scoreExists()) {
+        table.addCell("");
+      }
+      else if (score.isBye()) {
         table.addCell(new Phrase("Bye", SCORE_FONT));
       } else if (score.isNoShow()) {
         table.addCell(new Phrase("No Show", SCORE_FONT));
