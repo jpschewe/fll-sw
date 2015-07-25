@@ -17,6 +17,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import fll.util.FLLInternalException;
+import fll.util.FP;
 import fll.web.playoff.TeamScore;
 
 public abstract class AbstractGoal implements Serializable {
@@ -91,6 +92,19 @@ public abstract class AbstractGoal implements Serializable {
 
   public abstract double getMax();
 
+  /**
+   * Check if this goal is a yes/no.
+   */
+  public boolean isYesNo() {
+    if (isComputed()
+        || isEnumerated()) {
+      return false;
+    } else {
+      return FP.equals(0, getMin(), ChallengeParser.INITIAL_VALUE_TOLERANCE)
+          && FP.equals(1, getMax(), ChallengeParser.INITIAL_VALUE_TOLERANCE);
+    }
+  }
+
   protected final double applyScoreType(final double score) {
     switch (getScoreType()) {
     case FLOAT:
@@ -120,5 +134,5 @@ public abstract class AbstractGoal implements Serializable {
       }
     }
   }
-  
+
 }

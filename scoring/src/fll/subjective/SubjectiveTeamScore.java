@@ -75,6 +75,14 @@ import fll.web.playoff.TeamScore;
     }
   }
 
+  /**
+   * Always false as subjective scores are never byes.
+   */
+  @Override
+  public boolean isBye() {
+    return false;
+  }
+
   @Override
   public boolean scoreExists() {
     return true;

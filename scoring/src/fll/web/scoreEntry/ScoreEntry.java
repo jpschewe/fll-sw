@@ -168,9 +168,7 @@ public final class ScoreEntry {
         formatter.format("}%n");
 
         if (!goal.isEnumerated()
-            && !(FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE) && FP.equals(1,
-                                                                                         max,
-                                                                                         ChallengeParser.INITIAL_VALUE_TOLERANCE))) {
+            && !goal.isYesNo()) {
           formatter.format("function %s(increment) {%n", getIncrementMethodName(name));
           formatter.format("  var temp = %s%n", rawVarName);
           formatter.format("  %s += increment;%n", rawVarName);
@@ -275,11 +273,11 @@ public final class ScoreEntry {
                              value.toUpperCase());
           } // foreach value
           formatter.format("}%n");
-        } else if (FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE)
-            && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
+        } else if (goal.isYesNo()) {
           // set the radio button to match the gbl variable
           formatter.format("if(%s == 0) {%n", rawVarName);
-          // 0/1 needs to match the order of the buttons generated in generateYesNoButtons
+          // 0/1 needs to match the order of the buttons generated in
+          // generateYesNoButtons
           formatter.format("  document.scoreEntry.%s[0].checked = true%n", name);
           formatter.format("  document.scoreEntry.%s_radioValue.value = 'NO'%n", name);
           formatter.format("} else {%n");
@@ -523,8 +521,7 @@ public final class ScoreEntry {
 
     final double min = goalEle.getMin();
     final double max = goalEle.getMax();
-    if (FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE)
-        && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
+    if (goalEle.isYesNo()) {
       generateYesNoButtons(name, writer);
     } else {
       final double range = max
@@ -597,7 +594,7 @@ public final class ScoreEntry {
   private static void generateYesNoButtons(final String name,
                                            final JspWriter writer) throws IOException {
     // generate radio buttons with calls to set<name>
-    
+
     // order of yes/no buttons needs to match order in generateRefreshBody
     writer.println("        <td>");
     writer.println("          <input type='radio' id='"
@@ -691,7 +688,7 @@ public final class ScoreEntry {
       SQLFunctions.close(connection);
     }
   }
-  
+
   private static void generateEnumeratedGoalButtons(final AbstractGoal goal,
                                                     final String goalName,
                                                     final JspWriter writer) throws IOException, ParseException {
