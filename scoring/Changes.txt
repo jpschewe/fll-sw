@@ -1,3 +1,4 @@
+* 398 - Add report to display each team's performance scores in detail
 * 334 - Display the lowest scoring element first in the score sheets 
 * 374 - Check all saved schedules with a unit test to make sure they all load
 * 387 - Show quartiles rather than actual ranks in the ranking report
