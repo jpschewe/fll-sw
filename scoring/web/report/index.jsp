@@ -39,6 +39,10 @@
     <li><a href="RankingReport">Ranking Report for teams</a>. This
       is printed at the end of the day and each team gets their page.</li>
 
+    <li><a href="PerformanceScoreReport">Performance Score
+        Report</a>. This displays the details of the performance runs for
+      each team.</li>
+
     <li><a href="PlayoffReport">Winners of each playoff bracket</a>.
       This is useful for the awards ceremony.</li>
 

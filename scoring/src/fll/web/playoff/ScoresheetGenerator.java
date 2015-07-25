@@ -44,7 +44,6 @@ import fll.util.FP;
 import fll.util.LogUtils;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
-import fll.xml.ChallengeParser;
 import fll.xml.EnumeratedValue;
 import fll.xml.PerformanceScoreCategory;
 
@@ -563,8 +562,7 @@ public class ScoresheetGenerator {
           m_goalValue[realI].addElement(choices);
 
         } else {
-          if (FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE)
-              && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
+          if (goal.isYesNo()) {
             // order of yes/no needs to match ScoreEntry.generateYesNoButtons
             final Paragraph q = new Paragraph("NO / YES", COURIER_10PT_NORMAL);
             m_goalValue[realI].addElement(q);
