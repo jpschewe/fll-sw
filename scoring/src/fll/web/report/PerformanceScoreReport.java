@@ -182,48 +182,53 @@ public class PerformanceScoreReport extends BaseFLLServlet {
       table.addCell(new Phrase(goalTitle.toString(), HEADER_FONT));
 
       for (final TeamScore score : scores) {
-        final double computedValue = goal.getComputedScore(score);
+        if (score.isBye()
+            || score.isNoShow()) {
+          table.addCell("");
+        } else {
+          final double computedValue = goal.getComputedScore(score);
 
-        final StringBuilder cellStr = new StringBuilder();
-        if (!goal.isComputed()) {
-          if (goal.isEnumerated()) {
-            final String enumValue = score.getEnumRawScore(goal.getName());
-            boolean found = false;
-            for (final EnumeratedValue ev : goal.getValues()) {
-              if (ev.getValue().equals(enumValue)) {
-                cellStr.append(ev.getTitle()
-                    + " -> ");
-                found = true;
-                break;
+          final StringBuilder cellStr = new StringBuilder();
+          if (!goal.isComputed()) {
+            if (goal.isEnumerated()) {
+              final String enumValue = score.getEnumRawScore(goal.getName());
+              boolean found = false;
+              for (final EnumeratedValue ev : goal.getValues()) {
+                if (ev.getValue().equals(enumValue)) {
+                  cellStr.append(ev.getTitle()
+                      + " -> ");
+                  found = true;
+                  break;
+                }
               }
-            }
-            if (!found) {
-              LOG.warn("Could not find enumerated title for "
-                  + enumValue);
-              cellStr.append(enumValue
-                  + " -> ");
-            }
-          } else {
-            if (goal.isYesNo()) {
-              if (FP.greaterThan(score.getRawScore(goal.getName()), 0, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
-                cellStr.append("YES -> ");
-              } else {
-                cellStr.append("NO -> ");
+              if (!found) {
+                LOG.warn("Could not find enumerated title for "
+                    + enumValue);
+                cellStr.append(enumValue
+                    + " -> ");
               }
             } else {
-              final double rawValue = goal.getRawScore(score);
-              cellStr.append(Utilities.NUMBER_FORMAT_INSTANCE.format(rawValue)
-                  + " -> ");
-            }
-          }
-        }
+              if (goal.isYesNo()) {
+                if (FP.greaterThan(score.getRawScore(goal.getName()), 0, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
+                  cellStr.append("Yes -> ");
+                } else {
+                  cellStr.append("No -> ");
+                }
+              } else {
+                final double rawValue = goal.getRawScore(score);
+                cellStr.append(Utilities.NUMBER_FORMAT_INSTANCE.format(rawValue)
+                    + " -> ");
+              }
+            } // not enumerated
+          }// not computed
 
-        cellStr.append(Utilities.NUMBER_FORMAT_INSTANCE.format(computedValue));
-        if (FP.equals(bestScore, computedValue, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
-          table.addCell(new Phrase(cellStr.toString(), BEST_SCORE_FONT));
-        } else {
-          table.addCell(new Phrase(cellStr.toString(), SCORE_FONT));
-        }
+          cellStr.append(Utilities.NUMBER_FORMAT_INSTANCE.format(computedValue));
+          if (FP.equals(bestScore, computedValue, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
+            table.addCell(new Phrase(cellStr.toString(), BEST_SCORE_FONT));
+          } else {
+            table.addCell(new Phrase(cellStr.toString(), SCORE_FONT));
+          }
+        } // non-bye, non-no show
 
       } // foreach score
     } // foreach goal
@@ -232,12 +237,18 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     table.addCell(new Phrase("Total", HEADER_FONT));
     final double bestTotalScore = bestTotalScore(performance, scores);
     for (final TeamScore score : scores) {
-      final double totalScore = performance.evaluate(score);
-
-      if (FP.equals(bestTotalScore, totalScore, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
-        table.addCell(new Phrase(Utilities.NUMBER_FORMAT_INSTANCE.format(totalScore), BEST_SCORE_FONT));
+      if (score.isBye()) {
+        table.addCell(new Phrase("Bye", SCORE_FONT));
+      } else if (score.isNoShow()) {
+        table.addCell(new Phrase("No Show", SCORE_FONT));
       } else {
-        table.addCell(new Phrase(Utilities.NUMBER_FORMAT_INSTANCE.format(totalScore), SCORE_FONT));
+        final double totalScore = performance.evaluate(score);
+
+        if (FP.equals(bestTotalScore, totalScore, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
+          table.addCell(new Phrase(Utilities.NUMBER_FORMAT_INSTANCE.format(totalScore), BEST_SCORE_FONT));
+        } else {
+          table.addCell(new Phrase(Utilities.NUMBER_FORMAT_INSTANCE.format(totalScore), SCORE_FONT));
+        }
       }
 
     }
