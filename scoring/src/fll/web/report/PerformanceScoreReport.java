@@ -65,6 +65,10 @@ public class PerformanceScoreReport extends BaseFLLServlet {
 
   private static final Font HEADER_FONT = TITLE_FONT;
 
+  private static final Font SCORE_FONT = FontFactory.getFont(FontFactory.TIMES, 10, Font.NORMAL);
+
+  private static final Font BEST_SCORE_FONT = FontFactory.getFont(FontFactory.TIMES, 10, Font.BOLD);
+
   private static final String REPORT_TITLE = "Performance Score Report";
 
   @Override
@@ -164,19 +168,19 @@ public class PerformanceScoreReport extends BaseFLLServlet {
           + runNumber, HEADER_FONT));
     }
 
-    // FIXME track best score
-
     final PerformanceScoreCategory performance = challenge.getPerformance();
 
     final TeamScore[] scores = getScores(connection, tournament, team, numSeedingRounds);
     for (final AbstractGoal goal : performance.getGoals()) {
+      final double bestScore = bestScoreForGoal(scores, goal);
+
       final StringBuilder goalTitle = new StringBuilder();
       goalTitle.append(goal.getTitle());
       if (goal.isComputed()) {
         goalTitle.append(" (computed)");
       }
-      table.addCell(new Phrase(goalTitle.toString(), HEADER_FONT));      
-      
+      table.addCell(new Phrase(goalTitle.toString(), HEADER_FONT));
+
       for (final TeamScore score : scores) {
         final double computedValue = goal.getComputedScore(score);
 
@@ -213,11 +217,30 @@ public class PerformanceScoreReport extends BaseFLLServlet {
             }
           }
         }
-        cellStr.append(Utilities.NUMBER_FORMAT_INSTANCE.format(computedValue));
 
-        table.addCell(new Phrase(cellStr.toString()));
+        cellStr.append(Utilities.NUMBER_FORMAT_INSTANCE.format(computedValue));
+        if (FP.equals(bestScore, computedValue, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
+          table.addCell(new Phrase(cellStr.toString(), BEST_SCORE_FONT));
+        } else {
+          table.addCell(new Phrase(cellStr.toString(), SCORE_FONT));
+        }
+
       } // foreach score
     } // foreach goal
+
+    // totals
+    table.addCell(new Phrase("Total", HEADER_FONT));
+    final double bestTotalScore = bestTotalScore(performance, scores);
+    for (final TeamScore score : scores) {
+      final double totalScore = performance.evaluate(score);
+
+      if (FP.equals(bestTotalScore, totalScore, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
+        table.addCell(new Phrase(Utilities.NUMBER_FORMAT_INSTANCE.format(totalScore), BEST_SCORE_FONT));
+      } else {
+        table.addCell(new Phrase(Utilities.NUMBER_FORMAT_INSTANCE.format(totalScore), SCORE_FONT));
+      }
+
+    }
 
     document.add(table);
 
@@ -225,6 +248,34 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     definitionPara.add(Chunk.NEWLINE);
     definitionPara.add(new Chunk("The team's top score for each goal and overall are in bold."));
     document.add(definitionPara);
+  }
+
+  /**
+   * @return best total score
+   */
+  private double bestTotalScore(final PerformanceScoreCategory performance,
+                                final TeamScore[] scores) {
+    double bestScore = Double.MAX_VALUE
+        * -1;
+    for (final TeamScore score : scores) {
+      final double computedValue = performance.evaluate(score);
+      bestScore = Math.max(bestScore, computedValue);
+    }
+    return bestScore;
+  }
+
+  /**
+   * @return the best score for the specified goal
+   */
+  private double bestScoreForGoal(final TeamScore[] scores,
+                                  final AbstractGoal goal) {
+    double bestScore = Double.MAX_VALUE
+        * -1;
+    for (final TeamScore score : scores) {
+      final double computedValue = goal.getComputedScore(score);
+      bestScore = Math.max(bestScore, computedValue);
+    }
+    return bestScore;
   }
 
   private TeamScore[] getScores(final Connection connection,
