@@ -172,8 +172,8 @@ public class FullTournamentTest {
       SQLFunctions.close(prep);
       prep = null;
 
-      final Document challengeDocument  = ChallengeParser.parse(new InputStreamReader(
-                                                                                       FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")));
+      final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(
+                                                                                     FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")));
       Assert.assertNotNull(challengeDocument);
       final ChallengeDescription description = new ChallengeDescription(challengeDocument.getDocumentElement());
       final PerformanceScoreCategory performanceElement = description.getPerformance();
@@ -578,7 +578,7 @@ public class FullTournamentTest {
     Assert.assertNotNull("printable form not found", form);
 
     final String formSource = WebTestUtils.getPageSource(form.getPage());
-    LOGGER.info("Form source: "
+    LOGGER.debug("Form source: "
         + formSource);
 
     // set division
@@ -914,7 +914,7 @@ public class FullTournamentTest {
             if (!element.isComputed()) {
               final Goal goal = (Goal) element;
               final String name = goal.getName();
-              
+
               if (goal.isEnumerated()) {
                 // need check if the right radio button is selected
                 final String value = rs.getString(name);
