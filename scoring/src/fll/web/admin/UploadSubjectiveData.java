@@ -253,13 +253,40 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
       }
 
       saveCategoryData(currentTournament, connection, scoreCategoryElement, categoryName, categoryElement);
-      removeNullRows(currentTournament, connection, categoryName, categoryElement);
     }
 
-    final Tournament tournament = Tournament.findTournamentByID(connection,currentTournament);
+    removeNullSubjectiveRows(connection, currentTournament, challengeDescription);
+    
+    final Tournament tournament = Tournament.findTournamentByID(connection, currentTournament);
     tournament.recordSubjectiveModified(connection);
   }
 
+  /**
+   * Remove subjective score rows from database that are empty. These
+   * are rows that have null for all scores and is not a no show.
+   * 
+   * @param connection database connection
+   * @param tournamentId which tournament to work on
+   * @param challengeDescription the challenge description
+   */
+  public static void removeNullSubjectiveRows(final Connection connection,
+                                              final int tournamentId,
+                                              final ChallengeDescription challengeDescription) throws SQLException {
+    for (final ScoreCategory cat : challengeDescription.getSubjectiveCategories()) {
+      removeNullRows(tournamentId, connection, cat.getName(), cat);
+    }
+  }
+
+  /**
+   * Remove rows from the specified subjective category that are empty. These
+   * are rows that have null for all scores and is not a no show.
+   * 
+   * @param currentTournament
+   * @param connection
+   * @param categoryName
+   * @param categoryElement
+   * @throws SQLException
+   */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns are dynamic")
   private static void removeNullRows(final int currentTournament,
                                      final Connection connection,
