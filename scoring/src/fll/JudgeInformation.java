@@ -25,18 +25,30 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public final class JudgeInformation implements Serializable {
   private final String id;
 
+  /**
+   * The identifier of the judge. Identifiers for judges must be unique within a
+   * category, station combination.
+   */
   public String getId() {
     return id;
   }
 
   private final String category;
 
+  /**
+   * The name of the scoring category that this judge is scoring. This needs to
+   * match a category name in the challenge description.
+   */
   public String getCategory() {
     return category;
   }
 
   private final String station;
 
+  /**
+   * The station the judge is at. This is sometimes
+   * referred to as the division.
+   */
   public String getStation() {
     return station;
   }
