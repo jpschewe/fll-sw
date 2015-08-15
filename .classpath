@@ -67,8 +67,6 @@
 	<classpathentry kind="lib" path="scoring/lib/jackson-databind-2.2.3-javadoc.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/httpmime-4.3.3.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/serializer-2.7.1.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/test/selenium-java-2.42.2.jar" sourcepath="scoring/lib/test/selenium-java-2.42.2-srcs.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/test/selenium-server-standalone-2.42.2.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/schemaSpy_5.0.0.jar" sourcepath="scoring/lib/schemaSpy_5.0.0.source.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/asm-5.0.1.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/asm-analysis-5.0.1.jar"/>
@@ -84,5 +82,7 @@
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/logback-classic-1.0.13.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/logback-core-1.0.13.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/cobertura-2.1.1.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/selenium-java-2.47.1.jar" sourcepath="scoring/lib/test/selenium-java-2.47.1-srcs.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/selenium-server-standalone-2.47.1.jar"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>
