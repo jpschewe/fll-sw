@@ -230,7 +230,7 @@
    *          integer number of minutes for time slot
    */
   function Timeslot(time, duration) {
-    this.categories = {};
+    this.categories = {}; // categoryId -> teamNumber 
     this.time = new Date();
     this.time.setTime(time.getTime());
     this.endTime = new Date();
