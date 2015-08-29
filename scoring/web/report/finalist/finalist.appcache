@@ -8,6 +8,8 @@ CACHE MANIFEST
 
 ../../js/fll-objects.js
 
+../../style/base.css
+
 finalist.js
 
 params.html

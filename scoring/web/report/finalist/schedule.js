@@ -11,45 +11,52 @@ function handleDivisionChange() {
   updatePage();
 }
 
-function updatePage() {
+function updateHeader() {
+  var headerRow = $("#schedule_header");
+  headerRow.empty();
 
-  $("#schedule").empty();
+  headerRow.append($("<div class='rTableHead'>Time Slot</div>"));
 
-  // output header
-  var headerRow = $("<tr></tr>");
-  $("#schedule").append(headerRow);
-
-  headerRow.append($("<th>Time Slot</th>"));
   $.each($.finalist.getAllCategories(), function(i, category) {
     var room = $.finalist.getRoom(category, $.finalist.getCurrentDivision());
     var header;
     if (room == undefined || "" == room) {
-      header = $("<th>" + category.name + "</th>");
+      header = $("<div class='rTableHead'>" + category.name + "</div>");
     } else {
-      header = $("<th>" + category.name + "<br/>Room: " + room + "</th>");
+      header = $("<div class='rTableHead'>" + category.name + "<br/>Room: "
+          + room + "</div>");
     }
     headerRow.append(header);
   });
+}
+
+function updatePage() {
+
+  // $("#schedule").empty();
+
+  // output header
+  updateHeader();
 
   var schedule = $.finalist.scheduleFinalists();
 
   var schedRows = [];
   $.each(schedule, function(i, slot) {
-    var row = $("<tr></tr>");
-    $("#schedule").append(row);
+    var row = $("<div class='rTableRow'></div>");
+    $("#schedule_body").append(row);
 
-    row.append($("<td>" + slot.time.getHours().toString().padL(2, "0") + ":"
-        + slot.time.getMinutes().toString().padL(2, "0") + "</td>"));
+    row.append($("<div class='rTableCell'>"
+        + slot.time.getHours().toString().padL(2, "0") + ":"
+        + slot.time.getMinutes().toString().padL(2, "0") + "</div>"));
 
     $.each($.finalist.getAllCategories(), function(i, category) {
       var teamNum = slot.categories[category.catId];
       if (teamNum == null) {
-        row.append($("<td>&nbsp;</td>"));
+        row.append($("<div class='rTableCell'>&nbsp;</div>"));
       } else {
         var team = $.finalist.lookupTeam(teamNum);
         var group = team.judgingStation;
-        row.append($("<td>" + teamNum + " - " + team.name + " (" + group
-            + ")</td>"));
+        row.append($("<div class='rTableCell'>" + teamNum + " - " + team.name
+            + " (" + group + ")</div>"));
 
         var dbrow = new FinalistDBRow(category.name, slot.time.getHours(),
             slot.time.getMinutes(), teamNum);
