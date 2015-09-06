@@ -4,6 +4,10 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
+var draggingTeam = null;
+var draggingCategory = null;
+var draggingTeamDiv = null;
+
 function handleDivisionChange() {
   var divIndex = $("#divisions").val();
   var div = $.finalist.getDivisionByIndex(divIndex);
@@ -31,15 +35,109 @@ function updateHeader() {
 }
 
 /**
- * Create the div element for a team.
- * @param team a Team object
+ * Create the div element for a team in a particular category.
+ * 
+ * @param team
+ *          a Team object
+ * @param category
+ *          a Category object
  * @returns a jquery div object
  */
-function createTeamDiv(team) {
+function createTeamDiv(team, category) {
   var group = team.judgingStation;
-  var teamDiv = $("<div>" + team.num + " - " + team.name + " (" + group
-      + ")</div>");
+  var teamDiv = $("<div draggable='true'>" + team.num + " - " + team.name
+      + " (" + group + ")</div>");
+
+  teamDiv.on('dragstart', function(e) {
+    var rawEvent;
+    if (e.originalEvent) {
+      rawEvent = e.originalEvent;
+    } else {
+      rawEvent = e;
+    }
+    // rawEvent.target is the source node.
+
+    $(teamDiv).css('opacity', '0.4');
+
+    var dataTransfer = rawEvent.dataTransfer;
+
+    draggingTeam = team;
+    draggingCategory = category;
+    draggingTeamDiv = teamDiv;
+
+    dataTransfer.effectAllowed = 'move';
+
+    // need something to transfer, otherwise the browser won't let us drag
+    dataTransfer.setData('text/text', "true");
+  });
+  teamDiv.on('dragend', function(e) {
+    // rawEvent.target is the source node.
+    $(teamDiv).css('opacity', '1');
+  });
+
   return teamDiv;
+}
+
+/**
+ * 
+ * @param slot
+ *          Timeslot object
+ * @param category
+ *          Category object
+ * @returns jquery div object
+ */
+function createTimeslotCell(slot, category) {
+  var cell = $("<div class='rTableCell'></div>");
+
+  cell.on('dragover', function(e) {
+    var rawEvent;
+    if (e.originalEvent) {
+      rawEvent = e.originalEvent;
+    } else {
+      rawEvent = e;
+    }
+
+    if (rawEvent.preventDefault) {
+      rawEvent.preventDefault(); // Necessary. Allows us to drop.
+    }
+
+    // report to the user that this is a valid drop target, change the style of
+    // the element
+
+    // FIXME need to check what is being dragged
+
+    rawEvent.dataTransfer.dropEffect = 'move'; // See the section on the
+    // DataTransfer object.
+
+    var transferObj = rawEvent.dataTransfer
+        .getData('application/x-fll-finalist');
+
+    return false;
+  });
+
+  cell.on('drop', function(e) {
+    var rawEvent;
+    if (e.originalEvent) {
+      rawEvent = e.originalEvent;
+    } else {
+      rawEvent = e;
+    }
+
+    // rawEvent.target is current target element.
+
+    if (rawEvent.stopPropagation) {
+      rawEvent.stopPropagation(); // Stops some browsers from redirecting.
+    }
+
+    //FIXME need to update the schedule object
+    // do something with the drop
+    cell.append(draggingTeamDiv);
+    draggingTeam = null;
+    draggingCategory = null;
+    draggingTeamDiv = null;
+  });
+
+  return cell;
 }
 
 function updatePage() {
@@ -61,13 +159,13 @@ function updatePage() {
         + slot.time.getMinutes().toString().padL(2, "0") + "</div>"));
 
     $.each($.finalist.getAllCategories(), function(i, category) {
-      var cell = $("<div class='rTableCell'></div>");
+      var cell = createTimeslotCell(slot, category);
       row.append(cell);
 
       var teamNum = slot.categories[category.catId];
       if (teamNum != null) {
         var team = $.finalist.lookupTeam(teamNum);
-        var teamDiv = createTeamDiv(team);
+        var teamDiv = createTeamDiv(team, category);
         cell.append(teamDiv);
 
         var dbrow = new FinalistDBRow(category.name, slot.time.getHours(),
