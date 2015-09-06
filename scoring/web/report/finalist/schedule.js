@@ -30,6 +30,18 @@ function updateHeader() {
   });
 }
 
+/**
+ * Create the div element for a team.
+ * @param team a Team object
+ * @returns a jquery div object
+ */
+function createTeamDiv(team) {
+  var group = team.judgingStation;
+  var teamDiv = $("<div>" + team.num + " - " + team.name + " (" + group
+      + ")</div>");
+  return teamDiv;
+}
+
 function updatePage() {
 
   // $("#schedule").empty();
@@ -49,14 +61,14 @@ function updatePage() {
         + slot.time.getMinutes().toString().padL(2, "0") + "</div>"));
 
     $.each($.finalist.getAllCategories(), function(i, category) {
+      var cell = $("<div class='rTableCell'></div>");
+      row.append(cell);
+
       var teamNum = slot.categories[category.catId];
-      if (teamNum == null) {
-        row.append($("<div class='rTableCell'>&nbsp;</div>"));
-      } else {
+      if (teamNum != null) {
         var team = $.finalist.lookupTeam(teamNum);
-        var group = team.judgingStation;
-        row.append($("<div class='rTableCell'>" + teamNum + " - " + team.name
-            + " (" + group + ")</div>"));
+        var teamDiv = createTeamDiv(team);
+        cell.append(teamDiv);
 
         var dbrow = new FinalistDBRow(category.name, slot.time.getHours(),
             slot.time.getMinutes(), teamNum);
