@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <fll
   title="2015 FIRST LEGO League - Trash Trek"
-  revision="1"
+  revision="2"
   schemaVersion="1">
 
   <Performance
@@ -10,7 +10,7 @@
 
     <goal
       initialValue="0"
-      max="2"
+      max="4"
       min="0"
       multiplier="60"
       name="m01_using_recycled_material"
@@ -113,7 +113,7 @@
     <goal
       name="m04_sorting_black_reused"
       title="Sorting - Black - Reused (flower box, original)"
-      initialValue="0"
+      initialValue="12"
       min="0"
       max="12"
       multiplier="8">
@@ -163,7 +163,7 @@
       title="Careers"
       initialValue="0"
       min="0"
-      max="2"
+      max="1"
       multiplier="60">
     </goal>
 
@@ -203,7 +203,7 @@
 
     <goal
       name="m07_cleanup_chicken"
-      title="Cleanup - Chicken in small circle"
+      title="Cleanup - Chicken in small circle (BONUS)"
       initialValue="0"
       min="0"
       max="1"
