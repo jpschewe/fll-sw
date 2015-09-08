@@ -26,20 +26,20 @@
 
     <goal
       initialValue="0"
-      name="m03_transport"
-      title="Transport">
-      <value
-        score="60"
-        title="Yellow Bin is completely east of the Truck's Guide"
-        value="east_of_guide" />
-      <value
-        score="50"
-        title="Truck supports all of the Yellow Bin's Weight"
-        value="in_truck" />
-      <value
-        score="0"
-        title="None"
-        value="none" />
+      name="m03_transport_east"
+      title="Transport - Yellow Bin is completely east of the Truck's Guide"
+      min="0"
+      max="1"
+      multiplier="60">
+    </goal>
+
+    <goal
+      initialValue="0"
+      name="m03_transport_support"
+      title="Transport - Truck supports all of the Yellow Bin's Weight"
+      min="0"
+      max="1"
+      multiplier="50">
     </goal>
 
     <goal
@@ -96,7 +96,7 @@
 
     <restriction
       lowerBound="0"
-      upperBound="9"
+      upperBound="6"
       message="There are only 6 blue bars on the table">
       <term>
         <goalRef
@@ -208,22 +208,6 @@
       min="0"
       max="1"
       multiplier="35"></goal>
-
-    <restriction
-      lowerBound="0"
-      upperBound="3"
-      message="There are only 3 animals on the table">
-      <term>
-        <goalRef
-          goal="m07_cleanup_animal"
-          scoreType="raw" />
-      </term>
-      <term>
-        <goalRef
-          goal="m07_cleanup_chicken"
-          scoreType="raw" />
-      </term>
-    </restriction>
 
     <goal
       name="m08_composting"
