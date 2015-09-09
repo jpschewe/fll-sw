@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <fll
   title="2015 FIRST LEGO League - Trash Trek"
-  revision="2"
+  revision="3"
   schemaVersion="1">
 
   <Performance
@@ -14,7 +14,7 @@
       min="0"
       multiplier="60"
       name="m01_using_recycled_material"
-      title="Using Recycled Material" />
+      title="M01 - Blue/Yellow bar in bins in opposite safety - include both sides" />
 
     <goal
       initialValue="0"
@@ -22,29 +22,30 @@
       min="0"
       multiplier="40"
       name="m02_methane"
-      title="Methane" />
+      title="M02 - Methane in truck and/or factory" />
 
-    <goal
-      initialValue="0"
-      name="m03_transport_east"
-      title="Transport - Yellow Bin is completely east of the Truck's Guide"
-      min="0"
-      max="1"
-      multiplier="60">
-    </goal>
 
     <goal
       initialValue="0"
       name="m03_transport_support"
-      title="Transport - Truck supports all of the Yellow Bin's Weight"
+      title="M03 - Truck supports yellow bin's weight"
       min="0"
       max="1"
       multiplier="50">
     </goal>
 
     <goal
+      initialValue="0"
+      name="m03_transport_east"
+      title="M03 - Yellow bin is completely east of guide"
+      min="0"
+      max="1"
+      multiplier="60">
+    </goal>
+
+    <goal
       name="m04_sorting_yellow_east"
-      title="Sorting - Yellow - East Transfer"
+      title="M04 - Yellow bars in bin - West Transfer"
       initialValue="0"
       min="0"
       max="9"
@@ -53,7 +54,7 @@
 
     <goal
       name="m04_sorting_yellow_other"
-      title="Sorting - Yellow - All other areas"
+      title="M04 - Yellow bars in bin - Elsewhere on this side"
       initialValue="0"
       min="0"
       max="9"
@@ -78,7 +79,7 @@
 
     <goal
       name="m04_sorting_blue_east"
-      title="Sorting - Blue - East Transfer"
+      title="M04 - Blue bars in bin - West Transfer"
       initialValue="0"
       min="0"
       max="6"
@@ -87,7 +88,7 @@
 
     <goal
       name="m04_sorting_blue_other"
-      title="Sorting - Blue - All other areas"
+      title="M04 - Blue bars in bin - Elsewhere on this side"
       initialValue="0"
       min="0"
       max="6"
@@ -112,7 +113,7 @@
 
     <goal
       name="m04_sorting_black_reused"
-      title="Sorting - Black - Reused (flower box, original)"
+      title="M04 - Black bars - Reuse (flower box, original)"
       initialValue="12"
       min="0"
       max="12"
@@ -121,7 +122,7 @@
 
     <goal
       name="m04_sorting_black_trash"
-      title="Sorting - Black - Trash (Green bin, landfill)"
+      title="M04 - Black bars - Trash (in matching bin, landfill)"
       initialValue="0"
       min="0"
       max="12"
@@ -130,7 +131,7 @@
 
     <goal
       name="m04_sorting_black_penalty"
-      title="Sorting - Black - Elsewhere"
+      title="M04 - Black bars - Elsewhere NOTE: black bar total MUST equal 12"
       initialValue="0"
       min="0"
       max="12"
@@ -138,9 +139,9 @@
     </goal>
 
     <restriction
-      lowerBound="0"
+      lowerBound="12"
       upperBound="12"
-      message="There are only 12 black bars on the table">
+      message="There are always 12 black bars to score">
       <term>
         <goalRef
           goal="m04_sorting_black_reused"
@@ -160,7 +161,7 @@
 
     <goal
       name="m05_careers"
-      title="Careers"
+      title="M05 - At least one person in sorting area"
       initialValue="0"
       min="0"
       max="1"
@@ -169,7 +170,7 @@
 
     <goal
       name="m06_scrap_cars"
-      title="Scrap Cars"
+      title="M06 - Scrap car"
       initialValue="0">
       <value
         score="65"
@@ -187,7 +188,7 @@
 
     <goal
       name="m07_cleanup_bags"
-      title="Cleanup - Plastic Bags"
+      title="M07 - Plastic Bags in Safety"
       initialValue="0"
       min="0"
       max="2"
@@ -195,7 +196,7 @@
 
     <goal
       name="m07_cleanup_animal"
-      title="Cleanup - Animals"
+      title="M07 - Animals in circles"
       initialValue="0"
       min="0"
       max="3"
@@ -203,7 +204,7 @@
 
     <goal
       name="m07_cleanup_chicken"
-      title="Cleanup - Chicken in small circle (BONUS)"
+      title="M07 - Chicken in small circle (BONUS)"
       initialValue="0"
       min="0"
       max="1"
@@ -211,7 +212,7 @@
 
     <goal
       name="m08_composting"
-      title="Compositing"
+      title="M08 - Composting"
       initialValue="0">
       <value
         score="80"
@@ -229,7 +230,7 @@
 
     <goal
       name="m09_salvage"
-      title="Salvage - valuables to safety"
+      title="M09 - Valuables in safety"
       initialValue="0"
       min="0"
       max="1"
@@ -237,7 +238,7 @@
 
     <goal
       name="m10_demolition"
-      title="Demolition"
+      title="M10 - Building Completely Demolished"
       initialValue="0"
       min="0"
       max="1"
@@ -245,7 +246,7 @@
 
     <goal
       name="m11_purchasing_decisions"
-      title="Purchasing Decisions"
+      title="M11 - Toy planes in safety"
       initialValue="0"
       min="0"
       max="2"
@@ -253,7 +254,7 @@
 
     <goal
       name="m12_repurposing"
-      title="Repurposing"
+      title="M12 - Flower box with Compost"
       initialValue="0"
       min="0"
       max="1"
@@ -264,8 +265,39 @@
       <test winner="HIGH">
         <term>
           <goalRef
-            goal="m01_using_recycled_material"
-            scoreType="raw" />
+            goal="m07_cleanup_animal"
+            scoreType="computed" />
+        </term>
+        <term>
+          <goalRef
+            goal="m07_cleanup_chicken"
+            scoreType="computed" />
+        </term>
+      </test>
+
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="m04_sorting_yellow_east"
+            scoreType="computed" />
+          <goalRef
+            goal="m04_sorting_yellow_other"
+            scoreType="computed" />
+          <goalRef
+            goal="m04_sorting_blue_east"
+            scoreType="computed" />
+          <goalRef
+            goal="m04_sorting_blue_other"
+            scoreType="computed" />
+          <goalRef
+            goal="m04_sorting_black_reused"
+            scoreType="computed" />
+          <goalRef
+            goal="m04_sorting_black_trash"
+            scoreType="computed" />
+          <goalRef
+            goal="m04_sorting_black_penalty"
+            scoreType="computed" />
         </term>
       </test>
 
