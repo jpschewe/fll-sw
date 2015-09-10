@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <fll
   title="2015 FIRST LEGO League - Trash Trek"
-  revision="3"
+  revision="4"
   schemaVersion="1">
 
   <Performance
@@ -14,7 +14,7 @@
       min="0"
       multiplier="60"
       name="m01_using_recycled_material"
-      title="M01 - Blue/Yellow bar in bins in opposite safety - include both sides" />
+      title="M01 - Blue/Yellow in bins in opposite safety - both sides - in must include at least 1 bar" />
 
     <goal
       initialValue="0"
