@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <fll
   title="2015 FIRST LEGO League - Trash Trek"
-  revision="4"
+  revision="5"
   schemaVersion="1">
 
   <Performance
@@ -14,7 +14,7 @@
       min="0"
       multiplier="60"
       name="m01_using_recycled_material"
-      title="M01 - Blue/Yellow in bins in opposite safety - both sides - in must include at least 1 bar" />
+      title="M01 - Blue/Yellow in bins in opposite safety - both sides - bin must include at least 1 bar" />
 
     <goal
       initialValue="0"
@@ -1592,7 +1592,7 @@
       category="Gracious Professionalism">
       <description>Team members act and speak with integrity so others
         feel
-        valued—especially when solving problems or resolving
+        valued - especially when solving problems or resolving
         conflicts
       </description>
       <rubric>
@@ -2003,7 +2003,7 @@
           min="1"
           max="3"
           shortDescription="No clear goals AND no clear strategy">
-          <description>Strategy based only on ease of task – no combined
+          <description>Strategy based only on ease of task - no combined
             missions or maximizing time/effort.
           </description>
         </range>
