@@ -322,7 +322,8 @@ public final class ScoreEntry {
    * @throws ParseException
    */
   public static void generateCheckRestrictionsBody(final Writer writer,
-                                                   final ServletContext application) throws IOException, ParseException {
+                                                   final ServletContext application)
+                                                       throws IOException, ParseException {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final Formatter formatter = new Formatter(writer);
 
@@ -413,7 +414,8 @@ public final class ScoreEntry {
           }
           if (!found) {
             // fall back to just using the first enum value
-            LOG.warn(String.format("Initial value for enum goal '%s' does not match the score of any enum value", name));
+            LOG.warn(String.format("Initial value for enum goal '%s' does not match the score of any enum value",
+                                   name));
             writer.println("  "
                 + getVarNameForRawScore(name) + " = \"" + values.get(0).getValue() + "\";");
           }
@@ -423,7 +425,7 @@ public final class ScoreEntry {
               + getVarNameForRawScore(name) + " = " + initialValue + ";");
         }
       } // !computed
-    }// foreach goal
+    } // foreach goal
 
     writer.println("  Verified = 0;");
 
@@ -527,23 +529,24 @@ public final class ScoreEntry {
       final double range = max
           - min;
 
+      if (range >= 10) {
+        generateIncDecButton(name, -5, writer);
+      } else if (range >= 5) {
+        generateIncDecButton(name, -3, writer);
+      }
+
+      // -1
+      generateIncDecButton(name, -1, writer);
+
+      // +1
+      generateIncDecButton(name, 1, writer);
+
       if (FP.greaterThanOrEqual(range, 10, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
         generateIncDecButton(name, 5, writer);
       } else if (range >= 5) {
         generateIncDecButton(name, 3, writer);
       }
 
-      // +1
-      generateIncDecButton(name, 1, writer);
-
-      // -1
-      generateIncDecButton(name, -1, writer);
-
-      if (range >= 10) {
-        generateIncDecButton(name, -5, writer);
-      } else if (range >= 5) {
-        generateIncDecButton(name, -3, writer);
-      }
     }
     writer.println("       </tr>");
     writer.println("    </table>");
@@ -661,9 +664,8 @@ public final class ScoreEntry {
                 }
               }
               if (!found) {
-                throw new RuntimeException(
-                                           "Found enumerated value in the database that's not in the XML document, goal: "
-                                               + name + " value: " + storedValue);
+                throw new RuntimeException("Found enumerated value in the database that's not in the XML document, goal: "
+                    + name + " value: " + storedValue);
               }
             } else {
               // just use the value that is stored in the database

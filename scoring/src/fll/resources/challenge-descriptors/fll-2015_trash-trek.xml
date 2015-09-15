@@ -1,29 +1,303 @@
 <?xml version="1.0"?>
 <fll
-  title="2015 FIRST LEGO League"
-  revision="1"
+  title="2015 FIRST LEGO League - Trash Trek"
+  revision="5"
   schemaVersion="1">
 
-  <!-- FIXME: need the performance goals here -->
   <Performance
     minimumScore="0"
     weight="0">
 
     <goal
       initialValue="0"
-      max="12"
+      max="4"
       min="0"
-      multiplier="1"
-      name="dummy"
-      title="Dummy" />
+      multiplier="60"
+      name="m01_using_recycled_material"
+      title="M01 - Blue/Yellow in bins in opposite safety - both sides - bin must include at least 1 bar" />
+
+    <goal
+      initialValue="0"
+      max="2"
+      min="0"
+      multiplier="40"
+      name="m02_methane"
+      title="M02 - Methane in truck and/or factory" />
+
+
+    <goal
+      initialValue="0"
+      name="m03_transport_support"
+      title="M03 - Truck supports yellow bin's weight"
+      min="0"
+      max="1"
+      multiplier="50">
+    </goal>
+
+    <goal
+      initialValue="0"
+      name="m03_transport_east"
+      title="M03 - Yellow bin is completely east of guide"
+      min="0"
+      max="1"
+      multiplier="60">
+    </goal>
+
+    <goal
+      name="m04_sorting_yellow_east"
+      title="M04 - Yellow bars in bin - West Transfer"
+      initialValue="0"
+      min="0"
+      max="9"
+      multiplier="7">
+    </goal>
+
+    <goal
+      name="m04_sorting_yellow_other"
+      title="M04 - Yellow bars in bin - Elsewhere on this side"
+      initialValue="0"
+      min="0"
+      max="9"
+      multiplier="6">
+    </goal>
+
+    <restriction
+      lowerBound="0"
+      upperBound="9"
+      message="There are only 9 yellow bars on the table">
+      <term>
+        <goalRef
+          goal="m04_sorting_yellow_east"
+          scoreType="raw" />
+      </term>
+      <term>
+        <goalRef
+          goal="m04_sorting_yellow_other"
+          scoreType="raw" />
+      </term>
+    </restriction>
+
+    <goal
+      name="m04_sorting_blue_east"
+      title="M04 - Blue bars in bin - West Transfer"
+      initialValue="0"
+      min="0"
+      max="6"
+      multiplier="7">
+    </goal>
+
+    <goal
+      name="m04_sorting_blue_other"
+      title="M04 - Blue bars in bin - Elsewhere on this side"
+      initialValue="0"
+      min="0"
+      max="6"
+      multiplier="6">
+    </goal>
+
+    <restriction
+      lowerBound="0"
+      upperBound="6"
+      message="There are only 6 blue bars on the table">
+      <term>
+        <goalRef
+          goal="m04_sorting_blue_east"
+          scoreType="raw" />
+      </term>
+      <term>
+        <goalRef
+          goal="m04_sorting_blue_other"
+          scoreType="raw" />
+      </term>
+    </restriction>
+
+    <goal
+      name="m04_sorting_black_reused"
+      title="M04 - Black bars - Reuse (flower box, original)"
+      initialValue="12"
+      min="0"
+      max="12"
+      multiplier="8">
+    </goal>
+
+    <goal
+      name="m04_sorting_black_trash"
+      title="M04 - Black bars - Trash (in matching bin, landfill)"
+      initialValue="0"
+      min="0"
+      max="12"
+      multiplier="3">
+    </goal>
+
+    <goal
+      name="m04_sorting_black_penalty"
+      title="M04 - Black bars - Elsewhere NOTE: black bar total MUST equal 12"
+      initialValue="0"
+      min="0"
+      max="12"
+      multiplier="-8">
+    </goal>
+
+    <restriction
+      lowerBound="12"
+      upperBound="12"
+      message="There are always 12 black bars to score">
+      <term>
+        <goalRef
+          goal="m04_sorting_black_reused"
+          scoreType="raw" />
+      </term>
+      <term>
+        <goalRef
+          goal="m04_sorting_black_trash"
+          scoreType="raw" />
+      </term>
+      <term>
+        <goalRef
+          goal="m04_sorting_black_penalty"
+          scoreType="raw" />
+      </term>
+    </restriction>
+
+    <goal
+      name="m05_careers"
+      title="M05 - At least one person in sorting area"
+      initialValue="0"
+      min="0"
+      max="1"
+      multiplier="60">
+    </goal>
+
+    <goal
+      name="m06_scrap_cars"
+      title="M06 - Scrap car"
+      initialValue="0">
+      <value
+        score="65"
+        title="Engine installed"
+        value="engine_installed" />
+      <value
+        score="50"
+        title="Car folded"
+        value="car_folded" />
+      <value
+        score="0"
+        title="None"
+        value="none" />
+    </goal>
+
+    <goal
+      name="m07_cleanup_bags"
+      title="M07 - Plastic Bags in Safety"
+      initialValue="0"
+      min="0"
+      max="2"
+      multiplier="30"></goal>
+
+    <goal
+      name="m07_cleanup_animal"
+      title="M07 - Animals in circles"
+      initialValue="0"
+      min="0"
+      max="3"
+      multiplier="20"></goal>
+
+    <goal
+      name="m07_cleanup_chicken"
+      title="M07 - Chicken in small circle (BONUS)"
+      initialValue="0"
+      min="0"
+      max="1"
+      multiplier="35"></goal>
+
+    <goal
+      name="m08_composting"
+      title="M08 - Composting"
+      initialValue="0">
+      <value
+        score="80"
+        title="In Safety"
+        value="safety" />
+      <value
+        score="60"
+        title="Ejected"
+        value="ejected" />
+      <value
+        score="0"
+        title="None"
+        value="none" />
+    </goal>
+
+    <goal
+      name="m09_salvage"
+      title="M09 - Valuables in safety"
+      initialValue="0"
+      min="0"
+      max="1"
+      multiplier="60"></goal>
+
+    <goal
+      name="m10_demolition"
+      title="M10 - Building Completely Demolished"
+      initialValue="0"
+      min="0"
+      max="1"
+      multiplier="85"></goal>
+
+    <goal
+      name="m11_purchasing_decisions"
+      title="M11 - Toy planes in safety"
+      initialValue="0"
+      min="0"
+      max="2"
+      multiplier="40"></goal>
+
+    <goal
+      name="m12_repurposing"
+      title="M12 - Flower box with Compost"
+      initialValue="0"
+      min="0"
+      max="1"
+      multiplier="40"></goal>
 
     <tiebreaker>
 
       <test winner="HIGH">
         <term>
           <goalRef
-            goal="dummy"
-            scoreType="raw" />
+            goal="m07_cleanup_animal"
+            scoreType="computed" />
+        </term>
+        <term>
+          <goalRef
+            goal="m07_cleanup_chicken"
+            scoreType="computed" />
+        </term>
+      </test>
+
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="m04_sorting_yellow_east"
+            scoreType="computed" />
+          <goalRef
+            goal="m04_sorting_yellow_other"
+            scoreType="computed" />
+          <goalRef
+            goal="m04_sorting_blue_east"
+            scoreType="computed" />
+          <goalRef
+            goal="m04_sorting_blue_other"
+            scoreType="computed" />
+          <goalRef
+            goal="m04_sorting_black_reused"
+            scoreType="computed" />
+          <goalRef
+            goal="m04_sorting_black_trash"
+            scoreType="computed" />
+          <goalRef
+            goal="m04_sorting_black_penalty"
+            scoreType="computed" />
         </term>
       </test>
 
@@ -1318,7 +1592,7 @@
       category="Gracious Professionalism">
       <description>Team members act and speak with integrity so others
         feel
-        valued—especially when solving problems or resolving
+        valued - especially when solving problems or resolving
         conflicts
       </description>
       <rubric>
@@ -1729,7 +2003,7 @@
           min="1"
           max="3"
           shortDescription="No clear goals AND no clear strategy">
-          <description>Strategy based only on ease of task – no combined
+          <description>Strategy based only on ease of task - no combined
             missions or maximizing time/effort.
           </description>
         </range>
