@@ -12,6 +12,7 @@ import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -550,7 +551,9 @@ public class ScoresheetGenerator {
         if (goal.isEnumerated()) {
           // replace spaces with "no-break" spaces
           boolean first = true;
-          for (final EnumeratedValue value : goal.getSortedValues()) {
+          final List<EnumeratedValue> values = goal.getSortedValues();
+          Collections.reverse(values); // reverse as we want the bottom value from the score entry page to be on the left end
+          for (final EnumeratedValue value : values) {
             if (!first) {
               choices.append(" /"
                   + NON_BREAKING_SPACE);
