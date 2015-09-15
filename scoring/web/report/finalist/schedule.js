@@ -97,22 +97,21 @@ function createTimeslotCell(slot, category) {
       rawEvent = e;
     }
 
-    if (rawEvent.preventDefault) {
-      rawEvent.preventDefault(); // Necessary. Allows us to drop.
+    if (category == draggingCategory) {
+      if (rawEvent.preventDefault) {
+        rawEvent.preventDefault(); // Necessary. Allows us to drop.
+      }
+
+      rawEvent.dataTransfer.dropEffect = 'move'; // See the section on the
+      // DataTransfer object.
+
+      var transferObj = rawEvent.dataTransfer
+          .getData('application/x-fll-finalist');
+
+      return false;
+    } else {
+      return true;
     }
-
-    // report to the user that this is a valid drop target, change the style of
-    // the element
-
-    // FIXME need to check what is being dragged
-
-    rawEvent.dataTransfer.dropEffect = 'move'; // See the section on the
-    // DataTransfer object.
-
-    var transferObj = rawEvent.dataTransfer
-        .getData('application/x-fll-finalist');
-
-    return false;
   });
 
   cell.on('drop', function(e) {
@@ -129,7 +128,9 @@ function createTimeslotCell(slot, category) {
       rawEvent.stopPropagation(); // Stops some browsers from redirecting.
     }
 
-    //FIXME need to update the schedule object
+    draggingTeamDiv.removeClass('valid-target');
+
+    // FIXME need to update the schedule object
     // do something with the drop
     cell.append(draggingTeamDiv);
     draggingTeam = null;
