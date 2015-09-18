@@ -7,6 +7,7 @@
 var draggingTeam = null;
 var draggingCategory = null;
 var draggingTeamDiv = null;
+var schedule = null;
 
 function handleDivisionChange() {
   var divIndex = $("#divisions").val();
@@ -130,9 +131,11 @@ function createTimeslotCell(slot, category) {
 
     draggingTeamDiv.removeClass('valid-target');
 
-    // FIXME need to update the schedule object
+    moveTeam(draggingTeam, draggingCategory, slot);
+
     // do something with the drop
     cell.append(draggingTeamDiv);
+
     draggingTeam = null;
     draggingCategory = null;
     draggingTeamDiv = null;
@@ -141,16 +144,64 @@ function createTimeslotCell(slot, category) {
   return cell;
 }
 
-function updatePage() {
+/**
+ * Convert schedule to the JSON required to send to the server.
+ */
+function updateScheduleToSend() {
 
-  // $("#schedule").empty();
+  var schedRows = [];
+  $.each(schedule, function(i, slot) {
+    $.each($.finalist.getAllCategories(), function(i, category) {
+      var teamNum = slot.categories[category.catId];
+      if (teamNum != null) {
+        var dbrow = new FinalistDBRow(category.name, slot.time.getHours(),
+            slot.time.getMinutes(), teamNum);
+        schedRows.push(dbrow);
+      }
+    }); // foreach category
+
+  }); // foreach timeslot
+
+  $('#sched_data').val($.toJSON(schedRows));
+}
+
+/**
+ * Move a team from it's current timeslot to the newly specified timeslot for
+ * the specified category.
+ * 
+ * @param team
+ *          a Team object to move
+ * @param category
+ *          a Category object that the team is moving in
+ * @param newSlot
+ *          the new slot to put the team in
+ */
+function moveTeam(team, category, newSlot) {
+
+  // remove team from all slots with this category
+  $.each(schedule, function(i, slot) {
+    var found = false;
+    $.each(slot.categories, function(categoryId, teamNumber) {
+      if (categoryId == category.catId && teamNumber == team.num) {
+        found = true;
+      }
+    }); // foreach category
+    if (found) {
+      delete slot.categories[category.catId];
+    }
+  }); // foreach timeslot
+
+  // add team to new slot
+  newSlot.categories[category.catId] = team.num;
+}
+
+function updatePage() {
 
   // output header
   updateHeader();
 
-  var schedule = $.finalist.scheduleFinalists();
+  schedule = $.finalist.scheduleFinalists();
 
-  var schedRows = [];
   $.each(schedule, function(i, slot) {
     var row = $("<div class='rTableRow'></div>");
     $("#schedule_body").append(row);
@@ -168,16 +219,10 @@ function updatePage() {
         var team = $.finalist.lookupTeam(teamNum);
         var teamDiv = createTeamDiv(team, category);
         cell.append(teamDiv);
-
-        var dbrow = new FinalistDBRow(category.name, slot.time.getHours(),
-            slot.time.getMinutes(), teamNum);
-        schedRows.push(dbrow);
       }
     }); // foreach category
 
   }); // foreach timeslot
-
-  $('#sched_data').val($.toJSON(schedRows));
 
   var categoryRows = [];
   $.each($.finalist.getAllCategories(), function(i, category) {
@@ -205,9 +250,9 @@ $(document).ready(
       $("#divisions").change(function() {
         handleDivisionChange();
       });
-      handleDivisionChange();
 
-      updatePage();
+      // force an update to generate the initial page
+      handleDivisionChange();
 
       // doesn't depend on the division, so can be done only once
       var nonNumericNominees = [];
@@ -220,6 +265,9 @@ $(document).ready(
         nonNumericNominees.push(nominees);
       }); // foreach category
       $('#non-numeric-nominees_data').val($.toJSON(nonNumericNominees));
+
+      // update the schedule data before submitting the form
+      $('#get_sched_data').submit(updateScheduleToSend);
 
       $.finalist.displayNavbar();
     });
