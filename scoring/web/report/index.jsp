@@ -39,6 +39,10 @@
     <li><a href="RankingReport">Ranking Report for teams</a>. This
       is printed at the end of the day and each team gets their page.</li>
 
+    <li><a href="PerformanceScoreReport">Performance Score
+        Report</a>. This displays the details of the performance runs for
+      each team.</li>
+
     <li><a href="PlayoffReport">Winners of each playoff bracket</a>.
       This is useful for the awards ceremony.</li>
 
@@ -57,64 +61,65 @@
     a state tournament where all teams are competing for first place in
     each category, but there are too many teams for one judge to see.</p>
 
-  <li><a href="finalist/load.jsp">Schedule Finalists</a>. This is
-    used when one judge doesn't see all teams in a division and the top
-    teams need to be judged again to choose the winners.</li>
+  <ul>
+    <li><a href="finalist/load.jsp">Schedule Finalists</a>. This is
+      used when one judge doesn't see all teams in a division and the
+      top teams need to be judged again to choose the winners.</li>
 
-  <li>
-    <form
-      ACTION='finalist/PrivateFinalistSchedule'
-      METHOD='POST'>
-      <select name='division'>
-        <c:forEach
-          var="division"
-          items="${finalistDivisions }">
-          <option value='${division }'>${division }</option>
-        </c:forEach>
-      </select> <input
-        type='submit'
-        value='Private Finalist Schedule (PDF)' /> This displays the
-      finalist schedule for all categories.
-    </form>
-  </li>
+    <li>
+      <form
+        ACTION='finalist/PrivateFinalistSchedule'
+        METHOD='POST'>
+        <select name='division'>
+          <c:forEach
+            var="division"
+            items="${finalistDivisions }">
+            <option value='${division }'>${division }</option>
+          </c:forEach>
+        </select> <input
+          type='submit'
+          value='Private Finalist Schedule (PDF)' /> This displays the
+        finalist schedule for all categories.
+      </form>
+    </li>
 
-  <li>
-    <form
-      ACTION='finalist/PublicFinalistSchedule'
-      METHOD='POST'>
-      <select name='division'>
-        <c:forEach
-          var="division"
-          items="${finalistDivisions }">
-          <option value='${division }'>${division }</option>
-        </c:forEach>
-      </select> <input
-        type='submit'
-        value='Public Finalist Schedule (PDF)' /> This displays the
-      finalist schedule for public categories.
-    </form>
-  </li>
+    <li>
+      <form
+        ACTION='finalist/PublicFinalistSchedule'
+        METHOD='POST'>
+        <select name='division'>
+          <c:forEach
+            var="division"
+            items="${finalistDivisions }">
+            <option value='${division }'>${division }</option>
+          </c:forEach>
+        </select> <input
+          type='submit'
+          value='Public Finalist Schedule (PDF)' /> This displays the
+        finalist schedule for public categories.
+      </form>
+    </li>
 
-  <li>
-    <form
-      ACTION='finalist/PublicFinalistDisplaySchedule.jsp'
-      METHOD='POST'>
-      <select name='division'>
-        <c:forEach
-          var="division"
-          items="${finalistDivisions }">
-          <option value='${division }'>${division }</option>
-        </c:forEach>
-      </select> <input
-        type='submit'
-        value='Public Finalist Schedule (HTML)' /> This displays the
-      finalist schedule for public categories. This should be used on
-      the big screen display.
-    </form>
-  </li>
+    <li>
+      <form
+        ACTION='finalist/PublicFinalistDisplaySchedule.jsp'
+        METHOD='POST'>
+        <select name='division'>
+          <c:forEach
+            var="division"
+            items="${finalistDivisions }">
+            <option value='${division }'>${division }</option>
+          </c:forEach>
+        </select> <input
+          type='submit'
+          value='Public Finalist Schedule (HTML)' /> This displays the
+        finalist schedule for public categories. This should be used on
+        the big screen display.
+      </form>
+    </li>
 
-  <li><a href="finalist/TeamFinalistSchedule">Finalist Schedule
-      for each team</a></li>
+    <li><a href="finalist/TeamFinalistSchedule">Finalist
+        Schedule for each team</a></li>
 
 
   </ul>

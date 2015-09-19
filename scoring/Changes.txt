@@ -1,3 +1,8 @@
+* 403 - Allow judges to be added from the subjective datafile.
+* 402 - Remove null subjective rows when uploading scores from the webapp 
+* 398 - Add report to display each team's performance scores in detail
+* 334 - Display the lowest scoring element first in the score sheets 
+* 374 - Check all saved schedules with a unit test to make sure they all load
 * 387 - Show quartiles rather than actual ranks in the ranking report
 * 391 - Add shortDescription attribute to rubric range
 * 392 - Properly support no schedule in the subjective web app

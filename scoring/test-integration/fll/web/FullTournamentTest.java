@@ -57,7 +57,6 @@ import fll.TestUtils;
 import fll.Utilities;
 import fll.db.ImportDB;
 import fll.subjective.SubjectiveFrame;
-import fll.util.FP;
 import fll.util.LogUtils;
 import fll.web.developer.QueryHandler;
 import fll.web.playoff.PlayoffIndex;
@@ -173,8 +172,8 @@ public class FullTournamentTest {
       SQLFunctions.close(prep);
       prep = null;
 
-      final Document challengeDocument  = ChallengeParser.parse(new InputStreamReader(
-                                                                                       FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")));
+      final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(
+                                                                                     FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")));
       Assert.assertNotNull(challengeDocument);
       final ChallengeDescription description = new ChallengeDescription(challengeDocument.getDocumentElement());
       final PerformanceScoreCategory performanceElement = description.getPerformance();
@@ -579,7 +578,7 @@ public class FullTournamentTest {
     Assert.assertNotNull("printable form not found", form);
 
     final String formSource = WebTestUtils.getPageSource(form.getPage());
-    LOGGER.info("Form source: "
+    LOGGER.debug("Form source: "
         + formSource);
 
     // set division
@@ -805,8 +804,7 @@ public class FullTournamentTest {
                 final String valueStr = rs.getString(name);
                 final String radioID = ScoreEntry.getIDForEnumRadio(name, valueStr);
                 selenium.findElement(By.id(radioID)).click();
-              } else if (FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE)
-                  && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
+              } else if (goal.isYesNo()) {
                 final int value = rs.getInt(name);
                 final String buttonID;
                 if (0 == value) {
@@ -916,8 +914,6 @@ public class FullTournamentTest {
             if (!element.isComputed()) {
               final Goal goal = (Goal) element;
               final String name = goal.getName();
-              final double min = goal.getMin();
-              final double max = goal.getMax();
 
               if (goal.isEnumerated()) {
                 // need check if the right radio button is selected
@@ -930,8 +926,7 @@ public class FullTournamentTest {
 
                 Assert.assertEquals("Wrong enum selected for goal: "
                     + name, value.toLowerCase(), formValue.toLowerCase());
-              } else if (FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE)
-                  && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
+              } else if (goal.isYesNo()) {
                 final String formValue = selenium.findElement(By.name(ScoreEntry.getElementNameForYesNoDisplay(name)))
                                                  .getAttribute("value");
                 Assert.assertNotNull("Null value for goal: "

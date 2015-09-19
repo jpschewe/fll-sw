@@ -42,6 +42,7 @@ import fll.Tournament;
 import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
+import fll.web.admin.UploadSubjectiveData;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreCategory;
@@ -285,6 +286,8 @@ public class SubjectiveScoresServlet extends HttpServlet {
 
       } // foreach category
 
+      UploadSubjectiveData.removeNullSubjectiveRows(connection, currentTournament, challengeDescription);
+      
       final Tournament tournament = Tournament.findTournamentByID(connection, currentTournament);
       tournament.recordSubjectiveModified(connection);
 

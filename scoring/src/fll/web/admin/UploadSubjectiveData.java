@@ -17,6 +17,7 @@ import java.sql.Types;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -31,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
@@ -44,6 +46,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.JudgeInformation;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
@@ -150,8 +153,8 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
                                         final int currentTournament,
                                         final ChallengeDescription challengeDescription,
                                         final Connection connection,
-                                        final ServletContext application) throws SQLException, IOException,
-      ParseException, SAXException {
+                                        final ServletContext application)
+                                            throws SQLException, IOException, ParseException, SAXException {
     if (LOGGER.isDebugEnabled()) {
       try {
         LOGGER.debug("Saving uploaded file to ");
@@ -205,8 +208,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
       }
 
       if (null == scoreDocument) {
-        throw new FLLRuntimeException(
-                                      "Cannot parse input as a compressed subjective data file or an uncompressed XML file");
+        throw new FLLRuntimeException("Cannot parse input as a compressed subjective data file or an uncompressed XML file");
       }
 
       saveSubjectiveData(scoreDocument, currentTournament, challengeDescription, connection);
@@ -225,6 +227,9 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
                                         final ChallengeDescription challengeDescription,
                                         final Connection connection) throws SQLException, IOException, ParseException {
 
+    // make sure all judges exist in the database first
+    addMissingJudges(connection, currentTournament, scoreDocument);
+    
     final Element scoresElement = scoreDocument.getDocumentElement();
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("first element: "
@@ -247,19 +252,45 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
         }
       }
       if (null == categoryElement) {
-        throw new RuntimeException(
-                                   "Cannot find subjective category description for category in score document category: "
-                                       + categoryName);
+        throw new RuntimeException("Cannot find subjective category description for category in score document category: "
+            + categoryName);
       }
 
       saveCategoryData(currentTournament, connection, scoreCategoryElement, categoryName, categoryElement);
-      removeNullRows(currentTournament, connection, categoryName, categoryElement);
     }
 
-    final Tournament tournament = Tournament.findTournamentByID(connection,currentTournament);
+    removeNullSubjectiveRows(connection, currentTournament, challengeDescription);
+
+    final Tournament tournament = Tournament.findTournamentByID(connection, currentTournament);
     tournament.recordSubjectiveModified(connection);
   }
 
+  /**
+   * Remove subjective score rows from database that are empty. These
+   * are rows that have null for all scores and is not a no show.
+   * 
+   * @param connection database connection
+   * @param tournamentId which tournament to work on
+   * @param challengeDescription the challenge description
+   */
+  public static void removeNullSubjectiveRows(final Connection connection,
+                                              final int tournamentId,
+                                              final ChallengeDescription challengeDescription) throws SQLException {
+    for (final ScoreCategory cat : challengeDescription.getSubjectiveCategories()) {
+      removeNullRows(tournamentId, connection, cat.getName(), cat);
+    }
+  }
+
+  /**
+   * Remove rows from the specified subjective category that are empty. These
+   * are rows that have null for all scores and is not a no show.
+   * 
+   * @param currentTournament
+   * @param connection
+   * @param categoryName
+   * @param categoryElement
+   * @throws SQLException
+   */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns are dynamic")
   private static void removeNullRows(final int currentTournament,
                                      final Connection connection,
@@ -323,10 +354,10 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
           + insertSQLValues.toString() + ")");
       // initialze the tournament
       insertPrep.setInt(2, currentTournament);
-      updatePrep.setInt(numGoals + 3, currentTournament);
+      updatePrep.setInt(numGoals
+          + 3, currentTournament);
 
-      for (final Element scoreElement : new NodelistElementCollectionAdapter(
-                                                                             scoreCategoryElement.getElementsByTagName("score"))) {
+      for (final Element scoreElement : new NodelistElementCollectionAdapter(scoreCategoryElement.getElementsByTagName("score"))) {
 
         if (scoreElement.hasAttribute("modified")
             && "true".equalsIgnoreCase(scoreElement.getAttribute("modified"))) {
@@ -338,15 +369,17 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
                 + teamNumber);
           }
 
-          final String judge = scoreElement.getAttribute("judge");
+          final String judgeId = scoreElement.getAttribute("judge");
           final boolean noShow = Boolean.parseBoolean(scoreElement.getAttribute("NoShow"));
           updatePrep.setBoolean(1, noShow);
           insertPrep.setBoolean(4, noShow);
 
           insertPrep.setInt(1, teamNumber);
-          updatePrep.setInt(numGoals + 2, teamNumber);
-          insertPrep.setString(3, judge);
-          updatePrep.setString(numGoals + 4, judge);
+          updatePrep.setInt(numGoals
+              + 2, teamNumber);
+          insertPrep.setString(3, judgeId);
+          updatePrep.setString(numGoals
+              + 4, judgeId);
 
           int goalIndex = 0;
           for (final AbstractGoal goalDescription : goalDescriptions) {
@@ -355,16 +388,22 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
             final Element subscoreElement = SubjectiveUtils.getSubscoreElement(scoreElement, goalName);
             if (null == subscoreElement) {
               // no subscore element, no show or deleted
-              insertPrep.setNull(goalIndex + 5, Types.DOUBLE);
-              updatePrep.setNull(goalIndex + 2, Types.DOUBLE);
+              insertPrep.setNull(goalIndex
+                  + 5, Types.DOUBLE);
+              updatePrep.setNull(goalIndex
+                  + 2, Types.DOUBLE);
             } else {
               final String value = subscoreElement.getAttribute("value");
               if (!value.trim().isEmpty()) {
-                insertPrep.setString(goalIndex + 5, value.trim());
-                updatePrep.setString(goalIndex + 2, value.trim());
+                insertPrep.setString(goalIndex
+                    + 5, value.trim());
+                updatePrep.setString(goalIndex
+                    + 2, value.trim());
               } else {
-                insertPrep.setNull(goalIndex + 5, Types.DOUBLE);
-                updatePrep.setNull(goalIndex + 2, Types.DOUBLE);
+                insertPrep.setNull(goalIndex
+                    + 5, Types.DOUBLE);
+                updatePrep.setNull(goalIndex
+                    + 2, Types.DOUBLE);
               }
             }
 
@@ -386,4 +425,61 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
     }
 
   }
+
+  /**
+   * Add any judges to the database that are referenced in the score file that
+   * aren't already in the database.
+   */
+  private static void addMissingJudges(final Connection connection,
+                                       final int tournamentId,
+                                       final Document scoreDocument) throws SQLException {
+
+    PreparedStatement insertJudge = null;
+    try {
+      insertJudge = connection.prepareStatement("INSERT INTO Judges (id, category, Tournament, station) VALUES (?, ?, ?, ?)");
+      insertJudge.setInt(3, tournamentId);
+
+      final Collection<JudgeInformation> currentJudges = JudgeInformation.getJudges(connection, tournamentId);
+
+      final Element scoresElement = scoreDocument.getDocumentElement();
+
+      for (final Element scoreCategoryNode : new NodelistElementCollectionAdapter(scoresElement.getChildNodes())) {
+        final Element scoreCategoryElement = scoreCategoryNode; // "subjectiveCategory"
+        final String categoryName = scoreCategoryElement.getAttribute("name");
+
+        for (final Element scoreElement : new NodelistElementCollectionAdapter(scoreCategoryElement.getElementsByTagName("score"))) {
+          final String judgeId = scoreElement.getAttribute("judge");
+          final String station = scoreElement.getAttribute("judging_station");
+          final JudgeInformation judge = new JudgeInformation(judgeId, categoryName, station);
+          if (!doesJudgeExist(currentJudges, judge)) {
+            // add judge
+            insertJudge.setString(1, judge.getId());
+            insertJudge.setString(2, judge.getCategory());
+            insertJudge.setString(4, judge.getStation());
+            insertJudge.executeUpdate();
+
+            currentJudges.add(judge);
+          }
+        } // foreach score
+      } // foreach category
+
+    } finally {
+      SQLFunctions.close(insertJudge);
+    }
+
+  }
+
+  /**
+   * Is judge in currentJudges?
+   */
+  private static boolean doesJudgeExist(final Collection<JudgeInformation> currentJudges,
+                                        final JudgeInformation judge) {
+    for (final JudgeInformation cjudge : currentJudges) {
+      if (ComparisonUtils.safeEquals(cjudge, judge)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
 }

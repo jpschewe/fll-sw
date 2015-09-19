@@ -68,11 +68,8 @@ public class TestPlayoffs {
       }
 
       // set seeding rounds to 1
-      IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-          + "admin/index.jsp");
-      final Select seedingRoundsSelection = new Select(selenium.findElement(By.name("seedingRounds")));
-      seedingRoundsSelection.selectByValue("1");
-      selenium.findElement(By.name("changeSeedingRounds")).click();
+      final int tournamentId = IntegrationTestUtils.getCurrentTournamentId(selenium);
+      IntegrationTestUtils.changeNumSeedingRounds(selenium, tournamentId, 1);
 
       // enter 1 score for all teams equal to their team number
       for (int teamNumber = 0; teamNumber < 4; ++teamNumber) {
