@@ -9,9 +9,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.text.DateFormat;
 import java.util.Collections;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -36,11 +34,6 @@ import com.itextpdf.text.Font;
 import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.Phrase;
-import com.itextpdf.text.pdf.PdfContentByte;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfPageEventHelper;
 import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.CategoryRank;
@@ -69,8 +62,6 @@ public class RankingReport extends BaseFLLServlet {
 
   private static final Font HEADER_FONT = TITLE_FONT;
 
-  private boolean mUseQuartiles;
-
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -84,7 +75,7 @@ public class RankingReport extends BaseFLLServlet {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
 
-      mUseQuartiles = GlobalParameters.getUseQuartilesInRankingReport(connection);
+      final boolean useQuartiles = GlobalParameters.getUseQuartilesInRankingReport(connection);
 
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
@@ -92,8 +83,9 @@ public class RankingReport extends BaseFLLServlet {
       final Document document = new Document(PageSize.LETTER);
       final ByteArrayOutputStream baos = new ByteArrayOutputStream();
       final PdfWriter writer = PdfWriter.getInstance(document, baos);
-      writer.setPageEvent(new PageEventHandler(challengeDescription.getTitle(),
-                                               Queries.getCurrentTournamentName(connection)));
+      writer.setPageEvent(new ReportPageEventHandler(HEADER_FONT, "Final Computed Rankings",
+                                                     challengeDescription.getTitle(),
+                                                     Queries.getCurrentTournamentName(connection)));
 
       document.open();
 
@@ -131,21 +123,21 @@ public class RankingReport extends BaseFLLServlet {
         // pull out Overall first
         if (categories.contains(CategoryRank.OVERALL_CATEGORY_NAME)) {
           final String category = CategoryRank.OVERALL_CATEGORY_NAME;
-          outputCategory(para, teamRanks, category);
+          outputCategory(para, teamRanks, category, useQuartiles);
         }
         para.add(Chunk.NEWLINE);
 
         // pull out performance next
         if (categories.contains(CategoryRank.PERFORMANCE_CATEGORY_NAME)) {
           final String category = CategoryRank.PERFORMANCE_CATEGORY_NAME;
-          outputCategory(para, teamRanks, category);
+          outputCategory(para, teamRanks, category, useQuartiles);
         }
         para.add(Chunk.NEWLINE);
 
         for (final String category : categories) {
           if (!CategoryRank.PERFORMANCE_CATEGORY_NAME.equals(category)
               && !CategoryRank.OVERALL_CATEGORY_NAME.equals(category)) {
-            outputCategory(para, teamRanks, category);
+            outputCategory(para, teamRanks, category, useQuartiles);
           }
         }
 
@@ -189,7 +181,8 @@ public class RankingReport extends BaseFLLServlet {
 
   private void outputCategory(final Paragraph para,
                               final TeamRanking teamRanks,
-                              final String category) {
+                              final String category,
+                              boolean useQuartiles) {
     para.add(new Chunk(category
         + ": ", RANK_TITLE_FONT));
 
@@ -201,7 +194,7 @@ public class RankingReport extends BaseFLLServlet {
     } else {
       final double percentage = (double) rank
           / catRank.getNumTeams();
-      if (mUseQuartiles) {
+      if (useQuartiles) {
         para.add(new Chunk(String.format("%s in %s", convertPercentageToQuartile(percentage), catRank.getGroup()),
                            RANK_VALUE_FONT));
       } else {
@@ -222,52 +215,5 @@ public class RankingReport extends BaseFLLServlet {
     } else {
       return "Quartile 4";
     }
-  }
-
-  /**
-   * Be able to initialize the header table at the end of a page.
-   */
-  private static final class PageEventHandler extends PdfPageEventHelper {
-    public PageEventHandler(final String challengeTitle,
-                            final String tournament) {
-      _tournament = tournament;
-      _challengeTitle = challengeTitle;
-      _formattedDate = DateFormat.getDateInstance().format(new Date());
-    }
-
-    private final String _formattedDate;
-
-    private final String _tournament;
-
-    private final String _challengeTitle;
-
-    @Override
-    // initialization of the header table
-    public void onEndPage(final PdfWriter writer,
-                          final Document document) {
-      final PdfPTable header = new PdfPTable(2);
-      final Phrase p = new Phrase();
-      final Chunk ck = new Chunk(_challengeTitle
-          + "\nFinal Computed Rankings", HEADER_FONT);
-      p.add(ck);
-      header.getDefaultCell().setBorderWidth(0);
-      header.addCell(p);
-      header.getDefaultCell().setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
-      header.addCell(new Phrase(new Chunk("Tournament: "
-          + _tournament + "\nDate: " + _formattedDate, HEADER_FONT)));
-      final PdfPCell blankCell = new PdfPCell();
-      blankCell.setBorder(0);
-      blankCell.setBorderWidthTop(1.0f);
-      blankCell.setColspan(2);
-      header.addCell(blankCell);
-
-      final PdfContentByte cb = writer.getDirectContent();
-      cb.saveState();
-      header.setTotalWidth(document.right()
-          - document.left());
-      header.writeSelectedRows(0, -1, document.left(), document.getPageSize().getHeight() - 10, cb);
-      cb.restoreState();
-    }
-
   }
 }

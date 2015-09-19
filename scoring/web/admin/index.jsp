@@ -183,37 +183,6 @@
           href='javascript:hide("EventDivisionHelp")'>[hide]</a>
       </div></li>
 
-
-    <li>
-      <form
-        id='changeSeedingRounds'
-        action='ChangeSeedingRounds'
-        method='post'>
-        Select the number of seeding runs. <select name='seedingRounds'>
-          <c:forEach
-            begin="0"
-            end="10"
-            var="numRounds">
-            <c:choose>
-              <c:when test="${numRounds == numSeedingRounds}">
-                <option
-                  selected
-                  value='${numRounds}'>${numRounds}</option>
-              </c:when>
-              <c:otherwise>
-                <option value='${numRounds}'>${numRounds }</option>
-              </c:otherwise>
-            </c:choose>
-
-          </c:forEach>
-        </select> <input
-          type='submit'
-          name='changeSeedingRounds'
-          value='Commit'>
-      </form>
-    </li>
-
-
   </ol>
 
   <h2>Tournament day</h2>

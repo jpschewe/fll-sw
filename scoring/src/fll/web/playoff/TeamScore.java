@@ -5,7 +5,6 @@
  */
 package fll.web.playoff;
 
-
 /**
  * Represents a score for a team. Only the values of simple goals are available
  * through this object.
@@ -17,10 +16,20 @@ public abstract class TeamScore {
    */
   public static final int NON_PERFORMANCE_RUN_NUMBER = -1;
 
+  /**
+   * Create a non-performance TeamScore for the specified team.
+   * 
+   * @param teamNumber
+   */
   public TeamScore(final int teamNumber) {
     this(teamNumber, NON_PERFORMANCE_RUN_NUMBER);
   }
 
+  /**
+   * Create a performance TeamScore for the specified team and run number.
+   * 
+   * @param runNumber 1-based run number
+   */
   public TeamScore(final int teamNumber,
                    final int runNumber) {
     _teamNumber = teamNumber;
@@ -54,7 +63,16 @@ public abstract class TeamScore {
   public abstract boolean isNoShow();
 
   /**
+   * Is this score a bye?
+   * 
+   * @return true if this score is a no show
+   */
+  public abstract boolean isBye();
+
+  /**
    * What run do these scores apply to?
+   * This is a 1-based number. It will be {@link #NON_PERFORMANCE_RUN_NUMBER} if
+   * this is not a performance score.
    * 
    * @return the run for the scores
    */
