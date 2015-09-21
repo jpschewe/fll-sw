@@ -230,7 +230,7 @@
    *          integer number of minutes for time slot
    */
   function Timeslot(time, duration) {
-    this.categories = {}; // categoryId -> teamNumber 
+    this.categories = {}; // categoryId -> teamNumber
     this.time = new Date();
     this.time.setTime(time.getTime());
     this.endTime = new Date();
@@ -724,12 +724,24 @@
       }
     },
 
+    /**
+     * Removes a team and saves the data.
+     */
     removeTeamFromCategory : function(category, teamNum) {
+      $.finalist._removeTeamFromCategory(category, teamNum, true);
+    },
+
+    /**
+     * Removes a team, but only calls save if told to.
+     */
+    _removeTeamFromCategory : function(category, teamNum, save) {
       teamNum = parseInt(teamNum, 10);
       var index = category.teams.indexOf(teamNum);
       if (index != -1) {
         category.teams.splice(index, 1);
-        _save();
+        if (save) {
+          _save();
+        }
       }
     },
 
@@ -748,7 +760,7 @@
       });
 
       $.each(toRemove, function(index, teamNum) {
-        $.finalist.removeTeamFromCategory(category, teamNum);
+        $.finalist._removeTeamFromCategory(category, teamNum, false);
       });
       _save();
     },
