@@ -31,6 +31,7 @@
   var _playoffStartMinute;
   var _playoffEndHour;
   var _playoffEndMinute;
+  var _schedules;
 
   function _init_variables() {
     _teams = {};
@@ -49,6 +50,7 @@
     _playoffStartMinute = {};
     _playoffEndHour = {};
     _playoffEndMinute = {};
+    _schedules = {};
   }
 
   /**
@@ -72,6 +74,8 @@
     $.jStorage.set(STORAGE_PREFIX + "_playoffStartMinute", _playoffStartMinute);
     $.jStorage.set(STORAGE_PREFIX + "_playoffEndHour", _playoffEndHour);
     $.jStorage.set(STORAGE_PREFIX + "_playoffEndMinute", _playoffEndMinute);
+
+    $.jStorage.set(STORAGE_PREFIX + "_schedules", _schedules);
   }
 
   /**
@@ -144,6 +148,11 @@
     value = $.jStorage.get(STORAGE_PREFIX + "_playoffEndMinute");
     if (null != value) {
       _playoffEndMinute = value;
+    }
+
+    value = $.jStorage.get(STORAGE_PREFIX + "_schedules");
+    if (null != value) {
+      _schedules = value;
     }
   }
 
@@ -800,18 +809,41 @@
     },
 
     /**
-     * Create the finalist schedule.
+     * Get the schedule for the specified division. If no schedule exists, one
+     * is created.
+     */
+    getSchedule : function(currentDivision) {
+      var schedule = _schedules[currentDivision];
+      if (null == schedule) {
+        schedule = $.finalist.scheduleFinalists(currentDivision);
+        _schedules[currentDivision] = schedule;
+        _save();
+      }
+      return schedule;
+    },
+
+    /**
+     * Set the schedule for the specified division.
+     */
+    setSchedule : function(currentDivision, schedule) {
+      _schedules[currentDivision] = schedule;
+      _save();
+    },
+
+    /**
+     * Create the finalist schedule for the specified division.
      * 
+     * @param currentDivision
+     *          the division to create the schedule for
      * @return array of timeslots in order from earliest to latest
      */
-    scheduleFinalists : function() {
+    scheduleFinalists : function(currentDivision) {
       // Create map of teamNum -> [categories]
       var finalistsCount = {};
       $.each($.finalist.getAllCategories(), function(i, category) {
         $.each(category.teams, function(j, teamNum) {
           var team = $.finalist.lookupTeam(teamNum);
-          if ($.finalist
-              .isTeamInDivision(team, $.finalist.getCurrentDivision())) {
+          if ($.finalist.isTeamInDivision(team, currentDivision)) {
             if (null == finalistsCount[teamNum]) {
               finalistsCount[teamNum] = [];
             }
