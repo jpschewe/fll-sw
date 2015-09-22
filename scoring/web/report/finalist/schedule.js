@@ -154,8 +154,9 @@ function updateScheduleToSend() {
     $.each($.finalist.getAllCategories(), function(i, category) {
       var teamNum = slot.categories[category.catId];
       if (teamNum != null) {
-        var dbrow = new FinalistDBRow(category.name, slot.time.getHours(),
-            slot.time.getMinutes(), teamNum);
+        var slotTime = new Date(slot.time);
+        var dbrow = new FinalistDBRow(category.name, slotTime.getHours(),
+            slotTime.getMinutes(), teamNum);
         schedRows.push(dbrow);
       }
     }); // foreach category
@@ -177,22 +178,35 @@ function updateScheduleToSend() {
  *          the new slot to put the team in
  */
 function moveTeam(team, category, newSlot) {
-
+  var foundSlot = null;
+  var newSlotTime = new Date(newSlot.time);
+  
   // remove team from all slots with this category
   $.each(schedule, function(i, slot) {
-    var found = false;
+    var foundTeam = false;
     $.each(slot.categories, function(categoryId, teamNumber) {
       if (categoryId == category.catId && teamNumber == team.num) {
-        found = true;
+        foundTeam = true;
+      }
+      var slotTime = new Date(slot.time);
+      if(slotTime.getTime() == newSlotTime.getTime()) {
+        foundSlot = slot;
       }
     }); // foreach category
-    if (found) {
+    if (foundTeam) {
       delete slot.categories[category.catId];
     }
   }); // foreach timeslot
 
-  // add team to new slot
-  newSlot.categories[category.catId] = team.num;
+  if(null == foundSlot) {
+    alert("Internal error, could not find slot to move to");
+  }
+  
+  // add team to new slot, reference actual slot in case
+  // newSlot and foundSlot are not the same instance
+  foundSlot.categories[category.catId] = team.num;
+  
+  $.finalist.setSchedule($.finalist.getCurrentDivision(), schedule);
 }
 
 function updatePage() {
@@ -200,15 +214,17 @@ function updatePage() {
   // output header
   updateHeader();
 
-  schedule = $.finalist.scheduleFinalists();
+  schedule = $.finalist.getSchedule($.finalist.getCurrentDivision());
 
   $.each(schedule, function(i, slot) {
+    var slotTime = new Date(slot.time); // ensure we have a Date object
+    
     var row = $("<div class='rTableRow'></div>");
     $("#schedule_body").append(row);
 
     row.append($("<div class='rTableCell'>"
-        + slot.time.getHours().toString().padL(2, "0") + ":"
-        + slot.time.getMinutes().toString().padL(2, "0") + "</div>"));
+        + slotTime.getHours().toString().padL(2, "0") + ":"
+        + slotTime.getMinutes().toString().padL(2, "0") + "</div>"));
 
     $.each($.finalist.getAllCategories(), function(i, category) {
       var cell = createTimeslotCell(slot, category);
