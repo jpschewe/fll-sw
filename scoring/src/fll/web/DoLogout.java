@@ -15,17 +15,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.Logger;
-
-import fll.util.LogUtils;
-
 /**
  * Log a user out of the application.
  */
 @WebServlet("/DoLogout")
 public class DoLogout extends BaseFLLServlet {
-
-  private static final Logger LOGGER = LogUtils.getLogger();
 
   @Override
   protected void processRequest(final HttpServletRequest request,
