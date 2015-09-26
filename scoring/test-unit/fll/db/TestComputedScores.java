@@ -16,9 +16,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.zip.ZipInputStream;
 
-import junit.framework.Assert;
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -30,6 +28,7 @@ import fll.util.LogUtils;
 import fll.web.playoff.DatabaseTeamScore;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * 
