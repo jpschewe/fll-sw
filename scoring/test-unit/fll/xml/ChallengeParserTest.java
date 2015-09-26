@@ -12,9 +12,8 @@ import java.io.Reader;
 import java.net.URL;
 import java.util.Collection;
 
-import junit.framework.Assert;
-
 import org.apache.log4j.Logger;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;

@@ -14,9 +14,7 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import junit.framework.Assert;
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -25,6 +23,7 @@ import fll.TestUtils;
 import fll.Utilities;
 import fll.util.LogUtils;
 import fll.xml.ChallengeParser;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Test generating various databases.

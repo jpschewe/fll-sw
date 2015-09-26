@@ -21,13 +21,11 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-import junit.framework.Assert;
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -41,6 +39,7 @@ import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
 import fll.util.LogUtils;
 import fll.xml.ChallengeParser;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Tests for {@link TournamentSchedule}.
