@@ -74,13 +74,14 @@ public class GatherBugReport extends BaseFLLServlet {
 
       zipOut.putNextEntry(new ZipEntry("server_info.txt"));
       zipOut.write(String.format("Java version: %s%nJava vendor: %s%nOS Name: %s%nOS Arch: %s%nOS Version: %s%nServlet API: %d.%d%nServlet container: %s%n",
-                                 System.getProperty("java.vendor"),//
+                                 System.getProperty("java.vendor"), //
                                  System.getProperty("java.version"), //
-                                 System.getProperty("os.name"),//
-                                 System.getProperty("os.arch"),//
-                                 System.getProperty("os.version"),//
+                                 System.getProperty("os.name"), //
+                                 System.getProperty("os.arch"), //
+                                 System.getProperty("os.version"), //
                                  application.getMajorVersion(), application.getMinorVersion(), //
-                                 application.getServerInfo()).getBytes(Utilities.DEFAULT_CHARSET));
+                                 application.getServerInfo())
+                         .getBytes(Utilities.DEFAULT_CHARSET));
 
       addDatabase(zipOut, connection, challengeDocument);
       addLogFiles(zipOut, application);
@@ -150,16 +151,18 @@ public class GatherBugReport extends BaseFLLServlet {
         return name.startsWith("fllweb.log");
       }
     });
-    for (final File f : webLogs) {
-      if (f.isFile()) {
-        FileInputStream fis = null;
-        try {
-          zipOut.putNextEntry(new ZipEntry(f.getName()));
-          fis = new FileInputStream(f);
-          IOUtils.copy(fis, zipOut);
-          fis.close();
-        } finally {
-          IOUtils.closeQuietly(fis);
+    if (null != webLogs) {
+      for (final File f : webLogs) {
+        if (f.isFile()) {
+          FileInputStream fis = null;
+          try {
+            zipOut.putNextEntry(new ZipEntry(f.getName()));
+            fis = new FileInputStream(f);
+            IOUtils.copy(fis, zipOut);
+            fis.close();
+          } finally {
+            IOUtils.closeQuietly(fis);
+          }
         }
       }
     }
@@ -174,16 +177,19 @@ public class GatherBugReport extends BaseFLLServlet {
     final File tomcatLogDir = new File(tomcatDir, "logs");
     LOGGER.trace("tomcat log dir: "
         + tomcatLogDir.getAbsolutePath());
-    for (final File f : tomcatLogDir.listFiles()) {
-      if (f.isFile()) {
-        FileInputStream fis = null;
-        try {
-          zipOut.putNextEntry(new ZipEntry(f.getName()));
-          fis = new FileInputStream(f);
-          IOUtils.copy(fis, zipOut);
-          fis.close();
-        } finally {
-          IOUtils.closeQuietly(fis);
+    final File[] tomcatLogs = tomcatLogDir.listFiles();
+    if (null != tomcatLogDir) {
+      for (final File f : tomcatLogs) {
+        if (f.isFile()) {
+          FileInputStream fis = null;
+          try {
+            zipOut.putNextEntry(new ZipEntry(f.getName()));
+            fis = new FileInputStream(f);
+            IOUtils.copy(fis, zipOut);
+            fis.close();
+          } finally {
+            IOUtils.closeQuietly(fis);
+          }
         }
       }
     }
