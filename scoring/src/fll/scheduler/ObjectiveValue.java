@@ -58,7 +58,6 @@ import java.util.Arrays;
       throw new IllegalArgumentException("Cannot compare ObjectiveValues with different number of teams or groups");
     }
 
-    final int[] groupCompare = new int[this.numTeams.length];
     boolean equal = true;
     for (int group = 0; group < this.numTeams.length; ++group) {
       if (this.numTeams[group] != other.numTeams[group]) {
@@ -66,13 +65,9 @@ import java.util.Arrays;
       }
 
       if (this.latestSubjectiveTime[group] < other.latestSubjectiveTime[group]) {
-        groupCompare[group] = -1;
         equal = false;
       } else if (this.latestSubjectiveTime[group] > other.latestSubjectiveTime[group]) {
-        groupCompare[group] = 1;
         equal = false;
-      } else {
-        groupCompare[group] = 0;
       }
     }
     if (equal) {
@@ -161,7 +156,8 @@ import java.util.Arrays;
         + this.latestPerformanceTime);
     for (int group = 0; group < this.numTeams.length; ++group) {
       writer.println("group "
-          + group + " numTeams: " + this.numTeams[group] + " latestSubjectiveTime: " + this.latestSubjectiveTime[group]);
+          + group + " numTeams: " + this.numTeams[group] + " latestSubjectiveTime: "
+          + this.latestSubjectiveTime[group]);
     }
     writer.println("Warnings: "
         + this.numWarnings);
