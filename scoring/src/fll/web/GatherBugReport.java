@@ -178,7 +178,7 @@ public class GatherBugReport extends BaseFLLServlet {
     LOGGER.trace("tomcat log dir: "
         + tomcatLogDir.getAbsolutePath());
     final File[] tomcatLogs = tomcatLogDir.listFiles();
-    if (null != tomcatLogDir) {
+    if (null != tomcatLogs) {
       for (final File f : tomcatLogs) {
         if (f.isFile()) {
           FileInputStream fis = null;
