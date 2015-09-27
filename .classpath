@@ -28,7 +28,6 @@
 	<classpathentry kind="lib" path="scoring/lib/opencsv-jps-2.4.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/commons-io-2.4.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/oro-2.0.8.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/findbugs-3.0.0/lib/annotations.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/log4j-1.2.17.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/slf4j-api-1.7.5.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/slf4j-log4j12-1.7.5.jar"/>
@@ -84,5 +83,6 @@
 	<classpathentry kind="lib" path="scoring/lib/test/selenium-java-2.47.1.jar" sourcepath="scoring/lib/test/selenium-java-2.47.1-srcs.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/selenium-server-standalone-2.47.1.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/findbugs-3.0.1/lib/jsr305.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/findbugs-3.0.1/lib/annotations.jar"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>
