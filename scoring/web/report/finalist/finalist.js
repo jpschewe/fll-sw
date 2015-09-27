@@ -231,19 +231,42 @@
   }
 
   /**
+   * A time object.
+   */
+  function Time(hour, minute) {
+    this.hour = hour;
+    this.minute = minute;
+  }
+
+  /**
+   * Convert a time to a Date object
+   */
+  function timeToDate(time) {
+    var d = new Date();
+    d.setHours(time.hour);
+    d.setMinutes(time.minute);
+    return d;
+  }
+
+  /**
    * Schedule timeslot.
    * 
    * @param time
-   *          Date object for start of slot
+   *          Time object for start of slot
    * @param duration
    *          integer number of minutes for time slot
    */
   function Timeslot(time, duration) {
     this.categories = {}; // categoryId -> teamNumber
-    this.time = new Date();
-    this.time.setTime(time.getTime());
-    this.endTime = new Date();
-    this.endTime.setTime(this.time.getTime() + duration * 60 * 1000);
+    this.time = time;
+    this.endTime = $.finalist.addMinutesToTime(this.time, duration);
+  }
+
+  function _addMinutesToTime(time, minutes) {
+    var d = timeToDate(time);
+    d.setTime(d.getTime() + (minutes * 60 * 1000));
+    var t = new Time(d.getHours(), d.getMinutes());
+    return t;
   }
 
   // //////////////////////// PUBLIC INTERFACE /////////////////////////
@@ -253,6 +276,41 @@
     clearAllData : function() {
       _clear_local_storage();
       _init_variables();
+    },
+
+    /**
+     * Compare 2 times.
+     * 
+     * @return -1 if a is less than b, 0 if they are equal, 1 if a is greater
+     *         than b
+     */
+    compareTimes : function(a, b) {
+      if (a.hour == b.hour) {
+        if (a.minute == b.minute) {
+          return 0;
+        } else if (a.minute < b.minute) {
+          return -1;
+        } else {
+          return 1;
+        }
+      } else if (a.hour < b.hour) {
+        return -1
+      } else {
+        return 1;
+      }
+    },
+
+    /**
+     * Add a number of minutes to a time.
+     * 
+     * @param time
+     *          Time object
+     * @param minutes
+     *          integer minutes
+     * @return a new Time object
+     */
+    addMinutesToTime : function(time, minutes) {
+      return _addMinutesToTime(time, minutes);
     },
 
     setCategoryVisited : function(category, division) {
@@ -359,15 +417,13 @@
     },
 
     /**
-     * Date or undefined.
+     * Time or undefined.
      */
     getPlayoffStartTime : function(division) {
       var hour = $.finalist.getPlayoffStartHour(division);
       var minute = $.finalist.getPlayoffStartMinute(division);
       if (hour != undefined && hour >= 0 && minute != undefined && minute >= 0) {
-        var time = new Date();
-        time.setHours(hour);
-        time.setMinutes(minute);
+        var time = new Time(hour, minute);
         return time;
       } else {
         return undefined;
@@ -397,15 +453,13 @@
     },
 
     /**
-     * Date or undefined.
+     * Time or undefined.
      */
     getPlayoffEndTime : function(division) {
       var hour = $.finalist.getPlayoffEndHour(division);
       var minute = $.finalist.getPlayoffEndMinute(division);
       if (hour != undefined && hour >= 0 && minute != undefined && minute >= 0) {
-        var time = new Date();
-        time.setHours(hour);
-        time.setMinutes(minute);
+        var time = new Time(hour, minute);
         return time;
       } else {
         return undefined;
@@ -879,8 +933,8 @@
       var schedule = [];
       var nextTime = $.finalist.getStartTime();
       var slotDuration = $.finalist.getDuration();
-      $.finalist.log("Next timeslot starts at " + nextTime + " duration is "
-          + slotDuration);
+      $.finalist.log("Next timeslot starts at " + nextTime.hour + ":"
+          + nextTime.minute + " duration is " + slotDuration);
       $.each(sortedTeams, function(i, teamNum) {
         var team = $.finalist.lookupTeam(teamNum);
         var teamCategories = finalistsCount[teamNum];
@@ -898,7 +952,7 @@
             var newSlot = new Timeslot(nextTime, slotDuration);
             schedule.push(newSlot);
 
-            nextTime.setTime(nextTime.getTime() + (slotDuration * 60 * 1000));
+            nextTime = $.finalist.addMinutesToTime(nextTime, slotDuration);
 
             if (!$.finalist.hasPlayoffConflict(team, newSlot)) {
               scheduled = true;
@@ -926,7 +980,8 @@
         var start = $.finalist.getPlayoffStartTime(playoffDivision);
         var end = $.finalist.getPlayoffEndTime(playoffDivision);
         if (start != undefined && end != undefined) {
-          if (start < slot.endTime && slot.time < end) {
+          if ($.finalist.compareTimes(start, slot.endTime) < 0
+              && $.finalist.compareTimes(slot.time, end) < 0) {
             conflict = true;
           }
         }
@@ -953,9 +1008,7 @@
     },
 
     getStartTime : function() {
-      var time = new Date();
-      time.setHours(_startHour);
-      time.setMinutes(_startMinute);
+      var time = new Time(_startHour, _startMinute);
       return time;
     },
 
