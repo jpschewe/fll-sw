@@ -48,20 +48,19 @@ public class RowElement {
 		RubricRange rubric = null;
 		for (Iterator<RubricRange> iterator = rubricRangeElements.iterator(); iterator.hasNext();) {
 			rubric = iterator.next();
-			tempString = rubric.getDescription().substring(0,  rubric.getDescription().indexOf("\n"));
 			
 			switch (rubric.getTitle()) {
 				case SubjectiveConstants.BEGINNING:
-					this.beginningDescription = tempString;
+					this.beginningDescription = rubric.getShortDescription();;
 					break;
 				case SubjectiveConstants.DEVELOPING:
-					this.developingDescription = tempString;
+					this.developingDescription = rubric.getShortDescription();;
 					break;
 				case SubjectiveConstants.ACCOMPLISHED:
-					this.accomplishedDescription = tempString;
+					this.accomplishedDescription = rubric.getShortDescription();;
 					break;
 				case SubjectiveConstants.EXEMPLARY:
-					this.exemplaryDescription = tempString;
+					this.exemplaryDescription = rubric.getShortDescription();;
 					break;
 				default:
 					break;

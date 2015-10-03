@@ -982,14 +982,14 @@ public class TournamentSchedule implements Serializable {
     detailedSchedules.add(para);
   }
   
-  public void outputSubjectiveSheets(final String dir, String baseFileName) {
+  public void outputSubjectiveSheets(final String dir, String baseFileName, String xmlDoc) {
     SubjectivePdfManager pdfManager = new SubjectivePdfManager();   
     ChallengeXMLParser parser = new ChallengeXMLParser();
     
     String[] subjects = {SubjectiveConstants.PROJECT_NAME, SubjectiveConstants.CORE_VALUES_NAME, SubjectiveConstants.ROBOT_DESIGN_NAME, SubjectiveConstants.PROGRAMMING_NAME};
     
     //get the xml sucked in
-    parser.parseXMLDocument("C:\\eclipse_4.4.2\\gitfll-sw\\scoring\\src\\fll\\resources\\challenge-descriptors\\fll-2014.xml");
+    parser.parseXMLDocument(xmlDoc);
     
     //setup the sheets from the sucked in xml
     for (String subject : subjects) {
