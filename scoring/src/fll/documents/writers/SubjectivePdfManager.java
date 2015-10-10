@@ -2,6 +2,8 @@ package fll.documents.writers;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.Reader;
 import java.util.Date;
 
 import com.itextpdf.text.Document;
@@ -12,26 +14,31 @@ import com.itextpdf.text.pdf.PdfWriter;
 import fll.documents.elements.SheetElement;
 import fll.scheduler.SubjectiveTime;
 import fll.scheduler.TeamScheduleInfo;
+import fll.scheduler.TournamentSchedule;
+import fll.xml.ChallengeDescription;
+import fll.xml.ChallengeParser;
 
 public class SubjectivePdfManager {
 	public static SubjectivePdfWriter writer = SubjectivePdfWriter.getInstance();
-	static ChallengeXMLParser parser = new ChallengeXMLParser();
 		
 	SheetElement coreValuesSheet = null;
 	SheetElement projectSheet = null;
 	SheetElement robotDesignSheet = null;
 	SheetElement programmingSheet = null;
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws FileNotFoundException {
 		SubjectivePdfManager pdfManager = new SubjectivePdfManager();		
 		String[] subjects = {SubjectiveConstants.PROJECT_NAME, SubjectiveConstants.CORE_VALUES_NAME, SubjectiveConstants.ROBOT_DESIGN_NAME, SubjectiveConstants.PROGRAMMING_NAME};
 		
 		//get the xml sucked in
-		parser.parseXMLDocument("C:\\eclipse_4.4.2\\gitfll-sw\\scoring\\src\\fll\\resources\\challenge-descriptors\\fll-2014.xml");
+		final Reader descriptorReader = new FileReader("C:\\eclipse_4.4.2\\gitfll-sw\\scoring\\src\\fll\\resources\\challenge-descriptors\\fll-2014.xml");
+	  final org.w3c.dom.Document document = ChallengeParser.parse(descriptorReader);
+    final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
 		
 		//setup the sheets from the sucked in xml
 		for (String subject : subjects) {
-			pdfManager.setSheetElement(parser.createSubjectiveSheetElement(subject));
+		  final SheetElement sheetElement = TournamentSchedule.createSubjectiveSheetElement(subject, description);
+			pdfManager.setSheetElement(sheetElement);
 			
 			//This document will be all of the subjective pdf sheets in a single file.
 			Document pdf = SubjectivePdfManager.writer.createStandardDocument();

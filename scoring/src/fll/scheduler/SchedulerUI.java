@@ -585,7 +585,7 @@ public class SchedulerUI extends JFrame {
 
             getScheduleData().outputPerformanceSheets(scoresheetFos, description);
 
-            getScheduleData().outputSubjectiveSheets(directory.getAbsolutePath(), baseFilename, descriptorLocation.getFile());
+            getScheduleData().outputSubjectiveSheets(directory.getAbsolutePath(), baseFilename, description);
 
             JOptionPane.showMessageDialog(SchedulerUI.this, "Scoresheets written '"
                 + scoresheetFile.getAbsolutePath() + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
