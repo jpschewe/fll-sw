@@ -10,7 +10,7 @@ import fll.xml.RubricRange;
 
 
 /**
- * This represents a row pair in the pdf rubric table.  The top row is colored for the subjective catagory and is 
+ * This represents a row pair in the pdf rubric table.  The top row is colored for the subjective category and is 
  * labeled with the rows topic on the left side.  On the right side of the same colored row is the description
  * of the rows topic.  The second row is an ND and then 4 descriptions describing the depth of the teams ability 
  * for the rows topic.
@@ -39,7 +39,6 @@ public class RowElement {
 	String exemplaryDescription = null;
 	
 	public RowElement (AbstractGoal abstractGoal) {
-		String tempString = null;
 		this.catagory = ((Goal)abstractGoal).getCategory();
 		this.rowTitle = abstractGoal.getTitle();
 		this.rowDescription = abstractGoal.getDescription().replaceAll("\\s+", " ").replaceAll("\n", "");

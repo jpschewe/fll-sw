@@ -24,6 +24,7 @@ import fll.documents.elements.RowElement;
 import fll.documents.elements.TableElement;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
+import fll.util.FLLInternalException;
 import fll.util.LogUtils;
 
 public class SubjectivePdfWriter {
@@ -44,11 +45,7 @@ public class SubjectivePdfWriter {
 	final BaseColor rowRed = new BaseColor(0xE6, 0xA7, 0xA7);
 	
 	Font f6i = null;
-	Font f8 = null;
 	Font f8b = null;
-	Font f8i = null;
-	Font f9 = null;
-	Font f9i  = null;
 	Font f9b  = null;
 	Font f10b = null;
 	Font f12b = null;
@@ -70,11 +67,7 @@ public class SubjectivePdfWriter {
 	
 	private void initializeFonts() {
 		f6i = new Font(Font.FontFamily.HELVETICA, 6, Font.ITALIC);
-		f8 = new Font(Font.FontFamily.HELVETICA, 8);
 		f8b  = new Font(Font.FontFamily.HELVETICA, 8, Font.BOLD);
-		f8i  = new Font(Font.FontFamily.HELVETICA, 8, Font.ITALIC);
-		f9 = new Font(Font.FontFamily.HELVETICA, 9);
-		f9i  = new Font(Font.FontFamily.HELVETICA, 9, Font.ITALIC);
 		f9b  = new Font(Font.FontFamily.HELVETICA, 9, Font.BOLD);
 		f10b = new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD);
 		f12b = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
@@ -331,6 +324,7 @@ public class SubjectivePdfWriter {
 	}
 	
 	public void setSheetProperties(String sheetTitle) {
+    //FIXME make this generic
 		this.sheetTitle = sheetTitle;
 		switch (sheetTitle) {
 			case SubjectiveConstants.CORE_VALUES_TITLE:
@@ -349,6 +343,8 @@ public class SubjectivePdfWriter {
 				fontSize = FontSizes.PROGRAMMING;
 				sheetColor = rowRed;
 				break;
+      default:
+        throw new FLLInternalException("Unknown expected subjective sheet title: " + sheetTitle);
 		}
 	}
 

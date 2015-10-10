@@ -6,7 +6,6 @@
 package fll.scheduler;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -74,7 +73,6 @@ import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.documents.elements.SheetElement;
-import fll.documents.writers.SubjectiveConstants;
 import fll.documents.writers.SubjectivePdfManager;
 import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
@@ -1001,12 +999,9 @@ public class TournamentSchedule implements Serializable {
                                          throws DocumentException, MalformedURLException, IOException {
     final SubjectivePdfManager pdfManager = new SubjectivePdfManager();
 
-    final String[] subjects = { SubjectiveConstants.PROJECT_NAME, SubjectiveConstants.CORE_VALUES_NAME,
-                                SubjectiveConstants.ROBOT_DESIGN_NAME, SubjectiveConstants.PROGRAMMING_NAME };
-
     // setup the sheets from the sucked in xml
-    for (String subject : subjects) {
-      final SheetElement sheetElement = createSubjectiveSheetElement(subject, description);
+    for (final ScoreCategory category : description.getSubjectiveCategories()) {
+      final SheetElement sheetElement = createSubjectiveSheetElement(category);
       pdfManager.setSheetElement(sheetElement);
 
       // This document will be all of the subjective pdf sheets in a single
@@ -1014,7 +1009,7 @@ public class TournamentSchedule implements Serializable {
       com.itextpdf.text.Document pdf = SubjectivePdfManager.writer.createStandardDocument();
 
       PdfWriter.getInstance(pdf, new FileOutputStream(dir
-          + File.separator + baseFileName + "_SubjectiveSheets-" + subject + ".pdf"));
+          + File.separator + baseFileName + "_SubjectiveSheets-" + category.getName() + ".pdf"));
       System.out.println("Writing to: "
           + dir);
 
@@ -1022,19 +1017,17 @@ public class TournamentSchedule implements Serializable {
 
       // Go thru all of the team schedules and put them all into a pdf
       for (final TeamScheduleInfo teamInfo : _schedule) {
-        pdfManager.writeTeamSubjectivePdf(pdf, teamInfo, subject);
+        pdfManager.writeTeamSubjectivePdf(pdf, teamInfo, category.getName());
       }
 
       pdf.close();
     }
   }
 
-  public static SheetElement createSubjectiveSheetElement(final String subjectiveName,
-                                                          final ChallengeDescription description) {
+  public static SheetElement createSubjectiveSheetElement(final ScoreCategory sc) {
     // Get the info from the .xml sheet for the specific subjective category
     // An sc == a subjective category
-    ScoreCategory sc = description.getSubjectiveCategoryByName(subjectiveName);
-    SheetElement sheet = new SheetElement(sc);
+    final SheetElement sheet = new SheetElement(sc);
     LOGGER.info("Sheet Processing: "
         + sheet.getSheetName());
     sheet.processSheet();
