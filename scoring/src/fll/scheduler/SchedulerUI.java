@@ -123,6 +123,8 @@ public class SchedulerUI extends JFrame {
     }
   }
 
+  private final ChooseChallengeDescriptor chooseChallengeDescriptor = new ChooseChallengeDescriptor(SchedulerUI.this);
+
   private static final String BASE_TITLE = "FLL Scheduler";
 
   public SchedulerUI() {
@@ -333,8 +335,8 @@ public class SchedulerUI extends JFrame {
         } else if (null != selectedFile) {
           JOptionPane.showMessageDialog(SchedulerUI.this,
                                         new Formatter().format("%s is not a file or is not readable",
-                                                               selectedFile.getAbsolutePath()), "Error reading file",
-                                        JOptionPane.ERROR_MESSAGE);
+                                                               selectedFile.getAbsolutePath()),
+                                        "Error reading file", JOptionPane.ERROR_MESSAGE);
         }
       }
     }
@@ -483,7 +485,8 @@ public class SchedulerUI extends JFrame {
         final Formatter errorFormatter = new Formatter();
         errorFormatter.format("Error parsing file: %s", e.getMessage());
         LOGGER.error(errorFormatter, e);
-        JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error parsing file", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error parsing file",
+                                      JOptionPane.ERROR_MESSAGE);
       } finally {
         try {
           if (null != fis) {
@@ -568,10 +571,9 @@ public class SchedulerUI extends JFrame {
                                                          "Would you like to print the score sheets as well?",
                                                          "Print Scoresheets?", JOptionPane.YES_NO_OPTION);
         if (JOptionPane.YES_OPTION == answer) {
-          final ChooseChallengeDescriptor dialog = new ChooseChallengeDescriptor(SchedulerUI.this);
-          dialog.setLocationRelativeTo(SchedulerUI.this);
-          dialog.setVisible(true);
-          final URL descriptorLocation = dialog.getSelectedDescription();
+          chooseChallengeDescriptor.setLocationRelativeTo(SchedulerUI.this);
+          chooseChallengeDescriptor.setVisible(true);
+          final URL descriptorLocation = chooseChallengeDescriptor.getSelectedDescription();
           if (null != descriptorLocation) {
             final Reader descriptorReader = new InputStreamReader(descriptorLocation.openStream(),
                                                                   Utilities.DEFAULT_CHARSET);
@@ -620,8 +622,8 @@ public class SchedulerUI extends JFrame {
    * file.
    */
   private void runTableOptimizer() {
-    final TableOptimizer optimizer = new TableOptimizer(mSchedParams, mScheduleData, mScheduleFile.getAbsoluteFile()
-                                                                                                  .getParentFile());
+    final TableOptimizer optimizer = new TableOptimizer(mSchedParams, mScheduleData,
+                                                        mScheduleFile.getAbsoluteFile().getParentFile());
     optimizer.optimize();
     final File optimizedFile = optimizer.getBestScheduleOutputFile();
     if (null == optimizedFile) {
@@ -764,8 +766,8 @@ public class SchedulerUI extends JFrame {
       final String startingDirectory = PREFS.get(SCHEDULE_STARTING_DIRECTORY_PREF, null);
 
       final JFileChooser fileChooser = new JFileChooser();
-      final FileFilter filter = new BasicFileFilter("FLL Schedule (xls, xlsx, csv)", new String[] { "xls", "xlsx",
-                                                                                                   "csv" });
+      final FileFilter filter = new BasicFileFilter("FLL Schedule (xls, xlsx, csv)",
+                                                    new String[] { "xls", "xlsx", "csv" });
       fileChooser.setFileFilter(filter);
       if (null != startingDirectory) {
         fileChooser.setCurrentDirectory(new File(startingDirectory));
@@ -783,8 +785,8 @@ public class SchedulerUI extends JFrame {
         } else if (null != selectedFile) {
           JOptionPane.showMessageDialog(SchedulerUI.this,
                                         new Formatter().format("%s is not a file or is not readable",
-                                                               selectedFile.getAbsolutePath()), "Error reading file",
-                                        JOptionPane.ERROR_MESSAGE);
+                                                               selectedFile.getAbsolutePath()),
+                                        "Error reading file", JOptionPane.ERROR_MESSAGE);
         }
       }
     }
@@ -918,7 +920,8 @@ public class SchedulerUI extends JFrame {
       for (final ConstraintViolation violation : getViolationsModel().getViolations()) {
         if (violation.getTeam() == schedInfo.getTeamNumber()) {
           Collection<SubjectiveTime> subjectiveTimes = violation.getSubjectiveTimes();
-          if ((SchedulerTableModel.TEAM_NUMBER_COLUMN == tmCol || SchedulerTableModel.JUDGE_COLUMN == tmCol)
+          if ((SchedulerTableModel.TEAM_NUMBER_COLUMN == tmCol
+              || SchedulerTableModel.JUDGE_COLUMN == tmCol)
               && subjectiveTimes.isEmpty() && null == violation.getPerformance()) {
             error = true;
             isHard |= violation.isHard();
@@ -926,8 +929,8 @@ public class SchedulerUI extends JFrame {
             // need to check round which round
             int round = 0;
             // using Math.min to handle extra round
-            while (!violation.getPerformance().equals(schedInfo.getPerfTime(Math.min(schedInfo.getNumberOfRounds() - 1,
-                                                                                     round)))
+            while (!violation.getPerformance().equals(schedInfo.getPerfTime(Math.min(schedInfo.getNumberOfRounds()
+                - 1, round)))
                 && round < schedInfo.getNumberOfRounds()) {
               ++round;
               if (round > schedInfo.getNumberOfRounds()) {
@@ -936,10 +939,12 @@ public class SchedulerUI extends JFrame {
             }
             // handle extra run
             if (round >= schedInfo.getNumberOfRounds()) {
-              round = schedInfo.getNumberOfRounds() - 1;
+              round = schedInfo.getNumberOfRounds()
+                  - 1;
             }
             final int firstIdx = getScheduleModel().getFirstPerformanceColumn()
-                + (round * SchedulerTableModel.NUM_COLUMNS_PER_ROUND);
+                + (round
+                    * SchedulerTableModel.NUM_COLUMNS_PER_ROUND);
             final int lastIdx = firstIdx
                 + SchedulerTableModel.NUM_COLUMNS_PER_ROUND - 1;
             if (firstIdx <= tmCol
@@ -1055,8 +1060,7 @@ public class SchedulerUI extends JFrame {
           && column.length() > 0) {
         final JCheckBox checkbox = new JCheckBox(column);
         checkboxes.add(checkbox);
-        final JFormattedTextField duration = new JFormattedTextField(
-                                                                     Integer.valueOf(SchedParams.DEFAULT_SUBJECTIVE_MINUTES));
+        final JFormattedTextField duration = new JFormattedTextField(Integer.valueOf(SchedParams.DEFAULT_SUBJECTIVE_MINUTES));
         duration.setColumns(4);
         subjectiveDurations.add(duration);
         optionPanel.add(checkbox);
