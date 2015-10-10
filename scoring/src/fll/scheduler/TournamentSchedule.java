@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.io.Writer;
+import java.net.MalformedURLException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -997,7 +998,7 @@ public class TournamentSchedule implements Serializable {
   public void outputSubjectiveSheets(final String dir,
                                      String baseFileName,
                                      final ChallengeDescription description)
-                                         throws FileNotFoundException, DocumentException {
+                                         throws DocumentException, MalformedURLException, IOException {
     final SubjectivePdfManager pdfManager = new SubjectivePdfManager();
 
     final String[] subjects = { SubjectiveConstants.PROJECT_NAME, SubjectiveConstants.CORE_VALUES_NAME,

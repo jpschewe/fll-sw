@@ -3,9 +3,12 @@ package fll.documents.writers;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.Reader;
+import java.net.MalformedURLException;
 import java.util.Date;
 
+import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.pdf.PdfPTable;
@@ -26,7 +29,7 @@ public class SubjectivePdfManager {
 	SheetElement robotDesignSheet = null;
 	SheetElement programmingSheet = null;
 
-	public static void main(String[] args) throws FileNotFoundException {
+	public static void main(String[] args) throws BadElementException, MalformedURLException, IOException {
 		SubjectivePdfManager pdfManager = new SubjectivePdfManager();		
 		String[] subjects = {SubjectiveConstants.PROJECT_NAME, SubjectiveConstants.CORE_VALUES_NAME, SubjectiveConstants.ROBOT_DESIGN_NAME, SubjectiveConstants.PROGRAMMING_NAME};
 		
@@ -93,7 +96,7 @@ public class SubjectivePdfManager {
 		}
 	}
 	
-	public void writeTeamSubjectivePdf(Document doc, TeamScheduleInfo teamInfo, String subjectiveStation) {
+	public void writeTeamSubjectivePdf(Document doc, TeamScheduleInfo teamInfo, String subjectiveStation) throws BadElementException, MalformedURLException, IOException {
 		switch (subjectiveStation) {
 			case SubjectiveConstants.CORE_VALUES_NAME:
 				writeCoreValuesSheet(doc, teamInfo);
@@ -110,7 +113,7 @@ public class SubjectivePdfManager {
 		}
 	}
 
-	private void writeDesignSheet(Document doc, TeamScheduleInfo teamInfo) {
+	private void writeDesignSheet(Document doc, TeamScheduleInfo teamInfo) throws BadElementException, MalformedURLException, IOException {
 		PdfPTable table = writer.createStandardRubricTable();
 		writer.setSheetProperties(SubjectiveConstants.ROBOT_DESIGN_TITLE);
 		writer.writeHeader(doc, teamInfo);
@@ -131,7 +134,7 @@ public class SubjectivePdfManager {
 		writer.writeEndOfPageRow(doc);
 	}
 
-	private void writeProgrammingSheet(Document doc, TeamScheduleInfo teamInfo) {
+	private void writeProgrammingSheet(Document doc, TeamScheduleInfo teamInfo) throws BadElementException, MalformedURLException, IOException {
 		PdfPTable table = writer.createStandardRubricTable();
 		writer.setSheetProperties(SubjectiveConstants.PROGRAMMING_TITLE);
 		writer.writeHeader(doc, teamInfo);
@@ -152,7 +155,7 @@ public class SubjectivePdfManager {
 		writer.writeEndOfPageRow(doc);
 	}
 
-	private void writeProjectSheet(Document doc, TeamScheduleInfo teamInfo) {
+	private void writeProjectSheet(Document doc, TeamScheduleInfo teamInfo) throws BadElementException, MalformedURLException, IOException {
 		PdfPTable table = writer.createStandardRubricTable();
 		writer.setSheetProperties(SubjectiveConstants.PROJECT_TITLE);
 		writer.writeHeader(doc, teamInfo);
@@ -173,7 +176,7 @@ public class SubjectivePdfManager {
 		writer.writeEndOfPageRow(doc);
 	}
 
-	private void writeCoreValuesSheet(Document doc, TeamScheduleInfo teamInfo) {
+	private void writeCoreValuesSheet(Document doc, TeamScheduleInfo teamInfo) throws BadElementException, MalformedURLException, IOException {
 		PdfPTable table = writer.createStandardRubricTable();
 		writer.setSheetProperties(SubjectiveConstants.CORE_VALUES_TITLE);
 		writer.writeHeader(doc, teamInfo);

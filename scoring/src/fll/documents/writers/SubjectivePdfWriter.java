@@ -1,6 +1,8 @@
 package fll.documents.writers;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
@@ -79,7 +81,7 @@ public class SubjectivePdfWriter {
 		f20b = new Font(Font.FontFamily.HELVETICA, 20, Font.BOLD);
 	}
 
-	public void writeHeader(Document doc, TeamScheduleInfo teamInfo) {
+	public void writeHeader(Document doc, TeamScheduleInfo teamInfo) throws BadElementException, MalformedURLException, IOException {
 		Image image = null;
 		PdfPTable pageHeaderTable = null;
 		PdfPTable columnTitlesTable = null;
@@ -96,11 +98,9 @@ public class SubjectivePdfWriter {
 		pageHeaderTable.setSpacingBefore(0f);
 		
 		//get the FLL image to put on the document
-		try {
-			image = Image.getInstance("C:\\Marks_Workspaces\\Marks Space\\src\\images\\FLLHeader.png");
-		} catch (IOException | BadElementException ioe) {
-			LOGGER.error("Unable to get FLL Header image, using bricks", ioe);
-		}
+		  final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		  final URL imageUrl = classLoader.getResource("fll/resources/documents/FLLHeader.png");
+			image = Image.getInstance(imageUrl);
 		
 		//make it a little smaller
 		image.scalePercent(85);
@@ -150,8 +150,7 @@ public class SubjectivePdfWriter {
 		try {
 			columnTitlesTable.setWidths(colWidths);
 		} catch (DocumentException e) {
-			System.err.println("unable to set column widths on the table headings table");
-			e.printStackTrace(System.err);
+			LOGGER.error("unable to set column widths on the table headings table", e);
 		}
 		columnTitlesTable.addCell(createCell("", f10b, NO_BORDERS));
 		columnTitlesTable.addCell(createCell("", f10b, NO_BORDERS));
@@ -167,8 +166,7 @@ public class SubjectivePdfWriter {
 			doc.add(directions);
 			doc.add(columnTitlesTable);
 		} catch (DocumentException de) {
-			System.err.println("Unable to write out the document.");
-			de.printStackTrace(System.err);
+			LOGGER.error("Unable to write out the document.", de);
 		}	
 	}
 	
