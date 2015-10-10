@@ -73,7 +73,7 @@ import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.documents.elements.SheetElement;
-import fll.documents.writers.SubjectivePdfManager;
+import fll.documents.writers.SubjectivePdfWriter;
 import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
@@ -989,16 +989,14 @@ public class TournamentSchedule implements Serializable {
                                      String baseFileName,
                                      final ChallengeDescription description)
                                          throws DocumentException, MalformedURLException, IOException {
-    final SubjectivePdfManager pdfManager = new SubjectivePdfManager();
 
     // setup the sheets from the sucked in xml
     for (final ScoreCategory category : description.getSubjectiveCategories()) {
       final SheetElement sheetElement = createSubjectiveSheetElement(category);
-      pdfManager.setSheetElement(sheetElement);
 
       // This document will be all of the subjective pdf sheets in a single
       // file.
-      com.itextpdf.text.Document pdf = SubjectivePdfManager.writer.createStandardDocument();
+      com.itextpdf.text.Document pdf = SubjectivePdfWriter.createStandardDocument();
 
       PdfWriter.getInstance(pdf, new FileOutputStream(dir
           + File.separator + baseFileName + "_SubjectiveSheets-" + category.getName() + ".pdf"));
@@ -1009,11 +1007,28 @@ public class TournamentSchedule implements Serializable {
 
       // Go thru all of the team schedules and put them all into a pdf
       for (final TeamScheduleInfo teamInfo : _schedule) {
-        pdfManager.writeTeamSubjectivePdf(pdf, teamInfo, category.getName());
+        writeTeamSubjectivePdf(sheetElement, pdf, teamInfo);
       }
 
       pdf.close();
     }
+  }
+
+  public static void writeTeamSubjectivePdf(final SheetElement sheet,
+                                            final Document doc,
+                                            final TeamScheduleInfo teamInfo)
+                                                throws MalformedURLException, IOException, DocumentException {
+    final SubjectivePdfWriter writer = new SubjectivePdfWriter(sheet.getSheetData());
+    final PdfPTable table = writer.createStandardRubricTable();
+    writer.writeHeader(doc, teamInfo);
+    for (final String category : sheet.getCategories()) {
+      writer.writeRubricTable(table, sheet.getTableElement(category));
+      writer.writeCommentsSection(table);
+    }
+
+    doc.add(table);
+
+    writer.writeEndOfPageRow(doc);
   }
 
   public static SheetElement createSubjectiveSheetElement(final ScoreCategory sc) {
