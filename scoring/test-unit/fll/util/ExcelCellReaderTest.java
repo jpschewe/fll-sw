@@ -10,9 +10,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 
-import junit.framework.Assert;
-
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.junit.Assert;
 import org.junit.Test;
 
 import fll.Utilities;

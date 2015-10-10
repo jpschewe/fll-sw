@@ -19,7 +19,7 @@ $(document).ready(
         function() {
         
         <c:forEach items="${judgingStations }" var="station" varStatus="idx">
-        <!--  select/unselect ${station} -->
+        <!--  select/unselect station -->
 $("#station_select_${idx.count }").change(function() {
         	<c:forEach items="${playoff_data.tournamentTeamsValues }" var="team">
         	   <c:if test="${team.judgingStation == station}">

@@ -12,8 +12,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.xml.sax.SAXException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;

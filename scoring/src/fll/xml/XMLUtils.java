@@ -51,8 +51,7 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
    */
   public static Element getSubjectiveCategoryByName(final Document challengeDocument,
                                                     final String name) {
-    for (final Element categoryElement : new NodelistElementCollectionAdapter(
-                                                                              challengeDocument.getDocumentElement()
+    for (final Element categoryElement : new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement()
                                                                                                .getElementsByTagName("subjectiveCategory"))) {
       final String categoryName = categoryElement.getAttribute("name");
       if (categoryName.equals(name)) {
@@ -190,8 +189,7 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
 
   public static List<String> getSubjectiveCategoryNames(final Document challengeDocument) {
     final List<String> subjectiveCategories = new LinkedList<String>();
-    for (final Element categoryElement : new NodelistElementCollectionAdapter(
-                                                                              challengeDocument.getDocumentElement()
+    for (final Element categoryElement : new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement()
                                                                                                .getElementsByTagName("subjectiveCategory"))) {
       final String categoryName = categoryElement.getAttribute("name");
       subjectiveCategories.add(categoryName);
@@ -222,14 +220,17 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
       try {
         final URI uri = directory.toURI();
         final File fileDir = new File(uri);
-        for (final File file : fileDir.listFiles()) {
-          if (file.getName().endsWith(".xml")) {
-            try {
-              final URL fileUrl = file.toURI().toURL();
-              urls.add(fileUrl);
-            } catch (final MalformedURLException e) {
-              LOGGER.error("Unable to convert file to URL: "
-                  + file.getAbsolutePath(), e);
+        final File[] files = fileDir.listFiles();
+        if (null != files) {
+          for (final File file : files) {
+            if (file.getName().endsWith(".xml")) {
+              try {
+                final URL fileUrl = file.toURI().toURL();
+                urls.add(fileUrl);
+              } catch (final MalformedURLException e) {
+                LOGGER.error("Unable to convert file to URL: "
+                    + file.getAbsolutePath(), e);
+              }
             }
           }
         }
