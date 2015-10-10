@@ -865,6 +865,9 @@
     /**
      * Get the schedule for the specified division. If no schedule exists, one
      * is created.
+     * 
+     * @return the output of scheduleFinalists
+     * @see scheduleFinalists
      */
     getSchedule : function(currentDivision) {
       var schedule = _schedules[currentDivision];
@@ -878,6 +881,8 @@
 
     /**
      * Set the schedule for the specified division.
+     * 
+     * @see scheduleFinalists
      */
     setSchedule : function(currentDivision, schedule) {
       _schedules[currentDivision] = schedule;
