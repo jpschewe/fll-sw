@@ -565,7 +565,7 @@ public class SchedulerUI extends JFrame {
             + directory.getAbsolutePath() + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
 
         final int answer = JOptionPane.showConfirmDialog(SchedulerUI.this,
-                                                         "Would you like to print the morning score sheets as well?",
+                                                         "Would you like to print the score sheets as well?",
                                                          "Print Scoresheets?", JOptionPane.YES_NO_OPTION);
         if (JOptionPane.YES_OPTION == answer) {
           final ChooseChallengeDescriptor dialog = new ChooseChallengeDescriptor(SchedulerUI.this);
@@ -585,25 +585,12 @@ public class SchedulerUI extends JFrame {
 
             getScheduleData().outputPerformanceSheets(scoresheetFos, description);
 
+            getScheduleData().outputSubjectiveSheets(directory.getAbsolutePath(), baseFilename, descriptorLocation.getFile());
+
             JOptionPane.showMessageDialog(SchedulerUI.this, "Scoresheets written '"
                 + scoresheetFile.getAbsolutePath() + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
           }
         }
-
-        final int answer2 = JOptionPane.showConfirmDialog(SchedulerUI.this,
-                                                          "Would you like to write the subjective PDF sheets?",
-                                                          "Print Scoresheets?", JOptionPane.YES_NO_OPTION);
-        if (JOptionPane.YES_OPTION == answer2) {
-          
-           final ChooseChallengeDescriptor dialog = new
-           ChooseChallengeDescriptor(SchedulerUI.this);
-           dialog.setLocationRelativeTo(SchedulerUI.this);
-           dialog.setVisible(true);
-           final URL descriptorLocation = dialog.getSelectedDescription();
-           
-           getScheduleData().outputSubjectiveSheets(directory.getAbsolutePath(), baseFilename, descriptorLocation.getFile());
-        }
-
       } catch (final DocumentException e) {
         final Formatter errorFormatter = new Formatter();
         errorFormatter.format("Error writing detailed schedules: %s", e.getMessage());
