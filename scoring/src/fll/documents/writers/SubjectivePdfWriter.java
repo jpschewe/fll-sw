@@ -3,6 +3,8 @@ package fll.documents.writers;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
+
 import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
@@ -20,9 +22,12 @@ import fll.documents.elements.RowElement;
 import fll.documents.elements.TableElement;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
+import fll.util.LogUtils;
 
 public class SubjectivePdfWriter {
-	final String copyRightStatement = "2011 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST) and The LEGO Group. Used by special permission. All rights reserved.";
+  private static final Logger LOGGER = LogUtils.getLogger();
+  
+	private static final String copyRightStatement = "2011 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST) and The LEGO Group. Used by special permission. All rights reserved.";
 	
 	final static int NO_BORDERS = 0;
 	final static int NO_LEFT_RIGHT = 1;
@@ -94,8 +99,7 @@ public class SubjectivePdfWriter {
 		try {
 			image = Image.getInstance("C:\\Marks_Workspaces\\Marks Space\\src\\images\\FLLHeader.png");
 		} catch (IOException | BadElementException ioe) {
-			System.err.println("Unable to get FLL Header image.");
-			ioe.printStackTrace(System.err);
+			LOGGER.error("Unable to get FLL Header image, using bricks", ioe);
 		}
 		
 		//make it a little smaller
