@@ -76,7 +76,7 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
   }
 
   private int compareSide(final PerformanceTime other) {
-    return Integer.valueOf(this.side).compareTo(Integer.valueOf(other.side));
+    return Integer.compare(this.side, other.side);
   }
 
   public int compareTo(final PerformanceTime other) {

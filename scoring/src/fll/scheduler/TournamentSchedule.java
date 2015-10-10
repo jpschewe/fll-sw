@@ -556,23 +556,18 @@ public class TournamentSchedule implements Serializable {
 
   private static ColumnInformation parseHeader(final Collection<String> subjectiveHeaders,
                                                final String[] line) {
-    final Collection<String> remainingHeaders = new LinkedList<String>(Arrays.asList(line));
     final int numPerfRounds = countNumRounds(line);
 
     final int[] perfColumn = new int[numPerfRounds];
     final int[] perfTableColumn = new int[numPerfRounds];
 
     final int teamNumColumn = getColumnForHeader(line, TEAM_NUMBER_HEADER);
-    remainingHeaders.remove(TEAM_NUMBER_HEADER);
     final int organizationColumn = getColumnForHeader(line, ORGANIZATION_HEADER);
-    remainingHeaders.remove(ORGANIZATION_HEADER);
     final int teamNameColumn = getColumnForHeader(line, TEAM_NAME_HEADER);
-    remainingHeaders.remove(TEAM_NAME_HEADER);
 
     int judgeGroupColumn = -1;
     try {
       judgeGroupColumn = getColumnForHeader(line, JUDGE_GROUP_HEADER);
-      remainingHeaders.remove(JUDGE_GROUP_HEADER);
     } catch (final MissingColumnException e) {
       judgeGroupColumn = -1;
     }
@@ -580,7 +575,6 @@ public class TournamentSchedule implements Serializable {
     int divisionColumn = -1;
     try {
       divisionColumn = getColumnForHeader(line, DIVISION_HEADER);
-      remainingHeaders.remove(DIVISION_HEADER);
     } catch (final MissingColumnException e) {
       divisionColumn = -1;
     }
@@ -601,9 +595,7 @@ public class TournamentSchedule implements Serializable {
       final String perfTableHeader = String.format(TABLE_HEADER_FORMAT, (round
           + 1));
       perfColumn[round] = getColumnForHeader(line, perfHeader);
-      remainingHeaders.remove(perfHeader);
       perfTableColumn[round] = getColumnForHeader(line, perfTableHeader);
-      remainingHeaders.remove(perfTableHeader);
     }
 
     final Map<Integer, String> subjectiveColumns = new HashMap<Integer, String>();

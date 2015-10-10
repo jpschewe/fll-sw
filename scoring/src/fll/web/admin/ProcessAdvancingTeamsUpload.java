@@ -100,6 +100,8 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
       LOGGER.error(e, e);
       throw new RuntimeException("Error saving advancment data into the database", e);
     } finally {
+      session.setAttribute(SessionAttributes.MESSAGE, message.toString());
+
       if (!file.delete()) {
         file.deleteOnExit();
       }
@@ -115,19 +117,20 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
   public static Collection<Integer> processFile(final File file,
                                                 final String sheetName,
                                                 final String teamNumberColumnName) throws SQLException, IOException,
-      ParseException, InvalidFormatException {
-    
-    if(LOGGER.isTraceEnabled()) {
-      LOGGER.trace("File name: " + file.getName());
+                                                    ParseException, InvalidFormatException {
+
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("File name: "
+          + file.getName());
     }
-    
+
     final CellFileReader reader;
     if (ExcelCellReader.isExcelFile(file)) {
       FileInputStream fis = null;
       try {
         fis = new FileInputStream(file);
         reader = new ExcelCellReader(fis, sheetName);
-        if(LOGGER.isTraceEnabled()) {
+        if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("Created excel reader");
         }
       } finally {
@@ -149,12 +152,12 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
         }
         if (firstLine.indexOf('\t') != -1) {
           reader = new CSVCellReader(file, '\t');
-          if(LOGGER.isTraceEnabled()) {
+          if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Created csv tab reader");
           }
         } else {
           reader = new CSVCellReader(file);
-          if(LOGGER.isTraceEnabled()) {
+          if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Created csv comma reader");
           }
         }

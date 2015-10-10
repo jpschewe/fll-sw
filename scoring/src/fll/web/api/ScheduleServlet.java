@@ -19,21 +19,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
-import org.apache.log4j.Logger;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
-import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 @WebServlet("/api/Schedule/*")
 public class ScheduleServlet extends HttpServlet {
-
-  private static final Logger LOGGER = LogUtils.getLogger();
 
   @Override
   protected final void doGet(final HttpServletRequest request,

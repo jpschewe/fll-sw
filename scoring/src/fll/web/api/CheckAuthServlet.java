@@ -15,11 +15,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import fll.util.LogUtils;
 import fll.web.WebUtils;
 
 /**
@@ -27,8 +24,6 @@ import fll.web.WebUtils;
  */
 @WebServlet("/api/CheckAuth")
 public class CheckAuthServlet extends HttpServlet {
-
-  private static final Logger LOGGER = LogUtils.getLogger();
 
   @Override
   protected final void doGet(final HttpServletRequest request,

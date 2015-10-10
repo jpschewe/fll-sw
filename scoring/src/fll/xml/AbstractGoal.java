@@ -117,24 +117,6 @@ public abstract class AbstractGoal implements Serializable {
     }
   }
 
-  private static final class EnumeratedValueLowestFirst implements Comparator<EnumeratedValue>, Serializable {
-    public static final EnumeratedValueLowestFirst INSTANCE = new EnumeratedValueLowestFirst();
-
-    private EnumeratedValueLowestFirst() {
-    }
-
-    public int compare(final EnumeratedValue one,
-                       final EnumeratedValue two) {
-      if (one.getScore() < two.getScore()) {
-        return -1;
-      } else if (one.getScore() > two.getScore()) {
-        return 1;
-      } else {
-        return 0;
-      }
-    }
-  }
-
   private static final class EnumeratedValueHighestFirst implements Comparator<EnumeratedValue>, Serializable {
     public static final EnumeratedValueHighestFirst INSTANCE = new EnumeratedValueHighestFirst();
 
@@ -143,13 +125,8 @@ public abstract class AbstractGoal implements Serializable {
 
     public int compare(final EnumeratedValue one,
                        final EnumeratedValue two) {
-      if (one.getScore() > two.getScore()) {
-        return -1;
-      } else if (one.getScore() > two.getScore()) {
-        return 1;
-      } else {
-        return 0;
-      }
+      return -1
+          * Double.compare(one.getScore(), two.getScore());
     }
   }
 
