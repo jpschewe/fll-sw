@@ -1,6 +1,8 @@
 package fll.documents.elements;
 
+import java.util.Collections;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -24,13 +26,25 @@ import fll.xml.ScoreCategory;
  */
 public class SheetElement {
 
-  String sheetName = null;
+  private final String sheetName;
 
-  Hashtable<String, TableElement> tables = new Hashtable<String, TableElement>();
+  /**
+   * Category -> TableElement
+   */
+  private final Hashtable<String, TableElement> tables = new Hashtable<String, TableElement>();
 
-  ScoreCategory sheetData = null;
+  /**
+   * The categories for this ScoreCategory in order found.
+   */
+  private final List<String> categories = new LinkedList<>();
 
-  public SheetElement(ScoreCategory sheetData) {
+  private final ScoreCategory sheetData;
+
+  public ScoreCategory getSheetData() {
+    return this.sheetData;
+  }
+
+  public SheetElement(final ScoreCategory sheetData) {
     // Sheet name will be Programming, Project, Robot Design or Core Values
     this.sheetName = sheetData.getName();
     this.sheetData = sheetData;
@@ -45,18 +59,20 @@ public class SheetElement {
    * There is no guarantee the abstractGoals are in order for the tables
    */
   public void processSheet() {
-    List<AbstractGoal> goalsList = sheetData.getGoals();
-    TableElement tableElement = null;
-    String tableCategory = null;
+    final List<AbstractGoal> goalsList = sheetData.getGoals();
 
     // Go thru the sheet (ScoreCategory) and put all the rows (abstractGoal)
     // into the right tables (Category)
     // The assumption is made that the order in the xml is the proper order of
     // the abstractGoals
-    for (AbstractGoal abstractGoal : goalsList) {
+    for (final AbstractGoal abstractGoal : goalsList) {
       if (abstractGoal instanceof Goal) {
-        tableCategory = ((Goal) abstractGoal).getCategory();
-        tableElement = tables.get(tableCategory);
+        final String tableCategory = ((Goal) abstractGoal).getCategory();
+        if (!this.categories.contains(tableCategory)) {
+          categories.add(tableCategory);
+        }
+
+        TableElement tableElement = tables.get(tableCategory);
         if (null == tableElement) {
           tableElement = new TableElement(((Goal) abstractGoal).getCategory());
           tables.put(tableCategory, tableElement);
@@ -72,6 +88,16 @@ public class SheetElement {
 
   public TableElement getTableElement(String table) {
     return tables.get(table);
+  }
+
+  /**
+   * The categories in this ScoreCategory in the order they were found in the
+   * challenge description.
+   * 
+   * @return unmodifiable list
+   */
+  public List<String> getCategories() {
+    return Collections.unmodifiableList(this.categories);
   }
 
   public String toString() {

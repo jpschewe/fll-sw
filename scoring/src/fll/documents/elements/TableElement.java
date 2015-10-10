@@ -11,9 +11,9 @@ import java.util.ArrayList;
 public class TableElement {
 
 	//Example, MN Programming, or Strategy and Innovations
-	String tableCategory = null;
+	private final String tableCategory;
 	
-	ArrayList<RowElement> rows = new ArrayList<RowElement>();
+	private final ArrayList<RowElement> rows = new ArrayList<RowElement>();
 	
 	public TableElement(String tableCategory) {
 		this.tableCategory = tableCategory;
