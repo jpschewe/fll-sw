@@ -67,7 +67,8 @@ public class SheetElement {
     // the abstractGoals
     for (final AbstractGoal abstractGoal : goalsList) {
       if (abstractGoal instanceof Goal) {
-        final String tableCategory = ((Goal) abstractGoal).getCategory();
+        final Goal goal = (Goal) abstractGoal;
+        final String tableCategory = goal.getCategory();
         if (!this.categories.contains(tableCategory)) {
           categories.add(tableCategory);
         }
@@ -77,7 +78,7 @@ public class SheetElement {
           tableElement = new TableElement(((Goal) abstractGoal).getCategory());
           tables.put(tableCategory, tableElement);
         }
-        tableElement.addRowElement(new RowElement(abstractGoal));
+        tableElement.addRowElement(new RowElement(goal));
       }
     }
   }
@@ -101,12 +102,15 @@ public class SheetElement {
   }
 
   public String toString() {
+    final StringBuilder str = new StringBuilder();
     Set<String> keys = tables.keySet();
     for (String key : keys) {
-      System.out.println("Table["
+      str.append("Table["
           + key + "]: " + tables.get(key));
+      str.append(System.lineSeparator());
     }
-    return "Subjective Category: "
-        + this.sheetName;
+    str.append("Subjective Category: "
+        + this.sheetName);
+    return str.toString();
   }
 }

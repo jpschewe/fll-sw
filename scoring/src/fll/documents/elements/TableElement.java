@@ -36,9 +36,10 @@ public class TableElement {
 	}	
 	
 	public String toString() {
-		StringBuffer result = new StringBuffer();
+		final StringBuilder result = new StringBuilder();
 		for (RowElement rowElement : rows) {
-			System.out.println(rowElement);
+			result.append(rowElement);
+			result.append(System.lineSeparator());
 		}
 		
 		result.append("Table Catagory: ");

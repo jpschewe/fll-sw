@@ -52,12 +52,20 @@ public class Goal extends AbstractGoal {
 
   private final List<RubricRange> mRubric;
 
+  /**
+   * 
+   * @return unmodifiable list
+   */
   public List<RubricRange> getRubric() {
     return mRubric;
   }
 
   private final List<EnumeratedValue> mValues;
 
+  /**
+   * 
+   * @return unmodifiable list
+   */
   public List<EnumeratedValue> getValues() {
     return mValues;
   }
