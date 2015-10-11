@@ -7,7 +7,6 @@ import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 
-import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
@@ -37,27 +36,27 @@ public class SubjectivePdfWriter {
 
   private static final String copyRightStatement = "2011 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST) and The LEGO Group. Used by special permission. All rights reserved.";
 
-  final static int NO_BORDERS = 0;
+  private final static int NO_BORDERS = 0;
 
-  final static int NO_LEFT_RIGHT = 1;
+  private final static int NO_LEFT_RIGHT = 1;
 
-  final static int NO_TOP_BOTTOM = 2;
+  private final static int NO_TOP_BOTTOM = 2;
 
-  final static int NO_LEFT = 3;
+  private final static int NO_LEFT = 3;
 
-  final static int NO_TOP = 4;
+  private final static int NO_TOP = 4;
 
-  final static int NO_TOP_LEFT = 5;
+  private final static int NO_TOP_LEFT = 5;
 
-  final static int TOP_ONLY = 6;
+  private final static int TOP_ONLY = 6;
 
-  final int[] colWidths = { 4, 4, 23, 23, 23, 23 };
+  private static final int[] colWidths = { 4, 4, 23, 23, 23, 23 };
 
-  final BaseColor rowBlue = new BaseColor(0xB2, 0xCB, 0xE3);
+  private static final BaseColor rowBlue = new BaseColor(0xB2, 0xCB, 0xE3);
 
-  final BaseColor rowYellow = new BaseColor(0xEE, 0xF1, 0x97);
+  private static final BaseColor rowYellow = new BaseColor(0xEE, 0xF1, 0x97);
 
-  final BaseColor rowRed = new BaseColor(0xE6, 0xA7, 0xA7);
+  private static final BaseColor rowRed = new BaseColor(0xE6, 0xA7, 0xA7);
 
   private final Font f6i;
 
@@ -97,13 +96,10 @@ public class SubjectivePdfWriter {
       sheetColor = rowYellow;
       break;
     case SubjectiveConstants.ROBOT_DESIGN_NAME:
-      sheetColor = rowRed;
-      break;
     case SubjectiveConstants.PROGRAMMING_NAME:
-      sheetColor = rowRed;
-      break;
     default:
       sheetColor = rowRed;
+      break;
     }
 
   }
