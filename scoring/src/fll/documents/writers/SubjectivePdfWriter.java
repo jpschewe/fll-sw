@@ -25,6 +25,7 @@ import fll.documents.elements.TableElement;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.util.LogUtils;
+import fll.xml.RubricRange;
 import fll.xml.ScoreCategory;
 
 public class SubjectivePdfWriter {
@@ -108,7 +109,7 @@ public class SubjectivePdfWriter {
   }
 
   public void writeHeader(Document doc,
-                          TeamScheduleInfo teamInfo) throws BadElementException, MalformedURLException, IOException {
+                          TeamScheduleInfo teamInfo) throws MalformedURLException, IOException, DocumentException {
     Image image = null;
     PdfPTable pageHeaderTable = null;
     PdfPTable columnTitlesTable = null;
@@ -176,13 +177,12 @@ public class SubjectivePdfWriter {
     columnTitlesTable = new PdfPTable(6);
     columnTitlesTable.setSpacingBefore(5);
     columnTitlesTable.setWidthPercentage(100f);
-    try {
-      columnTitlesTable.setWidths(colWidths);
-    } catch (DocumentException e) {
-      LOGGER.error("unable to set column widths on the table headings table", e);
-    }
+    columnTitlesTable.setWidths(colWidths);
     columnTitlesTable.addCell(createCell("", f10b, NO_BORDERS));
     columnTitlesTable.addCell(createCell("", f10b, NO_BORDERS));
+
+    // FIXME get these off the sorted rubric ranges, need to check that all
+    // goals have the same rubric titles
     columnTitlesTable.addCell(createCell("Beginning", f10b, NO_BORDERS));
     columnTitlesTable.addCell(createCell("Developing", f10b, NO_BORDERS));
     columnTitlesTable.addCell(createCell("Accomplished", f10b, NO_BORDERS));
@@ -199,7 +199,7 @@ public class SubjectivePdfWriter {
     }
   }
 
-  public void writeEndOfPageRow(Document doc) {
+  public void writeEndOfPageRow(Document doc) throws DocumentException {
     PdfPTable closingTable = new PdfPTable(1);
 
     closingTable.setWidthPercentage(100f);
@@ -211,28 +211,18 @@ public class SubjectivePdfWriter {
     copyRight.setLeading(1f);
     copyRight.setAlignment(Element.ALIGN_CENTER);
 
-    try {
-      doc.add(closingTable);
-      doc.add(copyRight);
-      doc.newPage();
-    } catch (DocumentException e) {
-      System.err.println("unable to write to the document.");
-      e.printStackTrace(System.err);
-    }
+    doc.add(closingTable);
+    doc.add(copyRight);
+    doc.newPage();
   }
 
   public static Document createStandardDocument() {
     return new Document(PageSize.LETTER, 36, 36, 20, 36);
   }
 
-  public PdfPTable createStandardRubricTable() {
+  public PdfPTable createStandardRubricTable() throws DocumentException {
     PdfPTable table = new PdfPTable(6);
-    try {
-      table.setWidths(colWidths);
-    } catch (DocumentException e) {
-      System.err.println("unable to set column widths on a new standard table.");
-      e.printStackTrace(System.err);
-    }
+    table.setWidths(colWidths);
     table.setWidthPercentage(100f);
     return table;
   }
@@ -300,10 +290,10 @@ public class SubjectivePdfWriter {
       // These are the cells with the descriptions for each level of
       // accomplishment
       table.addCell(createCell("ND", font, NO_BORDERS));
-      table.addCell(createCell(rowElement.getBeginningDescription(), font, NO_TOP_BOTTOM));
-      table.addCell(createCell(rowElement.getDevelopingDescription(), font, NO_TOP_BOTTOM));
-      table.addCell(createCell(rowElement.getAccomplishedDescription(), font, NO_TOP_BOTTOM));
-      table.addCell(createCell(rowElement.getExemplaryDescription(), font, NO_TOP_BOTTOM));
+
+      for (final RubricRange rubricRange : rowElement.getSortedRubricRanges()) {
+        table.addCell(createCell(rubricRange.getShortDescription(), font, NO_TOP_BOTTOM));
+      }
     }
   }
 
