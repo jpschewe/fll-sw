@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import fll.xml.AbstractGoal;
 import fll.xml.Goal;
@@ -103,10 +103,9 @@ public class SheetElement {
 
   public String toString() {
     final StringBuilder str = new StringBuilder();
-    Set<String> keys = tables.keySet();
-    for (String key : keys) {
+    for (final Map.Entry<String, TableElement> entry : tables.entrySet()) {
       str.append("Table["
-          + key + "]: " + tables.get(key));
+          + entry.getKey() + "]: " + entry.getValue());
       str.append(System.lineSeparator());
     }
     str.append("Subjective Category: "
