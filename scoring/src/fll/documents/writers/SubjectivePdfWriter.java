@@ -74,8 +74,12 @@ public class SubjectivePdfWriter {
 
   private final ScoreCategory scoreCategory;
 
-  public SubjectivePdfWriter(final ScoreCategory scoreCategory) {
+  private final String scheduleColumn;
+
+  public SubjectivePdfWriter(final ScoreCategory scoreCategory,
+                             final String scheduleColumn) {
     this.scoreCategory = scoreCategory;
+    this.scheduleColumn = scheduleColumn;
 
     f6i = new Font(Font.FontFamily.HELVETICA, 6, Font.ITALIC);
     f8b = new Font(Font.FontFamily.HELVETICA, 8, Font.BOLD);
@@ -133,27 +137,14 @@ public class SubjectivePdfWriter {
     headerCell.setBorder(0);
     headerCell.setVerticalAlignment(Element.ALIGN_TOP);
 
-    // FIXME need to have mapping from subjective category to judging station
-    final String subjectName;
-    if (scoreCategory.getName().equals(SubjectiveConstants.PROGRAMMING_NAME)) {
-      subjectName = SubjectiveConstants.ROBOT_DESIGN_TITLE;
-    } else if (scoreCategory.getName().equals(SubjectiveConstants.ROBOT_DESIGN_NAME)) {
-      subjectName = SubjectiveConstants.ROBOT_DESIGN_TITLE;
-    } else if (scoreCategory.getName().equals(SubjectiveConstants.PROJECT_NAME)) {
-      subjectName = SubjectiveConstants.PROJECT_TITLE;
-    } else if (scoreCategory.getName().equals(SubjectiveConstants.CORE_VALUES_NAME)) {
-      subjectName = SubjectiveConstants.CORE_VALUES_TITLE;
-    } else {
-      subjectName = scoreCategory.getName();
-    }
-
     // put the rest of the header cells on the table
     pageHeaderTable.addCell(headerCell);
     pageHeaderTable.addCell(createCell(scoreCategory.getTitle(), f20b, NO_BORDERS, Element.ALIGN_LEFT));
     pageHeaderTable.addCell(createCell("Team Number: "
         + teamInfo.getTeamNumber(), f12b, NO_BORDERS, Element.ALIGN_LEFT));
     pageHeaderTable.addCell(createCell("Time: "
-        + TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(teamInfo.getSubjectiveTimeByName(subjectName).getTime()),
+        + TournamentSchedule.OUTPUT_DATE_FORMAT.get()
+                                               .format(teamInfo.getSubjectiveTimeByName(scheduleColumn).getTime()),
                                        f12b, NO_BORDERS, Element.ALIGN_RIGHT));
     pageHeaderTable.addCell(createCell("Judging Room: "
         + teamInfo.getDivision(), f10b, NO_BORDERS, Element.ALIGN_LEFT));

@@ -28,8 +28,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Formatter;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
@@ -59,10 +61,6 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
-import net.mtu.eggplant.util.BasicFileFilter;
-import net.mtu.eggplant.util.gui.BasicWindowMonitor;
-import net.mtu.eggplant.util.gui.GraphicsUtils;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -76,11 +74,16 @@ import fll.scheduler.TournamentSchedule.ColumnInformation;
 import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
+import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.GuiExceptionHandler;
 import fll.util.LogUtils;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
+import fll.xml.ScoreCategory;
+import net.mtu.eggplant.util.BasicFileFilter;
+import net.mtu.eggplant.util.gui.BasicWindowMonitor;
+import net.mtu.eggplant.util.gui.GraphicsUtils;
 
 /**
  * UI for the scheduler.
@@ -587,7 +590,27 @@ public class SchedulerUI extends JFrame {
 
             getScheduleData().outputPerformanceSheets(scoresheetFos, description);
 
-            getScheduleData().outputSubjectiveSheets(directory.getAbsolutePath(), baseFilename, description);
+            final MapSubjectiveHeaders mapDialog = new MapSubjectiveHeaders(SchedulerUI.this, description,
+                                                                            getScheduleData());
+            mapDialog.setLocationRelativeTo(SchedulerUI.this);
+            mapDialog.setVisible(true);
+            if (mapDialog.isMappingValid()) {
+              final Map<ScoreCategory, String> categoryToSchedule = new HashMap<>();
+              for (final ScoreCategory scoreCategory : description.getSubjectiveCategories()) {
+                final String scheduleColumn = mapDialog.getSubjectiveHeaderForCategory(scoreCategory);
+                if (null == scheduleColumn) {
+                  throw new FLLInternalException("Did not find a schedule column for "
+                      + scoreCategory.getTitle());
+                }
+                categoryToSchedule.put(scoreCategory, scheduleColumn);
+              }
+              getScheduleData().outputSubjectiveSheets(directory.getAbsolutePath(), baseFilename, description,
+                                                       categoryToSchedule);
+            } else {
+              JOptionPane.showMessageDialog(SchedulerUI.this,
+                                            "Subjective sheets not written out due to incomplete mapping of schedule columns to categories",
+                                            "Warning", JOptionPane.WARNING_MESSAGE);
+            }
 
             JOptionPane.showMessageDialog(SchedulerUI.this, "Scoresheets written '"
                 + scoresheetFile.getAbsolutePath() + "'", "Information", JOptionPane.INFORMATION_MESSAGE);

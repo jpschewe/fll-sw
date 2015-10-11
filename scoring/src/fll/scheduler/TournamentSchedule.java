@@ -985,9 +985,19 @@ public class TournamentSchedule implements Serializable {
     detailedSchedules.add(para);
   }
 
+  /**
+   * @param dir where to write the files
+   * @param baseFileName the base name of the files
+   * @param description the challenge description
+   * @param categoryToSchedule mapping of ScoreCategories to schedule columns
+   * @throws DocumentException
+   * @throws MalformedURLException
+   * @throws IOException
+   */
   public void outputSubjectiveSheets(final String dir,
-                                     String baseFileName,
-                                     final ChallengeDescription description)
+                                     final String baseFileName,
+                                     final ChallengeDescription description,
+                                     final Map<ScoreCategory, String> categoryToSchedule)
                                          throws DocumentException, MalformedURLException, IOException {
 
     // setup the sheets from the sucked in xml
@@ -1000,14 +1010,12 @@ public class TournamentSchedule implements Serializable {
 
       PdfWriter.getInstance(pdf, new FileOutputStream(dir
           + File.separator + baseFileName + "_SubjectiveSheets-" + category.getName() + ".pdf"));
-      System.out.println("Writing to: "
-          + dir);
 
       pdf.open();
 
       // Go thru all of the team schedules and put them all into a pdf
       for (final TeamScheduleInfo teamInfo : _schedule) {
-        writeTeamSubjectivePdf(sheetElement, pdf, teamInfo);
+        writeTeamSubjectivePdf(sheetElement, pdf, teamInfo, categoryToSchedule);
       }
 
       pdf.close();
@@ -1016,9 +1024,12 @@ public class TournamentSchedule implements Serializable {
 
   public static void writeTeamSubjectivePdf(final SheetElement sheet,
                                             final Document doc,
-                                            final TeamScheduleInfo teamInfo)
+                                            final TeamScheduleInfo teamInfo,
+                                            final Map<ScoreCategory, String> categoryToSchedule)
                                                 throws MalformedURLException, IOException, DocumentException {
-    final SubjectivePdfWriter writer = new SubjectivePdfWriter(sheet.getSheetData());
+    final ScoreCategory scoreCategory = sheet.getSheetData();
+    final String schedulerColumn = categoryToSchedule.get(scoreCategory);
+    final SubjectivePdfWriter writer = new SubjectivePdfWriter(scoreCategory, schedulerColumn);
     final PdfPTable table = writer.createStandardRubricTable();
     writer.writeHeader(doc, teamInfo);
     for (final String category : sheet.getCategories()) {
