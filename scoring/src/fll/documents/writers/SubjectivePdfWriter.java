@@ -3,7 +3,7 @@ package fll.documents.writers;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -20,6 +20,7 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 
 import fll.documents.elements.RowElement;
+import fll.documents.elements.SheetElement;
 import fll.documents.elements.TableElement;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
@@ -74,11 +75,14 @@ public class SubjectivePdfWriter {
 
   private final ScoreCategory scoreCategory;
 
+  private final SheetElement sheetElement;
+
   private final String scheduleColumn;
 
-  public SubjectivePdfWriter(final ScoreCategory scoreCategory,
+  public SubjectivePdfWriter(final SheetElement sheet,
                              final String scheduleColumn) {
-    this.scoreCategory = scoreCategory;
+    this.sheetElement = sheet;
+    this.scoreCategory = sheetElement.getSheetData();
     this.scheduleColumn = scheduleColumn;
 
     f6i = new Font(Font.FontFamily.HELVETICA, 6, Font.ITALIC);
@@ -104,8 +108,9 @@ public class SubjectivePdfWriter {
 
   }
 
-  public void writeHeader(Document doc,
-                          TeamScheduleInfo teamInfo) throws MalformedURLException, IOException, DocumentException {
+  public void writeHeader(final Document doc,
+                          final TeamScheduleInfo teamInfo)
+                              throws MalformedURLException, IOException, DocumentException {
     Image image = null;
     PdfPTable pageHeaderTable = null;
     PdfPTable columnTitlesTable = null;
@@ -170,19 +175,18 @@ public class SubjectivePdfWriter {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////// tables.
     //
 
-    columnTitlesTable = new PdfPTable(6);
+    final List<String> rubricRangeTitles = sheetElement.getRubricRangeTitles();
+    
+    columnTitlesTable = new PdfPTable(rubricRangeTitles.size() + 2);
     columnTitlesTable.setSpacingBefore(5);
     columnTitlesTable.setWidthPercentage(100f);
     columnTitlesTable.setWidths(colWidths);
     columnTitlesTable.addCell(createCell("", f10b, NO_BORDERS));
     columnTitlesTable.addCell(createCell("", f10b, NO_BORDERS));
 
-    // FIXME get these off the sorted rubric ranges, need to check that all
-    // goals have the same rubric titles
-    columnTitlesTable.addCell(createCell("Beginning", f10b, NO_BORDERS));
-    columnTitlesTable.addCell(createCell("Developing", f10b, NO_BORDERS));
-    columnTitlesTable.addCell(createCell("Accomplished", f10b, NO_BORDERS));
-    columnTitlesTable.addCell(createCell("Exemplary", f10b, NO_BORDERS));
+    for (final String title : rubricRangeTitles) {
+      columnTitlesTable.addCell(createCell(title, f10b, NO_BORDERS));
+    }
     columnTitlesTable.setSpacingAfter(3);
 
     // add the header, instructions and section column titles to the document
@@ -255,8 +259,8 @@ public class SubjectivePdfWriter {
     }
   }
 
-  public void writeRubricTable(PdfPTable table,
-                               TableElement tableData) {
+  public void writeRubricTable(final PdfPTable table,
+                               final TableElement tableData) {
     PdfPCell focusArea = null;
     PdfPCell topicArea = null;
     PdfPCell topicInstructions = null;
@@ -271,7 +275,7 @@ public class SubjectivePdfWriter {
         * 2);
     table.addCell(focusArea);
 
-    ArrayList<RowElement> rows = tableData.getRowElements();
+    final List<RowElement> rows = tableData.getRowElements();
     for (RowElement rowElement : rows) {
       // This is the title row with the background color
       topicArea = createCell(rowElement.getRowTitle(), f8b, NO_LEFT_RIGHT, sheetColor);
