@@ -68,6 +68,10 @@ public class ChallengeDescription implements Serializable {
 
   private final List<ScoreCategory> mSubjectiveCategories;
 
+  /**
+   * 
+   * @return unmodifiable list
+   */
   public List<ScoreCategory> getSubjectiveCategories() {
     return mSubjectiveCategories;
   }

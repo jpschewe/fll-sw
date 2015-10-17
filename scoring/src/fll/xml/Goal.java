@@ -7,14 +7,14 @@
 package fll.xml;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.w3c.dom.Element;
 
 import fll.web.playoff.TeamScore;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 public class Goal extends AbstractGoal {
 
@@ -39,6 +39,10 @@ public class Goal extends AbstractGoal {
         rubric.add(range);
       }
     }
+    
+    // sort so that the lowest range is first
+    Collections.sort(rubric, LEAST_RUBRIC_RANGE);
+
     mRubric = Collections.unmodifiableList(rubric);
 
     final List<EnumeratedValue> values = new LinkedList<EnumeratedValue>();
@@ -50,14 +54,30 @@ public class Goal extends AbstractGoal {
 
   }
 
+
+  private static final Comparator<RubricRange> LEAST_RUBRIC_RANGE = new Comparator<RubricRange>() {
+    public int compare(final RubricRange one,
+                       final RubricRange two) {
+      return Integer.compare(one.getMin(), two.getMin());
+    }
+  };
+  
   private final List<RubricRange> mRubric;
 
+  /**
+   * 
+   * @return unmodifiable list, sorted with lowest range first
+   */
   public List<RubricRange> getRubric() {
     return mRubric;
   }
 
   private final List<EnumeratedValue> mValues;
 
+  /**
+   * 
+   * @return unmodifiable list
+   */
   public List<EnumeratedValue> getValues() {
     return mValues;
   }

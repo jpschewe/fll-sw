@@ -13,6 +13,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.io.Writer;
+import java.net.MalformedURLException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -48,15 +49,11 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
-
-import au.com.bytecode.opencsv.CSVWriter;
 
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
@@ -67,12 +64,16 @@ import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 
+import au.com.bytecode.opencsv.CSVWriter;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.Queries;
+import fll.documents.elements.SheetElement;
+import fll.documents.writers.SubjectivePdfWriter;
 import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
@@ -83,7 +84,9 @@ import fll.util.PdfUtils;
 import fll.util.SimpleFooterHandler;
 import fll.web.playoff.ScoresheetGenerator;
 import fll.xml.ChallengeDescription;
+import fll.xml.ScoreCategory;
 import fll.xml.XMLUtils;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Tournament schedule. Can parse the schedule from a spreadsheet or CSV file.
@@ -250,8 +253,8 @@ public class TournamentSchedule implements Serializable {
   public TournamentSchedule(final String name,
                             final InputStream stream,
                             final String sheetName,
-                            final Collection<String> subjectiveHeaders) throws IOException, ParseException,
-      InvalidFormatException, ScheduleParseException {
+                            final Collection<String> subjectiveHeaders)
+                                throws IOException, ParseException, InvalidFormatException, ScheduleParseException {
     this(name, new ExcelCellReader(stream, sheetName), subjectiveHeaders);
   }
 
@@ -265,8 +268,8 @@ public class TournamentSchedule implements Serializable {
    */
   public TournamentSchedule(final String name,
                             final File csvFile,
-                            final Collection<String> subjectiveHeaders) throws IOException, ParseException,
-      ScheduleParseException {
+                            final Collection<String> subjectiveHeaders)
+                                throws IOException, ParseException, ScheduleParseException {
     this(name, new CSVCellReader(csvFile), subjectiveHeaders);
   }
 
@@ -279,8 +282,8 @@ public class TournamentSchedule implements Serializable {
    */
   private TournamentSchedule(final String name,
                              final CellFileReader reader,
-                             final Collection<String> subjectiveHeaders) throws IOException, ParseException,
-      ScheduleParseException {
+                             final Collection<String> subjectiveHeaders)
+                                 throws IOException, ParseException, ScheduleParseException {
     this.name = name;
     final ColumnInformation columnInfo = findColumns(reader, subjectiveHeaders);
     numRounds = columnInfo.getNumPerfs();
@@ -329,7 +332,8 @@ public class TournamentSchedule implements Serializable {
       getNumRounds.setInt(1, tournamentID);
       numRounds = getNumRounds.executeQuery();
       if (numRounds.next()) {
-        this.numRounds = numRounds.getInt(1) + 1;
+        this.numRounds = numRounds.getInt(1)
+            + 1;
       } else {
         throw new RuntimeException("No rounds found for tournament: "
             + tournamentID);
@@ -372,9 +376,13 @@ public class TournamentSchedule implements Serializable {
         int prevRound = -1;
         while (perfRounds.next()) {
           final int round = perfRounds.getInt(1);
-          if (round != prevRound + 1) {
+          if (round != prevRound
+              + 1) {
             throw new RuntimeException("Rounds must be consecutive and start at 1. Tournament: "
-                + tournamentID + " team: " + teamNumber + " round: " + (round + 1) + " prevRound: " + (prevRound + 1));
+                + tournamentID + " team: " + teamNumber + " round: " + (round
+                    + 1)
+                + " prevRound: " + (prevRound
+                    + 1));
           }
           final Time perfTime = perfRounds.getTime(2);
           final String tableColor = perfRounds.getString(3);
@@ -493,7 +501,9 @@ public class TournamentSchedule implements Serializable {
       }
       if (expectedValue != value.intValue()) {
         throw new FLLRuntimeException("Performance rounds not contiguous after "
-            + (expectedValue - 1) + " found " + value);
+            + (expectedValue
+                - 1)
+            + " found " + value);
       }
 
       final String tableHeader = String.format(TABLE_HEADER_FORMAT, expectedValue);
@@ -580,8 +590,10 @@ public class TournamentSchedule implements Serializable {
     }
 
     for (int round = 0; round < numPerfRounds; ++round) {
-      final String perfHeader = String.format(PERF_HEADER_FORMAT, (round + 1));
-      final String perfTableHeader = String.format(TABLE_HEADER_FORMAT, (round + 1));
+      final String perfHeader = String.format(PERF_HEADER_FORMAT, (round
+          + 1));
+      final String perfTableHeader = String.format(TABLE_HEADER_FORMAT, (round
+          + 1));
       perfColumn[round] = getColumnForHeader(line, perfHeader);
       perfTableColumn[round] = getColumnForHeader(line, perfTableHeader);
     }
@@ -824,7 +836,8 @@ public class TournamentSchedule implements Serializable {
     final Document pdf = PdfUtils.createLandscapePdfDoc(stream, new SimpleFooterHandler());
 
     final int numColumns = 5
-        + subjectiveStations.size() + getNumberOfRounds() * 2;
+        + subjectiveStations.size() + getNumberOfRounds()
+            * 2;
     final PdfPTable table = PdfUtils.createTable(numColumns);
     final float[] columnWidths = new float[numColumns];
     int idx = 0;
@@ -865,8 +878,10 @@ public class TournamentSchedule implements Serializable {
       table.addCell(PdfUtils.createHeaderCell(subjectiveStation));
     }
     for (int round = 0; round < getNumberOfRounds(); ++round) {
-      table.addCell(PdfUtils.createHeaderCell(String.format(PERF_HEADER_FORMAT, round + 1)));
-      table.addCell(PdfUtils.createHeaderCell(String.format(TABLE_HEADER_FORMAT, round + 1)));
+      table.addCell(PdfUtils.createHeaderCell(String.format(PERF_HEADER_FORMAT, round
+          + 1)));
+      table.addCell(PdfUtils.createHeaderCell(String.format(TABLE_HEADER_FORMAT, round
+          + 1)));
     }
     table.setHeaderRows(2);
 
@@ -935,12 +950,14 @@ public class TournamentSchedule implements Serializable {
       cal.add(Calendar.MINUTE, params.getStationByName(subjectiveStation).getDurationMinutes());
       final Date end = cal.getTime();
       para.add(new Chunk(String.format("%s - %s", OUTPUT_DATE_FORMAT.get().format(start),
-                                       OUTPUT_DATE_FORMAT.get().format(end)), TEAM_VALUE_FONT));
+                                       OUTPUT_DATE_FORMAT.get().format(end)),
+                         TEAM_VALUE_FONT));
       para.add(Chunk.NEWLINE);
     }
 
     for (int round = 0; round < getNumberOfRounds(); ++round) {
-      para.add(new Chunk(String.format(PERF_HEADER_FORMAT, round + 1)
+      para.add(new Chunk(String.format(PERF_HEADER_FORMAT, round
+          + 1)
           + ": ", TEAM_HEADER_FONT));
       final Date start = si.getPerfTime(round);
       cal.setTime(start);
@@ -948,18 +965,17 @@ public class TournamentSchedule implements Serializable {
       final Date end = cal.getTime();
       para.add(new Chunk(String.format("%s - %s %s %d", OUTPUT_DATE_FORMAT.get().format(start),
                                        OUTPUT_DATE_FORMAT.get().format(end), si.getPerfTableColor(round),
-                                       si.getPerfTableSide(round)), TEAM_VALUE_FONT));
+                                       si.getPerfTableSide(round)),
+                         TEAM_VALUE_FONT));
       para.add(Chunk.NEWLINE);
     }
 
     para.add(Chunk.NEWLINE);
-    para.add(new Chunk(
-                       "Performance rounds must start on time, and will start without you. Please ensure your team arrives at least 5 minutes ahead of scheduled time, and checks in.",
+    para.add(new Chunk("Performance rounds must start on time, and will start without you. Please ensure your team arrives at least 5 minutes ahead of scheduled time, and checks in.",
                        TEAM_HEADER_FONT));
 
     para.add(Chunk.NEWLINE);
-    para.add(new Chunk(
-                       "Note that there may be more judging and a head to head round after this judging, please see the main tournament schedule for these details.",
+    para.add(new Chunk("Note that there may be more judging and a head to head round after this judging, please see the main tournament schedule for these details.",
                        TEAM_HEADER_FONT));
     para.add(Chunk.NEWLINE);
     para.add(Chunk.NEWLINE);
@@ -969,9 +985,73 @@ public class TournamentSchedule implements Serializable {
     detailedSchedules.add(para);
   }
 
+  /**
+   * @param dir where to write the files
+   * @param baseFileName the base name of the files
+   * @param description the challenge description
+   * @param categoryToSchedule mapping of ScoreCategories to schedule columns
+   * @throws DocumentException
+   * @throws MalformedURLException
+   * @throws IOException
+   */
+  public void outputSubjectiveSheets(final String dir,
+                                     final String baseFileName,
+                                     final ChallengeDescription description,
+                                     final Map<ScoreCategory, String> categoryToSchedule)
+                                         throws DocumentException, MalformedURLException, IOException {
+
+    // setup the sheets from the sucked in xml
+    for (final ScoreCategory category : description.getSubjectiveCategories()) {
+      final SheetElement sheetElement = createSubjectiveSheetElement(category);
+
+      // This document will be all of the subjective pdf sheets in a single
+      // file.
+      com.itextpdf.text.Document pdf = SubjectivePdfWriter.createStandardDocument();
+
+      PdfWriter.getInstance(pdf, new FileOutputStream(dir
+          + File.separator + baseFileName + "_SubjectiveSheets-" + category.getName() + ".pdf"));
+
+      pdf.open();
+
+      // Go thru all of the team schedules and put them all into a pdf
+      for (final TeamScheduleInfo teamInfo : _schedule) {
+        writeTeamSubjectivePdf(sheetElement, pdf, teamInfo, categoryToSchedule);
+      }
+
+      pdf.close();
+    }
+  }
+
+  public static void writeTeamSubjectivePdf(final SheetElement sheet,
+                                            final Document doc,
+                                            final TeamScheduleInfo teamInfo,
+                                            final Map<ScoreCategory, String> categoryToSchedule)
+                                                throws MalformedURLException, IOException, DocumentException {
+    final ScoreCategory scoreCategory = sheet.getSheetData();
+    final String schedulerColumn = categoryToSchedule.get(scoreCategory);
+    final SubjectivePdfWriter writer = new SubjectivePdfWriter(sheet, schedulerColumn);
+    final PdfPTable table = writer.createStandardRubricTable();
+    writer.writeHeader(doc, teamInfo);
+    for (final String category : sheet.getCategories()) {
+      writer.writeRubricTable(table, sheet.getTableElement(category));
+      writer.writeCommentsSection(table);
+    }
+
+    doc.add(table);
+
+    writer.writeEndOfPageRow(doc);
+  }
+
+  public static SheetElement createSubjectiveSheetElement(final ScoreCategory sc) {
+    // Get the info from the .xml sheet for the specific subjective category
+    // An sc == a subjective category
+    final SheetElement sheet = new SheetElement(sc);
+    return sheet;
+  }
+
   public void outputPerformanceSheets(final OutputStream output,
-                                      final ChallengeDescription description) throws DocumentException, SQLException,
-      IOException {
+                                      final ChallengeDescription description)
+                                          throws DocumentException, SQLException, IOException {
     final ScoresheetGenerator scoresheets = new ScoresheetGenerator(getNumberOfRounds()
         * _schedule.size(), description);
     final SortedMap<PerformanceTime, TeamScheduleInfo> performanceTimes = new TreeMap<PerformanceTime, TeamScheduleInfo>();
@@ -989,7 +1069,8 @@ public class TournamentSchedule implements Serializable {
 
       scoresheets.setTime(sheetIndex, performance.getTime());
       scoresheets.setTable(sheetIndex, String.format("%s %d", performance.getTable(), performance.getSide()));
-      scoresheets.setRound(sheetIndex, String.valueOf(round + 1));
+      scoresheets.setRound(sheetIndex, String.valueOf(round
+          + 1));
       scoresheets.setNumber(sheetIndex, si.getTeamNumber());
       scoresheets.setDivision(sheetIndex, si.getDivision());
       scoresheets.setName(sheetIndex, si.getTeamName());
@@ -1050,7 +1131,8 @@ public class TournamentSchedule implements Serializable {
       table.addCell(PdfUtils.createCell(OUTPUT_DATE_FORMAT.get().format(si.getPerfTime(round)), backgroundColor));
       table.addCell(PdfUtils.createCell(si.getPerfTableColor(round)
           + " " + si.getPerfTableSide(round), backgroundColor));
-      table.addCell(PdfUtils.createCell(String.valueOf(round + 1)));
+      table.addCell(PdfUtils.createCell(String.valueOf(round
+          + 1)));
     }
 
     detailedSchedules.add(table);
@@ -1417,8 +1499,8 @@ public class TournamentSchedule implements Serializable {
    *           read
    */
   private TeamScheduleInfo parseLine(final CellFileReader reader,
-                                     final ColumnInformation ci) throws IOException, ParseException,
-      ScheduleParseException {
+                                     final ColumnInformation ci)
+                                         throws IOException, ParseException, ScheduleParseException {
     final String[] line = reader.readNext();
     if (null == line) {
       return null;
@@ -1475,7 +1557,8 @@ public class TournamentSchedule implements Serializable {
         if (ti.getPerfTableSide(perfNum) > 2
             || ti.getPerfTableSide(perfNum) < 1) {
           final String message = "There are only two sides to the table, number must be 1 or 2 team: "
-              + ti.getTeamNumber() + " round " + (perfNum + 1);
+              + ti.getTeamNumber() + " round " + (perfNum
+                  + 1);
           LOGGER.error(message);
           throw new ScheduleParseException(message);
         }
@@ -1875,7 +1958,8 @@ public class TournamentSchedule implements Serializable {
         final PerformanceTime perfTime = si.getPerf(round);
         final Element perf = document.createElementNS(null, "performance");
         team.appendChild(perf);
-        perf.setAttributeNS(null, "round", String.valueOf(round + 1));
+        perf.setAttributeNS(null, "round", String.valueOf(round
+            + 1));
         perf.setAttributeNS(null, "table_color", perfTime.getTable());
         perf.setAttributeNS(null, "table_side", String.valueOf(perfTime.getSide()));
         perf.setAttributeNS(null, "time", fll.xml.XMLUtils.XML_TIME_FORMAT.get().format(perfTime.getTime()));
@@ -1934,8 +2018,10 @@ public class TournamentSchedule implements Serializable {
         line.add(category);
       }
       for (int round = 0; round < getNumberOfRounds(); ++round) {
-        line.add(String.format(TournamentSchedule.PERF_HEADER_FORMAT, round + 1));
-        line.add(String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round + 1));
+        line.add(String.format(TournamentSchedule.PERF_HEADER_FORMAT, round
+            + 1));
+        line.add(String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round
+            + 1));
       }
       csv.writeNext(line.toArray(new String[line.size()]));
       line.clear();
