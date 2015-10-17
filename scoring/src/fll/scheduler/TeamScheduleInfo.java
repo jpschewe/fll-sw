@@ -210,6 +210,7 @@ public final class TeamScheduleInfo implements Serializable {
   /**
    * Get the subjective time by name.
    * 
+   * @param name name of a judging station
    * @return null if no time with that name found
    */
   public SubjectiveTime getSubjectiveTimeByName(final String name) {
