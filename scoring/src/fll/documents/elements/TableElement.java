@@ -1,6 +1,7 @@
 package fll.documents.elements;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class represents a single table of the many tables on a subjective score
@@ -14,9 +15,9 @@ public class TableElement {
   // Example, MN Programming, or Strategy and Innovations
   private final String tableCategory;
 
-  private final ArrayList<RowElement> rows = new ArrayList<RowElement>();
+  private final List<RowElement> rows = new ArrayList<RowElement>();
 
-  public TableElement(String tableCategory) {
+  public TableElement(final String tableCategory) {
     this.tableCategory = tableCategory;
   }
 
@@ -34,7 +35,7 @@ public class TableElement {
     this.rows.add(element);
   }
 
-  public ArrayList<RowElement> getRowElements() {
+  public List<RowElement> getRowElements() {
     return this.rows;
   }
 

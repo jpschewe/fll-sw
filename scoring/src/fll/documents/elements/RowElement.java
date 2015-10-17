@@ -1,8 +1,5 @@
 package fll.documents.elements;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 
 import fll.xml.Goal;
@@ -25,19 +22,10 @@ import fll.xml.RubricRange;
  * </p>
  */
 public class RowElement {
-  /** Inspiration for example (90 degrees on the left side of the table) */
-  private final String catagory;
 
-  /** Discovery for example (left side of the colored row) */
-  private final String rowTitle;
-
-  /**
-   * Balanced emphasis on all three aspects (Robot, Project, Core Values) of
-   * FLL; its not just about winning awards (right side of the colored row)
-   */
   private final String rowDescription;
 
-  private final List<RubricRange> sortedRubricRanges;
+  private final Goal goal;
 
   /**
    * The rubric ranges sorted with the least first.
@@ -45,26 +33,13 @@ public class RowElement {
    * @return unmodifiable list
    */
   public List<RubricRange> getSortedRubricRanges() {
-    return sortedRubricRanges;
+    return goal.getRubric();
   }
 
   public RowElement(final Goal goal) {
-    this.catagory = goal.getCategory();
-    this.rowTitle = goal.getTitle();
-    this.rowDescription = goal.getDescription().replaceAll("\\s+", " ").replaceAll("\n", "");
-
-    final List<RubricRange> rubricRangeElements = new LinkedList<>(goal.getRubric());
-    // sort so that the lowest range is first
-    Collections.sort(rubricRangeElements, LEAST_RUBRIC_RANGE);
-    sortedRubricRanges = Collections.unmodifiableList(rubricRangeElements);
+    this.goal = goal;
+    this.rowDescription = goal.getDescription().replaceAll("\\s+", " ").replaceAll("\n", "").replaceAll("\r", "");
   }
-
-  private static final Comparator<RubricRange> LEAST_RUBRIC_RANGE = new Comparator<RubricRange>() {
-    public int compare(final RubricRange one,
-                       final RubricRange two) {
-      return Integer.compare(one.getMin(), two.getMin());
-    }
-  };
 
   public String toString() {
     final String NL = System.lineSeparator();
@@ -72,10 +47,10 @@ public class RowElement {
     output.append("-RowElementStart----------------------------------");
     output.append(NL);
     output.append("Catagory: ");
-    output.append(catagory);
+    output.append(getCategory());
     output.append(NL);
     output.append("Row Title: ");
-    output.append(rowTitle);
+    output.append(getRowTitle());
     output.append(NL);
     output.append("Row Description: ");
     output.append(rowDescription);
@@ -83,14 +58,22 @@ public class RowElement {
     return output.toString();
   }
 
-  public String getCatagory() {
-    return catagory;
+  /** Inspiration for example (90 degrees on the left side of the table) */
+  public String getCategory() {
+    return goal.getCategory();
   }
 
+  /** Discovery for example (left side of the colored row) */
   public String getRowTitle() {
-    return rowTitle;
+    return goal.getTitle();
   }
 
+  /**
+   * Balanced emphasis on all three aspects (Robot, Project, Core Values) of
+   * FLL; its not just about winning awards (right side of the colored row).
+   * 
+   * Extra spaces and line endings have been removed.
+   */
   public String getDescription() {
     return rowDescription;
   }

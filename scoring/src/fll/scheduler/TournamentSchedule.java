@@ -1029,7 +1029,7 @@ public class TournamentSchedule implements Serializable {
                                                 throws MalformedURLException, IOException, DocumentException {
     final ScoreCategory scoreCategory = sheet.getSheetData();
     final String schedulerColumn = categoryToSchedule.get(scoreCategory);
-    final SubjectivePdfWriter writer = new SubjectivePdfWriter(scoreCategory, schedulerColumn);
+    final SubjectivePdfWriter writer = new SubjectivePdfWriter(sheet, schedulerColumn);
     final PdfPTable table = writer.createStandardRubricTable();
     writer.writeHeader(doc, teamInfo);
     for (final String category : sheet.getCategories()) {
@@ -1046,9 +1046,6 @@ public class TournamentSchedule implements Serializable {
     // Get the info from the .xml sheet for the specific subjective category
     // An sc == a subjective category
     final SheetElement sheet = new SheetElement(sc);
-    LOGGER.info("Sheet Processing: "
-        + sheet.getSheetName());
-    sheet.processSheet();
     return sheet;
   }
 
