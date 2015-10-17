@@ -92,6 +92,8 @@ public class SubjectivePdfWriter {
     f12b = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
     f20b = new Font(Font.FontFamily.HELVETICA, 20, Font.BOLD);
 
+    // uses hard coded constants to make the folors look like FIRST and default
+    // to red.
     switch (scoreCategory.getName()) {
     case SubjectiveConstants.CORE_VALUES_NAME:
       sheetColor = rowBlue;
@@ -176,8 +178,9 @@ public class SubjectivePdfWriter {
     //
 
     final List<String> rubricRangeTitles = sheetElement.getRubricRangeTitles();
-    
-    columnTitlesTable = new PdfPTable(rubricRangeTitles.size() + 2);
+
+    columnTitlesTable = new PdfPTable(rubricRangeTitles.size()
+        + 2);
     columnTitlesTable.setSpacingBefore(5);
     columnTitlesTable.setWidthPercentage(100f);
     columnTitlesTable.setWidths(colWidths);
@@ -361,6 +364,21 @@ public class SubjectivePdfWriter {
       break;
     }
     return result;
+  }
+
+  private static final class SubjectiveConstants {
+
+    // Core Values catagory constants
+    public static final String CORE_VALUES_NAME = "core_values";
+
+    // Project catagory constants
+    public static final String PROJECT_NAME = "project";
+
+    // Robot Design constants
+    public static final String ROBOT_DESIGN_NAME = "robot_design";
+
+    // Robot Programming constants
+    public static final String PROGRAMMING_NAME = "robot_programming";
   }
 
 }
