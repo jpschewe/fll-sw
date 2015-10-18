@@ -1,3 +1,5 @@
+Release 10.0
+------------
 * 394 - output subjective score sheets from the scheduler
 * 403 - Allow judges to be added from the subjective datafile.
 * 402 - Remove null subjective rows when uploading scores from the webapp 
