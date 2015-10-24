@@ -21,7 +21,8 @@
 
   <form
     action="FinalComputedScores"
-    method="post">
+    method="post"
+    target="_blank">
 
     <p>To advance to the next tournament a team's top performance
       score must be in the top X% of all teams top performance scores.
@@ -36,8 +37,10 @@
       name="percentage"
       value="0" />% <br /> <input type="submit" />
 
-
   </form>
+  <br />
+
+  <a href="index.jsp">Return to the Reporting index page.</a>
 
 </body>
 </html>
