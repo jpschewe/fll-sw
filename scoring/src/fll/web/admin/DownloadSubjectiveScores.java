@@ -6,7 +6,6 @@
 package fll.web.admin;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -20,8 +19,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -33,6 +30,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.xml.ChallengeDescription;
 import fll.xml.XMLUtils;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Download the subjective scores to be used by mobile apps.
@@ -49,33 +47,25 @@ public class DownloadSubjectiveScores extends BaseFLLServlet {
     try {
       connection = datasource.getConnection();
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
-      if (Queries.isJudgesProperlyAssigned(connection, challengeDescription)) {
-        response.reset();
-        response.setContentType("text/xml");
-        response.setHeader("Content-Disposition", "filename=score.xml");
+      response.reset();
+      response.setContentType("text/xml");
+      response.setHeader("Content-Disposition", "filename=score.xml");
 
-        final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection);
-        final int tournament = Queries.getCurrentTournament(connection);
+      final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection);
+      final int tournament = Queries.getCurrentTournament(connection);
 
-        final Document scoreDocument = DownloadSubjectiveData.createSubjectiveScoresDocument(challengeDescription,
-                                                                                             tournamentTeams.values(),
-                                                                                             connection, tournament);
+      final Document scoreDocument = DownloadSubjectiveData.createSubjectiveScoresDocument(challengeDescription,
+                                                                                           tournamentTeams.values(),
+                                                                                           connection, tournament);
 
-        try {
-          DownloadSubjectiveData.validateXML(scoreDocument);
-        } catch (final SAXException e) {
-          throw new FLLInternalException("Subjective XML document is invalid", e);
-        }
-
-        final Writer writer = response.getWriter();
-        XMLUtils.writeXML(scoreDocument, writer, Utilities.DEFAULT_CHARSET.name());
-
-      } else {
-        response.reset();
-        response.setContentType("text/plain");
-        final PrintWriter writer = response.getWriter();
-        writer.println("Judges are not properly assigned, please go back to the administration page and assign judges");
+      try {
+        DownloadSubjectiveData.validateXML(scoreDocument);
+      } catch (final SAXException e) {
+        throw new FLLInternalException("Subjective XML document is invalid", e);
       }
+
+      final Writer writer = response.getWriter();
+      XMLUtils.writeXML(scoreDocument, writer, Utilities.DEFAULT_CHARSET.name());
     } catch (final SQLException e) {
       throw new RuntimeException(e);
     } finally {
