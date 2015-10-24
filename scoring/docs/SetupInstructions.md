@@ -100,7 +100,11 @@ If you do not have a zip tool to open up the archives you can use the jar tool t
   1. Test the server
       1. Open an explorer window to the directory you you unzipped install file into. It should be called something like fll-sw-<version>
       1. Unzip the install file to a location that you want to run from.
-      1. Now goto bin and run start-tomcat.bat, this will cause a command window to come up, don't close it, you can minimize it though. Server errors will show up here. If you are running Windows XP, you may get prompted by the firewall dialog asking if Java has permission to use the network, you need to click Unlock otherwise clients won't be able to connect
+      1. Now goto bin and run start-tomcat.bat (start-tomcat.sh on Linux and Mac)
+        * This will cause a command window to come up, don't close it, you can minimize it though. 
+        * Server errors will show up here. 
+        * If you are running Windows XP, you may get prompted by the firewall dialog asking if Java has permission to use the network, you need to click Unlock otherwise clients won't be able to connect
+        * If on Linux and double clicking on start-tomcat.sh doesn't work, then you'll need to modify your file browser settings. Goto Edit->Preference->Behavior and select Ask Each Time. Now you should be able to select execute file when you double click on it.
       1. Double click on fll-sw.html in the bin directory. This will open up a web browser to the software main page
       1. If the database has already been initialized, then you're done unless you want to change the challenge descriptor. If so, click on the setup database link. If the database has not been initialized, then you'll be redirected to the setup page.
           1. Select the challenge descriptor or upload one and click submit
