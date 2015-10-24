@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.io.Writer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -37,8 +36,6 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -58,6 +55,7 @@ import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreCategory;
 import fll.xml.XMLUtils;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Download the data file for the subjective score app.
@@ -115,18 +113,11 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
       final Collection<CategoryColumnMapping> scheduleColumnMappings = CategoryColumnMapping.load(connection,
                                                                                                   currentTournament);
 
-      if (Queries.isJudgesProperlyAssigned(connection, challengeDescription)) {
-        response.reset();
-        response.setContentType("application/zip");
-        response.setHeader("Content-Disposition", "filename=subjective-data.fll");
-        writeSubjectiveData(connection, challengeDocument, challengeDescription, schedule, scheduleColumnMappings,
-                            response.getOutputStream());
-      } else {
-        response.reset();
-        response.setContentType("text/plain");
-        final PrintWriter writer = response.getWriter();
-        writer.println("Judges are not properly assigned, please go back to the administration page and assign judges");
-      }
+      response.reset();
+      response.setContentType("application/zip");
+      response.setHeader("Content-Disposition", "filename=subjective-data.fll");
+      writeSubjectiveData(connection, challengeDocument, challengeDescription, schedule, scheduleColumnMappings,
+                          response.getOutputStream());
     } catch (final SQLException e) {
       throw new RuntimeException(e);
     } finally {
@@ -312,8 +303,9 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
         // work.
         // JPS 2013-07-03
         final java.io.File temp = java.io.File.createTempFile("fll", "xml");
-        fll.xml.XMLUtils.writeXML(document, new java.io.OutputStreamWriter(new java.io.FileOutputStream(temp),
-                                                                           Utilities.DEFAULT_CHARSET),
+        fll.xml.XMLUtils.writeXML(document,
+                                  new java.io.OutputStreamWriter(new java.io.FileOutputStream(temp),
+                                                                 Utilities.DEFAULT_CHARSET),
                                   Utilities.DEFAULT_CHARSET.name());
         final InputStream scoreStream = new java.io.FileInputStream(temp);
         final Document tempDocument = fll.xml.XMLUtils.parseXMLDocument(scoreStream);
