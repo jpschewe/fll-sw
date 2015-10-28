@@ -1,3 +1,4 @@
+* 407 - open final computed scores in a new window
 * 406 - allow one to download the subjective data file without all judges assigned
 
 Release 10.0
