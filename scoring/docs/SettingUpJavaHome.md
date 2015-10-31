@@ -8,8 +8,7 @@ Windows
 The root of your Java install is the location that you installed java. This is usually something like `c:\Program Files\Java\jdk-1.6.0`. Follow the instructions below for your version of windows, the variable name is `JAVA_HOME` the variable value is the install location.
 
   * [Windows 95, 98, ME](http://www.chem.gla.ac.uk/~louis/software/faq/q1.html)
-  * [Windows XP and Windows Vista](http://www.support.tabs3.com/main/R10463.htm)
-  * [Windows 7](http://www.itechtalk.com/thread3595.html)
+  * [Windows XP, Windows Vista, Windows 7, Windows 8](http://www.support.tabs3.com/main/R10463.htm)
 
 Linux
 -----
