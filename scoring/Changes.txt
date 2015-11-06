@@ -1,3 +1,6 @@
+Release 10.2
+------------
+* Fix error in 2015 challenge description where subjective areas didn't all have the same spelling causing an extra table to appear on the judging sheet
 * Fix crash in the subjective application when tabbing between elements
 * 409 - sort subjective sheets by schedule time
 
