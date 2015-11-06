@@ -1013,7 +1013,13 @@ public class TournamentSchedule implements Serializable {
 
       pdf.open();
 
-      // Go thru all of the team schedules and put them all into a pdf
+      // sort the schedule by the category we're working with
+      final String subjectiveStation = categoryToSchedule.get(category);
+      if (null != subjectiveStation) {
+        Collections.sort(_schedule, getComparatorForSubjectiveByDivision(subjectiveStation));
+      }
+
+      // Go through all of the team schedules and put them all into a pdf
       for (final TeamScheduleInfo teamInfo : _schedule) {
         writeTeamSubjectivePdf(sheetElement, pdf, teamInfo, categoryToSchedule);
       }
