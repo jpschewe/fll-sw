@@ -635,7 +635,7 @@
       multiplier="1"
       name="mission_strategy"
       title="Mission Strategy"
-      category="Strategy and Innovations">
+      category="Strategy and Innovation">
       <description>Ability to clearly define and describe the team's
         game
         strategy.
@@ -687,7 +687,7 @@
       multiplier="1"
       name="innovation"
       title="Innovation"
-      category="Strategy and Innovations">
+      category="Strategy and Innovation">
       <description>Creation of new, unique or unexpected features (in
         design, programming, strategy or applications) that are
         beneficial
@@ -1939,7 +1939,7 @@
       multiplier="1"
       name="design_process"
       title="Design Process"
-      category="Strategy and Innovations">
+      category="Strategy and Innovation">
       <description>Ability to develop and explain improvement cycles
         where
         alternatives are considered and narrowed, selections
@@ -1992,7 +1992,7 @@
       multiplier="1"
       name="mission_strategy"
       title="Mission Strategy"
-      category="Strategy and Innovations">
+      category="Strategy and Innovation">
       <description>Ability to clearly define and describe the team's
         game
         strategy.
@@ -2044,7 +2044,7 @@
       multiplier="1"
       name="innovation"
       title="Innovation"
-      category="Strategy and Innovations">
+      category="Strategy and Innovation">
       <description>Creation of new, unique or unexpected features (in
         design, programming, strategy or applications) that are
         beneficial
