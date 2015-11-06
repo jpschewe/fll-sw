@@ -206,7 +206,9 @@ public class SubjectivePdfWriter {
     PdfPTable closingTable = new PdfPTable(1);
 
     closingTable.setWidthPercentage(100f);
-    closingTable.addCell(createCell(" ", f6i, TOP_ONLY, sheetColor));
+    final PdfPCell bottomCell = createCell(" ", f6i, TOP_ONLY, sheetColor);
+    bottomCell.setMinimumHeight(18f);
+    closingTable.addCell(bottomCell);
     closingTable.addCell(createCell(" ", f6i, NO_BORDERS));
 
     // add the copy right statement
@@ -247,6 +249,7 @@ public class SubjectivePdfWriter {
     commentLabel.setHorizontalAlignment(Element.ALIGN_CENTER);
     commentLabel.setVerticalAlignment(Element.ALIGN_CENTER);
     emptySpace = createCell(" ", font, TOP_ONLY);
+    emptySpace.setMinimumHeight(18f);
     table.addCell(commentLabel);
     // Need to add the empty cells so the row is complete and is displayed in
     // the pdf
@@ -295,7 +298,8 @@ public class SubjectivePdfWriter {
       table.addCell(createCell("ND", font, NO_BORDERS));
 
       for (final RubricRange rubricRange : rowElement.getSortedRubricRanges()) {
-        table.addCell(createCell(rubricRange.getShortDescription(), font, NO_TOP_BOTTOM));
+        final String shortDescription = rubricRange.getShortDescription().trim().replaceAll("\\s+", " ");
+        table.addCell(createCell(shortDescription, font, NO_TOP_BOTTOM));
       }
     }
   }
@@ -334,18 +338,15 @@ public class SubjectivePdfWriter {
       result.setVerticalAlignment(Element.ALIGN_CENTER);
       result.setBorderWidthRight(0);
       result.setBorderWidthLeft(0);
-      result.setMinimumHeight(20f);
       break;
     case NO_TOP_BOTTOM:
       result.setBorderWidthTop(0);
       result.setBorderWidthBottom(0);
-      result.setMinimumHeight(20f);
       result.setVerticalAlignment(Element.ALIGN_CENTER);
       result.setHorizontalAlignment(Element.ALIGN_CENTER);
       break;
     case NO_TOP:
       result.setBorderWidthTop(0);
-      result.setMinimumHeight(20f);
       result.setVerticalAlignment(Element.ALIGN_CENTER);
       result.setHorizontalAlignment(Element.ALIGN_CENTER);
       break;
@@ -358,7 +359,6 @@ public class SubjectivePdfWriter {
     case TOP_ONLY:
       result.setBorderWidth(0);
       result.setBorderWidthTop(1);
-      result.setMinimumHeight(18f);
       break;
     default:
       break;
