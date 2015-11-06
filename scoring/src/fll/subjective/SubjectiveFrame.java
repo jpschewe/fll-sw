@@ -274,8 +274,7 @@ public final class SubjectiveFrame extends JFrame {
 
       final ZipEntry challengeEntry = zipfile.getEntry(DownloadSubjectiveData.CHALLENGE_ENTRY_NAME);
       if (null == challengeEntry) {
-        throw new FLLRuntimeException(
-                                      "Unable to find challenge descriptor in file, you probably choose the wrong file or it is corrupted");
+        throw new FLLRuntimeException("Unable to find challenge descriptor in file, you probably choose the wrong file or it is corrupted");
       }
       final InputStream challengeStream = zipfile.getInputStream(challengeEntry);
       _challengeDocument = ChallengeParser.parse(new InputStreamReader(challengeStream, Utilities.DEFAULT_CHARSET));
@@ -285,8 +284,7 @@ public final class SubjectiveFrame extends JFrame {
 
       final ZipEntry scoreEntry = zipfile.getEntry(DownloadSubjectiveData.SCORE_ENTRY_NAME);
       if (null == scoreEntry) {
-        throw new FLLRuntimeException(
-                                      "Unable to find score data in file, you probably choose the wrong file or it is corrupted");
+        throw new FLLRuntimeException("Unable to find score data in file, you probably choose the wrong file or it is corrupted");
       }
       final InputStream scoreStream = zipfile.getInputStream(scoreEntry);
       _scoreDocument = XMLUtils.parseXMLDocument(scoreStream);
@@ -416,7 +414,10 @@ public final class SubjectiveFrame extends JFrame {
     final Action oldTabAction = table.getActionMap().get(im.get(tab));
     final Action tabAction = new AbstractAction() {
       public void actionPerformed(final ActionEvent e) {
-        oldTabAction.actionPerformed(e);
+        if (null != oldTabAction) {
+          oldTabAction.actionPerformed(e);
+        }
+
         final JTable table = (JTable) e.getSource();
         final int rowCount = table.getRowCount();
         final int columnCount = table.getColumnCount();
