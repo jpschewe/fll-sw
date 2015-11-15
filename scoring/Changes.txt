@@ -1,3 +1,4 @@
+* 412 - remove the overall ranking from the ranking report
 * 414 - show more teams on the most recent scores scoreboard page
 * 415 - Set background of scoreboard most recent scores title
 
