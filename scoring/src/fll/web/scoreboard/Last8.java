@@ -84,7 +84,7 @@ public class Last8 extends BaseFLLServlet {
       if (!showOrg) {
         --numColumns;
       }
-      formatter.format("<th colspan='%d'>Most Recent Performance Scores</th>", numColumns);
+      formatter.format("<th colspan='%d' bgcolor='#800080'>Most Recent Performance Scores</th>", numColumns);
       formatter.format("</tr>");
 
       // scores here
@@ -101,7 +101,7 @@ public class Last8 extends BaseFLLServlet {
           + "  AND Teams.TeamNumber = current_tournament_teams.TeamNumber" //
           + "  AND verified_performance.Bye = False" //
           + "  AND verified_performance.RunNumber <= ?"
-          + " ORDER BY verified_performance.TimeStamp DESC, Teams.TeamNumber ASC LIMIT 8");
+          + " ORDER BY verified_performance.TimeStamp DESC, Teams.TeamNumber ASC LIMIT 20");
       prep.setInt(1, currentTournament);
       prep.setInt(2, maxScoreboardRound);
       rs = prep.executeQuery();

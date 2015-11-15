@@ -1,3 +1,6 @@
+* 414 - show more teams on the most recent scores scoreboard page
+* 415 - Set background of scoreboard most recent scores title
+
 Release 10.2
 ------------
 * Fix error in 2015 challenge description where subjective areas didn't all have the same spelling causing an extra table to appear on the judging sheet
