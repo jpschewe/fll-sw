@@ -88,7 +88,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
       final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID());
 
       // create simple doc and write to a ByteArrayOutputStream
-      final Document document = new Document(PageSize.LETTER);
+      final Document document = new Document(PageSize.LETTER, 36, 36, 48, 36);
       final ByteArrayOutputStream baos = new ByteArrayOutputStream();
       final PdfWriter writer = PdfWriter.getInstance(document, baos);
       writer.setPageEvent(new ReportPageEventHandler(HEADER_FONT, REPORT_TITLE, challengeDescription.getTitle(),
