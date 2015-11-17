@@ -1,3 +1,4 @@
+* 418 - Add increment and decrement buttons to the score entry page for the max range
 * 413 - Add team information to the header of the performance score report
 * 412 - remove the overall ranking from the ranking report
 * 414 - show more teams on the most recent scores scoreboard page
