@@ -1,11 +1,23 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE HTML>
 <html>
 <head>
 <title>Login Page</title>
 <link rel="stylesheet" type="text/css"
  href="<c:url value='/style/style.jsp'/>" />
+ 
+ <link
+  rel="stylesheet"
+  href="extlib/jquery.mobile-1.4.5.min.css" />
+
+<script
+  type='text/javascript'
+  src='extlib/jquery-1.11.1.min.js'></script>
+<script
+  type='text/javascript'
+  src='extlib/jquery.mobile-1.4.5.min.js'></script>
+ 
 </head>
 <body>
  <h1>Login to FLL</h1>
