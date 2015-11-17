@@ -15,7 +15,7 @@
  <c:remove var="message" />
 
  <form method="POST" action="DoLogin" name="login">
-  Username : <input type="text" size="15" maxlength="64" name="user" /><br />
+  Username : <input type="text" size="15" maxlength="64" name="user" autocorrect="off" autocapitalize="off"/><br />
   Password : <input type="password" size="15" name="pass" /><br /> <input
    name="submit_login" value="Login" type="submit" />
  </form>
