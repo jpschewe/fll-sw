@@ -528,10 +528,14 @@ public final class ScoreEntry {
     } else {
       final double range = max
           - min;
+      final int maxRangeIncrement = (int) Math.floor(range);
 
-      if (range >= 10) {
+      generateIncDecButton(name, -1
+          * maxRangeIncrement, writer);
+
+      if (FP.greaterThanOrEqual(range, 10, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
         generateIncDecButton(name, -5, writer);
-      } else if (range >= 5) {
+      } else if (FP.greaterThanOrEqual(range, 5, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
         generateIncDecButton(name, -3, writer);
       }
 
@@ -543,9 +547,11 @@ public final class ScoreEntry {
 
       if (FP.greaterThanOrEqual(range, 10, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
         generateIncDecButton(name, 5, writer);
-      } else if (range >= 5) {
+      } else if (FP.greaterThanOrEqual(range, 5, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
         generateIncDecButton(name, 3, writer);
       }
+
+      generateIncDecButton(name, maxRangeIncrement, writer);
 
     }
     writer.println("       </tr>");
