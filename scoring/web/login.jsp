@@ -26,7 +26,7 @@
  <%-- clear out the message, so that we don't see it again --%>
  <c:remove var="message" />
 
- <form method="POST" action="DoLogin" name="login">
+ <form method="POST" action="DoLogin" name="login" data-ajax="false">
   Username : <input type="text" size="15" maxlength="64" name="user" autocorrect="off" autocapitalize="off" autocomplete="off" spellcheck="false"/><br />
   Password : <input type="password" size="15" name="pass" /><br /> <input
    name="submit_login" value="Login" type="submit" />
