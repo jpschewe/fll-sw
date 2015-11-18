@@ -1,39 +1,41 @@
-* 416 - Disable auto capitalize and auto correct for the username on the login page
-* 418 - Add increment and decrement buttons to the score entry page for the max range
-* 413 - Add team information to the header of the performance score report
-* 412 - remove the overall ranking from the ranking report
-* 414 - show more teams on the most recent scores scoreboard page
-* 415 - Set background of scoreboard most recent scores title
+Release 10.3
+------------
+* #416 - Disable auto capitalize and auto correct for the username on the login page
+* #418 - Add increment and decrement buttons to the score entry page for the max range
+* #413 - Add team information to the header of the performance score report
+* #412 - remove the overall ranking from the ranking report
+* #414 - show more teams on the most recent scores scoreboard page
+* #415 - Set background of scoreboard most recent scores title
 
 Release 10.2
 ------------
 * Fix error in 2015 challenge description where subjective areas didn't all have the same spelling causing an extra table to appear on the judging sheet
 * Fix crash in the subjective application when tabbing between elements
-* 409 - sort subjective sheets by schedule time
+* #409 - sort subjective sheets by schedule time
 
 Release 10.1
 ------------
-* 407 - open final computed scores in a new window
-* 406 - allow one to download the subjective data file without all judges assigned
+* #407 - open final computed scores in a new window
+* #406 - allow one to download the subjective data file without all judges assigned
 
 Release 10.0
 ------------
-* 394 - output subjective score sheets from the scheduler
-* 403 - Allow judges to be added from the subjective datafile.
-* 402 - Remove null subjective rows when uploading scores from the webapp 
-* 398 - Add report to display each team's performance scores in detail
-* 334 - Display the lowest scoring element first in the score sheets 
-* 374 - Check all saved schedules with a unit test to make sure they all load
-* 387 - Show quartiles rather than actual ranks in the ranking report
-* 391 - Add shortDescription attribute to rubric range
-* 392 - Properly support no schedule in the subjective web app
-* 393 - Properly handle no judges in the subjective web app
-* 383 - Add subjective webapp version to the sidebar
-* 309 - support schedules without the division column, just use the judging group column instead
-* 172 - make bracket sort be specified when initializing the brackets of a challenge descriptor attribute
-* 381 - handle missing information in TeamScheduleInfo
-* 380 - generate correct tanking report when there are multiple tournaments in the same database
-* 377 - correctly identify Excel files by extension
+* #394 - output subjective score sheets from the scheduler
+* #403 - Allow judges to be added from the subjective datafile.
+* #402 - Remove null subjective rows when uploading scores from the webapp 
+* #398 - Add report to display each team's performance scores in detail
+* #334 - Display the lowest scoring element first in the score sheets 
+* #374 - Check all saved schedules with a unit test to make sure they all load
+* #387 - Show quartiles rather than actual ranks in the ranking report
+* #391 - Add shortDescription attribute to rubric range
+* #392 - Properly support no schedule in the subjective web app
+* #393 - Properly handle no judges in the subjective web app
+* #383 - Add subjective webapp version to the sidebar
+* #309 - support schedules without the division column, just use the judging group column instead
+* #172 - make bracket sort be specified when initializing the brackets of a challenge descriptor attribute
+* #381 - handle missing information in TeamScheduleInfo
+* #380 - generate correct tanking report when there are multiple tournaments in the same database
+* #377 - correctly identify Excel files by extension
 
 Release 9.7
 -----------
