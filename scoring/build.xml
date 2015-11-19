@@ -280,7 +280,7 @@
 
     <!-- copy scripts -->
     <copy todir="${dir.build}/bin">
-      <fileset dir="bin" />
+      <fileset dir="script-templates" />
     </copy>
     <chmod perm="+x">
       <fileset dir="${dir.build}/bin">
