@@ -531,7 +531,7 @@
     <!-- copy scripts -->
     <mkdir dir="${dir.dist}/bin" />
     <copy todir="${dir.dist}/bin">
-      <fileset dir="bin" />
+      <fileset dir="script-templates" />
     </copy>
     <copy todir="${dir.dist}/bin">
       <fileset dir="${dir.build}/bin">
