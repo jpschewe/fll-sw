@@ -9,7 +9,7 @@ An attempt has been made at this in the branch `feature.jndi-datasource`, but th
 
 In Feburary of 2013 I changed the locking model on the database to `MVCC`, which may help with this.
 
-issue:186 is open for this task.
+issue #186 is open for this task.
 
 
 Isolate SQL
