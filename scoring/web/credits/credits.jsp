@@ -20,6 +20,7 @@
   <li><a href="http://mtu.net/~engstrom">Eric Engstrom</a></li>
   <li>Dan Churchill</li>
   <li>Jeremy Koletar</li>
+  <li>Mark Schleusner</li>
  </ul>
 
  <p>Testers (besides the developers):</p>
