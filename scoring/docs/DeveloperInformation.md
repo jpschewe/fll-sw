@@ -5,7 +5,7 @@ If you want to test out the latest code you can do so by [downloading the most r
 
 # Getting started as a developer
 
-  1. Make sure you have Java 7 (or greater) installed
+  1. Make sure you have Java 8 (or greater) installed
   1. Get the source code from git
     * git clone git@github.com:jpschewe/fll-sw (read-only)
     * Or you can create a fork and then submit a pull request when you have changes to merge in
@@ -13,6 +13,7 @@ If you want to test out the latest code you can do so by [downloading the most r
   1. You can start tomcat with `./ant.sh tomcat.start`
   1. You can stop tomcat with `./ant.sh tomcat.stop`, the target `tomcat.reload` can be useful when working on servlet code.
   1. We have a continuous integration server running using [Jenkins](http://jenkins-ci.org/). You can access it at [http://mtu.net/jenkins/job/fll-sw/](http://mtu.net/jenkins/job/fll-sw/). The master branch is built by the job 'fll-sw', all other branches are built by 'fll-sw-feature-branches'.
+  1. Take a look at docs/README.developer for other information
 
 You can edit using your favorite Java IDE. We provide project files for Eclipse.
 
@@ -77,13 +78,43 @@ Most ant targets will work out of the box once you tell Eclipse about our ant bu
 
 ## References to Documentation
 
-  * [Java](http://download.oracle.com/javase/7/docs/api/index.html)
+  * [Java](http://download.oracle.com/javase/8/docs/api/index.html)
   * [Tomcat API - 8](http://tomcat.apache.org/tomcat-8.0-doc/api/index.html)
   * [EL - 3.0](http://docs.oracle.com/javaee/7/api/javax/el/package-summary.html)
   * [Servlet - 3.1](http://docs.oracle.com/javaee/7/api/javax/servlet/package-summary.html)
   * [JSP - 2.3](http://docs.oracle.com/javaee/7/api/javax/servlet/jsp/package-summary.html)
   * [WebsSocket - 1.0](http://docs.oracle.com/javaee/7/api/javax/websocket/package-summary.html)
   * [JSTL - core tag library](http://download.oracle.com/docs/cd/E17802_01/products/products/jsp/jstl/1.1/docs/tlddocs/index.html)
+
+# Project goals
+
+Some overall goals for the project to give other developers an understanding of what I want to see in the software.
+This can help people understand my design decisions.
+
+## Challenge description agnostic
+
+I don't want to need to change the code when the challenge description changes. 
+Ideally one can install this software once and then use it for many years of challenges without needing a code change.
+This means that the code should not depend on any specific names that are in the challenge description and
+definitely will not crash when specific strings from a challenge description do not exist.
+
+This sometimes means that the score sheets and pages don't always look as pretty as possible, but this allows me to spend time fixing 
+bugs and adding desired features rather than making changes to font sizes and spacing when the challenge description changes.
+
+## Platform agnostic
+
+I develop on Linux and want it to run there. 
+However not everyone runs Linux and I want everyone to be able to run this software.
+So everything is written in Java so that it can run anywhere there is a Java virtual machine.
+
+
+## Easy to install
+
+In the past the software required the installation of a database server which was difficult for some to install and setup.
+I want this software to be easy to install and run.
+Everything that the software needs is integrated into the build as much as possible, so that the user can just download a
+release and go.
+
 
 
 # Making a release
@@ -99,7 +130,6 @@ Most ant targets will work out of the box once you tell Eclipse about our ant bu
   1. Create a new release on GitHub
     1. Paste the changes since the last release into the release notes
     1. Upload the file created in Jenkins
-
 
 # Misc Notes
 
