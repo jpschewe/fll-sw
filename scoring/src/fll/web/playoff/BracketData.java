@@ -1087,6 +1087,10 @@ public class BracketData {
                                                                                                    tournament,
                                                                                                    division);
 
+    if(LOG.isDebugEnabled()) {
+      LOG.debug("Tables: " + tournamentTables);
+    }
+    
     // Prevent divide by 0 errors if no tables were set in the database.
     if (tournamentTables.isEmpty()) {
       tournamentTables.add(new TableInformation(0, "Table 1", "Table 2", true));
@@ -1172,7 +1176,17 @@ public class BracketData {
               if (!tAssignIt.hasNext()) {
                 tAssignIt = tournamentTables.iterator();
               }
-              final TableInformation info = tAssignIt.next();
+              TableInformation info = tAssignIt.next();
+              while(!info.getUse() && tAssignIt.hasNext()) {
+                info = tAssignIt.next();
+              }
+              
+              if(!info.getUse() && !tAssignIt.hasNext()) {
+                 LOG.warn("No tables can be used, this is odd");
+                 tAssignIt = tournamentTables.iterator();
+                 info = tAssignIt.next();
+              }
+              
               tableA = info.getSideA();
               tableB = info.getSideB();
             }
