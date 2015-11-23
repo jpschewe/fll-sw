@@ -1,3 +1,5 @@
+* 420 - Correctly limit tables during playoff brackets when the limit tables checkboxes are used
+
 Release 10.3
 ------------
 * #416 - Disable auto capitalize and auto correct for the username on the login page
