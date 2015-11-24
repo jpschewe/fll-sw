@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <fll
   title="2015 FIRST LEGO League - Trash Trek"
-  revision="6"
+  revision="7"
   schemaVersion="1">
 
   <Performance
@@ -45,7 +45,7 @@
 
     <goal
       name="m04_sorting_yellow_east"
-      title="M04 - Yellow bars in bin - West Transfer"
+      title="M04 - Yellow bars in sorted bin - West Transfer"
       initialValue="0"
       min="0"
       max="9"
@@ -54,7 +54,7 @@
 
     <goal
       name="m04_sorting_yellow_other"
-      title="M04 - Yellow bars in bin - Elsewhere on this side"
+      title="M04 - Yellow bars in sorted bin - Elsewhere on this side"
       initialValue="0"
       min="0"
       max="9"
@@ -79,7 +79,7 @@
 
     <goal
       name="m04_sorting_blue_east"
-      title="M04 - Blue bars in bin - West Transfer"
+      title="M04 - Blue bars in sorted bin - West Transfer"
       initialValue="0"
       min="0"
       max="6"
@@ -88,7 +88,7 @@
 
     <goal
       name="m04_sorting_blue_other"
-      title="M04 - Blue bars in bin - Elsewhere on this side"
+      title="M04 - Blue bars in sorted bin - Elsewhere on this side"
       initialValue="0"
       min="0"
       max="6"
@@ -289,6 +289,18 @@
           scoreType="raw" />
       </term>
     </restriction>
+
+    <computedGoal
+      name="m04_sorting_black_bar_initial"
+      title="Points for no penalties">
+      <switch>
+        <default>
+          <term>
+            <constant value="32" />
+          </term>
+        </default>
+      </switch>
+    </computedGoal>
 
     <goal
       name="m04_sorting_black_penalty"
