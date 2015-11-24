@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <fll
   title="2015 FIRST LEGO League - Trash Trek"
-  revision="5"
+  revision="8"
   schemaVersion="1">
 
   <Performance
@@ -45,7 +45,7 @@
 
     <goal
       name="m04_sorting_yellow_east"
-      title="M04 - Yellow bars in bin - West Transfer"
+      title="M04 - Yellow bars in sorted bin - West Transfer"
       initialValue="0"
       min="0"
       max="9"
@@ -54,7 +54,7 @@
 
     <goal
       name="m04_sorting_yellow_other"
-      title="M04 - Yellow bars in bin - Elsewhere on this side"
+      title="M04 - Yellow bars in sorted bin - Elsewhere on this side"
       initialValue="0"
       min="0"
       max="9"
@@ -79,7 +79,7 @@
 
     <goal
       name="m04_sorting_blue_east"
-      title="M04 - Blue bars in bin - West Transfer"
+      title="M04 - Blue bars in sorted bin - West Transfer"
       initialValue="0"
       min="0"
       max="6"
@@ -88,7 +88,7 @@
 
     <goal
       name="m04_sorting_blue_other"
-      title="M04 - Blue bars in bin - Elsewhere on this side"
+      title="M04 - Blue bars in sorted bin - Elsewhere on this side"
       initialValue="0"
       min="0"
       max="6"
@@ -107,54 +107,6 @@
       <term>
         <goalRef
           goal="m04_sorting_blue_other"
-          scoreType="raw" />
-      </term>
-    </restriction>
-
-    <goal
-      name="m04_sorting_black_reused"
-      title="M04 - Black bars - Reuse (flower box, original)"
-      initialValue="12"
-      min="0"
-      max="12"
-      multiplier="8">
-    </goal>
-
-    <goal
-      name="m04_sorting_black_trash"
-      title="M04 - Black bars - Trash (in matching bin, landfill)"
-      initialValue="0"
-      min="0"
-      max="12"
-      multiplier="3">
-    </goal>
-
-    <goal
-      name="m04_sorting_black_penalty"
-      title="M04 - Black bars - Elsewhere NOTE: black bar total MUST equal 12"
-      initialValue="0"
-      min="0"
-      max="12"
-      multiplier="-8">
-    </goal>
-
-    <restriction
-      lowerBound="12"
-      upperBound="12"
-      message="There are always 12 black bars to score">
-      <term>
-        <goalRef
-          goal="m04_sorting_black_reused"
-          scoreType="raw" />
-      </term>
-      <term>
-        <goalRef
-          goal="m04_sorting_black_trash"
-          scoreType="raw" />
-      </term>
-      <term>
-        <goalRef
-          goal="m04_sorting_black_penalty"
           scoreType="raw" />
       </term>
     </restriction>
@@ -260,6 +212,111 @@
       max="1"
       multiplier="40"></goal>
 
+    <goal
+      name="m04_sorting_black_reused"
+      title="M04 - Black bars - Reuse (flower box)"
+      min="0"
+      max="2"
+      multiplier="8">
+    </goal>
+
+    <goal
+      name="m04_sorting_black_original"
+      title="M04 - Black bars - Original"
+      initialValue="8"
+      min="0"
+      max="8"
+      multiplier="8">
+    </goal>
+
+    <goal
+      name="m04_sorting_black_trash"
+      title="M04 - Black bars - Trash (in matching bin, landfill)"
+      initialValue="0"
+      min="0"
+      max="8"
+      multiplier="3">
+    </goal>
+
+    <goal
+      name="m04_sorting_black_elsewhere"
+      title="M04 - Black bars - Elsewhere NOTE: black bar total MUST equal 8"
+      initialValue="0"
+      min="0"
+      max="8"
+      multiplier="-8">
+    </goal>
+
+    <restriction
+      lowerBound="0"
+      upperBound="8"
+      message="If the building is demolished, at least 4 bars cannot be in their original position">
+      <term>
+        <goalRef
+          goal="m04_sorting_black_original"
+          scoreType="raw" />
+      </term>
+      <term>
+        <constant value="4" />
+        <goalRef
+          goal="m10_demolition"
+          scoreType="raw" />
+      </term>
+    </restriction>
+
+    <restriction
+      lowerBound="8"
+      upperBound="8"
+      message="There are always 8 black bars to score">
+      <term>
+        <goalRef
+          goal="m04_sorting_black_reused"
+          scoreType="raw" />
+      </term>
+      <term>
+        <goalRef
+          goal="m04_sorting_black_original"
+          scoreType="raw" />
+      </term>
+      <term>
+        <goalRef
+          goal="m04_sorting_black_trash"
+          scoreType="raw" />
+      </term>
+      <term>
+        <goalRef
+          goal="m04_sorting_black_elsewhere"
+          scoreType="raw" />
+      </term>
+    </restriction>
+
+    <goal
+      name="m04_sorting_black_bar_penalty"
+      title="Penalties (junk and touch)"
+      initialValue="0"
+      min="0"
+      max="4"
+      multiplier="-8">
+    </goal>
+
+    <computedGoal
+      name="m04_sorting_black_bar_penalty_original"
+      title="Points for not using all penalties">
+      <switch>
+        <default>
+          <term>
+            <constant value="32" />
+          </term>
+          <term>
+            <goalRef
+              goal="m04_sorting_black_bar_penalty"
+              scoreType="computed" />
+          </term>
+        </default>
+      </switch>
+    </computedGoal>
+
+
     <tiebreaker>
 
       <test winner="HIGH">
@@ -280,23 +337,45 @@
           <goalRef
             goal="m04_sorting_yellow_east"
             scoreType="computed" />
+        </term>
+        <term>
           <goalRef
             goal="m04_sorting_yellow_other"
             scoreType="computed" />
+        </term>
+        <term>
           <goalRef
             goal="m04_sorting_blue_east"
             scoreType="computed" />
+        </term>
+        <term>
           <goalRef
             goal="m04_sorting_blue_other"
             scoreType="computed" />
+        </term>
+        <term>
+          <goalRef
+            goal="m04_sorting_black_original"
+            scoreType="computed" />
+        </term>
+        <term>
           <goalRef
             goal="m04_sorting_black_reused"
             scoreType="computed" />
+        </term>
+        <term>
           <goalRef
             goal="m04_sorting_black_trash"
             scoreType="computed" />
+        </term>
+        <term>
           <goalRef
-            goal="m04_sorting_black_penalty"
+            goal="m04_sorting_black_elsewhere"
+            scoreType="computed" />
+        </term>
+        <term>
+          <goalRef
+            goal="m04_sorting_black_bar_penalty"
             scoreType="computed" />
         </term>
       </test>
