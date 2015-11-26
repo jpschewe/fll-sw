@@ -1,9 +1,10 @@
-<%--
-  This page is used for editing and adding teams.  The session attribute
-  addTeam is set when this page is being used to add a team.
-  --%>
-
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
+
+<%@page import="fll.web.admin.GatherTeamData"%>
+
+<%
+  GatherTeamData.populateContext(request, application, pageContext);
+%>
 
 <html>
 <head>
@@ -36,17 +37,36 @@
   }
 </script>
 
-<title>Add/Edit Team</title>
+<c:choose>
+  <c:when test="${addTeam }">
+    <title>Add Team</title>
+  </c:when>
+  <c:otherwise>
+    <title>Edit Team</title>
+  </c:otherwise>
+</c:choose>
 
 </head>
 
 <body>
-  <h1>Add/Edit Team</h1>
+  <c:choose>
+    <c:when test="${addTeam }">
+      <h1>Add Team</h1>
+    </c:when>
+    <c:otherwise>
+      <h1>Edit Team</h1>
+    </c:otherwise>
+  </c:choose>
 
   <form
     action="CommitTeam"
     method="post"
     name="editTeam">
+    <input
+      type='hidden'
+      name='addTeam'
+      value='${addTeam }' />
+
     <table border='1'>
       <tr>
         <td>Team Number (required)</td>
