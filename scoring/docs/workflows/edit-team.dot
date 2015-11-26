@@ -2,11 +2,9 @@ digraph edit_team {
 
 admin_index_jsp -> admin_select_team_jsp [label="Edit Team"];
 
-admin_index_jsp -> GatherTeamData [label="Add Team"];
+admin_index_jsp -> editTeam_jsp [label="Add Team"];
 
-admin_select_team_jsp -> GatherTeamData [label="teamNumber"];
-
-GatherTeamData -> editTeam_jsp;
+admin_select_team_jsp -> editTeam_jsp [label="teamNumber"];
 
 editTeam_jsp -> CommitTeam;
 

@@ -217,7 +217,7 @@
 
     <c:if test="${not playoffsInitialized}">
       <li><a
-        href='<c:url value="GatherTeamData">
+        href='<c:url value="editTeam.jsp">
                      <c:param name="addTeam" value="1"/>
                    </c:url>'>Add
           a team</a></li>
