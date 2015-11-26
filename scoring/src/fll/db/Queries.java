@@ -359,7 +359,7 @@ public final class Queries {
    */
   public static Map<Integer, TeamRanking> getTeamRankings(final Connection connection,
                                                           final ChallengeDescription challengeDescription)
-      throws SQLException {
+                                                              throws SQLException {
     final Map<Integer, TeamRanking> teamRankings = new HashMap<Integer, TeamRanking>();
     final int tournament = getCurrentTournament(connection);
     final List<String> divisions = getEventDivisions(connection);
@@ -605,7 +605,8 @@ public final class Queries {
       } else {
         runNumber = 0;
       }
-      return runNumber + 1;
+      return runNumber
+          + 1;
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
@@ -650,8 +651,8 @@ public final class Queries {
    */
   public static void insertOrUpdatePerformanceScore(final ChallengeDescription description,
                                                     final Connection connection,
-                                                    final HttpServletRequest request) throws SQLException,
-      ParseException, RuntimeException {
+                                                    final HttpServletRequest request)
+                                                        throws SQLException, ParseException, RuntimeException {
     final int oldTransactionIsolation = connection.getTransactionIsolation();
     final boolean oldAutoCommit = connection.getAutoCommit();
     try {
@@ -681,8 +682,8 @@ public final class Queries {
   @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Goals determine columns")
   private static void insertPerformanceScore(final ChallengeDescription description,
                                              final Connection connection,
-                                             final HttpServletRequest request) throws SQLException, ParseException,
-      RuntimeException {
+                                             final HttpServletRequest request)
+                                                 throws SQLException, ParseException, RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
     final Tournament tournament = Tournament.findTournamentByID(connection, currentTournament);
 
@@ -826,8 +827,8 @@ public final class Queries {
   @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate list of columns off the goals")
   private static int updatePerformanceScore(final ChallengeDescription description,
                                             final Connection connection,
-                                            final HttpServletRequest request) throws SQLException, ParseException,
-      RuntimeException {
+                                            final HttpServletRequest request)
+                                                throws SQLException, ParseException, RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
     final Tournament tournament = Tournament.findTournamentByID(connection, currentTournament);
 
@@ -956,8 +957,12 @@ public final class Queries {
 
     final String division = Playoff.getPlayoffDivision(connection, teamNumber, runNumber);
     if (ptLine > 0) {
-      final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division,
-                                                         (ptLine % 2 == 0 ? ptLine - 1 : ptLine + 1), runNumber);
+      final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division, (ptLine
+          % 2 == 0
+              ? ptLine
+                  - 1
+              : ptLine
+                  + 1), runNumber);
 
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Sibling is: "
@@ -993,24 +998,23 @@ public final class Queries {
               && newWinner != null && !oldWinner.equals(newWinner)) {
             // This score update changes the result of the match, so make sure
             // no other scores exist in later round for either of these 2 teams.
-            if (getPlayoffTableLineNumber(connection, currentTournament, teamNumber, runNumber + 1) > 0) {
+            if (getPlayoffTableLineNumber(connection, currentTournament, teamNumber, runNumber
+                + 1) > 0) {
               prep.setInt(1, teamNumber);
               prep.setInt(2, runNumber);
               prep.setInt(3, currentTournament);
               rs = prep.executeQuery();
               if (rs.next()) {
-                throw new FLLRuntimeException(
-                                              "Unable to update score for team number "
-                                                  + teamNumber
-                                                  + " in performance run "
-                                                  + runNumber
-                                                  + " because that team has scores entered in subsequent playoff rounds which would become inconsistent. "
-                                                  + "Delete those scores and then you may update this score.");
+                throw new FLLRuntimeException("Unable to update score for team number "
+                    + teamNumber + " in performance run " + runNumber
+                    + " because that team has scores entered in subsequent playoff rounds which would become inconsistent. "
+                    + "Delete those scores and then you may update this score.");
               }
               SQLFunctions.close(rs);
               rs = null;
             }
-            if (getPlayoffTableLineNumber(connection, currentTournament, siblingTeam, runNumber + 1) > 0) {
+            if (getPlayoffTableLineNumber(connection, currentTournament, siblingTeam, runNumber
+                + 1) > 0) {
               prep.setInt(1, siblingTeam);
               prep.setInt(2, runNumber);
               prep.setInt(3, currentTournament);
@@ -1034,15 +1038,17 @@ public final class Queries {
         // If the second-check flag is NO or the opposing team is not
         // verified, we set the match "winner" (possibly back) to NULL.
         if ("0".equals(request.getParameter("Verified"))
-            || !(Queries.performanceScoreExists(connection, teamB, runNumber) && Queries.isVerified(connection,
-                                                                                                    currentTournament,
-                                                                                                    teamB, runNumber))) {
+            || !(Queries.performanceScoreExists(connection, teamB, runNumber)
+                && Queries.isVerified(connection, currentTournament, teamB, runNumber))) {
           removePlayoffScore(connection, division, currentTournament, runNumber, ptLine);
         } else {
-          updatePlayoffTable(connection, newWinner.getTeamNumber(), division, currentTournament, (runNumber + 1),
-                             ((ptLine + 1) / 2));
+          updatePlayoffTable(connection, newWinner.getTeamNumber(), division, currentTournament, (runNumber
+              + 1), ((ptLine
+                  + 1)
+                  / 2));
           final int playoffRun = Playoff.getPlayoffRound(connection, division, runNumber);
-          final int semiFinalRound = getNumPlayoffRounds(connection, division) - 1;
+          final int semiFinalRound = getNumPlayoffRounds(connection, division)
+              - 1;
           if (playoffRun == semiFinalRound
               && isThirdPlaceEnabled(connection, division)) {
             final Team newLoser;
@@ -1051,8 +1057,10 @@ public final class Queries {
             } else {
               newLoser = teamA;
             }
-            updatePlayoffTable(connection, newLoser.getTeamNumber(), division, currentTournament, (runNumber + 1),
-                               ((ptLine + 5) / 2));
+            updatePlayoffTable(connection, newLoser.getTeamNumber(), division, currentTournament, (runNumber
+                + 1), ((ptLine
+                    + 5)
+                    / 2));
           }
         }
       }
@@ -1071,8 +1079,8 @@ public final class Queries {
    */
   @SuppressFBWarnings(value = "OBL_UNSATISFIED_OBLIGATION", justification = "Bug in findbugs - ticket:2924739")
   public static void deletePerformanceScore(final Connection connection,
-                                            final HttpServletRequest request) throws SQLException, RuntimeException,
-      ParseException {
+                                            final HttpServletRequest request)
+                                                throws SQLException, RuntimeException, ParseException {
     final int currentTournament = getCurrentTournament(connection);
 
     final String teamNumberStr = request.getParameter("TeamNumber");
@@ -1100,14 +1108,20 @@ public final class Queries {
         final int ptLine = getPlayoffTableLineNumber(connection, currentTournament, teamNumber, irunNumber);
         final String division = Playoff.getPlayoffDivision(connection, teamNumber, irunNumber);
         if (ptLine > 0) {
-          final int siblingLine = ptLine % 2 == 0 ? ptLine - 1 : ptLine + 1;
+          final int siblingLine = ptLine
+              % 2 == 0
+                  ? ptLine
+                      - 1
+                  : ptLine
+                      + 1;
           final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division, siblingLine,
                                                              irunNumber);
 
           if (siblingTeam != Team.NULL_TEAM_NUMBER) {
             // See if either teamNumber or siblingTeam has a score entered in
             // subsequent rounds
-            if (getPlayoffTableLineNumber(connection, currentTournament, teamNumber, irunNumber + 1) > 0) {
+            if (getPlayoffTableLineNumber(connection, currentTournament, teamNumber, irunNumber
+                + 1) > 0) {
               prep.setInt(1, teamNumber);
               prep.setInt(2, irunNumber);
               prep.setInt(3, currentTournament);
@@ -1119,7 +1133,8 @@ public final class Queries {
                     + "Delete those scores and then you may delete this score.");
               }
             }
-            if (getPlayoffTableLineNumber(connection, currentTournament, siblingTeam, irunNumber + 1) > 0) {
+            if (getPlayoffTableLineNumber(connection, currentTournament, siblingTeam, irunNumber
+                + 1) > 0) {
               prep.setInt(1, siblingTeam);
               prep.setInt(2, irunNumber);
               prep.setInt(3, currentTournament);
@@ -1205,15 +1220,20 @@ public final class Queries {
                                          final int currentTournament,
                                          final int runNumber,
                                          final int ptLine) throws SQLException {
-    updatePlayoffTable(connection, Team.NULL_TEAM_NUMBER, division, currentTournament, (runNumber + 1),
-                       ((ptLine + 1) / 2));
+    updatePlayoffTable(connection, Team.NULL_TEAM_NUMBER, division, currentTournament, (runNumber
+        + 1), ((ptLine
+            + 1)
+            / 2));
 
-    final int semiFinalRound = getNumPlayoffRounds(connection, division) - 1;
+    final int semiFinalRound = getNumPlayoffRounds(connection, division)
+        - 1;
     final int playoffRun = Playoff.getPlayoffRound(connection, division, runNumber);
     if (playoffRun == semiFinalRound
         && isThirdPlaceEnabled(connection, division)) {
-      updatePlayoffTable(connection, Team.NULL_TEAM_NUMBER, division, currentTournament, (runNumber + 1),
-                         ((ptLine + 5) / 2));
+      updatePlayoffTable(connection, Team.NULL_TEAM_NUMBER, division, currentTournament, (runNumber
+          + 1), ((ptLine
+              + 5)
+              / 2));
     }
   }
 
@@ -1331,8 +1351,8 @@ public final class Queries {
   public static List<Team> getTeamsNeedingSeedingRuns(final Connection connection,
                                                       final Map<Integer, ? extends Team> tournamentTeams,
                                                       final String division,
-                                                      final boolean verifiedScoresOnly) throws SQLException,
-      RuntimeException {
+                                                      final boolean verifiedScoresOnly)
+                                                          throws SQLException, RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
     final String view;
 
@@ -1353,8 +1373,7 @@ public final class Queries {
       } else {
         prep = connection.prepareStatement("SELECT "
             + view + ".TeamNumber,Count(" + view + ".TeamNumber) FROM " + view + ",current_tournament_teams WHERE "
-            + view
-            + ".TeamNumber = current_tournament_teams.TeamNumber AND current_tournament_teams.event_division = ?"
+            + view + ".TeamNumber = current_tournament_teams.TeamNumber AND current_tournament_teams.event_division = ?"
             + " AND " + view + ".Tournament = ? GROUP BY " + view + ".TeamNumber HAVING Count(" + view
             + ".TeamNumber) < ?");
         prep.setString(1, division);
@@ -1417,8 +1436,8 @@ public final class Queries {
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to choose ascending or descending order based upon winner criteria")
   public static List<Team> getPlayoffSeedingOrder(final Connection connection,
                                                   final WinnerType winnerCriteria,
-                                                  final Collection<? extends Team> teams) throws SQLException,
-      RuntimeException {
+                                                  final Collection<? extends Team> teams)
+                                                      throws SQLException, RuntimeException {
 
     final List<Integer> teamNumbers = new LinkedList<Integer>();
     for (final Team t : teams) {
@@ -1752,6 +1771,36 @@ public final class Queries {
         SQLFunctions.close(prep);
       }
     }
+  }
+
+  /**
+   * Get all tournament IDs that this team is in.
+   * 
+   * @param connection database connection
+   * @param teamNumber team number to search for
+   * @return collection of all tournament IDs that this team is in
+   * @throws SQLException if there is a database error
+   */
+  public static Collection<Integer> getAllTournamentsForTeam(final Connection connection,
+                                                             final int teamNumber) throws SQLException {
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    final Collection<Integer> tournaments = new LinkedList<>();
+    try {
+      prep = connection.prepareStatement("SELECT Tournament" //
+          + " FROM TournamentTeams" //
+          + " WHERE TeamNumber = ?");
+      prep.setInt(1, teamNumber);
+      rs = prep.executeQuery();
+      while (rs.next()) {
+        final int id = rs.getInt(1);
+        tournaments.add(id);
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+    return tournaments;
   }
 
   /**
@@ -2324,20 +2373,27 @@ public final class Queries {
    * Get the color for a division index. Below are the colors used.
    * <table>
    * <td>
-   * <td bgcolor="#800000">0 - #800000</td> </tr>
+   * <td bgcolor="#800000">0 - #800000</td>
+   * </tr>
    * <td>
-   * <td bgcolor="#008000">1 - #008000</td> </tr>
+   * <td bgcolor="#008000">1 - #008000</td>
+   * </tr>
    * <td>
-   * <td bgcolor="#CC6600">2 - #CC6600</td> </tr>
+   * <td bgcolor="#CC6600">2 - #CC6600</td>
+   * </tr>
    * <td>
-   * <td bgcolor="#FF00FF">3 - #FF00FF</td> </tr>
+   * <td bgcolor="#FF00FF">3 - #FF00FF</td>
+   * </tr>
    * <td>
-   * <td>continue at the top</td> </tr> </ol>
+   * <td>continue at the top</td>
+   * </tr>
+   * </ol>
    * 
    * @param index the division index
    */
   public static String getColorForDivisionIndex(final int index) throws SQLException {
-    final int idx = index % 4;
+    final int idx = index
+        % 4;
     switch (idx) {
     case 0:
       return "#800000";

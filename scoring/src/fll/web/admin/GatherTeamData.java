@@ -11,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -21,8 +22,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.log4j.Logger;
 
 import fll.Team;
@@ -32,6 +31,7 @@ import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Gather information for editing or adding a team and put it in the session.
@@ -79,12 +79,8 @@ public class GatherTeamData extends BaseFLLServlet {
         session.setAttribute(CommitTeam.TEAM_NAME, null);
         session.setAttribute(CommitTeam.ORGANIZATION, null);
         session.setAttribute(CommitTeam.DIVISION, null);
-        session.setAttribute("teamPrevTournament", null);
-
-        final int tournamentID = Queries.getCurrentTournament(connection);
-        final Tournament currentTournament = Tournament.findTournamentByID(connection, tournamentID);
-        session.setAttribute("teamCurrentTournament", currentTournament);
-
+        session.setAttribute("teamTournamentIDs", Collections.emptyList());
+        session.setAttribute("inPlayoffs", false);
         session.setAttribute("playoffsInitialized",
                              Queries.isPlayoffDataInitialized(connection, Queries.getCurrentTournament(connection)));
       } else {
@@ -117,21 +113,16 @@ public class GatherTeamData extends BaseFLLServlet {
         session.setAttribute(CommitTeam.TEAM_NAME, team.getTeamName());
         session.setAttribute(CommitTeam.ORGANIZATION, team.getOrganization());
         session.setAttribute(CommitTeam.DIVISION, team.getDivision());
-        final int teamCurrentTournamentID = Queries.getTeamCurrentTournament(connection, teamNumber);
-        final Tournament teamCurrentTournament = Tournament.findTournamentByID(connection, teamCurrentTournamentID);
-        final Integer teamPrevTournamentID = Queries.getTeamPrevTournament(connection, teamNumber,
-                                                                           teamCurrentTournamentID);
-        session.setAttribute("teamPrevTournament", teamPrevTournamentID);
-        session.setAttribute("teamCurrentTournament", teamCurrentTournament);
+        session.setAttribute("teamTournamentIDs", Queries.getAllTournamentsForTeam(connection, teamNumber));
 
-        final String currentEventDivision = Queries.getEventDivision(connection, teamNumber, teamCurrentTournamentID);
+        /* FIXME
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("Checking if playoffs are initialized for tournament: "
-              + teamCurrentTournamentID + " division: " + currentEventDivision);
+              + teamCurrentTournamentID);
         }
-        session.setAttribute("playoffsInitialized", Queries.isPlayoffDataInitialized(connection,
-                                                                                     teamCurrentTournamentID,
-                                                                                     currentEventDivision));
+        session.setAttribute("playoffsInitialized",
+                             Queries.isPlayoffDataInitialized(connection, teamCurrentTournamentID));
+                             */
       }
     } catch (final ParseException pe) {
       LOGGER.error("Error parsing team number, this is an internal error", pe);
