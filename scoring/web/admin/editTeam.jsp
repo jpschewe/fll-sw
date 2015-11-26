@@ -149,43 +149,89 @@
       <!-- tournaments -->
       <tr>
         <td>Tournament(s)</td>
-        <td><c:forEach
-            items='${tournaments}'
-            var='tournament'>
+        <td>
 
-            <label> <!-- check if team is in this tournament -->
-              <c:set
-                var="contains"
-                value="false" /> <c:forEach
-                var="tid"
-                items="${teamTournamentIDs}">
-                <c:if test="${tid eq tournament.tournamentID}">
-                  <c:set
-                    var="contains"
-                    value="true" />
-                </c:if>
-              </c:forEach> <!-- decide if tournament should be checked --> <c:choose>
-                <c:when test="${contains}">
-                  <input
-                    type='checkbox'
-                    name='tournaments'
-                    value='${tournament.tournamentID}'
-                    id='tournament_${tournament.tournamentID}'
-                    checked
-                    onchange="confirmRemoveFromTournament('${tournament.name}', 'tournament_${tournament.tournamentID}')" />
-                </c:when>
-                <c:otherwise>
-                  <input
-                    type='checkbox'
-                    name='tournaments'
-                    value='${tournament.tournamentID}'
-                    id='tournament_${tournament.tournamentID}' />
-                </c:otherwise>
-              </c:choose> ${tournament.name}
-            </label>
-            <br />
+          <table border="1">
+            <tr>
+              <th>Tournament</th>
+              <th>Event Division</th>
+              <th>Judging Station</th>
+            </tr>
 
-          </c:forEach></td>
+            <c:forEach
+              items='${tournaments}'
+              var='tournament'>
+
+              <tr>
+                <td>
+                  <!--  tournament name --> <label> <!-- check if team is in this tournament -->
+                    <c:set
+                      var="contains"
+                      value="false" /> <c:forEach
+                      var="tid"
+                      items="${teamTournamentIDs}">
+                      <c:if test="${tid eq tournament.tournamentID}">
+                        <c:set
+                          var="contains"
+                          value="true" />
+                      </c:if>
+                    </c:forEach> <!-- decide if tournament should be checked --> <c:choose>
+                      <c:when test="${contains}">
+                        <input
+                          type='checkbox'
+                          name='tournaments'
+                          value='${tournament.tournamentID}'
+                          id='tournament_${tournament.tournamentID}'
+                          checked
+                          onchange="confirmRemoveFromTournament('${tournament.name}', 'tournament_${tournament.tournamentID}')" />
+                      </c:when>
+                      <c:otherwise>
+                        <input
+                          type='checkbox'
+                          name='tournaments'
+                          value='${tournament.tournamentID}'
+                          id='tournament_${tournament.tournamentID}' />
+                      </c:otherwise>
+                    </c:choose> ${tournament.name}
+                </label>
+                </td>
+
+                <td>
+                  <!--  event division --> <select
+                  name="event_division_${tournament.tournamentID }"
+                  id="event_division_${tournament.tournamentID }">
+                    <c:forEach
+                      items="${tournamentEventDivisions[tournament.tournamentID] }"
+                      var="event_division">
+
+                      <c:choose>
+                        <c:when
+                          test="${currentEventDivisions[tournament.tournamentID] eq event_division}">
+                          <option
+                            value="${event_division }"
+                            selected>${event_division }</option>
+                        </c:when>
+                        <c:otherwise>
+                          <option value="${event_division }">${event_division }</option>
+                        </c:otherwise>
+                      </c:choose>
+
+                    </c:forEach>
+                </select>
+                </td>
+
+                <td>
+                  <!-- judging station --> Need judging station list
+                  here
+                </td>
+
+
+              </tr>
+
+            </c:forEach>
+
+          </table>
+        </td>
       </tr>
       <!--  end tournaments -->
 
