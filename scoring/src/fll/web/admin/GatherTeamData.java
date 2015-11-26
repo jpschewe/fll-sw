@@ -11,8 +11,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -66,10 +69,19 @@ public class GatherTeamData {
       final List<Tournament> tournaments = Tournament.getTournaments(connection);
       page.setAttribute("tournaments", tournaments);
 
+      final Map<Integer, Collection<String>> tournamentEventDivisions = new HashMap<>();
+      for (final Tournament tournament : tournaments) {
+        
+        final Collection<String> allEventDivisions = Queries.getEventDivisions(connection,
+                                                                               tournament.getTournamentID());
+        tournamentEventDivisions.put(tournament.getTournamentID(), allEventDivisions);
+      }
+      page.setAttribute("tournamentEventDivisions", tournamentEventDivisions);
+
       page.setAttribute("divisions", Queries.getDivisions(connection));
 
       final String teamNumberStr = request.getParameter("teamNumber");
-      
+
       if (null == teamNumberStr) {
         // put blanks in for all values
         page.setAttribute("addTeam", true);
@@ -80,13 +92,23 @@ public class GatherTeamData {
         page.setAttribute("teamTournamentIDs", Collections.emptyList());
         page.setAttribute("inPlayoffs", false);
         page.setAttribute("playoffsInitialized",
-                             Queries.isPlayoffDataInitialized(connection, Queries.getCurrentTournament(connection)));
+                          Queries.isPlayoffDataInitialized(connection, Queries.getCurrentTournament(connection)));
+        page.setAttribute("currentEventDivisions", Collections.emptyMap());
       } else {
         page.setAttribute("addTeam", false);
 
         // check parsing the team number to be sure that we fail right away
         final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue();
 
+        // track current division for team so that it can be selected
+        final Map<Integer, String> currentEventDivisions = new HashMap<>();
+        for (final Tournament tournament : tournaments) {
+          final String eventDivision = Queries.getEventDivision(connection, teamNumber, tournament.getTournamentID());
+          currentEventDivisions.put(tournament.getTournamentID(), eventDivision);
+        }
+        page.setAttribute("currentEventDivisions", currentEventDivisions);
+        
+        
         // check if team is listed in any playoff data
         PreparedStatement prep = null;
         ResultSet rs = null;
