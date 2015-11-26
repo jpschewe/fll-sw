@@ -70,13 +70,20 @@ public class GatherTeamData {
       page.setAttribute("tournaments", tournaments);
 
       final Map<Integer, Collection<String>> tournamentEventDivisions = new HashMap<>();
+      final Map<Integer, Collection<String>> tournamentJudgingStations = new HashMap<>();
       for (final Tournament tournament : tournaments) {
-        
+
         final Collection<String> allEventDivisions = Queries.getEventDivisions(connection,
                                                                                tournament.getTournamentID());
         tournamentEventDivisions.put(tournament.getTournamentID(), allEventDivisions);
+
+        final Collection<String> allJudgingStations = Queries.getJudgingStations(connection,
+                                                                                 tournament.getTournamentID());
+        tournamentJudgingStations.put(tournament.getTournamentID(), allJudgingStations);
+
       }
       page.setAttribute("tournamentEventDivisions", tournamentEventDivisions);
+      page.setAttribute("tournamentJudgingStations", tournamentJudgingStations);
 
       page.setAttribute("divisions", Queries.getDivisions(connection));
 
@@ -94,21 +101,26 @@ public class GatherTeamData {
         page.setAttribute("playoffsInitialized",
                           Queries.isPlayoffDataInitialized(connection, Queries.getCurrentTournament(connection)));
         page.setAttribute("currentEventDivisions", Collections.emptyMap());
+        page.setAttribute("currentJudgingStations", Collections.emptyMap());
       } else {
         page.setAttribute("addTeam", false);
 
         // check parsing the team number to be sure that we fail right away
         final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue();
 
-        // track current division for team so that it can be selected
+        // track current division and judging station for team so that it can be selected
         final Map<Integer, String> currentEventDivisions = new HashMap<>();
+        final Map<Integer, String> currentJudgingStations = new HashMap<>();
         for (final Tournament tournament : tournaments) {
-          final String eventDivision = Queries.getEventDivision(connection, teamNumber, tournament.getTournamentID());
+          final String eventDivision = Queries.getEventDivision(connection, teamNumber, tournament.getTournamentID());          
           currentEventDivisions.put(tournament.getTournamentID(), eventDivision);
+          
+          final String judgingStation = Queries.getJudgingStation(connection, teamNumber, tournament.getTournamentID());          
+          currentJudgingStations.put(tournament.getTournamentID(), judgingStation);
         }
         page.setAttribute("currentEventDivisions", currentEventDivisions);
-        
-        
+        page.setAttribute("currentJudgingStations", currentJudgingStations);
+
         // check if team is listed in any playoff data
         PreparedStatement prep = null;
         ResultSet rs = null;
