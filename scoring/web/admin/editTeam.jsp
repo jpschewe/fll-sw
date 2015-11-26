@@ -221,8 +221,27 @@
                 </td>
 
                 <td>
-                  <!-- judging station --> Need judging station list
-                  here
+                  <!--  judging station --> <select
+                  name="judging_station_${tournament.tournamentID }"
+                  id="judging_station_${tournament.tournamentID }">
+                    <c:forEach
+                      items="${tournamentJudgingStations[tournament.tournamentID] }"
+                      var="judging_station">
+
+                      <c:choose>
+                        <c:when
+                          test="${currentJudgingStations[tournament.tournamentID] eq judging_station}">
+                          <option
+                            value="${judging_station }"
+                            selected>${judging_station }</option>
+                        </c:when>
+                        <c:otherwise>
+                          <option value="${judging_station }">${judging_station }</option>
+                        </c:otherwise>
+                      </c:choose>
+
+                    </c:forEach>
+                </select>
                 </td>
 
 

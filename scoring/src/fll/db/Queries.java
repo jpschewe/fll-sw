@@ -1286,10 +1286,8 @@ public final class Queries {
    * 
    * @param teamNumber the team's number
    * @param tournamentID ID of tournament
-   * @return the judging station for the team
+   * @return the judging station for the team or null if not found
    * @throws SQLException on a database error
-   * @throws RuntimeException if <code>teamNumber</code> cannot be found in
-   *           TournamentTeams for the specified tournament
    */
   public static String getJudgingStation(final Connection connection,
                                          final int teamNumber,
@@ -1304,8 +1302,7 @@ public final class Queries {
       if (rs.next()) {
         return rs.getString(1);
       } else {
-        throw new RuntimeException("Couldn't find team number "
-            + teamNumber + " in the list of tournament teams! Tournament: " + tournamentID);
+        return null;
       }
     } finally {
       SQLFunctions.close(rs);
