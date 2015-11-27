@@ -71,6 +71,7 @@ public class GatherTeamData {
 
       final Map<Integer, Collection<String>> tournamentEventDivisions = new HashMap<>();
       final Map<Integer, Collection<String>> tournamentJudgingStations = new HashMap<>();
+      final Map<Integer, Boolean> playoffsInitialized = new HashMap<>();
       for (final Tournament tournament : tournaments) {
 
         final Collection<String> allEventDivisions = Queries.getEventDivisions(connection,
@@ -81,9 +82,12 @@ public class GatherTeamData {
                                                                                  tournament.getTournamentID());
         tournamentJudgingStations.put(tournament.getTournamentID(), allJudgingStations);
 
+        playoffsInitialized.put(tournament.getTournamentID(),
+                                Queries.isPlayoffDataInitialized(connection, tournament.getTournamentID()));
       }
       page.setAttribute("tournamentEventDivisions", tournamentEventDivisions);
       page.setAttribute("tournamentJudgingStations", tournamentJudgingStations);
+      page.setAttribute("playoffsInitialized", playoffsInitialized);
 
       page.setAttribute("divisions", Queries.getDivisions(connection));
 
@@ -151,17 +155,6 @@ public class GatherTeamData {
           teamInTournament.put(tid, true);
         }
         page.setAttribute("teamInTournament", teamInTournament);
-
-        /*
-         * FIXME
-         * if (LOGGER.isTraceEnabled()) {
-         * LOGGER.trace("Checking if playoffs are initialized for tournament: "
-         * + teamCurrentTournamentID);
-         * }
-         * session.setAttribute("playoffsInitialized",
-         * Queries.isPlayoffDataInitialized(connection,
-         * teamCurrentTournamentID));
-         */
       }
     } catch (final ParseException pe) {
       LOGGER.error("Error parsing team number, this is an internal error", pe);

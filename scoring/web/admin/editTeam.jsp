@@ -38,8 +38,26 @@ function valueExistsInSelect(select, value) {
 
 $(document).ready(function() {
 
-<%-- listeners checkboxes --%>
 <c:forEach items="${tournaments}" var="tournament">
+
+<c:choose>
+<c:when test="${playoffsInitialized[tournament.tournamentID]}">
+$("#tournament_${tournament.tournamentID}").prop("disabled", true);
+$("#event_division_${tournament.tournamentID }").prop("disabled", true);
+$("#judging_station_${tournament.tournamentID }").prop("disabled", true);
+
+<c:choose>
+<c:when test="${teamInTournament[tournament.tournamentID]}">
+$("#tournament_${tournament.tournamentID}").prop("checked", true);
+</c:when>
+<c:otherwise>
+$("#tournament_${tournament.tournamentID}").prop("checked", false);
+</c:otherwise>
+</c:choose>
+
+
+</c:when>
+<c:otherwise>
 
 // initialize tournament checkbox
 <c:choose>
@@ -78,7 +96,10 @@ $("#tournament_${tournament.tournamentID}").change(function() {
   }
 });
 
-</c:forEach> <%-- listeners for checkboxes --%>
+</c:otherwise> <%-- playoffs not initialized --%>
+</c:choose>
+
+</c:forEach> <%-- foreach tournament --%>
 
 });
 
@@ -108,6 +129,10 @@ $("#tournament_${tournament.tournamentID}").change(function() {
       <h1>Edit Team</h1>
     </c:otherwise>
   </c:choose>
+
+  <p>Note that teams cannot be added to or removed from a tournament
+    that has the playoffs initialized. Also teams cannot be deleted that
+    are involved in any initialized playoffs.</p>
 
   <form
     action="CommitTeam"
@@ -168,32 +193,15 @@ $("#tournament_${tournament.tournamentID}").change(function() {
               id='${possibleDivision}'
               <c:if test="${division == possibleDivision}">
        checked='true'
-     </c:if>
-              <c:if test="${playoffsInitialized}">
-       disabled='disabled'
      </c:if> />
             <label for='${possibleDivision}'>${possibleDivision}</label>
           </c:forEach> <input
           type='radio'
           id='division_text_choice'
           name='division'
-          value='text'
-          <c:if test="${playoffsInitialized}">
-       disabled='disabled'
-   </c:if> />
-          <input
+          value='text' /> <input
           type='text'
-          name='division_text'
-          <c:if test="${playoffsInitialized}">
-       disabled='disabled'
-   </c:if> />
-          <c:if test="${playoffsInitialized}">
-            <input
-              type='hidden'
-              name='division'
-              value='${division}' />
-            <!-- Browsers don't seem to submit the disabled form data, so I add this such that the edit still goes through -->
-          </c:if></td>
+          name='division_text' /></td>
       </tr>
       <!-- end specify division -->
 
