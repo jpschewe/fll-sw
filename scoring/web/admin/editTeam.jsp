@@ -12,28 +12,91 @@
   rel="stylesheet"
   type="text/css"
   href="<c:url value='/style/style.jsp'/>" />
+
+<script
+  type='text/javascript'
+  src='../extlib/jquery-1.11.1.min.js'></script>
+
 <script type='text/javascript'>
-  //confirm deleting a team
+
+/**
+ * Check if a value exists in a select element.
+ *
+ * @param select a jquery object for a select element
+ * @param value the value to check against the select
+ */
+function valueExistsInSelect(select, value) {
+  var exists = false;
+  $(select).each(function(){
+      if (this.value == value) {
+          exists = true;
+          return false;
+      }
+  });
+  return exists;
+}
+
+$(document).ready(function() {
+
+<%-- listeners checkboxes --%>
+<c:forEach items="${tournaments}" var="tournament">
+<c:set
+var="teamInTournament"
+value="false" /> 
+<c:forEach
+var="tid"
+items="${teamTournamentIDs}">
+<c:if test="${tid eq tournament.tournamentID}">
+  <c:set
+    var="teamInTournament"
+    value="true" />
+</c:if>
+</c:forEach>
+
+// initialize tournament checkbox
+<c:choose>
+<c:when test="${teamInTournament}">
+$("#tournament_${tournament.tournamentID}").prop("checked", true);
+$("#event_division_${tournament.tournamentID }").prop("disabled", false);
+$("#judging_station_${tournament.tournamentID }").prop("disabled", false);    
+</c:when>
+<c:otherwise>
+$("#tournament_${tournament.tournamentID}").prop("checked", false);
+$("#event_division_${tournament.tournamentID }").prop("disabled", true);
+$("#judging_station_${tournament.tournamentID }").prop("disabled", true);    
+</c:otherwise>
+</c:choose>
+
+
+$("#tournament_${tournament.tournamentID}").change(function() {
+  if($("#tournament_${tournament.tournamentID}").prop("checked") == true) {
+    $("#event_division_${tournament.tournamentID }").prop("disabled", false);
+    $("#judging_station_${tournament.tournamentID }").prop("disabled", false);    
+  } else {
+    <c:if test="${teamInTournament}">
+    var confirmed = confirm("Are you sure you want to remove team ${teamNumber} from ${tournament.name}?"
+        + " Any data associated with that team and this tournament (${tournament.name}) will be removed from the database, including any scores that have been entered."
+        + " You also need to download the files for subjective score entry again."
+        + " It is not advisable to do this while the tournament that the team is in is running.");
+    if (confirmed == true) {
+      </c:if>
+      $("#event_division_${tournament.tournamentID }").prop("disabled", true);
+      $("#judging_station_${tournament.tournamentID }").prop("disabled", true);    
+      <c:if test="${teamInTournament}">
+    } else {
+      this.checked = true;
+    }
+</c:if>        
+  }
+});
+
+</c:forEach> <%-- listeners for checkboxes --%>
+
+});
+
+//confirm deleting a team
   function confirmDeleteTeam() {
     return confirm("Are you sure you want to delete team ${teamNumber}?  Any data associated with that team will be removed from the database, including any scores that have been entered.  You also need to download the files for subjective score entry again.  It is not advisable to do this while the tournament that the team is in is running.");
-  }
-
-  // confirm removing team from tournament
-  function confirmRemoveFromTournament(tournamentName, checkboxId) {
-    if (document.getElementById(checkboxId).checked == true) {
-      return false;
-    } else {
-      var confirmed = confirm("Are you sure you want to remove team ${teamNumber} from "
-          + tournamentName
-          + "?  Any data associated with that team and this tournament ("
-          + tournamentName
-          + ") will be removed from the database, including any scores that have been entered.  You also need to download the files for subjective score entry again.  It is not advisable to do this while the tournament that the team is in is running.");
-      if (confirmed == true) {
-        return true;
-      } else {
-        document.getElementById(checkboxId).checked = true;
-      }
-    }
   }
 </script>
 
@@ -164,35 +227,12 @@
 
               <tr>
                 <td>
-                  <!--  tournament name --> <label> <!-- check if team is in this tournament -->
-                    <c:set
-                      var="contains"
-                      value="false" /> <c:forEach
-                      var="tid"
-                      items="${teamTournamentIDs}">
-                      <c:if test="${tid eq tournament.tournamentID}">
-                        <c:set
-                          var="contains"
-                          value="true" />
-                      </c:if>
-                    </c:forEach> <!-- decide if tournament should be checked --> <c:choose>
-                      <c:when test="${contains}">
-                        <input
-                          type='checkbox'
-                          name='tournaments'
-                          value='${tournament.tournamentID}'
-                          id='tournament_${tournament.tournamentID}'
-                          checked
-                          onchange="confirmRemoveFromTournament('${tournament.name}', 'tournament_${tournament.tournamentID}')" />
-                      </c:when>
-                      <c:otherwise>
-                        <input
-                          type='checkbox'
-                          name='tournaments'
-                          value='${tournament.tournamentID}'
-                          id='tournament_${tournament.tournamentID}' />
-                      </c:otherwise>
-                    </c:choose> ${tournament.name}
+                  <!--  tournament name --> <label> <input
+                    type='checkbox'
+                    name='tournaments'
+                    value='${tournament.tournamentID}'
+                    id='tournament_${tournament.tournamentID}' />
+                    ${tournament.name}
                 </label>
                 </td>
 
