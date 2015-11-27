@@ -40,22 +40,10 @@ $(document).ready(function() {
 
 <%-- listeners checkboxes --%>
 <c:forEach items="${tournaments}" var="tournament">
-<c:set
-var="teamInTournament"
-value="false" /> 
-<c:forEach
-var="tid"
-items="${teamTournamentIDs}">
-<c:if test="${tid eq tournament.tournamentID}">
-  <c:set
-    var="teamInTournament"
-    value="true" />
-</c:if>
-</c:forEach>
 
 // initialize tournament checkbox
 <c:choose>
-<c:when test="${teamInTournament}">
+<c:when test="${teamInTournament[tournament.tournamentID]}">
 $("#tournament_${tournament.tournamentID}").prop("checked", true);
 $("#event_division_${tournament.tournamentID }").prop("disabled", false);
 $("#judging_station_${tournament.tournamentID }").prop("disabled", false);    
@@ -73,7 +61,7 @@ $("#tournament_${tournament.tournamentID}").change(function() {
     $("#event_division_${tournament.tournamentID }").prop("disabled", false);
     $("#judging_station_${tournament.tournamentID }").prop("disabled", false);    
   } else {
-    <c:if test="${teamInTournament}">
+    <c:if test="${teamInTournament[tournament.tournamentID]}">
     var confirmed = confirm("Are you sure you want to remove team ${teamNumber} from ${tournament.name}?"
         + " Any data associated with that team and this tournament (${tournament.name}) will be removed from the database, including any scores that have been entered."
         + " You also need to download the files for subjective score entry again."
@@ -82,7 +70,7 @@ $("#tournament_${tournament.tournamentID}").change(function() {
       </c:if>
       $("#event_division_${tournament.tournamentID }").prop("disabled", true);
       $("#judging_station_${tournament.tournamentID }").prop("disabled", true);    
-      <c:if test="${teamInTournament}">
+      <c:if test="${teamInTournament[tournament.tournamentID]}">
     } else {
       this.checked = true;
     }
