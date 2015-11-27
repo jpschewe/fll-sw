@@ -96,7 +96,7 @@ public class GatherTeamData {
         page.setAttribute(CommitTeam.TEAM_NAME, null);
         page.setAttribute(CommitTeam.ORGANIZATION, null);
         page.setAttribute(CommitTeam.DIVISION, null);
-        page.setAttribute("teamTournamentIDs", Collections.emptyList());
+        page.setAttribute("teamInTouranemnt", Collections.emptyMap());
         page.setAttribute("inPlayoffs", false);
         page.setAttribute("playoffsInitialized",
                           Queries.isPlayoffDataInitialized(connection, Queries.getCurrentTournament(connection)));
@@ -108,14 +108,15 @@ public class GatherTeamData {
         // check parsing the team number to be sure that we fail right away
         final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue();
 
-        // track current division and judging station for team so that it can be selected
+        // track current division and judging station for team so that it can be
+        // selected
         final Map<Integer, String> currentEventDivisions = new HashMap<>();
         final Map<Integer, String> currentJudgingStations = new HashMap<>();
         for (final Tournament tournament : tournaments) {
-          final String eventDivision = Queries.getEventDivision(connection, teamNumber, tournament.getTournamentID());          
+          final String eventDivision = Queries.getEventDivision(connection, teamNumber, tournament.getTournamentID());
           currentEventDivisions.put(tournament.getTournamentID(), eventDivision);
-          
-          final String judgingStation = Queries.getJudgingStation(connection, teamNumber, tournament.getTournamentID());          
+
+          final String judgingStation = Queries.getJudgingStation(connection, teamNumber, tournament.getTournamentID());
           currentJudgingStations.put(tournament.getTournamentID(), judgingStation);
         }
         page.setAttribute("currentEventDivisions", currentEventDivisions);
@@ -145,7 +146,11 @@ public class GatherTeamData {
         page.setAttribute(CommitTeam.TEAM_NAME, team.getTeamName());
         page.setAttribute(CommitTeam.ORGANIZATION, team.getOrganization());
         page.setAttribute(CommitTeam.DIVISION, team.getDivision());
-        page.setAttribute("teamTournamentIDs", Queries.getAllTournamentsForTeam(connection, teamNumber));
+        final Map<Integer, Boolean> teamInTournament = new HashMap<>();
+        for (final Integer tid : Queries.getAllTournamentsForTeam(connection, teamNumber)) {
+          teamInTournament.put(tid, true);
+        }
+        page.setAttribute("teamInTournament", teamInTournament);
 
         /*
          * FIXME
