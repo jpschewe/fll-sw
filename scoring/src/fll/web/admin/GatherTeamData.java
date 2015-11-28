@@ -41,18 +41,6 @@ public class GatherTeamData {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  /**
-   * Key for team number in session when redirecting to pages for further
-   * editing. Value is an int.
-   */
-  public static final String TEAM_NUMBER = "teamNumber";
-
-  /**
-   * Key for checking if we're adding a team or not. Value is a boolean.
-   */
-  @Deprecated
-  public static final String ADD_TEAM = "addTeam";
-
   public static void populateContext(final HttpServletRequest request,
                                      final ServletContext application,
                                      final PageContext page) throws IOException, ServletException {
@@ -76,10 +64,18 @@ public class GatherTeamData {
 
         final Collection<String> allEventDivisions = Queries.getEventDivisions(connection,
                                                                                tournament.getTournamentID());
+        if(allEventDivisions.isEmpty()) {
+          // special case for empty, always allow 1
+          allEventDivisions.add("1");
+        }
         tournamentEventDivisions.put(tournament.getTournamentID(), allEventDivisions);
 
         final Collection<String> allJudgingStations = Queries.getJudgingStations(connection,
                                                                                  tournament.getTournamentID());
+        if(allJudgingStations.isEmpty()) {
+          // special case for empty, always allow 1
+          allJudgingStations.add("1");
+        }
         tournamentJudgingStations.put(tournament.getTournamentID(), allJudgingStations);
 
         playoffsInitialized.put(tournament.getTournamentID(),
@@ -96,14 +92,12 @@ public class GatherTeamData {
       if (null == teamNumberStr) {
         // put blanks in for all values
         page.setAttribute("addTeam", true);
-        page.setAttribute(TEAM_NUMBER, null);
-        page.setAttribute(CommitTeam.TEAM_NAME, null);
-        page.setAttribute(CommitTeam.ORGANIZATION, null);
-        page.setAttribute(CommitTeam.DIVISION, null);
+        page.setAttribute("teamNumber", null);
+        page.setAttribute("teamName", null);
+        page.setAttribute("organization", null);
+        page.setAttribute("division", null);
         page.setAttribute("teamInTouranemnt", Collections.emptyMap());
         page.setAttribute("inPlayoffs", false);
-        page.setAttribute("playoffsInitialized",
-                          Queries.isPlayoffDataInitialized(connection, Queries.getCurrentTournament(connection)));
         page.setAttribute("currentEventDivisions", Collections.emptyMap());
         page.setAttribute("currentJudgingStations", Collections.emptyMap());
       } else {
@@ -145,11 +139,11 @@ public class GatherTeamData {
         }
 
         // get the team information and put it in the session
-        page.setAttribute(TEAM_NUMBER, teamNumber);
+        page.setAttribute("teamNumber", teamNumber);
         final Team team = Team.getTeamFromDatabase(connection, teamNumber);
-        page.setAttribute(CommitTeam.TEAM_NAME, team.getTeamName());
-        page.setAttribute(CommitTeam.ORGANIZATION, team.getOrganization());
-        page.setAttribute(CommitTeam.DIVISION, team.getDivision());
+        page.setAttribute("teamName", team.getTeamName());
+        page.setAttribute("organization", team.getOrganization());
+        page.setAttribute("division", team.getDivision());
         final Map<Integer, Boolean> teamInTournament = new HashMap<>();
         for (final Integer tid : Queries.getAllTournamentsForTeam(connection, teamNumber)) {
           teamInTournament.put(tid, true);

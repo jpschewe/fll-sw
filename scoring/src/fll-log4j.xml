@@ -42,10 +42,8 @@
  </logger>
 
  <!-- stuff for debugging -->
- <!-- 
- <logger name="fll.db.ImportDB"><level value="TRACE"/></logger>
- -->
-
+ <logger name="fll.web.admin.CommitTeam"><level value="TRACE"/></logger>
+ 
  <!-- database connection information -->
  <!-- logger name="database"><level value="TRACE"/></logger -->
 

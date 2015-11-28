@@ -10,31 +10,8 @@ editTeam_jsp -> CommitTeam;
 
 editTeam_jsp -> admin_index_jsp [label="Cancel"];
 
-CommitTeam -> admin_select_team_jsp [label="Delete Team"];
+CommitTeam -> admin_select_team_jsp [label="Edit/Delete Team"];
 
-CommitTeam -> admin_select_team_jsp [label="Advance Team"];
-
-CommitTeam -> admin_select_team_jsp [label="Playoffs initialized"];
-
-CommitTeam -> admin_index_jsp [label="Error adding team"];
-
-CommitTeam -> CheckEventDivisionNeeded;
-
-CheckEventDivisionNeeded -> chooseEventDivision_jsp;
-
-chooseEventDivision_jsp -> CommitEventDivision;
-
-CommitEventDivision -> CheckJudgingStationNeeded;
-
-CheckEventDivisionNeeded -> CheckJudgingStationNeeded [label="No event divisions or already assigned event division"];
-
-CheckJudgingStationNeeded -> chooseJudgingStation_jsp;
-
-CheckJudgingStationNeeded -> SaveTeamData [label="No judging stations or already assigned judging station"];
-
-chooseJudgingStation_jsp -> CommitJudgingStation;
-
-CommitJudgingStation -> SaveTeamData;
-
+CommitTeam -> admin_index_jsp [label="Add Team"];
 
 }
