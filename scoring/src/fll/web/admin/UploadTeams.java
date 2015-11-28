@@ -573,15 +573,6 @@ public final class UploadTeams extends BaseFLLServlet {
     try {
       stmt = connection.createStatement();
 
-      // put all new teams in the DUMMY tournament by default and make the event
-      // division the same as the team division
-      final Tournament dummyTournament = Tournament.findTournamentByName(connection, GenerateDB.DUMMY_TOURNAMENT_NAME);
-      final int dummyTournamentID = dummyTournament.getTournamentID();
-      stmt.executeUpdate("INSERT INTO TournamentTeams " //
-          + " (Tournament, TeamNumber, event_division, judging_station)" // "
-          + " SELECT " + dummyTournamentID + ", Teams.TeamNumber, Teams.Division, Teams.Division" //
-          + " FROM Teams, FilteredTeams" //
-          + "   WHERE Teams.TeamNumber = FilteredTeams." + teamNumberColumn);
 
       // if a tournament is specified for the new data, set it
       if (null != tournamentColumn
@@ -596,9 +587,22 @@ public final class UploadTeams extends BaseFLLServlet {
             Tournament.createTournament(connection, tournamentName, tournamentName);
             tournament = Tournament.findTournamentByName(connection, tournamentName);
           }
-          Queries.changeTeamCurrentTournament(connection, teamNumber, tournament.getTournamentID());
+          
+          final String division = Queries.getDivisionOfTeam(connection, teamNumber);
+          Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), division, division);
         }
+      } else {
+        // put all new teams in the DUMMY tournament by default and make the event
+        // division the same as the team division
+        final Tournament dummyTournament = Tournament.findTournamentByName(connection, GenerateDB.DUMMY_TOURNAMENT_NAME);
+        final int dummyTournamentID = dummyTournament.getTournamentID();
+        stmt.executeUpdate("INSERT INTO TournamentTeams " //
+            + " (Tournament, TeamNumber, event_division, judging_station)" // "
+            + " SELECT " + dummyTournamentID + ", Teams.TeamNumber, Teams.Division, Teams.Division" //
+            + " FROM Teams, FilteredTeams" //
+            + "   WHERE Teams.TeamNumber = FilteredTeams." + teamNumberColumn);        
       }
+      
     } finally {
       SQLFunctions.close(stmt);
       SQLFunctions.close(rs);
