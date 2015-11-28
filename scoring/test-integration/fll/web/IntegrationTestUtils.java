@@ -306,6 +306,10 @@ public final class IntegrationTestUtils {
       loadPage(selenium, TestUtils.URL_ROOT
           + "api/Tournaments");
       final String json = selenium.getPageSource();
+      
+      if(LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Tournaments json: " + json);
+      }
 
       // get the JSON
       final ObjectMapper jsonMapper = new ObjectMapper();
