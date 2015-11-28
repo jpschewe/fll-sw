@@ -27,7 +27,7 @@
  */
 function valueExistsInSelect(select, value) {
   var exists = false;
-  $(select).each(function(){
+  $(select.selector + " option").each(function(){
       if (this.value == value) {
           exists = true;
           return false;
@@ -94,6 +94,22 @@ $("#tournament_${tournament.tournamentID}").change(function() {
     }
 </c:if>        
   }
+});
+
+$("#event_division_${tournament.tournamentID}").change(function() {
+  var thisSelect = $("#event_division_${tournament.tournamentID}");
+  var otherSelect = $("#judging_station_${tournament.tournamentID}");
+  if(valueExistsInSelect(otherSelect, thisSelect.val())) {
+    otherSelect.val(thisSelect.val());
+  }  
+});
+
+$("#judging_station_${tournament.tournamentID}").change(function() {
+  var thisSelect = $("#judging_station_${tournament.tournamentID}");
+  var otherSelect = $("#event_division_${tournament.tournamentID}");
+  if(valueExistsInSelect(otherSelect, thisSelect.val())) {
+    otherSelect.val(thisSelect.val());
+  }  
 });
 
 </c:otherwise> <%-- playoffs not initialized --%>
