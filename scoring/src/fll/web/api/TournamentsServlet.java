@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Tournament;
@@ -86,6 +87,13 @@ public class TournamentsServlet extends HttpServlet {
       SQLFunctions.close(connection);
     }
 
+  }
+
+  /**
+   * Type information for reading a collection of tournament objects.
+   */
+  public static final class TournamentsTypeInformation extends TypeReference<Collection<Tournament>> {
+    public static final TournamentsTypeInformation INSTANCE = new TournamentsTypeInformation();
   }
 
 }

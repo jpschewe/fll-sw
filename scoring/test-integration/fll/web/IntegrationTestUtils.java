@@ -11,6 +11,9 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
@@ -26,9 +29,13 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.Select;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import fll.TestUtils;
+import fll.Tournament;
 import fll.util.FLLInternalException;
 import fll.util.LogUtils;
+import fll.web.api.TournamentsServlet;
 import fll.xml.BracketSortType;
 
 /**
@@ -287,6 +294,47 @@ public final class IntegrationTestUtils {
   }
 
   /**
+   * Find a tournament by name using the JSON API.
+   * 
+   * @param selenium web interface
+   * @param tournamentName name of tournament
+   * @return the tournament or null if not found
+   */
+  public static Tournament getTournamentByName(final WebDriver selenium,
+                                               final String tournamentName) throws IOException {
+    try {
+      loadPage(selenium, TestUtils.URL_ROOT
+          + "api/Tournaments");
+      final String json = selenium.getPageSource();
+
+      // get the JSON
+      final ObjectMapper jsonMapper = new ObjectMapper();
+      final Reader reader = new StringReader(json);
+
+      final Collection<Tournament> tournaments = jsonMapper.readValue(reader,
+                                                                      TournamentsServlet.TournamentsTypeInformation.INSTANCE);
+
+      for (final Tournament tournament : tournaments) {
+        if (tournament.getName().equals(tournamentName)) {
+          return tournament;
+        }
+      }
+
+      return null;
+
+    } catch (final AssertionError e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final RuntimeException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final IOException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    }
+  }
+
+  /**
    * Add a team to a tournament.
    */
   public static void addTeam(final WebDriver selenium,
@@ -294,8 +342,10 @@ public final class IntegrationTestUtils {
                              final String teamName,
                              final String organization,
                              final String division,
-                             final String tournament) throws IOException {
+                             final String tournamentName) throws IOException {
     try {
+      final Tournament tournament = getTournamentByName(selenium, tournamentName);
+
       loadPage(selenium, TestUtils.URL_ROOT
           + "admin/index.jsp");
 
@@ -307,19 +357,8 @@ public final class IntegrationTestUtils {
       selenium.findElement(By.id("division_text_choice")).click();
       selenium.findElement(By.name("division_text")).sendKeys(division);
 
-      final WebElement currentTournament = selenium.findElement(By.id("currentTournamentSelect"));
-      final Select currentTournamentSel = new Select(currentTournament);
-      String tournamentID = null;
-      for (final WebElement option : currentTournamentSel.getOptions()) {
-        final String text = option.getText();
-        if (text.equals(tournament)) {
-          tournamentID = option.getAttribute("value");
-        }
-      }
-      Assert.assertNotNull("Could not find tournament with name: "
-          + tournament, tournamentID);
-
-      currentTournamentSel.selectByValue(tournamentID);
+      selenium.findElement(By.id("tournament_"
+          + tournament.getTournamentID())).click();
 
       selenium.findElement(By.name("commit")).click();
 
