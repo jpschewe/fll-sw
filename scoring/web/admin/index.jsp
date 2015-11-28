@@ -1,8 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%
-  fll.web.admin.AdminIndex.populateContext(application, session,
-					pageContext);
+  fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
 %>
 
 <html>
@@ -13,12 +12,12 @@
   type="text/css"
   href="<c:url value='/style/style.jsp'/>" />
 <script type="text/javascript">
-	function display(id) {
-		document.getElementById(id).style.display = "block";
-	}
-	function hide(id) {
-		document.getElementById(id).style.display = "none";
-	}
+  function display(id) {
+    document.getElementById(id).style.display = "block";
+  }
+  function hide(id) {
+    document.getElementById(id).style.display = "none";
+  }
 </script>
 </head>
 
@@ -215,13 +214,7 @@
 
 
 
-    <c:if test="${not playoffsInitialized}">
-      <li><a
-        href='<c:url value="editTeam.jsp">
-                     <c:param name="addTeam" value="1"/>
-                   </c:url>'>Add
-          a team</a></li>
-    </c:if>
+    <li><a href='editTeam.jsp'>Add a team</a></li>
 
 
     <li><a href='<c:url value="select_team.jsp"/>'>Edit team

@@ -1559,15 +1559,32 @@ public final class Queries {
       SQLFunctions.close(prep);
       prep = null;
 
-      // delete from Teams
-      prep = connection.prepareStatement("DELETE FROM Teams WHERE TeamNumber = ?");
+      // delete from FinalScores
+      prep = connection.prepareStatement("DELETE FROM FinalScores WHERE TeamNumber = ?");
       prep.setInt(1, teamNumber);
       prep.executeUpdate();
       SQLFunctions.close(prep);
       prep = null;
 
-      // delete from FinalScores
-      prep = connection.prepareStatement("DELETE FROM FinalScores WHERE TeamNumber = ?");
+      // delete from schedule
+      prep = connection.prepareStatement("DELETE FROM sched_perf_rounds WHERE team_number = ?");
+      prep.setInt(1, teamNumber);
+      prep.executeUpdate();
+      SQLFunctions.close(prep);
+      prep = null;
+      prep = connection.prepareStatement("DELETE FROM sched_subjective WHERE team_number = ?");
+      prep.setInt(1, teamNumber);
+      prep.executeUpdate();
+      SQLFunctions.close(prep);
+      prep = null;
+      prep = connection.prepareStatement("DELETE FROM schedule WHERE team_number = ?");
+      prep.setInt(1, teamNumber);
+      prep.executeUpdate();
+      SQLFunctions.close(prep);
+      prep = null;
+
+      // delete from Teams
+      prep = connection.prepareStatement("DELETE FROM Teams WHERE TeamNumber = ?");
       prep.setInt(1, teamNumber);
       prep.executeUpdate();
       SQLFunctions.close(prep);
@@ -1882,7 +1899,7 @@ public final class Queries {
 
     PreparedStatement prep = null;
     try {
-      deleteTeamFromTournamet(connection, description, teamNumber, currentTournament);
+      deleteTeamFromTournament(connection, description, teamNumber, currentTournament);
 
       final String division = getDivisionOfTeam(connection, teamNumber);
       if (LOGGER.isTraceEnabled()) {
@@ -1931,25 +1948,11 @@ public final class Queries {
   }
 
   /**
-   * Demote the team to it's previous tournament. This will delete all scores
-   * for the team in it's current tournament.
-   * 
-   * @param connection db connection
-   * @param teamNumber the team
-   */
-  public static void demoteTeam(final Connection connection,
-                                final ChallengeDescription description,
-                                final int teamNumber) throws SQLException {
-    final int currentTournament = getTeamCurrentTournament(connection, teamNumber);
-    deleteTeamFromTournamet(connection, description, teamNumber, currentTournament);
-  }
-
-  /**
    * Delete all record of a team from a tournament. This includes the scores and
    * the TournamentTeams table.
    */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
-  private static void deleteTeamFromTournamet(final Connection connection,
+  public static void deleteTeamFromTournament(final Connection connection,
                                               final ChallengeDescription description,
                                               final int teamNumber,
                                               final int currentTournament) throws SQLException {
@@ -1973,13 +1976,6 @@ public final class Queries {
       prep.executeUpdate();
       SQLFunctions.close(prep);
 
-      // delete from TournamentTeams
-      prep = connection.prepareStatement("DELETE FROM TournamentTeams WHERE TeamNumber = ? AND Tournament = ?");
-      prep.setInt(1, teamNumber);
-      prep.setInt(2, currentTournament);
-      prep.executeUpdate();
-      SQLFunctions.close(prep);
-
       // delete from FinalScores
       prep = connection.prepareStatement("DELETE FROM FinalScores WHERE TeamNumber = ? AND Tournament = ?");
       prep.setInt(1, teamNumber);
@@ -1989,6 +1985,30 @@ public final class Queries {
 
       // delete from PlayoffData
       prep = connection.prepareStatement("DELETE FROM PlayoffData WHERE Team = ? AND Tournament = ?");
+      prep.setInt(1, teamNumber);
+      prep.setInt(2, currentTournament);
+      prep.executeUpdate();
+      SQLFunctions.close(prep);
+
+      // delete from schedule
+      prep = connection.prepareStatement("DELETE FROM sched_perf_rounds WHERE team_number = ? AND tournament = ?");
+      prep.setInt(1, teamNumber);
+      prep.setInt(2, currentTournament);
+      prep.executeUpdate();
+      SQLFunctions.close(prep);
+      prep = connection.prepareStatement("DELETE FROM sched_subjective WHERE team_number = ? AND tournament = ?");
+      prep.setInt(1, teamNumber);
+      prep.setInt(2, currentTournament);
+      prep.executeUpdate();
+      SQLFunctions.close(prep);
+      prep = connection.prepareStatement("DELETE FROM schedule WHERE team_number = ? AND tournament = ?");
+      prep.setInt(1, teamNumber);
+      prep.setInt(2, currentTournament);
+      prep.executeUpdate();
+      SQLFunctions.close(prep);
+
+      // delete from TournamentTeams
+      prep = connection.prepareStatement("DELETE FROM TournamentTeams WHERE TeamNumber = ? AND Tournament = ?");
       prep.setInt(1, teamNumber);
       prep.setInt(2, currentTournament);
       prep.executeUpdate();
@@ -2039,20 +2059,60 @@ public final class Queries {
   }
 
   /**
-   * Add a team to the database. Automatically adds the team to the current
-   * tournament as well.
+   * Add a team to the database.
    * 
    * @return null on success, the name of the other team with the same team
    *         number on an error
+   * @throws FLLRuntimeException if the team number is an internal team number
    */
   public static String addTeam(final Connection connection,
                                final int number,
                                final String name,
                                final String organization,
                                final String division) throws SQLException {
-    return addTeam(connection, number, name, organization, division, getCurrentTournament(connection));
+    if (Team.isInternalTeamNumber(number)) {
+      throw new FLLRuntimeException("Cannot create team with an internal number: "
+          + number);
+    }
+
+    ResultSet rs = null;
+    PreparedStatement checkDuplicate = null;
+    PreparedStatement insert = null;
+    try {
+      // TODO this should probably be in a transaction as the insert depends on the same state as the select
+
+      // need to check for duplicate teamNumber
+      checkDuplicate = connection.prepareStatement("SELECT TeamName FROM Teams WHERE TeamNumber = ?");
+      checkDuplicate.setInt(1, number);
+      rs = checkDuplicate.executeQuery();
+      if (rs.next()) {
+        final String dup = rs.getString(1);
+        return dup;
+      }
+
+      insert = connection.prepareStatement("INSERT INTO Teams (TeamName, Organization, Division, TeamNumber) VALUES (?, ?, ?, ?)");
+      insert.setString(1, name);
+      insert.setString(2, organization);
+      insert.setString(3, division);
+      insert.setInt(4, number);
+      insert.executeUpdate();
+
+      return null;
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(checkDuplicate);
+      SQLFunctions.close(insert);
+    }
   }
 
+  /**
+   * Add a team to the database and add it to the specified tournament.
+   * 
+   * @param division used for the team division, event division and judging
+   *          station
+   * @return null on success, the name of the other team with the same team
+   *         number on an error
+   */
   public static String addTeam(final Connection connection,
                                final int number,
                                final String name,
@@ -2104,6 +2164,36 @@ public final class Queries {
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
     }
+  }
+
+  /**
+   * Add a team to a tournament.
+   * 
+   * @param connection database connection
+   * @param teamNumber the team to add
+   * @param tournament the tournament id of the tournament to be added to
+   * @param eventDivision the event division the team is in for this tournament
+   * @param judgingStation the judging station for the team in this tournament
+   * @throws SQLException if a database problem occurs, including the team
+   *           already being in the tournament
+   */
+  public static void addTeamToTournament(final Connection connection,
+                                         final int teamNumber,
+                                         final int tournament,
+                                         final String eventDivision,
+                                         final String judgingStation) throws SQLException {
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division, judging_station) VALUES (?, ?, ?, ?)");
+      prep.setInt(1, tournament);
+      prep.setInt(2, teamNumber);
+      prep.setString(3, eventDivision);
+      prep.setString(4, judgingStation);
+      prep.executeUpdate();
+    } finally {
+      SQLFunctions.close(prep);
+    }
+
   }
 
   /**

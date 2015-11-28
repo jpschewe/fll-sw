@@ -62,9 +62,6 @@ public class AdminIndex {
       final int currentTournamentID = Queries.getCurrentTournament(connection);
       pageContext.setAttribute("currentTournamentID", currentTournamentID);
 
-      pageContext.setAttribute("playoffsInitialized",
-                           Queries.isPlayoffDataInitialized(connection, Queries.getCurrentTournament(connection)));
-
       final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournamentID);
       pageContext.setAttribute("numSeedingRounds", numSeedingRounds);
 

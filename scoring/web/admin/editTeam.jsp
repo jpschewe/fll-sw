@@ -223,7 +223,7 @@ $("#judging_station_${tournament.tournamentID}").change(function() {
 
       <!-- tournaments -->
       <tr>
-        <td>Tournament(s)</td>
+        <td>Assign Tournaments</td>
         <td>
 
           <table border="1">
@@ -241,8 +241,8 @@ $("#judging_station_${tournament.tournamentID}").change(function() {
                 <td>
                   <!--  tournament name --> <label> <input
                     type='checkbox'
-                    name='tournaments'
-                    value='${tournament.tournamentID}'
+                    name='tournament_${tournament.tournamentID}'
+                    value='true'
                     id='tournament_${tournament.tournamentID}' />
                     ${tournament.name}
                 </label>
@@ -327,7 +327,7 @@ $("#judging_station_${tournament.tournamentID}").change(function() {
       <c:choose>
         <c:when test="${inPlayoffs}">
           <p>Teams cannot be deleted once they are in the playoff
-            data table for a tournament.</p>
+            data table for any tournament.</p>
         </c:when>
         <c:otherwise>
           <input

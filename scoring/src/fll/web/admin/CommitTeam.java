@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Collection;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -19,17 +20,19 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.log4j.Logger;
 
+import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
+import fll.util.FLLInternalException;
+import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.xml.ChallengeDescription;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Commit the changes made by editTeam.jsp.
@@ -76,25 +79,13 @@ public class CommitTeam extends BaseFLLServlet {
     final StringBuilder message = new StringBuilder();
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
 
     Connection connection = null;
     try {
       connection = datasource.getConnection();
       // parse the numbers first so that we don't get a partial commit
       final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(request.getParameter("teamNumber")).intValue();
-      session.setAttribute(GatherTeamData.TEAM_NUMBER, teamNumber);
-
-      final String division = resolveDivision(request);
-      session.setAttribute(DIVISION, division);
-
-      final String teamName = request.getParameter("teamName");
-      session.setAttribute(TEAM_NAME, teamName);
-
-      final String organization = request.getParameter("organization");
-      session.setAttribute(ORGANIZATION, organization);
-
-      // this will be null if the tournament can't be changed
-      final String newTournamentStr = request.getParameter("currentTournament");
 
       String redirect = null;
       if (null != request.getParameter("delete")) {
@@ -108,71 +99,102 @@ public class CommitTeam extends BaseFLLServlet {
 
         redirect = "select_team.jsp";
       } else {
-        final int newTournament = newTournamentStr == null ? -1
-            : Utilities.NUMBER_FORMAT_INSTANCE.parse(newTournamentStr).intValue();
+        final String division = resolveDivision(request);
+        final String teamName = request.getParameter("teamName");
+        final String organization = request.getParameter("organization");
 
-        if (null != newTournamentStr) {
-          // need to get these before the team is put in the tournament.
-          final Collection<String> allEventDivisions = Queries.getEventDivisions(connection, newTournament);
-          session.setAttribute(CheckEventDivisionNeeded.ALL_EVENT_DIVISIONS, allEventDivisions);
-
-          final Collection<String> allJudgingStations = Queries.getJudgingStations(connection, newTournament);
-          session.setAttribute(CommitTeam.ALL_JUDGING_STATIONS, allJudgingStations);
-        }
-
-        if (null != request.getParameter("advance")) {
-          if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Advancing "
-                + teamNumber);
-          }
-
-          final boolean result = Queries.advanceTeam(connection, teamNumber);
-          if (!result) {
-            message.append("<p class='error'>Error advancing team</p>");
-            LOGGER.error("Error advancing team: "
-                + teamNumber);
-            redirect = "select_team.jsp";
-          } else {
-            message.append("<p id='success'>Successfully advanced team "
-                + teamNumber + "</p>");
-          }
-        } else if (null != request.getParameter("demote")) {
-          if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Demoting team: "
-                + teamNumber);
-          }
-
-          Queries.demoteTeam(connection, challengeDescription, teamNumber);
-          message.append("<p id='success'>Successfully demoted team "
-              + teamNumber + "</p>");
-        }
-
-        if (SessionAttributes.getNonNullAttribute(session, GatherTeamData.ADD_TEAM, Boolean.class)) {
+        if (Boolean.valueOf(request.getParameter("addTeam"))) {
           if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Adding "
                 + teamNumber);
           }
 
-          final String otherTeam = Queries.addTeam(connection, teamNumber, teamName, organization, division,
-                                                   newTournament);
+          // came from the index, send back to the index
+          redirect = "index.jsp";
+
+          final String otherTeam = Queries.addTeam(connection, teamNumber, teamName, organization, division);
           if (null != otherTeam) {
             message.append("<p class='error'>Error, team number "
                 + teamNumber + " is already assigned.</p>");
             LOGGER.error("TeamNumber "
                 + teamNumber + " is already assigned");
-            redirect = "index.jsp";
           } else {
             message.append("<p id='success'>Successfully added team "
                 + teamNumber + "</p>");
           }
         } else {
-          if (null != newTournamentStr) {
-            final int teamCurrentTournament = Queries.getTeamCurrentTournament(connection, teamNumber);
-            if (teamCurrentTournament != newTournament) {
-              Queries.changeTeamCurrentTournament(connection, teamNumber, newTournament);
-            }
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Updating information for team: "
+                + teamNumber);
           }
+
+          redirect = "select_team.jsp";
+
+          Queries.updateTeam(connection, teamNumber, teamName, organization, division);
+          message.append("<p id='success'>Successfully updated a team "
+              + teamNumber + "'s info</p>");
         }
+
+        // assign tournaments
+        final List<Tournament> allTournaments = Tournament.getTournaments(connection);
+        final Collection<Integer> previouslyAssignedTournaments = Queries.getAllTournamentsForTeam(connection,
+                                                                                                   teamNumber);
+
+        for (final Tournament tournament : allTournaments) {
+
+          // can't change tournaments where the playoffs have been initialized
+          if (!Queries.isPlayoffDataInitialized(connection, tournament.getTournamentID())) {
+
+            if (LOGGER.isDebugEnabled()) {
+              LOGGER.debug("Checking if "
+                  + teamNumber + " should be assigned to tournament " + tournament.getName());
+            }
+
+            if (Boolean.valueOf(request.getParameter("tournament_"
+                + tournament.getTournamentID()))) {
+
+              if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Team "
+                    + teamNumber + " has checked tournament " + tournament.getName());
+              }
+
+              final String eventDivision = request.getParameter("event_division_"
+                  + tournament.getTournamentID());
+              final String judgingStation = request.getParameter("judging_station_"
+                  + tournament.getTournamentID());
+
+              if (!previouslyAssignedTournaments.contains(tournament.getTournamentID())) {
+                if (LOGGER.isDebugEnabled()) {
+                  LOGGER.debug("Adding team "
+                      + teamNumber + " to tournament " + tournament.getName());
+                }
+
+                // add to tournament
+                Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), eventDivision,
+                                            judgingStation);
+              } else {
+                // just update the division and judging station information
+
+                final String prevEventDivision = Queries.getEventDivision(connection, teamNumber,
+                                                                          tournament.getTournamentID());
+                if (!eventDivision.equals(prevEventDivision)) {
+                  Queries.setEventDivision(connection, teamNumber, tournament.getTournamentID(), eventDivision);
+                }
+
+                final String prevJudgingStation = Queries.getJudgingStation(connection, teamNumber,
+                                                                            tournament.getTournamentID());
+                if (!judgingStation.equals(prevJudgingStation)) {
+                  Queries.setJudgingStation(connection, teamNumber, tournament.getTournamentID(), judgingStation);
+                }
+              }
+
+            } else if (previouslyAssignedTournaments.contains(tournament.getTournamentID())) {
+              // team was removed from tournament
+              Queries.deleteTeamFromTournament(connection, description, teamNumber, tournament.getTournamentID());
+            }
+            
+          } // playoffs not initialized
+        } // foreach tournament
 
       } // not deleting team
 
@@ -180,23 +202,14 @@ public class CommitTeam extends BaseFLLServlet {
         session.setAttribute(SessionAttributes.MESSAGE, message.toString());
       }
 
-      if (null == redirect) {
-        // this is needed if editing team information after the playoffs have been initialized
-        if (null == newTournamentStr) {
-          response.sendRedirect(response.encodeRedirectURL("index.jsp"));
-        } else {
-          response.sendRedirect(response.encodeRedirectURL("CheckEventDivisionNeeded"));
-        }
-      } else {
-        response.sendRedirect(response.encodeRedirectURL(redirect));
-      }
+      response.sendRedirect(response.encodeRedirectURL(redirect));
 
     } catch (final ParseException pe) {
       LOGGER.error("Error parsing team number, this is an internal error", pe);
-      throw new RuntimeException("Error parsing team number, this is an internal error", pe);
+      throw new FLLInternalException("Error parsing team number, this is an internal error", pe);
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
-      throw new RuntimeException("There was an error talking to the database", e);
+      throw new FLLRuntimeException("There was an error talking to the database", e);
     } finally {
       SQLFunctions.close(connection);
     }
