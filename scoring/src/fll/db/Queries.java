@@ -1750,42 +1750,6 @@ public final class Queries {
   }
 
   /**
-   * Advance a team to the next tournament.
-   * 
-   * @param connection the database connection
-   * @param teamNumber the team to advance
-   * @return true on success. Failure indicates that no next tournament exists
-   */
-  public static boolean advanceTeam(final Connection connection,
-                                    final int teamNumber) throws SQLException {
-
-    final int currentTournamentID = getTeamCurrentTournament(connection, teamNumber);
-    final Tournament currentTournament = Tournament.findTournamentByID(connection, currentTournamentID);
-    final Integer nextTournamentID = currentTournament.getNextTournament();
-    if (null == nextTournamentID) {
-      if (LOGGER.isInfoEnabled()) {
-        LOGGER.info("advanceTeam - No next tournament exists for tournament: "
-            + currentTournament.getName() + " team: " + teamNumber);
-      }
-      return false;
-    } else {
-      PreparedStatement prep = null;
-      try {
-        prep = connection.prepareStatement("INSERT INTO TournamentTeams (TeamNumber, Tournament, event_division, judging_station) VALUES (?, ?, ?, ?)");
-        prep.setInt(1, teamNumber);
-        prep.setInt(2, currentTournament.getNextTournament());
-        prep.setString(3, getDivisionOfTeam(connection, teamNumber));
-        prep.setString(4, getDivisionOfTeam(connection, teamNumber));
-        prep.executeUpdate();
-
-        return true;
-      } finally {
-        SQLFunctions.close(prep);
-      }
-    }
-  }
-
-  /**
    * Get all tournament IDs that this team is in.
    * 
    * @param connection database connection

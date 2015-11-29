@@ -22,7 +22,7 @@ Features
   * Platform Independent (written in Java)
   * Scalable - Successfully used in tournaments with 8 to 80 teams
   * Easy to use web interface
-  * Allows hierarchical tournament structure to do tournament advancement from regional tournaments to state and beyond
+  * Allows a team to compete in multiple tournaments
   * Easy to configure for different tournaments with an XML file, no code changes required
 
 Instructions

@@ -17,8 +17,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.log4j.Logger;
 
 import fll.Tournament;
@@ -26,6 +24,7 @@ import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Servlet to create a tournament.
@@ -117,24 +116,6 @@ public class CreateTournament extends BaseFLLServlet {
     Tournament.createTournament(destConnection, sourceTournament.getName(), sourceTournament.getLocation());
     message.append("<p>Created tournament "
         + sourceTournament.getName() + "</p>");
-
-    if (null != sourceTournament.getNextTournament()) {
-      final int sourceNextId = sourceTournament.getNextTournament();
-      final Tournament sourceNextTournament = Tournament.findTournamentByID(sourceConnection, sourceNextId);
-      final Tournament destNextTournament = Tournament.findTournamentByName(destConnection,
-                                                                            sourceNextTournament.getName());
-      if (null == destNextTournament) {
-        createTournament(sourceConnection, destConnection, sourceNextTournament.getName(), message, session);
-        Tournament.setNextTournament(destConnection, tournamentName, sourceNextTournament.getName());
-      } else {
-        LOG.error("Cannot find tournament "
-            + tournamentName + " in imported database");
-
-        message.append("<p class='error'>Cannot find tournament "
-            + tournamentName + " in imported database!</p>");
-        session.setAttribute(SessionAttributes.REDIRECT_URL, "selectTournament.jsp");
-      }
-    }
 
     if (null == SessionAttributes.getRedirectURL(session)) {
       session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTournamentExists");
