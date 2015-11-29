@@ -28,12 +28,8 @@ import java.util.TreeMap;
 
 import javax.servlet.http.HttpServletRequest;
 
-import net.mtu.eggplant.util.ComparisonUtils;
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.CategoryRank;
@@ -55,6 +51,8 @@ import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreCategory;
 import fll.xml.TiebreakerTest;
 import fll.xml.WinnerType;
+import net.mtu.eggplant.util.ComparisonUtils;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Does all of our queries.
@@ -1871,52 +1869,6 @@ public final class Queries {
       return dummyTournament.getTournamentID();
     } finally {
       SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
-  }
-
-  /**
-   * Change the current tournament for a team. This will delete all scores for
-   * the team in it's current tournament.
-   * 
-   * @param connection db connection
-   * @param teamNumber the team
-   * @param newTournament the new current tournament for this team
-   */
-  public static void changeTeamCurrentTournament(final Connection connection,
-                                                 final int teamNumber,
-                                                 final int newTournament) throws SQLException {
-
-    final Document document = GlobalParameters.getChallengeDocument(connection);
-    final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
-
-    final int currentTournament = getTeamCurrentTournament(connection, teamNumber);
-
-    if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("changeTeamCurrentTournament teamNumber: "
-          + teamNumber + " newTournament: " + newTournament + " current tournament: " + currentTournament);
-    }
-
-    PreparedStatement prep = null;
-    try {
-      deleteTeamFromTournament(connection, description, teamNumber, currentTournament);
-
-      final String division = getDivisionOfTeam(connection, teamNumber);
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("Division for team "
-            + teamNumber + " is " + division);
-      }
-
-      // set new tournament
-      prep = connection.prepareStatement("INSERT INTO TournamentTeams (TeamNumber, Tournament, event_division, judging_station) VALUES (?, ?, ?, ?)");
-      prep.setInt(1, teamNumber);
-      prep.setInt(2, newTournament);
-      prep.setString(3, division);
-      prep.setString(4, division);
-      prep.executeUpdate();
-      SQLFunctions.close(prep);
-
-    } finally {
       SQLFunctions.close(prep);
     }
   }
