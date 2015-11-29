@@ -6,13 +6,18 @@
 
 package fll.web;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
@@ -293,6 +298,26 @@ public final class IntegrationTestUtils {
     submitElement.click();
   }
 
+  private static String readAll(final Reader rd) throws IOException {
+    StringBuilder sb = new StringBuilder();
+    int cp;
+    while ((cp = rd.read()) != -1) {
+      sb.append((char) cp);
+    }
+    return sb.toString();
+  }
+
+  private static String readJSON(final String url) throws MalformedURLException, IOException {
+    InputStream is = new URL(url).openStream();
+    try {
+      final BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+      final String jsonText = readAll(rd);
+      return jsonText;
+    } finally {
+      is.close();
+    }
+  }
+
   /**
    * Find a tournament by name using the JSON API.
    * 
@@ -303,12 +328,12 @@ public final class IntegrationTestUtils {
   public static Tournament getTournamentByName(final WebDriver selenium,
                                                final String tournamentName) throws IOException {
     try {
-      loadPage(selenium, TestUtils.URL_ROOT
+      final String json = readJSON(TestUtils.URL_ROOT
           + "api/Tournaments");
-      final String json = selenium.getPageSource();
-      
-      if(LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Tournaments json: " + json);
+
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Tournaments json: "
+            + json);
       }
 
       // get the JSON
