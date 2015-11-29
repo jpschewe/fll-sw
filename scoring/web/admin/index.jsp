@@ -82,9 +82,7 @@
         class='help'
         style='display: none'>
         This is an optional step. Use this page to modify the
-        tournaments created by team import step above, to assign
-        tournament advancement (e.g. teams may advance from regional
-        tournaments to the state tournament), or to create new
+        tournaments created by team import step above, or to create new
         tournaments.<br> <a
           href='javascript:hide("EditTournamentHelp")'>[hide]</a>
       </div></li>
@@ -280,17 +278,17 @@
 
     <li>
       <form
-        id='uploadAdvancingTeams'
+        id='uploadTeamTournamentAssignments'
         ACTION="<c:url value='/UploadSpreadsheet'/>"
         METHOD="POST"
         ENCTYPE="multipart/form-data">
-        Upload CSV or Excel of teams to advance <input
+        Upload CSV or Excel of teams and tournaments to assign them to <input
           type="file"
           size="32"
           name="file" /> <input
           type='hidden'
           name='uploadRedirect'
-          value="<c:url value='/admin/UploadAdvancingTeams'/>" /> <input
+          value="<c:url value='/admin/UploadTeamTournamentAssignments'/>" /> <input
           type="submit"
           value="Upload" />
       </form>
