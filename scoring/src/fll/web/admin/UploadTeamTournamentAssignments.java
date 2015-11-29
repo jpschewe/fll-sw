@@ -28,8 +28,8 @@ import fll.web.SessionAttributes;
  * Upload the teams to be advanced.
  * 
  */
-@WebServlet("/admin/UploadAdvancingTeams")
-public final class UploadAdvancingTeams extends BaseFLLServlet {
+@WebServlet("/admin/UploadTeamTournamentAssignments")
+public final class UploadTeamTournamentAssignments extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 

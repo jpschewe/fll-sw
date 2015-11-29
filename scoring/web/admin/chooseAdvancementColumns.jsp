@@ -3,22 +3,33 @@
   
 <html>
   <head>
-    <title>Advance Teams Column Selection</title>
+    <title>Assign Teams to Tournament</title>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
 
   <body>
-    <h1>${challengeDescription.title } (Advance Team Column Selection)</h1>
+    <h1>${challengeDescription.title } (Assign Teams to Tournament)</h1>
 
-	<p>Select the column that specifies the team numbers to be advanced to the next tournament.</p>
+	<p>Select the column that specifies the team numbers and the column for the tournament.</p>
       
-    <form action="ProcessAdvancingTeamsUpload" method="POST" name="advanceTeamColumnSelection">
+    <form action="ProcessTeamTournamentAssignmentsUpload" method="POST" name="columnSelection">
       <table border='1'>
 
         <tr bgcolor='yellow'>
           <td>TeamNumber</td>
           <td>
             <select name='teamNumber'>
+              <c:forEach items="${fileHeaders }" var="fileHeader">
+                <option value="${fileHeader }">${fileHeader }</option>
+              </c:forEach>
+            </select>
+          </td>
+        </tr>
+
+        <tr bgcolor='yellow'>
+          <td>Tournament</td>
+          <td>
+            <select name='tournament'>
               <c:forEach items="${fileHeaders }" var="fileHeader">
                 <option value="${fileHeader }">${fileHeader }</option>
               </c:forEach>

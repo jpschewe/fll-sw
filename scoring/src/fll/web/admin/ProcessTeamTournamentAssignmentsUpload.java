@@ -14,9 +14,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -26,25 +23,27 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
+import fll.Tournament;
 import fll.Utilities;
+import fll.db.Queries;
 import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
+import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Process the uploaded data and forward to GatherAdvancementData.
  */
-@WebServlet("/admin/ProcessAdvancingTeamsUpload")
-public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
+@WebServlet("/admin/ProcessTeamTournamentAssignmentsUpload")
+public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -66,12 +65,23 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
 
       final String teamNumberColumnName = request.getParameter("teamNumber");
       if (null == teamNumberColumnName) {
-        throw new RuntimeException("Cannot find 'teamNumber' request parameter");
+        throw new FLLRuntimeException("Cannot find 'teamNumber' request parameter");
       }
+
+      final String tournamentColumnName = request.getParameter("tournament");
+      if (null == tournamentColumnName) {
+        throw new FLLRuntimeException("Cannot find 'tournament' request parameter");
+      }
+
+      final DataSource datasource = ApplicationAttributes.getDataSource(application);
+      connection = datasource.getConnection();
 
       final String sheetName = SessionAttributes.getAttribute(session, "sheetName", String.class);
 
-      final Collection<Integer> teams = processFile(file, sheetName, teamNumberColumnName);
+      processFile(connection, message, file, sheetName, teamNumberColumnName, tournamentColumnName);
+
+      session.setAttribute("message", message.toString());
+      response.sendRedirect(response.encodeRedirectURL("index.jsp"));
 
       if (!file.delete()) {
         if (LOGGER.isDebugEnabled()) {
@@ -80,25 +90,21 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
         }
       }
 
-      // process as if the user had selected these teams
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
-      connection = datasource.getConnection();
-      GatherAdvancementData.processAdvancementData(response, session, false, connection, teams);
     } catch (final SQLException sqle) {
-      message.append("<p class='error'>Error saving advancment data into the database: "
+      message.append("<p class='error'>Error saving team assignmentsinto the database: "
           + sqle.getMessage() + "</p>");
       LOGGER.error(sqle, sqle);
-      throw new RuntimeException("Error saving advancment data into the database", sqle);
+      throw new RuntimeException("Error saving team assignments into the database", sqle);
     } catch (final ParseException e) {
-      message.append("<p class='error'>Error saving team data into the database: "
+      message.append("<p class='error'>Error saving team assignments into the database: "
           + e.getMessage() + "</p>");
       LOGGER.error(e, e);
-      throw new RuntimeException("Error saving advancment data into the database", e);
+      throw new RuntimeException("Error saving team assignments into the database", e);
     } catch (final Exception e) {
-      message.append("<p class='error'>Error saving advancment data into the database: "
+      message.append("<p class='error'>Error saving team assignments into the database: "
           + e.getMessage() + "</p>");
       LOGGER.error(e, e);
-      throw new RuntimeException("Error saving advancment data into the database", e);
+      throw new RuntimeException("Error saving team assignments into the database", e);
     } finally {
       session.setAttribute(SessionAttributes.MESSAGE, message.toString());
 
@@ -110,14 +116,17 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
   }
 
   /**
-   * Get the team numbers of advancing teams.
+   * Make the changes
    * 
    * @throws InvalidFormatException
    */
-  public static Collection<Integer> processFile(final File file,
-                                                final String sheetName,
-                                                final String teamNumberColumnName) throws SQLException, IOException,
-                                                    ParseException, InvalidFormatException {
+  public static void processFile(final Connection connection,
+                                 final StringBuilder message,
+                                 final File file,
+                                 final String sheetName,
+                                 final String teamNumberColumnName,
+                                 final String tournamentColumnName)
+                                     throws SQLException, IOException, ParseException, InvalidFormatException {
 
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("File name: "
@@ -148,7 +157,7 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
         final String firstLine = breader.readLine();
         if (null == firstLine) {
           LOGGER.error("Empty file");
-          return Collections.emptyList();
+          return;
         }
         if (firstLine.indexOf('\t') != -1) {
           reader = new CSVCellReader(file, '\t');
@@ -178,26 +187,54 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
           + " teamNumber column: " + teamNumberColumnName);
     }
 
-    int teamNumColumnIdx = 0;
-    while (!teamNumberColumnName.equals(columnNames[teamNumColumnIdx])) {
-      ++teamNumColumnIdx;
+    int teamNumColumnIdx = -1;
+    int tournamentColumnIdx = -1;
+    int index = 0;
+    while (-1 == teamNumColumnIdx
+        || -1 == tournamentColumnIdx) {
+      if (-1 == teamNumColumnIdx
+          && teamNumberColumnName.equals(columnNames[index])) {
+        teamNumColumnIdx = index;
+      }
+
+      if (-1 == tournamentColumnIdx
+          && tournamentColumnName.equals(columnNames[index])) {
+        tournamentColumnIdx = index;
+      }
+
+      ++index;
     }
 
-    final Collection<Integer> teams = new LinkedList<Integer>();
+    int rowsProcessed = 0;
     String[] data = reader.readNext();
     while (null != data) {
-      if (teamNumColumnIdx < data.length) {
+      if (teamNumColumnIdx < data.length
+          && tournamentColumnIdx < data.length) {
         final String teamNumStr = data[teamNumColumnIdx];
         if (null != teamNumStr
             && !"".equals(teamNumStr.trim())) {
           final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumStr).intValue();
-          teams.add(teamNumber);
+
+          final String division = Queries.getDivisionOfTeam(connection, teamNumber);
+
+          final String tournamentName = data[tournamentColumnIdx];
+          final Tournament tournament = Tournament.findTournamentByName(connection, tournamentName);
+          if (null == tournament) {
+            message.append("<p class='warning'>Could not find tournament name '"
+                + tournamentName + "' for team " + teamNumber + ", skipping row</p>");
+          } else {
+            Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), division, division);
+            ++rowsProcessed;
+          }
         }
       }
 
       data = reader.readNext();
     }
-    return teams;
+
+    message.append("<p>Successfully processed "
+        + rowsProcessed + " rows of data</p>");
+
   }
 
 }
