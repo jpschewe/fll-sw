@@ -16,14 +16,13 @@ import java.sql.Types;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.log4j.Logger;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import fll.db.GenerateDB;
 import fll.util.LogUtils;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * The representation of a tournament. If someone changes the database, this
@@ -36,12 +35,10 @@ public final class Tournament implements Serializable {
 
   private Tournament(@JsonProperty("tournamentID") final int tournamentID,
                      @JsonProperty("name") final String name,
-                     @JsonProperty("location") final String location,
-                     @JsonProperty("nextTournament") final Integer nextTournamentId) {
+                     @JsonProperty("location") final String location) {
     this.tournamentID = tournamentID;
     this.name = name;
     this.location = location;
-    this.nextTournament = nextTournamentId;
   }
 
   private final int tournamentID;
@@ -56,40 +53,10 @@ public final class Tournament implements Serializable {
     return name;
   }
 
-  private final Integer nextTournament;
-
-  /**
-   * The next tournament after this one.
-   * 
-   * @return null if there is no next tournament
-   */
-  public Integer getNextTournament() {
-    return nextTournament;
-  }
-
   private final String location;
 
   public String getLocation() {
     return location;
-  }
-
-  /**
-   * Create a tournament with a next tournament.
-   */
-  public static void createTournament(final Connection connection,
-                                      final String tournamentName,
-                                      final String location,
-                                      final int nextTournamentID) throws SQLException {
-    PreparedStatement prep = null;
-    try {
-      prep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location, NextTournament) VALUES (?, ?, ?)");
-      prep.setString(1, tournamentName);
-      prep.setString(2, location);
-      prep.setInt(3, nextTournamentID);
-      prep.executeUpdate();
-    } finally {
-      SQLFunctions.close(prep);
-    }
   }
 
   /**
@@ -143,22 +110,15 @@ public final class Tournament implements Serializable {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      prep = connection.prepareStatement("SELECT tournament_id, Name, Location, NextTournament FROM Tournaments WHERE tournament_id <> ? ORDER BY Name");
+      prep = connection.prepareStatement("SELECT tournament_id, Name, Location FROM Tournaments WHERE tournament_id <> ? ORDER BY Name");
       prep.setInt(1, GenerateDB.INTERNAL_TOURNAMENT_ID);
       rs = prep.executeQuery();
       while (rs.next()) {
         final int tournamentID = rs.getInt(1);
         final String name = rs.getString(2);
         final String location = rs.getString(3);
-        final int nextTournamentID = rs.getInt(4);
-        final Integer nextTournament;
-        if (rs.wasNull()) {
-          nextTournament = null;
-        } else {
-          nextTournament = nextTournamentID;
-        }
 
-        final Tournament tournament = new Tournament(tournamentID, name, location, nextTournament);
+        final Tournament tournament = new Tournament(tournamentID, name, location);
         retval.add(tournament);
       }
     } finally {
@@ -181,20 +141,13 @@ public final class Tournament implements Serializable {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      prep = connection.prepareStatement("SELECT tournament_id, Location, NextTournament FROM Tournaments WHERE Name = ?");
+      prep = connection.prepareStatement("SELECT tournament_id, Location FROM Tournaments WHERE Name = ?");
       prep.setString(1, name);
       rs = prep.executeQuery();
       if (rs.next()) {
         final int id = rs.getInt(1);
         final String location = rs.getString(2);
-        final int nextID = rs.getInt(3);
-        final Integer next;
-        if (rs.wasNull()) {
-          next = null;
-        } else {
-          next = nextID;
-        }
-        return new Tournament(id, name, location, next);
+        return new Tournament(id, name, location);
       } else {
         return null;
       }
@@ -217,20 +170,13 @@ public final class Tournament implements Serializable {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      prep = connection.prepareStatement("SELECT Name, Location, NextTournament FROM Tournaments WHERE tournament_id = ?");
+      prep = connection.prepareStatement("SELECT Name, Location FROM Tournaments WHERE tournament_id = ?");
       prep.setInt(1, tournamentID);
       rs = prep.executeQuery();
       if (rs.next()) {
         final String name = rs.getString(1);
         final String location = rs.getString(2);
-        final int nextID = rs.getInt(3);
-        final Integer next;
-        if (rs.wasNull()) {
-          next = null;
-        } else {
-          next = nextID;
-        }
-        return new Tournament(tournamentID, name, location, next);
+        return new Tournament(tournamentID, name, location);
       } else {
         return null;
       }
