@@ -1,0 +1,54 @@
+digraph import_database {
+
+developer_index_jsp -> ImportDBDump [label="Import Database"];
+
+ImportDBDump -> selectTournament_jsp;
+
+ImportDBDump -> developer_index_jsp [label="Incompatible challenge descriptions"]
+
+selectTournament_jsp -> CheckTournamentExists;
+
+CheckTournamentExists -> promptCreateTournament_jsp;
+
+CheckTournamentExists -> FindMissingTeams [label="tournament found"];
+
+promptCreateTournament_jsp -> CreateTournament;
+
+CreateTournament -> selectTournament_jsp [label="Cancel create tournament or error creating tournament"];
+
+CreateTournament -> CheckTournamentExists;
+
+FindMissingTeams -> CheckTeamInfo;
+
+FindMissingTeams -> promptCreateMissingTeams_jsp [label="Found missing teams"];
+
+promptCreateMissingTeams_jsp -> AddMissingTeams;
+
+promptCreateMissingTeams_jsp -> selectTournament_jsp [label="Don't create teams"];
+
+AddMissingTeams -> CheckTeamInfo;
+
+CheckTeamInfo -> ExecuteImport;
+
+CheckTeamInfo -> resolveTeamInfoDifferences_jsp [label="Found differences"];
+
+resolveTeamInfoDifferences_jsp -> CommitTeamChanges;
+
+resolveTeamInfoDifferences_jsp -> selectTournament_jsp [label="Cancel"];
+
+CommitTeamChanges -> CheckTeamInfo;
+
+CheckTournamentTeams -> resolveTournamentDifferences_jsp [label="Found differences"];
+
+CheckTournamentTeams -> ExecuteImport;
+
+resolveTournamentDifferences_jsp -> CommitTournamentChanges;
+
+resolveTournamentDifferences_jsp -> selectTournament_jsp [label="Cancel"];
+
+CommitTournamentChanges -> CheckTournamentTeams;
+
+ExecuteImport -> selectTournament_jsp;
+
+
+}
