@@ -31,10 +31,6 @@ import java.util.zip.ZipInputStream;
 
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.io.IOUtils;
-import net.mtu.eggplant.util.ComparisonUtils;
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -48,13 +44,15 @@ import fll.db.TeamPropertyDifference.TeamProperty;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.developer.importdb.ImportDBDump;
-import fll.web.developer.importdb.TournamentDifference;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreCategory;
 import fll.xml.XMLUtils;
+import net.mtu.eggplant.io.IOUtils;
+import net.mtu.eggplant.util.ComparisonUtils;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * database, otherwise need to map... Import scores from a tournament database
@@ -1819,85 +1817,9 @@ public final class ImportDB {
       differencesFound = true;
     }
 
-    // check tournament teams
-    final List<TournamentDifference> tournamentDifferences = computeMissingFromTournamentTeams(sourceConnection,
-                                                                                               destConnection,
-                                                                                               tournament);
-    if (!tournamentDifferences.isEmpty()) {
-      differencesFound = true;
-      for (final TournamentDifference diff : tournamentDifferences) {
-        LOG.error(String.format("%d is in tournament %s in the source database and tournament %s in the dest database",
-                                diff.getTeamNumber(), diff.getSourceTournament(), diff.getDestTournament()));
-      }
-    }
-
     // TODO issue:116 check documents
 
     return differencesFound;
-  }
-
-  /**
-   * Compute the teams that are missing from TournamenTeams between the two
-   * databases.
-   * 
-   * @param sourceConnection
-   * @param destConnection
-   * @param tournament
-   * @return the differences
-   * @throws SQLException
-   */
-  public static List<TournamentDifference> computeMissingFromTournamentTeams(final Connection sourceConnection,
-                                                                             final Connection destConnection,
-                                                                             final String tournament)
-      throws SQLException {
-    final Set<Integer> sourceMissing = new HashSet<Integer>();
-    final Set<Integer> destMissing = new HashSet<Integer>();
-
-    // check that tournament teams is the same for both databases
-    final Set<Integer> sourceTeams = getTournamentTeams(sourceConnection, tournament);
-    final Set<Integer> destTeams = getTournamentTeams(destConnection, tournament);
-
-    // diff the lists
-    destMissing.addAll(sourceTeams);
-    sourceMissing.addAll(destTeams);
-    destMissing.removeAll(destTeams);
-    sourceMissing.removeAll(sourceTeams);
-
-    final Set<Integer> differences = new HashSet<Integer>();
-    differences.addAll(sourceMissing);
-    differences.addAll(destMissing);
-    final List<TournamentDifference> tournamentDifferences = new LinkedList<TournamentDifference>();
-    for (final int teamNumber : differences) {
-      final int sourceTournament = Queries.getTeamCurrentTournament(sourceConnection, teamNumber);
-      final String sourceName = Tournament.findTournamentByID(sourceConnection, sourceTournament).getName();
-      final int destTournament = Queries.getTeamCurrentTournament(destConnection, teamNumber);
-      final String destName = Tournament.findTournamentByID(destConnection, destTournament).getName();
-      tournamentDifferences.add(new TournamentDifference(teamNumber, sourceName, destName));
-    }
-    return tournamentDifferences;
-  }
-
-  private static Set<Integer> getTournamentTeams(final Connection connection,
-                                                 final String tournament) throws SQLException {
-    final Set<Integer> teams = new HashSet<Integer>();
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = connection.prepareStatement("SELECT TeamNumber" //
-          + " FROM TournamentTeams, Tournaments" //
-          + " WHERE TournamentTeams.Tournament = Tournaments.tournament_id"//
-          + " AND Tournaments.Name = ?");
-      prep.setString(1, tournament);
-      rs = prep.executeQuery();
-      while (rs.next()) {
-        final int teamNumber = rs.getInt(1);
-        teams.add(teamNumber);
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
-    return teams;
   }
 
   /**
