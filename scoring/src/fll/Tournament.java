@@ -20,6 +20,8 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import fll.db.GenerateDB;
 import fll.util.LogUtils;
 
@@ -32,10 +34,10 @@ public final class Tournament implements Serializable {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  private Tournament(final int tournamentID,
-                     final String name,
-                     final String location,
-                     final Integer nextTournamentId) {
+  private Tournament(@JsonProperty("tournamentID") final int tournamentID,
+                     @JsonProperty("name") final String name,
+                     @JsonProperty("location") final String location,
+                     @JsonProperty("nextTournament") final Integer nextTournamentId) {
     this.tournamentID = tournamentID;
     this.name = name;
     this.location = location;
@@ -259,7 +261,8 @@ public final class Tournament implements Serializable {
   // try {
   // stmt = connection.createStatement();
   // rs =
-  // stmt.executeQuery("SELECT Name, Location, NextTournament, tournament_id FROM Tournaments ORDER BY Name");
+  // stmt.executeQuery("SELECT Name, Location, NextTournament, tournament_id
+  // FROM Tournaments ORDER BY Name");
   // while(rs.next()) {
   // final String name = rs.getString(1);
   // final String location = rs.getString(2);
