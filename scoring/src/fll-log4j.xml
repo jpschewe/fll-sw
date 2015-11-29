@@ -42,8 +42,10 @@
  </logger>
 
  <!-- stuff for debugging -->
+ <!-- 
  <logger name="fll.web.IntegrationTestUtils"><level value="TRACE"/></logger>
- 
+  -->
+  
  <!-- database connection information -->
  <!-- logger name="database"><level value="TRACE"/></logger -->
 
