@@ -75,30 +75,7 @@ public final class Tournament implements Serializable {
       SQLFunctions.close(prep);
     }
   }
-
-  /**
-   * Set the next tournament for the specified tournament.
-   */
-  public static void setNextTournament(final Connection connection,
-                                       final String tournamentName,
-                                       final String nextName) throws SQLException {
-    PreparedStatement setNext = null;
-    try {
-      setNext = connection.prepareStatement("UPDATE Tournaments SET NextTournament = ? WHERE Name = ?");
-      setNext.setString(2, tournamentName);
-      if (null == nextName
-          || "".equals(nextName.trim())) {
-        setNext.setNull(1, Types.INTEGER);
-      } else {
-        final Tournament next = findTournamentByName(connection, nextName);
-        setNext.setInt(1, next.getTournamentID());
-      }
-      setNext.executeUpdate();
-    } finally {
-      SQLFunctions.close(setNext);
-    }
-  }
-
+  
   /**
    * Get a list of tournaments in the DB ordered by Name. This excludes the
    * internal tournament.
@@ -198,35 +175,6 @@ public final class Tournament implements Serializable {
   public int hashCode() {
     return getTournamentID();
   }
-
-  //
-  // public static Collection<Tournament> getAllTournaments(final Connection
-  // connection) throws SQLException {
-  // Statement stmt = null;
-  // ResultSet rs = null;
-  // try {
-  // stmt = connection.createStatement();
-  // rs =
-  // stmt.executeQuery("SELECT Name, Location, NextTournament, tournament_id
-  // FROM Tournaments ORDER BY Name");
-  // while(rs.next()) {
-  // final String name = rs.getString(1);
-  // final String location = rs.getString(2);
-  // final int next = rs.getInt(3);
-  // final String nextName;
-  // if (!rs.wasNull()) {
-  // nextName = Queries.getTournamentName(connection, next);
-  // } else {
-  // nextName = null;
-  // }
-  // final int tournamentID = rs.getInt(4);
-  // generateRow(out, row, tournamentID, name, location, nextName);
-  // }
-  // } finally {
-  // SQLFunctions.closeResultSet(rs);
-  // SQLFunctions.closeStatement(stmt);
-  // }
-  // }
 
   @Override
   public String toString() {
