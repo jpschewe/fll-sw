@@ -376,7 +376,6 @@ public final class ImportDB {
     final Map<String, String> tournaments = new HashMap<String, String>();
     tournaments.put("Name".toLowerCase(), "varchar(128)");
     tournaments.put("Location".toLowerCase(), "longvarchar");
-    tournaments.put("NextTournament".toLowerCase(), "varchar(128)");
     typeInfo.put("Tournaments".toLowerCase(), tournaments);
 
     final Map<String, String> teams = new HashMap<String, String>();
@@ -984,14 +983,12 @@ public final class ImportDB {
 
       // get all data from Tournaments table
       final Map<String, String> nameLocation = new HashMap<String, String>();
-      final Map<String, String> nameNext = new HashMap<String, String>();
-      rs = stmt.executeQuery("SELECT Name, Location, NextTournament FROM Tournaments");
+      rs = stmt.executeQuery("SELECT Name, Location FROM Tournaments");
       while (rs.next()) {
         final String name = rs.getString(1);
         final String location = rs.getString(2);
         final String nextName = rs.getString(3);
         nameLocation.put(name, location);
-        nameNext.put(name, nextName);
       }
       SQLFunctions.close(rs);
 
@@ -1010,17 +1007,6 @@ public final class ImportDB {
           }
         }
       }
-      // set next tournaments
-      for (final Map.Entry<String, String> entry : nameNext.entrySet()) {
-        if (!GenerateDB.INTERNAL_TOURNAMENT_NAME.equals(entry.getKey())) {
-          if (LOG.isDebugEnabled()) {
-            LOG.debug("Setting next tournament of #"
-                + entry.getKey() + "# to #" + entry.getValue() + "#");
-          }
-          Tournament.setNextTournament(connection, entry.getKey(), entry.getValue());
-        }
-      }
-
       // get map of names to ids
       final Map<String, Integer> nameID = new HashMap<String, Integer>();
       rs = stmt.executeQuery("SELECT Name, tournament_id FROM Tournaments");
