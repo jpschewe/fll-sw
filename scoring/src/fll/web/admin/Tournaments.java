@@ -7,9 +7,7 @@ package fll.web.admin;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,8 +22,6 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspWriter;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.log4j.Logger;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -36,6 +32,7 @@ import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Java code used in tournaments.jsp
@@ -91,9 +88,9 @@ public final class Tournaments {
       if (verified) {
         commitData(session, request, response, connection);
       } else {
-        out.println("<p><b>Tournament name's must be unique and next tournament must refer to the name of another tournament listed.  Tournaments can be removed by erasing the name.</b></p>");
+        out.println("<p><b>Tournament name's must be unique.  Tournaments can be removed by erasing the name.</b></p>");
 
-        out.println("<table border='1'><tr><th>Name</th><th>Location</th><th>Next Tournament</th></tr>");
+        out.println("<table border='1'><tr><th>Name</th><th>Location</th></tr>");
 
         int row = 0; // keep track of which row we're generating
 
@@ -103,15 +100,7 @@ public final class Tournaments {
           final Iterator<Tournament> tournaments = Tournament.getTournaments(connection).iterator();
           for (row = 0; tournaments.hasNext(); row++) {
             final Tournament tournament = tournaments.next();
-            final String nextName;
-            if (null != tournament.getNextTournament()) {
-              final Tournament next = Tournament.findTournamentByID(connection, tournament.getNextTournament());
-              nextName = next.getName();
-            } else {
-              nextName = null;
-            }
-            generateRow(out, row, tournament.getTournamentID(), tournament.getName(), tournament.getLocation(),
-                        nextName);
+            generateRow(out, row, tournament.getTournamentID(), tournament.getName(), tournament.getLocation());
           }
         } else {
           // need to walk the parameters to see what we've been passed
@@ -121,11 +110,9 @@ public final class Tournaments {
               + row);
           String location = request.getParameter("location"
               + row);
-          String nextName = request.getParameter("next"
-              + row);
           while (null != keyStr) {
             final int key = Integer.parseInt(keyStr);
-            generateRow(out, row, key, name, location, nextName);
+            generateRow(out, row, key, name, location);
 
             row++;
             keyStr = request.getParameter("key"
@@ -134,8 +121,6 @@ public final class Tournaments {
                 + row);
             location = request.getParameter("location"
                 + row);
-            nextName = request.getParameter("next"
-                + row);
           }
         }
 
@@ -143,7 +128,7 @@ public final class Tournaments {
         final int tableRows = Math.max(numRows, row);
 
         for (; row < tableRows; row++) {
-          generateRow(out, row, null, null, null, null);
+          generateRow(out, row, null, null, null);
         }
 
         out.println("</table>");
@@ -167,7 +152,6 @@ public final class Tournaments {
    * @param row the row being generated, used for naming form elements
    * @param name name of tournament, can be null
    * @param location location of tournament, can be null
-   * @param nextName next tournament after this one, can be null
    * @throws SQLException
    * @throws IllegalArgumentException
    */
@@ -175,8 +159,7 @@ public final class Tournaments {
                                   final int row,
                                   final Integer key,
                                   final String name,
-                                  final String location,
-                                  final String nextName) throws IOException, IllegalArgumentException, SQLException {
+                                  final String location) throws IOException, IllegalArgumentException, SQLException {
     out.println("<tr>");
 
     out.print("  <input type='hidden' name='key"
@@ -214,18 +197,6 @@ public final class Tournaments {
     }
     out.println(" size='64'></td>");
 
-    out.print("  <td><input type='text' name='next"
-        + row + "'");
-    if (null != nextName) {
-      out.print(" value='"
-          + nextName + "'");
-    }
-    if (GenerateDB.DUMMY_TOURNAMENT_NAME.equals(name)
-        || GenerateDB.DROP_TOURNAMENT_NAME.equals(name)) {
-      out.print(" readonly");
-    }
-    out.println(" size='16'></td>");
-
     out.println("</tr>");
   }
 
@@ -252,7 +223,9 @@ public final class Tournaments {
         if (!"".equals(name)) {
           if (tournamentNames.containsKey(name)) {
             out.println("<p><font color='red'>Row "
-                + (row + 1) + " contains duplicate name " + name + "</font></p>");
+                + (row
+                    + 1)
+                + " contains duplicate name " + name + "</font></p>");
             retval = false;
           } else {
             if ("".equals(next)) {
@@ -363,54 +336,13 @@ public final class Tournaments {
                                  final HttpServletResponse response,
                                  final Connection connection) throws SQLException, IOException {
     createAndInsertTournaments(request, connection);
-    setNextTournaments(request, connection);
 
     session.setAttribute(SessionAttributes.MESSAGE, "<p id='success'>Successfully committed tournament changes.</p>");
 
     // finally redirect to index.jsp
-    // out.println("DEBUG: normally you'd be redirected to <a href='index.jsp'>here</a>");
+    // out.println("DEBUG: normally you'd be redirected to <a
+    // href='index.jsp'>here</a>");
     response.sendRedirect(response.encodeRedirectURL("index.jsp"));
   }
 
-  private static void setNextTournaments(final HttpServletRequest request,
-                                         final Connection connection) throws SQLException {
-    PreparedStatement setNextPrep = null;
-    try {
-      setNextPrep = connection.prepareStatement("UPDATE Tournaments SET NextTournament = ? WHERE tournament_id = ?");
-
-      int row = 0;
-      String keyStr = request.getParameter("key"
-          + row);
-      String name = request.getParameter("name"
-          + row);
-      String nextName = request.getParameter("next"
-          + row);
-      while (null != keyStr) {
-        if (null != name
-            && !"".equals(name)) {
-
-          final Tournament tournament = Tournament.findTournamentByName(connection, name);
-          setNextPrep.setInt(2, tournament.getTournamentID());
-          if (null != nextName
-              && !"".equals(nextName)) {
-            final Tournament nextTournament = Tournament.findTournamentByName(connection, nextName);
-            setNextPrep.setInt(1, nextTournament.getTournamentID());
-          } else {
-            setNextPrep.setNull(1, Types.INTEGER);
-          }
-          setNextPrep.executeUpdate();
-        }
-
-        row++;
-        keyStr = request.getParameter("key"
-            + row);
-        name = request.getParameter("name"
-            + row);
-        nextName = request.getParameter("next"
-            + row);
-      }
-    } finally {
-      SQLFunctions.close(setNextPrep);
-    }
-  }
 }

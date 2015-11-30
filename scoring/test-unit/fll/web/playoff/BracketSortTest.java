@@ -72,12 +72,14 @@ public class BracketSortTest {
       connection = DriverManager.getConnection("jdbc:hsqldb:mem:flldb-testAlphaTeam");
       GenerateDB.generateDB(document, connection);
 
+      final int tournament = Queries.getCurrentTournament(connection);
+      
       // put some teams in the database
       // final Map<Integer, Team> tournamentTeams = new HashMap<Integer,
       // Team>();
       for (int i = 0; i < teamNames.length; ++i) {
         final String otherTeam = Queries.addTeam(connection, teamNames.length
-            - i, teamNames[i], null, divisionStr);
+            - i, teamNames[i], null, divisionStr, tournament);
         Assert.assertNull(otherTeam);
         // final Team team = new Team();
         // team.setDivision(divisionStr);

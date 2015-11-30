@@ -57,7 +57,7 @@ public class CheckTeamInfo extends BaseFLLServlet {
 
       final List<TeamPropertyDifference> teamDifferences = ImportDB.checkTeamInfo(sourceConnection, destConnection, tournament);
       if(teamDifferences.isEmpty()) {
-        session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTournamentTeams");
+        session.setAttribute(SessionAttributes.REDIRECT_URL, "ExecuteImport");
       } else {
         session.setAttribute("teamDifferences", teamDifferences);
         session.setAttribute(SessionAttributes.REDIRECT_URL, "resolveTeamInfoDifferences.jsp");

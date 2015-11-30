@@ -1,3 +1,4 @@
+* 408 - Allows teams to be in multiple tournaments and no longer require a heirarchy of tournaments
 * 420 - Correctly limit tables during playoff brackets when the limit tables checkboxes are used
 
 Release 10.3
