@@ -300,7 +300,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     return scores;
   }
 
-  public final class PerformanceScoreReportPageEventHandler extends PdfPageEventHelper {
+  private static final class PerformanceScoreReportPageEventHandler extends PdfPageEventHelper {
     /**
      * @param headerFont font to use for the footer
      * @param reportTitle title of the report
