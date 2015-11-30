@@ -987,7 +987,6 @@ public final class ImportDB {
       while (rs.next()) {
         final String name = rs.getString(1);
         final String location = rs.getString(2);
-        final String nextName = rs.getString(3);
         nameLocation.put(name, location);
       }
       SQLFunctions.close(rs);
