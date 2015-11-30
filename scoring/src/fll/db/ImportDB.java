@@ -31,10 +31,6 @@ import java.util.zip.ZipInputStream;
 
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.io.IOUtils;
-import net.mtu.eggplant.util.ComparisonUtils;
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -48,13 +44,15 @@ import fll.db.TeamPropertyDifference.TeamProperty;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.developer.importdb.ImportDBDump;
-import fll.web.developer.importdb.TournamentDifference;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreCategory;
 import fll.xml.XMLUtils;
+import net.mtu.eggplant.io.IOUtils;
+import net.mtu.eggplant.util.ComparisonUtils;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * database, otherwise need to map... Import scores from a tournament database
@@ -93,9 +91,12 @@ public final class ImportDB {
             || args[1].charAt(0) == '\'') {
           substringStart = 1;
         }
-        if (args[1].charAt(substringEnd - 1) == '"'
-            || args[1].charAt(substringEnd - 1) == '\'') {
-          substringEnd = substringEnd - 1;
+        if (args[1].charAt(substringEnd
+            - 1) == '"'
+            || args[1].charAt(substringEnd
+                - 1) == '\'') {
+          substringEnd = substringEnd
+              - 1;
         }
         final String tournament = args[1].substring(substringStart, substringEnd);
         final String destinationURI = args[2];
@@ -225,7 +226,7 @@ public final class ImportDB {
       for (final Tournament sourceTournament : Tournament.getTournaments(memConnection)) {
         if (!GenerateDB.INTERNAL_TOURNAMENT_NAME.equals(sourceTournament.getName())
             && GenerateDB.INTERNAL_TOURNAMENT_ID != sourceTournament.getTournamentID()) {
-          createTournament(sourceTournament, memConnection, destConnection);
+          createTournament(sourceTournament, destConnection);
         }
       }
 
@@ -251,22 +252,12 @@ public final class ImportDB {
    * Recursively create a tournament and it's next tournament.
    */
   private static void createTournament(final Tournament sourceTournament,
-                                       final Connection sourceConnection,
                                        final Connection destConnection) throws SQLException {
     // add the tournament to the tournaments table if it doesn't already
     // exist
     final Tournament destTournament = Tournament.findTournamentByName(destConnection, sourceTournament.getName());
     if (null == destTournament) {
-      if (null == sourceTournament.getNextTournament()) {
-        Tournament.createTournament(destConnection, sourceTournament.getName(), sourceTournament.getLocation());
-      } else {
-        final Tournament sourceNext = Tournament.findTournamentByID(sourceConnection,
-                                                                    sourceTournament.getNextTournament());
-        createTournament(sourceNext, sourceConnection, destConnection);
-        final Tournament nextTournament = Tournament.findTournamentByName(destConnection, sourceNext.getName());
-        Tournament.createTournament(destConnection, sourceTournament.getName(), sourceTournament.getLocation(),
-                                    nextTournament.getTournamentID());
-      }
+      Tournament.createTournament(destConnection, sourceTournament.getName(), sourceTournament.getLocation());
     }
   }
 
@@ -385,7 +376,6 @@ public final class ImportDB {
     final Map<String, String> tournaments = new HashMap<String, String>();
     tournaments.put("Name".toLowerCase(), "varchar(128)");
     tournaments.put("Location".toLowerCase(), "longvarchar");
-    tournaments.put("NextTournament".toLowerCase(), "varchar(128)");
     typeInfo.put("Tournaments".toLowerCase(), tournaments);
 
     final Map<String, String> teams = new HashMap<String, String>();
@@ -491,8 +481,8 @@ public final class ImportDB {
    */
   private static void upgradeDatabase(final Connection connection,
                                       final Document challengeDocument,
-                                      final ChallengeDescription description) throws SQLException,
-      IllegalArgumentException {
+                                      final ChallengeDescription description)
+                                          throws SQLException, IllegalArgumentException {
     int dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 1) {
       upgrade0To1(connection, challengeDocument);
@@ -993,14 +983,11 @@ public final class ImportDB {
 
       // get all data from Tournaments table
       final Map<String, String> nameLocation = new HashMap<String, String>();
-      final Map<String, String> nameNext = new HashMap<String, String>();
-      rs = stmt.executeQuery("SELECT Name, Location, NextTournament FROM Tournaments");
+      rs = stmt.executeQuery("SELECT Name, Location FROM Tournaments");
       while (rs.next()) {
         final String name = rs.getString(1);
         final String location = rs.getString(2);
-        final String nextName = rs.getString(3);
         nameLocation.put(name, location);
-        nameNext.put(name, nextName);
       }
       SQLFunctions.close(rs);
 
@@ -1019,17 +1006,6 @@ public final class ImportDB {
           }
         }
       }
-      // set next tournaments
-      for (final Map.Entry<String, String> entry : nameNext.entrySet()) {
-        if (!GenerateDB.INTERNAL_TOURNAMENT_NAME.equals(entry.getKey())) {
-          if (LOG.isDebugEnabled()) {
-            LOG.debug("Setting next tournament of #"
-                + entry.getKey() + "# to #" + entry.getValue() + "#");
-          }
-          Tournament.setNextTournament(connection, entry.getKey(), entry.getValue());
-        }
-      }
-
       // get map of names to ids
       final Map<String, Integer> nameID = new HashMap<String, Integer>();
       rs = stmt.executeQuery("SELECT Name, tournament_id FROM Tournaments");
@@ -1191,7 +1167,8 @@ public final class ImportDB {
           if ("".equals(sourceObj)) {
             sourceObj = null;
           }
-          destPrep.setObject(i + 1, sourceObj);
+          destPrep.setObject(i
+              + 1, sourceObj);
         }
         destPrep.executeUpdate();
       }
@@ -1216,7 +1193,8 @@ public final class ImportDB {
           if ("".equals(sourceObj)) {
             sourceObj = null;
           }
-          destPrep.setObject(i + 1, sourceObj);
+          destPrep.setObject(i
+              + 1, sourceObj);
         }
         destPrep.executeUpdate();
       }
@@ -1241,7 +1219,8 @@ public final class ImportDB {
           if ("".equals(sourceObj)) {
             sourceObj = null;
           }
-          destPrep.setObject(i + 1, sourceObj);
+          destPrep.setObject(i
+              + 1, sourceObj);
         }
         destPrep.executeUpdate();
       }
@@ -1291,7 +1270,8 @@ public final class ImportDB {
           if ("".equals(sourceObj)) {
             sourceObj = null;
           }
-          destPrep.setObject(i + 1, sourceObj);
+          destPrep.setObject(i
+              + 1, sourceObj);
         }
         destPrep.executeUpdate();
       }
@@ -1332,7 +1312,8 @@ public final class ImportDB {
           if ("".equals(sourceObj)) {
             sourceObj = null;
           }
-          destPrep.setObject(i + 1, sourceObj);
+          destPrep.setObject(i
+              + 1, sourceObj);
         }
         destPrep.executeUpdate();
       }
@@ -1372,7 +1353,8 @@ public final class ImportDB {
           if ("".equals(sourceObj)) {
             sourceObj = null;
           }
-          destPrep.setObject(i + 1, sourceObj);
+          destPrep.setObject(i
+              + 1, sourceObj);
         }
         destPrep.executeUpdate();
       }
@@ -1412,7 +1394,8 @@ public final class ImportDB {
           if ("".equals(sourceObj)) {
             sourceObj = null;
           }
-          destPrep.setObject(i + 1, sourceObj);
+          destPrep.setObject(i
+              + 1, sourceObj);
         }
         destPrep.executeUpdate();
       }
@@ -1518,11 +1501,13 @@ public final class ImportDB {
       while (sourceRS.next()) {
         // skip tournament column
         for (int i = 1; i < numColumns; i++) {
-          Object sourceObj = sourceRS.getObject(i + 1);
+          Object sourceObj = sourceRS.getObject(i
+              + 1);
           if ("".equals(sourceObj)) {
             sourceObj = null;
           }
-          destPrep.setObject(i + 1, sourceObj);
+          destPrep.setObject(i
+              + 1, sourceObj);
         }
         destPrep.executeUpdate();
       }
@@ -1819,85 +1804,9 @@ public final class ImportDB {
       differencesFound = true;
     }
 
-    // check tournament teams
-    final List<TournamentDifference> tournamentDifferences = computeMissingFromTournamentTeams(sourceConnection,
-                                                                                               destConnection,
-                                                                                               tournament);
-    if (!tournamentDifferences.isEmpty()) {
-      differencesFound = true;
-      for (final TournamentDifference diff : tournamentDifferences) {
-        LOG.error(String.format("%d is in tournament %s in the source database and tournament %s in the dest database",
-                                diff.getTeamNumber(), diff.getSourceTournament(), diff.getDestTournament()));
-      }
-    }
-
     // TODO issue:116 check documents
 
     return differencesFound;
-  }
-
-  /**
-   * Compute the teams that are missing from TournamenTeams between the two
-   * databases.
-   * 
-   * @param sourceConnection
-   * @param destConnection
-   * @param tournament
-   * @return the differences
-   * @throws SQLException
-   */
-  public static List<TournamentDifference> computeMissingFromTournamentTeams(final Connection sourceConnection,
-                                                                             final Connection destConnection,
-                                                                             final String tournament)
-      throws SQLException {
-    final Set<Integer> sourceMissing = new HashSet<Integer>();
-    final Set<Integer> destMissing = new HashSet<Integer>();
-
-    // check that tournament teams is the same for both databases
-    final Set<Integer> sourceTeams = getTournamentTeams(sourceConnection, tournament);
-    final Set<Integer> destTeams = getTournamentTeams(destConnection, tournament);
-
-    // diff the lists
-    destMissing.addAll(sourceTeams);
-    sourceMissing.addAll(destTeams);
-    destMissing.removeAll(destTeams);
-    sourceMissing.removeAll(sourceTeams);
-
-    final Set<Integer> differences = new HashSet<Integer>();
-    differences.addAll(sourceMissing);
-    differences.addAll(destMissing);
-    final List<TournamentDifference> tournamentDifferences = new LinkedList<TournamentDifference>();
-    for (final int teamNumber : differences) {
-      final int sourceTournament = Queries.getTeamCurrentTournament(sourceConnection, teamNumber);
-      final String sourceName = Tournament.findTournamentByID(sourceConnection, sourceTournament).getName();
-      final int destTournament = Queries.getTeamCurrentTournament(destConnection, teamNumber);
-      final String destName = Tournament.findTournamentByID(destConnection, destTournament).getName();
-      tournamentDifferences.add(new TournamentDifference(teamNumber, sourceName, destName));
-    }
-    return tournamentDifferences;
-  }
-
-  private static Set<Integer> getTournamentTeams(final Connection connection,
-                                                 final String tournament) throws SQLException {
-    final Set<Integer> teams = new HashSet<Integer>();
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = connection.prepareStatement("SELECT TeamNumber" //
-          + " FROM TournamentTeams, Tournaments" //
-          + " WHERE TournamentTeams.Tournament = Tournaments.tournament_id"//
-          + " AND Tournaments.Name = ?");
-      prep.setString(1, tournament);
-      rs = prep.executeQuery();
-      while (rs.next()) {
-        final int teamNumber = rs.getInt(1);
-        teams.add(teamNumber);
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
-    return teams;
   }
 
   /**
@@ -1921,8 +1830,7 @@ public final class ImportDB {
           + " FROM Teams" + " WHERE Teams.TeamNumber = ?");
 
       sourcePrep = sourceConnection.prepareStatement("SELECT Teams.TeamNumber, Teams.TeamName, Teams.Division, Teams.Organization"
-          + " FROM Teams, TournamentTeams, Tournaments"
-          + " WHERE Teams.TeamNumber = TournamentTeams.TeamNumber"
+          + " FROM Teams, TournamentTeams, Tournaments" + " WHERE Teams.TeamNumber = TournamentTeams.TeamNumber"
           + " AND TournamentTeams.Tournament = Tournaments.tournament_id" //
           + " AND Tournaments.Name = ?");
 
@@ -1942,7 +1850,8 @@ public final class ImportDB {
           }
           final String destDivision = destRS.getString(2);
           if (!ComparisonUtils.safeEquals(destDivision, sourceDivision)) {
-            differences.add(new TeamPropertyDifference(teamNumber, TeamProperty.DIVISION, sourceDivision, destDivision));
+            differences.add(new TeamPropertyDifference(teamNumber, TeamProperty.DIVISION, sourceDivision,
+                                                       destDivision));
           }
           final String destOrganization = destRS.getString(3);
           if (!ComparisonUtils.safeEquals(destOrganization, sourceOrganization)) {

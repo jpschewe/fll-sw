@@ -6,11 +6,19 @@
 
 package fll.web;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
@@ -26,9 +34,13 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.Select;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import fll.TestUtils;
+import fll.Tournament;
 import fll.util.FLLInternalException;
 import fll.util.LogUtils;
+import fll.web.api.TournamentsServlet;
 import fll.xml.BracketSortType;
 
 /**
@@ -286,6 +298,71 @@ public final class IntegrationTestUtils {
     submitElement.click();
   }
 
+  private static String readAll(final Reader rd) throws IOException {
+    StringBuilder sb = new StringBuilder();
+    int cp;
+    while ((cp = rd.read()) != -1) {
+      sb.append((char) cp);
+    }
+    return sb.toString();
+  }
+
+  private static String readJSON(final String url) throws MalformedURLException, IOException {
+    InputStream is = new URL(url).openStream();
+    try {
+      final BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+      final String jsonText = readAll(rd);
+      return jsonText;
+    } finally {
+      is.close();
+    }
+  }
+
+  /**
+   * Find a tournament by name using the JSON API.
+   * 
+   * @param selenium web interface
+   * @param tournamentName name of tournament
+   * @return the tournament or null if not found
+   */
+  public static Tournament getTournamentByName(final WebDriver selenium,
+                                               final String tournamentName) throws IOException {
+    try {
+      final String json = readJSON(TestUtils.URL_ROOT
+          + "api/Tournaments");
+
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Tournaments json: "
+            + json);
+      }
+
+      // get the JSON
+      final ObjectMapper jsonMapper = new ObjectMapper();
+      final Reader reader = new StringReader(json);
+
+      final Collection<Tournament> tournaments = jsonMapper.readValue(reader,
+                                                                      TournamentsServlet.TournamentsTypeInformation.INSTANCE);
+
+      for (final Tournament tournament : tournaments) {
+        if (tournament.getName().equals(tournamentName)) {
+          return tournament;
+        }
+      }
+
+      return null;
+
+    } catch (final AssertionError e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final RuntimeException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final IOException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    }
+  }
+
   /**
    * Add a team to a tournament.
    */
@@ -294,8 +371,10 @@ public final class IntegrationTestUtils {
                              final String teamName,
                              final String organization,
                              final String division,
-                             final String tournament) throws IOException {
+                             final String tournamentName) throws IOException {
     try {
+      final Tournament tournament = getTournamentByName(selenium, tournamentName);
+
       loadPage(selenium, TestUtils.URL_ROOT
           + "admin/index.jsp");
 
@@ -307,19 +386,8 @@ public final class IntegrationTestUtils {
       selenium.findElement(By.id("division_text_choice")).click();
       selenium.findElement(By.name("division_text")).sendKeys(division);
 
-      final WebElement currentTournament = selenium.findElement(By.id("currentTournamentSelect"));
-      final Select currentTournamentSel = new Select(currentTournament);
-      String tournamentID = null;
-      for (final WebElement option : currentTournamentSel.getOptions()) {
-        final String text = option.getText();
-        if (text.equals(tournament)) {
-          tournamentID = option.getAttribute("value");
-        }
-      }
-      Assert.assertNotNull("Could not find tournament with name: "
-          + tournament, tournamentID);
-
-      currentTournamentSel.selectByValue(tournamentID);
+      selenium.findElement(By.id("tournament_"
+          + tournament.getTournamentID())).click();
 
       selenium.findElement(By.name("commit")).click();
 

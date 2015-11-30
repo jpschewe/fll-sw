@@ -39,7 +39,7 @@ ${message}
 <%-- clear out the message, so that we don't see it again --%>
 <c:remove var="message" />
   
-    <form action="GatherTeamData" method="POST" name="selectTeam">
+    <form action="editTeam.jsp" method="POST" name="selectTeam">
       <!-- top info bar -->
       <table width="100%" border="0" cellpadding="0" cellspacing="0">
         <tr>

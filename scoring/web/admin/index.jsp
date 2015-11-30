@@ -1,8 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%
-  fll.web.admin.AdminIndex.populateContext(application, session,
-					pageContext);
+  fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
 %>
 
 <html>
@@ -13,12 +12,12 @@
   type="text/css"
   href="<c:url value='/style/style.jsp'/>" />
 <script type="text/javascript">
-	function display(id) {
-		document.getElementById(id).style.display = "block";
-	}
-	function hide(id) {
-		document.getElementById(id).style.display = "none";
-	}
+  function display(id) {
+    document.getElementById(id).style.display = "block";
+  }
+  function hide(id) {
+    document.getElementById(id).style.display = "none";
+  }
 </script>
 </head>
 
@@ -83,9 +82,7 @@
         class='help'
         style='display: none'>
         This is an optional step. Use this page to modify the
-        tournaments created by team import step above, to assign
-        tournament advancement (e.g. teams may advance from regional
-        tournaments to the state tournament), or to create new
+        tournaments created by team import step above, or to create new
         tournaments.<br> <a
           href='javascript:hide("EditTournamentHelp")'>[hide]</a>
       </div></li>
@@ -215,13 +212,7 @@
 
 
 
-    <c:if test="${not playoffsInitialized}">
-      <li><a
-        href='<c:url value="GatherTeamData">
-                     <c:param name="addTeam" value="1"/>
-                   </c:url>'>Add
-          a team</a></li>
-    </c:if>
+    <li><a href='editTeam.jsp'>Add a team</a></li>
 
 
     <li><a href='<c:url value="select_team.jsp"/>'>Edit team
@@ -287,17 +278,17 @@
 
     <li>
       <form
-        id='uploadAdvancingTeams'
+        id='uploadTeamTournamentAssignments'
         ACTION="<c:url value='/UploadSpreadsheet'/>"
         METHOD="POST"
         ENCTYPE="multipart/form-data">
-        Upload CSV or Excel of teams to advance <input
+        Upload CSV or Excel of teams and tournaments to assign them to <input
           type="file"
           size="32"
           name="file" /> <input
           type='hidden'
           name='uploadRedirect'
-          value="<c:url value='/admin/UploadAdvancingTeams'/>" /> <input
+          value="<c:url value='/admin/UploadTeamTournamentAssignments'/>" /> <input
           type="submit"
           value="Upload" />
       </form>

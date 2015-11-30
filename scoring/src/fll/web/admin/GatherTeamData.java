@@ -11,17 +11,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
-
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
@@ -31,36 +31,23 @@ import fll.Utilities;
 import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
-import fll.web.BaseFLLServlet;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
- * Gather information for editing or adding a team and put it in the session.
+ * Gather information for editing or adding a team and put it in the page
+ * context.
  */
-@WebServlet("/admin/GatherTeamData")
-public class GatherTeamData extends BaseFLLServlet {
+public class GatherTeamData {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  /**
-   * Key for team number in session when redirecting to pages for further
-   * editing. Value is an int.
-   */
-  public static final String TEAM_NUMBER = "teamNumber";
-
-  /**
-   * Key for checking if we're adding a team or not. Value is a boolean.
-   */
-  public static final String ADD_TEAM = "addTeam";
-
-  protected void processRequest(final HttpServletRequest request,
-                                final HttpServletResponse response,
-                                final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+  public static void populateContext(final HttpServletRequest request,
+                                     final ServletContext application,
+                                     final PageContext page) throws IOException, ServletException {
     if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("Top of GatherTeamData.doPost");
+      LOGGER.trace("Top of GatherTeamData.populateContext");
     }
 
-    final StringBuilder message = new StringBuilder();
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     try {
@@ -68,30 +55,70 @@ public class GatherTeamData extends BaseFLLServlet {
 
       // store map of tournaments in session
       final List<Tournament> tournaments = Tournament.getTournaments(connection);
-      session.setAttribute("tournaments", tournaments);
+      page.setAttribute("tournaments", tournaments);
 
-      session.setAttribute("divisions", Queries.getDivisions(connection));
+      final Map<Integer, Collection<String>> tournamentEventDivisions = new HashMap<>();
+      final Map<Integer, Collection<String>> tournamentJudgingStations = new HashMap<>();
+      final Map<Integer, Boolean> playoffsInitialized = new HashMap<>();
+      for (final Tournament tournament : tournaments) {
 
-      if ("1".equals(request.getParameter("addTeam"))) {
+        final Collection<String> allEventDivisions = Queries.getEventDivisions(connection,
+                                                                               tournament.getTournamentID());
+        if(allEventDivisions.isEmpty()) {
+          // special case for empty, always allow 1
+          allEventDivisions.add("1");
+        }
+        tournamentEventDivisions.put(tournament.getTournamentID(), allEventDivisions);
+
+        final Collection<String> allJudgingStations = Queries.getJudgingStations(connection,
+                                                                                 tournament.getTournamentID());
+        if(allJudgingStations.isEmpty()) {
+          // special case for empty, always allow 1
+          allJudgingStations.add("1");
+        }
+        tournamentJudgingStations.put(tournament.getTournamentID(), allJudgingStations);
+
+        playoffsInitialized.put(tournament.getTournamentID(),
+                                Queries.isPlayoffDataInitialized(connection, tournament.getTournamentID()));
+      }
+      page.setAttribute("tournamentEventDivisions", tournamentEventDivisions);
+      page.setAttribute("tournamentJudgingStations", tournamentJudgingStations);
+      page.setAttribute("playoffsInitialized", playoffsInitialized);
+
+      page.setAttribute("divisions", Queries.getDivisions(connection));
+
+      final String teamNumberStr = request.getParameter("teamNumber");
+
+      if (null == teamNumberStr) {
         // put blanks in for all values
-        session.setAttribute(ADD_TEAM, true);
-        session.setAttribute(TEAM_NUMBER, null);
-        session.setAttribute(CommitTeam.TEAM_NAME, null);
-        session.setAttribute(CommitTeam.ORGANIZATION, null);
-        session.setAttribute(CommitTeam.DIVISION, null);
-        session.setAttribute("teamPrevTournament", null);
-
-        final int tournamentID = Queries.getCurrentTournament(connection);
-        final Tournament currentTournament = Tournament.findTournamentByID(connection, tournamentID);
-        session.setAttribute("teamCurrentTournament", currentTournament);
-
-        session.setAttribute("playoffsInitialized",
-                             Queries.isPlayoffDataInitialized(connection, Queries.getCurrentTournament(connection)));
+        page.setAttribute("addTeam", true);
+        page.setAttribute("teamNumber", null);
+        page.setAttribute("teamName", null);
+        page.setAttribute("organization", null);
+        page.setAttribute("division", null);
+        page.setAttribute("teamInTouranemnt", Collections.emptyMap());
+        page.setAttribute("inPlayoffs", false);
+        page.setAttribute("currentEventDivisions", Collections.emptyMap());
+        page.setAttribute("currentJudgingStations", Collections.emptyMap());
       } else {
-        session.setAttribute(ADD_TEAM, false);
+        page.setAttribute("addTeam", false);
 
         // check parsing the team number to be sure that we fail right away
-        final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(request.getParameter("teamNumber")).intValue();
+        final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue();
+
+        // track current division and judging station for team so that it can be
+        // selected
+        final Map<Integer, String> currentEventDivisions = new HashMap<>();
+        final Map<Integer, String> currentJudgingStations = new HashMap<>();
+        for (final Tournament tournament : tournaments) {
+          final String eventDivision = Queries.getEventDivision(connection, teamNumber, tournament.getTournamentID());
+          currentEventDivisions.put(tournament.getTournamentID(), eventDivision);
+
+          final String judgingStation = Queries.getJudgingStation(connection, teamNumber, tournament.getTournamentID());
+          currentJudgingStations.put(tournament.getTournamentID(), judgingStation);
+        }
+        page.setAttribute("currentEventDivisions", currentEventDivisions);
+        page.setAttribute("currentJudgingStations", currentJudgingStations);
 
         // check if team is listed in any playoff data
         PreparedStatement prep = null;
@@ -104,7 +131,7 @@ public class GatherTeamData extends BaseFLLServlet {
           if (!rs.next()) {
             throw new RuntimeException("Query to obtain count of PlayoffData entries returned no data");
           } else {
-            session.setAttribute("inPlayoffs", rs.getInt(1) > 0);
+            page.setAttribute("inPlayoffs", rs.getInt(1) > 0);
           }
         } finally {
           SQLFunctions.close(rs);
@@ -112,26 +139,16 @@ public class GatherTeamData extends BaseFLLServlet {
         }
 
         // get the team information and put it in the session
-        session.setAttribute(TEAM_NUMBER, teamNumber);
+        page.setAttribute("teamNumber", teamNumber);
         final Team team = Team.getTeamFromDatabase(connection, teamNumber);
-        session.setAttribute(CommitTeam.TEAM_NAME, team.getTeamName());
-        session.setAttribute(CommitTeam.ORGANIZATION, team.getOrganization());
-        session.setAttribute(CommitTeam.DIVISION, team.getDivision());
-        final int teamCurrentTournamentID = Queries.getTeamCurrentTournament(connection, teamNumber);
-        final Tournament teamCurrentTournament = Tournament.findTournamentByID(connection, teamCurrentTournamentID);
-        final Integer teamPrevTournamentID = Queries.getTeamPrevTournament(connection, teamNumber,
-                                                                           teamCurrentTournamentID);
-        session.setAttribute("teamPrevTournament", teamPrevTournamentID);
-        session.setAttribute("teamCurrentTournament", teamCurrentTournament);
-
-        final String currentEventDivision = Queries.getEventDivision(connection, teamNumber, teamCurrentTournamentID);
-        if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("Checking if playoffs are initialized for tournament: "
-              + teamCurrentTournamentID + " division: " + currentEventDivision);
+        page.setAttribute("teamName", team.getTeamName());
+        page.setAttribute("organization", team.getOrganization());
+        page.setAttribute("division", team.getDivision());
+        final Map<Integer, Boolean> teamInTournament = new HashMap<>();
+        for (final Integer tid : Queries.getAllTournamentsForTeam(connection, teamNumber)) {
+          teamInTournament.put(tid, true);
         }
-        session.setAttribute("playoffsInitialized", Queries.isPlayoffDataInitialized(connection,
-                                                                                     teamCurrentTournamentID,
-                                                                                     currentEventDivision));
+        page.setAttribute("teamInTournament", teamInTournament);
       }
     } catch (final ParseException pe) {
       LOGGER.error("Error parsing team number, this is an internal error", pe);
@@ -144,13 +161,7 @@ public class GatherTeamData extends BaseFLLServlet {
     }
 
     if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("Bottom of GatherTeamData.doPost");
+      LOGGER.trace("Bottom of GatherTeamData.populateContext");
     }
-
-    if (message.length() > 0) {
-      session.setAttribute("message", message.toString());
-    }
-
-    response.sendRedirect(response.encodeRedirectURL("editTeam.jsp"));
   }
 }
