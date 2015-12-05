@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <fll
   title="2015 FIRST LEGO League - Trash Trek"
-  revision="8"
+  revision="8.1"
   schemaVersion="1">
 
   <Performance
     minimumScore="0"
-    weight="0">
+    weight="1">
 
     <goal
       initialValue="0"
