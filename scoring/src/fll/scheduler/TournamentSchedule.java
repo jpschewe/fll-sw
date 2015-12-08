@@ -64,7 +64,6 @@ import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
 
 import au.com.bytecode.opencsv.CSVWriter;
 import fll.Team;
@@ -1004,14 +1003,8 @@ public class TournamentSchedule implements Serializable {
     for (final ScoreCategory category : description.getSubjectiveCategories()) {
       final SheetElement sheetElement = createSubjectiveSheetElement(category);
 
-      // This document will be all of the subjective pdf sheets in a single
-      // file.
-      com.itextpdf.text.Document pdf = SubjectivePdfWriter.createStandardDocument();
-
-      PdfWriter.getInstance(pdf, new FileOutputStream(dir
-          + File.separator + baseFileName + "_SubjectiveSheets-" + category.getName() + ".pdf"));
-
-      pdf.open();
+      final String filename = dir
+          + File.separator + baseFileName + "_SubjectiveSheets-" + category.getName() + ".pdf";
 
       // sort the schedule by the category we're working with
       final String subjectiveStation = categoryToSchedule.get(category);
@@ -1019,33 +1012,11 @@ public class TournamentSchedule implements Serializable {
         Collections.sort(_schedule, getComparatorForSubjectiveByDivision(subjectiveStation));
       }
 
-      // Go through all of the team schedules and put them all into a pdf
-      for (final TeamScheduleInfo teamInfo : _schedule) {
-        writeTeamSubjectivePdf(sheetElement, pdf, teamInfo, categoryToSchedule);
-      }
+      final ScoreCategory scoreCategory = sheetElement.getSheetData();
+      final String schedulerColumn = categoryToSchedule.get(scoreCategory);
 
-      pdf.close();
+      SubjectivePdfWriter.createDocument(filename, sheetElement, schedulerColumn, _schedule);
     }
-  }
-
-  public static void writeTeamSubjectivePdf(final SheetElement sheet,
-                                            final Document doc,
-                                            final TeamScheduleInfo teamInfo,
-                                            final Map<ScoreCategory, String> categoryToSchedule)
-                                                throws MalformedURLException, IOException, DocumentException {
-    final ScoreCategory scoreCategory = sheet.getSheetData();
-    final String schedulerColumn = categoryToSchedule.get(scoreCategory);
-    final SubjectivePdfWriter writer = new SubjectivePdfWriter(sheet, schedulerColumn);
-    final PdfPTable table = writer.createStandardRubricTable();
-    writer.writeHeader(doc, teamInfo);
-    for (final String category : sheet.getCategories()) {
-      writer.writeRubricTable(table, sheet.getTableElement(category));
-      writer.writeCommentsSection(table);
-    }
-
-    doc.add(table);
-
-    writer.writeEndOfPageRow(doc);
   }
 
   public static SheetElement createSubjectiveSheetElement(final ScoreCategory sc) {

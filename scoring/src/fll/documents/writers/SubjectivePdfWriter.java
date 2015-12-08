@@ -1,5 +1,6 @@
 package fll.documents.writers;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -18,6 +19,7 @@ import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.documents.elements.RowElement;
 import fll.documents.elements.SheetElement;
@@ -108,6 +110,30 @@ public class SubjectivePdfWriter {
       break;
     }
 
+  }
+
+  /**
+   * Write out a subjective sheet for the specified team.
+   * 
+   * @param doc where to write to
+   * @param teamInfo the team information to use when writing
+   * @throws MalformedURLException
+   * @throws IOException
+   * @throws DocumentException
+   */
+  public void writeTeamSubjectivePdf(final Document doc,
+                                     final TeamScheduleInfo teamInfo)
+                                         throws MalformedURLException, IOException, DocumentException {
+    final PdfPTable table = createStandardRubricTable();
+    writeHeader(doc, teamInfo);
+    for (final String category : sheetElement.getCategories()) {
+      writeRubricTable(table, sheetElement.getTableElement(category));
+      writeCommentsSection(table);
+    }
+
+    doc.add(table);
+
+    writeEndOfPageRow(doc);
   }
 
   public void writeHeader(final Document doc,
@@ -379,6 +405,39 @@ public class SubjectivePdfWriter {
 
     // Robot Programming constants
     public static final String PROGRAMMING_NAME = "robot_programming";
+  }
+
+  /**
+   * Create the document
+   * 
+   * @param filename where to write the document
+   * @param sheetElement describes the category to write
+   * @param schedulerColumn used to determine the schedule information to output
+   * @param schedule the schedule to get team information and time information
+   *          from
+   * @throws DocumentException
+   * @throws IOException
+   * @throws MalformedURLException
+   */
+  public static void createDocument(final String filename,
+                                    final SheetElement sheetElement,
+                                    final String schedulerColumn,
+                                    final List<TeamScheduleInfo> schedule)
+                                        throws DocumentException, MalformedURLException, IOException {
+    com.itextpdf.text.Document pdf = SubjectivePdfWriter.createStandardDocument();
+
+    PdfWriter.getInstance(pdf, new FileOutputStream(filename));
+
+    pdf.open();
+
+    final SubjectivePdfWriter writer = new SubjectivePdfWriter(sheetElement, schedulerColumn);
+
+    // Go through all of the team schedules and put them all into a pdf
+    for (final TeamScheduleInfo teamInfo : schedule) {
+      writer.writeTeamSubjectivePdf(pdf, teamInfo);
+    }
+
+    pdf.close();
   }
 
 }
