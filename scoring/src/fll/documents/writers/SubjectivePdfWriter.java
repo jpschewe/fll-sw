@@ -1,9 +1,12 @@
 package fll.documents.writers;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -19,6 +22,7 @@ import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.documents.elements.RowElement;
@@ -29,13 +33,10 @@ import fll.scheduler.TournamentSchedule;
 import fll.util.LogUtils;
 import fll.xml.RubricRange;
 import fll.xml.ScoreCategory;
+import net.mtu.eggplant.util.Pair;
 
 public class SubjectivePdfWriter {
   private static final Logger LOGGER = LogUtils.getLogger();
-
-  private static Font COMMENTS_FONT = new Font(Font.FontFamily.HELVETICA, 7);
-
-  private static Font RUBRIC_FONT = COMMENTS_FONT;
 
   private static final String copyRightStatement = "2011 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST) and The LEGO Group. Used by special permission. All rights reserved.";
 
@@ -81,6 +82,11 @@ public class SubjectivePdfWriter {
 
   private final String scheduleColumn;
 
+  /**
+   * @param sheet information about the rubric
+   * @param scheduleColumn the column in the schedule used to find the times,
+   *          may be null
+   */
   public SubjectivePdfWriter(final SheetElement sheet,
                              final String scheduleColumn) {
     this.sheetElement = sheet;
@@ -117,18 +123,22 @@ public class SubjectivePdfWriter {
    * 
    * @param doc where to write to
    * @param teamInfo the team information to use when writing
+   * @param font the font to use for comments and the rubric
+   * @param number of rows to put in the comment section
    * @throws MalformedURLException
    * @throws IOException
    * @throws DocumentException
    */
   public void writeTeamSubjectivePdf(final Document doc,
-                                     final TeamScheduleInfo teamInfo)
+                                     final TeamScheduleInfo teamInfo,
+                                     final Font font,
+                                     final int commentHeight)
                                          throws MalformedURLException, IOException, DocumentException {
     final PdfPTable table = createStandardRubricTable();
     writeHeader(doc, teamInfo);
     for (final String category : sheetElement.getCategories()) {
-      writeRubricTable(table, sheetElement.getTableElement(category));
-      writeCommentsSection(table);
+      writeRubricTable(table, sheetElement.getTableElement(category), font);
+      writeCommentsSection(table, font, commentHeight);
     }
 
     doc.add(table);
@@ -136,9 +146,9 @@ public class SubjectivePdfWriter {
     writeEndOfPageRow(doc);
   }
 
-  public void writeHeader(final Document doc,
-                          final TeamScheduleInfo teamInfo)
-                              throws MalformedURLException, IOException, DocumentException {
+  private void writeHeader(final Document doc,
+                           final TeamScheduleInfo teamInfo)
+                               throws MalformedURLException, IOException, DocumentException {
     Image image = null;
     PdfPTable pageHeaderTable = null;
     PdfPTable columnTitlesTable = null;
@@ -172,10 +182,17 @@ public class SubjectivePdfWriter {
     pageHeaderTable.addCell(createCell(scoreCategory.getTitle(), f20b, NO_BORDERS, Element.ALIGN_LEFT));
     pageHeaderTable.addCell(createCell("Team Number: "
         + teamInfo.getTeamNumber(), f12b, NO_BORDERS, Element.ALIGN_LEFT));
+
+    final String scheduledTimeStr;
+    if (null == scheduleColumn) {
+      scheduledTimeStr = "N/A";
+    } else {
+      final Date scheduledTime = teamInfo.getSubjectiveTimeByName(scheduleColumn).getTime();
+      scheduledTimeStr = TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(scheduledTime);
+    }
     pageHeaderTable.addCell(createCell("Time: "
-        + TournamentSchedule.OUTPUT_DATE_FORMAT.get()
-                                               .format(teamInfo.getSubjectiveTimeByName(scheduleColumn).getTime()),
-                                       f12b, NO_BORDERS, Element.ALIGN_RIGHT));
+        + scheduledTimeStr, f12b, NO_BORDERS, Element.ALIGN_RIGHT));
+
     pageHeaderTable.addCell(createCell("Judging Room: "
         + teamInfo.getDivision(), f10b, NO_BORDERS, Element.ALIGN_LEFT));
     PdfPCell c = createCell("Team Name: "
@@ -258,11 +275,11 @@ public class SubjectivePdfWriter {
     return table;
   }
 
-  public void writeCommentsSection(PdfPTable table) {
+  private void writeCommentsSection(final PdfPTable table,
+                                    final Font font,
+                                    final int height) {
     PdfPCell commentLabel = null;
     PdfPCell emptySpace = null;
-    final int height = 1;
-    final Font font = COMMENTS_FONT;
 
     font.setStyle(Font.ITALIC);
     // This is the 'Comments' section at the bottom of every table for the judge
@@ -291,12 +308,12 @@ public class SubjectivePdfWriter {
     }
   }
 
-  public void writeRubricTable(final PdfPTable table,
-                               final TableElement tableData) {
+  private void writeRubricTable(final PdfPTable table,
+                                final TableElement tableData,
+                                final Font font) {
     PdfPCell focusArea = null;
     PdfPCell topicArea = null;
     PdfPCell topicInstructions = null;
-    final Font font = RUBRIC_FONT;
 
     // This is the 90 degree turned title for the left side of the table
     focusArea = createCell(tableData.getSubjectiveCatetory(), f8b, NO_TOP_LEFT);
@@ -407,6 +424,42 @@ public class SubjectivePdfWriter {
     public static final String PROGRAMMING_NAME = "robot_programming";
   }
 
+  private static Pair<Font, Integer> determineParameters(final SheetElement sheetElement)
+      throws MalformedURLException, IOException, DocumentException {
+
+    for (int pointSize = 12; pointSize >= 7; --pointSize) {
+      final Font font = new Font(Font.FontFamily.HELVETICA, pointSize);
+
+      com.itextpdf.text.Document pdf = SubjectivePdfWriter.createStandardDocument();
+
+      final ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+      PdfWriter.getInstance(pdf, out);
+
+      pdf.open();
+
+      final SubjectivePdfWriter writer = new SubjectivePdfWriter(sheetElement, null);
+
+      final TeamScheduleInfo teamInfo = new TeamScheduleInfo(1, 1);
+      teamInfo.setDivision("dummy");
+      teamInfo.setJudgingStation("Dummy");
+      teamInfo.setOrganization("Dummy");
+      teamInfo.setTeamName("Dummy");
+      writer.writeTeamSubjectivePdf(pdf, teamInfo, font, 2);
+
+      pdf.close();
+
+      final ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+      final PdfReader reader = new PdfReader(in);
+      if (reader.getNumberOfPages() == 1) {
+        return new Pair<>(font, 2);
+      }
+    }
+
+    // no font size fit, just use 10 with comment height 2
+    return new Pair<>(new Font(Font.FontFamily.HELVETICA, 10), 2);
+  }
+
   /**
    * Create the document
    * 
@@ -424,6 +477,11 @@ public class SubjectivePdfWriter {
                                     final String schedulerColumn,
                                     final List<TeamScheduleInfo> schedule)
                                         throws DocumentException, MalformedURLException, IOException {
+
+    final Pair<Font, Integer> parameters = determineParameters(sheetElement);
+    final Font font = parameters.getOne();
+    final int commentHeight = parameters.getTwo();
+
     com.itextpdf.text.Document pdf = SubjectivePdfWriter.createStandardDocument();
 
     PdfWriter.getInstance(pdf, new FileOutputStream(filename));
@@ -434,7 +492,7 @@ public class SubjectivePdfWriter {
 
     // Go through all of the team schedules and put them all into a pdf
     for (final TeamScheduleInfo teamInfo : schedule) {
-      writer.writeTeamSubjectivePdf(pdf, teamInfo);
+      writer.writeTeamSubjectivePdf(pdf, teamInfo, font, commentHeight);
     }
 
     pdf.close();
