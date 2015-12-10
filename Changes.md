@@ -1,8 +1,8 @@
-* 408 - Allows teams to be in multiple tournaments and no longer require a heirarchy of tournaments
-* 420 - Correctly limit tables during playoff brackets when the limit tables checkboxes are used
+* #408 - Allows teams to be in multiple tournaments and no longer require a heirarchy of tournaments
+* #420 - Correctly limit tables during playoff brackets when the limit tables checkboxes are used
 
 Release 10.3
-------------
+============
 * #416 - Disable auto capitalize and auto correct for the username on the login page
 * #418 - Add increment and decrement buttons to the score entry page for the max range
 * #413 - Add team information to the header of the performance score report
@@ -11,18 +11,18 @@ Release 10.3
 * #415 - Set background of scoreboard most recent scores title
 
 Release 10.2
-------------
+============
 * Fix error in 2015 challenge description where subjective areas didn't all have the same spelling causing an extra table to appear on the judging sheet
 * Fix crash in the subjective application when tabbing between elements
 * #409 - sort subjective sheets by schedule time
 
 Release 10.1
-------------
+============
 * #407 - open final computed scores in a new window
 * #406 - allow one to download the subjective data file without all judges assigned
 
 Release 10.0
-------------
+============
 * #394 - output subjective score sheets from the scheduler
 * #403 - Allow judges to be added from the subjective datafile.
 * #402 - Remove null subjective rows when uploading scores from the webapp 
@@ -41,7 +41,7 @@ Release 10.0
 * #377 - correctly identify Excel files by extension
 
 Release 9.7
------------
+============
 * 359 - table optimizer takes into account empty tables now as well
 * Sort team schedules by team number
 * 370 - Add organization to team schedule
@@ -50,12 +50,12 @@ Release 9.7
 * 367 - Properly display summary for judge assigned to 2 judging groups
 
 Release 9.6
------------
+============
 * 361 - correct problem finding java on unix systems without JAVA_HOME set
 * 358 - correct bug on the remote control page with named displays
 
 Release 9.5
------------
+============
 * 263 - Only allow connections from loopback interface to not require a password
 * 351 - Detect when the summarized scores are out of date
 * 114 - Add the ability to uninitialize a playoff division
@@ -72,7 +72,7 @@ Release 9.5
 * 346 - add link to non-scrolling playoffs from playoff index
 
 Release 9.4
------------
+============
 * 333 - redirect to authentication page from subjective app when not authenticated
 * 331 - sort no shows last in scores by judging station report
 * 336 - Modify writeup for what to do with ties
@@ -84,7 +84,7 @@ Release 9.4
 * 11 - remove extra jar files from application classpaths
 
 Release 9.3
------------
+============
 * 322 - Don't put No Show teams in the playoffs
 * Reworked some pages to make it clear what is needed at a regional vs. state tournament
 * 320 - make root tomcat application redirect to fll-sw
@@ -92,19 +92,19 @@ Release 9.3
 * 325 - make sure a judge is always specified in the subjective web application
 
 Release 9.2
------------
+============
 * 315 - fix playoff table assignment algorithm for initial data.
 * 318 - use a double for the total score on a no show, allows sorting on the total score column
 * 317 - format times with 2 digits in the subjective application
 
 Release 9.1
------------
+============
 * 305 - top page in subjective app now works offline
 * Upgrade to jquery mobile 1.4.5
 * 307 - Print warning instead of error if not all judges are assigned
 
 Release 9.0
------------
+============
 * Create specific exceptions for errors in challenge parsing
 * 301 - allow computed goals to depend on computed goals
 * 287 - schedule finalists by division rather than score group
@@ -136,36 +136,36 @@ Release 9.0
 * SF.169 - use CSS to trim team names
 
 Release 8.11
------------
+============
 * 34 - support creating schedules without any performance rounds
 
 Release 8.10
------------
+============
 * Add challenge description for Anoka 2014
 
 Release 8.9
------------
+============
 * Add HTML version of the subjective application
 * Add challenge description for REC 2014
 
 Release 8.8
------------
+============
 * 263 - Make it clear when specifying judging station vs. event division
 * 264 - Use the correct run number to check if a playoff round is verified before sending JSON back
 
 Release 8.7
------------
+============
 * Fix table assignment during playoffs to ensure we don't trivally repeat tables
 * Import playoff table limits
 
 Release 8.6
------------
+============
 * Properly sort no shows to the bottom of the list when computing rankings
 * Fix bug causing scores to not be displayed in playoff brackets when data from another tournament exists
 * Add back the ability to select which rounds to show on the scoresheet generation playoff brackets
 
 Release 8.5
------------
+============
 * Fix display remote control so that it shows which finalist schedule is up
 * Allow the public to see the public finalist schedule without username and password
 * 26 - put No Shows in the reports
@@ -175,7 +175,7 @@ Release 8.5
         it shows up in the task bar before a file is loaded.
 
 Release 8.4
------------
+============
 * 237 - Keep track of if allteams.jsp should scroll or not without using a session variable
 * 203 - Allow the user to limit which tables are used for the playoff brackets
 * 239 - add "label for" tag to enums, this allows one to click on the text next to an enum button
@@ -187,24 +187,24 @@ Release 8.4
 * g1 - Find challenge descriptors inside of OneJar file for SchedulerUI distribution
 
 Release 8.3
------------
+============
 * Make sure minimum performance score is respected for entries into the database and displays
 * Handle invalid scores properly in the subjective app
 * When printing the morning score sheets start count at round 1 rather than round 0
 
 Release 8.2
------------
+============
 * 232 - Allow one to run all scheduling from the SchedulerUI
 * 233 - cleanup temp files created by the table optimizer
 * 230 - add the ability to print out the morning score sheets from the
         SchedulerUI
 
 Release 8.1
------------
+============
 * minor rewording to 2013 challenge description
 
 Release 8.0
------------
+============
 * 189 - Add a form to the error handler page to gather bug
         reporting information
 * 20 - Allow one to modify the flip rate of the top 10 through a global
@@ -247,25 +247,25 @@ Release 8.0
   initialized to avoid issues with divisions and the playoffs.
 
 Release 7.7
------------
+============
 * Allow schedules to be in 12 hour or 24 hour format. All schedules are
   output in 12 hour format.
 * Added support for generating a schedule for an odd number of teams
   with an odd number of performance rounds
 
 Release 7.6
------------
+============
 * Fix bug where scoresheets wouldn't print due to incorrect error
      checking
 
 Release 7.5
------------
+============
 * 164 - Add report for winners of the playoff brackets
 * 177 - Give a more reasonable error message when an XML document fails to parse
 * 188 - Display a reasonable error message to the user when no score sheets are selected to print
 
 Release 7.4
----------
+============
 * 167 - Use AJAX push for changing display pages quickly
 
 * 187 - Use AJAX polling for updating the display pages and handling network
@@ -293,7 +293,7 @@ Release 7.4
   an advanced admin option
 
 Release 7.3
----------
+============
 * 173 - allow the schedule tables to have teams that aren't in the current
   tournament for cases when teams move tournaments and a new schedule isn't
   uploaded.
@@ -304,7 +304,7 @@ Release 7.3
 * 172 - Handle deleted scores in the subjective score file on upload
 
 Release 7.1
----------
+============
 * 161 - Make sure that score page text can be set
 
 * 162 - Handle no show's in the subjective upload with the new subjective
@@ -316,7 +316,7 @@ Release 7.1
   database
 
 Release 7.0
----------
+============
 * Debug importing a database into a current database and make sure that creating a tournament works.
 
 * 27 - track the number of teams per judge by assigning teams to judging stations
@@ -327,7 +327,7 @@ Release 7.0
 
 
 Release 3.0
----------
+============
 * Restrictions are now checked on the client side instead of by the server and sending users back to the score entry page on an error.
 
 * Added support for computed goals.
@@ -380,11 +380,11 @@ Release 2.10
 * Set path in setenv.bat (1605786)
 
 Release 2.9
----------
+============
 * fixed compilation error in remoteControl.jsp and added unit test to watch for it
 
 Release 2.8
----------
+============
 * fixed categorized score report to show by division (1599044)
 
 * Remote control for the scoreboard now uses all divisions to determine how many rounds are possible (1599039)
@@ -392,7 +392,7 @@ Release 2.8
 * PDF reports now show all raw scores, just like the HTML reports (1599786)
 
 Release 2.7
----------
+============
 * Added the ability for tiebreakers to have sums (and coefficients on the goals)
 
 * added help text to the admin pages
@@ -400,7 +400,7 @@ Release 2.7
 * added underscores to the front of the goal titles in the PDF scoresheet to allow the refs to check them off
 
 Release 2.6
----------
+============
 * include Sun's JDK for Linux and Windows distributions so that Java doesn't need to be installed
 
 * Switched databases from MySQL to HSQL to make installation easier.  Now the only thing that needs to be installed for the software to run is Java.
