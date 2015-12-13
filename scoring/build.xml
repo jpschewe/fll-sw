@@ -519,7 +519,7 @@
         <include name="LICENSE" />
       </fileset>
     </copy>
-    <copy todir="${dir.dist}/docs" file="Changes.txt" />
+    <copy todir="${dir.dist}/docs" file="${basedir}/../Changes.md" />
 
     <!-- copy reports -->
     <mkdir dir="${dir.dist}/docs/reports" />
