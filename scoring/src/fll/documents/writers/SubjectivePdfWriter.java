@@ -38,7 +38,7 @@ import net.mtu.eggplant.util.Pair;
 public class SubjectivePdfWriter {
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  private static final String copyRightStatement = "2011 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST) and The LEGO Group. Used by special permission. All rights reserved.";
+  private static final String copyRightStatement = "2015 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST&#169;) and The LEGO Group. Used by special permission. All rights reserved.";
 
   private final static int NO_BORDERS = 0;
 
@@ -56,11 +56,11 @@ public class SubjectivePdfWriter {
 
   private static final int[] colWidths = { 4, 4, 23, 23, 23, 23 };
 
-  private static final BaseColor rowBlue = new BaseColor(0xB2, 0xCB, 0xE3);
+  private static final BaseColor rowBlue = new BaseColor(0xB4, 0xCD, 0xED);
 
-  private static final BaseColor rowYellow = new BaseColor(0xEE, 0xF1, 0x97);
+  private static final BaseColor rowYellow = new BaseColor(0xFF, 0xFF, 0xC8);
 
-  private static final BaseColor rowRed = new BaseColor(0xE6, 0xA7, 0xA7);
+  private static final BaseColor rowRed = new BaseColor(0xF7, 0x98, 0x85);
 
   private final Font f6i;
 
@@ -277,15 +277,16 @@ public class SubjectivePdfWriter {
   }
 
   private void writeCommentsSection(final PdfPTable table,
-                                    final Font font,
+                                    final Font baseFont,
                                     final int height) {
     PdfPCell commentLabel = null;
     PdfPCell emptySpace = null;
 
+    Font font = new Font(baseFont);
     font.setStyle(Font.ITALIC);
     // This is the 'Comments' section at the bottom of every table for the judge
     // to write in
-    commentLabel = createCell("Comments", font, NO_BORDERS);
+    commentLabel = createCell("Comments:", font, NO_BORDERS);
     commentLabel.setRotation(90);
     commentLabel.setRowspan(1);
     commentLabel.setBorderWidthLeft(0);
@@ -436,7 +437,7 @@ public class SubjectivePdfWriter {
       throws MalformedURLException, IOException, DocumentException {
 
     for (int pointSize = 12; pointSize >= 7; --pointSize) {
-      final Font font = new Font(Font.FontFamily.HELVETICA, pointSize);
+      final Font font = new Font(Font.FontFamily.HELVETICA, pointSize, Font.NORMAL);
 
       com.itextpdf.text.Document pdf = SubjectivePdfWriter.createStandardDocument();
 
@@ -465,7 +466,7 @@ public class SubjectivePdfWriter {
     }
 
     // no font size fit, just use 10 with comment height 2
-    return new Pair<>(new Font(Font.FontFamily.HELVETICA, 10), 2);
+    return new Pair<>(new Font(Font.FontFamily.HELVETICA, 10, Font.NORMAL), 2);
   }
 
   /**
