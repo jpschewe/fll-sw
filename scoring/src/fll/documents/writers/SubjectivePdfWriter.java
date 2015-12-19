@@ -104,7 +104,7 @@ public class SubjectivePdfWriter {
     // to red.
     switch (scoreCategory.getName()) {
     case SubjectiveConstants.CORE_VALUES_NAME:
-      sheetColor = rowBlue;
+      sheetColor = rowRed;
       break;
     case SubjectiveConstants.PROJECT_NAME:
       sheetColor = rowYellow;
@@ -112,7 +112,7 @@ public class SubjectivePdfWriter {
     case SubjectiveConstants.ROBOT_DESIGN_NAME:
     case SubjectiveConstants.PROGRAMMING_NAME:
     default:
-      sheetColor = rowRed;
+      sheetColor = rowBlue;
       break;
     }
 
@@ -204,7 +204,8 @@ public class SubjectivePdfWriter {
     // add the instructions to the header
     dirText = "Directions: For each skill area, clearly mark the box that best describes the team's accomplishments.  "
         + "If the team does not demonstrate skill in a particular area, then put an 'X' in the first box for Not Demonstrated (ND).  "
-        + "Please provide as many written comments as you can to acknowledge each teams's hard work and to help teams improve.";
+        + "Please provide as many written comments as you can to acknowledge each teams's hard work and to help teams improve. "
+        + "When you have completed the evaluation, please circle the team's areas of strength.";
     text = new Phrase(dirText, f9b);
     directions = new Paragraph();
     directions.add(text);
@@ -424,6 +425,13 @@ public class SubjectivePdfWriter {
     public static final String PROGRAMMING_NAME = "robot_programming";
   }
 
+  /**
+   * @param sheetElement describes the subjective category to output
+   * @return Font to use and the number of rows for the comment sheet
+   * @throws MalformedURLException
+   * @throws IOException
+   * @throws DocumentException
+   */
   private static Pair<Font, Integer> determineParameters(final SheetElement sheetElement)
       throws MalformedURLException, IOException, DocumentException {
 
