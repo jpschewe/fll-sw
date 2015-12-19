@@ -38,7 +38,7 @@ import net.mtu.eggplant.util.Pair;
 public class SubjectivePdfWriter {
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  private static final String copyRightStatement = "2015 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST&#169;) and The LEGO Group. Used by special permission. All rights reserved.";
+  private static final String copyRightStatement = "2015 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST\u00ae) and The LEGO Group. Used by special permission. All rights reserved.";
 
   private final static int NO_BORDERS = 0;
 
@@ -62,17 +62,17 @@ public class SubjectivePdfWriter {
 
   private static final BaseColor rowRed = new BaseColor(0xF7, 0x98, 0x85);
 
-  private final Font f6i;
+  private final Font f6i = new Font(Font.FontFamily.HELVETICA, 6, Font.ITALIC);
 
-  private final Font f8b;
+  private final Font f8b = new Font(Font.FontFamily.HELVETICA, 8, Font.BOLD);
 
-  private final Font f9b;
+  private final Font f9b = new Font(Font.FontFamily.HELVETICA, 9, Font.BOLD);
 
-  private final Font f10b;
+  private final Font f10b = new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD);
 
-  private final Font f12b;
+  private final Font f12b = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
 
-  private final Font f20b;
+  private final Font f20b = new Font(Font.FontFamily.HELVETICA, 20, Font.BOLD);
 
   private final BaseColor sheetColor;
 
@@ -92,13 +92,6 @@ public class SubjectivePdfWriter {
     this.sheetElement = sheet;
     this.scoreCategory = sheetElement.getSheetData();
     this.scheduleColumn = scheduleColumn;
-
-    f6i = new Font(Font.FontFamily.HELVETICA, 6, Font.ITALIC);
-    f8b = new Font(Font.FontFamily.HELVETICA, 8, Font.BOLD);
-    f9b = new Font(Font.FontFamily.HELVETICA, 9, Font.BOLD);
-    f10b = new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD);
-    f12b = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
-    f20b = new Font(Font.FontFamily.HELVETICA, 20, Font.BOLD);
 
     // uses hard coded constants to make the folors look like FIRST and default
     // to red.
@@ -246,11 +239,17 @@ public class SubjectivePdfWriter {
     }
   }
 
-  public void writeEndOfPageRow(Document doc) throws DocumentException {
+  public void writeEndOfPageRow(final Document doc) throws DocumentException {
     PdfPTable closingTable = new PdfPTable(1);
 
     closingTable.setWidthPercentage(100f);
-    final PdfPCell bottomCell = createCell(" ", f6i, TOP_ONLY, sheetColor);
+    final StringBuilder strengths = new StringBuilder();
+    strengths.append("Strengths:");
+    for (final String category : sheetElement.getCategories()) {
+      strengths.append("            ");
+      strengths.append(category);
+    }
+    final PdfPCell bottomCell = createCell(strengths.toString(), f9b, TOP_ONLY, sheetColor);
     bottomCell.setMinimumHeight(18f);
     closingTable.addCell(bottomCell);
     closingTable.addCell(createCell(" ", f6i, NO_BORDERS));
@@ -436,37 +435,39 @@ public class SubjectivePdfWriter {
   private static Pair<Font, Integer> determineParameters(final SheetElement sheetElement)
       throws MalformedURLException, IOException, DocumentException {
 
-    for (int pointSize = 12; pointSize >= 7; --pointSize) {
-      final Font font = new Font(Font.FontFamily.HELVETICA, pointSize, Font.NORMAL);
+    for (int commentHeight = 2; commentHeight > 0; --commentHeight) {
+      for (int pointSize = 12; pointSize >= 6; --pointSize) {
+        final Font font = new Font(Font.FontFamily.HELVETICA, pointSize);
 
-      com.itextpdf.text.Document pdf = SubjectivePdfWriter.createStandardDocument();
+        com.itextpdf.text.Document pdf = SubjectivePdfWriter.createStandardDocument();
 
-      final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-      PdfWriter.getInstance(pdf, out);
+        PdfWriter.getInstance(pdf, out);
 
-      pdf.open();
+        pdf.open();
 
-      final SubjectivePdfWriter writer = new SubjectivePdfWriter(sheetElement, null);
+        final SubjectivePdfWriter writer = new SubjectivePdfWriter(sheetElement, null);
 
-      final TeamScheduleInfo teamInfo = new TeamScheduleInfo(1, 1);
-      teamInfo.setDivision("dummy");
-      teamInfo.setJudgingStation("Dummy");
-      teamInfo.setOrganization("Dummy");
-      teamInfo.setTeamName("Dummy");
-      writer.writeTeamSubjectivePdf(pdf, teamInfo, font, 2);
+        final TeamScheduleInfo teamInfo = new TeamScheduleInfo(1, 1);
+        teamInfo.setDivision("dummy");
+        teamInfo.setJudgingStation("Dummy");
+        teamInfo.setOrganization("Dummy");
+        teamInfo.setTeamName("Dummy");
+        writer.writeTeamSubjectivePdf(pdf, teamInfo, font, commentHeight);
 
-      pdf.close();
+        pdf.close();
 
-      final ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-      final PdfReader reader = new PdfReader(in);
-      if (reader.getNumberOfPages() == 1) {
-        return new Pair<>(font, 2);
-      }
-    }
+        final ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+        final PdfReader reader = new PdfReader(in);
+        if (reader.getNumberOfPages() == 1) {
+          return new Pair<>(font, commentHeight);
+        }
+      } // font size
+    } // comment height
 
     // no font size fit, just use 10 with comment height 2
-    return new Pair<>(new Font(Font.FontFamily.HELVETICA, 10, Font.NORMAL), 2);
+    return new Pair<>(new Font(Font.FontFamily.HELVETICA, 10), 2);
   }
 
   /**
