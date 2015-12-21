@@ -31,6 +31,7 @@ import fll.documents.elements.TableElement;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.util.LogUtils;
+import fll.xml.ChallengeDescription;
 import fll.xml.RubricRange;
 import fll.xml.ScoreCategory;
 import net.mtu.eggplant.util.Pair;
@@ -38,7 +39,7 @@ import net.mtu.eggplant.util.Pair;
 public class SubjectivePdfWriter {
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  private static final String copyRightStatement = "2015 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST\u00ae) and The LEGO Group. Used by special permission. All rights reserved.";
+  private final ChallengeDescription description;
 
   private final static int NO_BORDERS = 0;
 
@@ -87,8 +88,10 @@ public class SubjectivePdfWriter {
    * @param scheduleColumn the column in the schedule used to find the times,
    *          may be null
    */
-  public SubjectivePdfWriter(final SheetElement sheet,
+  public SubjectivePdfWriter(final ChallengeDescription description,
+                             final SheetElement sheet,
                              final String scheduleColumn) {
+    this.description = description;
     this.sheetElement = sheet;
     this.scoreCategory = sheetElement.getSheetData();
     this.scheduleColumn = scheduleColumn;
@@ -254,13 +257,16 @@ public class SubjectivePdfWriter {
     closingTable.addCell(bottomCell);
     closingTable.addCell(createCell(" ", f6i, NO_BORDERS));
 
-    // add the copy right statement
-    Paragraph copyRight = new Paragraph(new Phrase(copyRightStatement, f6i));
-    copyRight.setLeading(1f);
-    copyRight.setAlignment(Element.ALIGN_CENTER);
-
     doc.add(closingTable);
-    doc.add(copyRight);
+
+    if (null != description.getCopyright()) {
+      // add the copy right statement
+      final Paragraph copyRight = new Paragraph(new Phrase("\u00A9" + description.getCopyright(), f6i));
+      copyRight.setLeading(1f);
+      copyRight.setAlignment(Element.ALIGN_CENTER);
+      doc.add(copyRight);
+    }
+
     doc.newPage();
   }
 
@@ -432,8 +438,9 @@ public class SubjectivePdfWriter {
    * @throws IOException
    * @throws DocumentException
    */
-  private static Pair<Font, Integer> determineParameters(final SheetElement sheetElement)
-      throws MalformedURLException, IOException, DocumentException {
+  private static Pair<Font, Integer> determineParameters(final ChallengeDescription description,
+                                                         final SheetElement sheetElement) throws MalformedURLException,
+                                                             IOException, DocumentException {
 
     for (int commentHeight = 2; commentHeight > 0; --commentHeight) {
       for (int pointSize = 12; pointSize >= 6; --pointSize) {
@@ -447,7 +454,7 @@ public class SubjectivePdfWriter {
 
         pdf.open();
 
-        final SubjectivePdfWriter writer = new SubjectivePdfWriter(sheetElement, null);
+        final SubjectivePdfWriter writer = new SubjectivePdfWriter(description, sheetElement, null);
 
         final TeamScheduleInfo teamInfo = new TeamScheduleInfo(1, 1);
         teamInfo.setDivision("dummy");
@@ -483,12 +490,13 @@ public class SubjectivePdfWriter {
    * @throws MalformedURLException
    */
   public static void createDocument(final String filename,
+                                    final ChallengeDescription description,
                                     final SheetElement sheetElement,
                                     final String schedulerColumn,
                                     final List<TeamScheduleInfo> schedule)
                                         throws DocumentException, MalformedURLException, IOException {
 
-    final Pair<Font, Integer> parameters = determineParameters(sheetElement);
+    final Pair<Font, Integer> parameters = determineParameters(description, sheetElement);
     final Font font = parameters.getOne();
     final int commentHeight = parameters.getTwo();
 
@@ -498,7 +506,7 @@ public class SubjectivePdfWriter {
 
     pdf.open();
 
-    final SubjectivePdfWriter writer = new SubjectivePdfWriter(sheetElement, schedulerColumn);
+    final SubjectivePdfWriter writer = new SubjectivePdfWriter(description, sheetElement, schedulerColumn);
 
     // Go through all of the team schedules and put them all into a pdf
     for (final TeamScheduleInfo teamInfo : schedule) {

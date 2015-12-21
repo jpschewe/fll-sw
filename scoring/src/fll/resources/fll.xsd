@@ -34,7 +34,19 @@
         name="revision"
         type="xsd:string"
         use="optional" />
-        
+
+      <xsd:attribute
+        name="copyright"
+        type="xsd:string"
+        use="optional">
+        <xsd:annotation>
+          <xsd:documentation>
+            The copyright to be applied to this challenge description.
+            This copyright will show up on the printed sheets.
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+
       <xsd:attribute
         name="winner"
         type="highlowType"

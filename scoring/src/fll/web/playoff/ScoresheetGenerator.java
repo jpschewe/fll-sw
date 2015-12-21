@@ -18,8 +18,6 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.log4j.Logger;
 
 import com.itextpdf.text.BaseColor;
@@ -47,6 +45,7 @@ import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.EnumeratedValue;
 import fll.xml.PerformanceScoreCategory;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * @author Dan Churchill
@@ -61,6 +60,10 @@ public class ScoresheetGenerator {
 
   private static final char NON_BREAKING_SPACE = '\u00a0';
 
+  private final Font f6i = new Font(Font.FontFamily.HELVETICA, 6, Font.ITALIC);
+  
+  private String m_copyright;
+  
   /**
    * Create document with the specified number of sheets. Initially all sheets
    * are empty. They should be filled in using the set methods.
@@ -132,10 +135,11 @@ public class ScoresheetGenerator {
       }
     } else {
       final String division = request.getParameter("division");
-      
+
       // called with specific sheets to print
       final int numMatches = Integer.parseInt(numMatchesStr);
-      final boolean[] checkedMatches = new boolean[numMatches + 1]; // ignore
+      final boolean[] checkedMatches = new boolean[numMatches
+          + 1]; // ignore
       // slot
       // index 0
       int checkedMatchCount = 0;
@@ -150,11 +154,11 @@ public class ScoresheetGenerator {
       }
 
       if (checkedMatchCount == 0) {
-        throw new FLLRuntimeException(
-                                      "No matches were found checked. Please go back and select the checkboxes for the scoresheets that you want to print");
+        throw new FLLRuntimeException("No matches were found checked. Please go back and select the checkboxes for the scoresheets that you want to print");
       }
 
-      m_numSheets = checkedMatchCount * 2;
+      m_numSheets = checkedMatchCount
+          * 2;
 
       initializeArrays();
       setPageTitle(m_pageTitle);
@@ -194,7 +198,7 @@ public class ScoresheetGenerator {
             final int bracketA = Playoff.getBracketNumber(connection, teamA.getTeamNumber(), performanceRunA);
             final String bracketALabel = String.format("Bracket %d", bracketA);
             m_time[j] = bracketALabel;
-            
+
             updatePrep.setString(1, m_table[j]);
             updatePrep.setString(2, divA);
             updatePrep.setInt(4, iRound);
@@ -301,7 +305,14 @@ public class ScoresheetGenerator {
     // Measurements are always in points (72 per inch)
     // This sets up 1/2 inch margins side margins and 0.35in top and bottom
     // margins
-    pdfDoc.setMargins(0.5f * POINTS_PER_INCH, 0.5f * POINTS_PER_INCH, 0.35f * POINTS_PER_INCH, 0.35f * POINTS_PER_INCH);
+    pdfDoc.setMargins(0.5f
+        * POINTS_PER_INCH,
+                      0.5f
+                          * POINTS_PER_INCH,
+                      0.35f
+                          * POINTS_PER_INCH,
+                      0.35f
+                          * POINTS_PER_INCH);
     pdfDoc.open();
 
     // Header cell with challenge title to add to both scoresheets
@@ -354,7 +365,9 @@ public class ScoresheetGenerator {
     wholePage.setWidthPercentage(100);
     for (int i = 0; i < m_numSheets; i++) {
       if (i > 0
-          && (orientationIsPortrait || (i % 2) == 0)) {
+          && (orientationIsPortrait
+              || (i
+                  % 2) == 0)) {
         pdfDoc.newPage();
         wholePage = getTableForPage(orientationIsPortrait);
         wholePage.setWidthPercentage(100);
@@ -475,6 +488,17 @@ public class ScoresheetGenerator {
 
       team[i].addCell(desC);
       team[i].addCell(sciC);
+      
+      if(null != m_copyright) {
+        final Phrase copyright = new Phrase("\u00A9" + m_copyright, f6i);
+        final PdfPCell copyrightC = new PdfPCell(team[i].getDefaultCell());
+        copyrightC.addElement(copyright);
+        copyrightC.setBorder(0);
+        copyrightC.setHorizontalAlignment(Element.ALIGN_CENTER);
+        copyrightC.setColspan(2);
+
+        team[i].addCell(copyrightC);
+      }
 
       cell[i] = new PdfPCell(team[i]);
       cell[i].setBorder(0);
@@ -482,10 +506,13 @@ public class ScoresheetGenerator {
 
       // Interior borders between scoresheets on a page
       if (!orientationIsPortrait) {
-        if (i % 2 == 0) {
-          cell[i].setPaddingRight(0.1f * POINTS_PER_INCH);
+        if (i
+            % 2 == 0) {
+          cell[i].setPaddingRight(0.1f
+              * POINTS_PER_INCH);
         } else {
-          cell[i].setPaddingLeft(0.1f * POINTS_PER_INCH);
+          cell[i].setPaddingLeft(0.1f
+              * POINTS_PER_INCH);
         }
       }
 
@@ -494,14 +521,16 @@ public class ScoresheetGenerator {
 
       // Add the current table of scoresheets to the document
       if (orientationIsPortrait
-          || (i % 2 != 0)) {
+          || (i
+              % 2 != 0)) {
         pdfDoc.add(wholePage);
       }
     }
 
     // Add a blank cells to complete the table of the last page
     if (!orientationIsPortrait
-        && m_numSheets % 2 != 0) {
+        && m_numSheets
+            % 2 != 0) {
       final PdfPCell blank = new PdfPCell();
       blank.setBorder(0);
       wholePage.addCell(blank);
@@ -518,8 +547,15 @@ public class ScoresheetGenerator {
    */
   private void setChallengeInfo(final ChallengeDescription description) {
     setPageTitle(description.getTitle());
+    
     if (null != description.getRevision()) {
       setRevisionInfo(description.getRevision());
+    }
+
+    if (null != description.getCopyright()) {
+      m_copyright = description.getCopyright();
+    } else {
+      m_copyright = null;
     }
 
     final PerformanceScoreCategory performanceElement = description.getPerformance();
@@ -552,7 +588,9 @@ public class ScoresheetGenerator {
           // replace spaces with "no-break" spaces
           boolean first = true;
           final List<EnumeratedValue> values = goal.getSortedValues();
-          Collections.reverse(values); // reverse as we want the bottom value from the score entry page to be on the left end
+          Collections.reverse(values); // reverse as we want the bottom value
+                                       // from the score entry page to be on the
+                                       // left end
           for (final EnumeratedValue value : values) {
             if (!first) {
               choices.append(" /"
@@ -575,7 +613,8 @@ public class ScoresheetGenerator {
                 + minStr + " - " + maxStr + ")";
             final PdfPTable t = new PdfPTable(2);
             t.setHorizontalAlignment(Element.ALIGN_LEFT);
-            t.setTotalWidth(1 * POINTS_PER_INCH);
+            t.setTotalWidth(1
+                * POINTS_PER_INCH);
             t.setLockedWidth(true);
             final Phrase r = new Phrase("", ARIAL_8PT_NORMAL);
             t.addCell(new PdfPCell(r));
