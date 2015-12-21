@@ -12,14 +12,15 @@
           minOccurs="0"
           maxOccurs="unbounded" />
       </xsd:sequence>
-      
+
       <xsd:attribute
         name="schemaVersion"
         type="xsd:integer"
         use="required">
         <xsd:annotation>
           <xsd:documentation>
-            See fll.xml.ChallengeParser.CURRENT_SCHEMA_VERSION for current
+            See
+            fll.xml.ChallengeParser.CURRENT_SCHEMA_VERSION for current
             expected version, currently 2
           </xsd:documentation>
         </xsd:annotation>
@@ -29,7 +30,7 @@
         name="title"
         type="xsd:string"
         use="required" />
-        
+
       <xsd:attribute
         name="revision"
         type="xsd:string"
@@ -41,8 +42,10 @@
         use="optional">
         <xsd:annotation>
           <xsd:documentation>
-            The copyright to be applied to this challenge description.
-            This copyright will show up on the printed sheets.
+            The copyright to be applied to this
+            challenge description.
+            This copyright will show up on the
+            printed sheets.
           </xsd:documentation>
         </xsd:annotation>
       </xsd:attribute>
@@ -225,8 +228,10 @@
                 type="xsd:string">
                 <xsd:annotation>
                   <xsd:documentation>
-                    Long description of the rubric range. This provides further
-                    detail over the short description.
+                    Long description of the rubric
+                    range. This provides further
+                    detail over the short
+                    description.
                   </xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
@@ -305,6 +310,7 @@
           minOccurs="0"
           maxOccurs="unbounded">
           <xsd:complexType>
+
             <xsd:attribute
               name="score"
               type="xsd:decimal"
@@ -317,6 +323,7 @@
                 </xsd:documentation>
               </xsd:annotation>
             </xsd:attribute>
+
             <xsd:attribute
               name="title"
               type="xsd:string"
@@ -327,6 +334,7 @@
                 </xsd:documentation>
               </xsd:annotation>
             </xsd:attribute>
+
             <xsd:attribute
               name="value"
               type="xsd:string"
@@ -426,6 +434,20 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:attribute>
+
+      <xsd:attribute
+        name="required"
+        type="xsd:boolean"
+        use="optional"
+        default="false">
+        <xsd:annotation>
+          <xsd:documentation>
+            If set to true, then this goal is required to be considered
+            for an award.
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+
     </xsd:complexType>
   </xsd:element>
 
