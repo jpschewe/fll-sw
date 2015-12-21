@@ -25,6 +25,11 @@ public abstract class AbstractGoal implements Serializable {
   public AbstractGoal(final Element ele) {
     mName = ele.getAttribute("name");
     mTitle = ele.getAttribute("title");
+    if (ele.hasAttribute("required")) {
+      mRequired = Boolean.valueOf(ele.getAttribute("required"));
+    } else {
+      mRequired = false;
+    }
 
     final NodeList descEles = ele.getElementsByTagName("description");
     if (descEles.getLength() > 0) {
@@ -33,6 +38,15 @@ public abstract class AbstractGoal implements Serializable {
     } else {
       mDescription = null;
     }
+  }
+
+  private final boolean mRequired;
+
+  /**
+   * True if the goal is required for award consideration.
+   */
+  public boolean isRequired() {
+    return mRequired;
   }
 
   private final String mName;

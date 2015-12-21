@@ -12,6 +12,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
@@ -31,6 +32,7 @@ import fll.documents.elements.TableElement;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.util.LogUtils;
+import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.RubricRange;
 import fll.xml.ScoreCategory;
@@ -63,9 +65,13 @@ public class SubjectivePdfWriter {
 
   private static final BaseColor rowRed = new BaseColor(0xF7, 0x98, 0x85);
 
+  private final Font f6Red = new Font(Font.FontFamily.HELVETICA, 6, Font.NORMAL, BaseColor.RED);
+
   private final Font f6i = new Font(Font.FontFamily.HELVETICA, 6, Font.ITALIC);
 
   private final Font f8b = new Font(Font.FontFamily.HELVETICA, 8, Font.BOLD);
+
+  private final Font f8bRed = new Font(Font.FontFamily.HELVETICA, 8, Font.BOLD, BaseColor.RED);
 
   private final Font f9b = new Font(Font.FontFamily.HELVETICA, 9, Font.BOLD);
 
@@ -252,20 +258,33 @@ public class SubjectivePdfWriter {
       strengths.append("            ");
       strengths.append(category);
     }
-    final PdfPCell bottomCell = createCell(strengths.toString(), f9b, TOP_ONLY, sheetColor);
-    bottomCell.setMinimumHeight(18f);
-    closingTable.addCell(bottomCell);
-    closingTable.addCell(createCell(" ", f6i, NO_BORDERS));
+    final PdfPCell strengthsCell = createCell(strengths.toString(), f9b, TOP_ONLY, sheetColor);
+    strengthsCell.setMinimumHeight(18f);
+    closingTable.addCell(strengthsCell);
 
-    doc.add(closingTable);
+    boolean somethingRequired = false;
+    for (final AbstractGoal goal : sheetElement.getSheetData().getGoals()) {
+      if (goal.isRequired()) {
+        somethingRequired = true;
+      }
+    }
+    if (somethingRequired) {
+      final PdfPCell requiredC = createCell("* Required for Award Consideration ", f6Red, NO_BORDERS);
+      // NO_BORDERS centers
+      requiredC.setHorizontalAlignment(Element.ALIGN_LEFT);
+      closingTable.addCell(requiredC);
+    } else {
+      closingTable.addCell(createCell(" ", f6Red, NO_BORDERS));
+    }
 
     if (null != description.getCopyright()) {
       // add the copy right statement
-      final Paragraph copyRight = new Paragraph(new Phrase("\u00A9" + description.getCopyright(), f6i));
-      copyRight.setLeading(1f);
-      copyRight.setAlignment(Element.ALIGN_CENTER);
-      doc.add(copyRight);
+      final PdfPCell copyrightC = createCell("\u00A9"
+          + description.getCopyright(), f6i, NO_BORDERS);
+      closingTable.addCell(copyrightC);
     }
+
+    doc.add(closingTable);
 
     doc.newPage();
   }
@@ -332,9 +351,24 @@ public class SubjectivePdfWriter {
     table.addCell(focusArea);
 
     final List<RowElement> rows = tableData.getRowElements();
-    for (RowElement rowElement : rows) {
+    for (final RowElement rowElement : rows) {
       // This is the title row with the background color
-      topicArea = createCell(rowElement.getRowTitle(), f8b, NO_LEFT_RIGHT, sheetColor);
+      final Chunk topicAreaC = new Chunk(rowElement.getRowTitle(), f8b);
+
+      final Phrase topicAreaP = new Phrase();
+      topicAreaP.add(topicAreaC);
+
+      if (rowElement.getGoal().isRequired()) {
+        final Chunk required = new Chunk(" *", f8bRed);
+        topicAreaP.add(required);
+      }
+
+      topicArea = new PdfPCell(topicAreaP);
+      topicArea.setVerticalAlignment(Element.ALIGN_CENTER);
+      topicArea.setBorderWidthRight(0);
+      topicArea.setBorderWidthLeft(0);
+      topicArea.setBackgroundColor(sheetColor);
+
       topicArea.setColspan(2);
       topicInstructions = createCell(rowElement.getDescription(), font, NO_LEFT, sheetColor);
       topicInstructions.setColspan(3);
@@ -372,10 +406,10 @@ public class SubjectivePdfWriter {
     return result;
   }
 
-  private PdfPCell createCell(String text,
-                              Font f,
-                              int borders) {
-    PdfPCell result = new PdfPCell(new Paragraph(text, f));
+  private PdfPCell createCell(final String text,
+                              final Font f,
+                              final int borders) {
+    final PdfPCell result = new PdfPCell(new Paragraph(text, f));
     switch (borders) {
     case NO_BORDERS:
       result.setBorder(0);

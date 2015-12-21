@@ -826,7 +826,8 @@
       multiplier="1"
       name="problem_identification"
       title="Problem Identification"
-      category="Research">
+      category="Research"
+      required="true">
       <description>Clear definition of the problem being studied
       </description>
       <rubric>
@@ -1028,7 +1029,8 @@
       multiplier="1"
       name="team_solution"
       title="Team Solution"
-      category="Innovative Solution">
+      category="Innovative Solution"
+      required="true">
       <description>Clear explanation of the proposed solution
       </description>
       <rubric>
@@ -1171,7 +1173,8 @@
       multiplier="1"
       name="sharing"
       title="Sharing"
-      category="Presentation">
+      category="Presentation"
+      required="true">
       <description>Degree to which the team shared their Project before
         the
         tournament with others who might benefit from the team's
