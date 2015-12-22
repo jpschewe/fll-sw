@@ -128,9 +128,9 @@ public class InitFilter implements Filter {
                 + "/api") //
             || path.startsWith(contextPath
                 + "/subjective") //
-        || path.startsWith(contextPath
-            + "/setup") //
-        )) {
+            || path.startsWith(contextPath
+                + "/setup") //
+    )) {
       if (path.startsWith(contextPath
           + "/report/finalist/PublicFinalistDisplaySchedule")) {
         // this report is public

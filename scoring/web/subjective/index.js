@@ -120,7 +120,7 @@ function serverLoadPage() {
 
       checkStoredData();
     } else {
-      location.href = "auth.html";
+      location.href = "Auth";
     }
   });
 

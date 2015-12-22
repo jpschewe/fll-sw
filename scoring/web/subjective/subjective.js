@@ -868,7 +868,7 @@
                         }
                       });
                 } else {
-                  location.href = "auth.html";
+                  location.href = "Auth";
                 }
               });
     },
