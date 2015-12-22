@@ -1,3 +1,4 @@
+* #434 - escape single quotes in team names and organizations on the edit team page
 * 2015 challenge has performance weighted at 1 like the subjective
     categories
 * #408 - Allows teams to be in multiple tournaments and no longer require a heirarchy of tournaments
