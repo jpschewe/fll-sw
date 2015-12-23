@@ -332,6 +332,7 @@ function updatePage() {
 
   schedule = $.finalist.getSchedule($.finalist.getCurrentDivision());
 
+  $("#schedule_body").empty();  
   $.each(schedule, function(i, slot) {
     var row = $("<div class='rTableRow'></div>");
     $("#schedule_body").append(row);
@@ -409,6 +410,11 @@ $(document).ready(
 
       // update the schedule data before submitting the form
       $('#get_sched_data').submit(updateScheduleToSend);
+      
+      $('#regenerate_schedule').click(function() {
+        $.finalist.setSchedule($.finalist.getCurrentDivision(), null); 
+        updatePage();
+      });
 
       $.finalist.displayNavbar();
     });
