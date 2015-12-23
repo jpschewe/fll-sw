@@ -95,7 +95,7 @@ public class TournamentScheduleTest {
 
       GenerateDB.generateDB(document, memConnection);
 
-      Queries.createTournament(memConnection, tournamentName, null);
+      Tournament.createTournament(memConnection, tournamentName, null);
       final Tournament tournament = Tournament.findTournamentByName(memConnection, tournamentName);
       Assert.assertNotNull(tournament);
 
