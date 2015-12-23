@@ -67,6 +67,13 @@ public class RowElement {
   public String getRowTitle() {
     return goal.getTitle();
   }
+  
+  /**
+   * The goal that defines this RowElement.
+   */
+  public Goal getGoal() {
+    return goal;
+  }
 
   /**
    * Balanced emphasis on all three aspects (Robot, Project, Core Values) of

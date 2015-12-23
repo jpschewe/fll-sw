@@ -136,10 +136,10 @@ public class JudgesServlet extends HttpServlet {
       jsonMapper.writeValue(writer, result);
 
     } catch (final SQLException e) {
+      LOGGER.error("Error uploading judges", e);
+
       final UploadResult result = new UploadResult(false, e.getMessage(), numNewJudges);
       jsonMapper.writeValue(writer, result);
-
-      throw new RuntimeException(e);
     } finally {
       SQLFunctions.close(insertJudge);
       SQLFunctions.close(connection);

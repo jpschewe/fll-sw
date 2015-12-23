@@ -406,12 +406,11 @@
   <target name="reload" description="alias for tomcat.reload" depends="tomcat.reload" />
   <target name="tomcat.reload" description="Load new code into tomcat">
     <antcall target="tomcat.stop" />
-    <antcall target="compile" />
     <antcall target="tomcat.start" />
   </target>
 
   <target name="start" description="alias for tomcat.start" depends="tomcat.start" />
-  <target name="tomcat.start" depends="tomcat.expand" description="start up tomcat">
+  <target name="tomcat.start" depends="tomcat.expand,compile" description="Compile and start up tomcat">
     <echo message="Starting tomcat" />
     <run-tomcat operation="start" spawn="true" />
 
@@ -520,7 +519,7 @@
         <include name="LICENSE" />
       </fileset>
     </copy>
-    <copy todir="${dir.dist}/docs" file="Changes.txt" />
+    <copy todir="${dir.dist}/docs" file="${basedir}/../Changes.md" />
 
     <!-- copy reports -->
     <mkdir dir="${dir.dist}/docs/reports" />

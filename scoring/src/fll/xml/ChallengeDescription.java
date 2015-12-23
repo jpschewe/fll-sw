@@ -31,6 +31,12 @@ public class ChallengeDescription implements Serializable {
     mRevision = ele.getAttribute("revision");
     mWinner = XMLUtils.getWinnerCriteria(ele);
 
+    if (ele.hasAttribute("copyright")) {
+      mCopyright = ele.getAttribute("copyright");
+    } else {
+      mCopyright = null;
+    }
+
     final Element performanceElement = (Element) ele.getElementsByTagName("Performance").item(0);
     mPerformance = new PerformanceScoreCategory(performanceElement);
 
@@ -40,6 +46,17 @@ public class ChallengeDescription implements Serializable {
       subjCats.add(subj);
     }
     mSubjectiveCategories = Collections.unmodifiableList(subjCats);
+  }
+
+  private final String mCopyright;
+
+  /**
+   * Copyright statement for the challenge.
+   * 
+   * @return the statement or null if there is no copyright
+   */
+  public String getCopyright() {
+    return mCopyright;
   }
 
   private final String mTitle;
@@ -69,7 +86,6 @@ public class ChallengeDescription implements Serializable {
   private final List<ScoreCategory> mSubjectiveCategories;
 
   /**
-   * 
    * @return unmodifiable list
    */
   public List<ScoreCategory> getSubjectiveCategories() {

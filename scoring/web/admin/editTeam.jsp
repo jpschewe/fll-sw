@@ -185,7 +185,7 @@ $("#judging_station_${tournament.tournamentID}").change(function() {
           type='text'
           name='teamName'
           size='64'
-          value='${teamName}'></td>
+          value='${teamNameEscaped}'></td>
       </tr>
       <tr>
         <td>Organization</td>
@@ -193,7 +193,7 @@ $("#judging_station_${tournament.tournamentID}").change(function() {
           type='text'
           name='organization'
           size='64'
-          value='${organization }'></td>
+          value='${organizationEscaped}'></td>
       </tr>
 
       <!--  specify division -->

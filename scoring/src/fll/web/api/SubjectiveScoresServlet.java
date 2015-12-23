@@ -298,7 +298,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
       jsonMapper.writeValue(writer, result);
 
     } catch (final SQLException sqle) {
-      LOGGER.error(sqle, sqle);
+      LOGGER.error("Error uploading scores", sqle);
 
       final UploadResult result = new UploadResult(false, sqle.getMessage(), numModified);
       response.reset();
