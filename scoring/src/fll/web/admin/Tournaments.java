@@ -32,6 +32,7 @@ import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
+import fll.xml.ChallengeDescription;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -55,6 +56,7 @@ public final class Tournaments {
                                   final HttpSession session,
                                   final HttpServletRequest request,
                                   final HttpServletResponse response) throws SQLException, IOException, ParseException {
+    final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     try {
@@ -86,7 +88,7 @@ public final class Tournaments {
       }
 
       if (verified) {
-        commitData(session, request, response, connection);
+        commitData(session, request, response, connection, description);
       } else {
         out.println("<p><b>Tournament name's must be unique.  Tournaments can be removed by erasing the name.</b></p>");
 
@@ -280,7 +282,11 @@ public final class Tournaments {
   }
 
   private static void createAndInsertTournaments(final HttpServletRequest request,
-                                                 final Connection connection) throws SQLException {
+                                                 final Connection connection,
+                                                 final ChallengeDescription description,
+                                                 final StringBuilder message) throws SQLException {
+    final int currentTournament = Queries.getCurrentTournament(connection);
+
     int row = 0;
     String keyStr = request.getParameter("key"
         + row);
@@ -294,7 +300,7 @@ public final class Tournaments {
         if (null != name
             && !"".equals(name)) {
           // new tournament
-          Queries.createTournament(connection, name, location);
+          Tournament.createTournament(connection, name, location);
           if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Adding a new tournament "
                 + name);
@@ -302,12 +308,25 @@ public final class Tournaments {
         }
       } else if (null == name
           || "".equals(name)) {
-        // delete if no name
-        Queries.deleteTournament(connection, key);
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Deleting a tournament "
-              + key);
-        }
+        final Tournament tournament = Tournament.findTournamentByID(connection, key);
+        if (null != tournament) {
+          if (key == currentTournament) {
+            message.append("<p class='warning'>Unable to delete tournament '"
+                + tournament.getName() + "' because it is the current tournament</p>");
+          } else {
+            // delete if no name
+            if (tournament.containsScores(connection, description)) {
+              message.append("<p class='warning'>Unable to delete tournament '"
+                  + tournament.getName() + "' that contains scores</p>");
+            } else {
+              Tournament.deleteTournament(connection, key);
+              if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Deleting a tournament "
+                    + key);
+              }
+            }
+          } // not current tournament
+        } // tournament exists
       } else {
         // update with new values
         Queries.updateTournament(connection, key, name, location);
@@ -330,14 +349,21 @@ public final class Tournaments {
   /**
    * Commit the subjective data from request to the database and redirect
    * response back to index.jsp.
+   * 
+   * @param description
    */
   private static void commitData(final HttpSession session,
                                  final HttpServletRequest request,
                                  final HttpServletResponse response,
-                                 final Connection connection) throws SQLException, IOException {
-    createAndInsertTournaments(request, connection);
+                                 final Connection connection,
+                                 final ChallengeDescription description) throws SQLException, IOException {
+    final StringBuilder message = new StringBuilder();
 
-    session.setAttribute(SessionAttributes.MESSAGE, "<p id='success'>Successfully committed tournament changes.</p>");
+    createAndInsertTournaments(request, connection, description, message);
+
+    message.append("<p id='success'>Committed tournament changes.</p>");
+
+    session.setAttribute(SessionAttributes.MESSAGE, message.toString());
 
     // finally redirect to index.jsp
     // out.println("DEBUG: normally you'd be redirected to <a
