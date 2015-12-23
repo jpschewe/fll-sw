@@ -4,6 +4,10 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
+/*
+ * It is assumed that each time slot contains at most 1 team.
+ */
+
 var draggingTeam = null;
 var draggingCategory = null;
 var draggingTeamDiv = null;
@@ -131,10 +135,18 @@ function createTimeslotCell(slot, category) {
 
     draggingTeamDiv.removeClass('valid-target');
 
-    moveTeam(draggingTeam, draggingCategory, slot);
+    if (cell.children().length > 0) {
+      // move current team to old parent
+      var oldTeamDiv = cell.children().first();
+      var draggingParent = draggingTeamDiv.parent();
+      draggingParent.append(oldTeamDiv);
+    }
 
-    // do something with the drop
+    // Add team to the current cell
     cell.append(draggingTeamDiv);
+
+    // updates the schedule
+    moveTeam(draggingTeam, draggingCategory, slot);
 
     draggingTeam = null;
     draggingCategory = null;
@@ -167,7 +179,8 @@ function updateScheduleToSend() {
 
 /**
  * Move a team from it's current timeslot to the newly specified timeslot for
- * the specified category.
+ * the specified category. If the specified timeslot contains another team, then
+ * the two teams are swapped.
  * 
  * @param team
  *          a Team object to move
@@ -178,6 +191,7 @@ function updateScheduleToSend() {
  */
 function moveTeam(team, category, newSlot) {
   var foundSlot = null;
+  var oldSlot = null;
 
   // remove team from all slots with this category
   $.each(schedule, function(i, slot) {
@@ -192,12 +206,20 @@ function moveTeam(team, category, newSlot) {
       }
     }); // foreach category
     if (foundTeam) {
-      delete slot.categories[category.catId];
+      oldSlot = slot;
     }
   }); // foreach timeslot
 
   if (null == foundSlot) {
     alert("Internal error, could not find slot to move to");
+  }
+
+  if (null == foundSlot.categories[category.catId]) {
+    // no team in the destination, just delete this team from the old slot
+    delete oldSlot.categories[category.catId];
+  } else {
+    // move team from destination to old slot
+    oldSlot.categories[category.catId] = foundSlot.categories[category.catId];
   }
 
   // add team to new slot, reference actual slot in case
