@@ -248,7 +248,8 @@ function moveTeam(team, category, newSlot) {
   // remove warning from source cell as it may become empty
   var srcCell = getCellForTimeAndCategory(srcSlot.time, category.catId);
   srcCell.removeClass("overlap-schedule");
-  
+  srcCell.removeClass("overlap-playoff");
+
   if (null == destSlot.categories[category.catId]) {
     // no team in the destination, just delete this team from the old slot
     delete srcSlot.categories[category.catId];
@@ -267,6 +268,10 @@ function moveTeam(team, category, newSlot) {
 
     // check old position to clear warnings
     checkForTimeOverlap(destSlot, oldTeamNumber);
+
+    if ($.finalist.hasPlayoffConflict(oldteam, srcSlot)) {
+      srcCell.addClass("overlap-playoff");
+    }
   }
 
   // add team to new slot, reference actual slot in case
@@ -285,7 +290,8 @@ function moveTeam(team, category, newSlot) {
 }
 
 /**
- * See if the specified team is in the same slot in multiple categories.
+ * See if the specified team is in the same slot in multiple categories or has a
+ * conflict with playoff times.
  * 
  * @param slot
  *          the slot to check
@@ -293,6 +299,7 @@ function moveTeam(team, category, newSlot) {
  *          the team number to check for
  */
 function checkForTimeOverlap(slot, teamNumber) {
+  var team = $.finalist.lookupTeam(teamNumber);
 
   var numCategories = 0;
   $.each(slot.categories, function(categoryId, checkTeamNumber) {
@@ -314,6 +321,13 @@ function checkForTimeOverlap(slot, teamNumber) {
         } else {
           cell.removeClass('overlap-schedule');
         }
+
+        if ($.finalist.hasPlayoffConflict(team, slot)) {
+          cell.addClass("overlap-playoff");
+        } else {
+          cell.removeClass("overlap-playoff");
+        }
+
       } // found cell
       else {
         alert("Can't find cell for " + time.hour + ":" + time.minute + " cat: "
@@ -332,7 +346,7 @@ function updatePage() {
 
   schedule = $.finalist.getSchedule($.finalist.getCurrentDivision());
 
-  $("#schedule_body").empty();  
+  $("#schedule_body").empty();
   $.each(schedule, function(i, slot) {
     var row = $("<div class='rTableRow'></div>");
     $("#schedule_body").append(row);
@@ -410,9 +424,9 @@ $(document).ready(
 
       // update the schedule data before submitting the form
       $('#get_sched_data').submit(updateScheduleToSend);
-      
+
       $('#regenerate_schedule').click(function() {
-        $.finalist.setSchedule($.finalist.getCurrentDivision(), null); 
+        $.finalist.setSchedule($.finalist.getCurrentDivision(), null);
         updatePage();
       });
 
