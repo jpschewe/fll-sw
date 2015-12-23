@@ -233,7 +233,7 @@ function moveTeam(team, category, newSlot) {
         foundTeam = true;
       }
     }); // foreach category
-    
+
     if ($.finalist.compareTimes(slot.time, newSlot.time) == 0) {
       destSlot = slot;
     }
@@ -342,6 +342,41 @@ function checkForTimeOverlap(slot, teamNumber) {
 
 }
 
+/**
+ * Add a row to the schedule table for the specified slot.
+ */
+function addRowForSlot(slot) {
+  var row = $("<div class='rTableRow'></div>");
+  $("#schedule_body").append(row);
+
+  row.append($("<div class='rTableCell'>"
+      + $.finalist.timeToDisplayString(slot.time) + "</div>"));
+
+  var categoriesToCells = {};
+  var teamsInSlot = {};
+  $.each($.finalist.getAllCategories(), function(i, category) {
+    var cell = createTimeslotCell(slot, category);
+    row.append(cell);
+
+    categoriesToCells[category.catId] = cell;
+
+    var teamNum = slot.categories[category.catId];
+    if (teamNum != null) {
+      var team = $.finalist.lookupTeam(teamNum);
+      var teamDiv = createTeamDiv(team, category);
+      cell.append(teamDiv);
+      teamsInSlot[teamNum] = true;
+    }
+  }); // foreach category
+
+  timeToCells[$.finalist.timeToDisplayString(slot.time)] = categoriesToCells;
+
+  // now check for overlaps in the loaded schedule
+  $.each(teamsInSlot, function(teamNum, ignore) {
+    checkForTimeOverlap(slot, teamNum);
+  });
+}
+
 function updatePage() {
 
   // output header
@@ -351,36 +386,7 @@ function updatePage() {
 
   $("#schedule_body").empty();
   $.each(schedule, function(i, slot) {
-    var row = $("<div class='rTableRow'></div>");
-    $("#schedule_body").append(row);
-
-    row.append($("<div class='rTableCell'>"
-        + $.finalist.timeToDisplayString(slot.time) + "</div>"));
-
-    var categoriesToCells = {};
-    var teamsInSlot = {};
-    $.each($.finalist.getAllCategories(), function(i, category) {
-      var cell = createTimeslotCell(slot, category);
-      row.append(cell);
-
-      categoriesToCells[category.catId] = cell;
-
-      var teamNum = slot.categories[category.catId];
-      if (teamNum != null) {
-        var team = $.finalist.lookupTeam(teamNum);
-        var teamDiv = createTeamDiv(team, category);
-        cell.append(teamDiv);
-        teamsInSlot[teamNum] = true;
-      }
-    }); // foreach category
-
-    timeToCells[$.finalist.timeToDisplayString(slot.time)] = categoriesToCells;
-
-    // now check for overlaps in the loaded schedule
-    $.each(teamsInSlot, function(teamNum, ignore) {
-      checkForTimeOverlap(slot, teamNum);
-    });
-
+    addRowForSlot(slot);
   }); // foreach timeslot
 
   var categoryRows = [];
@@ -431,6 +437,11 @@ $(document).ready(
       $('#regenerate_schedule').click(function() {
         $.finalist.setSchedule($.finalist.getCurrentDivision(), null);
         updatePage();
+      });
+
+      $('#add_timeslot').click(function() {
+        var newSlot = $.finalist.addSlotToSchedule(schedule);
+        addRowForSlot(newSlot);
       });
 
       $.finalist.displayNavbar();

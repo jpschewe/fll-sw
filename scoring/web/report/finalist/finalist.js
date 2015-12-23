@@ -995,6 +995,22 @@
     },
 
     /**
+     * Add a timeslot to the specified schedule. Note that the schedule is not
+     * saved by this function.
+     * 
+     * @param schedule
+     *          the schedule to add a slot to, it is modified
+     * @return the slot that was added.
+     */
+    addSlotToSchedule : function(schedule) {
+      var lastSlot = schedule[schedule.length - 1];
+      var newSlot = new Timeslot(lastSlot.endTime, $.finalist.getDuration());
+      schedule.push(newSlot);
+
+      return newSlot;
+    },
+
+    /**
      * Check if a team has a playoff conflict with the spcified timeslot
      * 
      * @param team
