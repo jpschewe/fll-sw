@@ -19,8 +19,11 @@ import org.apache.log4j.Logger;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.GenerateDB;
 import fll.util.LogUtils;
+import fll.xml.ChallengeDescription;
+import fll.xml.ScoreCategory;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -74,7 +77,7 @@ public final class Tournament implements Serializable {
       SQLFunctions.close(prep);
     }
   }
-  
+
   /**
    * Get a list of tournaments in the DB ordered by Name. This excludes the
    * internal tournament.
@@ -300,6 +303,129 @@ public final class Tournament implements Serializable {
       prep.executeUpdate();
     } finally {
       SQLFunctions.close(prep);
+    }
+  }
+
+  /**
+   * Check if there are scores in the specified table for this tournament.
+   * 
+   * @param connection database connection
+   * @param table table name to check
+   * @return true if there are scores for this tournament
+   * @throws SQLException
+   */
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic based upon tables in the database")
+  private boolean scoresInTable(final Connection connection,
+                                final String table) throws SQLException {
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT COUNT(*) FROM "
+          + table + " WHERE tournament = ?");
+      prep.setInt(1, getTournamentID());
+      rs = prep.executeQuery();
+      if (rs.next()) {
+        final int count = rs.getInt(1);
+        if (count > 0) {
+          return true;
+        }
+      }
+
+      // no scores found
+      return false;
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+  }
+
+  /**
+   * Check if this tournament contains scores.
+   * 
+   * @param connection
+   * @param description the challenge description to get the subjective
+   *          categories
+   * @return true if there are any performance or subjective scores in this
+   *         tournament
+   * @throws SQLException
+   */
+  public boolean containsScores(final Connection connection,
+                                final ChallengeDescription description) throws SQLException {
+    if (scoresInTable(connection, "performance")) {
+      return true;
+    }
+
+    for (final ScoreCategory category : description.getSubjectiveCategories()) {
+      if (scoresInTable(connection, category.getName())) {
+        return true;
+      }
+    }
+
+    // no scores found
+    return false;
+  }
+
+  /**
+   * Delete a tournament.
+   * This will delete a tournament if there are no scores associated with it.
+   * 
+   * @param connection
+   * @param tournamentID tournament to delete
+   * @return true if the tournament can be deleted, false if it contains scores
+   * @throws SQLException If there is a database error such as scores existing.
+   */
+  public static void deleteTournament(final Connection connection,
+                                      final int tournamentID) throws SQLException {
+    PreparedStatement deleteTournament = null;
+    PreparedStatement deleteTables = null;
+    PreparedStatement deleteJudges = null;
+    PreparedStatement deleteSchedule = null;
+    PreparedStatement deleteSchedulePerf = null;
+    PreparedStatement deleteScheduleSubj = null;
+    PreparedStatement deleteTournamentParameters = null;
+    PreparedStatement deleteTournamentTeams = null;
+    try {
+      deleteTables = connection.prepareStatement("DELETE FROM TableNames WHERE tournament = ?");
+      deleteTables.setInt(1, tournamentID);
+      deleteTables.executeUpdate();
+
+      deleteJudges = connection.prepareStatement("DELETE FROM judges WHERE tournament = ?");
+      deleteJudges.setInt(1, tournamentID);
+      deleteJudges.executeUpdate();
+
+      deleteSchedulePerf = connection.prepareStatement("DELETE FROM sched_perf_rounds WHERE tournament = ?");
+      deleteSchedulePerf.setInt(1, tournamentID);
+      deleteSchedulePerf.executeUpdate();
+
+      deleteScheduleSubj = connection.prepareStatement("DELETE FROM sched_subjective WHERE tournament = ?");
+      deleteScheduleSubj.setInt(1, tournamentID);
+      deleteScheduleSubj.executeUpdate();
+
+      deleteSchedule = connection.prepareStatement("DELETE FROM schedule WHERE tournament = ?");
+      deleteSchedule.setInt(1, tournamentID);
+      deleteSchedule.executeUpdate();
+
+      deleteTournamentParameters = connection.prepareStatement("DELETE FROM tournament_parameters WHERE tournament = ?");
+      deleteTournamentParameters.setInt(1, tournamentID);
+      deleteTournamentParameters.executeUpdate();
+
+      deleteTournamentTeams = connection.prepareStatement("DELETE FROM TournamentTeams WHERE tournament = ?");
+      deleteTournamentTeams.setInt(1, tournamentID);
+      deleteTournamentTeams.executeUpdate();
+
+      deleteTournament = connection.prepareStatement("DELETE FROM Tournaments WHERE tournament_id = ?");
+      deleteTournament.setInt(1, tournamentID);
+      deleteTournament.executeUpdate();
+    } finally {
+      SQLFunctions.close(deleteTournament);
+      SQLFunctions.close(deleteTables);
+      SQLFunctions.close(deleteJudges);
+      SQLFunctions.close(deleteSchedule);
+      SQLFunctions.close(deleteSchedulePerf);
+      SQLFunctions.close(deleteScheduleSubj);
+      SQLFunctions.close(deleteTournamentParameters);
+      SQLFunctions.close(deleteTournamentTeams);
+
     }
   }
 

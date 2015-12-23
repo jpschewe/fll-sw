@@ -1,3 +1,4 @@
+* #445 - properly delete tournaments from the edit tournaments page
 * #434 - escape single quotes in team names and organizations on the edit team page
 * 2015 challenge has performance weighted at 1 like the subjective
     categories
