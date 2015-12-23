@@ -4,14 +4,46 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
-/*
- * It is assumed that each time slot contains at most 1 team.
- */
+"use strict";
 
 var draggingTeam = null;
 var draggingCategory = null;
 var draggingTeamDiv = null;
 var schedule = null;
+
+/**
+ * Map time string to map of category id to div cell.
+ */
+var timeToCells = {};
+
+/**
+ * Find the cell for the specified time and category id.
+ * 
+ * @param searchTime
+ *          the time to search for
+ * @param serachCatId
+ *          the category id to search for
+ * @return the cell or null if not found
+ */
+function getCellForTimeAndCategory(searchTime, searchCatId) {
+  var searchTimeStr = $.finalist.timeToDisplayString(searchTime);
+
+  var foundCell = null;
+
+  $.each(timeToCells, function(timeStr, categoryToCells) {
+    if (searchTimeStr == timeStr) {
+
+      $.each(categoryToCells, function(catId, cell) {
+        if (catId == searchCatId) {
+          foundCell = cell;
+        }
+      });
+
+    }
+  });
+
+  return foundCell;
+}
 
 function handleDivisionChange() {
   var divIndex = $("#divisions").val();
@@ -133,8 +165,6 @@ function createTimeslotCell(slot, category) {
       rawEvent.stopPropagation(); // Stops some browsers from redirecting.
     }
 
-    draggingTeamDiv.removeClass('valid-target');
-
     if (cell.children().length > 0) {
       // move current team to old parent
       var oldTeamDiv = cell.children().first();
@@ -190,8 +220,8 @@ function updateScheduleToSend() {
  *          the new slot to put the team in
  */
 function moveTeam(team, category, newSlot) {
-  var foundSlot = null;
-  var oldSlot = null;
+  var destSlot = null;
+  var srcSlot = null;
 
   // remove team from all slots with this category
   $.each(schedule, function(i, slot) {
@@ -202,31 +232,97 @@ function moveTeam(team, category, newSlot) {
       }
       var slotTime = new Date(slot.time);
       if ($.finalist.compareTimes(slot.time, newSlot.time) == 0) {
-        foundSlot = slot;
+        destSlot = slot;
       }
     }); // foreach category
     if (foundTeam) {
-      oldSlot = slot;
+      srcSlot = slot;
     }
   }); // foreach timeslot
 
-  if (null == foundSlot) {
+  if (null == destSlot) {
     alert("Internal error, could not find slot to move to");
+    return;
   }
 
-  if (null == foundSlot.categories[category.catId]) {
+  // remove warning from source cell as it may become empty
+  var srcCell = getCellForTimeAndCategory(srcSlot.time, category.catId);
+  srcCell.removeClass("overlap-schedule");
+  
+  if (null == destSlot.categories[category.catId]) {
     // no team in the destination, just delete this team from the old slot
-    delete oldSlot.categories[category.catId];
+    delete srcSlot.categories[category.catId];
   } else {
-    // move team from destination to old slot
-    oldSlot.categories[category.catId] = foundSlot.categories[category.catId];
+    var oldTeamNumber = destSlot.categories[category.catId];
+
+    // clear the destination slot so that the warning check sees the correct
+    // state for this team
+    delete destSlot.categories[category.catId];
+
+    // move team to the source slot
+    srcSlot.categories[category.catId] = oldTeamNumber;
+
+    // check new position to set warnings
+    checkForTimeOverlap(srcSlot, oldTeamNumber);
+
+    // check old position to clear warnings
+    checkForTimeOverlap(destSlot, oldTeamNumber);
   }
 
   // add team to new slot, reference actual slot in case
-  // newSlot and foundSlot are not the same instance
-  foundSlot.categories[category.catId] = team.num;
+  // newSlot and destSlot are not the same instance.
+  // 12/23/2015 JPS - not sure how this could happen, but I must have thought it
+  // possible.
+  destSlot.categories[category.catId] = team.num;
+
+  // check where the team now is to see what warnings are needed
+  checkForTimeOverlap(destSlot, team.num);
+
+  // need to check where the team was to clear the warning
+  checkForTimeOverlap(srcSlot, team.num);
 
   $.finalist.setSchedule($.finalist.getCurrentDivision(), schedule);
+}
+
+/**
+ * See if the specified team is in the same slot in multiple categories.
+ * 
+ * @param slot
+ *          the slot to check
+ * @param teamNumber
+ *          the team number to check for
+ */
+function checkForTimeOverlap(slot, teamNumber) {
+
+  var numCategories = 0;
+  $.each(slot.categories, function(categoryId, checkTeamNumber) {
+    if (checkTeamNumber == teamNumber) {
+      numCategories = numCategories + 1;
+    }
+  });
+
+  $.each(slot.categories, function(categoryId, checkTeamNumber) {
+    if (checkTeamNumber == teamNumber) {
+      var cell = getCellForTimeAndCategory(slot.time, categoryId);
+      if (null != cell) {
+        if (numCategories > 1) {
+          cell.addClass('overlap-schedule');
+          /*
+           * alert("Found " + teamNumber + " in multiple categories at the same
+           * time");
+           */
+        } else {
+          cell.removeClass('overlap-schedule');
+        }
+      } // found cell
+      else {
+        alert("Can't find cell for " + time.hour + ":" + time.minute + " cat: "
+            + categoryId);
+        return;
+      }
+    } // team number matches
+  });
+
 }
 
 function updatePage() {
@@ -241,20 +337,31 @@ function updatePage() {
     $("#schedule_body").append(row);
 
     row.append($("<div class='rTableCell'>"
-        + slot.time.hour.toString().padL(2, "0") + ":"
-        + slot.time.minute.toString().padL(2, "0") + "</div>"));
+        + $.finalist.timeToDisplayString(slot.time) + "</div>"));
 
+    var categoriesToCells = {};
+    var teamsInSlot = {};
     $.each($.finalist.getAllCategories(), function(i, category) {
       var cell = createTimeslotCell(slot, category);
       row.append(cell);
+
+      categoriesToCells[category.catId] = cell;
 
       var teamNum = slot.categories[category.catId];
       if (teamNum != null) {
         var team = $.finalist.lookupTeam(teamNum);
         var teamDiv = createTeamDiv(team, category);
         cell.append(teamDiv);
+        teamsInSlot[teamNum] = true;
       }
     }); // foreach category
+
+    timeToCells[$.finalist.timeToDisplayString(slot.time)] = categoriesToCells;
+
+    // now check for overlaps in the loaded schedule
+    $.each(teamsInSlot, function(teamNum, ignore) {
+      checkForTimeOverlap(slot, teamNum);
+    });
 
   }); // foreach timeslot
 

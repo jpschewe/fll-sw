@@ -44,6 +44,14 @@ and mark draggable things as movable. */
 	-webkit-user-drag: element;
 	cursor: move;
 }
+
+.overlap-schedule {
+	background-color: yellow;
+}
+
+.overlap-playoff {
+	background-color: orange;
+}
 </style>
 
 </head>
@@ -72,6 +80,35 @@ and mark draggable things as movable. */
 
   </div>
 
+  <br />
+
+  <!--  legend -->
+  <div class='rTable'>
+
+    <div class='rTableHeading'>
+      <div class='rTableHead'>Legend</div>
+    </div>
+
+    <div class='rTableBody'>
+
+      <div class='rTableRow'>
+        <div class='rTableCell, overlap-schedule'>Team is being
+          judged in 2 categories at the same time</div>
+      </div>
+
+      <!--  not implemented yet
+      <div class='rTableRow'>
+        <div class='rTableCell, overlap-playoff'>Team is scheduled
+          to be in playoffs</div>
+      </div>
+ -->
+
+    </div>
+
+  </div>
+  <!--  end legend -->
+
+  <br />
 
   <form
     id='get_sched_data'
