@@ -12,41 +12,55 @@
           minOccurs="0"
           maxOccurs="unbounded" />
       </xsd:sequence>
-      <!-- See fll.xsml.ChallengeParser.CURRENT_SCHEMA_VERSION for current 
-        expected version, currently 2 -->
+
       <xsd:attribute
         name="schemaVersion"
         type="xsd:integer"
-        use="required" />
+        use="required">
+        <xsd:annotation>
+          <xsd:documentation>
+            See
+            fll.xml.ChallengeParser.CURRENT_SCHEMA_VERSION for current
+            expected version, currently 2
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+
       <xsd:attribute
         name="title"
         type="xsd:string"
         use="required" />
+
       <xsd:attribute
         name="revision"
         type="xsd:string"
         use="optional" />
+
       <xsd:attribute
-        name="bracketSort"
-        type="bracketSortType"
-        default="SEEDING">
+        name="copyright"
+        type="xsd:string"
+        use="optional">
         <xsd:annotation>
           <xsd:documentation>
-            The sort type for the brackets. Defaults to
-            "SEEDING", which sorts
-            teams based upon the seeding rounds.
+            The copyright to be applied to this
+            challenge description.
+            This copyright will show up on the
+            printed sheets.
           </xsd:documentation>
         </xsd:annotation>
       </xsd:attribute>
+
       <xsd:attribute
         name="winner"
         type="highlowType"
         default="HIGH">
         <xsd:annotation>
           <xsd:documentation>
-            Determine which scores are "better". Default is
+            Determine which scores are "better".
+            Default is
             for high scores to win,
-            although one might want to use low scores
+            although one might want to
+            use low scores
             for a golf tournament or
             drag race times.
           </xsd:documentation>
@@ -97,7 +111,8 @@
         default="0">
         <xsd:annotation>
           <xsd:documentation>
-            minimum score allowed in the performance scoring
+            minimum score allowed in the performance
+            scoring
           </xsd:documentation>
         </xsd:annotation>
       </xsd:attribute>
@@ -108,7 +123,8 @@
         default="1.0">
         <xsd:annotation>
           <xsd:documentation>
-            Weight this category has. Should be a number
+            Weight this category has. Should be a
+            number
             between 0 and 1.
           </xsd:documentation>
         </xsd:annotation>
@@ -162,7 +178,8 @@
         default="1.0">
         <xsd:annotation>
           <xsd:documentation>
-            Weight this category has. Should be a number
+            Weight this category has. Should be a
+            number
             between 0 and 1.
           </xsd:documentation>
         </xsd:annotation>
@@ -171,7 +188,8 @@
     <xsd:key name="subjectiveGoalKey">
       <xsd:annotation>
         <xsd:documentation>
-          All subjective goal names must be unique within a
+          All subjective goal names must be unique
+          within a
           category.
         </xsd:documentation>
       </xsd:annotation>
@@ -209,12 +227,14 @@
                 maxOccurs="1"
                 type="xsd:string">
                 <xsd:annotation>
-                <xsd:documentation>
-                Long description of the rubric range. This provides further
-                detail over the short description.
-                </xsd:documentation>
+                  <xsd:documentation>
+                    Long description of the rubric
+                    range. This provides further
+                    detail over the short
+                    description.
+                  </xsd:documentation>
                 </xsd:annotation>
-                </xsd:element>
+              </xsd:element>
 
             </xsd:sequence>
 
@@ -236,7 +256,8 @@
               use="optional">
               <xsd:annotation>
                 <xsd:documentation>
-                  This is meant as a one line description of the rubric range.
+                  This is meant as a one line
+                  description of the rubric range.
                 </xsd:documentation>
               </xsd:annotation>
             </xsd:attribute>
@@ -253,16 +274,22 @@
       <xsd:documentation>
         A goal is something that the team may be scored
         on. A goal has a
-        maximum and a minimum that define what values are
+        maximum and a minimum that define what values
+        are
         allowed. It also
-        has a multiplier for cases where this goal is used
+        has a multiplier for cases where this goal is
+        used
         to count things.
-        If there are no value child elements, then the score
+        If there are no value child elements, then
+        the score
         is determined
-        by multiplying the count, in the range min to max, by
+        by multiplying the count, in the range min
+        to max, by
         the
-        multiplier. If there are child elements, the score is the score
-        associated with the chosen child element times the multiplier.
+        multiplier. If there are child elements, the score
+        is the score
+        associated with the chosen child element times the
+        multiplier.
       </xsd:documentation>
     </xsd:annotation>
     <xsd:complexType>
@@ -283,17 +310,20 @@
           minOccurs="0"
           maxOccurs="unbounded">
           <xsd:complexType>
+
             <xsd:attribute
               name="score"
               type="xsd:decimal"
               default="0">
               <xsd:annotation>
                 <xsd:documentation>
-                  The raw score one gets for this value of an
+                  The raw score one gets for this value
+                  of an
                   enumerated goal.
                 </xsd:documentation>
               </xsd:annotation>
             </xsd:attribute>
+
             <xsd:attribute
               name="title"
               type="xsd:string"
@@ -304,13 +334,15 @@
                 </xsd:documentation>
               </xsd:annotation>
             </xsd:attribute>
+
             <xsd:attribute
               name="value"
               type="xsd:string"
               use="required">
               <xsd:annotation>
                 <xsd:documentation>
-                  The value to store in the database for this
+                  The value to store in the database
+                  for this
                   value.
                 </xsd:documentation>
               </xsd:annotation>
@@ -336,7 +368,8 @@
         default="0">
         <xsd:annotation>
           <xsd:documentation>
-            The minimum raw score for this goal. Ignored if
+            The minimum raw score for this goal.
+            Ignored if
             enumerated values
             exist
           </xsd:documentation>
@@ -349,7 +382,8 @@
         default="1">
         <xsd:annotation>
           <xsd:documentation>
-            The maximum raw score for this goal. Ignored if
+            The maximum raw score for this goal.
+            Ignored if
             enumerated values
             exist
           </xsd:documentation>
@@ -367,7 +401,8 @@
         default="0">
         <xsd:annotation>
           <xsd:documentation>
-            Used to initialize the counters in the score
+            Used to initialize the counters in the
+            score
             entry web page.
             Ignored for subjective goals.
           </xsd:documentation>
@@ -380,7 +415,8 @@
         default="INTEGER">
         <xsd:annotation>
           <xsd:documentation>
-            Specifies the type of number allowed for this
+            Specifies the type of number allowed for
+            this
             goal value.
           </xsd:documentation>
         </xsd:annotation>
@@ -392,11 +428,26 @@
         use="optional">
         <xsd:annotation>
           <xsd:documentation>
-            The category that this goal is in. This is a way
+            The category that this goal is in. This is
+            a way
             to group goals.
           </xsd:documentation>
         </xsd:annotation>
       </xsd:attribute>
+
+      <xsd:attribute
+        name="required"
+        type="xsd:boolean"
+        use="optional"
+        default="false">
+        <xsd:annotation>
+          <xsd:documentation>
+            If set to true, then this goal is required to be considered
+            for an award.
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+
     </xsd:complexType>
   </xsd:element>
 
@@ -410,9 +461,11 @@
   <xsd:element name="restriction">
     <xsd:annotation>
       <xsd:documentation>
-        A polynomial with an upper and lower bound used to
+        A polynomial with an upper and lower bound used
+        to
         determine if the
-        restriction is violated. Lower bound and upper bound
+        restriction is violated. Lower bound and upper
+        bound
         are inclusive.
       </xsd:documentation>
     </xsd:annotation>
@@ -439,7 +492,8 @@
   <xsd:complexType name="term">
     <xsd:annotation>
       <xsd:documentation>
-        A term is the product of a number of constants and
+        A term is the product of a number of constants
+        and
         goal references.
       </xsd:documentation>
     </xsd:annotation>
@@ -481,8 +535,10 @@
   <xsd:complexType name="goalRef">
     <xsd:annotation>
       <xsd:documentation>
-        Reference to the value of a goal. One must specify
-        the score type (raw or computed). Enumerated goals and computed
+        Reference to the value of a goal. One must
+        specify
+        the score type (raw or computed). Enumerated goals and
+        computed
         goals may only use the computed score type.
       </xsd:documentation>
     </xsd:annotation>
@@ -499,9 +555,11 @@
   <xsd:simpleType name="goalScoreType">
     <xsd:annotation>
       <xsd:documentation>
-        What score from the goal should be used? The 'raw'
+        What score from the goal should be used? The
+        'raw'
         score or the
-        'computed' score. Default is set to 'computed' to
+        'computed' score. Default is set to 'computed'
+        to
         support backwards
         compatibility
       </xsd:documentation>
@@ -515,15 +573,20 @@
   <xsd:simpleType name="floatingPointType">
     <xsd:annotation>
       <xsd:documentation>
-        How floating point data should be handled for an
+        How floating point data should be handled for
+        an
         operation. If set
-        to 'decimal', then just compute floating point
+        to 'decimal', then just compute floating
+        point
         values. If set to
-        'round', then round the value to the nearest
+        'round', then round the value to the
+        nearest
         integer. If set to
-        'truncate', then truncate the value. Default is
+        'truncate', then truncate the value.
+        Default is
         set to 'truncate'
-        for the standard usage for most tournaments.
+        for the standard usage for most
+        tournaments.
       </xsd:documentation>
     </xsd:annotation>
     <xsd:restriction base="xsd:string">
@@ -544,7 +607,8 @@
               <xsd:documentation>
                 Need to add a winner attribute to the
                 polynomial to be able to
-                determine the winner of a tiebreaker.
+                determine the winner of a
+                tiebreaker.
               </xsd:documentation>
             </xsd:annotation>
             <xsd:complexContent>
@@ -564,7 +628,8 @@
   <xsd:complexType name="polynomial">
     <xsd:annotation>
       <xsd:documentation>
-        A simple polynomial to be used in multiple places.
+        A simple polynomial to be used in multiple
+        places.
         A polynomial is made up of terms that are summed.
       </xsd:documentation>
     </xsd:annotation>
@@ -730,11 +795,14 @@
   <xsd:element name="condition">
     <xsd:annotation>
       <xsd:documentation>
-        The condition for a case in a switch. A condition
+        The condition for a case in a switch. A
+        condition
         represents an
-        inequality test that evaluates to a boolean. This is a
+        inequality test that evaluates to a
+        boolean. This is a
         comparison of
-        two numbers (represented as polynomials).
+        two numbers (represented as
+        polynomials).
       </xsd:documentation>
     </xsd:annotation>
     <xsd:complexType>

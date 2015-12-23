@@ -45,7 +45,7 @@
   <li><a href='display.jsp'>Big Screen Display</a> Follow this link
    on the computer that's used to display scores with the projector.</li>
 
-  <li><a href="subjective/index.html">Subjective Web
+  <li><a href="subjective/Auth">Subjective Web
     application</a> Follow this link on the subjective judge's electronic
    devices.</li>
 

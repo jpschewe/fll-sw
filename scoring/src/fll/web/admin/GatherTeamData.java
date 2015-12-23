@@ -64,7 +64,7 @@ public class GatherTeamData {
 
         final Collection<String> allEventDivisions = Queries.getEventDivisions(connection,
                                                                                tournament.getTournamentID());
-        if(allEventDivisions.isEmpty()) {
+        if (allEventDivisions.isEmpty()) {
           // special case for empty, always allow 1
           allEventDivisions.add("1");
         }
@@ -72,7 +72,7 @@ public class GatherTeamData {
 
         final Collection<String> allJudgingStations = Queries.getJudgingStations(connection,
                                                                                  tournament.getTournamentID());
-        if(allJudgingStations.isEmpty()) {
+        if (allJudgingStations.isEmpty()) {
           // special case for empty, always allow 1
           allJudgingStations.add("1");
         }
@@ -94,7 +94,9 @@ public class GatherTeamData {
         page.setAttribute("addTeam", true);
         page.setAttribute("teamNumber", null);
         page.setAttribute("teamName", null);
+        page.setAttribute("teamNameEscaped", null);
         page.setAttribute("organization", null);
+        page.setAttribute("organizationEscaped", null);
         page.setAttribute("division", null);
         page.setAttribute("teamInTouranemnt", Collections.emptyMap());
         page.setAttribute("inPlayoffs", false);
@@ -142,7 +144,9 @@ public class GatherTeamData {
         page.setAttribute("teamNumber", teamNumber);
         final Team team = Team.getTeamFromDatabase(connection, teamNumber);
         page.setAttribute("teamName", team.getTeamName());
+        page.setAttribute("teamNameEscaped", escape(team.getTeamName()));
         page.setAttribute("organization", team.getOrganization());
+        page.setAttribute("organizationEscaped", escape(team.getOrganization()));
         page.setAttribute("division", team.getDivision());
         final Map<Integer, Boolean> teamInTournament = new HashMap<>();
         for (final Integer tid : Queries.getAllTournamentsForTeam(connection, teamNumber)) {
@@ -163,5 +167,12 @@ public class GatherTeamData {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Bottom of GatherTeamData.populateContext");
     }
+  }
+
+  /**
+   * Escape the string to be used in the value of a form field.
+   */
+  private static String escape(final String str) {
+    return str.replace("'", "&apos;");
   }
 }

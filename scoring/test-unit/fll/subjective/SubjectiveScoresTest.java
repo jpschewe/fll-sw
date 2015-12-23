@@ -95,7 +95,7 @@ public class SubjectiveScoresTest {
 
       // setup the database with a team and some judges 
       GenerateDB.generateDB(challengeDocument, connection);
-      Queries.createTournament(connection, tournamentName, tournamentName);
+      Tournament.createTournament(connection, tournamentName, tournamentName);
       Tournament tournament = Tournament.findTournamentByName(connection, tournamentName);
       Queries.addTeam(connection, teamNumber, "team" + teamNumber, "org", division, tournament.getTournamentID());      
       prep = connection.prepareStatement("INSERT INTO Judges (id, category, station, Tournament) VALUES(?, ?, ?, ?)");

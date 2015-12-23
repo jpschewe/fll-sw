@@ -10,7 +10,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-import javax.servlet.ServletContext;
+import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
@@ -18,7 +18,7 @@ import org.apache.log4j.Logger;
 
 import fll.Tournament;
 import fll.util.LogUtils;
-import fll.web.ApplicationAttributes;
+import fll.web.SessionAttributes;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -27,14 +27,15 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 public class SelectTournament {
 
   private static final Logger LOGGER = LogUtils.getLogger();
-  
-  public static void populateContext(final ServletContext application,
+
+  public static void populateContext(final HttpSession session,
                                      final PageContext page) {
 
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final DataSource importDataSource = SessionAttributes.getNonNullAttribute(session, "dbimport", DataSource.class);
+
     Connection connection = null;
     try {
-      connection = datasource.getConnection();
+      connection = importDataSource.getConnection();
 
       final List<Tournament> tournaments = Tournament.getTournaments(connection);
       page.setAttribute("tournaments", tournaments);
@@ -46,5 +47,5 @@ public class SelectTournament {
       SQLFunctions.close(connection);
     }
   }
-  
+
 }
