@@ -985,6 +985,16 @@
     },
 
     /**
+     * Sort the specified schedule by time. This is useful after adding slots
+     * that may be out of order.
+     */
+    sortSchedule : function(schedule) {
+      schedule.sort(function(slotA, slotB) {
+        return $.finalist.compareTimes(slotA.time, slotB.time);
+      });
+    },
+
+    /**
      * Check if a team has a playoff conflict with the spcified timeslot
      * 
      * @param team
