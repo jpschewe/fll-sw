@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
 <fll
   title="2015 FIRST LEGO League - Trash Trek"
+  copyright="2015 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST&#174;) and The LEGO Group. Used by special permission. All rights reserved."
   revision="8.1"
-  schemaVersion="1">
+  schemaVersion="2">
 
   <Performance
     minimumScore="0"
@@ -431,7 +432,7 @@
           title="Exemplary"
           min="10"
           max="12"
-          shortDescription="Sound construction, no repairs">
+          shortDescription="Sound construction; no repairs">
           <description>Robot stable and robust. Robot assembles easily.
           </description>
         </range>
@@ -447,7 +448,7 @@
       title="Mechanical Efficiency"
       category="Mechanical Design">
       <description>Economic use of parts and time; easy to repair and
-        modify Components work together.
+        modify
       </description>
       <rubric>
         <range
@@ -691,7 +692,7 @@
           title="Accomplished"
           min="7"
           max="9"
-          shortDescription="Systematic and well-explained improvement cycle">
+          shortDescription="Systematic and well-explained">
           <description>Basic understanding of design process, evidence
             of concept planning, building, testing, refining.
           </description>
@@ -700,7 +701,7 @@
           title="Exemplary"
           min="10"
           max="12"
-          shortDescription="Systematic, well-explained and well-documented improvement cycle">
+          shortDescription="Systematic, well-explained and well-documented">
           <description>Good communication of complete design process.
           </description>
         </range>
@@ -767,17 +768,17 @@
       name="innovation"
       title="Innovation"
       category="Strategy and Innovation">
-      <description>Creation of new, unique or unexpected features (in
-        design, programming, strategy or applications) that are
+      <description>Creation of new, unique or unexpected feature(s) (e.g.
+        designs, programs, strategies or applications) that are
         beneficial
-        in performing the tasks.
+        in performing the specified tasks.
       </description>
       <rubric>
         <range
           title="Beginning"
           min="1"
           max="3"
-          shortDescription="Original features with no added value or potential">
+          shortDescription="Original feature(s) with no added value or potential">
           <description>Design, drive, structure are standard. Expected
             sensor use only.
           </description>
@@ -786,7 +787,7 @@
           title="Developing"
           min="4"
           max="6"
-          shortDescription="Original features with some added value or potential">
+          shortDescription="Original feature(s) with some added value or potential">
           <description>Either design creative, unique use of drive train
             or structure, or unique mission strategy.
           </description>
@@ -795,7 +796,7 @@
           title="Accomplished"
           min="7"
           max="9"
-          shortDescription="Original features with the potential to add significant value">
+          shortDescription="Original feature(s) with the potential to add significant value">
           <description>More than one unique design, drive train,
             structure, or mission strategy.
           </description>
@@ -804,7 +805,7 @@
           title="Exemplary"
           min="10"
           max="12"
-          shortDescription="Original features that add significant value">
+          shortDescription="Original feature(s) that add significant value">
           <description>Extremely unique/creative design, drive train,
             structure and/or mission strategy.
           </description>
@@ -825,7 +826,8 @@
       multiplier="1"
       name="problem_identification"
       title="Problem Identification"
-      category="Research">
+      category="Research"
+      required="true">
       <description>Clear definition of the problem being studied
       </description>
       <rubric>
@@ -885,7 +887,7 @@
           title="Beginning"
           min="1"
           max="3"
-          shortDescription="One type of information cited, minimal sources">
+          shortDescription="One type of information cited; minimal sources">
           <description>No hard data presented as background.
           </description>
         </range>
@@ -893,7 +895,7 @@
           title="Developing"
           min="4"
           max="6"
-          shortDescription="Two types of information cited, several sources">
+          shortDescription="Two types of information cited; several sources">
           <description>Weak or limited data to support proposal.
           </description>
         </range>
@@ -901,7 +903,7 @@
           title="Accomplished"
           min="7"
           max="9"
-          shortDescription="Three types of information cited, many sources, including professionals">
+          shortDescription="Three types of information cited; many sources, including professionals">
           <description>Adequate data supporting problem identification.
           </description>
         </range>
@@ -932,7 +934,7 @@
           title="Beginning"
           min="1"
           max="3"
-          shortDescription="Minimal study, no team analysis">
+          shortDescription="Minimal study; no team analysis">
           <description>No research on the impact of the problem,
             alternative theories or interpretations ignored.
           </description>
@@ -941,7 +943,7 @@
           title="Developing"
           min="4"
           max="6"
-          shortDescription="Minimal study, some team analysis">
+          shortDescription="Minimal study; some team analysis">
           <description>Limited research on the impact of the problem,
             alternative theories obscured.
           </description>
@@ -1027,7 +1029,8 @@
       multiplier="1"
       name="team_solution"
       title="Team Solution"
-      category="Innovative Solution">
+      category="Innovative Solution"
+      required="true">
       <description>Clear explanation of the proposed solution
       </description>
       <rubric>
@@ -1170,7 +1173,8 @@
       multiplier="1"
       name="sharing"
       title="Sharing"
-      category="Presentation">
+      category="Presentation"
+      required="true">
       <description>Degree to which the team shared their Project before
         the
         tournament with others who might benefit from the team's
@@ -1286,7 +1290,7 @@
           title="Developing"
           min="4"
           max="6"
-          shortDescription="Partially clear, minimal organization">
+          shortDescription="Partially clear; minimal organization">
           <description>Ineffective visual aids and support material,
             hesitant answers to judge questions.
           </description>
@@ -1295,7 +1299,7 @@
           title="Accomplished"
           min="7"
           max="9"
-          shortDescription="Mostly clear, mostly organized">
+          shortDescription="Mostly clear; mostly organized">
           <description>Supporting aids/material complement presentation,
             adequate answers.
           </description>
@@ -1304,7 +1308,7 @@
           title="Exemplary"
           min="10"
           max="12"
-          shortDescription="Very clear AND well organized">
+          shortDescription="Clear AND well organized">
           <description>Carefully chosen aids/material add to
             presentation, comprehensive answers.
           </description>
@@ -1622,7 +1626,7 @@
       multiplier="1"
       name="inclusion"
       title="Inclusion"
-      category="Gracious Professionalism">
+      category="Gracious Professionalism&#174;">
       <description>Consideration and appreciation for the contributions
         (ideas and skills) of all team members, with balanced
         involvement
@@ -1668,7 +1672,7 @@
       multiplier="1"
       name="respect"
       title="Respect"
-      category="Gracious Professionalism">
+      category="Gracious Professionalism&#174;">
       <description>Team members act and speak with integrity so others
         feel
         valued - especially when solving problems or resolving
@@ -1716,8 +1720,8 @@
       min="0"
       multiplier="1"
       name="coopertition"
-      title="Coopertition"
-      category="Gracious Professionalism">
+      title="Coopertition&#169;"
+      category="Gracious Professionalism&#174;">
       <description>Team competes in the spirit of friendly competition
         and
         cooperates with others
@@ -1952,7 +1956,7 @@
           title="Exemplary"
           min="10"
           max="12"
-          shortDescription="Streamline code and easy for anyone to understand">
+          shortDescription="Streamlined code and easy for anyone to understand">
           <description>Logically organized, and the team has an
             excellent understanding and use of language constructs.
           </description>
@@ -2124,10 +2128,10 @@
       name="innovation"
       title="Innovation"
       category="Strategy and Innovation">
-      <description>Creation of new, unique or unexpected features (in
-        design, programming, strategy or applications) that are
+      <description>Creation of new, unique or unexpected feature(s) (e.g.
+        designs, programs, strategies or applications) that are
         beneficial
-        in performing the tasks.
+        in performing the specified tasks.
       </description>
       <rubric>
         <range
