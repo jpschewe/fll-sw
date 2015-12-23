@@ -1,13 +1,18 @@
 package fll.documents.writers;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 
 import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
@@ -18,6 +23,8 @@ import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.documents.elements.RowElement;
 import fll.documents.elements.SheetElement;
@@ -25,17 +32,16 @@ import fll.documents.elements.TableElement;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.util.LogUtils;
+import fll.xml.AbstractGoal;
+import fll.xml.ChallengeDescription;
 import fll.xml.RubricRange;
 import fll.xml.ScoreCategory;
+import net.mtu.eggplant.util.Pair;
 
 public class SubjectivePdfWriter {
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  private static Font COMMENTS_FONT = new Font(Font.FontFamily.HELVETICA, 7);
-
-  private static Font RUBRIC_FONT = COMMENTS_FONT;
-
-  private static final String copyRightStatement = "2011 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST) and The LEGO Group. Used by special permission. All rights reserved.";
+  private final ChallengeDescription description;
 
   private final static int NO_BORDERS = 0;
 
@@ -53,23 +59,27 @@ public class SubjectivePdfWriter {
 
   private static final int[] colWidths = { 4, 4, 23, 23, 23, 23 };
 
-  private static final BaseColor rowBlue = new BaseColor(0xB2, 0xCB, 0xE3);
+  private static final BaseColor rowBlue = new BaseColor(0xB4, 0xCD, 0xED);
 
-  private static final BaseColor rowYellow = new BaseColor(0xEE, 0xF1, 0x97);
+  private static final BaseColor rowYellow = new BaseColor(0xFF, 0xFF, 0xC8);
 
-  private static final BaseColor rowRed = new BaseColor(0xE6, 0xA7, 0xA7);
+  private static final BaseColor rowRed = new BaseColor(0xF7, 0x98, 0x85);
 
-  private final Font f6i;
+  private final Font f6Red = new Font(Font.FontFamily.HELVETICA, 6, Font.NORMAL, BaseColor.RED);
 
-  private final Font f8b;
+  private final Font f6i = new Font(Font.FontFamily.HELVETICA, 6, Font.ITALIC);
 
-  private final Font f9b;
+  private final Font f8b = new Font(Font.FontFamily.HELVETICA, 8, Font.BOLD);
 
-  private final Font f10b;
+  private final Font f8bRed = new Font(Font.FontFamily.HELVETICA, 8, Font.BOLD, BaseColor.RED);
 
-  private final Font f12b;
+  private final Font f9b = new Font(Font.FontFamily.HELVETICA, 9, Font.BOLD);
 
-  private final Font f20b;
+  private final Font f10b = new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD);
+
+  private final Font f12b = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
+
+  private final Font f20b = new Font(Font.FontFamily.HELVETICA, 20, Font.BOLD);
 
   private final BaseColor sheetColor;
 
@@ -79,24 +89,24 @@ public class SubjectivePdfWriter {
 
   private final String scheduleColumn;
 
-  public SubjectivePdfWriter(final SheetElement sheet,
+  /**
+   * @param sheet information about the rubric
+   * @param scheduleColumn the column in the schedule used to find the times,
+   *          may be null
+   */
+  public SubjectivePdfWriter(final ChallengeDescription description,
+                             final SheetElement sheet,
                              final String scheduleColumn) {
+    this.description = description;
     this.sheetElement = sheet;
     this.scoreCategory = sheetElement.getSheetData();
     this.scheduleColumn = scheduleColumn;
-
-    f6i = new Font(Font.FontFamily.HELVETICA, 6, Font.ITALIC);
-    f8b = new Font(Font.FontFamily.HELVETICA, 8, Font.BOLD);
-    f9b = new Font(Font.FontFamily.HELVETICA, 9, Font.BOLD);
-    f10b = new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD);
-    f12b = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
-    f20b = new Font(Font.FontFamily.HELVETICA, 20, Font.BOLD);
 
     // uses hard coded constants to make the folors look like FIRST and default
     // to red.
     switch (scoreCategory.getName()) {
     case SubjectiveConstants.CORE_VALUES_NAME:
-      sheetColor = rowBlue;
+      sheetColor = rowRed;
       break;
     case SubjectiveConstants.PROJECT_NAME:
       sheetColor = rowYellow;
@@ -104,15 +114,43 @@ public class SubjectivePdfWriter {
     case SubjectiveConstants.ROBOT_DESIGN_NAME:
     case SubjectiveConstants.PROGRAMMING_NAME:
     default:
-      sheetColor = rowRed;
+      sheetColor = rowBlue;
       break;
     }
 
   }
 
-  public void writeHeader(final Document doc,
-                          final TeamScheduleInfo teamInfo)
-                              throws MalformedURLException, IOException, DocumentException {
+  /**
+   * Write out a subjective sheet for the specified team.
+   * 
+   * @param doc where to write to
+   * @param teamInfo the team information to use when writing
+   * @param font the font to use for comments and the rubric
+   * @param number of rows to put in the comment section
+   * @throws MalformedURLException
+   * @throws IOException
+   * @throws DocumentException
+   */
+  public void writeTeamSubjectivePdf(final Document doc,
+                                     final TeamScheduleInfo teamInfo,
+                                     final Font font,
+                                     final int commentHeight)
+                                         throws MalformedURLException, IOException, DocumentException {
+    final PdfPTable table = createStandardRubricTable();
+    writeHeader(doc, teamInfo);
+    for (final String category : sheetElement.getCategories()) {
+      writeRubricTable(table, sheetElement.getTableElement(category), font);
+      writeCommentsSection(table, font, commentHeight);
+    }
+
+    doc.add(table);
+
+    writeEndOfPageRow(doc);
+  }
+
+  private void writeHeader(final Document doc,
+                           final TeamScheduleInfo teamInfo)
+                               throws MalformedURLException, IOException, DocumentException {
     Image image = null;
     PdfPTable pageHeaderTable = null;
     PdfPTable columnTitlesTable = null;
@@ -146,10 +184,17 @@ public class SubjectivePdfWriter {
     pageHeaderTable.addCell(createCell(scoreCategory.getTitle(), f20b, NO_BORDERS, Element.ALIGN_LEFT));
     pageHeaderTable.addCell(createCell("Team Number: "
         + teamInfo.getTeamNumber(), f12b, NO_BORDERS, Element.ALIGN_LEFT));
+
+    final String scheduledTimeStr;
+    if (null == scheduleColumn) {
+      scheduledTimeStr = "N/A";
+    } else {
+      final Date scheduledTime = teamInfo.getSubjectiveTimeByName(scheduleColumn).getTime();
+      scheduledTimeStr = TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(scheduledTime);
+    }
     pageHeaderTable.addCell(createCell("Time: "
-        + TournamentSchedule.OUTPUT_DATE_FORMAT.get()
-                                               .format(teamInfo.getSubjectiveTimeByName(scheduleColumn).getTime()),
-                                       f12b, NO_BORDERS, Element.ALIGN_RIGHT));
+        + scheduledTimeStr, f12b, NO_BORDERS, Element.ALIGN_RIGHT));
+
     pageHeaderTable.addCell(createCell("Judging Room: "
         + teamInfo.getDivision(), f10b, NO_BORDERS, Element.ALIGN_LEFT));
     PdfPCell c = createCell("Team Name: "
@@ -161,7 +206,8 @@ public class SubjectivePdfWriter {
     // add the instructions to the header
     dirText = "Directions: For each skill area, clearly mark the box that best describes the team's accomplishments.  "
         + "If the team does not demonstrate skill in a particular area, then put an 'X' in the first box for Not Demonstrated (ND).  "
-        + "Please provide as many written comments as you can to acknowledge each teams's hard work and to help teams improve.";
+        + "Please provide as many written comments as you can to acknowledge each teams's hard work and to help teams improve. "
+        + "When you have completed the evaluation, please circle the team's areas of strength.";
     text = new Phrase(dirText, f9b);
     directions = new Paragraph();
     directions.add(text);
@@ -202,22 +248,44 @@ public class SubjectivePdfWriter {
     }
   }
 
-  public void writeEndOfPageRow(Document doc) throws DocumentException {
+  public void writeEndOfPageRow(final Document doc) throws DocumentException {
     PdfPTable closingTable = new PdfPTable(1);
 
     closingTable.setWidthPercentage(100f);
-    final PdfPCell bottomCell = createCell(" ", f6i, TOP_ONLY, sheetColor);
-    bottomCell.setMinimumHeight(18f);
-    closingTable.addCell(bottomCell);
-    closingTable.addCell(createCell(" ", f6i, NO_BORDERS));
+    final StringBuilder strengths = new StringBuilder();
+    strengths.append("Strengths:");
+    for (final String category : sheetElement.getCategories()) {
+      strengths.append("            ");
+      strengths.append(category);
+    }
+    final PdfPCell strengthsCell = createCell(strengths.toString(), f9b, TOP_ONLY, sheetColor);
+    strengthsCell.setMinimumHeight(18f);
+    closingTable.addCell(strengthsCell);
 
-    // add the copy right statement
-    Paragraph copyRight = new Paragraph(new Phrase(copyRightStatement, f6i));
-    copyRight.setLeading(1f);
-    copyRight.setAlignment(Element.ALIGN_CENTER);
+    boolean somethingRequired = false;
+    for (final AbstractGoal goal : sheetElement.getSheetData().getGoals()) {
+      if (goal.isRequired()) {
+        somethingRequired = true;
+      }
+    }
+    if (somethingRequired) {
+      final PdfPCell requiredC = createCell("* Required for Award Consideration ", f6Red, NO_BORDERS);
+      // NO_BORDERS centers
+      requiredC.setHorizontalAlignment(Element.ALIGN_LEFT);
+      closingTable.addCell(requiredC);
+    } else {
+      closingTable.addCell(createCell(" ", f6Red, NO_BORDERS));
+    }
+
+    if (null != description.getCopyright()) {
+      // add the copy right statement
+      final PdfPCell copyrightC = createCell("\u00A9"
+          + description.getCopyright(), f6i, NO_BORDERS);
+      closingTable.addCell(copyrightC);
+    }
 
     doc.add(closingTable);
-    doc.add(copyRight);
+
     doc.newPage();
   }
 
@@ -232,16 +300,17 @@ public class SubjectivePdfWriter {
     return table;
   }
 
-  public void writeCommentsSection(PdfPTable table) {
+  private void writeCommentsSection(final PdfPTable table,
+                                    final Font baseFont,
+                                    final int height) {
     PdfPCell commentLabel = null;
     PdfPCell emptySpace = null;
-    final int height = 1;
-    final Font font = COMMENTS_FONT;
 
+    Font font = new Font(baseFont);
     font.setStyle(Font.ITALIC);
     // This is the 'Comments' section at the bottom of every table for the judge
     // to write in
-    commentLabel = createCell("Comments", font, NO_BORDERS);
+    commentLabel = createCell("Comments:", font, NO_BORDERS);
     commentLabel.setRotation(90);
     commentLabel.setRowspan(1);
     commentLabel.setBorderWidthLeft(0);
@@ -265,12 +334,12 @@ public class SubjectivePdfWriter {
     }
   }
 
-  public void writeRubricTable(final PdfPTable table,
-                               final TableElement tableData) {
+  private void writeRubricTable(final PdfPTable table,
+                                final TableElement tableData,
+                                final Font font) {
     PdfPCell focusArea = null;
     PdfPCell topicArea = null;
     PdfPCell topicInstructions = null;
-    final Font font = RUBRIC_FONT;
 
     // This is the 90 degree turned title for the left side of the table
     focusArea = createCell(tableData.getSubjectiveCatetory(), f8b, NO_TOP_LEFT);
@@ -282,9 +351,24 @@ public class SubjectivePdfWriter {
     table.addCell(focusArea);
 
     final List<RowElement> rows = tableData.getRowElements();
-    for (RowElement rowElement : rows) {
+    for (final RowElement rowElement : rows) {
       // This is the title row with the background color
-      topicArea = createCell(rowElement.getRowTitle(), f8b, NO_LEFT_RIGHT, sheetColor);
+      final Chunk topicAreaC = new Chunk(rowElement.getRowTitle(), f8b);
+
+      final Phrase topicAreaP = new Phrase();
+      topicAreaP.add(topicAreaC);
+
+      if (rowElement.getGoal().isRequired()) {
+        final Chunk required = new Chunk(" *", f8bRed);
+        topicAreaP.add(required);
+      }
+
+      topicArea = new PdfPCell(topicAreaP);
+      topicArea.setVerticalAlignment(Element.ALIGN_CENTER);
+      topicArea.setBorderWidthRight(0);
+      topicArea.setBorderWidthLeft(0);
+      topicArea.setBackgroundColor(sheetColor);
+
       topicArea.setColspan(2);
       topicInstructions = createCell(rowElement.getDescription(), font, NO_LEFT, sheetColor);
       topicInstructions.setColspan(3);
@@ -322,10 +406,10 @@ public class SubjectivePdfWriter {
     return result;
   }
 
-  private PdfPCell createCell(String text,
-                              Font f,
-                              int borders) {
-    PdfPCell result = new PdfPCell(new Paragraph(text, f));
+  private PdfPCell createCell(final String text,
+                              final Font f,
+                              final int borders) {
+    final PdfPCell result = new PdfPCell(new Paragraph(text, f));
     switch (borders) {
     case NO_BORDERS:
       result.setBorder(0);
@@ -379,6 +463,91 @@ public class SubjectivePdfWriter {
 
     // Robot Programming constants
     public static final String PROGRAMMING_NAME = "robot_programming";
+  }
+
+  /**
+   * @param sheetElement describes the subjective category to output
+   * @return Font to use and the number of rows for the comment sheet
+   * @throws MalformedURLException
+   * @throws IOException
+   * @throws DocumentException
+   */
+  private static Pair<Font, Integer> determineParameters(final ChallengeDescription description,
+                                                         final SheetElement sheetElement) throws MalformedURLException,
+                                                             IOException, DocumentException {
+
+    for (int commentHeight = 2; commentHeight > 0; --commentHeight) {
+      for (int pointSize = 12; pointSize >= 6; --pointSize) {
+        final Font font = new Font(Font.FontFamily.HELVETICA, pointSize);
+
+        com.itextpdf.text.Document pdf = SubjectivePdfWriter.createStandardDocument();
+
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        PdfWriter.getInstance(pdf, out);
+
+        pdf.open();
+
+        final SubjectivePdfWriter writer = new SubjectivePdfWriter(description, sheetElement, null);
+
+        final TeamScheduleInfo teamInfo = new TeamScheduleInfo(1, 1);
+        teamInfo.setDivision("dummy");
+        teamInfo.setJudgingStation("Dummy");
+        teamInfo.setOrganization("Dummy");
+        teamInfo.setTeamName("Dummy");
+        writer.writeTeamSubjectivePdf(pdf, teamInfo, font, commentHeight);
+
+        pdf.close();
+
+        final ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+        final PdfReader reader = new PdfReader(in);
+        if (reader.getNumberOfPages() == 1) {
+          return new Pair<>(font, commentHeight);
+        }
+      } // font size
+    } // comment height
+
+    // no font size fit, just use 10 with comment height 2
+    return new Pair<>(new Font(Font.FontFamily.HELVETICA, 10), 2);
+  }
+
+  /**
+   * Create the document
+   * 
+   * @param filename where to write the document
+   * @param sheetElement describes the category to write
+   * @param schedulerColumn used to determine the schedule information to output
+   * @param schedule the schedule to get team information and time information
+   *          from
+   * @throws DocumentException
+   * @throws IOException
+   * @throws MalformedURLException
+   */
+  public static void createDocument(final String filename,
+                                    final ChallengeDescription description,
+                                    final SheetElement sheetElement,
+                                    final String schedulerColumn,
+                                    final List<TeamScheduleInfo> schedule)
+                                        throws DocumentException, MalformedURLException, IOException {
+
+    final Pair<Font, Integer> parameters = determineParameters(description, sheetElement);
+    final Font font = parameters.getOne();
+    final int commentHeight = parameters.getTwo();
+
+    com.itextpdf.text.Document pdf = SubjectivePdfWriter.createStandardDocument();
+
+    PdfWriter.getInstance(pdf, new FileOutputStream(filename));
+
+    pdf.open();
+
+    final SubjectivePdfWriter writer = new SubjectivePdfWriter(description, sheetElement, schedulerColumn);
+
+    // Go through all of the team schedules and put them all into a pdf
+    for (final TeamScheduleInfo teamInfo : schedule) {
+      writer.writeTeamSubjectivePdf(pdf, teamInfo, font, commentHeight);
+    }
+
+    pdf.close();
   }
 
 }
