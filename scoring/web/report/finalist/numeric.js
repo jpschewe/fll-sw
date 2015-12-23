@@ -42,11 +42,11 @@ function createTeamTable(teams, currentDivision, currentCategory) {
         var finalistDisplay = $("#" + getNumFinalistsId(team));
         var numFinalists = parseInt(finalistDisplay.text(), 10);
         if ($(this).prop("checked")) {
-          $.finalist.removeTeamFromCategory(currentCategory, team.num);
-          numFinalists = numFinalists - 1;
-        } else {
           $.finalist.addTeamToCategory(currentCategory, team.num);
           numFinalists = numFinalists + 1;
+        } else {
+          $.finalist.removeTeamFromCategory(currentCategory, team.num);
+          numFinalists = numFinalists - 1;
         }
         finalistDisplay.text(numFinalists);
       });
