@@ -2893,37 +2893,6 @@ public final class Queries {
   }
 
   /**
-   * Create a tournament in the database.
-   * 
-   * @param name the name of the tournament, must not be null
-   * @param location the location of the tournament, may be null
-   */
-  public static void createTournament(final Connection connection,
-                                      final String name,
-                                      final String location) throws SQLException {
-    PreparedStatement insertPrep = null;
-    try {
-      insertPrep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location) VALUES(?, ?)");
-      insertPrep.setString(1, name);
-      insertPrep.setString(2, location);
-      insertPrep.executeUpdate();
-    } finally {
-      SQLFunctions.close(insertPrep);
-    }
-  }
-
-  public static void deleteTournament(final Connection connection,
-                                      final int tournamentID) throws SQLException {
-    PreparedStatement deletePrep = null;
-    try {
-      deletePrep = connection.prepareStatement("DELETE FROM Tournaments WHERE tournament_id = ?");
-      deletePrep.setInt(1, tournamentID);
-    } finally {
-      SQLFunctions.close(deletePrep);
-    }
-  }
-
-  /**
    * Set the name and location of a tournament.
    * 
    * @param tournamentID which tournament to modify

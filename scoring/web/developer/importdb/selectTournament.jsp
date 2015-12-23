@@ -1,7 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%
-  fll.web.developer.importdb.SelectTournament.populateContext(application, pageContext);
+  fll.web.developer.importdb.SelectTournament.populateContext(session, pageContext);
 %>
 
 <html>
