@@ -17,7 +17,9 @@ var schedule = null;
 var timeToCells = {};
 
 /**
- * Find the cell for the specified time and category id.
+ * Find the cell for the specified time and category id. This does a lookup by
+ * comparing the times, so slots added later are ok as long as a cell has been
+ * added for the specified time.
  * 
  * @param searchTime
  *          the time to search for
@@ -230,18 +232,19 @@ function moveTeam(team, category, newSlot) {
       if (categoryId == category.catId && teamNumber == team.num) {
         foundTeam = true;
       }
-      var slotTime = new Date(slot.time);
-      if ($.finalist.compareTimes(slot.time, newSlot.time) == 0) {
-        destSlot = slot;
-      }
     }); // foreach category
+    
+    if ($.finalist.compareTimes(slot.time, newSlot.time) == 0) {
+      destSlot = slot;
+    }
+
     if (foundTeam) {
       srcSlot = slot;
     }
   }); // foreach timeslot
 
   if (null == destSlot) {
-    alert("Internal error, could not find slot to move to");
+    alert("Internal error, can't find destination slot in schedule");
     return;
   }
 
