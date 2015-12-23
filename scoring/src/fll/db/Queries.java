@@ -2918,6 +2918,7 @@ public final class Queries {
     try {
       deletePrep = connection.prepareStatement("DELETE FROM Tournaments WHERE tournament_id = ?");
       deletePrep.setInt(1, tournamentID);
+      deletePrep.executeUpdate();
     } finally {
       SQLFunctions.close(deletePrep);
     }
