@@ -782,6 +782,9 @@
       teamNum = parseInt(teamNum, 10);
       var index = category.teams.indexOf(teamNum);
       if (-1 == index) {
+        // clear the schedule for the current division
+        _schedules[$.finalist.getCurrentDivision()] = null;
+
         category.teams.push(teamNum);
         _save();
       }
@@ -801,6 +804,9 @@
       teamNum = parseInt(teamNum, 10);
       var index = category.teams.indexOf(teamNum);
       if (index != -1) {
+        // clear the schedule for the current division
+        _schedules[$.finalist.getCurrentDivision()] = null;
+        
         category.teams.splice(index, 1);
         if (save) {
           _save();
