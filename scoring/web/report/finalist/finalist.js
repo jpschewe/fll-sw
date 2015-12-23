@@ -313,6 +313,14 @@
       return _addMinutesToTime(time, minutes);
     },
 
+    /**
+     * Convert a time object to a string to be displayed.
+     */
+    timeToDisplayString : function(time) {
+      return time.hour.toString().padL(2, "0") + ":"
+          + time.minute.toString().padL(2, "0");
+    },
+
     setCategoryVisited : function(category, division) {
       var visited = _categoriesVisited[division];
       if (null == visited) {
@@ -806,7 +814,7 @@
       if (index != -1) {
         // clear the schedule for the current division
         _schedules[$.finalist.getCurrentDivision()] = null;
-        
+
         category.teams.splice(index, 1);
         if (save) {
           _save();
