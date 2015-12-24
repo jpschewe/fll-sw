@@ -23,7 +23,7 @@
   var _numTeamsAutoSelected;
   var _startHour;
   var _startMinute;
-  var _duration;
+  var _duration; // minutes
   var _categoriesVisited;
   var _currentCategoryId; // category to display with numeric.html
   var _playoffDivisions;
@@ -1011,7 +1011,7 @@
     },
 
     /**
-     * Check if a team has a playoff conflict with the spcified timeslot
+     * Check if a team has a playoff conflict with the specified timeslot
      * 
      * @param team
      *          Team object

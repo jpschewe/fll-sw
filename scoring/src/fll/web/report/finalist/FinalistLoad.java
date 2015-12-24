@@ -12,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Formatter;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
@@ -215,12 +216,61 @@ public class FinalistLoad {
           final double catScore = rs.getDouble(categoryName);
           output.format("$.finalist.setCategoryScore(%s, %s, %.02f);%n", teamVar, categoryVar, catScore);
         } // foreach category
-      }// foreach team
+      } // foreach team
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
       SQLFunctions.close(connection);
     }
+  }
+
+  public static void outputSchedules(final Writer writer,
+                                     final ServletContext application) throws SQLException {
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    Connection connection = null;
+
+    try {
+      connection = datasource.getConnection();
+
+      final int tournament = Queries.getCurrentTournament(connection);
+      final Formatter output = new Formatter(writer);
+
+      for (final String division : FinalistSchedule.getAllDivisions(connection, tournament)) {
+        output.format("{%n");
+
+        output.format("var division = '%s';%n", division);
+
+        final FinalistSchedule schedule = new FinalistSchedule(connection, tournament, division);
+
+        for (final Map.Entry<String, Boolean> entry : schedule.getCategories().entrySet()) {
+          output.format("$.finalist.setCategoryPublic($.finalist.getCategoryByName(\"%s\"), %b);%n", entry.getKey(), entry.getValue());
+        }
+
+        for (final Map.Entry<String, String> entry : schedule.getRooms().entrySet()) {
+          output.format("$.finalist.setRoom($.finalist.getCategoryByName(\"%s\"), division, \"%s\");%n", entry.getKey(), entry.getValue());
+        }
+
+        /* TODO ticket 447
+        output.format("var schedule = [];%n");
+
+        for (final FinalistDBRow row : schedule.getSchedule()) {
+           var time = new Time(hours, minutes);
+           var newSlot = new Timeslot(time, slotDuration);
+           schedule.push(newSlot);           
+        }
+
+        output.format("$.finalist.sortSchedule(schedule);%n");
+        output.format("$.finalist.setSchedule(division, schedule);%n");
+
+        output.format("}%n");
+        */
+        
+      }
+
+    } finally {
+      SQLFunctions.close(connection);
+    }
+
   }
 
 }

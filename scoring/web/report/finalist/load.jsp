@@ -33,9 +33,12 @@
 			championship = $.finalist.addCategory($.finalist.CHAMPIONSHIP_NAME,
 					true);
 		}
+		
 <%FinalistLoad.outputCategoryScores(out, application);%>
 
 <%FinalistLoad.outputNonNumericNominees(out, application);%>
+
+<%FinalistLoad.outputSchedules(out, application);%>
 
 	$.finalist.setTournament(_loadingTournament);
 	}
