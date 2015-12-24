@@ -21,8 +21,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
 import fll.db.Queries;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * The schedule for finalist judging.
@@ -132,7 +132,19 @@ public class FinalistSchedule implements Serializable {
     return Collections.unmodifiableMap(mRooms);
   }
 
+  /**
+   * Unmodifiable.
+   */
   private final Collection<FinalistDBRow> mSchedule;
+
+  /**
+   * The full schedule.
+   * 
+   * @return unmodifiable collection
+   */
+  public Collection<FinalistDBRow> getSchedule() {
+    return mSchedule; // already unmodifiable from constructor
+  }
 
   /**
    * The schedule time slots for the specified category.
