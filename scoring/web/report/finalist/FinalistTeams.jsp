@@ -1,3 +1,6 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+    
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%
@@ -10,7 +13,6 @@
   rel="stylesheet"
   type="text/css"
   href="<c:url value='/style/base.css'/>" />
-<title>Reporting</title>
 
 <script
   type='text/javascript'
