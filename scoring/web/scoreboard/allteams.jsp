@@ -61,12 +61,9 @@ if(numLogos < 1) {
 
 <html>
 <head>
-<style>
-FONT {
-	color: #ffffff;
-	font-family: "Arial"
-}
+<link rel='stylesheet' type='text/css' href='score_style.css' />
 
+<style>
 TABLE.A {
 	background-color: #000080
 }

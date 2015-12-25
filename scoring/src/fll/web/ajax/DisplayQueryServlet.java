@@ -54,9 +54,8 @@ public class DisplayQueryServlet extends BaseFLLServlet {
       localDisplayPage = myDisplayPage != null ? myDisplayPage
           : ApplicationAttributes.getAttribute(application, ApplicationAttributes.DISPLAY_PAGE, String.class);
 
-      localDisplayURL = myDisplayURL != null ? myDisplayURL : ApplicationAttributes.getAttribute(application,
-                                                                                                 "displayURL",
-                                                                                                 String.class);
+      localDisplayURL = myDisplayURL != null ? myDisplayURL
+          : ApplicationAttributes.getAttribute(application, "displayURL", String.class);
     } else {
       localDisplayPage = ApplicationAttributes.getAttribute(application, ApplicationAttributes.DISPLAY_PAGE,
                                                             String.class);
@@ -114,10 +113,14 @@ public class DisplayQueryServlet extends BaseFLLServlet {
         }
 
         return String.format("%s/report/finalist/PublicFinalistDisplaySchedule.jsp?finalistScheduleScroll=true&division=%s",
-                             contextPath, URLEncoder.encode(finalistScheduleDivision, Utilities.DEFAULT_CHARSET.name()));
+                             contextPath,
+                             URLEncoder.encode(finalistScheduleDivision, Utilities.DEFAULT_CHARSET.name()));
       } catch (final UnsupportedEncodingException e) {
         throw new FLLInternalException("Cannot encode using default charset?", e);
       }
+    } else if ("finalistTeams".equals(displayPage)) {
+      return contextPath
+          + "/report/finalist/FinalistTeams.jsp?finalistTeamsScroll=true";
     } else if ("special".equals(displayPage)) {
       return contextPath
           + "/" + displayURL;

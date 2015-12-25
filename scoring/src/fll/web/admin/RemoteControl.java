@@ -53,8 +53,8 @@ public class RemoteControl {
       if (null == application.getAttribute("slideShowInterval")) {
         application.setAttribute("slideShowInterval", Integer.valueOf(10));
       }
-      if (null == application.getAttribute("displayPage")) {
-        application.setAttribute("displayPage", "welcome");
+      if (null == application.getAttribute(ApplicationAttributes.DISPLAY_PAGE)) {
+        application.setAttribute(ApplicationAttributes.DISPLAY_PAGE, "welcome");
       }
 
       pageContext.setAttribute("numPlayoffRounds", Queries.getNumPlayoffRounds(connection));

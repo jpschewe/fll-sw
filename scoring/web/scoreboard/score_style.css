@@ -22,9 +22,11 @@ td.right {
 body {
 	background: #000080;
 	color: #ffffff;
-	font-family: 'Arial' font-size :   3;
+	font-family: 'Arial';
+	font-size: 16;
+	font-weight: bold;
 }
 
 table {
-    table-layout: fixed
-    }
+	table-layout: fixed
+}

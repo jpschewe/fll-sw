@@ -21,6 +21,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
 import org.icepush.PushContext;
 
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.DisplayNames;
 import fll.web.SessionAttributes;
@@ -77,7 +78,7 @@ public class RemoteControlPost extends BaseFLLServlet {
     if (null != slideIntervalStr) {
       application.setAttribute("slideShowInterval", Integer.valueOf(slideIntervalStr));
     }
-    application.setAttribute("displayPage", request.getParameter("remotePage"));
+    application.setAttribute(ApplicationAttributes.DISPLAY_PAGE, request.getParameter("remotePage"));
     application.setAttribute("displayURL", request.getParameter("remoteURL"));
     final String playoffRoundNumberStr = request.getParameter("playoffRoundNumber");
     if (null != playoffRoundNumberStr) {
@@ -110,7 +111,7 @@ public class RemoteControlPost extends BaseFLLServlet {
         } else {
           application.setAttribute(displayName
               + "_displayPage", request.getParameter(displayName
-              + "_remotePage"));
+                  + "_remotePage"));
           application.setAttribute(displayName
               + "_displayURL", request.getParameter("remoteURL"));
           final String displayPlayoffRoundNumberStr = request.getParameter(displayName
@@ -122,10 +123,11 @@ public class RemoteControlPost extends BaseFLLServlet {
           }
           application.setAttribute(displayName
               + "_playoffDivision", request.getParameter(displayName
-              + "_playoffDivision"));
+                  + "_playoffDivision"));
           application.setAttribute(displayName
-              + "_finalistDivision", request.getParameter(displayName
-              + "_finalistDivision"));
+              + "_finalistDivision",
+                                   request.getParameter(displayName
+                                       + "_finalistDivision"));
         }
       } // foreach display
 

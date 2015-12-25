@@ -1,22 +1,31 @@
-<%@ include file="/WEB-INF/jspf/init.jspf" %>
-  
-<html>
-  <head>
-    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title>Scoreboard</title>
-  </head>
-  <body>
-    <h1>Scoreboard</h1>
-    <ul>
-      <li><a href='<c:url value="main.jsp" />'>Primary Scoreboard (1024x768)</a></li>
-      <li><a href='<c:url value="/scoreboard_800/main.jsp" />'>Primary Scoreboard
-            (800x600)</a></li>
-        
-      <li><a href='<c:url value="allteams.jsp"/>'>All Teams, All Runs (primarily for internal use)</a></li>
-      <li><a href='<c:url value="Last8"/>'>Last 8 scores</a></li>
-      <li><a href='<c:url value="Top10"/>'>Top 10 scores</a></li>
-        
-    </ul>
+<%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-  </body>
+<html>
+<head>
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="<c:url value='/style/style.jsp'/>" />
+<title>Scoreboard</title>
+</head>
+<body>
+  <h1>Scoreboard</h1>
+  <ul>
+    <li><a href='<c:url value="main.jsp" />' target="_blank">Primary Scoreboard
+        (1024x768)</a></li>
+    <li><a href='<c:url value="/scoreboard_800/main.jsp" />' target="_blank">Primary
+        Scoreboard (800x600)</a></li>
+
+    <li><a href='<c:url value="allteams.jsp"/>' target="_blank">All Teams, All
+        Runs (primarily for internal use)</a></li>
+    <li><a href='<c:url value="Last8"/>' target="_blank">Last 8 scores</a></li>
+    <li><a href='<c:url value="Top10"/>' target="_blank">Top 10 scores</a></li>
+
+    <li><a
+      href='<c:url value="/report/finalist/FinalistTeams.jsp"/>' target="_blank">Teams
+        in finalist judging</a></li>
+
+  </ul>
+
+</body>
 </html>

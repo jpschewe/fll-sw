@@ -131,7 +131,7 @@ END DEBUG --%>
        </c:choose></td>
      </c:forEach>
     </c:if>
-   </tr>
+   </tr> <!-- welcome -->
 
    <tr>
     <th>Scoreboard</th>
@@ -160,40 +160,7 @@ END DEBUG --%>
        </c:choose></td>
      </c:forEach>
     </c:if>
-   </tr>
-
-   <tr>
-    <th>Slide show<br /> Seconds to show a slide: <input
-     type='text' name='slideInterval'
-     value='<c:out value="${slideShowInterval}"/>' size='3' />
-    </th>
-    <td><c:if test='${displayPage eq "slideshow"}'
-      var='slideshowPage'>
-      <input type='radio' id="slideshow" name='remotePage'
-       value='slideshow' checked />
-     </c:if> <c:if test='${not slideshowPage}'>
-      <input type='radio' id="slideshow" name='remotePage'
-       value='slideshow' />
-     </c:if></td>
-
-    <c:if test="${not empty displayNames}">
-     <c:forEach items="${displayNames}" var="displayName">
-      <td><c:set var="displayPageKey"
-        value="${displayName.key}_displayPage" /> <c:choose>
-        <c:when
-         test="${applicationScope[displayPageKey] == 'slideshow'}">
-         <input type='radio' name="${displayName.key}_remotePage"
-          value='slideshow' checked />
-        </c:when>
-        <c:otherwise>
-         <input type='radio' name="${displayName.key}_remotePage"
-          value='slideshow' />
-        </c:otherwise>
-       </c:choose></td>
-     </c:forEach>
-    </c:if>
-
-   </tr>
+   </tr> <!--  Scoreboard -->
 
    <tr>
     <th>Playoffs <i>WARNING: Do not select brackets until all
@@ -275,7 +242,7 @@ END DEBUG --%>
      </c:forEach>
     </c:if>
 
-   </tr>
+   </tr> <!--  Playoffs -->
 
    <tr>
     <th>Finalist Schedule</th>
@@ -337,8 +304,67 @@ END DEBUG --%>
      </c:forEach>
     </c:if>
 
-   </tr>
+   </tr> <!--  Finalist Schedule -->
 
+   <tr>
+    <th>Finalist Teams</th>
+    <td><input type='radio' id='finalistTeams' name='remotePage'
+     value='finalistTeams'
+     <c:if test='${displayPage == "finalistTeams"}'>
+    checked
+    </c:if> />
+    </td>
+
+    <c:if test="${not empty displayNames}">
+     <c:forEach items="${displayNames}" var="displayName">
+      <td><c:set var="displayPageKey"
+        value="${displayName.key}_displayPage" /> <c:choose>
+        <c:when test="${applicationScope[displayPageKey] == 'finalistTeams'}">
+         <input type='radio' name="${displayName.key}_remotePage"
+          value='finalistTeams' checked />
+        </c:when>
+        <c:otherwise>
+         <input type='radio' name="${displayName.key}_remotePage"
+          value='finalistTeams' />
+        </c:otherwise>
+       </c:choose></td>
+     </c:forEach>
+    </c:if>
+   </tr> <!--  Finalist teams -->
+   
+      <tr>
+    <th>Slide show<br /> Seconds to show a slide: <input
+     type='text' name='slideInterval'
+     value='<c:out value="${slideShowInterval}"/>' size='3' />
+    </th>
+    <td><c:if test='${displayPage eq "slideshow"}'
+      var='slideshowPage'>
+      <input type='radio' id="slideshow" name='remotePage'
+       value='slideshow' checked />
+     </c:if> <c:if test='${not slideshowPage}'>
+      <input type='radio' id="slideshow" name='remotePage'
+       value='slideshow' />
+     </c:if></td>
+
+    <c:if test="${not empty displayNames}">
+     <c:forEach items="${displayNames}" var="displayName">
+      <td><c:set var="displayPageKey"
+        value="${displayName.key}_displayPage" /> <c:choose>
+        <c:when
+         test="${applicationScope[displayPageKey] == 'slideshow'}">
+         <input type='radio' name="${displayName.key}_remotePage"
+          value='slideshow' checked />
+        </c:when>
+        <c:otherwise>
+         <input type='radio' name="${displayName.key}_remotePage"
+          value='slideshow' />
+        </c:otherwise>
+       </c:choose></td>
+     </c:forEach>
+    </c:if>
+
+   </tr> <!--  Slideshow -->
+   
    <tr>
     <th>Specify page relative to /fll-sw</th>
     <td><c:choose>
@@ -373,7 +399,7 @@ END DEBUG --%>
      </c:forEach>
     </c:if>
 
-   </tr>
+   </tr> <!-- specify page -->
 
   </table>
 

@@ -81,17 +81,6 @@ public final class SessionAttributes {
     return getAttribute(session, MESSAGE, String.class);
   }
 
-  /**
-   * {@link String} that keeps track of what page is being shown on the big
-   * screen. Used in conjunction with {@link ApplicationAttributes#DISPLAY_PAGE}
-   * to keep from refreshing the display too often.
-   */
-  public static final String SESSION_DISPLAY_PAGE = "sessionDisplayPage";
-
-  public static String getSessionDisplayPage(final HttpSession session) {
-    return getAttribute(session, SESSION_DISPLAY_PAGE, String.class);
-  }
-
   public static final String REDIRECT_URL = "redirect_url";
 
   public static String getRedirectURL(final HttpSession session) {

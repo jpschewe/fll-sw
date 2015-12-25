@@ -27,23 +27,23 @@
       will be returned to this page if there are no errors summarizing
       scores.</li>
 
-    <li><a href='getPerformancePercentage.jsp'>Final Computed
+    <li><a href='getPerformancePercentage.jsp' target="_blank">Final Computed
         Scores</a>. This is the report that the head judge will want to
       determine which teams advance to the next tournament.</li>
 
-    <li><a href="CategoryScoresByScoreGroup">Categorized Scores
+    <li><a href="CategoryScoresByScoreGroup" target="_blank">Categorized Scores
         by Judging Station</a>. This displays the scaled scores for each
       category by judging station. This is useful for checking the
       winners of each category.</li>
 
-    <li><a href="RankingReport">Ranking Report for teams</a>. This
+    <li><a href="RankingReport" target="_blank">Ranking Report for teams</a>. This
       is printed at the end of the day and each team gets their page.</li>
 
-    <li><a href="PerformanceScoreReport">Performance Score
+    <li><a href="PerformanceScoreReport" target="_blank">Performance Score
         Report</a>. This displays the details of the performance runs for
       each team.</li>
 
-    <li><a href="PlayoffReport">Winners of each playoff bracket</a>.
+    <li><a href="PlayoffReport" target="_blank">Winners of each playoff bracket</a>.
       This is useful for the awards ceremony.</li>
 
   </ol>
@@ -57,20 +57,21 @@
 
   <ul>
   
-    <li><a href="non-numeric-nominees.jsp">Enter non-numeric
+    <li><a href="non-numeric-nominees.jsp" target="_blank">Enter non-numeric
         nominees</a>. This is used to enter the teams that are up for
       consideration for the non-scored subjective categories. This
       information transfers over to the finalist scheduling web
       application. This is also used in the awards scripts report.</li>
   
-    <li><a href="finalist/load.jsp">Schedule Finalists</a>. This is
+    <li><a href="finalist/load.jsp" target="_blank">Schedule Finalists</a>. This is
       used when one judge doesn't see all teams in a division and the
       top teams need to be judged again to choose the winners.</li>
 
     <li>
       <form
         ACTION='finalist/PrivateFinalistSchedule'
-        METHOD='POST'>
+        METHOD='POST'
+        target="_blank">
         <select name='division'>
           <c:forEach
             var="division"
@@ -87,7 +88,8 @@
     <li>
       <form
         ACTION='finalist/PublicFinalistSchedule'
-        METHOD='POST'>
+        METHOD='POST'
+        target="_blank">
         <select name='division'>
           <c:forEach
             var="division"
@@ -104,7 +106,8 @@
     <li>
       <form
         ACTION='finalist/PublicFinalistDisplaySchedule.jsp'
-        METHOD='POST'>
+        METHOD='POST'
+        target="_blank">
         <select name='division'>
           <c:forEach
             var="division"
@@ -119,7 +122,7 @@
       </form>
     </li>
 
-    <li><a href="finalist/TeamFinalistSchedule">Finalist
+    <li><a href="finalist/TeamFinalistSchedule" target="_blank">Finalist
         Schedule for each team</a></li>
 
 
