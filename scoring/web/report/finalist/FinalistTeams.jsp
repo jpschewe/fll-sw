@@ -1,0 +1,63 @@
+<%@ include file="/WEB-INF/jspf/init.jspf"%>
+
+<%
+  fll.web.report.finalist.FinalistTeams.populateContext(application, pageContext);
+%>
+
+<html>
+<head>
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="<c:url value='/style/base.css'/>" />
+<title>Reporting</title>
+
+<script
+  type='text/javascript'
+  src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
+
+<link rel='stylesheet' type='text/css' href='../../scoreboard/score_style.css' />
+
+
+<script
+  type='text/javascript'
+  src="<c:url value='/scripts/scroll.js'/>"></script>
+
+<script type="text/javascript">
+  $(document).ready(function() {
+    <c:if test="${param.finalistTeamsScroll}">
+    startScrolling();
+    </c:if>
+  });
+</script>
+
+</head>
+
+<body>
+  ${message}
+  <%-- clear out the message, so that we don't see it again --%>
+  <c:remove var="message" />
+
+  <h1>Teams in finalist judging</h1>
+
+  <table border='1'>
+    <tr>
+      <th>Team #</th>
+      <th>Team Name</th>
+      <th>Organization</th>
+    </tr>
+
+    <c:forEach
+      items="${teams }"
+      var="team">
+      <tr>
+        <td>${team.teamNumber}</td>
+        <td>${team.teamName}</td>
+        <td>${team.organization}</td>
+      </tr>
+    </c:forEach>
+
+  </table>
+
+</body>
+</html>

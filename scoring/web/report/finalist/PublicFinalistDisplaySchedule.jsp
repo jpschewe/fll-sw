@@ -14,12 +14,7 @@
 <script type='text/javascript'
  src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
 
-<style>
-BODY {
-	color: #ffffff;
-	font-family: "Arial";
-	background-color: #000080;
-}
+<link rel='stylesheet' type='text/css' href='../../scoreboard/score_style.css' />
 </style>
 
 <script type='text/javascript' src="<c:url value='/scripts/scroll.js'/>"></script>

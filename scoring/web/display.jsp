@@ -92,9 +92,6 @@
     <p>This display is named ${displayName}</p>
   </c:if>
 
-  Displaying page ${sessionDisplayPage}.
-  <br />
-
   <p>Leave this page open on the display computer. It's used to
     control the actual display window. You may need to press F11 in the
     newly opened window to remove the titlebar and make it fullscreen.</p>
