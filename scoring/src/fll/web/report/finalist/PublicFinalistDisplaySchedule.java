@@ -33,7 +33,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
 
 /**
- * Support for PublicFinalistDisplaySchedule.html
+ * Support for PublicFinalistDisplaySchedule.jsp.
  */
 public class PublicFinalistDisplaySchedule {
 

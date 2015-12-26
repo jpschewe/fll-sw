@@ -261,9 +261,9 @@ public class FinalistLoad {
 
         output.format("$.finalist.sortSchedule(schedule);%n");
         output.format("$.finalist.setSchedule(division, schedule);%n");
+        */
 
         output.format("}%n");
-        */
         
       }
 

@@ -90,6 +90,7 @@ public class Top10 extends BaseFLLServlet {
       }
       session.setAttribute("divisionIndex", Integer.valueOf(divisionIndex));
 
+      formatter.format("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">");
       formatter.format("<html>");
       formatter.format("<head>");
       formatter.format("<link rel='stylesheet' type='text/css' href='../style/style.jsp' />");

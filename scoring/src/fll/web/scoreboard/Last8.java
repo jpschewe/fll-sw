@@ -56,8 +56,10 @@ public class Last8 extends BaseFLLServlet {
       connection = datasource.getConnection();
 
       final int currentTournament = Queries.getCurrentTournament(connection);
-      final int maxScoreboardRound = TournamentParameters.getMaxScoreboardPerformanceRound(connection, currentTournament);
+      final int maxScoreboardRound = TournamentParameters.getMaxScoreboardPerformanceRound(connection,
+                                                                                           currentTournament);
 
+      formatter.format("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">");
       formatter.format("<html>");
       formatter.format("<head>");
       formatter.format("<link rel='stylesheet' type='text/css' href='../style/style.jsp' />");
@@ -68,12 +70,12 @@ public class Last8 extends BaseFLLServlet {
       formatter.format("<body>");
       formatter.format("<center>");
       formatter.format("<table border='1' cellpadding='0' cellspacing='0' width='98%%'>");
-      
+
       formatter.format("<colgroup>");
       formatter.format("<col width='75px' />");
       formatter.format("<col />");
       if (showOrg) {
-      formatter.format("<col />");
+        formatter.format("<col />");
       }
       formatter.format("<col width='100px' />");
       formatter.format("<col width='75px' />");
@@ -134,7 +136,7 @@ public class Last8 extends BaseFLLServlet {
         formatter.format("</b></td>");
         formatter.format("</tr>");
 
-      }// end while next
+      } // end while next
 
       formatter.format("</table>");
       formatter.format("</body>");
