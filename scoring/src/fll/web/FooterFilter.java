@@ -60,7 +60,8 @@ public class FooterFilter implements Filter {
 
       final String contentType = wrapper.getContentType();
       if (wrapper.isStringUsed()) {
-        if (null != contentType && contentType.startsWith("text/html")) {
+        if (null != contentType
+            && contentType.startsWith("text/html")) {
           final String url = httpRequest.getRequestURI();
 
           final String origStr = wrapper.getString();
@@ -75,7 +76,8 @@ public class FooterFilter implements Filter {
           final int bodyIndex = origStr.indexOf("</body>");
           if (-1 != bodyIndex
               && !noFooter(url)) {
-            caw.write(origStr.substring(0, bodyIndex - 1));
+            caw.write(origStr.substring(0, bodyIndex
+                - 1));
             if (path.startsWith(httpRequest.getContextPath()
                 + "/public")) {
               addPublicFooter(caw, httpRequest);
@@ -130,13 +132,17 @@ public class FooterFilter implements Filter {
     } else if (url.indexOf("scoreboard") != -1
         && !url.endsWith("index.jsp")) {
       return true;
-    } else if(url.indexOf("playoff/remoteMain.jsp") != -1) {
+    } else if (url.indexOf("playoff/remoteMain.jsp") != -1) {
       return true;
-    } else if(url.indexOf("playoff/title.jsp") != -1) {
+    } else if (url.indexOf("playoff/title.jsp") != -1) {
       return true;
-    } else if(url.indexOf("playoff/remoteControlBrackets.jsp") != -1) {
+    } else if (url.indexOf("playoff/remoteControlBrackets.jsp") != -1) {
       return true;
-    } else if(url.indexOf("playoff/sponsors.jsp") != -1) {
+    } else if (url.indexOf("playoff/sponsors.jsp") != -1) {
+      return true;
+    } else if (url.indexOf("report/finalist/FinalistTeams.jsp") != -1) {
+      return true;
+    } else if (url.indexOf("report/finalist/PublicFinalistDisplaySchedule.jsp") != -1) {
       return true;
     } else {
       return false;
