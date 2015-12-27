@@ -52,7 +52,9 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
+import javax.swing.ProgressMonitor;
 import javax.swing.SwingConstants;
+import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ListSelectionEvent;
@@ -268,6 +270,7 @@ public class SchedulerUI extends JFrame {
         return;
       }
 
+      /*
       final TableOptimizer optimizer = new TableOptimizer(mSchedParams, mScheduleData,
                                                           mScheduleFile.getAbsoluteFile().getParentFile());
 
@@ -285,6 +288,12 @@ public class SchedulerUI extends JFrame {
 
         loadScheduleFile(optimizedFile, subjectiveStations);
       }
+      */
+     
+      _optimizerMonitor = new ProgressMonitor(SchedulerUI.this, "Running Table Optimizer", null, 0, 1);
+      final OptimizerWorker optimizerWorker = new OptimizerWorker(solver, subjectiveStations);
+      optimizerWorker.execute();
+      
     } catch (final IOException e) {
       final Formatter errorFormatter = new Formatter();
       errorFormatter.format("Error reading description file: %s", e.getMessage());
@@ -297,6 +306,56 @@ public class SchedulerUI extends JFrame {
       LOGGER.error(errorFormatter, e);
       JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error Running Scheduler",
                                     JOptionPane.ERROR_MESSAGE);
+    }
+
+  }
+
+  private ProgressMonitor _optimizerMonitor;
+  private final class OptimizerWorker extends SwingWorker<Void, Void> {
+    private final GreedySolver solver;
+
+    private final List<SubjectiveStation> subjectiveStations;
+
+    private final TableOptimizer optimizer;
+
+    public OptimizerWorker(final GreedySolver solver,
+                           final List<SubjectiveStation> subjectiveStations) {
+      this.solver = solver;
+      this.subjectiveStations = subjectiveStations;
+
+      this.optimizer = new TableOptimizer(mSchedParams, mScheduleData, mScheduleFile.getAbsoluteFile().getParentFile());
+    }
+
+    @Override
+    protected Void doInBackground() {
+      // see if we can get a better solution
+      optimizer.optimize();
+      
+      return null;
+    }
+
+    @Override
+    protected void done() {
+      if(null != _optimizerMonitor) {
+        _optimizerMonitor.close();
+        _optimizerMonitor = null;
+      }
+      
+      final File optimizedFile = optimizer.getBestScheduleOutputFile();
+      if (null != optimizedFile) {
+
+        final File solutionFile = solver.getBestSchedule();
+        if (!solutionFile.delete()) {
+          solutionFile.deleteOnExit();
+        }
+        final File objectiveFile = solver.getBestObjectiveFile();
+        if (!objectiveFile.delete()) {
+          objectiveFile.deleteOnExit();
+        }
+
+        loadScheduleFile(optimizedFile, subjectiveStations);
+      }
+
     }
 
   }
@@ -735,7 +794,7 @@ public class SchedulerUI extends JFrame {
       mRunOptimizerAction.setEnabled(true);
       mReloadFileAction.setEnabled(true);
       mScheduleFilename.setText(mScheduleFile.getName());
-      
+
       mTabbedPane.setSelectedIndex(1);
     } catch (final ParseException e) {
       final Formatter errorFormatter = new Formatter();
