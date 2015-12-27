@@ -492,7 +492,7 @@ public final class ScoreEntry {
         writer.println("  </td>");
 
         // error message
-        formatter.format("  <td class='error' id='error_%s'>&nbsp;</td>%n", name);
+        formatter.format("  <td class='error,score-error' id='error_%s'>&nbsp;</td>%n", name);
 
         writer.println("</tr>");
         writer.println("<!-- end "
