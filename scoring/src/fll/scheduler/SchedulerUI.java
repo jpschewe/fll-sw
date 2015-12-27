@@ -229,6 +229,9 @@ public class SchedulerUI extends JFrame {
     }
   };
 
+  /**
+   * Run the scheduler and the table optimizer.
+   */
   private void runScheduler() {
     try {
       saveScheduleDescription();
@@ -237,44 +240,50 @@ public class SchedulerUI extends JFrame {
       final int numSolutions = solver.solve();
       if (numSolutions < 1) {
         JOptionPane.showMessageDialog(SchedulerUI.this, "No solution found");
-      } else {
-        final List<SubjectiveStation> subjectiveStations = new LinkedList<SubjectiveStation>();
-        for (int subj = 0; subj < solver.getNumSubjectiveStations(); ++subj) {
-          final String name = solver.getSubjectiveColumnName(subj);
-          final int duration = solver.getSubjectiveDuration(subj);
-          final SubjectiveStation station = new SubjectiveStation(name, duration);
-          subjectiveStations.add(station);
+        return;
+      }
+
+      final List<SubjectiveStation> subjectiveStations = new LinkedList<SubjectiveStation>();
+      for (int subj = 0; subj < solver.getNumSubjectiveStations(); ++subj) {
+        final String name = solver.getSubjectiveColumnName(subj);
+        final int duration = solver.getSubjectiveDuration(subj);
+        final SubjectiveStation station = new SubjectiveStation(name, duration);
+        subjectiveStations.add(station);
+      }
+
+      // this causes mSchedParams, mScheduleData and mScheduleFile to be set
+      final File solutionFile = solver.getBestSchedule();
+      if (null == solutionFile) {
+        JOptionPane.showMessageDialog(SchedulerUI.this, "No valid schedule found", "Error Running Scheduler",
+                                      JOptionPane.ERROR_MESSAGE);
+        return;
+      }
+
+      loadScheduleFile(solutionFile, subjectiveStations);
+
+      final int result = JOptionPane.showConfirmDialog(SchedulerUI.this, "Would you like to run the table optimizer?",
+                                                       "Question", JOptionPane.YES_NO_OPTION);
+      if (JOptionPane.NO_OPTION == result) {
+        // don't run the optimizer
+        return;
+      }
+
+      final TableOptimizer optimizer = new TableOptimizer(mSchedParams, mScheduleData,
+                                                          mScheduleFile.getAbsoluteFile().getParentFile());
+
+      // see if we can get a better solution
+      optimizer.optimize();
+      final File optimizedFile = optimizer.getBestScheduleOutputFile();
+      if (null != optimizedFile) {
+        if (!solutionFile.delete()) {
+          solutionFile.deleteOnExit();
+        }
+        final File objectiveFile = solver.getBestObjectiveFile();
+        if (!objectiveFile.delete()) {
+          objectiveFile.deleteOnExit();
         }
 
-        // this causes mSchedParams, mScheduleData and mScheduleFile to be set
-        final File solutionFile = solver.getBestSchedule();
-        if (null == solutionFile) {
-          JOptionPane.showMessageDialog(SchedulerUI.this, "No valid schedule found", "Error Running Scheduler",
-                                        JOptionPane.ERROR_MESSAGE);
-          return;
-        }
-
-        loadScheduleFile(solutionFile, subjectiveStations);
-
-        final TableOptimizer optimizer = new TableOptimizer(mSchedParams, mScheduleData,
-                                                            mScheduleFile.getAbsoluteFile().getParentFile());
-
-        // see if we can get a better solution
-        optimizer.optimize();
-        final File optimizedFile = optimizer.getBestScheduleOutputFile();
-        if (null != optimizedFile) {
-          if (!solutionFile.delete()) {
-            solutionFile.deleteOnExit();
-          }
-          final File objectiveFile = solver.getBestObjectiveFile();
-          if (!objectiveFile.delete()) {
-            objectiveFile.deleteOnExit();
-          }
-
-          loadScheduleFile(optimizedFile, subjectiveStations);
-        }
-
-        mTabbedPane.setSelectedIndex(1);
+        loadScheduleFile(optimizedFile, subjectiveStations);
       }
     } catch (final IOException e) {
       final Formatter errorFormatter = new Formatter();
@@ -659,7 +668,7 @@ public class SchedulerUI extends JFrame {
   }
 
   /**
-   * Load the specified file
+   * Load the specified schedule file and select the schedule tab.
    * 
    * @param selectedFile
    * @param subjectiveStations if not null, use as the subjective stations,
@@ -726,6 +735,8 @@ public class SchedulerUI extends JFrame {
       mRunOptimizerAction.setEnabled(true);
       mReloadFileAction.setEnabled(true);
       mScheduleFilename.setText(mScheduleFile.getName());
+      
+      mTabbedPane.setSelectedIndex(1);
     } catch (final ParseException e) {
       final Formatter errorFormatter = new Formatter();
       errorFormatter.format("Error reading file %s: %s", selectedFile.getAbsolutePath(), e.getMessage());
