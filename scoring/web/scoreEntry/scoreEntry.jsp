@@ -10,9 +10,10 @@
     </c:when>
     <c:otherwise>
       <title>Score Entry</title>
-      <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
     </c:otherwise>
     </c:choose>
+
+      <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
 
     <style type='text/css'>
       TD {font-family: arial}
@@ -23,6 +24,16 @@
       body { 
       background-color: ${body_background};
       }
+      
+      table .score-entry {     
+table-layout: fixed;
+width: 100%;
+}
+
+td .score-error {
+  width: 100px;
+}
+      
     </style>
 
 <script language="javascript">
@@ -215,7 +226,7 @@ return m;
       <tr>
         <td align="center" valign="middle">
 
-          <table border='1' cellpadding='3' cellspacing='0' bordercolor='#808080' width="100%">
+          <table class='score-entry' border='1'  bordercolor='#808080'>
             <tr>
               <td colspan='2'>
                 <font size='4'><u>Goal</u></font>
@@ -227,7 +238,7 @@ return m;
                 <font size='4'><u>Score</u></font>
               </td>
                 <td align='center'>
-                  <font size='4'><u>Error Message</u></font>
+                  <font class='score-error' size='4'><u>Error Message</u></font>
                 </td>
             </tr>
 
