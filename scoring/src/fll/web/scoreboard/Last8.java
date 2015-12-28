@@ -59,35 +59,34 @@ public class Last8 extends BaseFLLServlet {
       final int maxScoreboardRound = TournamentParameters.getMaxScoreboardPerformanceRound(connection,
                                                                                            currentTournament);
 
-      formatter.format("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">");
-      formatter.format("<html>");
-      formatter.format("<head>");
-      formatter.format("<link rel='stylesheet' type='text/css' href='../style/style.jsp' />");
-      formatter.format("<link rel='stylesheet' type='text/css' href='score_style.css' />");
-      formatter.format("<meta http-equiv='refresh' content='30' />");
-      formatter.format("</head>");
+      formatter.format("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">%n");
+      formatter.format("<html>%n");
+      formatter.format("<head>%n");
+      formatter.format("<link rel='stylesheet' type='text/css' href='../style/style.jsp' />%n");
+      formatter.format("<link rel='stylesheet' type='text/css' href='score_style.css' />%n");
+      formatter.format("<meta http-equiv='refresh' content='30' />%n");
+      formatter.format("</head>%n");
 
-      formatter.format("<body>");
-      formatter.format("<center>");
-      formatter.format("<table border='1' cellpadding='0' cellspacing='0' width='98%%'>");
+      formatter.format("<body class='scoreboard'>%n");
+      formatter.format("<table border='1' cellpadding='2' cellspacing='0' width='98%%'>%n");
 
-      formatter.format("<colgroup>");
-      formatter.format("<col width='75px' />");
-      formatter.format("<col />");
+      formatter.format("<colgroup>%n");
+      formatter.format("<col width='75px' />%n");
+      formatter.format("<col />%n");
       if (showOrg) {
-        formatter.format("<col />");
+        formatter.format("<col />%n");
       }
-      formatter.format("<col width='100px' />");
-      formatter.format("<col width='75px' />");
-      formatter.format("</colgroup>");
+      formatter.format("<col width='100px' />%n");
+      formatter.format("<col width='75px' />%n");
+      formatter.format("</colgroup>%n");
 
-      formatter.format("<tr>");
+      formatter.format("<tr>%n");
       int numColumns = 5;
       if (!showOrg) {
         --numColumns;
       }
-      formatter.format("<th colspan='%d' bgcolor='#800080'>Most Recent Performance Scores</th>", numColumns);
-      formatter.format("</tr>");
+      formatter.format("<th colspan='%d' bgcolor='#800080'>Most Recent Performance Scores</th>%n", numColumns);
+      formatter.format("</tr>%n");
 
       // scores here
       prep = connection.prepareStatement("SELECT Teams.TeamNumber"
@@ -109,23 +108,23 @@ public class Last8 extends BaseFLLServlet {
       rs = prep.executeQuery();
 
       while (rs.next()) {
-        formatter.format("<tr>");
-        formatter.format("<td class='left'><b>%d</b></td>", rs.getInt("TeamNumber"));
+        formatter.format("<tr>%n");
+        formatter.format("<td class='left'>%d</td>%n", rs.getInt("TeamNumber"));
         String teamName = rs.getString("TeamName");
         if (null == teamName) {
           teamName = "&nbsp;";
         }
-        formatter.format("<td class='left truncate'><b>%s</b></td>", teamName);
+        formatter.format("<td class='left truncate'>%s</td>%n", teamName);
         if (showOrg) {
           String organization = rs.getString("Organization");
           if (null == organization) {
             organization = "&nbsp;";
           }
-          formatter.format("<td class='left truncate'><b>%s</b></td>", organization);
+          formatter.format("<td class='left truncate'>%s</td>%n", organization);
         }
-        formatter.format("<td class='right truncate'><b>%s</b></td>", rs.getString("event_division"));
+        formatter.format("<td class='right truncate'>%s</td>%n", rs.getString("event_division"));
 
-        formatter.format("<td class='right'><b>");
+        formatter.format("<td class='right'>");
         if (rs.getBoolean("NoShow")) {
           formatter.format("No Show");
         } else if (rs.getBoolean("Bye")) {
@@ -133,14 +132,14 @@ public class Last8 extends BaseFLLServlet {
         } else {
           formatter.format("%s", Utilities.NUMBER_FORMAT_INSTANCE.format(rs.getDouble("ComputedTotal")));
         }
-        formatter.format("</b></td>");
-        formatter.format("</tr>");
+        formatter.format("</td>%n");
+        formatter.format("</tr>%n");
 
       } // end while next
 
-      formatter.format("</table>");
-      formatter.format("</body>");
-      formatter.format("</html>");
+      formatter.format("</table>%n");
+      formatter.format("</body>%n");
+      formatter.format("</html>%n");
     } catch (final SQLException e) {
       throw new RuntimeException("Error talking to the database", e);
     } finally {

@@ -1,32 +1,24 @@
-th {
-	border: none;
-	font-weight: bold;
-}
-
-td {
-	padding: 4;
-}
-
-td.center {
-	text-align: center;
-}
-
-td.left {
-	text-align: left;
-}
-
-td.right {
-	text-align: right;
-}
-
 body {
-	background: #000080;
-	color: #ffffff;
 	font-family: 'Arial', 'Helvetica', 'sans-serif';
 	font-size: medium;
 	font-weight: bold;
 }
 
-table {
+body.scoreboard {
+    background: #000080;
+    color: #ffffff;
+}
+
+table.scoreboard {
 	table-layout: fixed;
 }
+
+th.scoreboard {
+    border: none;
+    font-weight: bold;
+}
+
+td.scoreboard {
+    padding: 4;
+}
+
