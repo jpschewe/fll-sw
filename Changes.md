@@ -1,3 +1,9 @@
+* #22 - allow one to override the auto-generated finalist schedule
+* #421 - make the font larger on the subjective sheets and fix some of the wording
+* #425 - use the same font across all of the big screen pages, should make everything readable
+* #430 - display list of finalist teams on the big screen without the categories
+* #431 - fix the size of the error column on the score entry page
+* #433 - apply fix for login problems with tablets used back to back days
 * #445 - properly delete tournaments from the edit tournaments page
 * #434 - escape single quotes in team names and organizations on the edit team page
 * 2015 challenge has performance weighted at 1 like the subjective
