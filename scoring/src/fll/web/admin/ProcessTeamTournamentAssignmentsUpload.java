@@ -32,6 +32,7 @@ import fll.db.Queries;
 import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
+import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -40,7 +41,7 @@ import fll.web.SessionAttributes;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
- * Process the uploaded data and forward to GatherAdvancementData.
+ * Assign teams to tournaments, creating tournaments if needed.
  */
 @WebServlet("/admin/ProcessTeamTournamentAssignmentsUpload")
 public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet {
@@ -218,10 +219,18 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
           final String division = Queries.getDivisionOfTeam(connection, teamNumber);
 
           final String tournamentName = data[tournamentColumnIdx];
-          final Tournament tournament = Tournament.findTournamentByName(connection, tournamentName);
+          Tournament tournament = Tournament.findTournamentByName(connection, tournamentName);
           if (null == tournament) {
-            message.append("<p class='warning'>Could not find tournament name '"
-                + tournamentName + "' for team " + teamNumber + ", skipping row</p>");
+            // create the tournament
+            Tournament.createTournament(connection, tournamentName, tournamentName);
+            tournament = Tournament.findTournamentByName(connection, tournamentName);
+            if (null == tournament) {
+              throw new FLLInternalException("Created tournament '"
+                  + tournamentName + "', but can't find it.");
+            } else {
+              message.append("<p>Created tournament '"
+                  + tournamentName + "'</p>");
+            }
           } else {
             Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), division, division);
             ++rowsProcessed;

@@ -26,7 +26,7 @@ import fll.web.SessionAttributes;
 
 /**
  * Upload the teams to be advanced.
- * 
+ * Pass off to chooseAdvancementColumns.jsp.
  */
 @WebServlet("/admin/UploadTeamTournamentAssignments")
 public final class UploadTeamTournamentAssignments extends BaseFLLServlet {
