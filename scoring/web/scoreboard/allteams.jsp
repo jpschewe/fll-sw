@@ -64,6 +64,7 @@ if(numLogos < 1) {
 
 <html>
 <head>
+<link rel='stylesheet' type='text/css' href='../style/base.css' />
 <link rel='stylesheet' type='text/css' href='score_style.css' />
 
 <style>
@@ -93,7 +94,7 @@ TABLE.B {
 
 </head>
 
-<body bgcolor='#000080'>
+<body class='scoreboard'>
  <br />
  <br />
  <br />
@@ -118,7 +119,7 @@ TABLE.B {
    <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
     height='15' width='1'></td>
   </tr>
-  <tr align='left'>
+  <tr class='left'>
    <%
      final String divisionStr = rs.getString("event_division");
          final Iterator<String> divisionIter = divisions.iterator();
@@ -135,17 +136,17 @@ TABLE.B {
          }
          final String headerColor = Queries.getColorForDivisionIndex(index);
    %>
-   <td width='25%' bgcolor='<%=headerColor%>'><font size='2'><b>&nbsp;&nbsp;Division:&nbsp;<%=divisionStr%>&nbsp;&nbsp;
-    </b></font></td>
-   <td align='right'><font size='2'><b>Team&nbsp;#:&nbsp;<%=rs.getInt("TeamNumber")%>&nbsp;&nbsp;
-    </b></font></td>
+   <td width='25%' bgcolor='<%=headerColor%>'>&nbsp;&nbsp;Division:&nbsp;<%=divisionStr%>&nbsp;&nbsp;
+    </td>
+   <td class='right'>Team&nbsp;#:&nbsp;<%=rs.getInt("TeamNumber")%>&nbsp;&nbsp;
+    </td>
   </tr>
-  <tr align='left'>
-   <td colspan='2'><font size='4'>&nbsp;&nbsp;<%=rs.getString("Organization")%></font>
+  <tr class='left'>
+   <td colspan='2'>&nbsp;&nbsp;<%=rs.getString("Organization")%>
    </td>
   </tr>
-  <tr align='left'>
-   <td colspan='2'><font size='4'>&nbsp;&nbsp;<%=rs.getString("TeamName")%></font>
+  <tr class='left'>
+   <td colspan='2'>&nbsp;&nbsp;<%=rs.getString("TeamName")%>
    </td>
   </tr>
   <tr>
@@ -156,25 +157,25 @@ TABLE.B {
   <tr>
    <td colspan='2'>
     <table border='0' cellpadding='1' cellspacing='0'>
-     <tr align='center'>
+     <tr class='center'>
       <td><img src='<c:url value="/images/blank.gif"/>' height='1'
        width='60' /></td>
-      <td><font size='4'>Run #</font></td>
+      <td>Run #</td>
       <td><img src='<c:url value="/images/blank.gif"/>' width='20'
        height='1' /></td>
-      <td><font size='4'>Score</font></td>
+      <td>Score</td>
      </tr>
      <%
        int prevNum = rs.getInt("TeamNumber");
            do {
      %>
-     <tr align='right'>
+     <tr class='right'>
       <td><img src='<c:url value="/images/blank.gif"/>' height='1'
        width='60' /></td>
-      <td><font size='4'><%=rs.getInt("RunNumber")%></font></td>
+      <td><%=rs.getInt("RunNumber")%></td>
       <td><img src='<c:url value="/images/blank.gif"/>' width='20'
        height='1' /></td>
-      <td><font size='4'> <%
+      <td> <%
    if (rs.getBoolean("NoShow")) {
  %> No Show <%
    } else if (rs.getBoolean("Bye")) {
@@ -187,7 +188,7 @@ TABLE.B {
          }
        } while (!done
            && prevNum == rs.getInt("TeamNumber"));
- %></font></td>
+ %></td>
      </tr>
     </table>
    </td>
@@ -200,10 +201,10 @@ TABLE.B {
           // display the next logo
   %>
   <tr style='background-color: white'>
-   <td width='50%' style='vertical-align: middle; text-align: right'>This
+   <td width='50%' style='vertical-align: middle' class="right">This
     tournament sponsored by:</td>
    <td width='50%'
-    style='vertical-align: middle; text-align: left; padding: 3px'>
+    style='vertical-align: middle; padding: 3px' class="left">
     <%
       lastLogoIndex = (lastLogoIndex + 1)
                 % numLogos;

@@ -274,8 +274,6 @@
   <ul>
     <li><a href="edit_all_parameters.jsp">Edit all parameters</a></li>
 
-    <li><a href="GatherAdvancementData">Advance teams</a></li>
-
     <li>
       <form
         id='uploadTeamTournamentAssignments'
