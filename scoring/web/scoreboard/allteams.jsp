@@ -94,7 +94,7 @@ TABLE.B {
 
 </head>
 
-<body bgcolor='#000080'>
+<body class='scoreboard'>
  <br />
  <br />
  <br />

@@ -15,6 +15,7 @@
 <script type='text/javascript'
  src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
 
+<link rel='stylesheet' type='text/css' href='../../style/base.css' />
 <link rel='stylesheet' type='text/css' href='../../scoreboard/score_style.css' />
 
 <script type='text/javascript' src="<c:url value='/scripts/scroll.js'/>"></script>
@@ -29,7 +30,7 @@
 
 </head>
 
-<body>
+<body class='scoreboard'>
  ${message}
  <%-- clear out the message, so that we don't see it again --%>
  <c:remove var="message" />
