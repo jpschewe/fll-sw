@@ -90,36 +90,35 @@ public class Top10 extends BaseFLLServlet {
       }
       session.setAttribute("divisionIndex", Integer.valueOf(divisionIndex));
 
-      formatter.format("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">");
-      formatter.format("<html>");
-      formatter.format("<head>");
-      formatter.format("<link rel='stylesheet' type='text/css' href='../style/style.jsp' />");
-      formatter.format("<link rel='stylesheet' type='text/css' href='score_style.css' />");
-      formatter.format("<meta http-equiv='refresh' content='%d' />",
+      formatter.format("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">%n");
+      formatter.format("<html>%n");
+      formatter.format("<head>%n");
+      formatter.format("<link rel='stylesheet' type='text/css' href='../style/style.jsp' />%n");
+      formatter.format("<link rel='stylesheet' type='text/css' href='score_style.css' />%n");
+      formatter.format("<meta http-equiv='refresh' content='%d' />%n",
                        GlobalParameters.getIntGlobalParameter(connection, GlobalParameters.DIVISION_FLIP_RATE));
-      formatter.format("</head>");
+      formatter.format("</head>%n");
 
-      formatter.format("<body>");
-      formatter.format("<center>");
-      formatter.format("<table border='1' cellpadding='0' cellspacing='0' width='98%%'>");
+      formatter.format("<body class='scoreboard'>%n");
+      formatter.format("<table border='1' cellpadding='2' cellspacing='0' width='98%%'>%n");
 
-      formatter.format("<colgroup>");
-      formatter.format("<col width='50px' />");
-      formatter.format("<col width='75px' />");
-      formatter.format("<col />");
-      formatter.format("<col />");
-      formatter.format("<col width='70px' />");
-      formatter.format("</colgroup>");
+      formatter.format("<colgroup>%n");
+      formatter.format("<col width='50px' />%n");
+      formatter.format("<col width='75px' />%n");
+      formatter.format("<col />%n");
+      formatter.format("<col />%n");
+      formatter.format("<col width='70px' />%n");
+      formatter.format("</colgroup>%n");
 
       if (!divisions.isEmpty()) {
-        formatter.format("<tr>");
+        formatter.format("<tr>%n");
         int numColumns = 5;
         if (!showOrg) {
           --numColumns;
         }
         formatter.format("<th colspan='%d' bgcolor='%s'>Top Performance Scores: Division %s</th>", numColumns,
                          Queries.getColorForDivisionIndex(divisionIndex), divisions.get(divisionIndex));
-        formatter.format("</tr>");
+        formatter.format("</tr>%n");
 
         final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
         final WinnerType winnerCriteria = challengeDescription.getWinner();
@@ -152,22 +151,22 @@ public class Top10 extends BaseFLLServlet {
             rank = i;
           }
 
-          formatter.format("<tr>");
-          formatter.format("<td class='center'><b>%d</b></td>", rank);
-          formatter.format("<td class='right'><b>%d</b></td>", rs.getInt("TeamNumber"));
+          formatter.format("<tr>%n");
+          formatter.format("<td class='center'>%d</td>%n", rank);
+          formatter.format("<td class='right'>%d</td>%n", rs.getInt("TeamNumber"));
           String teamName = rs.getString("TeamName");
           if (null == teamName) {
             teamName = "&nbsp;";
           }
-          formatter.format("<td class='left' width='28%%'><div class='truncate'><b>%s</b></div></td>", teamName);
+          formatter.format("<td class='left' width='28%%'><div class='truncate'><b>%s</b></div></td>%n", teamName);
           if (showOrg) {
             String organization = rs.getString("Organization");
             if (null == organization) {
               organization = "&nbsp;";
             }
-            formatter.format("<td class='left truncate'><b>%s</b></td>", organization);
+            formatter.format("<td class='left truncate'>%s</td>%n", organization);
           }
-          formatter.format("<td class='right'><b>%s</b></td>", Utilities.NUMBER_FORMAT_INSTANCE.format(score));
+          formatter.format("<td class='right'>%s</td>%n", Utilities.NUMBER_FORMAT_INSTANCE.format(score));
 
           formatter.format("</tr>");
 
@@ -175,9 +174,9 @@ public class Top10 extends BaseFLLServlet {
           ++i;
         }// end while next
       } // end divisions not empty
-      formatter.format("</table>");
-      formatter.format("</body>");
-      formatter.format("</html>");
+      formatter.format("</table>%n");
+      formatter.format("</body>%n");
+      formatter.format("</html>%n");
     } catch (final SQLException e) {
       throw new RuntimeException("Error talking to the database", e);
     } finally {

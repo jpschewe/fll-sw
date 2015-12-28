@@ -1,3 +1,15 @@
+td.center {
+    text-align: center;
+}
+
+td.left {
+    text-align: left;
+}
+
+td.right {
+    text-align: right;
+}
+
 .help {
 	background-color: #fafafa;
 	border: 1px solid black;
@@ -68,4 +80,4 @@
 	display: table-row-group;
 }
 
-/* end table tages */
+/* end table tags */
