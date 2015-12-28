@@ -1241,20 +1241,20 @@ public class BracketData {
                                   final boolean showScore,
                                   final boolean showOnlyVerifiedScores) throws IllegalArgumentException, SQLException {
     if (Team.BYE.equals(team)) {
-      return "<font class='TeamName'>BYE</font>";
+      return "<span class='TeamName'>BYE</span>";
     } else if (Team.TIE.equals(team)) {
-      return "<font class='TIE'>TIE</font>";
+      return "<span class='TIE'>TIE</span>";
     } else if (null == team
         || Team.NULL.equals(team)) {
       return "&nbsp;";
     } else {
 
       final StringBuffer sb = new StringBuffer();
-      sb.append("<font class='TeamNumber'>#");
+      sb.append("<span class='TeamNumber'>#");
       sb.append(team.getTeamNumber());
-      sb.append("</font>&nbsp;<font class='TeamName'>");
+      sb.append("</span>&nbsp;<span class='TeamName'>");
       sb.append(StringUtils.trimString(team.getTeamName(), Team.MAX_TEAM_NAME_LEN));
-      sb.append("</font>");
+      sb.append("</span>");
 
       final boolean performanceScoreExists = Queries.performanceScoreExists(_connection, team, runNumber);
       sb.append("<!-- performance score exists: "
@@ -1271,7 +1271,7 @@ public class BracketData {
         if (!scoreVerified) {
           sb.append("<span style='color:red'>");
         }
-        sb.append("<font class='TeamScore'>&nbsp;Score: <span id='");
+        sb.append("<span class='TeamScore'>&nbsp;Score: <span id='");
         sb.append(team.getTeamNumber()
             + "-" + runNumber + "-score'>");
         if (Playoff.isNoShow(_connection, currentTournament, team, runNumber)) {
@@ -1280,7 +1280,7 @@ public class BracketData {
           // only display score if it's not a bye
           sb.append(Playoff.getPerformanceScore(_connection, currentTournament, team, runNumber));
         }
-        sb.append("</span></font>");
+        sb.append("</span></span>");
         if (!scoreVerified) {
           sb.append("</span>");
         }
