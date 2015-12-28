@@ -1,3 +1,5 @@
+Release 10.4
+============
 * #22 - allow one to override the auto-generated finalist schedule
 * #421 - make the font larger on the subjective sheets and fix some of the wording
 * #425 - use the same font across all of the big screen pages, should make everything readable
