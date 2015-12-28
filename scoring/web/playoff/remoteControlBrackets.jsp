@@ -1,3 +1,6 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%@ page import="fll.web.playoff.BracketData"%>
@@ -74,11 +77,12 @@
 <html>
 <head>
 <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
+<link rel="stylesheet" type="text/css" href="<c:url value='/scoreboard/score_style.css'/>" />
+
 <title>Playoff Round <%=playoffRoundNumber%>, Division <%=division%></title>
 <style type='text/css'>
 TD.Leaf {
 	color: #ffffff;
-	font-family: Arial;
 	background-color: #000000
 }
 
@@ -86,35 +90,26 @@ TD.Bridge {
 	background-color: #808080
 }
 
-FONT {
-	font-family: Arial
-}
-
-FONT.TeamNumber {
+SPAN.TeamNumber {
 	color: #ff8080;
-	font-weight: bold
 }
 
-FONT.TeamName {
+SPAN.TeamName {
 	color: #ffffff;
-	font-weight: bold
 }
 
-FONT.TeamScore {
+SPAN.TeamScore {
 	color: #ffffff;
 	font-weight: bold;
-	font-size: 10pt
 }
 
-FONT.TIE {
+SPAN.TIE {
 	color: #ff0000;
-	font-weight: bold
 }
 
 .TABLE_ASSIGNMENT {
 	font-family: monospace;
-	font-size: 85%;
-	font-weight: bold;
+	font-size: small;
 	background-color: white;
 	padding-left: 5%;
 	padding-right: 5%
@@ -122,7 +117,7 @@ FONT.TIE {
 </style>
 <script type="text/javascript" src="<c:url value='/playoff/code.icepush'/>"></script>
 <script type="text/javascript" src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
-<script type="text/javascript" src="<c:url value='/extlib/jquery.scrollTo-1.4.12.min.js'/>"></script>
+<script type="text/javascript" src="<c:url value='/extlib/jquery.scrollTo-2.1.2.min.js'/>"></script>
 <script type="text/javascript">
   var ajaxURL = '<c:url value="/ajax/"/>';
   var currentRound = <%=playoffRoundNumber-1%>;
@@ -142,16 +137,16 @@ FONT.TIE {
   }
   displayStrings.getSpecialString = function (id, data, newest) {
       if (newest) {
-          return "<a name=\"newest\" id=\""+id+"-n\"></a><font class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</font>";
+          return "<a name=\"newest\" id=\""+id+"-n\"></a><span class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</span>";
       } else {
-          return "<font class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</font>";
+          return "<span class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</span>";
       }
   }
   displayStrings.getTeamNameString = function (id, data, newest) {
       if (newest) {
-          return "<a name=\"newest\" id=\""+id+"-n\"></a><font class=\"TeamNumber\">#" + data.team.teamNumber + "</font> <font class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</font>";
+          return "<a name=\"newest\" id=\""+id+"-n\"></a><span class=\"TeamNumber\">#" + data.team.teamNumber + "</span> <span class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</span>";
       } else {
-          return "<font class=\"TeamNumber\">#" + data.team.teamNumber + "</font> <font class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</font>";
+          return "<span class=\"TeamNumber\">#" + data.team.teamNumber + "</span> <span class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</span>";
       }
   }
   displayStrings.getTeamNameAndScoreString = function (id, data, scoreData, newest) {
@@ -159,9 +154,9 @@ FONT.TIE {
           scoreData += ".0";
       }
       if (newest) {
-          return "<a name=\"newest\" id=\""+id+"-n\"></a><font class=\"TeamNumber\">#" + data.team.teamNumber + "</font> <font class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</font><font class=\"TeamScore\"> Score: " + scoreData + "</font>";
+          return "<a name=\"newest\" id=\""+id+"-n\"></a><span class=\"TeamNumber\">#" + data.team.teamNumber + "</span> <span class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</span><span class=\"TeamScore\"> Score: " + scoreData + "</span>";
       } else {
-          return "<font class=\"TeamNumber\">#" + data.team.teamNumber + "</font> <font class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</font><font class=\"TeamScore\"> Score: " + scoreData + "</font>";
+          return "<span class=\"TeamNumber\">#" + data.team.teamNumber + "</span> <span class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</span><span class=\"TeamScore\"> Score: " + scoreData + "</span>";
       }
   }
 
@@ -296,29 +291,28 @@ FONT.TIE {
       ajaxList = ajaxList.replace(new RegExp("[a-z]", "g"), "");
   }
 
-  function scrollMgr(nexttgt) {
-      if (nexttgt == 'top') {
-          scrollTimer = $.scrollTo($("#top"), rows * 1000, {
-              easing: 'linear'
-          });
-          scrollTimer = $.scrollTo($("#top"), 3000);
-      } else if (nexttgt == 'bottom') {
-          scrollTimer = $.scrollTo($("#bottom"), rows * 1000, {
-              easing: 'linear'
-          });
-          scrollTimer = $.scrollTo($("#bottom"), 3000);
-      }
+  function scrollToBottom() {   
+    $.scrollTo($("#bottom"), {
+      duration: rows * 1000,
+      easing: 'linear',
+      onAfter: scrollToTop,
+  });    
   }
-
+  
+  function scrollToTop() {
+    $.scrollTo($("#top"), {
+      duration: rows * 1000,
+      easing: 'linear',
+      onAfter: scrollToBottom,
+  });    
+  }
+  
   $(document).ready(function() {
       buildAJAXList();
       <c:if test="${empty param.scroll}">
-      scrollMgr("bottom");
-      scrollMgr("top");
-      window.setInterval('scrollMgr("bottom");scrollMgr("top")', (rows * 2000)+6000);
+      scrollToBottom();
       </c:if>
       colorTableLabels();
-      //window.setInterval('iterate()',10000);
   });
 </script>
 <icep:register group="playoffs" callback="function(){iterate();}"/>
