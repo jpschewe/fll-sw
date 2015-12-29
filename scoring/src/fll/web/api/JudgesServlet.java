@@ -115,21 +115,23 @@ public class JudgesServlet extends HttpServlet {
 
       for (final JudgeInformation judge : judges) {
 
-        JudgeInformation found = null;
-        for (final JudgeInformation cjudge : currentJudges) {
-          if (ComparisonUtils.safeEquals(cjudge, judge)) {
-            found = cjudge;
+        if (null != judge) {
+          JudgeInformation found = null;
+          for (final JudgeInformation cjudge : currentJudges) {
+            if (ComparisonUtils.safeEquals(cjudge, judge)) {
+              found = cjudge;
+            }
           }
-        }
 
-        if (null == found) {
-          insertJudge.setString(1, judge.getId());
-          insertJudge.setString(2, judge.getCategory());
-          insertJudge.setString(4, judge.getStation());
-          insertJudge.executeUpdate();
-          ++numNewJudges;
-        }
-      }
+          if (null == found) {
+            insertJudge.setString(1, judge.getId());
+            insertJudge.setString(2, judge.getCategory());
+            insertJudge.setString(4, judge.getStation());
+            insertJudge.executeUpdate();
+            ++numNewJudges;
+          }
+        } // non-null judge
+      } // foreach judge sent
 
       final UploadResult result = new UploadResult(true, "Successfully uploaded judges", numNewJudges);
       response.reset();
