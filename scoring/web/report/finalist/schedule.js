@@ -60,6 +60,8 @@ function updateHeader() {
 
   headerRow.append($("<div class='rTableHead'>Time Slot</div>"));
 
+  headerRow.append($("<div class='rTableHead'>Playoffs</div>"));
+
   $.each($.finalist.getAllCategories(), function(i, category) {
     var room = $.finalist.getRoom(category, $.finalist.getCurrentDivision());
     var header;
@@ -351,6 +353,20 @@ function addRowForSlot(slot) {
 
   row.append($("<div class='rTableCell'>"
       + $.finalist.timeToDisplayString(slot.time) + "</div>"));
+
+  var playoffCell = $("<div class='rTableCell'></div>");
+  row.append(playoffCell);
+  var first = true;
+  $.each($.finalist.getPlayoffDivisions(), function(index, playoffDivision) {
+    if ($.finalist.slotHasPlayoffConflict(playoffDivision, slot)) {
+      if (first) {
+        first = false;
+      } else {
+        playoffCell.append(",");
+      }
+      playoffCell.append(playoffDivision);
+    }
+  });
 
   var categoriesToCells = {};
   var teamsInSlot = {};
