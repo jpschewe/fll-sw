@@ -135,8 +135,6 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
             while (rs.next()) {
               haveData = true;
 
-              LogUtils.getLogger().info("team number: "
-                  + rs.getInt(1));
               final int teamNumber = rs.getInt(1);
               final String teamName = rs.getString(2);
               final String organization = rs.getString(3);
