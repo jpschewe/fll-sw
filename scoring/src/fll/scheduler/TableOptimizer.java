@@ -34,6 +34,7 @@ import fll.Utilities;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
 import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
+import fll.util.CheckCanceled;
 import fll.util.ExcelCellReader;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -95,7 +96,8 @@ public class TableOptimizer {
 
     // warnings is most important, then table use
     return numWarnings
-        * 1000 + tableUseScore;
+        * 1000
+        + tableUseScore;
   }
 
   /**
@@ -161,11 +163,14 @@ public class TableOptimizer {
    * Compute the best table ordering for a set of teams at the
    * specified time.
    * 
+   * @param checkCanceled if non-null, check if the optimization should finish
+   *          early
    * @return best score found
    */
   private void computeBestTableOrdering(final List<Integer> teams,
                                         final Date time,
-                                        final List<String> tables) {
+                                        final List<String> tables,
+                                        final CheckCanceled checkCanceled) {
     if (teams.isEmpty()) {
       throw new IllegalArgumentException("Must have some teams to check");
     }
@@ -177,6 +182,12 @@ public class TableOptimizer {
 
     final List<Map<PerformanceTime, Integer>> possibleValues = computePossibleValues(teams, time, tables);
     for (final Map<PerformanceTime, Integer> possibleValue : possibleValues) {
+      if (null != checkCanceled
+          && checkCanceled.isCanceled()) {
+        // user interrupt
+        break;
+      }
+
       applyPerformanceOrdering(possibleValue);
 
       // check for better value
@@ -228,11 +239,12 @@ public class TableOptimizer {
 
     final boolean oddNumberOfTeams = Utilities.isOdd(teams.size());
 
-    final List<List<Integer>> possibleTableOrderings = permutate(tables.size() * 2);
+    final List<List<Integer>> possibleTableOrderings = permutate(tables.size()
+        * 2);
     for (final List<Integer> ordering : possibleTableOrderings) {
-      if (ordering.size() != tables.size() * 2) {
-        throw new FLLInternalException(
-                                       String.format("All possible orderings must be twice the number of tables. ordering.size: %d tableColors: %d",
+      if (ordering.size() != tables.size()
+          * 2) {
+        throw new FLLInternalException(String.format("All possible orderings must be twice the number of tables. ordering.size: %d tableColors: %d",
                                                      ordering.size(), tables.size()));
       }
 
@@ -245,12 +257,14 @@ public class TableOptimizer {
 
         // check in pairs to make sure we have a valid table assignment
         final int side1 = 1;
-        final int orderIndex1 = tableColorIndex * 2;
+        final int orderIndex1 = tableColorIndex
+            * 2;
         final int teamIndex1 = ordering.get(orderIndex1);
         final int teamNumber1 = getTeamNumber(teams, teamIndex1);
 
         final int side2 = 2;
-        final int orderIndex2 = orderIndex1 + 1;
+        final int orderIndex2 = orderIndex1
+            + 1;
         final int teamIndex2 = ordering.get(orderIndex2);
         final int teamNumber2 = getTeamNumber(teams, teamIndex2);
 
@@ -504,12 +518,16 @@ public class TableOptimizer {
         schedule = new TournamentSchedule(name, fis, sheetName, subjectiveHeaders);
       }
 
-      final TableOptimizer optimizer = new TableOptimizer(params, schedule, schedfile.getAbsoluteFile().getParentFile());
+      final TableOptimizer optimizer = new TableOptimizer(params, schedule,
+                                                          schedfile.getAbsoluteFile().getParentFile());
       final long start = System.currentTimeMillis();
-      optimizer.optimize();
+      optimizer.optimize(null);
       final long stop = System.currentTimeMillis();
       LOGGER.info("Optimization took: "
-          + (stop - start) / 1000.0 + " seconds");
+          + (stop
+              - start)
+              / 1000.0
+          + " seconds");
 
     } catch (final ParseException e) {
       LOGGER.fatal(e, e);
@@ -678,12 +696,20 @@ public class TableOptimizer {
     }
   }
 
-  public void optimize() {
+  /**
+   * Run the table optimizer.
+   * 
+   * @param checkCanceled if non-null, checked to see if the optimizer should
+   *          exit early
+   */
+  public void optimize(final CheckCanceled checkCanceled) {
     final Set<Integer> optimizedTeams = new HashSet<Integer>();
     final Set<Date> optimizedTimes = new HashSet<>();
 
     List<ConstraintViolation> teamViolations = pickTeamWithMostViolations(optimizedTeams);
-    while (!teamViolations.isEmpty()) {
+    while ((null != checkCanceled
+        && !checkCanceled.isCanceled())
+        && !teamViolations.isEmpty()) {
       final int team = teamViolations.get(0).getTeam();
       optimizedTeams.add(team);
 
@@ -693,19 +719,22 @@ public class TableOptimizer {
       }
 
       final Set<Date> perfTimes = gatherPerformanceTimes(teamViolations);
-      optimize(perfTimes);
+      optimize(perfTimes, checkCanceled);
 
       optimizedTimes.addAll(perfTimes);
 
       teamViolations = pickTeamWithMostViolations(optimizedTeams);
     } // while team violations
 
-    // optimize non-full table times if we haven't already touched them while
-    // optimizing teams
-    final Set<Date> perfTimes = findNonFullTableTimes();
-    perfTimes.removeAll(optimizedTimes);
-    if (!perfTimes.isEmpty()) {
-      optimize(perfTimes);
+    if (null != checkCanceled
+        && !checkCanceled.isCanceled()) {
+      // optimize non-full table times if we haven't already touched them while
+      // optimizing teams
+      final Set<Date> perfTimes = findNonFullTableTimes();
+      perfTimes.removeAll(optimizedTimes);
+      if (!perfTimes.isEmpty()) {
+        optimize(perfTimes, checkCanceled);
+      }
     }
 
   }
@@ -754,7 +783,8 @@ public class TableOptimizer {
       }
 
       // 2 teams on each table at a given time
-      final int expectedTableUse = tables.size() * 2;
+      final int expectedTableUse = tables.size()
+          * 2;
 
       if (useCount < expectedTableUse) {
         perfTimes.add(time);
@@ -767,9 +797,11 @@ public class TableOptimizer {
   /**
    * Optimize the table use at the specified times.
    * 
-   * @param perfTimes
+   * @param perfTimes the times to optimize at
+   * @param checkCancled used to check if the optimization should exit early
    */
-  private void optimize(final Set<Date> perfTimes) {
+  private void optimize(final Set<Date> perfTimes,
+                        final CheckCanceled checkCanceled) {
     for (final Date time : perfTimes) {
       final List<Integer> teams = new ArrayList<Integer>();
 
@@ -799,7 +831,7 @@ public class TableOptimizer {
         }
       } // foreach schedule item
 
-      computeBestTableOrdering(teams, time, tables);
+      computeBestTableOrdering(teams, time, tables, checkCanceled);
 
     } // foreach time
   }

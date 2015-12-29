@@ -12,6 +12,8 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,6 +34,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
@@ -53,8 +56,10 @@ import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
+import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.WindowConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
@@ -78,6 +83,7 @@ import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.GuiExceptionHandler;
 import fll.util.LogUtils;
+import fll.util.ProgressDialog;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.ScoreCategory;
@@ -132,6 +138,10 @@ public class SchedulerUI extends JFrame {
 
   public SchedulerUI() {
     super(BASE_TITLE);
+
+    _progressDialog = new ProgressDialog(SchedulerUI.this, "Please Wait");
+    _progressDialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+
     setJMenuBar(createMenubar());
 
     final Container cpane = getContentPane();
@@ -230,61 +240,27 @@ public class SchedulerUI extends JFrame {
   };
 
   /**
-   * Run the scheduler and the table optimizer.
+   * Run the scheduler and optionally the table optimizer.
    */
   private void runScheduler() {
     try {
       saveScheduleDescription();
 
-      final GreedySolver solver = new GreedySolver(mScheduleDescriptionFile, false);
-      final int numSolutions = solver.solve();
-      if (numSolutions < 1) {
-        JOptionPane.showMessageDialog(SchedulerUI.this, "No solution found");
-        return;
-      }
+      final SchedulerWorker worker = new SchedulerWorker();
 
-      final List<SubjectiveStation> subjectiveStations = new LinkedList<SubjectiveStation>();
-      for (int subj = 0; subj < solver.getNumSubjectiveStations(); ++subj) {
-        final String name = solver.getSubjectiveColumnName(subj);
-        final int duration = solver.getSubjectiveDuration(subj);
-        final SubjectiveStation station = new SubjectiveStation(name, duration);
-        subjectiveStations.add(station);
-      }
-
-      // this causes mSchedParams, mScheduleData and mScheduleFile to be set
-      final File solutionFile = solver.getBestSchedule();
-      if (null == solutionFile) {
-        JOptionPane.showMessageDialog(SchedulerUI.this, "No valid schedule found", "Error Running Scheduler",
-                                      JOptionPane.ERROR_MESSAGE);
-        return;
-      }
-
-      loadScheduleFile(solutionFile, subjectiveStations);
-
-      final int result = JOptionPane.showConfirmDialog(SchedulerUI.this, "Would you like to run the table optimizer?",
-                                                       "Question", JOptionPane.YES_NO_OPTION);
-      if (JOptionPane.NO_OPTION == result) {
-        // don't run the optimizer
-        return;
-      }
-
-      final TableOptimizer optimizer = new TableOptimizer(mSchedParams, mScheduleData,
-                                                          mScheduleFile.getAbsoluteFile().getParentFile());
-
-      // see if we can get a better solution
-      optimizer.optimize();
-      final File optimizedFile = optimizer.getBestScheduleOutputFile();
-      if (null != optimizedFile) {
-        if (!solutionFile.delete()) {
-          solutionFile.deleteOnExit();
+      // make sure the task doesn't start until the window is up
+      _progressDialog.addComponentListener(new ComponentAdapter() {
+        @Override
+        public void componentShown(final ComponentEvent e) {
+          _progressDialog.removeComponentListener(this);
+          worker.execute();
         }
-        final File objectiveFile = solver.getBestObjectiveFile();
-        if (!objectiveFile.delete()) {
-          objectiveFile.deleteOnExit();
-        }
+      });
 
-        loadScheduleFile(optimizedFile, subjectiveStations);
-      }
+      _progressDialog.setLocationRelativeTo(SchedulerUI.this);
+      _progressDialog.setNote("Running Scheduler");
+      _progressDialog.setVisible(true);
+
     } catch (final IOException e) {
       final Formatter errorFormatter = new Formatter();
       errorFormatter.format("Error reading description file: %s", e.getMessage());
@@ -299,6 +275,119 @@ public class SchedulerUI extends JFrame {
                                     JOptionPane.ERROR_MESSAGE);
     }
 
+  }
+
+  private final class SchedulerWorker extends SwingWorker<Integer, Void> {
+    private final GreedySolver solver;
+
+    public SchedulerWorker() throws IOException, ParseException {
+      this.solver = new GreedySolver(mScheduleDescriptionFile, false);
+    }
+
+    @Override
+    protected Integer doInBackground() {
+      return solver.solve(_progressDialog);
+    }
+
+    @Override
+    protected void done() {
+      _progressDialog.setVisible(false);
+
+      try {
+        final int numSolutions = this.get();
+
+        if (numSolutions < 1) {
+          if (_progressDialog.isCanceled()) {
+            JOptionPane.showMessageDialog(SchedulerUI.this, "Scheduler was canceled");
+            return;
+          }
+
+          JOptionPane.showMessageDialog(SchedulerUI.this, "No solution found");
+          return;
+        }
+
+        final List<SubjectiveStation> subjectiveStations = new LinkedList<SubjectiveStation>();
+        for (int subj = 0; subj < solver.getNumSubjectiveStations(); ++subj) {
+          final String name = solver.getSubjectiveColumnName(subj);
+          final int duration = solver.getSubjectiveDuration(subj);
+          final SubjectiveStation station = new SubjectiveStation(name, duration);
+          subjectiveStations.add(station);
+        }
+
+        // this causes mSchedParams, mScheduleData and mScheduleFile to be set
+        final File solutionFile = solver.getBestSchedule();
+        if (null == solutionFile) {
+          JOptionPane.showMessageDialog(SchedulerUI.this, "No valid schedule found", "Error Running Scheduler",
+                                        JOptionPane.ERROR_MESSAGE);
+          return;
+        }
+
+        loadScheduleFile(solutionFile, subjectiveStations);
+
+        final int result = JOptionPane.showConfirmDialog(SchedulerUI.this, "Would you like to run the table optimizer?",
+                                                         "Question", JOptionPane.YES_NO_OPTION);
+        if (JOptionPane.YES_OPTION == result) {
+          runTableOptimizer();
+        }
+
+      } catch (final ExecutionException e) {
+        LOGGER.error("Error executing scheduler", e);
+        JOptionPane.showMessageDialog(SchedulerUI.this, e.getMessage(), "Error running scheduler",
+                                      JOptionPane.ERROR_MESSAGE);
+      } catch (final InterruptedException e) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Received interrupted exception running scheduler");
+        }
+        JOptionPane.showMessageDialog(SchedulerUI.this, "Scheduler was interrupted before completing");
+        return;
+      }
+
+    }
+  }
+
+  private final ProgressDialog _progressDialog;
+
+  private final class OptimizerWorker extends SwingWorker<Void, Void> {
+    private final TableOptimizer optimizer;
+
+    public OptimizerWorker() {
+      this.optimizer = new TableOptimizer(mSchedParams, mScheduleData, mScheduleFile.getAbsoluteFile().getParentFile());
+    }
+
+    @Override
+    protected Void doInBackground() {
+      // see if we can get a better solution
+      optimizer.optimize(_progressDialog);
+
+      return null;
+    }
+
+    @Override
+    protected void done() {
+      _progressDialog.setVisible(false);
+
+      try {
+        this.get();
+
+        final File optimizedFile = optimizer.getBestScheduleOutputFile();
+        if (null != optimizedFile) {
+          loadScheduleFile(optimizedFile, mSchedParams.getSubjectiveStations());
+        } else {
+          JOptionPane.showMessageDialog(SchedulerUI.this, "No better schedule found");
+        }
+
+      } catch (final ExecutionException e) {
+        LOGGER.error("Error executing table optimizer", e);
+        JOptionPane.showMessageDialog(SchedulerUI.this, e.getMessage(), "Error running table optimizer",
+                                      JOptionPane.ERROR_MESSAGE);
+      } catch (final InterruptedException e) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Received interrupted exception running table optimizer");
+        }
+        return;
+      }
+
+    }
   }
 
   private final Action mRunSchedulerAction = new AbstractAction("Run Scheduler") {
@@ -654,17 +743,20 @@ public class SchedulerUI extends JFrame {
    * file.
    */
   private void runTableOptimizer() {
-    final TableOptimizer optimizer = new TableOptimizer(mSchedParams, mScheduleData,
-                                                        mScheduleFile.getAbsoluteFile().getParentFile());
-    optimizer.optimize();
-    final File optimizedFile = optimizer.getBestScheduleOutputFile();
-    if (null == optimizedFile) {
-      JOptionPane.showMessageDialog(SchedulerUI.this, "No better schedule found", "Information",
-                                    JOptionPane.INFORMATION_MESSAGE);
-    } else {
-      loadScheduleFile(optimizedFile, mSchedParams.getSubjectiveStations());
-    }
+    final OptimizerWorker optimizerWorker = new OptimizerWorker();
 
+    // make sure the task doesn't start until the window is up
+    _progressDialog.addComponentListener(new ComponentAdapter() {
+      @Override
+      public void componentShown(final ComponentEvent e) {
+        _progressDialog.removeComponentListener(this);
+        optimizerWorker.execute();
+      }
+    });
+
+    _progressDialog.setLocationRelativeTo(SchedulerUI.this);
+    _progressDialog.setNote("Running Table Optimizer");
+    _progressDialog.setVisible(true);
   }
 
   /**
@@ -735,7 +827,7 @@ public class SchedulerUI extends JFrame {
       mRunOptimizerAction.setEnabled(true);
       mReloadFileAction.setEnabled(true);
       mScheduleFilename.setText(mScheduleFile.getName());
-      
+
       mTabbedPane.setSelectedIndex(1);
     } catch (final ParseException e) {
       final Formatter errorFormatter = new Formatter();
