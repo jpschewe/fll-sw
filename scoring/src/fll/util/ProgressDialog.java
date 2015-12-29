@@ -24,7 +24,7 @@ import javax.swing.ProgressMonitor;
  * A modal indeterminate progress dialog.
  * If a determinate progress dialog is desired, use {@link ProgressMonitor}
  */
-public class ProgressDialog extends JDialog {
+public class ProgressDialog extends JDialog implements CheckCanceled {
 
   private final Object mLock = new Object();
 

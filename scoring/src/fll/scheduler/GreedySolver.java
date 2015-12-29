@@ -38,6 +38,7 @@ import org.apache.log4j.Logger;
 
 import au.com.bytecode.opencsv.CSVWriter;
 import fll.Utilities;
+import fll.util.CheckCanceled;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 
@@ -155,7 +156,7 @@ public class GreedySolver {
     formatter.printHelp("GreedySolver", options);
   }
 
-  public static void main(final String[] args) {
+  public static void main(final String[] args) throws InterruptedException {
     LogUtils.initializeLogging();
 
     final Options options = buildOptions();
@@ -187,10 +188,13 @@ public class GreedySolver {
 
       final GreedySolver solver = new GreedySolver(datafile, optimize);
       final long start = System.currentTimeMillis();
-      solver.solve();
+      solver.solve(null);
       final long stop = System.currentTimeMillis();
       LOGGER.info("Solve took: "
-          + (stop - start) / 1000.0 + " seconds");
+          + (stop
+              - start)
+              / 1000.0
+          + " seconds");
 
     } catch (final ParseException e) {
       LOGGER.fatal(e, e);
@@ -244,7 +248,8 @@ public class GreedySolver {
         + this.subjectiveFirst);
 
     final int perfOffsetMinutes = Integer.parseInt(properties.getProperty("perf_attempt_offset_minutes",
-                                                                          String.valueOf(tinc)).trim());
+                                                                          String.valueOf(tinc))
+                                                             .trim());
     performanceAttemptOffset = perfOffsetMinutes
         / tinc;
     if (perfOffsetMinutes != performanceAttemptOffset
@@ -255,7 +260,8 @@ public class GreedySolver {
         + performanceAttemptOffset);
 
     final int subjOffsetMinutes = Integer.parseInt(properties.getProperty("subjective_attempt_offset_minutes",
-                                                                          String.valueOf(tinc)).trim());
+                                                                          String.valueOf(tinc))
+                                                             .trim());
     subjectiveAttemptOffset = subjOffsetMinutes
         / tinc;
     if (subjOffsetMinutes != subjectiveAttemptOffset
@@ -267,7 +273,9 @@ public class GreedySolver {
     numTables = Utilities.readIntProperty(properties, "NTables");
     final int tmaxHours = Utilities.readIntProperty(properties, "TMax_hours");
     final int tmaxMinutes = Utilities.readIntProperty(properties, "TMax_minutes");
-    numTimeslots = (tmaxHours * 60 + tmaxMinutes)
+    numTimeslots = (tmaxHours
+        * 60
+        + tmaxMinutes)
         / tinc;
 
     numSubjectiveStations = Utilities.readIntProperty(properties, "NSubjective");
@@ -283,10 +291,12 @@ public class GreedySolver {
           + subjDurationStr + "'");
     }
     final String[] subjDurs;
-    if (lbracket + 1 == rbracket) {
+    if (lbracket
+        + 1 == rbracket) {
       subjDurs = new String[0];
     } else {
-      subjDurs = subjDurationStr.substring(lbracket + 1, rbracket).split(",");
+      subjDurs = subjDurationStr.substring(lbracket
+          + 1, rbracket).split(",");
     }
     if (subjDurs.length != numSubjectiveStations) {
       throw new FLLRuntimeException("Number of subjective stations not consistent with subj_minutes array size");
@@ -314,7 +324,8 @@ public class GreedySolver {
       throw new FLLRuntimeException("No ']' found in group_counts: '"
           + groupCountsStr + "'");
     }
-    final String[] groups = groupCountsStr.substring(lbracket + 1, rbracket).split(",");
+    final String[] groups = groupCountsStr.substring(lbracket
+        + 1, rbracket).split(",");
     if (groups.length != ngroups) {
       throw new FLLRuntimeException("Num groups and group_counts array not consistent");
     }
@@ -353,13 +364,15 @@ public class GreedySolver {
 
     if (alternate) {
       // make sure performanceDuration is even
-      if ((performanceDuration & 1) == 1) {
+      if ((performanceDuration
+          & 1) == 1) {
         throw new FLLRuntimeException("Number of timeslots for performance duration ("
             + performanceDuration + ") is not even and must be to alternate tables.");
       }
 
       // make sure num tables is even
-      if ((getNumTables() & 1) == 1) {
+      if ((getNumTables()
+          & 1) == 1) {
         throw new FLLRuntimeException("Number of tables ("
             + getNumTables() + ") is not even and must be to alternate tables.");
       }
@@ -377,8 +390,10 @@ public class GreedySolver {
     if (alternate) {
       for (int table = 0; table < performanceTables.length; ++table) {
         // even is 0, odd is 1/2 performance duration
-        if ((table & 1) == 1) {
-          performanceTables[table] = performanceDuration / 2;
+        if ((table
+            & 1) == 1) {
+          performanceTables[table] = performanceDuration
+              / 2;
         } else {
           performanceTables[table] = 0;
         }
@@ -453,7 +468,8 @@ public class GreedySolver {
       }
 
       final Date start = TournamentSchedule.parseDate(startStr);
-      final int startMinutes = (int) ((start.getTime() - startTime.getTime())
+      final int startMinutes = (int) ((start.getTime()
+          - startTime.getTime())
           / Utilities.MILLISECONDS_PER_SECOND / Utilities.SECONDS_PER_MINUTE);
       final int startInc = startMinutes
           / tinc;
@@ -579,7 +595,8 @@ public class GreedySolver {
    * @return
    */
   public String getSubjectiveColumnName(final int station) {
-    return String.format("%s%d", SUBJECTIVE_COLUMN_PREFIX, station + 1);
+    return String.format("%s%d", SUBJECTIVE_COLUMN_PREFIX, station
+        + 1);
   }
 
   private void unassignSubjective(final int group,
@@ -610,8 +627,9 @@ public class GreedySolver {
                                 final int timeslot,
                                 final int duration) {
     for (int slot = Math.max(0, timeslot
-        - getChangetime()); slot < Math.min(getNumTimeslots(), timeslot
-        + duration + getChangetime()); ++slot) {
+        - getChangetime()); slot < Math.min(getNumTimeslots(),
+                                            timeslot
+                                                + duration + getChangetime()); ++slot) {
       if (sy[group][team][station][slot]) {
         return false;
       }
@@ -636,8 +654,9 @@ public class GreedySolver {
                                 final int timeslot,
                                 final int duration) {
     for (int slot = Math.max(0, timeslot
-        - getChangetime()); slot < Math.min(getNumTimeslots(), timeslot
-        + duration + getChangetime()); ++slot) {
+        - getChangetime()); slot < Math.min(getNumTimeslots(),
+                                            timeslot
+                                                + duration + getChangetime()); ++slot) {
       for (int table = 0; table < getNumTables(); ++table) {
         if (py[group][team][table][0][slot]) {
           return false;
@@ -752,8 +771,10 @@ public class GreedySolver {
                                       final int team,
                                       final int timeslot) {
     for (int slot = Math.max(0, timeslot
-        - getPerformanceChangetime()); slot < Math.min(getNumTimeslots(), timeslot
-        + getPerformanceChangetime() + getPerformanceDuration()); ++slot) {
+        - getPerformanceChangetime()); slot < Math.min(getNumTimeslots(),
+                                                       timeslot
+                                                           + getPerformanceChangetime()
+                                                           + getPerformanceDuration()); ++slot) {
       for (int table = 0; table < getNumTables(); ++table) {
         if (py[group][team][table][0][slot]) {
           return false;
@@ -811,14 +832,16 @@ public class GreedySolver {
    * performance rounds and the dummy slot hasn't been used.
    */
   private boolean partialPerformanceAssignmentAllowed() {
-    final boolean oddPerfRounds = (numPerformanceRounds & 1) == 1;
-    final boolean oddTeams = (getAllTeams().size() & 1) == 1;
+    final boolean oddPerfRounds = (numPerformanceRounds
+        & 1) == 1;
+    final boolean oddTeams = (getAllTeams().size()
+        & 1) == 1;
     return !dummyPerformanceSlotUsed
         && oddTeams && oddPerfRounds;
   }
 
   private boolean schedPerf(final int table,
-                            final int timeslot) {
+                            final int timeslot) throws InterruptedException {
     final List<SchedTeam> teams = getPossiblePerformanceTeams();
     SchedTeam team1 = null;
 
@@ -891,8 +914,8 @@ public class GreedySolver {
                 LOGGER.trace("Choose dummy group: "
                     + prevTeamOnTable1.getGroup() + " team: " + prevTeamOnTable1.getIndex());
               }
-              if (assignPerformance(prevTeamOnTable1.getGroup(), prevTeamOnTable1.getIndex(), timeslot, table, 1,
-                                    false, true)) {
+              if (assignPerformance(prevTeamOnTable1.getGroup(), prevTeamOnTable1.getIndex(), timeslot, table, 1, false,
+                                    true)) {
                 foundOtherTeam = true;
               }
             }
@@ -995,7 +1018,8 @@ public class GreedySolver {
   private SchedTeam findPrevTeamOnTable(final int timeslot,
                                         final int table,
                                         final int side) {
-    for (int slot = timeslot - 1; slot >= 0; --slot) {
+    for (int slot = timeslot
+        - 1; slot >= 0; --slot) {
       for (final SchedTeam team : getAllTeams()) {
         if (py[team.getGroup()][team.getIndex()][table][side][slot]) {
           return team;
@@ -1060,7 +1084,7 @@ public class GreedySolver {
 
   private boolean schedSubj(final int group,
                             final int station,
-                            final int timeslot) {
+                            final int timeslot) throws InterruptedException {
     final List<SchedTeam> teams = getPossibleSubjectiveTeams(group, station);
     for (final SchedTeam team : teams) {
       if (assignSubjective(team.getGroup(), team.getIndex(), station, timeslot)) {
@@ -1128,17 +1152,32 @@ public class GreedySolver {
     return numPerformanceRounds;
   }
 
+  private CheckCanceled checkCanceled = null;
+
   /**
    * Solve the problem.
    * 
+   * @param checkCanceled if non-null, used to check if the schedule should be
+   *          interrupted
    * @return the number of solutions found
    */
-  public int solve() {
-    LOGGER.info("Starting solve");
-    scheduleNextStation();
+  public int solve(final CheckCanceled checkCanceled) {
+    this.checkCanceled = checkCanceled;
+
+    try {
+      LOGGER.info("Starting solve");
+      scheduleNextStation();
+    } catch (final InterruptedException e) {
+      LOGGER.debug("Solver interrupted");
+    }
 
     if (solutionsFound < 1) {
-      LOGGER.info("Infeasible problem, no solutions found");
+      if (null != checkCanceled
+          && checkCanceled.isCanceled()) {
+        LOGGER.info("Solver canceled before a solution was found");
+      } else {
+        LOGGER.info("Infeasible problem, no solutions found");
+      }
     } else {
       LOGGER.info("Found "
           + solutionsFound + " solutions");
@@ -1157,7 +1196,8 @@ public class GreedySolver {
     final Collection<String> subjectiveHeaders = new LinkedList<String>();
     for (int subj = 0; subj < getNumSubjectiveStations(); ++subj) {
       final String header = "Subj"
-          + (subj + 1);
+          + (subj
+              + 1);
       subjectiveHeaders.add(header);
       final SubjectiveStation station = new SubjectiveStation(header, getSubjectiveDuration(subj)
           * tinc);
@@ -1169,8 +1209,8 @@ public class GreedySolver {
 
       final SchedParams params = new SchedParams(subjectiveParams, getPerformanceDuration()
           * tinc, getChangetime()
-          * tinc, getPerformanceChangetime()
-          * tinc);
+              * tinc, getPerformanceChangetime()
+                  * tinc);
       final ScheduleChecker checker = new ScheduleChecker(params, schedule);
       final List<ConstraintViolation> violations = checker.verifySchedule();
       for (final ConstraintViolation violation : violations) {
@@ -1186,7 +1226,8 @@ public class GreedySolver {
     } catch (ParseException e) {
       throw new FLLRuntimeException("Should not have an ParseException trying to get warnings from CSV file", e);
     } catch (ScheduleParseException e) {
-      throw new FLLRuntimeException("Should not have an ScheduleParseException trying to get warnings from CSV file", e);
+      throw new FLLRuntimeException("Should not have an ScheduleParseException trying to get warnings from CSV file",
+                                    e);
     }
   }
 
@@ -1212,7 +1253,8 @@ public class GreedySolver {
    * The slot that has the latest subjective time for a group of teams.
    */
   private int findLatestSubjectiveTime(final int group) {
-    for (int slot = getNumTimeslots() - 1; slot >= 0; --slot) {
+    for (int slot = getNumTimeslots()
+        - 1; slot >= 0; --slot) {
       for (int station = 0; station < getNumSubjectiveStations(); ++station) {
         for (final SchedTeam team : getAllTeams()) {
           if (team.getGroup() == group) {
@@ -1232,7 +1274,8 @@ public class GreedySolver {
    * The slot that has the last performance time.
    */
   private int findLatestPerformanceTime() {
-    for (int slot = getNumTimeslots() - 1; slot >= 0; --slot) {
+    for (int slot = getNumTimeslots()
+        - 1; slot >= 0; --slot) {
       for (int table = 0; table < getNumTables(); ++table) {
         for (final SchedTeam team : getAllTeams()) {
           if (py[team.getGroup()][team.getIndex()][table][0][slot]) {
@@ -1248,7 +1291,16 @@ public class GreedySolver {
     return 0;
   }
 
-  private boolean scheduleNextStation() {
+  /**
+   * @return if a solution has been found
+   * @throws InterruptedException if the solver was canceled
+   */
+  private boolean scheduleNextStation() throws InterruptedException {
+    if (null != checkCanceled
+        && checkCanceled.isCanceled()) {
+      throw new InterruptedException();
+    }
+
     if (scheduleFinished()) {
       if (outputCurrentSolution()) {
         ++solutionsFound;
@@ -1277,7 +1329,8 @@ public class GreedySolver {
     }
 
     // try possible values
-    if ((subjectiveFirst && !subjectiveFinished())
+    if ((subjectiveFirst
+        && !subjectiveFinished())
         || (nextAvailableSubjSlot <= nextAvailablePerfSlot)) {
       for (int i = 0; i < possibleSubjectiveStations.size(); ++i) {
         final int station = possibleSubjectiveStations.get(i);
@@ -1450,7 +1503,8 @@ public class GreedySolver {
       mBestObjectiveFile = objectiveFile;
 
       // tighten down the constraints so that we find a better solution
-      final int newNumTimeslots = objective.getLatestPerformanceTime() + 1;
+      final int newNumTimeslots = objective.getLatestPerformanceTime()
+          + 1;
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Tightening numTimeslots from "
             + numTimeslots + " to " + newNumTimeslots);
@@ -1514,16 +1568,21 @@ public class GreedySolver {
         line.add(getSubjectiveColumnName(subj));
       }
       for (int round = 0; round < getNumPerformanceRounds(); ++round) {
-        line.add(String.format(TournamentSchedule.PERF_HEADER_FORMAT, round + 1));
-        line.add(String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round + 1));
+        line.add(String.format(TournamentSchedule.PERF_HEADER_FORMAT, round
+            + 1));
+        line.add(String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round
+            + 1));
       }
       csv.writeNext(line.toArray(new String[line.size()]));
       line.clear();
 
       for (final SchedTeam team : getAllTeams()) {
-        final int teamNum = (team.getGroup() + 1)
-            * 100 + team.getIndex();
-        final int judgingGroup = team.getGroup() + 1;
+        final int teamNum = (team.getGroup()
+            + 1)
+            * 100
+            + team.getIndex();
+        final int judgingGroup = team.getGroup()
+            + 1;
         line.add(String.valueOf(teamNum));
         line.add("D"
             + judgingGroup);
@@ -1537,7 +1596,12 @@ public class GreedySolver {
           final Date time = getTime(sz[team.getGroup()][team.getIndex()][subj], 1);
           if (null == time) {
             throw new RuntimeException("Could not find a subjective start for group: "
-                + (team.getGroup() + 1) + " team: " + (team.getIndex() + 1) + " subj: " + (subj + 1));
+                + (team.getGroup()
+                    + 1)
+                + " team: " + (team.getIndex()
+                    + 1)
+                + " subj: " + (subj
+                    + 1));
           }
           line.add(TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(time));
         }
@@ -1547,10 +1611,13 @@ public class GreedySolver {
         for (int round = 0; round < getNumPerformanceRounds(); ++round) {
           for (int table = 0; table < getNumTables(); ++table) {
             for (int side = 0; side < 2; ++side) {
-              final Date time = getTime(pz[team.getGroup()][team.getIndex()][table][side], round + 1);
+              final Date time = getTime(pz[team.getGroup()][team.getIndex()][table][side], round
+                  + 1);
               if (null != time) {
                 perfTimes.add(new PerformanceTime(time, "Table"
-                    + (table + 1), (side + 1)));
+                    + (table
+                        + 1), (side
+                            + 1)));
               }
             }
           }
@@ -1558,7 +1625,11 @@ public class GreedySolver {
         if (perfTimes.size() != getNumPerformanceRounds()) {
           throw new FLLRuntimeException("Expecting "
               + getNumPerformanceRounds() + " performance times, but found " + perfTimes.size() + " group: "
-              + (team.getGroup() + 1) + " team: " + (team.getIndex() + 1) + " perfs: " + perfTimes);
+              + (team.getGroup()
+                  + 1)
+              + " team: " + (team.getIndex()
+                  + 1)
+              + " perfs: " + perfTimes);
         }
         for (final PerformanceTime perfTime : perfTimes) {
           line.add(TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(perfTime.getTime()));
