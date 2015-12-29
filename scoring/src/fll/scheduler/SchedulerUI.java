@@ -286,7 +286,7 @@ public class SchedulerUI extends JFrame {
 
     @Override
     protected Integer doInBackground() {
-      return solver.solve();
+      return solver.solve(_progressDialog);
     }
 
     @Override
@@ -297,6 +297,11 @@ public class SchedulerUI extends JFrame {
         final int numSolutions = this.get();
 
         if (numSolutions < 1) {
+          if (_progressDialog.isCanceled()) {
+            JOptionPane.showMessageDialog(SchedulerUI.this, "Scheduler was canceled");
+            return;
+          }
+
           JOptionPane.showMessageDialog(SchedulerUI.this, "No solution found");
           return;
         }
@@ -333,6 +338,7 @@ public class SchedulerUI extends JFrame {
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug("Received interrupted exception running scheduler");
         }
+        JOptionPane.showMessageDialog(SchedulerUI.this, "Scheduler was interrupted before completing");
         return;
       }
 
@@ -351,7 +357,7 @@ public class SchedulerUI extends JFrame {
     @Override
     protected Void doInBackground() {
       // see if we can get a better solution
-      optimizer.optimize();
+      optimizer.optimize(_progressDialog);
 
       return null;
     }
