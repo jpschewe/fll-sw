@@ -290,13 +290,13 @@
   }
 
   /**
-   * Add the specified number of minutes to the duration of all timeslots
-   * in existing schedules. This slides everything forward to prevent 
+   * Add the specified number of minutes to the duration of all timeslots in
+   * existing schedules. This slides everything forward to prevent
    * 
    * Does NOT save.
    */
   function _addMinutesToDurationOfSchedules(minutes) {
-    
+
     $.each(_schedules, function(i, schedule) {
       if (null != schedule) {
         var addToStart = 0;
@@ -306,7 +306,7 @@
 
           slot.time = $.finalist.addMinutesToTime(slot.time, addToStart);
           slot.endTime = $.finalist.addMinutesToTime(slot.endTime, addToEnd);
-          
+
           addToStart = addToEnd;
           addToEnd = addToEnd + minutes;
         }); // foreach timeslot
@@ -1063,21 +1063,40 @@
      *          Team object
      * @param slot
      *          Timeslot object
-     * @returns
+     * @returns true or false
      */
     hasPlayoffConflict : function(team, slot) {
       var conflict = false;
       $.each(team.playoffDivisions, function(i, playoffDivision) {
         var start = $.finalist.getPlayoffStartTime(playoffDivision);
         var end = $.finalist.getPlayoffEndTime(playoffDivision);
-        if (start != undefined && end != undefined) {
-          if ($.finalist.compareTimes(start, slot.endTime) < 0
-              && $.finalist.compareTimes(slot.time, end) < 0) {
-            conflict = true;
-          }
+        if ($.finalist.slotHasPlayoffConflict(playoffDivision, slot)) {
+          conflict = true;
         }
       });
       return conflict;
+    },
+
+    /**
+     * Check if there is a conflict between the specified time slot and the
+     * playoff times for the specified playoff division.
+     * 
+     * @param playoffDivision
+     *          one of the playoff divisions
+     * @param slot
+     *          Timeslot object
+     * @returns true or false
+     */
+    slotHasPlayoffConflict : function(playoffDivision, slot) {
+      var start = $.finalist.getPlayoffStartTime(playoffDivision);
+      var end = $.finalist.getPlayoffEndTime(playoffDivision);
+      if (start != undefined && end != undefined) {
+        if ($.finalist.compareTimes(start, slot.endTime) < 0
+            && $.finalist.compareTimes(slot.time, end) < 0) {
+          return true;
+        }
+      }
+      return false;
     },
 
     setStartHour : function(hour) {
@@ -1113,7 +1132,7 @@
     setDuration : function(v) {
       var diffMinutes = v - _duration;
       _addMinutesToDurationOfSchedules(diffMinutes);
-      
+
       _duration = v;
       _save();
     },
