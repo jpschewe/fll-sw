@@ -1,3 +1,4 @@
+* #411 - add table names to the database when a schedule is uploaded
 * #427 - run the scheduler and table optimizer in a background thread
 
 Release 10.4

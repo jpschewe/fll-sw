@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -19,12 +21,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.log4j.Logger;
 
-import fll.db.Queries;
 import fll.db.CategoryColumnMapping;
+import fll.db.Queries;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
@@ -33,6 +33,9 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.WebUtils;
+import fll.web.admin.Tables;
+import net.mtu.eggplant.util.Pair;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Commit the schedule in uploadSchedule_schedule to the database for the
@@ -65,10 +68,19 @@ public class CommitSchedule extends BaseFLLServlet {
       // J2EE doesn't have things typed yet
       @SuppressWarnings("unchecked")
       final Collection<CategoryColumnMapping> categoryColumnMappings = SessionAttributes.getAttribute(session,
-                                                                                                                        UploadSchedule.MAPPINGS_KEY,
-                                                                                                                        Collection.class);
+                                                                                                      UploadSchedule.MAPPINGS_KEY,
+                                                                                                      Collection.class);
 
       CategoryColumnMapping.store(connection, tournamentID, categoryColumnMappings);
+
+      // store table names
+      final List<Pair<String, String>> tables = new LinkedList<>();
+      for (final String color : schedule.getTableColors()) {
+        tables.add(new Pair<>(color
+            + " 1", color
+                + " 2"));
+      }
+      Tables.replaceTablesForTournament(connection, tournamentID, tables);
 
       session.setAttribute(SessionAttributes.MESSAGE, "<p>Schedule successfully stored in the database</p>");
       WebUtils.sendRedirect(application, response, "/admin/index.jsp");

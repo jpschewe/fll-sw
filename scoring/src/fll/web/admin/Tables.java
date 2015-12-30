@@ -10,8 +10,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.ParseException;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -20,10 +21,11 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspWriter;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
+import net.mtu.eggplant.util.Pair;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Java code used in tables.jsp
@@ -53,7 +55,8 @@ public final class Tables {
 
       int rowIndex = 0;
       while (null != request.getParameter("SideA"
-          + (rowIndex + 1))) {
+          + (rowIndex
+              + 1))) {
         ++rowIndex;
         out.println("<!-- found a row "
             + rowIndex + "-->");
@@ -65,7 +68,8 @@ public final class Tables {
       }
       out.println("<!-- final count of rows is "
           + rowIndex + "-->");
-      final int numRows = rowIndex + 1;
+      final int numRows = rowIndex
+          + 1;
 
       out.println("<form action='tables.jsp' method='POST' name='tables'>");
 
@@ -183,6 +187,50 @@ public final class Tables {
   }
 
   /**
+   * Replace the tables for a tournament.
+   * 
+   * @param connection the database connection
+   * @param tournamentId the tournament id
+   * @param tables the new tables, each pair is side 1 and side 2 of the table
+   * @throws SQLException
+   */
+  public static void replaceTablesForTournament(final Connection connection,
+                                                final int tournamentId,
+                                                final List<Pair<String, String>> tables) throws SQLException {
+    PreparedStatement deleteNames = null;
+    PreparedStatement deleteInfo = null;
+    PreparedStatement insert = null;
+    try {
+      // delete old data in tablenames
+      deleteNames = connection.prepareStatement("DELETE FROM tablenames where Tournament = ?");
+      deleteNames.setInt(1, tournamentId);
+      deleteNames.executeUpdate();
+
+      deleteInfo = connection.prepareStatement("DELETE FROM table_division where Tournament = ?");
+      deleteInfo.setInt(1, tournamentId);
+      deleteInfo.executeUpdate();
+
+      insert = connection.prepareStatement("INSERT INTO tablenames (Tournament, PairID, SideA, SideB) VALUES(?, ?, ?, ?)");
+      insert.setInt(1, tournamentId);
+      int pairId = 0;
+      for (final Pair<String, String> tableInfo : tables) {
+        insert.setInt(2, pairId);
+        insert.setString(3, tableInfo.getOne());
+        insert.setString(4, tableInfo.getTwo());
+        insert.executeUpdate();
+
+        ++pairId;
+      }
+
+    } finally {
+      SQLFunctions.close(deleteInfo);
+      SQLFunctions.close(deleteNames);
+      SQLFunctions.close(insert);
+    }
+
+  }
+
+  /**
    * Commit the subjective data from request to the database and redirect
    * response back to index.jsp.
    * 
@@ -193,52 +241,35 @@ public final class Tables {
                                    final HttpSession session,
                                    final Connection connection,
                                    final int tournament) throws SQLException, IOException {
-    Statement stmt = null;
-    PreparedStatement prep = null;
-    try {
-      stmt = connection.createStatement();
+    final List<Pair<String, String>> tables = new LinkedList<>();
 
-      // delete old data in tablenames
-      prep = connection.prepareStatement("DELETE FROM tablenames where Tournament = ?");
-      prep.setInt(1, tournament);
-      prep.executeUpdate();
-      SQLFunctions.close(prep);
-
-      // walk request parameters and insert data into database
-      prep = connection.prepareStatement("INSERT INTO tablenames (Tournament, PairID, SideA, SideB) VALUES(?,?, ?, ?)");
-      prep.setInt(1, tournament);
-      int row = 0;
-      String sideA = request.getParameter("SideA"
-          + row);
-      String sideB = request.getParameter("SideB"
-          + row);
-      String delete = request.getParameter("delete"
-          + row);
-      while (null != sideA) {
-        if (null == delete
-            || delete.equals("")) {
-          // Don't put blank entries in the database
-          if (!(sideA.trim().equals("") && sideB.trim().equals(""))) {
-            prep.setInt(2, row);
-            prep.setString(3, sideA);
-            prep.setString(4, sideB);
-            prep.executeUpdate();
-          }
+    int row = 0;
+    String sideA = request.getParameter("SideA"
+        + row);
+    String sideB = request.getParameter("SideB"
+        + row);
+    String delete = request.getParameter("delete"
+        + row);
+    while (null != sideA) {
+      if (null == delete
+          || delete.equals("")) {
+        // Don't put blank entries in the database
+        if (!(sideA.trim().equals("")
+            && sideB.trim().equals(""))) {
+          tables.add(new Pair<>(sideA, sideB));
         }
-
-        row++;
-        sideA = request.getParameter("SideA"
-            + row);
-        sideB = request.getParameter("SideB"
-            + row);
-        delete = request.getParameter("delete"
-            + row);
       }
 
-    } finally {
-      SQLFunctions.close(stmt);
-      SQLFunctions.close(prep);
+      row++;
+      sideA = request.getParameter("SideA"
+          + row);
+      sideB = request.getParameter("SideB"
+          + row);
+      delete = request.getParameter("delete"
+          + row);
     }
+
+    replaceTablesForTournament(connection, tournament, tables);
 
     // finally redirect to index.jsp
     session.setAttribute(SessionAttributes.MESSAGE, "<p id='success'><i>Successfully assigned tables</i></p>");
