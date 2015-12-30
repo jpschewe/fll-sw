@@ -1,3 +1,4 @@
+<%@page import="fll.xml.BracketSortType"%>
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%
@@ -10,7 +11,10 @@
 </head>
 <body>
 
-  <p>Choose how the teams are sorted into the brackets.</p>
+  <p>
+    Choose how the teams are sorted into the brackets. Unless you are
+    doing something unusual the right answer is "<%=BracketSortType.SEEDING.getDescription()%>"
+  </p>
 
   <form
     method="POST"
