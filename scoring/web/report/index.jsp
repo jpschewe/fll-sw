@@ -181,7 +181,7 @@
       judge for each team in a category.</li>
 
     <li><a href="PerformanceScoreDump">CSV file containing
-        seeding round performance scores</a>. This is useful to manually
+        all performance scores</a>, excluding byes. This is useful to manually
       determine awards for most consistent or most improved robot
       performance.</li>
 

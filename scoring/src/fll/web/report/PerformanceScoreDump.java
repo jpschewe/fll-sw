@@ -20,16 +20,14 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.commons.io.IOUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
 import fll.Utilities;
 import fll.db.Queries;
-import fll.db.TournamentParameters;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * CSV file for seeding round performance scores.
@@ -81,16 +79,13 @@ public class PerformanceScoreDump extends BaseFLLServlet {
     PreparedStatement getScores = null;
     ResultSet scores = null;
     try {
-      final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournamentID);
-
       getScores = connection.prepareStatement("SELECT Teams.TeamName, Performance.TeamNumber, Performance.RunNumber, Performance.ComputedTotal"//
           + " FROM Teams, Performance" //
           + " WHERE Teams.TeamNumber = Performance.TeamNumber" //
           + " AND Performance.Tournament = ?" //
           + " AND Performance.verified = TRUE" //
-          + " AND Performance.RunNumber <= ?");
+          + " AND Performance.Bye = FALSE");
       getScores.setInt(1, tournamentID);
-      getScores.setInt(2, numSeedingRounds);
 
       scores = getScores.executeQuery();
       while (scores.next()) {
