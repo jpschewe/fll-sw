@@ -1,3 +1,5 @@
+Release 10.5
+============
 * #449 - display playoff times in the finalist schedule
 * #411 - add table names to the database when a schedule is uploaded
 * #448 - modify finalist schedule times when the start time is modified
