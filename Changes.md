@@ -1,3 +1,4 @@
+* #411 - add table names to the database when a schedule is uploaded
 * #448 - modify finalist schedule times when the start time is modified
 * #427 - run the scheduler and table optimizer in a background thread
 
