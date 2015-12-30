@@ -63,7 +63,7 @@ public final class TableInformation implements Serializable {
   public int getId() {
     return mId;
   }
-
+  
   private static List<Integer> getTablesForDivision(final Connection connection,
                                                     final int tournament,
                                                     final String division) throws SQLException {
