@@ -60,6 +60,8 @@ function updateHeader() {
 
   headerRow.append($("<div class='rTableHead'>Time Slot</div>"));
 
+  headerRow.append($("<div class='rTableHead'>Playoffs</div>"));
+
   $.each($.finalist.getAllCategories(), function(i, category) {
     var room = $.finalist.getRoom(category, $.finalist.getCurrentDivision());
     var header;
@@ -248,6 +250,11 @@ function moveTeam(team, category, newSlot) {
     return;
   }
 
+  if ($.finalist.compareTimes(srcSlot.time, destSlot.time) == 0) {
+    // dropping on the same slot where the team already was
+    return;
+  }
+
   // remove warning from source cell as it may become empty
   var srcCell = getCellForTimeAndCategory(srcSlot.time, category.catId);
   srcCell.removeClass("overlap-schedule");
@@ -258,6 +265,7 @@ function moveTeam(team, category, newSlot) {
     delete srcSlot.categories[category.catId];
   } else {
     var oldTeamNumber = destSlot.categories[category.catId];
+    var oldTeam = $.finalist.lookupTeam(oldTeamNumber);
 
     // clear the destination slot so that the warning check sees the correct
     // state for this team
@@ -311,6 +319,8 @@ function checkForTimeOverlap(slot, teamNumber) {
     }
   });
 
+  var hasPlayoffConflict = $.finalist.hasPlayoffConflict(team, slot);
+
   $.each(slot.categories, function(categoryId, checkTeamNumber) {
     if (checkTeamNumber == teamNumber) {
       var cell = getCellForTimeAndCategory(slot.time, categoryId);
@@ -325,10 +335,10 @@ function checkForTimeOverlap(slot, teamNumber) {
           cell.removeClass('overlap-schedule');
         }
 
-        if ($.finalist.hasPlayoffConflict(team, slot)) {
-          cell.addClass("overlap-playoff");
+        if (hasPlayoffConflict) {
+          cell.addClass('overlap-playoff');
         } else {
-          cell.removeClass("overlap-playoff");
+          cell.removeClass('overlap-playoff');
         }
 
       } // found cell
@@ -351,6 +361,20 @@ function addRowForSlot(slot) {
 
   row.append($("<div class='rTableCell'>"
       + $.finalist.timeToDisplayString(slot.time) + "</div>"));
+
+  var playoffCell = $("<div class='rTableCell'></div>");
+  row.append(playoffCell);
+  var first = true;
+  $.each($.finalist.getPlayoffDivisions(), function(index, playoffDivision) {
+    if ($.finalist.slotHasPlayoffConflict(playoffDivision, slot)) {
+      if (first) {
+        first = false;
+      } else {
+        playoffCell.append(",");
+      }
+      playoffCell.append(playoffDivision);
+    }
+  });
 
   var categoriesToCells = {};
   var teamsInSlot = {};
