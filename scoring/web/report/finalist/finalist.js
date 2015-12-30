@@ -269,6 +269,52 @@
     return t;
   }
 
+  /**
+   * Add the specified number of minutes to all timeslots in existing schedules.
+   * 
+   * Does NOT save.
+   */
+  function _addMinutesToSchedules(minutes) {
+
+    $.each(_schedules, function(i, schedule) {
+      if (null != schedule) {
+        $.each(schedule, function(k, slot) {
+
+          slot.time = $.finalist.addMinutesToTime(slot.time, minutes);
+          slot.endTime = $.finalist.addMinutesToTime(slot.endTime, minutes);
+
+        }); // foreach timeslot
+      }
+    }); // foreach schedule
+
+  }
+
+  /**
+   * Add the specified number of minutes to the duration of all timeslots
+   * in existing schedules. This slides everything forward to prevent 
+   * 
+   * Does NOT save.
+   */
+  function _addMinutesToDurationOfSchedules(minutes) {
+    
+    $.each(_schedules, function(i, schedule) {
+      if (null != schedule) {
+        var addToStart = 0;
+        var addToEnd = minutes;
+
+        $.each(schedule, function(k, slot) {
+
+          slot.time = $.finalist.addMinutesToTime(slot.time, addToStart);
+          slot.endTime = $.finalist.addMinutesToTime(slot.endTime, addToEnd);
+          
+          addToStart = addToEnd;
+          addToEnd = addToEnd + minutes;
+        }); // foreach timeslot
+      }
+    }); // foreach schedule
+
+  }
+
   // //////////////////////// PUBLIC INTERFACE /////////////////////////
   $.finalist = {
     CHAMPIONSHIP_NAME : "Championship",
@@ -1035,6 +1081,10 @@
     },
 
     setStartHour : function(hour) {
+      var diffHours = hour - _startHour;
+      var diffMinutes = diffHours * 60;
+      _addMinutesToSchedules(diffMinutes);
+
       _startHour = hour;
       _save();
     },
@@ -1044,6 +1094,9 @@
     },
 
     setStartMinute : function(minute) {
+      var diffMinutes = minute - _startMinute;
+      _addMinutesToSchedules(diffMinutes);
+
       _startMinute = minute;
       _save();
     },
@@ -1058,6 +1111,9 @@
     },
 
     setDuration : function(v) {
+      var diffMinutes = v - _duration;
+      _addMinutesToDurationOfSchedules(diffMinutes);
+      
       _duration = v;
       _save();
     },

@@ -163,6 +163,9 @@ $(document).ready(
         if (isNaN(duration)) {
           alert("Duration must be an integer");
           $("#duration").val($.finalist.getDuration());
+        } else if (duration < 5) {
+          alert("Duration must be at least 5 minutes");
+          $("#duration").val($.finalist.getDuration());
         } else {
           $.finalist.setDuration(duration);
         }
