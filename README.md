@@ -49,7 +49,7 @@ In 2008 I started taking over the scheduling of the regional tournaments in Minn
 
 Future plans
 ============
-Fix the bugs and make the software more user-friendly. If you have suggestions on this, please add them to the issues list (requires registration). The link is at the top of this page.
+Fix the bugs and make the software more user-friendly. If you have suggestions on this, please add them to the [issues list](https://github.com/jpschewe/fll-sw/issues) (requires registration).
 
 Developers
 ==========
