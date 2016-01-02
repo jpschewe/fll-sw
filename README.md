@@ -27,6 +27,7 @@ Features
 
 Instructions
 ============
+  1. Read the [terminology document](scoring/docs/terminology.md) to understand the concepts used in the scoring software.
   1. The [setup instructions](scoring/docs/SetupInstructions.md) include information on preparing to run the software, including the hardware and software for tournaments of different sizes.
   1. You should look at the [instructions for running the software](scoring/docs/InstructionsForRunningTheSoftware.md) for how to use the software to run a tournament.
   1. There are some training materials in the [training folder](training/). This includes a presentation used to train new head computer people in Minnesota and a sample tournament database. 
