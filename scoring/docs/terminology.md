@@ -4,14 +4,6 @@ Grouping Teams
 There are a number of different ways that teams are grouped in the software. 
 This describes the different groups and what they mean.
 
-Division
---------
-
-Each team is put in a division for the season. 
-This is used as the default value for the event division.
-*I am considering removing this concept in the future. 
-It is not really used and we can come up with another default for event division.*
-
 Event Division
 --------------
 
