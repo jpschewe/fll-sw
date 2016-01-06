@@ -22,7 +22,7 @@ At smaller tournaments where 1 judge has enough time to see all tabs in an event
 
 At larger tournaments the teams in an event division are split up into multiple judging groups.
 Then the top teams in a subjective category across all judging groups in an event division are judged again by a select group of judges to determine a winner.
-This second level of judging is needed to choose the best team in an event division because the scoring is subjective and a 10 for over judge doesn't mean the same thing as a 10 from another judge.
+This second level of judging is needed to choose the best team in an event division because scores from one judge don't correlate to scores from another judge.
 So the best we can do is choose the best team from each judge and see them again.
 
 Finalist judging is scheduled per event division. This is because as there is a winner in each event division and the finalist judging for multiple event divisions can occur at the same time.
@@ -59,6 +59,7 @@ All of the missions have a set of rules to determine what score a team gets for 
 Subjective
 ----------
 
+This is sometimes referred to as judging scores.
 There can be unlimited subjective categories.
 Missions in a subjective category are scored within a range by a judge.
 Each judge may use different parts of the range and therefore may come up with a different score for the same team than another judge.
