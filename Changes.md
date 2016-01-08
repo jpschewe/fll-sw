@@ -1,3 +1,5 @@
+* Take footer off of the slide show page
+
 Release 10.5
 ============
 * #449 - display playoff times in the finalist schedule
