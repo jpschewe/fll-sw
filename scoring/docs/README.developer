@@ -10,7 +10,7 @@ If you have development questions or suggestions, please contact:
   Jon Schewe	-- jpschewe@mtu.net
 
 Please follow the coding standards put forward at
-http://mtu.net/~jpschewe/java/CodingStandards.html.
+http://mtu.net/~jpschewe/java/CodingStandards.html
 
 Before checking in any code, please run the ant target "before-checkin" to
 ensure your code is correct.
@@ -22,23 +22,16 @@ Servlet 3.0 spec, annotations are under javax.servlet.annotation:
 http://docs.oracle.com/javaee/6/api/index.html?javax/servlet/package-summary.html
 
 JSP API documentation:
-http://tomcat.apache.org/tomcat-7.0-doc/jspapi/index.html
-
-There are some good ideas for JSP coding conventions here as well.
-http://developer.java.sun.com/developer/technicalArticles/javaserverpages/code_convention/
+http://tomcat.apache.org/tomcat-8.0-doc/jspapi/index.html
 
 Pointers on JSTL:
-- http://java.sun.com/products/jsp/jstl/ - the main page at Sun
-- http://www.manning.com/bayern/appendixA.pdf - good reference
-- Also if you grab the implementation from Jakarta, there are some very nice
-examples included.
+- Homepage https://jstl.java.net/
 
 Pointers on HSQLdb:
 - http://www.hsqldb.org/web/hsqlDocsFrame.html
 
 Documentation on iText (PDF library)
-- Homepage http://www.lowagie.com/iText/
-- docs http://www.lowagie.com/iText/docs.html
-- API http://itextdocs.lowagie.com/docs/
+- Homepage http://developers.itextpdf.com/
+- API http://api.itextpdf.com/itext/
 
 -- eof README.developer
