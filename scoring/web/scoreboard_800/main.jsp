@@ -27,7 +27,7 @@ html {
     <frame src='<c:url value="/scoreboard/title.jsp" />' marginheight='0' marginwidth='0' scrolling='no'>
     <frame src='<c:url value="/scoreboard/allteams.jsp"><c:param name="allTeamsScroll" value="true"/></c:url>' scrolling='no'>
   </frameset>
-  <frameset rows='350,*' border='1' framespacing='0'>
+  <frameset rows='50%,*' border='1' framespacing='0'>
     <frame src='<c:url value="/scoreboard/Top10"><c:param name="showOrganization" value="false" /></c:url>' marginheight='0' marginwidth='0' noresize scrolling='no' >
     <frame src='<c:url value="/scoreboard/Last8"><c:param name="showOrganization" value="false" /></c:url>' marginheight='3' marginwidth='0' noresize scrolling='no' >
   </frameset>

@@ -74,7 +74,8 @@ public class Top10 extends BaseFLLServlet {
       connection = datasource.getConnection();
 
       final int currentTournament = Queries.getCurrentTournament(connection);
-      final int maxScoreboardRound = TournamentParameters.getMaxScoreboardPerformanceRound(connection, currentTournament);
+      final int maxScoreboardRound = TournamentParameters.getMaxScoreboardPerformanceRound(connection,
+                                                                                           currentTournament);
 
       final Integer divisionIndexObj = SessionAttributes.getAttribute(session, "divisionIndex", Integer.class);
       int divisionIndex;
@@ -103,10 +104,12 @@ public class Top10 extends BaseFLLServlet {
       formatter.format("<table border='1' cellpadding='2' cellspacing='0' width='98%%'>%n");
 
       formatter.format("<colgroup>%n");
-      formatter.format("<col width='50px' />%n");
+      formatter.format("<col width='30px' />%n");
       formatter.format("<col width='75px' />%n");
       formatter.format("<col />%n");
-      formatter.format("<col />%n");
+      if (showOrg) {
+        formatter.format("<col />%n");
+      }
       formatter.format("<col width='70px' />%n");
       formatter.format("</colgroup>%n");
 
@@ -125,17 +128,14 @@ public class Top10 extends BaseFLLServlet {
 
         prep = connection.prepareStatement("SELECT Teams.TeamName, Teams.Organization, Teams.TeamNumber, T2.MaxOfComputedScore" //
             + " FROM (SELECT TeamNumber, " //
-            + winnerCriteria.getMinMaxString()
-            + "(ComputedTotal) AS MaxOfComputedScore" //
-            + "  FROM verified_performance WHERE Tournament = ? "
-            + "   AND NoShow = False" //
+            + winnerCriteria.getMinMaxString() + "(ComputedTotal) AS MaxOfComputedScore" //
+            + "  FROM verified_performance WHERE Tournament = ? " + "   AND NoShow = False" //
             + "   AND Bye = False" //
             + "   AND RunNumber <= ?" //
             + "  GROUP BY TeamNumber) AS T2"
             + " JOIN Teams ON Teams.TeamNumber = T2.TeamNumber, current_tournament_teams"
             + " WHERE Teams.TeamNumber = current_tournament_teams.TeamNumber" //
-            + " AND current_tournament_teams.event_division = ?"
-            + " ORDER BY T2.MaxOfComputedScore "
+            + " AND current_tournament_teams.event_division = ?" + " ORDER BY T2.MaxOfComputedScore "
             + winnerCriteria.getSortString());
         prep.setInt(1, currentTournament);
         prep.setInt(2, maxScoreboardRound);
@@ -158,7 +158,7 @@ public class Top10 extends BaseFLLServlet {
           if (null == teamName) {
             teamName = "&nbsp;";
           }
-          formatter.format("<td class='left' width='28%%'><div class='truncate'><b>%s</b></div></td>%n", teamName);
+          formatter.format("<td class='left truncate'>%s</td>%n", teamName);
           if (showOrg) {
             String organization = rs.getString("Organization");
             if (null == organization) {
@@ -172,7 +172,7 @@ public class Top10 extends BaseFLLServlet {
 
           prevScore = score;
           ++i;
-        }// end while next
+        } // end while next
       } // end divisions not empty
       formatter.format("</table>%n");
       formatter.format("</body>%n");

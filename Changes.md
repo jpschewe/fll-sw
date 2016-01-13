@@ -1,3 +1,4 @@
+* #462 - make scoreboard display more responsive to different resolutions
 * Take footer off of the slide show page
 
 Release 10.5

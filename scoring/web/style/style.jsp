@@ -42,7 +42,7 @@ BODY {
   
 
 .truncate {
-    width: 100%;
+    max-width: 1px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
