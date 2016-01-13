@@ -194,7 +194,7 @@ public class ScoresheetGenerator {
 
             final int performanceRunA = Playoff.getRunNumber(connection, division, teamA.getTeamNumber(), iRound);
             m_division[j] = division;
-            final int bracketA = Playoff.getBracketNumber(connection, teamA.getTeamNumber(), performanceRunA);
+            final int bracketA = Playoff.getBracketNumber(connection, tournament, teamA.getTeamNumber(), performanceRunA);
             final String bracketALabel = String.format("Bracket %d", bracketA);
             m_time[j] = bracketALabel;
 
@@ -220,7 +220,7 @@ public class ScoresheetGenerator {
 
             final int performanceRunB = Playoff.getRunNumber(connection, division, teamB.getTeamNumber(), iRound);
             m_division[j] = division;
-            final int bracketB = Playoff.getBracketNumber(connection, teamB.getTeamNumber(), performanceRunB);
+            final int bracketB = Playoff.getBracketNumber(connection, tournament, teamB.getTeamNumber(), performanceRunB);
             final String bracketBLabel = String.format("Bracket %d", bracketB);
             m_time[j] = bracketBLabel;
 
