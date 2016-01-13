@@ -888,12 +888,14 @@ public final class Playoff {
    * run number (1-based).
    * 
    * @param connection the database connection
+   * @param tournamentId id of the tournament
    * @param teamNumber the team
    * @param runNumber the run
    * @return the bracket number or -1 if the bracket cannot be determined
    * @throws SQLException if a database error occurs
    */
   public static int getBracketNumber(final Connection connection,
+                                     final int tournamentId,
                                      final int teamNumber,
                                      final int runNumber) throws SQLException {
     PreparedStatement prep = null;
@@ -901,9 +903,11 @@ public final class Playoff {
     try {
       prep = connection.prepareStatement("SELECT LineNumber FROM PlayoffData"//
           + " WHERE Team = ? " //
-          + " AND run_number = ?");
+          + " AND run_number = ?"
+          + " AND tournament = ?");
       prep.setInt(1, teamNumber);
       prep.setInt(2, runNumber);
+      prep.setInt(3, tournamentId);
       rs = prep.executeQuery();
       if (rs.next()) {
         final int lineNumber = rs.getInt(1);

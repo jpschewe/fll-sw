@@ -193,19 +193,18 @@ public class ScoresheetGenerator {
                 + i);
 
             final int performanceRunA = Playoff.getRunNumber(connection, division, teamA.getTeamNumber(), iRound);
-            final String divA = Playoff.getPlayoffDivision(connection, teamA.getTeamNumber(), performanceRunA);
-            m_division[j] = divA;
-            final int bracketA = Playoff.getBracketNumber(connection, teamA.getTeamNumber(), performanceRunA);
+            m_division[j] = division;
+            final int bracketA = Playoff.getBracketNumber(connection, tournament, teamA.getTeamNumber(), performanceRunA);
             final String bracketALabel = String.format("Bracket %d", bracketA);
             m_time[j] = bracketALabel;
 
             updatePrep.setString(1, m_table[j]);
-            updatePrep.setString(2, divA);
+            updatePrep.setString(2, division);
             updatePrep.setInt(4, iRound);
             updatePrep.setInt(5, teamA.getTeamNumber());
             if (updatePrep.executeUpdate() < 1) {
               LOGGER.warn(String.format("Could not update playoff table and print flags for team: %s playoff round: %s playoff division: %s",
-                                        teamA.getTeamNumber(), iRound, divA));
+                                        teamA.getTeamNumber(), iRound, division));
             }
             j++;
 
@@ -220,19 +219,18 @@ public class ScoresheetGenerator {
                 + i);
 
             final int performanceRunB = Playoff.getRunNumber(connection, division, teamB.getTeamNumber(), iRound);
-            final String divB = Playoff.getPlayoffDivision(connection, teamB.getTeamNumber(), performanceRunB);
-            m_division[j] = divB;
-            final int bracketB = Playoff.getBracketNumber(connection, teamB.getTeamNumber(), performanceRunB);
+            m_division[j] = division;
+            final int bracketB = Playoff.getBracketNumber(connection, tournament, teamB.getTeamNumber(), performanceRunB);
             final String bracketBLabel = String.format("Bracket %d", bracketB);
             m_time[j] = bracketBLabel;
 
             updatePrep.setString(1, m_table[j]);
-            updatePrep.setString(2, divB);
+            updatePrep.setString(2, division);
             updatePrep.setInt(4, iRound);
             updatePrep.setInt(5, teamB.getTeamNumber());
             if (updatePrep.executeUpdate() < 1) {
               LOGGER.warn(String.format("Could not update playoff table and print flags for team: %s playoff round: %s playoff division: %s",
-                                        teamB.getTeamNumber(), iRound, divB));
+                                        teamB.getTeamNumber(), iRound, division));
             }
             j++;
           }

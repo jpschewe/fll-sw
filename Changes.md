@@ -1,5 +1,6 @@
 Release 10.6
 ============
+* #461 - use tournament information when looking up playoff brackets to ensure score sheets have correct bracket numbers
 * #462 - make scoreboard display more responsive to different resolutions
 * Take footer off of the slide show page
 
