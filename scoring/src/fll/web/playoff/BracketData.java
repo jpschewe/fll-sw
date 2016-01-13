@@ -606,13 +606,13 @@ public class BracketData {
     final SortedMap<Integer, BracketDataType> roundData = _bracketData.get(round);
     if (roundData == null) {
       sb.append("<td>ERROR: No data for round "
-          + round + ".</td>");
+          + round + ".</td>\n");
       return;
     }
 
     final BracketDataType d = roundData.get(row);
     if (d == null) {
-      sb.append("<td width='400'>&nbsp;</td>");
+      sb.append("<td width='400'>&nbsp;</td>\n");
     } else if (d instanceof SpannedOverBracketCell) {
       final String comment = ((SpannedOverBracketCell) d).getComment();
       if (comment != null) {
@@ -631,13 +631,13 @@ public class BracketData {
         sb.append(getDisplayString(_currentTournament, round
             + _baseRunNumber, ((TeamBracketCell) d).getTeam(), true, _showOnlyVerifiedScores));
       }
-      sb.append("</td>");
+      sb.append("</td>\n");
 
     } else if (d instanceof BracketLabelCell) {
       sb.append("<td width='400'><font size='4'>");
       sb.append(((BracketLabelCell) d).getLabel()
           + "</font>");
-      sb.append("</td>");
+      sb.append("</td>\n");
     } else if (d instanceof ScoreSheetFormBracketCell) {
       final ScoreSheetFormBracketCell myD = (ScoreSheetFormBracketCell) d;
       sb.append("<td width='400' valign='middle'");
@@ -647,7 +647,7 @@ public class BracketData {
             + myD.getRowsSpanned() + "'>");
         sb.append("<table>\n  <tr><td colspan='3' align='center'><font size='4'>");
         sb.append(myD.getLabel());
-        sb.append("</font></td></tr>");
+        sb.append("</font></td>\n</tr>\n");
         sb.append("<tr>");
         sb.append("<td rowspan='2' align='center' valign='middle'>");
         sb.append("<input type='checkbox' name='print"
@@ -662,8 +662,8 @@ public class BracketData {
             + myD.getMatchNum() + "' value='" + myD.getTeamB().getTeamNumber() + "'/>");
         sb.append("<input type='hidden' name='round"
             + myD.getMatchNum() + "' value='" + round + "'/>");
-        sb.append("</td>");
-        sb.append("<td align='right'>Table A: </td>");
+        sb.append("</td>\n");
+        sb.append("<td align='right'>Table A: </td>\n");
         sb.append("<td align='left'>");
 
         final List<TableInformation> tableInfo = myD.getAllTables();
@@ -674,9 +674,9 @@ public class BracketData {
 
         outputTableSelect(sb, tableASelect, tableAAssigned, tableInfo);
 
-        sb.append("</td></tr>");
+        sb.append("</td>\n</tr>\n");
 
-        sb.append("<tr><td align='right'>Table B: </td>");
+        sb.append("<tr><td align='right'>Table B: </td>\n");
         sb.append("<td align='left'>");
 
         final String tableBSelect = "tableB"
@@ -684,9 +684,9 @@ public class BracketData {
         final String tableBAssigned = myD.getTableB();
 
         outputTableSelect(sb, tableBSelect, tableBAssigned, tableInfo);
-        sb.append("</td></tr>");
+        sb.append("</td>\n</tr>\n");
 
-        sb.append("</table></td>");
+        sb.append("</table>\n</td>\n");
       } else {
         // this block is not typically invoked because we use a BracketLabelCell
         // in addBracketLabelsAndScoreGenFormElements when one of the teams is
@@ -697,12 +697,12 @@ public class BracketData {
         sb.append("<font size='4'>");
         sb.append(myD.getLabel()
             + "</font>");
-        sb.append("</td>");
+        sb.append("</td>\n");
       }
     } else if (d instanceof BigScreenTableAssignmentCell) {
       sb.append("<td align='right' style='padding-right:30px'><span class='table_assignment'>");
       sb.append(((BigScreenTableAssignmentCell) d).getTable());
-      sb.append("</span></td>");
+      sb.append("</span></td>\n");
     }
 
   }
@@ -838,7 +838,7 @@ public class BracketData {
       if (round != _finalsRound) {
         // This is a bridge cell before (or after!) the 3rd/4th place brackets -
         // it's just a blank cell
-        sb.append("<td width='10'>&nbsp;</td>");
+        sb.append("<td width='10'>&nbsp;</td>\n");
       } else {
         if (row == topRowOfConsolationBracket()) {
           // top of the 3rd/4th place bracket
@@ -848,7 +848,7 @@ public class BracketData {
             sb.append("<td width='10' class='Bridge' rowspan='"
                 + (_rowsPerTeam
                     + 1)
-                + "'>&nbsp;</td>");
+                + "'>&nbsp;</td>\n");
           } else {
             throw new RuntimeException("Unknown value for TopRightCornerStyle");
           }
@@ -859,13 +859,13 @@ public class BracketData {
             sb.append("<!-- skip column for bridge -->");
           } else if (row < topRowOfConsolationBracket()
               + _rowsPerTeam) {
-            sb.append("<td width='10' class='BridgeMiddle'>&nbsp;</td>");
+            sb.append("<td width='10' class='BridgeMiddle'>&nbsp;</td>\n");
           } else if (row == topRowOfConsolationBracket()
               + _rowsPerTeam) {
-            sb.append("<td width='10' class='BridgeBottom'>&nbsp;</td>");
+            sb.append("<td width='10' class='BridgeBottom'>&nbsp;</td>\n");
           }
         } else {
-          sb.append("<td width='10'>&nbsp;</td>");
+          sb.append("<td width='10'>&nbsp;</td>\n");
         }
       }
     } else {
@@ -928,16 +928,16 @@ public class BracketData {
                                                             * Math.round(Math
                                                             * .pow(2, ar)))
                                                             */
-                + "'>&nbsp;</td>");
+                + "'>&nbsp;</td>\n");
           } else if (modVal == 0) {
             // If we are on the first line of the bridge, use the BridgeTop
             // class
-            sb.append("<td width='10' class='BridgeTop'>&nbsp;</td>");
+            sb.append("<td width='10' class='BridgeTop'>&nbsp;</td>\n");
           } else if (modVal == (_rowsPerTeam
               * (int) Math.round(Math.pow(2, ar)))) {
             // If we are on the last line of the bridge, use the BridgeBottom
             // class
-            sb.append("<td width='10' class='BridgeBottom'>&nbsp;</td>");
+            sb.append("<td width='10' class='BridgeBottom'>&nbsp;</td>\n");
           }
         } else if (cs.equals(TopRightCornerStyle.MEET_TOP_OF_CELL)
             && modVal == 0) {
@@ -945,13 +945,13 @@ public class BracketData {
               + (_rowsPerTeam
                   * (int) Math.round(Math.pow(2, ar))
                   + 1)
-              + "'>&nbsp;</td>");
+              + "'>&nbsp;</td>\n");
         } else {
           sb.append("<!-- skip column for bridge -->");
         }
       } else {
         // Outside of a bridge
-        sb.append("<td width='10'>&nbsp;</td>");
+        sb.append("<td width='10'>&nbsp;</td>\n");
       }
     }
   }
