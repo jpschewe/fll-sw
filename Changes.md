@@ -1,3 +1,5 @@
+* #464 - Allow one to edit a no show score, this converts it into a regular score 
+
 Release 10.6
 ============
 * #461 - use tournament information when looking up playoff brackets to ensure score sheets have correct bracket numbers
