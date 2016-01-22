@@ -101,9 +101,10 @@ $(document).ready(function() {
           <td align='left' valign='bottom'>
             <input type="checkbox"
                    name='EditFlag'
+                   id='EditFlagLeft'
                    value="1"
                    onclick="editFlagBoxClicked()" />
-            <b>Correct or double-check this score</b>
+            <b><label for="EditFlagLeft">Correct or double-check this score</label></b>
           </td>
         </tr>
         <tr>

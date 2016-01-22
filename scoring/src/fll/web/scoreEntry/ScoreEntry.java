@@ -428,9 +428,6 @@ public final class ScoreEntry {
     } // foreach goal
 
     writer.println("  Verified = 0;");
-
-    writer.println("  gbl_NoShow = 0;");
-
   }
 
   /**
@@ -683,9 +680,6 @@ public final class ScoreEntry {
         // Always init the special double-check column
         writer.println("  Verified = "
             + rs.getBoolean("Verified") + ";");
-
-        writer.println("  gbl_NoShow = "
-            + rs.getBoolean("NoShow") + ";");
       } else {
         throw new RuntimeException("Cannot find TeamNumber and RunNumber in Performance table"
             + " TeamNumber: " + teamNumber + " RunNumber: " + runNumber);

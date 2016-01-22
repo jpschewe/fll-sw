@@ -41,15 +41,10 @@ td .score-error {
 
 
 <!-- No Show -->
-var gbl_NoShow;
-function setNoShow(value) {
-  gbl_NoShow = value;
-  refresh();
-}
 function submit_NoShow() {
  retval = confirm("Are you sure this is a 'No Show'?") 
  if(retval) {
-  gbl_NoShow = 1;
+  document.scoreEntry.NoShow.value = true;
   Verified = 1;
   refresh();
  }
@@ -80,9 +75,7 @@ function init() {
   savedTotalScore = document.scoreEntry.totalScore.value;
 }
 
-function refresh() {
-  document.scoreEntry.NoShow.value = gbl_NoShow;
-  
+function refresh() { 
   var score = 0;
 
   <%ScoreEntry.generateRefreshBody(out, application);%>
@@ -175,6 +168,7 @@ return m;
 
 <body onload="init()">
     <form action="submit.jsp" method="POST" name="scoreEntry">
+      <input type='hidden' name='NoShow' value="false"/>
 
       <c:if test="${1 == EditFlag}">
         <input type='hidden' name='EditFlag' value='1' readonly>
@@ -242,18 +236,18 @@ return m;
                 </td>
             </tr>
 
-            <c:choose>           
+            <c:choose>
             <c:when test="${isBye}">
               <tr>
                 <td colspan='3'><b>Bye Run</b></td>
               </tr>
             </c:when>
-            <c:when test="${isNoShow}">
-              <tr>
-                <td colspan='3'><b>No Show</b></td>
-              </tr>
-            </c:when>
             <c:otherwise>
+            <c:if test="${isNoShow}">
+              <tr>
+                <td colspan='5' class='center warning'>Editing a No Show - submitting score will change to a real run</td>
+              </tr>
+            </c:if>
               <%ScoreEntry.generateScoreEntry(out, application);%>
 
               <!-- Total Score -->
@@ -265,14 +259,13 @@ return m;
                   <input type='text' name='totalScore' size='3' readonly tabindex='-1'>
                 </td>
               </tr>
-              <input type='hidden' name='NoShow'/>
               <%ScoreEntry.generateVerificationInput(out);%>
             </c:otherwise>
             </c:choose>  <!-- end check for bye -->
 
             <tr>
               <td colspan='3' align='right'>
-                <c:if test="${not isBye and not isNoShow}">
+                <c:if test="${not isBye}">
                   <c:choose>
                   <c:when test="${1 == EditFlag}">
                     <input type='submit' id='submit' name='submit' value='Submit Score' onclick='return confirm(verification())'>
@@ -287,7 +280,7 @@ return m;
                   <input type='submit' id='delete' name='delete' value='Delete Score' onclick='return confirm("Are you sure you want to delete this score?")'>
                 </c:if>
               </td>
-                <c:if test="${not isBye and not isNoShow}">
+                <c:if test="${not isBye}">
               <td colspan='2'>
                 <input type='submit' id='no_show' name='submit' value='No Show' onclick='return submit_NoShow()'>
               </td>

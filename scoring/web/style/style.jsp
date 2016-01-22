@@ -48,3 +48,6 @@ BODY {
     text-overflow: ellipsis;
 }
   
+.center {
+    text-align: center;
+}
