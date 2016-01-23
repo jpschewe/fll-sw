@@ -36,10 +36,13 @@
   <property name="findbugs.home" value="${dir.lib}/findbugs-3.0.1" />
   <property name="dir.lib.findbugs" value="${findbugs.home}/lib" />
 
-
   <import file="${basedir}/buildscript-imports.xml" />
 
   <taskdef name="findbugs" classpath="${dir.lib.findbugs}/findbugs-ant.jar" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" />
+
+  <property name="launch4j.dir" location="${dir.tools}/launch4j" />
+  <taskdef name="launch4j" classname="net.sf.launch4j.ant.Launch4jTask" classpath="${launch4j.dir}/launch4j.jar
+          :${launch4j.dir}/lib/xstream.jar" />
 
 
   <taskdef name="one-jar" classname="com.simontuffs.onejar.ant.OneJarTask">
@@ -247,6 +250,9 @@
     <condition property="arch" value="windows">
       <os family="windows" />
     </condition>
+    <condition property="arch" value="mac">
+      <os family="mac" />
+    </condition>
     <condition property="arch" value="other">
       <not>
         <isset property="arch" />
@@ -307,6 +313,9 @@
       </lib>
     </one-jar>
 
+
+    <!-- create windows executable -->
+    <launch4j bindir="${dir.tools}/launch4j/bin-${arch}" tmpdir="${dir.build}" configFile="${basedir}/launch4j.xml" outfile="${dir.build}/fll-sw.exe" fileVersion="${app.version.short}.0.0" txtFileVersion="${app.version.short}" productVersion="${app.version.short}.0.0" txtProductVersion="${app.version.short}" />
 
     <!-- copy libraries over -->
     <copy todir="${dir.build}/lib">
