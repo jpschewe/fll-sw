@@ -1,0 +1,37 @@
+<launch4jConfig>
+  <headerType>gui</headerType>
+  <outfile>fll-sw.exe</outfile>
+  <downloadUrl>http://www.oracle.com/technetwork/java/javase/downloads/index.html
+  </downloadUrl>
+  <errTitle>FLL SW</errTitle>
+  <jar>bin/SchedulerUI.jar</jar>
+  <dontWrapJar>true</dontWrapJar>
+
+  <classPath>
+    <mainClass>com.simontuffs.onejar.Boot</mainClass>
+  </classPath>
+
+  <jre>
+    <minVersion>1.8.0</minVersion>
+    <jdkPreference>jdkOnly</jdkPreference>
+    <maxHeapPercent>75</maxHeapPercent>
+  </jre>
+
+  <versionInfo>
+    <fileVersion>0.1</fileVersion>
+    <txtFileVersion>Development</txtFileVersion>
+    <fileDescription>FIRST Lego League Scoring Software
+    </fileDescription>
+    <copyright>GPL</copyright>
+    <productVersion>0.1</productVersion>
+    <txtProductVersion>devel</txtProductVersion>
+    <productName>FLL-SW</productName>
+    <internalName>fll-sw</internalName>
+    <originalFilename>fll-sw.exe</originalFilename>
+  </versionInfo>
+
+  <messages>
+    <jreVersionErr>FLL SW requires JDK version</jreVersionErr>
+  </messages>
+
+</launch4jConfig>
