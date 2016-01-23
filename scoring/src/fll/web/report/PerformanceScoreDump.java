@@ -80,8 +80,11 @@ public class PerformanceScoreDump extends BaseFLLServlet {
     ResultSet scores = null;
     try {
       getScores = connection.prepareStatement("SELECT Teams.TeamName, Performance.TeamNumber, Performance.RunNumber, Performance.ComputedTotal"//
-          + " FROM Teams, Performance" //
+          + ", TournamentTeams.event_division, TournamentTeams.judging_station" //
+          + " FROM Teams, Performance, TournamentTeams" //
           + " WHERE Teams.TeamNumber = Performance.TeamNumber" //
+          + " AND Teams.TeamNumber = TournamentTeams.TeamNumber"
+          + " AND Performance.Tournament = TournamentTeams.Tournament" //
           + " AND Performance.Tournament = ?" //
           + " AND Performance.verified = TRUE" //
           + " AND Performance.Bye = FALSE");
@@ -93,9 +96,12 @@ public class PerformanceScoreDump extends BaseFLLServlet {
         final int teamNumber = scores.getInt(2);
         final int runNumber = scores.getInt(3);
         final double score = scores.getDouble(4);
+        final String eventDivision = scores.getString(5);
+        final String judgingStation = scores.getString(6);
 
         final String[] row = new String[] { Integer.toString(teamNumber), teamName, Integer.toString(runNumber),
-                                           Utilities.NUMBER_FORMAT_INSTANCE.format(score) };
+                                            Utilities.NUMBER_FORMAT_INSTANCE.format(score), eventDivision,
+                                            judgingStation };
         csv.writeNext(row);
       }
 
@@ -112,7 +118,7 @@ public class PerformanceScoreDump extends BaseFLLServlet {
    * @param csv where to write
    */
   private void writeHeader(final CSVWriter csv) {
-    csv.writeNext(new String[] { "team#", "team name", "round", "score" });
+    csv.writeNext(new String[] { "team#", "team name", "round", "score", "event_divisions", "judging_station" });
   }
 
 }

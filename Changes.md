@@ -1,3 +1,4 @@
+* #463 - Add judging station and event division to performance scores dump
 * #464 - Allow one to edit a no show score, this converts it into a regular score 
 
 Release 10.6
