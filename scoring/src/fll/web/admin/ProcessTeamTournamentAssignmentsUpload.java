@@ -28,6 +28,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import fll.Tournament;
 import fll.Utilities;
+import fll.db.GenerateDB;
 import fll.db.Queries;
 import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
@@ -74,12 +75,16 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
         throw new FLLRuntimeException("Cannot find 'tournament' request parameter");
       }
 
+      final String eventDivisionColumnName = request.getParameter("event_division");
+      final String judgingStationColumnName = request.getParameter("judging_station");
+
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
 
       final String sheetName = SessionAttributes.getAttribute(session, "sheetName", String.class);
 
-      processFile(connection, message, file, sheetName, teamNumberColumnName, tournamentColumnName);
+      processFile(connection, message, file, sheetName, teamNumberColumnName, tournamentColumnName,
+                  eventDivisionColumnName, judgingStationColumnName);
 
       session.setAttribute("message", message.toString());
       response.sendRedirect(response.encodeRedirectURL("index.jsp"));
@@ -126,7 +131,9 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
                                  final File file,
                                  final String sheetName,
                                  final String teamNumberColumnName,
-                                 final String tournamentColumnName)
+                                 final String tournamentColumnName,
+                                 final String eventDivisionColumnName,
+                                 final String judgingStationColumnName)
                                      throws SQLException, IOException, ParseException, InvalidFormatException {
 
     if (LOGGER.isTraceEnabled()) {
@@ -190,9 +197,12 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
 
     int teamNumColumnIdx = -1;
     int tournamentColumnIdx = -1;
+    int eventDivisionColumnIdx = -1;
+    int judgingStationColumnIdx = -1;
     int index = 0;
-    while (-1 == teamNumColumnIdx
-        || -1 == tournamentColumnIdx) {
+    while (index < columnNames.length
+        && (-1 == teamNumColumnIdx
+            || -1 == tournamentColumnIdx || -1 == eventDivisionColumnIdx || -1 == judgingStationColumnIdx)) {
       if (-1 == teamNumColumnIdx
           && teamNumberColumnName.equals(columnNames[index])) {
         teamNumColumnIdx = index;
@@ -202,8 +212,22 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
           && tournamentColumnName.equals(columnNames[index])) {
         tournamentColumnIdx = index;
       }
+      if (-1 == eventDivisionColumnIdx
+          && eventDivisionColumnName.equals(columnNames[index])) {
+        eventDivisionColumnIdx = index;
+      }
+      if (-1 == judgingStationColumnIdx
+          && judgingStationColumnName.equals(columnNames[index])) {
+        judgingStationColumnIdx = index;
+      }
 
       ++index;
+    }
+
+    if (-1 == teamNumColumnIdx
+        || -1 == tournamentColumnIdx) {
+      throw new FLLInternalException("Cannot find index for team number column '"
+          + teamNumberColumnName + "' or tournament '" + tournamentColumnName + "'");
     }
 
     int rowsProcessed = 0;
@@ -215,8 +239,6 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
         if (null != teamNumStr
             && !"".equals(teamNumStr.trim())) {
           final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumStr).intValue();
-
-          final String division = Queries.getDivisionOfTeam(connection, teamNumber);
 
           final String tournamentName = data[tournamentColumnIdx];
           Tournament tournament = Tournament.findTournamentByName(connection, tournamentName);
@@ -231,10 +253,24 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
               message.append("<p>Created tournament '"
                   + tournamentName + "'</p>");
             }
-          } else {
-            Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), division, division);
-            ++rowsProcessed;
           }
+          
+          final String eventDivision;
+          if(eventDivisionColumnIdx < 0) {
+            eventDivision = GenerateDB.DEFAULT_TEAM_DIVISION;
+          } else {
+            eventDivision = data[eventDivisionColumnIdx];
+          }
+          final String judgingStation;
+          if(judgingStationColumnIdx < 0) {
+            judgingStation = GenerateDB.DEFAULT_TEAM_DIVISION;
+          } else {
+            judgingStation = data[judgingStationColumnIdx];
+          }
+          
+
+          Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), eventDivision, judgingStation);
+          ++rowsProcessed;
         }
       }
 
