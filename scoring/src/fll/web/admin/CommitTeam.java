@@ -99,7 +99,6 @@ public class CommitTeam extends BaseFLLServlet {
 
         redirect = "select_team.jsp";
       } else {
-        final String division = resolveDivision(request);
         final String teamName = request.getParameter("teamName");
         final String organization = request.getParameter("organization");
 
@@ -112,7 +111,7 @@ public class CommitTeam extends BaseFLLServlet {
           // came from the index, send back to the index
           redirect = "index.jsp";
 
-          final String otherTeam = Queries.addTeam(connection, teamNumber, teamName, organization, division);
+          final String otherTeam = Queries.addTeam(connection, teamNumber, teamName, organization);
           if (null != otherTeam) {
             message.append("<p class='error'>Error, team number "
                 + teamNumber + " is already assigned.</p>");
@@ -130,7 +129,7 @@ public class CommitTeam extends BaseFLLServlet {
 
           redirect = "select_team.jsp";
 
-          Queries.updateTeam(connection, teamNumber, teamName, organization, division);
+          Queries.updateTeam(connection, teamNumber, teamName, organization);
           message.append("<p id='success'>Successfully updated a team "
               + teamNumber + "'s info</p>");
         }
@@ -216,16 +215,4 @@ public class CommitTeam extends BaseFLLServlet {
 
   }
 
-  /**
-   * Figure out what the division is based on the value of the "division"
-   * parameter and possibly the "division_text" parameter.
-   */
-  private String resolveDivision(final HttpServletRequest request) {
-    final String div = request.getParameter("division");
-    if ("text".equals(div)) {
-      return request.getParameter("division_text");
-    } else {
-      return div;
-    }
-  }
 }

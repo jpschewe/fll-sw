@@ -21,8 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -35,7 +33,6 @@ import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
-import fll.util.LogUtils;
 import fll.util.PdfUtils;
 import fll.util.SimpleFooterHandler;
 import fll.web.ApplicationAttributes;
@@ -43,6 +40,7 @@ import fll.web.BaseFLLServlet;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreCategory;
 import fll.xml.WinnerType;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Display the report for scores by score group.

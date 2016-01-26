@@ -23,10 +23,9 @@ public class TournamentTeam extends Team {
   public TournamentTeam(@JsonProperty("teamNumber") final int teamNumber,
                         @JsonProperty("organization") final String org,
                         @JsonProperty("teamName") final String name,
-                        @JsonProperty("division") final String division,
                         @JsonProperty("eventDivision") final String eventDivision,
                         @JsonProperty("judgingStation") final String judgingStation) {
-    super(teamNumber, org, name, division);
+    super(teamNumber, org, name);
     _eventDivision = eventDivision;
     _judgingStation = judgingStation;
   }

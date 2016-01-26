@@ -274,7 +274,7 @@ public class JsonBracketDataTests {
     TournamentParameters.setNumSeedingRounds(connection, tournament, 0);
     // make teams
     for (int i = 0; i < teamNames.length; ++i) {
-      Assert.assertNull(Queries.addTeam(connection, i + 1, teamNames[i], "htk", div, 2));
+      Assert.assertNull(Queries.addTeam(connection, i + 1, teamNames[i], "htk", 2));
     }
 
     final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection);

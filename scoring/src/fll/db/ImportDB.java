@@ -194,24 +194,21 @@ public final class ImportDB {
       memStmt = memConnection.createStatement();
 
       // load the teams table into the destination database
-      memRS = memStmt.executeQuery("SELECT TeamNumber, TeamName, Organization, Division FROM Teams");
-      destPrep = destConnection.prepareStatement("INSERT INTO Teams (TeamNumber, TeamName, Organization, Division) VALUES (?, ?, ?, ?)");
+      memRS = memStmt.executeQuery("SELECT TeamNumber, TeamName, Organization FROM Teams");
+      destPrep = destConnection.prepareStatement("INSERT INTO Teams (TeamNumber, TeamName, Organization) VALUES (?, ?, ?)");
       while (memRS.next()) {
         final int num = memRS.getInt(1);
         final String name = memRS.getString(2);
         final String org = memRS.getString(3);
-        final String div = memRS.getString(4);
         if (!Team.isInternalTeamNumber(num)) {
           if (LOG.isDebugEnabled()) {
             LOG.debug("Inserting into teams: "
-                + num + ", " + name + ", " + org + ", " + div);
+                + num + ", " + name + ", " + org);
           }
           destPrep.setInt(1, num);
           destPrep.setString(2, name == null
               || "".equals(name) ? GenerateDB.DEFAULT_TEAM_NAME : name);
           destPrep.setString(3, org);
-          destPrep.setString(4, div == null
-              || "".equals(div) ? GenerateDB.DEFAULT_TEAM_DIVISION : div);
           destPrep.executeUpdate();
         }
       }
@@ -934,12 +931,12 @@ public final class ImportDB {
 
       prep = connection.prepareStatement("UPDATE TournamentTeams SET event_division = ? WHERE TeamNumber = ? AND Tournament = ?");
 
-      // set event_division based upon team division when NULL
+      // set event_division to the default
       rs = stmt.executeQuery("SELECT TeamNumber, Tournament FROM TournamentTeams WHERE event_division is NULL");
       while (rs.next()) {
         final int teamNumber = rs.getInt(1);
         final int tournament = rs.getInt(2);
-        final String division = Queries.getDivisionOfTeam(connection, teamNumber);
+        final String division = GenerateDB.DEFAULT_TEAM_DIVISION;
         prep.setInt(2, teamNumber);
         prep.setInt(3, tournament);
         prep.setString(1, division);
@@ -1826,10 +1823,10 @@ public final class ImportDB {
     ResultSet sourceRS = null;
     ResultSet destRS = null;
     try {
-      destPrep = destConnection.prepareStatement("SELECT Teams.TeamName, Teams.Division, Teams.Organization"
+      destPrep = destConnection.prepareStatement("SELECT Teams.TeamName, Teams.Organization"
           + " FROM Teams" + " WHERE Teams.TeamNumber = ?");
 
-      sourcePrep = sourceConnection.prepareStatement("SELECT Teams.TeamNumber, Teams.TeamName, Teams.Division, Teams.Organization"
+      sourcePrep = sourceConnection.prepareStatement("SELECT Teams.TeamNumber, Teams.TeamName, Teams.Organization"
           + " FROM Teams, TournamentTeams, Tournaments" + " WHERE Teams.TeamNumber = TournamentTeams.TeamNumber"
           + " AND TournamentTeams.Tournament = Tournaments.tournament_id" //
           + " AND Tournaments.Name = ?");
@@ -1839,7 +1836,6 @@ public final class ImportDB {
       while (sourceRS.next()) {
         final int teamNumber = sourceRS.getInt(1);
         final String sourceName = sourceRS.getString(2);
-        final String sourceDivision = sourceRS.getString(3);
         final String sourceOrganization = sourceRS.getString(4);
         destPrep.setInt(1, teamNumber);
         destRS = destPrep.executeQuery();
@@ -1847,11 +1843,6 @@ public final class ImportDB {
           final String destName = destRS.getString(1);
           if (!ComparisonUtils.safeEquals(destName, sourceName)) {
             differences.add(new TeamPropertyDifference(teamNumber, TeamProperty.NAME, sourceName, destName));
-          }
-          final String destDivision = destRS.getString(2);
-          if (!ComparisonUtils.safeEquals(destDivision, sourceDivision)) {
-            differences.add(new TeamPropertyDifference(teamNumber, TeamProperty.DIVISION, sourceDivision,
-                                                       destDivision));
           }
           final String destOrganization = destRS.getString(3);
           if (!ComparisonUtils.safeEquals(destOrganization, sourceOrganization)) {
