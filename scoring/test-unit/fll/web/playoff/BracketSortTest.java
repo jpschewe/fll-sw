@@ -79,7 +79,7 @@ public class BracketSortTest {
       // Team>();
       for (int i = 0; i < teamNames.length; ++i) {
         final String otherTeam = Queries.addTeam(connection, teamNames.length
-            - i, teamNames[i], null, divisionStr, tournament);
+            - i, teamNames[i], null, tournament);
         Assert.assertNull(otherTeam);
         // final Team team = new Team();
         // team.setDivision(divisionStr);

@@ -64,7 +64,7 @@ public class AddMissingTeams extends BaseFLLServlet {
       final List<Team> missingTeams = SessionAttributes.getNonNullAttribute(session, "missingTeams", List.class);
       for (final Team team : missingTeams) {
         final String dup = Queries.addTeam(destConnection, team.getTeamNumber(), team.getTeamName(),
-                                           team.getOrganization(), team.getDivision(), tournamentID);
+                                           team.getOrganization(), tournamentID);
         if (null != dup) {
           throw new FLLRuntimeException(
                                         String.format("Internal error, team with number %d should not exist in the destination database, found match with team with name: %s",

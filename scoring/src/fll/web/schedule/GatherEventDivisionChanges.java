@@ -70,7 +70,7 @@ public class GatherEventDivisionChanges extends BaseFLLServlet {
               + si.getTeamNumber() + " could not be found in the database");
         }
         final EventDivisionInfo info = new EventDivisionInfo(team.getTeamNumber(), team.getTeamName(),
-                                                             team.getDivision(), si.getDivision());
+                                                             si.getDivision());
         eventDivisionInfo.add(info);
       }
       session.setAttribute(EVENT_DIVISION_INFO_KEY, eventDivisionInfo);

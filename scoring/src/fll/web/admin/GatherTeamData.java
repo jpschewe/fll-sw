@@ -85,8 +85,6 @@ public class GatherTeamData {
       page.setAttribute("tournamentJudgingStations", tournamentJudgingStations);
       page.setAttribute("playoffsInitialized", playoffsInitialized);
 
-      page.setAttribute("divisions", Queries.getDivisions(connection));
-
       final String teamNumberStr = request.getParameter("teamNumber");
 
       if (null == teamNumberStr) {
@@ -147,7 +145,6 @@ public class GatherTeamData {
         page.setAttribute("teamNameEscaped", escape(team.getTeamName()));
         page.setAttribute("organization", team.getOrganization());
         page.setAttribute("organizationEscaped", escape(team.getOrganization()));
-        page.setAttribute("division", team.getDivision());
         final Map<Integer, Boolean> teamInTournament = new HashMap<>();
         for (final Integer tid : Queries.getAllTournamentsForTeam(connection, teamNumber)) {
           teamInTournament.put(tid, true);

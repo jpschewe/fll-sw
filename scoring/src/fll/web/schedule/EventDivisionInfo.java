@@ -13,11 +13,9 @@ public final class EventDivisionInfo {
 
   public EventDivisionInfo(final int teamNumber,
                            final String teamName,
-                           final String division,
                            final String eventDivision) {
     this.teamNumber = teamNumber;
     this.teamName = teamName;
-    this.division = division;
     this.eventDivision = eventDivision;
   }
 
@@ -31,12 +29,6 @@ public final class EventDivisionInfo {
 
   public String getTeamName() {
     return teamName;
-  }
-
-  private final String division;
-
-  public String getDivision() {
-    return division;
   }
 
   private final String eventDivision;

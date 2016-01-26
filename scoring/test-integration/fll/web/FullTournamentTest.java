@@ -181,7 +181,7 @@ public class FullTournamentTest {
       prep = testDataConn.prepareStatement("SELECT TeamNumber FROM Performance WHERE Tournament = ? AND RunNumber = ?");
       boolean initializedPlayoff = false;
       prep.setString(1, testTournamentName);
-      final List<String> divisions = getDivisions();
+      final List<String> divisions = getPlayoffDivisions();
       for (int runNumber = 1; runNumber <= maxRuns; ++runNumber) {
 
         if (runNumber > numSeedingRounds) {
@@ -288,7 +288,7 @@ public class FullTournamentTest {
    * 
    * @throws IOException
    */
-  private List<String> getDivisions() throws IOException {
+  private List<String> getPlayoffDivisions() throws IOException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "playoff");
 
@@ -452,7 +452,6 @@ public class FullTournamentTest {
     new Select(selenium.findElement(By.name("TeamName"))).selectByValue("tea_name");
     new Select(selenium.findElement(By.name("Organization"))).selectByValue("org_name");
     new Select(selenium.findElement(By.name("tournament"))).selectByValue("eve_name");
-    new Select(selenium.findElement(By.name("Division"))).selectByValue("div_name");
     selenium.findElement(By.id("next")).click();
     IntegrationTestUtils.assertNoException(selenium);
     Assert.assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
