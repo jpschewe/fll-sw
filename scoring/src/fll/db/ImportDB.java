@@ -39,8 +39,10 @@ import au.com.bytecode.opencsv.CSVReader;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.Tournament;
+import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.TeamPropertyDifference.TeamProperty;
+import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.developer.importdb.ImportDBDump;
@@ -1563,6 +1565,11 @@ public final class ImportDB {
     }
   }
 
+  /**
+   * Clear out the tournament teams in destinationConnection for
+   * destTournamentID and then insert all of the teams from sourceConnection for
+   * sourceTournamentID.
+   */
   private static void importTournamentTeams(final Connection sourceConnection,
                                             final Connection destinationConnection,
                                             final int sourceTournamentID,
@@ -1871,42 +1878,36 @@ public final class ImportDB {
    * @param sourceConnection source connection
    * @param destConnection destination connection
    * @param tournament the tournament to check
-   * @return the teams in the source database and not in the dest database
+   * @return the teams in the source database and not in the destination
+   *         database
    * @throws SQLException
    */
   public static List<Team> findMissingTeams(final Connection sourceConnection,
                                             final Connection destConnection,
                                             final String tournament) throws SQLException {
-    final List<Team> missingTeams = new LinkedList<Team>();
+    final List<Team> missingTeams = new LinkedList<>();
 
-    PreparedStatement sourcePrep = null;
-    PreparedStatement destPrep = null;
-    ResultSet sourceRS = null;
-    ResultSet destRS = null;
-    try {
-      destPrep = destConnection.prepareStatement("SELECT Teams.TeamName"
-          + " FROM Teams WHERE Teams.TeamNumber = ?");
+    final Tournament sourceTournament = Tournament.findTournamentByName(sourceConnection, tournament);
+    if (null == sourceTournament) {
+      throw new FLLInternalException("Could not find tournament with name '"
+          + tournament + "' in the source database. This should have been checked in a previous import step.");
+    }
 
-      sourcePrep = sourceConnection.prepareStatement("SELECT Teams.TeamNumber FROM Teams, TournamentTeams, Tournaments"
-          + " WHERE Teams.TeamNumber = TournamentTeams.TeamNumber" //
-          + " AND TournamentTeams.Tournament = Tournaments.tournament_id" //
-          + " AND Tournaments.Name = ?");
-      sourcePrep.setString(1, tournament);
-      sourceRS = sourcePrep.executeQuery();
-      while (sourceRS.next()) {
-        final int teamNumber = sourceRS.getInt(1);
-        destPrep.setInt(1, teamNumber);
-        destRS = destPrep.executeQuery();
-        if (!destRS.next()) {
-          missingTeams.add(Team.getTeamFromDatabase(sourceConnection, teamNumber));
-        }
-        SQLFunctions.close(destRS);
+    final Map<Integer, TournamentTeam> sourceTeams = Queries.getTournamentTeams(sourceConnection,
+                                                                                sourceTournament.getTournamentID());
+
+    final Tournament destTournament = Tournament.findTournamentByName(destConnection, tournament);
+    if (null == destTournament) {
+      throw new FLLInternalException("Could not find tournament with name '"
+          + tournament + "' in the destination database. This should have been checked in a previous import step.");
+    }
+
+    final Collection<Integer> destTeams = Queries.getAllTeamNumbers(destConnection);
+
+    for (final Map.Entry<Integer, TournamentTeam> sourceEntry : sourceTeams.entrySet()) {
+      if (!destTeams.contains(sourceEntry.getKey())) {
+        missingTeams.add(sourceEntry.getValue());
       }
-    } finally {
-      SQLFunctions.close(destRS);
-      SQLFunctions.close(sourceRS);
-      SQLFunctions.close(destPrep);
-      SQLFunctions.close(sourcePrep);
     }
     return missingTeams;
   }
