@@ -1989,63 +1989,6 @@ public final class Queries {
   }
 
   /**
-   * Add a team to the database and add it to the specified tournament.
-   * 
-   * @return null on success, the name of the other team with the same team
-   *         number on an error
-   */
-  public static String addTeam(final Connection connection,
-                               final int number,
-                               final String name,
-                               final String organization,
-                               final int tournament) throws SQLException {
-    if (Team.isInternalTeamNumber(number)) {
-      throw new RuntimeException("Cannot create team with an internal number: "
-          + number);
-    }
-
-    ResultSet rs = null;
-    PreparedStatement prep = null;
-    try {
-      // need to check for duplicate teamNumber
-      prep = connection.prepareStatement("SELECT TeamName FROM Teams WHERE TeamNumber = ?");
-      prep.setInt(1, number);
-      rs = prep.executeQuery();
-      if (rs.next()) {
-        prep = null;
-        final String dup = rs.getString(1);
-        return dup;
-      } else {
-        SQLFunctions.close(rs);
-        rs = null;
-      }
-      SQLFunctions.close(prep);
-
-      prep = connection.prepareStatement("INSERT INTO Teams (TeamName, Organization, TeamNumber) VALUES (?, ?, ?)");
-      prep.setString(1, name);
-      prep.setString(2, organization);
-      prep.setInt(3, number);
-      prep.executeUpdate();
-      SQLFunctions.close(prep);
-      prep = null;
-
-      prep = connection.prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division, judging_station) VALUES (?, ?, ?, ?)");
-      prep.setInt(1, tournament);
-      prep.setInt(2, number);
-      prep.setString(3, GenerateDB.DEFAULT_TEAM_DIVISION);
-      prep.setString(4, GenerateDB.DEFAULT_TEAM_DIVISION);
-      prep.executeUpdate();
-      SQLFunctions.close(prep);
-      prep = null;
-
-      return null;
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
-  }
-
-  /**
    * Add a team to a tournament.
    * 
    * @param connection database connection

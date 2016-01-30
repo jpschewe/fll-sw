@@ -18,8 +18,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.log4j.Logger;
 
 import fll.Team;
@@ -28,6 +26,7 @@ import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Servlet to find teams that are missing via
@@ -39,6 +38,13 @@ import fll.web.SessionAttributes;
 public class FindMissingTeams extends BaseFLLServlet {
 
   private static final Logger LOG = LogUtils.getLogger();
+
+  /**
+   * Teams that are in the source database for the tournament and not in the
+   * destination database for the tournament.
+   * List of type TournamentTeam.
+   */
+  public static final String MISSING_TEAMS = "missingTeams";
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -60,7 +66,7 @@ public class FindMissingTeams extends BaseFLLServlet {
       if (missingTeams.isEmpty()) {
         session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTeamInfo");
       } else {
-        session.setAttribute("missingTeams", missingTeams);
+        session.setAttribute(MISSING_TEAMS, missingTeams);
         session.setAttribute(SessionAttributes.REDIRECT_URL, "promptCreateMissingTeams.jsp");
       }
     } catch (final SQLException sqle) {

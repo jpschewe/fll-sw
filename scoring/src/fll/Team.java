@@ -118,7 +118,6 @@ public class Team implements Serializable {
     PreparedStatement stmt = null;
     ResultSet rs = null;
     try {
-
       stmt = connection.prepareStatement("SELECT Organization, TeamName FROM Teams"
           + " WHERE TeamNumber = ?");
       stmt.setInt(1, teamNumber);
