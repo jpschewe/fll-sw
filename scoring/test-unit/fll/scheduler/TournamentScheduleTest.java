@@ -108,8 +108,10 @@ public class TournamentScheduleTest {
       for (int teamNumber = 1; teamNumber <= 32; ++teamNumber) {
         final String dup = Queries.addTeam(memConnection, teamNumber, teamNumber
             + " Name", teamNumber
-                + " School", tournament.getTournamentID());
+                + " School");
         Assert.assertNull(dup);
+        Queries.addTeamToTournament(memConnection, teamNumber, tournament.getTournamentID(),
+                                    GenerateDB.DEFAULT_TEAM_DIVISION, GenerateDB.DEFAULT_TEAM_DIVISION);
       }
 
       // load schedule with matching team numbers

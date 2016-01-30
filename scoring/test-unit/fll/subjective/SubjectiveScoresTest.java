@@ -97,7 +97,9 @@ public class SubjectiveScoresTest {
       GenerateDB.generateDB(challengeDocument, connection);
       Tournament.createTournament(connection, tournamentName, tournamentName);
       Tournament tournament = Tournament.findTournamentByName(connection, tournamentName);
-      Queries.addTeam(connection, teamNumber, "team" + teamNumber, "org", tournament.getTournamentID());      
+      Assert.assertNull(Queries.addTeam(connection, teamNumber, "team" + teamNumber, "org"));  
+      Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), division, division);
+      
       prep = connection.prepareStatement("INSERT INTO Judges (id, category, station, Tournament) VALUES(?, ?, ?, ?)");
       prep.setInt(4, tournament.getTournamentID());
       for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
