@@ -1827,7 +1827,8 @@ public final class ImportDB {
           + " FROM Teams" + " WHERE Teams.TeamNumber = ?");
 
       sourcePrep = sourceConnection.prepareStatement("SELECT Teams.TeamNumber, Teams.TeamName, Teams.Organization"
-          + " FROM Teams, TournamentTeams, Tournaments" + " WHERE Teams.TeamNumber = TournamentTeams.TeamNumber"
+          + " FROM Teams, TournamentTeams, Tournaments" //
+          + " WHERE Teams.TeamNumber = TournamentTeams.TeamNumber" //
           + " AND TournamentTeams.Tournament = Tournaments.tournament_id" //
           + " AND Tournaments.Name = ?");
 
