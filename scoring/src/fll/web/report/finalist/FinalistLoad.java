@@ -243,28 +243,50 @@ public class FinalistLoad {
         final FinalistSchedule schedule = new FinalistSchedule(connection, tournament, division);
 
         for (final Map.Entry<String, Boolean> entry : schedule.getCategories().entrySet()) {
-          output.format("$.finalist.setCategoryPublic($.finalist.getCategoryByName(\"%s\"), %b);%n", entry.getKey(), entry.getValue());
+          final String categoryTitle = entry.getKey();
+          final String quotedCatTitle = WebUtils.quoteJavascriptString(categoryTitle);
+
+          output.format("{%n"); // scope so that variable names are easy
+          output.format("  var category = $.finalist.getCategoryByName(%s);%n", quotedCatTitle);
+          output.format("  if (null == category) {%n");
+          // will be non-numeric because all numeric categories were added earlier
+          output.format("    category = $.finalist.addCategory(%s, false);%n", quotedCatTitle);
+          output.format("  }%n");
+          output.format("  $.finalist.setCategoryPublic(category, %b);%n", entry.getValue());
+          output.format("}%n");
         }
 
         for (final Map.Entry<String, String> entry : schedule.getRooms().entrySet()) {
-          output.format("$.finalist.setRoom($.finalist.getCategoryByName(\"%s\"), division, \"%s\");%n", entry.getKey(), entry.getValue());
+          final String categoryTitle = entry.getKey();
+          final String quotedCatTitle = WebUtils.quoteJavascriptString(categoryTitle);
+
+          output.format("{%n"); // scope so that variable names are easy
+          output.format("  var category = $.finalist.getCategoryByName(%s);%n", quotedCatTitle);
+          output.format("  if (null == category) {%n");
+          // will be non-numeric because all numeric categories were added earlier
+          output.format("    category = $.finalist.addCategory(%s, false);%n", quotedCatTitle);
+          output.format("  }%n");
+          output.format("  $.finalist.setRoom(category, division, %s);%n",
+                        WebUtils.quoteJavascriptString(entry.getValue()));
+          output.format("}%n");
         }
 
-        /* TODO ticket 447
-        output.format("var schedule = [];%n");
-
-        for (final FinalistDBRow row : schedule.getSchedule()) {
-           var time = new Time(hours, minutes);
-           var newSlot = new Timeslot(time, slotDuration);
-           schedule.push(newSlot);           
-        }
-
-        output.format("$.finalist.sortSchedule(schedule);%n");
-        output.format("$.finalist.setSchedule(division, schedule);%n");
-        */
+        /*
+         * TODO ticket 447
+         * output.format("var schedule = [];%n");
+         * 
+         * for (final FinalistDBRow row : schedule.getSchedule()) {
+         * var time = new Time(hours, minutes);
+         * var newSlot = new Timeslot(time, slotDuration);
+         * schedule.push(newSlot);
+         * }
+         * 
+         * output.format("$.finalist.sortSchedule(schedule);%n");
+         * output.format("$.finalist.setSchedule(division, schedule);%n");
+         */
 
         output.format("}%n");
-        
+
       }
 
     } finally {
