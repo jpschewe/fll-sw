@@ -269,10 +269,12 @@ public final class IntegrationTestUtils {
     try (final DirectoryStream<Path> stream = Files.newDirectoryStream(dbroot, "flldb*")) {
       for (final Path entry : stream) {
         Files.copy(entry, tempDir.resolve(dbroot.relativize(entry)));
+        LOGGER.error("Copied database file " + entry.toString());
       }
     } catch (final DirectoryIteratorException ex) {
       LOGGER.error("Unable to get database files", ex);
     }
+    
     /*
      * Files.walkFileTree(dbroot, Collections.emptySet(), 1, new
      * SimpleFileVisitor<Path>() {
