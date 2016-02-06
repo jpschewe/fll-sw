@@ -7,9 +7,9 @@
 package fll.web;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -18,10 +18,14 @@ import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.DirectoryIteratorException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.openqa.selenium.Alert;
@@ -237,27 +241,51 @@ public final class IntegrationTestUtils {
   }
 
   public static void storeScreenshot(final WebDriver driver) throws IOException {
-    final File baseFile = File.createTempFile("fll", null, new File("screenshots"));
+    final Path tempDir = Files.createTempDirectory(Paths.get("screenshots"), "fll");
 
-    final File screenshot = new File(baseFile.getAbsolutePath()
-        + ".png");
     if (driver instanceof TakesScreenshot) {
+      final Path screenshot = tempDir.resolve("screenshot.png");
+
       final File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-      FileUtils.copyFile(scrFile, screenshot);
+      Files.copy(scrFile.toPath(), screenshot);
       LOGGER.error("Screenshot saved to "
-          + screenshot.getAbsolutePath());
+          + screenshot.toAbsolutePath().toString());
     } else {
       LOGGER.warn("Unable to get screenshot");
     }
 
-    final File htmlFile = new File(baseFile.getAbsolutePath()
-        + ".html");
+    final Path htmlFile = tempDir.resolve("page.html");
+
     final String html = driver.getPageSource();
-    final FileWriter writer = new FileWriter(htmlFile);
+    final BufferedWriter writer = Files.newBufferedWriter(htmlFile);
     writer.write(html);
     writer.close();
     LOGGER.error("HTML saved to "
-        + htmlFile.getAbsolutePath());
+        + htmlFile.toAbsolutePath().toString());
+
+    // get the database
+    final Path dbroot = Paths.get("tomcat", "webapps", "fll-sw", "WEB-INF");
+    // find all files starting with flldb in dbroot
+    try (final DirectoryStream<Path> stream = Files.newDirectoryStream(dbroot, "flldb*")) {
+      for (final Path entry : stream) {
+        Files.copy(entry, tempDir.resolve(dbroot.relativize(entry)));
+      }
+    } catch (final DirectoryIteratorException ex) {
+      LOGGER.error("Unable to get database files", ex);
+    }
+    /*
+     * Files.walkFileTree(dbroot, Collections.emptySet(), 1, new
+     * SimpleFileVisitor<Path>() {
+     * 
+     * @Override
+     * public FileVisitResult visitFile(final Path file,
+     * final BasicFileAttributes attrs) throws IOException {
+     * if (file.startsWith("flldb")) // startswith is not correct
+     * Files.copy(file, tempDir.resolve(dbroot.relativize(file)));
+     * return CONTINUE;
+     * }
+     * });
+     */
 
   }
 
