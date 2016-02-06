@@ -383,11 +383,19 @@ public final class IntegrationTestUtils {
       selenium.findElement(By.name("teamNumber")).sendKeys(String.valueOf(teamNumber));
       selenium.findElement(By.name("teamName")).sendKeys(teamName);
       selenium.findElement(By.name("organization")).sendKeys(organization);
-      selenium.findElement(By.id("division_text_choice")).click();
-      selenium.findElement(By.name("division_text")).sendKeys(division);
 
       selenium.findElement(By.id("tournament_"
           + tournament.getTournamentID())).click();
+
+      final WebElement eventDivision = selenium.findElement(By.id("event_division_"
+          + tournament.getTournamentID()));
+      final Select eventDivisionSel = new Select(eventDivision);
+      eventDivisionSel.selectByValue(division);
+
+      final WebElement judgingStation = selenium.findElement(By.id("judging_station_"
+          + tournament.getTournamentID()));
+      final Select judgingStationSel = new Select(judgingStation);
+      judgingStationSel.selectByValue(division);
 
       selenium.findElement(By.name("commit")).click();
 
