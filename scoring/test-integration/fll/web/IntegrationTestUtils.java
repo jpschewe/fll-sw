@@ -248,7 +248,7 @@ public final class IntegrationTestUtils {
 
       final File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
       Files.copy(scrFile.toPath(), screenshot);
-      LOGGER.error("Screenshot saved to "
+      LOGGER.info("Screenshot saved to "
           + screenshot.toAbsolutePath().toString());
     } else {
       LOGGER.warn("Unable to get screenshot");
@@ -260,34 +260,25 @@ public final class IntegrationTestUtils {
     final BufferedWriter writer = Files.newBufferedWriter(htmlFile);
     writer.write(html);
     writer.close();
-    LOGGER.error("HTML saved to "
+    LOGGER.info("HTML saved to "
         + htmlFile.toAbsolutePath().toString());
 
     // get the database
     final Path dbroot = Paths.get("tomcat", "webapps", "fll-sw", "WEB-INF");
-    // find all files starting with flldb in dbroot
+    LOGGER.info("Copying database files from "
+        + dbroot.toAbsolutePath() + " to " + tempDir.toAbsolutePath());
     try (final DirectoryStream<Path> stream = Files.newDirectoryStream(dbroot, "flldb*")) {
       for (final Path entry : stream) {
-        Files.copy(entry, tempDir.resolve(dbroot.relativize(entry)));
-        LOGGER.error("Copied database file " + entry.toString());
+        if (Files.isRegularFile(entry)) {
+          Files.copy(entry, tempDir.resolve(dbroot.relativize(entry)));
+          LOGGER.info("Copied database file "
+              + entry.toString());
+        }
       }
     } catch (final DirectoryIteratorException ex) {
       LOGGER.error("Unable to get database files", ex);
     }
-    
-    /*
-     * Files.walkFileTree(dbroot, Collections.emptySet(), 1, new
-     * SimpleFileVisitor<Path>() {
-     * 
-     * @Override
-     * public FileVisitResult visitFile(final Path file,
-     * final BasicFileAttributes attrs) throws IOException {
-     * if (file.startsWith("flldb")) // startswith is not correct
-     * Files.copy(file, tempDir.resolve(dbroot.relativize(file)));
-     * return CONTINUE;
-     * }
-     * });
-     */
+    LOGGER.info("Finished copying database files");
 
   }
 
