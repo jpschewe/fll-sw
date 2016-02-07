@@ -783,6 +783,8 @@ public class FullTournamentTest {
         // submit the page
         selenium.findElement(By.id("enter_submit")).click();
 
+        Assert.assertFalse("Errors: ", IntegrationTestUtils.isElementPresent(selenium, By.name("error")));
+        
         if (rs.getBoolean("NoShow")) {
           selenium.findElement(By.id("no_show")).click();
         } else {
