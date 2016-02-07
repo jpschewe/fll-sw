@@ -452,6 +452,8 @@ public class FullTournamentTest {
     new Select(selenium.findElement(By.name("TeamName"))).selectByValue("tea_name");
     new Select(selenium.findElement(By.name("Organization"))).selectByValue("org_name");
     new Select(selenium.findElement(By.name("tournament"))).selectByValue("eve_name");
+    new Select(selenium.findElement(By.name("event_division"))).selectByValue("div_name");
+    new Select(selenium.findElement(By.name("judging_station"))).selectByValue("div_name");
     selenium.findElement(By.id("next")).click();
     IntegrationTestUtils.assertNoException(selenium);
     Assert.assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
