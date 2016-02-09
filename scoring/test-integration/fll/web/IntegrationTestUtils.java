@@ -240,8 +240,23 @@ public final class IntegrationTestUtils {
     }
   }
 
+  /**
+   * Defaults filePrefix to "fll".
+   * @see #storeScreenshot(String, WebDriver)
+   */
   public static void storeScreenshot(final WebDriver driver) throws IOException {
-    final Path tempDir = Files.createTempDirectory(Paths.get("screenshots"), "fll");
+    storeScreenshot("fll", driver);
+  }
+  
+  /**
+   * Store screenshot and other information for debugging the error.
+   * 
+   * @param filePrefix prefix for the files that are created
+   * @param driver
+   * @throws IOException
+   */
+  public static void storeScreenshot(final String filePrefix, final WebDriver driver) throws IOException { 
+    final Path tempDir = Files.createTempDirectory(Paths.get("screenshots"), filePrefix);
 
     if (driver instanceof TakesScreenshot) {
       final Path screenshot = tempDir.resolve("screenshot.png");
