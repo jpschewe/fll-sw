@@ -1,19 +1,19 @@
 digraph upload_teams {
 
-admin_index_jsp -> UploadTeams [label="uploadSpreadsheet"];
+"admin_index.jsp" -> UploadTeams [label="uploadSpreadsheet"];
 
-UploadTeams -> filterTeams_jsp [label="Populate AllTeams"];
+UploadTeams -> "filterTeams.jsp" [label="Populate AllTeams"];
 
-filterTeams_jsp -> filterTeams_jsp [label="applyFilters"];
+"filterTeams.jsp" -> "filterTeams.jsp" [label="applyFilters"];
 
-filterTeams_jsp -> teamColumnSelection_jsp [label="Next, copyFilteredTeams"];
+"filterTeams.jsp" -> "teamColumnSelection.jsp" [label="Next, copyFilteredTeams"];
 
-teamColumnSelection_jsp -> verifyTeams_jsp;
+"teamColumnSelection.jsp" -> "verifyTeams.jsp";
 
-verifyTeams_jsp -> teamColumnSelection_jsp [label="missing column selections"];
+"verifyTeams.jsp" -> "teamColumnSelection.jsp" [label="missing column selections"];
 
-verifyTeams_jsp -> filterTeams_jsp [label="duplicate teams found"];
+"verifyTeams.jsp" -> "filterTeams.jsp" [label="duplicate teams found"];
 
-verifyTeams_jsp -> index_jsp [label="succcess, assign tournament teams"];
+"verifyTeams.jsp" -> "index.jsp" [label="succcess, assign tournament teams"];
 
 }

@@ -1,17 +1,17 @@
 digraph AssignJudges {
 
-admin_index_jsp -> GatherJudgeInformation [label="Assign Judges"];
+"admin_index.jsp" -> GatherJudgeInformation [label="Assign Judges"];
 
-GatherJudgeInformation -> judges_jsp;
+GatherJudgeInformation -> "judges.jsp";
 
-judges_jsp -> VerifyJudges;
+"judges.jsp" -> VerifyJudges;
 
-VerifyJudges -> judges_jsp [label="if missing phone number"];
-VerifyJudges -> displayJudges_jsp [label="no errors"];
+VerifyJudges -> "judges.jsp" [label="if missing phone number"];
+VerifyJudges -> "displayJudges.jsp" [label="no errors"];
 
-displayJudges_jsp -> CommitJudges [label="Commit the judges"];
-displayJudges_jsp -> admin_index_jsp [label="Cancel"];
+"displayJudges.jsp" -> CommitJudges [label="Commit the judges"];
+"displayJudges.jsp" -> "admin_index.jsp" [label="Cancel"];
 
-CommitJudges -> admin_index_jsp;
+CommitJudges -> "admin_index.jsp";
 
 }

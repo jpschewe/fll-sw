@@ -1,54 +1,54 @@
 digraph import_database {
 
-developer_index_jsp -> ImportDBDump [label="Import Database"];
+"developer_index.jsp" -> ImportDBDump [label="Import Database"];
 
-ImportDBDump -> selectTournament_jsp;
+ImportDBDump -> "selectTournament.jsp";
 
-ImportDBDump -> developer_index_jsp [label="Incompatible challenge descriptions"]
+ImportDBDump -> "developer_index.jsp" [label="Incompatible challenge descriptions"]
 
-selectTournament_jsp -> CheckTournamentExists;
+"selectTournament.jsp" -> CheckTournamentExists;
 
-CheckTournamentExists -> promptCreateTournament_jsp;
+CheckTournamentExists -> "promptCreateTournament.jsp";
 
 CheckTournamentExists -> FindMissingTeams [label="tournament found"];
 
-promptCreateTournament_jsp -> CreateTournament;
+"promptCreateTournament.jsp" -> CreateTournament;
 
-CreateTournament -> selectTournament_jsp [label="Cancel create tournament or error creating tournament"];
+CreateTournament -> "selectTournament.jsp" [label="Cancel create tournament or error creating tournament"];
 
 CreateTournament -> CheckTournamentExists;
 
 FindMissingTeams -> CheckTeamInfo;
 
-FindMissingTeams -> promptCreateMissingTeams_jsp [label="Found missing teams"];
+FindMissingTeams -> "promptCreateMissingTeams.jsp" [label="Found missing teams"];
 
-promptCreateMissingTeams_jsp -> AddMissingTeams;
+"promptCreateMissingTeams.jsp" -> AddMissingTeams;
 
-promptCreateMissingTeams_jsp -> selectTournament_jsp [label="Don't create teams"];
+"promptCreateMissingTeams.jsp" -> "selectTournament.jsp" [label="Don't create teams"];
 
 AddMissingTeams -> CheckTeamInfo;
 
 CheckTeamInfo -> ExecuteImport;
 
-CheckTeamInfo -> resolveTeamInfoDifferences_jsp [label="Found differences"];
+CheckTeamInfo -> "resolveTeamInfoDifferences.jsp" [label="Found differences"];
 
-resolveTeamInfoDifferences_jsp -> CommitTeamChanges;
+"resolveTeamInfoDifferences.jsp" -> CommitTeamChanges;
 
-resolveTeamInfoDifferences_jsp -> selectTournament_jsp [label="Cancel"];
+"resolveTeamInfoDifferences.jsp" -> "selectTournament.jsp" [label="Cancel"];
 
 CommitTeamChanges -> CheckTeamInfo;
 
-CheckTournamentTeams -> resolveTournamentDifferences_jsp [label="Found differences"];
+CheckTournamentTeams -> "resolveTournamentDifferences.jsp" [label="Found differences"];
 
 CheckTournamentTeams -> ExecuteImport;
 
-resolveTournamentDifferences_jsp -> CommitTournamentChanges;
+"resolveTournamentDifferences.jsp" -> CommitTournamentChanges;
 
-resolveTournamentDifferences_jsp -> selectTournament_jsp [label="Cancel"];
+"resolveTournamentDifferences.jsp" -> "selectTournament.jsp" [label="Cancel"];
 
 CommitTournamentChanges -> CheckTournamentTeams;
 
-ExecuteImport -> selectTournament_jsp;
+ExecuteImport -> "selectTournament.jsp";
 
 
 }
