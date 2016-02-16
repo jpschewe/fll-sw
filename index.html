@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Fll-sw by jpschewe</title>
+    <title>Fll-sw by Jon Schewe</title>
 
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/github-light.css">
@@ -20,12 +20,11 @@
         <p class="header">FIRST Lego League scoring software</p>
 
         <ul>
-          <li class="download"><a class="buttons" href="https://github.com/jpschewe/fll-sw/zipball/master">Download ZIP</a></li>
-          <li class="download"><a class="buttons" href="https://github.com/jpschewe/fll-sw/tarball/master">Download TAR</a></li>
-          <li><a class="buttons github" href="https://github.com/jpschewe/fll-sw">View On GitHub</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/jpschewe/fll-sw/releases/latest">Download fll-sw zip to get started</a></li>
+          <li><a class="buttons github" href="https://github.com/jpschewe/fll-sw">View On GitHub</a> (evelopers only)</li>
         </ul>
 
-        <p class="header">This project is maintained by <a class="header name" href="https://github.com/jpschewe">jpschewe</a></p>
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/jpschewe">Jon Schewe</a></p>
 
 
       </header>
@@ -45,7 +44,7 @@
 <a href="http://hightechkids.org/programs/mn-first-lego-league-grades-4-9">Minnesota First Lego League</a> (2001 - Present)</li>
 <li>
 <a href="http://hightechkids.org/programs/mn-renewable-energy-challenge-4-12-grade">Minnesota Renewable Energy Challenge</a> (2012 - Present)</li>
-<li>GEMs/GISE drag race (2009)</li>
+<li>Minnesota GEMs/GISE drag race (2009)</li>
 <li>Illinois (before 2005)</li>
 <li>San Paulo, Brazil (before 2005)</li>
 </ul>
@@ -70,10 +69,10 @@ at <a href="mailto:jpschewe@mtu.net">jpschewe@mtu.net</a> so that I can you add 
 <a id="instructions" class="anchor" href="#instructions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Instructions</h1>
 
 <ol>
-<li>Read the <a href="scoring/docs/terminology.md">terminology document</a> to understand the concepts used in the scoring software.</li>
-<li>The <a href="scoring/docs/SetupInstructions.md">setup instructions</a> include information on preparing to run the software, including the hardware and software for tournaments of different sizes.</li>
-<li>You should look at the <a href="scoring/docs/InstructionsForRunningTheSoftware.md">instructions for running the software</a> for how to use the software to run a tournament.</li>
-<li>There are some training materials in the <a href="training/">training folder</a>. This includes a presentation used to train new head computer people in Minnesota and a sample tournament database. </li>
+<li>Read the <a href="https://github.com/jpschewe/fll-sw/blob/master/scoring/docs/terminology.md">terminology document</a> to understand the concepts used in the scoring software.</li>
+<li>The <a href="https://github.com/jpschewe/fll-sw/blob/master/scoring/docs/SetupInstructions.md">setup instructions</a> include information on preparing to run the software, including the hardware and software for tournaments of different sizes.</li>
+<li>You should look at the <a href="https://github.com/jpschewe/fll-sw/blob/master/scoring/docs/InstructionsForRunningTheSoftware.md">instructions for running the software</a> for how to use the software to run a tournament.</li>
+<li>There are some training materials in the <a href="https://github.com/jpschewe/fll-sw/blob/master/training/">training folder</a>. This includes a presentation used to train new head computer people in Minnesota and a sample tournament database. </li>
 </ol>
 
 <h1>
@@ -85,7 +84,7 @@ at <a href="mailto:jpschewe@mtu.net">jpschewe@mtu.net</a> so that I can you add 
 <li>We made the application web-based as it's mostly just a bunch of forms without much need for user interaction and this makes it easy to use other devices for clients to enter scores in the future.</li>
 <li>The software is web-based, but not internet-based because most of our sites do not have a readily accessible internet connection.</li>
 <li>We are using the database     <a href="http://www.hsqldb.org/">HSQL</a> because it is a pure Java SQL database that can be run in memory. This makes it easier to install the software as another installer doesn't need to be run. We started with Access and moved off of that because it's Microsoft only and we wanted a database that is more robust. MySQL was used after that as it runs on Windows and Linux, however it still needs a separate installer.</li>
-<li>For an explanation of how the scores are totaled up read <a href="scoring/docs/ScoreExplaination.pdf">this document</a>. You may need to click "View Raw" on the next page.</li>
+<li>For an explanation of how the scores are totaled up read <a href="https://github.com/jpschewe/fll-sw/blob/master/scoring/docs/ScoreExplaination.pdf">this document</a>. You may need to click "View Raw" on the next page.</li>
 </ul>
 
 <h1>
@@ -93,7 +92,7 @@ at <a href="mailto:jpschewe@mtu.net">jpschewe@mtu.net</a> so that I can you add 
 
 <p>In 2008 I started taking over the scheduling of the regional tournaments in Minnesota. So I took the constraints that had previously been used to determine schedules and wrote them down so that I could write some software to help me with this task. This software is available as part of FLL-SW. </p>
 
-<p><a href="scoring/docs/scheduler.md">Details on the scheduler are available</a>.</p>
+<p><a href="https://github.com/jpschewe/fll-sw/blob/master/scoring/docs/scheduler.md">Details on the scheduler are available</a>.</p>
 
 <h1>
 <a id="future-plans" class="anchor" href="#future-plans" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Future plans</h1>
@@ -103,12 +102,12 @@ at <a href="mailto:jpschewe@mtu.net">jpschewe@mtu.net</a> so that I can you add 
 <h1>
 <a id="developers" class="anchor" href="#developers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Developers</h1>
 
-<p>If you are interested in digging in, see the <a href="scoring/docs/DeveloperInformation.md">Developer Information</a> page.</p>
+<p>If you are interested in digging in, see the <a href="https://github.com/jpschewe/fll-sw/blob/master/scoring/docs/DeveloperInformation.md">Developer Information</a> page.</p>
 
 <h1>
 <a id="minnesota" class="anchor" href="#minnesota" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Minnesota</h1>
 
-<p><a href="scoring/docs/MinnesotaNotes.md">Note for Minnesota</a></p>
+<p><a href="https://github.com/jpschewe/fll-sw/blob/master/scoring/docs/MinnesotaNotes.md">Notes for Minnesota</a></p>
       </section>
       <footer>
         <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
