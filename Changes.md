@@ -1,3 +1,5 @@
+Release 10.7
+============
 * #468 - Handle non-numeric categories without any teams in the finalist scheduling load
 * #463 - Add judging station and event division to performance scores dump
 * #464 - Allow one to edit a no show score, this converts it into a regular score 
