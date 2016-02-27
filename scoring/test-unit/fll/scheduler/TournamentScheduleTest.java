@@ -79,8 +79,8 @@ public class TournamentScheduleTest {
   }
 
   @Test
-  public void testStoreSchedule() throws SQLException, IOException, InvalidFormatException, ParseException,
-      ScheduleParseException {
+  public void testStoreSchedule()
+      throws SQLException, IOException, InvalidFormatException, ParseException, ScheduleParseException {
     Utilities.loadDBDriver();
 
     final String tournamentName = "ut_ts_test_ss1";
@@ -106,16 +106,12 @@ public class TournamentScheduleTest {
 
       // load teams into the database
       for (int teamNumber = 1; teamNumber <= 32; ++teamNumber) {
-        final String division;
-        if (teamNumber < 17) {
-          division = "1";
-        } else {
-          division = "2";
-        }
         final String dup = Queries.addTeam(memConnection, teamNumber, teamNumber
             + " Name", teamNumber
-            + " School", division, tournament.getTournamentID());
+                + " School");
         Assert.assertNull(dup);
+        Queries.addTeamToTournament(memConnection, teamNumber, tournament.getTournamentID(),
+                                    GenerateDB.DEFAULT_TEAM_DIVISION, GenerateDB.DEFAULT_TEAM_DIVISION);
       }
 
       // load schedule with matching team numbers
@@ -203,8 +199,8 @@ public class TournamentScheduleTest {
    * @throws ParseException
    */
   @Test
-  public void testScheduleTimeFormat() throws InvalidFormatException, IOException, ParseException,
-      ScheduleParseException {
+  public void testScheduleTimeFormat()
+      throws InvalidFormatException, IOException, ParseException, ScheduleParseException {
     final Collection<String> possibleSubjectiveHeaders = new LinkedList<String>();
     possibleSubjectiveHeaders.add("Core Values");
     possibleSubjectiveHeaders.add("Design");
@@ -243,7 +239,7 @@ public class TournamentScheduleTest {
    */
   private TournamentSchedule loadSchedule(final URL path,
                                           final Collection<String> possibleSubjectiveHeaders) throws IOException,
-      InvalidFormatException, ParseException, ScheduleParseException {
+                                              InvalidFormatException, ParseException, ScheduleParseException {
     InputStream scheduleStream = path.openStream();
     final List<String> sheetNames = ExcelCellReader.getAllSheetNames(scheduleStream);
     scheduleStream.close();
@@ -286,7 +282,8 @@ public class TournamentScheduleTest {
    * @throws InvalidFormatException
    */
   @Test
-  public void testLoadAllSchedules() throws InvalidFormatException, IOException, ParseException, ScheduleParseException {
+  public void testLoadAllSchedules()
+      throws InvalidFormatException, IOException, ParseException, ScheduleParseException {
     File baseScheduleDir = new File("../../scheduling/blank-schedules");
     if (!baseScheduleDir.exists()) {
       baseScheduleDir = new File("scheduling/blank-schedules");
@@ -309,11 +306,14 @@ public class TournamentScheduleTest {
     for (final File file : schedules) {
       final URL resource = file.toURI().toURL();
       final TournamentSchedule schedule = loadSchedule(resource, possibleSubjectiveHeaders);
-      
+
       // make sure there are some schedule entries
-      Assert.assertTrue("No entries for schedule: " + file.getName(), !schedule.getSchedule().isEmpty());
-      Assert.assertTrue("No division for schedule: " + file.getName(), !schedule.getDivisions().isEmpty());
-      Assert.assertTrue("No judging groups for schedule: " + file.getName(), !schedule.getJudgingGroups().isEmpty());
+      Assert.assertTrue("No entries for schedule: "
+          + file.getName(), !schedule.getSchedule().isEmpty());
+      Assert.assertTrue("No division for schedule: "
+          + file.getName(), !schedule.getDivisions().isEmpty());
+      Assert.assertTrue("No judging groups for schedule: "
+          + file.getName(), !schedule.getJudgingGroups().isEmpty());
     }
 
   }

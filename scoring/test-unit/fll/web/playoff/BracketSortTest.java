@@ -54,7 +54,8 @@ public class BracketSortTest {
    * @throws UnsupportedEncodingException
    */
   @Test
-  public void testAlphaTeam() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException, UnsupportedEncodingException {
+  public void testAlphaTeam() throws InstantiationException, IllegalAccessException, ClassNotFoundException,
+      SQLException, UnsupportedEncodingException {
     final String divisionStr = "1";
     final String[] teamNames = new String[] { "A", "B", "C", "D", "E", "F" };
     Connection connection = null;
@@ -66,21 +67,23 @@ public class BracketSortTest {
       Assert.assertNotNull(document);
 
       final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
-      
+
       // create in memory test database instance
       Class.forName("org.hsqldb.jdbcDriver").newInstance();
       connection = DriverManager.getConnection("jdbc:hsqldb:mem:flldb-testAlphaTeam");
       GenerateDB.generateDB(document, connection);
 
       final int tournament = Queries.getCurrentTournament(connection);
-      
+
       // put some teams in the database
       // final Map<Integer, Team> tournamentTeams = new HashMap<Integer,
       // Team>();
       for (int i = 0; i < teamNames.length; ++i) {
         final String otherTeam = Queries.addTeam(connection, teamNames.length
-            - i, teamNames[i], null, divisionStr, tournament);
+            - i, teamNames[i], null);
         Assert.assertNull(otherTeam);
+        Queries.addTeamToTournament(connection, teamNames.length
+            - i, tournament, divisionStr, divisionStr);
         // final Team team = new Team();
         // team.setDivision(divisionStr);
         // team.setTeamName(teamNames[i]);

@@ -103,20 +103,28 @@ if(null == errorMessage || "".equals(errorMessage)) {
             </select>
           </td>
         </tr>
-
-        <tr>
-          <td>Division</td>
-          <td>Text - 32 characters</td>
-          <td>
-            <select name='Division'>
+        
+      <tr>
+        <td>Event Division (only use if Initial Tournament specified)</td>
+        <td>Text - 32 characters</td>
+        <td><select name='event_division'>
             <option value='' selected>None</option>
             <%=session.getAttribute("columnSelectOptions")%>
-            </select>
-          </td>
-        </tr>
+        </select></td>
+      </tr>
+
+      <tr>
+        <td>Judging Station (only use if Initial Tournament specified)</td>
+        <td>Text - 32 characters</td>
+        <td><select name='judging_station'>
+            <option value='' selected>None</option>
+            <%=session.getAttribute("columnSelectOptions")%>
+        </select></td>
+      </tr>
+        
           
         <tr>
-          <td colspan='2'><input type='submit' id='next' value='Next'></td>
+          <td colspan='3'><input type='submit' id='next' value='Next'></td>
         </tr>
           
       </table> 

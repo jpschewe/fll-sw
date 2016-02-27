@@ -24,14 +24,12 @@ Confirm Event Divisions </h1>
    <tr>
     <th>Team Number</th>
     <th>Team Name</th>
-    <th>Season Division</th>
     <th>Event Division</th>
    </tr>
    <c:forEach items="${uploadSchedule_eventDivisionInfo }" var="info">
     <tr>
      <td>${info.teamNumber}</td>
      <td>${info.teamName}</td>
-     <td>${info.division}</td>
      <td>${info.eventDivision}</td>
     </tr>
    </c:forEach>

@@ -12,14 +12,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Comparator;
 
-import net.mtu.eggplant.util.ComparisonUtils;
-import net.mtu.eggplant.util.StringUtils;
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import fll.db.GenerateDB;
+import net.mtu.eggplant.util.ComparisonUtils;
+import net.mtu.eggplant.util.StringUtils;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * The static state of a team. This does not include information about the team
@@ -50,17 +48,17 @@ public class Team implements Serializable {
   /**
    * Team that represents a BYE
    */
-  public static final Team BYE = new Team(BYE_TEAM_NUMBER, "INTERNAL", "BYE", GenerateDB.DEFAULT_TEAM_DIVISION);
+  public static final Team BYE = new Team(BYE_TEAM_NUMBER, "INTERNAL", "BYE");
 
   /**
    * Team that represents a TIE.
    */
-  public static final Team TIE = new Team(TIE_TEAM_NUMBER, "INTERNAL", "TIE", GenerateDB.DEFAULT_TEAM_DIVISION);
+  public static final Team TIE = new Team(TIE_TEAM_NUMBER, "INTERNAL", "TIE");
 
   /**
    * NULL Team.
    */
-  public static final Team NULL = new Team(NULL_TEAM_NUMBER, "INTERNAL", "NULL", GenerateDB.DEFAULT_TEAM_DIVISION);
+  public static final Team NULL = new Team(NULL_TEAM_NUMBER, "INTERNAL", "NULL");
 
   public static final Comparator<Team> TEAM_NUMBER_COMPARATOR = new Comparator<Team>() {
     public int compare(final Team one,
@@ -89,12 +87,10 @@ public class Team implements Serializable {
 
   public Team(@JsonProperty("teamNumber") final int teamNumber,
               @JsonProperty("organization") final String org,
-              @JsonProperty("teamName") final String name,
-              @JsonProperty("division") final String division) {
+              @JsonProperty("teamName") final String name) {
     _teamNumber = teamNumber;
     _organization = org;
     _teamName = name;
-    _division = division;
   }
 
   /**
@@ -122,17 +118,15 @@ public class Team implements Serializable {
     PreparedStatement stmt = null;
     ResultSet rs = null;
     try {
-
-      stmt = connection.prepareStatement("SELECT Division, Organization, TeamName FROM Teams"
+      stmt = connection.prepareStatement("SELECT Organization, TeamName FROM Teams"
           + " WHERE TeamNumber = ?");
       stmt.setInt(1, teamNumber);
       rs = stmt.executeQuery();
       if (rs.next()) {
-        final String division = rs.getString(1);
-        final String org = rs.getString(2);
-        final String name = rs.getString(3);
+        final String org = rs.getString(1);
+        final String name = rs.getString(2);
 
-        final Team x = new Team(teamNumber, org, name, division);
+        final Team x = new Team(teamNumber, org, name);
         return x;
       } else {
         return null;
@@ -183,17 +177,6 @@ public class Team implements Serializable {
   @JsonIgnore
   public String getTrimmedTeamName() {
     return StringUtils.trimString(getTeamName(), Team.MAX_TEAM_NAME_LEN);
-  }
-
-  private final String _division;
-
-  /**
-   * The division that a team is entered as.
-   * 
-   * @return division
-   */
-  public String getDivision() {
-    return _division;
   }
 
   /**

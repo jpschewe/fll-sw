@@ -7,9 +7,9 @@
 package fll.web;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -18,10 +18,14 @@ import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.DirectoryIteratorException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.openqa.selenium.Alert;
@@ -236,28 +240,60 @@ public final class IntegrationTestUtils {
     }
   }
 
+  /**
+   * Defaults filePrefix to "fll".
+   * @see #storeScreenshot(String, WebDriver)
+   */
   public static void storeScreenshot(final WebDriver driver) throws IOException {
-    final File baseFile = File.createTempFile("fll", null, new File("screenshots"));
+    storeScreenshot("fll", driver);
+  }
+  
+  /**
+   * Store screenshot and other information for debugging the error.
+   * 
+   * @param filePrefix prefix for the files that are created
+   * @param driver
+   * @throws IOException
+   */
+  public static void storeScreenshot(final String filePrefix, final WebDriver driver) throws IOException { 
+    final Path tempDir = Files.createTempDirectory(Paths.get("screenshots"), filePrefix);
 
-    final File screenshot = new File(baseFile.getAbsolutePath()
-        + ".png");
     if (driver instanceof TakesScreenshot) {
+      final Path screenshot = tempDir.resolve("screenshot.png");
+
       final File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-      FileUtils.copyFile(scrFile, screenshot);
-      LOGGER.error("Screenshot saved to "
-          + screenshot.getAbsolutePath());
+      Files.copy(scrFile.toPath(), screenshot);
+      LOGGER.info("Screenshot saved to "
+          + screenshot.toAbsolutePath().toString());
     } else {
       LOGGER.warn("Unable to get screenshot");
     }
 
-    final File htmlFile = new File(baseFile.getAbsolutePath()
-        + ".html");
+    final Path htmlFile = tempDir.resolve("page.html");
+
     final String html = driver.getPageSource();
-    final FileWriter writer = new FileWriter(htmlFile);
+    final BufferedWriter writer = Files.newBufferedWriter(htmlFile);
     writer.write(html);
     writer.close();
-    LOGGER.error("HTML saved to "
-        + htmlFile.getAbsolutePath());
+    LOGGER.info("HTML saved to "
+        + htmlFile.toAbsolutePath().toString());
+
+    // get the database
+    final Path dbroot = Paths.get("tomcat", "webapps", "fll-sw", "WEB-INF");
+    LOGGER.info("Copying database files from "
+        + dbroot.toAbsolutePath() + " to " + tempDir.toAbsolutePath());
+    try (final DirectoryStream<Path> stream = Files.newDirectoryStream(dbroot, "flldb*")) {
+      for (final Path entry : stream) {
+        if (Files.isRegularFile(entry)) {
+          Files.copy(entry, tempDir.resolve(dbroot.relativize(entry)));
+          LOGGER.info("Copied database file "
+              + entry.toString());
+        }
+      }
+    } catch (final DirectoryIteratorException ex) {
+      LOGGER.error("Unable to get database files", ex);
+    }
+    LOGGER.info("Finished copying database files");
 
   }
 
@@ -383,11 +419,19 @@ public final class IntegrationTestUtils {
       selenium.findElement(By.name("teamNumber")).sendKeys(String.valueOf(teamNumber));
       selenium.findElement(By.name("teamName")).sendKeys(teamName);
       selenium.findElement(By.name("organization")).sendKeys(organization);
-      selenium.findElement(By.id("division_text_choice")).click();
-      selenium.findElement(By.name("division_text")).sendKeys(division);
 
       selenium.findElement(By.id("tournament_"
           + tournament.getTournamentID())).click();
+
+      final WebElement eventDivision = selenium.findElement(By.id("event_division_"
+          + tournament.getTournamentID()));
+      final Select eventDivisionSel = new Select(eventDivision);
+      eventDivisionSel.selectByValue(division);
+
+      final WebElement judgingStation = selenium.findElement(By.id("judging_station_"
+          + tournament.getTournamentID()));
+      final Select judgingStationSel = new Select(judgingStation);
+      judgingStationSel.selectByValue(division);
 
       selenium.findElement(By.name("commit")).click();
 

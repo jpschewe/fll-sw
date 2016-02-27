@@ -18,18 +18,15 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.log4j.Logger;
 
 import fll.Team;
-import fll.Tournament;
 import fll.db.Queries;
-import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Add teams after promptCreateMissingTeams.jsp.
@@ -50,26 +47,18 @@ public class AddMissingTeams extends BaseFLLServlet {
     Connection sourceConnection = null;
     Connection destConnection = null;
     try {
-      final String tournamentName = SessionAttributes.getNonNullAttribute(session, "selectedTournament", String.class);
       final DataSource sourceDataSource = SessionAttributes.getNonNullAttribute(session, "dbimport", DataSource.class);
       sourceConnection = sourceDataSource.getConnection();
 
       final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
       destConnection = destDataSource.getConnection();
 
-      final Tournament tournament = Tournament.findTournamentByName(destConnection, tournamentName);
-      final int tournamentID = tournament.getTournamentID();
-
       @SuppressWarnings(value = "unchecked")
-      final List<Team> missingTeams = SessionAttributes.getNonNullAttribute(session, "missingTeams", List.class);
+      final List<Team> missingTeams = SessionAttributes.getNonNullAttribute(session, FindMissingTeams.MISSING_TEAMS, List.class);
       for (final Team team : missingTeams) {
-        final String dup = Queries.addTeam(destConnection, team.getTeamNumber(), team.getTeamName(),
-                                           team.getOrganization(), team.getDivision(), tournamentID);
-        if (null != dup) {
-          throw new FLLRuntimeException(
-                                        String.format("Internal error, team with number %d should not exist in the destination database, found match with team with name: %s",
-                                                      team.getTeamNumber(), dup));
-        }
+        // ignore the duplicate return value, if the team is already in the database, just assign the team to this tournament
+        Queries.addTeam(destConnection, team.getTeamNumber(), team.getTeamName(),
+                                           team.getOrganization());
       }
 
       session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTeamInfo");

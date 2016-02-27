@@ -187,7 +187,6 @@ public final class Queries {
     try {
       prep = connection.prepareStatement("SELECT Teams.TeamNumber, Teams.Organization"//
           + ", Teams.TeamName"//
-          + ", Teams.Division" //
           + ", TournamentTeams.event_division" //
           + ", TournamentTeams.judging_station" //
           + " FROM Teams, TournamentTeams" //
@@ -199,11 +198,10 @@ public final class Queries {
         final int teamNumber = rs.getInt("TeamNumber");
         final String org = rs.getString("Organization");
         final String name = rs.getString("TeamName");
-        final String division = rs.getString("Division");
         final String eventDivision = rs.getString("event_division");
         final String judgingStation = rs.getString("judging_station");
 
-        final TournamentTeam team = new TournamentTeam(teamNumber, org, name, division, eventDivision, judgingStation);
+        final TournamentTeam team = new TournamentTeam(teamNumber, org, name, eventDivision, judgingStation);
         tournamentTeams.put(teamNumber, team);
       }
     } finally {
@@ -211,35 +209,6 @@ public final class Queries {
       SQLFunctions.close(prep);
     }
     return tournamentTeams;
-  }
-
-  /**
-   * Get the list of divisions of all teams.
-   * 
-   * @param connection the database connection
-   * @return the List of divisions. List of strings.
-   * @throws SQLException on a database error
-   */
-  public static List<String> getDivisions(final Connection connection) throws SQLException {
-    final List<String> list = new LinkedList<String>();
-
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = connection.prepareStatement("SELECT DISTINCT Division FROM Teams ORDER BY Division");
-      rs = prep.executeQuery();
-      while (rs.next()) {
-        final String division = rs.getString(1);
-        if (null != division
-            && !"".equals(division)) {
-          list.add(division);
-        }
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
-    return list;
   }
 
   /**
@@ -1984,8 +1953,7 @@ public final class Queries {
   public static String addTeam(final Connection connection,
                                final int number,
                                final String name,
-                               final String organization,
-                               final String division) throws SQLException {
+                               final String organization) throws SQLException {
     if (Team.isInternalTeamNumber(number)) {
       throw new FLLRuntimeException("Cannot create team with an internal number: "
           + number);
@@ -2006,11 +1974,10 @@ public final class Queries {
         return dup;
       }
 
-      insert = connection.prepareStatement("INSERT INTO Teams (TeamName, Organization, Division, TeamNumber) VALUES (?, ?, ?, ?)");
+      insert = connection.prepareStatement("INSERT INTO Teams (TeamName, Organization, TeamNumber) VALUES (?, ?, ?)");
       insert.setString(1, name);
       insert.setString(2, organization);
-      insert.setString(3, division);
-      insert.setInt(4, number);
+      insert.setInt(3, number);
       insert.executeUpdate();
 
       return null;
@@ -2018,67 +1985,6 @@ public final class Queries {
       SQLFunctions.close(rs);
       SQLFunctions.close(checkDuplicate);
       SQLFunctions.close(insert);
-    }
-  }
-
-  /**
-   * Add a team to the database and add it to the specified tournament.
-   * 
-   * @param division used for the team division, event division and judging
-   *          station
-   * @return null on success, the name of the other team with the same team
-   *         number on an error
-   */
-  public static String addTeam(final Connection connection,
-                               final int number,
-                               final String name,
-                               final String organization,
-                               final String division,
-                               final int tournament) throws SQLException {
-    if (Team.isInternalTeamNumber(number)) {
-      throw new RuntimeException("Cannot create team with an internal number: "
-          + number);
-    }
-
-    ResultSet rs = null;
-    PreparedStatement prep = null;
-    try {
-      // need to check for duplicate teamNumber
-      prep = connection.prepareStatement("SELECT TeamName FROM Teams WHERE TeamNumber = ?");
-      prep.setInt(1, number);
-      rs = prep.executeQuery();
-      if (rs.next()) {
-        prep = null;
-        final String dup = rs.getString(1);
-        return dup;
-      } else {
-        SQLFunctions.close(rs);
-        rs = null;
-      }
-      SQLFunctions.close(prep);
-
-      prep = connection.prepareStatement("INSERT INTO Teams (TeamName, Organization, Division, TeamNumber) VALUES (?, ?, ?, ?)");
-      prep.setString(1, name);
-      prep.setString(2, organization);
-      prep.setString(3, division);
-      prep.setInt(4, number);
-      prep.executeUpdate();
-      SQLFunctions.close(prep);
-      prep = null;
-
-      prep = connection.prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division, judging_station) VALUES (?, ?, ?, ?)");
-      prep.setInt(1, tournament);
-      prep.setInt(2, number);
-      prep.setString(3, division);
-      prep.setString(4, division);
-      prep.executeUpdate();
-      SQLFunctions.close(prep);
-      prep = null;
-
-      return null;
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
     }
   }
 
@@ -2137,32 +2043,13 @@ public final class Queries {
   public static void updateTeam(final Connection connection,
                                 final int number,
                                 final String name,
-                                final String organization,
-                                final String division) throws SQLException {
+                                final String organization) throws SQLException {
     PreparedStatement prep = null;
     try {
-      prep = connection.prepareStatement("UPDATE Teams SET TeamName = ?, Organization = ?, Division = ? WHERE TeamNumber = ?");
+      prep = connection.prepareStatement("UPDATE Teams SET TeamName = ?, Organization = ? WHERE TeamNumber = ?");
       prep.setString(1, name);
       prep.setString(2, organization);
-      prep.setString(3, division);
-      prep.setInt(4, number);
-      prep.executeUpdate();
-    } finally {
-      SQLFunctions.close(prep);
-    }
-  }
-
-  /**
-   * Update a team division.
-   */
-  public static void updateTeamDivision(final Connection connection,
-                                        final int number,
-                                        final String division) throws SQLException {
-    PreparedStatement prep = null;
-    try {
-      prep = connection.prepareStatement("UPDATE Teams SET Division = ? WHERE TeamNumber = ?");
-      prep.setString(1, division);
-      prep.setInt(2, number);
+      prep.setInt(3, number);
       prep.executeUpdate();
     } finally {
       SQLFunctions.close(prep);
@@ -2600,38 +2487,6 @@ public final class Queries {
       SQLFunctions.close(prep);
     }
     return Team.NULL_TEAM_NUMBER;
-  }
-
-  /**
-   * Get the division that a team is registered in. This is different from
-   * {@link #getEventDivision(Connection, int)} in that it doesn't change
-   * throughout the season.
-   * 
-   * @param connection Database connection.
-   * @param teamNumber Number of the team from which to look up the division.
-   * @return String containing the division for the specified teams.
-   * @throws SQLException on database errors.
-   * @throws RuntimeException if the team number is not found in the Teams
-   *           table.
-   */
-  public static String getDivisionOfTeam(final Connection connection,
-                                         final int teamNumber) throws SQLException, RuntimeException {
-    PreparedStatement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = connection.prepareStatement("SELECT Division FROM Teams WHERE TeamNumber = ?");
-      stmt.setInt(1, teamNumber);
-      rs = stmt.executeQuery();
-      if (rs.next()) {
-        return rs.getString(1);
-      } else {
-        throw new RuntimeException("Unable to find team number "
-            + teamNumber + " in the database.");
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
-    }
   }
 
   /**

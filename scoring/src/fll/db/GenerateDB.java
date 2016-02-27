@@ -99,7 +99,6 @@ public final class GenerateDB {
           + "  TeamNumber integer NOT NULL," //
           + "  TeamName varchar(255) default '" + DEFAULT_TEAM_NAME + "' NOT NULL," //
           + "  Organization varchar(255)," //
-          + "  Division varchar(32) default '" + DEFAULT_TEAM_DIVISION + "' NOT NULL," //
           + "  CONSTRAINT teams_pk PRIMARY KEY (TeamNumber)" + ")");
 
       // add the bye team so that references work

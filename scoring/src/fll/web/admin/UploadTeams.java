@@ -114,7 +114,7 @@ public final class UploadTeams extends BaseFLLServlet {
    * @throws InvalidFormatException
    */
   @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
-                               "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate the list of columns to create FilteredTeams table")
+                                "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate the list of columns to create FilteredTeams table")
   public static void parseFile(final File file,
                                final String sheetName,
                                final Connection connection,
@@ -373,7 +373,7 @@ public final class UploadTeams extends BaseFLLServlet {
    * @throws IOException on error writing to webpage
    */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
-                               "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate the list of columns for FilteredTeams table, Can't use PreparedStatement for constant value to select when inserting dummy tournament id")
+                                "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate the list of columns for FilteredTeams table, Can't use PreparedStatement for constant value to select when inserting dummy tournament id")
   public static boolean verifyTeams(final Connection connection,
                                     final HttpServletRequest request,
                                     final HttpServletResponse response,
@@ -389,6 +389,9 @@ public final class UploadTeams extends BaseFLLServlet {
     }
 
     final String tournamentColumn = request.getParameter("tournament");
+    final String eventDivisionColumn = request.getParameter("event_division");
+    final String judgingStationColumn = request.getParameter("judging_station");
+
     final StringBuilder message = new StringBuilder();
 
     Statement stmt = null;
@@ -409,7 +412,8 @@ public final class UploadTeams extends BaseFLLServlet {
       while (paramIter.hasMoreElements()) {
         final String parameter = (String) paramIter.nextElement();
         if (null != parameter
-            && !"".equals(parameter) && !"TeamNumber".equals(parameter) && !"tournament".equals(parameter)) {
+            && !"".equals(parameter) && !"TeamNumber".equals(parameter) && !"tournament".equals(parameter)
+            && !"event_division".equals(parameter) && !"judging_station".equals(parameter)) {
           final String value = request.getParameter(parameter);
           if (null != value
               && !"".equals(value)) {
@@ -478,13 +482,15 @@ public final class UploadTeams extends BaseFLLServlet {
         }
 
         for (int i = 1; i < numValues; i++) { // skip TeamNumber
-          String value = rs.getString(i + 1);
+          String value = rs.getString(i
+              + 1);
           if (null == value) {
             // handle empty data as empty string instead of null, handled better
             // elsewhere
             value = "";
           }
-          prep.setString(i + 1, value);
+          prep.setString(i
+              + 1, value);
         }
         try {
           prep.executeUpdate();
@@ -492,7 +498,7 @@ public final class UploadTeams extends BaseFLLServlet {
           throw new FLLRuntimeException("Got error inserting teamNumber "
               + teamNumStr + " into Teams table, probably have two teams with the same team number", sqle);
         }
-      }// for each row imported
+      } // for each row imported
 
     } finally {
       SQLFunctions.close(stmt);
@@ -500,7 +506,7 @@ public final class UploadTeams extends BaseFLLServlet {
       SQLFunctions.close(prep);
     }
 
-    updateTournamentTeams(connection, teamNumberColumn, tournamentColumn);
+    updateTournamentTeams(connection, teamNumberColumn, tournamentColumn, eventDivisionColumn, judgingStationColumn);
 
     return true;
   }
@@ -560,25 +566,62 @@ public final class UploadTeams extends BaseFLLServlet {
    *          number
    * @param tournamentColumn which column in FilteredTeams contains the
    *          tournament
+   * @param eventDivisionColumn which column in FilteredTeams contains the event
+   *          division - may be null
+   * @param judgingStationColumn which column in FilteredTeams contains the
+   *          judging station - may be null
    * @throws SQLException
    */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
-                               "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate the list of columns for FilteredTeams table, Can't use PreparedStatement for constant value to select when inserting dummy tournament id")
+                                "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate the list of columns for FilteredTeams table, Can't use PreparedStatement for constant value to select when inserting dummy tournament id")
   static private void updateTournamentTeams(final Connection connection,
                                             final String teamNumberColumn,
-                                            final String tournamentColumn) throws SQLException {
+                                            final String tournamentColumn,
+                                            final String eventDivisionColumn,
+                                            final String judgingStationColumn) throws SQLException {
     Statement stmt = null;
     PreparedStatement selectPrep = null;
     ResultSet rs = null;
     try {
       stmt = connection.createStatement();
 
+      final String eventDivisionSql;
+      if (null != eventDivisionColumn
+          && !eventDivisionColumn.isEmpty()) {
+        eventDivisionSql = eventDivisionColumn;
+      } else {
+        eventDivisionSql = "'"
+            + GenerateDB.DEFAULT_TEAM_DIVISION + "'";
+      }
+
+      final String judgingStationSql;
+      if (null != judgingStationColumn
+          && !judgingStationColumn.isEmpty()) {
+        judgingStationSql = judgingStationColumn;
+      } else {
+        judgingStationSql = "'"
+            + GenerateDB.DEFAULT_TEAM_DIVISION + "'";
+      }
 
       // if a tournament is specified for the new data, set it
       if (null != tournamentColumn
           && !tournamentColumn.isEmpty()) {
-        rs = stmt.executeQuery("SELECT "
-            + teamNumberColumn + ", " + tournamentColumn + " FROM FilteredTeams");
+
+        final StringBuilder sql = new StringBuilder();
+        sql.append("SELECT ");
+        sql.append(teamNumberColumn);
+        sql.append(", "
+            + tournamentColumn);
+
+        sql.append(", "
+            + eventDivisionSql);
+        sql.append(", "
+            + judgingStationSql);
+
+        sql.append(" FROM FilteredTeams");
+
+        rs = stmt.executeQuery(sql.toString());
+
         while (rs.next()) {
           final int teamNumber = rs.getInt(1);
           final String tournamentName = rs.getString(2);
@@ -587,22 +630,26 @@ public final class UploadTeams extends BaseFLLServlet {
             Tournament.createTournament(connection, tournamentName, tournamentName);
             tournament = Tournament.findTournamentByName(connection, tournamentName);
           }
-          
-          final String division = Queries.getDivisionOfTeam(connection, teamNumber);
-          Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), division, division);
+
+          final String eventDivision = rs.getString(3);
+          final String judgingStation = rs.getString(4);
+
+          Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), eventDivision,
+                                      judgingStation);
         }
       } else {
-        // put all new teams in the DUMMY tournament by default and make the event
-        // division the same as the team division
-        final Tournament dummyTournament = Tournament.findTournamentByName(connection, GenerateDB.DUMMY_TOURNAMENT_NAME);
+        // put all new teams in the DUMMY tournament by default and make the
+        // event division and judging station be the default division
+        final Tournament dummyTournament = Tournament.findTournamentByName(connection,
+                                                                           GenerateDB.DUMMY_TOURNAMENT_NAME);
         final int dummyTournamentID = dummyTournament.getTournamentID();
         stmt.executeUpdate("INSERT INTO TournamentTeams " //
             + " (Tournament, TeamNumber, event_division, judging_station)" // "
-            + " SELECT " + dummyTournamentID + ", Teams.TeamNumber, Teams.Division, Teams.Division" //
+            + " SELECT " + dummyTournamentID + ", Teams.TeamNumber, " + eventDivisionSql + ", " + judgingStationSql //
             + " FROM Teams, FilteredTeams" //
-            + "   WHERE Teams.TeamNumber = FilteredTeams." + teamNumberColumn);        
+            + "   WHERE Teams.TeamNumber = FilteredTeams." + teamNumberColumn);
       }
-      
+
     } finally {
       SQLFunctions.close(stmt);
       SQLFunctions.close(rs);
