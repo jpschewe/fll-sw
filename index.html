@@ -21,7 +21,8 @@
 
         <ul>
           <li class="download"><a class="buttons" href="https://github.com/jpschewe/fll-sw/releases/latest">Download fll-sw zip to get started</a></li>
-          <li><a class="buttons github" href="https://github.com/jpschewe/fll-sw">View On GitHub</a> (evelopers only)</li>
+          <li><a class="buttons github"
+href="https://github.com/jpschewe/fll-sw">View On GitHub</a> (Developers only)</li>
         </ul>
 
         <p class="header">This project is maintained by <a class="header name" href="https://github.com/jpschewe">Jon Schewe</a></p>
@@ -37,7 +38,7 @@
 <h1>
 <a id="where-used" class="anchor" href="#where-used" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Where Used</h1>
 
-<p>Here is a list of tournaments that have used the software over the years.</p>
+<p>Here is a list of tournaments that have used the FLL-SW over the years.</p>
 
 <ul>
 <li>
@@ -49,7 +50,7 @@
 <li>San Paulo, Brazil (before 2005)</li>
 </ul>
 
-<p>If you are using the software for your tournaments, please let me know
+<p>If you are using the FLL-SW for your tournaments, please let me know
 at <a href="mailto:jpschewe@mtu.net">jpschewe@mtu.net</a> so that I can you add to this list.</p>
 
 <h1>
@@ -70,8 +71,8 @@ at <a href="mailto:jpschewe@mtu.net">jpschewe@mtu.net</a> so that I can you add 
 
 <ol>
 <li>Read the <a href="https://github.com/jpschewe/fll-sw/blob/master/scoring/docs/terminology.md">terminology document</a> to understand the concepts used in the scoring software.</li>
-<li>The <a href="https://github.com/jpschewe/fll-sw/blob/master/scoring/docs/SetupInstructions.md">setup instructions</a> include information on preparing to run the software, including the hardware and software for tournaments of different sizes.</li>
-<li>You should look at the <a href="https://github.com/jpschewe/fll-sw/blob/master/scoring/docs/InstructionsForRunningTheSoftware.md">instructions for running the software</a> for how to use the software to run a tournament.</li>
+<li>The <a href="https://github.com/jpschewe/fll-sw/blob/master/scoring/docs/SetupInstructions.md">setup instructions</a> include information on preparing to run FLL-SW, including the hardware and software for tournaments of different sizes.</li>
+<li>You should look at the <a href="https://github.com/jpschewe/fll-sw/blob/master/scoring/docs/InstructionsForRunningTheSoftware.md">instructions for running FLL-SW</a> for how to use the software to run a tournament.</li>
 <li>There are some training materials in the <a href="https://github.com/jpschewe/fll-sw/blob/master/training/">training folder</a>. This includes a presentation used to train new head computer people in Minnesota and a sample tournament database. </li>
 </ol>
 
@@ -82,7 +83,7 @@ at <a href="mailto:jpschewe@mtu.net">jpschewe@mtu.net</a> so that I can you add 
 <li>Why is the subjective scoring application a separate app rather than a web based app? This is done because at many of our tournaments in the beginning we entered the subjective scores down at the location of the subjective judging and the network is in the performance area which is not close enough to network to the subjective judging area. We still run our state tournament this way, although most of our regionals aren't run this way.</li>
 <li>We used Java when writing the application because it is a language that we're familiar with and a number of other people know as well to help develop. We also needed a language that is capable of doing SQL processing and a fair amount of math. We also wanted a language that is platform independent so we can run on both Windows and Linux.</li>
 <li>We made the application web-based as it's mostly just a bunch of forms without much need for user interaction and this makes it easy to use other devices for clients to enter scores in the future.</li>
-<li>The software is web-based, but not internet-based because most of our sites do not have a readily accessible internet connection.</li>
+<li>FLL-SW is web-based, but not internet-based because most of our sites do not have a readily accessible internet connection.</li>
 <li>We are using the database     <a href="http://www.hsqldb.org/">HSQL</a> because it is a pure Java SQL database that can be run in memory. This makes it easier to install the software as another installer doesn't need to be run. We started with Access and moved off of that because it's Microsoft only and we wanted a database that is more robust. MySQL was used after that as it runs on Windows and Linux, however it still needs a separate installer.</li>
 <li>For an explanation of how the scores are totaled up read <a href="https://github.com/jpschewe/fll-sw/blob/master/scoring/docs/ScoreExplaination.pdf">this document</a>. You may need to click "View Raw" on the next page.</li>
 </ul>
