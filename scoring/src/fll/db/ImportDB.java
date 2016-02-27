@@ -1844,7 +1844,7 @@ public final class ImportDB {
       while (sourceRS.next()) {
         final int teamNumber = sourceRS.getInt(1);
         final String sourceName = sourceRS.getString(2);
-        final String sourceOrganization = sourceRS.getString(4);
+        final String sourceOrganization = sourceRS.getString(3);
         destPrep.setInt(1, teamNumber);
         destRS = destPrep.executeQuery();
         if (destRS.next()) {
@@ -1852,7 +1852,7 @@ public final class ImportDB {
           if (!ComparisonUtils.safeEquals(destName, sourceName)) {
             differences.add(new TeamPropertyDifference(teamNumber, TeamProperty.NAME, sourceName, destName));
           }
-          final String destOrganization = destRS.getString(3);
+          final String destOrganization = destRS.getString(2);
           if (!ComparisonUtils.safeEquals(destOrganization, sourceOrganization)) {
             differences.add(new TeamPropertyDifference(teamNumber, TeamProperty.ORGANIZATION, sourceOrganization,
                                                        destOrganization));
