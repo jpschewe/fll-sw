@@ -135,6 +135,9 @@ public class InitFilter implements Filter {
           + "/report/finalist/PublicFinalistDisplaySchedule")) {
         // this report is public
         return false;
+      } else if(path.startsWith(contextPath + "/report/finalist/FinalistTeams")) {
+        // allow the list of finalist teams to be public
+        return false;
       } else if (path.startsWith(contextPath
           + "/api/CheckAuth")) {
         // checking the authentication doesn't require security
