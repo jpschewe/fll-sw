@@ -26,7 +26,6 @@ import fll.TestUtils;
 import fll.db.GenerateDB;
 import fll.util.LogUtils;
 import fll.web.IntegrationTestUtils;
-import fll.web.WebWindow;
 import fll.xml.BracketSortType;
 
 /**
@@ -40,24 +39,37 @@ public class TestAJAXBrackets {
 
   private WebDriver selenium;
 
-  private JavascriptExecutor seleniumJS;
+  private WebDriver bracketsWindow;
+
+  private JavascriptExecutor bracketsWindowJS;
+
+  private WebDriver scoreEntryWindow;
+
+  private WebDriver scoresheetWindow;
 
   @Before
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
     selenium = IntegrationTestUtils.createWebDriver();
 
-    if (selenium instanceof JavascriptExecutor) {
-      seleniumJS = (JavascriptExecutor) selenium;
+    bracketsWindow = IntegrationTestUtils.createWebDriver();
+    if (bracketsWindow instanceof JavascriptExecutor) {
+      bracketsWindowJS = (JavascriptExecutor) bracketsWindow;
     } else {
       throw new RuntimeException("WebDriver is not capable of Javascript execution");
     }
 
+    scoreEntryWindow = IntegrationTestUtils.createWebDriver();
+
+    scoresheetWindow = IntegrationTestUtils.createWebDriver();
   }
 
   @After
   public void tearDown() {
     selenium.quit();
+    bracketsWindow.quit();
+    scoreEntryWindow.quit();
+    scoresheetWindow.quit();
   }
 
   @Test
@@ -90,32 +102,32 @@ public class TestAJAXBrackets {
       IntegrationTestUtils.initializePlayoffsForDivision(selenium, division, BracketSortType.ALPHA_TEAM);
 
       // open brackets
-      final WebWindow bracketsWindow = new WebWindow(selenium, TestUtils.URL_ROOT
+      IntegrationTestUtils.loadPage(bracketsWindow, TestUtils.URL_ROOT
           + "playoff/remoteControlBrackets.jsp?scroll=false");
 
       // open score entry
-      final WebWindow scoreEntryWindow = new WebWindow(selenium, TestUtils.URL_ROOT
+      IntegrationTestUtils.loadPage(scoreEntryWindow, TestUtils.URL_ROOT
           + "scoreEntry/select_team.jsp");
 
       // give windows a little time to get their bearings
-      // selenium.runScript("var timerRan = false;setTimeout('timerRan=true;', 5000);");
+      // selenium.runScript("var timerRan = false;setTimeout('timerRan=true;',
+      // 5000);");
       // selenium.waitForCondition("window.timerRan", JS_EVAL_TIMEOUT);
 
       // assign tables for the scoresheets
-      final WebWindow scoresheetWindow = new WebWindow(selenium, TestUtils.URL_ROOT
+      IntegrationTestUtils.loadPage(scoresheetWindow, TestUtils.URL_ROOT
           + "playoff/scoregenbrackets.jsp?division=" + division + "&firstRound=1&lastRound=7");
-      selenium.switchTo().window(scoresheetWindow.getWindowHandle());
-      selenium.findElement(By.name("print1")).click();
-      selenium.findElement(By.name("tableA1")).sendKeys("Blue 1");
-      selenium.findElement(By.name("tableB1")).sendKeys("Table 2");
-      selenium.findElement(By.id("print_scoresheets")).click();
+
+      scoresheetWindow.findElement(By.name("print1")).click();
+      scoresheetWindow.findElement(By.name("tableA1")).sendKeys("Blue 1");
+      scoresheetWindow.findElement(By.name("tableB1")).sendKeys("Table 2");
+      scoresheetWindow.findElement(By.id("print_scoresheets")).click();
 
       // check for a blue cell
-      selenium.switchTo().window(bracketsWindow.getWindowHandle());
       // TODO: I can't find a way selenium is
       // OK with that checks for a present CSS property, nor a string of JS
       // selenium is OK with to check for the element.
-      // selenium.waitForCondition("window.document.getElementsByClassName('table_assignment')[0].style.backgroundColor=='blue'",
+      // bracketsWindow.waitForCondition("window.document.getElementsByClassName('table_assignment')[0].style.backgroundColor=='blue'",
       // JS_EVAL_TIMEOUT); // > 1 element with a style attrib that contains the
       // string 'blue'
 
@@ -125,16 +137,14 @@ public class TestAJAXBrackets {
       // time between entering data and checking for
       // it than it can keep up with.
       // JPS may need to add some wait calls to replace this
-      // selenium.setSpeed("300");
+      // bracketsWindow.setSpeed("300");
 
       // enter unverified score for team 1
-      selenium.switchTo().window(scoreEntryWindow.getWindowHandle());
-      enterScore("4", 1);
+      enterScore(scoreEntryWindow, "4", 1);
 
-      selenium.switchTo().window(bracketsWindow.getWindowHandle());
-      final String scoreTextBefore = selenium.findElement(By.id("9-1")).getText();
+      final String scoreTextBefore = bracketsWindow.findElement(By.id("9-1")).getText();
       // final String scoreTextBefore =
-      // String.valueOf(seleniumJS.executeScript("window.document.getElementById('9-1').innerHTML"));
+      // String.valueOf(bracketsWindowJS.executeScript("window.document.getElementById('9-1').innerHTML"));
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Score text before: "
             + scoreTextBefore);
@@ -143,16 +153,14 @@ public class TestAJAXBrackets {
           + scoreTextBefore + "'", scoreTextBefore.contains("Score:"));
 
       // verify
-      selenium.switchTo().window(scoreEntryWindow.getWindowHandle());
-
-      final Select verifySelect = new Select(selenium.findElement(By.id("select-verify-teamnumber")));
+      final Select verifySelect = new Select(scoreEntryWindow.findElement(By.id("select-verify-teamnumber")));
       verifySelect.selectByValue("4-1");
-      selenium.findElement(By.id("verify_submit")).click();
+      scoreEntryWindow.findElement(By.id("verify_submit")).click();
 
-      selenium.findElement(By.id("Verified_yes")).click();
-      selenium.findElement(By.id("submit")).click();
+      scoreEntryWindow.findElement(By.id("Verified_yes")).click();
+      scoreEntryWindow.findElement(By.id("submit")).click();
 
-      final Alert confirmVerifyChange = selenium.switchTo().alert();
+      final Alert confirmVerifyChange = scoreEntryWindow.switchTo().alert();
       LOGGER.info("Confirmation text: "
           + confirmVerifyChange.getText());
       confirmVerifyChange.accept();
@@ -160,14 +168,13 @@ public class TestAJAXBrackets {
       // give the web server a chance to catch up
       Thread.sleep(1000);
 
-      selenium.switchTo().window(bracketsWindow.getWindowHandle());
       // run the javascript to refresh everything
-      seleniumJS.executeScript("window.iterate();");
+      bracketsWindowJS.executeScript("window.iterate();");
 
       // give the web server a chance to catch up
       Thread.sleep(30000);
 
-      final String scoreTextAfter = selenium.findElement(By.id("9-1")).getText();
+      final String scoreTextAfter = bracketsWindow.findElement(By.id("9-1")).getText();
       // final String scoreTextAfter =
       // String.valueOf(seleniumJS.executeScript("window.document.getElementById('1-2').innerHTML"));
       if (LOGGER.isDebugEnabled()) {
@@ -177,31 +184,27 @@ public class TestAJAXBrackets {
       Assert.assertTrue("Should find score in '"
           + scoreTextAfter + "'", scoreTextAfter.contains("Score:"));
 
-    } catch (final IOException e) {
+    } catch (final IOException | RuntimeException | AssertionError e) {
       LOGGER.fatal(e, e);
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final RuntimeException e) {
-      LOGGER.fatal(e, e);
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final AssertionError e) {
-      LOGGER.fatal(e, e);
-      IntegrationTestUtils.storeScreenshot(selenium);
+      IntegrationTestUtils.storeScreenshot("main", selenium);
+      IntegrationTestUtils.storeScreenshot("brackets", selenium);
+      IntegrationTestUtils.storeScreenshot("scoreEntry", selenium);
+      IntegrationTestUtils.storeScreenshot("scoreSheet", selenium);
       throw e;
     }
   }
 
-  private void enterScore(final String team,
+  private void enterScore(final WebDriver webDriver,
+                          final String team,
                           final int score) {
-    final Select teamSelect = new Select(selenium.findElement(By.id("select-teamnumber")));
+    final Select teamSelect = new Select(webDriver.findElement(By.id("select-teamnumber")));
     teamSelect.selectByValue(team);
-    selenium.findElement(By.id("enter_submit")).click();
+    webDriver.findElement(By.id("enter_submit")).click();
 
     for (int i = 0; i < score; i++) {
-      selenium.findElement(By.id("inc_score_1")).click();
+      webDriver.findElement(By.id("inc_score_1")).click();
     }
-    selenium.findElement(By.id("submit")).click();
+    webDriver.findElement(By.id("submit")).click();
 
     Alert confirmScoreChange = null;
     final int maxAttempts = 5;
@@ -209,7 +212,7 @@ public class TestAJAXBrackets {
     while (null == confirmScoreChange
         && attempt <= maxAttempts) {
       try {
-        confirmScoreChange = selenium.switchTo().alert();
+        confirmScoreChange = webDriver.switchTo().alert();
         LOGGER.info("Confirmation text: "
             + confirmScoreChange.getText());
         confirmScoreChange.accept();

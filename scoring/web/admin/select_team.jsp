@@ -68,13 +68,12 @@ ${message}
             <select size='20' name='teamNumber' ondblclick='selectTeam.submit()'>
               <%
               final Statement stmt = connection.createStatement();
-              final ResultSet rs = stmt.executeQuery("SELECT TeamNumber,TeamName,Organization,Division FROM Teams ORDER BY TeamNumber ASC");
+              final ResultSet rs = stmt.executeQuery("SELECT TeamNumber,TeamName,Organization FROM Teams ORDER BY TeamNumber ASC");
               while(rs.next()) {
                 final int teamNumber = rs.getInt(1);
                 if(!Team.isInternalTeamNumber(teamNumber)) {
                 final String teamName = rs.getString(2);
                 final String organization = rs.getString(3);
-                final String division = rs.getString(4);
                 out.print("<option value=");
                 out.print(String.valueOf(teamNumber));
                 out.print(">");
@@ -83,9 +82,6 @@ ${message}
                 out.print(StringUtils.trimString(teamName, Team.MAX_TEAM_NAME_LEN));
                 out.print("] ");
                 out.print(organization);
-                out.print(" (Div ");
-                out.print(division);
-                out.print(")");
                 out.print("</option>\n");
                 }
               }

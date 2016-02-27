@@ -196,31 +196,6 @@ $("#judging_station_${tournament.tournamentID}").change(function() {
           value='${organizationEscaped}'></td>
       </tr>
 
-      <!--  specify division -->
-      <tr>
-        <td>Division (required)</td>
-        <td><c:forEach
-            items="${divisions}"
-            var="possibleDivision">
-            <input
-              type='radio'
-              name='division'
-              value='${possibleDivision}'
-              id='${possibleDivision}'
-              <c:if test="${division == possibleDivision}">
-       checked='true'
-     </c:if> />
-            <label for='${possibleDivision}'>${possibleDivision}</label>
-          </c:forEach> <input
-          type='radio'
-          id='division_text_choice'
-          name='division'
-          value='text' /> <input
-          type='text'
-          name='division_text' /></td>
-      </tr>
-      <!-- end specify division -->
-
       <!-- tournaments -->
       <tr>
         <td>Assign Tournaments</td>

@@ -117,7 +117,7 @@ public class GatherScoreEntryData extends BaseFLLServlet {
         if (nextRunNumber > numSeedingRounds) {
           if (null == Playoff.involvedInUnfinishedPlayoff(connection, tournament, Collections.singletonList(teamNumber))) {
             session.setAttribute(SessionAttributes.MESSAGE,
-                                 "Selected team ("
+                                 "<p name='error' class='error'>Selected team ("
                                      + teamNumber
                                      + ") is not involved in an unfinished playoff bracket. Please double check that the playoff brackets were properly initialized"
                                      + " If you were intending to double check a score, you probably just forgot to check"

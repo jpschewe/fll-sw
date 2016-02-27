@@ -38,17 +38,6 @@ CheckTeamInfo -> "resolveTeamInfoDifferences.jsp" [label="Found differences"];
 
 CommitTeamChanges -> CheckTeamInfo;
 
-CheckTournamentTeams -> "resolveTournamentDifferences.jsp" [label="Found differences"];
-
-CheckTournamentTeams -> ExecuteImport;
-
-"resolveTournamentDifferences.jsp" -> CommitTournamentChanges;
-
-"resolveTournamentDifferences.jsp" -> "selectTournament.jsp" [label="Cancel"];
-
-CommitTournamentChanges -> CheckTournamentTeams;
-
-ExecuteImport -> "selectTournament.jsp";
-
+ExecuteImport -> selectTournament_jsp;
 
 }

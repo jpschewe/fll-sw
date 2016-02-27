@@ -1,3 +1,6 @@
+* #423 - Remove seasonal divisions, only event divisions are still used
+
+
 Release 10.7
 ============
 * #468 - Handle non-numeric categories without any teams in the finalist scheduling load
