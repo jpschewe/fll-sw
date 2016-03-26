@@ -221,14 +221,8 @@ public class GreedySolver {
     }
 
     final Properties properties = new Properties();
-    Reader reader = null;
-    try {
-      reader = new InputStreamReader(new FileInputStream(datafile), Utilities.DEFAULT_CHARSET);
+    try (final Reader reader = new InputStreamReader(new FileInputStream(datafile), Utilities.DEFAULT_CHARSET)) {
       properties.load(reader);
-    } finally {
-      if (null != reader) {
-        reader.close();
-      }
     }
     LOGGER.debug(properties.toString());
 
@@ -1469,23 +1463,12 @@ public class GreedySolver {
       LOGGER.info("Schedule provides a better objective value");
       bestObjective = objective;
 
-      Writer objectiveWriter = null;
-      try {
-        objectiveWriter = new OutputStreamWriter(new FileOutputStream(objectiveFile), Utilities.DEFAULT_CHARSET);
+      try (final Writer objectiveWriter = new OutputStreamWriter(new FileOutputStream(objectiveFile),
+                                                                 Utilities.DEFAULT_CHARSET)) {
         objectiveWriter.write(objective.toString());
         objectiveWriter.close();
       } catch (final IOException e) {
         throw new FLLRuntimeException("Error writing objective", e);
-      } finally {
-        try {
-          if (null != objectiveWriter) {
-            objectiveWriter.close();
-          }
-        } catch (final IOException e2) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(e2);
-          }
-        }
       }
 
       if (null != mBestSchedule) {
@@ -1555,9 +1538,8 @@ public class GreedySolver {
   }
 
   private void outputSchedule(final File schedule) throws IOException {
-    CSVWriter csv = null;
-    try {
-      csv = new CSVWriter(new OutputStreamWriter(new FileOutputStream(schedule), Utilities.DEFAULT_CHARSET));
+    try (final CSVWriter csv = new CSVWriter(new OutputStreamWriter(new FileOutputStream(schedule),
+                                                                    Utilities.DEFAULT_CHARSET))) {
       final List<String> line = new ArrayList<String>();
       line.add(TournamentSchedule.TEAM_NUMBER_HEADER);
       line.add(TournamentSchedule.DIVISION_HEADER);
@@ -1639,10 +1621,6 @@ public class GreedySolver {
 
         csv.writeNext(line.toArray(new String[line.size()]));
         line.clear();
-      }
-    } finally {
-      if (null != csv) {
-        csv.close();
       }
     }
   }
