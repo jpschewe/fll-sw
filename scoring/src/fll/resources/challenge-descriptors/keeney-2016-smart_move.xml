@@ -15,7 +15,7 @@ revision="Rev: 351" schemaVersion="1">
 
     <goal name="access_markers" title="Gain Access To Things: Access Markers Down" multiplier="25" max="4"/>
 
-    <goal name="loops" title="Gain Access To Things: Loops in Base" multiplier="10" max="11"/>
+    <goal name="loops" title="Gain Access To Things: Loops in safety" multiplier="10" max="11"/>
 
     <goal name="warning_beacons" title="Avoid Impacts: Warning Beacons Standing" multiplier="10" max="8" initialValue="8"/>
 
@@ -88,59 +88,6 @@ revision="Rev: 351" schemaVersion="1">
     </tiebreaker>
     
   </Performance>
-
-  <subjectiveCategory name="teamwork" title="Teamwork" weight="1.0">
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="roles" title="Roles and Responsibilities">
-    </goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="professionalism" title="Gracious Professionalism">
-    </goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="dynamics" title="Problem Solving &amp; Team Dynamics &amp; Communications">
-    </goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="confidence" title="Confidence &amp; Enthusiasm">
-    </goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="fll_values" title="FLL Values">
-    </goal>
-  </subjectiveCategory>
-
-
-  <subjectiveCategory name="robustdesign" title="Design" weight="0.5">
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="strategy" title="Strategy, Process, Problem Solving">
-    </goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="locomotion" title="Locomotion and Navigation">
-    </goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="design_kids" title="Kids Did the Work">
-    </goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="structural" title="Structural">
-    </goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="overall_design" title="Overall Design">
-    </goal>
-  </subjectiveCategory>
-
-
-  <subjectiveCategory name="programming" title="Programming" weight="0.5">
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="programming_strategy" title="Strategy, Process, Problem Solving"/>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="useoflanguage" title="Language Use, Modularity/Abstraction">
-    </goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="programming_kids" title="Kids Did the Work">
-    </goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="sensorcontrol" title="Sensor Control">
-    </goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="design" title="Overall Design">
-    </goal>
-  </subjectiveCategory>
-
-  <subjectiveCategory name="research" title="Research Project Assessment" weight="1.0">
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="research" title="Research">
-    </goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="innovative_solution" title="Innovative Solution">
-    </goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="background" title="Background, Data and Graphics">
-    </goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="creative" title="Quality of Presentation/Creative Presentation">
-    </goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="sharing" title="Sharing">
-    </goal>
-  </subjectiveCategory>
 
 
 </fll>
