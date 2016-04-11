@@ -54,6 +54,8 @@ public class GreedySolver {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
+  private final SchedParams solverParameters;
+
   /**
    * group, team, station
    */
@@ -208,6 +210,40 @@ public class GreedySolver {
     }
   }
 
+  public static final String TINC_KEY = "TInc";
+
+  public static final String NGROUPS_KEY = "NGroups";
+
+  public static final String START_TIME_KEY = "start_time";
+
+  public static final String ALTERNATE_TABLES_KEY = "alternate_tables";
+
+  public static final String SUBJECTIVE_FIRST_KEY = "sujective_first";
+
+  public static final String PERF_ATTEMPT_OFFSET_MINUTES_KEY = "perf_attempt_offset_minutes";
+
+  public static final String SUBJECTIVE_ATTEMPT_OFFSET_MINUTES_KEY = "subjective_attempt_offset_minutes";
+
+  public static final String NROUNDS_KEY = "NRounds";
+
+  public static final String NTABLES_KEY = "NTables";
+
+  public static final String TMAX_HOURS_KEY = "TMax_hours";
+
+  public static final String TMAX_MINUTES_KEY = "TMax_minutes";
+
+  public static final String NSUBJECTIVE_KEY = "NSubjective";
+
+  public static final String SUBJ_MINUTES_KEY = "subj_minutes";
+
+  public static final String GROUP_COUNTS_KEY = "group_counts";
+
+  public static final String ALPHA_PERF_MINUTES_KEY = "alpha_perf_minutes";
+
+  public static final String CT_MINUTES_KEY = "ct_minutes";
+
+  public static final String PCT_MINUTES_KEY = "pct_minutes";
+
   /**
    * @param datafile the datafile for the schedule to solve
    * @throws ParseException
@@ -226,22 +262,24 @@ public class GreedySolver {
     }
     LOGGER.debug(properties.toString());
 
-    this.startTime = TournamentSchedule.parseDate(properties.getProperty("start_time"));
+    this.solverParameters = new SchedParams(properties);
 
-    tinc = Utilities.readIntProperty(properties, "TInc");
-    ngroups = Utilities.readIntProperty(properties, "NGroups");
+    this.startTime = TournamentSchedule.parseDate(properties.getProperty(START_TIME_KEY));
 
-    final int alternateValue = Integer.parseInt(properties.getProperty("alternate_tables", "0").trim());
+    tinc = Utilities.readIntProperty(properties, TINC_KEY);
+    ngroups = Utilities.readIntProperty(properties, NGROUPS_KEY);
+
+    final int alternateValue = Integer.parseInt(properties.getProperty(ALTERNATE_TABLES_KEY, "0").trim());
     final boolean alternate = alternateValue == 1;
     LOGGER.debug("Alternate is: "
         + alternate);
 
-    final int subjectiveFirst = Integer.parseInt(properties.getProperty("subjective_first", "0").trim());
+    final int subjectiveFirst = Integer.parseInt(properties.getProperty(SUBJECTIVE_FIRST_KEY, "0").trim());
     this.subjectiveFirst = subjectiveFirst == 1;
     LOGGER.debug("Subjective first is: "
         + this.subjectiveFirst);
 
-    final int perfOffsetMinutes = Integer.parseInt(properties.getProperty("perf_attempt_offset_minutes",
+    final int perfOffsetMinutes = Integer.parseInt(properties.getProperty(PERF_ATTEMPT_OFFSET_MINUTES_KEY,
                                                                           String.valueOf(tinc))
                                                              .trim());
     performanceAttemptOffset = perfOffsetMinutes
@@ -253,7 +291,7 @@ public class GreedySolver {
     LOGGER.debug("Performance attempt offset: "
         + performanceAttemptOffset);
 
-    final int subjOffsetMinutes = Integer.parseInt(properties.getProperty("subjective_attempt_offset_minutes",
+    final int subjOffsetMinutes = Integer.parseInt(properties.getProperty(SUBJECTIVE_ATTEMPT_OFFSET_MINUTES_KEY,
                                                                           String.valueOf(tinc))
                                                              .trim());
     subjectiveAttemptOffset = subjOffsetMinutes
@@ -263,51 +301,26 @@ public class GreedySolver {
       throw new FLLRuntimeException("subjective_attempt_offset_minutes isn't divisible by tinc");
     }
 
-    numPerformanceRounds = Utilities.readIntProperty(properties, "NRounds");
-    numTables = Utilities.readIntProperty(properties, "NTables");
-    final int tmaxHours = Utilities.readIntProperty(properties, "TMax_hours");
-    final int tmaxMinutes = Utilities.readIntProperty(properties, "TMax_minutes");
+    numPerformanceRounds = Utilities.readIntProperty(properties, NROUNDS_KEY);
+    numTables = Utilities.readIntProperty(properties, NTABLES_KEY);
+    final int tmaxHours = Utilities.readIntProperty(properties, TMAX_HOURS_KEY);
+    final int tmaxMinutes = Utilities.readIntProperty(properties, TMAX_MINUTES_KEY);
     numTimeslots = (tmaxHours
         * 60
         + tmaxMinutes)
         / tinc;
 
-    numSubjectiveStations = Utilities.readIntProperty(properties, "NSubjective");
-    final String subjDurationStr = properties.getProperty("subj_minutes");
-    int lbracket = subjDurationStr.indexOf('[');
-    if (-1 == lbracket) {
-      throw new FLLRuntimeException("No '[' found in subj_minutes: '"
-          + subjDurationStr + "'");
-    }
-    int rbracket = subjDurationStr.indexOf(']', lbracket);
-    if (-1 == rbracket) {
-      throw new FLLRuntimeException("No ']' found in subj_minutes: '"
-          + subjDurationStr + "'");
-    }
-    final String[] subjDurs;
-    if (lbracket
-        + 1 == rbracket) {
-      subjDurs = new String[0];
-    } else {
-      subjDurs = subjDurationStr.substring(lbracket
-          + 1, rbracket).split(",");
-    }
-    if (subjDurs.length != numSubjectiveStations) {
-      throw new FLLRuntimeException("Number of subjective stations not consistent with subj_minutes array size");
-    }
-    subjectiveDurations = new int[getNumSubjectiveStations()];
-    for (int station = 0; station < subjDurs.length; ++station) {
-      final int durationMinutes = Integer.parseInt(subjDurs[station].trim());
-      subjectiveDurations[station] = durationMinutes
-          / tinc;
-      if (durationMinutes != subjectiveDurations[station]
-          * tinc) {
+    for (final SubjectiveStation station : this.solverParameters.getSubjectiveStations()) {
+      if (0 != station.getDurationMinutes()
+          % tinc) {
         throw new FLLRuntimeException("Subjective duration for station "
-            + station + " isn't divisible by tinc");
+            + station.getName() + " isn't divisible by tinc");
       }
     }
 
-    final String groupCountsStr = properties.getProperty("group_counts");
+    int lbracket;
+    int rbracket;
+    final String groupCountsStr = properties.getProperty(GROUP_COUNTS_KEY);
     lbracket = groupCountsStr.indexOf('[');
     if (-1 == lbracket) {
       throw new FLLRuntimeException("No '[' found in group_counts: '"
@@ -324,34 +337,31 @@ public class GreedySolver {
       throw new FLLRuntimeException("Num groups and group_counts array not consistent");
     }
 
-    final int performanceDurationMinutes = Utilities.readIntProperty(properties, "alpha_perf_minutes");
-    performanceDuration = performanceDurationMinutes
+    performanceDuration = this.solverParameters.getPerformanceMinutes()
         / tinc;
-    if (performanceDurationMinutes != performanceDuration
+    if (this.solverParameters.getPerformanceMinutes() != performanceDuration
         * tinc) {
       throw new FLLRuntimeException("Performance duration isn't divisible by tinc");
     }
 
-    final int changetimeMinutes = Utilities.readIntProperty(properties, "ct_minutes");
-    changetime = changetimeMinutes
+    changetime = this.solverParameters.getChangetimeMinutes()
         / tinc;
-    if (changetimeMinutes != changetime
+    if (this.solverParameters.getChangetimeMinutes() != changetime
         * tinc) {
       throw new FLLRuntimeException("Changetime isn't divisible by tinc");
     }
-    if (changetimeMinutes < SchedParams.MINIMUM_CHANGETIME_MINUTES) {
+    if (this.solverParameters.getChangetimeMinutes() < SchedParams.MINIMUM_CHANGETIME_MINUTES) {
       throw new FLLRuntimeException("Change time between events is too short, cannot be less than "
           + SchedParams.MINIMUM_CHANGETIME_MINUTES + " minutes");
     }
 
-    final int performanceChangetimeMinutes = Utilities.readIntProperty(properties, "pct_minutes");
-    performanceChangetime = performanceChangetimeMinutes
+    performanceChangetime = this.solverParameters.getPerformanceChangetimeMinutes()
         / tinc;
-    if (performanceChangetimeMinutes != performanceChangetime
+    if (this.solverParameters.getPerformanceChangetimeMinutes() != performanceChangetime
         * tinc) {
       throw new FLLRuntimeException("Performance changetime isn't divisible by tinc");
     }
-    if (performanceChangetimeMinutes < SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES) {
+    if (this.solverParameters.getPerformanceChangetimeMinutes() < SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES) {
       throw new FLLRuntimeException("Change time between performance rounds is too short, cannot be less than "
           + SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES + " minutes");
     }
@@ -575,20 +585,18 @@ public class GreedySolver {
     return true;
   }
 
-  private final int[] subjectiveDurations;
-
   /**
    * Get the duration for the given subjective station in time increments.
    */
   public int getSubjectiveDuration(final int station) {
-    return subjectiveDurations[station];
+    return this.solverParameters.getSubjectiveMinutes(station) / tinc;
   }
 
   /**
    * @param station zero based
    * @return
    */
-  public String getSubjectiveColumnName(final int station) {
+  public static String getSubjectiveColumnName(final int station) {
     return String.format("%s%d", SUBJECTIVE_COLUMN_PREFIX, station
         + 1);
   }
@@ -1502,10 +1510,8 @@ public class GreedySolver {
     return true;
   }
 
-  private final int numSubjectiveStations;
-
   public int getNumSubjectiveStations() {
-    return numSubjectiveStations;
+    return this.solverParameters.getNumSubjectiveStations();
   }
 
   /**

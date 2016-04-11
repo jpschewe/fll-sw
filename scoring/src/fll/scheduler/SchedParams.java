@@ -5,10 +5,14 @@
  */
 package fll.scheduler;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.io.Serializable;
+import java.util.Properties;
+
+import fll.Utilities;
+import fll.util.FLLRuntimeException;
 
 /**
  * Parameters for the scheduler.
@@ -51,22 +55,54 @@ public class SchedParams implements Serializable {
     mPerformanceChangetimeMinutes = performanceChangetimeMinutes;
   }
 
-  private final int mPerformanceMinutes;
+  /**
+   * Load the parameters from a properties object.
+   * 
+   * @param properies where to load the parameters from
+   */
+  public SchedParams(final Properties properties) {    
+    final int numSubjectiveStations = Utilities.readIntProperty(properties, GreedySolver.NSUBJECTIVE_KEY);
+    final String subjDurationStr = properties.getProperty(GreedySolver.SUBJ_MINUTES_KEY);
+    final int[] subjectiveDurations = Utilities.parseListOfIntegers(subjDurationStr);
+    if (subjectiveDurations.length != numSubjectiveStations) {
+      throw new FLLRuntimeException("Number of subjective stations not consistent with subj_minutes array size");
+    }
+    
+    mPerformanceMinutes = Utilities.readIntProperty(properties, GreedySolver.ALPHA_PERF_MINUTES_KEY);
+    mChangetimeMinutes = Utilities.readIntProperty(properties, GreedySolver.CT_MINUTES_KEY);
+    mPerformanceChangetimeMinutes = Utilities.readIntProperty(properties, GreedySolver.PCT_MINUTES_KEY);
+    
+    mSubjectiveStations = new ArrayList<>();
+    for(int i=0; i<numSubjectiveStations; ++i) {
+      final SubjectiveStation station = new SubjectiveStation(GreedySolver.getSubjectiveColumnName(i), subjectiveDurations[i]);
+      mSubjectiveStations.add(station);
+    }
+  }
+
+  private int mPerformanceMinutes;
 
   /**
    * Number of minutes per performance run.
    */
-  public int getPerformanceMinutes() {
+  public final int getPerformanceMinutes() {
     return mPerformanceMinutes;
   }
 
-  private final int mChangetimeMinutes;
+  protected final void setPerformanceMinutes(final int v) {
+    mPerformanceMinutes = v;
+  }
+
+  private int mChangetimeMinutes;
 
   /**
    * Number of minutes between judging stations for each team.
    */
-  public int getChangetimeMinutes() {
+  public final int getChangetimeMinutes() {
     return mChangetimeMinutes;
+  }
+
+  protected final void setChangetimeMinutes(final int v) {
+    mChangetimeMinutes = v;
   }
 
   private int mPerformanceChangetimeMinutes;
@@ -74,43 +110,57 @@ public class SchedParams implements Serializable {
   /**
    * Number of minutes between performance rounds for a team.
    */
-  public int getPerformanceChangetimeMinutes() {
+  public final int getPerformanceChangetimeMinutes() {
     return mPerformanceChangetimeMinutes;
   }
 
-  private final ArrayList<SubjectiveStation> mSubjectiveStations;
+  private ArrayList<SubjectiveStation> mSubjectiveStations;
 
   /**
    * Number of subjective judging stations.
    */
-  public int getNSubjective() {
+  public final int getNSubjective() {
     return mSubjectiveStations.size();
   }
 
-  public String getSubjectiveName(final int station) {
+  public final String getSubjectiveName(final int station) {
     return mSubjectiveStations.get(station).getName();
   }
 
   /**
    * @return Read-only copy of the subjective stations
    */
-  public List<SubjectiveStation> getSubjectiveStations() {
+  public final List<SubjectiveStation> getSubjectiveStations() {
     return Collections.unmodifiableList(mSubjectiveStations);
+  }
+
+  /**
+   * @param v new value for subjective stations
+   */
+  protected final void setSubjectiveStations(final List<SubjectiveStation> v) {
+    mSubjectiveStations = new ArrayList<>(v);
   }
 
   /**
    * Number of minutes for a subjective judging.
    */
-  public long getSubjectiveMinutes(final int station) {
+  public final int getSubjectiveMinutes(final int station) {
     return mSubjectiveStations.get(station).getDurationMinutes();
   }
 
+  /**
+   * @return the number of subjective stations
+   */
+  public final int getNumSubjectiveStations() {
+    return mSubjectiveStations.size();
+  }
+  
   /**
    * Find a station by name.
    * 
    * @return the station, null if no station by name found
    */
-  public SubjectiveStation getStationByName(final String name) {
+  public final SubjectiveStation getStationByName(final String name) {
     for (final SubjectiveStation station : mSubjectiveStations) {
       if (station.getName().equals(name)) {
         return station;

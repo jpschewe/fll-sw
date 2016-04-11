@@ -555,4 +555,39 @@ public final class Utilities {
     return !isEven(number);
   }
 
+  /**
+   * Parse a string of the form [integer, integer, ...].
+   * 
+   * @param str string to parse
+   * @return array of integers
+   * @throws FLLRuntimeException if the string cannot be parsed
+   */
+  public static int[] parseListOfIntegers(final String str) {
+    int lbracket = str.indexOf('[');
+    if (-1 == lbracket) {
+      throw new FLLRuntimeException("No '[' found in string: '"
+          + str + "'");
+    }
+    int rbracket = str.indexOf(']', lbracket);
+    if (-1 == rbracket) {
+      throw new FLLRuntimeException("No ']' found in string: '"
+          + str + "'");
+    }
+    final String[] subjDurs;
+    if (lbracket
+        + 1 == rbracket) {
+      subjDurs = new String[0];
+    } else {
+      subjDurs = str.substring(lbracket
+          + 1, rbracket).split(",");
+    }
+  
+    final int[] values = new int[subjDurs.length];
+    for (int i = 0; i < subjDurs.length; ++i) {
+      values[i] = Integer.parseInt(subjDurs[i].trim());
+    }
+  
+    return values;
+  }
+
 }
