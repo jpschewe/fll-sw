@@ -44,10 +44,10 @@ public final class ScoreStandardization {
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Can't use variable param for column to set")
   public static void summarizeScores(final Connection connection,
                                      final ChallengeDescription description,
-                                     final int tournament) throws SQLException, ParseException {
+                                     final int tournament)
+      throws SQLException, ParseException {
     if (tournament != Queries.getCurrentTournament(connection)) {
-      throw new FLLRuntimeException(
-                                    "Cannot compute summarized scores for a tournament other than the current tournament");
+      throw new FLLRuntimeException("Cannot compute summarized scores for a tournament other than the current tournament");
     }
 
     Statement stmt = null;
@@ -147,7 +147,8 @@ public final class ScoreStandardization {
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Can't use variable for column name in update")
   public static void standardizeSubjectiveScores(final Connection connection,
                                                  final ChallengeDescription description,
-                                                 final int tournament) throws SQLException {
+                                                 final int tournament)
+      throws SQLException {
     ResultSet rs = null;
     PreparedStatement updatePrep = null;
     PreparedStatement selectPrep = null;
@@ -160,15 +161,18 @@ public final class ScoreStandardization {
         final String category = catElement.getName();
 
         /*
-         * Update StandardizedScore for each team in the ScoreGroup formula: SS
-         * = Std_Mean + (Z-Score-of-ComputedTotal Std_Sigma) ( ( (ComputedTotal
-         * - ScoreGroup_Mean) ) SS = Standard_Mean + ( (
-         * --------------------------------- ) Standard_StandardDeviation ) ( (
-         * ScoreGroup_StandardDeviation )
+         * Update StandardizedScore for each team in the ScoreGroup formula:
+         * 
+         * SS = ( ( ComputedTotal - sgMean ) * ( sigma / sgStdev ) ) + mean
+         * 
+         * sgMean = average(all scores from judge)
+         * sgStdev = stdev(all scores from judge)
          */
         // 1 - sg_mean
-        // 2 - sg_stdev
-        // 3 - judge
+        // 2 - sigma / stStdev
+        // 3 - mean
+        // 4 - judge
+        // 5 - tournament
         updatePrep = connection.prepareStatement("UPDATE "
             + category + " SET StandardizedScore = ((ComputedTotal - ?) * ? ) + ?  WHERE Judge = ?"
             + " AND Tournament = ?");
@@ -223,7 +227,8 @@ public final class ScoreStandardization {
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Can't use variable for column name in select")
   public static void updateTeamTotalScores(final Connection connection,
                                            final ChallengeDescription description,
-                                           final int tournament) throws SQLException, ParseException {
+                                           final int tournament)
+      throws SQLException, ParseException {
     final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection, tournament);
 
     final Tournament currentTournament = Tournament.findTournamentByID(connection, tournament);
