@@ -220,8 +220,6 @@ public class GreedySolver {
 
   public static final String TMAX_MINUTES_KEY = "TMax_minutes";
 
-  public static final String NSUBJECTIVE_KEY = "NSubjective";
-
   public static final String SUBJ_MINUTES_KEY = "subj_minutes";
 
   public static final String GROUP_COUNTS_KEY = "group_counts";
