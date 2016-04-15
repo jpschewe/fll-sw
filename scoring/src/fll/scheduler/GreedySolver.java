@@ -54,7 +54,7 @@ public class GreedySolver {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  private final SchedParams solverParameters;
+  private final SolverParams solverParameters;
 
   /**
    * group, team, station
@@ -114,10 +114,6 @@ public class GreedySolver {
   public File getBestSchedule() {
     return mBestSchedule;
   }
-
-  private final int tinc;
-
-  private final Date startTime;
 
   private int solutionsFound = 0;
 
@@ -262,11 +258,8 @@ public class GreedySolver {
     }
     LOGGER.debug(properties.toString());
 
-    this.solverParameters = new SchedParams(properties);
+    this.solverParameters = new SolverParams(properties);
 
-    this.startTime = TournamentSchedule.parseDate(properties.getProperty(START_TIME_KEY));
-
-    tinc = Utilities.readIntProperty(properties, TINC_KEY);
     ngroups = Utilities.readIntProperty(properties, NGROUPS_KEY);
 
     final int alternateValue = Integer.parseInt(properties.getProperty(ALTERNATE_TABLES_KEY, "0").trim());
@@ -280,24 +273,24 @@ public class GreedySolver {
         + this.subjectiveFirst);
 
     final int perfOffsetMinutes = Integer.parseInt(properties.getProperty(PERF_ATTEMPT_OFFSET_MINUTES_KEY,
-                                                                          String.valueOf(tinc))
+                                                                          String.valueOf(solverParameters.getTimeIncrement()))
                                                              .trim());
     performanceAttemptOffset = perfOffsetMinutes
-        / tinc;
+        / solverParameters.getTimeIncrement();
     if (perfOffsetMinutes != performanceAttemptOffset
-        * tinc) {
+        * solverParameters.getTimeIncrement()) {
       throw new FLLRuntimeException("perf_attempt_offset_minutes isn't divisible by tinc");
     }
     LOGGER.debug("Performance attempt offset: "
         + performanceAttemptOffset);
 
     final int subjOffsetMinutes = Integer.parseInt(properties.getProperty(SUBJECTIVE_ATTEMPT_OFFSET_MINUTES_KEY,
-                                                                          String.valueOf(tinc))
+                                                                          String.valueOf(solverParameters.getTimeIncrement()))
                                                              .trim());
     subjectiveAttemptOffset = subjOffsetMinutes
-        / tinc;
+        / solverParameters.getTimeIncrement();
     if (subjOffsetMinutes != subjectiveAttemptOffset
-        * tinc) {
+        * solverParameters.getTimeIncrement()) {
       throw new FLLRuntimeException("subjective_attempt_offset_minutes isn't divisible by tinc");
     }
 
@@ -308,13 +301,14 @@ public class GreedySolver {
     numTimeslots = (tmaxHours
         * 60
         + tmaxMinutes)
-        / tinc;
+        / solverParameters.getTimeIncrement();
 
     for (final SubjectiveStation station : this.solverParameters.getSubjectiveStations()) {
       if (0 != station.getDurationMinutes()
-          % tinc) {
+          % solverParameters.getTimeIncrement()) {
         throw new FLLRuntimeException("Subjective duration for station "
-            + station.getName() + " isn't divisible by tinc");
+            + station.getName() + " isn't divisible by the specified time increment "
+            + solverParameters.getTimeIncrement());
       }
     }
 
@@ -338,16 +332,16 @@ public class GreedySolver {
     }
 
     performanceDuration = this.solverParameters.getPerformanceMinutes()
-        / tinc;
+        / solverParameters.getTimeIncrement();
     if (this.solverParameters.getPerformanceMinutes() != performanceDuration
-        * tinc) {
+        * solverParameters.getTimeIncrement()) {
       throw new FLLRuntimeException("Performance duration isn't divisible by tinc");
     }
 
     changetime = this.solverParameters.getChangetimeMinutes()
-        / tinc;
+        / solverParameters.getTimeIncrement();
     if (this.solverParameters.getChangetimeMinutes() != changetime
-        * tinc) {
+        * solverParameters.getTimeIncrement()) {
       throw new FLLRuntimeException("Changetime isn't divisible by tinc");
     }
     if (this.solverParameters.getChangetimeMinutes() < SchedParams.MINIMUM_CHANGETIME_MINUTES) {
@@ -356,9 +350,9 @@ public class GreedySolver {
     }
 
     performanceChangetime = this.solverParameters.getPerformanceChangetimeMinutes()
-        / tinc;
+        / solverParameters.getTimeIncrement();
     if (this.solverParameters.getPerformanceChangetimeMinutes() != performanceChangetime
-        * tinc) {
+        * solverParameters.getTimeIncrement()) {
       throw new FLLRuntimeException("Performance changetime isn't divisible by tinc");
     }
     if (this.solverParameters.getPerformanceChangetimeMinutes() < SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES) {
@@ -436,7 +430,7 @@ public class GreedySolver {
       Arrays.fill(performanceScheduled[group], 0);
     }
 
-    parseBreaks(properties, startTime, tinc);
+    parseBreaks(properties, solverParameters.getStartTime(), solverParameters.getTimeIncrement());
 
     // sort list of teams to make sure that the scheduler is deterministic
     Collections.sort(teams, lowestTeamIndex);
@@ -589,7 +583,8 @@ public class GreedySolver {
    * Get the duration for the given subjective station in time increments.
    */
   public int getSubjectiveDuration(final int station) {
-    return this.solverParameters.getSubjectiveMinutes(station) / tinc;
+    return this.solverParameters.getSubjectiveMinutes(station)
+        / solverParameters.getTimeIncrement();
   }
 
   /**
@@ -1202,7 +1197,7 @@ public class GreedySolver {
               + 1);
       subjectiveHeaders.add(header);
       final SubjectiveStation station = new SubjectiveStation(header, getSubjectiveDuration(subj)
-          * tinc);
+          * solverParameters.getTimeIncrement());
       subjectiveParams.add(station);
     }
 
@@ -1210,9 +1205,9 @@ public class GreedySolver {
       final TournamentSchedule schedule = new TournamentSchedule(datafile.getName(), scheduleFile, subjectiveHeaders);
 
       final SchedParams params = new SchedParams(subjectiveParams, getPerformanceDuration()
-          * tinc, getChangetime()
-              * tinc, getPerformanceChangetime()
-                  * tinc);
+          * solverParameters.getTimeIncrement(), getChangetime()
+              * solverParameters.getTimeIncrement(), getPerformanceChangetime()
+                  * solverParameters.getTimeIncrement());
       final ScheduleChecker checker = new ScheduleChecker(params, schedule);
       final List<ConstraintViolation> violations = checker.verifySchedule();
       for (final ConstraintViolation violation : violations) {
@@ -1646,9 +1641,9 @@ public class GreedySolver {
         ++n;
         if (n == count) {
           final Calendar cal = Calendar.getInstance();
-          cal.setTime(startTime);
+          cal.setTime(solverParameters.getStartTime());
           cal.add(Calendar.MINUTE, i
-              * tinc);
+              * solverParameters.getTimeIncrement());
           return cal.getTime();
         }
       }
