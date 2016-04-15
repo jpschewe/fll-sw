@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Properties;
 
 import fll.Utilities;
-import fll.util.FLLRuntimeException;
 
 /**
  * Parameters for the scheduler.
@@ -61,19 +60,15 @@ public class SchedParams implements Serializable {
    * @param properies where to load the parameters from
    */
   public SchedParams(final Properties properties) {    
-    final int numSubjectiveStations = Utilities.readIntProperty(properties, GreedySolver.NSUBJECTIVE_KEY);
     final String subjDurationStr = properties.getProperty(GreedySolver.SUBJ_MINUTES_KEY);
     final int[] subjectiveDurations = Utilities.parseListOfIntegers(subjDurationStr);
-    if (subjectiveDurations.length != numSubjectiveStations) {
-      throw new FLLRuntimeException("Number of subjective stations not consistent with subj_minutes array size");
-    }
     
     mPerformanceMinutes = Utilities.readIntProperty(properties, GreedySolver.ALPHA_PERF_MINUTES_KEY);
     mChangetimeMinutes = Utilities.readIntProperty(properties, GreedySolver.CT_MINUTES_KEY);
     mPerformanceChangetimeMinutes = Utilities.readIntProperty(properties, GreedySolver.PCT_MINUTES_KEY);
     
     mSubjectiveStations = new ArrayList<>();
-    for(int i=0; i<numSubjectiveStations; ++i) {
+    for(int i=0; i<subjectiveDurations.length; ++i) {
       final SubjectiveStation station = new SubjectiveStation(GreedySolver.getSubjectiveColumnName(i), subjectiveDurations[i]);
       mSubjectiveStations.add(station);
     }
