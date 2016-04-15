@@ -98,12 +98,6 @@ public class GreedySolver {
 
   private final File datafile;
 
-  private final int ngroups;
-
-  private int getNumGroups() {
-    return ngroups;
-  }
-
   private File mBestSchedule = null;
 
   /**
@@ -208,8 +202,6 @@ public class GreedySolver {
 
   public static final String TINC_KEY = "TInc";
 
-  public static final String NGROUPS_KEY = "NGroups";
-
   public static final String START_TIME_KEY = "start_time";
 
   public static final String ALTERNATE_TABLES_KEY = "alternate_tables";
@@ -259,8 +251,6 @@ public class GreedySolver {
     LOGGER.debug(properties.toString());
 
     this.solverParameters = new SolverParams(properties);
-
-    ngroups = Utilities.readIntProperty(properties, NGROUPS_KEY);
 
     final int alternateValue = Integer.parseInt(properties.getProperty(ALTERNATE_TABLES_KEY, "0").trim());
     final boolean alternate = alternateValue == 1;
@@ -312,25 +302,6 @@ public class GreedySolver {
       }
     }
 
-    int lbracket;
-    int rbracket;
-    final String groupCountsStr = properties.getProperty(GROUP_COUNTS_KEY);
-    lbracket = groupCountsStr.indexOf('[');
-    if (-1 == lbracket) {
-      throw new FLLRuntimeException("No '[' found in group_counts: '"
-          + groupCountsStr + "'");
-    }
-    rbracket = groupCountsStr.indexOf(']', lbracket);
-    if (-1 == rbracket) {
-      throw new FLLRuntimeException("No ']' found in group_counts: '"
-          + groupCountsStr + "'");
-    }
-    final String[] groups = groupCountsStr.substring(lbracket
-        + 1, rbracket).split(",");
-    if (groups.length != ngroups) {
-      throw new FLLRuntimeException("Num groups and group_counts array not consistent");
-    }
-
     performanceDuration = this.solverParameters.getPerformanceMinutes()
         / solverParameters.getTimeIncrement();
     if (this.solverParameters.getPerformanceMinutes() != performanceDuration
@@ -377,13 +348,13 @@ public class GreedySolver {
 
     }
 
-    sz = new boolean[groups.length][][][];
-    sy = new boolean[groups.length][][][];
-    pz = new boolean[groups.length][][][][];
-    py = new boolean[groups.length][][][][];
-    subjectiveScheduled = new boolean[groups.length][][];
-    subjectiveStations = new int[groups.length][getNumSubjectiveStations()];
-    performanceScheduled = new int[groups.length][];
+    sz = new boolean[solverParameters.getNumGroups()][][][];
+    sy = new boolean[solverParameters.getNumGroups()][][][];
+    pz = new boolean[solverParameters.getNumGroups()][][][][];
+    py = new boolean[solverParameters.getNumGroups()][][][][];
+    subjectiveScheduled = new boolean[solverParameters.getNumGroups()][][];
+    subjectiveStations = new int[solverParameters.getNumGroups()][getNumSubjectiveStations()];
+    performanceScheduled = new int[solverParameters.getNumGroups()][];
     performanceTables = new int[getNumTables()];
     if (alternate) {
       for (int table = 0; table < performanceTables.length; ++table) {
@@ -401,8 +372,8 @@ public class GreedySolver {
     } else {
       Arrays.fill(performanceTables, 0);
     }
-    for (int group = 0; group < groups.length; ++group) {
-      final int count = Integer.parseInt(groups[group].trim());
+    for (int group = 0; group < solverParameters.getNumGroups(); ++group) {
+      final int count = solverParameters.getNumTeamsInGroup(group);
       sz[group] = new boolean[count][getNumSubjectiveStations()][getNumTimeslots()];
       sy[group] = new boolean[count][getNumSubjectiveStations()][getNumTimeslots()];
       pz[group] = new boolean[count][getNumTables()][2][getNumTimeslots()];
@@ -1233,8 +1204,8 @@ public class GreedySolver {
    * @return the objective value, null on failure
    */
   private ObjectiveValue computeObjectiveValue(final File scheduleFile) {
-    final int[] numTeams = new int[getNumGroups()];
-    final int[] latestSubjectiveTime = new int[getNumGroups()];
+    final int[] numTeams = new int[solverParameters.getNumGroups()];
+    final int[] latestSubjectiveTime = new int[solverParameters.getNumGroups()];
     for (int group = 0; group < numTeams.length; ++group) {
       numTeams[group] = subjectiveScheduled[group].length;
       latestSubjectiveTime[group] = findLatestSubjectiveTime(group);
@@ -1420,7 +1391,7 @@ public class GreedySolver {
   private int findNextAvailableSubjectiveSlot(final List<Integer> possibleSubjectiveStations,
                                               final List<Integer> subjectiveGroups) {
     int nextAvailableSubjSlot = Integer.MAX_VALUE;
-    for (int group = 0; group < getNumGroups(); ++group) {
+    for (int group = 0; group < solverParameters.getNumGroups(); ++group) {
       for (int station = 0; station < getNumSubjectiveStations(); ++station) {
         if (subjectiveStations[group][station] <= nextAvailableSubjSlot) {
           if (subjectiveStations[group][station] < nextAvailableSubjSlot) {
