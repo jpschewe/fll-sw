@@ -28,6 +28,9 @@ public class SolverParams extends SchedParams {
 
     this.tinc = Utilities.readIntProperty(properties, GreedySolver.TINC_KEY);
 
+    final String groupCountsStr = properties.getProperty(GreedySolver.GROUP_COUNTS_KEY);
+    this.groupCounts = Utilities.parseListOfIntegers(groupCountsStr);
+
   }
 
   private Date startTime;
@@ -65,5 +68,40 @@ public class SolverParams extends SchedParams {
   public final void setTimeIncrement(int v) {
     tinc = v;
   }
+
+  private int[] groupCounts = new int[0];
+  
+  /**
+   * Set the number of teams in each grouping.
+   * This also defines the number of groups.
+   * 
+   * @param groupCounts the number of teams in each group, cannot be null
+   * @throws NullPointerException if groupCounts is null
+   */
+  public final void setGroupCounts(final int[] groupCounts) {
+    if(null == groupCounts) {
+      throw new NullPointerException("groupCounts cannot be null");
+    }
+    
+    this.groupCounts = new int[groupCounts.length];
+    System.arraycopy(groupCounts, 0, this.groupCounts, 0, groupCounts.length);
+  }
+  
+  /**
+   * Number of groups of teams.
+   */
+  public final int getNumGroups() {
+    return groupCounts.length;
+  }
+
+  /**
+   * @param index the index into groupCounts
+   * @return the number of teams in the specified group
+   * @throws IndexOutOfBoundsException if index is not a valid index for groupCounts
+   */
+  public final int getNumTeamsInGroup(int index) {
+    return this.groupCounts[index];
+  }
+
 
 }
