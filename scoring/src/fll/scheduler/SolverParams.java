@@ -48,6 +48,9 @@ public class SolverParams extends SchedParams {
     LOGGER.debug("Subjective first is: "
         + this.subjectiveFirst);
 
+    this.perfAttemptOffsetMinutes = Utilities.readIntProperty(properties, GreedySolver.PERF_ATTEMPT_OFFSET_MINUTES_KEY,
+                                                       this.tinc);
+
   }
 
   // TODO: replace with LocalTime type
@@ -164,13 +167,12 @@ public class SolverParams extends SchedParams {
 
   /**
    * If true, schedule the subjective stations before the performance.
-   * 
    * Defaults to false.
    */
   public final boolean getSubjectiveFirst() {
     return this.subjectiveFirst;
   }
-  
+
   /**
    * @see #getSubjectiveFirst()
    */
@@ -178,4 +180,23 @@ public class SolverParams extends SchedParams {
     this.subjectiveFirst = v;
   }
 
+  private int perfAttemptOffsetMinutes;
+
+  /**
+   * If a performance round cannot be scheduled at a time, how many
+   * minutes later should the next time to try be.
+   * 
+   * Defaults to {@link #getTimeIncrement()}.
+   */
+  public final int getPerformanceAttemptOffsetMinutes() {
+    return this.perfAttemptOffsetMinutes;
+  }
+
+  /**
+   * @see #getPerformanceAttemptOffsetMinutes()
+   */
+  public final void setPerformanceAttemptOffsetMinutes(final int v) {
+    this.perfAttemptOffsetMinutes = v;
+  }
+  
 }

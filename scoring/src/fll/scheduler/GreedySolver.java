@@ -233,7 +233,8 @@ public class GreedySolver {
    * @throws ParseException
    */
   public GreedySolver(final File datafile,
-                      final boolean optimize) throws IOException, ParseException {
+                      final boolean optimize)
+      throws IOException, ParseException {
     this.datafile = datafile;
     this.optimize = optimize;
     if (this.optimize) {
@@ -248,12 +249,9 @@ public class GreedySolver {
 
     this.solverParameters = new SolverParams(properties);
 
-    final int perfOffsetMinutes = Integer.parseInt(properties.getProperty(PERF_ATTEMPT_OFFSET_MINUTES_KEY,
-                                                                          String.valueOf(solverParameters.getTimeIncrement()))
-                                                             .trim());
-    performanceAttemptOffset = perfOffsetMinutes
+    performanceAttemptOffset = solverParameters.getPerformanceAttemptOffsetMinutes()
         / solverParameters.getTimeIncrement();
-    if (perfOffsetMinutes != performanceAttemptOffset
+    if (solverParameters.getPerformanceAttemptOffsetMinutes() != performanceAttemptOffset
         * solverParameters.getTimeIncrement()) {
       throw new FLLRuntimeException("perf_attempt_offset_minutes isn't divisible by tinc");
     }
@@ -399,7 +397,8 @@ public class GreedySolver {
    */
   private void parseBreaks(final Properties properties,
                            final Date startTime,
-                           final int tinc) throws ParseException {
+                           final int tinc)
+      throws ParseException {
     subjectiveBreaks.addAll(parseBreaks(properties, startTime, tinc, "subjective"));
     performanceBreaks.addAll(parseBreaks(properties, startTime, tinc, "performance"));
   }
@@ -407,7 +406,8 @@ public class GreedySolver {
   private Collection<ScheduledBreak> parseBreaks(final Properties properties,
                                                  final Date startTime,
                                                  final int tinc,
-                                                 final String breakType) throws ParseException {
+                                                 final String breakType)
+      throws ParseException {
     final Collection<ScheduledBreak> breaks = new LinkedList<ScheduledBreak>();
 
     final int numBreaks = Integer.parseInt(properties.getProperty(String.format("num_%s_breaks", breakType), "0"));
@@ -794,7 +794,8 @@ public class GreedySolver {
   }
 
   private boolean schedPerf(final int table,
-                            final int timeslot) throws InterruptedException {
+                            final int timeslot)
+      throws InterruptedException {
     final List<SchedTeam> teams = getPossiblePerformanceTeams();
     SchedTeam team1 = null;
 
@@ -1037,7 +1038,8 @@ public class GreedySolver {
 
   private boolean schedSubj(final int group,
                             final int station,
-                            final int timeslot) throws InterruptedException {
+                            final int timeslot)
+      throws InterruptedException {
     final List<SchedTeam> teams = getPossibleSubjectiveTeams(group, station);
     for (final SchedTeam team : teams) {
       if (assignSubjective(team.getGroup(), team.getIndex(), station, timeslot)) {
@@ -1156,8 +1158,9 @@ public class GreedySolver {
 
       final SchedParams params = new SchedParams(subjectiveParams, getPerformanceDuration()
           * solverParameters.getTimeIncrement(), getChangetime()
-              * solverParameters.getTimeIncrement(), getPerformanceChangetime()
-                  * solverParameters.getTimeIncrement());
+              * solverParameters.getTimeIncrement(),
+                                                 getPerformanceChangetime()
+                                                     * solverParameters.getTimeIncrement());
       final ScheduleChecker checker = new ScheduleChecker(params, schedule);
       final List<ConstraintViolation> violations = checker.verifySchedule();
       for (final ConstraintViolation violation : violations) {
@@ -1557,8 +1560,8 @@ public class GreedySolver {
         }
         if (perfTimes.size() != solverParameters.getNumPerformanceRounds()) {
           throw new FLLRuntimeException("Expecting "
-              + solverParameters.getNumPerformanceRounds() + " performance times, but found " + perfTimes.size() + " group: "
-              + (team.getGroup()
+              + solverParameters.getNumPerformanceRounds() + " performance times, but found " + perfTimes.size()
+              + " group: " + (team.getGroup()
                   + 1)
               + " team: " + (team.getIndex()
                   + 1)
