@@ -22,10 +22,6 @@ public class SchedParams implements Serializable {
 
   public static final int DEFAULT_MAX_HOURS = 8;
 
-  public static final int DEFAULT_NSUBJECTIVE = 2;
-
-  public static final int DEFAULT_NROUNDS = 3;
-
   public static final int DEFAULT_SUBJECTIVE_MINUTES = 20;
 
   public static final int DEFAULT_PERFORMANCE_MINUTES = 5;
@@ -59,65 +55,94 @@ public class SchedParams implements Serializable {
    * 
    * @param properies where to load the parameters from
    */
-  public SchedParams(final Properties properties) {    
+  public SchedParams(final Properties properties) {
     final String subjDurationStr = properties.getProperty(GreedySolver.SUBJ_MINUTES_KEY);
     final int[] subjectiveDurations = Utilities.parseListOfIntegers(subjDurationStr);
-    
+
     mPerformanceMinutes = Utilities.readIntProperty(properties, GreedySolver.ALPHA_PERF_MINUTES_KEY);
     mChangetimeMinutes = Utilities.readIntProperty(properties, GreedySolver.CT_MINUTES_KEY);
     mPerformanceChangetimeMinutes = Utilities.readIntProperty(properties, GreedySolver.PCT_MINUTES_KEY);
-    
+
     mSubjectiveStations = new ArrayList<>();
-    for(int i=0; i<subjectiveDurations.length; ++i) {
-      final SubjectiveStation station = new SubjectiveStation(GreedySolver.getSubjectiveColumnName(i), subjectiveDurations[i]);
+    for (int i = 0; i < subjectiveDurations.length; ++i) {
+      final SubjectiveStation station = new SubjectiveStation(GreedySolver.getSubjectiveColumnName(i),
+                                                              subjectiveDurations[i]);
       mSubjectiveStations.add(station);
     }
   }
 
-  private int mPerformanceMinutes;
+  private int mPerformanceMinutes = DEFAULT_PERFORMANCE_MINUTES;
 
   /**
    * Number of minutes per performance run.
+   * 
+   * Defaults to {@link #DEFAULT_PERFORMANCE_MINUTES}
    */
   public final int getPerformanceMinutes() {
     return mPerformanceMinutes;
   }
 
-  protected final void setPerformanceMinutes(final int v) {
+  /**
+   * @see #getPerformanceMinutes()
+   */
+  public final void setPerformanceMinutes(final int v) {
     mPerformanceMinutes = v;
   }
 
-  private int mChangetimeMinutes;
+  private int mChangetimeMinutes = MINIMUM_CHANGETIME_MINUTES;
 
   /**
    * Number of minutes between judging stations for each team.
+   * 
+   * Default is {@link #MINIMUM_CHANGETIME_MINUTES}
    */
   public final int getChangetimeMinutes() {
     return mChangetimeMinutes;
   }
 
-  protected final void setChangetimeMinutes(final int v) {
+  /**
+   * @see #getChangetimeMinutes()
+   */
+  public final void setChangetimeMinutes(final int v) {
     mChangetimeMinutes = v;
   }
 
-  private int mPerformanceChangetimeMinutes;
+  private int mPerformanceChangetimeMinutes = MINIMUM_PERFORMANCE_CHANGETIME_MINUTES;
 
   /**
    * Number of minutes between performance rounds for a team.
+   * 
+   * Default value is {@link #MINIMUM_PERFORMANCE_CHANGETIME_MINUTES}.
    */
   public final int getPerformanceChangetimeMinutes() {
     return mPerformanceChangetimeMinutes;
   }
+  
+  /**
+   * @see #getPerformanceChangetimeMinutes()
+   */
+  public final void setPerformanceChangetimeMinutes(final int v) {
+    mPerformanceChangetimeMinutes = v;
+  }
 
-  private ArrayList<SubjectiveStation> mSubjectiveStations;
+  private ArrayList<SubjectiveStation> mSubjectiveStations = new ArrayList<>();
 
   /**
    * Number of subjective judging stations.
+   * 
+   * Defaults to 0.
    */
   public final int getNSubjective() {
     return mSubjectiveStations.size();
   }
 
+  /**
+   * Get the name of the specified station.
+   * 
+   * @param station an index into the list of stations
+   * @return the name
+   * @throws IndexOutOfBoundsException when the station is outside the bounds of the list
+   */
   public final String getSubjectiveName(final int station) {
     return mSubjectiveStations.get(station).getName();
   }
@@ -149,7 +174,7 @@ public class SchedParams implements Serializable {
   public final int getNumSubjectiveStations() {
     return mSubjectiveStations.size();
   }
-  
+
   /**
    * Find a station by name.
    * 
