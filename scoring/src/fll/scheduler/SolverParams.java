@@ -29,7 +29,8 @@ public class SolverParams extends SchedParams {
   public SolverParams(Properties properties) throws ParseException {
     super(properties);
 
-    this.startTime = TournamentSchedule.parseDate(properties.getProperty(GreedySolver.START_TIME_KEY, startTime.toString()));
+    this.startTime = TournamentSchedule.parseDate(properties.getProperty(GreedySolver.START_TIME_KEY,
+                                                                         startTime.toString()));
 
     this.tinc = Utilities.readIntProperty(properties, GreedySolver.TINC_KEY, this.tinc);
 
@@ -39,9 +40,13 @@ public class SolverParams extends SchedParams {
     this.alternate = Utilities.readBooleanProperty(properties, GreedySolver.ALTERNATE_TABLES_KEY, false);
     LOGGER.debug("Alternate is: "
         + alternate);
-    
-    this.numPerformanceRounds = Utilities.readIntProperty(properties, GreedySolver.NROUNDS_KEY, this.numPerformanceRounds);
 
+    this.numPerformanceRounds = Utilities.readIntProperty(properties, GreedySolver.NROUNDS_KEY,
+                                                          this.numPerformanceRounds);
+
+    this.subjectiveFirst = Utilities.readBooleanProperty(properties, GreedySolver.SUBJECTIVE_FIRST_KEY, false);
+    LOGGER.debug("Subjective first is: "
+        + this.subjectiveFirst);
 
   }
 
@@ -153,6 +158,24 @@ public class SolverParams extends SchedParams {
    */
   public final void setNumPerformanceRounds(final int v) {
     numPerformanceRounds = v;
+  }
+
+  private boolean subjectiveFirst = false;
+
+  /**
+   * If true, schedule the subjective stations before the performance.
+   * 
+   * Defaults to false.
+   */
+  public final boolean getSubjectiveFirst() {
+    return this.subjectiveFirst;
+  }
+  
+  /**
+   * @see #getSubjectiveFirst()
+   */
+  public final void setSubjectiveFirst(final boolean v) {
+    this.subjectiveFirst = v;
   }
 
 }

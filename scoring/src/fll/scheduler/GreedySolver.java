@@ -121,8 +121,6 @@ public class GreedySolver {
 
   private final boolean optimize;
 
-  private final boolean subjectiveFirst;
-
   private static final String OPTIMIZE_OPTION = "o";
 
   private static final String DATA_FILE_OPTION = "d";
@@ -249,11 +247,6 @@ public class GreedySolver {
     LOGGER.debug(properties.toString());
 
     this.solverParameters = new SolverParams(properties);
-
-    final int subjectiveFirst = Integer.parseInt(properties.getProperty(SUBJECTIVE_FIRST_KEY, "0").trim());
-    this.subjectiveFirst = subjectiveFirst == 1;
-    LOGGER.debug("Subjective first is: "
-        + this.subjectiveFirst);
 
     final int perfOffsetMinutes = Integer.parseInt(properties.getProperty(PERF_ATTEMPT_OFFSET_MINUTES_KEY,
                                                                           String.valueOf(solverParameters.getTimeIncrement()))
@@ -1283,7 +1276,7 @@ public class GreedySolver {
     }
 
     // try possible values
-    if ((subjectiveFirst
+    if ((solverParameters.getSubjectiveFirst()
         && !subjectiveFinished())
         || (nextAvailableSubjSlot <= nextAvailablePerfSlot)) {
       for (int i = 0; i < possibleSubjectiveStations.size(); ++i) {
