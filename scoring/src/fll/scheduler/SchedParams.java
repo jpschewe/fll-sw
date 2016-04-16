@@ -59,9 +59,11 @@ public class SchedParams implements Serializable {
     final String subjDurationStr = properties.getProperty(GreedySolver.SUBJ_MINUTES_KEY);
     final int[] subjectiveDurations = Utilities.parseListOfIntegers(subjDurationStr);
 
-    mPerformanceMinutes = Utilities.readIntProperty(properties, GreedySolver.ALPHA_PERF_MINUTES_KEY);
-    mChangetimeMinutes = Utilities.readIntProperty(properties, GreedySolver.CT_MINUTES_KEY);
-    mPerformanceChangetimeMinutes = Utilities.readIntProperty(properties, GreedySolver.PCT_MINUTES_KEY);
+    mPerformanceMinutes = Utilities.readIntProperty(properties, GreedySolver.ALPHA_PERF_MINUTES_KEY,
+                                                    DEFAULT_PERFORMANCE_MINUTES);
+    mChangetimeMinutes = Utilities.readIntProperty(properties, GreedySolver.CT_MINUTES_KEY, MINIMUM_CHANGETIME_MINUTES);
+    mPerformanceChangetimeMinutes = Utilities.readIntProperty(properties, GreedySolver.PCT_MINUTES_KEY,
+                                                              MINIMUM_PERFORMANCE_CHANGETIME_MINUTES);
 
     mSubjectiveStations = new ArrayList<>();
     for (int i = 0; i < subjectiveDurations.length; ++i) {
@@ -75,7 +77,6 @@ public class SchedParams implements Serializable {
 
   /**
    * Number of minutes per performance run.
-   * 
    * Defaults to {@link #DEFAULT_PERFORMANCE_MINUTES}
    */
   public final int getPerformanceMinutes() {
@@ -93,7 +94,6 @@ public class SchedParams implements Serializable {
 
   /**
    * Number of minutes between judging stations for each team.
-   * 
    * Default is {@link #MINIMUM_CHANGETIME_MINUTES}
    */
   public final int getChangetimeMinutes() {
@@ -111,13 +111,12 @@ public class SchedParams implements Serializable {
 
   /**
    * Number of minutes between performance rounds for a team.
-   * 
    * Default value is {@link #MINIMUM_PERFORMANCE_CHANGETIME_MINUTES}.
    */
   public final int getPerformanceChangetimeMinutes() {
     return mPerformanceChangetimeMinutes;
   }
-  
+
   /**
    * @see #getPerformanceChangetimeMinutes()
    */
@@ -129,7 +128,6 @@ public class SchedParams implements Serializable {
 
   /**
    * Number of subjective judging stations.
-   * 
    * Defaults to 0.
    */
   public final int getNSubjective() {
@@ -141,7 +139,8 @@ public class SchedParams implements Serializable {
    * 
    * @param station an index into the list of stations
    * @return the name
-   * @throws IndexOutOfBoundsException when the station is outside the bounds of the list
+   * @throws IndexOutOfBoundsException when the station is outside the bounds of
+   *           the list
    */
   public final String getSubjectiveName(final int station) {
     return mSubjectiveStations.get(station).getName();

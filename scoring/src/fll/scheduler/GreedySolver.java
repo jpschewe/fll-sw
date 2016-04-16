@@ -277,7 +277,6 @@ public class GreedySolver {
       throw new FLLRuntimeException("subjective_attempt_offset_minutes isn't divisible by tinc");
     }
 
-    numPerformanceRounds = Utilities.readIntProperty(properties, NROUNDS_KEY);
     numTables = Utilities.readIntProperty(properties, NTABLES_KEY);
     final int tmaxHours = Utilities.readIntProperty(properties, TMAX_HOURS_KEY);
     final int tmaxMinutes = Utilities.readIntProperty(properties, TMAX_MINUTES_KEY);
@@ -793,7 +792,7 @@ public class GreedySolver {
    * performance rounds and the dummy slot hasn't been used.
    */
   private boolean partialPerformanceAssignmentAllowed() {
-    final boolean oddPerfRounds = (numPerformanceRounds
+    final boolean oddPerfRounds = (solverParameters.getNumPerformanceRounds()
         & 1) == 1;
     final boolean oddTeams = (getAllTeams().size()
         & 1) == 1;
@@ -849,7 +848,7 @@ public class GreedySolver {
 
     // undo partial assignment if not allowed
     if (null != team1) {
-      final boolean lastRoundForTeam1 = performanceScheduled[team1.getGroup()][team1.getIndex()] == getNumPerformanceRounds();
+      final boolean lastRoundForTeam1 = performanceScheduled[team1.getGroup()][team1.getIndex()] == solverParameters.getNumPerformanceRounds();
 
       boolean foundOtherTeam = false;
       if (lastRoundForTeam1
@@ -1035,7 +1034,7 @@ public class GreedySolver {
   private List<SchedTeam> getPossiblePerformanceTeams() {
     List<SchedTeam> possibles = new LinkedList<SchedTeam>();
     for (final SchedTeam team : getAllTeams()) {
-      if (performanceScheduled[team.getGroup()][team.getIndex()] < getNumPerformanceRounds()) {
+      if (performanceScheduled[team.getGroup()][team.getIndex()] < solverParameters.getNumPerformanceRounds()) {
         possibles.add(team);
       }
     }
@@ -1089,7 +1088,7 @@ public class GreedySolver {
       }
 
       for (int table = 0; table < getNumTables(); ++table) {
-        if (performanceScheduled[team.getGroup()][team.getIndex()] < getNumPerformanceRounds()) {
+        if (performanceScheduled[team.getGroup()][team.getIndex()] < solverParameters.getNumPerformanceRounds()) {
           return false;
         }
       }
@@ -1105,12 +1104,6 @@ public class GreedySolver {
    */
   private List<SchedTeam> getAllTeams() {
     return Collections.unmodifiableList(teams);
-  }
-
-  private final int numPerformanceRounds;
-
-  private int getNumPerformanceRounds() {
-    return numPerformanceRounds;
   }
 
   private CheckCanceled checkCanceled = null;
@@ -1514,7 +1507,7 @@ public class GreedySolver {
       for (int subj = 0; subj < getNumSubjectiveStations(); ++subj) {
         line.add(getSubjectiveColumnName(subj));
       }
-      for (int round = 0; round < getNumPerformanceRounds(); ++round) {
+      for (int round = 0; round < solverParameters.getNumPerformanceRounds(); ++round) {
         line.add(String.format(TournamentSchedule.PERF_HEADER_FORMAT, round
             + 1));
         line.add(String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round
@@ -1555,7 +1548,7 @@ public class GreedySolver {
 
         // find all performances for a team and then sort by time
         final SortedSet<PerformanceTime> perfTimes = new TreeSet<PerformanceTime>();
-        for (int round = 0; round < getNumPerformanceRounds(); ++round) {
+        for (int round = 0; round < solverParameters.getNumPerformanceRounds(); ++round) {
           for (int table = 0; table < getNumTables(); ++table) {
             for (int side = 0; side < 2; ++side) {
               final Date time = getTime(pz[team.getGroup()][team.getIndex()][table][side], round
@@ -1569,9 +1562,9 @@ public class GreedySolver {
             }
           }
         }
-        if (perfTimes.size() != getNumPerformanceRounds()) {
+        if (perfTimes.size() != solverParameters.getNumPerformanceRounds()) {
           throw new FLLRuntimeException("Expecting "
-              + getNumPerformanceRounds() + " performance times, but found " + perfTimes.size() + " group: "
+              + solverParameters.getNumPerformanceRounds() + " performance times, but found " + perfTimes.size() + " group: "
               + (team.getGroup()
                   + 1)
               + " team: " + (team.getIndex()

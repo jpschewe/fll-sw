@@ -539,6 +539,28 @@ public final class Utilities {
   }
 
   /**
+   * Read an integer property and fail if the property doesn't parse
+   * as a number.
+   * 
+   * @param properties where to read the property from
+   * @param property the property to read
+   * @param defaultValue the value to use if the property doesn't exist
+   * @return the value
+   * @throws NumberFormatException if there is a parse error
+   */
+  public static int readIntProperty(final Properties properties,
+                                    final String property,
+                                    final int defaultValue)
+      throws NumberFormatException {
+    final String value = properties.getProperty(property);
+    if (null == value) {
+      return defaultValue;
+    } else {
+      return Integer.parseInt(value.trim());
+    }
+  }
+
+  /**
    * Read a boolean property and fail if the property doesn't have a value.
    * "1" and "true" (case insensitive) are true, everything else is false.
    * 
