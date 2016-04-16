@@ -245,7 +245,9 @@ public class GreedySolver {
     try (final Reader reader = new InputStreamReader(new FileInputStream(datafile), Utilities.DEFAULT_CHARSET)) {
       properties.load(reader);
     }
-    LOGGER.debug(properties.toString());
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug(properties.toString());
+    }
 
     this.solverParameters = new SolverParams(properties);
 
@@ -265,7 +267,6 @@ public class GreedySolver {
       throw new FLLRuntimeException("subjective_attempt_offset_minutes isn't divisible by tinc");
     }
 
-    numTables = Utilities.readIntProperty(properties, NTABLES_KEY);
     final int tmaxHours = Utilities.readIntProperty(properties, TMAX_HOURS_KEY);
     final int tmaxMinutes = Utilities.readIntProperty(properties, TMAX_MINUTES_KEY);
     numTimeslots = (tmaxHours
@@ -320,10 +321,10 @@ public class GreedySolver {
       }
 
       // make sure num tables is even
-      if ((getNumTables()
+      if ((solverParameters.getNumTables()
           & 1) == 1) {
         throw new FLLRuntimeException("Number of tables ("
-            + getNumTables() + ") is not even and must be to alternate tables.");
+            + solverParameters.getNumTables() + ") is not even and must be to alternate tables.");
       }
 
     }
@@ -335,7 +336,7 @@ public class GreedySolver {
     subjectiveScheduled = new boolean[solverParameters.getNumGroups()][][];
     subjectiveStations = new int[solverParameters.getNumGroups()][getNumSubjectiveStations()];
     performanceScheduled = new int[solverParameters.getNumGroups()][];
-    performanceTables = new int[getNumTables()];
+    performanceTables = new int[solverParameters.getNumTables()];
     if (solverParameters.getAlternateTables()) {
       for (int table = 0; table < performanceTables.length; ++table) {
         // even is 0, odd is 1/2 performance duration
@@ -356,8 +357,8 @@ public class GreedySolver {
       final int count = solverParameters.getNumTeamsInGroup(group);
       sz[group] = new boolean[count][getNumSubjectiveStations()][getNumTimeslots()];
       sy[group] = new boolean[count][getNumSubjectiveStations()][getNumTimeslots()];
-      pz[group] = new boolean[count][getNumTables()][2][getNumTimeslots()];
-      py[group] = new boolean[count][getNumTables()][2][getNumTimeslots()];
+      pz[group] = new boolean[count][solverParameters.getNumTables()][2][getNumTimeslots()];
+      py[group] = new boolean[count][solverParameters.getNumTables()][2][getNumTimeslots()];
       subjectiveScheduled[group] = new boolean[count][getNumSubjectiveStations()];
       for (int team = 0; team < count; ++team) {
         teams.add(new SchedTeam(team, group));
@@ -367,7 +368,7 @@ public class GreedySolver {
           Arrays.fill(sy[group][team][station], false);
         }
 
-        for (int table = 0; table < getNumTables(); ++table) {
+        for (int table = 0; table < solverParameters.getNumTables(); ++table) {
           Arrays.fill(pz[group][team][table][0], false);
           Arrays.fill(pz[group][team][table][1], false);
           Arrays.fill(py[group][team][table][0], false);
@@ -607,7 +608,7 @@ public class GreedySolver {
         - getChangetime()); slot < Math.min(getNumTimeslots(),
                                             timeslot
                                                 + duration + getChangetime()); ++slot) {
-      for (int table = 0; table < getNumTables(); ++table) {
+      for (int table = 0; table < solverParameters.getNumTables(); ++table) {
         if (py[group][team][table][0][slot]) {
           return false;
         }
@@ -617,12 +618,6 @@ public class GreedySolver {
       }
     }
     return true;
-  }
-
-  private final int numTables;
-
-  private int getNumTables() {
-    return numTables;
   }
 
   private boolean assignPerformance(final int group,
@@ -725,7 +720,7 @@ public class GreedySolver {
                                                        timeslot
                                                            + getPerformanceChangetime()
                                                            + getPerformanceDuration()); ++slot) {
-      for (int table = 0; table < getNumTables(); ++table) {
+      for (int table = 0; table < solverParameters.getNumTables(); ++table) {
         if (py[group][team][table][0][slot]) {
           return false;
         }
@@ -845,7 +840,7 @@ public class GreedySolver {
       if (lastRoundForTeam1
           && partialPerformanceAssignmentAllowed()) {
         for (int otable = 0; !foundOtherTeam
-            && otable < getNumTables(); ++otable) {
+            && otable < solverParameters.getNumTables(); ++otable) {
           final SchedTeam prevTeamOnTable0 = findPrevTeamOnTable(timeslot, table, 0);
           if (null != prevTeamOnTable0) {
             if (assignPerformance(prevTeamOnTable0.getGroup(), prevTeamOnTable0.getIndex(), timeslot, table, 1, false,
@@ -1079,7 +1074,7 @@ public class GreedySolver {
         }
       }
 
-      for (int table = 0; table < getNumTables(); ++table) {
+      for (int table = 0; table < solverParameters.getNumTables(); ++table) {
         if (performanceScheduled[team.getGroup()][team.getIndex()] < solverParameters.getNumPerformanceRounds()) {
           return false;
         }
@@ -1223,7 +1218,7 @@ public class GreedySolver {
   private int findLatestPerformanceTime() {
     for (int slot = getNumTimeslots()
         - 1; slot >= 0; --slot) {
-      for (int table = 0; table < getNumTables(); ++table) {
+      for (int table = 0; table < solverParameters.getNumTables(); ++table) {
         for (final SchedTeam team : getAllTeams()) {
           if (py[team.getGroup()][team.getIndex()][table][0][slot]) {
             return slot;
@@ -1354,7 +1349,7 @@ public class GreedySolver {
 
   private int findNextAvailablePerformanceSlot(final List<Integer> possiblePerformanceTables) {
     int nextAvailablePerfSlot = Integer.MAX_VALUE;
-    for (int table = 0; table < getNumTables(); ++table) {
+    for (int table = 0; table < solverParameters.getNumTables(); ++table) {
       if (performanceTables[table] <= nextAvailablePerfSlot) {
         if (performanceTables[table] < nextAvailablePerfSlot) {
           // previous values are no longer valid
@@ -1542,7 +1537,7 @@ public class GreedySolver {
         // find all performances for a team and then sort by time
         final SortedSet<PerformanceTime> perfTimes = new TreeSet<PerformanceTime>();
         for (int round = 0; round < solverParameters.getNumPerformanceRounds(); ++round) {
-          for (int table = 0; table < getNumTables(); ++table) {
+          for (int table = 0; table < solverParameters.getNumTables(); ++table) {
             for (int side = 0; side < 2; ++side) {
               final Date time = getTime(pz[team.getGroup()][team.getIndex()][table][side], round
                   + 1);
@@ -1676,7 +1671,7 @@ public class GreedySolver {
           }
         }
 
-        for (int table = 0; table < getNumTables(); ++table) {
+        for (int table = 0; table < solverParameters.getNumTables(); ++table) {
           oneAssignments += performanceScheduled[one.getGroup()][one.getIndex()];
           twoAssignments += performanceScheduled[two.getGroup()][two.getIndex()];
         }

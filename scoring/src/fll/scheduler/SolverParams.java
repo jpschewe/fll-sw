@@ -55,6 +55,8 @@ public class SolverParams extends SchedParams {
                                                                     GreedySolver.SUBJECTIVE_ATTEMPT_OFFSET_MINUTES_KEY,
                                                                     this.tinc);
 
+    this.numTables = Utilities.readIntProperty(properties, GreedySolver.NTABLES_KEY, this.numTables);
+
   }
 
   // TODO: replace with LocalTime type
@@ -220,4 +222,24 @@ public class SolverParams extends SchedParams {
     this.subjectiveAttemptOffsetMinutes = v;
   }
 
+  private int numTables = 1;
+
+  /**
+   * The number of performance tables.
+   * Defaults to 1.
+   */
+  public final int getNumTables() {
+    return this.numTables;
+  }
+
+  /**
+   * @see #getNumTables()
+   */
+  public final void setNumTables(final int v) {
+    this.numTables = v;
+  }
+  
+  
+  
+  
 }
