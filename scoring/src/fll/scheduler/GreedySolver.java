@@ -250,11 +250,6 @@ public class GreedySolver {
 
     this.solverParameters = new SolverParams(properties);
 
-    final int alternateValue = Integer.parseInt(properties.getProperty(ALTERNATE_TABLES_KEY, "0").trim());
-    final boolean alternate = alternateValue == 1;
-    LOGGER.debug("Alternate is: "
-        + alternate);
-
     final int subjectiveFirst = Integer.parseInt(properties.getProperty(SUBJECTIVE_FIRST_KEY, "0").trim());
     this.subjectiveFirst = subjectiveFirst == 1;
     LOGGER.debug("Subjective first is: "
@@ -329,7 +324,7 @@ public class GreedySolver {
           + SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES + " minutes");
     }
 
-    if (alternate) {
+    if (solverParameters.getAlternateTables()) {
       // make sure performanceDuration is even
       if ((performanceDuration
           & 1) == 1) {
@@ -354,7 +349,7 @@ public class GreedySolver {
     subjectiveStations = new int[solverParameters.getNumGroups()][getNumSubjectiveStations()];
     performanceScheduled = new int[solverParameters.getNumGroups()][];
     performanceTables = new int[getNumTables()];
-    if (alternate) {
+    if (solverParameters.getAlternateTables()) {
       for (int table = 0; table < performanceTables.length; ++table) {
         // even is 0, odd is 1/2 performance duration
         if ((table
