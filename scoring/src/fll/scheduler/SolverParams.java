@@ -29,9 +29,9 @@ public class SolverParams extends SchedParams {
   public SolverParams(Properties properties) throws ParseException {
     super(properties);
 
-    this.startTime = TournamentSchedule.parseDate(properties.getProperty(GreedySolver.START_TIME_KEY));
+    this.startTime = TournamentSchedule.parseDate(properties.getProperty(GreedySolver.START_TIME_KEY, startTime.toString()));
 
-    this.tinc = Utilities.readIntProperty(properties, GreedySolver.TINC_KEY);
+    this.tinc = Utilities.readIntProperty(properties, GreedySolver.TINC_KEY, this.tinc);
 
     final String groupCountsStr = properties.getProperty(GreedySolver.GROUP_COUNTS_KEY);
     this.groupCounts = Utilities.parseListOfIntegers(groupCountsStr);
@@ -39,6 +39,9 @@ public class SolverParams extends SchedParams {
     this.alternate = Utilities.readBooleanProperty(properties, GreedySolver.ALTERNATE_TABLES_KEY, false);
     LOGGER.debug("Alternate is: "
         + alternate);
+    
+    this.numPerformanceRounds = Utilities.readIntProperty(properties, GreedySolver.NROUNDS_KEY, this.numPerformanceRounds);
+
 
   }
 
@@ -133,6 +136,23 @@ public class SolverParams extends SchedParams {
    */
   public final void setAlternateTables(final boolean v) {
     this.alternate = v;
+  }
+
+  private int numPerformanceRounds = 3;
+
+  /**
+   * The number of performance rounds.
+   * Defaults to 3.
+   */
+  public final int getNumPerformanceRounds() {
+    return numPerformanceRounds;
+  }
+
+  /**
+   * @see #getNumPerformanceRounds()
+   */
+  public final void setNumPerformanceRounds(final int v) {
+    numPerformanceRounds = v;
   }
 
 }
