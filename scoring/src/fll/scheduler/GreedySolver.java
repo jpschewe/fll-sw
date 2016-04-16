@@ -267,11 +267,9 @@ public class GreedySolver {
       throw new FLLRuntimeException("subjective_attempt_offset_minutes isn't divisible by tinc");
     }
 
-    final int tmaxHours = Utilities.readIntProperty(properties, TMAX_HOURS_KEY);
-    final int tmaxMinutes = Utilities.readIntProperty(properties, TMAX_MINUTES_KEY);
-    numTimeslots = (tmaxHours
+    numTimeslots = (solverParameters.getTMaxHours()
         * 60
-        + tmaxMinutes)
+        + solverParameters.getTMaxMinutes())
         / solverParameters.getTimeIncrement();
 
     for (final SubjectiveStation station : this.solverParameters.getSubjectiveStations()) {

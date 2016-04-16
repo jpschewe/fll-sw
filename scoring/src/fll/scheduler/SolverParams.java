@@ -57,6 +57,9 @@ public class SolverParams extends SchedParams {
 
     this.numTables = Utilities.readIntProperty(properties, GreedySolver.NTABLES_KEY, this.numTables);
 
+    this.tmaxHours = Utilities.readIntProperty(properties, GreedySolver.TMAX_HOURS_KEY);
+    this.tmaxMinutes = Utilities.readIntProperty(properties, GreedySolver.TMAX_MINUTES_KEY);
+
   }
 
   // TODO: replace with LocalTime type
@@ -238,8 +241,42 @@ public class SolverParams extends SchedParams {
   public final void setNumTables(final int v) {
     this.numTables = v;
   }
-  
-  
-  
-  
+
+  private int tmaxHours = 8;
+
+  /**
+   * Maximum number of hours the tournament should run. This
+   * is used to limit the search space when generating a schedule.
+   * Defaults to 8.
+   */
+  public final int getTMaxHours() {
+    return this.tmaxHours;
+  }
+
+  /**
+   * @see #getTMaxHours()
+   */
+  public final void setTMaxHours(final int v) {
+    this.tmaxHours = v;
+  }
+
+  //TODO would like to move this to a duration type
+  private int tmaxMinutes = 0;
+
+  /**
+   * This property is combined with {@link #getTMaxHours()} to create
+   * the limit on how long the tournament can be.
+   * Defaults to 0.
+   */
+  public final int getTMaxMinutes() {
+    return this.tmaxMinutes;
+  }
+
+  /**
+   * @see #getTMaxMinutes()
+   */
+  public final void setTMaxMinutes(final int v) {
+    this.tmaxMinutes = v;
+  }
+
 }
