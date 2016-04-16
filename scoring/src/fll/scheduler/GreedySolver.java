@@ -258,12 +258,9 @@ public class GreedySolver {
     LOGGER.debug("Performance attempt offset: "
         + performanceAttemptOffset);
 
-    final int subjOffsetMinutes = Integer.parseInt(properties.getProperty(SUBJECTIVE_ATTEMPT_OFFSET_MINUTES_KEY,
-                                                                          String.valueOf(solverParameters.getTimeIncrement()))
-                                                             .trim());
-    subjectiveAttemptOffset = subjOffsetMinutes
+    subjectiveAttemptOffset = solverParameters.getSubjectiveAttemptOffsetMinutes()
         / solverParameters.getTimeIncrement();
-    if (subjOffsetMinutes != subjectiveAttemptOffset
+    if (solverParameters.getSubjectiveAttemptOffsetMinutes() != subjectiveAttemptOffset
         * solverParameters.getTimeIncrement()) {
       throw new FLLRuntimeException("subjective_attempt_offset_minutes isn't divisible by tinc");
     }
