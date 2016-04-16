@@ -49,7 +49,11 @@ public class SolverParams extends SchedParams {
         + this.subjectiveFirst);
 
     this.perfAttemptOffsetMinutes = Utilities.readIntProperty(properties, GreedySolver.PERF_ATTEMPT_OFFSET_MINUTES_KEY,
-                                                       this.tinc);
+                                                              this.tinc);
+
+    this.subjectiveAttemptOffsetMinutes = Utilities.readIntProperty(properties,
+                                                                    GreedySolver.SUBJECTIVE_ATTEMPT_OFFSET_MINUTES_KEY,
+                                                                    this.tinc);
 
   }
 
@@ -185,7 +189,6 @@ public class SolverParams extends SchedParams {
   /**
    * If a performance round cannot be scheduled at a time, how many
    * minutes later should the next time to try be.
-   * 
    * Defaults to {@link #getTimeIncrement()}.
    */
   public final int getPerformanceAttemptOffsetMinutes() {
@@ -198,5 +201,23 @@ public class SolverParams extends SchedParams {
   public final void setPerformanceAttemptOffsetMinutes(final int v) {
     this.perfAttemptOffsetMinutes = v;
   }
-  
+
+  private int subjectiveAttemptOffsetMinutes;
+
+  /**
+   * If a subjective round cannot be scheduled at a time, how many
+   * minutes later should the next time to try be.
+   * Defaults to {@link #getTimeIncrement()}.
+   */
+  public final int getSubjectiveAttemptOffsetMinutes() {
+    return this.subjectiveAttemptOffsetMinutes;
+  }
+
+  /**
+   * @see #getSubjectiveAttemptOffsetMinutes()
+   */
+  public final void setSubjectiveAttemptOffsetMinutes(final int v) {
+    this.subjectiveAttemptOffsetMinutes = v;
+  }
+
 }
