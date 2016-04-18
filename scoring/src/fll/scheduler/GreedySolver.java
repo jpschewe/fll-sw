@@ -417,27 +417,27 @@ public class GreedySolver {
         throw new FLLRuntimeException(String.format("Missing start or duration for %s break %d", breakType, i));
       }
 
-      final Date start = TournamentSchedule.parseDate(startStr);
-      final int startMinutes = (int) ((start.getTime()
+      final Date breakStart = TournamentSchedule.parseDate(startStr);
+      final int breakStartMinutes = (int) ((breakStart.getTime()
           - startTime.getTime())
           / Utilities.MILLISECONDS_PER_SECOND / Utilities.SECONDS_PER_MINUTE);
-      final int startInc = startMinutes
+      final int breakStartInc = breakStartMinutes
           / tinc;
-      if (startMinutes != startInc
+      if (breakStartMinutes != breakStartInc
           * tinc) {
         throw new FLLRuntimeException(String.format("%s break %d start isn't divisible by tinc", breakType, i));
       }
 
-      final int durationMinutes = Integer.parseInt(durationStr);
-      final int durationInc = durationMinutes
+      final int breakDurationMinutes = Integer.parseInt(durationStr);
+      final int breakDurationInc = breakDurationMinutes
           / tinc;
-      if (durationMinutes != durationInc
+      if (breakDurationMinutes != breakDurationInc
           * tinc) {
         throw new FLLRuntimeException(String.format("%s break %d duration isn't divisible by tinc", breakType, i));
       }
 
-      breaks.add(new ScheduledBreak(startInc, startInc
-          + durationInc));
+      breaks.add(new ScheduledBreak(breakStartInc, breakStartInc
+          + breakDurationInc));
     }
     return breaks;
   }
@@ -1610,8 +1610,8 @@ public class GreedySolver {
                              final int end,
                              final Collection<ScheduledBreak> breaks) {
     for (final ScheduledBreak b : breaks) {
-      if (b.end > begin
-          && b.start < end) {
+      if (b.getEnd() > begin
+          && b.getStart() < end) {
         return false;
       }
     }
@@ -1684,16 +1684,4 @@ public class GreedySolver {
       }
     }
   };
-
-  private static final class ScheduledBreak {
-    public ScheduledBreak(final int start,
-                          final int end) {
-      this.start = start;
-      this.end = end;
-    }
-
-    public final int start;
-
-    public final int end;
-  }
 }
