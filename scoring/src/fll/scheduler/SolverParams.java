@@ -27,11 +27,20 @@ public class SolverParams extends SchedParams {
   private static final Logger LOGGER = LogUtils.getLogger();
 
   /**
+   * Create the object with all default values.
+   */
+  public SolverParams() {
+  }
+  
+  /**
+   * Populate the parameters from the properties object.
+   * 
    * @param properties
    * @throws ParseException if there is a problem parsing the properties
    */
-  public SolverParams(Properties properties) throws ParseException {
-    super(properties);
+  @Override
+  public void load(Properties properties) throws ParseException {
+    super.load(properties);
 
     this.startTime = TournamentSchedule.parseDate(properties.getProperty(GreedySolver.START_TIME_KEY,
                                                                          startTime.toString()));

@@ -6,6 +6,7 @@
 package fll.scheduler;
 
 import java.io.Serializable;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -51,11 +52,18 @@ public class SchedParams implements Serializable {
   }
 
   /**
+   * Create object with all default values.
+   */
+  public SchedParams() {
+    
+  }
+  
+  /**
    * Load the parameters from a properties object.
    * 
    * @param properies where to load the parameters from
    */
-  public SchedParams(final Properties properties) {
+  public void load(final Properties properties) throws ParseException {
     final String subjDurationStr = properties.getProperty(GreedySolver.SUBJ_MINUTES_KEY);
     final int[] subjectiveDurations = Utilities.parseListOfIntegers(subjDurationStr);
 
