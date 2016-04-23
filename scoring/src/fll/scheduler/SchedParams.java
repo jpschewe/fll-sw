@@ -8,6 +8,7 @@ package fll.scheduler;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
@@ -79,6 +80,24 @@ public class SchedParams implements Serializable {
                                                               subjectiveDurations[i]);
       mSubjectiveStations.add(station);
     }
+  }
+  
+  /**
+   * Save this object to the specified properties object.
+   * 
+   * @param properties where to store the data
+   */
+  public void save(final Properties properties) {
+    final int[] subjectiveDurations = new int[mSubjectiveStations.size()];
+    for(int index =0; index<subjectiveDurations.length; ++index) {
+      subjectiveDurations[index] = mSubjectiveStations.get(index).getDurationMinutes();
+    }    
+    properties.setProperty(GreedySolver.SUBJ_MINUTES_KEY, Arrays.toString(subjectiveDurations));
+    
+    properties.setProperty(GreedySolver.ALPHA_PERF_MINUTES_KEY, Integer.toString(mPerformanceMinutes));
+    
+    properties.setProperty(GreedySolver.CT_MINUTES_KEY, Integer.toString(mChangetimeMinutes));
+    properties.setProperty(GreedySolver.PCT_MINUTES_KEY, Integer.toString(mPerformanceChangetimeMinutes));    
   }
 
   private int mPerformanceMinutes = DEFAULT_PERFORMANCE_MINUTES;
