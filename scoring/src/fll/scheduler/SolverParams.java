@@ -7,12 +7,16 @@
 package fll.scheduler;
 
 import java.text.ParseException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
 import fll.Utilities;
+import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 
 /**
@@ -59,6 +63,8 @@ public class SolverParams extends SchedParams {
 
     this.tmaxHours = Utilities.readIntProperty(properties, GreedySolver.TMAX_HOURS_KEY);
     this.tmaxMinutes = Utilities.readIntProperty(properties, GreedySolver.TMAX_MINUTES_KEY);
+
+    parseBreaks(properties, getStartTime(), getTimeIncrement());
 
   }
 
@@ -277,6 +283,80 @@ public class SolverParams extends SchedParams {
    */
   public final void setTMaxMinutes(final int v) {
     this.tmaxMinutes = v;
+  }
+
+
+  private final Collection<ScheduledBreak> subjectiveBreaks = new LinkedList<ScheduledBreak>();
+  /**
+   * @return Read-only collection of the subjective breaks
+   */
+  public Collection<ScheduledBreak> getSubjectiveBreaks() {
+    return Collections.unmodifiableCollection(this.subjectiveBreaks);
+  }
+
+  private final Collection<ScheduledBreak> performanceBreaks = new LinkedList<ScheduledBreak>();
+
+  /**
+   * @return Read-only collection of the performance breaks
+   */
+  public Collection<ScheduledBreak> getPerformanceBreaks() {
+    return Collections.unmodifiableCollection(this.performanceBreaks);
+  }
+
+  /**
+   * Read the breaks out of the data file.
+   * 
+   * @throws ParseException
+   */
+  private void parseBreaks(final Properties properties,
+                           final Date startTime,
+                           final int tinc)
+      throws ParseException {
+    subjectiveBreaks.addAll(parseBreaks(properties, startTime, tinc, "subjective"));
+    performanceBreaks.addAll(parseBreaks(properties, startTime, tinc, "performance"));
+  }
+
+  private Collection<ScheduledBreak> parseBreaks(final Properties properties,
+                                                 final Date startTime,
+                                                 final int tinc,
+                                                 final String breakType)
+      throws ParseException {
+    final Collection<ScheduledBreak> breaks = new LinkedList<ScheduledBreak>();
+
+    final int numBreaks = Integer.parseInt(properties.getProperty(String.format("num_%s_breaks", breakType), "0"));
+    final String startFormat = "%s_break_%d_start";
+    final String durationFormat = "%s_break_%d_duration";
+    for (int i = 0; i < numBreaks; ++i) {
+      final String startStr = properties.getProperty(String.format(startFormat, breakType, i));
+      final String durationStr = properties.getProperty(String.format(durationFormat, breakType, i));
+      if (null == startStr
+          || null == durationStr) {
+        throw new FLLRuntimeException(String.format("Missing start or duration for %s break %d", breakType, i));
+      }
+
+      final Date breakStart = TournamentSchedule.parseDate(startStr);
+      final int breakStartMinutes = (int) ((breakStart.getTime()
+          - startTime.getTime())
+          / Utilities.MILLISECONDS_PER_SECOND / Utilities.SECONDS_PER_MINUTE);
+      final int breakStartInc = breakStartMinutes
+          / tinc;
+      if (breakStartMinutes != breakStartInc
+          * tinc) {
+        throw new FLLRuntimeException(String.format("%s break %d start isn't divisible by tinc", breakType, i));
+      }
+
+      final int breakDurationMinutes = Integer.parseInt(durationStr);
+      final int breakDurationInc = breakDurationMinutes
+          / tinc;
+      if (breakDurationMinutes != breakDurationInc
+          * tinc) {
+        throw new FLLRuntimeException(String.format("%s break %d duration isn't divisible by tinc", breakType, i));
+      }
+
+      breaks.add(new ScheduledBreak(breakStartInc, breakStartInc
+          + breakDurationInc));
+    }
+    return breaks;
   }
 
 }

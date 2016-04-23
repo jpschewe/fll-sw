@@ -125,10 +125,6 @@ public class GreedySolver {
 
   private static final String DATA_FILE_OPTION = "d";
 
-  private final Collection<ScheduledBreak> subjectiveBreaks = new LinkedList<ScheduledBreak>();
-
-  private final Collection<ScheduledBreak> performanceBreaks = new LinkedList<ScheduledBreak>();
-
   private static Options buildOptions() {
     final Options options = new Options();
     Option option = new Option(DATA_FILE_OPTION, "datafile", true, "<file> the file ");
@@ -380,66 +376,8 @@ public class GreedySolver {
       Arrays.fill(performanceScheduled[group], 0);
     }
 
-    parseBreaks(properties, solverParameters.getStartTime(), solverParameters.getTimeIncrement());
-
     // sort list of teams to make sure that the scheduler is deterministic
     Collections.sort(teams, lowestTeamIndex);
-  }
-
-  /**
-   * Read the breaks out of the data file.
-   * 
-   * @throws ParseException
-   */
-  private void parseBreaks(final Properties properties,
-                           final Date startTime,
-                           final int tinc)
-      throws ParseException {
-    subjectiveBreaks.addAll(parseBreaks(properties, startTime, tinc, "subjective"));
-    performanceBreaks.addAll(parseBreaks(properties, startTime, tinc, "performance"));
-  }
-
-  private Collection<ScheduledBreak> parseBreaks(final Properties properties,
-                                                 final Date startTime,
-                                                 final int tinc,
-                                                 final String breakType)
-      throws ParseException {
-    final Collection<ScheduledBreak> breaks = new LinkedList<ScheduledBreak>();
-
-    final int numBreaks = Integer.parseInt(properties.getProperty(String.format("num_%s_breaks", breakType), "0"));
-    final String startFormat = "%s_break_%d_start";
-    final String durationFormat = "%s_break_%d_duration";
-    for (int i = 0; i < numBreaks; ++i) {
-      final String startStr = properties.getProperty(String.format(startFormat, breakType, i));
-      final String durationStr = properties.getProperty(String.format(durationFormat, breakType, i));
-      if (null == startStr
-          || null == durationStr) {
-        throw new FLLRuntimeException(String.format("Missing start or duration for %s break %d", breakType, i));
-      }
-
-      final Date breakStart = TournamentSchedule.parseDate(startStr);
-      final int breakStartMinutes = (int) ((breakStart.getTime()
-          - startTime.getTime())
-          / Utilities.MILLISECONDS_PER_SECOND / Utilities.SECONDS_PER_MINUTE);
-      final int breakStartInc = breakStartMinutes
-          / tinc;
-      if (breakStartMinutes != breakStartInc
-          * tinc) {
-        throw new FLLRuntimeException(String.format("%s break %d start isn't divisible by tinc", breakType, i));
-      }
-
-      final int breakDurationMinutes = Integer.parseInt(durationStr);
-      final int breakDurationInc = breakDurationMinutes
-          / tinc;
-      if (breakDurationMinutes != breakDurationInc
-          * tinc) {
-        throw new FLLRuntimeException(String.format("%s break %d duration isn't divisible by tinc", breakType, i));
-      }
-
-      breaks.add(new ScheduledBreak(breakStartInc, breakStartInc
-          + breakDurationInc));
-    }
-    return breaks;
   }
 
   private boolean assignSubjective(final int group,
@@ -1603,7 +1541,7 @@ public class GreedySolver {
     final int end = timeslot
         + getSubjectiveDuration(station);
 
-    return checkBreak(begin, end, subjectiveBreaks);
+    return checkBreak(begin, end, solverParameters.getSubjectiveBreaks());
   }
 
   private boolean checkBreak(final int begin,
@@ -1627,7 +1565,7 @@ public class GreedySolver {
     final int end = timeslot
         + getPerformanceDuration();
 
-    return checkBreak(begin, end, performanceBreaks);
+    return checkBreak(begin, end, solverParameters.getPerformanceBreaks());
   }
 
   private static final Comparator<SchedTeam> lowestTeamIndex = new Comparator<SchedTeam>() {
