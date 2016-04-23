@@ -245,7 +245,8 @@ public class GreedySolver {
       LOGGER.debug(properties.toString());
     }
 
-    this.solverParameters = new SolverParams(properties);
+    this.solverParameters = new SolverParams();
+    this.solverParameters.load(properties);
 
     performanceAttemptOffset = solverParameters.getPerformanceAttemptOffsetMinutes()
         / solverParameters.getTimeIncrement();
