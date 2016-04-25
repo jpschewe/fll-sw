@@ -15,13 +15,12 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.text.ParseException;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -1458,7 +1457,7 @@ public class GreedySolver {
         line.add("G"
             + judgingGroup);
         for (int subj = 0; subj < getNumSubjectiveStations(); ++subj) {
-          final Date time = getTime(sz[team.getGroup()][team.getIndex()][subj], 1);
+          final LocalTime time = getTime(sz[team.getGroup()][team.getIndex()][subj], 1);
           if (null == time) {
             throw new RuntimeException("Could not find a subjective start for group: "
                 + (team.getGroup()
@@ -1468,7 +1467,7 @@ public class GreedySolver {
                 + " subj: " + (subj
                     + 1));
           }
-          line.add(TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(time));
+          line.add(time.format(TournamentSchedule.TIME_FORMAT));
         }
 
         // find all performances for a team and then sort by time
@@ -1476,7 +1475,7 @@ public class GreedySolver {
         for (int round = 0; round < solverParameters.getNumPerformanceRounds(); ++round) {
           for (int table = 0; table < solverParameters.getNumTables(); ++table) {
             for (int side = 0; side < 2; ++side) {
-              final Date time = getTime(pz[team.getGroup()][team.getIndex()][table][side], round
+              final LocalTime time = getTime(pz[team.getGroup()][team.getIndex()][table][side], round
                   + 1);
               if (null != time) {
                 perfTimes.add(new PerformanceTime(time, "Table"
@@ -1497,7 +1496,7 @@ public class GreedySolver {
               + " perfs: " + perfTimes);
         }
         for (final PerformanceTime perfTime : perfTimes) {
-          line.add(TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(perfTime.getTime()));
+          line.add(TournamentSchedule.TIME_FORMAT.format(perfTime.getTime()));
           line.add(perfTime.getTable()
               + " " + perfTime.getSide());
         }
@@ -1515,18 +1514,16 @@ public class GreedySolver {
    * @param count which time to find, 1 based count
    * @return
    */
-  private Date getTime(final boolean[] slots,
-                       final int count) {
+  private LocalTime getTime(final boolean[] slots,
+                            final int count) {
     int n = 0;
     for (int i = 0; i < slots.length; ++i) {
       if (slots[i]) {
         ++n;
         if (n == count) {
-          final Calendar cal = Calendar.getInstance();
-          cal.setTime(solverParameters.getStartTime());
-          cal.add(Calendar.MINUTE, i
+          LocalTime slotTime = solverParameters.getStartTime().plusMinutes(i
               * solverParameters.getTimeIncrement());
-          return cal.getTime();
+          return slotTime;
         }
       }
     }

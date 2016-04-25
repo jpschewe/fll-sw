@@ -7,7 +7,7 @@
 package fll.scheduler;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalTime;
 
 /**
  * Represents performance judging time.
@@ -19,12 +19,12 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
    * @param table the table color
    * @param side the table side, one based
    */
-  public PerformanceTime(final Date time,
+  public PerformanceTime(final LocalTime time,
                          final String table,
                          final int side) {
     this.table = table;
     this.side = side;
-    this.time = time == null ? null : new Date(time.getTime());
+    this.time = time;
   }
 
   private final String table;
@@ -42,10 +42,10 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
     return side;
   }
 
-  private final Date time;
+  private final LocalTime time;
 
-  public Date getTime() {
-    return null == time ? null : new Date(time.getTime());
+  public LocalTime getTime() {
+    return this.time;
   }
 
   @Override
@@ -97,7 +97,7 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
 
   @Override
   public String toString() {
-    return "time: " + TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(getTime()) + " table: "
+    return "time: " + TournamentSchedule.TIME_FORMAT.format(getTime()) + " table: "
         + getTable() + " side: " + getSide();
   }
 }

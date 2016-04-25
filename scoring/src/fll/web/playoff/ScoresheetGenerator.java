@@ -12,8 +12,8 @@ import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.time.LocalTime;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -758,8 +758,8 @@ public class ScoresheetGenerator {
    * @throws IllegalArgumentException Thrown if the index is out of valid range.
    */
   public void setTime(final int i,
-                      final Date time) throws IllegalArgumentException {
-    setTime(i, TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(time));
+                      final LocalTime time) throws IllegalArgumentException {
+    setTime(i, time.format(TournamentSchedule.TIME_FORMAT));
   }
 
   /**

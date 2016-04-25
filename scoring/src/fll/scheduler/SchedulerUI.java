@@ -26,6 +26,7 @@ import java.io.Writer;
 import java.net.URL;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.time.LocalTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -950,7 +951,7 @@ public class SchedulerUI extends JFrame {
   @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This calss isn't going to be serialized")
   private TournamentSchedule mScheduleData;
 
-  /* package */TournamentSchedule getScheduleData() {
+      /* package */TournamentSchedule getScheduleData() {
     return mScheduleData;
   }
 
@@ -968,7 +969,7 @@ public class SchedulerUI extends JFrame {
 
   private ViolationTableModel mViolationsModel;
 
-  /* package */ViolationTableModel getViolationsModel() {
+      /* package */ViolationTableModel getViolationsModel() {
     return mViolationsModel;
   }
 
@@ -1112,8 +1113,8 @@ public class SchedulerUI extends JFrame {
         }
       }
 
-      if (value instanceof Date) {
-        final String strValue = TournamentSchedule.OUTPUT_DATE_FORMAT.get().format((Date) value);
+      if (value instanceof LocalTime) {
+        final String strValue = TournamentSchedule.TIME_FORMAT.format((LocalTime) value);
         return super.getTableCellRendererComponent(table, strValue, isSelected, hasFocus, row, column);
       } else {
         return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);

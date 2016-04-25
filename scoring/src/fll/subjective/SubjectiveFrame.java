@@ -25,6 +25,7 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.time.LocalTime;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -66,9 +67,6 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyledDocument;
 
-import net.mtu.eggplant.util.BasicFileFilter;
-import net.mtu.eggplant.util.gui.GraphicsUtils;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -91,6 +89,8 @@ import fll.xml.ChallengeParser;
 import fll.xml.EnumeratedValue;
 import fll.xml.ScoreCategory;
 import fll.xml.XMLUtils;
+import net.mtu.eggplant.util.BasicFileFilter;
+import net.mtu.eggplant.util.gui.GraphicsUtils;
 
 /**
  * Application to enter subjective scores with
@@ -806,9 +806,9 @@ public final class SubjectiveFrame extends JFrame {
                                                    final boolean hasFocus,
                                                    final int row,
                                                    final int column) {
-      if (value instanceof Date) {
-        final Date d = (Date) value;
-        final String str = TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(d);
+      if (value instanceof LocalTime) {
+        final LocalTime d = (LocalTime) value;
+        final String str = TournamentSchedule.TIME_FORMAT.format(d);
         return super.getTableCellRendererComponent(table, str, isSelected, hasFocus, row, column);
       } else {
         return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
