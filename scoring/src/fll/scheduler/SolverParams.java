@@ -7,9 +7,10 @@
 package fll.scheduler;
 
 import java.text.ParseException;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.Properties;
 
@@ -31,7 +32,7 @@ public class SolverParams extends SchedParams {
    */
   public SolverParams() {
   }
-  
+
   /**
    * Populate the parameters from the properties object.
    * 
@@ -42,9 +43,10 @@ public class SolverParams extends SchedParams {
   public void load(Properties properties) throws ParseException {
     super.load(properties);
 
-    this.startTime = TournamentSchedule.parseDate(properties.getProperty(GreedySolver.START_TIME_KEY,
-                                                                         startTime.toString()));
-
+    final String startTimeStr = properties.getProperty(GreedySolver.START_TIME_KEY, null);
+    if (null != startTimeStr) {
+      this.startTime = LocalTime.parse(startTimeStr, TournamentSchedule.TIME_FORMAT);
+    }
     this.tinc = Utilities.readIntProperty(properties, GreedySolver.TINC_KEY, this.tinc);
 
     final String groupCountsStr = properties.getProperty(GreedySolver.GROUP_COUNTS_KEY);
@@ -77,22 +79,21 @@ public class SolverParams extends SchedParams {
 
   }
 
-  // TODO: replace with LocalTime type
-  private Date startTime = new Date(1970, 1, 1, 8, 0);
+  private LocalTime startTime = LocalTime.of(8, 0);
 
   /**
    * The start time of the tournament. Nothing is scheduled before this time.
    * Defaults to 8:00.
    */
-  public final Date getStartTime() {
-    return null == startTime ? null : new Date(startTime.getTime());
+  public final LocalTime getStartTime() {
+    return startTime;
   }
 
   /**
    * @see #getStartTime()
    */
-  public final void setStartTime(final Date v) {
-    this.startTime = null == v ? null : new Date(v.getTime());
+  public final void setStartTime(final LocalTime v) {
+    this.startTime = v;
   }
 
   private int tinc = 1;
@@ -275,7 +276,7 @@ public class SolverParams extends SchedParams {
     this.tmaxHours = v;
   }
 
-  //TODO would like to move this to a duration type
+  // TODO would like to move this to a duration type
   private int tmaxMinutes = 0;
 
   /**
@@ -294,8 +295,8 @@ public class SolverParams extends SchedParams {
     this.tmaxMinutes = v;
   }
 
-
   private final Collection<ScheduledBreak> subjectiveBreaks = new LinkedList<ScheduledBreak>();
+
   /**
    * @return Read-only collection of the subjective breaks
    */
@@ -318,7 +319,7 @@ public class SolverParams extends SchedParams {
    * @throws ParseException
    */
   private void parseBreaks(final Properties properties,
-                           final Date startTime,
+                           final LocalTime startTime,
                            final int tinc)
       throws ParseException {
     subjectiveBreaks.addAll(parseBreaks(properties, startTime, tinc, "subjective"));
@@ -326,7 +327,7 @@ public class SolverParams extends SchedParams {
   }
 
   private Collection<ScheduledBreak> parseBreaks(final Properties properties,
-                                                 final Date startTime,
+                                                 final LocalTime startTime,
                                                  final int tinc,
                                                  final String breakType)
       throws ParseException {
@@ -336,17 +337,15 @@ public class SolverParams extends SchedParams {
     final String startFormat = "%s_break_%d_start";
     final String durationFormat = "%s_break_%d_duration";
     for (int i = 0; i < numBreaks; ++i) {
-      final String startStr = properties.getProperty(String.format(startFormat, breakType, i));
-      final String durationStr = properties.getProperty(String.format(durationFormat, breakType, i));
+      final String startStr = properties.getProperty(String.format(startFormat, breakType, i), null);
+      final String durationStr = properties.getProperty(String.format(durationFormat, breakType, i), null);
       if (null == startStr
           || null == durationStr) {
         throw new FLLRuntimeException(String.format("Missing start or duration for %s break %d", breakType, i));
       }
 
-      final Date breakStart = TournamentSchedule.parseDate(startStr);
-      final int breakStartMinutes = (int) ((breakStart.getTime()
-          - startTime.getTime())
-          / Utilities.MILLISECONDS_PER_SECOND / Utilities.SECONDS_PER_MINUTE);
+      final LocalTime breakStart = LocalTime.parse(startStr, TournamentSchedule.TIME_FORMAT);
+      final int breakStartMinutes = (int)ChronoUnit.MINUTES.between(startTime, breakStart);
       final int breakStartInc = breakStartMinutes
           / tinc;
       if (breakStartMinutes != breakStartInc

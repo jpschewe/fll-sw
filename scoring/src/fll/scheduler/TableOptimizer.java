@@ -10,9 +10,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.ParseException;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -144,7 +144,7 @@ public class TableOptimizer {
    * 
    * @return key=table info, value=team number
    */
-  private Map<PerformanceTime, Integer> getCurrentTableAssignments(final Date time) {
+  private Map<PerformanceTime, Integer> getCurrentTableAssignments(final LocalTime time) {
     final Map<PerformanceTime, Integer> assignments = new HashMap<>();
 
     for (final TeamScheduleInfo si : this.schedule.getSchedule()) {
@@ -168,7 +168,7 @@ public class TableOptimizer {
    * @return best score found
    */
   private void computeBestTableOrdering(final List<Integer> teams,
-                                        final Date time,
+                                        final LocalTime time,
                                         final List<String> tables,
                                         final CheckCanceled checkCanceled) {
     if (teams.isEmpty()) {
@@ -233,7 +233,7 @@ public class TableOptimizer {
    *         number
    */
   private List<Map<PerformanceTime, Integer>> computePossibleValues(final List<Integer> teams,
-                                                                    final Date time,
+                                                                    final LocalTime time,
                                                                     final List<String> tables) {
     final List<Map<PerformanceTime, Integer>> possibleValues = new LinkedList<>();
 
@@ -388,10 +388,10 @@ public class TableOptimizer {
   /**
    * Gather up all performance times in the specified list of violations.
    */
-  private Set<Date> gatherPerformanceTimes(final Collection<ConstraintViolation> violations) {
-    final Set<Date> perfTimes = new HashSet<Date>();
+  private Set<LocalTime> gatherPerformanceTimes(final Collection<ConstraintViolation> violations) {
+    final Set<LocalTime> perfTimes = new HashSet<>();
     for (final ConstraintViolation violation : violations) {
-      final Date d = violation.getPerformance();
+      final LocalTime d = violation.getPerformance();
       if (null != d) {
         perfTimes.add(d);
       }
@@ -564,8 +564,8 @@ public class TableOptimizer {
    * @param schedule the schedule to work with
    * @return key=time, value=tables used at this time
    */
-  private static Map<Date, Set<String>> gatherTablesAtTime(final TournamentSchedule schedule) {
-    final Map<Date, Set<String>> tablesAtTime = new HashMap<>();
+  private static Map<LocalTime, Set<String>> gatherTablesAtTime(final TournamentSchedule schedule) {
+    final Map<LocalTime, Set<String>> tablesAtTime = new HashMap<>();
 
     for (int round = 0; round < schedule.getNumberOfRounds(); ++round) {
       for (final TeamScheduleInfo si : schedule.getSchedule()) {
@@ -604,10 +604,10 @@ public class TableOptimizer {
    * element.
    */
   private static List<List<String>> determineTableGroups(final TournamentSchedule schedule) {
-    final Map<Date, Set<String>> tablesAtTime = gatherTablesAtTime(schedule);
+    final Map<LocalTime, Set<String>> tablesAtTime = gatherTablesAtTime(schedule);
 
     final List<Set<String>> tableGroups = new ArrayList<>();
-    for (final Map.Entry<Date, Set<String>> entry : tablesAtTime.entrySet()) {
+    for (final Map.Entry<LocalTime, Set<String>> entry : tablesAtTime.entrySet()) {
       final Set<String> toFind = entry.getValue();
 
       boolean found = false;
@@ -704,7 +704,7 @@ public class TableOptimizer {
    */
   public void optimize(final CheckCanceled checkCanceled) {
     final Set<Integer> optimizedTeams = new HashSet<Integer>();
-    final Set<Date> optimizedTimes = new HashSet<>();
+    final Set<LocalTime> optimizedTimes = new HashSet<>();
 
     List<ConstraintViolation> teamViolations = pickTeamWithMostViolations(optimizedTeams);
     while ((null != checkCanceled
@@ -718,7 +718,7 @@ public class TableOptimizer {
             + team);
       }
 
-      final Set<Date> perfTimes = gatherPerformanceTimes(teamViolations);
+      final Set<LocalTime> perfTimes = gatherPerformanceTimes(teamViolations);
       optimize(perfTimes, checkCanceled);
 
       optimizedTimes.addAll(perfTimes);
@@ -730,7 +730,7 @@ public class TableOptimizer {
         && !checkCanceled.isCanceled()) {
       // optimize non-full table times if we haven't already touched them while
       // optimizing teams
-      final Set<Date> perfTimes = findNonFullTableTimes();
+      final Set<LocalTime> perfTimes = findNonFullTableTimes();
       perfTimes.removeAll(optimizedTimes);
       if (!perfTimes.isEmpty()) {
         optimize(perfTimes, checkCanceled);
@@ -743,13 +743,13 @@ public class TableOptimizer {
    * Find all times in the schedule where the number of teams
    * competing doesn't equal the number of tables available.
    */
-  private Set<Date> findNonFullTableTimes() {
-    final Map<Date, Integer> perfCounts = new HashMap<>();
-    final Map<Date, List<String>> perfTables = new HashMap<>();
+  private Set<LocalTime> findNonFullTableTimes() {
+    final Map<LocalTime, Integer> perfCounts = new HashMap<>();
+    final Map<LocalTime, List<String>> perfTables = new HashMap<>();
     for (final TeamScheduleInfo ti : this.schedule.getSchedule()) {
       for (int round = 0; round < ti.getNumberOfRounds(); ++round) {
         final PerformanceTime pt = ti.getPerf(round);
-        final Date time = pt.getTime();
+        final LocalTime time = pt.getTime();
 
         List<String> tables = perfTables.get(time);
         for (int i = 0; null == tables
@@ -770,16 +770,16 @@ public class TableOptimizer {
       }
     }
 
-    final Set<Date> perfTimes = new HashSet<>();
+    final Set<LocalTime> perfTimes = new HashSet<>();
 
-    for (final Map.Entry<Date, Integer> entry : perfCounts.entrySet()) {
-      final Date time = entry.getKey();
+    for (final Map.Entry<LocalTime, Integer> entry : perfCounts.entrySet()) {
+      final LocalTime time = entry.getKey();
       final int useCount = entry.getValue();
 
       final List<String> tables = perfTables.get(time);
       if (tables.isEmpty()) {
         throw new FLLInternalException("No tables found at time: "
-            + TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(time));
+            + TournamentSchedule.TIME_FORMAT.format(time));
       }
 
       // 2 teams on each table at a given time
@@ -800,9 +800,9 @@ public class TableOptimizer {
    * @param perfTimes the times to optimize at
    * @param checkCancled used to check if the optimization should exit early
    */
-  private void optimize(final Set<Date> perfTimes,
+  private void optimize(final Set<LocalTime> perfTimes,
                         final CheckCanceled checkCanceled) {
-    for (final Date time : perfTimes) {
+    for (final LocalTime time : perfTimes) {
       final List<Integer> teams = new ArrayList<Integer>();
 
       List<String> tables = null;
