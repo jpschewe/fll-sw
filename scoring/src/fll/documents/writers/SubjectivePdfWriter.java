@@ -190,7 +190,7 @@ public class SubjectivePdfWriter {
       scheduledTimeStr = "N/A";
     } else {
       final LocalTime scheduledTime = teamInfo.getSubjectiveTimeByName(scheduleColumn).getTime();
-      scheduledTimeStr = TournamentSchedule.TIME_FORMAT.format(scheduledTime);
+      scheduledTimeStr = TournamentSchedule.formatTime(scheduledTime);
     }
     pageHeaderTable.addCell(createCell("Time: "
         + scheduledTimeStr, f12b, NO_BORDERS, Element.ALIGN_RIGHT));

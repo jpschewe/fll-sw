@@ -1467,7 +1467,7 @@ public class GreedySolver {
                 + " subj: " + (subj
                     + 1));
           }
-          line.add(time.format(TournamentSchedule.TIME_FORMAT));
+          line.add(TournamentSchedule.formatTime(time));
         }
 
         // find all performances for a team and then sort by time
@@ -1496,7 +1496,7 @@ public class GreedySolver {
               + " perfs: " + perfTimes);
         }
         for (final PerformanceTime perfTime : perfTimes) {
-          line.add(TournamentSchedule.TIME_FORMAT.format(perfTime.getTime()));
+          line.add(TournamentSchedule.formatTime(perfTime.getTime()));
           line.add(perfTime.getTable()
               + " " + perfTime.getSide());
         }
