@@ -779,7 +779,7 @@ public class TableOptimizer {
       final List<String> tables = perfTables.get(time);
       if (tables.isEmpty()) {
         throw new FLLInternalException("No tables found at time: "
-            + TournamentSchedule.TIME_FORMAT.format(time));
+            + TournamentSchedule.formatTime(time));
       }
 
       // 2 teams on each table at a given time

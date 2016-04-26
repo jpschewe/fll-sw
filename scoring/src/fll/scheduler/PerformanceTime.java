@@ -97,7 +97,7 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
 
   @Override
   public String toString() {
-    return "time: " + TournamentSchedule.TIME_FORMAT.format(getTime()) + " table: "
+    return "time: " + TournamentSchedule.formatTime(getTime()) + " table: "
         + getTable() + " side: " + getSide();
   }
 }

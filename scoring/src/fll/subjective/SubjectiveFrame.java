@@ -808,7 +808,7 @@ public final class SubjectiveFrame extends JFrame {
                                                    final int column) {
       if (value instanceof LocalTime) {
         final LocalTime d = (LocalTime) value;
-        final String str = TournamentSchedule.TIME_FORMAT.format(d);
+        final String str = TournamentSchedule.formatTime(d);
         return super.getTableCellRendererComponent(table, str, isSelected, hasFocus, row, column);
       } else {
         return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);

@@ -45,7 +45,7 @@ public class SolverParams extends SchedParams {
 
     final String startTimeStr = properties.getProperty(GreedySolver.START_TIME_KEY, null);
     if (null != startTimeStr) {
-      this.startTime = LocalTime.parse(startTimeStr, TournamentSchedule.TIME_FORMAT);
+      this.startTime = TournamentSchedule.parseTime(startTimeStr);
     }
     this.tinc = Utilities.readIntProperty(properties, GreedySolver.TINC_KEY, this.tinc);
 
@@ -344,7 +344,7 @@ public class SolverParams extends SchedParams {
         throw new FLLRuntimeException(String.format("Missing start or duration for %s break %d", breakType, i));
       }
 
-      final LocalTime breakStart = LocalTime.parse(startStr, TournamentSchedule.TIME_FORMAT);
+      final LocalTime breakStart = TournamentSchedule.parseTime(startStr);
       final int breakStartMinutes = (int)ChronoUnit.MINUTES.between(startTime, breakStart);
       final int breakStartInc = breakStartMinutes
           / tinc;
