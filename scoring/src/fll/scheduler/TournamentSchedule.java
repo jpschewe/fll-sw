@@ -25,6 +25,7 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -140,6 +141,11 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
+   * XML format for time type.
+   */
+  private static final DateTimeFormatter XML_TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+  /**
    * Always output without 24-hour time and without AM/PM.
    */
   private static final DateTimeFormatter OUTPUT_TIME_FORMAT = DateTimeFormatter.ofPattern("h:mm");
@@ -158,18 +164,36 @@ public class TournamentSchedule implements Serializable {
   private static final int EARLIEST_HOUR = 7;
 
   /**
+   * The format used inside Excel spreadsheets.
+   */
+  private static final DateTimeFormatter TIME_FORMAT_AM_PM_SS = DateTimeFormatter.ofPattern("hh:mm:ss a");
+
+  /**
    * Parse a time from a schedule. This
    * 
    * @param str
    * @return
    */
   public static LocalTime parseTime(final String str) {
-    final LocalTime time = LocalTime.parse(str, INPUT_TIME_FORMAT);
-    if (time.getHour() < EARLIEST_HOUR) {
-      // no time should be this early, it must be the afternoon.
-      return time.plusHours(12);
-    } else {
+    try {
+      // first try with the generic parser
+      final LocalTime time = LocalTime.parse(str);
       return time;
+    } catch (final DateTimeParseException e) {
+      // try with seconds and AM/PM
+      try {
+        final LocalTime time = LocalTime.parse(str, TIME_FORMAT_AM_PM_SS);
+        return time;
+      } catch (final DateTimeParseException ampme) {
+        // then try with 24-hour clock
+        final LocalTime time = LocalTime.parse(str, INPUT_TIME_FORMAT);
+        if (time.getHour() < EARLIEST_HOUR) {
+          // no time should be this early, it must be the afternoon.
+          return time.plusHours(12);
+        } else {
+          return time;
+        }
+      }
     }
   }
 
@@ -1901,7 +1925,7 @@ public class TournamentSchedule implements Serializable {
         final Element subjective = document.createElementNS(null, "subjective");
         team.appendChild(subjective);
         subjective.setAttributeNS(null, "name", subjName);
-        subjective.setAttributeNS(null, "time", fll.xml.XMLUtils.XML_TIME_FORMAT.get().format(time));
+        subjective.setAttributeNS(null, "time", XML_TIME_FORMAT.format(time));
       }
 
       for (int round = 0; round < si.getNumberOfRounds(); ++round) {
@@ -1912,7 +1936,7 @@ public class TournamentSchedule implements Serializable {
             + 1));
         perf.setAttributeNS(null, "table_color", perfTime.getTable());
         perf.setAttributeNS(null, "table_side", String.valueOf(perfTime.getSide()));
-        perf.setAttributeNS(null, "time", fll.xml.XMLUtils.XML_TIME_FORMAT.get().format(perfTime.getTime()));
+        perf.setAttributeNS(null, "time", XML_TIME_FORMAT.format(perfTime.getTime()));
       }
     }
 
