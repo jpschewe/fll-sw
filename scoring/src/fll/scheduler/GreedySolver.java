@@ -16,6 +16,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.text.ParseException;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1542,12 +1543,26 @@ public class GreedySolver {
     return checkBreak(begin, end, solverParameters.getSubjectiveBreaks());
   }
 
+  /**
+   * Check if the interval [begin, end] overlaps a break.
+   * 
+   * @param begin the start of the interval (in time increments)
+   * @param end the end of the interval (in time increments)
+   * @param breaks the breaks to check against
+   * @return true if there is no overlap, false if there is an overlap
+   */
   private boolean checkBreak(final int begin,
                              final int end,
                              final Collection<ScheduledBreak> breaks) {
     for (final ScheduledBreak b : breaks) {
-      if (b.getEnd() > begin
-          && b.getStart() < end) {
+      final long breakStartOffsetMinutes = ChronoUnit.MINUTES.between(solverParameters.getStartTime(), b.getStart());
+      final long breakDurationMinutes = b.getDuration().toMinutes();
+      final int breakStartInc = (int)(breakStartOffsetMinutes / solverParameters.getTimeIncrement());
+      final int breakDurationInc = (int)(breakDurationMinutes / solverParameters.getTimeIncrement());
+      final int breakEndInc = breakStartInc + breakDurationInc;
+      
+      if (breakStartInc < end
+          && breakEndInc > begin) {
         return false;
       }
     }
