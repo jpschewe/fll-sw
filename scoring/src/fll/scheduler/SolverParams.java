@@ -7,6 +7,7 @@
 package fll.scheduler;
 
 import java.text.ParseException;
+import java.time.Duration;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
@@ -361,8 +362,7 @@ public class SolverParams extends SchedParams {
         throw new FLLRuntimeException(String.format("%s break %d duration isn't divisible by tinc", breakType, i));
       }
 
-      breaks.add(new ScheduledBreak(breakStartInc, breakStartInc
-          + breakDurationInc));
+      breaks.add(new ScheduledBreak(breakStart, Duration.ofMinutes(breakDurationMinutes)));
     }
     return breaks;
   }

@@ -6,32 +6,38 @@
 
 package fll.scheduler;
 
+import java.time.Duration;
+import java.time.LocalTime;
+
 /**
  * Holds information about a break in the schedule.
  */
 public final class ScheduledBreak {
 
   /**
-   * @param start start of break in {@link SolverParams#getTimeIncrement()}
-   *          units
-   * @param end end of break in {@link SolverParams#getTimeIncrement()} units
+   * @param start start of break
+   * @param duration how long the break is
    */
-  public ScheduledBreak(final int start,
-                        final int end) {
+  public ScheduledBreak(final LocalTime start,
+                        final Duration duration) {
     this.start = start;
-    this.end = end;
+    this.duration = duration;
   }
 
-  private int start;
+  private LocalTime start;
 
-  public int getStart() {
+  public LocalTime getStart() {
     return this.start;
   }
 
-  private int end;
+  private Duration duration;
 
-  public int getEnd() {
-    return this.end;
+  public Duration getDuration() {
+    return this.duration;
+  }
+
+  public LocalTime getEnd() {
+    return this.start.plus(this.duration);
   }
 
 }
