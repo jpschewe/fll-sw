@@ -309,7 +309,7 @@ public class SchedulerUI extends JFrame {
 
         final List<SubjectiveStation> subjectiveStations = new LinkedList<SubjectiveStation>();
         for (int subj = 0; subj < solver.getNumSubjectiveStations(); ++subj) {
-          final String name = solver.getSubjectiveColumnName(subj);
+          final String name = GreedySolver.getSubjectiveColumnName(subj);
           final int duration = solver.getSubjectiveDuration(subj);
           final SubjectiveStation station = new SubjectiveStation(name, duration);
           subjectiveStations.add(station);
