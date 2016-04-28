@@ -236,7 +236,7 @@ public class GreedySolver {
     if (this.optimize) {
       LOGGER.info("Optimization is turned on");
     }
-
+    
     final Properties properties = new Properties();
     try (final Reader reader = new InputStreamReader(new FileInputStream(datafile), Utilities.DEFAULT_CHARSET)) {
       properties.load(reader);
@@ -247,6 +247,13 @@ public class GreedySolver {
 
     this.solverParameters = new SolverParams();
     this.solverParameters.load(properties);
+
+    //FIXME debug
+    final String testout = datafile.getAbsolutePath() + ".test";
+    final Properties testProps = new Properties();
+    this.solverParameters.save(testProps);
+    testProps.store(new java.io.FileWriter(testout), null);
+    //end debug
 
     performanceAttemptOffset = solverParameters.getPerformanceAttemptOffsetMinutes()
         / solverParameters.getTimeIncrement();

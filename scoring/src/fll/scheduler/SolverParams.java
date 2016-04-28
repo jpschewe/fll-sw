@@ -10,9 +10,10 @@ import java.text.ParseException;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -27,6 +28,29 @@ import fll.util.LogUtils;
 public class SolverParams extends SchedParams {
 
   private static final Logger LOGGER = LogUtils.getLogger();
+
+  /**
+   * Format for the number of breaks property. Expected to be
+   * used with String.format() and one argument that is the
+   * type of break "subjective" or "performance".
+   */
+  private static final String numBreaksFormat = "num_%s_breaks";
+
+  /**
+   * Format for the start of break property. Expected to be
+   * used with String.format() and two arguments that is the
+   * type of break "subjective" or "performance" and then the index of the
+   * break (starting at 0).
+   */
+  private static final String startFormat = "%s_break_%d_start";
+
+  /**
+   * Format for the duration of break property. Expected to be
+   * used with String.format() and two arguments that is the
+   * type of break "subjective" or "performance" and then the index of the
+   * break (starting at 0).
+   */
+  private static final String durationFormat = "%s_break_%d_duration";
 
   /**
    * Create the object with all default values.
@@ -77,6 +101,37 @@ public class SolverParams extends SchedParams {
     this.tmaxMinutes = Utilities.readIntProperty(properties, GreedySolver.TMAX_MINUTES_KEY);
 
     parseBreaks(properties, getStartTime(), getTimeIncrement());
+
+  }
+
+  @Override
+  public void save(final Properties properties) {
+    super.save(properties);
+
+    properties.setProperty(GreedySolver.START_TIME_KEY, TournamentSchedule.formatTime(this.startTime));
+
+    properties.setProperty(GreedySolver.TINC_KEY, Integer.toString(this.tinc));
+
+    properties.setProperty(GreedySolver.GROUP_COUNTS_KEY, Arrays.toString(this.groupCounts));
+
+    properties.setProperty(GreedySolver.ALTERNATE_TABLES_KEY, Boolean.toString(this.alternate));
+
+    properties.setProperty(GreedySolver.NROUNDS_KEY, Integer.toString(this.numPerformanceRounds));
+
+    properties.setProperty(GreedySolver.SUBJECTIVE_FIRST_KEY, Boolean.toString(this.subjectiveFirst));
+
+    properties.setProperty(GreedySolver.PERF_ATTEMPT_OFFSET_MINUTES_KEY,
+                           Integer.toString(this.perfAttemptOffsetMinutes));
+
+    properties.setProperty(GreedySolver.SUBJECTIVE_ATTEMPT_OFFSET_MINUTES_KEY,
+                           Integer.toString(this.subjectiveAttemptOffsetMinutes));
+
+    properties.setProperty(GreedySolver.NTABLES_KEY, Integer.toString(this.numTables));
+
+    properties.setProperty(GreedySolver.TMAX_HOURS_KEY, Integer.toString(this.tmaxHours));
+    properties.setProperty(GreedySolver.TMAX_MINUTES_KEY, Integer.toString(this.tmaxMinutes));
+
+    saveBreaks(properties);
 
   }
 
@@ -296,22 +351,22 @@ public class SolverParams extends SchedParams {
     this.tmaxMinutes = v;
   }
 
-  private final Collection<ScheduledBreak> subjectiveBreaks = new LinkedList<ScheduledBreak>();
+  private final List<ScheduledBreak> subjectiveBreaks = new LinkedList<ScheduledBreak>();
 
   /**
-   * @return Read-only collection of the subjective breaks
+   * @return Read-only list of the subjective breaks
    */
-  public Collection<ScheduledBreak> getSubjectiveBreaks() {
-    return Collections.unmodifiableCollection(this.subjectiveBreaks);
+  public List<ScheduledBreak> getSubjectiveBreaks() {
+    return Collections.unmodifiableList(this.subjectiveBreaks);
   }
 
-  private final Collection<ScheduledBreak> performanceBreaks = new LinkedList<ScheduledBreak>();
+  private final List<ScheduledBreak> performanceBreaks = new LinkedList<ScheduledBreak>();
 
   /**
-   * @return Read-only collection of the performance breaks
+   * @return Read-only list of the performance breaks
    */
-  public Collection<ScheduledBreak> getPerformanceBreaks() {
-    return Collections.unmodifiableCollection(this.performanceBreaks);
+  public List<ScheduledBreak> getPerformanceBreaks() {
+    return Collections.unmodifiableList(this.performanceBreaks);
   }
 
   /**
@@ -321,22 +376,18 @@ public class SolverParams extends SchedParams {
    */
   private void parseBreaks(final Properties properties,
                            final LocalTime startTime,
-                           final int tinc)
-      throws ParseException {
+                           final int tinc) throws ParseException {
     subjectiveBreaks.addAll(parseBreaks(properties, startTime, tinc, "subjective"));
     performanceBreaks.addAll(parseBreaks(properties, startTime, tinc, "performance"));
   }
 
-  private Collection<ScheduledBreak> parseBreaks(final Properties properties,
-                                                 final LocalTime startTime,
-                                                 final int tinc,
-                                                 final String breakType)
-      throws ParseException {
-    final Collection<ScheduledBreak> breaks = new LinkedList<ScheduledBreak>();
+  private List<ScheduledBreak> parseBreaks(final Properties properties,
+                                           final LocalTime startTime,
+                                           final int tinc,
+                                           final String breakType) throws ParseException {
+    final List<ScheduledBreak> breaks = new LinkedList<ScheduledBreak>();
 
-    final int numBreaks = Integer.parseInt(properties.getProperty(String.format("num_%s_breaks", breakType), "0"));
-    final String startFormat = "%s_break_%d_start";
-    final String durationFormat = "%s_break_%d_duration";
+    final int numBreaks = Integer.parseInt(properties.getProperty(String.format(numBreaksFormat, breakType), "0"));
     for (int i = 0; i < numBreaks; ++i) {
       final String startStr = properties.getProperty(String.format(startFormat, breakType, i), null);
       final String durationStr = properties.getProperty(String.format(durationFormat, breakType, i), null);
@@ -346,7 +397,7 @@ public class SolverParams extends SchedParams {
       }
 
       final LocalTime breakStart = TournamentSchedule.parseTime(startStr);
-      final int breakStartMinutes = (int)ChronoUnit.MINUTES.between(startTime, breakStart);
+      final int breakStartMinutes = (int) ChronoUnit.MINUTES.between(startTime, breakStart);
       final int breakStartInc = breakStartMinutes
           / tinc;
       if (breakStartMinutes != breakStartInc
@@ -365,6 +416,32 @@ public class SolverParams extends SchedParams {
       breaks.add(new ScheduledBreak(breakStart, Duration.ofMinutes(breakDurationMinutes)));
     }
     return breaks;
+  }
+
+  /**
+   * Save the breaks to the properties object.
+   */
+  private void saveBreaks(final Properties properties) {
+    saveBreaks(properties, "subjective", subjectiveBreaks);
+    saveBreaks(properties, "performance", performanceBreaks);
+  }
+
+  private void saveBreaks(final Properties properties,
+                          final String breakType,
+                          final List<ScheduledBreak> breaks) {
+    final int numBreaks = breaks.size();
+    properties.setProperty(String.format(numBreaksFormat, breakType), Integer.toString(numBreaks));
+
+    for (int i = 0; i < numBreaks; ++i) {
+      final ScheduledBreak sbreak = breaks.get(i);
+      final String startStr = String.format(startFormat, breakType, i);
+      final String formattedStart = TournamentSchedule.formatTime(sbreak.getStart());
+      properties.setProperty(startStr, formattedStart);
+
+      final String durationStr = String.format(durationFormat, breakType, i);
+      properties.setProperty(durationStr, Long.toString(sbreak.getDuration().toMinutes()));
+    }
+
   }
 
 }
