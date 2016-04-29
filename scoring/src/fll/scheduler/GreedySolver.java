@@ -246,14 +246,6 @@ public class GreedySolver {
     this.solverParameters = new SolverParams();
     this.solverParameters.load(properties);
 
-    // FIXME debug
-    final String testout = datafile.getAbsolutePath()
-        + ".test";
-    final Properties testProps = new Properties();
-    this.solverParameters.save(testProps);
-    testProps.store(new java.io.FileWriter(testout), null);
-    // end debug
-
     performanceAttemptOffset = solverParameters.getPerformanceAttemptOffsetMinutes();
     LOGGER.debug("Performance attempt offset: "
         + performanceAttemptOffset);
