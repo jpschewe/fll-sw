@@ -9,7 +9,6 @@ package fll.scheduler;
 import java.text.ParseException;
 import java.time.Duration;
 import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -72,7 +71,6 @@ public class SolverParams extends SchedParams {
     if (null != startTimeStr) {
       this.startTime = TournamentSchedule.parseTime(startTimeStr);
     }
-    this.tinc = Utilities.readIntProperty(properties, GreedySolver.TINC_KEY, this.tinc);
 
     final String groupCountsStr = properties.getProperty(GreedySolver.GROUP_COUNTS_KEY);
     this.groupCounts = Utilities.parseListOfIntegers(groupCountsStr);
@@ -89,18 +87,18 @@ public class SolverParams extends SchedParams {
         + this.subjectiveFirst);
 
     this.perfAttemptOffsetMinutes = Utilities.readIntProperty(properties, GreedySolver.PERF_ATTEMPT_OFFSET_MINUTES_KEY,
-                                                              this.tinc);
+                                                              this.perfAttemptOffsetMinutes);
 
     this.subjectiveAttemptOffsetMinutes = Utilities.readIntProperty(properties,
                                                                     GreedySolver.SUBJECTIVE_ATTEMPT_OFFSET_MINUTES_KEY,
-                                                                    this.tinc);
+                                                                    this.subjectiveAttemptOffsetMinutes);
 
     this.numTables = Utilities.readIntProperty(properties, GreedySolver.NTABLES_KEY, this.numTables);
 
     this.tmaxHours = Utilities.readIntProperty(properties, GreedySolver.TMAX_HOURS_KEY);
     this.tmaxMinutes = Utilities.readIntProperty(properties, GreedySolver.TMAX_MINUTES_KEY);
 
-    parseBreaks(properties, getStartTime(), getTimeIncrement());
+    parseBreaks(properties);
 
   }
 
@@ -109,8 +107,6 @@ public class SolverParams extends SchedParams {
     super.save(properties);
 
     properties.setProperty(GreedySolver.START_TIME_KEY, TournamentSchedule.formatTime(this.startTime));
-
-    properties.setProperty(GreedySolver.TINC_KEY, Integer.toString(this.tinc));
 
     properties.setProperty(GreedySolver.GROUP_COUNTS_KEY, Arrays.toString(this.groupCounts));
 
@@ -150,27 +146,6 @@ public class SolverParams extends SchedParams {
    */
   public final void setStartTime(final LocalTime v) {
     this.startTime = v;
-  }
-
-  private int tinc = 1;
-
-  /**
-   * The number of minutes to use as the base time
-   * type. Normally this is set to 1, however if all activities
-   * should be scheduled on 5 minute intervals, then setting this to 5 would
-   * ensure that and speed up the solver. All specified time intervals must
-   * be even divisible by this number.
-   * Defaults to 1.
-   */
-  public final int getTimeIncrement() {
-    return tinc;
-  }
-
-  /**
-   * @see #getTimeIncrement()
-   */
-  public final void setTimeIncrement(int v) {
-    tinc = v;
   }
 
   private int[] groupCounts = new int[0];
@@ -261,7 +236,7 @@ public class SolverParams extends SchedParams {
     this.subjectiveFirst = v;
   }
 
-  private int perfAttemptOffsetMinutes;
+  private int perfAttemptOffsetMinutes = 1;
 
   /**
    * If a performance round cannot be scheduled at a time, how many
@@ -279,7 +254,7 @@ public class SolverParams extends SchedParams {
     this.perfAttemptOffsetMinutes = v;
   }
 
-  private int subjectiveAttemptOffsetMinutes;
+  private int subjectiveAttemptOffsetMinutes = 1;
 
   /**
    * If a subjective round cannot be scheduled at a time, how many
@@ -374,17 +349,15 @@ public class SolverParams extends SchedParams {
    * 
    * @throws ParseException
    */
-  private void parseBreaks(final Properties properties,
-                           final LocalTime startTime,
-                           final int tinc) throws ParseException {
-    subjectiveBreaks.addAll(parseBreaks(properties, startTime, tinc, "subjective"));
-    performanceBreaks.addAll(parseBreaks(properties, startTime, tinc, "performance"));
+  private void parseBreaks(final Properties properties)
+      throws ParseException {
+    subjectiveBreaks.addAll(parseBreaks(properties, "subjective"));
+    performanceBreaks.addAll(parseBreaks(properties, "performance"));
   }
 
   private List<ScheduledBreak> parseBreaks(final Properties properties,
-                                           final LocalTime startTime,
-                                           final int tinc,
-                                           final String breakType) throws ParseException {
+                                           final String breakType)
+      throws ParseException {
     final List<ScheduledBreak> breaks = new LinkedList<ScheduledBreak>();
 
     final int numBreaks = Integer.parseInt(properties.getProperty(String.format(numBreaksFormat, breakType), "0"));
@@ -397,21 +370,7 @@ public class SolverParams extends SchedParams {
       }
 
       final LocalTime breakStart = TournamentSchedule.parseTime(startStr);
-      final int breakStartMinutes = (int) ChronoUnit.MINUTES.between(startTime, breakStart);
-      final int breakStartInc = breakStartMinutes
-          / tinc;
-      if (breakStartMinutes != breakStartInc
-          * tinc) {
-        throw new FLLRuntimeException(String.format("%s break %d start isn't divisible by tinc", breakType, i));
-      }
-
       final int breakDurationMinutes = Integer.parseInt(durationStr);
-      final int breakDurationInc = breakDurationMinutes
-          / tinc;
-      if (breakDurationMinutes != breakDurationInc
-          * tinc) {
-        throw new FLLRuntimeException(String.format("%s break %d duration isn't divisible by tinc", breakType, i));
-      }
 
       breaks.add(new ScheduledBreak(breakStart, Duration.ofMinutes(breakDurationMinutes)));
     }
