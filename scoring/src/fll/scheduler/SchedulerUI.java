@@ -35,13 +35,13 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JCheckBox;
-import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
@@ -157,7 +157,7 @@ public class SchedulerUI extends JFrame {
     mDescriptionFilename = new JLabel("");
     scheduleDescriptionPanel.add(createDescriptionToolbar(), BorderLayout.PAGE_START);
 
-    mScheduleDescriptionEditor = new JEditorPane("text/plain", null);
+    mScheduleDescriptionEditor = new SolverParamsEditor();
     final JScrollPane editorScroller = new JScrollPane(mScheduleDescriptionEditor);
     scheduleDescriptionPanel.add(editorScroller, BorderLayout.CENTER);
 
@@ -210,18 +210,17 @@ public class SchedulerUI extends JFrame {
   };
 
   void saveScheduleDescription() {
-    Writer writer = null;
-    try {
-      writer = new OutputStreamWriter(new FileOutputStream(mScheduleDescriptionFile), Utilities.DEFAULT_CHARSET);
-      final String text = mScheduleDescriptionEditor.getText();
-      writer.write(text);
+    try (final Writer writer = new OutputStreamWriter(new FileOutputStream(mScheduleDescriptionFile),
+                                                      Utilities.DEFAULT_CHARSET)) {
+      final SolverParams params = mScheduleDescriptionEditor.getParams();
+      final Properties properties = new Properties();
+      params.save(properties);
+      properties.store(writer, null);
     } catch (final IOException e) {
       final Formatter errorFormatter = new Formatter();
       errorFormatter.format("Error saving file: %s", e.getMessage());
       LOGGER.error(errorFormatter, e);
       JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error saving file", JOptionPane.ERROR_MESSAGE);
-    } finally {
-      IOUtils.closeQuietly(writer);
     }
   }
 
@@ -445,26 +444,36 @@ public class SchedulerUI extends JFrame {
   };
 
   private void loadScheduleDescription(final File file) {
-    Reader reader = null;
-    try {
-      reader = new InputStreamReader(new FileInputStream(file), Utilities.DEFAULT_CHARSET);
-      final String text = net.mtu.eggplant.io.IOUtils.readIntoString(reader);
-
-      mScheduleDescriptionEditor.setText(text);
-
-      mScheduleDescriptionFile = file;
-
-      mSaveScheduleDescriptionAction.setEnabled(true);
-      mRunSchedulerAction.setEnabled(true);
-      mDescriptionFilename.setText(file.getName());
+    final Properties properties = new Properties();
+    try (final Reader reader = new InputStreamReader(new FileInputStream(file), Utilities.DEFAULT_CHARSET)) {
+      properties.load(reader);
     } catch (final IOException e) {
       final Formatter errorFormatter = new Formatter();
       errorFormatter.format("Error loading file: %s", e.getMessage());
       LOGGER.error(errorFormatter, e);
       JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error loading file", JOptionPane.ERROR_MESSAGE);
-    } finally {
-      IOUtils.closeQuietly(reader);
+      return;
     }
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug(properties.toString());
+    }
+
+    try {
+      final SolverParams params = new SolverParams();
+      params.load(properties);
+      mScheduleDescriptionEditor.setParams(params);
+    } catch (final ParseException pe) {
+      final Formatter errorFormatter = new Formatter();
+      errorFormatter.format("Error parsing file: %s", pe.getMessage());
+      LOGGER.error(errorFormatter, pe);
+      JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error parsing file", JOptionPane.ERROR_MESSAGE);
+      return;
+    }
+    mScheduleDescriptionFile = file;
+
+    mSaveScheduleDescriptionAction.setEnabled(true);
+    mRunSchedulerAction.setEnabled(true);
+    mDescriptionFilename.setText(file.getName());
   }
 
   private JToolBar createDescriptionToolbar() {
@@ -1000,7 +1009,7 @@ public class SchedulerUI extends JFrame {
 
   private final JTabbedPane mTabbedPane;
 
-  private final JEditorPane mScheduleDescriptionEditor;
+  private final SolverParamsEditor mScheduleDescriptionEditor;
 
   private final JTable mScheduleTable;
 
