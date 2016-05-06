@@ -24,7 +24,7 @@ import fll.util.FLLInternalException;
  */
 public class SolverParamsEditor extends JPanel {
 
-  private final JFormattedTextField startTimeEditor;
+  private final ScheduleTimeField startTimeEditor;
 
   private final JCheckBox alternateTables;
 
@@ -54,9 +54,9 @@ public class SolverParamsEditor extends JPanel {
 
       GridBagConstraints gbc;
 
-      startTimeEditor = new JFormattedTextField(new TimeFormat());
+      startTimeEditor = new ScheduleTimeField();
       addRow(new JLabel("Start Time:"), startTimeEditor);
-
+      
       alternateTables = new JCheckBox("Alternate tables");
       addRow(alternateTables);
 
@@ -94,8 +94,8 @@ public class SolverParamsEditor extends JPanel {
       numTables = new JFormattedTextField(integerFormat);
       addRow(new JLabel("Number of performance tables"), numTables);
 
-      //FIXME need format for this
-      maxTime = new JFormattedTextField(/*new HoursMinutesFormat()*/);
+      // FIXME need format for this
+      maxTime = new JFormattedTextField(/* new HoursMinutesFormat() */);
       addRow(new JLabel("Maximum length of the tournament"), maxTime);
 
       // end of form spacer
@@ -138,11 +138,15 @@ public class SolverParamsEditor extends JPanel {
   public void setParams(final SolverParams params) {
     this.params = params;
 
+    //startTimeEditor.setTime(params.getStartTime());
     startTimeEditor.setValue(params.getStartTime());
 
   }
 
   public SolverParams getParams() {
+    // FIXME make sure everything is valid
+    // FIXME copy valuesl from editors into params and then return, or should
+    // the values set immediately?
     return this.params;
   }
 
