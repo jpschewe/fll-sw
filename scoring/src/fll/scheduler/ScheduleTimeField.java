@@ -66,7 +66,8 @@ import fll.util.LogUtils;
    * @throws java.text.ParseException
    */
   public LocalTime getTime() {
-    return TournamentSchedule.parseTime((String) getValue());
+    final String str = getTimeText((String)getValue());
+    return TournamentSchedule.parseTime(str);
   }
 
   /**
@@ -78,19 +79,28 @@ import fll.util.LogUtils;
     setValue(TournamentSchedule.formatTime(time));
   }
 
-  static /* package */ class TimeVerifier extends InputVerifier {
+  /**
+   * Remove leading underscore if it exists.
+   * This allows the string to be parsed as a valid time if the hours is only a single digit.
+   *   
+   * @param raw the raw string
+   * @return the string without the leading underscore
+   */
+  private static String getTimeText(final String raw) {
+    if (raw.startsWith("_")) {
+      return raw.substring(1);
+    } else {
+      return raw;
+    }    
+  }
+  
+  private static class TimeVerifier extends InputVerifier {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public static final Color INVALID_COLOR = Color.red;
 
     public static final Color VALID_COLOR = Color.black;
-
-    /**
-     * 
-     */
-    public TimeVerifier() {
-    }
 
     /**
      * Check if the contents of the component are a valid schedule time.
@@ -100,10 +110,7 @@ import fll.util.LogUtils;
       if (input instanceof JFormattedTextField) {
         final JFormattedTextField field = (JFormattedTextField) input;
         try {
-          String text = field.getText();
-          if (text.startsWith("_")) {
-            text = text.substring(1);
-          }
+          final String text = getTimeText(field.getText());
           TournamentSchedule.parseTime(text);
           input.setForeground(VALID_COLOR);
           return true;
