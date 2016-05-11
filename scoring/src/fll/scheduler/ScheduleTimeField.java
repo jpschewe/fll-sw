@@ -66,7 +66,7 @@ import fll.util.LogUtils;
    * @throws java.text.ParseException
    */
   public LocalTime getTime() {
-    final String str = getTimeText((String)getValue());
+    final String str = getTimeText((String) getValue());
     return TournamentSchedule.parseTime(str);
   }
 
@@ -76,13 +76,15 @@ import fll.util.LogUtils;
    * @param time the new value, cannot be null
    */
   public void setTime(final LocalTime time) {
-    setValue(TournamentSchedule.formatTime(time));
+    final String formatted = TournamentSchedule.formatTime(time);
+    setValue(formatted);
   }
 
   /**
    * Remove leading underscore if it exists.
-   * This allows the string to be parsed as a valid time if the hours is only a single digit.
-   *   
+   * This allows the string to be parsed as a valid time if the hours is only a
+   * single digit.
+   * 
    * @param raw the raw string
    * @return the string without the leading underscore
    */
@@ -91,9 +93,9 @@ import fll.util.LogUtils;
       return raw.substring(1);
     } else {
       return raw;
-    }    
+    }
   }
-  
+
   private static class TimeVerifier extends InputVerifier {
 
     private static final Logger LOGGER = LogUtils.getLogger();
