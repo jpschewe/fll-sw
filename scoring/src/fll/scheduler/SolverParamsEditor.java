@@ -56,7 +56,7 @@ public class SolverParamsEditor extends JPanel {
 
       startTimeEditor = new ScheduleTimeField();
       addRow(new JLabel("Start Time:"), startTimeEditor);
-      
+
       alternateTables = new JCheckBox("Alternate tables");
       addRow(alternateTables);
 
@@ -118,8 +118,9 @@ public class SolverParamsEditor extends JPanel {
   private void addRow(final JComponent... components) {
     GridBagConstraints gbc;
 
-    //for (final JComponent comp : components) {
-    for(int i=0; i<components.length-1; ++i) {
+    // for (final JComponent comp : components) {
+    for (int i = 0; i < components.length
+        - 1; ++i) {
       final JComponent comp = components[i];
       gbc = new GridBagConstraints();
       gbc.anchor = GridBagConstraints.WEST;
@@ -132,8 +133,9 @@ public class SolverParamsEditor extends JPanel {
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.weightx = 1.0;
-    //add(new JPanel(), gbc);
-    add(components[components.length-1], gbc);
+    // add(new JPanel(), gbc);
+    add(components[components.length
+        - 1], gbc);
   }
 
   private SolverParams params;
@@ -142,9 +144,11 @@ public class SolverParamsEditor extends JPanel {
     this.params = params;
 
     startTimeEditor.setTime(params.getStartTime());
-
     alternateTables.setSelected(this.params.getAlternateTables());
-    
+    performanceDuration.setValue(params.getPerformanceMinutes());
+    changeDuration.setValue(params.getChangetimeMinutes());
+    performanceChangeDuration.setValue(params.getPerformanceChangetimeMinutes());
+
   }
 
   public SolverParams getParams() {
