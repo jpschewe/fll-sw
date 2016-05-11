@@ -118,7 +118,9 @@ public class SolverParamsEditor extends JPanel {
   private void addRow(final JComponent... components) {
     GridBagConstraints gbc;
 
-    for (final JComponent comp : components) {
+    //for (final JComponent comp : components) {
+    for(int i=0; i<components.length-1; ++i) {
+      final JComponent comp = components[i];
       gbc = new GridBagConstraints();
       gbc.anchor = GridBagConstraints.WEST;
       gbc.weighty = 0;
@@ -130,7 +132,8 @@ public class SolverParamsEditor extends JPanel {
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.weightx = 1.0;
-    add(new JPanel(), gbc);
+    //add(new JPanel(), gbc);
+    add(components[components.length-1], gbc);
   }
 
   private SolverParams params;
