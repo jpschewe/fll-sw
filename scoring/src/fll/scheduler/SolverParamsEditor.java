@@ -138,9 +138,10 @@ public class SolverParamsEditor extends JPanel {
   public void setParams(final SolverParams params) {
     this.params = params;
 
-    //startTimeEditor.setTime(params.getStartTime());
-    startTimeEditor.setValue(params.getStartTime());
+    startTimeEditor.setTime(params.getStartTime());
 
+    alternateTables.setSelected(this.params.getAlternateTables());
+    
   }
 
   public SolverParams getParams() {

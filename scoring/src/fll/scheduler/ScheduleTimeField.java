@@ -6,14 +6,21 @@
 
 package fll.scheduler;
 
+import java.awt.Color;
 import java.text.ParseException;
 import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 
+import javax.swing.InputVerifier;
+import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.MaskFormatter;
 
+import org.apache.log4j.Logger;
+
 import fll.util.FLLInternalException;
+import fll.util.LogUtils;
 
 /**
  * Field for displaying schedule times.
@@ -48,7 +55,7 @@ import fll.util.FLLInternalException;
     } catch (final ParseException pe) {
       throw new FLLInternalException("Invalid format for MaskFormatter", pe);
     }
-    
+
     setTime(value);
   }
 
@@ -71,4 +78,46 @@ import fll.util.FLLInternalException;
     setValue(TournamentSchedule.formatTime(time));
   }
 
+  static /* package */ class TimeVerifier extends InputVerifier {
+
+    private static final Logger LOGGER = LogUtils.getLogger();
+
+    public static final Color INVALID_COLOR = Color.red;
+
+    public static final Color VALID_COLOR = Color.black;
+
+    /**
+     * 
+     */
+    public TimeVerifier() {
+    }
+
+    /**
+     * Check if the contents of the component are a valid schedule time.
+     */
+    @Override
+    public boolean verify(final JComponent input) {
+      if (input instanceof JFormattedTextField) {
+        final JFormattedTextField field = (JFormattedTextField) input;
+        try {
+          String text = field.getText();
+          if (text.startsWith("_")) {
+            text = text.substring(1);
+          }
+          TournamentSchedule.parseTime(text);
+          input.setForeground(VALID_COLOR);
+          return true;
+        } catch (final DateTimeParseException e) {
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Unable to parse schedule time", e);
+          }
+          input.setForeground(INVALID_COLOR);
+          return false;
+        }
+      } else {
+        input.setForeground(INVALID_COLOR);
+        return false;
+      }
+    }
+  }
 }
