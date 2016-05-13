@@ -149,6 +149,16 @@ public class SolverParamsEditor extends JPanel {
     changeDuration.setValue(params.getChangetimeMinutes());
     performanceChangeDuration.setValue(params.getPerformanceChangetimeMinutes());
 
+    //FIXME assign groups
+    
+    numPerformanceRounds.setValue(params.getNumPerformanceRounds());
+    subjectiveFirst.setSelected(params.getSubjectiveFirst());
+    perfAttemptOffsetMinutes.setValue(params.getPerformanceAttemptOffsetMinutes());
+    subjectiveAttemptOffsetMinutes.setValue(params.getSubjectiveAttemptOffsetMinutes());
+    numTables.setValue(params.getNumTables());
+    
+    //FIXME need correct formatting for maxTime
+    
   }
 
   public SolverParams getParams() {
