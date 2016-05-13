@@ -9,6 +9,7 @@ package fll.scheduler;
 import java.awt.Color;
 import java.text.ParseException;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 import javax.swing.InputVerifier;
@@ -71,12 +72,20 @@ import fll.util.LogUtils;
   }
 
   /**
+   * Always output without 24-hour time and without AM/PM.
+   * Make sure there are always 2 digits in the hours field. This
+   * is the same as the time format used by TournamentSchedule as it's
+   * output format, except that we're making sure there is a leading 0.
+   */
+  private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("hh:mm");
+
+  /**
    * Set the current value.
    * 
    * @param time the new value, cannot be null
    */
   public void setTime(final LocalTime time) {
-    final String formatted = TournamentSchedule.formatTime(time);
+    final String formatted = TIME_FORMAT.format(time);
     setValue(formatted);
   }
 
