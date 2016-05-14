@@ -8,16 +8,17 @@ package fll.scheduler;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.text.ParseException;
+import java.text.DecimalFormat;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.text.MaskFormatter;
+import javax.swing.text.DefaultFormatterFactory;
+import javax.swing.text.NumberFormatter;
 
-import fll.util.FLLInternalException;
+import fll.util.IntegerVerifier;
 
 /**
  * Editor for {@link SolverParams}.
@@ -49,65 +50,81 @@ public class SolverParamsEditor extends JPanel {
   public SolverParamsEditor() {
     super(new GridBagLayout());
 
-    try {
-      final MaskFormatter integerFormat = new MaskFormatter("#");
+    GridBagConstraints gbc;
 
-      GridBagConstraints gbc;
+    startTimeEditor = new ScheduleTimeField();
+    addRow(new JLabel("Start Time:"), startTimeEditor);
 
-      startTimeEditor = new ScheduleTimeField();
-      addRow(new JLabel("Start Time:"), startTimeEditor);
+    alternateTables = new JCheckBox("Alternate tables");
+    addRow(alternateTables);
 
-      alternateTables = new JCheckBox("Alternate tables");
-      addRow(alternateTables);
+    performanceDuration = createIntegerField(1, 1000);
+    performanceDuration.setToolTipText("The number of minutes between performance runs");
+    addRow(new JLabel("Performance duration:"), performanceDuration);
 
-      performanceDuration = new JFormattedTextField(integerFormat);
-      performanceDuration.setToolTipText("The number of minutes between performance runs");
-      addRow(new JLabel("Performance duration:"), performanceDuration);
+    // FIXME mSubjectiveStations = new
+    // ArrayList<SubjectiveStation>(subjectiveParams);
 
-      // FIXME mSubjectiveStations = new
-      // ArrayList<SubjectiveStation>(subjectiveParams);
+    changeDuration = createIntegerField(0, 1000);
+    changeDuration.setToolTipText("The number of minutes that a team has between any 2 activities");
+    addRow(new JLabel("Change time duration:"), changeDuration);
 
-      changeDuration = new JFormattedTextField(integerFormat);
-      changeDuration.setToolTipText("The number of minutes that a team has between any 2 activities");
-      addRow(new JLabel("Change time duration:"), changeDuration);
+    performanceChangeDuration = createIntegerField(0, 1000);
+    performanceChangeDuration.setToolTipText("The number of minutes that a team has between any 2 performance runs");
+    addRow(new JLabel("Performance change time duration:"), performanceChangeDuration);
 
-      performanceChangeDuration = new JFormattedTextField(integerFormat);
-      performanceChangeDuration.setToolTipText("The number of minutes that a team has between any 2 performance runs");
-      addRow(new JLabel("Performance change time duration:"), performanceChangeDuration);
+    // FIXME put in group counts
 
-      // FIXME put in group counts
+    numPerformanceRounds = createIntegerField(0, 10);
+    addRow(new JLabel("Number of performance rounds:"), numPerformanceRounds);
 
-      numPerformanceRounds = new JFormattedTextField(integerFormat);
-      addRow(new JLabel("Number of performance rounds:"), numPerformanceRounds);
+    subjectiveFirst = new JCheckBox("Schedule subjective before performance");
+    addRow(subjectiveFirst);
 
-      subjectiveFirst = new JCheckBox("Schedule subjective before performance");
-      addRow(subjectiveFirst);
+    perfAttemptOffsetMinutes = createIntegerField(1, 1000);
+    perfAttemptOffsetMinutes.setToolTipText("How many minutes later to try to find a new performance slot");
+    addRow(new JLabel("Number of minutes between attempts "), perfAttemptOffsetMinutes);
 
-      perfAttemptOffsetMinutes = new JFormattedTextField(integerFormat);
-      perfAttemptOffsetMinutes.setToolTipText("How many minutes later to try to find a new performance slot");
-      addRow(new JLabel("Number of minutes between attempts "), perfAttemptOffsetMinutes);
+    subjectiveAttemptOffsetMinutes = createIntegerField(1, 1000);
+    subjectiveAttemptOffsetMinutes.setToolTipText("How many minutes later to try to find a new subjective slot");
+    addRow(new JLabel("Number of minutes between subjective attempts"), subjectiveAttemptOffsetMinutes);
 
-      subjectiveAttemptOffsetMinutes = new JFormattedTextField(integerFormat);
-      subjectiveAttemptOffsetMinutes.setToolTipText("How many minutes later to try to find a new subjective slot");
-      addRow(new JLabel("Number of minutes between subjective attempts"), subjectiveAttemptOffsetMinutes);
+    numTables = createIntegerField(1, 1000);
+    addRow(new JLabel("Number of performance tables"), numTables);
 
-      numTables = new JFormattedTextField(integerFormat);
-      addRow(new JLabel("Number of performance tables"), numTables);
+    maxTime = new ScheduleDurationField();
+    maxTime.setToolTipText("Maximum duration of the tournament hours:minutes");
+    addRow(new JLabel("Maximum length of the tournament"), maxTime);
 
-      maxTime = new ScheduleDurationField();
-      maxTime.setToolTipText("Maximum duration of the tournament hours:minutes");
-      addRow(new JLabel("Maximum length of the tournament"), maxTime);
+    // end of form spacer
+    gbc = new GridBagConstraints();
+    gbc.fill = GridBagConstraints.BOTH;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.gridheight = GridBagConstraints.REMAINDER;
+    gbc.weighty = 1.0;
+    add(new JPanel(), gbc);
+  }
 
-      // end of form spacer
-      gbc = new GridBagConstraints();
-      gbc.fill = GridBagConstraints.BOTH;
-      gbc.gridwidth = GridBagConstraints.REMAINDER;
-      gbc.gridheight = GridBagConstraints.REMAINDER;
-      gbc.weighty = 1.0;
-      add(new JPanel(), gbc);
-    } catch (final ParseException pe) {
-      throw new FLLInternalException("Error building up SolverParamsEditor", pe);
-    }
+  /**
+   * @param i
+   * @param j
+   * @return
+   */
+  private JFormattedTextField createIntegerField(final int min,
+                                                 final int max) {
+
+    final NumberFormatter def = new NumberFormatter();
+    def.setValueClass(Integer.class);
+    final NumberFormatter disp = new NumberFormatter((new DecimalFormat("#,###,##0")));
+    disp.setValueClass(Integer.class);
+    final NumberFormatter ed = new NumberFormatter((new DecimalFormat("#,###,##0")));
+    ed.setValueClass(Integer.class);
+    final DefaultFormatterFactory factory = new DefaultFormatterFactory(def, disp, ed);
+
+    final JFormattedTextField field = new JFormattedTextField(factory);
+    field.setValue(new Integer(min));
+    field.setInputVerifier(new IntegerVerifier(min, max));
+    return field;
   }
 
   /**
@@ -149,14 +166,14 @@ public class SolverParamsEditor extends JPanel {
     changeDuration.setValue(params.getChangetimeMinutes());
     performanceChangeDuration.setValue(params.getPerformanceChangetimeMinutes());
 
-    //FIXME assign groups
-    
+    // FIXME assign groups
+
     numPerformanceRounds.setValue(params.getNumPerformanceRounds());
     subjectiveFirst.setSelected(params.getSubjectiveFirst());
     perfAttemptOffsetMinutes.setValue(params.getPerformanceAttemptOffsetMinutes());
     subjectiveAttemptOffsetMinutes.setValue(params.getSubjectiveAttemptOffsetMinutes());
     numTables.setValue(params.getNumTables());
-    
+
     maxTime.setDuration(params.getMaxDuration());
   }
 
