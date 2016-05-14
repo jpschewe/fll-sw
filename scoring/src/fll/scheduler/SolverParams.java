@@ -289,6 +289,18 @@ public class SolverParams extends SchedParams {
     this.numTables = v;
   }
 
+  /**
+   * Maximum duration the tournament should run. This
+   * is used to limit the search space when generating a schedule.
+   * 
+   * @see #getTMaxHours()
+   * @see #getTMaxMinutes()
+   */
+  public final Duration getMaxDuration() {
+    final Duration d = Duration.ofHours(getTMaxHours()).plusMinutes(getTMaxMinutes());
+    return d;
+  }
+
   private int tmaxHours = 8;
 
   /**
@@ -349,8 +361,7 @@ public class SolverParams extends SchedParams {
    * 
    * @throws ParseException
    */
-  private void parseBreaks(final Properties properties)
-      throws ParseException {
+  private void parseBreaks(final Properties properties) throws ParseException {
     subjectiveBreaks.addAll(parseBreaks(properties, "subjective"));
     performanceBreaks.addAll(parseBreaks(properties, "performance"));
   }

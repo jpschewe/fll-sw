@@ -44,7 +44,7 @@ public class SolverParamsEditor extends JPanel {
 
   private final JFormattedTextField numTables;
 
-  private final JFormattedTextField maxTime;
+  private final ScheduleDurationField maxTime;
 
   public SolverParamsEditor() {
     super(new GridBagLayout());
@@ -94,8 +94,8 @@ public class SolverParamsEditor extends JPanel {
       numTables = new JFormattedTextField(integerFormat);
       addRow(new JLabel("Number of performance tables"), numTables);
 
-      // FIXME need format for this
-      maxTime = new JFormattedTextField(/* new HoursMinutesFormat() */);
+      maxTime = new ScheduleDurationField();
+      maxTime.setToolTipText("Maximum duration of the tournament hours:minutes");
       addRow(new JLabel("Maximum length of the tournament"), maxTime);
 
       // end of form spacer
@@ -157,8 +157,7 @@ public class SolverParamsEditor extends JPanel {
     subjectiveAttemptOffsetMinutes.setValue(params.getSubjectiveAttemptOffsetMinutes());
     numTables.setValue(params.getNumTables());
     
-    //FIXME need correct formatting for maxTime
-    
+    maxTime.setDuration(params.getMaxDuration());
   }
 
   public SolverParams getParams() {

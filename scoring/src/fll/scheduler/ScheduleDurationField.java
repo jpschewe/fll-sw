@@ -8,8 +8,7 @@ package fll.scheduler;
 
 import java.awt.Color;
 import java.text.ParseException;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
+import java.time.Duration;
 import java.time.format.DateTimeParseException;
 
 import javax.swing.InputVerifier;
@@ -24,26 +23,23 @@ import fll.util.FLLInternalException;
 import fll.util.LogUtils;
 
 /**
- * Field for displaying schedule times.
- * 
- * @see TournamentSchedule#parseTime(String)
- * @see TournamentSchedule#formatTime(java.time.LocalTime)
+ * Field for displaying schedule durations.
  */
-/* package */ class ScheduleTimeField extends JFormattedTextField {
+/* package */ class ScheduleDurationField extends JFormattedTextField {
 
   public static final String MASKFORMAT = "##:##";
 
   /**
-   * Default constructor, sets time to now.
+   * Default constructor, sets value to 0.
    */
-  public ScheduleTimeField() {
-    this(LocalTime.now());
+  public ScheduleDurationField() {
+    this(Duration.ofMinutes(0));
   }
 
   /**
-   * @param value the initial value for the widget
+   * @param value the duration to use for the initial value, may not be null
    */
-  public ScheduleTimeField(final LocalTime value) {
+  public ScheduleDurationField(final Duration value) {
     setInputVerifier(new TimeVerifier());
 
     try {
@@ -56,47 +52,75 @@ import fll.util.LogUtils;
       throw new FLLInternalException("Invalid format for MaskFormatter", pe);
     }
 
-    setTime(value);
+    setDuration(value);
   }
 
   /**
-   * Retrieve the current value as a {@link LocalTime} object
+   * Retrieve the current value as a {@link Duration} object
    * 
-   * @return Current value as a {@link LocalTime} object
+   * @return Current value as a {@link Duration} object
    * @throws java.text.ParseException
    */
-  public LocalTime getTime() {
-    final String str = getTimeText((String) getValue());
-    return TournamentSchedule.parseTime(str);
+  public Duration getDuration() {
+    final String str = getDurationText((String) getValue());
+    final Duration d = parseDuration(str);
+    return d;
   }
 
   /**
-   * Always output without 24-hour time and without AM/PM.
-   * Make sure there are always 2 digits in the hours field. This
-   * is the same as the time format used by TournamentSchedule as it's
-   * output format, except that we're making sure there is a leading 0.
+   * Parse a duration of the format ##:## assuming hours and minutes.
+   * Leading underscores are ignored.
+   * 
+   * @param str the string to parse
+   * @return null if the string cannot be parsed as a duration
    */
-  private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("hh:mm");
+  private static Duration parseDuration(final String str) {
+    final int colonIndex = str.indexOf(':');
+    if (colonIndex < 0) {
+      return null;
+    }
+
+    String hoursStr = str.substring(0, colonIndex);
+    while (!hoursStr.isEmpty()
+        && hoursStr.startsWith("_")) {
+      hoursStr = hoursStr.substring(1);
+    }
+
+    final String minutesStr = str.substring(colonIndex
+        + 1);
+
+    final Duration minutes  = Duration.ofMinutes(Integer.valueOf(minutesStr));
+    if(hoursStr.isEmpty()) {
+      return minutes;
+    } else {
+      final Duration total = minutes.plusHours(Integer.valueOf(hoursStr));
+      return total;
+    }
+  }
 
   /**
    * Set the current value.
    * 
-   * @param time the new value, cannot be null
+   * @param duration the new value, cannot be null
    */
-  public void setTime(final LocalTime time) {
-    final String formatted = TIME_FORMAT.format(time);
+  public void setDuration(final Duration duration) {
+    final long asMinutes = duration.toMinutes();
+    final long hours = asMinutes / 60;
+    final long minutes = asMinutes - (hours * 60);
+    final String formatted = String.format("%02d:%02d", hours, minutes);
     setValue(formatted);
   }
 
   /**
    * Remove leading underscore if it exists.
-   * This allows the string to be parsed as a valid time if the hours is only a
+   * This allows the string to be parsed as a valid duration if the hours is
+   * only a
    * single digit.
    * 
    * @param raw the raw string
    * @return the string without the leading underscore
    */
-  private static String getTimeText(final String raw) {
+  private static String getDurationText(final String raw) {
     if (raw.startsWith("_")) {
       return raw.substring(1);
     } else {
@@ -120,7 +144,7 @@ import fll.util.LogUtils;
       if (input instanceof JFormattedTextField) {
         final JFormattedTextField field = (JFormattedTextField) input;
         try {
-          final String text = getTimeText(field.getText());
+          final String text = getDurationText(field.getText());
           TournamentSchedule.parseTime(text);
           input.setForeground(VALID_COLOR);
           return true;
