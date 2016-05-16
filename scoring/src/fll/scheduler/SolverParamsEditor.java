@@ -8,17 +8,14 @@ package fll.scheduler;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.text.DecimalFormat;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.text.DefaultFormatterFactory;
-import javax.swing.text.NumberFormatter;
 
-import fll.util.IntegerVerifier;
+import fll.util.FormatterUtils;
 
 /**
  * Editor for {@link SolverParams}.
@@ -30,6 +27,8 @@ public class SolverParamsEditor extends JPanel {
   private final JCheckBox alternateTables;
 
   private final JFormattedTextField performanceDuration;
+  
+  private final SubjectiveStationListEditor subjectiveStations;
 
   private final JFormattedTextField changeDuration;
 
@@ -58,38 +57,40 @@ public class SolverParamsEditor extends JPanel {
     alternateTables = new JCheckBox("Alternate tables");
     addRow(alternateTables);
 
-    performanceDuration = createIntegerField(1, 1000);
+    performanceDuration = FormatterUtils.createIntegerField(1, 1000);
     performanceDuration.setToolTipText("The number of minutes between performance runs");
     addRow(new JLabel("Performance duration:"), performanceDuration);
 
     // FIXME mSubjectiveStations = new
     // ArrayList<SubjectiveStation>(subjectiveParams);
+    subjectiveStations = new SubjectiveStationListEditor();
+    addRow(subjectiveStations);
 
-    changeDuration = createIntegerField(0, 1000);
+    changeDuration = FormatterUtils.createIntegerField(0, 1000);
     changeDuration.setToolTipText("The number of minutes that a team has between any 2 activities");
     addRow(new JLabel("Change time duration:"), changeDuration);
 
-    performanceChangeDuration = createIntegerField(0, 1000);
+    performanceChangeDuration = FormatterUtils.createIntegerField(0, 1000);
     performanceChangeDuration.setToolTipText("The number of minutes that a team has between any 2 performance runs");
     addRow(new JLabel("Performance change time duration:"), performanceChangeDuration);
 
     // FIXME put in group counts
 
-    numPerformanceRounds = createIntegerField(0, 10);
+    numPerformanceRounds = FormatterUtils.createIntegerField(0, 10);
     addRow(new JLabel("Number of performance rounds:"), numPerformanceRounds);
 
     subjectiveFirst = new JCheckBox("Schedule subjective before performance");
     addRow(subjectiveFirst);
 
-    perfAttemptOffsetMinutes = createIntegerField(1, 1000);
+    perfAttemptOffsetMinutes = FormatterUtils.createIntegerField(1, 1000);
     perfAttemptOffsetMinutes.setToolTipText("How many minutes later to try to find a new performance slot");
     addRow(new JLabel("Number of minutes between attempts "), perfAttemptOffsetMinutes);
 
-    subjectiveAttemptOffsetMinutes = createIntegerField(1, 1000);
+    subjectiveAttemptOffsetMinutes = FormatterUtils.createIntegerField(1, 1000);
     subjectiveAttemptOffsetMinutes.setToolTipText("How many minutes later to try to find a new subjective slot");
     addRow(new JLabel("Number of minutes between subjective attempts"), subjectiveAttemptOffsetMinutes);
 
-    numTables = createIntegerField(1, 1000);
+    numTables = FormatterUtils.createIntegerField(1, 1000);
     addRow(new JLabel("Number of performance tables"), numTables);
 
     maxTime = new ScheduleDurationField();
@@ -103,28 +104,6 @@ public class SolverParamsEditor extends JPanel {
     gbc.gridheight = GridBagConstraints.REMAINDER;
     gbc.weighty = 1.0;
     add(new JPanel(), gbc);
-  }
-
-  /**
-   * @param i
-   * @param j
-   * @return
-   */
-  private JFormattedTextField createIntegerField(final int min,
-                                                 final int max) {
-
-    final NumberFormatter def = new NumberFormatter();
-    def.setValueClass(Integer.class);
-    final NumberFormatter disp = new NumberFormatter((new DecimalFormat("#,###,##0")));
-    disp.setValueClass(Integer.class);
-    final NumberFormatter ed = new NumberFormatter((new DecimalFormat("#,###,##0")));
-    ed.setValueClass(Integer.class);
-    final DefaultFormatterFactory factory = new DefaultFormatterFactory(def, disp, ed);
-
-    final JFormattedTextField field = new JFormattedTextField(factory);
-    field.setValue(new Integer(min));
-    field.setInputVerifier(new IntegerVerifier(min, max));
-    return field;
   }
 
   /**
