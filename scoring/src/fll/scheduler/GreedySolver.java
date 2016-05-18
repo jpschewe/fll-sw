@@ -441,7 +441,9 @@ public class GreedySolver {
   }
 
   /**
-   * @param station zero based
+   * Generated name for a subjective station.
+   * 
+   * @param station index used to generate the name
    * @return
    */
   public static String getSubjectiveColumnName(final int station) {
