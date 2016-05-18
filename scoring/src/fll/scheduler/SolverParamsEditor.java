@@ -61,8 +61,6 @@ public class SolverParamsEditor extends JPanel {
     performanceDuration.setToolTipText("The number of minutes between performance runs");
     addRow(new JLabel("Performance duration:"), performanceDuration);
 
-    // FIXME mSubjectiveStations = new
-    // ArrayList<SubjectiveStation>(subjectiveParams);
     subjectiveStations = new SubjectiveStationListEditor();
     addRow(subjectiveStations);
 
@@ -97,6 +95,8 @@ public class SolverParamsEditor extends JPanel {
     maxTime.setToolTipText("Maximum duration of the tournament hours:minutes");
     addRow(new JLabel("Maximum length of the tournament"), maxTime);
 
+    //FIXME add breaks
+    
     // end of form spacer
     gbc = new GridBagConstraints();
     gbc.fill = GridBagConstraints.BOTH;
@@ -145,6 +145,9 @@ public class SolverParamsEditor extends JPanel {
     changeDuration.setValue(params.getChangetimeMinutes());
     performanceChangeDuration.setValue(params.getPerformanceChangetimeMinutes());
 
+    subjectiveStations.setStations(params.getSubjectiveStations());
+    
+    // FIXME breaks
     // FIXME assign groups
 
     numPerformanceRounds.setValue(params.getNumPerformanceRounds());
