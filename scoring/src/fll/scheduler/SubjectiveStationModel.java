@@ -140,5 +140,15 @@ public class SubjectiveStationModel extends AbstractTableModel {
         - 1, stations.size()
             - 1);
   }
+  
+  /**
+   * Delete the specified row.
+   * 
+   * @param row
+   */
+  public void deleteRow(final int row) {
+    stations.remove(row);
+    fireTableRowsDeleted(row, row);
+  }
 
 }
