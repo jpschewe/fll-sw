@@ -1,9 +1,9 @@
 package fll.scheduler;
 
 import java.io.Serializable;
+import java.time.LocalTime;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -46,7 +46,7 @@ public final class TeamScheduleInfo implements Serializable {
   /**
    * @param idx zero based
    */
-  public Date getPerfTime(final int idx) {
+  public LocalTime getPerfTime(final int idx) {
     return perf[idx].getTime();
   }
 
@@ -77,7 +77,7 @@ public final class TeamScheduleInfo implements Serializable {
    * @param time
    * @return the round, -1 if cannot be found
    */
-  public int findRoundFortime(final Date time) {
+  public int findRoundFortime(final LocalTime time) {
     for (int round = 0; round < perf.length; ++round) {
       if (perf[round].getTime().equals(time)) {
         return round;

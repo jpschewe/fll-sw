@@ -7,6 +7,7 @@
 package fll.scheduler;
 
 import java.io.Serializable;
+import java.time.Duration;
 
 import fll.Utilities;
 
@@ -45,6 +46,10 @@ public final class SubjectiveStation implements Serializable {
    */
   public int getDurationMinutes() {
     return durationMinutes;
+  }
+
+  public Duration getDuration() {
+    return Duration.ofMinutes(durationMinutes);
   }
 
   @Override

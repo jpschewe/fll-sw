@@ -84,11 +84,12 @@ public final class Utilities {
    * @throws RuntimeException if the first line cannot be read
    */
   @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
-                               "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Generate columns based upon file loaded")
+                                "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Generate columns based upon file loaded")
   public static void loadCSVFile(final Connection connection,
                                  final String tablename,
                                  final Map<String, String> types,
-                                 final Reader reader) throws IOException, SQLException {
+                                 final Reader reader)
+      throws IOException, SQLException {
     Statement stmt = null;
     PreparedStatement prep = null;
     try {
@@ -148,7 +149,8 @@ public final class Utilities {
       prep = connection.prepareStatement(insertPrepSQL.append(valuesSQL).toString());
       while (null != (line = csvreader.readNext())) {
         for (int columnIndex = 0; columnIndex < line.length; ++columnIndex) {
-          coerceData(line[columnIndex], columnTypes[columnIndex], prep, columnIndex + 1);
+          coerceData(line[columnIndex], columnTypes[columnIndex], prep, columnIndex
+              + 1);
         }
         prep.executeUpdate();
       }
@@ -172,7 +174,8 @@ public final class Utilities {
   private static void coerceData(final String data,
                                  final String type,
                                  final PreparedStatement prep,
-                                 final int index) throws SQLException {
+                                 final int index)
+      throws SQLException {
     final String typeLower = type.toLowerCase();
     if ("longvarchar".equals(typeLower)
         || typeLower.startsWith("varchar")) {
@@ -250,13 +253,12 @@ public final class Utilities {
    * Extensions used by HSQL for it's database files. These extensions include
    * the dot.
    */
-  public static final Collection<String> HSQL_DB_EXTENSIONS = Collections.unmodifiableCollection(Arrays.asList(new String[] {
-                                                                                                                             ".properties",
-                                                                                                                             ".script",
-                                                                                                                             ".log",
-                                                                                                                             ".data",
-                                                                                                                             ".backup",
-                                                                                                                             "", }));
+  public static final Collection<String> HSQL_DB_EXTENSIONS = Collections.unmodifiableCollection(Arrays.asList(new String[] { ".properties",
+                                                                                                                              ".script",
+                                                                                                                              ".log",
+                                                                                                                              ".data",
+                                                                                                                              ".backup",
+                                                                                                                              "", }));
 
   /**
    * Test that the database behind the connection is initialized. Checks for the
@@ -526,7 +528,8 @@ public final class Utilities {
    * @throws NullPointerException if no value is found
    */
   public static int readIntProperty(final Properties properties,
-                                    final String property) throws NumberFormatException, NullPointerException {
+                                    final String property)
+      throws NumberFormatException, NullPointerException {
     final String value = properties.getProperty(property);
     if (null == value) {
       throw new NullPointerException("Property '"
@@ -536,13 +539,80 @@ public final class Utilities {
   }
 
   /**
+   * Read an integer property and fail if the property doesn't parse
+   * as a number.
+   * 
+   * @param properties where to read the property from
+   * @param property the property to read
+   * @param defaultValue the value to use if the property doesn't exist
+   * @return the value
+   * @throws NumberFormatException if there is a parse error
+   */
+  public static int readIntProperty(final Properties properties,
+                                    final String property,
+                                    final int defaultValue)
+      throws NumberFormatException {
+    final String value = properties.getProperty(property);
+    if (null == value) {
+      return defaultValue;
+    } else {
+      return Integer.parseInt(value.trim());
+    }
+  }
+
+  /**
+   * Read a boolean property and fail if the property doesn't have a value.
+   * "1" and "true" (case insensitive) are true, everything else is false.
+   * 
+   * @param properties where to read the property from
+   * @param property the property to read
+   * @return the value
+   * @throws NullPointerException if no value is found
+   */
+  public static boolean readBooleanProperty(final Properties properties,
+                                            final String property)
+      throws NullPointerException {
+    final String value = properties.getProperty(property);
+    if (null == value) {
+      throw new NullPointerException("Property '"
+          + property + "' doesn't have a value");
+    } else {
+      return "1".equals(value)
+          || "true".equalsIgnoreCase(value);
+    }
+  }
+
+  /**
+   * Read a boolean property and fail if the property doesn't have a value.
+   * "1" and "true" (case insensitive) are true, everything else is false.
+   * 
+   * @param properties where to read the property from
+   * @param property the property to read
+   * @param defaultValue the value to use if the property is not found
+   * @return the value
+   */
+  public static boolean readBooleanProperty(final Properties properties,
+                                            final String property,
+                                            final boolean defaultValue)
+      throws NullPointerException {
+    final String value = properties.getProperty(property);
+    if (null == value) {
+      return defaultValue;
+    } else {
+      return "1".equals(value)
+          || "true".equalsIgnoreCase(value);
+    }
+  }
+
+  /**
    * Check if a number is even.
    * 
    * @param number the number to check
    * @return true if the number is even
    */
   public static boolean isEven(final int number) {
-    return number % 2 == 0;
+    return number
+        % 2 == 0;
   }
 
   /**
@@ -553,6 +623,85 @@ public final class Utilities {
    */
   public static boolean isOdd(final int number) {
     return !isEven(number);
+  }
+
+  /**
+   * Parse a string of the form [integer, integer, ...].
+   * 
+   * @param str string to parse
+   * @return array of integers
+   * @throws FLLRuntimeException if the string cannot be parsed
+   */
+  public static int[] parseListOfIntegers(final String str) {
+    if (null == str
+        || str.isEmpty()) {
+      return new int[0];
+    }
+
+    int lbracket = str.indexOf('[');
+    if (-1 == lbracket) {
+      throw new FLLRuntimeException("No '[' found in string: '"
+          + str + "'");
+    }
+    int rbracket = str.indexOf(']', lbracket);
+    if (-1 == rbracket) {
+      throw new FLLRuntimeException("No ']' found in string: '"
+          + str + "'");
+    }
+    final String[] strings;
+    if (lbracket
+        + 1 == rbracket) {
+      strings = new String[0];
+    } else {
+      strings = str.substring(lbracket
+          + 1, rbracket).split(",");
+    }
+
+    final int[] values = new int[strings.length];
+    for (int i = 0; i < strings.length; ++i) {
+      values[i] = Integer.parseInt(strings[i].trim());
+    }
+
+    return values;
+  }
+
+  /**
+   * Parse a string of the form [string, string, ...].
+   * 
+   * @param str string to parse, handles null and empty
+   * @return array of strings
+   * @throws FLLRuntimeException if the string cannot be parsed
+   */
+  public static String[] parseListOfStrings(final String str) {
+    if (null == str
+        || str.isEmpty()) {
+      return new String[0];
+    }
+
+    int lbracket = str.indexOf('[');
+    if (-1 == lbracket) {
+      throw new FLLRuntimeException("No '[' found in string: '"
+          + str + "'");
+    }
+    int rbracket = str.indexOf(']', lbracket);
+    if (-1 == rbracket) {
+      throw new FLLRuntimeException("No ']' found in string: '"
+          + str + "'");
+    }
+    final String[] strings;
+    if (lbracket
+        + 1 == rbracket) {
+      strings = new String[0];
+    } else {
+      strings = str.substring(lbracket
+          + 1, rbracket).split(",");
+    }
+    
+    for(int i=0; i<strings.length; ++i) {
+      strings[i] = strings[i].trim();
+    }
+
+    return strings;
   }
 
 }

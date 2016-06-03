@@ -26,6 +26,7 @@ import java.io.Writer;
 import java.net.URL;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.time.LocalTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -34,13 +35,13 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JCheckBox;
-import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
@@ -75,6 +76,7 @@ import com.itextpdf.text.DocumentException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
+import fll.scheduler.SchedParams.InvalidParametersException;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
 import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
@@ -156,7 +158,7 @@ public class SchedulerUI extends JFrame {
     mDescriptionFilename = new JLabel("");
     scheduleDescriptionPanel.add(createDescriptionToolbar(), BorderLayout.PAGE_START);
 
-    mScheduleDescriptionEditor = new JEditorPane("text/plain", null);
+    mScheduleDescriptionEditor = new SolverParamsEditor();
     final JScrollPane editorScroller = new JScrollPane(mScheduleDescriptionEditor);
     scheduleDescriptionPanel.add(editorScroller, BorderLayout.CENTER);
 
@@ -209,18 +211,18 @@ public class SchedulerUI extends JFrame {
   };
 
   void saveScheduleDescription() {
-    Writer writer = null;
-    try {
-      writer = new OutputStreamWriter(new FileOutputStream(mScheduleDescriptionFile), Utilities.DEFAULT_CHARSET);
-      final String text = mScheduleDescriptionEditor.getText();
-      writer.write(text);
+    try (final Writer writer = new OutputStreamWriter(new FileOutputStream(mScheduleDescriptionFile),
+                                                      Utilities.DEFAULT_CHARSET)) {
+      final SolverParams params = mScheduleDescriptionEditor.getParams();
+
+      final Properties properties = new Properties();
+      params.save(properties);
+      properties.store(writer, null);
     } catch (final IOException e) {
       final Formatter errorFormatter = new Formatter();
       errorFormatter.format("Error saving file: %s", e.getMessage());
       LOGGER.error(errorFormatter, e);
       JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error saving file", JOptionPane.ERROR_MESSAGE);
-    } finally {
-      IOUtils.closeQuietly(writer);
     }
   }
 
@@ -273,6 +275,10 @@ public class SchedulerUI extends JFrame {
       LOGGER.error(errorFormatter, e);
       JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error Running Scheduler",
                                     JOptionPane.ERROR_MESSAGE);
+    } catch (final InvalidParametersException e) {
+      LOGGER.error(e.getMessage(), e);
+      JOptionPane.showMessageDialog(SchedulerUI.this, e.getMessage(), "Error Running Scheduler",
+                                    JOptionPane.ERROR_MESSAGE);
     }
 
   }
@@ -280,7 +286,7 @@ public class SchedulerUI extends JFrame {
   private final class SchedulerWorker extends SwingWorker<Integer, Void> {
     private final GreedySolver solver;
 
-    public SchedulerWorker() throws IOException, ParseException {
+    public SchedulerWorker() throws IOException, ParseException, InvalidParametersException {
       this.solver = new GreedySolver(mScheduleDescriptionFile, false);
     }
 
@@ -306,13 +312,7 @@ public class SchedulerUI extends JFrame {
           return;
         }
 
-        final List<SubjectiveStation> subjectiveStations = new LinkedList<SubjectiveStation>();
-        for (int subj = 0; subj < solver.getNumSubjectiveStations(); ++subj) {
-          final String name = solver.getSubjectiveColumnName(subj);
-          final int duration = solver.getSubjectiveDuration(subj);
-          final SubjectiveStation station = new SubjectiveStation(name, duration);
-          subjectiveStations.add(station);
-        }
+        final List<SubjectiveStation> subjectiveStations = solver.getParameters().getSubjectiveStations();
 
         // this causes mSchedParams, mScheduleData and mScheduleFile to be set
         final File solutionFile = solver.getBestSchedule();
@@ -444,26 +444,36 @@ public class SchedulerUI extends JFrame {
   };
 
   private void loadScheduleDescription(final File file) {
-    Reader reader = null;
-    try {
-      reader = new InputStreamReader(new FileInputStream(file), Utilities.DEFAULT_CHARSET);
-      final String text = net.mtu.eggplant.io.IOUtils.readIntoString(reader);
-
-      mScheduleDescriptionEditor.setText(text);
-
-      mScheduleDescriptionFile = file;
-
-      mSaveScheduleDescriptionAction.setEnabled(true);
-      mRunSchedulerAction.setEnabled(true);
-      mDescriptionFilename.setText(file.getName());
+    final Properties properties = new Properties();
+    try (final Reader reader = new InputStreamReader(new FileInputStream(file), Utilities.DEFAULT_CHARSET)) {
+      properties.load(reader);
     } catch (final IOException e) {
       final Formatter errorFormatter = new Formatter();
       errorFormatter.format("Error loading file: %s", e.getMessage());
       LOGGER.error(errorFormatter, e);
       JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error loading file", JOptionPane.ERROR_MESSAGE);
-    } finally {
-      IOUtils.closeQuietly(reader);
+      return;
     }
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug(properties.toString());
+    }
+
+    try {
+      final SolverParams params = new SolverParams();
+      params.load(properties);
+      mScheduleDescriptionEditor.setParams(params);
+    } catch (final ParseException pe) {
+      final Formatter errorFormatter = new Formatter();
+      errorFormatter.format("Error parsing file: %s", pe.getMessage());
+      LOGGER.error(errorFormatter, pe);
+      JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error parsing file", JOptionPane.ERROR_MESSAGE);
+      return;
+    }
+    mScheduleDescriptionFile = file;
+
+    mSaveScheduleDescriptionAction.setEnabled(true);
+    mRunSchedulerAction.setEnabled(true);
+    mDescriptionFilename.setText(file.getName());
   }
 
   private JToolBar createDescriptionToolbar() {
@@ -950,7 +960,7 @@ public class SchedulerUI extends JFrame {
   @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This calss isn't going to be serialized")
   private TournamentSchedule mScheduleData;
 
-  /* package */TournamentSchedule getScheduleData() {
+      /* package */TournamentSchedule getScheduleData() {
     return mScheduleData;
   }
 
@@ -968,7 +978,7 @@ public class SchedulerUI extends JFrame {
 
   private ViolationTableModel mViolationsModel;
 
-  /* package */ViolationTableModel getViolationsModel() {
+      /* package */ViolationTableModel getViolationsModel() {
     return mViolationsModel;
   }
 
@@ -999,7 +1009,7 @@ public class SchedulerUI extends JFrame {
 
   private final JTabbedPane mTabbedPane;
 
-  private final JEditorPane mScheduleDescriptionEditor;
+  private final SolverParamsEditor mScheduleDescriptionEditor;
 
   private final JTable mScheduleTable;
 
@@ -1112,8 +1122,8 @@ public class SchedulerUI extends JFrame {
         }
       }
 
-      if (value instanceof Date) {
-        final String strValue = TournamentSchedule.OUTPUT_DATE_FORMAT.get().format((Date) value);
+      if (value instanceof LocalTime) {
+        final String strValue = TournamentSchedule.formatTime((LocalTime) value);
         return super.getTableCellRendererComponent(table, strValue, isSelected, hasFocus, row, column);
       } else {
         return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
