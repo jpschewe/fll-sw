@@ -89,11 +89,11 @@ import fll.util.LogUtils;
     final String minutesStr = str.substring(colonIndex
         + 1);
 
-    final Duration minutes  = Duration.ofMinutes(Integer.valueOf(minutesStr));
+    final Duration minutes  = Duration.ofMinutes(Integer.parseInt(minutesStr));
     if(hoursStr.isEmpty()) {
       return minutes;
     } else {
-      final Duration total = minutes.plusHours(Integer.valueOf(hoursStr));
+      final Duration total = minutes.plusHours(Integer.parseInt(hoursStr));
       return total;
     }
   }
