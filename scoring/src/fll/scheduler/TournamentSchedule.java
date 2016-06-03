@@ -1533,7 +1533,7 @@ public class TournamentSchedule implements Serializable {
         final String station = entry.getValue();
         final int column = entry.getKey();
         final String str = line[column];
-        if ("".equals(str)) {
+        if (str.isEmpty()) {
           // If we got an empty string, then we must have hit the end
           return null;
         }
@@ -1545,7 +1545,7 @@ public class TournamentSchedule implements Serializable {
 
       for (int perfNum = 0; perfNum < getNumberOfRounds(); ++perfNum) {
         final String perf1Str = line[ci.getPerfColumn(perfNum)];
-        if ("".equals(perf1Str)) {
+        if (perf1Str.isEmpty()) {
           // If we got an empty string, then we must have hit the end
           return null;
         }
