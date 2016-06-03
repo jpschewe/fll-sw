@@ -8,6 +8,8 @@ package fll.scheduler;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
@@ -27,7 +29,7 @@ public class SolverParamsEditor extends JPanel {
   private final JCheckBox alternateTables;
 
   private final JFormattedTextField performanceDuration;
-  
+
   private final SubjectiveStationListEditor subjectiveStations;
 
   private final JFormattedTextField changeDuration;
@@ -45,6 +47,8 @@ public class SolverParamsEditor extends JPanel {
   private final JFormattedTextField numTables;
 
   private final ScheduleDurationField maxTime;
+
+  private final JudgingGroupListEditor judgingGroups;
 
   public SolverParamsEditor() {
     super(new GridBagLayout());
@@ -72,7 +76,8 @@ public class SolverParamsEditor extends JPanel {
     performanceChangeDuration.setToolTipText("The number of minutes that a team has between any 2 performance runs");
     addRow(new JLabel("Performance change time duration:"), performanceChangeDuration);
 
-    // FIXME put in group counts
+    judgingGroups = new JudgingGroupListEditor();
+    addRow(judgingGroups);
 
     numPerformanceRounds = FormatterUtils.createIntegerField(0, 10);
     addRow(new JLabel("Number of performance rounds:"), numPerformanceRounds);
@@ -95,8 +100,8 @@ public class SolverParamsEditor extends JPanel {
     maxTime.setToolTipText("Maximum duration of the tournament hours:minutes");
     addRow(new JLabel("Maximum length of the tournament"), maxTime);
 
-    //FIXME add breaks
-    
+    // FIXME add breaks
+
     // end of form spacer
     gbc = new GridBagConstraints();
     gbc.fill = GridBagConstraints.BOTH;
@@ -146,9 +151,14 @@ public class SolverParamsEditor extends JPanel {
     performanceChangeDuration.setValue(params.getPerformanceChangetimeMinutes());
 
     subjectiveStations.setStations(params.getSubjectiveStations());
-    
-    // FIXME breaks
-    // FIXME assign groups
+
+    final Map<String, Integer> judgingGroupMap = new HashMap<>();
+    for (int groupNum = 0; groupNum < params.getNumGroups(); ++groupNum) {
+      final int groupCount = params.getNumTeamsInGroup(groupNum);
+      final String groupName = String.format("group-%d", groupNum);
+      judgingGroupMap.put(groupName, groupCount);
+    }
+    judgingGroups.setJudgingGroups(judgingGroupMap);
 
     numPerformanceRounds.setValue(params.getNumPerformanceRounds());
     subjectiveFirst.setSelected(params.getSubjectiveFirst());
@@ -157,6 +167,9 @@ public class SolverParamsEditor extends JPanel {
     numTables.setValue(params.getNumTables());
 
     maxTime.setDuration(params.getMaxDuration());
+
+    // FIXME breaks
+
   }
 
   public SolverParams getParams() {
