@@ -10,6 +10,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
@@ -213,6 +214,28 @@ public class SchedParams implements Serializable {
       }
     }
     return null;
+  }
+  
+  /**
+   * Check if the parameters are valid.
+   * 
+   * @return a list of errors, the list is empty if the parameters are valid
+   */
+  public List<String> isValid() {
+    final List<String> errors = new LinkedList<>();
+    
+    if (getChangetimeMinutes() < SchedParams.MINIMUM_CHANGETIME_MINUTES) {
+      errors.add("Change time between events is too short, cannot be less than "
+          + SchedParams.MINIMUM_CHANGETIME_MINUTES + " minutes");
+    }
+    
+    if (getPerformanceChangetimeMinutes() < SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES) {
+      errors.add("Change time between performance rounds is too short, cannot be less than "
+          + SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES + " minutes");
+    }
+
+    
+    return errors;
   }
 
 }

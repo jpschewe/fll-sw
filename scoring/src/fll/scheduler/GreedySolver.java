@@ -245,6 +245,11 @@ public class GreedySolver {
 
     this.solverParameters = new SolverParams();
     this.solverParameters.load(properties);
+    final List<String> parameterErrors = this.solverParameters.isValid();
+    if (!parameterErrors.isEmpty()) {
+      throw new FLLRuntimeException("Parameters are invalid:\n"
+          + String.join("\n", parameterErrors));
+    }
 
     performanceAttemptOffset = solverParameters.getPerformanceAttemptOffsetMinutes();
     LOGGER.debug("Performance attempt offset: "
@@ -259,33 +264,8 @@ public class GreedySolver {
     performanceDuration = this.solverParameters.getPerformanceMinutes();
 
     changetime = this.solverParameters.getChangetimeMinutes();
-    if (this.solverParameters.getChangetimeMinutes() < SchedParams.MINIMUM_CHANGETIME_MINUTES) {
-      throw new FLLRuntimeException("Change time between events is too short, cannot be less than "
-          + SchedParams.MINIMUM_CHANGETIME_MINUTES + " minutes");
-    }
 
     performanceChangetime = this.solverParameters.getPerformanceChangetimeMinutes();
-    if (this.solverParameters.getPerformanceChangetimeMinutes() < SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES) {
-      throw new FLLRuntimeException("Change time between performance rounds is too short, cannot be less than "
-          + SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES + " minutes");
-    }
-
-    if (solverParameters.getAlternateTables()) {
-      // make sure performanceDuration is even
-      if ((performanceDuration
-          & 1) == 1) {
-        throw new FLLRuntimeException("Number of timeslots for performance duration ("
-            + performanceDuration + ") is not even and must be to alternate tables.");
-      }
-
-      // make sure num tables is even
-      if ((solverParameters.getNumTables()
-          & 1) == 1) {
-        throw new FLLRuntimeException("Number of tables ("
-            + solverParameters.getNumTables() + ") is not even and must be to alternate tables.");
-      }
-
-    }
 
     sz = new boolean[solverParameters.getNumGroups()][][][];
     sy = new boolean[solverParameters.getNumGroups()][][][];
@@ -1439,10 +1419,11 @@ public class GreedySolver {
               final LocalTime time = getTime(pz[team.getGroup()][team.getIndex()][table][side], round
                   + 1);
               if (null != time) {
-                perfTimes.add(new PerformanceTime(time, "Table"
-                    + (table
-                        + 1), (side
-                            + 1)));
+                final String tableName = String.format("Table %d", (table
+                    + 1));
+                final int displayedSide = side
+                    + 1;
+                perfTimes.add(new PerformanceTime(time, tableName, displayedSide));
               }
             }
           }
