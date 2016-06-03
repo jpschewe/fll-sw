@@ -38,6 +38,7 @@ import org.apache.log4j.Logger;
 
 import au.com.bytecode.opencsv.CSVWriter;
 import fll.Utilities;
+import fll.scheduler.SchedParams.InvalidParametersException;
 import fll.util.CheckCanceled;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
@@ -189,8 +190,9 @@ public class GreedySolver {
       LOGGER.fatal("Error reading file", e);
       System.exit(4);
     } catch (final RuntimeException e) {
+    } catch (final InvalidParametersException e) {
       LOGGER.fatal(e, e);
-      throw e;
+      System.exit(6);
     }
   }
 
@@ -225,10 +227,11 @@ public class GreedySolver {
   /**
    * @param datafile the datafile for the schedule to solve
    * @throws ParseException
+   * @throws InvalidParametersException
    */
   public GreedySolver(final File datafile,
                       final boolean optimize)
-      throws IOException, ParseException {
+      throws IOException, ParseException, InvalidParametersException {
     this.datafile = datafile;
     this.optimize = optimize;
     if (this.optimize) {
@@ -247,8 +250,7 @@ public class GreedySolver {
     this.solverParameters.load(properties);
     final List<String> parameterErrors = this.solverParameters.isValid();
     if (!parameterErrors.isEmpty()) {
-      throw new FLLRuntimeException("Parameters are invalid:\n"
-          + String.join("\n", parameterErrors));
+      throw new InvalidParametersException(parameterErrors);
     }
 
     performanceAttemptOffset = solverParameters.getPerformanceAttemptOffsetMinutes();
@@ -1419,7 +1421,7 @@ public class GreedySolver {
               final LocalTime time = getTime(pz[team.getGroup()][team.getIndex()][table][side], round
                   + 1);
               if (null != time) {
-                final String tableName = String.format("Table %d", (table
+                final String tableName = String.format("Table%d", (table
                     + 1));
                 final int displayedSide = side
                     + 1;
@@ -1574,4 +1576,5 @@ public class GreedySolver {
       }
     }
   };
+
 }

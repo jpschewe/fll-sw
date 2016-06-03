@@ -76,6 +76,7 @@ import com.itextpdf.text.DocumentException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
+import fll.scheduler.SchedParams.InvalidParametersException;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
 import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
@@ -213,6 +214,7 @@ public class SchedulerUI extends JFrame {
     try (final Writer writer = new OutputStreamWriter(new FileOutputStream(mScheduleDescriptionFile),
                                                       Utilities.DEFAULT_CHARSET)) {
       final SolverParams params = mScheduleDescriptionEditor.getParams();
+
       final Properties properties = new Properties();
       params.save(properties);
       properties.store(writer, null);
@@ -273,6 +275,10 @@ public class SchedulerUI extends JFrame {
       LOGGER.error(errorFormatter, e);
       JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error Running Scheduler",
                                     JOptionPane.ERROR_MESSAGE);
+    } catch (final InvalidParametersException e) {
+      LOGGER.error(e.getMessage(), e);
+      JOptionPane.showMessageDialog(SchedulerUI.this, e.getMessage(), "Error Running Scheduler",
+                                    JOptionPane.ERROR_MESSAGE);
     }
 
   }
@@ -280,7 +286,7 @@ public class SchedulerUI extends JFrame {
   private final class SchedulerWorker extends SwingWorker<Integer, Void> {
     private final GreedySolver solver;
 
-    public SchedulerWorker() throws IOException, ParseException {
+    public SchedulerWorker() throws IOException, ParseException, InvalidParametersException {
       this.solver = new GreedySolver(mScheduleDescriptionFile, false);
     }
 

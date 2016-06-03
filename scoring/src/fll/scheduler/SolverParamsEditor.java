@@ -182,10 +182,45 @@ public class SolverParamsEditor extends JPanel {
 
   }
 
+  /**
+   * The values from the editors are pushed into the parameters object and that
+   * object is returned.
+   * The caller should call {@link SchedParams#isValid()} called on it and
+   * display the errors to the user.
+   * 
+   * @return a non-null parameters object
+   */
   public SolverParams getParams() {
-    // FIXME make sure everything is valid
-    // FIXME copy valuesl from editors into params and then return, or should
-    // the values set immediately?
+
+    params.setStartTime(startTimeEditor.getTime());
+    params.setAlternateTables(alternateTables.isSelected());
+    params.setPerformanceMinutes((Integer) performanceDuration.getValue());
+    params.setChangetimeMinutes((Integer) performanceChangeDuration.getValue());
+    params.setPerformanceChangetimeMinutes((Integer) performanceChangeDuration.getValue());
+
+    params.setSubjectiveStations(subjectiveStations.getStations());
+
+    // TODO should change the parameters to support a map
+    final Map<String, Integer> judgingGroupMap = judgingGroups.getJudgingGroups();
+    final int[] groupCounts = new int[judgingGroupMap.size()];
+    int groupCountIndex = 0;
+    for (Map.Entry<String, Integer> entry : judgingGroupMap.entrySet()) {
+      groupCounts[groupCountIndex] = entry.getValue();
+      ++groupCountIndex;
+    }
+    params.setGroupCounts(groupCounts);
+
+    params.setNumPerformanceRounds((Integer) numPerformanceRounds.getValue());
+    params.setSubjectiveFirst(subjectiveFirst.isSelected());
+    params.setPerformanceAttemptOffsetMinutes((Integer) perfAttemptOffsetMinutes.getValue());
+    params.setSubjectiveAttemptOffsetMinutes((Integer) subjectiveAttemptOffsetMinutes.getValue());
+    params.setNumTables((Integer) numTables.getValue());
+
+    params.setMaxDuration(maxTime.getDuration());
+
+    params.setSubjectiveBreaks(subjectiveBreaks.getBreaks());
+    params.setPerformanceBreaks(performanceBreaks.getBreaks());
+    
     return this.params;
   }
 

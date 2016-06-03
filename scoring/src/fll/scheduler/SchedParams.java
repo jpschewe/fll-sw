@@ -34,6 +34,19 @@ public class SchedParams implements Serializable {
   public static final int MINIMUM_PERFORMANCE_CHANGETIME_MINUTES = 30;
 
   /**
+   * Thrown when the parameters are not valid.
+   */
+  public static class InvalidParametersException extends Exception {
+    /**
+     * @param errors the errors, typically from {@link SchedParams#isValid()}
+     */
+    public InvalidParametersException(final List<String> errors) {
+      super("Parameters are invalid:\n"
+          + String.join("\n", errors));
+    }
+  }
+
+  /**
    * @param subjectiveParams the parameters for the subjective categories, one
    *          entry for each subjective category
    * @param performanceMinutes the number of minutes that the performance
@@ -57,9 +70,9 @@ public class SchedParams implements Serializable {
    * Create object with all default values.
    */
   public SchedParams() {
-    
+
   }
-  
+
   /**
    * Load the parameters from a properties object.
    * 
@@ -82,7 +95,7 @@ public class SchedParams implements Serializable {
       mSubjectiveStations.add(station);
     }
   }
-  
+
   /**
    * Save this object to the specified properties object.
    * 
@@ -90,15 +103,15 @@ public class SchedParams implements Serializable {
    */
   public void save(final Properties properties) {
     final int[] subjectiveDurations = new int[mSubjectiveStations.size()];
-    for(int index =0; index<subjectiveDurations.length; ++index) {
+    for (int index = 0; index < subjectiveDurations.length; ++index) {
       subjectiveDurations[index] = mSubjectiveStations.get(index).getDurationMinutes();
-    }    
+    }
     properties.setProperty(GreedySolver.SUBJ_MINUTES_KEY, Arrays.toString(subjectiveDurations));
-    
+
     properties.setProperty(GreedySolver.ALPHA_PERF_MINUTES_KEY, Integer.toString(mPerformanceMinutes));
-    
+
     properties.setProperty(GreedySolver.CT_MINUTES_KEY, Integer.toString(mChangetimeMinutes));
-    properties.setProperty(GreedySolver.PCT_MINUTES_KEY, Integer.toString(mPerformanceChangetimeMinutes));    
+    properties.setProperty(GreedySolver.PCT_MINUTES_KEY, Integer.toString(mPerformanceChangetimeMinutes));
   }
 
   private int mPerformanceMinutes = DEFAULT_PERFORMANCE_MINUTES;
@@ -215,7 +228,7 @@ public class SchedParams implements Serializable {
     }
     return null;
   }
-  
+
   /**
    * Check if the parameters are valid.
    * 
@@ -223,18 +236,17 @@ public class SchedParams implements Serializable {
    */
   public List<String> isValid() {
     final List<String> errors = new LinkedList<>();
-    
+
     if (getChangetimeMinutes() < SchedParams.MINIMUM_CHANGETIME_MINUTES) {
       errors.add("Change time between events is too short, cannot be less than "
           + SchedParams.MINIMUM_CHANGETIME_MINUTES + " minutes");
     }
-    
+
     if (getPerformanceChangetimeMinutes() < SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES) {
       errors.add("Change time between performance rounds is too short, cannot be less than "
           + SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES + " minutes");
     }
 
-    
     return errors;
   }
 
