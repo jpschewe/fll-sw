@@ -633,6 +633,11 @@ public final class Utilities {
    * @throws FLLRuntimeException if the string cannot be parsed
    */
   public static int[] parseListOfIntegers(final String str) {
+    if (null == str
+        || str.isEmpty()) {
+      return new int[0];
+    }
+
     int lbracket = str.indexOf('[');
     if (-1 == lbracket) {
       throw new FLLRuntimeException("No '[' found in string: '"
@@ -643,21 +648,60 @@ public final class Utilities {
       throw new FLLRuntimeException("No ']' found in string: '"
           + str + "'");
     }
-    final String[] subjDurs;
+    final String[] strings;
     if (lbracket
         + 1 == rbracket) {
-      subjDurs = new String[0];
+      strings = new String[0];
     } else {
-      subjDurs = str.substring(lbracket
+      strings = str.substring(lbracket
           + 1, rbracket).split(",");
     }
 
-    final int[] values = new int[subjDurs.length];
-    for (int i = 0; i < subjDurs.length; ++i) {
-      values[i] = Integer.parseInt(subjDurs[i].trim());
+    final int[] values = new int[strings.length];
+    for (int i = 0; i < strings.length; ++i) {
+      values[i] = Integer.parseInt(strings[i].trim());
     }
 
     return values;
+  }
+
+  /**
+   * Parse a string of the form [string, string, ...].
+   * 
+   * @param str string to parse, handles null and empty
+   * @return array of strings
+   * @throws FLLRuntimeException if the string cannot be parsed
+   */
+  public static String[] parseListOfStrings(final String str) {
+    if (null == str
+        || str.isEmpty()) {
+      return new String[0];
+    }
+
+    int lbracket = str.indexOf('[');
+    if (-1 == lbracket) {
+      throw new FLLRuntimeException("No '[' found in string: '"
+          + str + "'");
+    }
+    int rbracket = str.indexOf(']', lbracket);
+    if (-1 == rbracket) {
+      throw new FLLRuntimeException("No ']' found in string: '"
+          + str + "'");
+    }
+    final String[] strings;
+    if (lbracket
+        + 1 == rbracket) {
+      strings = new String[0];
+    } else {
+      strings = str.substring(lbracket
+          + 1, rbracket).split(",");
+    }
+    
+    for(int i=0; i<strings.length; ++i) {
+      strings[i] = strings[i].trim();
+    }
+
+    return strings;
   }
 
 }

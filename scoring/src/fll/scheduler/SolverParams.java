@@ -28,6 +28,26 @@ public class SolverParams extends SchedParams {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
+  public static final String START_TIME_KEY = "start_time";
+
+  public static final String ALTERNATE_TABLES_KEY = "alternate_tables";
+
+  public static final String SUBJECTIVE_FIRST_KEY = "sujective_first";
+
+  public static final String PERF_ATTEMPT_OFFSET_MINUTES_KEY = "perf_attempt_offset_minutes";
+
+  public static final String SUBJECTIVE_ATTEMPT_OFFSET_MINUTES_KEY = "subjective_attempt_offset_minutes";
+
+  public static final String NROUNDS_KEY = "NRounds";
+
+  public static final String NTABLES_KEY = "NTables";
+
+  public static final String TMAX_HOURS_KEY = "TMax_hours";
+
+  public static final String TMAX_MINUTES_KEY = "TMax_minutes";
+
+  public static final String GROUP_COUNTS_KEY = "group_counts";
+
   /**
    * Format for the number of breaks property. Expected to be
    * used with String.format() and one argument that is the
@@ -67,36 +87,34 @@ public class SolverParams extends SchedParams {
   public void load(Properties properties) throws ParseException {
     super.load(properties);
 
-    final String startTimeStr = properties.getProperty(GreedySolver.START_TIME_KEY, null);
+    final String startTimeStr = properties.getProperty(START_TIME_KEY, null);
     if (null != startTimeStr) {
       this.startTime = TournamentSchedule.parseTime(startTimeStr);
     }
 
-    final String groupCountsStr = properties.getProperty(GreedySolver.GROUP_COUNTS_KEY);
+    final String groupCountsStr = properties.getProperty(GROUP_COUNTS_KEY);
     this.groupCounts = Utilities.parseListOfIntegers(groupCountsStr);
 
-    this.alternate = Utilities.readBooleanProperty(properties, GreedySolver.ALTERNATE_TABLES_KEY, false);
+    this.alternate = Utilities.readBooleanProperty(properties, ALTERNATE_TABLES_KEY, false);
     LOGGER.debug("Alternate is: "
         + alternate);
 
-    this.numPerformanceRounds = Utilities.readIntProperty(properties, GreedySolver.NROUNDS_KEY,
-                                                          this.numPerformanceRounds);
+    this.numPerformanceRounds = Utilities.readIntProperty(properties, NROUNDS_KEY, this.numPerformanceRounds);
 
-    this.subjectiveFirst = Utilities.readBooleanProperty(properties, GreedySolver.SUBJECTIVE_FIRST_KEY, false);
+    this.subjectiveFirst = Utilities.readBooleanProperty(properties, SUBJECTIVE_FIRST_KEY, false);
     LOGGER.debug("Subjective first is: "
         + this.subjectiveFirst);
 
-    this.perfAttemptOffsetMinutes = Utilities.readIntProperty(properties, GreedySolver.PERF_ATTEMPT_OFFSET_MINUTES_KEY,
+    this.perfAttemptOffsetMinutes = Utilities.readIntProperty(properties, PERF_ATTEMPT_OFFSET_MINUTES_KEY,
                                                               this.perfAttemptOffsetMinutes);
 
-    this.subjectiveAttemptOffsetMinutes = Utilities.readIntProperty(properties,
-                                                                    GreedySolver.SUBJECTIVE_ATTEMPT_OFFSET_MINUTES_KEY,
+    this.subjectiveAttemptOffsetMinutes = Utilities.readIntProperty(properties, SUBJECTIVE_ATTEMPT_OFFSET_MINUTES_KEY,
                                                                     this.subjectiveAttemptOffsetMinutes);
 
-    this.numTables = Utilities.readIntProperty(properties, GreedySolver.NTABLES_KEY, this.numTables);
+    this.numTables = Utilities.readIntProperty(properties, NTABLES_KEY, this.numTables);
 
-    this.tmaxHours = Utilities.readIntProperty(properties, GreedySolver.TMAX_HOURS_KEY);
-    this.tmaxMinutes = Utilities.readIntProperty(properties, GreedySolver.TMAX_MINUTES_KEY);
+    this.tmaxHours = Utilities.readIntProperty(properties, TMAX_HOURS_KEY);
+    this.tmaxMinutes = Utilities.readIntProperty(properties, TMAX_MINUTES_KEY);
 
     parseBreaks(properties);
 
@@ -106,26 +124,25 @@ public class SolverParams extends SchedParams {
   public void save(final Properties properties) {
     super.save(properties);
 
-    properties.setProperty(GreedySolver.START_TIME_KEY, TournamentSchedule.formatTime(this.startTime));
+    properties.setProperty(START_TIME_KEY, TournamentSchedule.formatTime(this.startTime));
 
-    properties.setProperty(GreedySolver.GROUP_COUNTS_KEY, Arrays.toString(this.groupCounts));
+    properties.setProperty(GROUP_COUNTS_KEY, Arrays.toString(this.groupCounts));
 
-    properties.setProperty(GreedySolver.ALTERNATE_TABLES_KEY, Boolean.toString(this.alternate));
+    properties.setProperty(ALTERNATE_TABLES_KEY, Boolean.toString(this.alternate));
 
-    properties.setProperty(GreedySolver.NROUNDS_KEY, Integer.toString(this.numPerformanceRounds));
+    properties.setProperty(NROUNDS_KEY, Integer.toString(this.numPerformanceRounds));
 
-    properties.setProperty(GreedySolver.SUBJECTIVE_FIRST_KEY, Boolean.toString(this.subjectiveFirst));
+    properties.setProperty(SUBJECTIVE_FIRST_KEY, Boolean.toString(this.subjectiveFirst));
 
-    properties.setProperty(GreedySolver.PERF_ATTEMPT_OFFSET_MINUTES_KEY,
-                           Integer.toString(this.perfAttemptOffsetMinutes));
+    properties.setProperty(PERF_ATTEMPT_OFFSET_MINUTES_KEY, Integer.toString(this.perfAttemptOffsetMinutes));
 
-    properties.setProperty(GreedySolver.SUBJECTIVE_ATTEMPT_OFFSET_MINUTES_KEY,
+    properties.setProperty(SUBJECTIVE_ATTEMPT_OFFSET_MINUTES_KEY,
                            Integer.toString(this.subjectiveAttemptOffsetMinutes));
 
-    properties.setProperty(GreedySolver.NTABLES_KEY, Integer.toString(this.numTables));
+    properties.setProperty(NTABLES_KEY, Integer.toString(this.numTables));
 
-    properties.setProperty(GreedySolver.TMAX_HOURS_KEY, Integer.toString(this.tmaxHours));
-    properties.setProperty(GreedySolver.TMAX_MINUTES_KEY, Integer.toString(this.tmaxMinutes));
+    properties.setProperty(TMAX_HOURS_KEY, Integer.toString(this.tmaxHours));
+    properties.setProperty(TMAX_MINUTES_KEY, Integer.toString(this.tmaxMinutes));
 
     saveBreaks(properties);
 
@@ -364,7 +381,7 @@ public class SolverParams extends SchedParams {
   public List<ScheduledBreak> getSubjectiveBreaks() {
     return Collections.unmodifiableList(this.subjectiveBreaks);
   }
-  
+
   public void setSubjectiveBreaks(final List<ScheduledBreak> breaks) {
     subjectiveBreaks.clear();
     subjectiveBreaks.addAll(breaks);
