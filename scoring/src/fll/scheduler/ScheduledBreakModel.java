@@ -19,7 +19,7 @@ import javax.swing.table.AbstractTableModel;
  */
 public class ScheduledBreakModel extends AbstractTableModel {
 
-  private final List<ScheduledBreak> breaks = new ArrayList<>();
+  private final ArrayList<ScheduledBreak> breaks = new ArrayList<>();
 
   public ScheduledBreakModel() {
   }

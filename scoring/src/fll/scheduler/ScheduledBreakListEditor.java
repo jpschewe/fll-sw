@@ -64,7 +64,7 @@ import fll.util.LogUtils;
     public void actionPerformed(final ActionEvent ae) {
       final String cmd = ae.getActionCommand();
       try {
-        final int row = Integer.valueOf(cmd);
+        final int row = Integer.parseInt(cmd);
         tableModel.deleteRow(row);
       } catch (final NumberFormatException nfe) {
         if (LOGGER.isDebugEnabled()) {
