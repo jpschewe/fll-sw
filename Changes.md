@@ -1,3 +1,5 @@
+Release 10.8
+============
 * #389 - Add a user interface to editing the scheduler input file
 * #423 - Remove seasonal divisions, only event divisions are still used
 
