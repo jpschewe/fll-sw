@@ -6,13 +6,14 @@
 
 package fll.scheduler;
 
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.LocalTime;
 
 /**
  * Holds information about a break in the schedule.
  */
-public final class ScheduledBreak {
+public final class ScheduledBreak implements Serializable {
 
   /**
    * @param start start of break
