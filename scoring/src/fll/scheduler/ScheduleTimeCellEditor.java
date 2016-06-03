@@ -20,7 +20,7 @@ import javax.swing.table.TableCellEditor;
 /* package */ final class ScheduleTimeCellEditor extends AbstractCellEditor implements TableCellEditor {
 
   private final ScheduleTimeField delegate;
-  private final ScheduleTimeField.TimeVerifier verifier;
+  private transient final ScheduleTimeField.TimeVerifier verifier = new ScheduleTimeField.TimeVerifier();
 
   /**
    * Create a cell editor for schedule times.
@@ -28,7 +28,6 @@ import javax.swing.table.TableCellEditor;
   public ScheduleTimeCellEditor() {
     super();
     delegate = new ScheduleTimeField();
-    verifier = new ScheduleTimeField.TimeVerifier();
   }
 
   @Override

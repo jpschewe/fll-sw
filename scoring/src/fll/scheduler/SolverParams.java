@@ -350,7 +350,7 @@ public class SolverParams extends SchedParams {
     final long allMinutes = duration.toMinutes();
     final int minutes = (int) (allMinutes
         - (hours
-            * 60));
+            * 60L));
     setTMaxHours(hours);
     setTMaxMinutes(minutes);
   }
@@ -392,7 +392,7 @@ public class SolverParams extends SchedParams {
     this.tmaxMinutes = v;
   }
 
-  private final List<ScheduledBreak> subjectiveBreaks = new LinkedList<ScheduledBreak>();
+  private final LinkedList<ScheduledBreak> subjectiveBreaks = new LinkedList<ScheduledBreak>();
 
   /**
    * @return Read-only list of the subjective breaks
@@ -406,7 +406,7 @@ public class SolverParams extends SchedParams {
     subjectiveBreaks.addAll(breaks);
   }
 
-  private final List<ScheduledBreak> performanceBreaks = new LinkedList<ScheduledBreak>();
+  private final LinkedList<ScheduledBreak> performanceBreaks = new LinkedList<ScheduledBreak>();
 
   /**
    * @return Read-only list of the performance breaks

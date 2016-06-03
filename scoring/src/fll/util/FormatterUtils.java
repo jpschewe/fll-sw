@@ -34,7 +34,7 @@ public final class FormatterUtils {
     final DefaultFormatterFactory factory = new DefaultFormatterFactory(def, disp, ed);
   
     final JFormattedTextField field = new JFormattedTextField(factory);
-    field.setValue(new Integer(min));
+    field.setValue(Integer.valueOf(min));
     field.setInputVerifier(new IntegerVerifier(min, max));
     return field;
   }
