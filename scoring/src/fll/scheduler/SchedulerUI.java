@@ -142,6 +142,7 @@ public class SchedulerUI extends JFrame {
           System.exit(0);
         }
       });
+
       GraphicsUtils.centerWindow(frame);
 
       frame.setVisible(true);
