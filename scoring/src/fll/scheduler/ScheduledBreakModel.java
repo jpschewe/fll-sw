@@ -6,28 +6,27 @@
 
 package fll.scheduler;
 
+import java.time.Duration;
+import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.table.AbstractTableModel;
 
 /**
- * Model for displaying and editing the list of judging groups.
+ * Model for displaying and editing a list of scheduled breaks.
  */
-public class JudgingGroupModel extends AbstractTableModel {
+public class ScheduledBreakModel extends AbstractTableModel {
 
-  private final List<String> judges = new ArrayList<>();
+  private final List<ScheduledBreak> breaks = new ArrayList<>();
 
-  private final List<Integer> counts = new ArrayList<>();
-
-  public JudgingGroupModel() {
+  public ScheduledBreakModel() {
   }
 
   @Override
   public int getRowCount() {
-    return judges.size();
+    return breaks.size();
   }
 
   @Override
@@ -39,9 +38,9 @@ public class JudgingGroupModel extends AbstractTableModel {
   public String getColumnName(final int column) {
     switch (column) {
     case 0:
-      return "Name";
+      return "Time";
     case 1:
-      return "# of teams";
+      return "Duration";
     case 2:
       return "Delete";
     default:
@@ -52,13 +51,14 @@ public class JudgingGroupModel extends AbstractTableModel {
   @Override
   public Object getValueAt(final int rowIndex,
                            final int columnIndex) {
+    final ScheduledBreak aBreak = breaks.get(rowIndex);
     switch (columnIndex) {
     case 0:
-      final String name = judges.get(rowIndex);
-      return name;
+      final LocalTime start = aBreak.getStart();
+      return start;
     case 1:
-      final Integer count = counts.get(rowIndex);
-      return count;
+      final Duration duration = aBreak.getDuration();
+      return duration.toMinutes();
     case 2:
       return "Delete";
     default:
@@ -70,17 +70,20 @@ public class JudgingGroupModel extends AbstractTableModel {
   public void setValueAt(final Object aValue,
                          final int rowIndex,
                          final int columnIndex) {
+    final ScheduledBreak oldBreak = breaks.get(rowIndex);
     switch (columnIndex) {
     case 0: {
-      final String newName = (String) aValue;
-      judges.remove(rowIndex);
-      judges.add(rowIndex, newName);
+      final LocalTime newStart = (LocalTime) aValue;
+      final ScheduledBreak newBreak = new ScheduledBreak(newStart, oldBreak.getDuration());
+      breaks.remove(rowIndex);
+      breaks.add(rowIndex, newBreak);
       break;
     }
     case 1: {
-      final Integer newCount = (Integer) aValue;
-      counts.remove(rowIndex);
-      counts.add(rowIndex, newCount);
+      final Integer newDurationMinutes = (Integer) aValue;
+      final ScheduledBreak newBreak = new ScheduledBreak(oldBreak.getStart(), Duration.ofMinutes(newDurationMinutes));
+      breaks.remove(rowIndex);
+      breaks.add(rowIndex, newBreak);
     }
       break;
     default:
@@ -94,7 +97,7 @@ public class JudgingGroupModel extends AbstractTableModel {
   public Class<?> getColumnClass(final int columnIndex) {
     switch (columnIndex) {
     case 0:
-      return String.class;
+      return LocalTime.class;
     case 1:
       return Integer.class;
     case 2:
@@ -114,39 +117,31 @@ public class JudgingGroupModel extends AbstractTableModel {
   /**
    * Specify the judging groups for the model.
    */
-  public void setData(final Map<String, Integer> data) {
-    this.judges.clear();
-    this.counts.clear();
-    for (final Map.Entry<String, Integer> entry : data.entrySet()) {
-      this.judges.add(entry.getKey());
-      this.counts.add(entry.getValue());
-    }
+  public void setData(final List<ScheduledBreak> data) {
+    this.breaks.clear();
+    breaks.addAll(data);
     fireTableDataChanged();
   }
 
   /**
    * Get the current data.
    * 
-   * @return new map of judge to number of teams
+   * @return an unmodifiable list of the breaks
    */
-  public Map<String, Integer> getData() {
-    final Map<String, Integer> map = new HashMap<>();
-    for (int i = 0; i < judges.size(); ++i) {
-      final String judge = judges.get(i);
-      final int numTeams = counts.get(i);
-      map.put(judge, numTeams);
-    }
-    return map;
+  public List<ScheduledBreak> getData() {
+    return Collections.unmodifiableList(breaks);
   }
 
   /**
-   * Add a new row to the table. The name will be auto generated. The count will be 1.
+   * Add a new row to the table. The name will be auto generated. The time will
+   * be 12:00 and the duration
+   * will be 30 minutes.
    */
   public void addNewRow() {
-    judges.add(String.format("group-%d", judges.size()));
-    counts.add(1);
-    fireTableRowsInserted(judges.size()
-        - 1, judges.size()
+    final ScheduledBreak newBreak = new ScheduledBreak(LocalTime.of(12, 0), Duration.ofMinutes(30));
+    breaks.add(newBreak);
+    fireTableRowsInserted(breaks.size()
+        - 1, breaks.size()
             - 1);
   }
 
@@ -156,8 +151,7 @@ public class JudgingGroupModel extends AbstractTableModel {
    * @param row
    */
   public void deleteRow(final int row) {
-    judges.remove(row);
-    counts.remove(row);
+    breaks.remove(row);
     fireTableRowsDeleted(row, row);
   }
 

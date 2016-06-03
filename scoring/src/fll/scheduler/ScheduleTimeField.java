@@ -15,6 +15,7 @@ import java.time.format.DateTimeParseException;
 import javax.swing.InputVerifier;
 import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
+import javax.swing.table.TableCellEditor;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.MaskFormatter;
 
@@ -25,6 +26,8 @@ import fll.util.LogUtils;
 
 /**
  * Field for displaying schedule times.
+ * The input verifier is not automatically added so that this
+ * class can be used with a {@link TableCellEditor} as well.
  * 
  * @see TournamentSchedule#parseTime(String)
  * @see TournamentSchedule#formatTime(java.time.LocalTime)
@@ -44,8 +47,6 @@ import fll.util.LogUtils;
    * @param value the initial value for the widget
    */
   public ScheduleTimeField(final LocalTime value) {
-    setInputVerifier(new TimeVerifier());
-
     try {
       final MaskFormatter mf = new MaskFormatter(MASKFORMAT);
       mf.setPlaceholderCharacter('_');
@@ -66,7 +67,7 @@ import fll.util.LogUtils;
    * @throws java.text.ParseException
    */
   public LocalTime getTime() {
-    final String str = getTimeText((String) getValue());
+    final String str = getTimeText(getText());
     return TournamentSchedule.parseTime(str);
   }
 
@@ -104,7 +105,10 @@ import fll.util.LogUtils;
     }
   }
 
-  private static class TimeVerifier extends InputVerifier {
+  /**
+   * Input verifier to be used with {@link ScheduleTimeField}.
+   */
+  public static class TimeVerifier extends InputVerifier {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 

@@ -50,12 +50,17 @@ public class SolverParamsEditor extends JPanel {
 
   private final JudgingGroupListEditor judgingGroups;
 
+  private final ScheduledBreakListEditor subjectiveBreaks;
+
+  private final ScheduledBreakListEditor performanceBreaks;
+
   public SolverParamsEditor() {
     super(new GridBagLayout());
 
     GridBagConstraints gbc;
 
     startTimeEditor = new ScheduleTimeField();
+    startTimeEditor.setInputVerifier(new ScheduleTimeField.TimeVerifier());
     addRow(new JLabel("Start Time:"), startTimeEditor);
 
     alternateTables = new JCheckBox("Alternate tables");
@@ -100,7 +105,11 @@ public class SolverParamsEditor extends JPanel {
     maxTime.setToolTipText("Maximum duration of the tournament hours:minutes");
     addRow(new JLabel("Maximum length of the tournament"), maxTime);
 
-    // FIXME add breaks
+    subjectiveBreaks = new ScheduledBreakListEditor("Subjective Breaks");
+    addRow(subjectiveBreaks);
+
+    performanceBreaks = new ScheduledBreakListEditor("Performance Breaks");
+    addRow(performanceBreaks);
 
     // end of form spacer
     gbc = new GridBagConstraints();
@@ -168,7 +177,8 @@ public class SolverParamsEditor extends JPanel {
 
     maxTime.setDuration(params.getMaxDuration());
 
-    // FIXME breaks
+    subjectiveBreaks.setBreaks(params.getSubjectiveBreaks());
+    performanceBreaks.setBreaks(params.getPerformanceBreaks());
 
   }
 
