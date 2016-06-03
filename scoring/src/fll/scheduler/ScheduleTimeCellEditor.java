@@ -49,7 +49,7 @@ import javax.swing.table.TableCellEditor;
       return super.stopCellEditing();
     } else {
       // dialog
-      JOptionPane.showMessageDialog(null, "You must enter a valid time", "Error", JOptionPane.WARNING_MESSAGE);
+      JOptionPane.showMessageDialog(delegate, "You must enter a valid time", "Error", JOptionPane.WARNING_MESSAGE);
       return false;
     }
   }

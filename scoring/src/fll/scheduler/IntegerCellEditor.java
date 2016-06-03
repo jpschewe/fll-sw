@@ -69,8 +69,7 @@ import fll.util.LogUtils;
     if (stop) {
       return super.stopCellEditing();
     } else {
-      // dialog
-      JOptionPane.showMessageDialog(null,
+      JOptionPane.showMessageDialog(getComponent(),
                                     String.format("You must enter an integer between %d and %d", minValue, maxValue),
                                     "Error", JOptionPane.WARNING_MESSAGE);
       return false;
