@@ -82,7 +82,6 @@ public class CommitJudges extends BaseFLLServlet {
                                  final Connection connection,
                                  final int tournament) throws SQLException, IOException {
     PreparedStatement prep = null;
-    ResultSet rs = null;
     try {
       // save old judge information
       Collection<JudgeInformation> oldJudges = JudgeInformation.getJudges(connection, tournament);
@@ -133,7 +132,6 @@ public class CommitJudges extends BaseFLLServlet {
 
     } finally {
       SQLFunctions.close(prep);
-      SQLFunctions.close(rs);
     }
   }
 }

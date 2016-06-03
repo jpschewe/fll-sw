@@ -580,7 +580,6 @@ public final class UploadTeams extends BaseFLLServlet {
                                             final String eventDivisionColumn,
                                             final String judgingStationColumn) throws SQLException {
     Statement stmt = null;
-    PreparedStatement selectPrep = null;
     ResultSet rs = null;
     try {
       stmt = connection.createStatement();
@@ -653,7 +652,6 @@ public final class UploadTeams extends BaseFLLServlet {
     } finally {
       SQLFunctions.close(stmt);
       SQLFunctions.close(rs);
-      SQLFunctions.close(selectPrep);
     }
   }
 
