@@ -15,18 +15,20 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.text.ParseException;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -38,6 +40,7 @@ import org.apache.log4j.Logger;
 
 import au.com.bytecode.opencsv.CSVWriter;
 import fll.Utilities;
+import fll.scheduler.SchedParams.InvalidParametersException;
 import fll.util.CheckCanceled;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
@@ -53,6 +56,15 @@ public class GreedySolver {
   public static final String SUBJECTIVE_COLUMN_PREFIX = "Subj";
 
   private static final Logger LOGGER = LogUtils.getLogger();
+
+  private final SolverParams solverParameters;
+
+  /**
+   * The parameters used by this instance of the solvers.
+   */
+  public final SolverParams getParameters() {
+    return solverParameters;
+  }
 
   /**
    * group, team, station
@@ -94,13 +106,13 @@ public class GreedySolver {
    */
   private final int[] performanceTables;
 
+  /**
+   * Names of judging groups, indexed the same as the *z variables.
+   * Used for output.
+   */
+  private final String[] groupNames;
+
   private final File datafile;
-
-  private final int ngroups;
-
-  private int getNumGroups() {
-    return ngroups;
-  }
 
   private File mBestSchedule = null;
 
@@ -112,10 +124,6 @@ public class GreedySolver {
   public File getBestSchedule() {
     return mBestSchedule;
   }
-
-  private final int tinc;
-
-  private final Date startTime;
 
   private int solutionsFound = 0;
 
@@ -129,15 +137,9 @@ public class GreedySolver {
 
   private final boolean optimize;
 
-  private final boolean subjectiveFirst;
-
   private static final String OPTIMIZE_OPTION = "o";
 
   private static final String DATA_FILE_OPTION = "d";
-
-  private final Collection<ScheduledBreak> subjectiveBreaks = new LinkedList<ScheduledBreak>();
-
-  private final Collection<ScheduledBreak> performanceBreaks = new LinkedList<ScheduledBreak>();
 
   private static Options buildOptions() {
     final Options options = new Options();
@@ -203,17 +205,20 @@ public class GreedySolver {
       LOGGER.fatal("Error reading file", e);
       System.exit(4);
     } catch (final RuntimeException e) {
+    } catch (final InvalidParametersException e) {
       LOGGER.fatal(e, e);
-      throw e;
+      System.exit(6);
     }
   }
 
   /**
    * @param datafile the datafile for the schedule to solve
    * @throws ParseException
+   * @throws InvalidParametersException
    */
   public GreedySolver(final File datafile,
-                      final boolean optimize) throws IOException, ParseException {
+                      final boolean optimize)
+      throws IOException, ParseException, InvalidParametersException {
     this.datafile = datafile;
     this.optimize = optimize;
     if (this.optimize) {
@@ -221,173 +226,45 @@ public class GreedySolver {
     }
 
     final Properties properties = new Properties();
-    Reader reader = null;
-    try {
-      reader = new InputStreamReader(new FileInputStream(datafile), Utilities.DEFAULT_CHARSET);
+    try (final Reader reader = new InputStreamReader(new FileInputStream(datafile), Utilities.DEFAULT_CHARSET)) {
       properties.load(reader);
-    } finally {
-      if (null != reader) {
-        reader.close();
-      }
     }
-    LOGGER.debug(properties.toString());
-
-    this.startTime = TournamentSchedule.parseDate(properties.getProperty("start_time"));
-
-    tinc = Utilities.readIntProperty(properties, "TInc");
-    ngroups = Utilities.readIntProperty(properties, "NGroups");
-
-    final int alternateValue = Integer.parseInt(properties.getProperty("alternate_tables", "0").trim());
-    final boolean alternate = alternateValue == 1;
-    LOGGER.debug("Alternate is: "
-        + alternate);
-
-    final int subjectiveFirst = Integer.parseInt(properties.getProperty("subjective_first", "0").trim());
-    this.subjectiveFirst = subjectiveFirst == 1;
-    LOGGER.debug("Subjective first is: "
-        + this.subjectiveFirst);
-
-    final int perfOffsetMinutes = Integer.parseInt(properties.getProperty("perf_attempt_offset_minutes",
-                                                                          String.valueOf(tinc))
-                                                             .trim());
-    performanceAttemptOffset = perfOffsetMinutes
-        / tinc;
-    if (perfOffsetMinutes != performanceAttemptOffset
-        * tinc) {
-      throw new FLLRuntimeException("perf_attempt_offset_minutes isn't divisible by tinc");
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug(properties.toString());
     }
+
+    this.solverParameters = new SolverParams();
+    this.solverParameters.load(properties);
+    final List<String> parameterErrors = this.solverParameters.isValid();
+    if (!parameterErrors.isEmpty()) {
+      throw new InvalidParametersException(parameterErrors);
+    }
+
+    performanceAttemptOffset = solverParameters.getPerformanceAttemptOffsetMinutes();
     LOGGER.debug("Performance attempt offset: "
         + performanceAttemptOffset);
 
-    final int subjOffsetMinutes = Integer.parseInt(properties.getProperty("subjective_attempt_offset_minutes",
-                                                                          String.valueOf(tinc))
-                                                             .trim());
-    subjectiveAttemptOffset = subjOffsetMinutes
-        / tinc;
-    if (subjOffsetMinutes != subjectiveAttemptOffset
-        * tinc) {
-      throw new FLLRuntimeException("subjective_attempt_offset_minutes isn't divisible by tinc");
-    }
+    subjectiveAttemptOffset = solverParameters.getSubjectiveAttemptOffsetMinutes();
 
-    numPerformanceRounds = Utilities.readIntProperty(properties, "NRounds");
-    numTables = Utilities.readIntProperty(properties, "NTables");
-    final int tmaxHours = Utilities.readIntProperty(properties, "TMax_hours");
-    final int tmaxMinutes = Utilities.readIntProperty(properties, "TMax_minutes");
-    numTimeslots = (tmaxHours
+    numTimeslots = (solverParameters.getTMaxHours()
         * 60
-        + tmaxMinutes)
-        / tinc;
+        + solverParameters.getTMaxMinutes());
 
-    numSubjectiveStations = Utilities.readIntProperty(properties, "NSubjective");
-    final String subjDurationStr = properties.getProperty("subj_minutes");
-    int lbracket = subjDurationStr.indexOf('[');
-    if (-1 == lbracket) {
-      throw new FLLRuntimeException("No '[' found in subj_minutes: '"
-          + subjDurationStr + "'");
-    }
-    int rbracket = subjDurationStr.indexOf(']', lbracket);
-    if (-1 == rbracket) {
-      throw new FLLRuntimeException("No ']' found in subj_minutes: '"
-          + subjDurationStr + "'");
-    }
-    final String[] subjDurs;
-    if (lbracket
-        + 1 == rbracket) {
-      subjDurs = new String[0];
-    } else {
-      subjDurs = subjDurationStr.substring(lbracket
-          + 1, rbracket).split(",");
-    }
-    if (subjDurs.length != numSubjectiveStations) {
-      throw new FLLRuntimeException("Number of subjective stations not consistent with subj_minutes array size");
-    }
-    subjectiveDurations = new int[getNumSubjectiveStations()];
-    for (int station = 0; station < subjDurs.length; ++station) {
-      final int durationMinutes = Integer.parseInt(subjDurs[station].trim());
-      subjectiveDurations[station] = durationMinutes
-          / tinc;
-      if (durationMinutes != subjectiveDurations[station]
-          * tinc) {
-        throw new FLLRuntimeException("Subjective duration for station "
-            + station + " isn't divisible by tinc");
-      }
-    }
+    performanceDuration = this.solverParameters.getPerformanceMinutes();
 
-    final String groupCountsStr = properties.getProperty("group_counts");
-    lbracket = groupCountsStr.indexOf('[');
-    if (-1 == lbracket) {
-      throw new FLLRuntimeException("No '[' found in group_counts: '"
-          + groupCountsStr + "'");
-    }
-    rbracket = groupCountsStr.indexOf(']', lbracket);
-    if (-1 == rbracket) {
-      throw new FLLRuntimeException("No ']' found in group_counts: '"
-          + groupCountsStr + "'");
-    }
-    final String[] groups = groupCountsStr.substring(lbracket
-        + 1, rbracket).split(",");
-    if (groups.length != ngroups) {
-      throw new FLLRuntimeException("Num groups and group_counts array not consistent");
-    }
+    changetime = this.solverParameters.getChangetimeMinutes();
 
-    final int performanceDurationMinutes = Utilities.readIntProperty(properties, "alpha_perf_minutes");
-    performanceDuration = performanceDurationMinutes
-        / tinc;
-    if (performanceDurationMinutes != performanceDuration
-        * tinc) {
-      throw new FLLRuntimeException("Performance duration isn't divisible by tinc");
-    }
+    performanceChangetime = this.solverParameters.getPerformanceChangetimeMinutes();
 
-    final int changetimeMinutes = Utilities.readIntProperty(properties, "ct_minutes");
-    changetime = changetimeMinutes
-        / tinc;
-    if (changetimeMinutes != changetime
-        * tinc) {
-      throw new FLLRuntimeException("Changetime isn't divisible by tinc");
-    }
-    if (changetimeMinutes < SchedParams.MINIMUM_CHANGETIME_MINUTES) {
-      throw new FLLRuntimeException("Change time between events is too short, cannot be less than "
-          + SchedParams.MINIMUM_CHANGETIME_MINUTES + " minutes");
-    }
-
-    final int performanceChangetimeMinutes = Utilities.readIntProperty(properties, "pct_minutes");
-    performanceChangetime = performanceChangetimeMinutes
-        / tinc;
-    if (performanceChangetimeMinutes != performanceChangetime
-        * tinc) {
-      throw new FLLRuntimeException("Performance changetime isn't divisible by tinc");
-    }
-    if (performanceChangetimeMinutes < SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES) {
-      throw new FLLRuntimeException("Change time between performance rounds is too short, cannot be less than "
-          + SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES + " minutes");
-    }
-
-    if (alternate) {
-      // make sure performanceDuration is even
-      if ((performanceDuration
-          & 1) == 1) {
-        throw new FLLRuntimeException("Number of timeslots for performance duration ("
-            + performanceDuration + ") is not even and must be to alternate tables.");
-      }
-
-      // make sure num tables is even
-      if ((getNumTables()
-          & 1) == 1) {
-        throw new FLLRuntimeException("Number of tables ("
-            + getNumTables() + ") is not even and must be to alternate tables.");
-      }
-
-    }
-
-    sz = new boolean[groups.length][][][];
-    sy = new boolean[groups.length][][][];
-    pz = new boolean[groups.length][][][][];
-    py = new boolean[groups.length][][][][];
-    subjectiveScheduled = new boolean[groups.length][][];
-    subjectiveStations = new int[groups.length][getNumSubjectiveStations()];
-    performanceScheduled = new int[groups.length][];
-    performanceTables = new int[getNumTables()];
-    if (alternate) {
+    sz = new boolean[solverParameters.getNumGroups()][][][];
+    sy = new boolean[solverParameters.getNumGroups()][][][];
+    pz = new boolean[solverParameters.getNumGroups()][][][][];
+    py = new boolean[solverParameters.getNumGroups()][][][][];
+    subjectiveScheduled = new boolean[solverParameters.getNumGroups()][][];
+    subjectiveStations = new int[solverParameters.getNumGroups()][getNumSubjectiveStations()];
+    performanceScheduled = new int[solverParameters.getNumGroups()][];
+    performanceTables = new int[solverParameters.getNumTables()];
+    if (solverParameters.getAlternateTables()) {
       for (int table = 0; table < performanceTables.length; ++table) {
         // even is 0, odd is 1/2 performance duration
         if ((table
@@ -403,12 +280,18 @@ public class GreedySolver {
     } else {
       Arrays.fill(performanceTables, 0);
     }
-    for (int group = 0; group < groups.length; ++group) {
-      final int count = Integer.parseInt(groups[group].trim());
+
+    final Map<String, Integer> judgingGroups = solverParameters.getJudgingGroups();
+    int group = 0;
+    groupNames = new String[judgingGroups.size()];
+    for (final Map.Entry<String, Integer> entry : judgingGroups.entrySet()) {
+      final int count = entry.getValue();
+
+      groupNames[group] = entry.getKey();
       sz[group] = new boolean[count][getNumSubjectiveStations()][getNumTimeslots()];
       sy[group] = new boolean[count][getNumSubjectiveStations()][getNumTimeslots()];
-      pz[group] = new boolean[count][getNumTables()][2][getNumTimeslots()];
-      py[group] = new boolean[count][getNumTables()][2][getNumTimeslots()];
+      pz[group] = new boolean[count][solverParameters.getNumTables()][2][getNumTimeslots()];
+      py[group] = new boolean[count][solverParameters.getNumTables()][2][getNumTimeslots()];
       subjectiveScheduled[group] = new boolean[count][getNumSubjectiveStations()];
       for (int team = 0; team < count; ++team) {
         teams.add(new SchedTeam(team, group));
@@ -418,7 +301,7 @@ public class GreedySolver {
           Arrays.fill(sy[group][team][station], false);
         }
 
-        for (int table = 0; table < getNumTables(); ++table) {
+        for (int table = 0; table < solverParameters.getNumTables(); ++table) {
           Arrays.fill(pz[group][team][table][0], false);
           Arrays.fill(pz[group][team][table][1], false);
           Arrays.fill(py[group][team][table][0], false);
@@ -426,70 +309,16 @@ public class GreedySolver {
         }
         Arrays.fill(subjectiveScheduled[group][team], false);
         Arrays.fill(subjectiveStations[group], 0);
-      }
+      } // foreach team in a judging group
 
       performanceScheduled[group] = new int[count];
       Arrays.fill(performanceScheduled[group], 0);
-    }
 
-    parseBreaks(properties, startTime, tinc);
+      ++group;
+    } // foreach judging group
 
     // sort list of teams to make sure that the scheduler is deterministic
     Collections.sort(teams, lowestTeamIndex);
-  }
-
-  /**
-   * Read the breaks out of the data file.
-   * 
-   * @throws ParseException
-   */
-  private void parseBreaks(final Properties properties,
-                           final Date startTime,
-                           final int tinc) throws ParseException {
-    subjectiveBreaks.addAll(parseBreaks(properties, startTime, tinc, "subjective"));
-    performanceBreaks.addAll(parseBreaks(properties, startTime, tinc, "performance"));
-  }
-
-  private Collection<ScheduledBreak> parseBreaks(final Properties properties,
-                                                 final Date startTime,
-                                                 final int tinc,
-                                                 final String breakType) throws ParseException {
-    final Collection<ScheduledBreak> breaks = new LinkedList<ScheduledBreak>();
-
-    final int numBreaks = Integer.parseInt(properties.getProperty(String.format("num_%s_breaks", breakType), "0"));
-    final String startFormat = "%s_break_%d_start";
-    final String durationFormat = "%s_break_%d_duration";
-    for (int i = 0; i < numBreaks; ++i) {
-      final String startStr = properties.getProperty(String.format(startFormat, breakType, i));
-      final String durationStr = properties.getProperty(String.format(durationFormat, breakType, i));
-      if (null == startStr
-          || null == durationStr) {
-        throw new FLLRuntimeException(String.format("Missing start or duration for %s break %d", breakType, i));
-      }
-
-      final Date start = TournamentSchedule.parseDate(startStr);
-      final int startMinutes = (int) ((start.getTime()
-          - startTime.getTime())
-          / Utilities.MILLISECONDS_PER_SECOND / Utilities.SECONDS_PER_MINUTE);
-      final int startInc = startMinutes
-          / tinc;
-      if (startMinutes != startInc
-          * tinc) {
-        throw new FLLRuntimeException(String.format("%s break %d start isn't divisible by tinc", breakType, i));
-      }
-
-      final int durationMinutes = Integer.parseInt(durationStr);
-      final int durationInc = durationMinutes
-          / tinc;
-      if (durationMinutes != durationInc
-          * tinc) {
-        throw new FLLRuntimeException(String.format("%s break %d duration isn't divisible by tinc", breakType, i));
-      }
-
-      breaks.add(new ScheduledBreak(startInc, startInc
-          + durationInc));
-    }
-    return breaks;
   }
 
   private boolean assignSubjective(final int group,
@@ -581,20 +410,20 @@ public class GreedySolver {
     return true;
   }
 
-  private final int[] subjectiveDurations;
-
   /**
    * Get the duration for the given subjective station in time increments.
    */
   public int getSubjectiveDuration(final int station) {
-    return subjectiveDurations[station];
+    return this.solverParameters.getSubjectiveMinutes(station);
   }
 
   /**
-   * @param station zero based
+   * Generated name for a subjective station.
+   * 
+   * @param station index used to generate the name
    * @return
    */
-  public String getSubjectiveColumnName(final int station) {
+  public static String getSubjectiveColumnName(final int station) {
     return String.format("%s%d", SUBJECTIVE_COLUMN_PREFIX, station
         + 1);
   }
@@ -657,7 +486,7 @@ public class GreedySolver {
         - getChangetime()); slot < Math.min(getNumTimeslots(),
                                             timeslot
                                                 + duration + getChangetime()); ++slot) {
-      for (int table = 0; table < getNumTables(); ++table) {
+      for (int table = 0; table < solverParameters.getNumTables(); ++table) {
         if (py[group][team][table][0][slot]) {
           return false;
         }
@@ -667,12 +496,6 @@ public class GreedySolver {
       }
     }
     return true;
-  }
-
-  private final int numTables;
-
-  private int getNumTables() {
-    return numTables;
   }
 
   private boolean assignPerformance(final int group,
@@ -775,7 +598,7 @@ public class GreedySolver {
                                                        timeslot
                                                            + getPerformanceChangetime()
                                                            + getPerformanceDuration()); ++slot) {
-      for (int table = 0; table < getNumTables(); ++table) {
+      for (int table = 0; table < solverParameters.getNumTables(); ++table) {
         if (py[group][team][table][0][slot]) {
           return false;
         }
@@ -832,7 +655,7 @@ public class GreedySolver {
    * performance rounds and the dummy slot hasn't been used.
    */
   private boolean partialPerformanceAssignmentAllowed() {
-    final boolean oddPerfRounds = (numPerformanceRounds
+    final boolean oddPerfRounds = (solverParameters.getNumPerformanceRounds()
         & 1) == 1;
     final boolean oddTeams = (getAllTeams().size()
         & 1) == 1;
@@ -841,7 +664,8 @@ public class GreedySolver {
   }
 
   private boolean schedPerf(final int table,
-                            final int timeslot) throws InterruptedException {
+                            final int timeslot)
+      throws InterruptedException {
     final List<SchedTeam> teams = getPossiblePerformanceTeams();
     SchedTeam team1 = null;
 
@@ -888,13 +712,13 @@ public class GreedySolver {
 
     // undo partial assignment if not allowed
     if (null != team1) {
-      final boolean lastRoundForTeam1 = performanceScheduled[team1.getGroup()][team1.getIndex()] == getNumPerformanceRounds();
+      final boolean lastRoundForTeam1 = performanceScheduled[team1.getGroup()][team1.getIndex()] == solverParameters.getNumPerformanceRounds();
 
       boolean foundOtherTeam = false;
       if (lastRoundForTeam1
           && partialPerformanceAssignmentAllowed()) {
         for (int otable = 0; !foundOtherTeam
-            && otable < getNumTables(); ++otable) {
+            && otable < solverParameters.getNumTables(); ++otable) {
           final SchedTeam prevTeamOnTable0 = findPrevTeamOnTable(timeslot, table, 0);
           if (null != prevTeamOnTable0) {
             if (assignPerformance(prevTeamOnTable0.getGroup(), prevTeamOnTable0.getIndex(), timeslot, table, 1, false,
@@ -1074,7 +898,7 @@ public class GreedySolver {
   private List<SchedTeam> getPossiblePerformanceTeams() {
     List<SchedTeam> possibles = new LinkedList<SchedTeam>();
     for (final SchedTeam team : getAllTeams()) {
-      if (performanceScheduled[team.getGroup()][team.getIndex()] < getNumPerformanceRounds()) {
+      if (performanceScheduled[team.getGroup()][team.getIndex()] < solverParameters.getNumPerformanceRounds()) {
         possibles.add(team);
       }
     }
@@ -1084,7 +908,8 @@ public class GreedySolver {
 
   private boolean schedSubj(final int group,
                             final int station,
-                            final int timeslot) throws InterruptedException {
+                            final int timeslot)
+      throws InterruptedException {
     final List<SchedTeam> teams = getPossibleSubjectiveTeams(group, station);
     for (final SchedTeam team : teams) {
       if (assignSubjective(team.getGroup(), team.getIndex(), station, timeslot)) {
@@ -1127,8 +952,8 @@ public class GreedySolver {
         }
       }
 
-      for (int table = 0; table < getNumTables(); ++table) {
-        if (performanceScheduled[team.getGroup()][team.getIndex()] < getNumPerformanceRounds()) {
+      for (int table = 0; table < solverParameters.getNumTables(); ++table) {
+        if (performanceScheduled[team.getGroup()][team.getIndex()] < solverParameters.getNumPerformanceRounds()) {
           return false;
         }
       }
@@ -1144,12 +969,6 @@ public class GreedySolver {
    */
   private List<SchedTeam> getAllTeams() {
     return Collections.unmodifiableList(teams);
-  }
-
-  private final int numPerformanceRounds;
-
-  private int getNumPerformanceRounds() {
-    return numPerformanceRounds;
   }
 
   private CheckCanceled checkCanceled = null;
@@ -1192,26 +1011,13 @@ public class GreedySolver {
    * @return the number of warnings or -1 if there are hard violations
    */
   private int getNumWarnings(final File scheduleFile) {
-    final List<SubjectiveStation> subjectiveParams = new LinkedList<SubjectiveStation>();
-    final Collection<String> subjectiveHeaders = new LinkedList<String>();
-    for (int subj = 0; subj < getNumSubjectiveStations(); ++subj) {
-      final String header = "Subj"
-          + (subj
-              + 1);
-      subjectiveHeaders.add(header);
-      final SubjectiveStation station = new SubjectiveStation(header, getSubjectiveDuration(subj)
-          * tinc);
-      subjectiveParams.add(station);
-    }
+    final List<SubjectiveStation> subjectiveParams = this.solverParameters.getSubjectiveStations();
+    final Collection<String> subjectiveHeaders = subjectiveParams.stream().map(ss -> ss.getName())
+                                                                 .collect(Collectors.toList());
 
     try {
       final TournamentSchedule schedule = new TournamentSchedule(datafile.getName(), scheduleFile, subjectiveHeaders);
-
-      final SchedParams params = new SchedParams(subjectiveParams, getPerformanceDuration()
-          * tinc, getChangetime()
-              * tinc, getPerformanceChangetime()
-                  * tinc);
-      final ScheduleChecker checker = new ScheduleChecker(params, schedule);
+      final ScheduleChecker checker = new ScheduleChecker(this.solverParameters, schedule);
       final List<ConstraintViolation> violations = checker.verifySchedule();
       for (final ConstraintViolation violation : violations) {
         if (violation.isHard()) {
@@ -1236,8 +1042,8 @@ public class GreedySolver {
    * @return the objective value, null on failure
    */
   private ObjectiveValue computeObjectiveValue(final File scheduleFile) {
-    final int[] numTeams = new int[getNumGroups()];
-    final int[] latestSubjectiveTime = new int[getNumGroups()];
+    final int[] numTeams = new int[solverParameters.getNumGroups()];
+    final int[] latestSubjectiveTime = new int[solverParameters.getNumGroups()];
     for (int group = 0; group < numTeams.length; ++group) {
       numTeams[group] = subjectiveScheduled[group].length;
       latestSubjectiveTime[group] = findLatestSubjectiveTime(group);
@@ -1276,7 +1082,7 @@ public class GreedySolver {
   private int findLatestPerformanceTime() {
     for (int slot = getNumTimeslots()
         - 1; slot >= 0; --slot) {
-      for (int table = 0; table < getNumTables(); ++table) {
+      for (int table = 0; table < solverParameters.getNumTables(); ++table) {
         for (final SchedTeam team : getAllTeams()) {
           if (py[team.getGroup()][team.getIndex()][table][0][slot]) {
             return slot;
@@ -1329,7 +1135,7 @@ public class GreedySolver {
     }
 
     // try possible values
-    if ((subjectiveFirst
+    if ((solverParameters.getSubjectiveFirst()
         && !subjectiveFinished())
         || (nextAvailableSubjSlot <= nextAvailablePerfSlot)) {
       for (int i = 0; i < possibleSubjectiveStations.size(); ++i) {
@@ -1407,7 +1213,7 @@ public class GreedySolver {
 
   private int findNextAvailablePerformanceSlot(final List<Integer> possiblePerformanceTables) {
     int nextAvailablePerfSlot = Integer.MAX_VALUE;
-    for (int table = 0; table < getNumTables(); ++table) {
+    for (int table = 0; table < solverParameters.getNumTables(); ++table) {
       if (performanceTables[table] <= nextAvailablePerfSlot) {
         if (performanceTables[table] < nextAvailablePerfSlot) {
           // previous values are no longer valid
@@ -1423,7 +1229,7 @@ public class GreedySolver {
   private int findNextAvailableSubjectiveSlot(final List<Integer> possibleSubjectiveStations,
                                               final List<Integer> subjectiveGroups) {
     int nextAvailableSubjSlot = Integer.MAX_VALUE;
-    for (int group = 0; group < getNumGroups(); ++group) {
+    for (int group = 0; group < solverParameters.getNumGroups(); ++group) {
       for (int station = 0; station < getNumSubjectiveStations(); ++station) {
         if (subjectiveStations[group][station] <= nextAvailableSubjSlot) {
           if (subjectiveStations[group][station] < nextAvailableSubjSlot) {
@@ -1469,23 +1275,12 @@ public class GreedySolver {
       LOGGER.info("Schedule provides a better objective value");
       bestObjective = objective;
 
-      Writer objectiveWriter = null;
-      try {
-        objectiveWriter = new OutputStreamWriter(new FileOutputStream(objectiveFile), Utilities.DEFAULT_CHARSET);
+      try (final Writer objectiveWriter = new OutputStreamWriter(new FileOutputStream(objectiveFile),
+                                                                 Utilities.DEFAULT_CHARSET)) {
         objectiveWriter.write(objective.toString());
         objectiveWriter.close();
       } catch (final IOException e) {
         throw new FLLRuntimeException("Error writing objective", e);
-      } finally {
-        try {
-          if (null != objectiveWriter) {
-            objectiveWriter.close();
-          }
-        } catch (final IOException e2) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(e2);
-          }
-        }
       }
 
       if (null != mBestSchedule) {
@@ -1519,10 +1314,8 @@ public class GreedySolver {
     return true;
   }
 
-  private final int numSubjectiveStations;
-
   public int getNumSubjectiveStations() {
-    return numSubjectiveStations;
+    return this.solverParameters.getNumSubjectiveStations();
   }
 
   /**
@@ -1555,19 +1348,19 @@ public class GreedySolver {
   }
 
   private void outputSchedule(final File schedule) throws IOException {
-    CSVWriter csv = null;
-    try {
-      csv = new CSVWriter(new OutputStreamWriter(new FileOutputStream(schedule), Utilities.DEFAULT_CHARSET));
+    final List<SubjectiveStation> subjectiveStations = solverParameters.getSubjectiveStations();
+
+    try (final CSVWriter csv = new CSVWriter(new OutputStreamWriter(new FileOutputStream(schedule),
+                                                                    Utilities.DEFAULT_CHARSET))) {
       final List<String> line = new ArrayList<String>();
       line.add(TournamentSchedule.TEAM_NUMBER_HEADER);
-      line.add(TournamentSchedule.DIVISION_HEADER);
       line.add(TournamentSchedule.TEAM_NAME_HEADER);
       line.add(TournamentSchedule.ORGANIZATION_HEADER);
       line.add(TournamentSchedule.JUDGE_GROUP_HEADER);
-      for (int subj = 0; subj < getNumSubjectiveStations(); ++subj) {
-        line.add(getSubjectiveColumnName(subj));
+      for (final SubjectiveStation station : subjectiveStations) {
+        line.add(station.getName());
       }
-      for (int round = 0; round < getNumPerformanceRounds(); ++round) {
+      for (int round = 0; round < solverParameters.getNumPerformanceRounds(); ++round) {
         line.add(String.format(TournamentSchedule.PERF_HEADER_FORMAT, round
             + 1));
         line.add(String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round
@@ -1581,68 +1374,60 @@ public class GreedySolver {
             + 1)
             * 100
             + team.getIndex();
-        final int judgingGroup = team.getGroup()
-            + 1;
+        final int judgingGroup = team.getGroup();
         line.add(String.valueOf(teamNum));
-        line.add("D"
-            + judgingGroup);
         line.add("Team "
             + teamNum);
         line.add("Org "
             + teamNum);
-        line.add("G"
-            + judgingGroup);
-        for (int subj = 0; subj < getNumSubjectiveStations(); ++subj) {
-          final Date time = getTime(sz[team.getGroup()][team.getIndex()][subj], 1);
+        line.add(groupNames[judgingGroup]); // judging group
+        for (int subj = 0; subj < subjectiveStations.size(); ++subj) {
+          final SubjectiveStation station = subjectiveStations.get(subj);
+
+          final LocalTime time = getTime(sz[team.getGroup()][team.getIndex()][subj], 1);
           if (null == time) {
             throw new RuntimeException("Could not find a subjective start for group: "
-                + (team.getGroup()
+                + groupNames[team.getGroup()] + " team: " + (team.getIndex()
                     + 1)
-                + " team: " + (team.getIndex()
-                    + 1)
-                + " subj: " + (subj
-                    + 1));
+                + " subj: " + station.getName());
           }
-          line.add(TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(time));
+          line.add(TournamentSchedule.formatTime(time));
         }
 
         // find all performances for a team and then sort by time
         final SortedSet<PerformanceTime> perfTimes = new TreeSet<PerformanceTime>();
-        for (int round = 0; round < getNumPerformanceRounds(); ++round) {
-          for (int table = 0; table < getNumTables(); ++table) {
+        for (int round = 0; round < solverParameters.getNumPerformanceRounds(); ++round) {
+          for (int table = 0; table < solverParameters.getNumTables(); ++table) {
             for (int side = 0; side < 2; ++side) {
-              final Date time = getTime(pz[team.getGroup()][team.getIndex()][table][side], round
+              final LocalTime time = getTime(pz[team.getGroup()][team.getIndex()][table][side], round
                   + 1);
               if (null != time) {
-                perfTimes.add(new PerformanceTime(time, "Table"
-                    + (table
-                        + 1), (side
-                            + 1)));
+                final String tableName = String.format("Table%d", (table
+                    + 1));
+                final int displayedSide = side
+                    + 1;
+                perfTimes.add(new PerformanceTime(time, tableName, displayedSide));
               }
             }
           }
         }
-        if (perfTimes.size() != getNumPerformanceRounds()) {
+        if (perfTimes.size() != solverParameters.getNumPerformanceRounds()) {
           throw new FLLRuntimeException("Expecting "
-              + getNumPerformanceRounds() + " performance times, but found " + perfTimes.size() + " group: "
-              + (team.getGroup()
+              + solverParameters.getNumPerformanceRounds() + " performance times, but found " + perfTimes.size()
+              + " group: " + (team.getGroup()
                   + 1)
               + " team: " + (team.getIndex()
                   + 1)
               + " perfs: " + perfTimes);
         }
         for (final PerformanceTime perfTime : perfTimes) {
-          line.add(TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(perfTime.getTime()));
+          line.add(TournamentSchedule.formatTime(perfTime.getTime()));
           line.add(perfTime.getTable()
               + " " + perfTime.getSide());
         }
 
         csv.writeNext(line.toArray(new String[line.size()]));
         line.clear();
-      }
-    } finally {
-      if (null != csv) {
-        csv.close();
       }
     }
   }
@@ -1654,18 +1439,15 @@ public class GreedySolver {
    * @param count which time to find, 1 based count
    * @return
    */
-  private Date getTime(final boolean[] slots,
-                       final int count) {
+  private LocalTime getTime(final boolean[] slots,
+                            final int count) {
     int n = 0;
     for (int i = 0; i < slots.length; ++i) {
       if (slots[i]) {
         ++n;
         if (n == count) {
-          final Calendar cal = Calendar.getInstance();
-          cal.setTime(startTime);
-          cal.add(Calendar.MINUTE, i
-              * tinc);
-          return cal.getTime();
+          LocalTime slotTime = solverParameters.getStartTime().plusMinutes(i);
+          return slotTime;
         }
       }
     }
@@ -1681,15 +1463,28 @@ public class GreedySolver {
     final int end = timeslot
         + getSubjectiveDuration(station);
 
-    return checkBreak(begin, end, subjectiveBreaks);
+    return checkBreak(begin, end, solverParameters.getSubjectiveBreaks());
   }
 
+  /**
+   * Check if the interval [begin, end] overlaps a break.
+   * 
+   * @param begin the start of the interval (in minutes from start)
+   * @param end the end of the interval (in minutes from start)
+   * @param breaks the breaks to check against
+   * @return true if there is no overlap, false if there is an overlap
+   */
   private boolean checkBreak(final int begin,
                              final int end,
                              final Collection<ScheduledBreak> breaks) {
     for (final ScheduledBreak b : breaks) {
-      if (b.end > begin
-          && b.start < end) {
+      final long breakStartOffsetMinutes = ChronoUnit.MINUTES.between(solverParameters.getStartTime(), b.getStart());
+      final long breakDurationMinutes = b.getDuration().toMinutes();
+      final long breakEndOffsetMinutes = breakStartOffsetMinutes
+          + breakDurationMinutes;
+
+      if (breakStartOffsetMinutes < end
+          && breakEndOffsetMinutes > begin) {
         return false;
       }
     }
@@ -1705,7 +1500,7 @@ public class GreedySolver {
     final int end = timeslot
         + getPerformanceDuration();
 
-    return checkBreak(begin, end, performanceBreaks);
+    return checkBreak(begin, end, solverParameters.getPerformanceBreaks());
   }
 
   private static final Comparator<SchedTeam> lowestTeamIndex = new Comparator<SchedTeam>() {
@@ -1747,7 +1542,7 @@ public class GreedySolver {
           }
         }
 
-        for (int table = 0; table < getNumTables(); ++table) {
+        for (int table = 0; table < solverParameters.getNumTables(); ++table) {
           oneAssignments += performanceScheduled[one.getGroup()][one.getIndex()];
           twoAssignments += performanceScheduled[two.getGroup()][two.getIndex()];
         }
@@ -1763,15 +1558,4 @@ public class GreedySolver {
     }
   };
 
-  private static final class ScheduledBreak {
-    public ScheduledBreak(final int start,
-                          final int end) {
-      this.start = start;
-      this.end = end;
-    }
-
-    public final int start;
-
-    public final int end;
-  }
 }

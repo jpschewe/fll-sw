@@ -7,7 +7,7 @@
 package fll.scheduler;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalTime;
 
 /**
  * Represents a subjective judging time from the schedule.
@@ -20,9 +20,9 @@ public final class SubjectiveTime implements Serializable {
    * @param category the subjective category this maps to
    */
   public SubjectiveTime(final String name,
-                        final Date time) {
+                        final LocalTime time) {
     this.name = name;
-    this.time = time == null ? null : new Date(time.getTime());
+    this.time = time;
   }
 
   private final String name;
@@ -36,12 +36,12 @@ public final class SubjectiveTime implements Serializable {
     return name;
   }
 
-  private final Date time;
+  private final LocalTime time;
 
   /**
    * Time of the judging session.
    */
-  public Date getTime() {
-    return null == time ? null : new Date(time.getTime());
+  public LocalTime getTime() {
+    return time;
   }
 }
