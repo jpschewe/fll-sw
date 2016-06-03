@@ -301,6 +301,24 @@ public class SolverParams extends SchedParams {
     return d;
   }
 
+  /**
+   * Maximum duration the tournament should run. This
+   * is used to limit the search space when generating a schedule.
+   *
+   * @param duration the new duration, will be truncated to even minutes
+   * @see #getTMaxHours()
+   * @see #getTMaxMinutes()
+   */
+  public final void setMaxDuration(final Duration duration) {
+    final int hours = (int) duration.toHours();
+    final long allMinutes = duration.toMinutes();
+    final int minutes = (int) (allMinutes
+        - (hours
+            * 60));
+    setTMaxHours(hours);
+    setTMaxMinutes(minutes);
+  }
+
   private int tmaxHours = 8;
 
   /**
@@ -346,6 +364,11 @@ public class SolverParams extends SchedParams {
   public List<ScheduledBreak> getSubjectiveBreaks() {
     return Collections.unmodifiableList(this.subjectiveBreaks);
   }
+  
+  public void setSubjectiveBreaks(final List<ScheduledBreak> breaks) {
+    subjectiveBreaks.clear();
+    subjectiveBreaks.addAll(breaks);
+  }
 
   private final List<ScheduledBreak> performanceBreaks = new LinkedList<ScheduledBreak>();
 
@@ -354,6 +377,11 @@ public class SolverParams extends SchedParams {
    */
   public List<ScheduledBreak> getPerformanceBreaks() {
     return Collections.unmodifiableList(this.performanceBreaks);
+  }
+
+  public void setPerformanceBreaks(final List<ScheduledBreak> breaks) {
+    performanceBreaks.clear();
+    performanceBreaks.addAll(breaks);
   }
 
   /**
