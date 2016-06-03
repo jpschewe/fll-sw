@@ -7,9 +7,9 @@
 package fll.web.report;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Collection;
 
 import javax.servlet.ServletContext;
@@ -17,14 +17,13 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.log4j.Logger;
 
 import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.report.finalist.FinalistSchedule;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Populate the page context for the report index page.
@@ -46,7 +45,7 @@ public class ReportIndex {
     session.removeAttribute(PromptSummarizeScores.SUMMARY_CHECKED_KEY);
 
     Connection connection = null;
-    Statement stmt = null;
+    PreparedStatement prep = null;
     ResultSet rs = null;
     try {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -54,9 +53,9 @@ public class ReportIndex {
 
       final int tournament = Queries.getCurrentTournament(connection);
 
-      stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = "
-          + Queries.getCurrentTournament(connection));
+      prep = connection.prepareStatement("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = ?");
+      prep.setInt(1, Queries.getCurrentTournament(connection));
+      rs = prep.executeQuery();
       final int maxRunNumber;
       if (rs.next()) {
         maxRunNumber = rs.getInt(1);
@@ -75,7 +74,7 @@ public class ReportIndex {
       throw new RuntimeException(e);
     } finally {
       SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
+      SQLFunctions.close(prep);
       SQLFunctions.close(connection);
     }
   }
