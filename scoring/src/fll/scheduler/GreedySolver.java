@@ -1354,7 +1354,6 @@ public class GreedySolver {
                                                                     Utilities.DEFAULT_CHARSET))) {
       final List<String> line = new ArrayList<String>();
       line.add(TournamentSchedule.TEAM_NUMBER_HEADER);
-      line.add(TournamentSchedule.DIVISION_HEADER);
       line.add(TournamentSchedule.TEAM_NAME_HEADER);
       line.add(TournamentSchedule.ORGANIZATION_HEADER);
       line.add(TournamentSchedule.JUDGE_GROUP_HEADER);
@@ -1377,7 +1376,6 @@ public class GreedySolver {
             + team.getIndex();
         final int judgingGroup = team.getGroup();
         line.add(String.valueOf(teamNum));
-        line.add(groupNames[judgingGroup]); // division
         line.add("Team "
             + teamNum);
         line.add("Org "
