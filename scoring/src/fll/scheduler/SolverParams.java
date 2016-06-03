@@ -414,4 +414,30 @@ public class SolverParams extends SchedParams {
 
   }
 
+  @Override
+  public List<String> isValid() {
+    final List<String> errors = super.isValid();
+
+    if (getAlternateTables()) {
+      // make sure performanceDuration is even
+      final int performanceDurationMinutes = getPerformanceMinutes();
+
+      if ((performanceDurationMinutes
+          & 1) == 1) {
+        errors.add("Number of timeslots for performance duration minutes ("
+            + performanceDurationMinutes + ") is not even and must be to alternate tables.");
+      }
+
+      // make sure num tables is even
+      if ((getNumTables()
+          & 1) == 1) {
+        errors.add("Number of tables ("
+            + getNumTables() + ") is not even and must be to alternate tables.");
+      }
+
+    }
+
+    return errors;
+  }
+
 }
