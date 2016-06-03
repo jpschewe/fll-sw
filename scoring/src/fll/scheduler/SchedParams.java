@@ -21,6 +21,16 @@ import fll.Utilities;
  */
 public class SchedParams implements Serializable {
 
+  public static final String SUBJ_MINUTES_KEY = "subj_minutes";
+
+  public static final String SUBJ_NAMES_KEY = "subj_names";
+
+  public static final String ALPHA_PERF_MINUTES_KEY = "alpha_perf_minutes";
+
+  public static final String CT_MINUTES_KEY = "ct_minutes";
+
+  public static final String PCT_MINUTES_KEY = "pct_minutes";
+
   public static final int DEFAULT_TINC = 5;
 
   public static final int DEFAULT_MAX_HOURS = 8;
@@ -79,19 +89,26 @@ public class SchedParams implements Serializable {
    * @param properies where to load the parameters from
    */
   public void load(final Properties properties) throws ParseException {
-    final String subjDurationStr = properties.getProperty(GreedySolver.SUBJ_MINUTES_KEY);
+    final String subjDurationStr = properties.getProperty(SUBJ_MINUTES_KEY);
     final int[] subjectiveDurations = Utilities.parseListOfIntegers(subjDurationStr);
 
-    mPerformanceMinutes = Utilities.readIntProperty(properties, GreedySolver.ALPHA_PERF_MINUTES_KEY,
-                                                    DEFAULT_PERFORMANCE_MINUTES);
-    mChangetimeMinutes = Utilities.readIntProperty(properties, GreedySolver.CT_MINUTES_KEY, MINIMUM_CHANGETIME_MINUTES);
-    mPerformanceChangetimeMinutes = Utilities.readIntProperty(properties, GreedySolver.PCT_MINUTES_KEY,
+    final String subjectiveNamesStr = properties.getProperty(SUBJ_NAMES_KEY, null);
+    final String[] subjectiveNames = Utilities.parseListOfStrings(subjectiveNamesStr);
+
+    mPerformanceMinutes = Utilities.readIntProperty(properties, ALPHA_PERF_MINUTES_KEY, DEFAULT_PERFORMANCE_MINUTES);
+    mChangetimeMinutes = Utilities.readIntProperty(properties, CT_MINUTES_KEY, MINIMUM_CHANGETIME_MINUTES);
+    mPerformanceChangetimeMinutes = Utilities.readIntProperty(properties, PCT_MINUTES_KEY,
                                                               MINIMUM_PERFORMANCE_CHANGETIME_MINUTES);
 
     mSubjectiveStations = new ArrayList<>();
     for (int i = 0; i < subjectiveDurations.length; ++i) {
-      final SubjectiveStation station = new SubjectiveStation(GreedySolver.getSubjectiveColumnName(i),
-                                                              subjectiveDurations[i]);
+      final String name;
+      if (i < subjectiveNames.length) {
+        name = subjectiveNames[i];
+      } else {
+        name = GreedySolver.getSubjectiveColumnName(i);
+      }
+      final SubjectiveStation station = new SubjectiveStation(name, subjectiveDurations[i]);
       mSubjectiveStations.add(station);
     }
   }
@@ -103,15 +120,19 @@ public class SchedParams implements Serializable {
    */
   public void save(final Properties properties) {
     final int[] subjectiveDurations = new int[mSubjectiveStations.size()];
+    final String[] subjectiveNames = new String[mSubjectiveStations.size()];
     for (int index = 0; index < subjectiveDurations.length; ++index) {
-      subjectiveDurations[index] = mSubjectiveStations.get(index).getDurationMinutes();
+      final SubjectiveStation station = mSubjectiveStations.get(index);
+      subjectiveDurations[index] = station.getDurationMinutes();
+      subjectiveNames[index] = station.getName();
     }
-    properties.setProperty(GreedySolver.SUBJ_MINUTES_KEY, Arrays.toString(subjectiveDurations));
+    properties.setProperty(SUBJ_MINUTES_KEY, Arrays.toString(subjectiveDurations));
+    properties.setProperty(SUBJ_NAMES_KEY, Arrays.toString(subjectiveNames));
 
-    properties.setProperty(GreedySolver.ALPHA_PERF_MINUTES_KEY, Integer.toString(mPerformanceMinutes));
+    properties.setProperty(ALPHA_PERF_MINUTES_KEY, Integer.toString(mPerformanceMinutes));
 
-    properties.setProperty(GreedySolver.CT_MINUTES_KEY, Integer.toString(mChangetimeMinutes));
-    properties.setProperty(GreedySolver.PCT_MINUTES_KEY, Integer.toString(mPerformanceChangetimeMinutes));
+    properties.setProperty(CT_MINUTES_KEY, Integer.toString(mChangetimeMinutes));
+    properties.setProperty(PCT_MINUTES_KEY, Integer.toString(mPerformanceChangetimeMinutes));
   }
 
   private int mPerformanceMinutes = DEFAULT_PERFORMANCE_MINUTES;

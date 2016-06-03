@@ -196,34 +196,6 @@ public class GreedySolver {
     }
   }
 
-  public static final String START_TIME_KEY = "start_time";
-
-  public static final String ALTERNATE_TABLES_KEY = "alternate_tables";
-
-  public static final String SUBJECTIVE_FIRST_KEY = "sujective_first";
-
-  public static final String PERF_ATTEMPT_OFFSET_MINUTES_KEY = "perf_attempt_offset_minutes";
-
-  public static final String SUBJECTIVE_ATTEMPT_OFFSET_MINUTES_KEY = "subjective_attempt_offset_minutes";
-
-  public static final String NROUNDS_KEY = "NRounds";
-
-  public static final String NTABLES_KEY = "NTables";
-
-  public static final String TMAX_HOURS_KEY = "TMax_hours";
-
-  public static final String TMAX_MINUTES_KEY = "TMax_minutes";
-
-  public static final String SUBJ_MINUTES_KEY = "subj_minutes";
-
-  public static final String GROUP_COUNTS_KEY = "group_counts";
-
-  public static final String ALPHA_PERF_MINUTES_KEY = "alpha_perf_minutes";
-
-  public static final String CT_MINUTES_KEY = "ct_minutes";
-
-  public static final String PCT_MINUTES_KEY = "pct_minutes";
-
   /**
    * @param datafile the datafile for the schedule to solve
    * @throws ParseException
