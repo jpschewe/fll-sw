@@ -9,6 +9,9 @@ package fll.scheduler;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JTextField;
 
+/**
+ * Edit strings that cannot be empty.
+ */
 /*package*/ final class NameCellEditor extends DefaultCellEditor {
 
   public NameCellEditor() {
