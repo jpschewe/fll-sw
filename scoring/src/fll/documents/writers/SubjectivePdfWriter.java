@@ -6,7 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Date;
+import java.time.LocalTime;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -189,8 +189,8 @@ public class SubjectivePdfWriter {
     if (null == scheduleColumn) {
       scheduledTimeStr = "N/A";
     } else {
-      final Date scheduledTime = teamInfo.getSubjectiveTimeByName(scheduleColumn).getTime();
-      scheduledTimeStr = TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(scheduledTime);
+      final LocalTime scheduledTime = teamInfo.getSubjectiveTimeByName(scheduleColumn).getTime();
+      scheduledTimeStr = TournamentSchedule.formatTime(scheduledTime);
     }
     pageHeaderTable.addCell(createCell("Time: "
         + scheduledTimeStr, f12b, NO_BORDERS, Element.ALIGN_RIGHT));

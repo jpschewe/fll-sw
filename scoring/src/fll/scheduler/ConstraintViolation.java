@@ -7,12 +7,10 @@
 package fll.scheduler;
 
 import java.io.Serializable;
+import java.time.LocalTime;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.LinkedList;
-
-import net.mtu.eggplant.util.DateUtils;
 
 /**
  * Constraint violation during scheduling.
@@ -28,10 +26,10 @@ public final class ConstraintViolation implements Serializable {
     return team;
   }
 
-  private final Date performance;
+  private final LocalTime performance;
 
-  public Date getPerformance() {
-    return DateUtils.copyDate(performance);
+  public LocalTime getPerformance() {
+    return performance;
   }
 
   private final String message;
@@ -59,7 +57,7 @@ public final class ConstraintViolation implements Serializable {
                              final int team,
                              final SubjectiveTime subjective1,
                              final SubjectiveTime subjective2,
-                             final Date performance,
+                             final LocalTime performance,
                              final String message) {
     this.isHard = isHard;
     this.team = team;
@@ -69,7 +67,7 @@ public final class ConstraintViolation implements Serializable {
     if (null != subjective2) {
       subjectiveTimes.add(subjective2);
     }
-    this.performance = DateUtils.copyDate(performance);
+    this.performance = performance;
     this.message = message;
   }
 
