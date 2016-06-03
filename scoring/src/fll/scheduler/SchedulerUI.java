@@ -120,7 +120,6 @@ public class SchedulerUI extends JFrame {
     try {
       final SchedulerUI frame = new SchedulerUI();
 
-      frame.pack();
       frame.setSize(frame.getPreferredSize());
       frame.addWindowListener(new BasicWindowMonitor());
       GraphicsUtils.centerWindow(frame);
@@ -191,6 +190,8 @@ public class SchedulerUI extends JFrame {
     mReloadFileAction.setEnabled(false);
     mSaveScheduleDescriptionAction.setEnabled(false);
     mRunSchedulerAction.setEnabled(false);
+    
+    pack();
   }
 
   @SuppressFBWarnings(value = "SE_TRANSIENT_FIELD_NOT_RESTORED", justification = "There is no state needed to be kept here")
