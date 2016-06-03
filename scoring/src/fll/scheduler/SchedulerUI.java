@@ -312,13 +312,7 @@ public class SchedulerUI extends JFrame {
           return;
         }
 
-        final List<SubjectiveStation> subjectiveStations = new LinkedList<SubjectiveStation>();
-        for (int subj = 0; subj < solver.getNumSubjectiveStations(); ++subj) {
-          final String name = GreedySolver.getSubjectiveColumnName(subj);
-          final int duration = solver.getSubjectiveDuration(subj);
-          final SubjectiveStation station = new SubjectiveStation(name, duration);
-          subjectiveStations.add(station);
-        }
+        final List<SubjectiveStation> subjectiveStations = solver.getParameters().getSubjectiveStations();
 
         // this causes mSchedParams, mScheduleData and mScheduleFile to be set
         final File solutionFile = solver.getBestSchedule();

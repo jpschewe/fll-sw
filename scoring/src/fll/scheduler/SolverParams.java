@@ -11,8 +11,10 @@ import java.time.Duration;
 import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -47,6 +49,8 @@ public class SolverParams extends SchedParams {
   public static final String TMAX_MINUTES_KEY = "TMax_minutes";
 
   public static final String GROUP_COUNTS_KEY = "group_counts";
+
+  public static final String GROUP_NAMES_KEY = "group_names";
 
   /**
    * Format for the number of breaks property. Expected to be
@@ -93,7 +97,19 @@ public class SolverParams extends SchedParams {
     }
 
     final String groupCountsStr = properties.getProperty(GROUP_COUNTS_KEY);
-    this.groupCounts = Utilities.parseListOfIntegers(groupCountsStr);
+    int[] groupCounts = Utilities.parseListOfIntegers(groupCountsStr);
+    final String groupNamesStr = properties.getProperty(GROUP_NAMES_KEY, null);
+    String[] groupNames = Utilities.parseListOfStrings(groupNamesStr);
+    judgingGroups = new HashMap<>();
+    for (int i = 0; i < groupCounts.length; ++i) {
+      final String name;
+      if (i < groupNames.length) {
+        name = groupNames[i];
+      } else {
+        name = String.format("G%d", i);
+      }
+      judgingGroups.put(name, groupCounts[i]);
+    }
 
     this.alternate = Utilities.readBooleanProperty(properties, ALTERNATE_TABLES_KEY, false);
     LOGGER.debug("Alternate is: "
@@ -126,7 +142,17 @@ public class SolverParams extends SchedParams {
 
     properties.setProperty(START_TIME_KEY, TournamentSchedule.formatTime(this.startTime));
 
-    properties.setProperty(GROUP_COUNTS_KEY, Arrays.toString(this.groupCounts));
+    final int[] judgingGroupCounts = new int[judgingGroups.size()];
+    final String[] judgingGroupNames = new String[judgingGroups.size()];
+    int judgingGroupIndex = 0;
+    for (final Map.Entry<String, Integer> entry : judgingGroups.entrySet()) {
+      judgingGroupCounts[judgingGroupIndex] = entry.getValue();
+      judgingGroupNames[judgingGroupIndex] = entry.getKey();
+
+      ++judgingGroupIndex;
+    }
+    properties.setProperty(GROUP_COUNTS_KEY, Arrays.toString(judgingGroupCounts));
+    properties.setProperty(GROUP_NAMES_KEY, Arrays.toString(judgingGroupNames));
 
     properties.setProperty(ALTERNATE_TABLES_KEY, Boolean.toString(this.alternate));
 
@@ -165,22 +191,25 @@ public class SolverParams extends SchedParams {
     this.startTime = v;
   }
 
-  private int[] groupCounts = new int[0];
+  private Map<String, Integer> judgingGroups = new HashMap<>();
 
   /**
-   * Set the number of teams in each grouping.
-   * This also defines the number of groups.
+   * The judging groups.
    * 
-   * @param groupCounts the number of teams in each group, cannot be null
-   * @throws NullPointerException if groupCounts is null
+   * @param judgingGroups key is name, value is number of teams
    */
-  public final void setGroupCounts(final int[] groupCounts) {
-    if (null == groupCounts) {
-      throw new NullPointerException("groupCounts cannot be null");
-    }
+  public void setJudgingGroups(final Map<String, Integer> judgingGroups) {
+    this.judgingGroups = new HashMap<>(judgingGroups);
+  }
 
-    this.groupCounts = new int[groupCounts.length];
-    System.arraycopy(groupCounts, 0, this.groupCounts, 0, groupCounts.length);
+  /**
+   * The judging groups.
+   * 
+   * @return unmodifiable map, judgingGroups key is name, value is number of
+   *         teams
+   */
+  public Map<String, Integer> getJudgingGroups() {
+    return Collections.unmodifiableMap(this.judgingGroups);
   }
 
   /**
@@ -188,17 +217,7 @@ public class SolverParams extends SchedParams {
    * Defaults to 0.
    */
   public final int getNumGroups() {
-    return groupCounts.length;
-  }
-
-  /**
-   * @param index the index into groupCounts
-   * @return the number of teams in the specified group
-   * @throws IndexOutOfBoundsException if index is not a valid index for
-   *           groupCounts
-   */
-  public final int getNumTeamsInGroup(int index) {
-    return this.groupCounts[index];
+    return judgingGroups.size();
   }
 
   private boolean alternate = false;
@@ -407,7 +426,10 @@ public class SolverParams extends SchedParams {
    * @throws ParseException
    */
   private void parseBreaks(final Properties properties) throws ParseException {
+    subjectiveBreaks.clear();
     subjectiveBreaks.addAll(parseBreaks(properties, "subjective"));
+
+    performanceBreaks.clear();
     performanceBreaks.addAll(parseBreaks(properties, "performance"));
   }
 

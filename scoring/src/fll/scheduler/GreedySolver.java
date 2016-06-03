@@ -24,9 +24,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -56,6 +58,13 @@ public class GreedySolver {
   private static final Logger LOGGER = LogUtils.getLogger();
 
   private final SolverParams solverParameters;
+
+  /**
+   * The parameters used by this instance of the solvers.
+   */
+  public final SolverParams getParameters() {
+    return solverParameters;
+  }
 
   /**
    * group, team, station
@@ -96,6 +105,12 @@ public class GreedySolver {
    * next available time for table
    */
   private final int[] performanceTables;
+
+  /**
+   * Names of judging groups, indexed the same as the *z variables.
+   * Used for output.
+   */
+  private final String[] groupNames;
 
   private final File datafile;
 
@@ -265,8 +280,14 @@ public class GreedySolver {
     } else {
       Arrays.fill(performanceTables, 0);
     }
-    for (int group = 0; group < solverParameters.getNumGroups(); ++group) {
-      final int count = solverParameters.getNumTeamsInGroup(group);
+
+    final Map<String, Integer> judgingGroups = solverParameters.getJudgingGroups();
+    int group = 0;
+    groupNames = new String[judgingGroups.size()];
+    for (final Map.Entry<String, Integer> entry : judgingGroups.entrySet()) {
+      final int count = entry.getValue();
+
+      groupNames[group] = entry.getKey();
       sz[group] = new boolean[count][getNumSubjectiveStations()][getNumTimeslots()];
       sy[group] = new boolean[count][getNumSubjectiveStations()][getNumTimeslots()];
       pz[group] = new boolean[count][solverParameters.getNumTables()][2][getNumTimeslots()];
@@ -288,11 +309,13 @@ public class GreedySolver {
         }
         Arrays.fill(subjectiveScheduled[group][team], false);
         Arrays.fill(subjectiveStations[group], 0);
-      }
+      } // foreach team in a judging group
 
       performanceScheduled[group] = new int[count];
       Arrays.fill(performanceScheduled[group], 0);
-    }
+
+      ++group;
+    } // foreach judging group
 
     // sort list of teams to make sure that the scheduler is deterministic
     Collections.sort(teams, lowestTeamIndex);
@@ -988,23 +1011,13 @@ public class GreedySolver {
    * @return the number of warnings or -1 if there are hard violations
    */
   private int getNumWarnings(final File scheduleFile) {
-    final List<SubjectiveStation> subjectiveParams = new LinkedList<SubjectiveStation>();
-    final Collection<String> subjectiveHeaders = new LinkedList<String>();
-    for (int subj = 0; subj < getNumSubjectiveStations(); ++subj) {
-      final String header = "Subj"
-          + (subj
-              + 1);
-      subjectiveHeaders.add(header);
-      final SubjectiveStation station = new SubjectiveStation(header, getSubjectiveDuration(subj));
-      subjectiveParams.add(station);
-    }
+    final List<SubjectiveStation> subjectiveParams = this.solverParameters.getSubjectiveStations();
+    final Collection<String> subjectiveHeaders = subjectiveParams.stream().map(ss -> ss.getName())
+                                                                 .collect(Collectors.toList());
 
     try {
       final TournamentSchedule schedule = new TournamentSchedule(datafile.getName(), scheduleFile, subjectiveHeaders);
-
-      final SchedParams params = new SchedParams(subjectiveParams, getPerformanceDuration(), getChangetime(),
-                                                 getPerformanceChangetime());
-      final ScheduleChecker checker = new ScheduleChecker(params, schedule);
+      final ScheduleChecker checker = new ScheduleChecker(this.solverParameters, schedule);
       final List<ConstraintViolation> violations = checker.verifySchedule();
       for (final ConstraintViolation violation : violations) {
         if (violation.isHard()) {
@@ -1335,6 +1348,8 @@ public class GreedySolver {
   }
 
   private void outputSchedule(final File schedule) throws IOException {
+    final List<SubjectiveStation> subjectiveStations = solverParameters.getSubjectiveStations();
+
     try (final CSVWriter csv = new CSVWriter(new OutputStreamWriter(new FileOutputStream(schedule),
                                                                     Utilities.DEFAULT_CHARSET))) {
       final List<String> line = new ArrayList<String>();
@@ -1343,8 +1358,8 @@ public class GreedySolver {
       line.add(TournamentSchedule.TEAM_NAME_HEADER);
       line.add(TournamentSchedule.ORGANIZATION_HEADER);
       line.add(TournamentSchedule.JUDGE_GROUP_HEADER);
-      for (int subj = 0; subj < getNumSubjectiveStations(); ++subj) {
-        line.add(getSubjectiveColumnName(subj));
+      for (final SubjectiveStation station : subjectiveStations) {
+        line.add(station.getName());
       }
       for (int round = 0; round < solverParameters.getNumPerformanceRounds(); ++round) {
         line.add(String.format(TournamentSchedule.PERF_HEADER_FORMAT, round
@@ -1360,27 +1375,23 @@ public class GreedySolver {
             + 1)
             * 100
             + team.getIndex();
-        final int judgingGroup = team.getGroup()
-            + 1;
+        final int judgingGroup = team.getGroup();
         line.add(String.valueOf(teamNum));
-        line.add("D"
-            + judgingGroup);
+        line.add(groupNames[judgingGroup]); // division
         line.add("Team "
             + teamNum);
         line.add("Org "
             + teamNum);
-        line.add("G"
-            + judgingGroup);
-        for (int subj = 0; subj < getNumSubjectiveStations(); ++subj) {
+        line.add(groupNames[judgingGroup]); // judging group
+        for (int subj = 0; subj < subjectiveStations.size(); ++subj) {
+          final SubjectiveStation station = subjectiveStations.get(subj);
+
           final LocalTime time = getTime(sz[team.getGroup()][team.getIndex()][subj], 1);
           if (null == time) {
             throw new RuntimeException("Could not find a subjective start for group: "
-                + (team.getGroup()
+                + groupNames[team.getGroup()] + " team: " + (team.getIndex()
                     + 1)
-                + " team: " + (team.getIndex()
-                    + 1)
-                + " subj: " + (subj
-                    + 1));
+                + " subj: " + station.getName());
           }
           line.add(TournamentSchedule.formatTime(time));
         }

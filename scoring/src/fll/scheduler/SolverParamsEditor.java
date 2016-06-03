@@ -8,7 +8,6 @@ package fll.scheduler;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JCheckBox;
@@ -161,13 +160,7 @@ public class SolverParamsEditor extends JPanel {
 
     subjectiveStations.setStations(params.getSubjectiveStations());
 
-    final Map<String, Integer> judgingGroupMap = new HashMap<>();
-    for (int groupNum = 0; groupNum < params.getNumGroups(); ++groupNum) {
-      final int groupCount = params.getNumTeamsInGroup(groupNum);
-      final String groupName = String.format("group-%d", groupNum);
-      judgingGroupMap.put(groupName, groupCount);
-    }
-    judgingGroups.setJudgingGroups(judgingGroupMap);
+    judgingGroups.setJudgingGroups(params.getJudgingGroups());
 
     numPerformanceRounds.setValue(params.getNumPerformanceRounds());
     subjectiveFirst.setSelected(params.getSubjectiveFirst());
@@ -200,15 +193,8 @@ public class SolverParamsEditor extends JPanel {
 
     params.setSubjectiveStations(subjectiveStations.getStations());
 
-    // TODO should change the parameters to support a map
     final Map<String, Integer> judgingGroupMap = judgingGroups.getJudgingGroups();
-    final int[] groupCounts = new int[judgingGroupMap.size()];
-    int groupCountIndex = 0;
-    for (Map.Entry<String, Integer> entry : judgingGroupMap.entrySet()) {
-      groupCounts[groupCountIndex] = entry.getValue();
-      ++groupCountIndex;
-    }
-    params.setGroupCounts(groupCounts);
+    params.setJudgingGroups(judgingGroupMap);
 
     params.setNumPerformanceRounds((Integer) numPerformanceRounds.getValue());
     params.setSubjectiveFirst(subjectiveFirst.isSelected());
@@ -220,7 +206,7 @@ public class SolverParamsEditor extends JPanel {
 
     params.setSubjectiveBreaks(subjectiveBreaks.getBreaks());
     params.setPerformanceBreaks(performanceBreaks.getBreaks());
-    
+
     return this.params;
   }
 
