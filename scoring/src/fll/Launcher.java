@@ -100,13 +100,13 @@ public class Launcher extends JFrame {
     final Container cpane = getContentPane();
     cpane.setLayout(new GridLayout(0, 2));
 
-    final JButton webserverStartButton = new JButton("Start Webserver");
+    final JButton webserverStartButton = new JButton("Start web server");
     webserverStartButton.addActionListener(ae -> {
       controlWebserver(true);
     });
     cpane.add(webserverStartButton);
 
-    final JButton webserverStopButton = new JButton("Stop Webserver");
+    final JButton webserverStopButton = new JButton("Stop web server");
     webserverStopButton.addActionListener(ae -> {
       controlWebserver(false);
     });
