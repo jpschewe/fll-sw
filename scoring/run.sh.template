@@ -70,4 +70,5 @@ if $cygwin; then
   mypath=`cygpath --windows -a "$mypath"`
 fi
 
+cd "${mypath}"
 exec "$JAVACMD" @JAVA_ARGS@ -classpath "$LOCALCLASSPATH" @CLASSNAME@ "$@"
