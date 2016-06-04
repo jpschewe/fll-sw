@@ -277,7 +277,7 @@ public final class SubjectiveFrame extends JFrame {
           + file.getAbsolutePath() + " - " + ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
       LOGGER.fatal("Error reading datafile: "
           + file.getAbsolutePath(), ioe);
-      System.exit(1);
+      setVisible(false);
     }
   }
 
