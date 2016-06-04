@@ -6,8 +6,11 @@
 
 package fll;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.Desktop;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -15,10 +18,16 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.net.Socket;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
@@ -93,50 +102,107 @@ public class Launcher extends JFrame {
     }
   }
 
+  private final JLabel mServerStatus;
+
+  private boolean mServerOnline = false;
+
+  private static final String ONLINE = "ONLINE";
+
+  private static final Color ONLINE_COLOR = Color.GREEN;
+
+  private static final String OFFLINE = "OFFLINE";
+
+  private static final Color OFFLINE_COLOR = Color.RED;
+
   public Launcher() {
     super();
     setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
     final Container cpane = getContentPane();
-    cpane.setLayout(new GridLayout(0, 2));
+    cpane.setLayout(new BorderLayout());
+
+    final JPanel topPanel = new JPanel(new FlowLayout());
+    cpane.add(topPanel, BorderLayout.NORTH);
+    topPanel.add(new JLabel("Web server is"));
+    mServerStatus = new JLabel(OFFLINE);
+    mServerStatus.setOpaque(true);
+    mServerStatus.setBackground(OFFLINE_COLOR);
+    topPanel.add(mServerStatus);
+
+    final JPanel buttonBox = new JPanel(new GridLayout(0, 2));
+    cpane.add(buttonBox, BorderLayout.CENTER);
 
     final JButton webserverStartButton = new JButton("Start web server");
     webserverStartButton.addActionListener(ae -> {
       controlWebserver(true);
     });
-    cpane.add(webserverStartButton);
+    buttonBox.add(webserverStartButton);
 
     final JButton webserverStopButton = new JButton("Stop web server");
     webserverStopButton.addActionListener(ae -> {
       controlWebserver(false);
     });
-    cpane.add(webserverStopButton);
+    buttonBox.add(webserverStopButton);
 
     final JButton mainPage = new JButton("Visit the main web page");
     mainPage.addActionListener(ae -> {
       loadFllHtml();
     });
-    cpane.add(mainPage);
+    buttonBox.add(mainPage);
 
     final JButton schedulerButton = new JButton("Scheduler");
     schedulerButton.addActionListener(ae -> {
       launchScheduler();
     });
-    cpane.add(schedulerButton);
+    buttonBox.add(schedulerButton);
 
     final JButton subjectiveButton = new JButton("Subjective Application");
     subjectiveButton.addActionListener(ae -> {
       launchSubjective();
     });
-    cpane.add(subjectiveButton);
+    buttonBox.add(subjectiveButton);
 
     final JButton exit = new JButton("Exit");
     exit.addActionListener(ae -> {
       setVisible(false);
     });
-    cpane.add(exit);
+    cpane.add(exit, BorderLayout.SOUTH);
 
     pack();
+
+    startWebserverMonitor();
+  }
+
+  private void startWebserverMonitor() {
+    final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+    executorService.scheduleWithFixedDelay(() -> {
+      checkWebserver();
+    }, 0, 10, TimeUnit.SECONDS);
+  }
+
+  /**
+   * Check if the webserver is up and update the status label.
+   */
+  private void checkWebserver() {
+    boolean newServerOnline = false;
+    try (final Socket s = new Socket("localhost", 9080)) {
+      newServerOnline = true;
+    } catch (final IOException ex) {
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("Error checking web server, probably down", ex);
+      }
+    }
+    if (newServerOnline != mServerOnline) {
+      // change detected
+      mServerOnline = newServerOnline;
+      if (mServerOnline) {
+        mServerStatus.setText(ONLINE);
+        mServerStatus.setBackground(ONLINE_COLOR);
+      } else {
+        mServerStatus.setText("Offline");
+        mServerStatus.setBackground(OFFLINE_COLOR);
+      }
+    }
   }
 
   private SchedulerUI scheduler = null;
