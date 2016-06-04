@@ -106,6 +106,12 @@ public class Launcher extends JFrame {
     });
     cpane.add(webserverStopButton);
 
+    final JButton mainPage = new JButton("Visit the main web page");
+    mainPage.addActionListener(ae -> {
+      loadFllHtml();
+    });
+    cpane.add(mainPage);
+
     final JButton schedulerButton = new JButton("Scheduler");
     schedulerButton.addActionListener(ae -> {
       launchScheduler();
@@ -258,18 +264,7 @@ public class Launcher extends JFrame {
 
       webserverThread.start();
 
-      final String fllHtml = getFLLHtmlFile();
-      if (null == fllHtml) {
-        JOptionPane.showMessageDialog(this, "Cannot find fll-sw.html, you will need to open this is your browser.");
-        return;
-      }
-      final File htmlFile = new File(fllHtml);
-      try {
-        Desktop.getDesktop().browse(htmlFile.toURI());
-      } catch (final IOException e) {
-        LOGGER.error("Unable to open web browser", e);
-        JOptionPane.showMessageDialog(this, "Cannot open fll-sw.html, you will need to open this is your browser.");
-      }
+      loadFllHtml();
 
     } else {
       try {
@@ -282,6 +277,24 @@ public class Launcher extends JFrame {
         throw new FLLInternalException("Could not stop tomcat", e);
       }
 
+    }
+  }
+
+  /**
+   * Open up the main page.
+   */
+  private void loadFllHtml() {
+    final String fllHtml = getFLLHtmlFile();
+    if (null == fllHtml) {
+      JOptionPane.showMessageDialog(this, "Cannot find fll-sw.html, you will need to open this is your browser.");
+      return;
+    }
+    final File htmlFile = new File(fllHtml);
+    try {
+      Desktop.getDesktop().browse(htmlFile.toURI());
+    } catch (final IOException e) {
+      LOGGER.error("Unable to open web browser", e);
+      JOptionPane.showMessageDialog(this, "Cannot open fll-sw.html, you will need to open this is your browser.");
     }
   }
 
