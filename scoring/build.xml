@@ -520,7 +520,7 @@
 
     <!-- copy reports -->
     <mkdir dir="${dir.dist}/docs/reports" />
-    <copy todir="${dir.dist}/docs/reports">
+    <copy failonerror="false" todir="${dir.dist}/docs/reports">
       <fileset dir="${dir.reports}" />
     </copy>
 
