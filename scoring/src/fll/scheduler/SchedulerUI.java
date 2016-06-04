@@ -120,12 +120,16 @@ public class SchedulerUI extends JFrame {
 
     try {
       final SchedulerUI frame = new SchedulerUI();
+
       frame.addWindowListener(new WindowAdapter() {
         @Override
+        @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "Exiting from main is OK")
         public void windowClosing(final WindowEvent e) {
           System.exit(0);
         }
+
         @Override
+        @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "Exiting from main is OK")
         public void windowClosed(final WindowEvent e) {
           System.exit(0);
         }
@@ -133,6 +137,7 @@ public class SchedulerUI extends JFrame {
       // should be able to watch for window closing, but hidden works
       frame.addComponentListener(new ComponentAdapter() {
         @Override
+        @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "Exiting from main is OK")
         public void componentHidden(final ComponentEvent e) {
           System.exit(0);
         }

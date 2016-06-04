@@ -25,6 +25,7 @@ import javax.swing.WindowConstants;
 
 import org.apache.log4j.Logger;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.scheduler.SchedulerUI;
 import fll.subjective.SubjectiveFrame;
 import fll.util.FLLInternalException;
@@ -62,11 +63,13 @@ public class Launcher extends JFrame {
       final Launcher frame = new Launcher();
       frame.addWindowListener(new WindowAdapter() {
         @Override
-        public void windowClosing(final WindowEvent e) {          
+        @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "Exiting from main is OK")
+        public void windowClosing(final WindowEvent e) {
           System.exit(0);
         }
 
         @Override
+        @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "Exiting from main is OK")
         public void windowClosed(final WindowEvent e) {
           System.exit(0);
         }
@@ -74,6 +77,7 @@ public class Launcher extends JFrame {
       // should be able to watch for window closing, but hidden works
       frame.addComponentListener(new ComponentAdapter() {
         @Override
+        @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "Exiting from main is OK")
         public void componentHidden(final ComponentEvent e) {
           System.exit(0);
         }
@@ -229,7 +233,7 @@ public class Launcher extends JFrame {
     return null;
   }
 
-  private Thread webserverThread = null;
+  private transient Thread webserverThread = null;
 
   private void controlWebserver(final boolean start) {
     if (start
