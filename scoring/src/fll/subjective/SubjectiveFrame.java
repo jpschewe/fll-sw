@@ -12,6 +12,8 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -120,6 +122,23 @@ public final class SubjectiveFrame extends JFrame {
 
     try {
       final SubjectiveFrame frame = new SubjectiveFrame();
+      frame.addWindowListener(new WindowAdapter() {
+        @Override
+        public void windowClosing(final WindowEvent e) {
+          System.exit(0);
+        }
+        @Override
+        public void windowClosed(final WindowEvent e) {
+          System.exit(0);
+        }
+      });
+      // should be able to watch for window closing, but hidden works
+      frame.addComponentListener(new ComponentAdapter() {
+        @Override
+        public void componentHidden(final ComponentEvent e) {
+          System.exit(0);
+        }
+      });
       GraphicsUtils.centerWindow(frame);
       frame.setVisible(true);
       frame.promptForFile();
@@ -137,6 +156,7 @@ public final class SubjectiveFrame extends JFrame {
    */
   public SubjectiveFrame() {
     super("Subjective Score Entry");
+    setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
     getContentPane().setLayout(new BorderLayout());
 
@@ -231,7 +251,6 @@ public final class SubjectiveFrame extends JFrame {
         quit();
       }
     });
-    setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
     pack();
   }
@@ -241,14 +260,13 @@ public final class SubjectiveFrame extends JFrame {
    * 
    * @throws IOException
    */
-  @SuppressFBWarnings(value = "DM_EXIT", justification = "If no file is chosen we cannot continue")
   public void promptForFile() throws IOException {
     final File file = chooseSubjectiveFile("Please choose the subjective data file");
     try {
       if (null != file) {
         load(file);
       } else {
-        System.exit(0);
+        setVisible(false);
       }
     } catch (final IOException ioe) {
       JOptionPane.showMessageDialog(null, "Error reading data file: "
@@ -536,12 +554,12 @@ public final class SubjectiveFrame extends JFrame {
     }
   }
 
-  /**
-   * Prompt the user with yes/no/cancel. Yes exits and saves, no exits without
-   * saving and cancel doesn't quit.
-   */
-  @SuppressFBWarnings(value = "DM_EXIT", justification = "This is the exit method for the application")
-  /* package */void quit() {
+      /**
+       * Prompt the user with yes/no/cancel. Yes exits and saves, no exits
+       * without
+       * saving and cancel doesn't quit.
+       */
+      /* package */void quit() {
     if (validateData()) {
 
       final int state = JOptionPane.showConfirmDialog(SubjectiveFrame.this,
@@ -551,17 +569,13 @@ public final class SubjectiveFrame extends JFrame {
         try {
           save();
           setVisible(false);
-          dispose();
         } catch (final IOException ioe) {
           JOptionPane.showMessageDialog(null, "Error writing to data file: "
               + ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
 
-        System.exit(0);
       } else if (JOptionPane.NO_OPTION == state) {
         setVisible(false);
-        dispose();
-        System.exit(0);
       }
     }
   }
@@ -758,7 +772,7 @@ public final class SubjectiveFrame extends JFrame {
 
   private ChallengeDescription _challengeDescription;
 
-  /* package */ChallengeDescription getChallengeDescription() {
+      /* package */ChallengeDescription getChallengeDescription() {
     return _challengeDescription;
   }
 
@@ -766,7 +780,7 @@ public final class SubjectiveFrame extends JFrame {
 
   private Document _scoreDocument;
 
-  /* package */Document getScoreDocument() {
+      /* package */Document getScoreDocument() {
     return _scoreDocument;
   }
 

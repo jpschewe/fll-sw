@@ -15,6 +15,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -90,7 +92,6 @@ import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.ScoreCategory;
 import net.mtu.eggplant.util.BasicFileFilter;
-import net.mtu.eggplant.util.gui.BasicWindowMonitor;
 import net.mtu.eggplant.util.gui.GraphicsUtils;
 
 /**
@@ -119,9 +120,23 @@ public class SchedulerUI extends JFrame {
 
     try {
       final SchedulerUI frame = new SchedulerUI();
-
-      frame.setSize(frame.getPreferredSize());
-      frame.addWindowListener(new BasicWindowMonitor());
+      frame.addWindowListener(new WindowAdapter() {
+        @Override
+        public void windowClosing(final WindowEvent e) {
+          System.exit(0);
+        }
+        @Override
+        public void windowClosed(final WindowEvent e) {
+          System.exit(0);
+        }
+      });
+      // should be able to watch for window closing, but hidden works
+      frame.addComponentListener(new ComponentAdapter() {
+        @Override
+        public void componentHidden(final ComponentEvent e) {
+          System.exit(0);
+        }
+      });
       GraphicsUtils.centerWindow(frame);
 
       frame.setVisible(true);
@@ -139,6 +154,7 @@ public class SchedulerUI extends JFrame {
 
   public SchedulerUI() {
     super(BASE_TITLE);
+    setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
     _progressDialog = new ProgressDialog(SchedulerUI.this, "Please Wait");
     _progressDialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -190,7 +206,7 @@ public class SchedulerUI extends JFrame {
     mReloadFileAction.setEnabled(false);
     mSaveScheduleDescriptionAction.setEnabled(false);
     mRunSchedulerAction.setEnabled(false);
-    
+
     pack();
   }
 
@@ -545,7 +561,7 @@ public class SchedulerUI extends JFrame {
     menu.setMnemonic('f');
 
     menu.add(mPreferencesAction);
-    menu.add(EXIT_ACTION);
+    menu.add(mExitAction);
 
     return menu;
   }
@@ -628,7 +644,7 @@ public class SchedulerUI extends JFrame {
     }
   };
 
-  private static final Action EXIT_ACTION = new AbstractAction("Exit") {
+  private final Action mExitAction = new AbstractAction("Exit") {
     {
       putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Stop16.gif"));
       putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Stop24.gif"));
@@ -637,9 +653,8 @@ public class SchedulerUI extends JFrame {
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Q, ActionEvent.CTRL_MASK));
     }
 
-    @SuppressFBWarnings(value = "DM_EXIT", justification = "This is the exit method for the application")
     public void actionPerformed(final ActionEvent ae) {
-      System.exit(0);
+      SchedulerUI.this.setVisible(false);
     }
   };
 
