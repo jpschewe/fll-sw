@@ -7,11 +7,14 @@
 package fll;
 
 import java.awt.Container;
+import java.awt.Desktop;
 import java.awt.GridLayout;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -23,6 +26,7 @@ import org.apache.log4j.Logger;
 
 import fll.scheduler.SchedulerUI;
 import fll.subjective.SubjectiveFrame;
+import fll.util.FLLInternalException;
 import fll.util.GuiExceptionHandler;
 import fll.util.LogUtils;
 import net.mtu.eggplant.util.gui.GraphicsUtils;
@@ -60,6 +64,7 @@ public class Launcher extends JFrame {
         public void windowClosing(final WindowEvent e) {
           System.exit(0);
         }
+
         @Override
         public void windowClosed(final WindowEvent e) {
           System.exit(0);
@@ -88,6 +93,18 @@ public class Launcher extends JFrame {
 
     final Container cpane = getContentPane();
     cpane.setLayout(new GridLayout(0, 2));
+
+    final JButton webserverStartButton = new JButton("Start Webserver");
+    webserverStartButton.addActionListener(ae -> {
+      controlWebserver(true);
+    });
+    cpane.add(webserverStartButton);
+
+    final JButton webserverStopButton = new JButton("Stop Webserver");
+    webserverStopButton.addActionListener(ae -> {
+      controlWebserver(false);
+    });
+    cpane.add(webserverStopButton);
 
     final JButton schedulerButton = new JButton("Scheduler");
     schedulerButton.addActionListener(ae -> {
@@ -123,6 +140,7 @@ public class Launcher extends JFrame {
           public void windowClosing(final WindowEvent e) {
             scheduler = null;
           }
+
           @Override
           public void windowClosed(final WindowEvent e) {
             scheduler = null;
@@ -154,12 +172,13 @@ public class Launcher extends JFrame {
     } else {
       try {
         subjective = new SubjectiveFrame();
-        
+
         subjective.addWindowListener(new WindowAdapter() {
           @Override
           public void windowClosing(final WindowEvent e) {
             subjective = null;
           }
+
           @Override
           public void windowClosed(final WindowEvent e) {
             subjective = null;
@@ -172,7 +191,7 @@ public class Launcher extends JFrame {
             subjective = null;
           }
         });
-        
+
         GraphicsUtils.centerWindow(subjective);
         subjective.setVisible(true);
         subjective.promptForFile();
@@ -182,6 +201,106 @@ public class Launcher extends JFrame {
             + e.getMessage(), "Error Launching Scheduler", JOptionPane.ERROR_MESSAGE);
       }
     }
+  }
+
+  /**
+   * Find tomcat directory.
+   * 
+   * @return the location or null if it cannot be determined
+   */
+  private String findTomcatDirectory() {
+    final String[] possibleLocations = { "tomcat", "../tomcat", "build/tomcat", "scoring/build/tomcat" };
+    for (final String location : possibleLocations) {
+      final File f = new File(location);
+      if (f.exists()
+          && f.isDirectory()) {
+        return f.getAbsolutePath();
+      }
+    }
+    return null;
+  }
+
+  private Thread webserverThread = null;
+
+  private void controlWebserver(final boolean start) {
+    if (start
+        && null != webserverThread) {
+      JOptionPane.showMessageDialog(this, "Webserver has already been told to start");
+      return;
+    }
+
+    final String tomcatDir = findTomcatDirectory();
+    if (null == tomcatDir) {
+      LOGGER.error("Cannot find tomcat directory");
+      JOptionPane.showMessageDialog(this, "Cannot find tomcat directory", "Error launching webserver",
+                                    JOptionPane.ERROR_MESSAGE);
+    }
+    final boolean windows = System.getProperty("os.name").startsWith("Windows");
+
+    if (start) {
+      webserverThread = new Thread(() -> {
+        try {
+          if (windows) {
+            Runtime.getRuntime().exec(String.format("cmd /c start %s/bin/startup.bat", tomcatDir));
+          } else {
+            Runtime.getRuntime().exec(String.format("%s/bin/startup.sh", tomcatDir));
+          }
+        } catch (final IOException e) {
+          throw new FLLInternalException("Could not start tomcat", e);
+        }
+
+        // TODO: invoke via java rather than system call
+
+        webserverThread = null;
+      });
+
+      webserverThread.setDaemon(true);
+
+      webserverThread.start();
+
+      final String fllHtml = getFLLHtmlFile();
+      if (null == fllHtml) {
+        JOptionPane.showMessageDialog(this, "Cannot find fll-sw.html, you will need to open this is your browser.");
+        return;
+      }
+      final File htmlFile = new File(fllHtml);
+      try {
+        Desktop.getDesktop().browse(htmlFile.toURI());
+      } catch (final IOException e) {
+        LOGGER.error("Unable to open web browser", e);
+        JOptionPane.showMessageDialog(this, "Cannot open fll-sw.html, you will need to open this is your browser.");
+      }
+
+    } else {
+      try {
+        if (windows) {
+          Runtime.getRuntime().exec(String.format("cmd /c start %s/bin/shutdown.bat", tomcatDir));
+        } else {
+          Runtime.getRuntime().exec(String.format("%s/bin/shutdown.sh", tomcatDir));
+        }
+      } catch (final IOException e) {
+        throw new FLLInternalException("Could not stop tomcat", e);
+      }
+
+    }
+  }
+
+  /**
+   * Find the path to fll-sw.html.
+   * 
+   * @return null if the file cannot be found
+   */
+  private String getFLLHtmlFile() {
+    final String[] possibleLocations = { "bin", ".", "build/bin", "scoring/build/bin" };
+    for (final String location : possibleLocations) {
+      final File f = new File(location
+          + "/fll-sw.html");
+      if (f.exists()
+          && f.isFile()) {
+        return f.getAbsolutePath();
+      }
+    }
+    return null;
   }
 
 }
