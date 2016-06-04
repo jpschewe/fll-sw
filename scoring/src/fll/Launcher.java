@@ -21,6 +21,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.WindowConstants;
 
 import org.apache.log4j.Logger;
 
@@ -61,7 +62,7 @@ public class Launcher extends JFrame {
       final Launcher frame = new Launcher();
       frame.addWindowListener(new WindowAdapter() {
         @Override
-        public void windowClosing(final WindowEvent e) {
+        public void windowClosing(final WindowEvent e) {          
           System.exit(0);
         }
 
@@ -90,6 +91,7 @@ public class Launcher extends JFrame {
 
   public Launcher() {
     super();
+    setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
     final Container cpane = getContentPane();
     cpane.setLayout(new GridLayout(0, 2));
@@ -126,7 +128,8 @@ public class Launcher extends JFrame {
 
     final JButton exit = new JButton("Exit");
     exit.addActionListener(ae -> {
-      System.exit(0);
+      controlWebserver(false);
+      setVisible(false);
     });
     cpane.add(exit);
 
