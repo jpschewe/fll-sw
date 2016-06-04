@@ -1,14 +1,15 @@
 <launch4jConfig>
   <headerType>gui</headerType>
   <outfile>fll-sw.exe</outfile>
+  <dontWrapJar>true</dontWrapJar>
+  <errTitle>FLL SW</errTitle>
   <downloadUrl>http://www.oracle.com/technetwork/java/javase/downloads/index.html
   </downloadUrl>
-  <errTitle>FLL SW</errTitle>
-  <jar>bin/SchedulerUI.jar</jar>
-  <dontWrapJar>true</dontWrapJar>
 
   <classPath>
-    <mainClass>com.simontuffs.onejar.Boot</mainClass>
+    <mainClass>fll.Launcher</mainClass>
+    <cp>%EXEDIR%/tomcat/webapps/fll-sw/WEB-INF/classes</cp>
+    <cp>%EXEDIR%/lib/*.jar</cp>
   </classPath>
 
   <jre>
