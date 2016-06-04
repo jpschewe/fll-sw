@@ -551,9 +551,19 @@
         <include name="*" />
       </fileset>
     </copy>
+    <copy todir="${dir.dist}">
+      <fileset dir="${dir.build}">
+        <include name="fll-sw.exe" />
+        <include name="fll-sw.sh" />
+      </fileset>
+    </copy>
     <chmod perm="+x">
       <fileset dir="${dir.dist}/bin">
         <include name="*.sh" />
+      </fileset>
+      <fileset dir="${dir.dist}">
+        <include name="fll-sw.sh" />
+        <include name="fll-sw.exe" />
       </fileset>
     </chmod>
 
