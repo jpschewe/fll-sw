@@ -313,6 +313,14 @@
       </lib>
     </one-jar>
 
+    <path id="launcher.classpath">
+      <!-- these paths will be transformed by the buildscript task -->
+      <path refid="base.classpath" />
+      <pathelement location="classes" />
+    </path>
+    <buildscript scripts.dir="${dir.build}" scripts.basedir="${basedir}" scripts.root="tomcat/webapps/fll-sw/WEB-INF" scripts.path="launcher.classpath" script.name="fll-sw" class.main="fll.Launcher" java.args="-Dapp.name=fll-sw -Dlogroot=./" template.name="run" />
+    <!-- don't want the windows bat file, want them to use the executable -->
+    <delete file="${dir.build}/fll-sw.bat" />
 
     <!-- create windows executable -->
     <launch4j bindir="${dir.tools}/launch4j/bin-${arch}" tmpdir="${dir.build}" configFile="${basedir}/launch4j.xml" outfile="${dir.build}/fll-sw.exe" fileVersion="${app.version.short}.0.0" txtFileVersion="${app.version.short}" productVersion="${app.version.short}.0.0" txtProductVersion="${app.version.short}" />
