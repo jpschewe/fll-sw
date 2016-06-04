@@ -132,7 +132,6 @@ public class Launcher extends JFrame {
 
     final JButton exit = new JButton("Exit");
     exit.addActionListener(ae -> {
-      controlWebserver(false);
       setVisible(false);
     });
     cpane.add(exit);
