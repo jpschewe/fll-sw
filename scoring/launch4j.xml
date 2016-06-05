@@ -3,8 +3,6 @@
   <outfile>fll-sw.exe</outfile>
   <dontWrapJar>true</dontWrapJar>
   <errTitle>FLL SW</errTitle>
-  <downloadUrl>http://www.oracle.com/technetwork/java/javase/downloads/index.html
-  </downloadUrl>
 
   <classPath>
     <mainClass>fll.Launcher</mainClass>
@@ -14,7 +12,6 @@
 
   <jre>
     <minVersion>1.8.0</minVersion>
-    <jdkPreference>jdkOnly</jdkPreference>
     <maxHeapPercent>75</maxHeapPercent>
   </jre>
 
@@ -30,9 +27,5 @@
     <internalName>fll-sw</internalName>
     <originalFilename>fll-sw.exe</originalFilename>
   </versionInfo>
-
-  <messages>
-    <jreVersionErr>FLL SW requires JDK version</jreVersionErr>
-  </messages>
 
 </launch4jConfig>
