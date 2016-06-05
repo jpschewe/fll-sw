@@ -281,23 +281,6 @@ public class Launcher extends JFrame {
     }
   }
 
-  /**
-   * Find tomcat directory.
-   * 
-   * @return the location or null if it cannot be determined
-   */
-  private String findTomcatDirectory() {
-    final String[] possibleLocations = { "tomcat", "../tomcat", "build/tomcat", "scoring/build/tomcat" };
-    for (final String location : possibleLocations) {
-      final File f = new File(location);
-      if (f.exists()
-          && f.isDirectory()) {
-        return f.getAbsolutePath();
-      }
-    }
-    return null;
-  }
-
   private transient Thread webserverThread = null;
 
   private void controlWebserver(final boolean start) {
@@ -307,21 +290,23 @@ public class Launcher extends JFrame {
       return;
     }
 
-    final String tomcatDir = findTomcatDirectory();
-    if (null == tomcatDir) {
-      LOGGER.error("Cannot find tomcat directory");
-      JOptionPane.showMessageDialog(this, "Cannot find tomcat directory", "Error launching webserver",
-                                    JOptionPane.ERROR_MESSAGE);
+    final File jdkHome = findJdkHome();
+    if (null == jdkHome) {
+      LOGGER.error("Cannot find JDK directory, try setting the JAVA_HOME environment variable");
+      JOptionPane.showMessageDialog(this, "Cannot find JDK directory, try setting the JAVA_HOME environment variable",
+                                    "Error launching webserver", JOptionPane.ERROR_MESSAGE);
+      return;
     }
-    final boolean windows = System.getProperty("os.name").startsWith("Windows");
 
+    final String[] env = { "JAVA_HOME="
+        + jdkHome.getAbsolutePath() };
     if (start) {
       webserverThread = new Thread(() -> {
         try {
-          if (windows) {
-            Runtime.getRuntime().exec(String.format("cmd /c start %s/bin/startup.bat", tomcatDir));
+          if (isWindows()) {
+            Runtime.getRuntime().exec("cmd /c start /b bin\\start-tomcat.bat", env);
           } else {
-            Runtime.getRuntime().exec(String.format("%s/bin/startup.sh", tomcatDir));
+            Runtime.getRuntime().exec("./bin/start-tomcat.sh", env);
           }
         } catch (final IOException e) {
           throw new FLLInternalException("Could not start tomcat", e);
@@ -340,10 +325,10 @@ public class Launcher extends JFrame {
 
     } else {
       try {
-        if (windows) {
-          Runtime.getRuntime().exec(String.format("cmd /c start %s/bin/shutdown.bat", tomcatDir));
+        if (isWindows()) {
+          Runtime.getRuntime().exec("cmd /c start /b bin\\stop-tomcat.bat", env);
         } else {
-          Runtime.getRuntime().exec(String.format("%s/bin/shutdown.sh", tomcatDir));
+          Runtime.getRuntime().exec("./bin/stop-tomcat.sh", env);
         }
       } catch (final IOException e) {
         throw new FLLInternalException("Could not stop tomcat", e);
@@ -386,6 +371,52 @@ public class Launcher extends JFrame {
       }
     }
     return null;
+  }
+
+  /**
+   * Find JDK home based on the java.home system property.
+   * Makes and assumption that on Windows this is being executed
+   * from a JDK already, so we just need to find the correct path.
+   * 
+   * @return the path or null if the JDK cannot be found
+   */
+  private File findJdkHome() {
+    final File javaHome = new File(System.getProperty("java.home"));
+    if (isAcceptableJdkHome(javaHome)) {
+      return javaHome;
+    } else {
+      final File parent = javaHome.getParentFile();
+      if (isAcceptableJdkHome(parent)) {
+        return parent;
+      } else {
+        final String javaHomeEnvStr = System.getenv("JAVA_HOME");
+        if (null != javaHomeEnvStr) {
+          final File javaHomeEnv = new File(javaHomeEnvStr);
+          if (isAcceptableJdkHome(javaHomeEnv)) {
+            return javaHomeEnv;
+          }
+        }
+        // couldn't find javac
+        return null;
+      }
+    }
+
+  }
+
+  private static boolean isAcceptableJdkHome(final File jdkHome) {
+    final String javacExeStr = isWindows() ? "javac.exe" : "javac";
+
+    final File bin = new File(jdkHome, "bin");
+
+    final File javac = new File(bin, javacExeStr);
+
+    return javac.exists()
+        && javac.canExecute();
+  }
+
+  private static boolean isWindows() {
+    final boolean windows = System.getProperty("os.name").startsWith("Windows");
+    return windows;
   }
 
 }
