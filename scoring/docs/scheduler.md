@@ -3,7 +3,7 @@
 The scheduler built into FLL-SW is implemented as a greedy solver. I
 originally tried to solve the problem using an MILP, but had trouble
 representing all of the constraints. Furthermore once I did represent most
-of the constraints even an 8 team ournament was taking hours to solve. With
+of the constraints even an 8 team tournament was taking hours to solve. With
 a greedy solver the solution isn't optimal, but we get a solution very
 quickly. An 80 team tournament takes less than 5 minutes to come up with a solution.
 
@@ -15,7 +15,11 @@ the number of warnings.
 
 ## SchedulerUI
 
-In the bin directory you will find an application `SchedulerUI`. This application has 2 tabs, description and schedule.
+ 1. [Install the server software](InstallServerSoftware.md) on your computer
+ 1. Open up the install directory
+ 1. Double click on fll-sw.exe (fll-sw.sh for Linux and Mac)
+ 1. Click on Scheduler
+    * This application has 2 tabs, description and schedule.
 
 ### Description tab
 
@@ -39,6 +43,8 @@ The file being asked for is a spreadsheet of your schedule. At this point only E
 
 
 ## Configurable Parameters
+
+With the user interface you mostly don't need to worry about these, but if you end up looking at the resulting properties file here is what the variables mean.
 
 TInc - Time increment in minutes. Generally leave at 1. Must be an integer.
 
