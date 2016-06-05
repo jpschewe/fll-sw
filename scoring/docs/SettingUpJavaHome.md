@@ -2,6 +2,7 @@ Setting the JAVA_HOME environment variable
 ==========================================
 
 The `JAVA_HOME` environment variable needs to point to the root of your Java install. 
+In most cases this should not be required with FLL-SW versions 10.8 and later.
 
 Windows
 -------

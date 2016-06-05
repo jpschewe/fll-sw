@@ -290,16 +290,8 @@ public class Launcher extends JFrame {
       return;
     }
 
-    final File jdkHome = findJdkHome();
-    if (null == jdkHome) {
-      LOGGER.error("Cannot find JDK directory, try setting the JAVA_HOME environment variable");
-      JOptionPane.showMessageDialog(this, "Cannot find JDK directory, try setting the JAVA_HOME environment variable",
-                                    "Error launching webserver", JOptionPane.ERROR_MESSAGE);
-      return;
-    }
-
-    final String[] env = { "JAVA_HOME="
-        + jdkHome.getAbsolutePath() };
+    final String[] env = { "JRE_HOME="
+        + System.getProperty("java.home") };
     if (start) {
       webserverThread = new Thread(() -> {
         try {
@@ -371,47 +363,6 @@ public class Launcher extends JFrame {
       }
     }
     return null;
-  }
-
-  /**
-   * Find JDK home based on the java.home system property.
-   * Makes and assumption that on Windows this is being executed
-   * from a JDK already, so we just need to find the correct path.
-   * 
-   * @return the path or null if the JDK cannot be found
-   */
-  private File findJdkHome() {
-    final File javaHome = new File(System.getProperty("java.home"));
-    if (isAcceptableJdkHome(javaHome)) {
-      return javaHome;
-    } else {
-      final File parent = javaHome.getParentFile();
-      if (isAcceptableJdkHome(parent)) {
-        return parent;
-      } else {
-        final String javaHomeEnvStr = System.getenv("JAVA_HOME");
-        if (null != javaHomeEnvStr) {
-          final File javaHomeEnv = new File(javaHomeEnvStr);
-          if (isAcceptableJdkHome(javaHomeEnv)) {
-            return javaHomeEnv;
-          }
-        }
-        // couldn't find javac
-        return null;
-      }
-    }
-
-  }
-
-  private static boolean isAcceptableJdkHome(final File jdkHome) {
-    final String javacExeStr = isWindows() ? "javac.exe" : "javac";
-
-    final File bin = new File(jdkHome, "bin");
-
-    final File javac = new File(bin, javacExeStr);
-
-    return javac.exists()
-        && javac.canExecute();
   }
 
   private static boolean isWindows() {
