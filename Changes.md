@@ -1,3 +1,5 @@
+Release 10.8
+============
 * #466 - Add a windows executable for starting the main application
 * #467 - Add a single application to launch the other applications
 * #389 - Add a user interface to editing the scheduler input file
