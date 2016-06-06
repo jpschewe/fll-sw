@@ -120,16 +120,21 @@ release and go.
 # Making a release
 
   1. Get the latest code from git
+  1. Update Changes.md for the new release and commit that
   1. Create a tag with `git tag -s <tag name>`
     * `tag name` should be `x.y` where `x` is the major version (counting up per season), `y` is the minor version
     * You can optionally use `-a` instead of `-s` to create an unsigned tag
     * You may needed execute `git config user.signingkey 0x<your key id>` before the signing works 
-  1. Push the tag with `git push origin <tag name>`
+  1. Push the tag with `git push origin master <tag name>`
   1. Use Jenkins to run the `fll-release` job and get the resulting archive from there
     * Contact Jon Schewe if you don't have access to create releases
   1. Create a new release on GitHub
     1. Paste the changes since the last release into the release notes
-    1. Upload the file created in Jenkins
+    1. Upload the file created in Jenkins to GitHub
+    1. Update the current release pointer - this updates the website documentation to match this release
+      1. git checkout current-release
+      1. git merge --ff-only `tag name`
+      1. Push the updated pointer with `git push origin current-release`
 
 # Misc Notes
 
