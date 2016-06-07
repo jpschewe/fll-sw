@@ -4,24 +4,27 @@ Grouping Teams
 There are a number of different ways that teams are grouped in the software. 
 This describes the different groups and what they mean.
 
-Event Division
+Award Group
 --------------
 
-At each tournament a team is put into an event division.
-An event division is a group of teams that are competing against each other.
-There are one set of awards for each event division.
-Teams in different event divisions may compete on opposite sides of the performance table from each other during the seeding rounds.
+At each tournament a team is put into an award group.
+An award group is a group of teams that are competing against each other.
+There are one set of awards for each award group.
+Teams in different award groups may compete on opposite sides of the performance table from each other during the seeding rounds.
 This is OK because teams are just going for the best score at this point and not really competing against the team on the other side of the table.
 
 Judging Group
 -------------
 
 Each team is assigned to a judging group for subjective judging.
-This defined which judge they will see for the subjective scoring categories.
-At smaller tournaments where 1 judge has enough time to see all tabs in an event division, the judging station is effectively the same as the event division; and in many cases the names are the same.
+This defines which judge they will see for the subjective scoring categories.
+At smaller tournaments where 1 judge has enough time to see all teams in an award group, the judging group is the same as the award group.
 
-At larger tournaments the teams in an event division are split up into multiple judging groups.
-Then the top teams in a subjective category across all judging groups in an event division are judged again by a select group of judges to determine a winner.
+At larger tournaments, the teams in an award group are split up into multiple judging groups.
+A second level of judging is needed to choose the best team in an award group because scores from one judging group don't correlate to scores from another judging group.
+So the best we can do is choose the best team from each judging group and see them again.
+The top team in each judging groups in each subjective category are judged again  by a select group of judges to choose the winner in an award group.
+
 This second level of judging is needed to choose the best team in an event division because scores from one judge don't correlate to scores from another judge.
 So the best we can do is choose the best team from each judge and see them again.
 
