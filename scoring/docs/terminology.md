@@ -23,21 +23,19 @@ At smaller tournaments where 1 set of judges has enough time to see all teams in
 At larger tournaments, the teams in an award group are split up into multiple judging groups.
 A second level of judging is needed to choose the best team in an award group because the scores from one judging group may not correlate to scores from another judging group.
 So the best we can do is choose the best team from each judging group and see them again.
-The top team in each judging group in each subjective category are judged again by a select group of judges to choose the winner in an award group for a category.
+The top team in each judging group in each subjective category is judged again by a select group of judges to choose the winner in an award group for a category.
 
-This second level of judging is needed to choose the best team in an event division because scores from one judge don't correlate to scores from another judge.
-So the best we can do is choose the best team from each judge and see them again.
 
-Finalist judging is scheduled per event division. This is because as there is a winner in each event division and the finalist judging for multiple event divisions can occur at the same time.
-
-Playoff Division
+Playoff Brackets
 ----------------
 
-When the payoff brackets are used playoff divisions after created to group there teams that will compete against reach other in the playoff bracket.
-In most cases the playoff divisions map directly to event divisions.
-However at some large tournaments where there is finalist judging an event division will many times be split into two or more playoff divisions.
+Playoff brackets are an optional part of the software.
+
+Each playoff bracket contains a group teams that will compete against each other to determine an overall performance winner.
+In most cases, the playoff brackets map directly to award groups.
+However at some large tournaments where there is finalist judging an award group will many times be split into two or more playoff brackets.
 These teams will then compete and determine a winner or possibly the top 4 teams.
-Then the top teams or teams in each playoff division will compete in another playoff bracket to determine the event division wonder of the playoffs.
+Then the top teams or teams in each playoff bracket will compete in another playoff bracket to determine the award group winner of the playoffs.
 
 Score Categories
 ================
