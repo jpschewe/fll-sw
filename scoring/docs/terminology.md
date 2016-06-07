@@ -29,9 +29,9 @@ The top team in each judging group in each subjective category is judged again b
 Playoff Brackets
 ----------------
 
-Playoff brackets are an optional part of the software.
+Playoff brackets are an optional part of a tournament.
 
-Each playoff bracket contains a group teams that will compete against each other to determine an overall performance winner.
+Each playoff bracket contains a group of teams that will compete against each other to determine an overall performance winner.
 In most cases, the playoff brackets map directly to award groups.
 However at some large tournaments where there is finalist judging an award group will many times be split into two or more playoff brackets.
 These teams will then compete and determine a winner or possibly the top 4 teams.
@@ -40,7 +40,7 @@ Then the top teams or teams in each playoff bracket will compete in another play
 Score Categories
 ================
 
-There are 2 ties of scoring categories.
+There are 2 typeses of scoring categories.
 Performance and subjective.
 Categories are made up of missions.
 *eventually they will be made up of areas and areas will contain missions.*
