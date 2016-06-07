@@ -17,13 +17,13 @@ Judging Group
 -------------
 
 Each team is assigned to a judging group for subjective judging.
-This defines which judge they will see for the subjective scoring categories.
-At smaller tournaments where 1 judge has enough time to see all teams in an award group, the judging group is the same as the award group.
+This defines which set of judges they will see for the subjective scoring categories.
+At smaller tournaments where 1 set of judges has enough time to see all teams in an award group, the judging group is the same as the award group.
 
 At larger tournaments, the teams in an award group are split up into multiple judging groups.
-A second level of judging is needed to choose the best team in an award group because scores from one judging group don't correlate to scores from another judging group.
+A second level of judging is needed to choose the best team in an award group because the scores from one judging group may not correlate to scores from another judging group.
 So the best we can do is choose the best team from each judging group and see them again.
-The top team in each judging groups in each subjective category are judged again  by a select group of judges to choose the winner in an award group.
+The top team in each judging group in each subjective category are judged again by a select group of judges to choose the winner in an award group for a category.
 
 This second level of judging is needed to choose the best team in an event division because scores from one judge don't correlate to scores from another judge.
 So the best we can do is choose the best team from each judge and see them again.
