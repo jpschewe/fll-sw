@@ -10,6 +10,7 @@ The Java application can be used on a desktop or laptop. The judges names need t
     * This is a link on the admin page
   1. Start the subjective app
     * This is included in the install or can be downloaded from the main page
+    * This can be launched from the main launcher application
   1. Select the file that was downloaded
   1. Select the tab for the category that you are entering
   1. Find the row for the team and judge that you have a score sheet for
