@@ -66,15 +66,3 @@ If something blows up, take a look at the message that was spit out. It should b
 
 If you encounter an error, please file a bug report. Save the error log that is displayed (if there is one) as well as `tomcat/webapps/fll-sw/fllweb*` and `tomcat/logs` and attach them to the bug report.
 
-
-# Discussion of divisions
-
-In the scoring software there are references to divisions and event divisions. 
-A team is in a division for a season.
-This division is usually based upon age.
-An event division is the group that a team is in for a tournament. 
-Typically the event division that a team is in for a tournament matches the division that the team is in for the season.
-At some tournaments there are only teams from one division, but there are too many teams to handle as one group. 
-In this case the teams are broken up into multiple event divisions that each get their own set of awards.
-An example of this is with divisions named "Div 1" and "Div 2", a tournament with a lot of teams from "Div 1" may have event divisions "Div 1A" and "Div 1B".
-The teams are still in division "Div 1" for the season and for purposes of advancement to the next tournament.
