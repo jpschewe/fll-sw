@@ -59,9 +59,9 @@ Playoffs
 
 Playoffs are a single elimination competition bracket.
 Sometimes referred to as head to head.
-Teams after seeded into the bracket based on some criteria, usually this is based on the scores from the seeding rounds.
-A team then completes against the team across the table from them.
-The team with the best score contributes on.
+Teams after seeded into the bracket based on some criteria, usually this is based on the scores from the performance rounds.
+A team then competes against the team across the table from them.
+The team with the best score continues on.
 See
 [Wikipedia article on single elimination tournaments](https://en.wikipedia.org/wiki/Single-elimination_tournament)
 for more information.
