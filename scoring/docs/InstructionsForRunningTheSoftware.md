@@ -1,12 +1,13 @@
 # FLL Instructions
 
-If you are viewing this page on the server and the software is up and running, then the links should work, otherwise they will not.
+If you are viewing this page on the server and the software is up and running, then the links should work. It is best to go through this the first time from the server so that you can follow the links.
 
 
 ## Setup of tournament
 
 Links in this section are also found on the [administration page](http://localhost:9080/fll-sw/admin/index.jsp). Not all of these things need to be done the day before, you can do them the morning of, but it helps to prepare as much as you can the first few tournaments you do. You can skip this section if you were provided a database dump to load.
 
+  1. You will need to provide a challenge description, either one from the software itself or a custom one or from a saved database (instructions below)
   1. Go to the [administration page](http://localhost:9080/fll-sw/admin/index.jsp) and upload the team datafile. This takes in a tab delimited file and uses that information to determine what teams will exist in the database. Note the sizes and datatypes of columns. If the columns in your datafile are too large the text will be truncated. The most common problem here is with region names and not being able to tell regions apart.
     * Any tournament that is listed as the initial tournament for a team during upload is automatically created 
   1. If the team data doesn't look quite right you can [edit it](http://localhost:9080/fll-sw/admin/select_team.jsp).
