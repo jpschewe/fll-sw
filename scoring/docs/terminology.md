@@ -31,10 +31,10 @@ Playoff Brackets
 
 Playoff brackets are an optional part of a tournament.
 
-Each playoff bracket contains a group of teams that will compete against each other to determine an overall performance winner.
-In most cases, the playoff brackets map directly to award groups.
-However at some large tournaments where there is finalist judging an award group will many times be split into two or more playoff brackets.
-These teams will then compete and determine a winner or possibly the top 4 teams.
+Each playoff bracket contains a group of teams that will compete against each other to determine a playoff winner.
+In most cases, a playoff bracket correlates directly to an award group.
+However at some large tournaments where finalist judging is used an award group may be split into two or more playoff brackets.
+These teams will then compete and determine a winner.
 Then the top teams or teams in each playoff bracket will compete in another playoff bracket to determine the award group winner of the playoffs.
 
 Score Categories
