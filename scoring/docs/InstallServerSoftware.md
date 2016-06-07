@@ -12,8 +12,10 @@ Test the software
 =================
 
   1. Open up the install directory
-  1. Double click on fll-sw.exe (fll-sw.sh for Linux and Mac)
+  1. Double click on fll-sw (fll-sw.sh for Linux and Mac)
+    * If windows smart screen comes up, click on More Details, then Run Anyway
   1. Click on Start web server
+    * If windows asks about allowing access for Java, you need to click allow access
   1. Your web browser should now open and you should see the setup page. If you get an error that tomcat is not running, see troubleshooting.
 
 Troubleshooting
