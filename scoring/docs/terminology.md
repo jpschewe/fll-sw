@@ -26,17 +26,6 @@ So the best we can do is choose the best team from each judging group and see th
 The top team in each judging group in each subjective category is judged again by a select group of judges to choose the winner in an award group for a category.
 
 
-Playoff Brackets
-----------------
-
-Playoff brackets are an optional part of a tournament.
-
-Each playoff bracket contains a group of teams that will compete against each other to determine a playoff winner.
-In most cases, a playoff bracket correlates directly to an award group.
-However at some large tournaments where finalist judging is used an award group may be split into two or more playoff brackets.
-These teams will then compete and determine a winner.
-Then the top teams or teams in each playoff bracket will compete in another playoff bracket to determine the award group winner of the playoffs.
-
 Score Categories
 ================
 
@@ -63,17 +52,27 @@ This is sometimes referred to as judging scores.
 There can be unlimited subjective categories.
 Goals in a subjective category are scored within a range by a judge.
 Each judge may use different parts of the range and therefore may come up with a different score for the same team than another judge.
-For this reason to determine there winner in a subjective category a single judge must see all teams in an event division or finalist judging must be used.
+For this reason, to determine the winner in a subjective category a single judge must see all teams in an award group or finalist judging must be used.
 
 Playoffs
 ========
 
 Playoffs are a single elimination competition bracket.
 Sometimes referred to as head to head.
-Teams after seeded into the bracket based on since criteria, usually this is based on the scores from the seeding rounds.
+Teams after seeded into the bracket based on some criteria, usually this is based on the scores from the seeding rounds.
 A team then completes against the team across the table from them.
 The team with the best score contributes on.
 See
 [Wikipedia article on single elimination tournaments](https://en.wikipedia.org/wiki/Single-elimination_tournament)
 for more information.
 
+Playoff Brackets
+----------------
+
+Playoff brackets are an optional part of a tournament.
+
+Each playoff bracket contains a group of teams that will compete against each other to determine a playoff winner.
+In most cases, a playoff bracket correlates directly to an award group.
+However at some large tournaments where finalist judging is used an award group may be split into two or more playoff brackets.
+These teams will then compete and determine a winner.
+Then the top teams or teams in each playoff bracket will compete in another playoff bracket to determine the award group winner of the playoffs.
