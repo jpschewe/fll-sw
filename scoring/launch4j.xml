@@ -7,7 +7,7 @@
   <classPath>
     <mainClass>fll.Launcher</mainClass>
     <cp>%EXEDIR%/tomcat/webapps/fll-sw/WEB-INF/classes</cp>
-    <cp>%EXEDIR%/lib/*.jar</cp>
+    <cp>%EXEDIR%/tomcat/webapps/fll-sw/WEB-INF/lib/*.jar</cp>
   </classPath>
 
   <jre>
