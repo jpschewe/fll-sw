@@ -40,11 +40,10 @@ Then the top teams or teams in each playoff bracket will compete in another play
 Score Categories
 ================
 
-There are 2 typeses of scoring categories.
+There are 2 types of scoring categories.
 Performance and subjective.
-Categories are made up of missions.
-*eventually they will be made up of areas and areas will contain missions.*
-All scores for the missions in a category are added together to determine the raw score for a category.
+Categories are made up of goals.
+All scores for the goals in a category are added together to determine the raw score for a category.
 Each category had a weight that determines how much that score contributes to a team's overall score.
 This weight is multiplied by the scaled score for a category and then summed to determine there overall score.
 See [score normalization](ScoreExplaination.pdf) for details on how raw scores become scaled scores.
@@ -55,14 +54,14 @@ Performance
 
 There is currently only one performance category at each tournament.
 Performance scoring is objective.
-All of the missions have a set of rules to determine what score a team gets for the mission.
+All of the goals have a set of rules to determine what score a team gets for the goal.
 
 Subjective
 ----------
 
 This is sometimes referred to as judging scores.
 There can be unlimited subjective categories.
-Missions in a subjective category are scored within a range by a judge.
+Goals in a subjective category are scored within a range by a judge.
 Each judge may use different parts of the range and therefore may come up with a different score for the same team than another judge.
 For this reason to determine there winner in a subjective category a single judge must see all teams in an event division or finalist judging must be used.
 
