@@ -1,10 +1,10 @@
-The server software needs to be installed on any computer used as a server, should only be 1 at each tournament. This software can be installed on multiple computers so that they can all be used as servers, but the database only lives on one, so you can only use one at a time for the same tournament.
+The server software needs to be installed on any computer used as a server or to run the scheduling software, should only be 1 at each tournament. This software can be installed on multiple computers so that they can all be used as servers, but the database only lives on one, so you can only use one at a time for the same tournament.
 
 
 Get the software installed
 ==========================
 
-  1. Download the latest version of the software
+  1. Download the [latest version of the software](https://github.com/jpschewe/fll-sw/releases/latest)
   1. Extract the zip file to a location that you can remember. This is where the software will run from. 
     * It can be run from a USB drive too, so you could pick it up and move it from computer to computer.
   
