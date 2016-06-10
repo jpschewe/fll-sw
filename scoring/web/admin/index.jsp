@@ -40,21 +40,22 @@
           <span class='bold'>[DONE] </span>
         </c:if>
         Upload the datafile for teams. This file can be tab separated or
-        comma separated or an Excel file (xls and xlsx supported).
-        <a href='javascript:display("UploadTeamsHelp")'>[help]</a>
+        comma separated or an Excel file (xls and xlsx supported). <a
+          href='javascript:display("UploadTeamsHelp")'>[help]</a>
         <div
           id='UploadTeamsHelp'
           class='help'
           style='display: none'>
           Each column of the input file needs to matched against the
-          required data for teams. This information includes: team
-          number, team name, organization, initial tournament, award group, judging group.
-          The team number must be a number and is required. The other
-          columns are not required, but are a good idea to include. You
-          will be prompted to pick a column from your data file to match
-          against each piece of team data that the software uses. You
-          can select the same column for multiple pieces of data. <a
-            href='javascript:hide("UploadTeamsHelp")'>[hide]</a>
+          required data for teams. The column names are the first row of
+          your data file. This information includes: team number, team
+          name, organization, initial tournament, award group, judging
+          group. The team number must be a number and is required. The
+          other columns are not required, but are a good idea to
+          include. You will be prompted to pick a column from your data
+          file to match against each piece of team data that the
+          software uses. You can select the same column for multiple
+          pieces of data. <a href='javascript:hide("UploadTeamsHelp")'>[hide]</a>
         </div>
 
         <input
@@ -86,14 +87,15 @@
 
 
     <li><a href='DisplayTournamentAssignments'>Display
-        Tournament Assignments</a> <a href='javascript:display("DisplayTournamentAssignmentsHelp")'>[help]</a>
+        Tournament Assignments</a> <a
+      href='javascript:display("DisplayTournamentAssignmentsHelp")'>[help]</a>
       <div
         id='DisplayTournamentAssignmentsHelp'
         class='help'
         style='display: none'>
-        This is an optional step. Use this page to display what teams are
-        assigned to what tournament and what judging groups they are in.<br> <a
-          href='javascript:hide("EditTournamentHelp")'>[hide]</a>
+        This is an optional step. Use this page to display what teams
+        are assigned to what tournament and what judging groups they are
+        in.<br> <a href='javascript:hide("EditTournamentHelp")'>[hide]</a>
       </div></li>
 
 
@@ -156,14 +158,19 @@
       </form> <c:if test="${scheduleUploaded }">
         <!--  downloads for the schedule -->
         <ul>
-          <li><a href="ScheduleByTeam" target="_new">Full schedule sorted by
-              team</a></li>
-          <li><a href="SubjectiveScheduleByJudgingStation" target="_new">Subjective
-              schedule sorted by judging group, then time</a></li>
-          <li><a href="SubjectiveScheduleByTime" target="_new">Subjective
-              schedule sorted by time</a></li>
-          <li><a href="PerformanceSchedule" target="_new">Performance
-              Schedule</a></li>
+          <li><a
+            href="ScheduleByTeam"
+            target="_new">Full schedule sorted by team</a></li>
+          <li><a
+            href="SubjectiveScheduleByJudgingStation"
+            target="_new">Subjective schedule sorted by judging
+              group, then time</a></li>
+          <li><a
+            href="SubjectiveScheduleByTime"
+            target="_new">Subjective schedule sorted by time</a></li>
+          <li><a
+            href="PerformanceSchedule"
+            target="_new">Performance Schedule</a></li>
         </ul>
       </c:if></li>
 
@@ -291,7 +298,8 @@
           name="file" /> <input
           type='hidden'
           name='uploadRedirect'
-          value="<c:url value='/admin/UploadTeamTournamentAssignments'/>" /> <input
+          value="<c:url value='/admin/UploadTeamTournamentAssignments'/>" />
+        <input
           type="submit"
           value="Upload" />
       </form>
