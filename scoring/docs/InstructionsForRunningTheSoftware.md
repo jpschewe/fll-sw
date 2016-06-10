@@ -1,6 +1,6 @@
 # FLL Instructions
 
-If you are viewing this page on the server and the software is up and running, then the links should work. It is best to go through this the first time from the server so that you can follow the links.
+It is best to go through this documentation the first time from the server so that you can follow the links.
 
 
 ## Setup of tournament

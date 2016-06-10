@@ -31,6 +31,7 @@ import fll.Utilities;
 import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
+import fll.web.WebUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -142,9 +143,9 @@ public class GatherTeamData {
         page.setAttribute("teamNumber", teamNumber);
         final Team team = Team.getTeamFromDatabase(connection, teamNumber);
         page.setAttribute("teamName", team.getTeamName());
-        page.setAttribute("teamNameEscaped", escape(team.getTeamName()));
+        page.setAttribute("teamNameEscaped", WebUtils.escapeForHtmlFormValue(team.getTeamName()));
         page.setAttribute("organization", team.getOrganization());
-        page.setAttribute("organizationEscaped", escape(team.getOrganization()));
+        page.setAttribute("organizationEscaped", WebUtils.escapeForHtmlFormValue(team.getOrganization()));
         final Map<Integer, Boolean> teamInTournament = new HashMap<>();
         for (final Integer tid : Queries.getAllTournamentsForTeam(connection, teamNumber)) {
           teamInTournament.put(tid, true);
@@ -164,12 +165,5 @@ public class GatherTeamData {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Bottom of GatherTeamData.populateContext");
     }
-  }
-
-  /**
-   * Escape the string to be used in the value of a form field.
-   */
-  private static String escape(final String str) {
-    return str.replace("'", "&apos;");
   }
 }

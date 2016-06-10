@@ -204,8 +204,8 @@ $("#judging_station_${tournament.tournamentID}").change(function() {
           <table border="1">
             <tr>
               <th>Tournament</th>
-              <th>Event Division</th>
-              <th>Judging Station</th>
+              <th>Award Group</th>
+              <th>Judging Group</th>
             </tr>
 
             <c:forEach
@@ -224,7 +224,7 @@ $("#judging_station_${tournament.tournamentID}").change(function() {
                 </td>
 
                 <td>
-                  <!--  event division --> <select
+                  <!--  award group --> <select
                   name="event_division_${tournament.tournamentID }"
                   id="event_division_${tournament.tournamentID }">
                     <c:forEach
@@ -248,7 +248,7 @@ $("#judging_station_${tournament.tournamentID}").change(function() {
                 </td>
 
                 <td>
-                  <!--  judging station --> <select
+                  <!--  judging group --> <select
                   name="judging_station_${tournament.tournamentID }"
                   id="judging_station_${tournament.tournamentID }">
                     <c:forEach
