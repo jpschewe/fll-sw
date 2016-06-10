@@ -136,6 +136,19 @@ release and go.
       1. git merge --ff-only `tag name`
       1. Push the updated pointer with `git push origin current-release`
 
+# Confusing terms
+
+Over the years a few confusing terms have been introduced into the software and since then fixed. 
+Here is a mapping of the confusing terms to what they are now. 
+Any display of the old terms is already replaced by the new term, however there will be variables and SQL columns using the old terms.
+ 
+
+| Old Terms     | New Term    |
+--------------------------------
+| event division  | award group   |
+| judging station | judging group | 
+
+
 # Misc Notes
 
 
