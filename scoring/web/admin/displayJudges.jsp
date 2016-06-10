@@ -43,7 +43,7 @@ If changes need to be made to the judges, press the back button.</p>
   <tr>
    <th>ID</th>
    <th>Category</th>
-   <th>Judging Station</th>
+   <th>Judging Group</th>
   </tr>
 
   <c:forEach items="${JUDGES }" var="judge">

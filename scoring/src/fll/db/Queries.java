@@ -1249,14 +1249,14 @@ public final class Queries {
   }
 
   /**
-   * Get the judging station that a team is in for the specified tournament.
+   * Get the judging group that a team is in for the specified tournament.
    * 
    * @param teamNumber the team's number
    * @param tournamentID ID of tournament
-   * @return the judging station for the team or null if not found
+   * @return the judging group for the team or null if not found
    * @throws SQLException on a database error
    */
-  public static String getJudgingStation(final Connection connection,
+  public static String getJudgingGroup(final Connection connection,
                                          final int teamNumber,
                                          final int tournamentID) throws SQLException, RuntimeException {
     PreparedStatement prep = null;
@@ -1280,7 +1280,7 @@ public final class Queries {
   /**
    * Set judging station for a team.
    */
-  public static void setJudgingStation(final Connection connection,
+  public static void setJudgingGroup(final Connection connection,
                                        final int teamNumber,
                                        final int tournament,
                                        final String judgingStation) throws SQLException {
@@ -1816,7 +1816,7 @@ public final class Queries {
    * @return true if the update occurrred, false if the team isn't in the
    *         tournament
    */
-  public static boolean updateTeamJudgingStation(final Connection connection,
+  public static boolean updateTeamJudgingGroups(final Connection connection,
                                                  final int teamNumber,
                                                  final int tournamentID,
                                                  final String judgingStation) throws SQLException {

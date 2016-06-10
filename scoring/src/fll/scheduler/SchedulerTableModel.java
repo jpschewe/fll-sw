@@ -88,7 +88,7 @@ import javax.swing.table.AbstractTableModel;
     if (columnIndex == TEAM_NUMBER_COLUMN) {
       return schedInfo.getTeamNumber();
     } else if (columnIndex == JUDGE_COLUMN) {
-      return schedInfo.getJudgingStation();
+      return schedInfo.getJudgingGroup();
     } else if (columnIndex < getFirstPerformanceColumn()) {
       // columns are named by the subjective categories
       final SubjectiveTime subj = schedInfo.getSubjectiveTimeByName(getColumnName(columnIndex));

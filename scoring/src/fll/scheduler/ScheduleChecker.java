@@ -126,9 +126,9 @@ public class ScheduleChecker {
 
         final Set<String> judges = new HashSet<String>();
         for (final TeamScheduleInfo ti : entry.getValue()) {
-          if (!judges.add(ti.getJudgingStation())) {
+          if (!judges.add(ti.getJudgingGroup())) {
             final String message = String.format("%s judge %s cannot see more than one team at %s", topEntry.getKey(),
-                                                 ti.getJudgingStation(),
+                                                 ti.getJudgingGroup(),
                                                  TournamentSchedule.formatTime(entry.getKey()));
             violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, null,
                                                    new SubjectiveTime(topEntry.getKey(), entry.getKey()), null,
@@ -462,7 +462,7 @@ public class ScheduleChecker {
     // category -> judge -> times
     final Map<String, Map<String, SortedSet<LocalTime>>> subjectiveToTime = new HashMap<>();
     for (final TeamScheduleInfo si : schedule.getSchedule()) {
-      final String judge = si.getJudgingStation();
+      final String judge = si.getJudgingGroup();
       for (final SubjectiveTime subj : si.getSubjectiveTimes()) {
         Map<String, SortedSet<LocalTime>> judges = subjectiveToTime.get(subj.getName());
         if (null == judges) {

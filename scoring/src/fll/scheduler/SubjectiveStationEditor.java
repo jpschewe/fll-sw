@@ -31,7 +31,7 @@ import fll.util.FormatterUtils;
     add(nameEditor);
 
     durationEditor = FormatterUtils.createIntegerField(1, 1000);
-    durationEditor.setToolTipText("The duration of the subjective station in minutes");
+    durationEditor.setToolTipText("The duration of the judging for this subjective category in minutes");
     add(durationEditor);
 
   }

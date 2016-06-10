@@ -99,7 +99,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
 
       final List<ScoreCategory> subjectiveCategories = challengeDescription.getSubjectiveCategories();
       final Collection<String> eventDivisions = Queries.getEventDivisions(connection);
-      final Collection<String> judgingStations = Queries.getJudgingStations(connection, tournament.getTournamentID());
+      final Collection<String> judgingGroups = Queries.getJudgingStations(connection, tournament.getTournamentID());
 
       for (final ScoreCategory catElement : subjectiveCategories) {
         final String catName = catElement.getName();
@@ -121,12 +121,12 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
         prep.setInt(2, tournament.getTournamentID());
 
         for (final String division : eventDivisions) {
-          for (final String judgingStation : judgingStations) {
+          for (final String judgingGroup : judgingGroups) {
             final PdfPTable table = PdfUtils.createTable(4);
 
-            createHeader(table, challengeTitle, catTitle, division, judgingStation, tournament);
+            createHeader(table, challengeTitle, catTitle, division, judgingGroup, tournament);
             prep.setString(3, division);
-            prep.setString(4, judgingStation);
+            prep.setString(4, judgingGroup);
 
             boolean haveData = false;
             rs = prep.executeQuery();
@@ -176,15 +176,15 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
                             final String challengeTitle,
                             final String catTitle,
                             final String division,
-                            final String judgingStation,
+                            final String judgingGroup,
                             final Tournament tournament) throws BadElementException {
     final PdfPCell tournamentCell = PdfUtils.createHeaderCell(String.format("%s - %s", challengeTitle,
                                                                             tournament.getName()));
     tournamentCell.setColspan(4);
     table.addCell(tournamentCell);
 
-    final PdfPCell categoryHeader = PdfUtils.createHeaderCell(String.format("Category: %s - Division: %s - JudgingStation: %s",
-                                                                            catTitle, division, judgingStation));
+    final PdfPCell categoryHeader = PdfUtils.createHeaderCell(String.format("Category: %s - Division: %s - JudgingGroup: %s",
+                                                                            catTitle, division, judgingGroup));
     categoryHeader.setColspan(4);
     table.addCell(categoryHeader);
 

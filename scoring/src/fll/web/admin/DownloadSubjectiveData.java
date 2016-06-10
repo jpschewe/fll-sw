@@ -173,9 +173,9 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
           final String judgingStation = rs.getString(2);
 
           for (final Team team : teams) {
-            final String teamJudgingStation = Queries.getJudgingStation(connection, team.getTeamNumber(),
+            final String teamJudgingGroup = Queries.getJudgingGroup(connection, team.getTeamNumber(),
                                                                         currentTournament);
-            if (judgingStation.equals(teamJudgingStation)) {
+            if (judgingStation.equals(teamJudgingGroup)) {
               final String teamDiv = Queries.getEventDivision(connection, team.getTeamNumber());
 
               final Element scoreElement = document.createElementNS(null, SCORE_NODE_NAME);
@@ -184,7 +184,7 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
               scoreElement.setAttributeNS(null, "teamName", team.getTeamName());
               scoreElement.setAttributeNS(null, "teamNumber", String.valueOf(team.getTeamNumber()));
               scoreElement.setAttributeNS(null, "division", teamDiv);
-              scoreElement.setAttributeNS(null, "judging_station", teamJudgingStation);
+              scoreElement.setAttributeNS(null, "judging_station", teamJudgingGroup);
               scoreElement.setAttributeNS(null, "organization", team.getOrganization());
               scoreElement.setAttributeNS(null, "judge", judge);
 

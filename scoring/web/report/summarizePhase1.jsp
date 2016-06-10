@@ -20,7 +20,7 @@
   <p>
     Below is a list of judges found and what categories they scored.<b>Note:</b>
     If there is no schedule loaded and there are multiple judging
-    stations for a division, then the number of teams expected will be
+    groups for an award group, then the number of teams expected will be
     too high.
   </p>
 
@@ -28,7 +28,7 @@
     <tr>
       <th>Judge</th>
       <th>Category</th>
-      <th>Station</th>
+      <th>Judging Group</th>
       <th>Num Teams Expected</th>
       <th>Num Teams Scored</th>
     </tr>

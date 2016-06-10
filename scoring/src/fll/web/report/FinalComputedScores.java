@@ -363,7 +363,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
         curteam.getDefaultCell().setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
 
         if (null != schedule) {
-          // insert judging station here
+          // insert judging group here
           final TeamScheduleInfo si = schedule.getSchedInfoForTeam(teamNumber);
           if (null == si) {
             if (LOGGER.isTraceEnabled()) {
@@ -373,13 +373,13 @@ public final class FinalComputedScores extends BaseFLLServlet {
             curteam.addCell("");
           } else {
             if (LOGGER.isTraceEnabled()) {
-              LOGGER.trace("Found judging station "
-                  + si.getJudgingStation() + " for team " + teamNumber);
+              LOGGER.trace("Found judging group "
+                  + si.getJudgingGroup() + " for team " + teamNumber);
             }
-            final PdfPCell judgeStation = new PdfPCell(new Phrase(si.getJudgingStation(), ARIAL_8PT_NORMAL));
-            judgeStation.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-            judgeStation.setBorder(0);
-            curteam.addCell(judgeStation);
+            final PdfPCell judgeGroup = new PdfPCell(new Phrase(si.getJudgingGroup(), ARIAL_8PT_NORMAL));
+            judgeGroup.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+            judgeGroup.setBorder(0);
+            curteam.addCell(judgeGroup);
           }
         }
 
@@ -542,10 +542,10 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
     // judging group
     if (null != schedule) {
-      final Paragraph judgingStation = new Paragraph("Judging", ARIAL_8PT_BOLD);
-      judgingStation.add(Chunk.NEWLINE);
-      judgingStation.add(new Chunk("Station"));
-      final PdfPCell osCell = new PdfPCell(judgingStation);
+      final Paragraph judgingGroup = new Paragraph("Judging", ARIAL_8PT_BOLD);
+      judgingGroup.add(Chunk.NEWLINE);
+      judgingGroup.add(new Chunk("Group"));
+      final PdfPCell osCell = new PdfPCell(judgingGroup);
       osCell.setBorder(0);
       osCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
       osCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);

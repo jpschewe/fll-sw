@@ -63,7 +63,7 @@ public class CommitSchedule extends BaseFLLServlet {
 
       schedule.storeSchedule(connection, tournamentID);
 
-      assignJudgingStations(connection, tournamentID, schedule);
+      assignJudgingGroups(connection, tournamentID, schedule);
 
       // J2EE doesn't have things typed yet
       @SuppressWarnings("unchecked")
@@ -96,14 +96,14 @@ public class CommitSchedule extends BaseFLLServlet {
   /**
    * Set judging_station to be the info from the schedule
    */
-  private void assignJudgingStations(final Connection connection,
+  private void assignJudgingGroups(final Connection connection,
                                      final int tournamentID,
                                      final TournamentSchedule schedule) throws SQLException {
 
     for (final TeamScheduleInfo si : schedule.getSchedule()) {
-      final String station = si.getJudgingStation();
+      final String group = si.getJudgingGroup();
       final int teamNumber = si.getTeamNumber();
-      Queries.updateTeamJudgingStation(connection, teamNumber, tournamentID, station);
+      Queries.updateTeamJudgingGroups(connection, teamNumber, tournamentID, group);
     }
 
   }

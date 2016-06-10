@@ -114,7 +114,7 @@ if(null == errorMessage || "".equals(errorMessage)) {
       </tr>
 
       <tr>
-        <td>Judging Station (only use if Initial Tournament specified)</td>
+        <td>Judging Group (only use if Initial Tournament specified)</td>
         <td>Text - 32 characters</td>
         <td><select name='judging_station'>
             <option value='' selected>None</option>

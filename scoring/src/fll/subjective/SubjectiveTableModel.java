@@ -100,9 +100,9 @@ public final class SubjectiveTableModel extends AbstractTableModel {
     case 1:
       return "TeamName";
     case 2:
-      return "Division";
+      return "Award Group";
     case 3:
-      return "Judging Station";
+      return "Judging Group";
     case 4:
       return "Judge";
     case 5:
@@ -284,7 +284,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
       // Division
       return false;
     case 3:
-      // Judging Station
+      // Award Group
       return false;
     case 4:
       // Judge

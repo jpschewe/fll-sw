@@ -51,7 +51,7 @@ import fll.util.LogUtils;
 public class GreedySolver {
 
   /**
-   * Prefix for columns of subjective stations.
+   * Prefix for columns of subjective groupss.
    */
   public static final String SUBJECTIVE_COLUMN_PREFIX = "Subj";
 

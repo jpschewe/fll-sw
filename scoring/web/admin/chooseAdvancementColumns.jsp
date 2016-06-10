@@ -57,7 +57,7 @@
       </tr>
 
       <tr>
-        <td>Judging Station</td>
+        <td>Judging Group</td>
         <td><select name='judging_station'>
             <c:forEach
               items="${fileHeaders }"
