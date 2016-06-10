@@ -1,3 +1,5 @@
+* Remove filtering of uploaded teams file. It's best to just filter outside of FLL-SW.
+
 Release 10.8
 ============
 * #466 - Add a windows executable for starting the main application
