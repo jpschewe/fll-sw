@@ -248,4 +248,11 @@ public final class WebUtils {
     }
   }
 
+  /**
+   * Escape the string to be used in the value of a form field.
+   */
+  public static String escapeForHtmlFormValue(final String str) {
+    return str.replace("'", "&apos;");
+  }
+
 }
