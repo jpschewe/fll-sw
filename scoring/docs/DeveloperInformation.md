@@ -133,7 +133,7 @@ release and go.
     1. Upload the file created in Jenkins to GitHub
     1. Update the current release pointer - this updates the website documentation to match this release
       1. git checkout current-release
-      1. git merge --ff-only `tag name`
+      1. git merge --ff-only `<tag name>`
       1. Push the updated pointer with `git push origin current-release`
 
 # Confusing terms
