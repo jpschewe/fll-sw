@@ -97,7 +97,7 @@ public class CommitTeam extends BaseFLLServlet {
         message.append("<p id='success'>Successfully deleted team "
             + teamNumber + "</p>");
 
-        redirect = "select_team.jsp";
+        redirect = "index.jsp";
       } else {
         final String teamName = request.getParameter("teamName");
         final String organization = request.getParameter("organization");
@@ -127,7 +127,7 @@ public class CommitTeam extends BaseFLLServlet {
                 + teamNumber);
           }
 
-          redirect = "select_team.jsp";
+          redirect = "index.jsp";
 
           Queries.updateTeam(connection, teamNumber, teamName, organization);
           message.append("<p id='success'>Successfully updated a team "
