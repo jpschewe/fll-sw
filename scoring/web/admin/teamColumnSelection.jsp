@@ -17,9 +17,6 @@ if(null == session.getAttribute("columnSelectOptions")) {
   throw new RuntimeException("Error columnSelectOptions not set.  Please start back at administration page and go forward.");
 }
 final String errorMessage = (String)session.getAttribute("errorMessage");
-if(null == errorMessage || "".equals(errorMessage)) {
-  UploadTeams.copyFilteredTeams(connection, request);
-}
 %>
 <html>
   <head>

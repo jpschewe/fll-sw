@@ -48,7 +48,7 @@
           style='display: none'>
           Each column of the input file needs to matched against the
           required data for teams. This information includes: team
-          number, team name, organization, initial tournament, division.
+          number, team name, organization, initial tournament, award group, judging group.
           The team number must be a number and is required. The other
           columns are not required, but are a good idea to include. You
           will be prompted to pick a column from your data file to match
