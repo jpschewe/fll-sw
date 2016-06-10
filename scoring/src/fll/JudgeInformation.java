@@ -46,8 +46,7 @@ public final class JudgeInformation implements Serializable {
   private final String station;
 
   /**
-   * The station the judge is at. This is sometimes
-   * referred to as the division.
+   * The judging group the judge is at.
    */
   public String getStation() {
     return station;

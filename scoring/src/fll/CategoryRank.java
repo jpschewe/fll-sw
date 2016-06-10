@@ -62,7 +62,7 @@ public class CategoryRank {
 
   /**
    * The group that this ranking applies to.
-   * This is usually the judging station for the team, but
+   * This is usually the judging group for the team, but
    * may be something else if there is a different grouping such as performance
    * where this may be the division.
    */

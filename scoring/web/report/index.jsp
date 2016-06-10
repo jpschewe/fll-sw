@@ -32,8 +32,8 @@
       determine which teams advance to the next tournament.</li>
 
     <li><a href="CategoryScoresByScoreGroup" target="_blank">Categorized Scores
-        by Judging Station</a>. This displays the scaled scores for each
-      category by judging station. This is useful for checking the
+        by Judging Group</a>. This displays the scaled scores for each
+      category by judging group. This is useful for checking the
       winners of each category.</li>
 
     <li><a href="RankingReport" target="_blank">Ranking Report for teams</a>. This

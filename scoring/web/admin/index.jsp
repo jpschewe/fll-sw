@@ -159,7 +159,7 @@
           <li><a href="ScheduleByTeam" target="_new">Full schedule sorted by
               team</a></li>
           <li><a href="SubjectiveScheduleByJudgingStation" target="_new">Subjective
-              schedule sorted by judging station, then time</a></li>
+              schedule sorted by judging group, then time</a></li>
           <li><a href="SubjectiveScheduleByTime" target="_new">Subjective
               schedule sorted by time</a></li>
           <li><a href="PerformanceSchedule" target="_new">Performance

@@ -705,7 +705,7 @@ public class TournamentSchedule implements Serializable {
       addToMatches(ti, round);
     }
     _divisions.add(ti.getDivision());
-    _judgingGroups.add(ti.getJudgingStation());
+    _judgingGroups.add(ti.getJudgingGroup());
   }
 
   /**
@@ -949,7 +949,7 @@ public class TournamentSchedule implements Serializable {
       table.addCell(PdfUtils.createCell(String.valueOf(si.getTeamNumber())));
       table.addCell(PdfUtils.createCell(si.getTeamName()));
       table.addCell(PdfUtils.createCell(si.getOrganization()));
-      table.addCell(PdfUtils.createCell(si.getJudgingStation()));
+      table.addCell(PdfUtils.createCell(si.getJudgingGroup()));
       table.addCell(PdfUtils.createCell(si.getDivision()));
 
       for (final String subjectiveStation : subjectiveStations) {
@@ -1205,7 +1205,7 @@ public class TournamentSchedule implements Serializable {
       table.addCell(PdfUtils.createCell(si.getOrganization()));
       table.addCell(PdfUtils.createCell(si.getTeamName()));
       table.addCell(PdfUtils.createCell(formatTime(si.getSubjectiveTimeByName(subjectiveStation).getTime())));
-      table.addCell(PdfUtils.createCell(si.getJudgingStation()));
+      table.addCell(PdfUtils.createCell(si.getJudgingGroup()));
     }
 
     detailedSchedules.add(table);
@@ -1238,7 +1238,7 @@ public class TournamentSchedule implements Serializable {
       table.addCell(PdfUtils.createCell(si.getOrganization()));
       table.addCell(PdfUtils.createCell(si.getTeamName()));
       table.addCell(PdfUtils.createCell(formatTime(si.getSubjectiveTimeByName(subjectiveStation).getTime())));
-      table.addCell(PdfUtils.createCell(si.getJudgingStation()));
+      table.addCell(PdfUtils.createCell(si.getJudgingGroup()));
     }
 
     detailedSchedules.add(table);
@@ -1295,7 +1295,7 @@ public class TournamentSchedule implements Serializable {
           }
         }
         if (timeCompare == 0) {
-          return one.getJudgingStation().compareTo(two.getJudgingStation());
+          return one.getJudgingGroup().compareTo(two.getJudgingGroup());
         } else {
           return timeCompare;
         }
@@ -1337,7 +1337,7 @@ public class TournamentSchedule implements Serializable {
         if (!one.getDivision().equals(two.getDivision())) {
           return one.getDivision().compareTo(two.getDivision());
         } else {
-          return one.getJudgingStation().compareTo(two.getJudgingStation());
+          return one.getJudgingGroup().compareTo(two.getJudgingGroup());
         }
       } else {
         return timeCompare;
@@ -1373,7 +1373,7 @@ public class TournamentSchedule implements Serializable {
     final Map<String, LocalTime> maxSubjectiveTimes = new HashMap<>();
 
     for (final TeamScheduleInfo si : _schedule) {
-      final String judgingStation = si.getJudgingStation();
+      final String judgingStation = si.getJudgingGroup();
       for (final SubjectiveTime stime : si.getSubjectiveTimes()) {
         final LocalTime currentMin = minSubjectiveTimes.get(judgingStation);
         if (null == currentMin) {
@@ -1677,7 +1677,7 @@ public class TournamentSchedule implements Serializable {
 
       for (final TeamScheduleInfo si : getSchedule()) {
         insertSchedule.setInt(2, si.getTeamNumber());
-        insertSchedule.setString(3, si.getJudgingStation());
+        insertSchedule.setString(3, si.getJudgingGroup());
         insertSchedule.executeUpdate();
 
         insertPerfRounds.setInt(2, si.getTeamNumber());
@@ -1737,7 +1737,7 @@ public class TournamentSchedule implements Serializable {
             + si.getTeamNumber() + " is in schedule, but not in database"));
       }
 
-      if (si.getJudgingStation().isEmpty()) {
+      if (si.getJudgingGroup().isEmpty()) {
         violations.add(new ConstraintViolation(true, si.getTeamNumber(), null, null, null, "Team "
             + si.getTeamNumber() + " has no judging station specified"));
       }
@@ -1937,7 +1937,7 @@ public class TournamentSchedule implements Serializable {
       final Element team = document.createElementNS(null, "team");
       top.appendChild(team);
       team.setAttributeNS(null, "number", String.valueOf(si.getTeamNumber()));
-      team.setAttributeNS(null, "judging_station", si.getJudgingStation());
+      team.setAttributeNS(null, "judging_station", si.getJudgingGroup());
 
       for (final String subjName : si.getKnownSubjectiveStations()) {
         final LocalTime time = si.getSubjectiveTimeByName(subjName).getTime();
@@ -2024,7 +2024,7 @@ public class TournamentSchedule implements Serializable {
         line.add(si.getDivision());
         line.add(si.getTeamName());
         line.add(si.getOrganization());
-        line.add(si.getJudgingStation());
+        line.add(si.getJudgingGroup());
         for (final String category : categories) {
           final LocalTime d = si.getSubjectiveTimeByName(category).getTime();
           line.add(TournamentSchedule.formatTime(d));

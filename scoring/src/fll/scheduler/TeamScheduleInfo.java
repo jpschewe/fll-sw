@@ -179,7 +179,7 @@ public final class TeamScheduleInfo implements Serializable {
   /**
    * @return the judging station, never null
    */
-  public String getJudgingStation() {
+  public String getJudgingGroup() {
     if (null == judgingStation) {
       return "";
     } else {

@@ -115,7 +115,7 @@ public class GatherTeamData {
           final String eventDivision = Queries.getEventDivision(connection, teamNumber, tournament.getTournamentID());
           currentEventDivisions.put(tournament.getTournamentID(), eventDivision);
 
-          final String judgingStation = Queries.getJudgingStation(connection, teamNumber, tournament.getTournamentID());
+          final String judgingStation = Queries.getJudgingGroup(connection, teamNumber, tournament.getTournamentID());
           currentJudgingStations.put(tournament.getTournamentID(), judgingStation);
         }
         page.setAttribute("currentEventDivisions", currentEventDivisions);

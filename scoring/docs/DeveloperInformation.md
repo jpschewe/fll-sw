@@ -143,10 +143,11 @@ Here is a mapping of the confusing terms to what they are now.
 Any display of the old terms is already replaced by the new term, however there will be variables and SQL columns using the old terms.
  
 
-| Old Terms     | New Term    |
---------------------------------
-| event division  | award group   |
-| judging station | judging group | 
+| Old Terms     | New Term    | Notes      |
+--------------------------------------------
+| event division  | award group   | 
+| judging station | judging group | judging station is still used internally to refer to the location that judging for a particular category takes place |
+
 
 
 # Misc Notes

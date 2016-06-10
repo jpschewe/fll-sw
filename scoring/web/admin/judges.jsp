@@ -50,7 +50,7 @@
    <tr>
     <th>ID</th>
     <th>Category</th>
-    <th>Judging Station</th>
+    <th>Judging Group</th>
    </tr>
 
    <c:forEach items="${JUDGES }" var="judge" varStatus="loopStatus">
