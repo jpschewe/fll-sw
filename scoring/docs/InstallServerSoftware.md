@@ -31,15 +31,11 @@ If the tomcat window didn't stay open, then tomcat couldn't start for some reaso
     1. Open a command prompt (terminal or xterm in Linux and Mac)
       * Start->Run (or search) cmd
     1. Change to the directory that the server software is installed in
-      * This is done as a set of cd commands eg. 
-
-~~~~
-cd Downloads
-cd fll-sw-5.11
-~~~~
-
+      * This is done as a set of cd commands eg.
+        * ```cd Downloads```
+        * ```cd fll-sw-5.11```
     1. Change to the tomcat\bin directory with `cd tomcat\bin`
-    1. Execute `startup`
+    1. `startup`
     1. Check the error messages and see if you can figure out what the problem is. 
       * It may be that you don't have `JAVA_HOME` setup properly, see [setting up JAVA_HOME](SettingUpJavaHome).
       * Try searching on Google for the error messages
