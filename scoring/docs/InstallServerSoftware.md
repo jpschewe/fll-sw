@@ -54,13 +54,14 @@ Pick the appropriate challenge descriptor built into the software or download a 
 
 If it worked then you will return to the setup page with a nice message at the top, otherwise you'll get some nasty error. If you get an error, file a ticket with what's on the screen.
 
-From a Database Dump
+From a Saved Database
 --------------------
-Use the bottom part of the setup page and select the database dump that you've been given and click `Create Database`. 
+Use the portion of the setup page that talks about uploading a saved database. Select the saved database file that you've been given and click `Create Database`. 
 
-If it worked then you will return to the setup page with a nice message at the top, otherwise you'll get some nasty error. If you get an error, file a ticket with what's on the screen.
+If it worked then you will be prompted to create a username and password for the software.
+If you get an error, file a ticket with what's on the screen.
 
-This is also an easy way to setup a database on one computer and move it to another. You can get the database setup and then use the `download database` link on ad the administration page and then upload it here on another computer.
+This is also an easy way to setup a database on one computer and move it to another. You can get the database setup and then use the `Download database` link on the administration page and then upload it here on another computer.
 
 
 Shutting down the software
