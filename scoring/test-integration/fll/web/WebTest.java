@@ -45,21 +45,23 @@ public class WebTest {
   @Test
   public void testPages() throws SAXException, MalformedURLException, IOException {
     final String[] pages = new String[] { //
-        "", //
-        "display.jsp", //
-        "index.jsp", //
-        "welcome.jsp", "admin", "admin/index.jsp", "admin/edit_event_division.jsp", "admin/tournaments.jsp",
-        "admin/judges.jsp", "admin/tables.jsp", "admin/select_team.jsp", "admin/remoteControl.jsp", //
-        "credits/credits.jsp", //
-        "developer/index.jsp", "developer/query.jsp", //
-        "playoff/index.jsp", "playoff/check.jsp?division=__all__",
-        // "playoff/remoteMain.jsp",
-        "report/index.jsp",
-        // "report/CategorizedScores",
-        // "scoreboard/index.jsp",
-        // "scoreboard/main.jsp",
-        // "scoreboard_800/main.jsp",
-        "scoreEntry/select_team.jsp", "setup/index.jsp", "style/style.jsp", "troubleshooting/index.jsp", };
+                                          "", //
+                                          "display.jsp", //
+                                          "index.jsp", //
+                                          "welcome.jsp", "admin", "admin/index.jsp", "admin/edit_event_division.jsp",
+                                          "admin/tournaments.jsp", "admin/judges.jsp", "admin/tables.jsp",
+                                          "admin/select_team.jsp", "admin/remoteControl.jsp", //
+                                          "credits/credits.jsp", //
+                                          "developer/index.jsp", "developer/query.jsp", //
+                                          "playoff/index.jsp", "playoff/check.jsp?division=__all__",
+                                          // "playoff/remoteMain.jsp",
+                                          "report/index.jsp",
+                                          // "report/CategorizedScores",
+                                          // "scoreboard/index.jsp",
+                                          // "scoreboard/main.jsp",
+                                          // "scoreboard_800/main.jsp",
+                                          "scoreEntry/select_team.jsp", "setup/index.jsp",
+                                          "troubleshooting/index.jsp", };
     for (final String page : pages) {
       LOG.info("Testing page #"
           + page + "#");

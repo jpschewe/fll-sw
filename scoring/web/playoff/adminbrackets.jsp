@@ -65,7 +65,7 @@ bracketInfo.addStaticTableLabels();
 
 <html>
   <head>
-    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/fll-sw.css'/>" />
     <title><%=divisionStr%> Printable Brackets</title>
   </head>
   <style type='text/css'>

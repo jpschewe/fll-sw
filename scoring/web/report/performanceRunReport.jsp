@@ -15,7 +15,7 @@
 
 <html>
   <head>
-    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/fll-sw.css'/>" />
     <title>Performance Run <c:out value="${param.RunNumber}"/></title>
   </head>
 

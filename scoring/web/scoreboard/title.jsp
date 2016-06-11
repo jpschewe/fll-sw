@@ -1,27 +1,23 @@
-<%@ include file="/WEB-INF/jspf/init.jspf" %>
-  
+<%@ include file="/WEB-INF/jspf/init.jspf"%>
+
 <html>
 <head>
-  <meta http-equiv='refresh' content='90' />
-</head>
-<body bgcolor='#000080'>
-<center>
-<table border='0' cellpadding='0' cellspacing='0' width='98%'>
-<tr>
-  <td align='left'>
-    <font face='arial' size='3' color='#ffffff'>
-      <b><c:out value="${ScorePageText}" /></b>
-    </font>
-  </td>
-</tr>
+<meta
+  http-equiv='refresh'
+  content='90' />
 
-<tr><td colspan='2'><hr size='1' color='#ffffff'></td></tr>
-<tr>
-  <td align='left' valign='top' nowrap colspan='2'>
-    <font face='Arial' size='3' color='#ffffff'><b>All Teams: Alphabetical by Organization</b></font>
-  </td>
-</tr>
-</table>
-</center>
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="<c:url value='/style/base.css'/>" />
+
+</head>
+<body bgcolor='#008000'>
+  <div class='center bold'>
+    <font
+      face='arial'
+      size='3'
+      color='#ffffff'> ${ScorePageText } </font>
+  </div>
 </body>
 </html>

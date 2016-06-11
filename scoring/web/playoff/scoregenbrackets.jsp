@@ -47,7 +47,7 @@ fll.web.playoff.ScoregenBrackets.populateContext(application,
 <html>
 <head>
 <link rel="stylesheet" type="text/css"
- href="<c:url value='/style/style.jsp'/>" />
+ href="<c:url value='/style/fll-sw.css'/>" />
 <title>${division} Playoff Brackets</title>
 
 <style type='text/css'>

@@ -4,7 +4,7 @@
 
 <html>
   <head>
-    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/fll-sw.css'/>" />
   <title>Score Entry [Select Team]</title>
 
   <style title='local_style' type='text/css'>

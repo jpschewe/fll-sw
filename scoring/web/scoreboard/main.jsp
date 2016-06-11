@@ -23,7 +23,7 @@ html {
 </head>
 
 <frameset cols="40%,*" border='1' framespacing='0'>
-  <frameset rows='60,*' border='0' framespacing='0'>
+  <frameset rows='40,*' border='0' framespacing='0'>
     <frame src='<c:url value="title.jsp" />' marginheight='0' marginwidth='0'scrolling=no>
     <frame src='<c:url value="allteams.jsp"><c:param name="allTeamsScroll" value="true"/></c:url>' scrolling='no'>
   </frameset>
