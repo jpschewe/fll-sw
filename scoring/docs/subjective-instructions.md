@@ -6,8 +6,8 @@ There are 2 ways to enter subjective scores, via a Java application and via a we
 
 The Java application can be used on a desktop or laptop. The judges names need to be entered before using the Java application to enter subjective scores.
 
-  1. Download the subjective datafile from the server
-    * This is a link on the admin page
+  1. Download the subjective datafile from the server.
+    * This is a link on the admin index
   1. Start the subjective app
     * This is included in the install or can be downloaded from the main page
     * This can be launched from the main launcher application
