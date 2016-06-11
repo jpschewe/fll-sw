@@ -11,6 +11,15 @@
   rel="stylesheet"
   type="text/css"
   href="<c:url value='/style/fll-sw.css'/>" />
+
+
+<style>
+.completed {
+	background-color: #008000;
+	font-weight: bold;
+}
+</style>
+
 <script type="text/javascript">
   function display(id) {
     document.getElementById(id).style.display = "block";
@@ -37,10 +46,20 @@
         METHOD="POST"
         ENCTYPE="multipart/form-data">
         <c:if test="${teamsUploaded }">
-          <span class='bold'>[DONE] </span>
+          <span class='completed'>DONE </span>
         </c:if>
         Upload the datafile for teams. This file can be tab separated or
-        comma separated or an Excel file (xls and xlsx supported). <a
+        comma separated or an Excel file (xls and xlsx supported). <input
+          type="file"
+          size="32"
+          id='teams_file'
+          name="file"> <input
+          type='hidden'
+          name='uploadRedirect'
+          value="<c:url value='/admin/UploadTeams'/>" /> <input
+          type="submit"
+          id='upload_teams'
+          value="Upload"> <a
           href='javascript:display("UploadTeamsHelp")'>[help]</a>
         <div
           id='UploadTeamsHelp'
@@ -58,17 +77,6 @@
           pieces of data. <a href='javascript:hide("UploadTeamsHelp")'>[hide]</a>
         </div>
 
-        <input
-          type="file"
-          size="32"
-          id='teams_file'
-          name="file"> <input
-          type='hidden'
-          name='uploadRedirect'
-          value="<c:url value='/admin/UploadTeams'/>" /> <input
-          type="submit"
-          id='upload_teams'
-          value="Upload">
       </form>
     </li>
 
@@ -150,7 +158,7 @@
 
 
     <li><c:if test="${scheduleUploaded }">
-        <span class='bold'>[DONE] </span>
+        <span class='completed'>DONE </span>
       </c:if> Upload schedule for current tournament. <a
       href='javascript:display("ScheduleHelp")'>[help]</a>
       <div
@@ -222,30 +230,31 @@
           name='ScorePageText'
           value='<c:out value="${ScorePageText}"/>'> <input
           type='submit'
-          value='Change text'>
-      </form> <a href='javascript:display("ScorePageTextHelp")'>[help]</a>
-      <div
-        id='ScorePageTextHelp'
-        class='help'
-        style='display: none'>
-        This text is displayed on the various big screen display pages.
-        There is only 1 or 2 lines of space available, so keep it short.
-        This can be used to notify participants and spectators of when
-        the next break will be over.<a
-          href='javascript:hide("ScorePageTextHelp")'>[hide]</a>
-      </div>
+          value='Change text'> <a
+          href='javascript:display("ScorePageTextHelp")'>[help]</a>
+        <div
+          id='ScorePageTextHelp'
+          class='help'
+          style='display: none'>
+          This text is displayed on the various big screen display
+          pages. There is only 1 or 2 lines of space available, so keep
+          it short. This can be used to notify participants and
+          spectators of when the next break will be over.<a
+            href='javascript:hide("ScorePageTextHelp")'>[hide]</a>
+        </div>
+      </form>
     </li>
 
 
     <li><c:if test="${judgesAssigned }">
-        <span class='bold'>[DONE] </span>
+        <span class='completed'>DONE </span>
       </c:if> <a
       href='<c:url value="GatherJudgeInformation"/>'
       id='assign_judges'>Assign Judges</a></li>
 
 
     <li><c:if test="${tablesAssigned}">
-        <span class='bold'>[DONE] </span>
+        <span class='completed'>DONE </span>
       </c:if> <a href='<c:url value="tables.jsp"/>'>Assign Table Labels</a>
       (for scoresheet printing during playoffs)</li>
 
@@ -268,8 +277,9 @@
             Scoring Application</a> (Executable Jar file) - run with "java
           -jar subjective-app.jar"</li>
 
-        <li><a href='<c:url value="/subjective/index.html"/>' target="_new">Subjective
-            Web application</a></li>
+        <li><a
+          href='<c:url value="/subjective/index.html"/>'
+          target="_new">Subjective Web application</a></li>
 
 
       </ul></li>
