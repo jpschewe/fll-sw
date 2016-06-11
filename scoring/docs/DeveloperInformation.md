@@ -54,7 +54,7 @@ Don't fast forward master, always use `--no-ff` when merging into master. This w
 When you start work on a ticket, assign it to yourself. Don't work on someone else's assigned tickets unless you talk to them.
 
 ### Attachments to tickets
-Github allows attachments of images, but not general files. So if you want to attach a file other than an image you need to host the file somewhere and put a link to it in the ticket. I found a solution using Github's Gist service http://feeding.cloud.geek.nz/posts/attaching-files-to-github-issues/.
+GitHub allows attachments of certain file types. [You can find the list here](https://help.github.com/articles/file-attachments-on-issues-and-pull-requests/). If you rename the file you want to attach to one of these extensions, they will attach nicely. For databases and subjective data files I add ".zip" a second extension, for log files I add ".txt" as a second extension. This way GitHub accepts the attachment and we still know what type of file it was.
 
 
 ## Wiki Editing
