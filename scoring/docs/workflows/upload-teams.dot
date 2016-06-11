@@ -4,9 +4,9 @@ digraph upload_teams {
 
 UploadTeams -> "teamColumnSelection.jsp" [label="Populate AllTeams"];
 
-"teamColumnSelection.jsp" -> "verifyTeams.jsp";
+"teamColumnSelection.jsp" -> "verifyTeams.jsp" [label="Next"];
 
-"verifyTeams.jsp" -> "teamColumnSelection.jsp" [label="missing column selections OR duplicate teams found"];
+"verifyTeams.jsp" -> "teamColumnSelection.jsp" [label="Missing column selections OR Duplicate teams found"];
 
 "verifyTeams.jsp" -> "index.jsp" [label="success, assign tournament teams"];
 
