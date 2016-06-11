@@ -9,7 +9,7 @@
 <link
   rel="stylesheet"
   type="text/css"
-  href="<c:url value='/style/style.jsp'/>" />
+  href="<c:url value='/style/fll-sw.css'/>" />
 
 <script type="text/javascript">
   // if this action will overwrite existing data, confirm this change with the user

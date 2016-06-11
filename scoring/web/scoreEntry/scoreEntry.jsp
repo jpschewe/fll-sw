@@ -13,7 +13,7 @@
     </c:otherwise>
     </c:choose>
 
-      <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
+      <link rel="stylesheet" type="text/css" href="<c:url value='/style/fll-sw.css'/>" />
 
     <style type='text/css'>
       TD {font-family: arial}

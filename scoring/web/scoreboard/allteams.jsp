@@ -36,7 +36,7 @@ final Connection connection = datasource.getConnection();
   + "   AND Teams.TeamNumber = verified_performance.TeamNumber"
   + "   AND verified_performance.Bye = False"
   + "   AND verified_performance.RunNumber <= ?"
-  + " ORDER BY Teams.Organization, Teams.TeamNumber, verified_performance.RunNumber");
+  + " ORDER BY Teams.TeamNumber, verified_performance.RunNumber");
   prep.setInt(1, currentTournament);
   prep.setInt(2, maxScoreboardRound);
   final ResultSet rs = prep.executeQuery();
@@ -136,7 +136,7 @@ TABLE.B {
          }
          final String headerColor = Queries.getColorForDivisionIndex(index);
    %>
-   <td width='25%' bgcolor='<%=headerColor%>'>&nbsp;&nbsp;Division:&nbsp;<%=divisionStr%>&nbsp;&nbsp;
+   <td width='25%' bgcolor='<%=headerColor%>'>&nbsp;&nbsp;<%=divisionStr%>&nbsp;&nbsp;
     </td>
    <td class='right'>Team&nbsp;#:&nbsp;<%=rs.getInt("TeamNumber")%>&nbsp;&nbsp;
     </td>

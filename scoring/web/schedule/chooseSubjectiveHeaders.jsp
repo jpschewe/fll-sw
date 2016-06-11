@@ -4,7 +4,7 @@
 <head>
 <title>FLL-SW</title>
 <link rel="stylesheet" type="text/css"
- href="<c:url value='/style/style.jsp'/>" />
+ href="<c:url value='/style/fll-sw.css'/>" />
 
 </head>
 

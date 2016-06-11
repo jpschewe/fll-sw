@@ -76,7 +76,7 @@
 
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
+<link rel="stylesheet" type="text/css" href="<c:url value='/style/fll-sw.css'/>" />
 <link rel="stylesheet" type="text/css" href="<c:url value='/scoreboard/score_style.css'/>" />
 
 <title>Playoff Round <%=playoffRoundNumber%>, Division <%=division%></title>
