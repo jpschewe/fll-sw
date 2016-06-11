@@ -72,6 +72,22 @@
       </form>
     </li>
 
+    <li><a href='editTeam.jsp'>Add a team</a> <a
+      href='javascript:display("AddTeamHelp")'>[help]</a>
+      <div
+        id='AddTeamHelp'
+        class='help'
+        style='display: none'>
+        This can be used to add a team to the software that wasn't added
+        through the team upload. This may be used for small tournaments
+        where all of the teams aren't known in advance or a team shows
+        up for a tournament at the last minute. Special care needs to be
+        taken when adding a team to an already running tournament to
+        ensure that they have a schedule for where to go when and that
+        they get judged properly. In most cases this function should not
+        be used at the tournament, but rather before the tournament.<a
+          href='javascript:hide("AddTeamHelp")'>[hide]</a>
+      </div></li>
 
     <li><a href='<c:url value="tournaments.jsp"/>'>Add or Edit
         Tournaments</a> <a href='javascript:display("EditTournamentHelp")'>[help]</a>
@@ -95,7 +111,8 @@
         style='display: none'>
         This is an optional step. Use this page to display what teams
         are assigned to what tournament and what judging groups they are
-        in.<br> <a href='javascript:hide("EditTournamentHelp")'>[hide]</a>
+        in.<br> <a
+          href='javascript:hide("DisplayTournamentAssignmentsHelp")'>[hide]</a>
       </div></li>
 
 
@@ -200,13 +217,23 @@
       <form
         action='ChangeScorePageText'
         method='post'>
-        Score page text: <input
+        Scoring display text: <input
           type='text'
           name='ScorePageText'
           value='<c:out value="${ScorePageText}"/>'> <input
           type='submit'
           value='Change text'>
-      </form>
+      </form> <a href='javascript:display("ScorePageTextHelp")'>[help]</a>
+      <div
+        id='ScorePageTextHelp'
+        class='help'
+        style='display: none'>
+        This text is displayed on the various big screen display pages.
+        There is only 1 or 2 lines of space available, so keep it short.
+        This can be used to notify participants and spectators of when
+        the next break will be over.<a
+          href='javascript:hide("ScorePageTextHelp")'>[hide]</a>
+      </div>
     </li>
 
 
@@ -222,9 +249,6 @@
       </c:if> <a href='<c:url value="tables.jsp"/>'>Assign Table Labels</a>
       (for scoresheet printing during playoffs)</li>
 
-
-
-    <li><a href='editTeam.jsp'>Add a team</a></li>
 
 
     <li><a href='<c:url value="select_team.jsp"/>'>Edit team
@@ -244,7 +268,7 @@
             Scoring Application</a> (Executable Jar file) - run with "java
           -jar subjective-app.jar"</li>
 
-        <li><a href='<c:url value="/subjective/index.html"/>'>Subjective
+        <li><a href='<c:url value="/subjective/index.html"/>' target="_new">Subjective
             Web application</a></li>
 
 
