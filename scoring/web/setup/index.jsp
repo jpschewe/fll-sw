@@ -1,9 +1,7 @@
-<%@ taglib
-  prefix="c"
-  uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%
-  fll.web.setup.SetupIndex.populateContext(pageContext);
+  fll.web.setup.SetupIndex.populateContext(application, pageContext);
 %>
 
 <html>
@@ -12,6 +10,23 @@
   rel="stylesheet"
   type="text/css"
   href="<c:url value='/style/style.jsp'/>" />
+
+<script type="text/javascript">
+  // if this action will overwrite existing data, confirm this change with the user
+  function confirmOverwrite() {
+    <c:choose>
+    <c:when test="${dbinitialized}">
+    retval = confirm("This will erase ALL scores and team information in the database, are you sure?");
+    </c:when>
+    <c:otherwise>
+    retval = true;
+    </c:otherwise>
+    </c:choose>
+
+    return retval;
+  }
+</script>
+
 <title>FLL (Database setup)</title>
 </head>
 
@@ -38,8 +53,13 @@
       On this page you can setup the database used by the scoring
       software. You may find the <a
         href='<c:url value="/documentation/index.html"/>'
-        target="_documentation">documentation</a> helpful (opens new window).
+        target="_documentation">documentation</a> helpful (opens new
+      window).
     </p>
+
+    <p>You need to choose how you will initialize the software. It
+      is most likely that you will want to choose the first or second
+      option below.</p>
 
     <hr />
     <p>You can select a description that shipped with the software</p>
@@ -60,19 +80,7 @@
       type='submit'
       name='chooseDescription'
       value='Choose Description'
-      onclick='return confirm("This will erase ALL scores in the database fll (if it already exists), are you sure?")' />
-
-
-    <hr />
-    <p>Or provide your own challenge description file</p>
-    <input
-      type='file'
-      size='32'
-      name='xmldocument'> <input
-      type='submit'
-      name='reinitializeDatabase'
-      value='Upload Description'
-      onclick='return confirm("This will erase ALL scores in the database fll (if it already exists), are you sure?")' />
+      onclick='return confirmOverwrite()' />
 
 
     <hr />
@@ -86,7 +94,21 @@
       name='dbdump'> <input
       type='submit'
       name='createdb'
-      value='Upload Dump' />
+      value='Upload Dump'
+      onclick='return confirmOverwrite()' />
+
+    <hr />
+    <p>Or provide your own custom challenge description file</p>
+    <input
+      type='file'
+      size='32'
+      name='xmldocument'> <input
+      type='submit'
+      name='reinitializeDatabase'
+      value='Upload Description'
+      onclick='return confirmOverwrite()' />
+
+
 
   </form>
 
