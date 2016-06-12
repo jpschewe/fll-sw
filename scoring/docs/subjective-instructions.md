@@ -34,6 +34,4 @@ By looking at this you can quickly tell which scores haven't been entered or if 
 
 ## Web Application
 
-The web application can be used on a desktop, laptop, phone, or tablet. Although a phone screen might be a little small to be useful. Judges names do not need to be entered before using the subjective web application.
-
-  1. Follow the link to the subjective web application on the main page.
+The web application can be used on a desktop, laptop, phone, or tablet. Although a phone screen might be a little small to be useful. Judges names do not need to be entered before using the subjective web application. This application is accessible from the main index and from the admin index. The app is intended to be self explanatory as the user is guided through the judging.
