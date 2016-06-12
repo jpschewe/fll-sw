@@ -9,6 +9,7 @@ The subjective score entry software is used to enter subjective scores. There ar
     1. Click on Subjective Application
   1. Or you can download the application from your server
     1. Visit http://server-address:9080/fll-sw
+      * The server address can be found on the main index.
     1. Click on Admin
     1. Click on Subjective Scoring Application to download the jar file
     1. Double click on the downloaded subjective-app.jar file

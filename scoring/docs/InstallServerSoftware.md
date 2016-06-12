@@ -31,15 +31,11 @@ If the tomcat window didn't stay open, then tomcat couldn't start for some reaso
     1. Open a command prompt (terminal or xterm in Linux and Mac)
       * Start->Run (or search) cmd
     1. Change to the directory that the server software is installed in
-      * This is done as a set of cd commands eg. 
-
-~~~~
-cd Downloads
-cd fll-sw-5.11
-~~~~
-
+      * This is done as a set of cd commands eg.
+        * ```cd Downloads```
+        * ```cd fll-sw-5.11```
     1. Change to the tomcat\bin directory with `cd tomcat\bin`
-    1. Execute `startup`
+    1. `startup`
     1. Check the error messages and see if you can figure out what the problem is. 
       * It may be that you don't have `JAVA_HOME` setup properly, see [setting up JAVA_HOME](SettingUpJavaHome).
       * Try searching on Google for the error messages
@@ -58,13 +54,14 @@ Pick the appropriate challenge descriptor built into the software or download a 
 
 If it worked then you will return to the setup page with a nice message at the top, otherwise you'll get some nasty error. If you get an error, file a ticket with what's on the screen.
 
-From a Database Dump
+From a Saved Database
 --------------------
-Use the bottom part of the setup page and select the database dump that you've been given and click `Create Database`. 
+Use the portion of the setup page that talks about uploading a saved database. Select the saved database file that you've been given and click `Create Database`. 
 
-If it worked then you will return to the setup page with a nice message at the top, otherwise you'll get some nasty error. If you get an error, file a ticket with what's on the screen.
+If it worked then you will be prompted to create a username and password for the software.
+If you get an error, file a ticket with what's on the screen.
 
-This is also an easy way to setup a database on one computer and move it to another. You can get the database setup and then use the `download database` link on ad the administration page and then upload it here on another computer.
+This is also an easy way to setup a database on one computer and move it to another. You can get the database setup and then use the `Download database` link on the administration page and then upload it here on another computer.
 
 
 Shutting down the software
