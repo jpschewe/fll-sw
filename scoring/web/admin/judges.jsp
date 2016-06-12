@@ -37,7 +37,7 @@
   judge. Keep in mind that this ID needs to be entered on the judging
   forms. There must be at least 1 judge for each category.</p>
 
- ${message}
+ <div class='status-message'>${message}</div>
  <%-- clear out the message, so that we don't see it again --%>
  <c:remove var="message" />
 

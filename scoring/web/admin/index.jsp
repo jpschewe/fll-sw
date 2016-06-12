@@ -15,7 +15,7 @@
 
 <style>
 .completed {
-	background-color: #008000;
+	background-color: #00FF00;
 	font-weight: bold;
 }
 </style>
@@ -33,7 +33,7 @@
 <body>
   <h1>${challengeDescription.title }(Administration)</h1>
 
-  ${message}
+  <div class='status-message'>${message}</div>
   <%-- clear out the message, so that we don't see it again --%>
   <c:remove var="message" />
 

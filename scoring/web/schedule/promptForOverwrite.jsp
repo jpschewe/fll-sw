@@ -9,7 +9,7 @@
 <body>
 <h1>Upload Schedule</h1>
 
-${message}
+<div class='status-message'>${message}</div>
 <%-- clear out the message, so that we don't see it again --%>
 <c:remove var="message" />
 

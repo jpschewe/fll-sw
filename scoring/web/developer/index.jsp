@@ -15,7 +15,7 @@
     only. If you don't know what you're doing, LEAVE THIS PAGE!</b></font>
  </p>
 
- ${message}
+ <div class='status-message'>${message}</div>
 
  <%-- clear out the message, so that we don't see it again --%>
  <c:remove var="message" />

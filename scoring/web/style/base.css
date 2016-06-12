@@ -31,6 +31,15 @@ td.right {
 	background-color: black;
 }
 
+.success, #success {
+	background-color: #00FF00;
+}
+
+.status-message {
+	font-size: 120%;
+    background-color: #ADD8E6;	 
+}
+
 .hard-violation {
 	background-color: red;
 }

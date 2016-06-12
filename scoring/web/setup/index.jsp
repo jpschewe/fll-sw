@@ -33,7 +33,7 @@
 <body>
   <h1>FLL (Database setup)</h1>
 
-  <p>${message}</p>
+  <p><div class='status-message'>${message}</div></p>
   <%-- clear out the message, so that we don't see it again --%>
   <c:remove var="message" />
 
