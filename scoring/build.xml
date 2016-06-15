@@ -85,6 +85,10 @@
       <!-- keep logback out until explicitly added -->
       <exclude name="lib/logback*.jar" />
     </fileset>
+    <!-- use common commons-lang3 -->
+    <pathelement location="${dir.lib}/commons-lang3-3.4.jar" />
+	 
+    <pathelement location="${dir.lib}/slf4j-api-1.7.5.jar" />
     <pathelement location="${dir.lib}/slf4j-api-1.7.5.jar" />
     <!-- use tomcat's servlet api.jar -->
     <pathelement location="${dir.tomcat.src}/lib/servlet-api.jar" />
@@ -103,7 +107,7 @@
     <pathelement location="${dir.lib}/xmlunit-1.4.jar" />
     <pathelement location="${dir.lib}/JonsInfra-1.5.jar" />
 
-    <pathelement location="${dir.lib}/commons-lang3-3.3.2.jar" />
+    <pathelement location="${dir.lib}/commons-lang3-3.4.jar" />
 
     <!-- command line argument parsing -->
     <pathelement location="${dir.lib}/commons-cli-1.2.jar" />
@@ -139,7 +143,7 @@
     <pathelement location="${dir.lib.findbugs}/jsr305.jar" />
 
     <!-- used for password hashes -->
-    <pathelement location="${dir.lib}/commons-codec-1.9.jar" />
+    <pathelement location="${dir.lib}/commons-codec-1.10.jar" />
 
     <!-- used to create json out of objects -->
     <pathelement location="${dir.lib}/jackson-annotations-2.2.3.jar" />
@@ -149,7 +153,7 @@
     <!-- handles ajax pushes -->
     <pathelement location="${dir.lib}/icepush-2.0.0-alpha3.jar" />
 
-    <pathelement location="${dir.lib}/commons-io-2.4.jar" />
+    <pathelement location="${dir.lib}/commons-io-2.5.jar" />
 
     <!-- writing out database diagrams -->
     <pathelement location="${dir.lib}/schemaSpy_5.0.0.jar" />
