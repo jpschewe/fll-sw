@@ -85,6 +85,10 @@
       <!-- keep logback out until explicitly added -->
       <exclude name="lib/logback*.jar" />
     </fileset>
+    <!-- use common commons-lang3 -->
+    <pathelement location="${dir.lib}/commons-lang3-3.4.jar" />
+	 
+    <pathelement location="${dir.lib}/slf4j-api-1.7.5.jar" />
     <pathelement location="${dir.lib}/slf4j-api-1.7.5.jar" />
     <!-- use tomcat's servlet api.jar -->
     <pathelement location="${dir.tomcat.src}/lib/servlet-api.jar" />
