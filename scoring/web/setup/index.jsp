@@ -33,7 +33,9 @@
 <body>
   <h1>FLL (Database setup)</h1>
 
-  <p><div class='status-message'>${message}</div></p>
+  <p>
+  <div class='status-message'>${message}</div>
+  </p>
   <%-- clear out the message, so that we don't see it again --%>
   <c:remove var="message" />
 
@@ -84,8 +86,8 @@
 
 
     <hr />
-    <p>Or initialize the database based upon a previous database
-      dump that was created using the download database link on the
+    <p>Or initialize the database based upon a previously saved
+      database that was created using the download database link on the
       administration page.</p>
 
     <input
@@ -94,7 +96,7 @@
       name='dbdump'> <input
       type='submit'
       name='createdb'
-      value='Upload Dump'
+      value='Upload Saved Database'
       onclick='return confirmOverwrite()' />
 
     <hr />
