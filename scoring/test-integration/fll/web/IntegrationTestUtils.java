@@ -214,6 +214,17 @@ public final class IntegrationTestUtils {
         final WebElement createEle = selenium.findElement(By.name("createdb"));
         createEle.click();
 
+        try {
+          final Alert confirmCreateDB = selenium.switchTo().alert();
+          LOGGER.info("Confirmation text: "
+              + confirmCreateDB.getText());
+          confirmCreateDB.accept();
+        } catch (final NoAlertPresentException e) {
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("No alert found, assuming the database was empty and didn't need an alert.");
+          }
+        }
+
         selenium.findElement(By.id("success"));
 
         // setup user
