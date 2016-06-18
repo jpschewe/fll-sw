@@ -87,7 +87,7 @@ If you encounter an error, please file a ticket. Save the error log that is disp
 
 In most cases when an error occurs you will be prompted to submit a bug report. 
 This packages up the logs and the database into a zip file that can be attached to the ticket. 
-After entering a description of what was happening when the error occured, click submit and you'll be told where to find the zip file.
+After entering a description of what was happening when the error occurred, click submit and you'll be told where to find the zip file.
 
 
 
