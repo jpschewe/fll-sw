@@ -86,7 +86,7 @@ public class CreateUser extends BaseFLLServlet {
       addUser.setString(2, hashedPass);
       addUser.executeUpdate();
 
-      session.setAttribute(SessionAttributes.MESSAGE, "<p id='success-create-user'>Successfully created user '"
+      session.setAttribute(SessionAttributes.MESSAGE, "<p class='success' id='success-create-user'>Successfully created user '"
           + user + "'</p>");
 
       // do a login if not already logged in
