@@ -201,14 +201,13 @@ public final class Tables {
     PreparedStatement deleteInfo = null;
     PreparedStatement insert = null;
     try {
-      // delete old data in tablenames
-      deleteNames = connection.prepareStatement("DELETE FROM tablenames where Tournament = ?");
-      deleteNames.setInt(1, tournamentId);
-      deleteNames.executeUpdate();
-
       deleteInfo = connection.prepareStatement("DELETE FROM table_division where Tournament = ?");
       deleteInfo.setInt(1, tournamentId);
       deleteInfo.executeUpdate();
+
+      deleteNames = connection.prepareStatement("DELETE FROM tablenames where Tournament = ?");
+      deleteNames.setInt(1, tournamentId);
+      deleteNames.executeUpdate();
 
       insert = connection.prepareStatement("INSERT INTO tablenames (Tournament, PairID, SideA, SideB) VALUES(?, ?, ?, ?)");
       insert.setInt(1, tournamentId);
