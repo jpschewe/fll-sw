@@ -82,7 +82,7 @@ public class CommitSchedule extends BaseFLLServlet {
       }
       Tables.replaceTablesForTournament(connection, tournamentID, tables);
 
-      session.setAttribute(SessionAttributes.MESSAGE, "<p>Schedule successfully stored in the database</p>");
+      session.setAttribute(SessionAttributes.MESSAGE, "<p class='success'>Schedule successfully stored in the database</p>");
       WebUtils.sendRedirect(application, response, "/admin/index.jsp");
       return;
     } catch (final SQLException e) {
