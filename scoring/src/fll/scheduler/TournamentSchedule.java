@@ -1416,15 +1416,21 @@ public class TournamentSchedule implements Serializable {
     stations.addAll(minSubjectiveTimes.keySet());
     stations.addAll(maxSubjectiveTimes.keySet());
     for (final String station : stations) {
-      output.format("Subjective earliest start for judging station %s: %s%n", station,
-                    formatTime(minSubjectiveTimes.get(station)));
-      output.format("Subjective latest start for judging station %s: %s%n", station,
-                    formatTime(maxSubjectiveTimes.get(station)));
+      final LocalTime earliestStart = minSubjectiveTimes.get(station);
+      final LocalTime latestStart = maxSubjectiveTimes.get(station);
+      final Duration subjectiveDuration = Duration.ofMinutes(SolverParams.DEFAULT_SUBJECTIVE_MINUTES);
+      final LocalTime latestEnd = latestStart.plus(subjectiveDuration);
+
+      output.format("Subjective times for judging station %s: %s - %s (assumes default subjective time of %d minutes)%n",
+                    station, formatTime(earliestStart), formatTime(latestEnd), SolverParams.DEFAULT_SUBJECTIVE_MINUTES);
     }
     if (null != minPerf
         && null != maxPerf) {
-      output.format("Earliest performance start: %s%n", formatTime(minPerf));
-      output.format("Latest performance start: %s%n", formatTime(maxPerf));
+      final Duration performanceDuration = Duration.ofMinutes(SolverParams.DEFAULT_PERFORMANCE_MINUTES);
+      final LocalTime performanceEnd = maxPerf.plus(performanceDuration);
+
+      output.format("Performance times: %s - %s (assumes default performance time of %d minutes)%n",
+                    formatTime(minPerf), formatTime(performanceEnd), SolverParams.DEFAULT_PERFORMANCE_MINUTES);
     }
     return output.toString();
   }
