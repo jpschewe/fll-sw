@@ -1075,9 +1075,10 @@ public class SchedulerUI extends JFrame {
       for (final ConstraintViolation violation : getViolationsModel().getViolations()) {
         if (violation.getTeam() == schedInfo.getTeamNumber()) {
           Collection<SubjectiveTime> subjectiveTimes = violation.getSubjectiveTimes();
-          if ((SchedulerTableModel.TEAM_NUMBER_COLUMN == tmCol
-              || SchedulerTableModel.JUDGE_COLUMN == tmCol)
+          if (tmCol <= SchedulerTableModel.JUDGE_COLUMN
               && subjectiveTimes.isEmpty() && null == violation.getPerformance()) {
+            // there is an error for this team and the team information fields
+            // should be highlighted
             error = true;
             isHard |= violation.isHard();
           } else if (null != violation.getPerformance()) {

@@ -1,3 +1,4 @@
+* Display team names in the scheduler user interface
 * Add end times to the general schedule display in SchedulerUI
 * Fix bug where schedule could not be replaced after playoff tables have been assigned
 * Remove filtering of uploaded teams file. It's best to just filter outside of FLL-SW.
