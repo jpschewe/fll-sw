@@ -702,8 +702,8 @@ public class SchedulerUI extends JFrame {
             + directory.getAbsolutePath() + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
 
         final int answer = JOptionPane.showConfirmDialog(SchedulerUI.this,
-                                                         "Would you like to print the score sheets as well?",
-                                                         "Print Scoresheets?", JOptionPane.YES_NO_OPTION);
+                                                         "Would you like to write out the score sheets as well?",
+                                                         "Write Out Scoresheets?", JOptionPane.YES_NO_OPTION);
         if (JOptionPane.YES_OPTION == answer) {
           chooseChallengeDescriptor.setLocationRelativeTo(SchedulerUI.this);
           chooseChallengeDescriptor.setVisible(true);
@@ -742,7 +742,7 @@ public class SchedulerUI extends JFrame {
                   + scoresheetFile.getAbsolutePath() + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
             } // not canceled
           } // valid descriptor location
-        } // yes to print score sheets
+        } // yes to write score sheets
       } catch (final DocumentException e) {
         final Formatter errorFormatter = new Formatter();
         errorFormatter.format("Error writing detailed schedules: %s", e.getMessage());
