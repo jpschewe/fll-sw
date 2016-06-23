@@ -1,3 +1,4 @@
+* Allow the user to edit the judging groups
 * Display team names in the scheduler user interface
 * Add end times to the general schedule display in SchedulerUI
 * Fix bug where schedule could not be replaced after playoff tables have been assigned
