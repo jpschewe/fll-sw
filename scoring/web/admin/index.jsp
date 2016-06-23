@@ -214,6 +214,21 @@
           href='javascript:hide("EventDivisionHelp")'>[hide]</a>
       </div></li>
 
+
+    <li><a href='edit_judging_groups.jsp'>Assign teams to judging groups
+        groups in current tournament</a>. <a
+      href='javascript:display("JudgingGroupHelp")'>[help]</a>
+      <div
+        id='JudgingGroupHelp'
+        class='help'
+        style='display: none'>
+        This information is typically specified in the schedule data
+        file. If it has not been specified or needs to be modified you
+        can use this page to change the judging groups for teams in the
+        current tournament. <br> <a
+          href='javascript:hide("JudgingGroupHelp")'>[hide]</a>
+      </div></li>
+
   </ol>
 
   <h2>Tournament day</h2>

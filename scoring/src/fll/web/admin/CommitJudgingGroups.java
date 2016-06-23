@@ -28,13 +28,15 @@ import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.xml.ChallengeDescription;
+import fll.xml.ScoreCategory;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
- * Commit the changes from edit_event_division.jsp.
+ * Commit the changes from edit_judging_groups.jsp.
  */
-@WebServlet("/admin/CommitAwardGroups")
-public class CommitAwardGroups extends BaseFLLServlet {
+@WebServlet("/admin/CommitJudgingGroups")
+public class CommitJudgingGroups extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -57,7 +59,7 @@ public class CommitAwardGroups extends BaseFLLServlet {
 
       final int currentTournamentID = Queries.getCurrentTournament(connection);
 
-      pageContext.setAttribute("divisions", Queries.getEventDivisions(connection, currentTournamentID));
+      pageContext.setAttribute("judgingGroups", Queries.getJudgingStations(connection, currentTournamentID));
 
       final Map<Integer, TournamentTeam> teams = Queries.getTournamentTeams(connection, currentTournamentID);
       pageContext.setAttribute("teams", teams.values());
@@ -88,6 +90,8 @@ public class CommitAwardGroups extends BaseFLLServlet {
       message.append(existingMessage);
     }
 
+    final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
+
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     try {
@@ -101,34 +105,39 @@ public class CommitAwardGroups extends BaseFLLServlet {
         for (final Map.Entry<Integer, TournamentTeam> entry : teams.entrySet()) {
           final int teamNumber = entry.getValue().getTeamNumber();
           final String teamNumberStr = String.valueOf(teamNumber);
-          String newAwardGroup = request.getParameter(teamNumberStr);
-          if (null != newAwardGroup
-              && !newAwardGroup.isEmpty()) {
-            if ("text".equals(newAwardGroup)) {
+          String newJudgingGroup = request.getParameter(teamNumberStr);
+          if (null != newJudgingGroup
+              && !newJudgingGroup.isEmpty()) {
+            if ("text".equals(newJudgingGroup)) {
               // get from text box
-              newAwardGroup = request.getParameter("text_"
+              newJudgingGroup = request.getParameter("text_"
                   + teamNumberStr);
             }
-            if (null != newAwardGroup
-                && !newAwardGroup.trim().isEmpty()) {
-              newAwardGroup = newAwardGroup.trim();
+            if (null != newJudgingGroup
+                && !newJudgingGroup.trim().isEmpty()) {
+              newJudgingGroup = newJudgingGroup.trim();
 
-              final String currentAwardGroup = Queries.getEventDivision(connection, teamNumber, currentTournamentID);
-              if (!newAwardGroup.equals(currentAwardGroup)) {
-                Queries.setEventDivision(connection, teamNumber, currentTournamentID, newAwardGroup);
+              final String currentJudgingGroup = Queries.getJudgingGroup(connection, teamNumber, currentTournamentID);
+              if (!newJudgingGroup.equals(currentJudgingGroup)) {
+                // clear out scores for this team first
+                for (final ScoreCategory category : challengeDescription.getSubjectiveCategories()) {
+                  Queries.deleteSubjectiveScores(connection, category.getName(), teamNumber, currentTournamentID);
+                }
+                
+                Queries.setJudgingGroup(connection, teamNumber, currentTournamentID, newJudgingGroup);
               }
             }
           }
         }
       }
 
-      message.append("<p class='success' id='success'>Award group changes saved</p>");
+      message.append("<p class='success' id='success'>Judging group changes saved</p>");
 
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
           + sqle.getMessage() + "</p>");
       LOGGER.error(sqle, sqle);
-      throw new RuntimeException("Error saving award group data into the database", sqle);
+      throw new RuntimeException("Error saving judging group data into the database", sqle);
     } finally {
       SQLFunctions.close(connection);
     }

@@ -1,12 +1,12 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%
-  fll.web.admin.CommitAwardGroups.populateContext(application, session, pageContext);
+  fll.web.admin.CommitJudgingGroups.populateContext(application, session, pageContext);
 %>
 
 <html>
 <head>
-<title>Edit Award Groups</title>
+<title>Edit Judging Groups</title>
 <link
   rel="stylesheet"
   type="text/css"
@@ -14,20 +14,25 @@
 </head>
 
 <body>
-  <h1>Edit Award Groups</h1>
+  <h1>Edit Judging Groups</h1>
 
   <div class='status-message'>${message}</div>
   <%-- clear out the message, so that we don't see it again --%>
   <c:remove var="message" />
 
-  <p>This page allows you to assign teams to award groups. Below are
-    the teams at the current tournament and what award group they are
-    in. You can either select one of the existing award groups or select
-    the text field and enter a new award group.</p>
+  <p>This page allows you to assign teams to judging groups. Below
+    are the teams at the current tournament and what judging group they
+    are in. You can either select one of the existing judging groups or
+    select the text field and enter a new award group.
+  <p>
+  <p>
+    <b>If the judging group is changed for a team that already has
+      subjective scores entered, those scores will be deleted.</b>
+  </p>
 
   <form
-    name='edit_event_divisions'
-    action='CommitAwardGroups'
+    name='edit_judging_groups'
+    action='CommitJudgingGroups'
     method='post'>
     <table
       id='data'
@@ -35,7 +40,7 @@
       <tr>
         <th>Team Number</th>
         <th>Team Name</th>
-        <th>Award Group</th>
+        <th>Judging Group</th>
       </tr>
       <c:forEach
         items="${teams}"
@@ -45,24 +50,24 @@
           <td><c:out value="${team.teamName}" /></td>
 
           <td><c:forEach
-              items="${divisions}"
-              var="division">
+              items="${judgingGroups}"
+              var="group">
               <c:choose>
-                <c:when test="${team.eventDivision == division}">
+                <c:when test="${team.judgingStation == group}">
                   <input
                     type='radio'
                     name='<c:out value="${team.teamNumber}"/>'
-                    value='<c:out value="${division}"/>'
+                    value='<c:out value="${group}"/>'
                     checked />
                 </c:when>
                 <c:otherwise>
                   <input
                     type='radio'
                     name='<c:out value="${team.teamNumber}"/>'
-                    value='<c:out value="${division}"/>' />
+                    value='<c:out value="${group}"/>' />
                 </c:otherwise>
               </c:choose>
-              <c:out value="${division}" />
+              <c:out value="${group}" />
             </c:forEach> <input
             type='radio'
             name='<c:out value="${team.teamNumber}"/>'
