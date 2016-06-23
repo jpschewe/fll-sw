@@ -200,20 +200,17 @@
       </c:if></li>
 
 
-    <li><a href='edit_event_division.jsp'> Assign event
-        divisions to teams in current tournament</a>. <a
+    <li><a href='edit_event_division.jsp'>Assign teams to award
+        groups in current tournament</a>. <a
       href='javascript:display("EventDivisionHelp")'>[help]</a>
       <div
         id='EventDivisionHelp'
         class='help'
         style='display: none'>
-        Typical tournaments have 2 groups of teams competing against
-        each other, one for division 1 and one for division 2. If your
-        tournament team groupings are not based solely on the division
-        of the teams, e.g. you have 2 groups of teams that are all
-        division 1, use this page to assign &ldquo;event
-        divisions&rdquo; to divide your tournament&rsquo;s teams into
-        the groups in which they will be competing.<br> <a
+        This information is typically specified in the schedule data
+        file. If it has not been specified or needs to be modified you
+        can use this page to change the award groups for teams in the
+        current tournament. <br> <a
           href='javascript:hide("EventDivisionHelp")'>[hide]</a>
       </div></li>
 
