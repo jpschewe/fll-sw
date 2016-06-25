@@ -172,8 +172,7 @@ public class FullTournamentTest {
       SQLFunctions.close(prep);
       prep = null;
 
-      final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(
-                                                                                     FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")));
+      final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")));
       Assert.assertNotNull(challengeDocument);
       final ChallengeDescription description = new ChallengeDescription(challengeDocument.getDocumentElement());
       final PerformanceScoreCategory performanceElement = description.getPerformance();
@@ -186,11 +185,12 @@ public class FullTournamentTest {
 
         if (runNumber > numSeedingRounds) {
           if (!initializedPlayoff) {
+            checkSeedingRounds();
+
             // initialize the playoff brackets with playoff/index.jsp form
             for (final String division : divisions) {
               LOGGER.info("Initializing playoff brackets for division "
                   + division);
-              checkSeedingRoundsForDivision(division);
               IntegrationTestUtils.initializePlayoffsForDivision(selenium, division);
             }
             initializedPlayoff = true;
@@ -269,18 +269,15 @@ public class FullTournamentTest {
   }
 
   /**
-   * Make sure there are no teams with more or less than seeding rounds for the
-   * specified division.
+   * Make sure there are no teams with more or less than seeding rounds.
    */
-  private void checkSeedingRoundsForDivision(final String division) throws IOException {
+  private void checkSeedingRounds() throws IOException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "playoff");
-    final Select select = new Select(selenium.findElement(By.id("check-division")));
-    select.selectByValue(division);
     selenium.findElement(By.id("check_seeding_rounds")).click();
 
-    Assert.assertFalse("Some teams with more or less than seeding rounds found for division '"
-        + division + "'", IntegrationTestUtils.isElementPresent(selenium, By.className("warning")));
+    Assert.assertFalse("Some teams with more or less than seeding rounds found",
+                       IntegrationTestUtils.isElementPresent(selenium, By.className("warning")));
   }
 
   /**
@@ -319,7 +316,8 @@ public class FullTournamentTest {
   private void assignJudge(final String id,
                            final String category,
                            final String station,
-                           final int judgeIndex) throws IOException {
+                           final int judgeIndex)
+      throws IOException {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Assigning judge '"
           + id + "' cat: '" + category + "' station: '" + station + "' index: " + judgeIndex);
@@ -355,7 +353,8 @@ public class FullTournamentTest {
   }
 
   private void assignJudges(final Connection testDataConn,
-                            final String testTournamentName) throws IOException, SQLException {
+                            final String testTournamentName)
+      throws IOException, SQLException {
     ResultSet rs;
     PreparedStatement prep;
 
@@ -565,8 +564,8 @@ public class FullTournamentTest {
    * @throws InterruptedException
    * @throws SAXException
    */
-  private static void printPlayoffScoresheets(final String division) throws MalformedURLException, IOException,
-      InterruptedException, SAXException {
+  private static void printPlayoffScoresheets(final String division)
+      throws MalformedURLException, IOException, InterruptedException, SAXException {
     final WebClient conversation = WebTestUtils.getConversation();
 
     final Page indexResponse = WebTestUtils.loadPage(conversation, new WebRequest(new URL(TestUtils.URL_ROOT
@@ -623,8 +622,8 @@ public class FullTournamentTest {
    */
   private void enterSubjectiveScores(final Connection testDataConn,
                                      final ChallengeDescription description,
-                                     final String testTournament) throws SQLException, IOException,
-      MalformedURLException, ParseException, SAXException {
+                                     final String testTournament)
+      throws SQLException, IOException, MalformedURLException, ParseException, SAXException {
 
     final File subjectiveZip = File.createTempFile("fll", ".zip", new File("screenshots"));
     PreparedStatement prep = null;
@@ -758,8 +757,8 @@ public class FullTournamentTest {
                                      final PerformanceScoreCategory performanceElement,
                                      final String testTournament,
                                      final int runNumber,
-                                     final int teamNumber) throws SQLException, IOException, MalformedURLException,
-      ParseException {
+                                     final int teamNumber)
+      throws SQLException, IOException, MalformedURLException, ParseException {
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
@@ -786,7 +785,7 @@ public class FullTournamentTest {
         selenium.findElement(By.id("enter_submit")).click();
 
         Assert.assertFalse("Errors: ", IntegrationTestUtils.isElementPresent(selenium, By.name("error")));
-        
+
         if (rs.getBoolean("NoShow")) {
           selenium.findElement(By.id("no_show")).click();
         } else {
@@ -878,8 +877,8 @@ public class FullTournamentTest {
                                       final PerformanceScoreCategory performanceElement,
                                       final String testTournament,
                                       final int runNumber,
-                                      final int teamNumber) throws SQLException, IOException, MalformedURLException,
-      ParseException, InterruptedException {
+                                      final int teamNumber)
+      throws SQLException, IOException, MalformedURLException, ParseException, InterruptedException {
     final String selectTeamPage = TestUtils.URL_ROOT
         + "scoreEntry/select_team.jsp";
 
