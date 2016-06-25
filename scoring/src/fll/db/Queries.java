@@ -1323,8 +1323,6 @@ public final class Queries {
    * 
    * @param connection connection to the database
    * @param tournamentTeams keyed by team number
-   * @param division String with the division to query on, or the special string
-   *          "__all__" if all divisions should be queried.
    * @param verifiedScoresOnly True if the database query should use only
    *          verified scores, false if it should use all scores.
    * @return a List of Team objects
@@ -1334,7 +1332,6 @@ public final class Queries {
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to pick view dynamically")
   public static List<Team> getTeamsNeedingSeedingRuns(final Connection connection,
                                                       final Map<Integer, ? extends Team> tournamentTeams,
-                                                      final String division,
                                                       final boolean verifiedScoresOnly)
       throws SQLException, RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
@@ -1349,21 +1346,12 @@ public final class Queries {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      if ("__all__".equals(division)) {
-        prep = connection.prepareStatement("SELECT TeamNumber,Count(*) FROM "
-            + view + " WHERE Tournament = ? GROUP BY TeamNumber" + " HAVING Count(*) < ?");
-        prep.setInt(1, currentTournament);
-        prep.setInt(2, TournamentParameters.getNumSeedingRounds(connection, currentTournament));
-      } else {
-        prep = connection.prepareStatement("SELECT "
-            + view + ".TeamNumber,Count(" + view + ".TeamNumber) FROM " + view + ",current_tournament_teams WHERE "
-            + view + ".TeamNumber = current_tournament_teams.TeamNumber AND current_tournament_teams.event_division = ?"
-            + " AND " + view + ".Tournament = ? GROUP BY " + view + ".TeamNumber HAVING Count(" + view
-            + ".TeamNumber) < ?");
-        prep.setString(1, division);
-        prep.setInt(2, currentTournament);
-        prep.setInt(3, TournamentParameters.getNumSeedingRounds(connection, currentTournament));
-      }
+      prep = connection.prepareStatement("SELECT TeamNumber,Count(*) FROM "
+          + view //
+          + " WHERE Tournament = ? GROUP BY TeamNumber" //
+          + " HAVING Count(*) < ?");
+      prep.setInt(1, currentTournament);
+      prep.setInt(2, TournamentParameters.getNumSeedingRounds(connection, currentTournament));
 
       rs = prep.executeQuery();
       return collectTeamsFromQuery(tournamentTeams, rs);
@@ -1371,17 +1359,6 @@ public final class Queries {
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
     }
-  }
-
-  /**
-   * Convenience function that defaults to querying all scores, not just those
-   * that are verified.
-   */
-  public static List<Team> getTeamsNeedingSeedingRuns(final Connection connection,
-                                                      final Map<Integer, Team> tournamentTeams,
-                                                      final String division)
-      throws SQLException, RuntimeException {
-    return getTeamsNeedingSeedingRuns(connection, tournamentTeams, division, false);
   }
 
   /**
