@@ -22,8 +22,8 @@
 
   <ol>
     <li>If using the automatic table assignment feature for
-      scoresheet generation, make certain to set up labels for each of
-      your tables, available from the Admin page or by clicking <a
+      score sheet generation, make certain to set up labels for each of
+      your tables, available from the Admin Index or by clicking <a
       href='<c:url value="/admin/tables.jsp"/>'>here</a>.
     </li>
 
@@ -32,16 +32,7 @@
       <form
         name='check'
         action='CheckSeedingRounds'
-        method='POST'>
-        Select Division: <select
-          id='check-division'
-          name='division'>
-          <c:forEach
-            items="${playoff_data.eventDivisions }"
-            var="division">
-            <option value='${division}'>${division}</option>
-          </c:forEach>
-        </select> <input
+        method='POST'><input
           type='submit'
           id='check_seeding_rounds'
           value='Check Seeding Rounds' />
