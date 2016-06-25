@@ -48,7 +48,7 @@
     if (!divisions.isEmpty()) {
       division = divisions.get(0);
     } else {
-      throw new RuntimeException("No division specified and no divisions in the database!");
+      throw new RuntimeException("No playoff bracket specified and no playoff brackets in the database!");
     }
   } else {
     division = ApplicationAttributes.getAttribute(application, divisionKey, String.class);
@@ -79,7 +79,7 @@
 <link rel="stylesheet" type="text/css" href="<c:url value='/style/fll-sw.css'/>" />
 <link rel="stylesheet" type="text/css" href="<c:url value='/scoreboard/score_style.css'/>" />
 
-<title>Playoff Round <%=playoffRoundNumber%>, Division <%=division%></title>
+<title>Playoff Round <%=playoffRoundNumber%>, Playoff Bracket <%=division%></title>
 <style type='text/css'>
 TD.Leaf {
 	color: #ffffff;

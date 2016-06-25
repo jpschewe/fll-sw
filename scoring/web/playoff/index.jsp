@@ -21,9 +21,9 @@
   <c:remove var="message" />
 
   <ol>
-    <li>If using the automatic table assignment feature for
-      score sheet generation, make certain to set up labels for each of
-      your tables, available from the Admin Index or by clicking <a
+    <li>If using the automatic table assignment feature for score
+      sheet generation, make certain to set up labels for each of your
+      tables, available from the Admin Index or by clicking <a
       href='<c:url value="/admin/tables.jsp"/>'>here</a>.
     </li>
 
@@ -32,7 +32,8 @@
       <form
         name='check'
         action='CheckSeedingRounds'
-        method='POST'><input
+        method='POST'>
+        <input
           type='submit'
           id='check_seeding_rounds'
           value='Check Seeding Rounds' />
@@ -41,11 +42,9 @@
 
 
     <li><b>WARNING: Do not initialize playoff brackets for a
-        division until all seeding runs for that division have been
-        recorded!</b> Doing so will automatically add bye runs to the teams
-      that don't have enough seeding runs. If creating a new playoff
-      division it is assumed that you know how many runs each team has
-      completed.<br />
+        until all seeding runs have been recorded!</b> Doing so will
+      automatically add bye runs to the teams that don't have enough
+      seeding runs.<br />
       <form
         name='initialize'
         action='StorePlayoffParameters'
@@ -80,7 +79,7 @@
 
           <c:if test="${not tablesAssigned }">
             <p class='warning'>
-              Tables are not not assigned. Entering into the scoresheet
+              Tables are not not assigned. Entering into the score sheet
               generating brackets at this point will have undesired
               results. You should visit the <a
                 href='<c:url value="/admin/tables.jsp"/>'>table
@@ -88,10 +87,10 @@
             </p>
           </c:if>
 
-          <b>Scoresheet Generation Brackets</b><br />
+          <b>Score sheet Generation Brackets</b><br />
 
-          <%-- division --%>
-          Select Division: <select
+          <%-- bracket --%>
+          Select Bracket: <select
             id='printable.division'
             name='division'>
             <c:forEach
@@ -154,8 +153,7 @@
           name='admin'
           action='adminbrackets.jsp'
           method='get'>
-          <b>Printable Brackets</b><br /> Select Division: <select
-            name='division'>
+          Select Bracket to print: <select name='division'>
             <c:forEach
               items="${playoff_data.existingDivisions }"
               var="division">
@@ -185,7 +183,8 @@
               end="${playoff_data.numPlayoffRounds+1 }"
               var="numRounds">
               <c:choose>
-                <c:when test="${numRounds == playoff_data.numPlayoffRounds+1 }">
+                <c:when
+                  test="${numRounds == playoff_data.numPlayoffRounds+1 }">
                   <option
                     value='${numRounds }'
                     selected>${numRounds }</option>
@@ -204,12 +203,12 @@
 
 
       <li>
-        <%-- uninitialize division --%>
+        <%-- uninitialize bracket --%>
         <form
           name="uninitialize_playoff"
           method="POST"
           action="UninitializePlayoff">
-          <b>Uninitialize playoffs</b><br /> Select Division: <select
+          Select bracket to uninitialize: <select
             id='uninitialize-division'
             name='division'>
             <c:forEach
@@ -221,12 +220,12 @@
             type='submit'
             id='uninitialize_playoff-submit'
             value='Submit'
-            onclick='return confirm("Are you absolutly sure you want to delete all scores associated with this playoff division?")' />
+            onclick='return confirm("Are you absolutly sure you want to delete all scores associated with this playoff bracket?")' />
         </form> <%-- end uninitialize division --%>
       </li>
 
     </c:if>
-    <%-- if playoff divisions not empty --%>
+    <%-- if playoff brackets not empty --%>
 
   </ol>
 
@@ -237,13 +236,13 @@
 
 
       <li><a href="remoteMain.jsp">Scrolling Brackets</a> (as on
-        big screen display)<br /> Division and round must be selected
+        big screen display)<br /> Bracket and round must be selected
         from the big screen display <a
         href="<c:url value='/admin/remoteControl.jsp'/>">remote
           control</a> page.</li>
 
       <li><a href="remoteControlBrackets.jsp?scroll=false">Non-Scrolling
-          Brackets</a> (as on big screen display)<br /> Division and round
+          Brackets</a> (as on big screen display)<br /> Bracket and round
         must be selected from the big screen display <a
         href="<c:url value='/admin/remoteControl.jsp'/>">remote
           control</a> page.</li>

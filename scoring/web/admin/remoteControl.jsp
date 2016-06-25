@@ -173,7 +173,7 @@ END DEBUG --%>
      </c:if> <c:if test='${not playoffsPage}'>
       <input type='radio' id='playoffs' name='remotePage'
        value='playoffs' />
-     </c:if> Division: <select name='playoffDivision'>
+     </c:if> Playoff Bracket: <select name='playoffDivision'>
       <c:forEach items="${divisions}" var="division">
        <c:choose>
         <c:when test="${division == playoffDivision}">
@@ -212,7 +212,7 @@ END DEBUG --%>
          <input type='radio' name="${displayName.key}_remotePage"
           value='playoffs' />
         </c:otherwise>
-       </c:choose> Division: <select name='${displayName.key}_playoffDivision'>
+       </c:choose> Playoff Bracket: <select name='${displayName.key}_playoffDivision'>
         <c:forEach items="${divisions}" var="division">
          <c:choose>
           <c:when
@@ -256,7 +256,7 @@ END DEBUG --%>
        <input type='radio' id='finalistSchedule' name='remotePage'
         value='finalistSchedule' />
       </c:otherwise>
-     </c:choose> Division: <select name='finalistDivision'>
+     </c:choose> Award Group: <select name='finalistDivision'>
       <c:forEach var="fdiv" items="${finalistDivisions }">
 
        <c:choose>
