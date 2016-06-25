@@ -53,15 +53,12 @@ public class ProcessSubjectiveHeaders extends BaseFLLServlet {
     // get params for subjectiveHeader
     final List<SubjectiveStation> subjectiveStations = new LinkedList<SubjectiveStation>();
 
-    final List<ScoreCategory> categories = new LinkedList<ScoreCategory>();
     for (final ScoreCategory cat : challenge.getSubjectiveCategories()) {
       final String value = request.getParameter(cat.getName()
           + ":header");
       if (null != value) {
         final int headerIndex = Integer.parseInt(value);
         final String header = unusedHeaders.get(headerIndex);
-
-        categories.add(cat);
 
         final String durationStr = request.getParameter(cat.getName()
             + ":duration");
