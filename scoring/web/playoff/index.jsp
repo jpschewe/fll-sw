@@ -10,6 +10,16 @@
   rel="stylesheet"
   type="text/css"
   href="<c:url value='/style/fll-sw.css'/>" />
+
+<script type="text/javascript">
+  function display(id) {
+    document.getElementById(id).style.display = "block";
+  }
+  function hide(id) {
+    document.getElementById(id).style.display = "none";
+  }
+</script>
+
 <title>Playoff's</title>
 </head>
 
@@ -20,36 +30,50 @@
   <%-- clear out the message, so that we don't see it again --%>
   <c:remove var="message" />
 
-  <ol>
-    <li>If using the automatic table assignment feature for score
-      sheet generation, make certain to set up labels for each of your
-      tables, available from the Admin Index or by clicking <a
-      href='<c:url value="/admin/tables.jsp"/>'>here</a>.
-    </li>
+  <p>
+    If using the automatic table assignment feature for score sheet
+    generation, make certain to set up labels for each of your tables,
+    available from the Admin Index or by clicking <a
+      href='<c:url value="/admin/tables.jsp"/>'
+      target='_new'>here</a>.
+  </p>
 
-    <li>Check to make sure all teams have scores entered for each
-      seeding round.<br />
+  <p>
+    Scores for the playoff brackets are entered just like the scores for
+    the seeding rounds using the <a
+      href='<c:url value="/scoreEntry/select_team.jsp"/>'
+      target='_new'>Score Entry</a> page. If a team leaves the
+    tournament before the playoffs, they should be entered as a No Show
+    on the Score Entry page. If a tie occurs in a match; print out the
+    score sheets again and run the teams a second time. Then change the
+    scores for the teams to be the new scores.
+  </p>
+
+  <ol>
+    <li>
       <form
         name='check'
         action='CheckSeedingRounds'
         method='POST'>
-        <input
+        Check to make sure all teams have scores entered for each
+        seeding round. <input
           type='submit'
           id='check_seeding_rounds'
           value='Check Seeding Rounds' />
+
       </form>
     </li>
 
 
-    <li><b>WARNING: Do not initialize playoff brackets for a
-        until all seeding runs have been recorded!</b> Doing so will
-      automatically add bye runs to the teams that don't have enough
-      seeding runs.<br />
+    <li>
       <form
         name='initialize'
         action='StorePlayoffParameters'
         method='POST'>
-        Select Division: <select
+        <b>WARNING: Do not initialize any playoff brackets until all
+          seeding runs have been recorded!</b> Doing so will automatically
+        add bye runs to the teams that don't have enough seeding runs.<br />
+        Select Bracket: <select
           id='initialize-division'
           name='division'>
           <c:forEach
@@ -60,12 +84,27 @@
         </select><br> <input
           type='checkbox'
           name='enableThird'
-          value='yes' />Check to enable 3rd/4th place brackets<br>
-        <input
+          value='yes' />Check to enable 3rd/4th place match<br> <input
           type='submit'
           id='initialize_brackets'
-          value='Initialize Brackets' />
-      </form></li>
+          value='Initialize Bracket' /> <a
+          href='javascript:display("InitializeBracketHelp")'>[help]</a>
+        <div
+          id='InitializeBracketHelp'
+          class='help'
+          style='display: none'>
+          Initializing a playoff bracket allows it to be run. A playoff
+          bracket cannot be initialized if any teams that are to compete
+          in the playoff bracket Are still competing in a playoff
+          bracket that has not been run to completion. The 3rd/4th place
+          match is need if you want to know not only 1st and 2nd place
+          in the bracket, but 3rd and 4th place as well. This will add a
+          match with the two teams that lost in the semi-final matches.<a
+            href='javascript:hide("InitializeBracketHelp")'>[hide]</a>
+        </div>
+
+      </form>
+    </li>
 
 
     <c:if test="${not empty playoff_data.existingDivisions }">
@@ -80,15 +119,14 @@
           <c:if test="${not tablesAssigned }">
             <p class='warning'>
               Tables are not not assigned. Entering into the score sheet
-              generating brackets at this point will have undesired
+              generating brackets at this point may have undesired
               results. You should visit the <a
                 href='<c:url value="/admin/tables.jsp"/>'>table
                 assignment page</a>.
             </p>
           </c:if>
 
-          <b>Score sheet Generation Brackets</b><br />
-
+          Score sheet Generation Brackets<br />
           <%-- bracket --%>
           Select Bracket: <select
             id='printable.division'
@@ -143,7 +181,20 @@
           <input
             type='submit'
             id='display_scoregen_brackets'
-            value='Display Brackets'>
+            value='Display Brackets'> <a
+            href='javascript:display("ScoreGenBracketsHelp")'>[help]</a>
+          <div
+            id='ScoreGenBracketsHelp'
+            class='help'
+            style='display: none'>
+            This page is used to print out score sheets for the
+            specified playoff bracket. This page will automatically
+            assign the matches to the tables specified in on the table
+            assignment page. The assigned tables can be changed before
+            printing if desired. <a
+              href='javascript:hide("ScoreGenBracketsHelp")'>[hide]</a>
+          </div>
+
         </form>
       </li>
       <%-- end scoresheet generation --%>
@@ -197,7 +248,20 @@
           </select> <input
             type='submit'
             id='display_printable_brackets'
-            value='Display Brackets'>
+            value='Display Brackets'> <a
+            href='javascript:display("PrintableBracketsHelp")'>[help]</a>
+          <div
+            id='PrintableBracketsHelp'
+            class='help'
+            style='display: none'>
+            This page is used to print out the bracket for registration
+            or the emcee. The score sheet generation bracket page should
+            be used to print out the first matches before this page is
+            used to print the bracket. This will ensure that the
+            assigned tables appears on the printed bracket. <a
+              href='javascript:hide("PrintableBracketsHelp")'>[hide]</a>
+          </div>
+
         </form>
       </li>
 
@@ -221,6 +285,20 @@
             id='uninitialize_playoff-submit'
             value='Submit'
             onclick='return confirm("Are you absolutly sure you want to delete all scores associated with this playoff bracket?")' />
+
+          <a href='javascript:display("UninitializeBracketsHelp")'>[help]</a>
+          <div
+            id='UninitializeBracketsHelp'
+            class='help'
+            style='display: none'>
+            This link is used to uninitialize a playoff bracket. In most
+            cases this link should not be used. It may be useful if a
+            playoff bracket was initialized by mistake and a different
+            one should be run first. Any scores that have been entered
+            for this bracket will be deleted.<a
+              href='javascript:hide("UninitializeBracketsHelp")'>[hide]</a>
+          </div>
+
         </form> <%-- end uninitialize division --%>
       </li>
 
