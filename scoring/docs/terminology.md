@@ -59,7 +59,7 @@ Playoffs
 
 Playoffs are a single elimination competition bracket.
 Sometimes referred to as head to head.
-Teams after seeded into the bracket based on some criteria, usually this is based on the scores from the performance rounds.
+Teams are seeded into the bracket based on some criteria, usually this is based on the scores from the performance rounds.
 A team then competes against the team across the table from them.
 The team with the best score continues on.
 See
@@ -76,3 +76,30 @@ In most cases, a playoff bracket correlates directly to an award group.
 However at some large tournaments where finalist judging is used an award group may be split into two or more playoff brackets.
 These teams will then compete and determine a winner.
 Then the top teams or teams in each playoff bracket will compete in another playoff bracket to determine the award group winner of the playoffs.
+
+
+Example Tournament Configurations
+=================================
+
+Below are some example configurations based on tournaments that are run in Minnesota.
+All judging groups max out at 16 teams as it is hard to have a single judge see more than 16 teams in a day.
+At regional and sectional tournaments there exists an award group for every 16 teams.
+This means that multiple sets of awards will be handed out and it avoids needing to do finalist judging.
+
+For a 16 team tournament there is a single award group and a single judging group.
+
+For a 32 team tournament there is are 2 award groups. Each award group has a judging group. In this case there will be 2 awards for each category.
+
+For a 48 team tournament there is are 3 award groups. Each award group has a judging group. In this case there will be 3 awards for each category.
+
+For a 60 team state tournament there is 1 award group with 6 judging groups.
+There is a single award group because this is the championship tournament for the state and 1 winner in each category must be chosen.
+Each judging group has 10 teams. 
+This allows each judge to come up with their best team early in the day and allow for time to complete finalist judging.
+
+![Example Tournament Configurations](tournament-groups.png)
+
+
+
+
+ 
