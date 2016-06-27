@@ -10,7 +10,7 @@
   rel="stylesheet"
   type="text/css"
   href="<c:url value='/style/fll-sw.css'/>" />
-<title>Create Playoff Division</title>
+<title>Create Playoff Bracket</title>
 
 
 <script
@@ -39,14 +39,13 @@
 </head>
 
 <body>
-  <h1>Create Playoff Division</h1>
+  <h1>Create Playoff Bracket</h1>
 
   <div class='status-message'>${message}</div>
   <%-- clear out the message, so that we don't see it again --%>
   <c:remove var="message" />
 
-  <p>Choose the teams that you want to include in the custom event
-    division. This group of teams will compete against each other in a
+  <p>Choose the teams that you want to include in the playoff bracket. This group of teams will compete against each other in a
     single elimination playoff bracket.</p>
 
   <form

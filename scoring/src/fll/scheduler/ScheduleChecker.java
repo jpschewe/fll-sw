@@ -218,7 +218,7 @@ public class ScheduleChecker {
          * Not sure I like this check if
          * (!ComparisonUtils.safeEquals(ti.getDivision(),
          * opponent.getDivision())) { final String divMessage = String.format(
-         * "Team %d in division %s is competing against team %d from division %s round %d"
+         * "Team %d in award group %s is competing against team %d from award group %s round %d"
          * , ti.getTeamNumber(), ti.getDivision(), opponent.getTeamNumber(),
          * opponent.getDivision(), (round + 1)); violations.add(new
          * ConstraintViolation(false, ti.getTeamNumber(), null, null,

@@ -84,7 +84,7 @@ public class CategorizedScores extends BaseFLLServlet {
           final String categoryTitle = entry.getKey();
           final String categoryName = entry.getValue();
 
-          writer.format("<h3>%s Division: %s</h3>", categoryTitle, division);
+          writer.format("<h3>%s Award Group: %s</h3>", categoryTitle, division);
           writer.format("<table border='0'>");
           writer.format("<tr><th colspan='3'>Team # / Organization / Team Name</th><th>Raw Score</th><th>Scaled Score</th></tr>");
 

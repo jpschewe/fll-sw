@@ -63,7 +63,7 @@ public class UninitializePlayoff extends BaseFLLServlet {
       final String division = request.getParameter("division");
       if (null == division
           || "".equals(division)) {
-        session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>No division specified to uninitialize</p>");
+        session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>No playoff bracket specified to uninitialize</p>");
         WebUtils.sendRedirect(application, response, "/playoff/index.jsp");
         return;
       }
@@ -113,7 +113,7 @@ public class UninitializePlayoff extends BaseFLLServlet {
       LOGGER.info("Uninitialized playoff division "
           + division);
 
-      session.setAttribute(SessionAttributes.MESSAGE, "<p id='success'>Uninitialized playoff division "
+      session.setAttribute(SessionAttributes.MESSAGE, "<p id='success'>Uninitialized playoff bracket "
           + division + ".</p>");
       WebUtils.sendRedirect(application, response, "/playoff/index.jsp");
     } catch (final SQLException e) {

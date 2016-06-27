@@ -46,7 +46,7 @@
       </tr>
 
       <tr>
-        <td>Event Division</td>
+        <td>Award Group</td>
         <td><select name='event_division'>
             <c:forEach
               items="${fileHeaders }"

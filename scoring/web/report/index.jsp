@@ -64,7 +64,7 @@
       application. This is also used in the awards scripts report.</li>
   
     <li><a href="finalist/load.jsp" target="_blank">Schedule Finalists</a>. This is
-      used when one judge doesn't see all teams in a division and the
+      used when one judge doesn't see all teams in an award group and the
       top teams need to be judged again to choose the winners.</li>
 
     <li>

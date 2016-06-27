@@ -130,14 +130,14 @@ public class PlayoffReport extends BaseFLLServlet {
     try {
       final Paragraph para = new Paragraph();
       para.add(Chunk.NEWLINE);
-      para.add(new Chunk("Results for division "
+      para.add(new Chunk("Results for playoff bracket "
           + division, TITLE_FONT));
       para.add(Chunk.NEWLINE);
 
       final int maxRun = Playoff.getMaxRunNumber(connection, tournament.getTournamentID(), division);
 
       if (maxRun < 1) {
-        para.add("Cannot determine max run number for this division. This is an internal error");
+        para.add("Cannot determine max run number for this playoff bracket. This is an internal error");
       } else {
         teamPrep = connection.prepareStatement("SELECT Teams.TeamNumber, Teams.TeamName, Teams.Organization" //
             + " FROM PlayoffData, Teams" //

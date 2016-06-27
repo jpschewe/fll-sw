@@ -18,7 +18,7 @@ final int currentTournament = Queries.getCurrentTournament(connection);
 
 final String divisionStr = request.getParameter("division");
 if(null == divisionStr) {
-  throw new RuntimeException("No division specified, please go back to the <a href='index.jsp'>playoff main page</a> and start again.");
+  throw new RuntimeException("No playoff bracket specified, please go back to the <a href='index.jsp'>playoff main page</a> and start again.");
 }
 
 final String specifiedFirstRound = request.getParameter("firstRound");
@@ -66,7 +66,7 @@ bracketInfo.addStaticTableLabels();
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/fll-sw.css'/>" />
-    <title><%=divisionStr%> Printable Brackets</title>
+    <title><%=divisionStr%> Printable Playoff Bracket</title>
   </head>
   <style type='text/css'>
       TD.Leaf {font-family:Arial;border-bottom: solid}
@@ -83,7 +83,7 @@ bracketInfo.addStaticTableLabels();
 
   <body>
 
-    <h2>Playoff Brackets Division: <%=divisionStr%></h2>
+    <h2>Playoff Bracket: <%=divisionStr%></h2>
 
     <%=bracketInfo.outputBrackets(BracketData.TopRightCornerStyle.MEET_BOTTOM_OF_CELL) %>
 

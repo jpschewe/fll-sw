@@ -57,25 +57,23 @@ For this reason, to determine the winner in a subjective category a single judge
 Playoffs
 ========
 
+This is an optional part of a tournament.
+
 Playoffs are a single elimination competition bracket.
 Sometimes referred to as head to head.
-Teams are seeded into the bracket based on some criteria, usually this is based on the scores from the performance rounds.
-A team then competes against the team across the table from them.
-The team with the best score continues on.
-See
-[Wikipedia article on single elimination tournaments](https://en.wikipedia.org/wiki/Single-elimination_tournament)
-for more information.
-
-Playoff Brackets
-----------------
-
-Playoff brackets are an optional part of a tournament.
 
 Each playoff bracket contains a group of teams that will compete against each other to determine a playoff winner.
 In most cases, a playoff bracket correlates directly to an award group.
 However at some large tournaments where finalist judging is used an award group may be split into two or more playoff brackets.
 These teams will then compete and determine a winner.
 Then the top teams or teams in each playoff bracket will compete in another playoff bracket to determine the award group winner of the playoffs.
+
+Teams are seeded into the bracket based on some criteria, usually this is based on the scores from the performance rounds.
+A team then competes against the team across the table from them in a match.
+The team with the best score continues on.
+See
+[Wikipedia article on single elimination tournaments](https://en.wikipedia.org/wiki/Single-elimination_tournament)
+for more information.
 
 
 Example Tournament Configurations

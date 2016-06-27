@@ -35,7 +35,7 @@
        if (!divisions.isEmpty()) {
          division = divisions.get(0);
        } else {
-         throw new RuntimeException("No division specified and no divisions in the database!");
+         throw new RuntimeException("No playoff bracket specified and no divisions in the database!");
        }
      } else {
        division = (String) application.getAttribute(divisionKey);
@@ -65,7 +65,7 @@
 <tr>
 <td align='center'>
 <font face='arial' size='3'><b>${challengeDescription.title } (Playoff
-Round <%=playoffRoundNumber%>, Division <%=division%>)</b></font>
+Round <%=playoffRoundNumber%>, Playoff Bracket <%=division%>)</b></font>
 </td>
 </tr>
 <tr>

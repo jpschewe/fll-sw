@@ -703,7 +703,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
     p2.add(new Chunk("Tournament: "
         + tournamentName, TIMES_12PT_NORMAL));
     p2.add(Chunk.NEWLINE);
-    p2.add(new Chunk("Division: "
+    p2.add(new Chunk("Award Group: "
         + division, TIMES_12PT_NORMAL));
     header.addCell(p2);
 

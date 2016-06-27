@@ -50,11 +50,6 @@ public class CommitTeam extends BaseFLLServlet {
   /**
    * Value is String
    */
-  public static final String DIVISION = "division";
-
-  /**
-   * Value is String
-   */
   public static final String ORGANIZATION = "organization";
 
   /**

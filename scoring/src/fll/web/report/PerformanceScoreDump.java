@@ -118,7 +118,7 @@ public class PerformanceScoreDump extends BaseFLLServlet {
    * @param csv where to write
    */
   private void writeHeader(final CSVWriter csv) {
-    csv.writeNext(new String[] { "team#", "team name", "round", "score", "event_divisions", "judging_group" });
+    csv.writeNext(new String[] { "team#", "team name", "round", "score", "award_group", "judging_group" });
   }
 
 }

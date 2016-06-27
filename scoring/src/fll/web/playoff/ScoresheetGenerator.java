@@ -195,7 +195,7 @@ public class ScoresheetGenerator {
             final int performanceRunA = Playoff.getRunNumber(connection, division, teamA.getTeamNumber(), iRound);
             m_division[j] = division;
             final int bracketA = Playoff.getBracketNumber(connection, tournament, teamA.getTeamNumber(), performanceRunA);
-            final String bracketALabel = String.format("Bracket %d", bracketA);
+            final String bracketALabel = String.format("Match %d", bracketA);
             m_time[j] = bracketALabel;
 
             updatePrep.setString(1, m_table[j]);
@@ -203,7 +203,7 @@ public class ScoresheetGenerator {
             updatePrep.setInt(4, iRound);
             updatePrep.setInt(5, teamA.getTeamNumber());
             if (updatePrep.executeUpdate() < 1) {
-              LOGGER.warn(String.format("Could not update playoff table and print flags for team: %s playoff round: %s playoff division: %s",
+              LOGGER.warn(String.format("Could not update playoff table and print flags for team: %s playoff round: %s playoff bracket: %s",
                                         teamA.getTeamNumber(), iRound, division));
             }
             j++;
@@ -221,7 +221,7 @@ public class ScoresheetGenerator {
             final int performanceRunB = Playoff.getRunNumber(connection, division, teamB.getTeamNumber(), iRound);
             m_division[j] = division;
             final int bracketB = Playoff.getBracketNumber(connection, tournament, teamB.getTeamNumber(), performanceRunB);
-            final String bracketBLabel = String.format("Bracket %d", bracketB);
+            final String bracketBLabel = String.format("Match %d", bracketB);
             m_time[j] = bracketBLabel;
 
             updatePrep.setString(1, m_table[j]);
@@ -229,7 +229,7 @@ public class ScoresheetGenerator {
             updatePrep.setInt(4, iRound);
             updatePrep.setInt(5, teamB.getTeamNumber());
             if (updatePrep.executeUpdate() < 1) {
-              LOGGER.warn(String.format("Could not update playoff table and print flags for team: %s playoff round: %s playoff division: %s",
+              LOGGER.warn(String.format("Could not update playoff table and print flags for team: %s playoff round: %s playoff bracket: %s",
                                         teamB.getTeamNumber(), iRound, division));
             }
             j++;
@@ -439,7 +439,7 @@ public class ScoresheetGenerator {
       teamInfo.addCell(nbrVc);
 
       // Team division label cell
-      final Paragraph divP = new Paragraph("Division:", ARIAL_10PT_NORMAL);
+      final Paragraph divP = new Paragraph("Playoff Bracket:", ARIAL_10PT_NORMAL);
       divP.setAlignment(Element.ALIGN_RIGHT);
       final PdfPCell divlc = new PdfPCell(team[i].getDefaultCell());
       divlc.setPaddingRight(2);
