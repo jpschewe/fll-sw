@@ -14,8 +14,6 @@ import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
-
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -33,6 +31,7 @@ import fll.xml.EnumeratedValue;
 import fll.xml.ScoreCategory;
 import fll.xml.ScoreType;
 import fll.xml.XMLUtils;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**
  * TableModel for entering subjective scores.
@@ -45,7 +44,8 @@ public final class SubjectiveTableModel extends AbstractTableModel {
 
   public int getNumColumnsLeftOfScores() {
     if (null != _schedule) {
-      return BASE_NUM_COLUMNS_LEFT_OF_SCORES + 1;
+      return BASE_NUM_COLUMNS_LEFT_OF_SCORES
+          + 1;
     } else {
       return BASE_NUM_COLUMNS_LEFT_OF_SCORES;
     }
@@ -78,13 +78,11 @@ public final class SubjectiveTableModel extends AbstractTableModel {
    */
   public static List<Element> getScoreElements(final Document scoreDocument,
                                                final String categoryName) {
-    for (final Element subCatElement : new NodelistElementCollectionAdapter(
-                                                                            scoreDocument.getDocumentElement()
+    for (final Element subCatElement : new NodelistElementCollectionAdapter(scoreDocument.getDocumentElement()
                                                                                          .getElementsByTagName(DownloadSubjectiveData.SUBJECTIVE_CATEGORY_NODE_NAME))) {
       final String name = subCatElement.getAttribute("name");
       if (categoryName.equals(name)) {
-        final List<Element> scoreElements = new NodelistElementCollectionAdapter(
-                                                                                 subCatElement.getElementsByTagName(DownloadSubjectiveData.SCORE_NODE_NAME)).asList();
+        final List<Element> scoreElements = new NodelistElementCollectionAdapter(subCatElement.getElementsByTagName(DownloadSubjectiveData.SCORE_NODE_NAME)).asList();
         return scoreElements;
       }
     }
@@ -203,7 +201,11 @@ public final class SubjectiveTableModel extends AbstractTableModel {
           final String categoryName = _subjectiveCategory.getName();
           final String schedColumn = getSchedColumnForCategory(categoryName);
           final SubjectiveTime subjTime = schedInfo.getSubjectiveTimeByName(schedColumn);
-          return subjTime.getTime();
+          if (null != subjTime) {
+            return subjTime.getTime();
+          } else {
+            return null;
+          }
         }
       default:
         if (column == getNumGoals()
@@ -212,7 +214,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
         } else if (column == getNumGoals()
             + getNumColumnsLeftOfScores() + 1) {
           if (Boolean.valueOf(scoreEle.getAttribute("NoShow"))) {
-            return (double)0;
+            return (double) 0;
           } else {
             // compute total score
             final double newTotalScore = _subjectiveCategory.evaluate(getTeamScore(row));
@@ -441,7 +443,8 @@ public final class SubjectiveTableModel extends AbstractTableModel {
     } else {
       fireTableCellUpdated(row, column);
       forceComputedGoalUpdates(row);
-      fireTableCellUpdated(row, getColumnCount() - 1); // update the total
+      fireTableCellUpdated(row, getColumnCount()
+          - 1); // update the total
       // score
     }
   }
