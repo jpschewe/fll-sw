@@ -152,14 +152,14 @@ public final class TeamScheduleInfo implements Serializable {
   }
 
   /**
-   * @param division the division to set
+   * @param award group to set
    */
   public void setDivision(final String division) {
     this.division = division;
   }
 
   /**
-   * @return the division, never null
+   * @return the award group, never null
    */
   public String getDivision() {
     if (null == division) {

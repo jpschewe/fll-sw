@@ -33,7 +33,7 @@
 <ul>
 <li>displayPage - ${applicationScope.displayPage }</li>
 <li>displayURL - ${applicationScope.displayURL }</li>
-<li>playoffDivision - ${applicationScope.playoffDivision }</li>
+<li>playoffBracket - ${applicationScope.playoffDivision }</li>
 <li>playoffRoundNumber - ${applicationScope.playoffRoundNumber }</li>
     <c:if test="${not empty displayNames}">
       <c:forEach items="${displayNames}" var="displayName">
@@ -46,7 +46,7 @@
 <ul>
 <li>displayPage - ${applicationScope[displayPageKey]}</li>
 <li>displayURL - ${applicationScope[displayURLKey] }</li>
-<li>playoffDivision - ${applicationScope[playoffDivisionKey] }</li>
+<li>playoffBracket - ${applicationScope[playoffDivisionKey] }</li>
 <li>playoffRoundNumber - ${applicationScope[playoffRoundNumberKey] }</li>
 </ul>
 </li>

@@ -183,7 +183,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
     tournamentCell.setColspan(4);
     table.addCell(tournamentCell);
 
-    final PdfPCell categoryHeader = PdfUtils.createHeaderCell(String.format("Category: %s - Division: %s - JudgingGroup: %s",
+    final PdfPCell categoryHeader = PdfUtils.createHeaderCell(String.format("Category: %s - Award Group: %s - JudgingGroup: %s",
                                                                             catTitle, division, judgingGroup));
     categoryHeader.setColspan(4);
     table.addCell(categoryHeader);

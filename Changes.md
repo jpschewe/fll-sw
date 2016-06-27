@@ -1,3 +1,5 @@
+* Use the term "Playoff Bracket" to mean the group of teams competing in a head to head competition (formally known as "Playoff Division")
+* Use the term "Award Group" to mean the group of teams competing for a single set of awards (formally known as "Event Division")
 * Allow the user to edit the judging groups
 * Display team names in the scheduler user interface
 * Add end times to the general schedule display in SchedulerUI

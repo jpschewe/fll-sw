@@ -638,7 +638,7 @@ public class TournamentSchedule implements Serializable {
     // Need one of judge group column or division column
     if (-1 == judgeGroupColumn
         && -1 == divisionColumn) {
-      throw new MissingColumnException("Must have judging station column or division column");
+      throw new MissingColumnException("Must have judging station column or award group column");
     } else if (-1 == judgeGroupColumn) {
       judgeGroupColumn = divisionColumn;
     } else if (-1 == divisionColumn) {

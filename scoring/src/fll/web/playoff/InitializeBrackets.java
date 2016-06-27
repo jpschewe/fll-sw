@@ -76,12 +76,12 @@ public class InitializeBrackets extends BaseFLLServlet {
       final int currentTournamentID = currentTournament.getTournamentID();
 
       if (null == data.getDivision()) {
-        message.append("<p class='error'>No division specified.</p>");
+        message.append("<p class='error'>No playoff bracket specified.</p>");
       } else if (PlayoffIndex.CREATE_NEW_PLAYOFF_DIVISION.equals(data.getDivision())) {
         redirect = "create_playoff_division.jsp";
       } else {
         if (Queries.isPlayoffDataInitialized(connection, data.getDivision())) {
-          message.append("<p class='warning'>Playoffs have already been initialized for division "
+          message.append("<p class='warning'>Playoffs have already been initialized for playoff bracket "
               + data.getDivision() + ".</p>");
         } else {
           final List<String> eventDivisions = Queries.getEventDivisions(connection, currentTournamentID);
