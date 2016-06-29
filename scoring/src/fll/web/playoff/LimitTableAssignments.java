@@ -56,7 +56,7 @@ public class LimitTableAssignments extends BaseFLLServlet {
 
       final String division = request.getParameter("division");
       if (null == division) {
-        throw new FLLRuntimeException("Division parameter cannot be null");
+        throw new FLLRuntimeException("Division (playoff bracket) parameter cannot be null");
       }
       final String firstRound = request.getParameter("firstRound");
       if (null == firstRound) {

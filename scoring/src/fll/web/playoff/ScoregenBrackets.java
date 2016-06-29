@@ -53,7 +53,7 @@ public class ScoregenBrackets {
 
         if (null == division) {
           throw new RuntimeException(
-                                     "No division specified, please go back to the <a href='index.jsp'>playoff main page</a> and start again.");
+                                     "No playoff bracket specified, please go back to the <a href='index.jsp'>playoff main page</a> and start again.");
         }
       }
       pageContext.setAttribute("division", division);

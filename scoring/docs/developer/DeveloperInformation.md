@@ -54,7 +54,7 @@ Don't fast forward master, always use `--no-ff` when merging into master. This w
 When you start work on a ticket, assign it to yourself. Don't work on someone else's assigned tickets unless you talk to them.
 
 ### Attachments to tickets
-Github allows attachments of images, but not general files. So if you want to attach a file other than an image you need to host the file somewhere and put a link to it in the ticket. I found a solution using Github's Gist service http://feeding.cloud.geek.nz/posts/attaching-files-to-github-issues/.
+GitHub allows attachments of certain file types. [You can find the list here](https://help.github.com/articles/file-attachments-on-issues-and-pull-requests/). If you rename the file you want to attach to one of these extensions, they will attach nicely. For databases and subjective data files I add ".zip" a second extension, for log files I add ".txt" as a second extension. This way GitHub accepts the attachment and we still know what type of file it was.
 
 
 ## Wiki Editing
@@ -133,8 +133,25 @@ release and go.
     1. Upload the file created in Jenkins to GitHub
     1. Update the current release pointer - this updates the website documentation to match this release
       1. git checkout current-release
-      1. git merge --ff-only `tag name`
+      1. git merge --ff-only `<tag name>`
       1. Push the updated pointer with `git push origin current-release`
+
+# Confusing terms
+
+Over the years a few confusing terms have been introduced into the software and since then fixed. 
+Here is a mapping of the confusing terms to what they are now. 
+Any display of the old terms is already replaced by the new term, however there will be variables and SQL columns using the old terms.
+ 
+
+| Old Terms       | New Term      | Notes      |
+|-----------------|---------------|------------|
+| event division  | award group   | |
+| judging station | judging group | judging station is still used internally to refer to the location that judging for a particular category takes place |
+
+# Design Documents
+
+  * [Challenge Description](ChallengeDescription.md)
+
 
 # Misc Notes
 

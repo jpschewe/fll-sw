@@ -50,11 +50,6 @@ public class CommitTeam extends BaseFLLServlet {
   /**
    * Value is String
    */
-  public static final String DIVISION = "division";
-
-  /**
-   * Value is String
-   */
   public static final String ORGANIZATION = "organization";
 
   /**
@@ -97,7 +92,7 @@ public class CommitTeam extends BaseFLLServlet {
         message.append("<p id='success'>Successfully deleted team "
             + teamNumber + "</p>");
 
-        redirect = "select_team.jsp";
+        redirect = "index.jsp";
       } else {
         final String teamName = request.getParameter("teamName");
         final String organization = request.getParameter("organization");
@@ -127,7 +122,7 @@ public class CommitTeam extends BaseFLLServlet {
                 + teamNumber);
           }
 
-          redirect = "select_team.jsp";
+          redirect = "index.jsp";
 
           Queries.updateTeam(connection, teamNumber, teamName, organization);
           message.append("<p id='success'>Successfully updated a team "
@@ -159,7 +154,7 @@ public class CommitTeam extends BaseFLLServlet {
 
               final String eventDivision = request.getParameter("event_division_"
                   + tournament.getTournamentID());
-              final String judgingStation = request.getParameter("judging_station_"
+              final String judgingGroup = request.getParameter("judging_station_"
                   + tournament.getTournamentID());
 
               if (!previouslyAssignedTournaments.contains(tournament.getTournamentID())) {
@@ -170,7 +165,7 @@ public class CommitTeam extends BaseFLLServlet {
 
                 // add to tournament
                 Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), eventDivision,
-                                            judgingStation);
+                                            judgingGroup);
               } else {
                 // just update the division and judging station information
 
@@ -180,10 +175,10 @@ public class CommitTeam extends BaseFLLServlet {
                   Queries.setEventDivision(connection, teamNumber, tournament.getTournamentID(), eventDivision);
                 }
 
-                final String prevJudgingStation = Queries.getJudgingStation(connection, teamNumber,
+                final String prevJudgingGroup = Queries.getJudgingGroup(connection, teamNumber,
                                                                             tournament.getTournamentID());
-                if (!judgingStation.equals(prevJudgingStation)) {
-                  Queries.setJudgingStation(connection, teamNumber, tournament.getTournamentID(), judgingStation);
+                if (!judgingGroup.equals(prevJudgingGroup)) {
+                  Queries.setJudgingGroup(connection, teamNumber, tournament.getTournamentID(), judgingGroup);
                 }
               }
 

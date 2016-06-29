@@ -98,7 +98,7 @@ public class BracketData {
    */
   public static class BracketLabelCell extends BracketDataType {
     public BracketLabelCell(final int num) {
-      _label = "Bracket "
+      _label = "Match "
           + num;
     }
 
@@ -1127,7 +1127,7 @@ public class BracketData {
               && bracketNumber == 2) {
             bracketLabel = "3rd/4th Place";
           } else {
-            bracketLabel = "Bracket "
+            bracketLabel = "Match "
                 + bracketNumber;
           }
           curArray = rit.next();

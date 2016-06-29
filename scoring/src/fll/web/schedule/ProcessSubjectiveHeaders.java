@@ -8,10 +8,8 @@ package fll.web.schedule;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -40,7 +38,8 @@ public class ProcessSubjectiveHeaders extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
 
     final ChallengeDescription challenge = ApplicationAttributes.getChallengeDescription(application);
 
@@ -51,40 +50,26 @@ public class ProcessSubjectiveHeaders extends BaseFLLServlet {
 
     final Collection<CategoryColumnMapping> categoryColumns = new LinkedList<CategoryColumnMapping>();
 
-    final Set<ScoreCategory> assignedCategories = new HashSet<ScoreCategory>();
-
     // get params for subjectiveHeader
     final List<SubjectiveStation> subjectiveStations = new LinkedList<SubjectiveStation>();
-    for (int index = 0; index < unusedHeaders.size(); ++index) {
-      final String header = unusedHeaders.get(index);
 
-      final List<ScoreCategory> categories = new LinkedList<ScoreCategory>();
-      for (final ScoreCategory cat : challenge.getSubjectiveCategories()) {
-        final String value = request.getParameter(index
-            + ":" + cat.getName());
-        if (null != value) {
-          categories.add(cat);
+    for (final ScoreCategory cat : challenge.getSubjectiveCategories()) {
+      final String value = request.getParameter(cat.getName()
+          + ":header");
+      if (null != value) {
+        final int headerIndex = Integer.parseInt(value);
+        final String header = unusedHeaders.get(headerIndex);
 
-          if (!assignedCategories.add(cat)) {
-            session.setAttribute(SessionAttributes.MESSAGE,
-                                 String.format("<p class='error'>%s is assigned to 2 schedule columns. This is not allowed.</p>",
-                                               cat.getTitle()));
-            WebUtils.sendRedirect(application, response, "/schedule/chooseSubjectiveHeaders.jsp");
-            return;
-          }
-        }
-      }
-
-      if (!categories.isEmpty()) {
-        final String durationStr = request.getParameter(index
+        final String durationStr = request.getParameter(cat.getName()
             + ":duration");
 
-        subjectiveStations.add(new SubjectiveStation(header, Integer.parseInt(durationStr)));
+        //TODO issue:129 validate that duration is not empty and a number
+        
+        final int duration = Integer.parseInt(durationStr);
+        subjectiveStations.add(new SubjectiveStation(header, duration));
 
-        for (final ScoreCategory category : categories) {
-          final CategoryColumnMapping mapping = new CategoryColumnMapping(category.getName(), header);
-          categoryColumns.add(mapping);
-        }
+        final CategoryColumnMapping mapping = new CategoryColumnMapping(cat.getName(), header);
+        categoryColumns.add(mapping);
       }
 
     }

@@ -398,7 +398,7 @@ public final class Playoff {
                                         final BracketSortType bracketSort) throws SQLException {
 
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("initializing brackets for division: "
+      LOGGER.debug("initializing playoff bracket: "
           + division + " enableThird: " + enableThird);
     }
     final int currentTournament = Queries.getCurrentTournament(connection);
@@ -839,7 +839,7 @@ public final class Playoff {
           while (detail.next()) {
             final int teamNumber = detail.getInt(1);
             message.append("<li>Team "
-                + teamNumber + " is involved in the playoff for '" + eventDivision + "', which isn't finished</li>");
+                + teamNumber + " is involved in the playoff bracket '" + eventDivision + "', which isn't finished</li>");
           }
           SQLFunctions.close(detail);
           detail = null;

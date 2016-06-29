@@ -1,3 +1,11 @@
+* Use the term "Playoff Bracket" to mean the group of teams competing in a head to head competition (formally known as "Playoff Division")
+* Use the term "Award Group" to mean the group of teams competing for a single set of awards (formally known as "Event Division")
+* Allow the user to edit the judging groups
+* Display team names in the scheduler user interface
+* Add end times to the general schedule display in SchedulerUI
+* Fix bug where schedule could not be replaced after playoff tables have been assigned
+* Remove filtering of uploaded teams file. It's best to just filter outside of FLL-SW.
+
 Release 10.8
 ============
 * #466 - Add a windows executable for starting the main application

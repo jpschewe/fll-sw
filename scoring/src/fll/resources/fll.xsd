@@ -69,14 +69,6 @@
     </xsd:complexType>
   </xsd:element>
 
-  <xsd:simpleType name="bracketSortType">
-    <xsd:restriction base="xsd:string">
-      <xsd:enumeration value="SEEDING" />
-      <xsd:enumeration value="ALPHA_TEAM" />
-      <xsd:enumeration value="RANDOM" />
-    </xsd:restriction>
-  </xsd:simpleType>
-
   <xsd:element name="Performance">
     <xsd:complexType>
       <xsd:sequence>

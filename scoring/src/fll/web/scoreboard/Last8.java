@@ -62,7 +62,7 @@ public class Last8 extends BaseFLLServlet {
       formatter.format("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">%n");
       formatter.format("<html>%n");
       formatter.format("<head>%n");
-      formatter.format("<link rel='stylesheet' type='text/css' href='../style/style.jsp' />%n");
+      formatter.format("<link rel='stylesheet' type='text/css' href='../style/fll-sw.css' />%n");
       formatter.format("<link rel='stylesheet' type='text/css' href='score_style.css' />%n");
       formatter.format("<meta http-equiv='refresh' content='30' />%n");
       formatter.format("</head>%n");

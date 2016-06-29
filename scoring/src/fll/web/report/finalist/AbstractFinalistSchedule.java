@@ -211,7 +211,7 @@ abstract public class AbstractFinalistSchedule extends BaseFLLServlet {
                           final Document document) {
       final PdfPTable header = new PdfPTable(2);
       final Phrase p = new Phrase();
-      final Chunk ck = new Chunk(String.format("%s%n %s Finalist Schedule - Division: %s", //
+      final Chunk ck = new Chunk(String.format("%s%n %s Finalist Schedule - Award Group: %s", //
                                                mChallengeTitle, //
                                                mShowPrivate ? "Private" : "", mDivision), HEADER_FONT);
       p.add(ck);

@@ -34,7 +34,7 @@ public class StorePlayoffParameters extends BaseFLLServlet {
 
     final String divisionParam = request.getParameter("division");
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("division: '"
+      LOGGER.debug("playoff bracket: '"
           + divisionParam + "'");
     }
     data.setDivision(divisionParam);

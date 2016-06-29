@@ -32,6 +32,7 @@ import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
+import fll.web.WebUtils;
 import fll.xml.ChallengeDescription;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -55,7 +56,8 @@ public final class Tournaments {
                                   final ServletContext application,
                                   final HttpSession session,
                                   final HttpServletRequest request,
-                                  final HttpServletResponse response) throws SQLException, IOException, ParseException {
+                                  final HttpServletResponse response)
+      throws SQLException, IOException, ParseException {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
@@ -92,7 +94,7 @@ public final class Tournaments {
       } else {
         out.println("<p><b>Tournament name's must be unique.  Tournaments can be removed by erasing the name.</b></p>");
 
-        out.println("<table border='1'><tr><th>Name</th><th>Location</th></tr>");
+        out.println("<table border='1'><tr><th>Name</th><th>Detailed Name</th></tr>");
 
         int row = 0; // keep track of which row we're generating
 
@@ -161,7 +163,8 @@ public final class Tournaments {
                                   final int row,
                                   final Integer key,
                                   final String name,
-                                  final String location) throws IOException, IllegalArgumentException, SQLException {
+                                  final String location)
+      throws IOException, IllegalArgumentException, SQLException {
     out.println("<tr>");
 
     out.print("  <input type='hidden' name='key"
@@ -179,7 +182,7 @@ public final class Tournaments {
         + row + "'");
     if (null != name) {
       out.print(" value='"
-          + name + "'");
+          + WebUtils.escapeForHtmlFormValue(name) + "'");
     }
     if (GenerateDB.DUMMY_TOURNAMENT_NAME.equals(name)
         || GenerateDB.DROP_TOURNAMENT_NAME.equals(name)) {
@@ -191,7 +194,7 @@ public final class Tournaments {
         + row + "'");
     if (null != location) {
       out.print(" value='"
-          + location + "'");
+          + WebUtils.escapeForHtmlFormValue(location) + "'");
     }
     if (GenerateDB.DUMMY_TOURNAMENT_NAME.equals(name)
         || GenerateDB.DROP_TOURNAMENT_NAME.equals(name)) {
@@ -211,7 +214,8 @@ public final class Tournaments {
    */
   @SuppressFBWarnings(value = "XSS_REQUEST_PARAMETER_TO_JSP_WRITER", justification = "Need to write out the name specified as part of the error message")
   private static boolean verifyData(final JspWriter out,
-                                    final HttpServletRequest request) throws IOException {
+                                    final HttpServletRequest request)
+      throws IOException {
     final Map<String, String> tournamentNames = new HashMap<String, String>();
     boolean retval = true;
 
@@ -284,7 +288,8 @@ public final class Tournaments {
   private static void createAndInsertTournaments(final HttpServletRequest request,
                                                  final Connection connection,
                                                  final ChallengeDescription description,
-                                                 final StringBuilder message) throws SQLException {
+                                                 final StringBuilder message)
+      throws SQLException {
     final int currentTournament = Queries.getCurrentTournament(connection);
 
     int row = 0;
@@ -356,7 +361,8 @@ public final class Tournaments {
                                  final HttpServletRequest request,
                                  final HttpServletResponse response,
                                  final Connection connection,
-                                 final ChallengeDescription description) throws SQLException, IOException {
+                                 final ChallengeDescription description)
+      throws SQLException, IOException {
     final StringBuilder message = new StringBuilder();
 
     createAndInsertTournaments(request, connection, description, message);

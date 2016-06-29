@@ -43,6 +43,7 @@ import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.Box;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
@@ -701,8 +702,8 @@ public class SchedulerUI extends JFrame {
             + directory.getAbsolutePath() + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
 
         final int answer = JOptionPane.showConfirmDialog(SchedulerUI.this,
-                                                         "Would you like to print the score sheets as well?",
-                                                         "Print Scoresheets?", JOptionPane.YES_NO_OPTION);
+                                                         "Would you like to write out the score sheets as well?",
+                                                         "Write Out Scoresheets?", JOptionPane.YES_NO_OPTION);
         if (JOptionPane.YES_OPTION == answer) {
           chooseChallengeDescriptor.setLocationRelativeTo(SchedulerUI.this);
           chooseChallengeDescriptor.setVisible(true);
@@ -724,7 +725,7 @@ public class SchedulerUI extends JFrame {
                                                                             getScheduleData());
             mapDialog.setLocationRelativeTo(SchedulerUI.this);
             mapDialog.setVisible(true);
-            if (mapDialog.isMappingValid()) {
+            if (!mapDialog.isCanceled()) {
               final Map<ScoreCategory, String> categoryToSchedule = new HashMap<>();
               for (final ScoreCategory scoreCategory : description.getSubjectiveCategories()) {
                 final String scheduleColumn = mapDialog.getSubjectiveHeaderForCategory(scoreCategory);
@@ -736,16 +737,12 @@ public class SchedulerUI extends JFrame {
               }
               getScheduleData().outputSubjectiveSheets(directory.getAbsolutePath(), baseFilename, description,
                                                        categoryToSchedule);
-            } else {
-              JOptionPane.showMessageDialog(SchedulerUI.this,
-                                            "Subjective sheets not written out due to incomplete mapping of schedule columns to categories",
-                                            "Warning", JOptionPane.WARNING_MESSAGE);
-            }
 
-            JOptionPane.showMessageDialog(SchedulerUI.this, "Scoresheets written '"
-                + scoresheetFile.getAbsolutePath() + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
-          }
-        }
+              JOptionPane.showMessageDialog(SchedulerUI.this, "Scoresheets written '"
+                  + scoresheetFile.getAbsolutePath() + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
+            } // not canceled
+          } // valid descriptor location
+        } // yes to write score sheets
       } catch (final DocumentException e) {
         final Formatter errorFormatter = new Formatter();
         errorFormatter.format("Error writing detailed schedules: %s", e.getMessage());
@@ -1078,9 +1075,10 @@ public class SchedulerUI extends JFrame {
       for (final ConstraintViolation violation : getViolationsModel().getViolations()) {
         if (violation.getTeam() == schedInfo.getTeamNumber()) {
           Collection<SubjectiveTime> subjectiveTimes = violation.getSubjectiveTimes();
-          if ((SchedulerTableModel.TEAM_NUMBER_COLUMN == tmCol
-              || SchedulerTableModel.JUDGE_COLUMN == tmCol)
+          if (tmCol <= SchedulerTableModel.JUDGE_COLUMN
               && subjectiveTimes.isEmpty() && null == violation.getPerformance()) {
+            // there is an error for this team and the team information fields
+            // should be highlighted
             error = true;
             isHard |= violation.isHard();
           } else if (null != violation.getPerformance()) {
@@ -1208,10 +1206,14 @@ public class SchedulerUI extends JFrame {
     final List<String> unusedColumns = columnInfo.getUnusedColumns();
     final List<JCheckBox> checkboxes = new LinkedList<JCheckBox>();
     final List<JFormattedTextField> subjectiveDurations = new LinkedList<JFormattedTextField>();
-    final JPanel optionPanel = new JPanel(new GridLayout(0, 2));
+    final Box optionPanel = Box.createVerticalBox();
 
-    optionPanel.add(new JLabel("Column"));
-    optionPanel.add(new JLabel("Duration (minutes)"));
+    optionPanel.add(new JLabel("Specify which columns in the data file are for subjective judging"));
+
+    final JPanel grid = new JPanel(new GridLayout(0, 2));
+    optionPanel.add(grid);
+    grid.add(new JLabel("Data file column"));
+    grid.add(new JLabel("Duration (minutes)"));
 
     for (final String column : unusedColumns) {
       if (null != column
@@ -1221,8 +1223,8 @@ public class SchedulerUI extends JFrame {
         final JFormattedTextField duration = new JFormattedTextField(Integer.valueOf(SchedParams.DEFAULT_SUBJECTIVE_MINUTES));
         duration.setColumns(4);
         subjectiveDurations.add(duration);
-        optionPanel.add(checkbox);
-        optionPanel.add(duration);
+        grid.add(checkbox);
+        grid.add(duration);
       }
     }
     final List<SubjectiveStation> subjectiveHeaders;

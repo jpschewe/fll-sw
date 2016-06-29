@@ -43,13 +43,13 @@
 <link
   rel="stylesheet"
   type="text/css"
-  href="<c:url value='/style/style.jsp'/>" />
+  href="<c:url value='/style/fll-sw.css'/>" />
 <title>Add missing teams</title>
 </head>
 
 <body>
 
-  ${message}
+  <div class='status-message'>${message}</div>
   <%-- clear out the message, so that we don't see it again --%>
   <c:remove var="message" />
 

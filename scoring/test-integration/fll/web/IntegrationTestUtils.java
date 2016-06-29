@@ -30,6 +30,7 @@ import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
@@ -87,7 +88,8 @@ public final class IntegrationTestUtils {
    * @throws IOException
    */
   public static void loadPage(final WebDriver selenium,
-                              final String url) throws IOException {
+                              final String url)
+      throws IOException {
     try {
       selenium.get(url);
 
@@ -113,7 +115,8 @@ public final class IntegrationTestUtils {
    * @throws IOException
    */
   public static void initializeDatabase(final WebDriver driver,
-                                        final InputStream challengeStream) throws IOException {
+                                        final InputStream challengeStream)
+      throws IOException {
     try {
       Assert.assertNotNull(challengeStream);
       final File challengeFile = IntegrationTestUtils.storeInputStreamToFile(challengeStream);
@@ -134,10 +137,16 @@ public final class IntegrationTestUtils {
         final WebElement reinitDB = driver.findElement(By.name("reinitializeDatabase"));
         reinitDB.click();
 
-        final Alert confirmCreateDB = driver.switchTo().alert();
-        LOGGER.info("Confirmation text: "
-            + confirmCreateDB.getText());
-        confirmCreateDB.accept();
+        try {
+          final Alert confirmCreateDB = driver.switchTo().alert();
+          LOGGER.info("Confirmation text: "
+              + confirmCreateDB.getText());
+          confirmCreateDB.accept();
+        } catch (final NoAlertPresentException e) {
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("No alert found, assuming the database was empty and didn't need an alert.");
+          }
+        }
 
         driver.findElement(By.id("success"));
 
@@ -183,7 +192,8 @@ public final class IntegrationTestUtils {
    * @throws IOException
    */
   public static void initializeDatabaseFromDump(final WebDriver selenium,
-                                                final InputStream inputStream) throws IOException {
+                                                final InputStream inputStream)
+      throws IOException {
     try {
       Assert.assertNotNull(inputStream);
       final File dumpFile = IntegrationTestUtils.storeInputStreamToFile(inputStream);
@@ -203,6 +213,17 @@ public final class IntegrationTestUtils {
 
         final WebElement createEle = selenium.findElement(By.name("createdb"));
         createEle.click();
+
+        try {
+          final Alert confirmCreateDB = selenium.switchTo().alert();
+          LOGGER.info("Confirmation text: "
+              + confirmCreateDB.getText());
+          confirmCreateDB.accept();
+        } catch (final NoAlertPresentException e) {
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("No alert found, assuming the database was empty and didn't need an alert.");
+          }
+        }
 
         selenium.findElement(By.id("success"));
 
@@ -242,12 +263,13 @@ public final class IntegrationTestUtils {
 
   /**
    * Defaults filePrefix to "fll".
+   * 
    * @see #storeScreenshot(String, WebDriver)
    */
   public static void storeScreenshot(final WebDriver driver) throws IOException {
     storeScreenshot("fll", driver);
   }
-  
+
   /**
    * Store screenshot and other information for debugging the error.
    * 
@@ -255,7 +277,9 @@ public final class IntegrationTestUtils {
    * @param driver
    * @throws IOException
    */
-  public static void storeScreenshot(final String filePrefix, final WebDriver driver) throws IOException { 
+  public static void storeScreenshot(final String filePrefix,
+                                     final WebDriver driver)
+      throws IOException {
     final Path tempDir = Files.createTempDirectory(Paths.get("screenshots"), filePrefix);
 
     if (driver instanceof TakesScreenshot) {
@@ -362,7 +386,8 @@ public final class IntegrationTestUtils {
    * @return the tournament or null if not found
    */
   public static Tournament getTournamentByName(final WebDriver selenium,
-                                               final String tournamentName) throws IOException {
+                                               final String tournamentName)
+      throws IOException {
     try {
       final String json = readJSON(TestUtils.URL_ROOT
           + "api/Tournaments");
@@ -407,7 +432,8 @@ public final class IntegrationTestUtils {
                              final String teamName,
                              final String organization,
                              final String division,
-                             final String tournamentName) throws IOException {
+                             final String tournamentName)
+      throws IOException {
     try {
       final Tournament tournament = getTournamentByName(selenium, tournamentName);
 
@@ -458,7 +484,8 @@ public final class IntegrationTestUtils {
    * @throws IOException
    */
   public static void setTournament(final WebDriver selenium,
-                                   final String tournamentName) throws IOException {
+                                   final String tournamentName)
+      throws IOException {
     try {
       loadPage(selenium, TestUtils.URL_ROOT
           + "admin/index.jsp");
@@ -510,13 +537,15 @@ public final class IntegrationTestUtils {
   }
 
   public static void initializePlayoffsForDivision(final WebDriver selenium,
-                                                   final String division) throws IOException {
+                                                   final String division)
+      throws IOException {
     initializePlayoffsForDivision(selenium, division, BracketSortType.SEEDING);
   }
 
   public static void initializePlayoffsForDivision(final WebDriver selenium,
                                                    final String division,
-                                                   final BracketSortType bracketSort) throws IOException {
+                                                   final BracketSortType bracketSort)
+      throws IOException {
     loadPage(selenium, TestUtils.URL_ROOT
         + "playoff");
 
@@ -568,7 +597,8 @@ public final class IntegrationTestUtils {
    */
   public static void changeNumSeedingRounds(final WebDriver selenium,
                                             final int tournamentId,
-                                            final int newValue) throws NoSuchElementException, IOException {
+                                            final int newValue)
+      throws NoSuchElementException, IOException {
     try {
       IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
           + "admin/edit_all_parameters.jsp");

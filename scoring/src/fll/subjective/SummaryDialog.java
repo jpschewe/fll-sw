@@ -231,7 +231,7 @@ import fll.xml.ScoreCategory;
     public String getColumnName(final int column) {
       switch (column) {
       case 0:
-        return "Division";
+        return "Award Group";
       case 1:
         return "# of scores";
       default:
@@ -298,7 +298,7 @@ import fll.xml.ScoreCategory;
       case 0:
         return "Team Number";
       case 1:
-        return "Division";
+        return "Award Group";
       default:
         return _categoryColumnNames.get(column - 2);
       }

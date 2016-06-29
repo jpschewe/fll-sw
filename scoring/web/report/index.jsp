@@ -9,14 +9,14 @@
 <link
   rel="stylesheet"
   type="text/css"
-  href="<c:url value='/style/style.jsp'/>" />
+  href="<c:url value='/style/fll-sw.css'/>" />
 <title>Reporting</title>
 </head>
 
 <body>
   <h1>Reporting</h1>
 
-  ${message}
+  <div class='status-message'>${message}</div>
   <%-- clear out the message, so that we don't see it again --%>
   <c:remove var="message" />
 
@@ -32,8 +32,8 @@
       determine which teams advance to the next tournament.</li>
 
     <li><a href="CategoryScoresByScoreGroup" target="_blank">Categorized Scores
-        by Judging Station</a>. This displays the scaled scores for each
-      category by judging station. This is useful for checking the
+        by Judging Group</a>. This displays the scaled scores for each
+      category by judging group. This is useful for checking the
       winners of each category.</li>
 
     <li><a href="RankingReport" target="_blank">Ranking Report for teams</a>. This
@@ -64,7 +64,7 @@
       application. This is also used in the awards scripts report.</li>
   
     <li><a href="finalist/load.jsp" target="_blank">Schedule Finalists</a>. This is
-      used when one judge doesn't see all teams in a division and the
+      used when one judge doesn't see all teams in an award group and the
       top teams need to be judged again to choose the winners.</li>
 
     <li>

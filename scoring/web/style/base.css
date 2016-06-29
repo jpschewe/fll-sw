@@ -31,6 +31,15 @@ td.right {
 	background-color: black;
 }
 
+.success, #success {
+	background-color: #00FF00;
+}
+
+.status-message {
+	font-size: 120%;
+    background-color: #ADD8E6;	 
+}
+
 .hard-violation {
 	background-color: red;
 }
@@ -40,8 +49,21 @@ td.right {
 }
 
 .bold {
-	font-weight: bold;
+  font-weight: bold;
 }
+  
+
+.truncate {
+    max-width: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+  
+.center {
+    text-align: center;
+}
+
 
 /* use div tags for tables */
 .rTable {
