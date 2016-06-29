@@ -118,7 +118,7 @@ public class TeamFinalistSchedule extends BaseFLLServlet {
             para.add(new Chunk(team.getTeamName()
                 + " / " + team.getOrganization(), TITLE_FONT));
             para.add(Chunk.NEWLINE);
-            para.add(new Chunk("Division: "
+            para.add(new Chunk("Award Group: "
                 + team.getEventDivision(), TITLE_FONT));
             para.add(Chunk.NEWLINE);
             para.add(Chunk.NEWLINE);

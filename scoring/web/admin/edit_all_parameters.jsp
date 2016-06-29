@@ -14,7 +14,7 @@
 <link
   rel="stylesheet"
   type="text/css"
-  href="<c:url value='/style/style.jsp'/>" />
+  href="<c:url value='/style/fll-sw.css'/>" />
 
 <style>
 .content table {
@@ -74,7 +74,7 @@
 
     <h1>Edit All Parameters</h1>
 
-    ${message}
+    <div class='status-message'>${message}</div>
     <%-- clear out the message, so that we don't see it again --%>
     <c:remove var="message" />
 
@@ -321,14 +321,14 @@
         </tr>
 
         <tr>
-          <th>Division Flip Rate <a
+          <th>Award Group Flip Rate <a
             href='javascript:display("DivisionFlipRateHelp")'>[help]</a>
             <div
               id='DivisionFlipRateHelp'
               class='help'
               style='display: none'>
               The number of seconds between when the scoreboard's "Top
-              Division Scores" panel switches which division is shown.
+              Scores" panel switches which division is shown.
               Default 30 seconds. <a
                 href='javascript:hide("DivisionFlipRateHelp")'>[hide]</a>
             </div>

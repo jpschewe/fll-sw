@@ -11,20 +11,26 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.servlet.ServletContext;
 import javax.servlet.jsp.PageContext;
+import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.ComparisonUtils;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
 import fll.Utilities;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;
@@ -40,12 +46,27 @@ public class SetupIndex {
    * Populate the page context with information for the jsp.
    * pageContext:
    * descriptions - List<DescriptionInfo> (sorted by title)
+   * 
+   * dbinitialized - boolean if the database has been initialized
    */
-  public static void populateContext(final PageContext pageContext) {
+  public static void populateContext(final ServletContext application,
+                                     final PageContext pageContext) {
 
     final List<DescriptionInfo> descriptions = DescriptionInfo.getAllKnownChallengeDescriptionInfo();
 
     pageContext.setAttribute("descriptions", descriptions);
+
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    Connection connection = null;
+    try {
+      connection = datasource.getConnection();
+      pageContext.setAttribute("dbinitialized", Utilities.testDatabaseInitialized(connection));
+    } catch (final SQLException sqle) {
+      LOGGER.error(sqle, sqle);
+      throw new RuntimeException("Error saving team data into the database", sqle);
+    } finally {
+      SQLFunctions.close(connection);
+    }
   }
 
   /**

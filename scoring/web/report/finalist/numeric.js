@@ -92,7 +92,7 @@ function updatePage() {
 
   $("#data").empty();
 
-  var headerRow = $("<tr><th>Finalist?</th><th>Score Group</th><th>Team #</th><th>Team Name</th><th>Score</th><th>Num Categories</th></tr>");
+  var headerRow = $("<tr><th>Finalist?</th><th>Judging Group</th><th>Team #</th><th>Team Name</th><th>Score</th><th>Num Categories</th></tr>");
   $("#data").append(headerRow);
 
   var teams = $.finalist.getAllTeams();

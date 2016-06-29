@@ -10,13 +10,13 @@
 <link
   rel="stylesheet"
   type="text/css"
-  href="<c:url value='/style/style.jsp'/>" />
+  href="<c:url value='/style/fll-sw.css'/>" />
 </head>
 
 <body>
   <h1>${challengeDescription.title }</h1>
 
-  ${message}
+  <div class='status-message'>${message}</div>
   <%-- clear out the message, so that we don't see it again --%>
   <c:remove var="message" />
 

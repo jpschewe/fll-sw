@@ -9,29 +9,26 @@ package fll.scheduler;
 import java.awt.BorderLayout;
 import java.awt.Dialog;
 import java.awt.Frame;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.swing.Box;
 import javax.swing.JButton;
-import javax.swing.JComponent;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTextArea;
-import javax.swing.table.AbstractTableModel;
 
-import fll.util.FLLInternalException;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreCategory;
 
 /**
  * Map subjective headers to subjective categories.
+ * This dialog is modal.
  */
 public class MapSubjectiveHeaders extends JDialog {
 
@@ -39,7 +36,16 @@ public class MapSubjectiveHeaders extends JDialog {
 
   private final TournamentSchedule schedule;
 
-  private MappingTableModel tableModel;
+  private final Map<ScoreCategory, JComboBox<String>> comboBoxes = new HashMap<>();
+
+  private boolean canceled = true;
+
+  /**
+   * @return Was cancel pressed on the dialog?
+   */
+  public boolean isCanceled() {
+    return canceled;
+  }
 
   public MapSubjectiveHeaders(final Frame owner,
                               final ChallengeDescription description,
@@ -64,33 +70,37 @@ public class MapSubjectiveHeaders extends JDialog {
   private void initComponents() {
     getContentPane().setLayout(new BorderLayout());
 
-    final JTextArea instructions = new JTextArea("Match the columns in the schedule with the subjective categories that they contain the schedule for. You cannot have the same subjective category mapped to 2 schedule columns.");
+    final JTextArea instructions = new JTextArea("Match the column names from the schedule data file with the subjective categories that they contain the schedule for. Also specify the number of minutes between judging sessions for each category.");
     instructions.setEditable(false);
     instructions.setWrapStyleWord(true);
     instructions.setLineWrap(true);
     getContentPane().add(instructions, BorderLayout.NORTH);
 
-    tableModel = new MappingTableModel(description, schedule);
+    final JPanel grid = new JPanel(new GridLayout(0, 2));
+    getContentPane().add(grid, BorderLayout.CENTER);
 
-    final JTable table = new JTable(tableModel);
+    grid.add(new JLabel("Subjective Category"));
+    grid.add(new JLabel("Data file column name"));
 
-    final JScrollPane scroller = new JScrollPane(table);
-    getContentPane().add(scroller, BorderLayout.CENTER);
+    final String[] scheduleColumns = schedule.getSubjectiveStations().toArray(new String[0]);
 
-    final JComponent buttonBox = Box.createHorizontalBox();
+    for (final ScoreCategory category : description.getSubjectiveCategories()) {
+      grid.add(new JLabel(category.getTitle()));
+
+      final JComboBox<String> comboBox = new JComboBox<>(scheduleColumns);
+      grid.add(comboBox);
+      comboBoxes.put(category, comboBox);
+    }
+
+    final Box buttonBox = Box.createHorizontalBox();
     getContentPane().add(buttonBox, BorderLayout.SOUTH);
 
     final JButton ok = new JButton("OK");
     buttonBox.add(ok);
     ok.addActionListener(new ActionListener() {
       public void actionPerformed(final ActionEvent ae) {
-        if (isMappingValid()) {
-          setVisible(false);
-        } else {
-          JOptionPane.showMessageDialog(MapSubjectiveHeaders.this,
-                                        "Each subjective category must have exactly 1 schedule column", "Error",
-                                        JOptionPane.ERROR_MESSAGE);
-        }
+        setVisible(false);
+        canceled = false;
       }
     });
 
@@ -99,9 +109,11 @@ public class MapSubjectiveHeaders extends JDialog {
     cancel.addActionListener(new ActionListener() {
       public void actionPerformed(final ActionEvent ae) {
         setVisible(false);
+        canceled = true;
       }
     });
 
+    setMinimumSize(getPreferredSize());
     pack();
   }
 
@@ -112,143 +124,12 @@ public class MapSubjectiveHeaders extends JDialog {
    * @return null if not found
    */
   public String getSubjectiveHeaderForCategory(final ScoreCategory category) {
-    return tableModel.getSubjectiveHeaderForCategory(category);
-  }
-
-  /**
-   * @return true if all categories have 1 schedule column
-   */
-  public boolean isMappingValid() {
-    return tableModel.isMappingValid();
-  }
-
-  private static final class MappingTableModel extends AbstractTableModel {
-
-    private final Map<String, Map<ScoreCategory, Boolean>> mappings = new HashMap<>();
-
-    private final List<String> subjectiveStations;
-
-    private final List<ScoreCategory> categories;
-
-    public MappingTableModel(final ChallengeDescription description,
-                             final TournamentSchedule schedule) {
-      subjectiveStations = new ArrayList<>(schedule.getSubjectiveStations());
-      categories = description.getSubjectiveCategories();
-
-      for (final String subjectiveStation : subjectiveStations) {
-        final Map<ScoreCategory, Boolean> stationMappings = new HashMap<>();
-        for (final ScoreCategory category : categories) {
-          stationMappings.put(category, false);
-        }
-        mappings.put(subjectiveStation, stationMappings);
-      }
-    }
-
-    /**
-     * Find schedule column for category.
-     * 
-     * @param category what to find
-     * @return null if not found
-     */
-    public String getSubjectiveHeaderForCategory(final ScoreCategory category) {
-      for (final Map.Entry<String, Map<ScoreCategory, Boolean>> stationEntry : mappings.entrySet()) {
-        if (stationEntry.getValue().get(category)) {
-          return stationEntry.getKey();
-        }
-      }
+    final JComboBox<String> combo = comboBoxes.get(category);
+    if (null != combo) {
+      return (String) combo.getSelectedItem();
+    } else {
       return null;
     }
-
-    /**
-     * @return true if each category has exactly 1 schedule column
-     */
-    public boolean isMappingValid() {
-      for (final ScoreCategory category : categories) {
-        int found = 0;
-
-        for (final Map.Entry<String, Map<ScoreCategory, Boolean>> stationEntry : mappings.entrySet()) {
-          if (stationEntry.getValue().get(category)) {
-            ++found;
-          }
-        } // for each top mapping
-
-        if (1 != found) {
-          return false;
-        }
-
-      } // foreach category
-
-      return true;
-    }
-
-    public int getRowCount() {
-      return subjectiveStations.size();
-    }
-
-    public int getColumnCount() {
-      return categories.size()
-          + 1;
-    }
-
-    @Override
-    public String getColumnName(final int column) {
-      switch (column) {
-      case 0:
-        return "Schedule Column";
-      default:
-        return categories.get(column
-            - 1).getTitle();
-      }
-    }
-
-    public Object getValueAt(final int row,
-                             final int column) {
-      if (0 == column) {
-        return subjectiveStations.get(row);
-      } else {
-        final String subjectiveStation = subjectiveStations.get(row);
-        final ScoreCategory category = categories.get(column
-            - 1);
-        final Map<ScoreCategory, Boolean> rowMapping = mappings.get(subjectiveStation);
-        return rowMapping.get(category);
-      }
-    }
-
-    public void setValueAt(final Object value,
-                           final int row,
-                           final int column) {
-      if (column > 0) {
-        if (!(value instanceof Boolean)) {
-          throw new FLLInternalException("Found class other than boolean in set: "
-              + value.getClass());
-        }
-
-        final String subjectiveStation = subjectiveStations.get(row);
-        final ScoreCategory category = categories.get(column
-            - 1);
-        final Map<ScoreCategory, Boolean> rowMapping = mappings.get(subjectiveStation);
-        rowMapping.put(category, (Boolean) value);
-      }
-
-    }
-
-    public Class<?> getColumnClass(final int columnIndex) {
-      if (0 == columnIndex) {
-        return String.class;
-      } else {
-        return Boolean.class;
-      }
-    }
-
-    public boolean isCellEditable(final int rowIndex,
-                                  final int columnIndex) {
-      if (0 == columnIndex) {
-        return false;
-      } else {
-        return true;
-      }
-    }
-
   }
 
 }

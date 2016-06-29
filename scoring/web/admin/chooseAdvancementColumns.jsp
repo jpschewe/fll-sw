@@ -7,7 +7,7 @@
 <link
   rel="stylesheet"
   type="text/css"
-  href="<c:url value='/style/style.jsp'/>" />
+  href="<c:url value='/style/fll-sw.css'/>" />
 </head>
 
 <body>
@@ -46,7 +46,7 @@
       </tr>
 
       <tr>
-        <td>Event Division</td>
+        <td>Award Group</td>
         <td><select name='event_division'>
             <c:forEach
               items="${fileHeaders }"
@@ -57,7 +57,7 @@
       </tr>
 
       <tr>
-        <td>Judging Station</td>
+        <td>Judging Group</td>
         <td><select name='judging_station'>
             <c:forEach
               items="${fileHeaders }"

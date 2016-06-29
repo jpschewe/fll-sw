@@ -92,7 +92,7 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
       final String divisionStr = request.getParameter("division_name");
       if (null == divisionStr
           || "".equals(divisionStr)) {
-        message.append("<p class='error'>You need to specify a name for the palyoff division</p>");
+        message.append("<p class='error'>You need to specify a name for the playoff bracket</p>");
         redirect = "create_playoff_division.jsp";
       } else if (playoffDivisions.contains(divisionStr)) {
         message.append("<p class='error'>The division '"

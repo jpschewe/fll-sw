@@ -54,8 +54,8 @@ public class DisplayTournamentAssignments extends BaseFLLServlet {
 
       prep = connection.prepareStatement("select Teams.TeamNumber"//
           + " ,Teams.TeamName"//
-          + " ,Teams.Division" //
           + " ,TournamentTeams.event_division"//
+          + " ,TournamentTeams.judging_station"//
           + " FROM Teams,TournamentTeams"//
           + " WHERE TournamentTeams.Tournament = ?"//
           + " AND TournamentTeams.TeamNumber = Teams.TeamNumber"//
@@ -65,7 +65,7 @@ public class DisplayTournamentAssignments extends BaseFLLServlet {
         formatter.format("<h1>%s</h1>", tournament.getName());
 
         formatter.format("<table border='1'>");
-        formatter.format("<tr><th>Number</th><th>Name</th><th>Division</th><th>Event Division</th></tr>");
+        formatter.format("<tr><th>Number</th><th>Name</th><th>Award Group</th><th>Judging Group</th></tr>");
         prep.setInt(1, tournament.getTournamentID());
         rs = prep.executeQuery();
         while (rs.next()) {
@@ -76,11 +76,11 @@ public class DisplayTournamentAssignments extends BaseFLLServlet {
           final String teamName = rs.getString(2);
           formatter.format("<td>%s</td>", teamName);
 
-          final String division = rs.getString(3);
-          formatter.format("<td>%s</td>", division);
-
-          final String eventDivision = rs.getString(4);
+          final String eventDivision = rs.getString(3);
           formatter.format("<td>%s</td>", eventDivision);
+
+          final String judgingGroup = rs.getString(4);
+          formatter.format("<td>%s</td>", judgingGroup);
 
           formatter.format("</tr>");
         }

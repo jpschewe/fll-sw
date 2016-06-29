@@ -94,7 +94,7 @@ public class Top10 extends BaseFLLServlet {
       formatter.format("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">%n");
       formatter.format("<html>%n");
       formatter.format("<head>%n");
-      formatter.format("<link rel='stylesheet' type='text/css' href='../style/style.jsp' />%n");
+      formatter.format("<link rel='stylesheet' type='text/css' href='../style/fll-sw.css' />%n");
       formatter.format("<link rel='stylesheet' type='text/css' href='score_style.css' />%n");
       formatter.format("<meta http-equiv='refresh' content='%d' />%n",
                        GlobalParameters.getIntGlobalParameter(connection, GlobalParameters.DIVISION_FLIP_RATE));
@@ -119,7 +119,7 @@ public class Top10 extends BaseFLLServlet {
         if (!showOrg) {
           --numColumns;
         }
-        formatter.format("<th colspan='%d' bgcolor='%s'>Top Performance Scores: Division %s</th>", numColumns,
+        formatter.format("<th colspan='%d' bgcolor='%s'>Top Performance Scores: %s</th>", numColumns,
                          Queries.getColorForDivisionIndex(divisionIndex), divisions.get(divisionIndex));
         formatter.format("</tr>%n");
 

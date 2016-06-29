@@ -10,7 +10,16 @@
 <link
   rel="stylesheet"
   type="text/css"
-  href="<c:url value='/style/style.jsp'/>" />
+  href="<c:url value='/style/fll-sw.css'/>" />
+
+
+<style>
+.completed {
+	background-color: #00FF00;
+	font-weight: bold;
+}
+</style>
+
 <script type="text/javascript">
   function display(id) {
     document.getElementById(id).style.display = "block";
@@ -24,7 +33,7 @@
 <body>
   <h1>${challengeDescription.title }(Administration)</h1>
 
-  ${message}
+  <div class='status-message'>${message}</div>
   <%-- clear out the message, so that we don't see it again --%>
   <c:remove var="message" />
 
@@ -37,30 +46,10 @@
         METHOD="POST"
         ENCTYPE="multipart/form-data">
         <c:if test="${teamsUploaded }">
-          <span class='bold'>[DONE] </span>
+          <span class='completed'>DONE </span>
         </c:if>
         Upload the datafile for teams. This file can be tab separated or
-        comma separated or an Excel file (xls and xlsx supported). The
-        filter functionality provided here is very basic and has very
-        limited feedback. It's suggested that you edit the input file
-        before upload to contain only the teams for your tournament(s).
-        <a href='javascript:display("UploadTeamsHelp")'>[help]</a>
-        <div
-          id='UploadTeamsHelp'
-          class='help'
-          style='display: none'>
-          Each column of the input file needs to matched against the
-          required data for teams. This information includes: team
-          number, team name, organization, initial tournament, division.
-          The team number must be a number and is required. The other
-          columns are not required, but are a good idea to include. You
-          will be prompted to pick a column from your data file to match
-          against each piece of team data that the software uses. You
-          can select the same column for multiple pieces of data. <a
-            href='javascript:hide("UploadTeamsHelp")'>[hide]</a>
-        </div>
-
-        <input
+        comma separated or an Excel file (xls and xlsx supported). <input
           type="file"
           size="32"
           id='teams_file'
@@ -70,10 +59,43 @@
           value="<c:url value='/admin/UploadTeams'/>" /> <input
           type="submit"
           id='upload_teams'
-          value="Upload">
+          value="Upload"> <a
+          href='javascript:display("UploadTeamsHelp")'>[help]</a>
+        <div
+          id='UploadTeamsHelp'
+          class='help'
+          style='display: none'>
+          Each column of the input file needs to matched against the
+          required data for teams. The column names are the first row of
+          your data file. This information includes: team number, team
+          name, organization, initial tournament, award group, judging
+          group. The team number must be a number and is required. The
+          other columns are not required, but are a good idea to
+          include. You will be prompted to pick a column from your data
+          file to match against each piece of team data that the
+          software uses. You can select the same column for multiple
+          pieces of data. <a href='javascript:hide("UploadTeamsHelp")'>[hide]</a>
+        </div>
+
       </form>
     </li>
 
+    <li><a href='editTeam.jsp'>Add a team</a> <a
+      href='javascript:display("AddTeamHelp")'>[help]</a>
+      <div
+        id='AddTeamHelp'
+        class='help'
+        style='display: none'>
+        This can be used to add a team to the software that wasn't added
+        through the team upload. This may be used for small tournaments
+        where all of the teams aren't known in advance or a team shows
+        up for a tournament at the last minute. Special care needs to be
+        taken when adding a team to an already running tournament to
+        ensure that they have a schedule for where to go when and that
+        they get judged properly. In most cases this function should not
+        be used at the tournament, but rather before the tournament.<a
+          href='javascript:hide("AddTeamHelp")'>[hide]</a>
+      </div></li>
 
     <li><a href='<c:url value="tournaments.jsp"/>'>Add or Edit
         Tournaments</a> <a href='javascript:display("EditTournamentHelp")'>[help]</a>
@@ -82,14 +104,24 @@
         class='help'
         style='display: none'>
         This is an optional step. Use this page to modify the
-        tournaments created by team import step above, or to create new
+        tournaments created by team upload step above, or to create new
         tournaments.<br> <a
           href='javascript:hide("EditTournamentHelp")'>[hide]</a>
       </div></li>
 
 
     <li><a href='DisplayTournamentAssignments'>Display
-        Tournament Assignments</a></li>
+        Tournament Assignments</a> <a
+      href='javascript:display("DisplayTournamentAssignmentsHelp")'>[help]</a>
+      <div
+        id='DisplayTournamentAssignmentsHelp'
+        class='help'
+        style='display: none'>
+        This is an optional step. Use this page to display what teams
+        are assigned to what tournament and what judging groups they are
+        in.<br> <a
+          href='javascript:hide("DisplayTournamentAssignmentsHelp")'>[hide]</a>
+      </div></li>
 
 
     <li>
@@ -126,7 +158,7 @@
 
 
     <li><c:if test="${scheduleUploaded }">
-        <span class='bold'>[DONE] </span>
+        <span class='completed'>DONE </span>
       </c:if> Upload schedule for current tournament. <a
       href='javascript:display("ScheduleHelp")'>[help]</a>
       <div
@@ -151,33 +183,50 @@
       </form> <c:if test="${scheduleUploaded }">
         <!--  downloads for the schedule -->
         <ul>
-          <li><a href="ScheduleByTeam">Full schedule sorted by
-              team</a></li>
-          <li><a href="SubjectiveScheduleByJudgingStation">Subjective
-              schedule sorted by judging station, then time</a></li>
-          <li><a href="SubjectiveScheduleByTime">Subjective
-              schedule sorted by time</a></li>
-          <li><a href="PerformanceSchedule">Performance
-              Schedule</a></li>
+          <li><a
+            href="ScheduleByTeam"
+            target="_new">Full schedule sorted by team</a></li>
+          <li><a
+            href="SubjectiveScheduleByJudgingStation"
+            target="_new">Subjective schedule sorted by judging
+              group, then time</a></li>
+          <li><a
+            href="SubjectiveScheduleByTime"
+            target="_new">Subjective schedule sorted by time</a></li>
+          <li><a
+            href="PerformanceSchedule"
+            target="_new">Performance Schedule</a></li>
         </ul>
       </c:if></li>
 
 
-    <li><a href='edit_event_division.jsp'> Assign event
-        divisions to teams in current tournament</a>. <a
+    <li><a href='edit_event_division.jsp'>Assign teams to award
+        groups in current tournament</a>. <a
       href='javascript:display("EventDivisionHelp")'>[help]</a>
       <div
         id='EventDivisionHelp'
         class='help'
         style='display: none'>
-        Typical tournaments have 2 groups of teams competing against
-        each other, one for division 1 and one for division 2. If your
-        tournament team groupings are not based solely on the division
-        of the teams, e.g. you have 2 groups of teams that are all
-        division 1, use this page to assign &ldquo;event
-        divisions&rdquo; to divide your tournament&rsquo;s teams into
-        the groups in which they will be competing.<br> <a
+        This information is typically specified in the schedule data
+        file. If it has not been specified or needs to be modified you
+        can use this page to change the award groups for teams in the
+        current tournament. <br> <a
           href='javascript:hide("EventDivisionHelp")'>[hide]</a>
+      </div></li>
+
+
+    <li><a href='edit_judging_groups.jsp'>Assign teams to judging groups
+        groups in current tournament</a>. <a
+      href='javascript:display("JudgingGroupHelp")'>[help]</a>
+      <div
+        id='JudgingGroupHelp'
+        class='help'
+        style='display: none'>
+        This information is typically specified in the schedule data
+        file. If it has not been specified or needs to be modified you
+        can use this page to change the judging groups for teams in the
+        current tournament. <br> <a
+          href='javascript:hide("JudgingGroupHelp")'>[hide]</a>
       </div></li>
 
   </ol>
@@ -188,31 +237,39 @@
       <form
         action='ChangeScorePageText'
         method='post'>
-        Score page text: <input
+        Scoring display text: <input
           type='text'
           name='ScorePageText'
           value='<c:out value="${ScorePageText}"/>'> <input
           type='submit'
-          value='Change text'>
+          value='Change text'> <a
+          href='javascript:display("ScorePageTextHelp")'>[help]</a>
+        <div
+          id='ScorePageTextHelp'
+          class='help'
+          style='display: none'>
+          This text is displayed on the various big screen display
+          pages. There is only 1 or 2 lines of space available, so keep
+          it short. This can be used to notify participants and
+          spectators of when the next break will be over.<a
+            href='javascript:hide("ScorePageTextHelp")'>[hide]</a>
+        </div>
       </form>
     </li>
 
 
     <li><c:if test="${judgesAssigned }">
-        <span class='bold'>[DONE] </span>
+        <span class='completed'>DONE </span>
       </c:if> <a
       href='<c:url value="GatherJudgeInformation"/>'
       id='assign_judges'>Assign Judges</a></li>
 
 
     <li><c:if test="${tablesAssigned}">
-        <span class='bold'>[DONE] </span>
+        <span class='completed'>DONE </span>
       </c:if> <a href='<c:url value="tables.jsp"/>'>Assign Table Labels</a>
       (for scoresheet printing during playoffs)</li>
 
-
-
-    <li><a href='editTeam.jsp'>Add a team</a></li>
 
 
     <li><a href='<c:url value="select_team.jsp"/>'>Edit team
@@ -232,8 +289,9 @@
             Scoring Application</a> (Executable Jar file) - run with "java
           -jar subjective-app.jar"</li>
 
-        <li><a href='<c:url value="/subjective/index.html"/>'>Subjective
-            Web application</a></li>
+        <li><a
+          href='<c:url value="/subjective/index.html"/>'
+          target="_new">Subjective Web application</a></li>
 
 
       </ul></li>
@@ -286,7 +344,8 @@
           name="file" /> <input
           type='hidden'
           name='uploadRedirect'
-          value="<c:url value='/admin/UploadTeamTournamentAssignments'/>" /> <input
+          value="<c:url value='/admin/UploadTeamTournamentAssignments'/>" />
+        <input
           type="submit"
           value="Upload" />
       </form>

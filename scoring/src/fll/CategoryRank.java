@@ -37,7 +37,7 @@ public class CategoryRank {
   private final int mNumTeams;
 
   /**
-   * Number of teams in the ranking.
+   * @return Number of teams in the ranking.
    */
   public int getNumTeams() {
     return mNumTeams;
@@ -61,10 +61,11 @@ public class CategoryRank {
   public static final int NO_SHOW_RANK = -1;
 
   /**
-   * The group that this ranking applies to.
-   * This is usually the judging station for the team, but
+   * This is usually the judging group for the team, but
    * may be something else if there is a different grouping such as performance
-   * where this may be the division.
+   * where this may be the award group.
+   * 
+   * @return the group that this ranking applies to.
    */
   public String getGroup() {
     return mGroup;

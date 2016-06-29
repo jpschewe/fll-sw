@@ -14,7 +14,6 @@ import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
-
 /**
  * Table model for scheduler information used in {@link SchedulerUI}.
  */
@@ -50,13 +49,19 @@ import javax.swing.table.AbstractTableModel;
    * @see javax.swing.table.TableModel#getColumnCount()
    */
   public int getColumnCount() {
-    return (JUDGE_COLUMN + 1)
-        + subjectiveColumns.size() + (schedule.getNumberOfRounds() * NUM_COLUMNS_PER_ROUND);
+    return (JUDGE_COLUMN
+        + 1)
+        + subjectiveColumns.size() + (schedule.getNumberOfRounds()
+            * NUM_COLUMNS_PER_ROUND);
   }
 
   public static final int TEAM_NUMBER_COLUMN = 0;
 
-  public static final int JUDGE_COLUMN = TEAM_NUMBER_COLUMN + 1;
+  public static final int TEAM_NAME_COLUMN = TEAM_NUMBER_COLUMN
+      + 1;
+
+  public static final int JUDGE_COLUMN = TEAM_NAME_COLUMN
+      + 1;
 
   /**
    * Number of columns per performance found.
@@ -87,8 +92,10 @@ import javax.swing.table.AbstractTableModel;
     final TeamScheduleInfo schedInfo = scheduleData.get(rowIndex);
     if (columnIndex == TEAM_NUMBER_COLUMN) {
       return schedInfo.getTeamNumber();
+    } else if (columnIndex == TEAM_NAME_COLUMN) {
+      return schedInfo.getTeamName();
     } else if (columnIndex == JUDGE_COLUMN) {
-      return schedInfo.getJudgingStation();
+      return schedInfo.getJudgingGroup();
     } else if (columnIndex < getFirstPerformanceColumn()) {
       // columns are named by the subjective categories
       final SubjectiveTime subj = schedInfo.getSubjectiveTimeByName(getColumnName(columnIndex));
@@ -121,6 +128,8 @@ import javax.swing.table.AbstractTableModel;
   public Class<?> getColumnClass(final int columnIndex) {
     if (columnIndex == TEAM_NUMBER_COLUMN) {
       return Integer.class;
+    } else if (columnIndex == TEAM_NAME_COLUMN) {
+      return String.class;
     } else if (columnIndex == JUDGE_COLUMN) {
       return String.class;
     } else if (columnIndex < getFirstPerformanceColumn()) {
@@ -146,6 +155,8 @@ import javax.swing.table.AbstractTableModel;
   public String getColumnName(final int columnIndex) {
     if (columnIndex == TEAM_NUMBER_COLUMN) {
       return "Team #";
+    } else if (columnIndex == TEAM_NAME_COLUMN) {
+      return "Team Name";
     } else if (columnIndex == JUDGE_COLUMN) {
       return "Judge";
     } else if (columnIndex < getFirstPerformanceColumn()) {
@@ -160,7 +171,8 @@ import javax.swing.table.AbstractTableModel;
           % NUM_COLUMNS_PER_ROUND) {
       case 0:
         return "Perf #"
-            + (round + 1);
+            + (round
+                + 1);
       case 1:
         return "Table";
       case 2:
