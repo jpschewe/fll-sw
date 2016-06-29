@@ -1162,7 +1162,7 @@
           title="Beginning"
           min="1"
           max="3"
-          shortDescription="Sensors used incorrectly">
+          shortDescription="Sensors used incorrectly.  Weak or poorly designed attachments">
           <description>Weak or poorly designed attachments, difficult to
             add/remove.
           </description>
@@ -1171,7 +1171,7 @@
           title="Developing"
           min="4"
           max="6"
-          shortDescription="Sensor use inconsistent">
+          shortDescription="Sensor use inconsistent.  Not modular or consistent attachments">
           <description>Not modular or consistent attachments,
             attachments awkward to add/remove. Not repeatable.
           </description>
@@ -1180,7 +1180,7 @@
           title="Accomplished"
           min="7"
           max="9"
-          shortDescription="Sensors used appropriately">
+          shortDescription="Sensors used appropriately.  Attachments somewhat modular and work as expected">
           <description>Attachments somewhat modular and work as
             expected. Easy to add/remove. Somewhat repeatable.
           </description>
@@ -1189,7 +1189,7 @@
           title="Exemplary"
           min="10"
           max="12"
-          shortDescription="Sensor use precise and repeatable">
+          shortDescription="Sensor use precise and repeatable.  Attachments modular and work as expected">
           <description>Attachments modular and work as expected,
             repeatedly. They look like they belong to the robot.
           </description>
@@ -1411,10 +1411,10 @@
 
   </subjectiveCategory>
 
-  
 
 
-  
+
+
 
   <subjectiveCategory
     name="robot_programming"
@@ -1448,14 +1448,14 @@
           title="Accomplished"
           min="7"
           max="9"
-          shortDescription="Variables, loops, subroutines and conditions are used and understood">
+          shortDescription="Variables, loops, subroutines and conditions are used and understood.  Some signs of code reuse">
           <description>Some signs of code reuse.</description>
         </range>
         <range
           title="Exemplary"
           min="10"
           max="12"
-          shortDescription="Variables, loops, subroutines and conditions are used effectively">
+          shortDescription="Variables, loops, subroutines and conditions are used effectively.  Code reuse evident and understood">
           <description>Code reuse evident and understood.</description>
         </range>
       </rubric>
@@ -1777,7 +1777,8 @@
       name="innovation"
       title="Innovation"
       category="Strategy and Innovation">
-      <description>Creation of new, unique or unexpected feature(s) (e.g.
+      <description>Creation of new, unique or unexpected feature(s)
+        (e.g.
         designs, programs, strategies or applications) that are
         beneficial
         in performing the specified tasks.
