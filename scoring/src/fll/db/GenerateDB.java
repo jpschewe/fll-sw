@@ -39,7 +39,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 14;
+  public static final int DATABASE_VERSION = 15;
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -150,6 +150,9 @@ public final class GenerateDB {
           + ",CONSTRAINT playoff_data_fk2 FOREIGN KEY(Team) REFERENCES Teams(TeamNumber)" //
           + ")");
 
+      // table to track which teams are in which playoff bracket
+      createPlayoffBracketTeams(connection);
+      
       // table to hold team numbers of teams in this tournament
       stmt.executeUpdate("DROP TABLE IF EXISTS TournamentTeams CASCADE");
       stmt.executeUpdate("CREATE TABLE TournamentTeams ("
@@ -835,4 +838,29 @@ public final class GenerateDB {
     }
   }
 
+  /**
+   * Create the table playoff_bracket_teams.
+   * 
+   * @param connection
+   */
+  /*package*/ static void createPlayoffBracketTeams(final Connection connection) throws SQLException {
+    Statement stmt = null;
+    try {
+      stmt = connection.createStatement();
+
+      stmt.executeUpdate("DROP TABLE IF EXISTS playoff_bracket_teams CASCADE");
+      final StringBuilder sql = new StringBuilder();
+      sql.append("CREATE TABLE playoff_bracket_teams (");
+      sql.append("  tournament_id INTEGER NOT NULL");
+      sql.append(" ,bracket_name LONGVARCHAR NOT NULL");
+      sql.append(" ,team_number INTEGER NOT NULL");
+      sql.append(" ,CONSTRAINT playoff_bracket_teams_pk PRIMARY KEY (tournament_id, bracket_name, team_number)");
+      sql.append(")");
+      stmt.executeUpdate(sql.toString());
+
+    } finally {
+      SQLFunctions.close(stmt);
+      stmt = null;
+    }
+  }
 }

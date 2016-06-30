@@ -40,7 +40,7 @@ public class RemoteControl {
       connection = datasource.getConnection();
       final int currentTournament = Queries.getCurrentTournament(connection);
 
-      final List<String> divisions = Playoff.getPlayoffDivisions(connection, currentTournament);
+      final List<String> divisions = Playoff.getPlayoffBrackets(connection, currentTournament);
       pageContext.setAttribute("divisions", divisions);
 
       if (null == application.getAttribute("playoffDivision")

@@ -121,7 +121,7 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
       division = sessionDivision;
     } else if (null == ApplicationAttributes.getAttribute(application, divisionKey, String.class)) {
       try {
-        final List<String> divisions = Playoff.getPlayoffDivisions(connection, tournament);
+        final List<String> divisions = Playoff.getPlayoffBrackets(connection, tournament);
         if (!divisions.isEmpty()) {
           division = divisions.get(0);
         } else {

@@ -2560,7 +2560,7 @@ public final class Queries {
   public static int getNumPlayoffRounds(final Connection connection) throws SQLException {
     final int tournament = getCurrentTournament(connection);
     int numRounds = 0;
-    for (final String division : Playoff.getPlayoffDivisions(connection, tournament)) {
+    for (final String division : Playoff.getPlayoffBrackets(connection, tournament)) {
       final int x = getFirstPlayoffRoundSize(connection, division);
       if (x > 0) {
         numRounds = Math.max((int) Math.round(Math.log(x)
