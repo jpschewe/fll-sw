@@ -24,11 +24,17 @@
     $("#station_select_${idx.count }").change(function() {
       <c:forEach items="${playoff_data.tournamentTeamsValues }" var="team">
       <c:if test="${team.judgingStation == station}">
-      if ($(this).is(":checked")) {
-        $("#select_${team.teamNumber}").attr("checked", "checked");
-      } else {
-        $("#select_${team.teamNumber}").removeAttr("checked");
-      }
+      $("#select_${team.teamNumber}").prop("checked", $(this).is(":checked"));
+      </c:if>
+      </c:forEach>
+    });
+    </c:forEach>
+
+    <c:forEach items="${awardGroups }" var="awardGroup" varStatus="idx">
+    $("#award_group_select_${idx.count }").change(function() {
+      <c:forEach items="${playoff_data.tournamentTeamsValues }" var="team">
+      <c:if test="${team.eventDivision == awardGroup}">
+      $("#select_${team.teamNumber}").prop("checked", $(this).is(":checked"));
       </c:if>
       </c:forEach>
     });
@@ -54,6 +60,20 @@
     action="CreatePlayoffDivision">
 
     <label for="division_name">Name: </label><input name="division_name" />
+
+    <div>Select/unselect teams by award group</div>
+    <c:forEach
+      items="${awardGroups }"
+      var="awardGroup"
+      varStatus="idx">
+      <div>
+        <input
+          type="checkbox"
+          name="award_group_select_${idx.count}"
+          id="award_group_select_${idx.count }" /> <label
+          for="award_group_select_${idx.count}">${awardGroup }</label>
+      </div>
+    </c:forEach>
 
     <div>Select/unselect teams by judging station</div>
     <c:forEach
