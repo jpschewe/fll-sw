@@ -56,6 +56,9 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
       final List<String> judgingStations = Queries.getJudgingStations(connection, currentTournamentID);
       pageContext.setAttribute("judgingStations", judgingStations);
 
+      final List<String> awardGroups = Queries.getEventDivisions(connection, currentTournamentID);
+      pageContext.setAttribute("awardGroups", awardGroups);
+
     } catch (final SQLException sqle) {
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);
