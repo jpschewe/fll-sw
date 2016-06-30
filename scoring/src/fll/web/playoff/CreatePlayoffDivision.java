@@ -21,16 +21,15 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.log4j.Logger;
 
-import fll.Team;
+import fll.Tournament;
 import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Create a new playoff division.
@@ -69,7 +68,8 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     final StringBuilder message = new StringBuilder();
     final String existingMessage = SessionAttributes.getMessage(session);
     if (null != existingMessage) {
@@ -85,22 +85,19 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
       final PlayoffSessionData data = SessionAttributes.getNonNullAttribute(session, PlayoffIndex.SESSION_DATA,
                                                                             PlayoffSessionData.class);
 
-      final int currentTournamentID = Queries.getCurrentTournament(connection);
+      final Tournament currentTournament = data.getCurrentTournament();
+      final int currentTournamentID = currentTournament.getTournamentID();
 
-      final List<String> playoffDivisions = Playoff.getPlayoffDivisions(connection, currentTournamentID);
+      final List<String> playoffDivisions = Playoff.getPlayoffBrackets(connection, currentTournamentID);
 
-      final String divisionStr = request.getParameter("division_name");
-      if (null == divisionStr
-          || "".equals(divisionStr)) {
+      final String bracketName = request.getParameter("division_name");
+      if (null == bracketName
+          || "".equals(bracketName)) {
         message.append("<p class='error'>You need to specify a name for the playoff bracket</p>");
         redirect = "create_playoff_division.jsp";
-      } else if (playoffDivisions.contains(divisionStr)) {
+      } else if (playoffDivisions.contains(bracketName)) {
         message.append("<p class='error'>The division '"
-            + divisionStr + "' already exists, please pick a different name");
-        redirect = "create_playoff_division.jsp";
-      } else if (Queries.getEventDivisions(connection, currentTournamentID).contains(divisionStr)) {
-        message.append("<p class='error'>The division '"
-            + divisionStr + "' matches an event division, please pick a different name");
+            + bracketName + "' already exists, please pick a different name");
         redirect = "create_playoff_division.jsp";
       } else {
         final String[] selectedTeams = request.getParameterValues("selected_team");
@@ -110,24 +107,17 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
           teamNumbers.add(num);
         }
 
-        data.setDivision(divisionStr);
-
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("Selected team numbers: "
               + teamNumbers);
         }
 
-        final List<Team> teams = new LinkedList<Team>();
-        for (final int number : teamNumbers) {
-          final Team team = Team.getTeamFromDatabase(connection, number);
-          teams.add(team);
-        }
+        Playoff.createPlayoffBracket(connection, currentTournamentID, bracketName, teamNumbers);
 
-        data.setDivisionTeams(teams);
-        
-        session.setAttribute(PlayoffIndex.SESSION_DATA, data);
+        message.append("<p id='success'>Created playoff bracket"
+            + bracketName + "</p>");
 
-        redirect = "InitializeBrackets";
+        redirect = "index.jsp";
       }
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "

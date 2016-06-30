@@ -26,8 +26,6 @@ import java.util.Map;
 
 import javax.swing.table.TableModel;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Assert;
@@ -59,7 +57,6 @@ import fll.db.ImportDB;
 import fll.subjective.SubjectiveFrame;
 import fll.util.LogUtils;
 import fll.web.developer.QueryHandler;
-import fll.web.playoff.PlayoffIndex;
 import fll.web.scoreEntry.ScoreEntry;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
@@ -67,6 +64,7 @@ import fll.xml.ChallengeParser;
 import fll.xml.Goal;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreCategory;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Test a full tournament.
@@ -293,9 +291,7 @@ public class FullTournamentTest {
     final Select select = new Select(selenium.findElement(By.id("initialize-division")));
     for (final WebElement option : select.getOptions()) {
       final String text = option.getText();
-      if (!PlayoffIndex.CREATE_NEW_PLAYOFF_DIVISION.equals(text)) {
-        divisions.add(text);
-      }
+      divisions.add(text);
     }
 
     Assert.assertFalse(divisions.isEmpty());

@@ -45,7 +45,8 @@
   <%-- clear out the message, so that we don't see it again --%>
   <c:remove var="message" />
 
-  <p>Choose the teams that you want to include in the playoff bracket. This group of teams will compete against each other in a
+  <p>Choose the teams that you want to include in the playoff
+    bracket. This group of teams will compete against each other in a
     single elimination playoff bracket.</p>
 
   <form
@@ -75,6 +76,7 @@
         <th>Number</th>
         <th>Name</th>
         <th>Judging Station</th>
+        <th>Award Group</th>
       </tr>
       <c:forEach
         items="${playoff_data.tournamentTeamsValues }"
@@ -92,6 +94,8 @@
           <td>${team.teamName }</td>
 
           <td>${team.judgingStation }</td>
+
+          <td>${team.eventDivision }</td>
 
         </tr>
       </c:forEach>

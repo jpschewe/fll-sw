@@ -70,7 +70,7 @@ public class FinalistLoad {
     output.format("$.finalist.addTeamToDivision(%s, %s);%n", teamVarName,
                   WebUtils.quoteJavascriptString(team.getEventDivision()));
 
-    for (final String playoffDivision : Playoff.getPlayoffDivisionsForTeam(connection, team.getTeamNumber())) {
+    for (final String playoffDivision : Playoff.getPlayoffBracketsForTeam(connection, team.getTeamNumber())) {
       output.format("$.finalist.addTeamToPlayoffDivision(%s, %s);%n", teamVarName,
                     WebUtils.quoteJavascriptString(playoffDivision));
     }
@@ -105,7 +105,7 @@ public class FinalistLoad {
         output.format("$.finalist.addDivision(%s);%n", WebUtils.quoteJavascriptString(division));
       }
 
-      for (final String playoffDivision : Playoff.getPlayoffDivisions(connection, tournament)) {
+      for (final String playoffDivision : Playoff.getPlayoffBrackets(connection, tournament)) {
         output.format("$.finalist.addPlayoffDivision(%s);%n", WebUtils.quoteJavascriptString(playoffDivision));
       }
 
