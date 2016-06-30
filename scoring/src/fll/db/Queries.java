@@ -2216,6 +2216,14 @@ public final class Queries {
     }
   }
 
+  /**
+   * Check if any playoff bracket is initialized for the specified tournament.
+   * 
+   * @param connection database connection
+   * @param tournamentID tournament ID
+   * @return true if any playoff bracket is initialized in the tournament
+   * @throws SQLException if the database connection fails
+   */
   public static boolean isPlayoffDataInitialized(final Connection connection,
                                                  final int tournamentID)
       throws SQLException, RuntimeException {
