@@ -138,7 +138,7 @@ public final class Queries {
       for (final TournamentTeam team : Queries.getTournamentTeams(connection).values()) {
         // only show the teams for the division that we are looking at right
         // now
-        if (division.equals(team.getEventDivision())) {
+        if (division.equals(team.getAwardGroup())) {
           final int teamNum = team.getTeamNumber();
           final StringBuilder scoreGroup = new StringBuilder();
           prep.setInt(1, teamNum);

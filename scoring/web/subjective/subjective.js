@@ -446,8 +446,8 @@
     getJudgingGroups : function() {
       var retval = [];
       $.each(_teams, function(index, team) {
-        if (-1 == $.inArray(team.judgingStation, retval)) {
-          retval.push(team.judgingStation);
+        if (-1 == $.inArray(team.judgingGroup, retval)) {
+          retval.push(team.judgingGroup);
         }
       });
       return retval;
@@ -569,7 +569,7 @@
     getCurrentTeams : function() {
       var retval = [];
       $.each(_teams, function(index, team) {
-        if (team.judgingStation == _currentJudgingGroup) {
+        if (team.judgingGroup == _currentJudgingGroup) {
           retval.push(team);
         }
       });
