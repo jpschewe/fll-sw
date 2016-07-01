@@ -13,15 +13,23 @@ If you want to test out the latest code you can do so by [downloading the most r
   1. You can start tomcat with `./ant.sh tomcat.start`
   1. You can stop tomcat with `./ant.sh tomcat.stop`, the target `tomcat.reload` can be useful when working on servlet code.
   1. We have a continuous integration server running using [Jenkins](http://jenkins-ci.org/). You can access it at [http://mtu.net/jenkins/job/fll-sw/](http://mtu.net/jenkins/job/fll-sw/). The master branch is built by the job 'fll-sw', all other branches are built by 'fll-sw-feature-branches'.
-  1. Take a look at docs/README.developer for other information
 
 You can edit using your favorite Java IDE. We provide project files for Eclipse.
 
 If you're new to git read at least the first 3 chapters of [http://progit.org/book/](http://progit.org/book/)
 
 
+# Copyright
 
-## GIT rules/guidelines
+All of the code is currently Copyrighted by INSciTE.
+Please make sure anything you add has the following sort of header:
+
+    Copyright (c) ${year} INSciTE.  All rights reserved
+    INSciTE is on the web at: http://www.hightechkids.org
+    This code is released under GPL; see LICENSE.txt for details.
+
+
+# GIT rules/guidelines
 
 Do all development on a branch other than master. Branches named "feature.XXX" or "ticket.XXX" are preferred. Where "XXX" can be anything, but typically has the number of the ticket that you're working on in it and some short description of what you're doing. Example usage:
 
@@ -50,33 +58,40 @@ Don't fast forward master, always use `--no-ff` when merging into master. This w
 
 
 
-## Ticket rules/guidelines
+# Ticket guidelines
 When you start work on a ticket, assign it to yourself. Don't work on someone else's assigned tickets unless you talk to them.
 
-### Attachments to tickets
+## Attachments to tickets
 GitHub allows attachments of certain file types. [You can find the list here](https://help.github.com/articles/file-attachments-on-issues-and-pull-requests/). If you rename the file you want to attach to one of these extensions, they will attach nicely. For databases and subjective data files I add ".zip" a second extension, for log files I add ".txt" as a second extension. This way GitHub accepts the attachment and we still know what type of file it was.
 
 
-## Wiki Editing
+# Wiki Editing
 Please stick to [standard markdown syntax](http://daringfireball.net/projects/markdown/syntax) as much as possible. This is because we package a copy of the wiki in the release and the processor only handles standard markdown plus basic linking.
 
 
-## Using Eclipse
+# Using Eclipse
 
   1. [Download Eclipse](http://www.eclipse.org/downloads/). Get the Jave EE developer edition.
   1. Tell Eclipse to import an existing project and point it to the root of the git checkout
 
-
-### Viewing the database diagram
-
-After running the ant target doc.database-diagram the database diagram can be found in docs/database-diagram/index.html.
-
-### Using Ant in Eclipse
+## Using Ant in Eclipse
 
 Most ant targets will work out of the box once you tell Eclipse about our ant build file. However if you want to run the test.report target you'll get an error about the style sheet. Using the instructions at http://help.eclipse.org/juno/index.jsp?topic=%2Forg.eclipse.platform.doc.user%2Ftasks%2Ftasks-ant-version.htm you can point Eclipse at scoring/tools/ant as the Ant Home variable and then the test.report target works. This setting is for the workspace, so you'll want to make sure you're workspace is only used for fll-sw. 
 
+# Viewing the database diagram
 
-## References to Documentation
+After running the ant target doc.database-diagram the database diagram can be found in docs/database-diagram/index.html.
+
+# Code style
+
+Please follow the coding standards put forward at
+http://mtu.net/~jpschewe/java/CodingStandards.html
+
+Before checking in any code, please run the ant target "before-checkin" to
+ensure your code is correct.
+
+
+# References to Documentation
 
   * [Java](http://download.oracle.com/javase/8/docs/api/index.html)
   * [Tomcat API - 8](http://tomcat.apache.org/tomcat-8.0-doc/api/index.html)
@@ -85,6 +100,8 @@ Most ant targets will work out of the box once you tell Eclipse about our ant bu
   * [JSP - 2.3](http://docs.oracle.com/javaee/7/api/javax/servlet/jsp/package-summary.html)
   * [WebsSocket - 1.0](http://docs.oracle.com/javaee/7/api/javax/websocket/package-summary.html)
   * [JSTL - core tag library](http://download.oracle.com/docs/cd/E17802_01/products/products/jsp/jstl/1.1/docs/tlddocs/index.html)
+  * [HSQL - embedded database](http://www.hsqldb.org/web/hsqlDocsFrame.html)
+  * [iText - PDF library](http://api.itextpdf.com/itext/)
 
 # Project goals
 
