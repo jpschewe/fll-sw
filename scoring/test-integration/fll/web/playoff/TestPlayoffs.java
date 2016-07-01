@@ -79,7 +79,7 @@ public class TestPlayoffs {
       }
 
       // initialize playoffs
-      IntegrationTestUtils.initializePlayoffsForDivision(selenium, "1");
+      IntegrationTestUtils.initializePlayoffsForAwardGroup(selenium, "1");
       
       IntegrationTestUtils.assertNoException(selenium);
 

@@ -50,6 +50,10 @@
   </p>
 
   <ol>
+
+    <li><a href="create_playoff_division.jsp">Create playoff
+        bracket</a></li>
+
     <li>
       <form
         name='check'
@@ -65,49 +69,53 @@
     </li>
 
 
-    <li>
-      <form
-        name='initialize'
-        action='StorePlayoffParameters'
-        method='POST'>
-        <b>WARNING: Do not initialize any playoff brackets until all
-          seeding runs have been recorded!</b> Doing so will automatically
-        add bye runs to the teams that don't have enough seeding runs.<br />
-        Select Bracket: <select
-          id='initialize-division'
-          name='division'>
-          <c:forEach
-            items="${playoff_data.initDivisions }"
-            var="division">
-            <option value='${division}'>${division}</option>
-          </c:forEach>
-        </select><br> <input
-          type='checkbox'
-          name='enableThird'
-          value='yes' />Check to enable 3rd/4th place match<br> <input
-          type='submit'
-          id='initialize_brackets'
-          value='Initialize Bracket' /> <a
-          href='javascript:display("InitializeBracketHelp")'>[help]</a>
-        <div
-          id='InitializeBracketHelp'
-          class='help'
-          style='display: none'>
-          Initializing a playoff bracket allows it to be run. A playoff
-          bracket cannot be initialized if any teams that are to compete
-          in the playoff bracket Are still competing in a playoff
-          bracket that has not been run to completion. The 3rd/4th place
-          match is need if you want to know not only 1st and 2nd place
-          in the bracket, but 3rd and 4th place as well. This will add a
-          match with the two teams that lost in the semi-final matches.<a
-            href='javascript:hide("InitializeBracketHelp")'>[hide]</a>
-        </div>
+    <c:if test="${not empty playoff_data.uninitializedBrackets }">
+      <li>
+        <form
+          name='initialize'
+          action='StorePlayoffParameters'
+          method='POST'>
+          <b>WARNING: Do not initialize any playoff brackets until
+            all seeding runs have been recorded!</b> Doing so will
+          automatically add bye runs to the teams that don't have enough
+          seeding runs.<br /> Select Bracket: <select
+            id='initialize-division'
+            name='division'>
+            <c:forEach
+              items="${playoff_data.uninitializedBrackets }"
+              var="division">
+              <option value='${division}'>${division}</option>
+            </c:forEach>
+          </select><br> <input
+            type='checkbox'
+            name='enableThird'
+            value='yes' />Check to enable 3rd/4th place match<br>
+          <input
+            type='submit'
+            id='initialize_brackets'
+            value='Initialize Bracket' /> <a
+            href='javascript:display("InitializeBracketHelp")'>[help]</a>
+          <div
+            id='InitializeBracketHelp'
+            class='help'
+            style='display: none'>
+            Initializing a playoff bracket allows it to be run. A
+            playoff bracket cannot be initialized if any teams that are
+            to compete in the playoff bracket Are still competing in a
+            playoff bracket that has not been run to completion. The
+            3rd/4th place match is need if you want to know not only 1st
+            and 2nd place in the bracket, but 3rd and 4th place as well.
+            This will add a match with the two teams that lost in the
+            semi-final matches.<a
+              href='javascript:hide("InitializeBracketHelp")'>[hide]</a>
+          </div>
 
-      </form>
-    </li>
+        </form>
+      </li>
+    </c:if>
+    <!--  end if not empty uninitializedBrackets -->
 
-
-    <c:if test="${not empty playoff_data.existingDivisions }">
+    <c:if test="${not empty playoff_data.initializedBrackets }">
 
       <%-- scoresheet generation --%>
       <li>
@@ -132,7 +140,7 @@
             id='printable.division'
             name='division'>
             <c:forEach
-              items="${playoff_data.existingDivisions }"
+              items="${playoff_data.initializedBrackets }"
               var="division">
               <option value='${division}'>${division}</option>
             </c:forEach>
@@ -206,7 +214,7 @@
           method='get'>
           Select Bracket to print: <select name='division'>
             <c:forEach
-              items="${playoff_data.existingDivisions }"
+              items="${playoff_data.initializedBrackets }"
               var="division">
               <option value='${division}'>${division}</option>
             </c:forEach>
@@ -276,7 +284,7 @@
             id='uninitialize-division'
             name='division'>
             <c:forEach
-              items="${playoff_data.existingDivisions }"
+              items="${playoff_data.initializedBrackets }"
               var="division">
               <option value='${division}'>${division}</option>
             </c:forEach>
@@ -303,31 +311,29 @@
       </li>
 
     </c:if>
-    <%-- if playoff brackets not empty --%>
-
+    <%-- if initialized playoff brackets not empty --%>
   </ol>
 
-  <c:if test="${not empty playoff_data.existingDivisions }">
+  <c:if test="${not empty playoff_data.initializedBrackets }">
 
     <h2>Other useful pages</h2>
     <ul>
 
-
-      <li><a href="remoteMain.jsp">Scrolling Brackets</a> (as on
-        big screen display)<br /> Bracket and round must be selected
-        from the big screen display <a
+      <li><a href="remoteMain.jsp">Scrolling Playoff Bracket</a>
+        (as on big screen display)<br /> Bracket and round must be
+        selected from the big screen display <a
         href="<c:url value='/admin/remoteControl.jsp'/>">remote
           control</a> page.</li>
 
       <li><a href="remoteControlBrackets.jsp?scroll=false">Non-Scrolling
-          Brackets</a> (as on big screen display)<br /> Bracket and round
-        must be selected from the big screen display <a
+          Playoff Bracket</a> (as on big screen display)<br /> Bracket and
+        round must be selected from the big screen display <a
         href="<c:url value='/admin/remoteControl.jsp'/>">remote
           control</a> page.</li>
 
     </ul>
   </c:if>
-  <!-- if playoff divisions not empty -->
+  <!-- if initialized playoff divisions not empty -->
 
 
 </body>

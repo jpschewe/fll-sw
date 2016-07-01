@@ -54,7 +54,6 @@
 	<classpathentry kind="lib" path="scoring/lib/poi-ooxml-schemas-3.10-FINAL-20140208.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/dom4j-1.6.1.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/commons-codec-1.10.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/commons-lang3-3.3.2.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/commons-logging-1.2.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/jackson-annotations-2.2.3-javadoc.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/jackson-core-2.2.3-javadoc.jar"/>
@@ -65,7 +64,6 @@
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/asm-commons-5.0.1.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/asm-tree-5.0.1.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/asm-util-5.0.1.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/commons-lang3-3.4.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/hamcrest-core-1.3.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/jaxen-1.1.4.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/jetty-6.1.14.jar"/>
@@ -80,5 +78,6 @@
 	<classpathentry kind="lib" path="scoring/lib/test/selenium/selenium-server-standalone-2.53.0.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/selenium/junit-4.12.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/htmlunit-2.22.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/commons-lang3-3.4.jar"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>

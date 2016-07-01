@@ -14,7 +14,7 @@
 <%@ page import="fll.web.playoff.Playoff" %>
 
 <%
-	/*
+  /*
   application parameters
   playoffDivision - String for the division
   playoffRoundNumber - Integer for the playoff round number, counted from the 1st playoff round
@@ -32,9 +32,9 @@
   final Number sessionRoundNumber;
   if (null != displayName) {
     sessionDivision = ApplicationAttributes.getAttribute(application, displayName
-        + "_" + divisionKey, String.class);
+    + "_" + divisionKey, String.class);
     sessionRoundNumber = ApplicationAttributes.getAttribute(application, displayName
-        + "_" + roundNumberKey, Number.class);
+    + "_" + roundNumberKey, Number.class);
   } else {
     sessionDivision = null;
     sessionRoundNumber = null;
@@ -44,11 +44,11 @@
   if (null != sessionDivision) {
     division = sessionDivision;
   } else if (null == application.getAttribute(divisionKey)) {
-    final List<String> divisions = Playoff.getPlayoffDivisions(connection, currentTournament);
+    final List<String> divisions = Playoff.getPlayoffBrackets(connection, currentTournament);
     if (!divisions.isEmpty()) {
-      division = divisions.get(0);
+  division = divisions.get(0);
     } else {
-      throw new RuntimeException("No playoff bracket specified and no playoff brackets in the database!");
+  throw new RuntimeException("No playoff bracket specified and no playoff brackets in the database!");
     }
   } else {
     division = ApplicationAttributes.getAttribute(application, divisionKey, String.class);

@@ -65,7 +65,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  */
 public final class ImportDB {
 
-  private static final Logger LOG = LoggerFactory.getLogger(ImportDB.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ImportDB.class);
 
   /**
    * Import tournament data from one database to another database
@@ -77,9 +77,9 @@ public final class ImportDB {
 
     try {
       if (args.length != 3) {
-        LOG.error("You must specify <source uri> <tournament> <destination uri>");
+        LOGGER.error("You must specify <source uri> <tournament> <destination uri>");
         for (final String arg : args) {
-          LOG.error("arg: "
+          LOGGER.error("arg: "
               + arg);
         }
         System.exit(1);
@@ -114,13 +114,13 @@ public final class ImportDB {
             stmt1 = sourceConnection.createStatement();
             stmt1.executeUpdate("SET WRITE_DELAY 1 MILLIS");
           } catch (final SQLException sqle) {
-            LOG.info("Source either isn't HSQLDB or there is a problem", sqle);
+            LOGGER.info("Source either isn't HSQLDB or there is a problem", sqle);
           }
           try {
             stmt2 = destinationConnection.createStatement();
             stmt2.executeUpdate("SET WRITE_DELAY 1 MILLIS");
           } catch (final SQLException sqle) {
-            LOG.info("Destination either isn't HSQLDB or there is a problem", sqle);
+            LOGGER.info("Destination either isn't HSQLDB or there is a problem", sqle);
           }
         } finally {
           SQLFunctions.close(stmt1);
@@ -129,16 +129,16 @@ public final class ImportDB {
 
         final boolean differences = checkForDifferences(sourceConnection, destinationConnection, tournament);
         if (!differences) {
-          if (LOG.isDebugEnabled()) {
-            LOG.debug("Importing data for "
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Importing data for "
                 + tournament + " from " + sourceURI + " to " + destinationURI);
           }
           importDatabase(sourceConnection, destinationConnection, tournament);
-          if (LOG.isDebugEnabled()) {
-            LOG.debug("Data successfully imported");
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Data successfully imported");
           }
         } else {
-          LOG.error("Import aborted due to differences in databases");
+          LOGGER.error("Import aborted due to differences in databases");
         }
 
         try {
@@ -146,13 +146,13 @@ public final class ImportDB {
             stmt1 = sourceConnection.createStatement();
             stmt1.executeUpdate("SHUTDOWN COMPACT");
           } catch (final SQLException sqle) {
-            LOG.info("Source either isn't HSQLDB or there is a problem", sqle);
+            LOGGER.info("Source either isn't HSQLDB or there is a problem", sqle);
           }
           try {
             stmt2 = destinationConnection.createStatement();
             stmt2.executeUpdate("SHUTDOWN COMPACT");
           } catch (final SQLException sqle) {
-            LOG.info("Destination either isn't HSQLDB or there is a problem", sqle);
+            LOGGER.info("Destination either isn't HSQLDB or there is a problem", sqle);
           }
         } finally {
           SQLFunctions.close(stmt1);
@@ -179,7 +179,8 @@ public final class ImportDB {
    * @throws SQLException if there is an error importing the data
    */
   public static void loadFromDumpIntoNewDB(final ZipInputStream zipfile,
-                                           final Connection destConnection) throws IOException, SQLException {
+                                           final Connection destConnection)
+      throws IOException, SQLException {
     PreparedStatement destPrep = null;
     Connection memConnection = null;
     Statement memStmt = null;
@@ -203,8 +204,8 @@ public final class ImportDB {
         final String name = memRS.getString(2);
         final String org = memRS.getString(3);
         if (!Team.isInternalTeamNumber(num)) {
-          if (LOG.isDebugEnabled()) {
-            LOG.debug("Inserting into teams: "
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Inserting into teams: "
                 + num + ", " + name + ", " + org);
           }
           destPrep.setInt(1, num);
@@ -251,7 +252,8 @@ public final class ImportDB {
    * Recursively create a tournament and it's next tournament.
    */
   private static void createTournament(final Tournament sourceTournament,
-                                       final Connection destConnection) throws SQLException {
+                                       final Connection destConnection)
+      throws SQLException {
     // add the tournament to the tournaments table if it doesn't already
     // exist
     final Tournament destTournament = Tournament.findTournamentByName(destConnection, sourceTournament.getName());
@@ -310,7 +312,8 @@ public final class ImportDB {
    * @throws FLLRuntimeException if the database version in the dump is too new
    */
   public static Document loadDatabaseDump(final ZipInputStream zipfile,
-                                          final Connection connection) throws IOException, SQLException {
+                                          final Connection connection)
+      throws IOException, SQLException {
     Document challengeResult = null;
 
     final Map<String, Map<String, String>> typeInfo = new HashMap<String, Map<String, String>>();
@@ -332,7 +335,7 @@ public final class ImportDB {
         final Map<String, String> columnTypes = loadTypeInfo(reader);
         typeInfo.put(tablename, columnTypes);
       } else {
-        LOG.warn("Unexpected file found in imported zip file, skipping: "
+        LOGGER.warn("Unexpected file found in imported zip file, skipping: "
             + name);
       }
       zipfile.closeEntry();
@@ -481,7 +484,7 @@ public final class ImportDB {
   private static void upgradeDatabase(final Connection connection,
                                       final Document challengeDocument,
                                       final ChallengeDescription description)
-                                          throws SQLException, IllegalArgumentException {
+      throws SQLException, IllegalArgumentException {
     int dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 1) {
       upgrade0To1(connection, challengeDocument);
@@ -529,6 +532,10 @@ public final class ImportDB {
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 14) {
       upgrade13To14(connection);
+    }
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 15) {
+      upgrade14To15(connection);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
@@ -616,8 +623,8 @@ public final class ImportDB {
    * Adds time columns to tournaments table.
    */
   private static void upgrade13To14(final Connection connection) throws SQLException {
-    if (LOG.isTraceEnabled()) {
-      LOG.trace("Upgrading database from 13 to 14");
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Upgrading database from 13 to 14");
     }
 
     Statement stmt = null;
@@ -643,6 +650,51 @@ public final class ImportDB {
   }
 
   /**
+   * Adds playoff_bracket_teams table.
+   */
+  private static void upgrade14To15(final Connection connection) throws SQLException {
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Upgrading database from 14 to 15");
+    }
+
+    GenerateDB.createPlayoffBracketTeams(connection);
+
+    PreparedStatement prep = null;
+    Statement stmt = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("INSERT INTO playoff_bracket_teams (tournament_id, bracket_name, team_number) VALUES(?, ?, ?)");
+
+      stmt = connection.createStatement();
+
+      rs = stmt.executeQuery("SELECT DISTINCT tournament, event_division, team FROM PlayoffData");
+      while (rs.next()) {
+        final int tournament = rs.getInt(1);
+        final String bracketName = rs.getString(2);
+        final int team = rs.getInt(3);
+        if (!Team.isInternalTeamNumber(team)) {
+
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Adding to playoff_bracket_names tournament: "
+                + tournament + " bracketName: " + bracketName + " team: " + team);
+          }
+
+          prep.setInt(1, tournament);
+          prep.setString(2, bracketName);
+          prep.setInt(3, team);
+          prep.executeUpdate();
+        }
+      }
+
+      setDBVersion(connection, 15);
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(stmt);
+      SQLFunctions.close(prep);
+    }
+  }
+
+  /**
    * Check for a column in a table. This checks table names both upper and lower
    * case.
    * This also checks column names ignoring case.
@@ -654,7 +706,8 @@ public final class ImportDB {
    */
   private static boolean checkForColumnInTable(final Connection connection,
                                                final String table,
-                                               final String column) throws SQLException {
+                                               final String column)
+      throws SQLException {
     ResultSet metaData = null;
     try {
       final DatabaseMetaData md = connection.getMetaData();
@@ -691,9 +744,10 @@ public final class ImportDB {
    * @throws SQLException
    */
   private static void upgrade12To13(final Connection connection,
-                                    final ChallengeDescription description) throws SQLException {
-    if (LOG.isTraceEnabled()) {
-      LOG.trace("Upgrading database from 12 to 13");
+                                    final ChallengeDescription description)
+      throws SQLException {
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Upgrading database from 12 to 13");
     }
 
     final Set<String> challengeSubjectiveCategories = new HashSet<>();
@@ -769,9 +823,10 @@ public final class ImportDB {
    * @throws SQLException
    */
   private static void upgrade11To12(final Connection connection,
-                                    final ChallengeDescription description) throws SQLException {
-    if (LOG.isTraceEnabled()) {
-      LOG.trace("Upgrading database from 11 to 12");
+                                    final ChallengeDescription description)
+      throws SQLException {
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Upgrading database from 11 to 12");
     }
 
     PreparedStatement getTournaments = null;
@@ -804,15 +859,15 @@ public final class ImportDB {
           scheduleColumns.add(name);
         }
 
-        if (LOG.isTraceEnabled()) {
-          LOG.trace(String.format("Tournament %d has %s schedule columns", tournament, scheduleColumns.toString()));
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace(String.format("Tournament %d has %s schedule columns", tournament, scheduleColumns.toString()));
         }
 
         for (final ScoreCategory category : description.getSubjectiveCategories()) {
           final String column = findScheduleColumnForCategory(category, scheduleColumns);
 
-          if (LOG.isTraceEnabled()) {
-            LOG.trace(String.format("Category %s maps to column %s", category.getName(), column));
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace(String.format("Category %s maps to column %s", category.getName(), column));
           }
 
           if (null != column) {
@@ -966,7 +1021,8 @@ public final class ImportDB {
 
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic based upon tables in the database")
   private static void upgrade0To1(final Connection connection,
-                                  final Document challengeDocument) throws SQLException {
+                                  final Document challengeDocument)
+      throws SQLException {
     Statement stmt = null;
     ResultSet rs = null;
     PreparedStatement stringsToInts = null;
@@ -1015,8 +1071,8 @@ public final class ImportDB {
       }
       SQLFunctions.close(rs);
 
-      if (LOG.isTraceEnabled()) {
-        LOG.trace("Map from names to tournament IDs: "
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("Map from names to tournament IDs: "
             + nameID);
       }
 
@@ -1056,7 +1112,8 @@ public final class ImportDB {
   }
 
   private static void setDBVersion(final Connection connection,
-                                   final int version) throws SQLException {
+                                   final int version)
+      throws SQLException {
     PreparedStatement setVersion = null;
     try {
       setVersion = connection.prepareStatement("UPDATE global_parameters SET param_value = ? WHERE param = ?");
@@ -1084,7 +1141,8 @@ public final class ImportDB {
    */
   public static void importDatabase(final Connection sourceConnection,
                                     final Connection destinationConnection,
-                                    final String tournamentName) throws SQLException {
+                                    final String tournamentName)
+      throws SQLException {
 
     final Document document = GlobalParameters.getChallengeDocument(destinationConnection);
     final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
@@ -1110,6 +1168,7 @@ public final class ImportDB {
     importTableNames(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
     importPlayoffData(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+    importPlayoffTeams(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
     importSubjectiveNominees(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
@@ -1128,9 +1187,10 @@ public final class ImportDB {
   private static void importSchedule(final Connection sourceConnection,
                                      final Connection destinationConnection,
                                      final int sourceTournamentID,
-                                     final int destTournamentID) throws SQLException {
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("Importing Schedule");
+                                     final int destTournamentID)
+      throws SQLException {
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Importing Schedule");
     }
 
     PreparedStatement destPrep = null;
@@ -1243,13 +1303,14 @@ public final class ImportDB {
   private static void importCategoryScheduleMapping(final Connection sourceConnection,
                                                     final Connection destinationConnection,
                                                     final int sourceTournamentID,
-                                                    final int destTournamentID) throws SQLException {
+                                                    final int destTournamentID)
+      throws SQLException {
     PreparedStatement destPrep = null;
     PreparedStatement sourcePrep = null;
     ResultSet sourceRS = null;
     try {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Importing table_division");
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Importing table_division");
       }
       destPrep = destinationConnection.prepareStatement("DELETE FROM category_schedule_column WHERE tournament = ?");
       destPrep.setInt(1, destTournamentID);
@@ -1284,9 +1345,10 @@ public final class ImportDB {
   private static void importPlayoffData(final Connection sourceConnection,
                                         final Connection destinationConnection,
                                         final int sourceTournamentID,
-                                        final int destTournamentID) throws SQLException {
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("Importing PlayoffData");
+                                        final int destTournamentID)
+      throws SQLException {
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Importing PlayoffData");
     }
 
     PreparedStatement destPrep = null;
@@ -1323,16 +1385,56 @@ public final class ImportDB {
     }
   }
 
-  private static void importTableNames(final Connection sourceConnection,
-                                       final Connection destinationConnection,
-                                       final int sourceTournamentID,
-                                       final int destTournamentID) throws SQLException {
+  private static void importPlayoffTeams(final Connection sourceConnection,
+                                         final Connection destinationConnection,
+                                         final int sourceTournamentID,
+                                         final int destTournamentID)
+      throws SQLException {
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Importing PlayoffTeams");
+    }
+
     PreparedStatement destPrep = null;
     PreparedStatement sourcePrep = null;
     ResultSet sourceRS = null;
     try {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Importing tablenames");
+      destPrep = destinationConnection.prepareStatement("DELETE FROM playoff_bracket_teams WHERE tournament_id = ?");
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+      SQLFunctions.close(destPrep);
+
+      sourcePrep = sourceConnection.prepareStatement("SELECT bracket_name, team_number "
+          + "FROM playoff_bracket_teams WHERE tournament_id=?");
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep = destinationConnection.prepareStatement("INSERT INTO playoff_bracket_teams (tournament_id, bracket_name, team_number)"
+          + "VALUES (?, ?, ?)");
+      destPrep.setInt(1, destTournamentID);
+      sourceRS = sourcePrep.executeQuery();
+      while (sourceRS.next()) {
+        final String bracketName = sourceRS.getString(1);
+        final int team = sourceRS.getInt(2);
+        destPrep.setString(2, bracketName);
+        destPrep.setInt(3, team);
+        destPrep.executeUpdate();
+      }
+    } finally {
+      SQLFunctions.close(sourceRS);
+      SQLFunctions.close(sourcePrep);
+      SQLFunctions.close(destPrep);
+    }
+  }
+
+  private static void importTableNames(final Connection sourceConnection,
+                                       final Connection destinationConnection,
+                                       final int sourceTournamentID,
+                                       final int destTournamentID)
+      throws SQLException {
+    PreparedStatement destPrep = null;
+    PreparedStatement sourcePrep = null;
+    ResultSet sourceRS = null;
+    try {
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Importing tablenames");
       }
       destPrep = destinationConnection.prepareStatement("DELETE FROM tablenames WHERE Tournament = ?");
       destPrep.setInt(1, destTournamentID);
@@ -1367,13 +1469,14 @@ public final class ImportDB {
   private static void importTableDivision(final Connection sourceConnection,
                                           final Connection destinationConnection,
                                           final int sourceTournamentID,
-                                          final int destTournamentID) throws SQLException {
+                                          final int destTournamentID)
+      throws SQLException {
     PreparedStatement destPrep = null;
     PreparedStatement sourcePrep = null;
     ResultSet sourceRS = null;
     try {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Importing table_division");
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Importing table_division");
       }
       destPrep = destinationConnection.prepareStatement("DELETE FROM table_division WHERE tournament = ?");
       destPrep.setInt(1, destTournamentID);
@@ -1410,14 +1513,15 @@ public final class ImportDB {
                                        final Connection destinationConnection,
                                        final int sourceTournamentID,
                                        final int destTournamentID,
-                                       final ChallengeDescription description) throws SQLException {
+                                       final ChallengeDescription description)
+      throws SQLException {
     PreparedStatement destPrep = null;
     try {
       // loop over each subjective category
       for (final ScoreCategory categoryElement : description.getSubjectiveCategories()) {
         final String tableName = categoryElement.getName();
-        if (LOG.isDebugEnabled()) {
-          LOG.debug("Importing "
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Importing "
               + tableName);
         }
 
@@ -1472,7 +1576,8 @@ public final class ImportDB {
                                    final Connection destinationConnection,
                                    final int destTournamentID,
                                    final Connection sourceConnection,
-                                   final int sourceTournamentID) throws SQLException {
+                                   final int sourceTournamentID)
+      throws SQLException {
     PreparedStatement destPrep = null;
     PreparedStatement sourcePrep = null;
     ResultSet sourceRS = null;
@@ -1523,11 +1628,12 @@ public final class ImportDB {
                                         final Connection destinationConnection,
                                         final int sourceTournamentID,
                                         final int destTournamentID,
-                                        final ChallengeDescription description) throws SQLException {
+                                        final ChallengeDescription description)
+      throws SQLException {
     PreparedStatement destPrep = null;
     try {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Importing performance scores");
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Importing performance scores");
       }
       final PerformanceScoreCategory performanceElement = description.getPerformance();
       final String tableName = "Performance";
@@ -1573,13 +1679,14 @@ public final class ImportDB {
   private static void importTournamentTeams(final Connection sourceConnection,
                                             final Connection destinationConnection,
                                             final int sourceTournamentID,
-                                            final int destTournamentID) throws SQLException {
+                                            final int destTournamentID)
+      throws SQLException {
     PreparedStatement destPrep = null;
     PreparedStatement sourcePrep = null;
     ResultSet sourceRS = null;
     try {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Importing TournamentTeams");
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Importing TournamentTeams");
       }
       destPrep = destinationConnection.prepareStatement("DELETE FROM TournamentTeams WHERE Tournament = ?");
       destPrep.setInt(1, destTournamentID);
@@ -1613,9 +1720,10 @@ public final class ImportDB {
   private static void importTournamentParameters(final Connection sourceConnection,
                                                  final Connection destinationConnection,
                                                  final int sourceTournamentID,
-                                                 final int destTournamentID) throws SQLException {
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("Importing tournament_parameters");
+                                                 final int destTournamentID)
+      throws SQLException {
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Importing tournament_parameters");
     }
 
     // use the "get" methods rather than generic SQL query to ensure that the
@@ -1631,13 +1739,14 @@ public final class ImportDB {
   private static void importJudges(final Connection sourceConnection,
                                    final Connection destinationConnection,
                                    final int sourceTournamentID,
-                                   final int destTournamentID) throws SQLException {
+                                   final int destTournamentID)
+      throws SQLException {
     PreparedStatement destPrep = null;
     PreparedStatement sourcePrep = null;
     ResultSet sourceRS = null;
     try {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Importing Judges");
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Importing Judges");
       }
 
       destPrep = destinationConnection.prepareStatement("DELETE FROM Judges WHERE Tournament = ?");
@@ -1667,13 +1776,14 @@ public final class ImportDB {
   private static void importSubjectiveNominees(final Connection sourceConnection,
                                                final Connection destinationConnection,
                                                final int sourceTournamentID,
-                                               final int destTournamentID) throws SQLException {
+                                               final int destTournamentID)
+      throws SQLException {
     PreparedStatement destPrep = null;
     PreparedStatement sourcePrep = null;
     ResultSet sourceRS = null;
     try {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Importing subjective nominees");
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Importing subjective nominees");
       }
 
       // do drops first
@@ -1705,13 +1815,14 @@ public final class ImportDB {
   private static void importFinalistSchedule(final Connection sourceConnection,
                                              final Connection destinationConnection,
                                              final int sourceTournamentID,
-                                             final int destTournamentID) throws SQLException {
+                                             final int destTournamentID)
+      throws SQLException {
     PreparedStatement destPrep = null;
     PreparedStatement sourcePrep = null;
     ResultSet sourceRS = null;
     try {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Importing finalist schedule");
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Importing finalist schedule");
       }
 
       // do drops first
@@ -1771,19 +1882,20 @@ public final class ImportDB {
    */
   public static boolean checkForDifferences(final Connection sourceConnection,
                                             final Connection destConnection,
-                                            final String tournament) throws SQLException {
+                                            final String tournament)
+      throws SQLException {
 
     // check that the tournament exists
     final Tournament destTournament = Tournament.findTournamentByName(destConnection, tournament);
     if (null == destTournament) {
-      LOG.error("Tournament: "
+      LOGGER.error("Tournament: "
           + tournament + " doesn't exist in the destination database!");
       return true;
     }
 
     final Tournament sourceTournament = Tournament.findTournamentByName(sourceConnection, tournament);
     if (null == sourceTournament) {
-      LOG.error("Tournament: "
+      LOGGER.error("Tournament: "
           + tournament + " doesn't exist in the source database!");
       return true;
     }
@@ -1793,7 +1905,8 @@ public final class ImportDB {
     final List<Team> missingTeams = findMissingTeams(sourceConnection, destConnection, tournament);
     if (!missingTeams.isEmpty()) {
       for (final Team team : missingTeams) {
-        LOG.error(String.format("Team %d is in the source database, but not the dest database", team.getTeamNumber()));
+        LOGGER.error(String.format("Team %d is in the source database, but not the dest database",
+                                   team.getTeamNumber()));
       }
       differencesFound = true;
     }
@@ -1802,8 +1915,8 @@ public final class ImportDB {
     final List<TeamPropertyDifference> teamDifferences = checkTeamInfo(sourceConnection, destConnection, tournament);
     if (!teamDifferences.isEmpty()) {
       for (final TeamPropertyDifference diff : teamDifferences) {
-        LOG.error(String.format("%s is different for team %d source value: %s dest value: %s", diff.getProperty(),
-                                diff.getTeamNumber(), diff.getSourceValue(), diff.getDestValue()));
+        LOGGER.error(String.format("%s is different for team %d source value: %s dest value: %s", diff.getProperty(),
+                                   diff.getTeamNumber(), diff.getSourceValue(), diff.getDestValue()));
       }
       differencesFound = true;
     }
@@ -1822,7 +1935,8 @@ public final class ImportDB {
    */
   public static List<TeamPropertyDifference> checkTeamInfo(final Connection sourceConnection,
                                                            final Connection destConnection,
-                                                           final String tournament) throws SQLException {
+                                                           final String tournament)
+      throws SQLException {
     final List<TeamPropertyDifference> differences = new LinkedList<TeamPropertyDifference>();
 
     PreparedStatement sourcePrep = null;
@@ -1884,7 +1998,8 @@ public final class ImportDB {
    */
   public static List<Team> findMissingTeams(final Connection sourceConnection,
                                             final Connection destConnection,
-                                            final String tournament) throws SQLException {
+                                            final String tournament)
+      throws SQLException {
     final List<Team> missingTeams = new LinkedList<>();
 
     final Tournament sourceTournament = Tournament.findTournamentByName(sourceConnection, tournament);

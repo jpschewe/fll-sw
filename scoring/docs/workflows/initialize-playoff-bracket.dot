@@ -8,14 +8,5 @@ StorePlayoffParameters -> "choose_bracket_sort.jsp";
 
 ChooseBracketSort -> InitializeBrackets;
 
-InitializeBrackets -> "playoff_index.jsp" [label="initialize existing division"];
-
-InitializeBrackets -> "create_playoff_division.jsp" [label="Create new division"];
-
-"create_playoff_division.jsp" -> CreatePlayoffDivision;
-
-CreatePlayoffDivision -> "create_playoff_division.jsp" [label="no name, matches existing division name"];
-
-CreatePlayoffDivision -> InitializeBrackets [label="created division"];
-
+InitializeBrackets -> "playoff_index.jsp";
 }

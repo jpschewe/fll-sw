@@ -2216,6 +2216,14 @@ public final class Queries {
     }
   }
 
+  /**
+   * Check if any playoff bracket is initialized for the specified tournament.
+   * 
+   * @param connection database connection
+   * @param tournamentID tournament ID
+   * @return true if any playoff bracket is initialized in the tournament
+   * @throws SQLException if the database connection fails
+   */
   public static boolean isPlayoffDataInitialized(final Connection connection,
                                                  final int tournamentID)
       throws SQLException, RuntimeException {
@@ -2552,7 +2560,7 @@ public final class Queries {
   public static int getNumPlayoffRounds(final Connection connection) throws SQLException {
     final int tournament = getCurrentTournament(connection);
     int numRounds = 0;
-    for (final String division : Playoff.getPlayoffDivisions(connection, tournament)) {
+    for (final String division : Playoff.getPlayoffBrackets(connection, tournament)) {
       final int x = getFirstPlayoffRoundSize(connection, division);
       if (x > 0) {
         numRounds = Math.max((int) Math.round(Math.log(x)

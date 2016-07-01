@@ -215,8 +215,8 @@
       </div></li>
 
 
-    <li><a href='edit_judging_groups.jsp'>Assign teams to judging groups
-        groups in current tournament</a>. <a
+    <li><a href='edit_judging_groups.jsp'>Assign teams to
+        judging groups groups in current tournament</a>. <a
       href='javascript:display("JudgingGroupHelp")'>[help]</a>
       <div
         id='JudgingGroupHelp'
@@ -280,6 +280,11 @@
 
     <li><h3>Subjective Scoring</h3>
       <ul>
+        <li><a
+          href='<c:url value="/subjective/index.html"/>'
+          target="_new">Subjective Web application</a></li>
+
+
         <li><a href="subjective-data.fll">Download the datafile
             for subjective score entry.</a> Should be downloaded after each
           subjective score upload to lessen chance of data loss due to
@@ -289,28 +294,28 @@
             Scoring Application</a> (Executable Jar file) - run with "java
           -jar subjective-app.jar"</li>
 
-        <li><a
-          href='<c:url value="/subjective/index.html"/>'
-          target="_new">Subjective Web application</a></li>
-
+        <li>
+          <form
+            name='uploadSubjective'
+            ACTION='<c:url value="UploadSubjectiveData"/>'
+            METHOD="POST"
+            ENCTYPE="multipart/form-data">
+            Upload the datafile for subjective scores. <input
+              type="file"
+              size="32"
+              name="subjectiveFile" /> <input
+              type="submit"
+              value="Upload" />
+          </form>
+        </li>
 
       </ul></li>
 
-    <li>
-      <form
-        name='uploadSubjective'
-        ACTION='<c:url value="UploadSubjectiveData"/>'
-        METHOD="POST"
-        ENCTYPE="multipart/form-data">
-        Upload the datafile for subjective scores. <input
-          type="file"
-          size="32"
-          name="subjectiveFile" /> <input
-          type="submit"
-          value="Upload" />
-      </form>
+    <li>Once the seeding rounds have been completed you will need
+      to setup the <a
+      href="../playoff"
+      target="_new">playoffs</a>.
     </li>
-
 
   </ol>
 
