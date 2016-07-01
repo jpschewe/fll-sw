@@ -56,7 +56,7 @@ function createTeamTable(teams, currentDivision, currentCategory) {
 
       var sgCol = $("<td></td>");
       row.append(sgCol);
-      var group = team.judgingStation;
+      var group = team.judgingGroup;
       sgCol.text(group);
 
       var numCol = $("<td></td>");

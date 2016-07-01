@@ -311,7 +311,7 @@ public class TournamentScheduleTest {
       Assert.assertTrue("No entries for schedule: "
           + file.getName(), !schedule.getSchedule().isEmpty());
       Assert.assertTrue("No division for schedule: "
-          + file.getName(), !schedule.getDivisions().isEmpty());
+          + file.getName(), !schedule.getAwardGroups().isEmpty());
       Assert.assertTrue("No judging groups for schedule: "
           + file.getName(), !schedule.getJudgingGroups().isEmpty());
     }

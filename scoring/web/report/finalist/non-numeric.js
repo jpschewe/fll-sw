@@ -140,7 +140,7 @@ function populateTeamInformation(category, teamIdx, team) {
   $("#" + teamNameId(category.catId, teamIdx)).val(team.name);
   $("#" + teamOrgId(category.catId, teamIdx)).val(team.org);
   $("#" + teamJudgingStationId(category.catId, teamIdx)).val(
-      team.judgingStation);
+      team.judgingGroup);
 }
 
 /**

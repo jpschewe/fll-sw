@@ -196,7 +196,7 @@ public class SubjectivePdfWriter {
         + scheduledTimeStr, f12b, NO_BORDERS, Element.ALIGN_RIGHT));
 
     pageHeaderTable.addCell(createCell("Judging Room: "
-        + teamInfo.getDivision(), f10b, NO_BORDERS, Element.ALIGN_LEFT));
+        + teamInfo.getAwardGroup(), f10b, NO_BORDERS, Element.ALIGN_LEFT));
     PdfPCell c = createCell("Team Name: "
         + teamInfo.getTeamName(), f12b, NO_BORDERS, Element.ALIGN_LEFT);
     c.setColspan(2);
@@ -492,7 +492,7 @@ public class SubjectivePdfWriter {
 
         final TeamScheduleInfo teamInfo = new TeamScheduleInfo(1, 1);
         teamInfo.setDivision("dummy");
-        teamInfo.setJudgingStation("Dummy");
+        teamInfo.setJudgingGroup("Dummy");
         teamInfo.setOrganization("Dummy");
         teamInfo.setTeamName("Dummy");
         writer.writeTeamSubjectivePdf(pdf, teamInfo, font, commentHeight);

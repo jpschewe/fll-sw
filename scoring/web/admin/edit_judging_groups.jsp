@@ -53,7 +53,7 @@
               items="${judgingGroups}"
               var="group">
               <c:choose>
-                <c:when test="${team.judgingStation == group}">
+                <c:when test="${team.judgingGroup == group}">
                   <input
                     type='radio'
                     name='<c:out value="${team.teamNumber}"/>'

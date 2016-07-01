@@ -64,11 +64,11 @@ public class FinalistLoad {
     output.format("  %s = $.finalist.addTeam(%d, %s, %s, %s);%n", teamVarName, team.getTeamNumber(),
                   WebUtils.quoteJavascriptString(team.getTrimmedTeamName()),
                   WebUtils.quoteJavascriptString(team.getOrganization()),
-                  WebUtils.quoteJavascriptString(team.getJudgingStation()));
+                  WebUtils.quoteJavascriptString(team.getJudgingGroup()));
     output.format("}%n");
 
     output.format("$.finalist.addTeamToDivision(%s, %s);%n", teamVarName,
-                  WebUtils.quoteJavascriptString(team.getEventDivision()));
+                  WebUtils.quoteJavascriptString(team.getAwardGroup()));
 
     for (final String playoffDivision : Playoff.getPlayoffBracketsForTeam(connection, team.getTeamNumber())) {
       output.format("$.finalist.addTeamToPlayoffDivision(%s, %s);%n", teamVarName,
