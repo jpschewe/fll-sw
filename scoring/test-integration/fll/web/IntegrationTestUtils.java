@@ -551,7 +551,7 @@ public final class IntegrationTestUtils {
 
     selenium.findElement(By.linkText("Create playoff bracket")).click();
 
-    selenium.findElement(By.xpath("//input[contains(normalize-space(.),'Create Playoff Bracket for Award Group "
+    selenium.findElement(By.xpath("//input[@value = 'Create Playoff Bracket for Award Group "
         + awardGroup + "'")).click();
     Assert.assertTrue("Error creating bracket for award group: "
         + awardGroup, isElementPresent(selenium, By.id("success")));
