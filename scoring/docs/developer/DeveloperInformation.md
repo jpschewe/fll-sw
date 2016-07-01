@@ -16,9 +16,6 @@ If you want to test out the latest code you can do so by [downloading the most r
 
 You can edit using your favorite Java IDE. We provide project files for Eclipse.
 
-If you're new to git read at least the first 3 chapters of [http://progit.org/book/](http://progit.org/book/)
-
-
 # Copyright
 
 All of the code is currently Copyrighted by INSciTE.
@@ -31,6 +28,8 @@ Please make sure anything you add has the following sort of header:
 
 # GIT rules/guidelines
 
+If you're new to git read at least the first 3 chapters of [http://progit.org/book/](http://progit.org/book/)
+
 Do all development on a branch other than master. Branches named "feature.XXX" or "ticket.XXX" are preferred. Where "XXX" can be anything, but typically has the number of the ticket that you're working on in it and some short description of what you're doing. Example usage:
 
 
@@ -42,6 +41,7 @@ Do all development on a branch other than master. Branches named "feature.XXX" o
     ./ant.sh before-checkin # to make sure you didn't break something
     git push origin ticket.11.foo # push all changes in local branch "ticket.11.foo" to a remote branch with the same name on the remote "origin"
 
+Alternatively fork the repository and submit a pull request.
 
 Commit early and often.
 
