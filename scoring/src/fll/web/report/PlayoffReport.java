@@ -81,7 +81,7 @@ public class PlayoffReport extends BaseFLLServlet {
 
       document.addTitle("Playoff Report");
 
-      final List<String> playoffDivisions = Playoff.getPlayoffDivisions(connection, tournament.getTournamentID());
+      final List<String> playoffDivisions = Playoff.getPlayoffBrackets(connection, tournament.getTournamentID());
       for (final String division : playoffDivisions) {
 
         Paragraph para = processDivision(connection, tournament, division);

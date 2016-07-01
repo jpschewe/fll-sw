@@ -9,8 +9,10 @@ package fll.web.playoff;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -21,16 +23,16 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.log4j.Logger;
 
-import fll.Team;
+import fll.Tournament;
+import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Create a new playoff division.
@@ -57,6 +59,9 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
       final List<String> judgingStations = Queries.getJudgingStations(connection, currentTournamentID);
       pageContext.setAttribute("judgingStations", judgingStations);
 
+      final List<String> awardGroups = Queries.getEventDivisions(connection, currentTournamentID);
+      pageContext.setAttribute("awardGroups", awardGroups);
+
     } catch (final SQLException sqle) {
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);
@@ -69,7 +74,8 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     final StringBuilder message = new StringBuilder();
     final String existingMessage = SessionAttributes.getMessage(session);
     if (null != existingMessage) {
@@ -85,50 +91,98 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
       final PlayoffSessionData data = SessionAttributes.getNonNullAttribute(session, PlayoffIndex.SESSION_DATA,
                                                                             PlayoffSessionData.class);
 
-      final int currentTournamentID = Queries.getCurrentTournament(connection);
+      final Tournament currentTournament = data.getCurrentTournament();
+      final int currentTournamentID = currentTournament.getTournamentID();
 
-      final List<String> playoffDivisions = Playoff.getPlayoffDivisions(connection, currentTournamentID);
+      final List<String> playoffDivisions = Playoff.getPlayoffBrackets(connection, currentTournamentID);
 
-      final String divisionStr = request.getParameter("division_name");
-      if (null == divisionStr
-          || "".equals(divisionStr)) {
-        message.append("<p class='error'>You need to specify a name for the playoff bracket</p>");
-        redirect = "create_playoff_division.jsp";
-      } else if (playoffDivisions.contains(divisionStr)) {
-        message.append("<p class='error'>The division '"
-            + divisionStr + "' already exists, please pick a different name");
-        redirect = "create_playoff_division.jsp";
-      } else if (Queries.getEventDivisions(connection, currentTournamentID).contains(divisionStr)) {
-        message.append("<p class='error'>The division '"
-            + divisionStr + "' matches an event division, please pick a different name");
-        redirect = "create_playoff_division.jsp";
+      if (null != request.getParameter("selected_teams")) {
+        final String bracketName = request.getParameter("bracket_name");
+        if (null == bracketName
+            || "".equals(bracketName)) {
+          message.append("<p class='error'>You need to specify a name for the playoff bracket</p>");
+          redirect = "create_playoff_division.jsp";
+        } else if (playoffDivisions.contains(bracketName)) {
+          message.append("<p class='error'>The playoff bracket '"
+              + bracketName + "' already exists, please pick a different name");
+          redirect = "create_playoff_division.jsp";
+        } else {
+          final String[] selectedTeams = request.getParameterValues("selected_team");
+          final List<Integer> teamNumbers = new LinkedList<Integer>();
+          for (final String teamStr : selectedTeams) {
+            final int num = Integer.parseInt(teamStr);
+            teamNumbers.add(num);
+          }
+
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Selected team numbers: "
+                + teamNumbers);
+          }
+
+          Playoff.createPlayoffBracket(connection, currentTournamentID, bracketName, teamNumbers);
+
+          message.append("<p id='success'>Created playoff bracket"
+              + bracketName + "</p>");
+
+          redirect = "index.jsp";
+        }
       } else {
-        final String[] selectedTeams = request.getParameterValues("selected_team");
-        final List<Integer> teamNumbers = new LinkedList<Integer>();
-        for (final String teamStr : selectedTeams) {
-          final int num = Integer.parseInt(teamStr);
-          teamNumbers.add(num);
+        // create bracket based on award group or judging group
+
+        boolean done = false;
+
+        Enumeration<String> paramNames = request.getParameterNames();
+        while (paramNames.hasMoreElements()) {
+          final String paramName = paramNames.nextElement();
+          if (paramName.startsWith("create_award_group_")) {
+            final String idxStr = paramName.substring("create_award_group_".length());
+            final int idx = Integer.parseInt(idxStr);
+            final String awardGroup = request.getParameter("award_group_"
+                + idx);
+
+            // get list of teams in this award group
+            final List<Integer> teamNumbers = new LinkedList<>();
+            for (final Map.Entry<Integer, TournamentTeam> entry : data.getTournamentTeams().entrySet()) {
+              if (awardGroup.equals(entry.getValue().getEventDivision())) {
+                teamNumbers.add(entry.getKey());
+              }
+            }
+
+            Playoff.createPlayoffBracket(connection, currentTournamentID, awardGroup, teamNumbers);
+
+            message.append("<p id='success'>Created playoff bracket '"
+                + awardGroup + "'</p>");
+            redirect = "index.jsp";
+            done = true;
+          } else if (paramName.startsWith("create_judging_group_")) {
+            final String idxStr = paramName.substring("create_judging_group_".length());
+            final int idx = Integer.parseInt(idxStr);
+            final String judgingGroup = request.getParameter("judging_group_"
+                + idx);
+
+            // get list of teams in this judging group
+            final List<Integer> teamNumbers = new LinkedList<>();
+            for (final Map.Entry<Integer, TournamentTeam> entry : data.getTournamentTeams().entrySet()) {
+              if (judgingGroup.equals(entry.getValue().getJudgingStation())) {
+                teamNumbers.add(entry.getKey());
+              }
+            }
+
+            Playoff.createPlayoffBracket(connection, currentTournamentID, judgingGroup, teamNumbers);
+
+            message.append("<p id='success'>Created playoff bracket '"
+                + judgingGroup + "'</p>");
+            redirect = "index.jsp";
+            done = true;
+          }
         }
 
-        data.setDivision(divisionStr);
-
-        if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("Selected team numbers: "
-              + teamNumbers);
+        if (!done) {
+          message.append("<p class='error'>No action specified</p>");
+          redirect = "create_playoff_division.jsp";
         }
-
-        final List<Team> teams = new LinkedList<Team>();
-        for (final int number : teamNumbers) {
-          final Team team = Team.getTeamFromDatabase(connection, number);
-          teams.add(team);
-        }
-
-        data.setDivisionTeams(teams);
-        
-        session.setAttribute(PlayoffIndex.SESSION_DATA, data);
-
-        redirect = "InitializeBrackets";
       }
+
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
           + sqle.getMessage() + "</p>");

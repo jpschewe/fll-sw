@@ -99,7 +99,7 @@ public class TestAJAXBrackets {
 
       final String division = "1";
 
-      IntegrationTestUtils.initializePlayoffsForDivision(selenium, division, BracketSortType.ALPHA_TEAM);
+      IntegrationTestUtils.initializePlayoffsForAwardGroup(selenium, division, BracketSortType.ALPHA_TEAM);
 
       // open brackets
       IntegrationTestUtils.loadPage(bracketsWindow, TestUtils.URL_ROOT
