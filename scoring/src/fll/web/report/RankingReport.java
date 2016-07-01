@@ -108,7 +108,7 @@ public class RankingReport extends BaseFLLServlet {
             + " / " + team.getOrganization(), TITLE_FONT));
         para.add(Chunk.NEWLINE);
         para.add(new Chunk("Award Group: "
-            + team.getEventDivision(), TITLE_FONT));
+            + team.getAwardGroup(), TITLE_FONT));
         para.add(Chunk.NEWLINE);
         para.add(new Chunk(
                            "Each team is ranked in each category in the judging group and award group they were judged in. Performance scores are ranked by division only. Teams may have the same rank if they were tied.",
