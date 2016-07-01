@@ -51,15 +51,52 @@
   <%-- clear out the message, so that we don't see it again --%>
   <c:remove var="message" />
 
-  <p>Choose the teams that you want to include in the playoff
-    bracket. This group of teams will compete against each other in a
-    single elimination playoff bracket.</p>
-
   <form
     method="POST"
     action="CreatePlayoffDivision">
 
-    <label for="division_name">Name: </label><input name="division_name" />
+    <c:forEach
+      items="${awardGroups }"
+      var="awardGroup"
+      varStatus="idx">
+      <div>
+        <c:if
+          test="${not playoff_data.existingBrackets.contains(awardGroup)}">
+          <input
+            type='submit'
+            name='create_award_group_${idx.count}'
+            value='Create Playoff Bracket for Award Group ${awardGroup }' />
+          <input
+            type='hidden'
+            name='award_group_${idx.count}'
+            value='${awardGroup}' />
+        </c:if>
+      </div>
+    </c:forEach>
+
+    <c:forEach
+      items="${judgingStations }"
+      var="station"
+      varStatus="idx">
+      <div>
+        <c:if
+          test="${not playoff_data.existingBrackets.contains(station)}">
+          <input
+            type='submit'
+            name='create_judging_group_${idx.count}'
+            value='Create Playoff Bracket for Judging Group ${station }' />
+          <input
+            type='hidden'
+            name='judging_group_${idx.count}'
+            value='${station}' />
+        </c:if>
+      </div>
+    </c:forEach>
+
+    <hr />
+
+    <p>Alternatively select the teams that you want to include in
+      the playoff bracket and choose a name for the it.</p>
 
     <div>Select/unselect teams by award group</div>
     <c:forEach
@@ -72,10 +109,13 @@
           name="award_group_select_${idx.count}"
           id="award_group_select_${idx.count }" /> <label
           for="award_group_select_${idx.count}">${awardGroup }</label>
+        <c:if
+          test="${not playoff_data.existingBrackets.contains(awardGroup)}">
+        </c:if>
       </div>
     </c:forEach>
 
-    <div>Select/unselect teams by judging station</div>
+    <div>Select/unselect teams by judging group</div>
     <c:forEach
       items="${judgingStations }"
       var="station"
@@ -89,13 +129,19 @@
       </div>
     </c:forEach>
 
+    <label for="division_name">Name: </label><input name="bracket_name" />
+    <input
+      type='submit'
+      name='selected_teams'
+      value='Create Playoff Bracket with selected teams' /><br />
+
     <table border='1'>
 
       <tr>
         <th>Select</th>
         <th>Number</th>
         <th>Name</th>
-        <th>Judging Station</th>
+        <th>Judging Group</th>
         <th>Award Group</th>
       </tr>
       <c:forEach
@@ -120,10 +166,6 @@
         </tr>
       </c:forEach>
     </table>
-
-    <input
-      type='submit'
-      value='Submit' />
 
   </form>
 
