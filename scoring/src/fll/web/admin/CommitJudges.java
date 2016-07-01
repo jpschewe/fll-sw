@@ -106,14 +106,14 @@ public class CommitJudges extends BaseFLLServlet {
       for (final JudgeInformation info : judges) {
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("Doing insert for id: "
-              + info.getId() + " category: " + info.getCategory() + " station: " + info.getStation());
+              + info.getId() + " category: " + info.getCategory() + " station: " + info.getGroup());
         }
 
         newJudgeInfo.add(info);
 
         prep.setString(1, info.getId());
         prep.setString(2, info.getCategory());
-        prep.setString(3, info.getStation());
+        prep.setString(3, info.getGroup());
         prep.executeUpdate();
       }
 

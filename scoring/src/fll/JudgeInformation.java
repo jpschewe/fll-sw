@@ -46,22 +46,22 @@ public final class JudgeInformation implements Serializable {
     return category;
   }
 
-  private final String station;
+  private final String group;
 
   /**
    * @return The judging group the judge is at.
    */
-  public String getStation() {
-    return station;
+  public String getGroup() {
+    return group;
   }
 
   @JsonCreator
   public JudgeInformation(@JsonProperty("id") final String id,
                           @JsonProperty("category") final String category,
-                          @JsonProperty("station") final String station) {
+                          @JsonProperty("group") final String group) {
     this.id = id;
     this.category = category;
-    this.station = station;
+    this.group = group;
   }
 
   @Override
@@ -78,7 +78,7 @@ public final class JudgeInformation implements Serializable {
     } else if (o.getClass().equals(JudgeInformation.class)) {
       final JudgeInformation other = (JudgeInformation) o;
       return getId().equals(other.getId())
-          && getCategory().equals(other.getCategory()) && getStation().equals(other.getStation());
+          && getCategory().equals(other.getCategory()) && getGroup().equals(other.getGroup());
     } else {
       return false;
     }
