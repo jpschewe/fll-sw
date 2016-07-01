@@ -18,9 +18,9 @@ public final class TeamScheduleInfo implements Serializable {
 
   private String organization;
 
-  private String division;
+  private String awardGroup;
 
-  private String judgingStation;
+  private String judgingGroup;
 
   private final PerformanceTime[] perf;
 
@@ -155,35 +155,35 @@ public final class TeamScheduleInfo implements Serializable {
    * @param award group to set
    */
   public void setDivision(final String division) {
-    this.division = division;
+    this.awardGroup = division;
   }
 
   /**
    * @return the award group, never null
    */
-  public String getDivision() {
-    if (null == division) {
+  public String getAwardGroup() {
+    if (null == awardGroup) {
       return "";
     } else {
-      return division;
+      return awardGroup;
     }
   }
 
   /**
-   * @param judge the judging station
+   * @param judge the judging group
    */
-  public void setJudgingStation(final String judge) {
-    this.judgingStation = judge;
+  public void setJudgingGroup(final String judge) {
+    this.judgingGroup = judge;
   }
 
   /**
-   * @return the judging station, never null
+   * @return the judging group, never null
    */
   public String getJudgingGroup() {
-    if (null == judgingStation) {
+    if (null == judgingGroup) {
       return "";
     } else {
-      return judgingStation;
+      return judgingGroup;
     }
   }
 

@@ -234,10 +234,10 @@ public class TournamentSchedule implements Serializable {
     return Collections.unmodifiableSet(_tableColors);
   }
 
-  private final HashSet<String> _divisions = new HashSet<String>();
+  private final HashSet<String> _awardGroups = new HashSet<String>();
 
-  public Set<String> getDivisions() {
-    return Collections.unmodifiableSet(_divisions);
+  public Set<String> getAwardGroups() {
+    return Collections.unmodifiableSet(_awardGroups);
   }
 
   private final HashSet<String> _judgingGroups = new HashSet<String>();
@@ -408,7 +408,7 @@ public class TournamentSchedule implements Serializable {
         final String judgingStation = sched.getString(2);
 
         final TeamScheduleInfo ti = new TeamScheduleInfo(this.numRounds, teamNumber);
-        ti.setJudgingStation(judgingStation);
+        ti.setJudgingGroup(judgingStation);
 
         getSubjective.setInt(2, teamNumber);
         subjective = getSubjective.executeQuery();
@@ -704,7 +704,7 @@ public class TournamentSchedule implements Serializable {
       _tableColors.add(ti.getPerfTableColor(round));
       addToMatches(ti, round);
     }
-    _divisions.add(ti.getDivision());
+    _awardGroups.add(ti.getAwardGroup());
     _judgingGroups.add(ti.getJudgingGroup());
   }
 
@@ -950,7 +950,7 @@ public class TournamentSchedule implements Serializable {
       table.addCell(PdfUtils.createCell(si.getTeamName()));
       table.addCell(PdfUtils.createCell(si.getOrganization()));
       table.addCell(PdfUtils.createCell(si.getJudgingGroup()));
-      table.addCell(PdfUtils.createCell(si.getDivision()));
+      table.addCell(PdfUtils.createCell(si.getAwardGroup()));
 
       for (final String subjectiveStation : subjectiveStations) {
         table.addCell(PdfUtils.createCell(formatTime(si.getSubjectiveTimeByName(subjectiveStation).getTime())));
@@ -995,7 +995,7 @@ public class TournamentSchedule implements Serializable {
     para.add(Chunk.NEWLINE);
 
     para.add(new Chunk("Division: ", TEAM_HEADER_FONT));
-    para.add(new Chunk(si.getDivision(), TEAM_VALUE_FONT));
+    para.add(new Chunk(si.getAwardGroup(), TEAM_VALUE_FONT));
     para.add(Chunk.NEWLINE);
 
     for (final String subjectiveStation : subjectiveStations) {
@@ -1099,7 +1099,7 @@ public class TournamentSchedule implements Serializable {
       scoresheets.setRound(sheetIndex, String.valueOf(round
           + 1));
       scoresheets.setNumber(sheetIndex, si.getTeamNumber());
-      scoresheets.setDivision(sheetIndex, si.getDivision());
+      scoresheets.setDivision(sheetIndex, si.getAwardGroup());
       scoresheets.setName(sheetIndex, si.getTeamName());
 
       ++sheetIndex;
@@ -1152,7 +1152,7 @@ public class TournamentSchedule implements Serializable {
       }
 
       table.addCell(PdfUtils.createCell(String.valueOf(si.getTeamNumber())));
-      table.addCell(PdfUtils.createCell(si.getDivision()));
+      table.addCell(PdfUtils.createCell(si.getAwardGroup()));
       table.addCell(PdfUtils.createCell(si.getOrganization()));
       table.addCell(PdfUtils.createCell(si.getTeamName()));
       table.addCell(PdfUtils.createCell(formatTime(si.getPerfTime(round)), backgroundColor));
@@ -1201,7 +1201,7 @@ public class TournamentSchedule implements Serializable {
     Collections.sort(_schedule, getComparatorForSubjectiveByDivision(subjectiveStation));
     for (final TeamScheduleInfo si : _schedule) {
       table.addCell(PdfUtils.createCell(String.valueOf(si.getTeamNumber())));
-      table.addCell(PdfUtils.createCell(si.getDivision()));
+      table.addCell(PdfUtils.createCell(si.getAwardGroup()));
       table.addCell(PdfUtils.createCell(si.getOrganization()));
       table.addCell(PdfUtils.createCell(si.getTeamName()));
       table.addCell(PdfUtils.createCell(formatTime(si.getSubjectiveTimeByName(subjectiveStation).getTime())));
@@ -1234,7 +1234,7 @@ public class TournamentSchedule implements Serializable {
     Collections.sort(_schedule, getComparatorForSubjectiveByTime(subjectiveStation));
     for (final TeamScheduleInfo si : _schedule) {
       table.addCell(PdfUtils.createCell(String.valueOf(si.getTeamNumber())));
-      table.addCell(PdfUtils.createCell(si.getDivision()));
+      table.addCell(PdfUtils.createCell(si.getAwardGroup()));
       table.addCell(PdfUtils.createCell(si.getOrganization()));
       table.addCell(PdfUtils.createCell(si.getTeamName()));
       table.addCell(PdfUtils.createCell(formatTime(si.getSubjectiveTimeByName(subjectiveStation).getTime())));
@@ -1274,8 +1274,8 @@ public class TournamentSchedule implements Serializable {
     public int compare(final TeamScheduleInfo one,
                        final TeamScheduleInfo two) {
 
-      if (!one.getDivision().equals(two.getDivision())) {
-        return one.getDivision().compareTo(two.getDivision());
+      if (!one.getAwardGroup().equals(two.getAwardGroup())) {
+        return one.getAwardGroup().compareTo(two.getAwardGroup());
       } else {
         final SubjectiveTime oneTime = one.getSubjectiveTimeByName(name);
         final SubjectiveTime twoTime = two.getSubjectiveTimeByName(name);
@@ -1334,8 +1334,8 @@ public class TournamentSchedule implements Serializable {
         }
       }
       if (timeCompare == 0) {
-        if (!one.getDivision().equals(two.getDivision())) {
-          return one.getDivision().compareTo(two.getDivision());
+        if (!one.getAwardGroup().equals(two.getAwardGroup())) {
+          return one.getAwardGroup().compareTo(two.getAwardGroup());
         } else {
           return one.getJudgingGroup().compareTo(two.getJudgingGroup());
         }
@@ -1569,7 +1569,7 @@ public class TournamentSchedule implements Serializable {
         ti.addSubjectiveTime(new SubjectiveTime(station, time));
       }
 
-      ti.setJudgingStation(line[ci.getJudgeGroupColumn()]);
+      ti.setJudgingGroup(line[ci.getJudgeGroupColumn()]);
 
       for (int perfNum = 0; perfNum < getNumberOfRounds(); ++perfNum) {
         final String perf1Str = line[ci.getPerfColumn(perfNum)];
@@ -2027,7 +2027,7 @@ public class TournamentSchedule implements Serializable {
 
       for (final TeamScheduleInfo si : getSchedule()) {
         line.add(String.valueOf(si.getTeamNumber()));
-        line.add(si.getDivision());
+        line.add(si.getAwardGroup());
         line.add(si.getTeamName());
         line.add(si.getOrganization());
         line.add(si.getJudgingGroup());
