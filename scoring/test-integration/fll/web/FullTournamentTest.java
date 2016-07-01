@@ -20,9 +20,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Collections;
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.table.TableModel;
 
@@ -178,7 +179,7 @@ public class FullTournamentTest {
       prep = testDataConn.prepareStatement("SELECT TeamNumber FROM Performance WHERE Tournament = ? AND RunNumber = ?");
       boolean initializedPlayoff = false;
       prep.setString(1, testTournamentName);
-      final List<String> divisions = getPlayoffDivisions();
+      final Set<String> awardGroups = getAwardGroups();
       for (int runNumber = 1; runNumber <= maxRuns; ++runNumber) {
 
         if (runNumber > numSeedingRounds) {
@@ -186,10 +187,10 @@ public class FullTournamentTest {
             checkSeedingRounds();
 
             // initialize the playoff brackets with playoff/index.jsp form
-            for (final String division : divisions) {
+            for (final String awardGroup : awardGroups) {
               LOGGER.info("Initializing playoff brackets for division "
-                  + division);
-              IntegrationTestUtils.initializePlayoffsForDivision(selenium, division);
+                  + awardGroup);
+              IntegrationTestUtils.initializePlayoffsForAwardGroup(selenium, awardGroup);
             }
             initializedPlayoff = true;
           }
@@ -209,7 +210,7 @@ public class FullTournamentTest {
 
         if (runNumber > numSeedingRounds
             && runNumber != maxRuns) {
-          for (final String division : divisions) {
+          for (final String division : awardGroups) {
             printPlayoffScoresheets(division);
           }
         }
@@ -279,23 +280,27 @@ public class FullTournamentTest {
   }
 
   /**
-   * Get the divisions in this tournament.
+   * Get the award groups in this tournament.
    * 
    * @throws IOException
    */
-  private List<String> getPlayoffDivisions() throws IOException {
+  private Set<String> getAwardGroups() throws IOException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-        + "playoff");
+        + "admin/index.jsp");
 
-    final List<String> divisions = new LinkedList<String>();
-    final Select select = new Select(selenium.findElement(By.id("initialize-division")));
-    for (final WebElement option : select.getOptions()) {
-      final String text = option.getText();
-      divisions.add(text);
+    selenium.findElement(By.partialLinkText("Assign teams to award groups")).click();
+
+    final Set<String> awardGroups = new HashSet<>();
+    final List<WebElement> inputs = selenium.findElements(By.cssSelector("input:checked[type='radio']"));
+    for (final WebElement radioButton : inputs) {
+      final String awardGroup = radioButton.getAttribute("value");
+      awardGroups.add(awardGroup);
     }
+    
+    LOGGER.info("Found awardGroups: " + awardGroups);
 
-    Assert.assertFalse(divisions.isEmpty());
-    return divisions;
+    Assert.assertFalse(awardGroups.isEmpty());
+    return awardGroups;
   }
 
   private void assignTableLabels() throws IOException {

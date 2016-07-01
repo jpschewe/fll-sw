@@ -536,21 +536,28 @@ public final class IntegrationTestUtils {
     return selenium;
   }
 
-  public static void initializePlayoffsForDivision(final WebDriver selenium,
-                                                   final String division)
+  public static void initializePlayoffsForAwardGroup(final WebDriver selenium,
+                                                     final String awardGroup)
       throws IOException {
-    initializePlayoffsForDivision(selenium, division, BracketSortType.SEEDING);
+    initializePlayoffsForAwardGroup(selenium, awardGroup, BracketSortType.SEEDING);
   }
 
-  public static void initializePlayoffsForDivision(final WebDriver selenium,
-                                                   final String division,
-                                                   final BracketSortType bracketSort)
+  public static void initializePlayoffsForAwardGroup(final WebDriver selenium,
+                                                     final String awardGroup,
+                                                     final BracketSortType bracketSort)
       throws IOException {
     loadPage(selenium, TestUtils.URL_ROOT
         + "playoff");
 
+    selenium.findElement(By.linkText("Create playoff bracket")).click();
+
+    selenium.findElement(By.xpath("//input[contains(normalize-space(.),'Create Playoff Bracket for Award Group "
+        + awardGroup + "'")).click();
+    Assert.assertTrue("Error creating bracket for award group: "
+        + awardGroup, isElementPresent(selenium, By.id("success")));
+
     final Select initDiv = new Select(selenium.findElement(By.id("initialize-division")));
-    initDiv.selectByValue(division);
+    initDiv.selectByValue(awardGroup);
     selenium.findElement(By.id("initialize_brackets")).click();
     Assert.assertFalse("Error loading page", isElementPresent(selenium, By.id("exception-handler")));
 
@@ -558,7 +565,6 @@ public final class IntegrationTestUtils {
     sort.selectByValue(bracketSort.name());
     selenium.findElement(By.id("submit")).click();
     Assert.assertFalse("Error loading page", isElementPresent(selenium, By.id("exception-handler")));
-
   }
 
   /**
