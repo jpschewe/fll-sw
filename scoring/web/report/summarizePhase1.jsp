@@ -38,7 +38,7 @@
       <tr>
         <td>${judgeInfo.judge}</td>
         <td>${judgeInfo.category }</td>
-        <td>${judgeInfo.station}</td>
+        <td>${judgeInfo.group}</td>
         <td>${judgeInfo.numExpected}</td>
         <td>${judgeInfo.numActual}</td>
       </tr>
