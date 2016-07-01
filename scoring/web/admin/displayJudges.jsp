@@ -52,7 +52,7 @@ If changes need to be made to the judges, press the back button.</p>
 
     <td>${judge.id }</td>
     <td>${judge.category }</td>
-    <td>${judge.station }</td>
+    <td>${judge.group }</td>
 
    </tr>
 

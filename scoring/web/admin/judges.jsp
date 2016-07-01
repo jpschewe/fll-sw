@@ -80,7 +80,7 @@
        <c:forEach items="${JUDGING_STATIONS}" var="stationSel">
 
         <c:choose>
-         <c:when test="${judge.station == stationSel }">
+         <c:when test="${judge.group == stationSel }">
           <option value="${stationSel}" selected>${stationSel }</option>
          </c:when>
          <c:otherwise>
