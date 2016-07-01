@@ -143,7 +143,7 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
             // get list of teams in this award group
             final List<Integer> teamNumbers = new LinkedList<>();
             for (final Map.Entry<Integer, TournamentTeam> entry : data.getTournamentTeams().entrySet()) {
-              if (awardGroup.equals(entry.getValue().getEventDivision())) {
+              if (awardGroup.equals(entry.getValue().getAwardGroup())) {
                 teamNumbers.add(entry.getKey());
               }
             }
@@ -163,7 +163,7 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
             // get list of teams in this judging group
             final List<Integer> teamNumbers = new LinkedList<>();
             for (final Map.Entry<Integer, TournamentTeam> entry : data.getTournamentTeams().entrySet()) {
-              if (judgingGroup.equals(entry.getValue().getJudgingStation())) {
+              if (judgingGroup.equals(entry.getValue().getJudgingGroup())) {
                 teamNumbers.add(entry.getKey());
               }
             }

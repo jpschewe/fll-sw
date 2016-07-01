@@ -23,7 +23,7 @@
     <c:forEach items="${judgingStations }" var="station" varStatus="idx">
     $("#station_select_${idx.count }").change(function() {
       <c:forEach items="${playoff_data.tournamentTeamsValues }" var="team">
-      <c:if test="${team.judgingStation == station}">
+      <c:if test="${team.judgingGroup == station}">
       $("#select_${team.teamNumber}").prop("checked", $(this).is(":checked"));
       </c:if>
       </c:forEach>
@@ -33,7 +33,7 @@
     <c:forEach items="${awardGroups }" var="awardGroup" varStatus="idx">
     $("#award_group_select_${idx.count }").change(function() {
       <c:forEach items="${playoff_data.tournamentTeamsValues }" var="team">
-      <c:if test="${team.eventDivision == awardGroup}">
+      <c:if test="${team.awardGroup == awardGroup}">
       $("#select_${team.teamNumber}").prop("checked", $(this).is(":checked"));
       </c:if>
       </c:forEach>
@@ -159,9 +159,9 @@
 
           <td>${team.teamName }</td>
 
-          <td>${team.judgingStation }</td>
+          <td>${team.judgingGroup }</td>
 
-          <td>${team.eventDivision }</td>
+          <td>${team.awardGroup }</td>
 
         </tr>
       </c:forEach>

@@ -48,7 +48,7 @@
               items="${divisions}"
               var="division">
               <c:choose>
-                <c:when test="${team.eventDivision == division}">
+                <c:when test="${team.awardGroup == division}">
                   <input
                     type='radio'
                     name='<c:out value="${team.teamNumber}"/>'

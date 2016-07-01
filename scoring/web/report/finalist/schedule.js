@@ -85,7 +85,7 @@ function updateHeader() {
  * @returns a jquery div object
  */
 function createTeamDiv(team, category) {
-  var group = team.judgingStation;
+  var group = team.judgingGroup;
   var teamDiv = $("<div draggable='true'>" + team.num + " - " + team.name
       + " (" + group + ")</div>");
 

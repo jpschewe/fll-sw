@@ -168,6 +168,7 @@ Any display of the old terms is already replaced by the new term, however there 
 # Design Documents
 
   * [Challenge Description](ChallengeDescription.md)
+  * [RESTful JSON API](JSON-api.md) 
 
 
 # Misc Notes
