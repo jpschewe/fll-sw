@@ -211,8 +211,6 @@ public class SchedulerUI extends JFrame {
     mDisplayGeneralScheduleAction.setEnabled(false);
     mRunOptimizerAction.setEnabled(false);
     mReloadFileAction.setEnabled(false);
-    mSaveScheduleDescriptionAction.setEnabled(false);
-    mRunSchedulerAction.setEnabled(false);
 
     pack();
   }
@@ -235,6 +233,32 @@ public class SchedulerUI extends JFrame {
   };
 
   void saveScheduleDescription() {
+    if (null == mScheduleDescriptionFile) {
+      // prompt the user for a filename to save to
+
+      final String startingDirectory = PREFS.get(DESCRIPTION_STARTING_DIRECTORY_PREF, null);
+
+      final JFileChooser fileChooser = new JFileChooser();
+      final FileFilter filter = new BasicFileFilter("FLL Schedule Description (properties)",
+                                                    new String[] { "properties" });
+      fileChooser.setFileFilter(filter);
+      if (null != startingDirectory) {
+        fileChooser.setCurrentDirectory(new File(startingDirectory));
+      }
+
+      final int returnVal = fileChooser.showSaveDialog(SchedulerUI.this);
+      if (returnVal == JFileChooser.APPROVE_OPTION) {
+        final File currentDirectory = fileChooser.getCurrentDirectory();
+        PREFS.put(DESCRIPTION_STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
+
+        mScheduleDescriptionFile = fileChooser.getSelectedFile();
+        mDescriptionFilename.setText(mScheduleDescriptionFile.getName());
+      } else {
+        // user canceled
+        return;
+      }
+    }
+
     try (final Writer writer = new OutputStreamWriter(new FileOutputStream(mScheduleDescriptionFile),
                                                       Utilities.DEFAULT_CHARSET)) {
       final SolverParams params = mScheduleDescriptionEditor.getParams();
@@ -264,6 +288,33 @@ public class SchedulerUI extends JFrame {
       saveScheduleDescription();
     }
   };
+
+  private final Action mNewScheduleDescriptionAction = new AbstractAction("New Schedule Description") {
+    {
+      putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/New16.gif"));
+      putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/New24.gif"));
+      putValue(SHORT_DESCRIPTION, "Createa a new schedule description file");
+      putValue(MNEMONIC_KEY, KeyEvent.VK_N);
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
+    }
+
+    @Override
+    public void actionPerformed(final ActionEvent ae) {
+      newScheduleDescription();
+    }
+  };
+
+  private void newScheduleDescription() {
+    final int result = JOptionPane.showConfirmDialog(SchedulerUI.this, "This action will remove any changes to the current schedule and load the defaults. Do you want to continue?",
+                                                     "Question", JOptionPane.YES_NO_OPTION);
+    if (JOptionPane.YES_OPTION == result) {
+      mScheduleDescriptionFile = null;
+      mDescriptionFilename.setText("");
+
+      final SolverParams params = new SolverParams();
+      mScheduleDescriptionEditor.setParams(params);
+    }
+  }
 
   /**
    * Run the scheduler and optionally the table optimizer.
@@ -495,8 +546,6 @@ public class SchedulerUI extends JFrame {
     }
     mScheduleDescriptionFile = file;
 
-    mSaveScheduleDescriptionAction.setEnabled(true);
-    mRunSchedulerAction.setEnabled(true);
     mDescriptionFilename.setText(file.getName());
   }
 
@@ -506,6 +555,7 @@ public class SchedulerUI extends JFrame {
 
     toolbar.add(mDescriptionFilename);
     toolbar.addSeparator();
+    toolbar.add(mNewScheduleDescriptionAction);
     toolbar.add(mOpenScheduleDescriptionAction);
     toolbar.add(mSaveScheduleDescriptionAction);
     toolbar.add(mRunSchedulerAction);
@@ -556,6 +606,7 @@ public class SchedulerUI extends JFrame {
     final JMenu menu = new JMenu("Description");
     menu.setMnemonic('d');
 
+    menu.add(mNewScheduleDescriptionAction);
     menu.add(mOpenScheduleDescriptionAction);
     menu.add(mSaveScheduleDescriptionAction);
     menu.add(mRunSchedulerAction);
@@ -1180,7 +1231,7 @@ public class SchedulerUI extends JFrame {
     }
   };
 
-  private File mScheduleDescriptionFile;
+  private File mScheduleDescriptionFile = null;
 
   private File mScheduleFile;
 
