@@ -1,3 +1,4 @@
+* #460 - Require the user to specify the tables used for a playoff bracket at initialization time
 * #503 - Allow one to create new schedule description files
 * #486 - Separate creating playoff brackets from initializing playoff brackets
 * Use the term "Playoff Bracket" to mean the group of teams competing in a head to head competition (formally known as "Playoff Division")

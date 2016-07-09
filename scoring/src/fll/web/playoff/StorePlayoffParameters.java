@@ -49,7 +49,7 @@ public class StorePlayoffParameters extends BaseFLLServlet {
 
     session.setAttribute(PlayoffIndex.SESSION_DATA, data);
 
-    response.sendRedirect(response.encodeRedirectURL("choose_bracket_sort.jsp"));
+    response.sendRedirect(response.encodeRedirectURL("bracket_parameters.jsp"));
 
   }
 
