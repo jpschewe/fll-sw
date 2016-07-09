@@ -69,7 +69,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     Connection connection = null;
     try {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -87,10 +88,10 @@ public final class FinalComputedScores extends BaseFLLServlet {
       } else {
         percentageHurdle = Integer.parseInt(percentageStr);
       }
-      final double performanceHurdle = percentageHurdle / 100.0;
+      final double performanceHurdle = percentageHurdle
+          / 100.0;
 
-      final Set<Integer> bestTeams = determineTeamsMeetingPerformanceHurdle(performanceHurdle, connection,
-                                                                            tournamentID,
+      final Set<Integer> bestTeams = determineTeamsMeetingPerformanceHurdle(performanceHurdle, connection, tournamentID,
                                                                             challengeDescription.getWinner());
 
       response.reset();
@@ -123,7 +124,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
   private Set<Integer> determineTeamsMeetingPerformanceHurdle(final double performanceHurdle,
                                                               final Connection connection,
                                                               final int tournament,
-                                                              final WinnerType winnerCriteria) throws SQLException {
+                                                              final WinnerType winnerCriteria)
+      throws SQLException {
 
     final Set<Integer> bestTeams = new HashSet<>();
 
@@ -183,10 +185,10 @@ public final class FinalComputedScores extends BaseFLLServlet {
                               final String challengeTitle,
                               final Tournament tournament,
                               final SimpleFooterHandler pageHandler,
-                              final Set<Integer> bestTeams) throws SQLException, IOException {
+                              final Set<Integer> bestTeams)
+      throws SQLException, IOException {
     if (tournament.getTournamentID() != Queries.getCurrentTournament(connection)) {
-      throw new FLLRuntimeException(
-                                    "Cannot generate final score report for a tournament other than the current tournament");
+      throw new FLLRuntimeException("Cannot generate final score report for a tournament other than the current tournament");
     }
 
     final WinnerType winnerCriteria = challengeDescription.getWinner();
@@ -305,7 +307,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
                            final TournamentSchedule schedule,
                            final List<ScoreCategory> subjectiveCategories,
                            final PdfPTable divTable,
-                           final Set<Integer> bestTeams) throws SQLException {
+                           final Set<Integer> bestTeams)
+      throws SQLException {
     ResultSet rawScoreRS = null;
     PreparedStatement teamPrep = null;
     ResultSet teamsRS = null;
@@ -439,15 +442,16 @@ public final class FinalComputedScores extends BaseFLLServlet {
           final double catWeight = weights[cat];
           if (catWeight > 0.0) {
             final double scaledScore;
-            final double v = teamsRS.getDouble(5 + cat + 1);
+            final double v = teamsRS.getDouble(5
+                + cat + 1);
             if (teamsRS.wasNull()) {
               scaledScore = Double.NaN;
             } else {
               scaledScore = v;
             }
 
-            final PdfPCell subjCell = new PdfPCell((Double.isNaN(scaledScore) ? new Phrase("No Score",
-                                                                                           ARIAL_8PT_NORMAL_RED)
+            final PdfPCell subjCell = new PdfPCell((Double.isNaN(scaledScore)
+                ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED)
                 : new Phrase(Utilities.NUMBER_FORMAT_INSTANCE.format(scaledScore), ARIAL_8PT_NORMAL)));
             subjCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
             subjCell.setBorder(0);
@@ -471,11 +475,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
             font = ARIAL_8PT_NORMAL_RED;
             scaledScoreStr = "No Score";
           } else {
-            if (bestTeams.contains(teamNumber)) {
-              font = ARIAL_8PT_BOLD;
-            } else {
-              font = ARIAL_8PT_NORMAL;
-            }
+            font = ARIAL_8PT_NORMAL;
             scaledScoreStr = Utilities.NUMBER_FORMAT_INSTANCE.format(scaledScore);
           }
 
@@ -486,8 +486,17 @@ public final class FinalComputedScores extends BaseFLLServlet {
         }
 
         // Last column contains the overall scaled score
-        pCell = new PdfPCell((Double.isNaN(totalScore) ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED)
-            : new Phrase(Utilities.NUMBER_FORMAT_INSTANCE.format(totalScore), ARIAL_8PT_NORMAL)));
+        final String overallScoreSuffix;
+        if (bestTeams.contains(teamNumber)) {
+          overallScoreSuffix = "\u00a0*";
+        } else {
+          overallScoreSuffix = "\u00a0\u00a0";
+        }
+
+        pCell = new PdfPCell((Double.isNaN(totalScore) ? new Phrase("No Score"
+            + overallScoreSuffix, ARIAL_8PT_NORMAL_RED)
+            : new Phrase(Utilities.NUMBER_FORMAT_INSTANCE.format(totalScore)
+                + overallScoreSuffix, ARIAL_8PT_NORMAL)));
         pCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
         pCell.setBorder(0);
         curteam.addCell(pCell);
@@ -529,7 +538,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                   final float[] relativeWidths,
                                   final ChallengeDescription challengeDescription,
                                   final List<ScoreCategory> subjectiveCategories,
-                                  final PdfPTable divTable) throws ParseException {
+                                  final PdfPTable divTable)
+      throws ParseException {
 
     // /////////////////////////////////////////////////////////////////////
     // Write the table column headers
@@ -642,7 +652,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                      final List<ScoreCategory> subjectiveCategories,
                                      final double[] weights,
                                      final int teamNumber,
-                                     final PdfPTable curteam) throws SQLException {
+                                     final PdfPTable curteam)
+      throws SQLException {
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
