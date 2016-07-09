@@ -28,7 +28,7 @@ public final class TableInformation implements Serializable {
    * @param id the id of the table information
    * @param sideA name of side A
    * @param sideB name of side B
-   * @param use can this table be used
+   * @param use true if this table should be used
    */
   public TableInformation(final int id,
                           final String sideA,

@@ -10,21 +10,18 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.log4j.Logger;
 
 import fll.db.Queries;
-import fll.db.TableInformation;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Helpers for scoregenbrackets.jsp.
@@ -105,13 +102,6 @@ public class ScoregenBrackets {
 
       request.setAttribute("firstRound", Integer.valueOf(firstRound));
       request.setAttribute("lastRound", Integer.valueOf(lastRound));
-
-      final int currentTournament = Queries.getCurrentTournament(connection);
-
-      final List<TableInformation> tableInfo = TableInformation.getTournamentTableInformation(connection,
-                                                                                              currentTournament,
-                                                                                              division);
-      pageContext.setAttribute("tableInfo", tableInfo);
 
     } catch (final SQLException e) {
       LOGGER.error(e, e);
