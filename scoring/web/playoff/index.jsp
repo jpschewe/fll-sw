@@ -36,6 +36,11 @@
     available from the Admin Index or by clicking <a
       href='<c:url value="/admin/tables.jsp"/>'
       target='_new'>here</a>.
+
+    <c:if test="${not tablesAssigned }">
+      <span class='warning'> Tables are currently not assigned. </span>
+    </c:if>
+
   </p>
 
   <p>
@@ -116,17 +121,6 @@
         name='printable'
         action='scoregenbrackets.jsp'
         method='get'>
-
-        <c:if test="${not tablesAssigned }">
-          <p class='warning'>
-            Tables are not not assigned. Entering into the score sheet
-            generating brackets at this point may have undesired
-            results. You should visit the <a
-              href='<c:url value="/admin/tables.jsp"/>'>table
-              assignment page</a>.
-          </p>
-        </c:if>
-
         Score sheet Generation Brackets<br />
         <%-- bracket --%>
         Select Bracket: <select
