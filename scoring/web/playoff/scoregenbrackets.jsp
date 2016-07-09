@@ -127,34 +127,7 @@ FONT.TIE {
  <p>
   <a href="index.jsp">Return to Playoff menu</a>
  </p>
- <form name='limit_tables' method='post' action='LimitTableAssignments'>
-  You can limit which tables teams are automatically assigned to.<br />
-
-  <input type='hidden' name='division' value='${division }' />
-  <input type='hidden' name='firstRound' value='${firstRound }' />
-  <input type='hidden' name='lastRound' value='${lastRound }' />
-
-  <c:forEach items="${tableInfo}" var="info">
-
-   <label for='${info.id }'>${info.sideA } / ${info.sideB }</label>
-
-   <c:choose>
-    <c:when test="${info.use }">
-     <input type="checkbox" name='tables' value='${info.id}' checked />
-    </c:when>
-    <c:otherwise>
-     <input type="checkbox" name='tables' value='${info.id}' />
-    </c:otherwise>
-   </c:choose>
-   <br />
-
-  </c:forEach>
-
-  <input type='submit' value='Limit Tables' />
-
- </form>
-
-
+ 
  <form name='printScoreSheets' method='post' action='ScoresheetServlet'
   target='_new'>
   <input type='hidden' name='division' value='<%=divisionStr%>' /> <input

@@ -36,6 +36,11 @@
     available from the Admin Index or by clicking <a
       href='<c:url value="/admin/tables.jsp"/>'
       target='_new'>here</a>.
+
+    <c:if test="${not tablesAssigned }">
+      <span class='warning'> Tables are currently not assigned. </span>
+    </c:if>
+
   </p>
 
   <p>
@@ -69,249 +74,228 @@
     </li>
 
 
-    <c:if test="${not empty playoff_data.uninitializedBrackets }">
-      <li>
-        <form
-          name='initialize'
-          action='StorePlayoffParameters'
-          method='POST'>
-          <b>WARNING: Do not initialize any playoff brackets until
-            all seeding runs have been recorded!</b> Doing so will
-          automatically add bye runs to the teams that don't have enough
-          seeding runs.<br /> Select Bracket: <select
-            id='initialize-division'
-            name='division'>
-            <c:forEach
-              items="${playoff_data.uninitializedBrackets }"
-              var="division">
-              <option value='${division}'>${division}</option>
-            </c:forEach>
-          </select><br> <input
-            type='checkbox'
-            name='enableThird'
-            value='yes' />Check to enable 3rd/4th place match<br>
-          <input
-            type='submit'
-            id='initialize_brackets'
-            value='Initialize Bracket' /> <a
-            href='javascript:display("InitializeBracketHelp")'>[help]</a>
-          <div
-            id='InitializeBracketHelp'
-            class='help'
-            style='display: none'>
-            Initializing a playoff bracket allows it to be run. A
-            playoff bracket cannot be initialized if any teams that are
-            to compete in the playoff bracket Are still competing in a
-            playoff bracket that has not been run to completion. The
-            3rd/4th place match is need if you want to know not only 1st
-            and 2nd place in the bracket, but 3rd and 4th place as well.
-            This will add a match with the two teams that lost in the
-            semi-final matches.<a
-              href='javascript:hide("InitializeBracketHelp")'>[hide]</a>
-          </div>
+    <li>
+      <form
+        name='initialize'
+        action='StorePlayoffParameters'
+        method='POST'>
+        <b>WARNING: Do not initialize any playoff brackets until all
+          seeding runs have been recorded!</b> Doing so will automatically
+        add bye runs to the teams that don't have enough seeding runs.<br />
+        Select Bracket: <select
+          id='initialize-division'
+          name='division'>
+          <c:forEach
+            items="${playoff_data.uninitializedBrackets }"
+            var="division">
+            <option value='${division}'>${division}</option>
+          </c:forEach>
+        </select><br> <input
+          type='checkbox'
+          name='enableThird'
+          value='yes' />Check to enable 3rd/4th place match<br> <input
+          type='submit'
+          id='initialize_brackets'
+          value='Initialize Bracket' /> <a
+          href='javascript:display("InitializeBracketHelp")'>[help]</a>
+        <div
+          id='InitializeBracketHelp'
+          class='help'
+          style='display: none'>
+          Initializing a playoff bracket allows it to be run. A playoff
+          bracket cannot be initialized if any teams that are to compete
+          in the playoff bracket Are still competing in a playoff
+          bracket that has not been run to completion. The 3rd/4th place
+          match is need if you want to know not only 1st and 2nd place
+          in the bracket, but 3rd and 4th place as well. This will add a
+          match with the two teams that lost in the semi-final matches.<a
+            href='javascript:hide("InitializeBracketHelp")'>[hide]</a>
+        </div>
 
-        </form>
-      </li>
-    </c:if>
-    <!--  end if not empty uninitializedBrackets -->
+      </form>
+    </li>
 
-    <c:if test="${not empty playoff_data.initializedBrackets }">
+    <%-- scoresheet generation --%>
+    <li>
+      <form
+        name='printable'
+        action='scoregenbrackets.jsp'
+        method='get'>
+        Score sheet Generation Brackets<br />
+        <%-- bracket --%>
+        Select Bracket: <select
+          id='printable.division'
+          name='division'>
+          <c:forEach
+            items="${playoff_data.initializedBrackets }"
+            var="division">
+            <option value='${division}'>${division}</option>
+          </c:forEach>
+        </select>
 
-      <%-- scoresheet generation --%>
-      <li>
-        <form
-          name='printable'
-          action='scoregenbrackets.jsp'
-          method='get'>
+        <%-- select rounds --%>
+        from round <select name='firstRound'>
+          <c:forEach
+            begin="1"
+            end="${playoff_data.numPlayoffRounds }"
+            var="numRounds">
+            <c:choose>
+              <c:when test="${numRounds == 1 }">
+                <option
+                  value='${numRounds }'
+                  selected>${numRounds }</option>
+              </c:when>
+              <c:otherwise>
+                <option value='${numRounds }'>${numRounds }</option>
+              </c:otherwise>
+            </c:choose>
+          </c:forEach>
+        </select> to
 
-          <c:if test="${not tablesAssigned }">
-            <p class='warning'>
-              Tables are not not assigned. Entering into the score sheet
-              generating brackets at this point may have undesired
-              results. You should visit the <a
-                href='<c:url value="/admin/tables.jsp"/>'>table
-                assignment page</a>.
-            </p>
-          </c:if>
+        <%-- numPlayoffRounds+1 == the column in which the 1st place winner is displayed  --%>
+        <select name='lastRound'>
+          <c:forEach
+            begin="2"
+            end="${playoff_data.numPlayoffRounds+1 }"
+            var="numRounds">
+            <c:choose>
+              <c:when
+                test="${numRounds == playoff_data.numPlayoffRounds+1 }">
+                <option
+                  value='${numRounds }'
+                  selected>${numRounds }</option>
+              </c:when>
+              <c:otherwise>
+                <option value='${numRounds }'>${numRounds }</option>
+              </c:otherwise>
+            </c:choose>
+          </c:forEach>
+        </select>
 
-          Score sheet Generation Brackets<br />
-          <%-- bracket --%>
-          Select Bracket: <select
-            id='printable.division'
-            name='division'>
-            <c:forEach
-              items="${playoff_data.initializedBrackets }"
-              var="division">
-              <option value='${division}'>${division}</option>
-            </c:forEach>
-          </select>
+        <%-- submit--%>
+        <input
+          type='submit'
+          id='display_scoregen_brackets'
+          value='Display Brackets'> <a
+          href='javascript:display("ScoreGenBracketsHelp")'>[help]</a>
+        <div
+          id='ScoreGenBracketsHelp'
+          class='help'
+          style='display: none'>
+          This page is used to print out score sheets for the specified
+          playoff bracket. This page will automatically assign the
+          matches to the tables specified in on the table assignment
+          page. The assigned tables can be changed before printing if
+          desired. <a href='javascript:hide("ScoreGenBracketsHelp")'>[hide]</a>
+        </div>
 
-          <%-- select rounds --%>
-          from round <select name='firstRound'>
-            <c:forEach
-              begin="1"
-              end="${playoff_data.numPlayoffRounds }"
-              var="numRounds">
-              <c:choose>
-                <c:when test="${numRounds == 1 }">
-                  <option
-                    value='${numRounds }'
-                    selected>${numRounds }</option>
-                </c:when>
-                <c:otherwise>
-                  <option value='${numRounds }'>${numRounds }</option>
-                </c:otherwise>
-              </c:choose>
-            </c:forEach>
-          </select> to
+      </form>
+    </li>
+    <%-- end scoresheet generation --%>
 
-          <%-- numPlayoffRounds+1 == the column in which the 1st place winner is displayed  --%>
-          <select name='lastRound'>
-            <c:forEach
-              begin="2"
-              end="${playoff_data.numPlayoffRounds+1 }"
-              var="numRounds">
-              <c:choose>
-                <c:when
-                  test="${numRounds == playoff_data.numPlayoffRounds+1 }">
-                  <option
-                    value='${numRounds }'
-                    selected>${numRounds }</option>
-                </c:when>
-                <c:otherwise>
-                  <option value='${numRounds }'>${numRounds }</option>
-                </c:otherwise>
-              </c:choose>
-            </c:forEach>
-          </select>
+    <li>
+      <form
+        name='admin'
+        action='adminbrackets.jsp'
+        method='get'>
+        Select Bracket to print: <select name='division'>
+          <c:forEach
+            items="${playoff_data.initializedBrackets }"
+            var="division">
+            <option value='${division}'>${division}</option>
+          </c:forEach>
+        </select> from round <select name='firstRound'>
+          <c:forEach
+            begin="1"
+            end="${playoff_data.numPlayoffRounds }"
+            var="numRounds">
+            <c:choose>
+              <c:when test="${numRounds == 1 }">
+                <option
+                  value='${numRounds }'
+                  selected>${numRounds }</option>
+              </c:when>
+              <c:otherwise>
+                <option value='${numRounds }'>${numRounds }</option>
+              </c:otherwise>
+            </c:choose>
+          </c:forEach>
+        </select> to
+        <%-- numPlayoffRounds+1 == the column in which the 1st place winner is displayed  --%>
+        <select name='lastRound'>
+          <c:forEach
+            begin="2"
+            end="${playoff_data.numPlayoffRounds+1 }"
+            var="numRounds">
+            <c:choose>
+              <c:when
+                test="${numRounds == playoff_data.numPlayoffRounds+1 }">
+                <option
+                  value='${numRounds }'
+                  selected>${numRounds }</option>
+              </c:when>
+              <c:otherwise>
+                <option value='${numRounds }'>${numRounds }</option>
+              </c:otherwise>
+            </c:choose>
+          </c:forEach>
+        </select> <input
+          type='submit'
+          id='display_printable_brackets'
+          value='Display Brackets'> <a
+          href='javascript:display("PrintableBracketsHelp")'>[help]</a>
+        <div
+          id='PrintableBracketsHelp'
+          class='help'
+          style='display: none'>
+          This page is used to print out the bracket for registration or
+          the emcee. The score sheet generation bracket page should be
+          used to print out the first matches before this page is used
+          to print the bracket. This will ensure that the assigned
+          tables appears on the printed bracket. <a
+            href='javascript:hide("PrintableBracketsHelp")'>[hide]</a>
+        </div>
 
-          <%-- submit--%>
-          <input
-            type='submit'
-            id='display_scoregen_brackets'
-            value='Display Brackets'> <a
-            href='javascript:display("ScoreGenBracketsHelp")'>[help]</a>
-          <div
-            id='ScoreGenBracketsHelp'
-            class='help'
-            style='display: none'>
-            This page is used to print out score sheets for the
-            specified playoff bracket. This page will automatically
-            assign the matches to the tables specified in on the table
-            assignment page. The assigned tables can be changed before
-            printing if desired. <a
-              href='javascript:hide("ScoreGenBracketsHelp")'>[hide]</a>
-          </div>
-
-        </form>
-      </li>
-      <%-- end scoresheet generation --%>
-
-      <li>
-        <form
-          name='admin'
-          action='adminbrackets.jsp'
-          method='get'>
-          Select Bracket to print: <select name='division'>
-            <c:forEach
-              items="${playoff_data.initializedBrackets }"
-              var="division">
-              <option value='${division}'>${division}</option>
-            </c:forEach>
-          </select> from round <select name='firstRound'>
-            <c:forEach
-              begin="1"
-              end="${playoff_data.numPlayoffRounds }"
-              var="numRounds">
-              <c:choose>
-                <c:when test="${numRounds == 1 }">
-                  <option
-                    value='${numRounds }'
-                    selected>${numRounds }</option>
-                </c:when>
-                <c:otherwise>
-                  <option value='${numRounds }'>${numRounds }</option>
-                </c:otherwise>
-              </c:choose>
-            </c:forEach>
-          </select> to
-          <%-- numPlayoffRounds+1 == the column in which the 1st place winner is displayed  --%>
-          <select name='lastRound'>
-            <c:forEach
-              begin="2"
-              end="${playoff_data.numPlayoffRounds+1 }"
-              var="numRounds">
-              <c:choose>
-                <c:when
-                  test="${numRounds == playoff_data.numPlayoffRounds+1 }">
-                  <option
-                    value='${numRounds }'
-                    selected>${numRounds }</option>
-                </c:when>
-                <c:otherwise>
-                  <option value='${numRounds }'>${numRounds }</option>
-                </c:otherwise>
-              </c:choose>
-            </c:forEach>
-          </select> <input
-            type='submit'
-            id='display_printable_brackets'
-            value='Display Brackets'> <a
-            href='javascript:display("PrintableBracketsHelp")'>[help]</a>
-          <div
-            id='PrintableBracketsHelp'
-            class='help'
-            style='display: none'>
-            This page is used to print out the bracket for registration
-            or the emcee. The score sheet generation bracket page should
-            be used to print out the first matches before this page is
-            used to print the bracket. This will ensure that the
-            assigned tables appears on the printed bracket. <a
-              href='javascript:hide("PrintableBracketsHelp")'>[hide]</a>
-          </div>
-
-        </form>
-      </li>
+      </form>
+    </li>
 
 
-      <li>
-        <%-- uninitialize bracket --%>
-        <form
-          name="uninitialize_playoff"
-          method="POST"
-          action="UninitializePlayoff">
-          Select bracket to uninitialize: <select
-            id='uninitialize-division'
-            name='division'>
-            <c:forEach
-              items="${playoff_data.initializedBrackets }"
-              var="division">
-              <option value='${division}'>${division}</option>
-            </c:forEach>
-          </select> <input
-            type='submit'
-            id='uninitialize_playoff-submit'
-            value='Submit'
-            onclick='return confirm("Are you absolutly sure you want to delete all scores associated with this playoff bracket?")' />
+    <li>
+      <%-- uninitialize bracket --%>
+      <form
+        name="uninitialize_playoff"
+        method="POST"
+        action="UninitializePlayoff">
+        Select bracket to uninitialize: <select
+          id='uninitialize-division'
+          name='division'>
+          <c:forEach
+            items="${playoff_data.initializedBrackets }"
+            var="division">
+            <option value='${division}'>${division}</option>
+          </c:forEach>
+        </select> <input
+          type='submit'
+          id='uninitialize_playoff-submit'
+          value='Submit'
+          onclick='return confirm("Are you absolutly sure you want to delete all scores associated with this playoff bracket?")' />
 
-          <a href='javascript:display("UninitializeBracketsHelp")'>[help]</a>
-          <div
-            id='UninitializeBracketsHelp'
-            class='help'
-            style='display: none'>
-            This link is used to uninitialize a playoff bracket. In most
-            cases this link should not be used. It may be useful if a
-            playoff bracket was initialized by mistake and a different
-            one should be run first. Any scores that have been entered
-            for this bracket will be deleted.<a
-              href='javascript:hide("UninitializeBracketsHelp")'>[hide]</a>
-          </div>
+        <a href='javascript:display("UninitializeBracketsHelp")'>[help]</a>
+        <div
+          id='UninitializeBracketsHelp'
+          class='help'
+          style='display: none'>
+          This link is used to uninitialize a playoff bracket. In most
+          cases this link should not be used. It may be useful if a
+          playoff bracket was initialized by mistake and a different one
+          should be run first. Any scores that have been entered for
+          this bracket will be deleted.<a
+            href='javascript:hide("UninitializeBracketsHelp")'>[hide]</a>
+        </div>
 
-        </form> <%-- end uninitialize division --%>
-      </li>
+      </form> <%-- end uninitialize division --%>
+    </li>
 
-    </c:if>
-    <%-- if initialized playoff brackets not empty --%>
   </ol>
 
   <c:if test="${not empty playoff_data.initializedBrackets }">
