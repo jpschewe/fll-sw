@@ -2,11 +2,11 @@ digraph initialize_playoff_bracket {
 
 "playoff_index.jsp" -> StorePlayoffParameters [label="Initialize Brackets"];
 
-StorePlayoffParameters -> "choose_bracket_sort.jsp";
+StorePlayoffParameters -> "bracket_parameters.jsp";
 
-"choose_bracket_sort.jsp" -> ChooseBracketSort;
+"bracket_parameters.jsp" -> BracketParameters;
 
-ChooseBracketSort -> InitializeBrackets;
+BracketParameters -> InitializeBrackets;
 
 InitializeBrackets -> "playoff_index.jsp";
 }
