@@ -14,7 +14,6 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -24,8 +23,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
-
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
@@ -56,6 +53,7 @@ import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreCategory;
 import fll.xml.WinnerType;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Final computed scores report.
@@ -209,20 +207,18 @@ public final class FinalComputedScores extends BaseFLLServlet {
       // orientation
       final Document pdfDoc = PdfUtils.createPortraitPdfDoc(out, pageHandler);
 
-      final List<ScoreCategory> subjectiveCategories = challengeDescription.getSubjectiveCategories();
-
       final Iterator<String> agIter = Queries.getAwardGroups(connection).iterator();
       while (agIter.hasNext()) {
         final String awardGroup = agIter.next();
 
+        final ScoreCategory[] subjectiveCategories = challengeDescription.getSubjectiveCategories().toArray(new ScoreCategory[0]);
+
         // Figure out how many subjective categories have weights > 0.
-        final double[] weights = new double[subjectiveCategories.size()];
-        final ScoreCategory[] catElements = new ScoreCategory[subjectiveCategories.size()];
+        final double[] weights = new double[subjectiveCategories.length];
         int nonZeroWeights = 0;
-        for (int cat = 0; cat < subjectiveCategories.size(); cat++) {
-          catElements[cat] = subjectiveCategories.get(cat);
-          weights[cat] = catElements[cat].getWeight();
-          if (weights[cat] > 0.0) {
+        for (int catIndex = 0; catIndex < subjectiveCategories.length; catIndex++) {
+          weights[catIndex] = subjectiveCategories[catIndex].getWeight();
+          if (weights[catIndex] > 0.0) {
             nonZeroWeights++;
           }
         }
@@ -273,11 +269,10 @@ public final class FinalComputedScores extends BaseFLLServlet {
           }
         }
 
-        writeColumnHeaders(schedule, weights, catElements, relativeWidths, challengeDescription, subjectiveCategories,
-                           divTable);
+        writeColumnHeaders(schedule, weights, subjectiveCategories, relativeWidths, challengeDescription, divTable);
 
-        writeScores(connection, catElements, weights, relativeWidths, awardGroup, winnerCriteria, tournament, schedule,
-                    subjectiveCategories, divTable, bestTeams);
+        writeScores(connection, subjectiveCategories, weights, relativeWidths, awardGroup, winnerCriteria, tournament, schedule,
+                    divTable, bestTeams);
 
         // Add the division table to the document
         pdfDoc.add(divTable);
@@ -305,7 +300,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
                            final WinnerType winnerCriteria,
                            final Tournament tournament,
                            final TournamentSchedule schedule,
-                           final List<ScoreCategory> subjectiveCategories,
                            final PdfPTable divTable,
                            final Set<Integer> bestTeams)
       throws SQLException {
@@ -392,7 +386,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
         rawLabel.setBorder(0);
         curteam.addCell(rawLabel);
 
-        insertRawScoreColumns(connection, tournament, winnerCriteria.getSortString(), subjectiveCategories, weights,
+        insertRawScoreColumns(connection, tournament, winnerCriteria.getSortString(), catElements, weights,
                               teamNumber, curteam);
 
         // Column for the highest performance score of the seeding rounds
@@ -438,7 +432,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
         // Next, one column containing the scaled score for each subjective
         // category with weight > 0
-        for (int cat = 0; cat < subjectiveCategories.size(); cat++) {
+        for (int cat = 0; cat < catElements.length; cat++) {
           final double catWeight = weights[cat];
           if (catWeight > 0.0) {
             final double scaledScore;
@@ -534,10 +528,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
    */
   private void writeColumnHeaders(final TournamentSchedule schedule,
                                   final double[] weights,
-                                  final ScoreCategory[] catElements,
+                                  final ScoreCategory[] subjectiveCategories,
                                   final float[] relativeWidths,
                                   final ChallengeDescription challengeDescription,
-                                  final List<ScoreCategory> subjectiveCategories,
                                   final PdfPTable divTable)
       throws ParseException {
 
@@ -564,9 +557,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
     divTable.addCell(""); // weight/raw&scaled
 
-    for (int cat = 0; cat < catElements.length; cat++) {
+    for (int cat = 0; cat < subjectiveCategories.length; cat++) {
       if (weights[cat] > 0.0) {
-        final String catTitle = catElements[cat].getTitle();
+        final String catTitle = subjectiveCategories[cat].getTitle();
 
         final Paragraph catPar = new Paragraph(catTitle, ARIAL_8PT_BOLD);
         final PdfPCell catCell = new PdfPCell(catPar);
@@ -611,9 +604,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
     wCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
     divTable.addCell(wCell);
 
-    final PdfPCell[] wCells = new PdfPCell[subjectiveCategories.size()];
-    final Paragraph[] wPars = new Paragraph[subjectiveCategories.size()];
-    for (int cat = 0; cat < catElements.length; cat++) {
+    final PdfPCell[] wCells = new PdfPCell[subjectiveCategories.length];
+    final Paragraph[] wPars = new Paragraph[subjectiveCategories.length];
+    for (int cat = 0; cat < subjectiveCategories.length; cat++) {
       if (weights[cat] > 0.0) {
         wPars[cat] = new Paragraph(Double.toString(weights[cat]), ARIAL_8PT_NORMAL);
         wCells[cat] = new PdfPCell(wPars[cat]);
@@ -649,7 +642,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
   private void insertRawScoreColumns(final Connection connection,
                                      final Tournament tournament,
                                      final String ascDesc,
-                                     final List<ScoreCategory> subjectiveCategories,
+                                     final ScoreCategory[] subjectiveCategories,
                                      final double[] weights,
                                      final int teamNumber,
                                      final PdfPTable curteam)
@@ -659,9 +652,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
     try {
       // Next, one column containing the raw score for each subjective
       // category with weight > 0
-      for (int cat = 0; cat < subjectiveCategories.size(); cat++) {
-        final ScoreCategory catElement = subjectiveCategories.get(cat);
-        final double catWeight = weights[cat];
+      for (int catIndex = 0; catIndex < subjectiveCategories.length; catIndex++) {
+        final ScoreCategory catElement = subjectiveCategories[catIndex];
+        final double catWeight = weights[catIndex];
         if (catWeight > 0.0) {
           final String catName = catElement.getName();
           prep = connection.prepareStatement("SELECT ComputedTotal"
