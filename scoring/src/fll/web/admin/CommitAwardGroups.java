@@ -57,7 +57,7 @@ public class CommitAwardGroups extends BaseFLLServlet {
 
       final int currentTournamentID = Queries.getCurrentTournament(connection);
 
-      pageContext.setAttribute("divisions", Queries.getEventDivisions(connection, currentTournamentID));
+      pageContext.setAttribute("divisions", Queries.getAwardGroups(connection, currentTournamentID));
 
       final Map<Integer, TournamentTeam> teams = Queries.getTournamentTeams(connection, currentTournamentID);
       pageContext.setAttribute("teams", teams.values());

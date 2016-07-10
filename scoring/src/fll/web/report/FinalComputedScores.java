@@ -139,7 +139,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           + " ORDER by performance_seeding_max.score " + winnerCriteria.getSortString());
       prep.setInt(1, tournament);
 
-      for (final String division : Queries.getEventDivisions(connection)) {
+      for (final String division : Queries.getAwardGroups(connection)) {
         final Set<Integer> teamNumbers = Queries.getTeamNumbersInEventDivision(connection, tournament, division);
         final int numTeams = teamNumbers.size();
         final int hurdle = (int) Math.floor(numTeams
@@ -211,9 +211,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
       final List<ScoreCategory> subjectiveCategories = challengeDescription.getSubjectiveCategories();
 
-      final Iterator<String> divisionIter = Queries.getEventDivisions(connection).iterator();
-      while (divisionIter.hasNext()) {
-        final String division = divisionIter.next();
+      final Iterator<String> agIter = Queries.getAwardGroups(connection).iterator();
+      while (agIter.hasNext()) {
+        final String awardGroup = agIter.next();
 
         // Figure out how many subjective categories have weights > 0.
         final double[] weights = new double[subjectiveCategories.size()];
@@ -259,7 +259,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
         divTable.getDefaultCell().setBorder(0);
         divTable.setWidthPercentage(100);
 
-        final PdfPTable header = createHeader(challengeTitle, tournament.getName(), division);
+        final PdfPTable header = createHeader(challengeTitle, tournament.getName(), awardGroup);
         final PdfPCell headerCell = new PdfPCell(header);
         headerCell.setColspan(relativeWidths.length);
         divTable.addCell(headerCell);
@@ -276,14 +276,14 @@ public final class FinalComputedScores extends BaseFLLServlet {
         writeColumnHeaders(schedule, weights, catElements, relativeWidths, challengeDescription, subjectiveCategories,
                            divTable);
 
-        writeScores(connection, catElements, weights, relativeWidths, division, winnerCriteria, tournament, schedule,
+        writeScores(connection, catElements, weights, relativeWidths, awardGroup, winnerCriteria, tournament, schedule,
                     subjectiveCategories, divTable, bestTeams);
 
         // Add the division table to the document
         pdfDoc.add(divTable);
 
         // If there is another division to process, start it on a new page
-        if (divisionIter.hasNext()) {
+        if (agIter.hasNext()) {
           pdfDoc.newPage();
         }
       }
@@ -301,7 +301,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
                            final ScoreCategory[] catElements,
                            final double[] weights,
                            final float[] relativeWidths,
-                           final String division,
+                           final String awardGroup,
                            final WinnerType winnerCriteria,
                            final Tournament tournament,
                            final TournamentSchedule schedule,
@@ -332,7 +332,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           + winnerCriteria.getSortString() + ", Teams.TeamNumber");
       teamPrep = connection.prepareStatement(query.toString());
       teamPrep.setInt(1, tournament.getTournamentID());
-      teamPrep.setString(2, division);
+      teamPrep.setString(2, awardGroup);
       teamsRS = teamPrep.executeQuery();
 
       scorePrep = connection.prepareStatement("SELECT score FROM performance_seeding_max"

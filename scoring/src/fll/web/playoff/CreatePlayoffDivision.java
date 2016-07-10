@@ -59,7 +59,7 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
       final List<String> judgingStations = Queries.getJudgingStations(connection, currentTournamentID);
       pageContext.setAttribute("judgingStations", judgingStations);
 
-      final List<String> awardGroups = Queries.getEventDivisions(connection, currentTournamentID);
+      final List<String> awardGroups = Queries.getAwardGroups(connection, currentTournamentID);
       pageContext.setAttribute("awardGroups", awardGroups);
 
     } catch (final SQLException sqle) {

@@ -223,9 +223,9 @@ public final class Queries {
    * @throws SQLException on a database error
    * @see #getCurrentTournament(Connection)
    */
-  public static List<String> getEventDivisions(final Connection connection) throws SQLException {
+  public static List<String> getAwardGroups(final Connection connection) throws SQLException {
     final int currentTournament = getCurrentTournament(connection);
-    return getEventDivisions(connection, currentTournament);
+    return getAwardGroups(connection, currentTournament);
   }
 
   /**
@@ -237,7 +237,7 @@ public final class Queries {
    * @throws SQLException on a database error
    * @see #getCurrentTournament(Connection)
    */
-  public static List<String> getEventDivisions(final Connection connection,
+  public static List<String> getAwardGroups(final Connection connection,
                                                final int tournament)
       throws SQLException {
     final List<String> list = new LinkedList<String>();
@@ -335,7 +335,7 @@ public final class Queries {
       throws SQLException {
     final Map<Integer, TeamRanking> teamRankings = new HashMap<Integer, TeamRanking>();
     final int tournament = getCurrentTournament(connection);
-    final List<String> divisions = getEventDivisions(connection);
+    final List<String> divisions = getAwardGroups(connection);
 
     final WinnerType winnerCriteria = challengeDescription.getWinner();
     final String ascDesc = winnerCriteria.getSortString();

@@ -63,7 +63,7 @@ public class GatherTeamData {
       final Map<Integer, Boolean> playoffsInitialized = new HashMap<>();
       for (final Tournament tournament : tournaments) {
 
-        final Collection<String> allEventDivisions = Queries.getEventDivisions(connection,
+        final Collection<String> allEventDivisions = Queries.getAwardGroups(connection,
                                                                                tournament.getTournamentID());
         if (allEventDivisions.isEmpty()) {
           // special case for empty, always allow 1

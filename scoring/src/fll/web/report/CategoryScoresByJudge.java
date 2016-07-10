@@ -79,7 +79,7 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
       writer.write("<hr/>");
 
       // foreach division
-      for (final String division : Queries.getEventDivisions(connection)) {
+      for (final String division : Queries.getAwardGroups(connection)) {
 
         // foreach subjective category
         for (final Map.Entry<String, String> entry : subjectiveCategories.entrySet()) {
