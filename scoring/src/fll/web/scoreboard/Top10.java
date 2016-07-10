@@ -85,7 +85,7 @@ public class Top10 extends BaseFLLServlet {
         divisionIndex = divisionIndexObj.intValue();
       }
       ++divisionIndex;
-      final List<String> divisions = Queries.getEventDivisions(connection);
+      final List<String> divisions = Queries.getAwardGroups(connection);
       if (divisionIndex >= divisions.size()) {
         divisionIndex = 0;
       }

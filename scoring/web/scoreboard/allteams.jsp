@@ -40,7 +40,7 @@ final Connection connection = datasource.getConnection();
   prep.setInt(1, currentTournament);
   prep.setInt(2, maxScoreboardRound);
   final ResultSet rs = prep.executeQuery();
-  final List<String> divisions = Queries.getEventDivisions(connection);
+  final List<String> divisions = Queries.getAwardGroups(connection);
 %>
 
 <%
