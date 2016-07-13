@@ -12,8 +12,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -41,7 +44,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
-import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
@@ -211,7 +213,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
       while (agIter.hasNext()) {
         final String awardGroup = agIter.next();
 
-        final ScoreCategory[] subjectiveCategories = challengeDescription.getSubjectiveCategories().toArray(new ScoreCategory[0]);
+        final ScoreCategory[] subjectiveCategories = challengeDescription.getSubjectiveCategories()
+                                                                         .toArray(new ScoreCategory[0]);
 
         // Figure out how many subjective categories have weights > 0.
         final double[] weights = new double[subjectiveCategories.length];
@@ -225,22 +228,13 @@ public final class FinalComputedScores extends BaseFLLServlet {
         // Array of relative widths for the columns of the score page
         // Array length varies with the number of subjective scores weighted >
         // 0.
-        final int numColumnsLeftOfSubjective;
-        if (null == schedule) {
-          numColumnsLeftOfSubjective = 2;
-        } else {
-          numColumnsLeftOfSubjective = 3;
-        }
+        final int numColumnsLeftOfSubjective = 3;
         final int numColumnsRightOfSubjective = 2;
         final float[] relativeWidths = new float[numColumnsLeftOfSubjective
             + nonZeroWeights + numColumnsRightOfSubjective];
         relativeWidths[0] = 3f;
-        if (null != schedule) {
-          relativeWidths[1] = 1.0f;
-          relativeWidths[2] = 1.0f;
-        } else {
-          relativeWidths[1] = 1.0f;
-        }
+        relativeWidths[1] = 1.0f;
+        relativeWidths[2] = 1.0f;
         relativeWidths[relativeWidths.length
             - numColumnsRightOfSubjective] = 1.5f;
         relativeWidths[relativeWidths.length
@@ -271,7 +265,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
         writeColumnHeaders(schedule, weights, subjectiveCategories, relativeWidths, challengeDescription, divTable);
 
-        writeScores(connection, subjectiveCategories, weights, relativeWidths, awardGroup, winnerCriteria, tournament, schedule,
+        writeScores(connection, subjectiveCategories, weights, relativeWidths, awardGroup, winnerCriteria, tournament,
                     divTable, bestTeams);
 
         // Add the division table to the document
@@ -291,28 +285,109 @@ public final class FinalComputedScores extends BaseFLLServlet {
     }
   }
 
+  /**
+   * @return category -> {Judging Group -> {team number -> rank}}
+   * @throws SQLException
+   */
+  private Map<ScoreCategory, Map<String, Map<Integer, Integer>>> gatherRankedSubjectiveTeams(final Connection connection,
+                                                                                             final ScoreCategory[] subjectiveCategories,
+                                                                                             final WinnerType winnerCriteria,
+                                                                                             final Tournament tournament,
+                                                                                             final String awardGroup)
+      throws SQLException {
+    final Map<ScoreCategory, Map<String, Map<Integer, Integer>>> retval = new HashMap<>();
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      final List<String> judgingStations = Queries.getJudgingStations(connection, tournament.getTournamentID());
+
+      for (int cat = 0; cat < subjectiveCategories.length; cat++) {
+        final String catName = subjectiveCategories[cat].getName();
+
+        final Map<String, Map<Integer, Integer>> categoryRanks = new HashMap<>();
+
+        prep = connection.prepareStatement("SELECT FinalScores.TeamNumber, FinalScores."
+            + catName //
+            + " FROM FinalScores, TournamentTeams" //
+            + " WHERE FinalScores.Tournament = ?" //
+            + " AND TournamentTeams.event_division = ?"//
+            + " AND TournamentTeams.TeamNumber = FinalScores.TeamNumber"//
+            + " AND TournamentTeams.judging_station = ?" //
+            + " ORDER BY FinalScores." + catName + " " + winnerCriteria.getSortString());
+        prep.setInt(1, tournament.getTournamentID());
+        prep.setString(2, awardGroup);
+
+        for (final String judgingStation : judgingStations) {
+          prep.setString(3, judgingStation);
+
+          final Map<Integer, Integer> rankedTeams = new HashMap<>();
+
+          int numTied = 1;
+          int rank = 0;
+          double prevScore = Double.NaN;
+          rs = prep.executeQuery();
+          while (rs.next()) {
+            final int teamNumber = rs.getInt(1);
+            final double score = rs.getDouble(2);
+
+            if (score != prevScore) {
+              rank += numTied;
+              numTied = 1;
+            } else {
+              ++numTied;
+            }
+
+            rankedTeams.put(teamNumber, rank);
+          }
+
+          categoryRanks.put(judgingStation, rankedTeams);
+
+          SQLFunctions.close(rs);
+          rs = null;
+        } // foreach judging station
+
+        retval.put(subjectiveCategories[cat], categoryRanks);
+
+        SQLFunctions.close(prep);
+        prep = null;
+      } // foreach category
+
+      return retval;
+
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+  }
+
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table name")
   private void writeScores(final Connection connection,
-                           final ScoreCategory[] catElements,
+                           final ScoreCategory[] subjectiveCategories,
                            final double[] weights,
                            final float[] relativeWidths,
                            final String awardGroup,
                            final WinnerType winnerCriteria,
                            final Tournament tournament,
-                           final TournamentSchedule schedule,
                            final PdfPTable divTable,
                            final Set<Integer> bestTeams)
       throws SQLException {
+
+    final Map<ScoreCategory, Map<String, Map<Integer, Integer>>> teamRanks = gatherRankedSubjectiveTeams(connection,
+                                                                                                         subjectiveCategories,
+                                                                                                         winnerCriteria,
+                                                                                                         tournament,
+                                                                                                         awardGroup);
+
     ResultSet rawScoreRS = null;
     PreparedStatement teamPrep = null;
     ResultSet teamsRS = null;
     PreparedStatement scorePrep = null;
     try {
       final StringBuilder query = new StringBuilder();
-      query.append("SELECT Teams.Organization,Teams.TeamName,Teams.TeamNumber,FinalScores.OverallScore,FinalScores.performance");
-      for (int cat = 0; cat < catElements.length; cat++) {
+      query.append("SELECT Teams.Organization,Teams.TeamName,Teams.TeamNumber,FinalScores.OverallScore,FinalScores.performance,current_tournament_teams.judging_station");
+      for (int cat = 0; cat < subjectiveCategories.length; cat++) {
         if (weights[cat] > 0.0) {
-          final String catName = catElements[cat].getName();
+          final String catName = subjectiveCategories[cat].getName();
           query.append(",FinalScores."
               + catName);
         }
@@ -336,6 +411,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
         final int teamNumber = teamsRS.getInt(3);
         final String organization = teamsRS.getString(1);
         final String teamName = teamsRS.getString(2);
+        final String judgingGroup = teamsRS.getString(6);
 
         final double totalScore;
         final double ts = teamsRS.getDouble(4);
@@ -359,26 +435,10 @@ public final class FinalComputedScores extends BaseFLLServlet {
         curteam.addCell(teamCol);
         curteam.getDefaultCell().setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
 
-        if (null != schedule) {
-          // insert judging group here
-          final TeamScheduleInfo si = schedule.getSchedInfoForTeam(teamNumber);
-          if (null == si) {
-            if (LOGGER.isTraceEnabled()) {
-              LOGGER.trace("Got null sched info for team "
-                  + teamNumber);
-            }
-            curteam.addCell("");
-          } else {
-            if (LOGGER.isTraceEnabled()) {
-              LOGGER.trace("Found judging group "
-                  + si.getJudgingGroup() + " for team " + teamNumber);
-            }
-            final PdfPCell judgeGroup = new PdfPCell(new Phrase(si.getJudgingGroup(), ARIAL_8PT_NORMAL));
-            judgeGroup.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-            judgeGroup.setBorder(0);
-            curteam.addCell(judgeGroup);
-          }
-        }
+        final PdfPCell judgeGroupCell = new PdfPCell(new Phrase(judgingGroup, ARIAL_8PT_NORMAL));
+        judgeGroupCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+        judgeGroupCell.setBorder(0);
+        curteam.addCell(judgeGroupCell);
 
         // Second column is "Raw:"
         final PdfPCell rawLabel = new PdfPCell(new Phrase("Raw:", ARIAL_8PT_NORMAL));
@@ -386,7 +446,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
         rawLabel.setBorder(0);
         curteam.addCell(rawLabel);
 
-        insertRawScoreColumns(connection, tournament, winnerCriteria.getSortString(), catElements, weights,
+        insertRawScoreColumns(connection, tournament, winnerCriteria.getSortString(), subjectiveCategories, weights,
                               teamNumber, curteam);
 
         // Column for the highest performance score of the seeding rounds
@@ -425,18 +485,18 @@ public final class FinalComputedScores extends BaseFLLServlet {
         final PdfPCell scaledCell = new PdfPCell(new Phrase("Scaled:", ARIAL_8PT_NORMAL));
         scaledCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
         scaledCell.setBorder(0);
-        if (null != schedule) {
-          scaledCell.setColspan(2);
-        }
+        scaledCell.setColspan(2);
         curteam.addCell(scaledCell);
 
         // Next, one column containing the scaled score for each subjective
         // category with weight > 0
-        for (int cat = 0; cat < catElements.length; cat++) {
+        for (int cat = 0; cat < subjectiveCategories.length; cat++) {
+          final Map<String, Map<Integer, Integer>> catRanks = teamRanks.get(subjectiveCategories[cat]);
+
           final double catWeight = weights[cat];
           if (catWeight > 0.0) {
             final double scaledScore;
-            final double v = teamsRS.getDouble(5
+            final double v = teamsRS.getDouble(6
                 + cat + 1);
             if (teamsRS.wasNull()) {
               scaledScore = Double.NaN;
@@ -444,14 +504,39 @@ public final class FinalComputedScores extends BaseFLLServlet {
               scaledScore = v;
             }
 
-            final PdfPCell subjCell = new PdfPCell((Double.isNaN(scaledScore)
-                ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED)
-                : new Phrase(Utilities.NUMBER_FORMAT_INSTANCE.format(scaledScore), ARIAL_8PT_NORMAL)));
+            final Map<Integer, Integer> judgingRanks = catRanks.get(judgingGroup);
+
+            Font scoreFont;
+            final String rankText;
+            if (judgingRanks.containsKey(teamNumber)) {
+              final int rank = judgingRanks.get(teamNumber);
+              rankText = String.format("\u00a0(%1$d)", rank);
+              if (1 == rank) {
+                scoreFont = ARIAL_8PT_BOLD;
+              } else {
+                scoreFont = ARIAL_8PT_NORMAL;
+              }
+            } else {
+              rankText = "\u00a0\u00a0\u00a0\u00a0\u00a0";
+              scoreFont = ARIAL_8PT_NORMAL;
+            }
+
+            final String scoreText;
+            if (Double.isNaN(scaledScore)) {
+              scoreText = "No Score"
+                  + rankText;
+              scoreFont = ARIAL_8PT_NORMAL_RED;
+            } else {
+              scoreText = Utilities.NUMBER_FORMAT_INSTANCE.format(scaledScore)
+                  + rankText;
+            }
+
+            final PdfPCell subjCell = new PdfPCell(new Phrase(scoreText, scoreFont));
             subjCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
             subjCell.setBorder(0);
             curteam.addCell(subjCell);
           }
-        }
+        } // foreach category
 
         // 2nd to last column has the scaled performance score
         {
@@ -477,7 +562,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           pCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
           pCell.setBorder(0);
           curteam.addCell(pCell);
-        }
+        } // performance score
 
         // Last column contains the overall scaled score
         final String overallScoreSuffix;
