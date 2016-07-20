@@ -16,6 +16,9 @@ If you want to test out the latest code you can do so by [downloading the most r
 
 You can edit using your favorite Java IDE. We provide project files for Eclipse.
 
+If running on 64-bit Linux you will need libc6-i386 installed otherwise you will get a cryptic file not found error when the launch4j task runs.
+This is because the launch4j task needs to execute a 32-bit binary.
+
 # Copyright
 
 All of the code is currently Copyrighted by INSciTE.
