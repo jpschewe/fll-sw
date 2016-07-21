@@ -21,8 +21,7 @@ This defines which set of judges they will see for the subjective scoring catego
 
 At larger tournaments with a single award group, the teams in the award group are split up into multiple judging groups.
 A second level of judging is needed to choose the best team in the award group because the scores from one judging group may not correlate to scores from another judging group.
-So the best we can do is choose the best team from each judging group and see them again.
-The top team in each judging group in each subjective category is judged again by a select group of judges to choose the winner in an award group for a category.
+To accomplish this, the top team in each judging group in each subjective category is judged again by a common set of judges to choose the winner in an award group for a category.
 
 See the diagram at the bottom of this page for some examples.
 
@@ -33,8 +32,8 @@ There are 2 types of scoring categories.
 Performance and subjective.
 Categories are made up of goals.
 All scores for the goals in a category are added together to determine the raw score for a category.
-Each category had a weight that determines how much that score contributes to a team's overall score.
-This weight is multiplied by the scaled score for a category and then summed to determine there overall score.
+Each category has a weight that determines how much that score contributes to a team's overall score.
+This weight is multiplied by the scaled score for a category and then summed to determine their overall score.
 See [score normalization](ScoreExplaination.pdf) for details on how raw scores become scaled scores.
 
 
@@ -68,12 +67,10 @@ However at some large tournaments where finalist judging is used an award group 
 These teams will then compete and determine a winner.
 Then the top teams or teams in each playoff bracket will compete in another playoff bracket to determine the award group winner of the playoffs.
 
-Teams are seeded into the bracket based on some criteria, usually this is based on the scores from the performance rounds.
+Teams are seeded into the bracket based on some criteria; usually this is based on the scores from the performance rounds.
 A team then competes against the team across the table from them in a match.
 The team with the best score continues on.
-See
-[Wikipedia article on single elimination tournaments](https://en.wikipedia.org/wiki/Single-elimination_tournament)
-for more information.
+See [Wikipedia article on single elimination tournaments](https://en.wikipedia.org/wiki/Single-elimination_tournament) for more information.
 
 
 Example Tournament Configurations
