@@ -286,6 +286,60 @@ public final class FinalComputedScores extends BaseFLLServlet {
   }
 
   /**
+   * @return {team number -> rank}
+   * @throws SQLException
+   */
+  private Map<Integer, Integer> gatherRhankedPerformanceTeams(final Connection connection,
+                                                              final WinnerType winnerCriteria,
+                                                              final Tournament tournament,
+                                                              final String awawrdGroup)
+      throws SQLException {
+    final Map<Integer, Integer> rankedTeams = new HashMap<>();
+
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT FinalScores.TeamNumber, FinalScores.performance"
+          + " FROM FinalScores, TournamentTeams" //
+          + " WHERE FinalScores.Tournament = ?" //
+          + " AND TournamentTeams.event_division = ?"//
+          + " AND TournamentTeams.TeamNumber = FinalScores.TeamNumber"//
+          + " ORDER BY FinalScores.performance " + winnerCriteria.getSortString());
+      prep.setInt(1, tournament.getTournamentID());
+      prep.setString(2, awawrdGroup);
+
+      int numTied = 1;
+      int rank = 0;
+      double prevScore = Double.NaN;
+      rs = prep.executeQuery();
+      while (rs.next()) {
+        final int teamNumber = rs.getInt(1);
+        double score = rs.getDouble(2);
+        if (rs.wasNull()) {
+          score = Double.NaN;
+        }
+
+        if (score != prevScore) {
+          rank += numTied;
+          numTied = 1;
+        } else {
+          ++numTied;
+        }
+
+        rankedTeams.put(teamNumber, rank);
+
+        prevScore = score;
+      }
+
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+
+    return rankedTeams;
+  }
+
+  /**
    * @return category -> {Judging Group -> {team number -> rank}}
    * @throws SQLException
    */
@@ -328,7 +382,10 @@ public final class FinalComputedScores extends BaseFLLServlet {
           rs = prep.executeQuery();
           while (rs.next()) {
             final int teamNumber = rs.getInt(1);
-            final double score = rs.getDouble(2);
+            double score = rs.getDouble(2);
+            if (rs.wasNull()) {
+              score = Double.NaN;
+            }
 
             if (score != prevScore) {
               rank += numTied;
@@ -338,6 +395,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
             }
 
             rankedTeams.put(teamNumber, rank);
+
+            prevScore = score;
           }
 
           categoryRanks.put(judgingStation, rankedTeams);
@@ -372,11 +431,14 @@ public final class FinalComputedScores extends BaseFLLServlet {
                            final Set<Integer> bestTeams)
       throws SQLException {
 
-    final Map<ScoreCategory, Map<String, Map<Integer, Integer>>> teamRanks = gatherRankedSubjectiveTeams(connection,
-                                                                                                         subjectiveCategories,
-                                                                                                         winnerCriteria,
-                                                                                                         tournament,
-                                                                                                         awardGroup);
+    final Map<ScoreCategory, Map<String, Map<Integer, Integer>>> teamSubjectiveRanks = gatherRankedSubjectiveTeams(connection,
+                                                                                                                   subjectiveCategories,
+                                                                                                                   winnerCriteria,
+                                                                                                                   tournament,
+                                                                                                                   awardGroup);
+
+    final Map<Integer, Integer> teamPerformanceRanks = gatherRhankedPerformanceTeams(connection, winnerCriteria,
+                                                                                     tournament, awardGroup);
 
     ResultSet rawScoreRS = null;
     PreparedStatement teamPrep = null;
@@ -491,7 +553,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
         // Next, one column containing the scaled score for each subjective
         // category with weight > 0
         for (int cat = 0; cat < subjectiveCategories.length; cat++) {
-          final Map<String, Map<Integer, Integer>> catRanks = teamRanks.get(subjectiveCategories[cat]);
+          final Map<String, Map<Integer, Integer>> catRanks = teamSubjectiveRanks.get(subjectiveCategories[cat]);
 
           final double catWeight = weights[cat];
           if (catWeight > 0.0) {
@@ -540,6 +602,21 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
         // 2nd to last column has the scaled performance score
         {
+          Font scoreFont;
+          final String rankText;
+          if (teamPerformanceRanks.containsKey(teamNumber)) {
+            final int rank = teamPerformanceRanks.get(teamNumber);
+            rankText = String.format("\u00a0(%1$d)", rank);
+            if (1 == rank) {
+              scoreFont = ARIAL_8PT_BOLD;
+            } else {
+              scoreFont = ARIAL_8PT_NORMAL;
+            }
+          } else {
+            rankText = "\u00a0\u00a0\u00a0\u00a0\u00a0";
+            scoreFont = ARIAL_8PT_NORMAL;
+          }
+
           final double scaledScore;
           final double v = teamsRS.getDouble(5);
           if (teamsRS.wasNull()) {
@@ -548,17 +625,17 @@ public final class FinalComputedScores extends BaseFLLServlet {
             scaledScore = v;
           }
 
-          final Font font;
           final String scaledScoreStr;
           if (Double.isNaN(scaledScore)) {
-            font = ARIAL_8PT_NORMAL_RED;
-            scaledScoreStr = "No Score";
+            scoreFont = ARIAL_8PT_NORMAL_RED;
+            scaledScoreStr = "No Score"
+                + rankText;
           } else {
-            font = ARIAL_8PT_NORMAL;
-            scaledScoreStr = Utilities.NUMBER_FORMAT_INSTANCE.format(scaledScore);
+            scaledScoreStr = Utilities.NUMBER_FORMAT_INSTANCE.format(scaledScore)
+                + rankText;
           }
 
-          pCell = new PdfPCell(new Phrase(scaledScoreStr, font));
+          pCell = new PdfPCell(new Phrase(scaledScoreStr, scoreFont));
           pCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
           pCell.setBorder(0);
           curteam.addCell(pCell);
