@@ -37,8 +37,14 @@ import com.itextpdf.text.Font;
 import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
+import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfPageEventHelper;
+import com.itextpdf.text.pdf.PdfTemplate;
+import com.itextpdf.text.pdf.PdfWriter;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
@@ -48,7 +54,6 @@ import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.util.PdfUtils;
-import fll.util.SimpleFooterHandler;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.xml.ChallengeDescription;
@@ -99,7 +104,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
       response.setHeader("Content-Disposition", "filename=finalComputedScores.pdf");
 
       final String challengeTitle = challengeDescription.getTitle();
-      final SimpleFooterHandler pageHandler = new SimpleFooterHandler();
+      final FooterHandler pageHandler = new FooterHandler(percentageHurdle);
 
       generateReport(connection, response.getOutputStream(), challengeDescription, challengeTitle, tournament,
                      pageHandler, bestTeams);
@@ -184,7 +189,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
                               final ChallengeDescription challengeDescription,
                               final String challengeTitle,
                               final Tournament tournament,
-                              final SimpleFooterHandler pageHandler,
+                              final PdfPageEventHelper pageHandler,
                               final Set<Integer> bestTeams)
       throws SQLException, IOException {
     if (tournament.getTournamentID() != Queries.getCurrentTournament(connection)) {
@@ -875,4 +880,70 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
     return header;
   }
-}
+
+  private static class FooterHandler extends PdfPageEventHelper {
+
+    private PdfTemplate _tpl;
+
+    private BaseFont _headerFooterFont;
+
+    private final String _legendTextFmt = "* - teams in the top %d%% of performance scores, bold - top team in a category & judging group";
+
+    private final int _percentageHurdle;
+
+    public FooterHandler(final int percentageHurdle) {
+      _percentageHurdle = percentageHurdle;
+    }
+
+    @Override
+    public void onOpenDocument(final PdfWriter writer,
+                               final Document document) {
+      _headerFooterFont = TIMES_12PT_NORMAL.getBaseFont();
+
+      // initialization of the footer template
+      _tpl = writer.getDirectContent().createTemplate(100, 100);
+      _tpl.setBoundingBox(new Rectangle(-20, -20, 100, 100));
+    }
+
+    @Override
+    public void onEndPage(final PdfWriter writer,
+                          final Document document) {
+      final PdfContentByte cb = writer.getDirectContent();
+      cb.saveState();
+
+      // compose the footer
+      final String text = String.format(_legendTextFmt, _percentageHurdle)
+          + "    Page " + writer.getPageNumber() + " of ";
+
+      final float textSize = _headerFooterFont.getWidthPoint(text, 12);
+      final float textBase = document.bottom()
+          - 20;
+      cb.beginText();
+      cb.setFontAndSize(_headerFooterFont, 12);
+
+      final float adjust = _headerFooterFont.getWidthPoint("0", 12);
+      cb.setTextMatrix(document.right()
+          - textSize - adjust, textBase);
+      cb.showText(text);
+      cb.endText();
+      cb.addTemplate(_tpl, document.right()
+          - adjust, textBase);
+
+      cb.restoreState();
+    }
+
+    @Override
+    public void onCloseDocument(final PdfWriter writer,
+                                final Document document) {
+      _tpl.beginText();
+      _tpl.setFontAndSize(_headerFooterFont, 12);
+      _tpl.setTextMatrix(0, 0);
+      _tpl.showText(""
+          + (writer.getPageNumber()
+              - 1));
+      _tpl.endText();
+    }
+
+  } // class FooterHandler
+
+} // class FinalComputedScores

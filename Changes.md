@@ -1,3 +1,4 @@
+* #440 - Add more information to the final computed scores report to aide head judges
 * #460 - Require the user to specify the tables used for a playoff bracket at initialization time
 * #503 - Allow one to create new schedule description files
 * #486 - Separate creating playoff brackets from initializing playoff brackets
