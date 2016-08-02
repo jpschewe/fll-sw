@@ -28,7 +28,8 @@ import fll.web.ApplicationAttributes;
 public class GatherParameterInformation {
 
   public static void populateContext(final ServletContext application,
-                                     final PageContext pageContext) throws SQLException {
+                                     final PageContext pageContext)
+      throws SQLException {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
@@ -62,8 +63,22 @@ public class GatherParameterInformation {
       }
       pageContext.setAttribute("maxScoreboardRound", maxScoreboardRound);
 
+      pageContext.setAttribute("performanceAdvancementPercentage_default",
+                               TournamentParameters.getDefaultPerformanceAdvancementPercentage(connection));
+      final Map<Integer, Integer> performanceAdvancementPercentage = new HashMap<Integer, Integer>();
+      for (final Tournament tournament : tournaments) {
+        if (TournamentParameters.tournamentParameterValueExists(connection, tournament.getTournamentID(),
+                                                                TournamentParameters.PERFORMANCE_ADVANCEMENT_PERCENTAGE)) {
+          performanceAdvancementPercentage.put(tournament.getTournamentID(),
+                                               TournamentParameters.getPerformanceAdvancementPercentage(connection,
+                                                                                                        tournament.getTournamentID()));
+        }
+      }
+      pageContext.setAttribute("performanceAdvancementPercentage", performanceAdvancementPercentage);
+
       pageContext.setAttribute("gStandardizedMean",
-                               GlobalParameters.getDoubleGlobalParameter(connection, GlobalParameters.STANDARDIZED_MEAN));
+                               GlobalParameters.getDoubleGlobalParameter(connection,
+                                                                         GlobalParameters.STANDARDIZED_MEAN));
 
       pageContext.setAttribute("gStandardizedSigma",
                                GlobalParameters.getDoubleGlobalParameter(connection,
@@ -71,9 +86,9 @@ public class GatherParameterInformation {
 
       pageContext.setAttribute("gDivisionFlipRate",
                                GlobalParameters.getIntGlobalParameter(connection, GlobalParameters.DIVISION_FLIP_RATE));
-      
+
       pageContext.setAttribute("gUseQuartiles", GlobalParameters.getUseQuartilesInRankingReport(connection));
-      
+
     } finally {
       SQLFunctions.close(connection);
     }

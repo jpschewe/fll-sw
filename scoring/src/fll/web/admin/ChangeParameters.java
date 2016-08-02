@@ -44,7 +44,8 @@ public class ChangeParameters extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     final StringBuilder message = new StringBuilder();
     final String existingMessage = SessionAttributes.getMessage(session);
     if (null != existingMessage) {
@@ -61,6 +62,8 @@ public class ChangeParameters extends BaseFLLServlet {
       storeSeedingRounds(connection, request, tournaments, message);
 
       storeMaxScoreboardRound(connection, request, tournaments);
+
+      storePerformanceAdvancementPercentage(connection, request, tournaments);
 
       GlobalParameters.setDoubleGlobalParameter(connection, GlobalParameters.STANDARDIZED_MEAN,
                                                 Double.valueOf(request.getParameter("gStandardizedMean")));
@@ -93,7 +96,8 @@ public class ChangeParameters extends BaseFLLServlet {
   private void storeSeedingRounds(final Connection connection,
                                   final HttpServletRequest request,
                                   final List<Tournament> tournaments,
-                                  final StringBuilder message) throws SQLException {
+                                  final StringBuilder message)
+      throws SQLException {
     final int defaultNumRounds = Integer.parseInt(request.getParameter("seeding_rounds_default"));
     TournamentParameters.setDefaultNumSeedingRounds(connection, defaultNumRounds);
 
@@ -131,7 +135,8 @@ public class ChangeParameters extends BaseFLLServlet {
 
   private void storeMaxScoreboardRound(final Connection connection,
                                        final HttpServletRequest request,
-                                       final List<Tournament> tournaments) throws SQLException {
+                                       final List<Tournament> tournaments)
+      throws SQLException {
     final int defaultNumRounds = Integer.parseInt(request.getParameter("max_scoreboard_round_default"));
     TournamentParameters.setDefaultMaxScoreboardPerformanceRound(connection, defaultNumRounds);
 
@@ -146,4 +151,25 @@ public class ChangeParameters extends BaseFLLServlet {
       }
     }
   }
+
+  private void storePerformanceAdvancementPercentage(final Connection connection,
+                                                     final HttpServletRequest request,
+                                                     final List<Tournament> tournaments)
+      throws SQLException {
+    final int defaultValue = Integer.parseInt(request.getParameter("performance_advancement_percentage_default"));
+    TournamentParameters.setDefaultPerformanceAdvancementPercentage(connection, defaultValue);
+
+    for (final Tournament tournament : tournaments) {
+      final String str = request.getParameter("performance_advancement_percentage_"
+          + tournament.getTournamentID());
+      if (null == str
+          || "".equals(str.trim()) || "default".equals(str)) {
+        TournamentParameters.unsetPerformanceAdvancementPercentage(connection, tournament.getTournamentID());
+      } else {
+        final int value = Integer.parseInt(str);
+        TournamentParameters.setPerformanceAdvancementPercentage(connection, tournament.getTournamentID(), value);
+      }
+    }
+  }
+
 }
