@@ -36,7 +36,7 @@ public final class TournamentParameters {
 
   public static final String PERFORMANCE_ADVANCEMENT_PERCENTAGE = "PerformanceAdvancementPercentage";
 
-  public static final int PERFORMANCE_ADVANCEMENT_PERCENTAGE_DEFAULT = 40;
+  public static final int PERFORMANCE_ADVANCEMENT_PERCENTAGE_DEFAULT = 0;
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
