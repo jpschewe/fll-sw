@@ -1,3 +1,4 @@
+* #479 - Add performance advancement percentage to the database and remove it from the generation of the final computed scores report
 * #440 - Add more information to the final computed scores report to aide head judges
 
 Release 10.9

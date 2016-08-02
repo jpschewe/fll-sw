@@ -50,6 +50,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
+import fll.db.TournamentParameters;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
@@ -76,6 +77,11 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+
+    if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session, "/report/FinalComputedScores")) {
+      return;
+    }
+
     Connection connection = null;
     try {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -85,16 +91,16 @@ public final class FinalComputedScores extends BaseFLLServlet {
       final int tournamentID = Queries.getCurrentTournament(connection);
       final Tournament tournament = Tournament.findTournamentByID(connection, tournamentID);
 
-      final String percentageStr = request.getParameter("percentage");
-      final int percentageHurdle;
-      if (null == percentageStr
-          || percentageStr.trim().equals("")) {
-        percentageHurdle = 100;
+      final int percentageHurdle = TournamentParameters.getPerformanceAdvancementPercentage(connection, tournamentID);
+      final double performanceHurdle;
+      if (percentageHurdle > 0
+          && percentageHurdle < 100) {
+        // set to a realistic value
+        performanceHurdle = percentageHurdle
+            / 100.0;
       } else {
-        percentageHurdle = Integer.parseInt(percentageStr);
+        performanceHurdle = 0;
       }
-      final double performanceHurdle = percentageHurdle
-          / 100.0;
 
       final Set<Integer> bestTeams = determineTeamsMeetingPerformanceHurdle(performanceHurdle, connection, tournamentID,
                                                                             challengeDescription.getWinner());
@@ -121,7 +127,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
    * This is computed per division and stored in mTeamsMeetingPerformanceHurdle.
    * 
    * @param performanceHurdle the percentage hurdle as a floating point number
-   *          between 0 and 1.
+   *          between 0 and 1. Outside this range causes the return value to be
+   *          empty.
    * @return the set of teams that have a good enough performance score
    * @throws SQLException
    */
@@ -133,6 +140,10 @@ public final class FinalComputedScores extends BaseFLLServlet {
       throws SQLException {
 
     final Set<Integer> bestTeams = new HashSet<>();
+    if (performanceHurdle <= 0
+        || performanceHurdle >= 1) {
+      return bestTeams;
+    }
 
     PreparedStatement prep = null;
     ResultSet rs = null;
@@ -887,12 +898,19 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
     private BaseFont _headerFooterFont;
 
-    private final String _legendTextFmt = "* - teams in the top %d%% of performance scores, bold - top team in a category & judging group";
+    private final String _legendText;
 
-    private final int _percentageHurdle;
-
+    /**
+     * @param percentageHurdle percentage as an integer between 0 and 100
+     */
     public FooterHandler(final int percentageHurdle) {
-      _percentageHurdle = percentageHurdle;
+      if (percentageHurdle > 0
+          && percentageHurdle < 100) {
+        _legendText = String.format("* - teams in the top %d%% of performance scores, bold - top team in a category & judging group",
+                                    percentageHurdle);
+      } else {
+        _legendText = "bold - top team in a category & judging group";
+      }
     }
 
     @Override
@@ -912,10 +930,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
       cb.saveState();
 
       // compose the footer
-      final String text = String.format(_legendTextFmt, _percentageHurdle)
-          + "    Page " + writer.getPageNumber() + " of ";
 
-      final float textSize = _headerFooterFont.getWidthPoint(text, 12);
+      final float textSize = _headerFooterFont.getWidthPoint(_legendText, 12);
       final float textBase = document.bottom()
           - 20;
       cb.beginText();
@@ -924,7 +940,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
       final float adjust = _headerFooterFont.getWidthPoint("0", 12);
       cb.setTextMatrix(document.right()
           - textSize - adjust, textBase);
-      cb.showText(text);
+      cb.showText(_legendText);
       cb.endText();
       cb.addTemplate(_tpl, document.right()
           - adjust, textBase);
