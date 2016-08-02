@@ -50,6 +50,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
+import fll.db.TournamentParameters;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
@@ -76,6 +77,11 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+
+    if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session, "/report/FinalComputedScores")) {
+      return;
+    }
+
     Connection connection = null;
     try {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -85,14 +91,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
       final int tournamentID = Queries.getCurrentTournament(connection);
       final Tournament tournament = Tournament.findTournamentByID(connection, tournamentID);
 
-      final String percentageStr = request.getParameter("percentage");
-      final int percentageHurdle;
-      if (null == percentageStr
-          || percentageStr.trim().equals("")) {
-        percentageHurdle = 100;
-      } else {
-        percentageHurdle = Integer.parseInt(percentageStr);
-      }
+      final int percentageHurdle = TournamentParameters.getPerformanceAdvancementPercentage(connection, tournamentID);
       final double performanceHurdle = percentageHurdle
           / 100.0;
 
