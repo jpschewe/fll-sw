@@ -8,38 +8,38 @@
 <%@ page import="java.sql.Connection" %>
   
   <%
-    	final DataSource datasource = ApplicationAttributes.getDataSource(application);
+      final DataSource datasource = ApplicationAttributes.getDataSource(application);
       final Connection connection = datasource.getConnection();
 
-     final String divisionKey = "playoffDivision";
-     final String roundNumberKey = "playoffRoundNumber";
-     final String displayName = (String)session.getAttribute("displayName");
+         final String divisionKey = "playoffDivision";
+         final String roundNumberKey = "playoffRoundNumber";
+         final String displayName = (String)session.getAttribute("displayName");
 
-     final String sessionDivision;
-     final Number sessionRoundNumber;
-     if (null != displayName) {
+         final String sessionDivision;
+         final Number sessionRoundNumber;
+         if (null != displayName) {
        sessionDivision = (String) application.getAttribute(displayName
            + "_" + divisionKey);
        sessionRoundNumber = (Number) application.getAttribute(displayName
            + "_" + roundNumberKey);
-     } else {
+         } else {
        sessionDivision = null;
        sessionRoundNumber = null;
-     }
+         }
 
-     final String division;
-     if (null != sessionDivision) {
+         final String division;
+         if (null != sessionDivision) {
        division = sessionDivision;
-     } else if (null == application.getAttribute(divisionKey)) {
-       final List<String> divisions = Queries.getEventDivisions(connection);
+         } else if (null == application.getAttribute(divisionKey)) {
+       final List<String> divisions = Queries.getAwardGroups(connection);
        if (!divisions.isEmpty()) {
          division = divisions.get(0);
        } else {
          throw new RuntimeException("No playoff bracket specified and no divisions in the database!");
        }
-     } else {
+         } else {
        division = (String) application.getAttribute(divisionKey);
-     }
+         }
 
       final int playoffRoundNumber;
       if (null != sessionRoundNumber) {

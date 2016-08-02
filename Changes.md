@@ -1,3 +1,5 @@
+* #440 - Add more information to the final computed scores report to aide head judges
+
 Release 10.9
 ============
 
