@@ -78,7 +78,7 @@ public class CategorizedScores extends BaseFLLServlet {
       final int currentTournament = Queries.getCurrentTournament(connection);
 
       // foreach division
-      for (final String division : Queries.getEventDivisions(connection)) {
+      for (final String division : Queries.getAwardGroups(connection)) {
         // foreach subjective category
         for (final Map.Entry<String, String> entry : subjectiveCategories.entrySet()) {
           final String categoryTitle = entry.getKey();

@@ -98,7 +98,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
       final WinnerType winnerCriteria = challengeDescription.getWinner();
 
       final List<ScoreCategory> subjectiveCategories = challengeDescription.getSubjectiveCategories();
-      final Collection<String> eventDivisions = Queries.getEventDivisions(connection);
+      final Collection<String> eventDivisions = Queries.getAwardGroups(connection);
       final Collection<String> judgingGroups = Queries.getJudgingStations(connection, tournament.getTournamentID());
 
       for (final ScoreCategory catElement : subjectiveCategories) {

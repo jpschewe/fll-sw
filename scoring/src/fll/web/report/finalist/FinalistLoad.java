@@ -101,7 +101,7 @@ public class FinalistLoad {
       final int tournament = Queries.getCurrentTournament(connection);
 
       final Formatter output = new Formatter(writer);
-      for (final String division : Queries.getEventDivisions(connection, tournament)) {
+      for (final String division : Queries.getAwardGroups(connection, tournament)) {
         output.format("$.finalist.addDivision(%s);%n", WebUtils.quoteJavascriptString(division));
       }
 
