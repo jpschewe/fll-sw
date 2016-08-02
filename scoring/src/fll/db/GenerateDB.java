@@ -66,9 +66,11 @@ public final class GenerateDB {
    * @param document and XML document that describes a tournament
    * @param connection connection to the database to create the tables in
    */
-  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE", "OBL_UNSATISFIED_OBLIGATION" }, justification = "Need dynamic data for default values, Bug in findbugs - ticket:2924739")
+  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
+                                "OBL_UNSATISFIED_OBLIGATION" }, justification = "Need dynamic data for default values, Bug in findbugs - ticket:2924739")
   public static void generateDB(final Document document,
-                                final Connection connection) throws SQLException, UnsupportedEncodingException {
+                                final Connection connection)
+      throws SQLException, UnsupportedEncodingException {
 
     Statement stmt = null;
     PreparedStatement prep = null;
@@ -152,14 +154,13 @@ public final class GenerateDB {
 
       // table to track which teams are in which playoff bracket
       createPlayoffBracketTeams(connection);
-      
+
       // table to hold team numbers of teams in this tournament
       stmt.executeUpdate("DROP TABLE IF EXISTS TournamentTeams CASCADE");
       stmt.executeUpdate("CREATE TABLE TournamentTeams ("
           + "  TeamNumber integer NOT NULL" //
           + " ,Tournament INTEGER NOT NULL" //
-          + " ,event_division varchar(32) default '" + DEFAULT_TEAM_DIVISION
-          + "' NOT NULL" //
+          + " ,event_division varchar(32) default '" + DEFAULT_TEAM_DIVISION + "' NOT NULL" //
           + " ,judging_station varchar(64) NOT NULL"
           + " ,CONSTRAINT tournament_teams_pk PRIMARY KEY (TeamNumber, Tournament)" //
           + " ,CONSTRAINT tournament_teams_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber)" //
@@ -297,13 +298,10 @@ public final class GenerateDB {
           + " SELECT TeamNumber, Max(ComputedTotal) As Score, AVG(ComputedTotal) As average" //
           + " FROM Performance" //
           + " WHERE " //
-          + " tournament IN "
-          + " (SELECT CONVERT(param_value, INTEGER) " // " +
+          + " tournament IN " + " (SELECT CONVERT(param_value, INTEGER) " // " +
           + "      FROM global_parameters " //
-          + "      WHERE param = '" + GlobalParameters.CURRENT_TOURNAMENT
-          + "'"//
-          + "  )"
-          + " AND RunNumber <= ("//
+          + "      WHERE param = '" + GlobalParameters.CURRENT_TOURNAMENT + "'"//
+          + "  )" + " AND RunNumber <= ("//
           // compute the run number for the current tournament
           + "   SELECT CONVERT(param_value, INTEGER) FROM tournament_parameters" //
           + "     WHERE param = 'SeedingRounds' AND tournament = ("
@@ -343,7 +341,8 @@ public final class GenerateDB {
   }
 
   /* package */static void createNonNumericNomineesTables(final Connection connection,
-                                                          final boolean createConstraints) throws SQLException {
+                                                          final boolean createConstraints)
+      throws SQLException {
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
@@ -377,7 +376,8 @@ public final class GenerateDB {
    * @param createConstraints if false, don't create foreign key constraints
    */
   /* package */static void createFinalistScheduleTables(final Connection connection,
-                                                        final boolean createConstraints) throws SQLException {
+                                                        final boolean createConstraints)
+      throws SQLException {
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
@@ -510,7 +510,8 @@ public final class GenerateDB {
 
   private static void renameTournament(final Connection connection,
                                        final int tournament,
-                                       final String newName) throws SQLException {
+                                       final String newName)
+      throws SQLException {
     PreparedStatement prep = null;
     try {
       prep = connection.prepareStatement("UPDATE Tournaments SET Name = ? WHERE tournament_id = ?");
@@ -619,13 +620,20 @@ public final class GenerateDB {
                                                                      TournamentParameters.MAX_SCOREBOARD_ROUND_DEFAULT);
       }
 
+      if (!TournamentParameters.defaultParameterExists(connection,
+                                                       TournamentParameters.PERFORMANCE_ADVANCEMENT_PERCENTAGE)) {
+        TournamentParameters.setDefaultPerformanceAdvancementPercentage(connection,
+                                                                        TournamentParameters.PERFORMANCE_ADVANCEMENT_PERCENTAGE_DEFAULT);
+      }
+
     } finally {
       SQLFunctions.close(globalInsert);
     }
   }
 
   public static void insertOrUpdateChallengeDocument(final Document document,
-                                                     final Connection connection) throws SQLException {
+                                                     final Connection connection)
+      throws SQLException {
     PreparedStatement challengePrep = null;
     try {
       final boolean check = GlobalParameters.globalParameterExists(connection, GlobalParameters.CHALLENGE_DOCUMENT);
@@ -654,7 +662,8 @@ public final class GenerateDB {
   }
 
   /* package */static void createGlobalParameters(final Document document,
-                                                  final Connection connection) throws SQLException {
+                                                  final Connection connection)
+      throws SQLException {
     Statement stmt = null;
     PreparedStatement insertPrep = null;
     PreparedStatement deletePrep = null;
@@ -722,7 +731,8 @@ public final class GenerateDB {
   }
 
   /* package */static void createTableDivision(final Connection connection,
-                                               final boolean createConstraints) throws SQLException {
+                                               final boolean createConstraints)
+      throws SQLException {
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
@@ -754,7 +764,8 @@ public final class GenerateDB {
    * @throws SQLException
    */
   /* package */static void createScheduleTables(final Connection connection,
-                                                final boolean createConstraints) throws SQLException {
+                                                final boolean createConstraints)
+      throws SQLException {
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
@@ -843,7 +854,7 @@ public final class GenerateDB {
    * 
    * @param connection
    */
-  /*package*/ static void createPlayoffBracketTeams(final Connection connection) throws SQLException {
+  /* package */ static void createPlayoffBracketTeams(final Connection connection) throws SQLException {
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
