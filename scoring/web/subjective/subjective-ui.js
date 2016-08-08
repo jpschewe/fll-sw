@@ -365,10 +365,10 @@ function populateTeams() {
     if (!$.subjective.isScoreCompleted(score)) {
       scoreStr = "";
     } else if (score.noShow) {
-      scoreStr = "No Show - ";
+      scoreStr = "<span class='no-show'>No Show</span> - ";
     } else {
       var computedScore = $.subjective.computeScore(score);
-      scoreStr = "Score: " + computedScore + " - ";
+      scoreStr = "<span class='score'>Score: " + computedScore + "</span> - ";
     }
 
     var label = "";
