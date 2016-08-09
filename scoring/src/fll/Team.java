@@ -60,6 +60,9 @@ public class Team implements Serializable {
    */
   public static final Team NULL = new Team(NULL_TEAM_NUMBER, "INTERNAL", "NULL");
 
+  /**
+   * Compare teams by number.
+   */
   public static final Comparator<Team> TEAM_NUMBER_COMPARATOR = new Comparator<Team>() {
     public int compare(final Team one,
                        final Team two) {
