@@ -69,8 +69,7 @@ This has caught many data entry errors in previous tournaments.
     * When you initialize the playoffs you will be asked how to seed the teams into the brackets. In most cases you want to choose "Use the best score from the seeding rounds".
   * You can print out the brackets by going to the admin/printable bracket page, under the Playoffs link on the main index, for each division and printing that out.
   * You can goto the printable bracket page and then keep refreshing the page. As scores are entered the bracket will fill out. Clicking the print scoresheets button at the top will create a PDF of the score sheets for the rounds that can be determined and haven't been printed yet. If you want to reprint some scoresheets you just check the box next to the round to print and then click the print scoresheets button.
-  * If there is a tie during playoffs the software will attempt to break it with the standard tie breaker defined in the software. However if this is not possible TIE will be shown as the winner of a round. This means that these two teams need to compete again. Their previous scores should be deleted, the score sheet printed again and the new scores entered. Then the brackets page will display the new scores as it updates.
-
+  * Scores are entered per the [Performance Score Entry Instructions](performance-entry-instructions.md)
 
 ## End of tournament
 
