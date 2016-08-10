@@ -1,3 +1,4 @@
+* #510 - Add separator with category name to the subjective web application
 * #476 - Sort finalist callback display by team number
 * #495 - color background of subjective scores to make it clear which teams have been scored
 * #479 - Add performance advancement percentage to the database and remove it from the generation of the final computed scores report
