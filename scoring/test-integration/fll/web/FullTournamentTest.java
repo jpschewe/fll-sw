@@ -129,8 +129,6 @@ public class FullTournamentTest {
     final int numSeedingRounds = 3;
 
     Connection testDataConn = null;
-    ResultSet rs = null;
-    PreparedStatement prep = null;
     try {
       Class.forName("org.hsqldb.jdbcDriver").newInstance();
 
@@ -141,9 +139,65 @@ public class FullTournamentTest {
 
       final String testTournamentName = "Field";
 
+      try (final InputStream challengeDocIS = FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")) {
+        replayTournament(testDataConn, testTournamentName, challengeDocIS, numSeedingRounds);
+      }
+
+    } catch (final AssertionError e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final RuntimeException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final IOException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final ClassNotFoundException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final InstantiationException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final IllegalAccessException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final ParseException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final SQLException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final InterruptedException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } finally {
+      SQLFunctions.close(testDataConn);
+    }
+  }
+
+  /**
+   * Replay a tournament.
+   * 
+   * @param testDataConn connection to the source data
+   * @param testTournamentName name of the tournament to create
+   * @param challengeDocIS input stream for the challenge description
+   * @param numSeedingRounds number of seeding rounds for the tournament
+   * @throws IOException
+   * @throws SQLException
+   * @throws ParseException
+   * @throws InterruptedException
+   * @throws SAXException
+   */
+  private void replayTournament(final Connection testDataConn,
+                                final String testTournamentName,
+                                final InputStream challengeDocIS,
+                                final int numSeedingRounds)
+      throws IOException, SQLException, ParseException, InterruptedException, SAXException {
+    ResultSet rs = null;
+    PreparedStatement prep = null;
+    try {
       // --- initialize database ---
       LOGGER.info("Initializing the database from data/challenge-ft.xml");
-      final InputStream challengeDocIS = FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml");
       IntegrationTestUtils.initializeDatabase(selenium, challengeDocIS);
 
       LOGGER.info("Loading teams");
@@ -231,39 +285,9 @@ public class FullTournamentTest {
 
       LOGGER.info("Checking rank and scores");
       checkRankAndScores(testTournamentName);
-
-    } catch (final AssertionError e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final RuntimeException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final IOException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final ClassNotFoundException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final InstantiationException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final IllegalAccessException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final ParseException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final SQLException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final InterruptedException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
-      SQLFunctions.close(testDataConn);
-      // Utilities.closeConnection(connection);
     }
   }
 
@@ -296,8 +320,9 @@ public class FullTournamentTest {
       final String awardGroup = radioButton.getAttribute("value");
       awardGroups.add(awardGroup);
     }
-    
-    LOGGER.info("Found awardGroups: " + awardGroups);
+
+    LOGGER.info("Found awardGroups: "
+        + awardGroups);
 
     Assert.assertFalse(awardGroups.isEmpty());
     return awardGroups;
