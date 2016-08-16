@@ -6,7 +6,6 @@
 package fll.web;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -139,7 +138,7 @@ public class FullTournamentTest {
 
       try (final InputStream challengeDocIS = FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")) {
         replayTournament(testDataConn, testTournamentName, challengeDocIS, numSeedingRounds);
-        
+
         LOGGER.info("Computing final scores");
         computeFinalScores();
 
@@ -501,24 +500,14 @@ public class FullTournamentTest {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "report/CategoryScoresByJudge");
 
-    // PDF reports can't be done with selenium
-    final WebClient conversation = WebTestUtils.getConversation();
-    WebRequest request = new WebRequest(new URL(TestUtils.URL_ROOT
-        + "report/FinalComputedScores"));
+    IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+        + "report/FinalComputedScores"), "application/pdf", null);
 
-    Page response = WebTestUtils.loadPage(conversation, request);
-    Assert.assertEquals("application/pdf", response.getWebResponse().getContentType());
+    IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+        + "report/CategoryScoresByScoreGroup"), "application/pdf", null);
 
-    request = new WebRequest(new URL(TestUtils.URL_ROOT
-        + "report/CategoryScoresByScoreGroup"));
-    response = WebTestUtils.loadPage(conversation, request);
-    Assert.assertEquals("application/pdf", response.getWebResponse().getContentType());
-
-    request = new WebRequest(new URL(TestUtils.URL_ROOT
-        + "report/PlayoffReport"));
-    response = WebTestUtils.loadPage(conversation, request);
-    Assert.assertEquals("application/pdf", response.getWebResponse().getContentType());
-
+    IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+        + "report/PlayoffReport"), "application/pdf", null);
   }
 
   private void checkRankAndScores(final String testTournamentName) throws IOException, SAXException {
@@ -652,28 +641,8 @@ public class FullTournamentTest {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      final WebClient conversation = WebTestUtils.getConversation();
-
-      // download subjective zip
-      WebRequest request = new WebRequest(new URL(TestUtils.URL_ROOT
-          + "admin/subjective-data.fll"));
-      Page response = WebTestUtils.loadPage(conversation, request);
-      final String contentType = response.getWebResponse().getContentType();
-      if (!"application/zip".equals(contentType)) {
-        LOGGER.error("Got non-zip content: "
-            + WebTestUtils.getPageSource(response));
-      }
-      Assert.assertEquals("application/zip", contentType);
-
-      final InputStream zipStream = response.getWebResponse().getContentAsStream();
-      final FileOutputStream outputStream = new FileOutputStream(subjectiveZip);
-      final byte[] buffer = new byte[512];
-      int bytesRead = 0;
-      while (-1 != (bytesRead = zipStream.read(buffer))) {
-        outputStream.write(buffer, 0, bytesRead);
-      }
-      outputStream.close();
-      zipStream.close();
+      IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+          + "admin/subjective-data.fll"), "application/zip", subjectiveZip);
 
       final SubjectiveFrame subjective = new SubjectiveFrame();
       subjective.load(subjectiveZip);
@@ -749,9 +718,12 @@ public class FullTournamentTest {
       subjective.save();
 
       // upload scores
-      request = new WebRequest(new URL(TestUtils.URL_ROOT
+      final WebClient conversation = WebTestUtils.getConversation();
+
+      // TODO switch to selenium and use sendkeys...
+      WebRequest request = new WebRequest(new URL(TestUtils.URL_ROOT
           + "admin/index.jsp"));
-      response = WebTestUtils.loadPage(conversation, request);
+      Page response = WebTestUtils.loadPage(conversation, request);
       Assert.assertTrue(response.isHtmlPage());
       final HtmlForm uploadForm = ((HtmlPage) response).getFormByName("uploadSubjective");
 
