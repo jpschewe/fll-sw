@@ -139,6 +139,15 @@ public class FullTournamentTest {
 
       try (final InputStream challengeDocIS = FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")) {
         replayTournament(testDataConn, testTournamentName, challengeDocIS, numSeedingRounds);
+        
+        LOGGER.info("Computing final scores");
+        computeFinalScores();
+
+        LOGGER.info("Checking the reports");
+        checkReports();
+
+        LOGGER.info("Checking rank and scores");
+        checkRankAndScores(testTournamentName);
       }
 
     } catch (final AssertionError e) {
@@ -274,15 +283,6 @@ public class FullTournamentTest {
 
       LOGGER.info("Checking the subjective scores");
       enterSubjectiveScores(testDataConn, description, testTournamentName);
-
-      LOGGER.info("Computing final scores");
-      computeFinalScores();
-
-      LOGGER.info("Checking the reports");
-      checkReports();
-
-      LOGGER.info("Checking rank and scores");
-      checkRankAndScores(testTournamentName);
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
