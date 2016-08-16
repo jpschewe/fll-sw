@@ -16,6 +16,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.DirectoryIteratorException;
@@ -26,6 +27,15 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.protocol.BasicHttpContext;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.openqa.selenium.Alert;
@@ -655,6 +665,53 @@ public final class IntegrationTestUtils {
     } catch (final IOException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
+    }
+  }
+
+  /**
+   * Download the specified file and check the content type.
+   * If the content type doesn't match an assertion violation will be thrown.
+   * 
+   * @param urlToLoad the page to load
+   * @param destination where to save the file, may be null to not save the file
+   *          and just check the content type
+   */
+  public static void downloadFile(final URL urlToLoad,
+                                  final String expectedContentType,
+                                  final File destination)
+      throws ClientProtocolException, IOException {
+
+    try (final CloseableHttpClient client = HttpClientBuilder.create().build()) {
+      final BasicHttpContext localContext = new BasicHttpContext();
+
+      // if (this.mimicWebDriverCookieState) {
+      // localContext.setAttribute(ClientContext.COOKIE_STORE,
+      // mimicCookieState(selenium.manage().getCookies()));
+      // }
+      final HttpRequestBase requestMethod = new HttpGet();
+      requestMethod.setURI(urlToLoad.toURI());
+      // HttpParams httpRequestParameters = requestMethod.getParams();
+      // httpRequestParameters.setParameter(ClientPNames.HANDLE_REDIRECTS,
+      // this.followRedirects);
+      // requestMethod.setParams(httpRequestParameters);
+
+      final HttpResponse response = client.execute(requestMethod, localContext);
+
+      final Header contentTypeHeader = response.getFirstHeader("Content-type");
+      Assert.assertNotNull("Null content type header: "
+          + urlToLoad.toString(), contentTypeHeader);
+      final String contentType = contentTypeHeader.getValue().split(";")[0].trim();
+      Assert.assertEquals("Unexpected content type from: "
+          + urlToLoad.toString(), expectedContentType, contentType);
+
+      if (null != destination) {
+        try (final InputStream stream = response.getEntity().getContent()) {
+          FileUtils.copyInputStreamToFile(stream, destination);
+        } // try create stream
+      } // non-null destination
+
+    } catch (final URISyntaxException e) {
+      throw new FLLInternalException("Got exception turning URL into URI, this shouldn't happen", e);
     }
   }
 
