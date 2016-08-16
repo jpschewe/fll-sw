@@ -19,7 +19,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +49,6 @@ import com.gargoylesoftware.htmlunit.html.HtmlOption;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlSelect;
 import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
-import com.gargoylesoftware.htmlunit.util.NameValuePair;
 
 import fll.TestUtils;
 import fll.Utilities;
@@ -507,7 +505,6 @@ public class FullTournamentTest {
     final WebClient conversation = WebTestUtils.getConversation();
     WebRequest request = new WebRequest(new URL(TestUtils.URL_ROOT
         + "report/FinalComputedScores"));
-    request.setRequestParameters(Collections.singletonList(new NameValuePair("percentage", "40")));
 
     Page response = WebTestUtils.loadPage(conversation, request);
     Assert.assertEquals("application/pdf", response.getWebResponse().getContentType());
