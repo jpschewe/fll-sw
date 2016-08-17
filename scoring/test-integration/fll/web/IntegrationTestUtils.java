@@ -27,7 +27,6 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -678,7 +677,7 @@ public final class IntegrationTestUtils {
    */
   public static void downloadFile(final URL urlToLoad,
                                   final String expectedContentType,
-                                  final File destination)
+                                  final Path destination)
       throws ClientProtocolException, IOException {
 
     try (final CloseableHttpClient client = HttpClientBuilder.create().build()) {
@@ -706,7 +705,7 @@ public final class IntegrationTestUtils {
 
       if (null != destination) {
         try (final InputStream stream = response.getEntity().getContent()) {
-          FileUtils.copyInputStreamToFile(stream, destination);
+          Files.copy(stream, destination);
         } // try create stream
       } // non-null destination
 

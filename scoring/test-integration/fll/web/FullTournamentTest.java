@@ -12,6 +12,9 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -81,7 +84,9 @@ public class FullTournamentTest {
 
   @After
   public void tearDown() {
-    selenium.quit();
+    if (null != selenium) {
+      selenium.quit();
+    }
   }
 
   /**
@@ -137,7 +142,9 @@ public class FullTournamentTest {
       final String testTournamentName = "Field";
 
       try (final InputStream challengeDocIS = FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")) {
-        replayTournament(testDataConn, testTournamentName, challengeDocIS, numSeedingRounds);
+        final Path outputDirectory = Files.createDirectories(Paths.get("FullTournamentTestOutputs"));
+
+        replayTournament(testDataConn, testTournamentName, challengeDocIS, numSeedingRounds, outputDirectory);
 
         LOGGER.info("Computing final scores");
         computeFinalScores();
@@ -188,6 +195,7 @@ public class FullTournamentTest {
    * @param testTournamentName name of the tournament to create
    * @param challengeDocIS input stream for the challenge description
    * @param numSeedingRounds number of seeding rounds for the tournament
+   * @param outputDirectory where to save files
    * @throws IOException
    * @throws SQLException
    * @throws ParseException
@@ -197,8 +205,15 @@ public class FullTournamentTest {
   private void replayTournament(final Connection testDataConn,
                                 final String testTournamentName,
                                 final InputStream challengeDocIS,
-                                final int numSeedingRounds)
+                                final int numSeedingRounds,
+                                final Path outputDirectory)
       throws IOException, SQLException, ParseException, InterruptedException, SAXException {
+
+    if (null != outputDirectory) {
+      // make sure the directory exists
+      Files.createDirectories(outputDirectory);
+    }
+
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
@@ -209,14 +224,23 @@ public class FullTournamentTest {
       LOGGER.info("Loading teams");
       loadTeams();
 
+      IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+          + "admin/database.flldb"), "application/zip", outputDirectory.resolve("01-teams-loaded.flldb"));
+
       LOGGER.info("Setting current tournament");
       IntegrationTestUtils.setTournament(selenium, testTournamentName);
 
       LOGGER.info("Assigning judges");
       assignJudges(testDataConn, testTournamentName);
 
+      IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+          + "admin/database.flldb"), "application/zip", outputDirectory.resolve("02-judges-assigned.flldb"));
+
       LOGGER.info("Assigning table labels");
       assignTableLabels();
+
+      IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+          + "admin/database.flldb"), "application/zip", outputDirectory.resolve("03-table-labels-assigned.flldb"));
 
       /*
        * --- Enter 3 runs for each team --- Use data from test data base,
@@ -281,7 +305,12 @@ public class FullTournamentTest {
       checkDisplays();
 
       LOGGER.info("Checking the subjective scores");
-      enterSubjectiveScores(testDataConn, description, testTournamentName);
+      enterSubjectiveScores(testDataConn, description, testTournamentName, outputDirectory);
+
+      LOGGER.info("Writing final datbaase");
+      IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+          + "admin/database.flldb"), "application/zip", outputDirectory.resolve("99-final.flldb"));
+
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
@@ -634,10 +663,11 @@ public class FullTournamentTest {
    */
   private void enterSubjectiveScores(final Connection testDataConn,
                                      final ChallengeDescription description,
-                                     final String testTournament)
+                                     final String testTournament,
+                                     final Path outputDirectory)
       throws SQLException, IOException, MalformedURLException, ParseException, SAXException {
 
-    final File subjectiveZip = File.createTempFile("fll", ".zip", new File("screenshots"));
+    final Path subjectiveZip = Files.createTempFile(outputDirectory, "subjective", "zip");
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
@@ -645,7 +675,7 @@ public class FullTournamentTest {
           + "admin/subjective-data.fll"), "application/zip", subjectiveZip);
 
       final SubjectiveFrame subjective = new SubjectiveFrame();
-      subjective.load(subjectiveZip);
+      subjective.load(subjectiveZip.toFile());
 
       // insert scores into zip
       for (final ScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
@@ -728,7 +758,7 @@ public class FullTournamentTest {
       final HtmlForm uploadForm = ((HtmlPage) response).getFormByName("uploadSubjective");
 
       final HtmlFileInput uploadFile = uploadForm.getInputByName("subjectiveFile");
-      uploadFile.setValueAttribute(subjectiveZip.getAbsolutePath());
+      uploadFile.setValueAttribute(subjectiveZip.toAbsolutePath().toString());
 
       final HtmlSubmitInput button = uploadForm.getInputByValue("Upload");
       request = uploadForm.getWebRequest(button);
