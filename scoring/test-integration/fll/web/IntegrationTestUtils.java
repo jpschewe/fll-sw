@@ -24,6 +24,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
@@ -705,7 +706,7 @@ public final class IntegrationTestUtils {
 
       if (null != destination) {
         try (final InputStream stream = response.getEntity().getContent()) {
-          Files.copy(stream, destination);
+          Files.copy(stream, destination, StandardCopyOption.REPLACE_EXISTING);
         } // try create stream
       } // non-null destination
 
