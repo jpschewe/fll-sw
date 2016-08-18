@@ -45,7 +45,6 @@ import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.HtmlCheckBoxInput;
-import com.gargoylesoftware.htmlunit.html.HtmlFileInput;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlOption;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -748,26 +747,15 @@ public class FullTournamentTest {
       subjective.save();
 
       // upload scores
-      final WebClient conversation = WebTestUtils.getConversation();
-
-      // TODO switch to selenium and use sendkeys...
-      WebRequest request = new WebRequest(new URL(TestUtils.URL_ROOT
-          + "admin/index.jsp"));
-      Page response = WebTestUtils.loadPage(conversation, request);
-      Assert.assertTrue(response.isHtmlPage());
-      final HtmlForm uploadForm = ((HtmlPage) response).getFormByName("uploadSubjective");
-
-      final HtmlFileInput uploadFile = uploadForm.getInputByName("subjectiveFile");
-      uploadFile.setValueAttribute(subjectiveZip.toAbsolutePath().toString());
-
-      final HtmlSubmitInput button = uploadForm.getInputByValue("Upload");
-      request = uploadForm.getWebRequest(button);
-
-      response = WebTestUtils.loadPage(conversation, request);
-      Assert.assertTrue(response.isHtmlPage());
-
-      Assert.assertNotNull(((HtmlPage) response).getElementById("success"));
-
+      IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+                                    + "admin/index.jsp");
+      final WebElement fileInput = selenium.findElement(By.name("subjectiveFile"));
+      fileInput.sendKeys(subjectiveZip.toAbsolutePath().toString());
+      
+      fileInput.click();
+      
+      Assert.assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.id("error")));
+      Assert.assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
