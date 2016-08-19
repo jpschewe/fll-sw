@@ -752,7 +752,7 @@ public class FullTournamentTest {
       final WebElement fileInput = selenium.findElement(By.name("subjectiveFile"));
       fileInput.sendKeys(subjectiveZip.toAbsolutePath().toString());
       
-      fileInput.click();
+      selenium.findElement(By.id("uploadSubjectiveFile")).click();
       
       Assert.assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.id("error")));
       Assert.assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));

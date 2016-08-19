@@ -304,6 +304,7 @@
               type="file"
               size="32"
               name="subjectiveFile" /> <input
+              id='uploadSubjectiveFile'
               type="submit"
               value="Upload" />
           </form>
