@@ -666,7 +666,7 @@ public class FullTournamentTest {
                                      final Path outputDirectory)
       throws SQLException, IOException, MalformedURLException, ParseException, SAXException {
 
-    final Path subjectiveZip = Files.createTempFile(outputDirectory, "subjective", "zip");
+    final Path subjectiveZip = Files.createTempFile(outputDirectory, "subjective", ".zip");
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
