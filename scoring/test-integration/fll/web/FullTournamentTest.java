@@ -5,11 +5,10 @@
  */
 package fll.web;
 
-import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -25,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.ZipInputStream;
 
 import javax.swing.table.TableModel;
 
@@ -51,16 +51,20 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlSelect;
 import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
 
+import au.com.bytecode.opencsv.CSVWriter;
 import fll.TestUtils;
+import fll.Tournament;
+import fll.TournamentTeam;
 import fll.Utilities;
+import fll.db.GlobalParameters;
 import fll.db.ImportDB;
+import fll.db.Queries;
 import fll.subjective.SubjectiveFrame;
 import fll.util.LogUtils;
 import fll.web.developer.QueryHandler;
 import fll.web.scoreEntry.ScoreEntry;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
-import fll.xml.ChallengeParser;
 import fll.xml.Goal;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreCategory;
@@ -89,25 +93,13 @@ public class FullTournamentTest {
   }
 
   /**
-   * Load the data data from CSV files into the specified connection.
+   * Load the test data into the specified database.
    */
   private static void loadTestData(final Connection testDataConn) throws SQLException, IOException {
-    final String[] tableNames = { "teamwork", "robustdesign", "research", "programming", "performance", "judges" };
-    for (final String table : tableNames) {
-      final InputStream typeStream = FullTournamentTest.class.getResourceAsStream("data/"
-          + table + ".types");
-      Assert.assertNotNull("Missing test data "
-          + table + ".types", typeStream);
-      final Reader typeReader = new InputStreamReader(typeStream);
-      final Map<String, String> columnTypes = ImportDB.loadTypeInfo(typeReader);
-
-      final InputStream tableStream = FullTournamentTest.class.getResourceAsStream("data/"
-          + table + ".csv");
-      Assert.assertNotNull("Missing test data "
-          + table + ".csv", tableStream);
-      final Reader tableReader = new InputStreamReader(tableStream);
-      Utilities.loadCSVFile(testDataConn, table, columnTypes, tableReader);
-
+    try (final InputStream dbResourceStream = FullTournamentTest.class.getResourceAsStream("data/99-final.flldb")) {
+      Assert.assertNotNull("Missing test data", dbResourceStream);
+      final ZipInputStream zipStream = new ZipInputStream(dbResourceStream);
+      ImportDB.loadFromDumpIntoNewDB(zipStream, testDataConn);
     }
   }
 
@@ -140,10 +132,12 @@ public class FullTournamentTest {
 
       final String testTournamentName = "Field";
 
+      final Document challengeDocument = GlobalParameters.getChallengeDocument(testDataConn);
+
       try (final InputStream challengeDocIS = FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")) {
         final Path outputDirectory = Files.createDirectories(Paths.get("FullTournamentTestOutputs"));
 
-        replayTournament(testDataConn, testTournamentName, challengeDocIS, numSeedingRounds, outputDirectory);
+        replayTournament(testDataConn, testTournamentName, challengeDocument, numSeedingRounds, outputDirectory);
 
         LOGGER.info("Computing final scores");
         computeFinalScores();
@@ -192,7 +186,7 @@ public class FullTournamentTest {
    * 
    * @param testDataConn connection to the source data
    * @param testTournamentName name of the tournament to create
-   * @param challengeDocIS input stream for the challenge description
+   * @param challengeDocument the challenge document
    * @param numSeedingRounds number of seeding rounds for the tournament
    * @param outputDirectory where to save files
    * @throws IOException
@@ -203,25 +197,30 @@ public class FullTournamentTest {
    */
   private void replayTournament(final Connection testDataConn,
                                 final String testTournamentName,
-                                final InputStream challengeDocIS,
+                                final Document challengeDocument,
                                 final int numSeedingRounds,
                                 final Path outputDirectory)
       throws IOException, SQLException, ParseException, InterruptedException, SAXException {
+
+    Assert.assertNotNull(challengeDocument);
 
     if (null != outputDirectory) {
       // make sure the directory exists
       Files.createDirectories(outputDirectory);
     }
 
+    final Tournament sourceTournament = Tournament.findTournamentByName(testDataConn, testTournamentName);
+    Assert.assertNotNull(sourceTournament);
+
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
       // --- initialize database ---
-      LOGGER.info("Initializing the database from data/challenge-ft.xml");
-      IntegrationTestUtils.initializeDatabase(selenium, challengeDocIS);
+      LOGGER.info("Initializing the database");
+      IntegrationTestUtils.initializeDatabase(selenium, challengeDocument);
 
       LOGGER.info("Loading teams");
-      loadTeams();
+      loadTeams(testDataConn, sourceTournament, outputDirectory);
 
       IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
           + "admin/database.flldb"), "application/zip", outputDirectory.resolve("01-teams-loaded.flldb"));
@@ -254,8 +253,6 @@ public class FullTournamentTest {
       SQLFunctions.close(prep);
       prep = null;
 
-      final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")));
-      Assert.assertNotNull(challengeDocument);
       final ChallengeDescription description = new ChallengeDescription(challengeDocument.getDocumentElement());
       final PerformanceScoreCategory performanceElement = description.getPerformance();
 
@@ -473,23 +470,57 @@ public class FullTournamentTest {
 
   }
 
-  private void loadTeams() throws IOException {
-    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-        + "admin/");
+  /**
+   * Load the teams from testDataConnection.
+   * 
+   * @param testDataConnection where to get the teams from
+   * @param outputDirectory where to write the teams file, may be null in which
+   *          case a temp file will be used
+   * @throws IOException
+   * @throws SQLException
+   */
+  private void loadTeams(final Connection testDataConnection,
+                         final Tournament sourceTournament,
+                         final Path outputDirectory)
+      throws IOException, SQLException {
 
-    final InputStream teamsIS = FullTournamentTest.class.getResourceAsStream("data/teams-ft.csv");
-    Assert.assertNotNull(teamsIS);
-    final File teamsFile = IntegrationTestUtils.storeInputStreamToFile(teamsIS);
-    teamsIS.close();
+    final Path teamsFile;
+    final boolean deleteFile = null == outputDirectory;
+    if (null == outputDirectory) {
+      teamsFile = Files.createTempFile("fll", ".csv");
+    } else {
+      teamsFile = outputDirectory.resolve("teams.csv");
+    }
+
     try {
-      selenium.findElement(By.id("teams_file")).sendKeys(teamsFile.getAbsolutePath());
+      // write the teams out to a file
+      try (final Writer writer = new FileWriter(teamsFile.toFile())) {
+        try (final CSVWriter csvWriter = new CSVWriter(writer)) {
+          csvWriter.writeNext(new String[] { "team_name", "team_number", "affiliation", "award_group", "judging_group",
+                                             "tournament" });
+          final Map<Integer, TournamentTeam> sourceTeams = Queries.getTournamentTeams(testDataConnection,
+                                                                                      sourceTournament.getTournamentID());
+          for (final Map.Entry<Integer, TournamentTeam> entry : sourceTeams.entrySet()) {
+            final TournamentTeam team = entry.getValue();
+
+            csvWriter.writeNext(new String[] { team.getTeamName(), Integer.toString(team.getTeamNumber()),
+                                               team.getOrganization(), team.getAwardGroup(), team.getJudgingGroup(),
+                                               sourceTournament.getName() });
+          }
+        }
+      }
+
+      IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+          + "admin/");
+
+      selenium.findElement(By.id("teams_file")).sendKeys(teamsFile.toAbsolutePath().toString());
 
       selenium.findElement(By.id("upload_teams")).click();
 
       IntegrationTestUtils.assertNoException(selenium);
     } finally {
-      if (!teamsFile.delete()) {
-        teamsFile.deleteOnExit();
+      if (deleteFile) {
+        Files.delete(teamsFile);
       }
     }
 
@@ -498,12 +529,12 @@ public class FullTournamentTest {
     IntegrationTestUtils.assertNoException(selenium);
 
     // team column selection
-    new Select(selenium.findElement(By.name("TeamNumber"))).selectByValue("tea_number");
-    new Select(selenium.findElement(By.name("TeamName"))).selectByValue("tea_name");
-    new Select(selenium.findElement(By.name("Organization"))).selectByValue("org_name");
-    new Select(selenium.findElement(By.name("tournament"))).selectByValue("eve_name");
-    new Select(selenium.findElement(By.name("event_division"))).selectByValue("div_name");
-    new Select(selenium.findElement(By.name("judging_station"))).selectByValue("div_name");
+    new Select(selenium.findElement(By.name("TeamNumber"))).selectByValue("team_number");
+    new Select(selenium.findElement(By.name("TeamName"))).selectByValue("team_name");
+    new Select(selenium.findElement(By.name("Organization"))).selectByValue("affiliation");
+    new Select(selenium.findElement(By.name("tournament"))).selectByValue("tournament");
+    new Select(selenium.findElement(By.name("event_division"))).selectByValue("award_group");
+    new Select(selenium.findElement(By.name("judging_station"))).selectByValue("judging_group");
     selenium.findElement(By.id("next")).click();
     IntegrationTestUtils.assertNoException(selenium);
     Assert.assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
@@ -748,12 +779,12 @@ public class FullTournamentTest {
 
       // upload scores
       IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-                                    + "admin/index.jsp");
+          + "admin/index.jsp");
       final WebElement fileInput = selenium.findElement(By.name("subjectiveFile"));
       fileInput.sendKeys(subjectiveZip.toAbsolutePath().toString());
-      
+
       selenium.findElement(By.id("uploadSubjectiveFile")).click();
-      
+
       Assert.assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.id("error")));
       Assert.assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
     } finally {

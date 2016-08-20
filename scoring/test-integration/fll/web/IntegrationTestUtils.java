@@ -10,11 +10,13 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -48,6 +50,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.Select;
+import org.w3c.dom.Document;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -57,6 +60,7 @@ import fll.util.FLLInternalException;
 import fll.util.LogUtils;
 import fll.web.api.TournamentsServlet;
 import fll.xml.BracketSortType;
+import net.mtu.eggplant.xml.XMLUtils;
 
 /**
  * Some utilities for integration tests.
@@ -113,6 +117,29 @@ public final class IntegrationTestUtils {
   }
 
   /**
+   * Initialize the database using the given challenge document.
+   * 
+   * @param driver the test controller
+   * @param challengeDocument the challenge descriptor
+   * @throws IOException
+   */
+  public static void initializeDatabase(final WebDriver driver,
+                                        final Document challengeDocument)
+      throws IOException {
+    Assert.assertNotNull(challengeDocument);
+
+    final Path challengeFile = Files.createTempFile("fll", ".xml");
+    try (final Writer writer = new FileWriter(challengeFile.toFile())) {
+      XMLUtils.writeXML(challengeDocument, writer);
+    }
+    try {
+      initializeDatabase(driver, challengeFile);
+    } finally {
+      Files.delete(challengeFile);
+    }
+  }
+
+  /**
    * Initialize the database using the given challenge descriptor.
    * 
    * @param driver the test controller
@@ -123,58 +150,73 @@ public final class IntegrationTestUtils {
                                         final InputStream challengeStream)
       throws IOException {
     Assert.assertNotNull(challengeStream);
-    final File challengeFile = IntegrationTestUtils.storeInputStreamToFile(challengeStream);
+
+    final Path challengeFile = Files.createTempFile("fll", ".xml");
+    Files.copy(challengeStream, challengeFile, StandardCopyOption.REPLACE_EXISTING);
     try {
+      initializeDatabase(driver, challengeFile);
+    } finally {
+      Files.delete(challengeFile);
+    }
+  }
+
+  /**
+   * Initialize the database using the given challenge descriptor.
+   * 
+   * @param driver the test controller
+   * @param challengeFile a file to read the challenge description from. This
+   *          file will not be deleted.
+   * @throws IOException
+   */
+  public static void initializeDatabase(final WebDriver driver,
+                                        final Path challengeFile) {
+
+    driver.get(TestUtils.URL_ROOT
+        + "setup/");
+
+    if (isElementPresent(driver, By.name("submit_login"))) {
+      login(driver);
+
       driver.get(TestUtils.URL_ROOT
           + "setup/");
+    }
 
-      if (isElementPresent(driver, By.name("submit_login"))) {
-        login(driver);
+    final WebElement fileEle = driver.findElement(By.name("xmldocument"));
+    fileEle.sendKeys(challengeFile.toAbsolutePath().toString());
 
-        driver.get(TestUtils.URL_ROOT
-            + "setup/");
-      }
+    final WebElement reinitDB = driver.findElement(By.name("reinitializeDatabase"));
+    reinitDB.click();
 
-      final WebElement fileEle = driver.findElement(By.name("xmldocument"));
-      fileEle.sendKeys(challengeFile.getAbsolutePath());
-
-      final WebElement reinitDB = driver.findElement(By.name("reinitializeDatabase"));
-      reinitDB.click();
-
-      try {
-        final Alert confirmCreateDB = driver.switchTo().alert();
-        LOGGER.info("Confirmation text: "
-            + confirmCreateDB.getText());
-        confirmCreateDB.accept();
-      } catch (final NoAlertPresentException e) {
-        if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("No alert found, assuming the database was empty and didn't need an alert.");
-        }
-      }
-
-      driver.findElement(By.id("success"));
-
-      // setup user
-      final WebElement userElement = driver.findElement(By.name("user"));
-      userElement.sendKeys(TEST_USERNAME);
-
-      final WebElement passElement = driver.findElement(By.name("pass"));
-      passElement.sendKeys(TEST_PASSWORD);
-
-      final WebElement passCheckElement = driver.findElement(By.name("pass_check"));
-      passCheckElement.sendKeys(TEST_PASSWORD);
-
-      final WebElement submitElement = driver.findElement(By.name("submit_create_user"));
-      submitElement.click();
-
-      driver.findElement(By.id("success-create-user"));
-
-      login(driver);
-    } finally {
-      if (!challengeFile.delete()) {
-        challengeFile.deleteOnExit();
+    try {
+      final Alert confirmCreateDB = driver.switchTo().alert();
+      LOGGER.info("Confirmation text: "
+          + confirmCreateDB.getText());
+      confirmCreateDB.accept();
+    } catch (final NoAlertPresentException e) {
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("No alert found, assuming the database was empty and didn't need an alert.");
       }
     }
+
+    driver.findElement(By.id("success"));
+
+    // setup user
+    final WebElement userElement = driver.findElement(By.name("user"));
+    userElement.sendKeys(TEST_USERNAME);
+
+    final WebElement passElement = driver.findElement(By.name("pass"));
+    passElement.sendKeys(TEST_PASSWORD);
+
+    final WebElement passCheckElement = driver.findElement(By.name("pass_check"));
+    passCheckElement.sendKeys(TEST_PASSWORD);
+
+    final WebElement submitElement = driver.findElement(By.name("submit_create_user"));
+    submitElement.click();
+
+    driver.findElement(By.id("success-create-user"));
+
+    login(driver);
+
   }
 
   /**
@@ -363,12 +405,11 @@ public final class IntegrationTestUtils {
 
   /**
    * Find a tournament by name using the JSON API.
-   * @param tournamentName name of tournament
    * 
+   * @param tournamentName name of tournament
    * @return the tournament or null if not found
    */
-  public static Tournament getTournamentByName(final String tournamentName)
-      throws IOException {
+  public static Tournament getTournamentByName(final String tournamentName) throws IOException {
     final String json = readJSON(TestUtils.URL_ROOT
         + "api/Tournaments");
 
