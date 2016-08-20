@@ -53,6 +53,7 @@ import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
+import fll.util.FP;
 import fll.util.LogUtils;
 import fll.util.PdfUtils;
 import fll.web.ApplicationAttributes;
@@ -305,10 +306,11 @@ public final class FinalComputedScores extends BaseFLLServlet {
    * @return {team number -> rank}
    * @throws SQLException
    */
-  private Map<Integer, Integer> gatherRhankedPerformanceTeams(final Connection connection,
-                                                              final WinnerType winnerCriteria,
-                                                              final Tournament tournament,
-                                                              final String awawrdGroup)
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Winner criteria determines the sort")
+  private Map<Integer, Integer> gatherRankedPerformanceTeams(final Connection connection,
+                                                             final WinnerType winnerCriteria,
+                                                             final Tournament tournament,
+                                                             final String awawrdGroup)
       throws SQLException {
     final Map<Integer, Integer> rankedTeams = new HashMap<>();
 
@@ -335,7 +337,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           score = Double.NaN;
         }
 
-        if (score != prevScore) {
+        if (!FP.equals(score, prevScore, 1E-6)) {
           rank += numTied;
           numTied = 1;
         } else {
@@ -359,6 +361,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
    * @return category -> {Judging Group -> {team number -> rank}}
    * @throws SQLException
    */
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name and winner criteria determines the sort")
   private Map<ScoreCategory, Map<String, Map<Integer, Integer>>> gatherRankedSubjectiveTeams(final Connection connection,
                                                                                              final ScoreCategory[] subjectiveCategories,
                                                                                              final WinnerType winnerCriteria,
@@ -403,7 +406,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
               score = Double.NaN;
             }
 
-            if (score != prevScore) {
+            if (!FP.equals(score, prevScore, 1E-6)) {
               rank += numTied;
               numTied = 1;
             } else {
@@ -453,8 +456,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                                                                                                    tournament,
                                                                                                                    awardGroup);
 
-    final Map<Integer, Integer> teamPerformanceRanks = gatherRhankedPerformanceTeams(connection, winnerCriteria,
-                                                                                     tournament, awardGroup);
+    final Map<Integer, Integer> teamPerformanceRanks = gatherRankedPerformanceTeams(connection, winnerCriteria,
+                                                                                    tournament, awardGroup);
 
     ResultSet rawScoreRS = null;
     PreparedStatement teamPrep = null;
