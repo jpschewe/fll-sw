@@ -36,13 +36,18 @@ public class QueryTest {
 
   @Test
   public void test0() throws IOException, SAXException {
-    IntegrationTestUtils.initializeDatabaseFromDump(selenium,
-                                                    TestUtils.class.getResourceAsStream("/fll/data/testdb.flldb"));
+    try {
+      IntegrationTestUtils.initializeDatabaseFromDump(selenium,
+                                                      TestUtils.class.getResourceAsStream("/fll/data/testdb.flldb"));
 
-    final String query = "SELECT * FROM Tournaments";
-    final QueryHandler.ResultData result = WebTestUtils.executeServerQuery(query);
-    for (final String colName : result.getColumnNames()) {
-      LOGGER.info(colName);
+      final String query = "SELECT * FROM Tournaments";
+      final QueryHandler.ResultData result = WebTestUtils.executeServerQuery(query);
+      for (final String colName : result.getColumnNames()) {
+        LOGGER.info(colName);
+      }
+    } catch (final IOException | RuntimeException | AssertionError e) {
+      LOGGER.fatal(e, e);
+      IntegrationTestUtils.storeScreenshot(selenium);
     }
   }
 

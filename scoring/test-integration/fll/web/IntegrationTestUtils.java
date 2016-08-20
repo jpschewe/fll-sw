@@ -100,19 +100,14 @@ public final class IntegrationTestUtils {
   public static void loadPage(final WebDriver selenium,
                               final String url)
       throws IOException {
-    try {
-      selenium.get(url);
+    selenium.get(url);
 
-      assertNoException(selenium);
-    } catch (final AssertionError e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final RuntimeException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    }
+    assertNoException(selenium);
   }
 
+  /**
+   * Assert that the current page is not the error handler page.
+   */
   public static void assertNoException(final WebDriver selenium) {
     Assert.assertFalse("Error loading page", isElementPresent(selenium, By.id("exception-handler")));
   }
@@ -127,69 +122,58 @@ public final class IntegrationTestUtils {
   public static void initializeDatabase(final WebDriver driver,
                                         final InputStream challengeStream)
       throws IOException {
+    Assert.assertNotNull(challengeStream);
+    final File challengeFile = IntegrationTestUtils.storeInputStreamToFile(challengeStream);
     try {
-      Assert.assertNotNull(challengeStream);
-      final File challengeFile = IntegrationTestUtils.storeInputStreamToFile(challengeStream);
-      try {
+      driver.get(TestUtils.URL_ROOT
+          + "setup/");
+
+      if (isElementPresent(driver, By.name("submit_login"))) {
+        login(driver);
+
         driver.get(TestUtils.URL_ROOT
             + "setup/");
+      }
 
-        if (isElementPresent(driver, By.name("submit_login"))) {
-          login(driver);
+      final WebElement fileEle = driver.findElement(By.name("xmldocument"));
+      fileEle.sendKeys(challengeFile.getAbsolutePath());
 
-          driver.get(TestUtils.URL_ROOT
-              + "setup/");
-        }
+      final WebElement reinitDB = driver.findElement(By.name("reinitializeDatabase"));
+      reinitDB.click();
 
-        final WebElement fileEle = driver.findElement(By.name("xmldocument"));
-        fileEle.sendKeys(challengeFile.getAbsolutePath());
-
-        final WebElement reinitDB = driver.findElement(By.name("reinitializeDatabase"));
-        reinitDB.click();
-
-        try {
-          final Alert confirmCreateDB = driver.switchTo().alert();
-          LOGGER.info("Confirmation text: "
-              + confirmCreateDB.getText());
-          confirmCreateDB.accept();
-        } catch (final NoAlertPresentException e) {
-          if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("No alert found, assuming the database was empty and didn't need an alert.");
-          }
-        }
-
-        driver.findElement(By.id("success"));
-
-        // setup user
-        final WebElement userElement = driver.findElement(By.name("user"));
-        userElement.sendKeys(TEST_USERNAME);
-
-        final WebElement passElement = driver.findElement(By.name("pass"));
-        passElement.sendKeys(TEST_PASSWORD);
-
-        final WebElement passCheckElement = driver.findElement(By.name("pass_check"));
-        passCheckElement.sendKeys(TEST_PASSWORD);
-
-        final WebElement submitElement = driver.findElement(By.name("submit_create_user"));
-        submitElement.click();
-
-        driver.findElement(By.id("success-create-user"));
-
-        login(driver);
-      } finally {
-        if (!challengeFile.delete()) {
-          challengeFile.deleteOnExit();
+      try {
+        final Alert confirmCreateDB = driver.switchTo().alert();
+        LOGGER.info("Confirmation text: "
+            + confirmCreateDB.getText());
+        confirmCreateDB.accept();
+      } catch (final NoAlertPresentException e) {
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("No alert found, assuming the database was empty and didn't need an alert.");
         }
       }
-    } catch (final AssertionError e) {
-      IntegrationTestUtils.storeScreenshot(driver);
-      throw e;
-    } catch (final RuntimeException e) {
-      IntegrationTestUtils.storeScreenshot(driver);
-      throw e;
-    } catch (final IOException e) {
-      IntegrationTestUtils.storeScreenshot(driver);
-      throw e;
+
+      driver.findElement(By.id("success"));
+
+      // setup user
+      final WebElement userElement = driver.findElement(By.name("user"));
+      userElement.sendKeys(TEST_USERNAME);
+
+      final WebElement passElement = driver.findElement(By.name("pass"));
+      passElement.sendKeys(TEST_PASSWORD);
+
+      final WebElement passCheckElement = driver.findElement(By.name("pass_check"));
+      passCheckElement.sendKeys(TEST_PASSWORD);
+
+      final WebElement submitElement = driver.findElement(By.name("submit_create_user"));
+      submitElement.click();
+
+      driver.findElement(By.id("success-create-user"));
+
+      login(driver);
+    } finally {
+      if (!challengeFile.delete()) {
+        challengeFile.deleteOnExit();
+      }
     }
   }
 
@@ -204,71 +188,60 @@ public final class IntegrationTestUtils {
   public static void initializeDatabaseFromDump(final WebDriver selenium,
                                                 final InputStream inputStream)
       throws IOException {
+    Assert.assertNotNull(inputStream);
+    final File dumpFile = IntegrationTestUtils.storeInputStreamToFile(inputStream);
     try {
-      Assert.assertNotNull(inputStream);
-      final File dumpFile = IntegrationTestUtils.storeInputStreamToFile(inputStream);
-      try {
+      selenium.get(TestUtils.URL_ROOT
+          + "setup/");
+
+      if (isElementPresent(selenium, By.name("submit_login"))) {
+        login(selenium);
+
         selenium.get(TestUtils.URL_ROOT
             + "setup/");
+      }
 
-        if (isElementPresent(selenium, By.name("submit_login"))) {
-          login(selenium);
+      final WebElement dbEle = selenium.findElement(By.name("dbdump"));
+      dbEle.sendKeys(dumpFile.getAbsolutePath());
 
-          selenium.get(TestUtils.URL_ROOT
-              + "setup/");
-        }
+      final WebElement createEle = selenium.findElement(By.name("createdb"));
+      createEle.click();
 
-        final WebElement dbEle = selenium.findElement(By.name("dbdump"));
-        dbEle.sendKeys(dumpFile.getAbsolutePath());
-
-        final WebElement createEle = selenium.findElement(By.name("createdb"));
-        createEle.click();
-
-        try {
-          final Alert confirmCreateDB = selenium.switchTo().alert();
-          LOGGER.info("Confirmation text: "
-              + confirmCreateDB.getText());
-          confirmCreateDB.accept();
-        } catch (final NoAlertPresentException e) {
-          if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("No alert found, assuming the database was empty and didn't need an alert.");
-          }
-        }
-
-        selenium.findElement(By.id("success"));
-
-        // setup user
-        final WebElement userElement = selenium.findElement(By.name("user"));
-        userElement.sendKeys(TEST_USERNAME);
-
-        final WebElement passElement = selenium.findElement(By.name("pass"));
-        passElement.sendKeys(TEST_PASSWORD);
-
-        final WebElement passCheckElement = selenium.findElement(By.name("pass_check"));
-        passCheckElement.sendKeys(TEST_PASSWORD);
-
-        final WebElement submitElement = selenium.findElement(By.name("submit_create_user"));
-        submitElement.click();
-
-        selenium.findElement(By.id("success-create-user"));
-
-        login(selenium);
-      } finally {
-        if (!dumpFile.delete()) {
-          dumpFile.deleteOnExit();
+      try {
+        final Alert confirmCreateDB = selenium.switchTo().alert();
+        LOGGER.info("Confirmation text: "
+            + confirmCreateDB.getText());
+        confirmCreateDB.accept();
+      } catch (final NoAlertPresentException e) {
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("No alert found, assuming the database was empty and didn't need an alert.");
         }
       }
+
+      selenium.findElement(By.id("success"));
+
+      // setup user
+      final WebElement userElement = selenium.findElement(By.name("user"));
+      userElement.sendKeys(TEST_USERNAME);
+
+      final WebElement passElement = selenium.findElement(By.name("pass"));
+      passElement.sendKeys(TEST_PASSWORD);
+
+      final WebElement passCheckElement = selenium.findElement(By.name("pass_check"));
+      passCheckElement.sendKeys(TEST_PASSWORD);
+
+      final WebElement submitElement = selenium.findElement(By.name("submit_create_user"));
+      submitElement.click();
+
+      selenium.findElement(By.id("success-create-user"));
+
       login(selenium);
-    } catch (final AssertionError e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final RuntimeException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final IOException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
+    } finally {
+      if (!dumpFile.delete()) {
+        dumpFile.deleteOnExit();
+      }
     }
+    login(selenium);
   }
 
   /**
@@ -390,48 +363,34 @@ public final class IntegrationTestUtils {
 
   /**
    * Find a tournament by name using the JSON API.
-   * 
-   * @param selenium web interface
    * @param tournamentName name of tournament
+   * 
    * @return the tournament or null if not found
    */
-  public static Tournament getTournamentByName(final WebDriver selenium,
-                                               final String tournamentName)
+  public static Tournament getTournamentByName(final String tournamentName)
       throws IOException {
-    try {
-      final String json = readJSON(TestUtils.URL_ROOT
-          + "api/Tournaments");
+    final String json = readJSON(TestUtils.URL_ROOT
+        + "api/Tournaments");
 
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Tournaments json: "
-            + json);
-      }
-
-      // get the JSON
-      final ObjectMapper jsonMapper = new ObjectMapper();
-      final Reader reader = new StringReader(json);
-
-      final Collection<Tournament> tournaments = jsonMapper.readValue(reader,
-                                                                      TournamentsServlet.TournamentsTypeInformation.INSTANCE);
-
-      for (final Tournament tournament : tournaments) {
-        if (tournament.getName().equals(tournamentName)) {
-          return tournament;
-        }
-      }
-
-      return null;
-
-    } catch (final AssertionError e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final RuntimeException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final IOException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Tournaments json: "
+          + json);
     }
+
+    // get the JSON
+    final ObjectMapper jsonMapper = new ObjectMapper();
+    final Reader reader = new StringReader(json);
+
+    final Collection<Tournament> tournaments = jsonMapper.readValue(reader,
+                                                                    TournamentsServlet.TournamentsTypeInformation.INSTANCE);
+
+    for (final Tournament tournament : tournaments) {
+      if (tournament.getName().equals(tournamentName)) {
+        return tournament;
+      }
+    }
+
+    return null;
   }
 
   /**
@@ -444,46 +403,33 @@ public final class IntegrationTestUtils {
                              final String division,
                              final String tournamentName)
       throws IOException {
-    try {
-      final Tournament tournament = getTournamentByName(selenium, tournamentName);
+    final Tournament tournament = getTournamentByName(tournamentName);
 
-      loadPage(selenium, TestUtils.URL_ROOT
-          + "admin/index.jsp");
+    loadPage(selenium, TestUtils.URL_ROOT
+        + "admin/index.jsp");
 
-      selenium.findElement(By.linkText("Add a team")).click();
+    selenium.findElement(By.linkText("Add a team")).click();
 
-      selenium.findElement(By.name("teamNumber")).sendKeys(String.valueOf(teamNumber));
-      selenium.findElement(By.name("teamName")).sendKeys(teamName);
-      selenium.findElement(By.name("organization")).sendKeys(organization);
+    selenium.findElement(By.name("teamNumber")).sendKeys(String.valueOf(teamNumber));
+    selenium.findElement(By.name("teamName")).sendKeys(teamName);
+    selenium.findElement(By.name("organization")).sendKeys(organization);
 
-      selenium.findElement(By.id("tournament_"
-          + tournament.getTournamentID())).click();
+    selenium.findElement(By.id("tournament_"
+        + tournament.getTournamentID())).click();
 
-      final WebElement eventDivision = selenium.findElement(By.id("event_division_"
-          + tournament.getTournamentID()));
-      final Select eventDivisionSel = new Select(eventDivision);
-      eventDivisionSel.selectByValue(division);
+    final WebElement eventDivision = selenium.findElement(By.id("event_division_"
+        + tournament.getTournamentID()));
+    final Select eventDivisionSel = new Select(eventDivision);
+    eventDivisionSel.selectByValue(division);
 
-      final WebElement judgingStation = selenium.findElement(By.id("judging_station_"
-          + tournament.getTournamentID()));
-      final Select judgingStationSel = new Select(judgingStation);
-      judgingStationSel.selectByValue(division);
+    final WebElement judgingStation = selenium.findElement(By.id("judging_station_"
+        + tournament.getTournamentID()));
+    final Select judgingStationSel = new Select(judgingStation);
+    judgingStationSel.selectByValue(division);
 
-      selenium.findElement(By.name("commit")).click();
+    selenium.findElement(By.name("commit")).click();
 
-      selenium.findElement(By.id("success"));
-
-    } catch (final AssertionError e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final RuntimeException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final IOException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    }
-
+    selenium.findElement(By.id("success"));
   }
 
   /**
@@ -496,44 +442,33 @@ public final class IntegrationTestUtils {
   public static void setTournament(final WebDriver selenium,
                                    final String tournamentName)
       throws IOException {
-    try {
-      loadPage(selenium, TestUtils.URL_ROOT
-          + "admin/index.jsp");
+    loadPage(selenium, TestUtils.URL_ROOT
+        + "admin/index.jsp");
 
-      final WebElement currentTournament = selenium.findElement(By.id("currentTournamentSelect"));
+    final WebElement currentTournament = selenium.findElement(By.id("currentTournamentSelect"));
 
-      final Select currentTournamentSel = new Select(currentTournament);
-      String tournamentID = null;
-      for (final WebElement option : currentTournamentSel.getOptions()) {
-        final String text = option.getText();
-        if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("setTournament option: "
-              + text);
-        }
-        if (text.endsWith("[ "
-            + tournamentName + " ]")) {
-          tournamentID = option.getAttribute("value");
-        }
+    final Select currentTournamentSel = new Select(currentTournament);
+    String tournamentID = null;
+    for (final WebElement option : currentTournamentSel.getOptions()) {
+      final String text = option.getText();
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("setTournament option: "
+            + text);
       }
-      Assert.assertNotNull("Could not find tournament with name: "
-          + tournamentName, tournamentID);
-
-      currentTournamentSel.selectByValue(tournamentID);
-
-      final WebElement changeTournament = selenium.findElement(By.name("change_tournament"));
-      changeTournament.click();
-
-      Assert.assertNotNull(selenium.findElement(By.id("success")));
-    } catch (final AssertionError e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final RuntimeException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final IOException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
+      if (text.endsWith("[ "
+          + tournamentName + " ]")) {
+        tournamentID = option.getAttribute("value");
+      }
     }
+    Assert.assertNotNull("Could not find tournament with name: "
+        + tournamentName, tournamentID);
+
+    currentTournamentSel.selectByValue(tournamentID);
+
+    final WebElement changeTournament = selenium.findElement(By.name("change_tournament"));
+    changeTournament.click();
+
+    Assert.assertNotNull(selenium.findElement(By.id("success")));
   }
 
   /**
@@ -615,25 +550,14 @@ public final class IntegrationTestUtils {
                                             final int tournamentId,
                                             final int newValue)
       throws NoSuchElementException, IOException {
-    try {
-      IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-          + "admin/edit_all_parameters.jsp");
-      final Select seedingRoundsSelection = new Select(selenium.findElement(By.name("seeding_rounds_"
-          + tournamentId)));
-      seedingRoundsSelection.selectByValue(Integer.toString(newValue));
-      selenium.findElement(By.id("submit")).click();
+    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+        + "admin/edit_all_parameters.jsp");
+    final Select seedingRoundsSelection = new Select(selenium.findElement(By.name("seeding_rounds_"
+        + tournamentId)));
+    seedingRoundsSelection.selectByValue(Integer.toString(newValue));
+    selenium.findElement(By.id("submit")).click();
 
-      selenium.findElement(By.id("success"));
-    } catch (final AssertionError e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final RuntimeException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final IOException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    }
+    selenium.findElement(By.id("success"));
   }
 
   /**
@@ -642,30 +566,19 @@ public final class IntegrationTestUtils {
    * @throws IOException
    */
   public static int getCurrentTournamentId(final WebDriver selenium) throws IOException {
-    try {
-      loadPage(selenium, TestUtils.URL_ROOT
-          + "admin/index.jsp");
+    loadPage(selenium, TestUtils.URL_ROOT
+        + "admin/index.jsp");
 
-      final WebElement currentTournament = selenium.findElement(By.id("currentTournamentSelect"));
+    final WebElement currentTournament = selenium.findElement(By.id("currentTournamentSelect"));
 
-      final Select currentTournamentSel = new Select(currentTournament);
-      for (final WebElement option : currentTournamentSel.getOptions()) {
-        if (option.isSelected()) {
-          final String idStr = option.getAttribute("value");
-          return Integer.valueOf(idStr);
-        }
+    final Select currentTournamentSel = new Select(currentTournament);
+    for (final WebElement option : currentTournamentSel.getOptions()) {
+      if (option.isSelected()) {
+        final String idStr = option.getAttribute("value");
+        return Integer.valueOf(idStr);
       }
-      throw new FLLInternalException("Cannot find default tournament");
-    } catch (final AssertionError e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final RuntimeException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final IOException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
     }
+    throw new FLLInternalException("Cannot find default tournament");
   }
 
   /**
