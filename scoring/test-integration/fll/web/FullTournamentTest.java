@@ -20,6 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlSelect;
 import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
 
 import au.com.bytecode.opencsv.CSVWriter;
+import fll.JudgeInformation;
 import fll.TestUtils;
 import fll.Tournament;
 import fll.TournamentTeam;
@@ -226,10 +228,10 @@ public class FullTournamentTest {
           + "admin/database.flldb"), "application/zip", outputDirectory.resolve("01-teams-loaded.flldb"));
 
       LOGGER.info("Setting current tournament");
-      IntegrationTestUtils.setTournament(selenium, testTournamentName);
+      IntegrationTestUtils.setTournament(selenium, sourceTournament.getName());
 
       LOGGER.info("Assigning judges");
-      assignJudges(testDataConn, testTournamentName);
+      assignJudges(testDataConn, sourceTournament);
 
       IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
           + "admin/database.flldb"), "application/zip", outputDirectory.resolve("02-judges-assigned.flldb"));
@@ -401,47 +403,19 @@ public class FullTournamentTest {
   }
 
   private void assignJudges(final Connection testDataConn,
-                            final String testTournamentName)
+                            final Tournament sourceTournament)
       throws IOException, SQLException {
-    ResultSet rs;
-    PreparedStatement prep;
 
-    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-        + "admin/index.jsp");
+    final Collection<JudgeInformation> judges = JudgeInformation.getJudges(testDataConn,
+                                                                           sourceTournament.getTournamentID());
 
-    selenium.findElement(By.id("assign_judges")).click();
+    int judgeIndex = 0;
+    for (final JudgeInformation judge : judges) {
 
-    // assign judges from database
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("Assigning judges");
-      IntegrationTestUtils.storeScreenshot(selenium);
+      assignJudge(judge.getId(), judge.getCategory(), judge.getGroup(), judgeIndex);
+
+      ++judgeIndex;
     }
-
-    int judgeIndex = 1;
-    prep = testDataConn.prepareStatement("SELECT id, category, Division FROM Judges WHERE Tournament = ?");
-    prep.setString(1, testTournamentName);
-    rs = prep.executeQuery();
-    while (rs.next()) {
-      final String id = rs.getString(1);
-      final String category = rs.getString(2);
-      final String division = rs.getString(3);
-
-      if ("All".equals(division)) {
-
-        final Select select = new Select(IntegrationTestUtils.findElement(selenium, By.name("station1"), 5));
-        for (final WebElement option : select.getOptions()) {
-          final String station = option.getText();
-          assignJudge(id, category, station, judgeIndex);
-          ++judgeIndex;
-        }
-
-      } else {
-        assignJudge(id, category, division, judgeIndex);
-        ++judgeIndex;
-      }
-    }
-    SQLFunctions.close(rs);
-    SQLFunctions.close(prep);
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("After assigning judges");
