@@ -369,24 +369,21 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                                                                              final String awardGroup)
       throws SQLException {
     final Map<ScoreCategory, Map<String, Map<Integer, Integer>>> retval = new HashMap<>();
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      final List<String> judgingStations = Queries.getJudgingStations(connection, tournament.getTournamentID());
+    final List<String> judgingStations = Queries.getJudgingStations(connection, tournament.getTournamentID());
 
-      for (int cat = 0; cat < subjectiveCategories.length; cat++) {
-        final String catName = subjectiveCategories[cat].getName();
+    for (int cat = 0; cat < subjectiveCategories.length; cat++) {
+      final String catName = subjectiveCategories[cat].getName();
 
-        final Map<String, Map<Integer, Integer>> categoryRanks = new HashMap<>();
+      final Map<String, Map<Integer, Integer>> categoryRanks = new HashMap<>();
 
-        prep = connection.prepareStatement("SELECT FinalScores.TeamNumber, FinalScores."
-            + catName //
-            + " FROM FinalScores, TournamentTeams" //
-            + " WHERE FinalScores.Tournament = ?" //
-            + " AND TournamentTeams.event_division = ?"//
-            + " AND TournamentTeams.TeamNumber = FinalScores.TeamNumber"//
-            + " AND TournamentTeams.judging_station = ?" //
-            + " ORDER BY FinalScores." + catName + " " + winnerCriteria.getSortString());
+      try (final PreparedStatement prep = connection.prepareStatement("SELECT FinalScores.TeamNumber, FinalScores."
+          + catName //
+          + " FROM FinalScores, TournamentTeams" //
+          + " WHERE FinalScores.Tournament = ?" //
+          + " AND TournamentTeams.event_division = ?"//
+          + " AND TournamentTeams.TeamNumber = FinalScores.TeamNumber"//
+          + " AND TournamentTeams.judging_station = ?" //
+          + " ORDER BY FinalScores." + catName + " " + winnerCriteria.getSortString())) {
         prep.setInt(1, tournament.getTournamentID());
         prep.setString(2, awardGroup);
 
@@ -398,44 +395,38 @@ public final class FinalComputedScores extends BaseFLLServlet {
           int numTied = 1;
           int rank = 0;
           double prevScore = Double.NaN;
-          rs = prep.executeQuery();
-          while (rs.next()) {
-            final int teamNumber = rs.getInt(1);
-            double score = rs.getDouble(2);
-            if (rs.wasNull()) {
-              score = Double.NaN;
+          try (final ResultSet rs = prep.executeQuery()) {
+            while (rs.next()) {
+              final int teamNumber = rs.getInt(1);
+              double score = rs.getDouble(2);
+              if (rs.wasNull()) {
+                score = Double.NaN;
+              }
+
+              if (!FP.equals(score, prevScore, 1E-6)) {
+                rank += numTied;
+                numTied = 1;
+              } else {
+                ++numTied;
+              }
+
+              rankedTeams.put(teamNumber, rank);
+
+              prevScore = score;
             }
 
-            if (!FP.equals(score, prevScore, 1E-6)) {
-              rank += numTied;
-              numTied = 1;
-            } else {
-              ++numTied;
-            }
+            categoryRanks.put(judgingStation, rankedTeams);
 
-            rankedTeams.put(teamNumber, rank);
-
-            prevScore = score;
-          }
-
-          categoryRanks.put(judgingStation, rankedTeams);
-
-          SQLFunctions.close(rs);
-          rs = null;
+          } // try ResultSet
         } // foreach judging station
 
         retval.put(subjectiveCategories[cat], categoryRanks);
 
-        SQLFunctions.close(prep);
-        prep = null;
-      } // foreach category
+      } // try PreparedStatement
+    } // foreach category
 
-      return retval;
+    return retval;
 
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
   }
 
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table name")
