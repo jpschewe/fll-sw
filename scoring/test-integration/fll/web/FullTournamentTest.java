@@ -412,7 +412,7 @@ public class FullTournamentTest {
     final Collection<JudgeInformation> judges = JudgeInformation.getJudges(testDataConn,
                                                                            sourceTournament.getTournamentID());
 
-    int judgeIndex = 0;
+    int judgeIndex = 1;
     for (final JudgeInformation judge : judges) {
 
       assignJudge(judge.getId(), judge.getCategory(), judge.getGroup(), judgeIndex);
