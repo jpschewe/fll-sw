@@ -406,6 +406,10 @@ public class FullTournamentTest {
                             final Tournament sourceTournament)
       throws IOException, SQLException {
 
+    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+        + "admin/index.jsp");
+    selenium.findElement(By.id("assign_judges")).click();
+
     final Collection<JudgeInformation> judges = JudgeInformation.getJudges(testDataConn,
                                                                            sourceTournament.getTournamentID());
 
