@@ -49,6 +49,7 @@ import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.Select;
 import org.w3c.dom.Document;
 
@@ -60,6 +61,7 @@ import fll.util.FLLInternalException;
 import fll.util.LogUtils;
 import fll.web.api.TournamentsServlet;
 import fll.xml.BracketSortType;
+import io.github.bonigarcia.wdm.MarionetteDriverManager;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
@@ -512,11 +514,25 @@ public final class IntegrationTestUtils {
     Assert.assertNotNull(selenium.findElement(By.id("success")));
   }
 
+  private static boolean WEB_DRIVER_SETUP = false;
+
+  private static synchronized void setupWebDriver() {
+    if (!WEB_DRIVER_SETUP) {
+      MarionetteDriverManager.getInstance().setup();
+      WEB_DRIVER_SETUP = true;
+    }
+  }
+
   /**
    * Create a web driver and set appropriate timeouts on it.
    */
   public static WebDriver createWebDriver() {
-    final WebDriver selenium = new FirefoxDriver();
+    setupWebDriver();
+    
+    final DesiredCapabilities capabilities = DesiredCapabilities.firefox();
+    capabilities.setCapability("marionette", false);
+    final WebDriver selenium = new FirefoxDriver(capabilities);
+
     selenium.manage().timeouts().implicitlyWait(500, TimeUnit.MILLISECONDS);
     selenium.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
     return selenium;
@@ -628,7 +644,8 @@ public final class IntegrationTestUtils {
    * 
    * @param urlToLoad the page to load
    * @param destination where to save the file, may be null to not save the file
-   *          and just check the content type
+   *          and just check the content type. Any existing file will be
+   *          overwritten.
    */
   public static void downloadFile(final URL urlToLoad,
                                   final String expectedContentType,
