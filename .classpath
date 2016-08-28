@@ -74,10 +74,11 @@
 	<classpathentry kind="lib" path="scoring/lib/cobertura/cobertura-2.1.1.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/findbugs-3.0.1/lib/jsr305.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/findbugs-3.0.1/lib/annotations.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/test/selenium/selenium-java-2.53.0.jar" sourcepath="scoring/lib/test/selenium-java-2.53.0-srcs.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/test/selenium/selenium-server-standalone-2.53.0.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/selenium/junit-4.12.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/htmlunit-2.22.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/commons-lang3-3.4.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/selenium/client-combined-3.0.0-beta2-nodeps.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/selenium/selenium-server-standalone-3.0.0-beta2.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/webdrivermanager/webdrivermanager-1.4.8.jar"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>

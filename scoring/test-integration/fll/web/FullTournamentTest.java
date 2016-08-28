@@ -974,6 +974,8 @@ public class FullTournamentTest {
             selenium.findElement(By.id("submit")).click();
           } // not NoShow
 
+          LOGGER.info("Checking for an alert");
+
           // confirm selection, not going to bother checking the text
           final Alert confirmScoreChange = selenium.switchTo().alert();
           if (LOGGER.isTraceEnabled()) {
