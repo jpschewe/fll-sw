@@ -61,6 +61,7 @@ import fll.Utilities;
 import fll.db.GlobalParameters;
 import fll.db.ImportDB;
 import fll.db.Queries;
+import fll.db.TournamentParameters;
 import fll.subjective.SubjectiveFrame;
 import fll.util.LogUtils;
 import fll.web.developer.QueryHandler;
@@ -70,7 +71,6 @@ import fll.xml.ChallengeDescription;
 import fll.xml.Goal;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreCategory;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Test a full tournament.
@@ -121,25 +121,20 @@ public class FullTournamentTest {
   @Test
   public void testFullTournament() throws IOException, ClassNotFoundException, InstantiationException,
       IllegalAccessException, ParseException, SQLException, InterruptedException, SAXException {
-    final int numSeedingRounds = 3;
 
-    Connection testDataConn = null;
     try {
       Class.forName("org.hsqldb.jdbcDriver").newInstance();
 
-      testDataConn = DriverManager.getConnection("jdbc:hsqldb:mem:full-tournament-test");
-      Assert.assertNotNull("Error connecting to test data database", testDataConn);
+      try (final Connection testDataConn = DriverManager.getConnection("jdbc:hsqldb:mem:full-tournament-test")) {
+        Assert.assertNotNull("Error connecting to test data database", testDataConn);
 
-      loadTestData(testDataConn);
+        loadTestData(testDataConn);
 
-      final String testTournamentName = "Field";
+        final String testTournamentName = "Field";
 
-      final Document challengeDocument = GlobalParameters.getChallengeDocument(testDataConn);
-
-      try (final InputStream challengeDocIS = FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")) {
         final Path outputDirectory = Files.createDirectories(Paths.get("FullTournamentTestOutputs"));
 
-        replayTournament(testDataConn, testTournamentName, challengeDocument, numSeedingRounds, outputDirectory);
+        replayTournament(testDataConn, testTournamentName, outputDirectory);
 
         LOGGER.info("Computing final scores");
         computeFinalScores();
@@ -149,7 +144,7 @@ public class FullTournamentTest {
 
         LOGGER.info("Checking rank and scores");
         checkRankAndScores(testTournamentName);
-      }
+      } // try Connection
 
     } catch (final AssertionError e) {
       IntegrationTestUtils.storeScreenshot(selenium);
@@ -178,8 +173,6 @@ public class FullTournamentTest {
     } catch (final InterruptedException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
-    } finally {
-      SQLFunctions.close(testDataConn);
     }
   }
 
@@ -188,8 +181,6 @@ public class FullTournamentTest {
    * 
    * @param testDataConn connection to the source data
    * @param testTournamentName name of the tournament to create
-   * @param challengeDocument the challenge document
-   * @param numSeedingRounds number of seeding rounds for the tournament
    * @param outputDirectory where to save files
    * @throws IOException
    * @throws SQLException
@@ -199,11 +190,10 @@ public class FullTournamentTest {
    */
   private void replayTournament(final Connection testDataConn,
                                 final String testTournamentName,
-                                final Document challengeDocument,
-                                final int numSeedingRounds,
                                 final Path outputDirectory)
       throws IOException, SQLException, ParseException, InterruptedException, SAXException {
 
+    final Document challengeDocument = GlobalParameters.getChallengeDocument(testDataConn);
     Assert.assertNotNull(challengeDocument);
 
     if (null != outputDirectory) {
@@ -213,6 +203,9 @@ public class FullTournamentTest {
 
     final Tournament sourceTournament = Tournament.findTournamentByName(testDataConn, testTournamentName);
     Assert.assertNotNull(sourceTournament);
+
+    final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(testDataConn,
+                                                                          sourceTournament.getTournamentID());
 
     // --- initialize database ---
     LOGGER.info("Initializing the database");
