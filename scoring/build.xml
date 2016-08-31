@@ -433,7 +433,7 @@
     <run-tomcat operation="start" spawn="true" />
 
     <echo message="Waiting for tomcat to startup" />
-    <waitfor maxwait="5" maxwaitunit="minute" checkevery="1000" checkeveryunit="millisecond" timeoutproperty="fll-sw.timeout">
+    <waitfor maxwait="1" maxwaitunit="minute" checkevery="1000" checkeveryunit="millisecond" timeoutproperty="fll-sw.timeout">
       <http url="http://localhost:9080/" />
     </waitfor>
     <fail message="Access to timed out to http://localhost:9080/ " if="fll-sw.timeout" />
