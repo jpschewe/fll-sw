@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <fll
   title="2016 FIRST LEGO League - Animal Allies"
-  copyright="2015 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST&#174;) and The LEGO Group. Used by special permission. All rights reserved."
+  copyright="2016 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST&#174;) and The LEGO Group. Used by special permission. All rights reserved."
   revision="1"
   schemaVersion="2">
 
@@ -12,18 +12,282 @@
 
     <goal
       initialValue="0"
-      max="4"
-      min="0"
-      multiplier="60"
-      name="dummy"
-      title="Dummy goal until we have the challenge description" />
+      name="m01_shark_target"
+      title="M01 - Shark Shipment">
+      <value
+        score="10"
+        title="Target 2"
+        value="target2" />
+      <value
+        score="7"
+        title="Target 1"
+        value="target1" />
+      <value
+        score="0"
+        title="None"
+        value="none" />
+    </goal>
 
+    <goal
+      initialValue="0"
+      name="m01_shark_bonus"
+      title="M01 - Shark Shipment Bonus"
+      min="0"
+      max="1"
+      multiplier="20" />
+
+    <!-- raw(m01_shark_bonus) <= computed(m01_shark_target) <= Infinity -->
+    <restriction
+      lowerBound="0"
+      upperBound="100"
+      message="Cannot score shark bonus if shark is not in target">
+      <term>
+        <goalRef
+          goal="m01_shark_target"
+          scoreType="computed" />
+      </term>
+      <term>
+        <constant value="-1" />
+        <goalRef
+          goal="m01_shark_bonus"
+          scoreType="raw" />
+      </term>
+    </restriction>
+
+    <goal
+      name="m02_service_dog"
+      title="M02 Service Dog Action"
+      initialValue="0"
+      min="0"
+      max="1"
+      multiplier="15" />
+
+    <goal
+      initialValue="0"
+      name="m03_animal_conservation"
+      title="M03 Animal Conservation"
+      min="0"
+      max="5"
+      multiplier="20" />
+
+    <goal
+      name="m04_feeding"
+      title="M04 Feeding"
+      initialValue="0"
+      min="0"
+      max="8"
+      multiplier="10" />
+
+    <goal
+      name="m05_biomimicry_gecko"
+      title="M05 Biomimicry Gecko"
+      initialValue="0"
+      min="0"
+      max="1"
+      multiplier="15" />
+
+    <goal
+      name="m05_biomimicry_robot"
+      title="M05 Biomimicry Robot"
+      initialValue="0"
+      min="0"
+      max="1"
+      multiplier="32" />
+
+    <goal
+      name="m06_milking_automation"
+      title="M06 Milking Automation"
+      initialValue="0">
+      <value
+        value="milk"
+        title="Milk NO Manure"
+        score="20" />
+
+      <value
+        value="milk_manure"
+        title="Milk &amp; Manure"
+        score="15" />
+
+      <value
+        value="none"
+        title="None"
+        score="0" />
+
+    </goal>
+
+    <goal
+      name="m07_panda_release"
+      title="M07 Panda Release"
+      initialValue="0"
+      min="0"
+      max="1"
+      multiplier="10" />
+
+    <goal
+      name="m08_camera_recovery"
+      title="M08 Camera Recovery"
+      initialValue="0"
+      min="0"
+      max="1"
+      multiplier="15" />
+
+    <goal
+      name="m09_training_dog_trainer"
+      title="M09 Training - Dog &amp; Trainer"
+      initialValue="0"
+      min="0"
+      max="1"
+      multiplier="12" />
+
+    <goal
+      name="m09_training_zoologist"
+      title="M09 Training - Zoologist"
+      initialValue="0"
+      min="0"
+      max="1"
+      multiplier="15" />
+
+    <goal
+      name="m09_training_manure"
+      title="M09 Training - Manure"
+      initialValue="0"
+      min="0"
+      max="7"
+      multiplier="5" />
+
+    <goal
+      name="m10_beekeeping"
+      title="M10 Beekeeping"
+      initialValue="0">
+      <value
+        value="honey_base"
+        title="Bee on Beehive &amp; Honey In Base"
+        score="15" />
+
+      <value
+        value="no_honey"
+        title="Bee on Beehive &amp; No Honey in Beehive"
+        score="12" />
+
+      <value
+        value="none"
+        title="None"
+        score="0" />
+
+    </goal>
+
+
+    <goal
+      name="m11_prosthesis"
+      title="M11 Prosthesis"
+      initialValue="0">
+      <value
+        value="farm"
+        title="Pet in Farm"
+        score="15" />
+
+      <value
+        value="fitted"
+        title="Fitted to Pet, not in Farm"
+        score="9" />
+
+      <value
+        value="none"
+        title="None"
+        score="0" />
+
+    </goal>
+
+    <goal
+      name="m12_seal"
+      title="M12 Seal in Base"
+      initialValue="0"
+      min="0"
+      max="1"
+      multiplier="1" />
+
+
+    <goal
+      name="m13_milk"
+      title="M13 Milk in Base"
+      initialValue="0"
+      min="0"
+      max="1"
+      multiplier="1" />
+
+    <goal
+      name="m14_milk_ramp"
+      title="M14 Milk on Ramp"
+      initialValue="0">
+      <value
+        value="standing"
+        title="All Standing"
+        score="4" />
+      <value
+        value="only_things_ramp"
+        title="Only things on Ramp"
+        score="3" />
+      <value
+        value="supported_ramp"
+        title="Supported by Ramp"
+        score="2" />
+      <value
+        value="none"
+        title="None"
+        score="0" />
+    </goal>
+
+    <computedGoal
+      name="m15_all_samples"
+      title="M15 All Samples">
+      <switch>
+        <case>
+          <condition>
+            <left>
+              <term>
+                <goalRef
+                  goal="m09_training_manure"
+                  scoreType="raw" />
+              </term>
+            </left>
+            <equal-to />
+            <right>
+              <term>
+                <constant value="7" />
+              </term>
+            </right>
+          </condition>
+          <result>
+            <term>
+              <constant value="5" />
+            </term>
+          </result>
+        </case>
+        <default>
+          <term>
+            <constant value="0" />
+          </term>
+        </default>
+      </switch>
+    </computedGoal>
+
+
+    <goal
+      name="penalties"
+      title="Penalties"
+      initialValue="0"
+      min="0"
+      max="5"
+      multiplier="-6" />
+
+
+    <!-- FIXME need a tie breaker -->
     <tiebreaker>
 
       <test winner="HIGH">
         <term>
           <goalRef
-            goal="dummy"
+            goal="m15_all_samples"
             scoreType="computed" />
         </term>
       </test>
