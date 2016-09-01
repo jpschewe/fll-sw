@@ -27,7 +27,7 @@
       will be returned to this page if there are no errors summarizing
       scores.</li>
 
-    <li><a href='getPerformancePercentage.jsp' target="_blank">Final Computed
+    <li><a href='FinalComputedScores' target="_blank">Final Computed
         Scores</a>. This is the report that the head judge will want to
       determine which teams advance to the next tournament.</li>
 
