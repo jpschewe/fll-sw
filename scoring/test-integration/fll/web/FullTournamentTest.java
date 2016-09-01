@@ -260,6 +260,9 @@ public class FullTournamentTest {
 
         if (runNumber > numSeedingRounds) {
           if (!initializedPlayoff) {
+            IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+                + "admin/database.flldb"), "application/zip", outputDirectory.resolve("04-seeding-rounds-completed.flldb"));
+
             checkSeedingRounds();
 
             // initialize the playoff brackets with playoff/index.jsp form
