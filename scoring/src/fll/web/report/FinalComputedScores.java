@@ -948,18 +948,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
       cb.restoreState();
     }
 
-    @Override
-    public void onCloseDocument(final PdfWriter writer,
-                                final Document document) {
-      _tpl.beginText();
-      _tpl.setFontAndSize(_headerFooterFont, 12);
-      _tpl.setTextMatrix(0, 0);
-      _tpl.showText(""
-          + (writer.getPageNumber()
-              - 1));
-      _tpl.endText();
-    }
-
   } // class FooterHandler
 
 } // class FinalComputedScores
