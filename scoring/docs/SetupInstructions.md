@@ -133,3 +133,11 @@ If you do not have a zip tool to open up the archives you can use the jar tool t
 Sponsor Logos
 =============
 In version 4 of the software we added the ability to have sponsor logos displayed. These logos are displayed on the main welcome page, in between team scores on the scoreboard and on the bottom of the playoff brackets page. Any files with image extensions (currently the list is: `.jpg`, `.jpeg`, `.gif`, `.png`) put into the directory `tomcat/webapps/fll-sw/sponsor_logos` will be displayed on these pages. See the `README.txt` file in this directory for information about sizing. The welcome page lists the logos sorted by filename, so you can to show the sponsors in a particular order, say by amount donated. The logos are displayed randomly on the other pages.    
+
+Slideshow
+=========
+There is an option to display a slide show on the big screen display.
+This option shows all image files (`.jpg`, `.jpeg`, `.gif`, `.png`) from the directory `tomcat/webapps/fll-sw/slideshow/images`.
+The images are displayed in order, so naming them starting with 2 or 3 numbers helps to know what order they will be displayed in.
+
+
