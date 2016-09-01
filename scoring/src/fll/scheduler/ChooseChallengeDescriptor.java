@@ -30,9 +30,9 @@ import javax.swing.ListCellRenderer;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 
-import net.mtu.eggplant.util.BasicFileFilter;
 import fll.util.FLLInternalException;
 import fll.web.setup.SetupIndex.DescriptionInfo;
+import net.mtu.eggplant.util.BasicFileFilter;
 
 /**
  * Prompt the user to choose a challenge descriptor.
@@ -120,7 +120,7 @@ public class ChooseChallengeDescriptor extends JDialog {
         }
 
         final String text = mFileField.getText();
-        if (!text.isEmpty()) {
+        if (!org.apache.commons.lang3.StringUtils.isEmpty(text)) {
           final File file = new File(text);
           if (file.exists()) {
             try {
