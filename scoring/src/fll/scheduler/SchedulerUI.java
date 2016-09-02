@@ -149,9 +149,10 @@ public class SchedulerUI extends JFrame {
       frame.setVisible(true);
     } catch (final Exception e) {
       LOGGER.fatal("Unexpected error", e);
-      JOptionPane.showMessageDialog(null, "Unexpected error: "
-          + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-      System.exit(1);
+      JOptionPane.showMessageDialog(null,
+                                    "An unexpected error occurred. Please send the log file and a description of what you were doing to the developer. Error message: "
+                                        + e.getMessage(),
+                                    "Error", JOptionPane.ERROR_MESSAGE);
     }
   }
 
@@ -305,7 +306,8 @@ public class SchedulerUI extends JFrame {
   };
 
   private void newScheduleDescription() {
-    final int result = JOptionPane.showConfirmDialog(SchedulerUI.this, "This action will remove any changes to the current schedule and load the defaults. Do you want to continue?",
+    final int result = JOptionPane.showConfirmDialog(SchedulerUI.this,
+                                                     "This action will remove any changes to the current schedule and load the defaults. Do you want to continue?",
                                                      "Question", JOptionPane.YES_NO_OPTION);
     if (JOptionPane.YES_OPTION == result) {
       mScheduleDescriptionFile = null;
