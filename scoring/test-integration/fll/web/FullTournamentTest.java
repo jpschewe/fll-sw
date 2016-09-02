@@ -221,26 +221,34 @@ public class FullTournamentTest {
     loadTeams(testDataConn, sourceTournament, outputDirectory);
 
     IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
-        + "admin/database.flldb"), "application/zip", outputDirectory.resolve("01-teams-loaded.flldb"));
+        + "admin/database.flldb"), "application/zip",
+                                      outputDirectory.resolve(testTournamentName
+                                          + "_01-teams-loaded.flldb"));
 
     LOGGER.info("Setting current tournament");
     IntegrationTestUtils.setTournament(selenium, sourceTournament.getName());
 
     uploadSchedule(testDataConn, sourceTournament, outputDirectory);
     IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
-        + "admin/database.flldb"), "application/zip", outputDirectory.resolve("03-schedule-loaded.flldb"));
+        + "admin/database.flldb"), "application/zip",
+                                      outputDirectory.resolve(testTournamentName
+                                          + "_02-schedule-loaded.flldb"));
 
     LOGGER.info("Assigning judges");
     assignJudges(testDataConn, sourceTournament);
 
     IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
-        + "admin/database.flldb"), "application/zip", outputDirectory.resolve("03-judges-assigned.flldb"));
+        + "admin/database.flldb"), "application/zip",
+                                      outputDirectory.resolve(testTournamentName
+                                          + "_03-judges-assigned.flldb"));
 
     LOGGER.info("Assigning table labels");
     assignTableLabels();
 
     IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
-        + "admin/database.flldb"), "application/zip", outputDirectory.resolve("04-table-labels-assigned.flldb"));
+        + "admin/database.flldb"), "application/zip",
+                                      outputDirectory.resolve(testTournamentName
+                                          + "_04-table-labels-assigned.flldb"));
 
     /*
      * --- Enter 3 runs for each team --- Use data from test data base,
@@ -272,7 +280,8 @@ public class FullTournamentTest {
           if (!initializedPlayoff) {
             IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
                 + "admin/database.flldb"), "application/zip",
-                                              outputDirectory.resolve("05-seeding-rounds-completed.flldb"));
+                                              outputDirectory.resolve(testTournamentName
+                                                  + "_05-seeding-rounds-completed.flldb"));
 
             checkSeedingRounds();
 
@@ -316,7 +325,9 @@ public class FullTournamentTest {
 
       LOGGER.info("Writing final datbaase");
       IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
-          + "admin/database.flldb"), "application/zip", outputDirectory.resolve("99-final.flldb"));
+          + "admin/database.flldb"), "application/zip",
+                                        outputDirectory.resolve(testTournamentName
+                                            + "_99-final.flldb"));
     }
 
   }
@@ -340,7 +351,8 @@ public class FullTournamentTest {
       if (null == outputDirectory) {
         outputFile = Files.createTempFile("schedule", ".csv");
       } else {
-        outputFile = Files.createTempFile(outputDirectory, "schedule", ".csv");
+        outputFile = Files.createTempFile(outputDirectory, sourceTournament.getName()
+            + "_schedule", ".csv");
       }
       try {
         schedule.writeToCSV(outputFile.toFile());
@@ -544,7 +556,8 @@ public class FullTournamentTest {
     if (null == outputDirectory) {
       teamsFile = Files.createTempFile("fll", ".csv");
     } else {
-      teamsFile = outputDirectory.resolve("teams.csv");
+      teamsFile = outputDirectory.resolve(sourceTournament.getName()
+          + "_teams.csv");
     }
 
     try {
@@ -756,7 +769,8 @@ public class FullTournamentTest {
     if (null == outputDirectory) {
       subjectiveZip = Files.createTempFile("subjective", ".zip");
     } else {
-      subjectiveZip = Files.createTempFile(outputDirectory, "subjective", ".zip");
+      subjectiveZip = Files.createTempFile(outputDirectory, sourceTournament.getName()
+          + "_subjective", ".zip");
     }
 
     try {
@@ -847,7 +861,6 @@ public class FullTournamentTest {
 
       Assert.assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.id("error")));
       Assert.assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
-
     } finally {
       if (deleteFile) {
         Files.delete(subjectiveZip);
