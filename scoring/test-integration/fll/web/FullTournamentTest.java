@@ -5,6 +5,10 @@
  */
 package fll.web;
 
+import static org.junit.Assert.assertThat;
+import static org.hamcrest.core.StringContains.containsString;
+import static org.hamcrest.core.IsNot.not;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,10 +62,12 @@ import fll.TestUtils;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
+import fll.db.CategoryColumnMapping;
 import fll.db.GlobalParameters;
 import fll.db.ImportDB;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
+import fll.scheduler.TournamentSchedule;
 import fll.subjective.SubjectiveFrame;
 import fll.util.LogUtils;
 import fll.web.developer.QueryHandler;
@@ -220,17 +226,21 @@ public class FullTournamentTest {
     LOGGER.info("Setting current tournament");
     IntegrationTestUtils.setTournament(selenium, sourceTournament.getName());
 
+    uploadSchedule(testDataConn, sourceTournament, outputDirectory);
+    IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+        + "admin/database.flldb"), "application/zip", outputDirectory.resolve("03-schedule-loaded.flldb"));
+
     LOGGER.info("Assigning judges");
     assignJudges(testDataConn, sourceTournament);
 
     IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
-        + "admin/database.flldb"), "application/zip", outputDirectory.resolve("02-judges-assigned.flldb"));
+        + "admin/database.flldb"), "application/zip", outputDirectory.resolve("03-judges-assigned.flldb"));
 
     LOGGER.info("Assigning table labels");
     assignTableLabels();
 
     IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
-        + "admin/database.flldb"), "application/zip", outputDirectory.resolve("03-table-labels-assigned.flldb"));
+        + "admin/database.flldb"), "application/zip", outputDirectory.resolve("04-table-labels-assigned.flldb"));
 
     /*
      * --- Enter 3 runs for each team --- Use data from test data base,
@@ -261,7 +271,8 @@ public class FullTournamentTest {
         if (runNumber > numSeedingRounds) {
           if (!initializedPlayoff) {
             IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
-                + "admin/database.flldb"), "application/zip", outputDirectory.resolve("04-seeding-rounds-completed.flldb"));
+                + "admin/database.flldb"), "application/zip",
+                                              outputDirectory.resolve("05-seeding-rounds-completed.flldb"));
 
             checkSeedingRounds();
 
@@ -308,6 +319,77 @@ public class FullTournamentTest {
           + "admin/database.flldb"), "application/zip", outputDirectory.resolve("99-final.flldb"));
     }
 
+  }
+
+  /**
+   * @param testDataConn
+   * @param sourceTournament
+   * @throws SQLException
+   * @throws IOException
+   */
+  private void uploadSchedule(final Connection testDataConn,
+                              final Tournament sourceTournament,
+                              final Path outputDirectory)
+      throws SQLException, IOException {
+    if (TournamentSchedule.scheduleExistsInDatabase(testDataConn, sourceTournament.getTournamentID())) {
+
+      final TournamentSchedule schedule = new TournamentSchedule(testDataConn, sourceTournament.getTournamentID());
+
+      final boolean deleteFile = null == outputDirectory;
+      final Path outputFile;
+      if (null == outputDirectory) {
+        outputFile = Files.createTempFile("schedule", ".csv");
+      } else {
+        outputFile = Files.createTempFile(outputDirectory, "schedule", ".csv");
+      }
+      try {
+        schedule.writeToCSV(outputFile.toFile());
+
+        // upload the saved file
+        IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+            + "admin/index.jsp");
+        final WebElement fileInput = selenium.findElement(By.name("scheduleFile"));
+        fileInput.sendKeys(outputFile.toAbsolutePath().toString());
+        selenium.findElement(By.id("upload-schedule")).click();
+        Assert.assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.id("error")));
+
+        // check that we're on the choose headers page and set the header
+        // mappings
+        Assert.assertTrue(selenium.getCurrentUrl().contains("chooseSubjectiveHeaders"));
+        final Collection<CategoryColumnMapping> mappings = CategoryColumnMapping.load(testDataConn,
+                                                                                      sourceTournament.getTournamentID());
+        for (final CategoryColumnMapping map : mappings) {
+          final Select select = new Select(selenium.findElement(By.name(map.getCategoryName()
+              + ":header")));
+          select.selectByVisibleText(map.getScheduleColumn());
+        }
+        selenium.findElement(By.id("submit")).click();
+
+        // check that we don't have hard violations and skip past soft
+        // violations
+        assertThat(selenium.getCurrentUrl(), not(containsString("displayHardViolations")));
+        if (selenium.getCurrentUrl().contains("displaySoftViolations")) {
+          selenium.findElement(By.id("yes")).click();
+        }
+
+        // set event divisions
+        assertThat(selenium.getCurrentUrl(), containsString("promptForEventDivision"));
+        selenium.findElement(By.id("yes")).click();
+
+        // assume the values are fine
+        assertThat(selenium.getCurrentUrl(), containsString("displayEventDivisionConfirmation"));
+        selenium.findElement(By.id("yes")).click();
+
+        // check that it all worked
+        Assert.assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.id("error")));
+        Assert.assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
+
+      } finally {
+        if (deleteFile) {
+          Files.delete(outputFile);
+        }
+      }
+    }
   }
 
   /**
@@ -669,95 +751,108 @@ public class FullTournamentTest {
                                      final Path outputDirectory)
       throws SQLException, IOException, MalformedURLException, ParseException, SAXException {
 
-    final Path subjectiveZip = Files.createTempFile(outputDirectory, "subjective", ".zip");
-    IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
-        + "admin/subjective-data.fll"), "application/zip", subjectiveZip);
+    final boolean deleteFile = null == outputDirectory;
+    final Path subjectiveZip;
+    if (null == outputDirectory) {
+      subjectiveZip = Files.createTempFile("subjective", ".zip");
+    } else {
+      subjectiveZip = Files.createTempFile(outputDirectory, "subjective", ".zip");
+    }
 
-    final SubjectiveFrame subjective = new SubjectiveFrame();
-    subjective.load(subjectiveZip.toFile());
+    try {
+      IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+          + "admin/subjective-data.fll"), "application/zip", subjectiveZip);
 
-    // insert scores into zip
-    for (final ScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
-      final String category = subjectiveElement.getName();
-      final String title = subjectiveElement.getTitle();
+      final SubjectiveFrame subjective = new SubjectiveFrame();
+      subjective.load(subjectiveZip.toFile());
 
-      // find appropriate table model
-      final TableModel tableModel = subjective.getTableModelForTitle(title);
-      Assert.assertNotNull(tableModel);
+      // insert scores into zip
+      for (final ScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
+        final String category = subjectiveElement.getName();
+        final String title = subjectiveElement.getTitle();
 
-      final int teamNumberColumn = findColumnByName(tableModel, "TeamNumber");
-      Assert.assertTrue("Can't find TeamNumber column in subjective table model", teamNumberColumn >= 0);
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("Found team number column at "
-            + teamNumberColumn);
-      }
+        // find appropriate table model
+        final TableModel tableModel = subjective.getTableModelForTitle(title);
+        Assert.assertNotNull(tableModel);
 
-      try (final PreparedStatement prep = testDataConn.prepareStatement("SELECT * FROM "
-          + category + " WHERE Tournament = ?")) {
-        prep.setInt(1, sourceTournament.getTournamentID());
+        final int teamNumberColumn = findColumnByName(tableModel, "TeamNumber");
+        Assert.assertTrue("Can't find TeamNumber column in subjective table model", teamNumberColumn >= 0);
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("Found team number column at "
+              + teamNumberColumn);
+        }
 
-        try (final ResultSet rs = prep.executeQuery()) {
-          while (rs.next()) {
-            final int teamNumber = rs.getInt("TeamNumber");
+        try (final PreparedStatement prep = testDataConn.prepareStatement("SELECT * FROM "
+            + category + " WHERE Tournament = ?")) {
+          prep.setInt(1, sourceTournament.getTournamentID());
 
-            // find row number in table
-            int rowIndex = -1;
-            for (int rowIdx = 0; rowIdx < tableModel.getRowCount(); ++rowIdx) {
-              final Object teamNumberRaw = tableModel.getValueAt(rowIdx, teamNumberColumn);
-              Assert.assertNotNull(teamNumberRaw);
-              final int value = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumberRaw.toString()).intValue();
+          try (final ResultSet rs = prep.executeQuery()) {
+            while (rs.next()) {
+              final int teamNumber = rs.getInt("TeamNumber");
 
-              if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace("Checking if "
-                    + teamNumber + " equals " + value + " raw: " + teamNumberRaw + "? " + (value == teamNumber)
-                    + " rowIdx: " + rowIdx + " numRows: " + tableModel.getRowCount());
-              }
+              // find row number in table
+              int rowIndex = -1;
+              for (int rowIdx = 0; rowIdx < tableModel.getRowCount(); ++rowIdx) {
+                final Object teamNumberRaw = tableModel.getValueAt(rowIdx, teamNumberColumn);
+                Assert.assertNotNull(teamNumberRaw);
+                final int value = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumberRaw.toString()).intValue();
 
-              if (value == teamNumber) {
-                rowIndex = rowIdx;
-                break;
-              }
-            }
-            Assert.assertTrue("Can't find team "
-                + teamNumber + " in subjective table model", rowIndex >= 0);
+                if (LOGGER.isTraceEnabled()) {
+                  LOGGER.trace("Checking if "
+                      + teamNumber + " equals " + value + " raw: " + teamNumberRaw + "? " + (value == teamNumber)
+                      + " rowIdx: " + rowIdx + " numRows: " + tableModel.getRowCount());
+                }
 
-            if (rs.getBoolean("NoShow")) {
-              // find column for no show
-              final int columnIndex = findColumnByName(tableModel, "No Show");
-              Assert.assertTrue("Can't find No Show column in subjective table model", columnIndex >= 0);
-              tableModel.setValueAt(Boolean.TRUE, rowIndex, columnIndex);
-            } else {
-              for (final AbstractGoal goalElement : subjectiveElement.getGoals()) {
-                if (!goalElement.isComputed()) {
-                  final String goalName = goalElement.getName();
-                  final String goalTitle = goalElement.getTitle();
-
-                  // find column index for goal and call set
-                  final int columnIndex = findColumnByName(tableModel, goalTitle);
-                  Assert.assertTrue("Can't find "
-                      + goalTitle + " column in subjective table model", columnIndex >= 0);
-                  final int value = rs.getInt(goalName);
-                  tableModel.setValueAt(Integer.valueOf(value), rowIndex, columnIndex);
+                if (value == teamNumber) {
+                  rowIndex = rowIdx;
+                  break;
                 }
               }
-            } // not NoShow
-          } // foreach score
-        } // try ResultSet
-      } // try PreparedStatement
-    } // foreach category
-    subjective.save();
+              Assert.assertTrue("Can't find team "
+                  + teamNumber + " in subjective table model", rowIndex >= 0);
 
-    // upload scores
-    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-        + "admin/index.jsp");
-    final WebElement fileInput = selenium.findElement(By.name("subjectiveFile"));
-    fileInput.sendKeys(subjectiveZip.toAbsolutePath().toString());
+              if (rs.getBoolean("NoShow")) {
+                // find column for no show
+                final int columnIndex = findColumnByName(tableModel, "No Show");
+                Assert.assertTrue("Can't find No Show column in subjective table model", columnIndex >= 0);
+                tableModel.setValueAt(Boolean.TRUE, rowIndex, columnIndex);
+              } else {
+                for (final AbstractGoal goalElement : subjectiveElement.getGoals()) {
+                  if (!goalElement.isComputed()) {
+                    final String goalName = goalElement.getName();
+                    final String goalTitle = goalElement.getTitle();
 
-    selenium.findElement(By.id("uploadSubjectiveFile")).click();
+                    // find column index for goal and call set
+                    final int columnIndex = findColumnByName(tableModel, goalTitle);
+                    Assert.assertTrue("Can't find "
+                        + goalTitle + " column in subjective table model", columnIndex >= 0);
+                    final int value = rs.getInt(goalName);
+                    tableModel.setValueAt(Integer.valueOf(value), rowIndex, columnIndex);
+                  }
+                }
+              } // not NoShow
+            } // foreach score
+          } // try ResultSet
+        } // try PreparedStatement
+      } // foreach category
+      subjective.save();
 
-    Assert.assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.id("error")));
-    Assert.assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
+      // upload scores
+      IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+          + "admin/index.jsp");
+      final WebElement fileInput = selenium.findElement(By.name("subjectiveFile"));
+      fileInput.sendKeys(subjectiveZip.toAbsolutePath().toString());
 
+      selenium.findElement(By.id("uploadSubjectiveFile")).click();
+
+      Assert.assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.id("error")));
+      Assert.assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
+
+    } finally {
+      if (deleteFile) {
+        Files.delete(subjectiveZip);
+      }
+    }
   }
 
   /**
