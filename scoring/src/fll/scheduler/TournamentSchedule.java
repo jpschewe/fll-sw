@@ -2002,9 +2002,7 @@ public class TournamentSchedule implements Serializable {
    * @throws IOException
    */
   public void writeToCSV(final Writer outputWriter) throws IOException {
-    CSVWriter csv = null;
-    try {
-      csv = new CSVWriter(outputWriter);
+    try (final CSVWriter csv = new CSVWriter(outputWriter)) {
 
       final List<String> line = new ArrayList<String>();
       line.add(TournamentSchedule.TEAM_NUMBER_HEADER);
@@ -2044,10 +2042,6 @@ public class TournamentSchedule implements Serializable {
         csv.writeNext(line.toArray(new String[line.size()]));
         line.clear();
       }
-    } finally {
-      if (null != csv) {
-        csv.close();
-      }
     }
   }
 
@@ -2058,8 +2052,9 @@ public class TournamentSchedule implements Serializable {
    * @throws IOException
    */
   public void writeToCSV(final File outputFile) throws IOException {
-    final Writer writer = new OutputStreamWriter(new FileOutputStream(outputFile), Utilities.DEFAULT_CHARSET);
-    writeToCSV(writer);
+    try (final Writer writer = new OutputStreamWriter(new FileOutputStream(outputFile), Utilities.DEFAULT_CHARSET)) {
+      writeToCSV(writer);
+    }
   }
 
   public static class MissingColumnException extends FLLRuntimeException {
