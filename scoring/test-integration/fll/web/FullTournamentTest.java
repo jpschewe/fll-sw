@@ -5,10 +5,11 @@
  */
 package fll.web;
 
-import static org.junit.Assert.*;
-import static org.hamcrest.core.StringContains.*;
-import static org.hamcrest.core.IsNot.*;
-import static org.hamcrest.core.IsNull.*;
+import static org.hamcrest.core.IsNot.not;
+import static org.hamcrest.core.IsNull.notNullValue;
+import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -30,6 +31,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipInputStream;
 
 import javax.swing.table.TableModel;
@@ -200,10 +203,12 @@ public class FullTournamentTest {
    * @throws InterruptedException
    * @throws SAXException
    */
-  private void replayTournament(final Connection testDataConn,
-                                final String testTournamentName,
-                                final Path outputDirectory)
+  public void replayTournament(final Connection testDataConn,
+                               final String testTournamentName,
+                               final Path outputDirectory)
       throws IOException, SQLException, ParseException, InterruptedException, SAXException {
+
+    final String safeTestTournamentName = sanitizeFilename(testTournamentName);
 
     final Document challengeDocument = GlobalParameters.getChallengeDocument(testDataConn);
     Assert.assertNotNull(challengeDocument);
@@ -226,16 +231,17 @@ public class FullTournamentTest {
 
     IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
         + "admin/database.flldb"), "application/zip",
-                                      outputDirectory.resolve(testTournamentName
+                                      outputDirectory.resolve(safeTestTournamentName
                                           + "_01-teams-loaded.flldb"));
 
     LOGGER.info("Setting current tournament");
     IntegrationTestUtils.setTournament(selenium, sourceTournament.getName());
 
+    LOGGER.info("Loading the schedule");
     uploadSchedule(testDataConn, sourceTournament, outputDirectory);
     IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
         + "admin/database.flldb"), "application/zip",
-                                      outputDirectory.resolve(testTournamentName
+                                      outputDirectory.resolve(safeTestTournamentName
                                           + "_02-schedule-loaded.flldb"));
 
     LOGGER.info("Assigning judges");
@@ -243,7 +249,7 @@ public class FullTournamentTest {
 
     IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
         + "admin/database.flldb"), "application/zip",
-                                      outputDirectory.resolve(testTournamentName
+                                      outputDirectory.resolve(safeTestTournamentName
                                           + "_03-judges-assigned.flldb"));
 
     LOGGER.info("Assigning table labels");
@@ -251,7 +257,7 @@ public class FullTournamentTest {
 
     IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
         + "admin/database.flldb"), "application/zip",
-                                      outputDirectory.resolve(testTournamentName
+                                      outputDirectory.resolve(safeTestTournamentName
                                           + "_04-table-labels-assigned.flldb"));
 
     /*
@@ -284,7 +290,7 @@ public class FullTournamentTest {
           if (!initializedPlayoff) {
             IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
                 + "admin/database.flldb"), "application/zip",
-                                              outputDirectory.resolve(testTournamentName
+                                              outputDirectory.resolve(safeTestTournamentName
                                                   + "_05-seeding-rounds-completed.flldb"));
 
             checkSeedingRounds();
@@ -330,7 +336,7 @@ public class FullTournamentTest {
       LOGGER.info("Writing final datbaase");
       IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
           + "admin/database.flldb"), "application/zip",
-                                        outputDirectory.resolve(testTournamentName
+                                        outputDirectory.resolve(safeTestTournamentName
                                             + "_99-final.flldb"));
     }
 
@@ -350,8 +356,8 @@ public class FullTournamentTest {
 
       final TournamentSchedule schedule = new TournamentSchedule(testDataConn, sourceTournament.getTournamentID());
 
-      final Path outputFile = Files.createTempFile(outputDirectory, sourceTournament.getName()
-          + "_schedule", ".csv");
+      final Path outputFile = outputDirectory.resolve(sanitizeFilename(sourceTournament.getName())
+          + "_schedule.csv");
       schedule.writeToCSV(outputFile.toFile());
 
       // upload the saved file
@@ -542,7 +548,7 @@ public class FullTournamentTest {
                          final Path outputDirectory)
       throws IOException, SQLException {
 
-    final Path teamsFile = outputDirectory.resolve(sourceTournament.getName()
+    final Path teamsFile = outputDirectory.resolve(sanitizeFilename(sourceTournament.getName())
         + "_teams.csv");
     // write the teams out to a file
     try (final Writer writer = new FileWriter(teamsFile.toFile())) {
@@ -742,8 +748,8 @@ public class FullTournamentTest {
                                      final Path outputDirectory)
       throws SQLException, IOException, MalformedURLException, ParseException, SAXException {
 
-    final Path subjectiveZip = Files.createTempFile(outputDirectory, sourceTournament.getName()
-        + "_subjective", ".zip");
+    final Path subjectiveZip = outputDirectory.resolve(sanitizeFilename(sourceTournament.getName())
+        + "_subjective-data.fll");
 
     IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
         + "admin/subjective-data.fll"), "application/zip", subjectiveZip);
@@ -930,6 +936,10 @@ public class FullTournamentTest {
               } // !computed
             } // foreach goal
 
+            // check that the submit button is active
+            assertTrue("Submit button is not enabled, invalid score entered",
+                       selenium.findElement(By.id("submit")).isEnabled());
+
             selenium.findElement(By.id("submit")).click();
           } // not NoShow
 
@@ -1103,5 +1113,23 @@ public class FullTournamentTest {
     }
     return -1;
   }
+
+  /**
+   * Create a string that's a valid file name.
+   */
+  private static String sanitizeFilename(final String str) {
+    if (null == str
+        || "".equals(str)) {
+      return "NULL";
+    } else {
+      String ret = str;
+      final Matcher illegalCharMatcher = ILLEGAL_CHAR_PATTERN.matcher(ret);
+      ret = illegalCharMatcher.replaceAll("_");
+
+      return ret;
+    }
+  }
+
+  private static final Pattern ILLEGAL_CHAR_PATTERN = Pattern.compile("[^A-Za-z0-9_]");
 
 }
