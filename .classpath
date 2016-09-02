@@ -79,5 +79,22 @@
 	<classpathentry kind="lib" path="scoring/lib/test/selenium/selenium-server-standalone-3.0.0-beta2.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/webdrivermanager/webdrivermanager-1.4.8.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/junit-4.12.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/cssparser-0.9.19.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/htmlunit-core-js-2.22.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/jetty-io-9.2.17.v20160517.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/jetty-util-9.2.17.v20160517.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/neko-htmlunit-2.21.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/sac-1.3.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/serializer-2.7.2.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/websocket-api-9.2.17.v20160517.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/websocket-client-9.2.17.v20160517.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/websocket-common-9.2.17.v20160517.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/xalan-2.7.2.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/xercesImpl-2.11.0.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/xml-apis-1.4.01.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/webdrivermanager/commons-compress-1.12.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/webdrivermanager/config-1.3.0.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/webdrivermanager/jarchivelib-0.7.0.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/webdrivermanager/xz-1.5.jar"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>
