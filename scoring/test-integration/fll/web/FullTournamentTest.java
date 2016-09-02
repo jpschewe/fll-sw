@@ -865,6 +865,11 @@ public class FullTournamentTest {
 
       try (final ResultSet rs = prep.executeQuery()) {
         if (rs.next()) {
+          if (rs.getBoolean("BYE")) {
+            LOGGER.info("Run is a bye, not entering a score");
+            return;
+          }
+
           // need to get the score entry form
           IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
               + "scoreEntry/select_team.jsp");
