@@ -238,7 +238,7 @@ public final class Queries {
    * @see #getCurrentTournament(Connection)
    */
   public static List<String> getAwardGroups(final Connection connection,
-                                               final int tournament)
+                                            final int tournament)
       throws SQLException {
     final List<String> list = new LinkedList<String>();
 
@@ -1970,34 +1970,30 @@ public final class Queries {
           + number);
     }
 
-    ResultSet rs = null;
-    PreparedStatement checkDuplicate = null;
-    PreparedStatement insert = null;
-    try {
-      // TODO this should probably be in a transaction as the insert depends on
-      // the same state as the select
+    // TODO this should probably be in a transaction as the insert depends on
+    // the same state as the select
 
-      // need to check for duplicate teamNumber
-      checkDuplicate = connection.prepareStatement("SELECT TeamName FROM Teams WHERE TeamNumber = ?");
+    // need to check for duplicate teamNumber
+    try (
+        final PreparedStatement checkDuplicate = connection.prepareStatement("SELECT TeamName FROM Teams WHERE TeamNumber = ?")) {
       checkDuplicate.setInt(1, number);
-      rs = checkDuplicate.executeQuery();
-      if (rs.next()) {
-        final String dup = rs.getString(1);
-        return dup;
+      try (final ResultSet rs = checkDuplicate.executeQuery()) {
+        if (rs.next()) {
+          final String dup = rs.getString(1);
+          return dup;
+        }
       }
+    }
 
-      insert = connection.prepareStatement("INSERT INTO Teams (TeamName, Organization, TeamNumber) VALUES (?, ?, ?)");
+    try (
+        final PreparedStatement insert = connection.prepareStatement("INSERT INTO Teams (TeamName, Organization, TeamNumber) VALUES (?, ?, ?)")) {
       insert.setString(1, name);
       insert.setString(2, organization);
       insert.setInt(3, number);
       insert.executeUpdate();
-
-      return null;
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(checkDuplicate);
-      SQLFunctions.close(insert);
     }
+
+    return null;
   }
 
   /**

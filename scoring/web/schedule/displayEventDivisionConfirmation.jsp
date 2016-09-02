@@ -41,8 +41,11 @@
     </table>
 
 
-    <a href='<c:url value="/schedule/CommitEventDivisions"/>'>Yes,
+    <a
+      id='yes'
+      href='<c:url value="/schedule/CommitEventDivisions"/>'>Yes,
       these changes look OK</a><br /> <a
+      id='no'
       href='<c:url value="/schedule/CommitSchedule"/>'>No, don't
       assign award groups</a><br />
   </form>
