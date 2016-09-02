@@ -171,12 +171,16 @@ public final class ImportDB {
 
   /**
    * Load data from a dump file into a new database specified by
-   * <code>database</code>.
+   * <code>database</code>. Unlike
+   * {@link #loadFromDumpIntoNewDB(ZipInputStream, Connection)}, this
+   * will result in a database with all views and generated columns.
    * 
    * @param zipfile the dump file to read
    * @param destConnection where to load the data
    * @throws IOException if there is an error reading the dump file
    * @throws SQLException if there is an error importing the data
+   * @see ImportDB#loadDatabaseDump(ZipInputStream, Connection)
+   * @see ImportDB#importDatabase(Connection, Connection, String)
    */
   public static void loadFromDumpIntoNewDB(final ZipInputStream zipfile,
                                            final Connection destConnection)
@@ -299,7 +303,7 @@ public final class ImportDB {
    * </p>
    * <p>
    * The created database does not have constraints, nor does it have the
-   * generated columns. The intention is that this database will be migrated
+   * views. The intention is that this database will be migrated
    * into a newly created database.
    * </p>
    * 

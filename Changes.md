@@ -1,3 +1,4 @@
+* #457, #499 - enhanced the training databases and made sure they are part of the distribution
 * #510 - Add separator with category name to the subjective web application
 * #476 - Sort finalist callback display by team number
 * #495 - color background of subjective scores to make it clear which teams have been scored

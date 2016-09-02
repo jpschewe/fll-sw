@@ -53,6 +53,7 @@ import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
+import fll.util.FP;
 import fll.util.LogUtils;
 import fll.util.PdfUtils;
 import fll.web.ApplicationAttributes;
@@ -305,10 +306,11 @@ public final class FinalComputedScores extends BaseFLLServlet {
    * @return {team number -> rank}
    * @throws SQLException
    */
-  private Map<Integer, Integer> gatherRhankedPerformanceTeams(final Connection connection,
-                                                              final WinnerType winnerCriteria,
-                                                              final Tournament tournament,
-                                                              final String awawrdGroup)
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Winner criteria determines the sort")
+  private Map<Integer, Integer> gatherRankedPerformanceTeams(final Connection connection,
+                                                             final WinnerType winnerCriteria,
+                                                             final Tournament tournament,
+                                                             final String awawrdGroup)
       throws SQLException {
     final Map<Integer, Integer> rankedTeams = new HashMap<>();
 
@@ -335,7 +337,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           score = Double.NaN;
         }
 
-        if (score != prevScore) {
+        if (!FP.equals(score, prevScore, 1E-6)) {
           rank += numTied;
           numTied = 1;
         } else {
@@ -359,6 +361,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
    * @return category -> {Judging Group -> {team number -> rank}}
    * @throws SQLException
    */
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name and winner criteria determines the sort")
   private Map<ScoreCategory, Map<String, Map<Integer, Integer>>> gatherRankedSubjectiveTeams(final Connection connection,
                                                                                              final ScoreCategory[] subjectiveCategories,
                                                                                              final WinnerType winnerCriteria,
@@ -366,24 +369,21 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                                                                              final String awardGroup)
       throws SQLException {
     final Map<ScoreCategory, Map<String, Map<Integer, Integer>>> retval = new HashMap<>();
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      final List<String> judgingStations = Queries.getJudgingStations(connection, tournament.getTournamentID());
+    final List<String> judgingStations = Queries.getJudgingStations(connection, tournament.getTournamentID());
 
-      for (int cat = 0; cat < subjectiveCategories.length; cat++) {
-        final String catName = subjectiveCategories[cat].getName();
+    for (int cat = 0; cat < subjectiveCategories.length; cat++) {
+      final String catName = subjectiveCategories[cat].getName();
 
-        final Map<String, Map<Integer, Integer>> categoryRanks = new HashMap<>();
+      final Map<String, Map<Integer, Integer>> categoryRanks = new HashMap<>();
 
-        prep = connection.prepareStatement("SELECT FinalScores.TeamNumber, FinalScores."
-            + catName //
-            + " FROM FinalScores, TournamentTeams" //
-            + " WHERE FinalScores.Tournament = ?" //
-            + " AND TournamentTeams.event_division = ?"//
-            + " AND TournamentTeams.TeamNumber = FinalScores.TeamNumber"//
-            + " AND TournamentTeams.judging_station = ?" //
-            + " ORDER BY FinalScores." + catName + " " + winnerCriteria.getSortString());
+      try (final PreparedStatement prep = connection.prepareStatement("SELECT FinalScores.TeamNumber, FinalScores."
+          + catName //
+          + " FROM FinalScores, TournamentTeams" //
+          + " WHERE FinalScores.Tournament = ?" //
+          + " AND TournamentTeams.event_division = ?"//
+          + " AND TournamentTeams.TeamNumber = FinalScores.TeamNumber"//
+          + " AND TournamentTeams.judging_station = ?" //
+          + " ORDER BY FinalScores." + catName + " " + winnerCriteria.getSortString())) {
         prep.setInt(1, tournament.getTournamentID());
         prep.setString(2, awardGroup);
 
@@ -395,44 +395,38 @@ public final class FinalComputedScores extends BaseFLLServlet {
           int numTied = 1;
           int rank = 0;
           double prevScore = Double.NaN;
-          rs = prep.executeQuery();
-          while (rs.next()) {
-            final int teamNumber = rs.getInt(1);
-            double score = rs.getDouble(2);
-            if (rs.wasNull()) {
-              score = Double.NaN;
+          try (final ResultSet rs = prep.executeQuery()) {
+            while (rs.next()) {
+              final int teamNumber = rs.getInt(1);
+              double score = rs.getDouble(2);
+              if (rs.wasNull()) {
+                score = Double.NaN;
+              }
+
+              if (!FP.equals(score, prevScore, 1E-6)) {
+                rank += numTied;
+                numTied = 1;
+              } else {
+                ++numTied;
+              }
+
+              rankedTeams.put(teamNumber, rank);
+
+              prevScore = score;
             }
 
-            if (score != prevScore) {
-              rank += numTied;
-              numTied = 1;
-            } else {
-              ++numTied;
-            }
+            categoryRanks.put(judgingStation, rankedTeams);
 
-            rankedTeams.put(teamNumber, rank);
-
-            prevScore = score;
-          }
-
-          categoryRanks.put(judgingStation, rankedTeams);
-
-          SQLFunctions.close(rs);
-          rs = null;
+          } // try ResultSet
         } // foreach judging station
 
         retval.put(subjectiveCategories[cat], categoryRanks);
 
-        SQLFunctions.close(prep);
-        prep = null;
-      } // foreach category
+      } // try PreparedStatement
+    } // foreach category
 
-      return retval;
+    return retval;
 
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
   }
 
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table name")
@@ -453,8 +447,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                                                                                                    tournament,
                                                                                                                    awardGroup);
 
-    final Map<Integer, Integer> teamPerformanceRanks = gatherRhankedPerformanceTeams(connection, winnerCriteria,
-                                                                                     tournament, awardGroup);
+    final Map<Integer, Integer> teamPerformanceRanks = gatherRankedPerformanceTeams(connection, winnerCriteria,
+                                                                                    tournament, awardGroup);
 
     ResultSet rawScoreRS = null;
     PreparedStatement teamPrep = null;

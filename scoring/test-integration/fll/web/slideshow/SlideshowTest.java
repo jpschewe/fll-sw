@@ -29,7 +29,7 @@ import fll.web.IntegrationTestUtils;
 public class SlideshowTest {
 
   private static final Logger LOGGER = LogUtils.getLogger();
-  
+
   private WebDriver selenium;
 
   @Before
@@ -54,15 +54,15 @@ public class SlideshowTest {
   @Test
   public void testSlideshowInterval() throws IOException {
     LOGGER.info("Top testSlideshowInterval");
-    final InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml");
-    IntegrationTestUtils.initializeDatabase(selenium, challengeStream);
-
-    IntegrationTestUtils.setTournament(selenium, GenerateDB.DUMMY_TOURNAMENT_NAME);
-
-    // add a dummy team so that we have something in the database
-    IntegrationTestUtils.addTeam(selenium, 1, "team", "org", "1", GenerateDB.DUMMY_TOURNAMENT_NAME);
-
     try {
+      final InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml");
+      IntegrationTestUtils.initializeDatabase(selenium, challengeStream);
+
+      IntegrationTestUtils.setTournament(selenium, GenerateDB.DUMMY_TOURNAMENT_NAME);
+
+      // add a dummy team so that we have something in the database
+      IntegrationTestUtils.addTeam(selenium, 1, "team", "org", "1", GenerateDB.DUMMY_TOURNAMENT_NAME);
+
       selenium.findElement(By.linkText("Admin Index")).click();
 
       selenium.findElement(By.linkText("Remote control of display")).click();

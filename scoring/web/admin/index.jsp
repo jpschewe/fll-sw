@@ -178,6 +178,7 @@
           type="file"
           size="32"
           name="scheduleFile" /> <input
+          id="upload-schedule"
           type="submit"
           value="Upload Schedule" />
       </form> <c:if test="${scheduleUploaded }">
@@ -304,6 +305,7 @@
               type="file"
               size="32"
               name="subjectiveFile" /> <input
+              id='uploadSubjectiveFile'
               type="submit"
               value="Upload" />
           </form>

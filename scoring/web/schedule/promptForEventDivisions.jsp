@@ -16,8 +16,8 @@
 <p>
 Would you like to set the award groups based upon the information in the schedule data file? 
 You will be prompted with the changes before they are committed.<br/>
-<a href='<c:url value="/schedule/GatherEventDivisionChanges"/>'>Yes</a>
-<a href='<c:url value="/schedule/CommitSchedule"/>'>No</a>
+<a id='yes' href='<c:url value="/schedule/GatherEventDivisionChanges"/>'>Yes</a>
+<a id='no' href='<c:url value="/schedule/CommitSchedule"/>'>No</a>
 </p>
 
 </body>
