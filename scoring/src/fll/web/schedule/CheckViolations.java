@@ -26,8 +26,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
@@ -47,6 +45,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.WebUtils;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Read uploadSchedule_file and uploadSchedule_sheet, then check for constraint
@@ -66,7 +65,8 @@ public class CheckViolations extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
 
     final File scheduleFile = SessionAttributes.getNonNullAttribute(session, "uploadSchedule_file", File.class);
     final String sheetName = SessionAttributes.getNonNullAttribute(session, "uploadSchedule_sheet", String.class);
@@ -81,23 +81,26 @@ public class CheckViolations extends BaseFLLServlet {
       @SuppressWarnings("unchecked")
       List<SubjectiveStation> subjectiveStations = SessionAttributes.getAttribute(session, SUBJECTIVE_STATIONS,
                                                                                   List.class);
+
+      final boolean isCsvFile = !ExcelCellReader.isExcelFile(scheduleFile);
+
       if (null == subjectiveStations) {
         // get unused headers
-        final InputStream stream = new FileInputStream(scheduleFile);
-        final CellFileReader reader = new ExcelCellReader(stream, sheetName);
-        final ColumnInformation columnInfo = TournamentSchedule.findColumns(reader, new LinkedList<String>());
-        stream.close();
-        if (!columnInfo.getUnusedColumns().isEmpty()) {
-          session.setAttribute(UNUSED_HEADERS, columnInfo.getUnusedColumns());
-          session.setAttribute("default_duration", SchedParams.DEFAULT_SUBJECTIVE_MINUTES);
-          WebUtils.sendRedirect(application, response, "/schedule/chooseSubjectiveHeaders.jsp");
-          return;
-        } else {
-          subjectiveStations = Collections.emptyList();
+
+        try (final CellFileReader reader = CellFileReader.createCellReader(scheduleFile, sheetName)) {
+          final ColumnInformation columnInfo = TournamentSchedule.findColumns(reader, new LinkedList<String>());
+          // stream.close();
+          if (!columnInfo.getUnusedColumns().isEmpty()) {
+            session.setAttribute(UNUSED_HEADERS, columnInfo.getUnusedColumns());
+            session.setAttribute("default_duration", SchedParams.DEFAULT_SUBJECTIVE_MINUTES);
+            WebUtils.sendRedirect(application, response, "/schedule/chooseSubjectiveHeaders.jsp");
+            return;
+          } else {
+            subjectiveStations = Collections.emptyList();
+          }
         }
       }
 
-      final InputStream stream = new FileInputStream(scheduleFile);
       final String fullname = scheduleFile.getName();
       final int dotIndex = fullname.lastIndexOf('.');
       final String name;
@@ -110,7 +113,14 @@ public class CheckViolations extends BaseFLLServlet {
       for (final SubjectiveStation station : subjectiveStations) {
         subjectiveHeaders.add(station.getName());
       }
-      final TournamentSchedule schedule = new TournamentSchedule(name, stream, sheetName, subjectiveHeaders);
+      final TournamentSchedule schedule;
+      if (isCsvFile) {
+        schedule = new TournamentSchedule(name, scheduleFile, subjectiveHeaders);
+      } else {
+        try (final InputStream stream = new FileInputStream(scheduleFile)) {
+          schedule = new TournamentSchedule(name, stream, sheetName, subjectiveHeaders);
+        }
+      }
       session.setAttribute(UploadSchedule.SCHEDULE_KEY, schedule);
 
       final int tournamentID = Queries.getCurrentTournament(connection);
