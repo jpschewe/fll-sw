@@ -57,7 +57,7 @@ public class ExcelCellReader extends CellFileReader {
     final String contentType = Files.probeContentType(file.toPath());
 
     final boolean isCsvFile;
-    if (contentType.startsWith("text/")) {
+    if (null != contentType && contentType.startsWith("text/")) {
       isCsvFile = true;
     } else {
       isCsvFile = false;
