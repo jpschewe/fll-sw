@@ -26,13 +26,14 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JTextArea;
 import javax.swing.ListCellRenderer;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 
-import net.mtu.eggplant.util.BasicFileFilter;
 import fll.util.FLLInternalException;
 import fll.web.setup.SetupIndex.DescriptionInfo;
+import net.mtu.eggplant.util.BasicFileFilter;
 
 /**
  * Prompt the user to choose a challenge descriptor.
@@ -67,6 +68,18 @@ public class ChooseChallengeDescriptor extends JDialog {
     getContentPane().setLayout(new GridBagLayout());
 
     GridBagConstraints gbc = new GridBagConstraints();
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.weightx = 1;
+    gbc.weighty = 1;
+    gbc.fill = GridBagConstraints.BOTH;
+    final JTextArea instructions = new JTextArea("Choose a challenge description from the drop down list OR choose a file containing your custom challenge description.",
+                                                 3, 40);
+    instructions.setEditable(false);
+    instructions.setWrapStyleWord(true);
+    instructions.setLineWrap(true);
+    getContentPane().add(instructions, gbc);
+
+    gbc = new GridBagConstraints();
     mCombo = new JComboBox<DescriptionInfo>();
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     getContentPane().add(mCombo, gbc);
