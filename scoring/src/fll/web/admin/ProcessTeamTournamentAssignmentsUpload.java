@@ -5,11 +5,8 @@
  */
 package fll.web.admin;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -30,9 +27,7 @@ import fll.Tournament;
 import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.db.Queries;
-import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
-import fll.util.ExcelCellReader;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
@@ -141,47 +136,7 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
           + file.getName());
     }
 
-    final CellFileReader reader;
-    if (ExcelCellReader.isExcelFile(file)) {
-      FileInputStream fis = null;
-      try {
-        fis = new FileInputStream(file);
-        reader = new ExcelCellReader(fis, sheetName);
-        if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("Created excel reader");
-        }
-      } finally {
-        if (null != fis) {
-          fis.close();
-        }
-      }
-    } else {
-      // determine if the file is tab separated or comma separated, check the
-      // first line for tabs and if they aren't found, assume it's comma
-      // separated
-      final BufferedReader breader = new BufferedReader(new InputStreamReader(new FileInputStream(file),
-                                                                              Utilities.DEFAULT_CHARSET));
-      try {
-        final String firstLine = breader.readLine();
-        if (null == firstLine) {
-          LOGGER.error("Empty file");
-          return;
-        }
-        if (firstLine.indexOf('\t') != -1) {
-          reader = new CSVCellReader(file, '\t');
-          if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Created csv tab reader");
-          }
-        } else {
-          reader = new CSVCellReader(file);
-          if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Created csv comma reader");
-          }
-        }
-      } finally {
-        breader.close();
-      }
-    }
+    final CellFileReader reader = CellFileReader.createCellReader(file, sheetName);
 
     // parse out the first non-blank line as the names of the columns
     String[] columnNames = reader.readNext();
