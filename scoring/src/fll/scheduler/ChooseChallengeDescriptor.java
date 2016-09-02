@@ -31,6 +31,8 @@ import javax.swing.ListCellRenderer;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 
+import org.apache.commons.lang3.StringUtils;
+
 import fll.util.FLLInternalException;
 import fll.web.setup.SetupIndex.DescriptionInfo;
 import net.mtu.eggplant.util.BasicFileFilter;
@@ -127,13 +129,15 @@ public class ChooseChallengeDescriptor extends JDialog {
     ok.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(final ActionEvent ae) {
+
+        // use the selected description if nothing is entered in the file box
         final DescriptionInfo descriptionInfo = mCombo.getItemAt(mCombo.getSelectedIndex());
         if (null != descriptionInfo) {
           mSelected = descriptionInfo.getURL();
         }
 
         final String text = mFileField.getText();
-        if (!text.isEmpty()) {
+        if (!StringUtils.isEmpty(text)) {
           final File file = new File(text);
           if (file.exists()) {
             try {
