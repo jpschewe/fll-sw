@@ -582,14 +582,14 @@ public final class FinalComputedScores extends BaseFLLServlet {
             final String rankText;
             if (judgingRanks.containsKey(teamNumber)) {
               final int rank = judgingRanks.get(teamNumber);
-              rankText = String.format("\u00a0(%1$d)", rank);
+              rankText = String.format("%1$s(%2$d)", Utilities.NON_BREAKING_SPACE, rank);
               if (1 == rank) {
                 scoreFont = ARIAL_8PT_BOLD;
               } else {
                 scoreFont = ARIAL_8PT_NORMAL;
               }
             } else {
-              rankText = "\u00a0\u00a0\u00a0\u00a0\u00a0";
+              rankText = String.format("%1$s%1$s%1$s%1$s%1$s", Utilities.NON_BREAKING_SPACE);
               scoreFont = ARIAL_8PT_NORMAL;
             }
 
@@ -616,14 +616,14 @@ public final class FinalComputedScores extends BaseFLLServlet {
           final String rankText;
           if (teamPerformanceRanks.containsKey(teamNumber)) {
             final int rank = teamPerformanceRanks.get(teamNumber);
-            rankText = String.format("\u00a0(%1$d)", rank);
+            rankText = String.format("%1$s(%2$d)", Utilities.NON_BREAKING_SPACE, rank);
             if (1 == rank) {
               scoreFont = ARIAL_8PT_BOLD;
             } else {
               scoreFont = ARIAL_8PT_NORMAL;
             }
           } else {
-            rankText = "\u00a0\u00a0\u00a0\u00a0\u00a0";
+            rankText = String.format("%1$s%1$s%1$s%1$s%1$s", Utilities.NON_BREAKING_SPACE);
             scoreFont = ARIAL_8PT_NORMAL;
           }
 
@@ -654,9 +654,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
         // Last column contains the overall scaled score
         final String overallScoreSuffix;
         if (bestTeams.contains(teamNumber)) {
-          overallScoreSuffix = "\u00a0*";
+          overallScoreSuffix = String.format("%1$s*", Utilities.NON_BREAKING_SPACE);
         } else {
-          overallScoreSuffix = "\u00a0\u00a0";
+          overallScoreSuffix = String.format("%1$s%1$s", Utilities.NON_BREAKING_SPACE);
         }
 
         pCell = new PdfPCell((Double.isNaN(totalScore) ? new Phrase("No Score"
