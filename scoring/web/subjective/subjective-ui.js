@@ -16,7 +16,7 @@ $(document).on(
       $.subjective.log("choose judging group pageinit");
 
       $("#choose-judging-group_version").text($.subjective.getVersion());
-      
+
       $("#choose-judging-group_upload-scores").click(
           function() {
             $.mobile.loading("show");
@@ -365,10 +365,10 @@ function populateTeams() {
     if (!$.subjective.isScoreCompleted(score)) {
       scoreStr = "";
     } else if (score.noShow) {
-      scoreStr = "No Show - ";
+      scoreStr = "<span class='no-show'>No Show</span> - ";
     } else {
       var computedScore = $.subjective.computeScore(score);
-      scoreStr = "Score: " + computedScore + " - ";
+      scoreStr = "<span class='score'>Score: " + computedScore + "</span> - ";
     }
 
     var label = "";
@@ -606,6 +606,7 @@ $(document).on("pagebeforeshow", "#enter-score-page", function(event) {
   }
 
   $("#enter-score_score-content").empty();
+  var prevCategory = null;
   $.each($.subjective.getCurrentCategory().goals, function(index, goal) {
     if (goal.enumerated) {
       alert("Enumerated goals not supported: " + goal.name);
@@ -615,7 +616,14 @@ $(document).on("pagebeforeshow", "#enter-score-page", function(event) {
         subscore = score.standardSubScores[goal.name];
       }
 
+      if (prevCategory != goal.category) {
+        if (goal.category != null && "" != goal.category) {
+          var separator = $("<div class='ui-bar-a'>" + goal.category + "</div>");
+          $("#enter-score_score-content").append(separator);
+        }
+      }
       createScoreRow(goal, subscore);
+      prevCategory = goal.category;
     }
   });
 

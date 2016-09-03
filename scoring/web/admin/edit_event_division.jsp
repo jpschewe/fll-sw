@@ -1,154 +1,86 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<%@ page import="fll.db.Queries"%>
-
-<%@ page import="java.sql.Connection"%>
-<%@ page import="javax.sql.DataSource"%>
-<%@ page import="fll.web.ApplicationAttributes"%>
-
 <%
-final DataSource datasource = ApplicationAttributes.getDataSource(application);
-final Connection connection = datasource.getConnection();
-pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(connection));
+  fll.web.admin.CommitAwardGroups.populateContext(application, session, pageContext);
 %>
-<%-- check for form submission --%>
-<c:if test="${param.submit == 'Cancel'}">
- <!--  redirect to index.jsp -->
- <c:redirect url="index.jsp">
-  <c:param name="message">Canceled changes to event divisions</c:param>
- </c:redirect>
-</c:if>
-<c:if test="${param.submit == 'Commit'}">
- <%--  form submission --%>
- <sql:query var="result" dataSource="${datasource}">
-  SELECT TeamNumber
-    FROM current_tournament_teams
-</sql:query>
- <c:forEach items="${result.rows}" var="row">
-  <c:set var="teamNumber" scope="page">
-   <c:out value="${row.TeamNumber}" />
-  </c:set>
-  <!-- 
-      checking against empty <c:out value="${paramValues[teamNumber][0]}"/> 
-      team number <c:out value="${teamNumber}"/> 
- -->
-  <c:if test="${not empty paramValues[teamNumber][0]}">
-   <c:choose>
-    <c:when test="${paramValues[teamNumber][0] eq 'text'}">
-     <!--  inside when - is text -->
-     <c:set var="division_param" scope="page">
-      <c:out value="${teamNumber}" />_text    
-     </c:set>
-     <c:set var="new_division" value="${paramValues[division_param][0]}"
-      scope="page" />
-    </c:when>
-    <c:otherwise>
-     <c:set var="new_division" value="${paramValues[teamNumber][0]}"
-      scope="page" />
-    </c:otherwise>
-   </c:choose>
-   
-   <!--  setting event division for <c:out value="${teamNumber}"/> 
-         to <c:out value="${new_division}"/> 
-         in tournament <c:out value="${currentTournament}"/> -->
-         <%--  TODO: have this call Queries.setEventDivision --%>
-   <sql:update dataSource="${datasource}">
-    UPDATE TournamentTeams 
-      SET event_division = '<c:out value="${new_division}" />' 
-      WHERE TeamNumber = <c:out value="${teamNumber}" />
-      AND Tournament = <c:out value="${currentTournament}" />
-  </sql:update>
-  
-  <%-- clear out judges --%>
-  <sql:update dataSource='${datasource}'>
-  DELETE FROM Judges WHERE Tournament = ${currentTournament } 
-  </sql:update>
-  
-  <%-- clear out subjective scores --%>
-  <c:forEach items="${challengeDescription.subjectiveCategories }" var="category">
-    <sql:update dataSource='${datasource}'>
-    DELETE FROM ${category.name } WHERE Tournament = ${currentTournament } 
-    </sql:update>
-  </c:forEach>
-  
-  </c:if>
- </c:forEach>
-</c:if>
 
 <html>
 <head>
-<title>Administration</title>
-<link rel="stylesheet" type="text/css"
- href="<c:url value='/style/style.jsp'/>" />
+<title>Edit Award Groups</title>
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="<c:url value='/style/fll-sw.css'/>" />
 </head>
 
 <body>
-<h1>Edit Event
-Division</h1>
+  <h1>Edit Award Groups</h1>
 
- <sql:query var="result" dataSource="${datasource}">
-  SELECT id FROM Judges WHERE Tournament = ${currentTournament } LIMIT 1
-</sql:query>
- <c:forEach items="${result.rows}" var="row">
-<p class='error'>Judges have already been assigned for this tournament, changing the event divisions will cause the judges and any subjective scores to be deleted.</p>
-</c:forEach>
+  <div class='status-message'>${message}</div>
+  <%-- clear out the message, so that we don't see it again --%>
+  <c:remove var="message" />
 
-<p>This page allows you to assign event divisions to each team.
-Normally teams are just in the divisions they are registered in. However
-at some tournaments the teams are in different divisions to allow one to
-run effectively two tournaments at the same location. Below are the
-teams at the current tournament and what event division they are in. You
-can either select one of the existing divisions or select the text field
-and enter a new division name. Once you've entered a new division name
-you may press commit at the bottom and this division name will be added
-to the radio buttons.</p>
+  <p>This page allows you to assign teams to award groups. Below are
+    the teams at the current tournament and what award group they are
+    in. You can either select one of the existing award groups or select
+    the text field and enter a new award group.</p>
 
-<sql:query var="result" dataSource="${datasource}">
-SELECT Teams.TeamNumber, Teams.TeamName, current_tournament_teams.event_division 
-  FROM current_tournament_teams, Teams 
-  WHERE current_tournament_teams.TeamNumber = Teams.TeamNumber 
-  ORDER BY Teams.TeamNumber
-</sql:query>
-<form name='edit_event_divisions' action='edit_event_division.jsp'
- method='post'>
-<table id='data' border='1'>
- <tr>
-  <th>Team Number</th>
-  <th>Team Name</th>
-  <th>Division</th>
- </tr>
- <c:forEach items="${result.rows}" var="row">
-  <tr>
-   <td><c:out value="${row.TeamNumber}" /></td>
-   <td><c:out value="${row.TeamName}" /></td>
-   <%
-   	pageContext.setAttribute("divisions", Queries.getEventDivisions(connection));
-   %>
+  <form
+    name='edit_event_divisions'
+    action='CommitAwardGroups'
+    method='post'>
+    <table
+      id='data'
+      border='1'>
+      <tr>
+        <th>Team Number</th>
+        <th>Team Name</th>
+        <th>Award Group</th>
+      </tr>
+      <c:forEach
+        items="${teams}"
+        var="team">
+        <tr>
+          <td><c:out value="${team.teamNumber}" /></td>
+          <td><c:out value="${team.teamName}" /></td>
 
-   <td>
-   <c:forEach items="${divisions}" var="division">
-    <c:choose>
-     <c:when test="${row.event_division == division}">
-      <input type='radio' name='<c:out value="${row.TeamNumber}"/>'
-       value='<c:out value="${division}"/>' checked />
-     </c:when>
-     <c:otherwise>
-      <input type='radio' name='<c:out value="${row.TeamNumber}"/>'
-       value='<c:out value="${division}"/>' />
-     </c:otherwise>
-    </c:choose>
-    <c:out value="${division}" />
-   </c:forEach>
-   <input type='radio' name='<c:out value="${row.TeamNumber}"/>'
-    value='text' /> <input type='text'
-    name='<c:out value="${row.TeamNumber}"/>_text' />
-    </td>
-  </tr>
- </c:forEach>
-</table>
+          <td><c:forEach
+              items="${divisions}"
+              var="division">
+              <c:choose>
+                <c:when test="${team.awardGroup == division}">
+                  <input
+                    type='radio'
+                    name='<c:out value="${team.teamNumber}"/>'
+                    value='<c:out value="${division}"/>'
+                    checked />
+                </c:when>
+                <c:otherwise>
+                  <input
+                    type='radio'
+                    name='<c:out value="${team.teamNumber}"/>'
+                    value='<c:out value="${division}"/>' />
+                </c:otherwise>
+              </c:choose>
+              <c:out value="${division}" />
+            </c:forEach> <input
+            type='radio'
+            name='<c:out value="${team.teamNumber}"/>'
+            value='text' /> <input
+            type='text'
+            name='<c:out value="${team.teamNumber}"/>_text' /></td>
+        </tr>
+      </c:forEach>
+    </table>
 
-<input type='submit' name='submit' value='Commit' /> <input
- type='submit' name='submit' value='Cancel' /></form>
+    <input
+      type='submit'
+      name='submit'
+      value='Commit' /> <input
+      type='submit'
+      name='submit'
+      value='Cancel' />
+  </form>
 
 
 </body>

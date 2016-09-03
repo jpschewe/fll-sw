@@ -48,7 +48,7 @@ import fll.web.SessionAttributes;
 
 /**
  * Java code for uploading team data to the database. Called from
- * filterTeams.jsp and columnSelection.jsp.
+ * teamColumnSelection.jsp.
  */
 @WebServlet("/admin/UploadTeams")
 public final class UploadTeams extends BaseFLLServlet {
@@ -58,7 +58,8 @@ public final class UploadTeams extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
 
     final StringBuilder message = new StringBuilder();
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -97,7 +98,7 @@ public final class UploadTeams extends BaseFLLServlet {
       }
     }
     session.setAttribute(SessionAttributes.MESSAGE, message.toString());
-    response.sendRedirect(response.encodeRedirectURL("filterTeams.jsp"));
+    response.sendRedirect(response.encodeRedirectURL("teamColumnSelection.jsp"));
 
   }
 
@@ -114,11 +115,12 @@ public final class UploadTeams extends BaseFLLServlet {
    * @throws InvalidFormatException
    */
   @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
-                                "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate the list of columns to create FilteredTeams table")
+                                "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate the list of columns to create AllTeams table")
   public static void parseFile(final File file,
                                final String sheetName,
                                final Connection connection,
-                               final HttpSession session) throws SQLException, IOException, InvalidFormatException {
+                               final HttpSession session)
+      throws SQLException, IOException, InvalidFormatException {
     final CellFileReader reader = CellFileReader.createCellReader(file, sheetName);
 
     // stores <option value='columnName'>columnName</option> for each column
@@ -135,8 +137,6 @@ public final class UploadTeams extends BaseFLLServlet {
     // build the SQL for creating the temporary tables
     final StringBuffer createTable = new StringBuffer();
     createTable.append("CREATE TABLE AllTeams (");
-    final StringBuffer createFilteredTable = new StringBuffer();
-    createFilteredTable.append("CREATE TABLE FilteredTeams (");
 
     // iterate over each column name and append to appropriate buffers
     boolean first = true;
@@ -158,19 +158,15 @@ public final class UploadTeams extends BaseFLLServlet {
         first = false;
       } else {
         createTable.append(", ");
-        createFilteredTable.append(", ");
         insertPrepSQL.append(", ");
       }
       createTable.append(columnName
-          + " longvarchar");
-      createFilteredTable.append(columnName
           + " longvarchar");
       insertPrepSQL.append("?");
       selectOptions.append("<option value='"
           + columnName + "'>" + columnName + "</option>");
     }
     createTable.append(")");
-    createFilteredTable.append(")");
     insertPrepSQL.append(")");
 
     PreparedStatement insertPrep = null;
@@ -186,12 +182,6 @@ public final class UploadTeams extends BaseFLLServlet {
       }
       stmt.executeUpdate(createTable.toString()); // create AllTeams
 
-      // make sure the table doesn't yet exist
-      stmt.executeUpdate("DROP TABLE IF EXISTS FilteredTeams");
-
-      // create FilteredTeams
-      stmt.executeUpdate(createFilteredTable.toString());
-
       insertPrep = connection.prepareStatement(insertPrepSQL.toString());
 
       insertLinesIntoAllTeams(reader, columnNamesSeen, insertPrep);
@@ -206,7 +196,8 @@ public final class UploadTeams extends BaseFLLServlet {
 
   private static void insertLinesIntoAllTeams(final CellFileReader reader,
                                               final List<String> columnNamesSeen,
-                                              final PreparedStatement insertPrep) throws IOException, SQLException {
+                                              final PreparedStatement insertPrep)
+      throws IOException, SQLException {
     try {
       // loop over the rest of the rows and insert them into AllTeams
       String[] values;
@@ -259,100 +250,6 @@ public final class UploadTeams extends BaseFLLServlet {
   }
 
   /**
-   * Apply the set of filters currently stored in session.
-   * 
-   * @param connection the database connection
-   * @param request the request where the filters are stored
-   * @return the number of rows that match
-   * @throws SQLException if an error occurs talking to the database
-   */
-  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate where clause with the filters")
-  public static long applyFilters(final Connection connection,
-                                  final HttpServletRequest request) throws SQLException {
-    Statement stmt = null;
-    ResultSet rs = null;
-    try {
-      final String whereClause = createFilterWhereClauseFromRequest(request);
-
-      stmt = connection.createStatement();
-
-      String sql = "SELECT COUNT(*) FROM AllTeams";
-      if (whereClause.length() > 0) {
-        sql += " WHERE "
-            + whereClause;
-      }
-
-      rs = stmt.executeQuery(sql);
-      if (rs.next()) {
-        return rs.getLong(1);
-      } else {
-        throw new RuntimeException("Internal error, can't get count");
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
-    }
-  }
-
-  /**
-   * Copy teams out of AllTeams into FilteredTeams applying the filters in
-   * request
-   */
-  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate where clause based on filters")
-  public static void copyFilteredTeams(final Connection connection,
-                                       final HttpServletRequest request) throws SQLException {
-    Statement stmt = null;
-    try {
-      final String whereClause = createFilterWhereClauseFromRequest(request);
-
-      stmt = connection.createStatement();
-
-      // first clean out FilteredTeams
-      stmt.executeUpdate("DELETE FROM FilteredTeams");
-
-      // do the copy
-      String sql = "INSERT INTO FilteredTeams SELECT * FROM AllTeams";
-      if (whereClause.length() > 0) {
-        sql += " WHERE "
-            + whereClause;
-      }
-      stmt.executeUpdate(sql);
-    } finally {
-      SQLFunctions.close(stmt);
-    }
-  }
-
-  private static String createFilterWhereClauseFromRequest(final HttpServletRequest request) {
-    final StringBuffer whereClause = new StringBuffer();
-    int filterCount = 0;
-    String filterColumn = request.getParameter("filterColumn"
-        + filterCount);
-    String filterText = request.getParameter("filterText"
-        + filterCount);
-    String filterDelete = request.getParameter("filterDelete"
-        + filterCount);
-    while (null != filterColumn) {
-      if (!"".equals(filterText)
-          && !"1".equals(filterDelete)) {
-        if (whereClause.length() > 0) {
-          whereClause.append(" AND ");
-        }
-        whereClause.append(filterColumn
-            + " LIKE '" + filterText.trim() + "'");
-      }
-
-      filterCount++;
-      filterColumn = request.getParameter("filterColumn"
-          + filterCount);
-      filterText = request.getParameter("filterText"
-          + filterCount);
-      filterDelete = request.getParameter("filterDelete"
-          + filterCount);
-    }
-    return whereClause.toString();
-  }
-
-  /**
    * Verify the team information. Used with verifyTeams.jsp
    * <ul>
    * <li>Make sure that the column for TeamNumber is specified</li>
@@ -373,12 +270,13 @@ public final class UploadTeams extends BaseFLLServlet {
    * @throws IOException on error writing to webpage
    */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
-                                "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate the list of columns for FilteredTeams table, Can't use PreparedStatement for constant value to select when inserting dummy tournament id")
+                                "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate the list of columns for AllTeams table, Can't use PreparedStatement for constant value to select when inserting dummy tournament id")
   public static boolean verifyTeams(final Connection connection,
                                     final HttpServletRequest request,
                                     final HttpServletResponse response,
                                     final HttpSession session,
-                                    final JspWriter out) throws SQLException, IOException {
+                                    final JspWriter out)
+      throws SQLException, IOException {
     final String teamNumberColumn = request.getParameter("TeamNumber");
     if (null == teamNumberColumn
         || "".equals(teamNumberColumn)) {
@@ -429,13 +327,13 @@ public final class UploadTeams extends BaseFLLServlet {
 
       if (!verifyNoDuplicateTeamNumbers(connection, message, teamNumberColumn)) {
         session.setAttribute(SessionAttributes.MESSAGE, message);
-        response.sendRedirect(response.encodeRedirectURL("filterTeams.jsp"));
+        response.sendRedirect(response.encodeRedirectURL("teamColumnSelection.jsp"));
         return false;
       }
 
       // now copy the data over converting the team number to an integer
       final String selectSQL = "SELECT "
-          + dataColumns.toString() + " FROM FilteredTeams";
+          + dataColumns.toString() + " FROM AllTeams";
       final String insertSQL = "INSERT INTO Teams ("
           + dbColumns.toString() + ") VALUES(" + values.toString() + ")";
       prep = connection.prepareStatement(insertSQL);
@@ -512,7 +410,7 @@ public final class UploadTeams extends BaseFLLServlet {
   }
 
   /**
-   * Check if there are any team numbers in FilteredTeams that are in Teams.
+   * Check if there are any team numbers in AllTeams that are in Teams.
    * 
    * @param connection
    * @param message
@@ -522,14 +420,15 @@ public final class UploadTeams extends BaseFLLServlet {
   @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate name of teamNumberColumn")
   private static boolean verifyNoDuplicateTeamNumbers(final Connection connection,
                                                       final StringBuilder message,
-                                                      final String teamNumberColumn) throws SQLException {
+                                                      final String teamNumberColumn)
+      throws SQLException {
     Statement stmt = null;
     ResultSet rs = null;
     try {
       stmt = connection.createStatement();
       rs = stmt.executeQuery("SELECT Teams.TeamNumber" //
-          + " FROM Teams, FilteredTeams" //
-          + " WHERE FilteredTeams." + teamNumberColumn + " = Teams.TeamNumber");
+          + " FROM Teams, AllTeams" //
+          + " WHERE AllTeams." + teamNumberColumn + " = Teams.TeamNumber");
 
       final StringBuilder teams = new StringBuilder();
       boolean first = true;
@@ -562,23 +461,24 @@ public final class UploadTeams extends BaseFLLServlet {
    * Update TournamentTeams table with newly inserted teams.
    * 
    * @param connection database connection
-   * @param teamNumberColumn which column in FilteredTeams contains the team
+   * @param teamNumberColumn which column in AllTeams contains the team
    *          number
-   * @param tournamentColumn which column in FilteredTeams contains the
+   * @param tournamentColumn which column in AllTeams contains the
    *          tournament
-   * @param eventDivisionColumn which column in FilteredTeams contains the event
+   * @param eventDivisionColumn which column in AllTeams contains the event
    *          division - may be null
-   * @param judgingStationColumn which column in FilteredTeams contains the
+   * @param judgingStationColumn which column in AllTeams contains the
    *          judging station - may be null
    * @throws SQLException
    */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
-                                "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate the list of columns for FilteredTeams table, Can't use PreparedStatement for constant value to select when inserting dummy tournament id")
+                                "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate the list of columns for AllTeams table, Can't use PreparedStatement for constant value to select when inserting dummy tournament id")
   static private void updateTournamentTeams(final Connection connection,
                                             final String teamNumberColumn,
                                             final String tournamentColumn,
                                             final String eventDivisionColumn,
-                                            final String judgingStationColumn) throws SQLException {
+                                            final String judgingStationColumn)
+      throws SQLException {
     Statement stmt = null;
     ResultSet rs = null;
     try {
@@ -617,7 +517,7 @@ public final class UploadTeams extends BaseFLLServlet {
         sql.append(", "
             + judgingStationSql);
 
-        sql.append(" FROM FilteredTeams");
+        sql.append(" FROM AllTeams");
 
         rs = stmt.executeQuery(sql.toString());
 
@@ -645,8 +545,8 @@ public final class UploadTeams extends BaseFLLServlet {
         stmt.executeUpdate("INSERT INTO TournamentTeams " //
             + " (Tournament, TeamNumber, event_division, judging_station)" // "
             + " SELECT " + dummyTournamentID + ", Teams.TeamNumber, " + eventDivisionSql + ", " + judgingStationSql //
-            + " FROM Teams, FilteredTeams" //
-            + "   WHERE Teams.TeamNumber = FilteredTeams." + teamNumberColumn);
+            + " FROM Teams, AllTeams" //
+            + "   WHERE Teams.TeamNumber = AllTeams." + teamNumberColumn);
       }
 
     } finally {

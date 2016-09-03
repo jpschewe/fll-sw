@@ -63,7 +63,8 @@ public final class Playoff {
   public static List<Team> buildInitialBracketOrder(final Connection connection,
                                                     final BracketSortType bracketSort,
                                                     final WinnerType winnerCriteria,
-                                                    final List<? extends Team> teams) throws SQLException {
+                                                    final List<? extends Team> teams)
+      throws SQLException {
     if (null == connection) {
       throw new NullPointerException("Connection cannot be null");
     }
@@ -95,8 +96,7 @@ public final class Playoff {
       final int tournament = Queries.getCurrentTournament(connection);
       final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament);
       if (numSeedingRounds < 1) {
-        throw new FLLRuntimeException(
-                                      "Cannot initialize playoff brackets using scores from seeding rounds when the number of seeing rounds is less than 1");
+        throw new FLLRuntimeException("Cannot initialize playoff brackets using scores from seeding rounds when the number of seeing rounds is less than 1");
       }
 
       seedingOrder = Queries.getPlayoffSeedingOrder(connection, winnerCriteria, teams);
@@ -115,7 +115,8 @@ public final class Playoff {
       if (element > seedingOrder.size()) {
         list.add(Team.BYE);
       } else {
-        final Team team = seedingOrder.get(element - 1);
+        final Team team = seedingOrder.get(element
+            - 1);
         list.add(team);
       }
     }
@@ -160,7 +161,8 @@ public final class Playoff {
                                 final Team teamA,
                                 final Team teamB,
                                 final TeamScore teamBScore,
-                                final int runNumber) throws SQLException, ParseException {
+                                final int runNumber)
+      throws SQLException, ParseException {
     final TeamScore teamAScore = new DatabaseTeamScore("Performance", tournament, teamA.getTeamNumber(), runNumber,
                                                        connection);
     final Team retval = pickWinner(performanceElement, tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB,
@@ -196,7 +198,8 @@ public final class Playoff {
                                 final WinnerType winnerCriteria,
                                 final Team teamA,
                                 final Team teamB,
-                                final int runNumber) throws SQLException, ParseException {
+                                final int runNumber)
+      throws SQLException, ParseException {
     final TeamScore teamAScore = new DatabaseTeamScore("Performance", tournament, teamA.getTeamNumber(), runNumber,
                                                        connection);
     final TeamScore teamBScore = new DatabaseTeamScore("Performance", tournament, teamB.getTeamNumber(), runNumber,
@@ -219,7 +222,8 @@ public final class Playoff {
                                  final Team teamA,
                                  final TeamScore teamAScore,
                                  final Team teamB,
-                                 final TeamScore teamBScore) throws ParseException {
+                                 final TeamScore teamBScore)
+      throws ParseException {
 
     // teamA can actually be a bye here in the degenerate case of a 3-team
     // tournament with 3rd/4th place brackets enabled...
@@ -269,7 +273,8 @@ public final class Playoff {
                                          final Team teamA,
                                          final TeamScore teamAScore,
                                          final Team teamB,
-                                         final TeamScore teamBScore) throws ParseException {
+                                         final TeamScore teamBScore)
+      throws ParseException {
 
     // walk test elements in tiebreaker to decide who wins
     for (final TiebreakerTest testElement : tiebreakerElement) {
@@ -293,7 +298,8 @@ public final class Playoff {
    */
   public static void insertBye(final Connection connection,
                                final Team team,
-                               final int runNumber) throws SQLException {
+                               final int runNumber)
+      throws SQLException {
     final int tournament = Queries.getCurrentTournament(connection);
     PreparedStatement prep = null;
     try {
@@ -321,7 +327,8 @@ public final class Playoff {
   public static double getPerformanceScore(final Connection connection,
                                            final int tournament,
                                            final Team team,
-                                           final int runNumber) throws SQLException, IllegalArgumentException {
+                                           final int runNumber)
+      throws SQLException, IllegalArgumentException {
     if (null == team) {
       throw new IllegalArgumentException("Cannot get score for null team");
     } else {
@@ -356,7 +363,8 @@ public final class Playoff {
   public static boolean isNoShow(final Connection connection,
                                  final int tournament,
                                  final Team team,
-                                 final int runNumber) throws SQLException {
+                                 final int runNumber)
+      throws SQLException {
     return Queries.isNoShow(connection, tournament, team.getTeamNumber(), runNumber);
   }
 
@@ -369,7 +377,8 @@ public final class Playoff {
   public static boolean isBye(final Connection connection,
                               final int tournament,
                               final Team team,
-                              final int runNumber) throws SQLException {
+                              final int runNumber)
+      throws SQLException {
     return Queries.isBye(connection, tournament, team.getTeamNumber(), runNumber);
   }
 
@@ -395,10 +404,11 @@ public final class Playoff {
                                         final String division,
                                         final boolean enableThird,
                                         final List<? extends Team> teams,
-                                        final BracketSortType bracketSort) throws SQLException {
+                                        final BracketSortType bracketSort)
+      throws SQLException {
 
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("initializing brackets for division: "
+      LOGGER.debug("initializing playoff bracket: "
           + division + " enableThird: " + enableThird);
     }
     final int currentTournament = Queries.getCurrentTournament(connection);
@@ -459,7 +469,8 @@ public final class Playoff {
 
       // run_number may overlap, but never for the same team with the
       // exception of the NULL team
-      insertStmt.setInt(6, 1 + baseRunNumber);
+      insertStmt.setInt(6, 1
+          + baseRunNumber);
       int lineNbr = 1;
       while (it.hasNext()) {
         insertStmt.setInt(4, lineNbr);
@@ -472,7 +483,8 @@ public final class Playoff {
 
       // Create the remaining entries for the playoff data table using Null team
       // number
-      int currentRoundSize = firstRound.size() / 2;
+      int currentRoundSize = firstRound.size()
+          / 2;
       int roundNumber = 2;
       insertStmt.setInt(1, currentTournament);
       insertStmt.setString(2, division);
@@ -483,7 +495,8 @@ public final class Playoff {
         lineNbr = currentRoundSize;
         if (enableThird
             && currentRoundSize <= 2) {
-          lineNbr = lineNbr * 2;
+          lineNbr = lineNbr
+              * 2;
         }
         while (lineNbr >= 1) {
           insertStmt.setInt(4, lineNbr);
@@ -492,7 +505,8 @@ public final class Playoff {
           lineNbr--;
         }
         roundNumber++;
-        currentRoundSize = currentRoundSize / 2;
+        currentRoundSize = currentRoundSize
+            / 2;
       }
       SQLFunctions.close(insertStmt);
       insertStmt = null;
@@ -546,17 +560,21 @@ public final class Playoff {
           throw new RuntimeException("Error initializing brackets. Round number"
               + " mismatch between teams expected to be in the same match");
         }
-        if (line1 + 1 != line2) {
+        if (line1
+            + 1 != line2) {
           throw new RuntimeException("Error initializing brackets. Line numbers"
               + " are not consecutive");
         }
 
         // Advance teams if one of them is a bye...
-        if ((team1 == Team.BYE_TEAM_NUMBER || team2 == Team.BYE_TEAM_NUMBER)
-            && !(team1 == Team.BYE_TEAM_NUMBER && team2 == Team.BYE_TEAM_NUMBER)) {
+        if ((team1 == Team.BYE_TEAM_NUMBER
+            || team2 == Team.BYE_TEAM_NUMBER)
+            && !(team1 == Team.BYE_TEAM_NUMBER
+                && team2 == Team.BYE_TEAM_NUMBER)) {
           final int teamToAdvance = (team1 == Team.BYE_TEAM_NUMBER ? team2 : team1);
 
-          insertBye(connection, Team.getTeamFromDatabase(connection, teamToAdvance), baseRunNumber + 1);
+          insertBye(connection, Team.getTeamFromDatabase(connection, teamToAdvance), baseRunNumber
+              + 1);
 
           insertStmt = connection.prepareStatement("UPDATE PlayoffData SET Team= ?" //
               + " WHERE Tournament= ?" //
@@ -566,8 +584,10 @@ public final class Playoff {
           insertStmt.setInt(1, teamToAdvance);
           insertStmt.setInt(2, currentTournament);
           insertStmt.setString(3, division);
-          insertStmt.setInt(4, round1 + 1);
-          insertStmt.setInt(5, line2 / 2); // technically (line2+1)/2 but we
+          insertStmt.setInt(4, round1
+              + 1);
+          insertStmt.setInt(5, line2
+              / 2); // technically (line2+1)/2 but we
           // know
           // line2 is always the even team so this
           // is the same...
@@ -575,9 +595,12 @@ public final class Playoff {
           // Degenerate case of BYE team advancing to the loser's bracket
           // (i.e. a 3-team tournament with 3rd/4th place bracket enabled...)
           if (enableThird
-              && (numPlayoffRounds - round1) == 1) {
+              && (numPlayoffRounds
+                  - round1) == 1) {
             insertStmt.setInt(1, Team.BYE_TEAM_NUMBER);
-            insertStmt.setInt(5, line2 / 2 + 2);
+            insertStmt.setInt(5, line2
+                / 2
+                + 2);
           }
           SQLFunctions.close(insertStmt);
           insertStmt = null;
@@ -604,7 +627,8 @@ public final class Playoff {
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate query from list of teams")
   private static int getMaxPerformanceRound(final Connection connection,
                                             final int currentTournament,
-                                            final List<Integer> teamNumbers) throws SQLException {
+                                            final List<Integer> teamNumbers)
+      throws SQLException {
     final String teamNumbersStr = StringUtils.join(teamNumbers, ",");
 
     PreparedStatement divisionsPrep = null;
@@ -646,7 +670,8 @@ public final class Playoff {
    */
   public static int getMaxPerformanceRound(final Connection connection,
                                            final int currentTournament,
-                                           final String playoffDivision) throws SQLException {
+                                           final String playoffDivision)
+      throws SQLException {
     PreparedStatement maxPrep = null;
     ResultSet max = null;
     try {
@@ -692,19 +717,28 @@ public final class Playoff {
         || 1 == n) {
       return new int[] { 1, 2 };
     } else {
-      final int[] smallerBracket = computeInitialBrackets(n / 2);
+      final int[] smallerBracket = computeInitialBrackets(n
+          / 2);
       final int[] retval = new int[n];
       for (int index = 0; index < smallerBracket.length; ++index) {
         final int team = smallerBracket[index];
         final int opponent = n
             - team + 1;
 
-        if (index + 1 < n / 2) {
-          retval[index * 2] = team;
-          retval[index * 2 + 1] = opponent;
+        if (index
+            + 1 < n
+                / 2) {
+          retval[index
+              * 2] = team;
+          retval[index
+              * 2
+              + 1] = opponent;
         } else {
-          retval[index * 2] = opponent;
-          retval[index * 2 + 1] = team;
+          retval[index
+              * 2] = opponent;
+          retval[index
+              * 2
+              + 1] = team;
         }
       }
       return retval;
@@ -720,27 +754,29 @@ public final class Playoff {
    * @return if the number is a power of 2
    */
   private static boolean isPowerOfTwoFast(final int n) {
-    return ((n != 0) && (n & (n - 1)) == 0);
+    return ((n != 0)
+        && (n
+            & (n
+                - 1)) == 0);
   }
 
   /**
-   * Get the list of playoff divisions at the specified tournament as a List of
-   * Strings. This may be different from the event divisions for the overall
-   * tournament if one has defined virtual divisions for running the playoffs
-   * over a subset of teams.
+   * Get the list of playoff brackets at the specified tournament as a List of
+   * Strings.
    * 
    * @param connection the database connection
-   * @return the List of divisions. List of strings.
+   * @return the List of brackets sorted by bracket name
    * @throws SQLException on a database error
    */
-  public static List<String> getPlayoffDivisions(final Connection connection,
-                                                 final int tournament) throws SQLException {
+  public static List<String> getPlayoffBrackets(final Connection connection,
+                                                final int tournament)
+      throws SQLException {
     final List<String> list = new LinkedList<String>();
 
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      prep = connection.prepareStatement("SELECT DISTINCT event_division FROM PlayoffData WHERE Tournament = ? ORDER BY event_division");
+      prep = connection.prepareStatement("SELECT DISTINCT bracket_name FROM playoff_bracket_teams WHERE tournament_id = ? ORDER BY bracket_name");
       prep.setInt(1, tournament);
       rs = prep.executeQuery();
       while (rs.next()) {
@@ -762,7 +798,8 @@ public final class Playoff {
    */
   public static int getMaxRunNumber(final Connection connection,
                                     final int tournament,
-                                    final String division) throws SQLException {
+                                    final String division)
+      throws SQLException {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
@@ -792,7 +829,8 @@ public final class Playoff {
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate query from list of teams")
   public static String involvedInUnfinishedPlayoff(final Connection connection,
                                                    final int tournament,
-                                                   final List<Integer> teamNumbers) throws SQLException {
+                                                   final List<Integer> teamNumbers)
+      throws SQLException {
     final StringBuilder message = new StringBuilder();
 
     final String teamNumbersStr = StringUtils.join(teamNumbers, ",");
@@ -839,7 +877,8 @@ public final class Playoff {
           while (detail.next()) {
             final int teamNumber = detail.getInt(1);
             message.append("<li>Team "
-                + teamNumber + " is involved in the playoff for '" + eventDivision + "', which isn't finished</li>");
+                + teamNumber + " is involved in the playoff bracket '" + eventDivision
+                + "', which isn't finished</li>");
           }
           SQLFunctions.close(detail);
           detail = null;
@@ -874,10 +913,12 @@ public final class Playoff {
    */
   static private void insertByes(final Connection connection,
                                  final int baseRunNumber,
-                                 final List<? extends Team> teams) throws SQLException {
+                                 final List<? extends Team> teams)
+      throws SQLException {
     for (final Team team : teams) {
       final int maxRunCompleted = Queries.maxPerformanceRunNumberCompleted(connection, team.getTeamNumber());
-      for (int round = maxRunCompleted + 1; round <= baseRunNumber; ++round) {
+      for (int round = maxRunCompleted
+          + 1; round <= baseRunNumber; ++round) {
         insertBye(connection, team, round);
       }
     }
@@ -897,14 +938,14 @@ public final class Playoff {
   public static int getBracketNumber(final Connection connection,
                                      final int tournamentId,
                                      final int teamNumber,
-                                     final int runNumber) throws SQLException {
+                                     final int runNumber)
+      throws SQLException {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
       prep = connection.prepareStatement("SELECT LineNumber FROM PlayoffData"//
           + " WHERE Team = ? " //
-          + " AND run_number = ?"
-          + " AND tournament = ?");
+          + " AND run_number = ?" + " AND tournament = ?");
       prep.setInt(1, teamNumber);
       prep.setInt(2, runNumber);
       prep.setInt(3, tournamentId);
@@ -912,7 +953,9 @@ public final class Playoff {
       if (rs.next()) {
         final int lineNumber = rs.getInt(1);
         // Always want to round up
-        final int bracket = (lineNumber + 1) / 2;
+        final int bracket = (lineNumber
+            + 1)
+            / 2;
         return bracket;
       } else {
         return -1;
@@ -932,7 +975,8 @@ public final class Playoff {
    */
   public static int getPlayoffRound(final Connection connection,
                                     final String division,
-                                    final int runNumber) throws SQLException {
+                                    final int runNumber)
+      throws SQLException {
 
     final int tournament = Queries.getCurrentTournament(connection);
     PreparedStatement prep = null;
@@ -957,26 +1001,27 @@ public final class Playoff {
   }
 
   /**
-   * Given a team, get the playoff divisions that the team is associated with.
+   * Given a team, get the playoff brackets that the team is associated with.
    * 
-   * @return the division or null if not found
+   * @return the brackets, may be an empty list
    */
-  public static List<String> getPlayoffDivisionsForTeam(final Connection connection,
-                                                        final int teamNumber) throws SQLException {
+  public static List<String> getPlayoffBracketsForTeam(final Connection connection,
+                                                       final int teamNumber)
+      throws SQLException {
     final List<String> ret = new LinkedList<String>();
     final int tournament = Queries.getCurrentTournament(connection);
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      prep = connection.prepareStatement("SELECT event_division FROM PlayoffData"
-          + " WHERE Team = ?"//
-          + " AND Tournament = ?");
+      prep = connection.prepareStatement("SELECT bracket_name FROM playoff_bracket_teams"
+          + " WHERE team_number = ?"//
+          + " AND tournament_id = ?");
       prep.setInt(1, teamNumber);
       prep.setInt(2, tournament);
       rs = prep.executeQuery();
       while (rs.next()) {
-        final String division = rs.getString(1);
-        ret.add(division);
+        final String bracket = rs.getString(1);
+        ret.add(bracket);
       }
     } finally {
       SQLFunctions.close(rs);
@@ -993,7 +1038,8 @@ public final class Playoff {
    */
   public static String getPlayoffDivision(final Connection connection,
                                           final int teamNumber,
-                                          final int runNumber) throws SQLException {
+                                          final int runNumber)
+      throws SQLException {
     final int tournament = Queries.getCurrentTournament(connection);
     PreparedStatement prep = null;
     ResultSet rs = null;
@@ -1028,7 +1074,8 @@ public final class Playoff {
   public static int getRunNumber(final Connection connection,
                                  final String division,
                                  final int teamNumber,
-                                 final int playoffRound) throws SQLException {
+                                 final int playoffRound)
+      throws SQLException {
     final int tournament = Queries.getCurrentTournament(connection);
     PreparedStatement prep = null;
     ResultSet rs = null;
@@ -1050,6 +1097,64 @@ public final class Playoff {
       }
     } finally {
       SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+  }
+
+  /**
+   * Get the list of team numbers that are in the specified playoff bracket.
+   * The bracket may not be initialized yet.
+   * 
+   * @throws SQLException
+   */
+  public static List<Integer> getTeamNumbersForPlayoffBracket(final Connection connection,
+                                                              final int tournamentId,
+                                                              final String bracketName)
+      throws SQLException {
+    final List<Integer> teams = new LinkedList<>();
+
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT team_number" //
+          + " FROM playoff_bracket_teams" //
+          + " WHERE tournament_id = ?" //
+          + "   AND bracket_name = ?");
+      prep.setInt(1, tournamentId);
+      prep.setString(2, bracketName);
+      rs = prep.executeQuery();
+      while (rs.next()) {
+        final int teamNumber = rs.getInt(1);
+        teams.add(teamNumber);
+      }
+
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+
+    return teams;
+  }
+
+  /**
+   * Create a playoff bracket.
+   * Does not check if the bracket already exists.
+   */
+  public static void createPlayoffBracket(final Connection connection,
+                                          final int tournamentId,
+                                          final String bracketName,
+                                          final List<Integer> teamNumbers)
+      throws SQLException {
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("INSERT INTO playoff_bracket_teams (tournament_id, bracket_name, team_number) VALUES(?, ?, ?)");
+      prep.setInt(1, tournamentId);
+      prep.setString(2, bracketName);
+      for (final Integer teamNumber : teamNumbers) {
+        prep.setInt(3, teamNumber);
+        prep.executeUpdate();
+      }
+    } finally {
       SQLFunctions.close(prep);
     }
   }

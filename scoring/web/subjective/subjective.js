@@ -240,6 +240,14 @@
       _categoryColumnMapping = data;
     });
   }
+  
+  function _javaLocalTimeToJsDate(javaTime) {
+    var jsDate = new Date(0);
+    jsDate.setHours(Number(javaTime.hour));
+    jsDate.setMinutes(Number(javaTime.minute));
+    jsDate.setSeconds(Number(javaTime.second));
+    return jsDate;
+  }
 
   // //////////////////////// PUBLIC INTERFACE /////////////////////////
   $.subjective = {
@@ -446,8 +454,8 @@
     getJudgingGroups : function() {
       var retval = [];
       $.each(_teams, function(index, team) {
-        if (-1 == $.inArray(team.judgingStation, retval)) {
-          retval.push(team.judgingStation);
+        if (-1 == $.inArray(team.judgingGroup, retval)) {
+          retval.push(team.judgingGroup);
         }
       });
       return retval;
@@ -489,7 +497,7 @@
         return retval;
       } else {
         $.each(_judges, function(index, judge) {
-          if (judge.station == _currentJudgingGroup
+          if (judge.group == _currentJudgingGroup
               && judge.category == _currentCategory.name) {
             retval.push(judge);
           }
@@ -503,7 +511,7 @@
       if (null != _judges) {
         $.each(_judges,
             function(index, judge) {
-              if (judge.station == _currentJudgingGroup
+              if (judge.group == _currentJudgingGroup
                   && judge.category == _currentCategory.name
                   && judge.id == judgeId) {
                 foundJudge = judge;
@@ -514,7 +522,7 @@
         foundJudge = new Object();
         foundJudge.id = judgeId;
         foundJudge.category = _currentCategory.name;
-        foundJudge.station = _currentJudgingGroup;
+        foundJudge.group = _currentJudgingGroup;
         _judges.push(foundJudge);
       }
 
@@ -531,7 +539,7 @@
       if (null != _judges) {
         $.each(_judges,
             function(index, judge) {
-              if (judge.station == _currentJudgingGroup
+              if (judge.group == _currentJudgingGroup
                   && judge.category == _currentCategory.name
                   && judge.id == judgeID) {
                 foundJudge = judge;
@@ -542,7 +550,7 @@
         var judge = new Object();
         judge.id = judgeID;
         judge.category = _currentCategory.name;
-        judge.station = _currentJudgingGroup;
+        judge.group = _currentJudgingGroup;
       }
       _judges.push(judge);
       _save();
@@ -569,7 +577,7 @@
     getCurrentTeams : function() {
       var retval = [];
       $.each(_teams, function(index, team) {
-        if (team.judgingStation == _currentJudgingGroup) {
+        if (team.judgingGroup == _currentJudgingGroup) {
           retval.push(team);
         }
       });
@@ -730,19 +738,20 @@
         _log("No schedinfo for " + teamNumber);
         retval = null;
       } else {
-        var timeStr = null;
+        var time = null;
         var column = $.subjective
             .getScheduleColumnForCategory(_currentCategory.name);
         $.each(schedInfo.subjectiveTimes, function(index, value) {
           if (value.name == column) {
-            timeStr = value.time;
+            time = value.time;
           }
         });
-        if (null == timeStr) {
+        if (null == time) {
           _log("No time found for " + teamNumber);
           retval = new Date(0);
         } else {
-          _teamTimeCache[teamNumber] = retval = new Date(Number(timeStr));
+          retval = _javaLocalTimeToJsDate(time); 
+          _teamTimeCache[teamNumber] = retval;
         }
       }
 

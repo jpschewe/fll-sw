@@ -8,9 +8,9 @@ package fll.web.report.finalist;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.servlet.ServletContext;
 import javax.servlet.jsp.PageContext;
@@ -18,6 +18,7 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 
+import fll.Team;
 import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.util.LogUtils;
@@ -40,7 +41,7 @@ public class FinalistTeams {
 
       final int tournament = Queries.getCurrentTournament(connection);
 
-      final Set<TournamentTeam> teams = new HashSet<>();
+      final SortedSet<TournamentTeam> teams = new TreeSet<>(Team.TEAM_NUMBER_COMPARATOR);
 
       final Map<Integer, TournamentTeam> allTeams = Queries.getTournamentTeams(connection, tournament);
 

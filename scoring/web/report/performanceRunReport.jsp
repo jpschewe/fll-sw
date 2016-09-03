@@ -7,15 +7,15 @@
 <%@ page import="javax.sql.DataSource" %>
   
 <%
-  	final DataSource datasource = ApplicationAttributes.getDataSource(application);
-  final Connection connection = datasource.getConnection();
-  pageContext.setAttribute("tournament", Queries.getCurrentTournament(connection));
-  pageContext.setAttribute("divisions", Queries.getEventDivisions(connection));
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final Connection connection = datasource.getConnection();
+    pageContext.setAttribute("tournament", Queries.getCurrentTournament(connection));
+    pageContext.setAttribute("divisions", Queries.getAwardGroups(connection));
   %>
 
 <html>
   <head>
-    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/fll-sw.css'/>" />
     <title>Performance Run <c:out value="${param.RunNumber}"/></title>
   </head>
 

@@ -56,7 +56,7 @@ function createTeamTable(teams, currentDivision, currentCategory) {
 
       var sgCol = $("<td></td>");
       row.append(sgCol);
-      var group = team.judgingStation;
+      var group = team.judgingGroup;
       sgCol.text(group);
 
       var numCol = $("<td></td>");
@@ -92,7 +92,7 @@ function updatePage() {
 
   $("#data").empty();
 
-  var headerRow = $("<tr><th>Finalist?</th><th>Score Group</th><th>Team #</th><th>Team Name</th><th>Score</th><th>Num Categories</th></tr>");
+  var headerRow = $("<tr><th>Finalist?</th><th>Judging Group</th><th>Team #</th><th>Team Name</th><th>Score</th><th>Num Categories</th></tr>");
   $("#data").append(headerRow);
 
   var teams = $.finalist.getAllTeams();

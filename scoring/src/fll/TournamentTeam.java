@@ -23,31 +23,29 @@ public class TournamentTeam extends Team {
   public TournamentTeam(@JsonProperty("teamNumber") final int teamNumber,
                         @JsonProperty("organization") final String org,
                         @JsonProperty("teamName") final String name,
-                        @JsonProperty("eventDivision") final String eventDivision,
-                        @JsonProperty("judgingStation") final String judgingStation) {
+                        @JsonProperty("awardGroup") final String awardGroup,
+                        @JsonProperty("judgingGroup") final String judgingGroup) {
     super(teamNumber, org, name);
-    _eventDivision = eventDivision;
-    _judgingStation = judgingStation;
+    _awardGroup = awardGroup;
+    _judgingGroup = judgingGroup;
   }
 
-  private final String _eventDivision;
+  private final String _awardGroup;
 
   /**
-   * The event division that a team is entered in.
-   * 
-   * @return division
+   * @return The award group that the team is in.
    */
-  public String getEventDivision() {
-    return _eventDivision;
+  public String getAwardGroup() {
+    return _awardGroup;
   }
 
-  private final String _judgingStation;
+  private final String _judgingGroup;
 
   /**
-   * The judging station for the team.
+   * @return The judging group for the team.
    */
-  public String getJudgingStation() {
-    return _judgingStation;
+  public String getJudgingGroup() {
+    return _judgingGroup;
   }
 
   /**
@@ -64,7 +62,7 @@ public class TournamentTeam extends Team {
     final Iterator<TournamentTeam> iter = teams.iterator();
     while (iter.hasNext()) {
       final TournamentTeam t = iter.next();
-      final String eventDivision = t.getEventDivision();
+      final String eventDivision = t.getAwardGroup();
       if (!eventDivision.equals(divisionStr)) {
         iter.remove();
       }

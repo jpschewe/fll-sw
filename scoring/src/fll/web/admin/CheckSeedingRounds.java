@@ -9,7 +9,6 @@ package fll.web.admin;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -20,8 +19,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
-
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +31,7 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.playoff.PlayoffIndex;
 import fll.web.playoff.PlayoffSessionData;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Check seeding round information for teams. Redirects to
@@ -48,7 +46,8 @@ public class CheckSeedingRounds extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     Connection connection = null;
     try {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -61,23 +60,9 @@ public class CheckSeedingRounds extends BaseFLLServlet {
       final PlayoffSessionData data = SessionAttributes.getNonNullAttribute(session, PlayoffIndex.SESSION_DATA,
                                                                             PlayoffSessionData.class);
 
-      final String division = request.getParameter("division");
-      if (null == division
-          || "".equals(division)) {
-        throw new IllegalArgumentException("Missing division parameter");
-      }
-      data.setDivision(division);
-
       final Map<Integer, TournamentTeam> tournamentTeams = data.getTournamentTeams();
 
-      final List<Team> less;
-      if (Queries.isPlayoffDataInitialized(connection, division)) {
-        message.append("<p class='warning'>Playoffs have already been initialized for this division.</p>");
-        less = Collections.emptyList();
-
-      } else {
-        less = Queries.getTeamsNeedingSeedingRuns(connection, tournamentTeams, division, true);
-      }
+      final List<Team> less = Queries.getTeamsNeedingSeedingRuns(connection, tournamentTeams, true);
       data.setTeamsNeedingSeedingRounds(less);
 
       session.setAttribute(SessionAttributes.MESSAGE, message.toString());

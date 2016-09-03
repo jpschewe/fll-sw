@@ -9,10 +9,9 @@ package fll.web.playoff;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -21,8 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
-
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
@@ -35,6 +32,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.xml.ChallengeDescription;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Initialize playoff brackets.
@@ -48,8 +46,9 @@ public class InitializeBrackets extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
-    
+                                final HttpSession session)
+      throws IOException, ServletException {
+
     final StringBuilder message = new StringBuilder();
     final String existingMessage = SessionAttributes.getMessage(session);
     if (null != existingMessage) {
@@ -75,45 +74,32 @@ public class InitializeBrackets extends BaseFLLServlet {
       final Tournament currentTournament = data.getCurrentTournament();
       final int currentTournamentID = currentTournament.getTournamentID();
 
-      if (null == data.getDivision()) {
-        message.append("<p class='error'>No division specified.</p>");
-      } else if (PlayoffIndex.CREATE_NEW_PLAYOFF_DIVISION.equals(data.getDivision())) {
-        redirect = "create_playoff_division.jsp";
+      if (null == data.getBracket()) {
+        message.append("<p class='error'>No playoff bracket specified.</p>");
+      } else if (Queries.isPlayoffDataInitialized(connection, data.getBracket())) {
+        message.append("<p class='warning'>Playoffs have already been initialized for playoff bracket "
+            + data.getBracket() + ".</p>");
       } else {
-        if (Queries.isPlayoffDataInitialized(connection, data.getDivision())) {
-          message.append("<p class='warning'>Playoffs have already been initialized for division "
-              + data.getDivision() + ".</p>");
+        final List<Integer> teamNumbersInBracket = Playoff.getTeamNumbersForPlayoffBracket(connection,
+                                                                                           currentTournamentID,
+                                                                                           data.getBracket());
+        final Map<Integer, TournamentTeam> tournamentTeams = data.getTournamentTeams();
+
+        final List<Team> teams = teamNumbersInBracket.stream().map(teamNum -> tournamentTeams.get(teamNum))
+                                                     .collect(Collectors.toList());
+
+        final String errors = Playoff.involvedInUnfinishedPlayoff(connection, currentTournamentID,
+                                                                  teamNumbersInBracket);
+        if (null != errors) {
+          message.append(errors);
         } else {
-          final List<String> eventDivisions = Queries.getEventDivisions(connection, currentTournamentID);
-          final List<? extends Team> teams;
 
-          if (eventDivisions.contains(data.getDivision())) {
-            final Map<Integer, TournamentTeam> tournamentTeams = data.getTournamentTeams();
-            final List<TournamentTeam> tempTeams = new ArrayList<TournamentTeam>(tournamentTeams.values());
-            TournamentTeam.filterTeamsToEventDivision(tempTeams, data.getDivision());
-            teams = tempTeams;
-          } else {
-            // assume new playoff division
-            teams = data.getDivisionTeams();
-          }
-
-          final List<Integer> teamNumbers = new LinkedList<Integer>();
-          for (final Team t : teams) {
-            teamNumbers.add(t.getTeamNumber());
-          }
-
-          final String errors = Playoff.involvedInUnfinishedPlayoff(connection, currentTournamentID, teamNumbers);
-          if (null != errors) {
-            message.append(errors);
-          } else {
-
-            Playoff.initializeBrackets(connection, challengeDescription, data.getDivision(), 
-                                       data.getEnableThird(), teams, data.getSort());
-          }
-
-          message.append("<p>Playoffs have been successfully initialized for division "
-              + data.getDivision() + ".</p>");
+          Playoff.initializeBrackets(connection, challengeDescription, data.getBracket(), data.getEnableThird(), teams,
+                                     data.getSort());
         }
+
+        message.append("<p id='success'>Playoffs have been successfully initialized for division "
+            + data.getBracket() + ".</p>");
       }
 
     } catch (final SQLException sqle) {

@@ -3,62 +3,74 @@
 <html>
 <head>
 <title>FLL-SW</title>
-<link rel="stylesheet" type="text/css"
- href="<c:url value='/style/style.jsp'/>" />
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="<c:url value='/style/fll-sw.css'/>" />
 
 </head>
 
 <body>
- <h1>Choose Subjective Headers</h1>
+  <h1>Choose Subjective Headers</h1>
 
- ${message}
- <%-- clear out the message, so that we don't see it again --%>
- <c:remove var="message" />
+  <div class='status-message'>${message}</div>
+  <%-- clear out the message, so that we don't see it again --%>
+  <c:remove var="message" />
 
- <form name="choose_headers" method='POST'
-  action='ProcessSubjectiveHeaders'>
-  <p>Match the columns in the schedule with the subjective
-   categories that they contain the schedule for. If a schedule column
-   is for a subjective category, then the amount of time must be
-   specified as well.</p>
+  <form
+    name="choose_headers"
+    method='POST'
+    action='ProcessSubjectiveHeaders'>
+    <p>Match the column names from the schedule data file with the
+      subjective categories that they contain the schedule for. Also
+      specify the number of minutes between judging sessions for each
+      category.</p>
 
-  <p>You cannot have the same subjective category mapped to 2
-   schedule columns.</p>
+    <table border='1'>
+      <tr>
+        <th>Subjective Category</th>
+        <th>Data file column name</th>
+        <th>Duration (minutes)</th>
+      </tr>
+      <c:forEach
+        items="${challengeDescription.subjectiveCategories }"
+        var="subcat">
+        <tr>
 
-  <table border='1'>
-   <tr>
-    <th>Schedule Column</th>
-    <th>Duration in Minutes</th>
+          <td>${subcat.title}</td>
 
-    <c:forEach items="${challengeDescription.subjectiveCategories }"
-     var="subcat">
-     <th>${subcat.title}</th>
-    </c:forEach>
+          <td><select name='${subcat.name}:header'>
 
-   </tr>
-   <c:forEach items="${uploadSchedule_unusedHeaders }" var="subjHeader"
-    varStatus="loopStatus">
-    <c:if test="${fn:length(subjHeader) > 0 }">
-     <tr>
-      <th>${subjHeader}</th>
+              <c:forEach
+                items="${uploadSchedule_unusedHeaders }"
+                var="subjHeader"
+                varStatus="loopStatus">
+                <c:if test="${fn:length(subjHeader) > 0 }">
+                  <option value='${loopStatus.index }'>${subjHeader }</option>
+                </c:if>
+              </c:forEach>
+              <!-- foreach data file header -->
 
-      <!--  TODO issue:129 need to validate that this is a number -->
-      <td><input type="text" name="${loopStatus.index}:duration"
-       value="${default_duration}" /></td>
+          </select></td>
 
-      <c:forEach items="${challengeDescription.subjectiveCategories }"
-       var="subcat">
-       <td><input type="checkbox"
-        name="${loopStatus.index}:${subcat.name}" /></td>
+          <!--  TODO issue:129 need to validate that this is a number -->
+          <td><input
+            type="text"
+            name="${subcat.name}:duration"
+            value="${default_duration}" /></td>
+
+        </tr>
+        <!-- row for category -->
+
       </c:forEach>
+      <!--  foreach category -->
 
-     </tr>
-    </c:if>
-   </c:forEach>
-  </table>
+    </table>
 
-  <input type="submit" />
- </form>
+    <input
+      type="submit"
+      id='submit' />
+  </form>
 
 </body>
 </html>

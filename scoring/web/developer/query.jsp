@@ -3,7 +3,7 @@
 <html>
 <head>
 <link rel="stylesheet" type="text/css"
- href="<c:url value='/style/style.jsp'/>" />
+ href="<c:url value='/style/fll-sw.css'/>" />
 <title>Developer Database Commands</title>
 
 <script type='text/javascript' src='../extlib/jquery-1.11.1.min.js'></script>

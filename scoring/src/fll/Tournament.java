@@ -181,7 +181,7 @@ public final class Tournament implements Serializable {
   @Override
   public String toString() {
     return getName()
-        + "(" + getTournamentID() + ") - " + getLocation();
+        + " (" + getTournamentID() + ") - " + getLocation();
   }
 
   /**

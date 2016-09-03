@@ -365,8 +365,8 @@ public class PerformanceScoreReport extends BaseFLLServlet {
         para.add(new Chunk("Team #"
             + _team.getTeamNumber() + " " + _team.getTeamName() + " / " + _team.getOrganization(), TITLE_FONT));
         para.add(Chunk.NEWLINE);
-        para.add(new Chunk("Division: "
-            + _team.getEventDivision(), TITLE_FONT));
+        para.add(new Chunk("Award Group: "
+            + _team.getAwardGroup(), TITLE_FONT));
         para.add(Chunk.NEWLINE);
 
         final PdfPCell teamInformation = new PdfPCell(para);

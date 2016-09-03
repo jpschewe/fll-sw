@@ -3,21 +3,21 @@
 <html>
 <head>
 <title>Upload Schedule</title>
-<link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
+<link rel="stylesheet" type="text/css" href="<c:url value='/style/fll-sw.css'/>" />
 </head>
 
 <body>
 <h1>Upload Schedule</h1>
 
-${message}
+<div class='status-message'>${message}</div>
 <%-- clear out the message, so that we don't see it again --%>
 <c:remove var="message" />
 
 <p>
-Would you like to set the event divisions based upon the divisions in this schedule? 
+Would you like to set the award groups based upon the information in the schedule data file? 
 You will be prompted with the changes before they are committed.<br/>
-<a href='<c:url value="/schedule/GatherEventDivisionChanges"/>'>Yes</a>
-<a href='<c:url value="/schedule/CommitSchedule"/>'>No</a>
+<a id='yes' href='<c:url value="/schedule/GatherEventDivisionChanges"/>'>Yes</a>
+<a id='no' href='<c:url value="/schedule/CommitSchedule"/>'>No</a>
 </p>
 
 </body>

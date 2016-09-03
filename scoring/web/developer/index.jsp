@@ -3,7 +3,7 @@
 <html>
 <head>
 <link rel="stylesheet" type="text/css"
- href="<c:url value='/style/style.jsp'/>" />
+ href="<c:url value='/style/fll-sw.css'/>" />
 <title>Developer Commands</title>
 </head>
 
@@ -15,7 +15,7 @@
     only. If you don't know what you're doing, LEAVE THIS PAGE!</b></font>
  </p>
 
- ${message}
+ <div class='status-message'>${message}</div>
 
  <%-- clear out the message, so that we don't see it again --%>
  <c:remove var="message" />

@@ -9,7 +9,7 @@
 <head>
 <title>Display Controller</title>
 <link rel="stylesheet" type="text/css"
- href="<c:url value='/style/style.jsp'/>" />
+ href="<c:url value='/style/fll-sw.css'/>" />
 
 <script type="text/javascript">
 	function display(id) {
@@ -33,7 +33,7 @@
 <ul>
 <li>displayPage - ${applicationScope.displayPage }</li>
 <li>displayURL - ${applicationScope.displayURL }</li>
-<li>playoffDivision - ${applicationScope.playoffDivision }</li>
+<li>playoffBracket - ${applicationScope.playoffDivision }</li>
 <li>playoffRoundNumber - ${applicationScope.playoffRoundNumber }</li>
     <c:if test="${not empty displayNames}">
       <c:forEach items="${displayNames}" var="displayName">
@@ -46,7 +46,7 @@
 <ul>
 <li>displayPage - ${applicationScope[displayPageKey]}</li>
 <li>displayURL - ${applicationScope[displayURLKey] }</li>
-<li>playoffDivision - ${applicationScope[playoffDivisionKey] }</li>
+<li>playoffBracket - ${applicationScope[playoffDivisionKey] }</li>
 <li>playoffRoundNumber - ${applicationScope[playoffRoundNumberKey] }</li>
 </ul>
 </li>
@@ -57,7 +57,7 @@
 END DEBUG --%>
 
  <%-- NOTE: The values of the radio buttons need to match up with the strings in DisplayQueryServlet.pickURL() --%>
- ${message}
+ <div class='status-message'>${message}</div>
  <%-- clear out the message, so that we don't see it again --%>
  <c:remove var="message" />
 
@@ -173,7 +173,7 @@ END DEBUG --%>
      </c:if> <c:if test='${not playoffsPage}'>
       <input type='radio' id='playoffs' name='remotePage'
        value='playoffs' />
-     </c:if> Division: <select name='playoffDivision'>
+     </c:if> Playoff Bracket: <select name='playoffDivision'>
       <c:forEach items="${divisions}" var="division">
        <c:choose>
         <c:when test="${division == playoffDivision}">
@@ -212,7 +212,7 @@ END DEBUG --%>
          <input type='radio' name="${displayName.key}_remotePage"
           value='playoffs' />
         </c:otherwise>
-       </c:choose> Division: <select name='${displayName.key}_playoffDivision'>
+       </c:choose> Playoff Bracket: <select name='${displayName.key}_playoffDivision'>
         <c:forEach items="${divisions}" var="division">
          <c:choose>
           <c:when
@@ -256,7 +256,7 @@ END DEBUG --%>
        <input type='radio' id='finalistSchedule' name='remotePage'
         value='finalistSchedule' />
       </c:otherwise>
-     </c:choose> Division: <select name='finalistDivision'>
+     </c:choose> Award Group: <select name='finalistDivision'>
       <c:forEach var="fdiv" items="${finalistDivisions }">
 
        <c:choose>

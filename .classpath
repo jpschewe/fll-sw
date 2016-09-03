@@ -54,7 +54,6 @@
 	<classpathentry kind="lib" path="scoring/lib/poi-ooxml-schemas-3.10-FINAL-20140208.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/dom4j-1.6.1.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/commons-codec-1.10.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/commons-lang3-3.3.2.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/commons-logging-1.2.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/jackson-annotations-2.2.3-javadoc.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/jackson-core-2.2.3-javadoc.jar"/>
@@ -65,20 +64,37 @@
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/asm-commons-5.0.1.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/asm-tree-5.0.1.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/asm-util-5.0.1.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/commons-lang3-3.4.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/hamcrest-core-1.3.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/jaxen-1.1.4.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/jetty-6.1.14.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/jetty-util-6.1.14.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/junit-4.11.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/logback-classic-1.0.13.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/logback-core-1.0.13.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/cobertura-2.1.1.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/findbugs-3.0.1/lib/jsr305.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/findbugs-3.0.1/lib/annotations.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/test/selenium/selenium-java-2.53.0.jar" sourcepath="scoring/lib/test/selenium-java-2.53.0-srcs.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/test/selenium/selenium-server-standalone-2.53.0.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/test/selenium/junit-4.12.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/htmlunit-2.22.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/commons-lang3-3.4.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/selenium/client-combined-3.0.0-beta2-nodeps.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/selenium/selenium-server-standalone-3.0.0-beta2.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/webdrivermanager/webdrivermanager-1.4.8.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/junit-4.12.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/cssparser-0.9.19.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/htmlunit-core-js-2.22.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/jetty-io-9.2.17.v20160517.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/jetty-util-9.2.17.v20160517.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/neko-htmlunit-2.21.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/sac-1.3.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/serializer-2.7.2.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/websocket-api-9.2.17.v20160517.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/websocket-client-9.2.17.v20160517.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/websocket-common-9.2.17.v20160517.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/xalan-2.7.2.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/xercesImpl-2.11.0.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/xml-apis-1.4.01.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/webdrivermanager/commons-compress-1.12.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/webdrivermanager/config-1.3.0.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/webdrivermanager/jarchivelib-0.7.0.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/webdrivermanager/xz-1.5.jar"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>

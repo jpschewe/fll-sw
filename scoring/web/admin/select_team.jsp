@@ -18,7 +18,7 @@ final Connection connection = datasource.getConnection();
 
 <html>
   <head>
-    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/fll-sw.css'/>" />
   <title>Edit Team [Select Team]</title>
 
   <!--<style type='text/css'>
@@ -34,7 +34,7 @@ final Connection connection = datasource.getConnection();
 
   </head>
   <body>
-${message}
+<div class='status-message'>${message}</div>
 
 <%-- clear out the message, so that we don't see it again --%>
 <c:remove var="message" />

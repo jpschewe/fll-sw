@@ -78,13 +78,13 @@ public class CategorizedScores extends BaseFLLServlet {
       final int currentTournament = Queries.getCurrentTournament(connection);
 
       // foreach division
-      for (final String division : Queries.getEventDivisions(connection)) {
+      for (final String division : Queries.getAwardGroups(connection)) {
         // foreach subjective category
         for (final Map.Entry<String, String> entry : subjectiveCategories.entrySet()) {
           final String categoryTitle = entry.getKey();
           final String categoryName = entry.getValue();
 
-          writer.format("<h3>%s Division: %s</h3>", categoryTitle, division);
+          writer.format("<h3>%s Award Group: %s</h3>", categoryTitle, division);
           writer.format("<table border='0'>");
           writer.format("<tr><th colspan='3'>Team # / Organization / Team Name</th><th>Raw Score</th><th>Scaled Score</th></tr>");
 

@@ -41,9 +41,9 @@ public class EditTournamentsTest {
 
   @Test
   public void testAddTournament() throws IOException {
-    final InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml");
-    IntegrationTestUtils.initializeDatabase(selenium, challengeStream);
     try {
+      final InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml");
+      IntegrationTestUtils.initializeDatabase(selenium, challengeStream);
       selenium.findElement(By.linkText("Admin Index")).click();
 
       selenium.findElement(By.linkText("Add or Edit Tournaments")).click();
@@ -57,7 +57,8 @@ public class EditTournamentsTest {
       final int numRows = Integer.parseInt(numRowsStr);
 
       // type in tournament name
-      final int lastRowIdx = numRows - 1;
+      final int lastRowIdx = numRows
+          - 1;
       final String lastRowName = "name"
           + lastRowIdx;
       final WebElement lastRow = selenium.findElement(By.name(lastRowName));
@@ -72,6 +73,9 @@ public class EditTournamentsTest {
     } catch (final AssertionError e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
+    } catch(final IOException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;      
     }
   }
 

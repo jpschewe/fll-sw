@@ -5,7 +5,7 @@
 <head>
 <title>Judge Assignments</title>
 <link rel="stylesheet" type="text/css"
- href="<c:url value='/style/style.jsp'/>" />
+ href="<c:url value='/style/fll-sw.css'/>" />
 
 <script type='text/javascript' src='../extlib/jquery-1.11.1.min.js'></script>
 
@@ -37,7 +37,7 @@
   judge. Keep in mind that this ID needs to be entered on the judging
   forms. There must be at least 1 judge for each category.</p>
 
- ${message}
+ <div class='status-message'>${message}</div>
  <%-- clear out the message, so that we don't see it again --%>
  <c:remove var="message" />
 
@@ -50,7 +50,7 @@
    <tr>
     <th>ID</th>
     <th>Category</th>
-    <th>Judging Station</th>
+    <th>Judging Group</th>
    </tr>
 
    <c:forEach items="${JUDGES }" var="judge" varStatus="loopStatus">
@@ -80,7 +80,7 @@
        <c:forEach items="${JUDGING_STATIONS}" var="stationSel">
 
         <c:choose>
-         <c:when test="${judge.station == stationSel }">
+         <c:when test="${judge.group == stationSel }">
           <option value="${stationSel}" selected>${stationSel }</option>
          </c:when>
          <c:otherwise>

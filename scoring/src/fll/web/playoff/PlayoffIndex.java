@@ -31,8 +31,6 @@ public class PlayoffIndex {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  public static final String CREATE_NEW_PLAYOFF_DIVISION = "Create Playoff Division...";
-
   /**
    * Instance of {@link PlayoffSessionData} is stored here.
    */

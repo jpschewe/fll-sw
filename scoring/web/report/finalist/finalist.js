@@ -183,7 +183,7 @@
   /**
    * Constructor for a Team.
    */
-  function Team(num, name, org, judgingStation) {
+  function Team(num, name, org, judgingGroup) {
     if (typeof (_teams[num]) != 'undefined') {
       throw new Error("Team already exists with number: " + num);
     }
@@ -192,7 +192,7 @@
     this.divisions = [];
     this.name = name;
     this.org = org;
-    this.judgingStation = judgingStation;
+    this.judgingGroup = judgingGroup;
     this.categoryScores = {};
     this.playoffDivisions = [];
     _teams[num] = this;
@@ -620,7 +620,7 @@
       var scoreGroups = {};
       $.each(teams, function(i, team) {
         if ($.finalist.isTeamInDivision(team, currentDivision)) {
-          var group = team.judgingStation;
+          var group = team.judgingGroup;
           scoreGroups[group] = $.finalist.getNumTeamsAutoSelected();
         }
       });
@@ -635,8 +635,8 @@
       teams.sort(function(a, b) {
         if (currentCategory.name != $.finalist.CHAMPIONSHIP_NAME) {
           // sort by score group first
-          var aGroup = a.judgingStation;
-          var bGroup = b.judgingStation;
+          var aGroup = a.judgingGroup;
+          var bGroup = b.judgingGroup;
           if (aGroup < bGroup) {
             return -1;
           } else if (aGroup > bGroup) {
@@ -676,7 +676,7 @@
       $.each(teams, function(i, team) {
         if ($.finalist.isTeamInDivision(team, currentDivision)) {
           if (!checkedEnoughTeams) {
-            var group = team.judgingStation;
+            var group = team.judgingGroup;
             prevScore = prevScores[group];
             curScore = $.finalist.getCategoryScore(team, currentCategory);
             if (prevScore == undefined) {

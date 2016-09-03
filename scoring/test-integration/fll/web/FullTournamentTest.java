@@ -5,28 +5,37 @@
  */
 package fll.web;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import static org.hamcrest.core.IsNot.not;
+import static org.hamcrest.core.IsNull.notNullValue;
+import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.util.Collections;
-import java.util.LinkedList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.zip.ZipInputStream;
 
 import javax.swing.table.TableModel;
-
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 import org.junit.After;
@@ -45,25 +54,30 @@ import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.HtmlCheckBoxInput;
-import com.gargoylesoftware.htmlunit.html.HtmlFileInput;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlOption;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlSelect;
 import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
-import com.gargoylesoftware.htmlunit.util.NameValuePair;
 
+import au.com.bytecode.opencsv.CSVWriter;
+import fll.JudgeInformation;
 import fll.TestUtils;
+import fll.Tournament;
+import fll.TournamentTeam;
 import fll.Utilities;
+import fll.db.CategoryColumnMapping;
+import fll.db.GlobalParameters;
 import fll.db.ImportDB;
+import fll.db.Queries;
+import fll.db.TournamentParameters;
+import fll.scheduler.TournamentSchedule;
 import fll.subjective.SubjectiveFrame;
 import fll.util.LogUtils;
 import fll.web.developer.QueryHandler;
-import fll.web.playoff.PlayoffIndex;
 import fll.web.scoreEntry.ScoreEntry;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
-import fll.xml.ChallengeParser;
 import fll.xml.Goal;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreCategory;
@@ -85,29 +99,19 @@ public class FullTournamentTest {
 
   @After
   public void tearDown() {
-    selenium.quit();
+    if (null != selenium) {
+      selenium.quit();
+    }
   }
 
   /**
-   * Load the data data from CSV files into the specified connection.
+   * Load the test data into the specified database.
    */
   private static void loadTestData(final Connection testDataConn) throws SQLException, IOException {
-    final String[] tableNames = { "teamwork", "robustdesign", "research", "programming", "performance", "judges" };
-    for (final String table : tableNames) {
-      final InputStream typeStream = FullTournamentTest.class.getResourceAsStream("data/"
-          + table + ".types");
-      Assert.assertNotNull("Missing test data "
-          + table + ".types", typeStream);
-      final Reader typeReader = new InputStreamReader(typeStream);
-      final Map<String, String> columnTypes = ImportDB.loadTypeInfo(typeReader);
-
-      final InputStream tableStream = FullTournamentTest.class.getResourceAsStream("data/"
-          + table + ".csv");
-      Assert.assertNotNull("Missing test data "
-          + table + ".csv", tableStream);
-      final Reader tableReader = new InputStreamReader(tableStream);
-      Utilities.loadCSVFile(testDataConn, table, columnTypes, tableReader);
-
+    try (final InputStream dbResourceStream = FullTournamentTest.class.getResourceAsStream("data/99-final.flldb")) {
+      Assert.assertNotNull("Missing test data", dbResourceStream);
+      final ZipInputStream zipStream = new ZipInputStream(dbResourceStream);
+      ImportDB.loadFromDumpIntoNewDB(zipStream, testDataConn);
     }
   }
 
@@ -127,111 +131,35 @@ public class FullTournamentTest {
   @Test
   public void testFullTournament() throws IOException, ClassNotFoundException, InstantiationException,
       IllegalAccessException, ParseException, SQLException, InterruptedException, SAXException {
-    final int numSeedingRounds = 3;
 
-    Connection testDataConn = null;
-    ResultSet rs = null;
-    PreparedStatement prep = null;
     try {
       Class.forName("org.hsqldb.jdbcDriver").newInstance();
 
-      testDataConn = DriverManager.getConnection("jdbc:hsqldb:mem:full-tournament-test");
-      Assert.assertNotNull("Error connecting to test data database", testDataConn);
+      try (final Connection testDataConn = DriverManager.getConnection("jdbc:hsqldb:mem:full-tournament-test")) {
+        Assert.assertNotNull("Error connecting to test data database", testDataConn);
 
-      loadTestData(testDataConn);
+        loadTestData(testDataConn);
 
-      final String testTournamentName = "Field";
+        final String testTournamentName = "Field";
 
-      // --- initialize database ---
-      LOGGER.info("Initializing the database from data/challenge-ft.xml");
-      final InputStream challengeDocIS = FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml");
-      IntegrationTestUtils.initializeDatabase(selenium, challengeDocIS);
+        final Path outputDirectory = Files.createDirectories(Paths.get("FullTournamentTestOutputs"));
 
-      LOGGER.info("Loading teams");
-      loadTeams();
-
-      LOGGER.info("Setting current tournament");
-      IntegrationTestUtils.setTournament(selenium, testTournamentName);
-
-      LOGGER.info("Assigning judges");
-      assignJudges(testDataConn, testTournamentName);
-
-      LOGGER.info("Assigning table labels");
-      assignTableLabels();
-
-      /*
-       * --- Enter 3 runs for each team --- Use data from test data base,
-       * converted from Field 2005. Enter 4th run and rest of playoffs.
-       */
-      prep = testDataConn.prepareStatement("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = ?");
-      prep.setString(1, testTournamentName);
-      rs = prep.executeQuery();
-      Assert.assertTrue("No performance scores in test data", rs.next());
-      final int maxRuns = rs.getInt(1);
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-      prep = null;
-
-      final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(
-                                                                                     FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")));
-      Assert.assertNotNull(challengeDocument);
-      final ChallengeDescription description = new ChallengeDescription(challengeDocument.getDocumentElement());
-      final PerformanceScoreCategory performanceElement = description.getPerformance();
-
-      prep = testDataConn.prepareStatement("SELECT TeamNumber FROM Performance WHERE Tournament = ? AND RunNumber = ?");
-      boolean initializedPlayoff = false;
-      prep.setString(1, testTournamentName);
-      final List<String> divisions = getPlayoffDivisions();
-      for (int runNumber = 1; runNumber <= maxRuns; ++runNumber) {
-
-        if (runNumber > numSeedingRounds) {
-          if (!initializedPlayoff) {
-            // initialize the playoff brackets with playoff/index.jsp form
-            for (final String division : divisions) {
-              LOGGER.info("Initializing playoff brackets for division "
-                  + division);
-              checkSeedingRoundsForDivision(division);
-              IntegrationTestUtils.initializePlayoffsForDivision(selenium, division);
-            }
-            initializedPlayoff = true;
-          }
+        if (null != outputDirectory) {
+          // make sure the directory exists
+          Files.createDirectories(outputDirectory);
         }
 
-        prep.setInt(2, runNumber);
-        rs = prep.executeQuery();
+        replayTournament(testDataConn, testTournamentName, outputDirectory);
 
-        // for each score in a run
-        while (rs.next()) {
-          final int teamNumber = rs.getInt(1);
-          enterPerformanceScore(testDataConn, performanceElement, testTournamentName, runNumber, teamNumber);
-          // give the web server a chance to catch up
-          Thread.sleep(100);
-          verifyPerformanceScore(testDataConn, performanceElement, testTournamentName, runNumber, teamNumber);
-        }
+        LOGGER.info("Computing final scores");
+        computeFinalScores();
 
-        if (runNumber > numSeedingRounds
-            && runNumber != maxRuns) {
-          for (final String division : divisions) {
-            printPlayoffScoresheets(division);
-          }
-        }
+        LOGGER.info("Checking the reports");
+        checkReports();
 
-      }
-
-      LOGGER.info("Checking displays");
-      checkDisplays();
-
-      LOGGER.info("Checking the subjective scores");
-      enterSubjectiveScores(testDataConn, description, testTournamentName);
-
-      LOGGER.info("Computing final scores");
-      computeFinalScores();
-
-      LOGGER.info("Checking the reports");
-      checkReports();
-
-      LOGGER.info("Checking rank and scores");
-      checkRankAndScores(testTournamentName);
+        LOGGER.info("Checking rank and scores");
+        checkRankAndScores(testTournamentName);
+      } // try Connection
 
     } catch (final AssertionError e) {
       IntegrationTestUtils.storeScreenshot(selenium);
@@ -260,49 +188,254 @@ public class FullTournamentTest {
     } catch (final InterruptedException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-      SQLFunctions.close(testDataConn);
-      // Utilities.closeConnection(connection);
     }
   }
 
   /**
-   * Make sure there are no teams with more or less than seeding rounds for the
-   * specified division.
-   */
-  private void checkSeedingRoundsForDivision(final String division) throws IOException {
-    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-        + "playoff");
-    final Select select = new Select(selenium.findElement(By.id("check-division")));
-    select.selectByValue(division);
-    selenium.findElement(By.id("check_seeding_rounds")).click();
-
-    Assert.assertFalse("Some teams with more or less than seeding rounds found for division '"
-        + division + "'", IntegrationTestUtils.isElementPresent(selenium, By.className("warning")));
-  }
-
-  /**
-   * Get the divisions in this tournament.
+   * Replay a tournament.
    * 
+   * @param testDataConn connection to the source data
+   * @param testTournamentName name of the tournament to create
+   * @param outputDirectory where to save files, must not be null and must exist
    * @throws IOException
+   * @throws SQLException
+   * @throws ParseException
+   * @throws InterruptedException
+   * @throws SAXException
    */
-  private List<String> getPlayoffDivisions() throws IOException {
-    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-        + "playoff");
+  public void replayTournament(final Connection testDataConn,
+                               final String testTournamentName,
+                               final Path outputDirectory)
+      throws IOException, SQLException, ParseException, InterruptedException, SAXException {
 
-    final List<String> divisions = new LinkedList<String>();
-    final Select select = new Select(selenium.findElement(By.id("initialize-division")));
-    for (final WebElement option : select.getOptions()) {
-      final String text = option.getText();
-      if (!PlayoffIndex.CREATE_NEW_PLAYOFF_DIVISION.equals(text)) {
-        divisions.add(text);
+    final String safeTestTournamentName = sanitizeFilename(testTournamentName);
+
+    final Document challengeDocument = GlobalParameters.getChallengeDocument(testDataConn);
+    Assert.assertNotNull(challengeDocument);
+
+    assertThat(outputDirectory, notNullValue());
+    assertTrue("Output directory must exist", Files.exists(outputDirectory));
+
+    final Tournament sourceTournament = Tournament.findTournamentByName(testDataConn, testTournamentName);
+    Assert.assertNotNull(sourceTournament);
+
+    final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(testDataConn,
+                                                                          sourceTournament.getTournamentID());
+
+    // --- initialize database ---
+    LOGGER.info("Initializing the database");
+    IntegrationTestUtils.initializeDatabase(selenium, challengeDocument);
+
+    LOGGER.info("Loading teams");
+    loadTeams(testDataConn, sourceTournament, outputDirectory);
+
+    IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+        + "admin/database.flldb"), "application/zip",
+                                      outputDirectory.resolve(safeTestTournamentName
+                                          + "_01-teams-loaded.flldb"));
+
+    LOGGER.info("Setting current tournament");
+    IntegrationTestUtils.setTournament(selenium, sourceTournament.getName());
+
+    LOGGER.info("Loading the schedule");
+    uploadSchedule(testDataConn, sourceTournament, outputDirectory);
+    IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+        + "admin/database.flldb"), "application/zip",
+                                      outputDirectory.resolve(safeTestTournamentName
+                                          + "_02-schedule-loaded.flldb"));
+
+    LOGGER.info("Assigning judges");
+    assignJudges(testDataConn, sourceTournament);
+
+    IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+        + "admin/database.flldb"), "application/zip",
+                                      outputDirectory.resolve(safeTestTournamentName
+                                          + "_03-judges-assigned.flldb"));
+
+    LOGGER.info("Assigning table labels");
+    assignTableLabels();
+
+    IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+        + "admin/database.flldb"), "application/zip",
+                                      outputDirectory.resolve(safeTestTournamentName
+                                          + "_04-table-labels-assigned.flldb"));
+
+    /*
+     * --- Enter 3 runs for each team --- Use data from test data base,
+     * converted from Field 2005. Enter 4th run and rest of playoffs.
+     */
+    final int maxRuns;
+    try (
+        final PreparedStatement maxRunPrep = testDataConn.prepareStatement("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = ?")) {
+      maxRunPrep.setInt(1, sourceTournament.getTournamentID());
+      try (final ResultSet maxRunResult = maxRunPrep.executeQuery()) {
+        Assert.assertTrue("No performance scores in test data", maxRunResult.next());
+        maxRuns = maxRunResult.getInt(1);
       }
     }
 
-    Assert.assertFalse(divisions.isEmpty());
-    return divisions;
+    final ChallengeDescription description = new ChallengeDescription(challengeDocument.getDocumentElement());
+    final PerformanceScoreCategory performanceElement = description.getPerformance();
+
+    try (
+        final PreparedStatement prep = testDataConn.prepareStatement("SELECT TeamNumber FROM Performance WHERE Tournament = ? AND RunNumber = ?")) {
+
+      boolean initializedPlayoff = false;
+      prep.setInt(1, sourceTournament.getTournamentID());
+
+      final Set<String> awardGroups = getAwardGroups();
+      for (int runNumber = 1; runNumber <= maxRuns; ++runNumber) {
+
+        if (runNumber > numSeedingRounds) {
+          if (!initializedPlayoff) {
+            IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+                + "admin/database.flldb"), "application/zip",
+                                              outputDirectory.resolve(safeTestTournamentName
+                                                  + "_05-seeding-rounds-completed.flldb"));
+
+            checkSeedingRounds();
+
+            // initialize the playoff brackets with playoff/index.jsp form
+            for (final String awardGroup : awardGroups) {
+              LOGGER.info("Initializing playoff brackets for division "
+                  + awardGroup);
+              IntegrationTestUtils.initializePlayoffsForAwardGroup(selenium, awardGroup);
+            }
+            initializedPlayoff = true;
+          }
+        }
+
+        prep.setInt(2, runNumber);
+        try (final ResultSet rs = prep.executeQuery()) {
+          // for each score in a run
+          while (rs.next()) {
+            final int teamNumber = rs.getInt(1);
+            enterPerformanceScore(testDataConn, performanceElement, sourceTournament, runNumber, teamNumber);
+
+            // give the web server a chance to catch up
+            Thread.sleep(100);
+            verifyPerformanceScore(testDataConn, performanceElement, sourceTournament, runNumber, teamNumber);
+          }
+        }
+
+        if (runNumber > numSeedingRounds
+            && runNumber != maxRuns) {
+          for (final String division : awardGroups) {
+            printPlayoffScoresheets(division);
+          }
+        }
+
+      }
+
+      LOGGER.info("Checking displays");
+      checkDisplays();
+
+      LOGGER.info("Checking the subjective scores");
+      enterSubjectiveScores(testDataConn, description, sourceTournament, outputDirectory);
+
+      LOGGER.info("Writing final datbaase");
+      IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+          + "admin/database.flldb"), "application/zip",
+                                        outputDirectory.resolve(safeTestTournamentName
+                                            + "_99-final.flldb"));
+    }
+
+  }
+
+  /**
+   * @param testDataConn
+   * @param sourceTournament
+   * @throws SQLException
+   * @throws IOException
+   */
+  private void uploadSchedule(final Connection testDataConn,
+                              final Tournament sourceTournament,
+                              final Path outputDirectory)
+      throws SQLException, IOException {
+    if (TournamentSchedule.scheduleExistsInDatabase(testDataConn, sourceTournament.getTournamentID())) {
+
+      final TournamentSchedule schedule = new TournamentSchedule(testDataConn, sourceTournament.getTournamentID());
+
+      final Path outputFile = outputDirectory.resolve(sanitizeFilename(sourceTournament.getName())
+          + "_schedule.csv");
+      schedule.writeToCSV(outputFile.toFile());
+
+      // upload the saved file
+      IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+          + "admin/index.jsp");
+      final WebElement fileInput = selenium.findElement(By.name("scheduleFile"));
+      fileInput.sendKeys(outputFile.toAbsolutePath().toString());
+      selenium.findElement(By.id("upload-schedule")).click();
+      Assert.assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.id("error")));
+
+      // check that we're on the choose headers page and set the header
+      // mappings
+      Assert.assertTrue(selenium.getCurrentUrl().contains("chooseSubjectiveHeaders"));
+      final Collection<CategoryColumnMapping> mappings = CategoryColumnMapping.load(testDataConn,
+                                                                                    sourceTournament.getTournamentID());
+      for (final CategoryColumnMapping map : mappings) {
+        final Select select = new Select(selenium.findElement(By.name(map.getCategoryName()
+            + ":header")));
+        select.selectByVisibleText(map.getScheduleColumn());
+      }
+      selenium.findElement(By.id("submit")).click();
+
+      // check that we don't have hard violations and skip past soft
+      // violations
+      assertThat(selenium.getCurrentUrl(), not(containsString("displayHardViolations")));
+      if (selenium.getCurrentUrl().contains("displaySoftViolations")) {
+        selenium.findElement(By.id("yes")).click();
+      }
+
+      // set event divisions
+      assertThat(selenium.getCurrentUrl(), containsString("promptForEventDivision"));
+      selenium.findElement(By.id("yes")).click();
+
+      // assume the values are fine
+      assertThat(selenium.getCurrentUrl(), containsString("displayEventDivisionConfirmation"));
+      selenium.findElement(By.id("yes")).click();
+
+      // check that it all worked
+      Assert.assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.id("error")));
+      Assert.assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
+    }
+  }
+
+  /**
+   * Make sure there are no teams with more or less than seeding rounds.
+   */
+  private void checkSeedingRounds() throws IOException {
+    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+        + "playoff");
+    selenium.findElement(By.id("check_seeding_rounds")).click();
+
+    Assert.assertFalse("Some teams with more or less than seeding rounds found",
+                       IntegrationTestUtils.isElementPresent(selenium, By.className("warning")));
+  }
+
+  /**
+   * Get the award groups in this tournament.
+   * 
+   * @throws IOException
+   */
+  private Set<String> getAwardGroups() throws IOException {
+    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+        + "admin/index.jsp");
+
+    selenium.findElement(By.partialLinkText("Assign teams to award groups")).click();
+
+    final Set<String> awardGroups = new HashSet<>();
+    final List<WebElement> inputs = selenium.findElements(By.cssSelector("input:checked[type='radio']"));
+    for (final WebElement radioButton : inputs) {
+      final String awardGroup = radioButton.getAttribute("value");
+      awardGroups.add(awardGroup);
+    }
+
+    LOGGER.info("Found awardGroups: "
+        + awardGroups);
+
+    Assert.assertFalse(awardGroups.isEmpty());
+    return awardGroups;
   }
 
   private void assignTableLabels() throws IOException {
@@ -319,7 +452,8 @@ public class FullTournamentTest {
   private void assignJudge(final String id,
                            final String category,
                            final String station,
-                           final int judgeIndex) throws IOException {
+                           final int judgeIndex)
+      throws IOException {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Assigning judge '"
           + id + "' cat: '" + category + "' station: '" + station + "' index: " + judgeIndex);
@@ -355,46 +489,23 @@ public class FullTournamentTest {
   }
 
   private void assignJudges(final Connection testDataConn,
-                            final String testTournamentName) throws IOException, SQLException {
-    ResultSet rs;
-    PreparedStatement prep;
+                            final Tournament sourceTournament)
+      throws IOException, SQLException {
 
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "admin/index.jsp");
-
     selenium.findElement(By.id("assign_judges")).click();
 
-    // assign judges from database
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("Assigning judges");
-      IntegrationTestUtils.storeScreenshot(selenium);
-    }
+    final Collection<JudgeInformation> judges = JudgeInformation.getJudges(testDataConn,
+                                                                           sourceTournament.getTournamentID());
 
     int judgeIndex = 1;
-    prep = testDataConn.prepareStatement("SELECT id, category, Division FROM Judges WHERE Tournament = ?");
-    prep.setString(1, testTournamentName);
-    rs = prep.executeQuery();
-    while (rs.next()) {
-      final String id = rs.getString(1);
-      final String category = rs.getString(2);
-      final String division = rs.getString(3);
+    for (final JudgeInformation judge : judges) {
 
-      if ("All".equals(division)) {
+      assignJudge(judge.getId(), judge.getCategory(), judge.getGroup(), judgeIndex);
 
-        final Select select = new Select(IntegrationTestUtils.findElement(selenium, By.name("station1"), 5));
-        for (final WebElement option : select.getOptions()) {
-          final String station = option.getText();
-          assignJudge(id, category, station, judgeIndex);
-          ++judgeIndex;
-        }
-
-      } else {
-        assignJudge(id, category, division, judgeIndex);
-        ++judgeIndex;
-      }
+      ++judgeIndex;
     }
-    SQLFunctions.close(rs);
-    SQLFunctions.close(prep);
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("After assigning judges");
@@ -423,37 +534,59 @@ public class FullTournamentTest {
 
   }
 
-  private void loadTeams() throws IOException {
+  /**
+   * Load the teams from testDataConnection.
+   * 
+   * @param testDataConnection where to get the teams from
+   * @param outputDirectory where to write the teams file, may be null in which
+   *          case a temp file will be used
+   * @throws IOException
+   * @throws SQLException
+   */
+  private void loadTeams(final Connection testDataConnection,
+                         final Tournament sourceTournament,
+                         final Path outputDirectory)
+      throws IOException, SQLException {
+
+    final Path teamsFile = outputDirectory.resolve(sanitizeFilename(sourceTournament.getName())
+        + "_teams.csv");
+    // write the teams out to a file
+    try (final Writer writer = new FileWriter(teamsFile.toFile())) {
+      try (final CSVWriter csvWriter = new CSVWriter(writer)) {
+        csvWriter.writeNext(new String[] { "team_name", "team_number", "affiliation", "award_group", "judging_group",
+                                           "tournament" });
+        final Map<Integer, TournamentTeam> sourceTeams = Queries.getTournamentTeams(testDataConnection,
+                                                                                    sourceTournament.getTournamentID());
+        for (final Map.Entry<Integer, TournamentTeam> entry : sourceTeams.entrySet()) {
+          final TournamentTeam team = entry.getValue();
+
+          csvWriter.writeNext(new String[] { team.getTeamName(), Integer.toString(team.getTeamNumber()),
+                                             team.getOrganization(), team.getAwardGroup(), team.getJudgingGroup(),
+                                             sourceTournament.getName() });
+        }
+      }
+    }
+
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "admin/");
 
-    final InputStream teamsIS = FullTournamentTest.class.getResourceAsStream("data/teams-ft.csv");
-    Assert.assertNotNull(teamsIS);
-    final File teamsFile = IntegrationTestUtils.storeInputStreamToFile(teamsIS);
-    teamsIS.close();
-    try {
-      selenium.findElement(By.id("teams_file")).sendKeys(teamsFile.getAbsolutePath());
+    selenium.findElement(By.id("teams_file")).sendKeys(teamsFile.toAbsolutePath().toString());
 
-      selenium.findElement(By.id("upload_teams")).click();
+    selenium.findElement(By.id("upload_teams")).click();
 
-      IntegrationTestUtils.assertNoException(selenium);
-    } finally {
-      if (!teamsFile.delete()) {
-        teamsFile.deleteOnExit();
-      }
-    }
+    IntegrationTestUtils.assertNoException(selenium);
 
     // skip past the filter page
     selenium.findElement(By.id("next")).click();
     IntegrationTestUtils.assertNoException(selenium);
 
     // team column selection
-    new Select(selenium.findElement(By.name("TeamNumber"))).selectByValue("tea_number");
-    new Select(selenium.findElement(By.name("TeamName"))).selectByValue("tea_name");
-    new Select(selenium.findElement(By.name("Organization"))).selectByValue("org_name");
-    new Select(selenium.findElement(By.name("tournament"))).selectByValue("eve_name");
-    new Select(selenium.findElement(By.name("event_division"))).selectByValue("div_name");
-    new Select(selenium.findElement(By.name("judging_station"))).selectByValue("div_name");
+    new Select(selenium.findElement(By.name("TeamNumber"))).selectByValue("team_number");
+    new Select(selenium.findElement(By.name("TeamName"))).selectByValue("team_name");
+    new Select(selenium.findElement(By.name("Organization"))).selectByValue("affiliation");
+    new Select(selenium.findElement(By.name("tournament"))).selectByValue("tournament");
+    new Select(selenium.findElement(By.name("event_division"))).selectByValue("award_group");
+    new Select(selenium.findElement(By.name("judging_station"))).selectByValue("judging_group");
     selenium.findElement(By.id("next")).click();
     IntegrationTestUtils.assertNoException(selenium);
     Assert.assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
@@ -478,25 +611,14 @@ public class FullTournamentTest {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "report/CategoryScoresByJudge");
 
-    // PDF reports can't be done with selenium
-    final WebClient conversation = WebTestUtils.getConversation();
-    WebRequest request = new WebRequest(new URL(TestUtils.URL_ROOT
-        + "report/FinalComputedScores"));
-    request.setRequestParameters(Collections.singletonList(new NameValuePair("percentage", "40")));
+    IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+        + "report/FinalComputedScores"), "application/pdf", null);
 
-    Page response = WebTestUtils.loadPage(conversation, request);
-    Assert.assertEquals("application/pdf", response.getWebResponse().getContentType());
+    IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+        + "report/CategoryScoresByScoreGroup"), "application/pdf", null);
 
-    request = new WebRequest(new URL(TestUtils.URL_ROOT
-        + "report/CategoryScoresByScoreGroup"));
-    response = WebTestUtils.loadPage(conversation, request);
-    Assert.assertEquals("application/pdf", response.getWebResponse().getContentType());
-
-    request = new WebRequest(new URL(TestUtils.URL_ROOT
-        + "report/PlayoffReport"));
-    response = WebTestUtils.loadPage(conversation, request);
-    Assert.assertEquals("application/pdf", response.getWebResponse().getContentType());
-
+    IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+        + "report/PlayoffReport"), "application/pdf", null);
   }
 
   private void checkRankAndScores(final String testTournamentName) throws IOException, SAXException {
@@ -565,8 +687,8 @@ public class FullTournamentTest {
    * @throws InterruptedException
    * @throws SAXException
    */
-  private static void printPlayoffScoresheets(final String division) throws MalformedURLException, IOException,
-      InterruptedException, SAXException {
+  private static void printPlayoffScoresheets(final String division)
+      throws MalformedURLException, IOException, InterruptedException, SAXException {
     final WebClient conversation = WebTestUtils.getConversation();
 
     final Page indexResponse = WebTestUtils.loadPage(conversation, new WebRequest(new URL(TestUtils.URL_ROOT
@@ -617,137 +739,106 @@ public class FullTournamentTest {
    * 
    * @param testDataConn Where to get the test data from
    * @param challengeDocument the challenge descriptor
-   * @param testTournament the name of the tournament to enter scores for
    * @throws SQLException
    * @throws SAXException
    */
   private void enterSubjectiveScores(final Connection testDataConn,
                                      final ChallengeDescription description,
-                                     final String testTournament) throws SQLException, IOException,
-      MalformedURLException, ParseException, SAXException {
+                                     final Tournament sourceTournament,
+                                     final Path outputDirectory)
+      throws SQLException, IOException, MalformedURLException, ParseException, SAXException {
 
-    final File subjectiveZip = File.createTempFile("fll", ".zip", new File("screenshots"));
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      final WebClient conversation = WebTestUtils.getConversation();
+    final Path subjectiveZip = outputDirectory.resolve(sanitizeFilename(sourceTournament.getName())
+        + "_subjective-data.fll");
 
-      // download subjective zip
-      WebRequest request = new WebRequest(new URL(TestUtils.URL_ROOT
-          + "admin/subjective-data.fll"));
-      Page response = WebTestUtils.loadPage(conversation, request);
-      final String contentType = response.getWebResponse().getContentType();
-      if (!"application/zip".equals(contentType)) {
-        LOGGER.error("Got non-zip content: "
-            + WebTestUtils.getPageSource(response));
+    IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
+        + "admin/subjective-data.fll"), "application/zip", subjectiveZip);
+
+    final SubjectiveFrame subjective = new SubjectiveFrame();
+    subjective.load(subjectiveZip.toFile());
+
+    // insert scores into zip
+    for (final ScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
+      final String category = subjectiveElement.getName();
+      final String title = subjectiveElement.getTitle();
+
+      // find appropriate table model
+      final TableModel tableModel = subjective.getTableModelForTitle(title);
+      Assert.assertNotNull(tableModel);
+
+      final int teamNumberColumn = findColumnByName(tableModel, "TeamNumber");
+      Assert.assertTrue("Can't find TeamNumber column in subjective table model", teamNumberColumn >= 0);
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("Found team number column at "
+            + teamNumberColumn);
       }
-      Assert.assertEquals("application/zip", contentType);
 
-      final InputStream zipStream = response.getWebResponse().getContentAsStream();
-      final FileOutputStream outputStream = new FileOutputStream(subjectiveZip);
-      final byte[] buffer = new byte[512];
-      int bytesRead = 0;
-      while (-1 != (bytesRead = zipStream.read(buffer))) {
-        outputStream.write(buffer, 0, bytesRead);
-      }
-      outputStream.close();
-      zipStream.close();
+      try (final PreparedStatement prep = testDataConn.prepareStatement("SELECT * FROM "
+          + category + " WHERE Tournament = ?")) {
+        prep.setInt(1, sourceTournament.getTournamentID());
 
-      final SubjectiveFrame subjective = new SubjectiveFrame();
-      subjective.load(subjectiveZip);
+        try (final ResultSet rs = prep.executeQuery()) {
+          while (rs.next()) {
+            final int teamNumber = rs.getInt("TeamNumber");
 
-      // insert scores into zip
-      for (final ScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
-        final String category = subjectiveElement.getName();
-        final String title = subjectiveElement.getTitle();
+            // find row number in table
+            int rowIndex = -1;
+            for (int rowIdx = 0; rowIdx < tableModel.getRowCount(); ++rowIdx) {
+              final Object teamNumberRaw = tableModel.getValueAt(rowIdx, teamNumberColumn);
+              Assert.assertNotNull(teamNumberRaw);
+              final int value = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumberRaw.toString()).intValue();
 
-        // find appropriate table model
-        final TableModel tableModel = subjective.getTableModelForTitle(title);
-        Assert.assertNotNull(tableModel);
+              if (LOGGER.isTraceEnabled()) {
+                LOGGER.trace("Checking if "
+                    + teamNumber + " equals " + value + " raw: " + teamNumberRaw + "? " + (value == teamNumber)
+                    + " rowIdx: " + rowIdx + " numRows: " + tableModel.getRowCount());
+              }
 
-        final int teamNumberColumn = findColumnByName(tableModel, "TeamNumber");
-        Assert.assertTrue("Can't find TeamNumber column in subjective table model", teamNumberColumn >= 0);
-        if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("Found team number column at "
-              + teamNumberColumn);
-        }
-
-        prep = testDataConn.prepareStatement("SELECT * FROM "
-            + category + " WHERE Tournament = ?");
-        prep.setString(1, testTournament);
-        rs = prep.executeQuery();
-        while (rs.next()) {
-          final int teamNumber = rs.getInt("TeamNumber");
-
-          // find row number in table
-          int rowIndex = -1;
-          for (int rowIdx = 0; rowIdx < tableModel.getRowCount(); ++rowIdx) {
-            final Object teamNumberRaw = tableModel.getValueAt(rowIdx, teamNumberColumn);
-            Assert.assertNotNull(teamNumberRaw);
-            final int value = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumberRaw.toString()).intValue();
-
-            if (LOGGER.isTraceEnabled()) {
-              LOGGER.trace("Checking if "
-                  + teamNumber + " equals " + value + " raw: " + teamNumberRaw + "? " + (value == teamNumber)
-                  + " rowIdx: " + rowIdx + " numRows: " + tableModel.getRowCount());
-            }
-
-            if (value == teamNumber) {
-              rowIndex = rowIdx;
-              break;
-            }
-          }
-          Assert.assertTrue("Can't find team "
-              + teamNumber + " in subjective table model", rowIndex >= 0);
-
-          if (rs.getBoolean("NoShow")) {
-            // find column for no show
-            final int columnIndex = findColumnByName(tableModel, "No Show");
-            Assert.assertTrue("Can't find No Show column in subjective table model", columnIndex >= 0);
-            tableModel.setValueAt(Boolean.TRUE, rowIndex, columnIndex);
-          } else {
-            for (final AbstractGoal goalElement : subjectiveElement.getGoals()) {
-              if (!goalElement.isComputed()) {
-                final String goalName = goalElement.getName();
-                final String goalTitle = goalElement.getTitle();
-
-                // find column index for goal and call set
-                final int columnIndex = findColumnByName(tableModel, goalTitle);
-                Assert.assertTrue("Can't find "
-                    + goalTitle + " column in subjective table model", columnIndex >= 0);
-                final int value = rs.getInt(goalName);
-                tableModel.setValueAt(Integer.valueOf(value), rowIndex, columnIndex);
+              if (value == teamNumber) {
+                rowIndex = rowIdx;
+                break;
               }
             }
-          }
-        }
-      }
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-      subjective.save();
+            Assert.assertTrue("Can't find team "
+                + teamNumber + " in subjective table model", rowIndex >= 0);
 
-      // upload scores
-      request = new WebRequest(new URL(TestUtils.URL_ROOT
-          + "admin/index.jsp"));
-      response = WebTestUtils.loadPage(conversation, request);
-      Assert.assertTrue(response.isHtmlPage());
-      final HtmlForm uploadForm = ((HtmlPage) response).getFormByName("uploadSubjective");
+            if (rs.getBoolean("NoShow")) {
+              // find column for no show
+              final int columnIndex = findColumnByName(tableModel, "No Show");
+              Assert.assertTrue("Can't find No Show column in subjective table model", columnIndex >= 0);
+              tableModel.setValueAt(Boolean.TRUE, rowIndex, columnIndex);
+            } else {
+              for (final AbstractGoal goalElement : subjectiveElement.getGoals()) {
+                if (!goalElement.isComputed()) {
+                  final String goalName = goalElement.getName();
+                  final String goalTitle = goalElement.getTitle();
 
-      final HtmlFileInput uploadFile = uploadForm.getInputByName("subjectiveFile");
-      uploadFile.setValueAttribute(subjectiveZip.getAbsolutePath());
+                  // find column index for goal and call set
+                  final int columnIndex = findColumnByName(tableModel, goalTitle);
+                  Assert.assertTrue("Can't find "
+                      + goalTitle + " column in subjective table model", columnIndex >= 0);
+                  final int value = rs.getInt(goalName);
+                  tableModel.setValueAt(Integer.valueOf(value), rowIndex, columnIndex);
+                }
+              }
+            } // not NoShow
+          } // foreach score
+        } // try ResultSet
+      } // try PreparedStatement
+    } // foreach category
+    subjective.save();
 
-      final HtmlSubmitInput button = uploadForm.getInputByValue("Upload");
-      request = uploadForm.getWebRequest(button);
+    // upload scores
+    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+        + "admin/index.jsp");
+    final WebElement fileInput = selenium.findElement(By.name("subjectiveFile"));
+    fileInput.sendKeys(subjectiveZip.toAbsolutePath().toString());
 
-      response = WebTestUtils.loadPage(conversation, request);
-      Assert.assertTrue(response.isHtmlPage());
+    selenium.findElement(By.id("uploadSubjectiveFile")).click();
 
-      Assert.assertNotNull(((HtmlPage) response).getElementById("success"));
+    Assert.assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.id("error")));
+    Assert.assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
 
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
   }
 
   /**
@@ -756,115 +847,121 @@ public class FullTournamentTest {
    */
   private void enterPerformanceScore(final Connection testDataConn,
                                      final PerformanceScoreCategory performanceElement,
-                                     final String testTournament,
+                                     final Tournament sourceTournament,
                                      final int runNumber,
-                                     final int teamNumber) throws SQLException, IOException, MalformedURLException,
-      ParseException {
-    ResultSet rs = null;
-    PreparedStatement prep = null;
-    try {
+                                     final int teamNumber)
+      throws SQLException, IOException, MalformedURLException, ParseException {
 
-      if (LOGGER.isInfoEnabled()) {
-        LOGGER.info("Setting score for "
-            + teamNumber + " run: " + runNumber);
-      }
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("Setting score for "
+          + teamNumber + " run: " + runNumber);
+    }
 
-      prep = testDataConn.prepareStatement("SELECT * FROM Performance WHERE Tournament = ? AND RunNumber = ? AND TeamNumber = ?");
-      prep.setString(1, testTournament);
+    try (
+        final PreparedStatement prep = testDataConn.prepareStatement("SELECT * FROM Performance WHERE Tournament = ? AND RunNumber = ? AND TeamNumber = ?")) {
+      prep.setInt(1, sourceTournament.getTournamentID());
       prep.setInt(2, runNumber);
       prep.setInt(3, teamNumber);
-      rs = prep.executeQuery();
-      if (rs.next()) {
-        // need to get the score entry form
-        IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-            + "scoreEntry/select_team.jsp");
 
-        // select this entry
-        new Select(selenium.findElement(By.id("select-teamnumber"))).selectByValue(String.valueOf(teamNumber));
+      try (final ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          if (rs.getBoolean("BYE")) {
+            LOGGER.info("Run is a bye, not entering a score");
+            return;
+          }
 
-        // submit the page
-        selenium.findElement(By.id("enter_submit")).click();
+          // need to get the score entry form
+          IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+              + "scoreEntry/select_team.jsp");
 
-        Assert.assertFalse("Errors: ", IntegrationTestUtils.isElementPresent(selenium, By.name("error")));
-        
-        if (rs.getBoolean("NoShow")) {
-          selenium.findElement(By.id("no_show")).click();
-        } else {
-          // walk over challenge descriptor to get all element names and then
-          // use the values from rs
-          for (final AbstractGoal element : performanceElement.getGoals()) {
-            if (!element.isComputed()) {
-              final Goal goal = (Goal) element;
-              final String name = goal.getName();
-              final double min = goal.getMin();
-              final double max = goal.getMax();
-              if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Setting form parameter: "
-                    + name + " min: " + min + " max: " + max);
-              }
+          // select this entry
+          new Select(selenium.findElement(By.id("select-teamnumber"))).selectByValue(String.valueOf(teamNumber));
 
-              if (goal.isEnumerated()) {
-                final String valueStr = rs.getString(name);
-                final String radioID = ScoreEntry.getIDForEnumRadio(name, valueStr);
-                selenium.findElement(By.id(radioID)).click();
-              } else if (goal.isYesNo()) {
-                final int value = rs.getInt(name);
-                final String buttonID;
-                if (0 == value) {
-                  buttonID = name
-                      + "_no";
-                } else {
-                  buttonID = name
-                      + "_yes";
+          // submit the page
+          selenium.findElement(By.id("enter_submit")).click();
+
+          Assert.assertFalse("Errors: ", IntegrationTestUtils.isElementPresent(selenium, By.name("error")));
+
+          if (rs.getBoolean("NoShow")) {
+            selenium.findElement(By.id("no_show")).click();
+          } else {
+            // walk over challenge descriptor to get all element names and then
+            // use the values from rs
+            for (final AbstractGoal element : performanceElement.getGoals()) {
+              if (!element.isComputed()) {
+                final Goal goal = (Goal) element;
+                final String name = goal.getName();
+                final double min = goal.getMin();
+                final double max = goal.getMax();
+                if (LOGGER.isDebugEnabled()) {
+                  LOGGER.debug("Setting form parameter: "
+                      + name + " min: " + min + " max: " + max);
                 }
-                selenium.findElement(By.id(buttonID)).click();
-              } else {
-                final int initialValue = (int) goal.getInitialValue();
-                final int value = rs.getInt(name);
-                final String buttonID;
-                final int difference;
-                if (initialValue < value) {
-                  // increment
-                  difference = value
-                      - initialValue;
-                  buttonID = ScoreEntry.getIncDecButtonID(name, 1);
-                } else if (value < initialValue) {
-                  // decrement
-                  difference = initialValue
-                      - value;
-                  buttonID = ScoreEntry.getIncDecButtonID(name, -1);
-                } else {
-                  // no change
-                  difference = 0;
-                  buttonID = null;
-                }
-                for (int i = 0; i < difference; ++i) {
+
+                if (goal.isEnumerated()) {
+                  final String valueStr = rs.getString(name);
+                  final String radioID = ScoreEntry.getIDForEnumRadio(name, valueStr);
+                  selenium.findElement(By.id(radioID)).click();
+                } else if (goal.isYesNo()) {
+                  final int value = rs.getInt(name);
+                  final String buttonID;
+                  if (0 == value) {
+                    buttonID = name
+                        + "_no";
+                  } else {
+                    buttonID = name
+                        + "_yes";
+                  }
                   selenium.findElement(By.id(buttonID)).click();
+                } else {
+                  final int initialValue = (int) goal.getInitialValue();
+                  final int value = rs.getInt(name);
+                  final String buttonID;
+                  final int difference;
+                  if (initialValue < value) {
+                    // increment
+                    difference = value
+                        - initialValue;
+                    buttonID = ScoreEntry.getIncDecButtonID(name, 1);
+                  } else if (value < initialValue) {
+                    // decrement
+                    difference = initialValue
+                        - value;
+                    buttonID = ScoreEntry.getIncDecButtonID(name, -1);
+                  } else {
+                    // no change
+                    difference = 0;
+                    buttonID = null;
+                  }
+                  for (int i = 0; i < difference; ++i) {
+                    selenium.findElement(By.id(buttonID)).click();
+                  }
+
                 }
+              } // !computed
+            } // foreach goal
 
-              }
-            } // !computed
-          } // foreach goal
+            // check that the submit button is active
+            assertTrue("Submit button is not enabled, invalid score entered",
+                       selenium.findElement(By.id("submit")).isEnabled());
 
-          selenium.findElement(By.id("submit")).click();
+            selenium.findElement(By.id("submit")).click();
+          } // not NoShow
+
+          final Alert confirmScoreChange = selenium.switchTo().alert();
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Confirmation text: "
+                + confirmScoreChange.getText());
+          }
+          confirmScoreChange.accept();
+
+          Assert.assertFalse("Errors: ", IntegrationTestUtils.isElementPresent(selenium, By.name("error")));
+        } else {
+          Assert.fail("Cannot find scores for "
+              + teamNumber + " run " + runNumber);
         }
-
-        final Alert confirmScoreChange = selenium.switchTo().alert();
-        if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("Confirmation text: "
-              + confirmScoreChange.getText());
-        }
-        confirmScoreChange.accept();
-
-        Assert.assertFalse("Errors: ", IntegrationTestUtils.isElementPresent(selenium, By.name("error")));
-      } else {
-        Assert.fail("Cannot find scores for "
-            + teamNumber + " run " + runNumber);
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
+      } // try ResultSet
+    } // try PreparedStatement
 
   }
 
@@ -876,120 +973,118 @@ public class FullTournamentTest {
    */
   private void verifyPerformanceScore(final Connection testDataConn,
                                       final PerformanceScoreCategory performanceElement,
-                                      final String testTournament,
+                                      final Tournament sourceTournament,
                                       final int runNumber,
-                                      final int teamNumber) throws SQLException, IOException, MalformedURLException,
-      ParseException, InterruptedException {
+                                      final int teamNumber)
+      throws SQLException, IOException, MalformedURLException, ParseException, InterruptedException {
     final String selectTeamPage = TestUtils.URL_ROOT
         + "scoreEntry/select_team.jsp";
 
-    ResultSet rs = null;
-    PreparedStatement prep = null;
-    try {
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("Verify score for "
+          + teamNumber + " run: " + runNumber);
+    }
 
-      if (LOGGER.isInfoEnabled()) {
-        LOGGER.info("Verify score for "
-            + teamNumber + " run: " + runNumber);
-      }
-
-      prep = testDataConn.prepareStatement("SELECT * FROM Performance WHERE Tournament = ? AND RunNumber = ? AND TeamNumber = ?");
-      prep.setString(1, testTournament);
+    try (
+        final PreparedStatement prep = testDataConn.prepareStatement("SELECT * FROM Performance WHERE Tournament = ? AND RunNumber = ? AND TeamNumber = ?")) {
+      prep.setInt(1, sourceTournament.getTournamentID());
       prep.setInt(2, runNumber);
       prep.setInt(3, teamNumber);
-      rs = prep.executeQuery();
-      if (rs.next()) {
-        if (rs.getBoolean("NoShow")) {
-          // no shows don't need verifying
-          return;
-        } else {
-          // need to get the score entry form
-          IntegrationTestUtils.loadPage(selenium, selectTeamPage);
 
-          new Select(selenium.findElement(By.id("select-verify-teamnumber"))).selectByValue(teamNumber
-              + "-" + runNumber);
+      try (final ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          if (rs.getBoolean("NoShow")) {
+            // no shows don't need verifying
+            return;
+          } else {
+            // need to get the score entry form
+            IntegrationTestUtils.loadPage(selenium, selectTeamPage);
 
-          // submit the page
-          selenium.findElement(By.id("verify_submit")).click();
+            new Select(selenium.findElement(By.id("select-verify-teamnumber"))).selectByValue(teamNumber
+                + "-" + runNumber);
 
-          // walk over challenge descriptor to get all element names and then
-          // use the values from rs
-          for (final AbstractGoal element : performanceElement.getGoals()) {
-            if (!element.isComputed()) {
-              final Goal goal = (Goal) element;
-              final String name = goal.getName();
+            // submit the page
+            selenium.findElement(By.id("verify_submit")).click();
 
-              if (goal.isEnumerated()) {
-                // need check if the right radio button is selected
-                final String value = rs.getString(name);
+            // walk over challenge descriptor to get all element names and then
+            // use the values from rs
+            for (final AbstractGoal element : performanceElement.getGoals()) {
+              if (!element.isComputed()) {
+                final Goal goal = (Goal) element;
+                final String name = goal.getName();
 
-                final String formValue = selenium.findElement(By.name(ScoreEntry.getElementNameForYesNoDisplay(name)))
-                                                 .getAttribute("value");
-                Assert.assertNotNull("Null value for goal: "
-                    + name, formValue);
+                if (goal.isEnumerated()) {
+                  // need check if the right radio button is selected
+                  final String value = rs.getString(name);
 
-                Assert.assertEquals("Wrong enum selected for goal: "
-                    + name, value.toLowerCase(), formValue.toLowerCase());
-              } else if (goal.isYesNo()) {
-                final String formValue = selenium.findElement(By.name(ScoreEntry.getElementNameForYesNoDisplay(name)))
-                                                 .getAttribute("value");
-                Assert.assertNotNull("Null value for goal: "
-                    + name, formValue);
+                  final String formValue = selenium.findElement(By.name(ScoreEntry.getElementNameForYesNoDisplay(name)))
+                                                   .getAttribute("value");
+                  Assert.assertNotNull("Null value for goal: "
+                      + name, formValue);
 
-                // yes/no
-                final int value = rs.getInt(name);
-                final String expectedValue;
-                if (value == 0) {
-                  expectedValue = "no";
+                  Assert.assertEquals("Wrong enum selected for goal: "
+                      + name, value.toLowerCase(), formValue.toLowerCase());
+                } else if (goal.isYesNo()) {
+                  final String formValue = selenium.findElement(By.name(ScoreEntry.getElementNameForYesNoDisplay(name)))
+                                                   .getAttribute("value");
+                  Assert.assertNotNull("Null value for goal: "
+                      + name, formValue);
+
+                  // yes/no
+                  final int value = rs.getInt(name);
+                  final String expectedValue;
+                  if (value == 0) {
+                    expectedValue = "no";
+                  } else {
+                    expectedValue = "yes";
+                  }
+                  Assert.assertEquals("Wrong value for goal: "
+                      + name, expectedValue.toLowerCase(), formValue.toLowerCase());
                 } else {
-                  expectedValue = "yes";
+                  final String formValue = selenium.findElement(By.name(name)).getAttribute("value");
+                  Assert.assertNotNull("Null value for goal: "
+                      + name, formValue);
+
+                  final int value = rs.getInt(name);
+                  final int formValueInt = Integer.parseInt(formValue);
+                  Assert.assertEquals("Wrong value for goal: "
+                      + name, value, formValueInt);
                 }
-                Assert.assertEquals("Wrong value for goal: "
-                    + name, expectedValue.toLowerCase(), formValue.toLowerCase());
-              } else {
-                final String formValue = selenium.findElement(By.name(name)).getAttribute("value");
-                Assert.assertNotNull("Null value for goal: "
-                    + name, formValue);
+              } // !computed
+            } // foreach goal
 
-                final int value = rs.getInt(name);
-                final int formValueInt = Integer.parseInt(formValue);
-                Assert.assertEquals("Wrong value for goal: "
-                    + name, value, formValueInt);
-              }
-            } // !computed
-          } // foreach goal
+            // Set the verified field to yes
+            selenium.findElement(By.id("Verified_yes")).click();
 
-          // Set the verified field to yes
-          selenium.findElement(By.id("Verified_yes")).click();
+            // submit score
+            selenium.findElement(By.id("submit")).click();
+          } // not NoShow
 
-          // submit score
-          selenium.findElement(By.id("submit")).click();
+          LOGGER.info("Checking for an alert");
+
+          // confirm selection, not going to bother checking the text
+          final Alert confirmScoreChange = selenium.switchTo().alert();
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Confirmation text: "
+                + confirmScoreChange.getText());
+          }
+          confirmScoreChange.accept();
+
+          // give the web server a chance to catch up
+          Thread.sleep(1500);
+
+          // check for errors
+          // Gives trouble too often
+          // Assert.assertEquals(selectTeamPage, selenium.getCurrentUrl());
+          Assert.assertTrue("Error submitting form, not on select team page url: "
+              + selenium.getCurrentUrl(), selenium.getPageSource().contains("Unverified Runs"));
+
+        } else {
+          Assert.fail("Cannot find scores for "
+              + teamNumber + " run " + runNumber);
         }
-
-        // confirm selection, not going to bother checking the text
-        final Alert confirmScoreChange = selenium.switchTo().alert();
-        if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("Confirmation text: "
-              + confirmScoreChange.getText());
-        }
-        confirmScoreChange.accept();
-
-        // give the web server a chance to catch up
-        Thread.sleep(1500);
-
-        // check for errors
-        // Gives trouble too often
-        // Assert.assertEquals(selectTeamPage, selenium.getCurrentUrl());
-        Assert.assertTrue("Error submitting form, not on select team page url: "
-            + selenium.getCurrentUrl(), selenium.getPageSource().contains("Unverified Runs"));
-
-      } else {
-        Assert.fail("Cannot find scores for "
-            + teamNumber + " run " + runNumber);
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
+      } // try ResultSet
+    } // try PreparedStatement
 
   }
 
@@ -1023,5 +1118,23 @@ public class FullTournamentTest {
     }
     return -1;
   }
+
+  /**
+   * Create a string that's a valid file name.
+   */
+  private static String sanitizeFilename(final String str) {
+    if (null == str
+        || "".equals(str)) {
+      return "NULL";
+    } else {
+      String ret = str;
+      final Matcher illegalCharMatcher = ILLEGAL_CHAR_PATTERN.matcher(ret);
+      ret = illegalCharMatcher.replaceAll("_");
+
+      return ret;
+    }
+  }
+
+  private static final Pattern ILLEGAL_CHAR_PATTERN = Pattern.compile("[^A-Za-z0-9_]");
 
 }

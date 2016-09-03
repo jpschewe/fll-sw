@@ -18,7 +18,7 @@ public final class JudgeSummary implements Serializable {
 
   private final String mCategory;
 
-  private final String mStation;
+  private final String mGroup;
 
   private final int mNumExpected;
 
@@ -32,8 +32,8 @@ public final class JudgeSummary implements Serializable {
     return mCategory;
   }
 
-  public String getStation() {
-    return mStation;
+  public String getGroup() {
+    return mGroup;
   }
 
   public int getNumExpected() {
@@ -46,12 +46,12 @@ public final class JudgeSummary implements Serializable {
 
   public JudgeSummary(final String judge,
                       final String category,
-                      final String station,
+                      final String group,
                       final int numExpected,
                       final int numActual) {
     mJudge = judge;
     mCategory = category;
-    mStation = station;
+    mGroup = group;
     mNumExpected = numExpected;
     mNumActual = numActual;
   }

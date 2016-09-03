@@ -126,7 +126,7 @@ public class JudgesServlet extends HttpServlet {
           if (null == found) {
             insertJudge.setString(1, judge.getId());
             insertJudge.setString(2, judge.getCategory());
-            insertJudge.setString(4, judge.getStation());
+            insertJudge.setString(4, judge.getGroup());
             insertJudge.executeUpdate();
             ++numNewJudges;
           }

@@ -5,7 +5,7 @@
 <html>
   <head>
     <title>Table Labels</title>
-    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/fll-sw.css'/>" />
   </head>
 
   <body>

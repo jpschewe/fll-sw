@@ -35,7 +35,6 @@ import fll.web.WebUtils;
  * If redirected here with sheetName set in the request, store that in
  * uploadSchedule_sheet.
  * </p>
- * 
  */
 @WebServlet("/schedule/GetSheetNames")
 public class GetSheetNames extends BaseFLLServlet {
@@ -46,34 +45,43 @@ public class GetSheetNames extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
-    if(null != session.getAttribute("sheetName")) {
+                                final HttpSession session)
+      throws IOException, ServletException {
+    if (null != session.getAttribute("sheetName")) {
       // handle case where we're redirected here from picking the sheet
       session.setAttribute("uploadSchedule_sheet", session.getAttribute("sheetName"));
       WebUtils.sendRedirect(application, response, "/schedule/CheckViolations");
-      return;   
+      return;
     }
-    
+
     try {
       final File file = SessionAttributes.getNonNullAttribute(session, "uploadSchedule_file", File.class);
 
-      // get list of sheet names
-      final List<String> sheetNames = ExcelCellReader.getAllSheetNames(file);
-
-      if (sheetNames.isEmpty()) {
-        session.setAttribute(SessionAttributes.MESSAGE,
-                             "<p class='error'>The specified spreadsheet has no worksheets.</p>");
-        WebUtils.sendRedirect(application, response, "/admin/index.jsp");
-        return;
-      } else if (1 == sheetNames.size()) {
-        session.setAttribute("uploadSchedule_sheet", sheetNames.get(0));
+      final boolean isCsvFile = !ExcelCellReader.isExcelFile(file);
+      if (isCsvFile) {
+        // must be CSV file
+        session.setAttribute("uploadSchedule_sheet", "csv");
         WebUtils.sendRedirect(application, response, "/schedule/CheckViolations");
         return;
       } else {
-        session.setAttribute("sheetNames", sheetNames);
-        session.setAttribute("uploadRedirect", WebUtils.makeAbsoluteURL(application, "/schedule/GetSheetNames"));
-        WebUtils.sendRedirect(application, response, "/promptForSheetName.jsp");
-        return;
+        // get list of sheet names
+        final List<String> sheetNames = ExcelCellReader.getAllSheetNames(file);
+
+        if (sheetNames.isEmpty()) {
+          session.setAttribute(SessionAttributes.MESSAGE,
+                               "<p class='error'>The specified spreadsheet has no worksheets.</p>");
+          WebUtils.sendRedirect(application, response, "/admin/index.jsp");
+          return;
+        } else if (1 == sheetNames.size()) {
+          session.setAttribute("uploadSchedule_sheet", sheetNames.get(0));
+          WebUtils.sendRedirect(application, response, "/schedule/CheckViolations");
+          return;
+        } else {
+          session.setAttribute("sheetNames", sheetNames);
+          session.setAttribute("uploadRedirect", WebUtils.makeAbsoluteURL(application, "/schedule/GetSheetNames"));
+          WebUtils.sendRedirect(application, response, "/promptForSheetName.jsp");
+          return;
+        }
       }
 
     } catch (final InvalidFormatException e) {

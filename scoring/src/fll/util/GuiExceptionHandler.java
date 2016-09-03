@@ -35,7 +35,8 @@ public class GuiExceptionHandler implements UncaughtExceptionHandler {
   @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "We want the application to exit after an error")
   public void uncaughtException(final Thread t,
                                 final Throwable ex) {
-    final String message = String.format("Unexpected error on thread %s: %s", t.getName(), ex.getMessage());
+    final String message = String.format("An unexpected error occurred. Please send the log, this message and a description of what you were doing to the developer. Thread %s: %s",
+                                         t.getName(), ex.getMessage());
     LOGGER.fatal(message, ex);
     JOptionPane.showMessageDialog(null, message, "Unexpected Error", JOptionPane.ERROR_MESSAGE);
     System.exit(1);
