@@ -1,3 +1,28 @@
+* #516 - Add instructions to the dialog in the scheduler when choosing a challenge description
+* #457, #499 - enhanced the training databases and made sure they are part of the distribution
+* #510 - Add separator with category name to the subjective web application
+* #476 - Sort finalist callback display by team number
+* #495 - color background of subjective scores to make it clear which teams have been scored
+* #479 - Add performance advancement percentage to the database and remove it from the generation of the final computed scores report
+* #440 - Add more information to the final computed scores report to aide head judges
+
+Release 10.9
+============
+
+This release focuses on updates to the documentation and making the
+software easier to use for new users.
+
+* #460 - Require the user to specify the tables used for a playoff bracket at initialization time
+* #503 - Allow one to create new schedule description files
+* #486 - Separate creating playoff brackets from initializing playoff brackets
+* Use the term "Playoff Bracket" to mean the group of teams competing in a head to head competition (formally known as "Playoff Division")
+* Use the term "Award Group" to mean the group of teams competing for a single set of awards (formally known as "Event Division")
+* Allow the user to edit the judging groups
+* Display team names in the scheduler user interface
+* Add end times to the general schedule display in SchedulerUI
+* Fix bug where schedule could not be replaced after playoff tables have been assigned
+* Remove filtering of uploaded teams file. It's best to just filter outside of FLL-SW.
+
 Release 10.8
 ============
 * #466 - Add a windows executable for starting the main application

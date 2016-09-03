@@ -47,8 +47,8 @@ fll.web.playoff.ScoregenBrackets.populateContext(application,
 <html>
 <head>
 <link rel="stylesheet" type="text/css"
- href="<c:url value='/style/style.jsp'/>" />
-<title>${division} Playoff Brackets</title>
+ href="<c:url value='/style/fll-sw.css'/>" />
+<title>${division} - Playoff Bracket</title>
 
 <style type='text/css'>
 TD.Leaf {
@@ -123,44 +123,17 @@ FONT.TIE {
 
 
 <body>
- <h2>Playoff Brackets Division: ${division }</h2>
+ <h2>Playoff Bracket: ${division }</h2>
  <p>
   <a href="index.jsp">Return to Playoff menu</a>
  </p>
- <form name='limit_tables' method='post' action='LimitTableAssignments'>
-  You can limit which tables teams are automatically assigned to.<br />
-
-  <input type='hidden' name='division' value='${division }' />
-  <input type='hidden' name='firstRound' value='${firstRound }' />
-  <input type='hidden' name='lastRound' value='${lastRound }' />
-
-  <c:forEach items="${tableInfo}" var="info">
-
-   <label for='${info.id }'>${info.sideA } / ${info.sideB }</label>
-
-   <c:choose>
-    <c:when test="${info.use }">
-     <input type="checkbox" name='tables' value='${info.id}' checked />
-    </c:when>
-    <c:otherwise>
-     <input type="checkbox" name='tables' value='${info.id}' />
-    </c:otherwise>
-   </c:choose>
-   <br />
-
-  </c:forEach>
-
-  <input type='submit' value='Limit Tables' />
-
- </form>
-
-
+ 
  <form name='printScoreSheets' method='post' action='ScoresheetServlet'
   target='_new'>
   <input type='hidden' name='division' value='<%=divisionStr%>' /> <input
    type='hidden' name='numMatches' value='<%=numMatches%>' /> <input
    type='submit' value='Print scoresheets' id='print_scoresheets' /> - <b>Print the
-   scoresheets for the brackets that have their boxes checked.</b>
+   scoresheets for the matches that have their boxes checked.</b>
 
 
   <%=bracketInfo.outputBrackets(BracketData.TopRightCornerStyle.MEET_BOTTOM_OF_CELL)%>

@@ -5,7 +5,7 @@
 <head>
 <title>Judge Assignments</title>
 <link rel="stylesheet" type="text/css"
- href="<c:url value='/style/style.jsp'/>" />
+ href="<c:url value='/style/fll-sw.css'/>" />
 
 <script type='text/javascript' src='../extlib/jquery-1.11.1.min.js'></script>
 
@@ -32,7 +32,7 @@ $(document).ready(function() {
  </h1>
 
 
- ${message}
+ <div class='status-message'>${message}</div>
  <%-- clear out the message, so that we don't see it again --%>
  <c:remove var="message" />
 
@@ -43,7 +43,7 @@ If changes need to be made to the judges, press the back button.</p>
   <tr>
    <th>ID</th>
    <th>Category</th>
-   <th>Judging Station</th>
+   <th>Judging Group</th>
   </tr>
 
   <c:forEach items="${JUDGES }" var="judge">
@@ -52,7 +52,7 @@ If changes need to be made to the judges, press the back button.</p>
 
     <td>${judge.id }</td>
     <td>${judge.category }</td>
-    <td>${judge.station }</td>
+    <td>${judge.group }</td>
 
    </tr>
 

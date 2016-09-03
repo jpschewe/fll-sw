@@ -31,11 +31,11 @@
 </head>
 
 <body class='scoreboard'>
- ${message}
+ <div class='status-message'>${message}</div>
  <%-- clear out the message, so that we don't see it again --%>
  <c:remove var="message" />
 
- <h1>Finalist Schedule for Division: ${division }</h1>
+ <h1>Finalist Schedule for Award Group: ${division }</h1>
 
  <c:forEach items="${publicCategories }" var="category">
   <c:choose>

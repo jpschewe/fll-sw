@@ -26,8 +26,9 @@ public final class JudgeInformation implements Serializable {
   private final String id;
 
   /**
-   * The identifier of the judge. Identifiers for judges must be unique within a
+   * Identifiers for judges must be unique within a
    * category, station combination.
+   * @return The identifier of the judge
    */
   public String getId() {
     return id;
@@ -38,28 +39,29 @@ public final class JudgeInformation implements Serializable {
   /**
    * The name of the scoring category that this judge is scoring. This needs to
    * match a category name in the challenge description.
+   * 
+   * @return the name of the scoring category
    */
   public String getCategory() {
     return category;
   }
 
-  private final String station;
+  private final String group;
 
   /**
-   * The station the judge is at. This is sometimes
-   * referred to as the division.
+   * @return The judging group the judge is at.
    */
-  public String getStation() {
-    return station;
+  public String getGroup() {
+    return group;
   }
 
   @JsonCreator
   public JudgeInformation(@JsonProperty("id") final String id,
                           @JsonProperty("category") final String category,
-                          @JsonProperty("station") final String station) {
+                          @JsonProperty("group") final String group) {
     this.id = id;
     this.category = category;
-    this.station = station;
+    this.group = group;
   }
 
   @Override
@@ -76,7 +78,7 @@ public final class JudgeInformation implements Serializable {
     } else if (o.getClass().equals(JudgeInformation.class)) {
       final JudgeInformation other = (JudgeInformation) o;
       return getId().equals(other.getId())
-          && getCategory().equals(other.getCategory()) && getStation().equals(other.getStation());
+          && getCategory().equals(other.getCategory()) && getGroup().equals(other.getGroup());
     } else {
       return false;
     }
@@ -88,7 +90,7 @@ public final class JudgeInformation implements Serializable {
    * @param connection the database
    * @param tournament tournament ID
    * @return the judges
-   * @throws SQLException
+   * @throws SQLException when there is an error talking to the database
    */
   public static Collection<JudgeInformation> getJudges(final Connection connection,
                                                        final int tournament) throws SQLException {

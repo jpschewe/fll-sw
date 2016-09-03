@@ -5,7 +5,7 @@
 <head>
 <title>Login Page</title>
 <link rel="stylesheet" type="text/css"
- href="<c:url value='/style/style.jsp'/>" />
+ href="<c:url value='/style/fll-sw.css'/>" />
  
  <link
   rel="stylesheet"
@@ -22,7 +22,7 @@
 <body>
  <h1>Login to FLL</h1>
 
- ${message}
+ <div class='status-message'>${message}</div>
  <%-- clear out the message, so that we don't see it again --%>
  <c:remove var="message" />
 

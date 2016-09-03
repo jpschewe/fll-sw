@@ -31,6 +31,7 @@ import fll.Utilities;
 import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
+import fll.web.WebUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -62,7 +63,7 @@ public class GatherTeamData {
       final Map<Integer, Boolean> playoffsInitialized = new HashMap<>();
       for (final Tournament tournament : tournaments) {
 
-        final Collection<String> allEventDivisions = Queries.getEventDivisions(connection,
+        final Collection<String> allEventDivisions = Queries.getAwardGroups(connection,
                                                                                tournament.getTournamentID());
         if (allEventDivisions.isEmpty()) {
           // special case for empty, always allow 1
@@ -114,7 +115,7 @@ public class GatherTeamData {
           final String eventDivision = Queries.getEventDivision(connection, teamNumber, tournament.getTournamentID());
           currentEventDivisions.put(tournament.getTournamentID(), eventDivision);
 
-          final String judgingStation = Queries.getJudgingStation(connection, teamNumber, tournament.getTournamentID());
+          final String judgingStation = Queries.getJudgingGroup(connection, teamNumber, tournament.getTournamentID());
           currentJudgingStations.put(tournament.getTournamentID(), judgingStation);
         }
         page.setAttribute("currentEventDivisions", currentEventDivisions);
@@ -142,9 +143,9 @@ public class GatherTeamData {
         page.setAttribute("teamNumber", teamNumber);
         final Team team = Team.getTeamFromDatabase(connection, teamNumber);
         page.setAttribute("teamName", team.getTeamName());
-        page.setAttribute("teamNameEscaped", escape(team.getTeamName()));
+        page.setAttribute("teamNameEscaped", WebUtils.escapeForHtmlFormValue(team.getTeamName()));
         page.setAttribute("organization", team.getOrganization());
-        page.setAttribute("organizationEscaped", escape(team.getOrganization()));
+        page.setAttribute("organizationEscaped", WebUtils.escapeForHtmlFormValue(team.getOrganization()));
         final Map<Integer, Boolean> teamInTournament = new HashMap<>();
         for (final Integer tid : Queries.getAllTournamentsForTeam(connection, teamNumber)) {
           teamInTournament.put(tid, true);
@@ -164,12 +165,5 @@ public class GatherTeamData {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Bottom of GatherTeamData.populateContext");
     }
-  }
-
-  /**
-   * Escape the string to be used in the value of a form field.
-   */
-  private static String escape(final String str) {
-    return str.replace("'", "&apos;");
   }
 }

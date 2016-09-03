@@ -1,22 +1,18 @@
 digraph FinalComputedScores {
 
-"report_index.jsp" -> "getPerformancePercentage.jsp";
+"report_index.jsp" -> FinalComputedScores;
 
-"getPerformancePercentage.jsp" -> FinalComputedScores;
-
-"getPerformancePercentage.jsp" -> "promptSummarizeScores.jsp" [label="if summary out of date and summary_checked is unset, pass redirect url"];
-
+FinalComputedScores -> "promptSummarizeScores.jsp" [label="if summary out of date and summary_checked is unset, pass redirect url"];
 
 "promptSummarizeScores.jsp" -> "summarizePhase1.jsp" [label="set summary_checked session variable"];
 
-"promptSummarizeScores.jsp" -> "getPerformancePercentage.jsp" [label="if no, set summary_checked session variable"];
-
+"promptSummarizeScores.jsp" -> FinalComputedScores [label="if no, set summary_checked session variable"];
 
 "summarizePhase1.jsp" -> "summarizePhase2.jsp";
 
 "summarizePhase2.jsp" -> "report_index.jsp";
 
-"summarizePhase2.jsp" -> "getPerformancePercentage.jsp" [label="if redirect url set"];
+"summarizePhase2.jsp" -> FinalComputedScores [label="if redirect url set"];
 
 
 }

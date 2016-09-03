@@ -11,6 +11,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
+import java.nio.file.Files;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -49,10 +50,19 @@ public class ExcelCellReader extends CellFileReader {
 
   /**
    * Check if we believe this file to be an Excel file.
+   * @throws IOException 
    */
-  public static boolean isExcelFile(final File file) {
-    return file.getName().endsWith(".xls")
-        || file.getName().endsWith(".xlsx");
+  public static boolean isExcelFile(final File file) throws IOException {
+
+    final String contentType = Files.probeContentType(file.toPath());
+
+    final boolean isCsvFile;
+    if (null != contentType && contentType.startsWith("text/")) {
+      isCsvFile = true;
+    } else {
+      isCsvFile = false;
+    }
+    return !isCsvFile;
   }
 
   public static List<String> getAllSheetNames(final File file) throws InvalidFormatException, IOException {
@@ -106,7 +116,8 @@ public class ExcelCellReader extends CellFileReader {
    * @throws InvalidFormatException
    */
   public ExcelCellReader(final InputStream file,
-                         final String sheetName) throws IOException, InvalidFormatException {
+                         final String sheetName)
+      throws IOException, InvalidFormatException {
     workbook = createWorkbook(file);
     if (workbook instanceof HSSFWorkbook) {
       formulaEvaluator = new HSSFFormulaEvaluator((HSSFWorkbook) workbook);

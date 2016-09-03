@@ -21,7 +21,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * The static state of a team. This does not include information about the team
- * at a given tournament. Note that the {@link #getDivision() division}
+ * at a given tournament. Note that the {@link #getAwardGroup() division}
  * attribute represents the division the team is registered in, which may not be
  * the same division that the team is competing in at a tournament (called
  * {@link fll.db.Queries#getEventDivision(Connection, int) event division}). If
@@ -60,6 +60,9 @@ public class Team implements Serializable {
    */
   public static final Team NULL = new Team(NULL_TEAM_NUMBER, "INTERNAL", "NULL");
 
+  /**
+   * Compare teams by number.
+   */
   public static final Comparator<Team> TEAM_NUMBER_COMPARATOR = new Comparator<Team>() {
     public int compare(final Team one,
                        final Team two) {

@@ -16,7 +16,7 @@ This computer is the brains behind the whole system. It contains the database an
 I would suggest something with a 1Ghz processor and at least 512MB of RAM, preferably 1GB, just to be comfortable.
 This computer must have a network connection and be able to be networked to the performance score entry computers and the display computer.
 
-This computer requires the [Java JDK](InstallJava.md) and the [server software](InstallServerSoftware.md) and a [Supported Web browser](SupportedWebBrowsers.md). It also requires that the [JAVA_HOME environment variable be set properly](SettingUpJavaHome.md).
+This computer requires the [Java JRE](InstallJava.md) and the [server software](InstallServerSoftware.md) and a [Supported Web browser](SupportedWebBrowsers.md).
 
 This computer is also the one that is used to print out reports. So it needs to have a printer attached. Technically any computer on the network can be used for printing, but the server is usually a logical choice. I would stick with a small laser printer as they print reasonably fast and everything is black and white. Any printer will work though, it just may get slow during the head to head competition.
 
@@ -93,10 +93,7 @@ If you do not have a zip tool to open up the archives you can use the jar tool t
   1. Change to the directory you put the zip file in, on windows cd <path to zip file>
   1. Execute jar -xf zipfile
   1. You should now have the files uncompressed in a directory and you can move them around as needed.
-  1. [Install Java (the JDK) 1.6 or higher](InstallJava.md) (the language everything is written in). If you downloaded a version of the software is the JDK bundled in, then you can skip this step for the server. This needs to be done on the server and on any machines that will be used to enter subjective scores.
-      * When prompted for where to install it choose c:\packages\jdk-1.5.0
-      * Set the environment variable JAVA_HOME to c:\packages\jdk-1.5.0
-          * Under `*nix` this can be done by doing "JAVA_HOME=path; export JAVA_HOME"
+  1. [Install Java (the JRE) 1.8 or higher](InstallJava.md) (the language everything is written in). If you downloaded a version of the software is the JRE bundled in, then you can skip this step for the server. This needs to be done on the server and on any machines that will be used to enter subjective scores.
   1. Test the server
       1. Open an explorer window to the directory you you unzipped install file into. It should be called something like fll-sw-<version>
       1. Unzip the install file to a location that you want to run from.
@@ -136,3 +133,11 @@ If you do not have a zip tool to open up the archives you can use the jar tool t
 Sponsor Logos
 =============
 In version 4 of the software we added the ability to have sponsor logos displayed. These logos are displayed on the main welcome page, in between team scores on the scoreboard and on the bottom of the playoff brackets page. Any files with image extensions (currently the list is: `.jpg`, `.jpeg`, `.gif`, `.png`) put into the directory `tomcat/webapps/fll-sw/sponsor_logos` will be displayed on these pages. See the `README.txt` file in this directory for information about sizing. The welcome page lists the logos sorted by filename, so you can to show the sponsors in a particular order, say by amount donated. The logos are displayed randomly on the other pages.    
+
+Slideshow
+=========
+There is an option to display a slide show on the big screen display.
+This option shows all image files (`.jpg`, `.jpeg`, `.gif`, `.png`) from the directory `tomcat/webapps/fll-sw/slideshow/images`.
+The images are displayed in order, so naming them starting with 2 or 3 numbers helps to know what order they will be displayed in.
+
+

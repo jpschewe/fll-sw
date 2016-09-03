@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -28,14 +29,20 @@ public final class PlayoffSessionData implements Serializable {
   public PlayoffSessionData(final Connection connection) throws SQLException {
     final int currentTournamentID = Queries.getCurrentTournament(connection);
     mCurrentTournament = Tournament.findTournamentByID(connection, currentTournamentID);
-    mEventDivisions = Queries.getEventDivisions(connection, mCurrentTournament.getTournamentID());
     mNumPlayoffRounds = Queries.getNumPlayoffRounds(connection);
     mTournamentTeams = Queries.getTournamentTeams(connection, mCurrentTournament.getTournamentID());
 
-    mExistingDivisions = Playoff.getPlayoffDivisions(connection, mCurrentTournament.getTournamentID());
+    mExistingBrackets = Playoff.getPlayoffBrackets(connection, mCurrentTournament.getTournamentID());
 
-    mInitDivisions = new LinkedList<String>(mEventDivisions);
-    mInitDivisions.add(PlayoffIndex.CREATE_NEW_PLAYOFF_DIVISION);
+    mInitializedBrackets = new LinkedList<>();
+    mUninitializedBrackets = new LinkedList<>();
+    for (final String bracketName : mExistingBrackets) {
+      if (Queries.isPlayoffDataInitialized(connection, mCurrentTournament.getTournamentID(), bracketName)) {
+        mInitializedBrackets.add(bracketName);
+      } else {
+        mUninitializedBrackets.add(bracketName);
+      }
+    }
 
     mSort = null;
   }
@@ -76,32 +83,31 @@ public final class PlayoffSessionData implements Serializable {
     return mCurrentTournament;
   }
 
-  private final List<String> mExistingDivisions;
+  private final List<String> mExistingBrackets;
 
   /**
-   * All existing playoff divisions.
+   * All existing playoff brackets.
    */
-  public List<String> getExistingDivisions() {
-    return mExistingDivisions;
+  public List<String> getExistingBrackets() {
+    return mExistingBrackets;
   }
 
-  private final List<String> mEventDivisions;
+  private final List<String> mInitializedBrackets;
 
   /**
-   * All event divisions.
+   * @return Brackets that have already been initialized
    */
-  public List<String> getEventDivisions() {
-    return mEventDivisions;
+  public List<String> getInitializedBrackets() {
+    return Collections.unmodifiableList(mInitializedBrackets);
   }
 
-  private final List<String> mInitDivisions;
+  private final List<String> mUninitializedBrackets;
 
   /**
-   * Divisions that can be initialized, this is event divisions plus
-   * {@link PlayoffIndex#CREATE_NEW_PLAYOFF_DIVISION}.
+   * @return Brackets that have not been initialized.
    */
-  public List<String> getInitDivisions() {
-    return mInitDivisions;
+  public List<String> getUninitializedBrackets() {
+    return Collections.unmodifiableList(mUninitializedBrackets);
   }
 
   private final int mNumPlayoffRounds;
@@ -110,14 +116,14 @@ public final class PlayoffSessionData implements Serializable {
     return mNumPlayoffRounds;
   }
 
-  private String mDivision;
+  private String mBracket;
 
-  public void setDivision(final String v) {
-    mDivision = v;
+  public void setBracket(final String v) {
+    mBracket = v;
   }
 
-  public String getDivision() {
-    return mDivision;
+  public String getBracket() {
+    return mBracket;
   }
 
   private List<Team> mTeamsNeedingSeedingRuns;
@@ -129,18 +135,5 @@ public final class PlayoffSessionData implements Serializable {
   public void setTeamsNeedingSeedingRounds(final List<Team> v) {
     mTeamsNeedingSeedingRuns = v;
   }
-
-  /**
-   * Teams that are to be used to initialize a custom division.
-   */
-  public List<Team> getDivisionTeams() {
-    return mDivisionTeams;
-  }
-
-  public void setDivisionTeams(final List<Team> v) {
-    mDivisionTeams = v;
-  }
-
-  private List<Team> mDivisionTeams;
 
 }

@@ -90,11 +90,11 @@ public class SolverParamsEditor extends JPanel {
     addRow(subjectiveFirst);
 
     perfAttemptOffsetMinutes = FormatterUtils.createIntegerField(1, 1000);
-    perfAttemptOffsetMinutes.setToolTipText("How many minutes later to try to find a new performance slot");
-    addRow(new JLabel("Number of minutes between attempts "), perfAttemptOffsetMinutes);
+    perfAttemptOffsetMinutes.setToolTipText("How many minutes later to try to find a new performance time slot when no team can be scheduled at a time.");
+    addRow(new JLabel("Number of minutes between performance attempts "), perfAttemptOffsetMinutes);
 
     subjectiveAttemptOffsetMinutes = FormatterUtils.createIntegerField(1, 1000);
-    subjectiveAttemptOffsetMinutes.setToolTipText("How many minutes later to try to find a new subjective slot");
+    subjectiveAttemptOffsetMinutes.setToolTipText("How many minutes later to try to find a new subjective time slot when no team can be scheduled at a time.");
     addRow(new JLabel("Number of minutes between subjective attempts"), subjectiveAttemptOffsetMinutes);
 
     numTables = FormatterUtils.createIntegerField(1, 1000);

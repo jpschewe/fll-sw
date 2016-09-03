@@ -106,7 +106,7 @@ public class VerifyJudges extends BaseFLLServlet {
 
           for (final JudgeInformation judge : judges) {
             if (judge.getCategory().equals(categoryName)
-                && judge.getStation().equals(jstation)) {
+                && judge.getGroup().equals(jstation)) {
               found = true;
             }
           }

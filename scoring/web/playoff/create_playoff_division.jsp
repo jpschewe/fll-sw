@@ -9,8 +9,8 @@
 <link
   rel="stylesheet"
   type="text/css"
-  href="<c:url value='/style/style.jsp'/>" />
-<title>Create Playoff Division</title>
+  href="<c:url value='/style/fll-sw.css'/>" />
+<title>Create Playoff Bracket</title>
 
 
 <script
@@ -23,12 +23,18 @@
     <c:forEach items="${judgingStations }" var="station" varStatus="idx">
     $("#station_select_${idx.count }").change(function() {
       <c:forEach items="${playoff_data.tournamentTeamsValues }" var="team">
-      <c:if test="${team.judgingStation == station}">
-      if ($(this).is(":checked")) {
-        $("#select_${team.teamNumber}").attr("checked", "checked");
-      } else {
-        $("#select_${team.teamNumber}").removeAttr("checked");
-      }
+      <c:if test="${team.judgingGroup == station}">
+      $("#select_${team.teamNumber}").prop("checked", $(this).is(":checked"));
+      </c:if>
+      </c:forEach>
+    });
+    </c:forEach>
+
+    <c:forEach items="${awardGroups }" var="awardGroup" varStatus="idx">
+    $("#award_group_select_${idx.count }").change(function() {
+      <c:forEach items="${playoff_data.tournamentTeamsValues }" var="team">
+      <c:if test="${team.awardGroup == awardGroup}">
+      $("#select_${team.teamNumber}").prop("checked", $(this).is(":checked"));
       </c:if>
       </c:forEach>
     });
@@ -39,23 +45,77 @@
 </head>
 
 <body>
-  <h1>Create Playoff Division</h1>
+  <h1>Create Playoff Bracket</h1>
 
-  ${message}
+  <div class='status-message'>${message}</div>
   <%-- clear out the message, so that we don't see it again --%>
   <c:remove var="message" />
-
-  <p>Choose the teams that you want to include in the custom event
-    division. This group of teams will compete against each other in a
-    single elimination playoff bracket.</p>
 
   <form
     method="POST"
     action="CreatePlayoffDivision">
 
-    <label for="division_name">Name: </label><input name="division_name" />
+    <c:forEach
+      items="${awardGroups }"
+      var="awardGroup"
+      varStatus="idx">
+      <div>
+        <c:if
+          test="${not playoff_data.existingBrackets.contains(awardGroup)}">
+          <input
+            type='submit'
+            name='create_award_group_${idx.count}'
+            value='Create Playoff Bracket for Award Group ${awardGroup }' />
+          <input
+            type='hidden'
+            name='award_group_${idx.count}'
+            value='${awardGroup}' />
+        </c:if>
+      </div>
+    </c:forEach>
 
-    <div>Select/unselect teams by judging station</div>
+    <c:forEach
+      items="${judgingStations }"
+      var="station"
+      varStatus="idx">
+      <div>
+        <c:if
+          test="${not playoff_data.existingBrackets.contains(station)}">
+          <input
+            type='submit'
+            name='create_judging_group_${idx.count}'
+            value='Create Playoff Bracket for Judging Group ${station }' />
+          <input
+            type='hidden'
+            name='judging_group_${idx.count}'
+            value='${station}' />
+        </c:if>
+      </div>
+    </c:forEach>
+
+    <hr />
+
+    <p>Alternatively select the teams that you want to include in
+      the playoff bracket and choose a name for the it.</p>
+
+    <div>Select/unselect teams by award group</div>
+    <c:forEach
+      items="${awardGroups }"
+      var="awardGroup"
+      varStatus="idx">
+      <div>
+        <input
+          type="checkbox"
+          name="award_group_select_${idx.count}"
+          id="award_group_select_${idx.count }" /> <label
+          for="award_group_select_${idx.count}">${awardGroup }</label>
+        <c:if
+          test="${not playoff_data.existingBrackets.contains(awardGroup)}">
+        </c:if>
+      </div>
+    </c:forEach>
+
+    <div>Select/unselect teams by judging group</div>
     <c:forEach
       items="${judgingStations }"
       var="station"
@@ -69,13 +129,20 @@
       </div>
     </c:forEach>
 
+    <label for="division_name">Name: </label><input name="bracket_name" />
+    <input
+      type='submit'
+      name='selected_teams'
+      value='Create Playoff Bracket with selected teams' /><br />
+
     <table border='1'>
 
       <tr>
         <th>Select</th>
         <th>Number</th>
         <th>Name</th>
-        <th>Judging Station</th>
+        <th>Judging Group</th>
+        <th>Award Group</th>
       </tr>
       <c:forEach
         items="${playoff_data.tournamentTeamsValues }"
@@ -92,15 +159,13 @@
 
           <td>${team.teamName }</td>
 
-          <td>${team.judgingStation }</td>
+          <td>${team.judgingGroup }</td>
+
+          <td>${team.awardGroup }</td>
 
         </tr>
       </c:forEach>
     </table>
-
-    <input
-      type='submit'
-      value='Submit' />
 
   </form>
 

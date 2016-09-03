@@ -27,17 +27,18 @@ public class StorePlayoffParameters extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
 
     final PlayoffSessionData data = SessionAttributes.getNonNullAttribute(session, PlayoffIndex.SESSION_DATA,
                                                                           PlayoffSessionData.class);
 
-    final String divisionParam = request.getParameter("division");
+    final String bracketParam = request.getParameter("division");
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("division: '"
-          + divisionParam + "'");
+      LOGGER.debug("playoff bracket: '"
+          + bracketParam + "'");
     }
-    data.setDivision(divisionParam);
+    data.setBracket(bracketParam);
 
     final String thirdFourthPlaceBrackets = request.getParameter("enableThird");
     if (null == thirdFourthPlaceBrackets) {
@@ -48,8 +49,8 @@ public class StorePlayoffParameters extends BaseFLLServlet {
 
     session.setAttribute(PlayoffIndex.SESSION_DATA, data);
 
-    response.sendRedirect(response.encodeRedirectURL("choose_bracket_sort.jsp"));
-    
+    response.sendRedirect(response.encodeRedirectURL("bracket_parameters.jsp"));
+
   }
 
 }

@@ -43,6 +43,7 @@ import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.Box;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
@@ -148,9 +149,10 @@ public class SchedulerUI extends JFrame {
       frame.setVisible(true);
     } catch (final Exception e) {
       LOGGER.fatal("Unexpected error", e);
-      JOptionPane.showMessageDialog(null, "Unexpected error: "
-          + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-      System.exit(1);
+      JOptionPane.showMessageDialog(null,
+                                    "An unexpected error occurred. Please send the log file and a description of what you were doing to the developer. Error message: "
+                                        + e.getMessage(),
+                                    "Error", JOptionPane.ERROR_MESSAGE);
     }
   }
 
@@ -210,8 +212,6 @@ public class SchedulerUI extends JFrame {
     mDisplayGeneralScheduleAction.setEnabled(false);
     mRunOptimizerAction.setEnabled(false);
     mReloadFileAction.setEnabled(false);
-    mSaveScheduleDescriptionAction.setEnabled(false);
-    mRunSchedulerAction.setEnabled(false);
 
     pack();
   }
@@ -234,6 +234,32 @@ public class SchedulerUI extends JFrame {
   };
 
   void saveScheduleDescription() {
+    if (null == mScheduleDescriptionFile) {
+      // prompt the user for a filename to save to
+
+      final String startingDirectory = PREFS.get(DESCRIPTION_STARTING_DIRECTORY_PREF, null);
+
+      final JFileChooser fileChooser = new JFileChooser();
+      final FileFilter filter = new BasicFileFilter("FLL Schedule Description (properties)",
+                                                    new String[] { "properties" });
+      fileChooser.setFileFilter(filter);
+      if (null != startingDirectory) {
+        fileChooser.setCurrentDirectory(new File(startingDirectory));
+      }
+
+      final int returnVal = fileChooser.showSaveDialog(SchedulerUI.this);
+      if (returnVal == JFileChooser.APPROVE_OPTION) {
+        final File currentDirectory = fileChooser.getCurrentDirectory();
+        PREFS.put(DESCRIPTION_STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
+
+        mScheduleDescriptionFile = fileChooser.getSelectedFile();
+        mDescriptionFilename.setText(mScheduleDescriptionFile.getName());
+      } else {
+        // user canceled
+        return;
+      }
+    }
+
     try (final Writer writer = new OutputStreamWriter(new FileOutputStream(mScheduleDescriptionFile),
                                                       Utilities.DEFAULT_CHARSET)) {
       final SolverParams params = mScheduleDescriptionEditor.getParams();
@@ -263,6 +289,34 @@ public class SchedulerUI extends JFrame {
       saveScheduleDescription();
     }
   };
+
+  private final Action mNewScheduleDescriptionAction = new AbstractAction("New Schedule Description") {
+    {
+      putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/New16.gif"));
+      putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/New24.gif"));
+      putValue(SHORT_DESCRIPTION, "Createa a new schedule description file");
+      putValue(MNEMONIC_KEY, KeyEvent.VK_N);
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
+    }
+
+    @Override
+    public void actionPerformed(final ActionEvent ae) {
+      newScheduleDescription();
+    }
+  };
+
+  private void newScheduleDescription() {
+    final int result = JOptionPane.showConfirmDialog(SchedulerUI.this,
+                                                     "This action will remove any changes to the current schedule and load the defaults. Do you want to continue?",
+                                                     "Question", JOptionPane.YES_NO_OPTION);
+    if (JOptionPane.YES_OPTION == result) {
+      mScheduleDescriptionFile = null;
+      mDescriptionFilename.setText("");
+
+      final SolverParams params = new SolverParams();
+      mScheduleDescriptionEditor.setParams(params);
+    }
+  }
 
   /**
    * Run the scheduler and optionally the table optimizer.
@@ -494,8 +548,6 @@ public class SchedulerUI extends JFrame {
     }
     mScheduleDescriptionFile = file;
 
-    mSaveScheduleDescriptionAction.setEnabled(true);
-    mRunSchedulerAction.setEnabled(true);
     mDescriptionFilename.setText(file.getName());
   }
 
@@ -505,6 +557,7 @@ public class SchedulerUI extends JFrame {
 
     toolbar.add(mDescriptionFilename);
     toolbar.addSeparator();
+    toolbar.add(mNewScheduleDescriptionAction);
     toolbar.add(mOpenScheduleDescriptionAction);
     toolbar.add(mSaveScheduleDescriptionAction);
     toolbar.add(mRunSchedulerAction);
@@ -555,6 +608,7 @@ public class SchedulerUI extends JFrame {
     final JMenu menu = new JMenu("Description");
     menu.setMnemonic('d');
 
+    menu.add(mNewScheduleDescriptionAction);
     menu.add(mOpenScheduleDescriptionAction);
     menu.add(mSaveScheduleDescriptionAction);
     menu.add(mRunSchedulerAction);
@@ -701,8 +755,8 @@ public class SchedulerUI extends JFrame {
             + directory.getAbsolutePath() + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
 
         final int answer = JOptionPane.showConfirmDialog(SchedulerUI.this,
-                                                         "Would you like to print the score sheets as well?",
-                                                         "Print Scoresheets?", JOptionPane.YES_NO_OPTION);
+                                                         "Would you like to write out the score sheets as well?",
+                                                         "Write Out Scoresheets?", JOptionPane.YES_NO_OPTION);
         if (JOptionPane.YES_OPTION == answer) {
           chooseChallengeDescriptor.setLocationRelativeTo(SchedulerUI.this);
           chooseChallengeDescriptor.setVisible(true);
@@ -724,7 +778,7 @@ public class SchedulerUI extends JFrame {
                                                                             getScheduleData());
             mapDialog.setLocationRelativeTo(SchedulerUI.this);
             mapDialog.setVisible(true);
-            if (mapDialog.isMappingValid()) {
+            if (!mapDialog.isCanceled()) {
               final Map<ScoreCategory, String> categoryToSchedule = new HashMap<>();
               for (final ScoreCategory scoreCategory : description.getSubjectiveCategories()) {
                 final String scheduleColumn = mapDialog.getSubjectiveHeaderForCategory(scoreCategory);
@@ -736,16 +790,12 @@ public class SchedulerUI extends JFrame {
               }
               getScheduleData().outputSubjectiveSheets(directory.getAbsolutePath(), baseFilename, description,
                                                        categoryToSchedule);
-            } else {
-              JOptionPane.showMessageDialog(SchedulerUI.this,
-                                            "Subjective sheets not written out due to incomplete mapping of schedule columns to categories",
-                                            "Warning", JOptionPane.WARNING_MESSAGE);
-            }
 
-            JOptionPane.showMessageDialog(SchedulerUI.this, "Scoresheets written '"
-                + scoresheetFile.getAbsolutePath() + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
-          }
-        }
+              JOptionPane.showMessageDialog(SchedulerUI.this, "Scoresheets written '"
+                  + scoresheetFile.getAbsolutePath() + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
+            } // not canceled
+          } // valid descriptor location
+        } // yes to write score sheets
       } catch (final DocumentException e) {
         final Formatter errorFormatter = new Formatter();
         errorFormatter.format("Error writing detailed schedules: %s", e.getMessage());
@@ -1078,9 +1128,10 @@ public class SchedulerUI extends JFrame {
       for (final ConstraintViolation violation : getViolationsModel().getViolations()) {
         if (violation.getTeam() == schedInfo.getTeamNumber()) {
           Collection<SubjectiveTime> subjectiveTimes = violation.getSubjectiveTimes();
-          if ((SchedulerTableModel.TEAM_NUMBER_COLUMN == tmCol
-              || SchedulerTableModel.JUDGE_COLUMN == tmCol)
+          if (tmCol <= SchedulerTableModel.JUDGE_COLUMN
               && subjectiveTimes.isEmpty() && null == violation.getPerformance()) {
+            // there is an error for this team and the team information fields
+            // should be highlighted
             error = true;
             isHard |= violation.isHard();
           } else if (null != violation.getPerformance()) {
@@ -1182,7 +1233,7 @@ public class SchedulerUI extends JFrame {
     }
   };
 
-  private File mScheduleDescriptionFile;
+  private File mScheduleDescriptionFile = null;
 
   private File mScheduleFile;
 
@@ -1208,10 +1259,14 @@ public class SchedulerUI extends JFrame {
     final List<String> unusedColumns = columnInfo.getUnusedColumns();
     final List<JCheckBox> checkboxes = new LinkedList<JCheckBox>();
     final List<JFormattedTextField> subjectiveDurations = new LinkedList<JFormattedTextField>();
-    final JPanel optionPanel = new JPanel(new GridLayout(0, 2));
+    final Box optionPanel = Box.createVerticalBox();
 
-    optionPanel.add(new JLabel("Column"));
-    optionPanel.add(new JLabel("Duration (minutes)"));
+    optionPanel.add(new JLabel("Specify which columns in the data file are for subjective judging"));
+
+    final JPanel grid = new JPanel(new GridLayout(0, 2));
+    optionPanel.add(grid);
+    grid.add(new JLabel("Data file column"));
+    grid.add(new JLabel("Duration (minutes)"));
 
     for (final String column : unusedColumns) {
       if (null != column
@@ -1221,8 +1276,8 @@ public class SchedulerUI extends JFrame {
         final JFormattedTextField duration = new JFormattedTextField(Integer.valueOf(SchedParams.DEFAULT_SUBJECTIVE_MINUTES));
         duration.setColumns(4);
         subjectiveDurations.add(duration);
-        optionPanel.add(checkbox);
-        optionPanel.add(duration);
+        grid.add(checkbox);
+        grid.add(duration);
       }
     }
     final List<SubjectiveStation> subjectiveHeaders;

@@ -64,13 +64,13 @@ public class FinalistLoad {
     output.format("  %s = $.finalist.addTeam(%d, %s, %s, %s);%n", teamVarName, team.getTeamNumber(),
                   WebUtils.quoteJavascriptString(team.getTrimmedTeamName()),
                   WebUtils.quoteJavascriptString(team.getOrganization()),
-                  WebUtils.quoteJavascriptString(team.getJudgingStation()));
+                  WebUtils.quoteJavascriptString(team.getJudgingGroup()));
     output.format("}%n");
 
     output.format("$.finalist.addTeamToDivision(%s, %s);%n", teamVarName,
-                  WebUtils.quoteJavascriptString(team.getEventDivision()));
+                  WebUtils.quoteJavascriptString(team.getAwardGroup()));
 
-    for (final String playoffDivision : Playoff.getPlayoffDivisionsForTeam(connection, team.getTeamNumber())) {
+    for (final String playoffDivision : Playoff.getPlayoffBracketsForTeam(connection, team.getTeamNumber())) {
       output.format("$.finalist.addTeamToPlayoffDivision(%s, %s);%n", teamVarName,
                     WebUtils.quoteJavascriptString(playoffDivision));
     }
@@ -101,11 +101,11 @@ public class FinalistLoad {
       final int tournament = Queries.getCurrentTournament(connection);
 
       final Formatter output = new Formatter(writer);
-      for (final String division : Queries.getEventDivisions(connection, tournament)) {
+      for (final String division : Queries.getAwardGroups(connection, tournament)) {
         output.format("$.finalist.addDivision(%s);%n", WebUtils.quoteJavascriptString(division));
       }
 
-      for (final String playoffDivision : Playoff.getPlayoffDivisions(connection, tournament)) {
+      for (final String playoffDivision : Playoff.getPlayoffBrackets(connection, tournament)) {
         output.format("$.finalist.addPlayoffDivision(%s);%n", WebUtils.quoteJavascriptString(playoffDivision));
       }
 
