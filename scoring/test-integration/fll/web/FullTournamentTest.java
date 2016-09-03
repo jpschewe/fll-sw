@@ -422,7 +422,7 @@ public class FullTournamentTest {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "admin/index.jsp");
 
-    selenium.findElement(By.partialLinkText("Assign teams to award groups")).click();
+    selenium.findElement(By.partialLinkText("Change award group assignments")).click();
 
     final Set<String> awardGroups = new HashSet<>();
     final List<WebElement> inputs = selenium.findElements(By.cssSelector("input:checked[type='radio']"));
