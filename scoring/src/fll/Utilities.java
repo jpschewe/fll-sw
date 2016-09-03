@@ -65,6 +65,8 @@ public final class Utilities {
    */
   public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
+  public static final char NON_BREAKING_SPACE = '\u00a0';
+
   private Utilities() {
   }
 

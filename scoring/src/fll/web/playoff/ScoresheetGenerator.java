@@ -36,6 +36,7 @@ import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.Team;
+import fll.Utilities;
 import fll.Version;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
@@ -57,8 +58,6 @@ public class ScoresheetGenerator {
   private static final String LONG_BLANK = "_________________________";
 
   private static final String SHORT_BLANK = "______";
-
-  private static final char NON_BREAKING_SPACE = '\u00a0';
 
   private final Font f6i = new Font(Font.FontFamily.HELVETICA, 6, Font.ITALIC);
   
@@ -592,11 +591,11 @@ public class ScoresheetGenerator {
           for (final EnumeratedValue value : values) {
             if (!first) {
               choices.append(" /"
-                  + NON_BREAKING_SPACE);
+                  + Utilities.NON_BREAKING_SPACE);
             } else {
               first = false;
             }
-            choices.append(value.getTitle().toUpperCase().replace(' ', NON_BREAKING_SPACE));
+            choices.append(value.getTitle().toUpperCase().replace(' ', Utilities.NON_BREAKING_SPACE));
           }
           m_goalValue[realI].addElement(choices);
 
