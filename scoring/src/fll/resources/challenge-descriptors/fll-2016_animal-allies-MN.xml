@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fll
-  title="2016 FIRST LEGO League - Animal Allies"
+  title="2016 Minnesota FIRST LEGO League - Animal Allies"
   copyright="2016 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST&#174;) and The LEGO Group. Used by special permission. All rights reserved."
   revision="1"
   schemaVersion="2">
@@ -296,9 +296,9 @@
 
 
   <subjectiveCategory
-  name="project"
-  title="Project"
-  weight="1.0">
+    name="project"
+    title="Project"
+    weight="1.0">
     <goal
       initialValue="0"
       max="12"
@@ -1247,7 +1247,7 @@
   <subjectiveCategory
     name="robot_design"
     title="Robot Design"
-    weight="1.0">
+    weight="0.5">
     <goal
       initialValue="0"
       max="12"
@@ -1407,6 +1407,376 @@
       </rubric>
     </goal>
 
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="attachments"
+      title="Attachments and Sensors"
+      category="MN Design">
+      <description>Attachments and Sensors, if used, are an integrated
+        part
+        of the design, they are used appropriately and achieve
+        consistent
+        results.
+      </description>
+      <rubric>
+        <range
+          title="Beginning"
+          min="1"
+          max="3"
+          shortDescription="Sensors used incorrectly.  Weak or poorly designed attachments">
+          <description>Weak or poorly designed attachments, difficult to
+            add/remove.
+          </description>
+        </range>
+        <range
+          title="Developing"
+          min="4"
+          max="6"
+          shortDescription="Sensor use inconsistent.  Not modular or consistent attachments">
+          <description>Not modular or consistent attachments,
+            attachments awkward to add/remove. Not repeatable.
+          </description>
+        </range>
+        <range
+          title="Accomplished"
+          min="7"
+          max="9"
+          shortDescription="Sensors used appropriately.  Attachments somewhat modular and work as expected">
+          <description>Attachments somewhat modular and work as
+            expected. Easy to add/remove. Somewhat repeatable.
+          </description>
+        </range>
+        <range
+          title="Exemplary"
+          min="10"
+          max="12"
+          shortDescription="Sensor use precise and repeatable.  Attachments modular and work as expected">
+          <description>Attachments modular and work as expected,
+            repeatedly. They look like they belong to the robot.
+          </description>
+        </range>
+      </rubric>
+    </goal>
+
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="kids_work"
+      title="Kids Did the Work"
+      category="MN Design">
+      <description>Appropriate balance between team responsibility and
+        coach guidance
+      </description>
+      <rubric>
+        <range
+          title="Beginning"
+          min="1"
+          max="3"
+          shortDescription="Limited team responsibility AND excessive coach guidance">
+          <description>Little knowledge of why parts are as they are on
+            robot. Little or no understanding of what pieces do what.
+          </description>
+        </range>
+        <range
+          title="Developing"
+          min="4"
+          max="6"
+          shortDescription="Limited team responsibility OR excessive coach guidance">
+          <description>Minimal understanding of underlying design,
+            technology, strategy and robot structure.
+          </description>
+        </range>
+        <range
+          title="Accomplished"
+          min="7"
+          max="9"
+          shortDescription="Good balance between team responsibility and coach guidance">
+          <description>Moderate understanding of robot structure,
+            underlying design, strategy and technology.
+          </description>
+        </range>
+        <range
+          title="Exemplary"
+          min="10"
+          max="12"
+          shortDescription="Team independence with minimal coach guidance">
+          <description>Thorough understanding of robot structure,
+            underlying design, strategy and technology.
+          </description>
+        </range>
+      </rubric>
+    </goal>
+
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="design_process"
+      title="Design Process"
+      category="Strategy and Innovation">
+      <description>Ability to develop and explain improvement cycles
+        where
+        alternatives are considered and narrowed, selections
+        tested, design
+        improved.
+      </description>
+      <rubric>
+        <range
+          title="Beginning"
+          min="1"
+          max="3"
+          shortDescription="Organization AND explanation need improvement">
+          <description>Disorganized AND poorly explained improvement
+            cycles. Uses standard design. No design process (concept
+            build test refine).
+          </description>
+        </range>
+        <range
+          title="Developing"
+          min="4"
+          max="6"
+          shortDescription="Organization OR explanation need improvement">
+          <description>Disorganized OR poorly explained improvement
+            cycles. Some forethought in initial design. Refinement of
+            robot not well communicated.
+          </description>
+        </range>
+        <range
+          title="Accomplished"
+          min="7"
+          max="9"
+          shortDescription="Systematic and well-explained">
+          <description>Basic understanding of design process, evidence
+            of concept planning, building, testing, refining.
+          </description>
+        </range>
+        <range
+          title="Exemplary"
+          min="10"
+          max="12"
+          shortDescription="Systematic, well-explained and well-documented">
+          <description>Good communication of complete design process.
+          </description>
+        </range>
+      </rubric>
+    </goal>
+
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="mission_strategy"
+      title="Mission Strategy"
+      category="Strategy and Innovation">
+      <description>Ability to clearly define and describe the team's
+        game
+        strategy.
+      </description>
+      <rubric>
+        <range
+          title="Beginning"
+          min="1"
+          max="3"
+          shortDescription="No clear goals AND no clear strategy">
+          <description>Strategy based only on ease of task - no combined
+            missions or maximizing time/effort.
+          </description>
+        </range>
+        <range
+          title="Developing"
+          min="4"
+          max="6"
+          shortDescription="No clear goals OR no clear strategy">
+          <description>Strategy based on ease of tasks, few risks. Some
+            consideration or time/efforts/points.
+          </description>
+        </range>
+        <range
+          title="Accomplished"
+          min="7"
+          max="9"
+          shortDescription="Clear strategy to accomplish the team's well defined goals">
+          <description>Effective strategic planning, combining of
+            missions, routes, attachments.
+          </description>
+        </range>
+        <range
+          title="Exemplary"
+          min="10"
+          max="12"
+          shortDescription="Clear strategy to accomplish most/all game missions and team goals">
+          <description>Excellent/innovative strategy, combining
+            missions, routes, points.
+          </description>
+        </range>
+      </rubric>
+    </goal>
+
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="innovation"
+      title="Innovation"
+      category="Strategy and Innovation">
+      <description>Creation of new, unique or unexpected feature(s)
+        (e.g.
+        designs, programs, strategies or applications) that are
+        beneficial
+        in performing the specified tasks.
+      </description>
+      <rubric>
+        <range
+          title="Beginning"
+          min="1"
+          max="3"
+          shortDescription="Original feature(s) with no added value or potential">
+          <description>Design, drive, structure are standard. Expected
+            sensor use only.
+          </description>
+        </range>
+        <range
+          title="Developing"
+          min="4"
+          max="6"
+          shortDescription="Original feature(s) with some added value or potential">
+          <description>Either design creative, unique use of drive train
+            or structure, or unique mission strategy.
+          </description>
+        </range>
+        <range
+          title="Accomplished"
+          min="7"
+          max="9"
+          shortDescription="Original feature(s) with the potential to add significant value">
+          <description>More than one unique design, drive train,
+            structure, or mission strategy.
+          </description>
+        </range>
+        <range
+          title="Exemplary"
+          min="10"
+          max="12"
+          shortDescription="Original feature(s) that add significant value">
+          <description>Extremely unique/creative design, drive train,
+            structure and/or mission strategy.
+          </description>
+        </range>
+      </rubric>
+    </goal>
+
+  </subjectiveCategory>
+
+
+
+
+
+
+  <subjectiveCategory
+    name="robot_programming"
+    title="Programming"
+    weight="0.5">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="code_structure"
+      title="Code Structure and Reuse"
+      category="MN Programming">
+      <description>Programs show proper use of variables, loops,
+        subroutines and there is an understanding of code reuse.
+      </description>
+      <rubric>
+        <range
+          title="Beginning"
+          min="1"
+          max="3"
+          shortDescription="Variables, loops, subroutines and conditions defined, but not used">
+        </range>
+        <range
+          title="Developing"
+          min="4"
+          max="6"
+          shortDescription="Variables, loops, subroutines and conditions exist, but not fully understood or utilized">
+        </range>
+        <range
+          title="Accomplished"
+          min="7"
+          max="9"
+          shortDescription="Variables, loops, subroutines and conditions are used and understood.  Some signs of code reuse">
+          <description>Some signs of code reuse.</description>
+        </range>
+        <range
+          title="Exemplary"
+          min="10"
+          max="12"
+          shortDescription="Variables, loops, subroutines and conditions are used effectively.  Code reuse evident and understood">
+          <description>Code reuse evident and understood.</description>
+        </range>
+      </rubric>
+    </goal>
+
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="kids_work"
+      title="Kids Did the Work"
+      category="MN Programming">
+      <description>Appropriate balance between team responsibility and
+        coach guidance
+      </description>
+      <rubric>
+        <range
+          title="Beginning"
+          min="1"
+          max="3"
+          shortDescription="Limited team responsibility AND excessive coach guidance">
+          <description>Little knowledge of how programs work on robot.
+            Little or no understanding of what pieces do what.
+          </description>
+        </range>
+        <range
+          title="Developing"
+          min="4"
+          max="6"
+          shortDescription="Limited team responsibility OR excessive coach guidance">
+          <description>Appears primarily directed by the coach. Minimal
+            understanding of underlying design, strategy and robot
+            programming.
+          </description>
+        </range>
+        <range
+          title="Accomplished"
+          min="7"
+          max="9"
+          shortDescription="Good balance between team responsibility and coach guidance">
+          <description>Moderate understanding of underlying design,
+            strategy and robot programming. Kids describe most missions.
+          </description>
+        </range>
+        <range
+          title="Exemplary"
+          min="10"
+          max="12"
+          shortDescription="Team independence with minimal coach guidance">
+          <description>Thorough understanding of underlying design,
+            strategy and programming. Kids describe missions and
+            reference appropriate programs.
+          </description>
+        </range>
+      </rubric>
+    </goal>
 
     <goal
       initialValue="0"
@@ -1578,9 +1948,8 @@
           min="1"
           max="3"
           shortDescription="Organization AND explanation need improvement">
-          <description>Disorganized AND poorly explained improvement
-            cycles. Uses standard design. No design process (concept
-            build test refine).
+          <description>Uses simple programming design. No design process
+            (concept code test refine).
           </description>
         </range>
         <range
@@ -1588,9 +1957,8 @@
           min="4"
           max="6"
           shortDescription="Organization OR explanation need improvement">
-          <description>Disorganized OR poorly explained improvement
-            cycles. Some forethought in initial design. Refinement of
-            robot not well communicated.
+          <description>Some forethought in initial programming design.
+            Refinement of code not well communicated.
           </description>
         </range>
         <range
@@ -1599,7 +1967,7 @@
           max="9"
           shortDescription="Systematic and well-explained">
           <description>Basic understanding of design process, evidence
-            of concept planning, building, testing, refining.
+            of concept planning, coding, testing, refining.
           </description>
         </range>
         <range
@@ -1641,7 +2009,7 @@
           max="6"
           shortDescription="No clear goals OR no clear strategy">
           <description>Strategy based on ease of tasks, few risks. Some
-            consideration or time/efforts/points.
+            consideration for time/efforts/points.
           </description>
         </range>
         <range
@@ -1650,7 +2018,7 @@
           max="9"
           shortDescription="Clear strategy to accomplish the team's well defined goals">
           <description>Effective strategic planning, combining of
-            missions, routes, attachments.
+            missions, routes, attachments, code.
           </description>
         </range>
         <range
@@ -1685,7 +2053,7 @@
           min="1"
           max="3"
           shortDescription="Original feature(s) with no added value or potential">
-          <description>Design, drive, structure are standard. Expected
+          <description>Programs and strategy are standard. Expected
             sensor use only.
           </description>
         </range>
@@ -1694,8 +2062,7 @@
           min="4"
           max="6"
           shortDescription="Original feature(s) with some added value or potential">
-          <description>Either design creative, unique use of drive train
-            or structure, or unique mission strategy.
+          <description>A unique use of programming or mission strategy.
           </description>
         </range>
         <range
@@ -1703,8 +2070,8 @@
           min="7"
           max="9"
           shortDescription="Original feature(s) with the potential to add significant value">
-          <description>More than one unique design, drive train,
-            structure, or mission strategy.
+          <description>More than one unique use of program controls or
+            mission coordinating strategy.
           </description>
         </range>
         <range
@@ -1712,8 +2079,8 @@
           min="10"
           max="12"
           shortDescription="Original feature(s) that add significant value">
-          <description>Extremely unique/creative design, drive train,
-            structure and/or mission strategy.
+          <description>Extremely unique/creative/unexpected program,
+            control, construct or mission strategy.
           </description>
         </range>
       </rubric>
