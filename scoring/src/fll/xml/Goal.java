@@ -27,7 +27,6 @@ public class Goal extends AbstractGoal {
     mInitialValue = Double.valueOf(ele.getAttribute("initialValue"));
 
     mScoreType = XMLUtils.getScoreType(ele);
-    mCategory = ele.getAttribute("category");
 
     final List<RubricRange> rubric = new LinkedList<RubricRange>();
     final NodelistElementCollectionAdapter rubricEles = new NodelistElementCollectionAdapter(
@@ -110,12 +109,6 @@ public class Goal extends AbstractGoal {
 
   public ScoreType getScoreType() {
     return mScoreType;
-  }
-
-  private final String mCategory;
-
-  public String getCategory() {
-    return mCategory;
   }
 
   public boolean isEnumerated() {
