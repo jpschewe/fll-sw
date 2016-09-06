@@ -60,6 +60,10 @@ function updateTeams() {
   });
 }
 
+function checkCategoryEmpty(category) {
+  return category.teams.length == 0;
+}
+
 function addCategoryElement(category) {
   var catEle = $("<li></li>");
   $("#categories").append(catEle);
@@ -89,6 +93,23 @@ function addCategoryElement(category) {
   });
   roomEle.val($.finalist.getRoom(category, $.finalist.getCurrentDivision()));
 
+  var deleteButton = $("<button id='delete_" + category.catId + "'>Delete</button>");
+  catEle.append(deleteButton);
+  deleteButton.click(function() {
+    // check all teams being empty
+    var categoryIsEmpty = checkCategoryEmpty(category);
+    if(!categoryIsEmpty) {
+      var reallyDelete = confirm("Are you sure you want to delete category " + category.name + "?");
+      if(reallyDelete) {
+        $.finalist.removeCategory(category);
+        catEle.remove();
+      }
+    } else {
+      $.finalist.removeCategory(category);
+      catEle.remove();
+    }
+  });
+  
   var teamList = $("<ul id='category_" + category.catId + "'></ul>");
   catEle.append(teamList);
 
