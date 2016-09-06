@@ -720,6 +720,16 @@
         return newCategory;
       }
     },
+    
+    /**
+     * Remove the speciifed category.
+     * 
+     * @param category a category object
+     */
+    removeCategory : function(category) {
+      delete _categories[category.catId];
+      _save();
+    },
 
     /**
      * Get the non-numeric categories known to the system.
