@@ -221,6 +221,13 @@ return m;
         <td align="center" valign="middle">
 
           <table class='score-entry' border='1'  bordercolor='#808080'>
+          <colgroup>
+          <col width="30%"/> <!--  goal -->
+          <col width="20%"/> <!-- buttons -->
+          <col width="10%"/> <!-- count -->
+          <col width="10%"/> <!--  score -->
+          <col width="30%"/> <!--  error -->
+          </colgroup>
             <tr>
               <td colspan='2'>
                 <font size='4'><u>Goal</u></font>
