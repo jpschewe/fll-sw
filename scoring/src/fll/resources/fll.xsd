@@ -434,7 +434,8 @@
         default="false">
         <xsd:annotation>
           <xsd:documentation>
-            If set to true, then this goal is required to be considered
+            If set to true, then this goal is required
+            to be considered
             for an award.
           </xsd:documentation>
         </xsd:annotation>
@@ -703,6 +704,7 @@
           maxOccurs="unbounded" />
         <xsd:element ref="switch" />
       </xsd:sequence>
+    
       <xsd:attribute
         name="name"
         type="databaseName"
@@ -711,6 +713,20 @@
         name="title"
         type="xsd:string"
         use="required" />
+
+      <xsd:attribute
+        name="category"
+        type="xsd:string"
+        use="optional">
+        <xsd:annotation>
+          <xsd:documentation>
+            The category that this goal is in. This is
+            a way
+            to group goals.
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+
     </xsd:complexType>
     <xsd:key name="variableKey">
       <xsd:annotation>

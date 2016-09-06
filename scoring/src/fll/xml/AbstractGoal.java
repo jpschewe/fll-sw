@@ -38,6 +38,14 @@ public abstract class AbstractGoal implements Serializable {
     } else {
       mDescription = null;
     }
+
+    mCategory = ele.getAttribute("category");
+  }
+
+  private final String mCategory;
+
+  public String getCategory() {
+    return mCategory;
   }
 
   private final boolean mRequired;
