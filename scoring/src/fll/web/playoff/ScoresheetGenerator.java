@@ -606,8 +606,7 @@ public class ScoresheetGenerator {
             categoryCell.setBorderWidthTop(1);
             categoryCell.setBorderWidthBottom(0);
             categoryCell.setBorderWidthLeft(0);
-            categoryCell.setBorderWidthRight(0);
-            ;
+            categoryCell.setBorderWidthRight(0);            
             categoryCell.setVerticalAlignment(Element.ALIGN_CENTER);
             categoryCell.setHorizontalAlignment(Element.ALIGN_CENTER);
             categoryCell.setRotation(90);
@@ -622,8 +621,9 @@ public class ScoresheetGenerator {
         // This is the text for the left hand "label" cell
         final String title = goal.getTitle();
         final Paragraph p = new Paragraph(title, ARIAL_10PT_NORMAL);
-        p.setAlignment(Element.ALIGN_RIGHT);
         final PdfPCell goalLabel = new PdfPCell(p);
+        goalLabel.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        goalLabel.setVerticalAlignment(Element.ALIGN_CENTER);
         if (firstRowInCategory) {
           goalLabel.setBorderWidthTop(1);
           goalLabel.setBorderWidthBottom(0);
