@@ -134,6 +134,10 @@ function teamJudgingStationId(category, teamIdx) {
   return "judgingStation_" + category + "_" + teamIdx;
 }
 
+function teamDeleteId(category, teamIdx) {
+  return "delete_" + category + "_" + teamIdx;
+}
+
 function populateTeamInformation(category, teamIdx, team) {
   $("#" + teamNumId(category.catId, teamIdx)).val(team.num);
   $("#" + teamNumId(category.catId, teamIdx)).data('oldVal', team.num);
@@ -190,6 +194,22 @@ function addTeam(category) {
   var judgingStationEle = $("<input id='"
       + teamJudgingStationId(category.catId, teamIdx) + "' readonly/>");
   teamEle.append(judgingStationEle);
+  
+  var deleteButton = $("<button id='" + teamDeleteId(category.catId, teamIdx) + "'>Delete</button>");
+  teamEle.append(deleteButton);
+  deleteButton.click(function() {
+    var teamNum = numEle.val();
+    if("" != teamNum) {
+      var reallyDelete = confirm("Are you sure you want to delete this team?");
+      if(reallyDelete) {
+        $.finalist.removeTeamFromCategory(category, teamNum);
+        teamEle.remove();
+      }
+    } else {
+      $.finalist.removeTeamFromCategory(category, teamNum);
+      teamEle.remove();
+    }
+  });
 
   return teamIdx;
 }
