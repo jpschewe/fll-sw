@@ -1,3 +1,4 @@
+* #513 - Add support for groups to the performance score sheet and performance score entry
 * #516 - Add instructions to the dialog in the scheduler when choosing a challenge description
 * #457, #499 - enhanced the training databases and made sure they are part of the distribution
 * #510 - Add separator with category name to the subjective web application

@@ -26,6 +26,7 @@ import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import fll.Team;
@@ -79,7 +80,8 @@ public final class ScoreEntry {
    * of document.
    */
   public static void generateIsConsistent(final JspWriter writer,
-                                          final ServletContext application) throws IOException {
+                                          final ServletContext application)
+      throws IOException {
     final ChallengeDescription descriptor = ApplicationAttributes.getChallengeDescription(application);
     final PerformanceScoreCategory performanceElement = descriptor.getPerformance();
 
@@ -121,7 +123,8 @@ public final class ScoreEntry {
    * @throws ParseException
    */
   public static void generateIncrementMethods(final Writer writer,
-                                              final ServletContext application) throws IOException, ParseException {
+                                              final ServletContext application)
+      throws IOException, ParseException {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final PerformanceScoreCategory performanceElement = description.getPerformance();
     final Formatter formatter = new Formatter(writer);
@@ -207,7 +210,8 @@ public final class ScoreEntry {
    * Generate the body of the refresh function
    */
   public static void generateRefreshBody(final Writer writer,
-                                         final ServletContext application) throws ParseException, IOException {
+                                         final ServletContext application)
+      throws ParseException, IOException {
     if (LOG.isTraceEnabled()) {
       LOG.trace("Entering generateRefreshBody");
     }
@@ -323,7 +327,7 @@ public final class ScoreEntry {
    */
   public static void generateCheckRestrictionsBody(final Writer writer,
                                                    final ServletContext application)
-                                                       throws IOException, ParseException {
+      throws IOException, ParseException {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final Formatter formatter = new Formatter(writer);
 
@@ -390,7 +394,8 @@ public final class ScoreEntry {
    * values.
    */
   public static void generateInitForNewScore(final JspWriter writer,
-                                             final ServletContext application) throws IOException, ParseException {
+                                             final ServletContext application)
+      throws IOException, ParseException {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final PerformanceScoreCategory performanceElement = description.getPerformance();
 
@@ -450,15 +455,28 @@ public final class ScoreEntry {
    * Generate the score entry form.
    */
   public static void generateScoreEntry(final JspWriter writer,
-                                        final ServletContext application) throws IOException {
+                                        final ServletContext application)
+      throws IOException {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final Formatter formatter = new Formatter(writer);
 
+    String prevCategory = null;
     final PerformanceScoreCategory performanceElement = description.getPerformance();
     for (final AbstractGoal goalEle : performanceElement.getGoals()) {
       final String name = goalEle.getName();
       final String title = goalEle.getTitle();
+      final String category = goalEle.getCategory();
+
       try {
+
+        if (!StringUtils.equals(prevCategory, category)) {
+          writer.println("<tr><td colspan='5'>&nbsp;</td></tr>");
+          if (!StringUtils.isEmpty(category)) {
+            writer.println("<tr><td colspan='5' class='center'><b>"
+                + category + "</b></td></tr>");
+          }
+        }
+
         writer.println("<!-- "
             + name + " -->");
         writer.println("<tr>");
@@ -499,6 +517,8 @@ public final class ScoreEntry {
         throw new RuntimeException("FATAL: min/max not parsable for goal: "
             + name);
       }
+
+      prevCategory = category;
     } // end foreach child of performance
   }
 
@@ -513,7 +533,8 @@ public final class ScoreEntry {
    */
   private static void generateSimpleGoalButtons(final AbstractGoal goalEle,
                                                 final String name,
-                                                final JspWriter writer) throws IOException, ParseException {
+                                                final JspWriter writer)
+      throws IOException, ParseException {
     // start inc/dec buttons
     writer.println("    <table border='0' cellpadding='0' cellspacing='0' width='150'>");
     writer.println("      <tr align='center'>");
@@ -575,7 +596,8 @@ public final class ScoreEntry {
    */
   private static void generateIncDecButton(final String name,
                                            final int increment,
-                                           final JspWriter writer) throws IOException {
+                                           final JspWriter writer)
+      throws IOException {
     // generate buttons with calls to increment<name>
     final String buttonName = (increment < 0 ? "" : "+")
         + String.valueOf(increment);
@@ -598,7 +620,8 @@ public final class ScoreEntry {
    * Generate yes and no buttons for goal name.
    */
   private static void generateYesNoButtons(final String name,
-                                           final JspWriter writer) throws IOException {
+                                           final JspWriter writer)
+      throws IOException {
     // generate radio buttons with calls to set<name>
 
     // order of yes/no buttons needs to match order in generateRefreshBody
@@ -623,7 +646,8 @@ public final class ScoreEntry {
    */
   public static void generateInitForScoreEdit(final JspWriter writer,
                                               final ServletContext application,
-                                              final HttpSession session) throws SQLException, IOException {
+                                              final HttpSession session)
+      throws SQLException, IOException {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final int teamNumber = SessionAttributes.getNonNullAttribute(session, "team", Team.class).getTeamNumber();
     final int runNumber = SessionAttributes.getNonNullAttribute(session, "lRunNumber", Number.class).intValue();
@@ -693,7 +717,8 @@ public final class ScoreEntry {
 
   private static void generateEnumeratedGoalButtons(final AbstractGoal goal,
                                                     final String goalName,
-                                                    final JspWriter writer) throws IOException, ParseException {
+                                                    final JspWriter writer)
+      throws IOException, ParseException {
     writer.println("    <table border='0' cellpadding='0' cellspacing='0' width='100%'>");
 
     for (final EnumeratedValue valueEle : goal.getSortedValues()) {
@@ -805,7 +830,8 @@ public final class ScoreEntry {
   }
 
   private static void generateComputedGoalFunction(final Formatter formatter,
-                                                   final ComputedGoal compGoal) throws ParseException {
+                                                   final ComputedGoal compGoal)
+      throws ParseException {
     final String goalName = compGoal.getName();
 
     formatter.format("function %s() {%n", getComputedMethodName(goalName));
@@ -834,7 +860,8 @@ public final class ScoreEntry {
   private static void generateSwitch(final Formatter formatter,
                                      final SwitchStatement ele,
                                      final String goalName,
-                                     final int indent) throws ParseException {
+                                     final int indent)
+      throws ParseException {
     // keep track if there are any case statements
     boolean first = true;
     final boolean hasCase = !ele.getCases().isEmpty();
@@ -982,7 +1009,8 @@ public final class ScoreEntry {
    */
   private static void generateCondition(final Formatter formatter,
                                         final String ifPrefix,
-                                        final AbstractConditionStatement ele) throws ParseException {
+                                        final AbstractConditionStatement ele)
+      throws ParseException {
     formatter.format("%sif(", ifPrefix);
 
     if (ele instanceof ConditionStatement) {
