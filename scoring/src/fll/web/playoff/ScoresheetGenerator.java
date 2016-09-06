@@ -13,11 +13,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.itextpdf.text.BaseColor;
@@ -563,21 +565,78 @@ public class ScoresheetGenerator {
     }
 
     final PerformanceScoreCategory performanceElement = description.getPerformance();
-    final List<AbstractGoal> goals = performanceElement.getGoals();
+    final List<AbstractGoal> goals = new ArrayList<>(performanceElement.getGoals()); // use
+                                                                                     // ArrayList
+                                                                                     // as
+                                                                                     // we
+                                                                                     // will
+                                                                                     // be
+                                                                                     // doing
+                                                                                     // indexed
+                                                                                     // access
+                                                                                     // in
+                                                                                     // the
+                                                                                     // loop
 
-    m_goalsTable = new PdfPTable(2);
+    final float[] relativeWidths = new float[3];
+    relativeWidths[0] = 10;
+    relativeWidths[1] = 45;
+    relativeWidths[2] = 45;
+    m_goalsTable = new PdfPTable(relativeWidths);
 
-    for (final AbstractGoal goal : goals) {
+    String prevCategory = null;
+    for (int goalIndex = 0; goalIndex < goals.size(); ++goalIndex) {
+      final AbstractGoal goal = goals.get(goalIndex);
       if (!goal.isComputed()) {
+        final String category = goal.getCategory();
+
+        // FIXME add top and bottom borders to categories
+
+        // add category cell if needed
+        if (!StringUtils.equals(prevCategory, category)) {
+          if (null != category) {
+
+            // find out how many future goals have the same category
+            int categoryRowSpan = 1;
+            for (int otherIndex = goalIndex
+                + 1; otherIndex < goals.size(); ++otherIndex) {
+              final AbstractGoal otherGoal = goals.get(otherIndex);
+              if (!otherGoal.isComputed()) {
+                if (StringUtils.equals(category, otherGoal.getCategory())) {
+                  ++categoryRowSpan;
+                } else {
+                  break;
+                }
+              }
+            }
+
+            final Paragraph catPara = new Paragraph(category, ARIAL_10PT_NORMAL);
+            final PdfPCell categoryCell = new PdfPCell(catPara);
+            categoryCell.setBorder(0);
+            categoryCell.setVerticalAlignment(Element.ALIGN_CENTER);
+            categoryCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            categoryCell.setRotation(90);
+            categoryCell.setRowspan(categoryRowSpan);
+            m_goalsTable.addCell(categoryCell);
+          }
+
+        }
+
         // This is the text for the left hand "label" cell
         final String title = goal.getTitle();
         final Paragraph p = new Paragraph(title, ARIAL_10PT_NORMAL);
         p.setAlignment(Element.ALIGN_RIGHT);
-        final PdfPCell goalLabel = new PdfPCell();
+        final PdfPCell goalLabel = new PdfPCell(p);
         goalLabel.setBorder(0);
         goalLabel.setPaddingRight(9);
-        goalLabel.addElement(p);
         goalLabel.setVerticalAlignment(Element.ALIGN_TOP);
+        if (null == category) {
+          // category column and goal label column
+          goalLabel.setColspan(2);
+        }
+        m_goalsTable.addCell(goalLabel);
+
+        // define the value cell
         final double min = goal.getMin();
         final String minStr = FP.equals(min, Math.round(min), 1E-6) ? String.valueOf((int) min) : String.valueOf(min);
         final double max = goal.getMax();
@@ -631,10 +690,14 @@ public class ScoresheetGenerator {
         goalValue.setBorder(0);
         goalValue.setVerticalAlignment(Element.ALIGN_MIDDLE);
 
-        m_goalsTable.addCell(goalLabel);
         m_goalsTable.addCell(goalValue);
-      } // if not computd goal
+
+        // setup for next loop
+        prevCategory = category;
+      } // if not computed goal
+
     } // foreach goal
+
   }
 
   private int m_numSheets;
