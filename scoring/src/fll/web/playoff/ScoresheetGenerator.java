@@ -565,18 +565,8 @@ public class ScoresheetGenerator {
     }
 
     final PerformanceScoreCategory performanceElement = description.getPerformance();
-    final List<AbstractGoal> goals = new ArrayList<>(performanceElement.getGoals()); // use
-                                                                                     // ArrayList
-                                                                                     // as
-                                                                                     // we
-                                                                                     // will
-                                                                                     // be
-                                                                                     // doing
-                                                                                     // indexed
-                                                                                     // access
-                                                                                     // in
-                                                                                     // the
-                                                                                     // loop
+    // use ArrayList as we will be doing indexed access in the loop
+    final List<AbstractGoal> goals = new ArrayList<>(performanceElement.getGoals());
 
     final float[] relativeWidths = new float[3];
     relativeWidths[0] = 10;
@@ -593,8 +583,9 @@ public class ScoresheetGenerator {
         // FIXME add top and bottom borders to categories
 
         // add category cell if needed
+        boolean firstRowInCategory = false;
         if (!StringUtils.equals(prevCategory, category)) {
-          if (null != category) {
+          if (!StringUtils.isEmpty(category)) {
 
             // find out how many future goals have the same category
             int categoryRowSpan = 1;
@@ -612,7 +603,11 @@ public class ScoresheetGenerator {
 
             final Paragraph catPara = new Paragraph(category, ARIAL_10PT_NORMAL);
             final PdfPCell categoryCell = new PdfPCell(catPara);
-            categoryCell.setBorder(0);
+            categoryCell.setBorderWidthTop(1);
+            categoryCell.setBorderWidthBottom(0);
+            categoryCell.setBorderWidthLeft(0);
+            categoryCell.setBorderWidthRight(0);
+            ;
             categoryCell.setVerticalAlignment(Element.ALIGN_CENTER);
             categoryCell.setHorizontalAlignment(Element.ALIGN_CENTER);
             categoryCell.setRotation(90);
@@ -620,6 +615,8 @@ public class ScoresheetGenerator {
             m_goalsTable.addCell(categoryCell);
           }
 
+          // first row in a new category, which may be empty
+          firstRowInCategory = true;
         }
 
         // This is the text for the left hand "label" cell
@@ -627,10 +624,17 @@ public class ScoresheetGenerator {
         final Paragraph p = new Paragraph(title, ARIAL_10PT_NORMAL);
         p.setAlignment(Element.ALIGN_RIGHT);
         final PdfPCell goalLabel = new PdfPCell(p);
-        goalLabel.setBorder(0);
+        if (firstRowInCategory) {
+          goalLabel.setBorderWidthTop(1);
+          goalLabel.setBorderWidthBottom(0);
+          goalLabel.setBorderWidthLeft(0);
+          goalLabel.setBorderWidthRight(0);
+        } else {
+          goalLabel.setBorder(0);
+        }
         goalLabel.setPaddingRight(9);
         goalLabel.setVerticalAlignment(Element.ALIGN_TOP);
-        if (null == category) {
+        if (StringUtils.isEmpty(category)) {
           // category column and goal label column
           goalLabel.setColspan(2);
         }
@@ -687,7 +691,14 @@ public class ScoresheetGenerator {
           }
         }
 
-        goalValue.setBorder(0);
+        if (firstRowInCategory) {
+          goalValue.setBorderWidthTop(1);
+          goalValue.setBorderWidthBottom(0);
+          goalValue.setBorderWidthLeft(0);
+          goalValue.setBorderWidthRight(0);
+        } else {
+          goalValue.setBorder(0);
+        }
         goalValue.setVerticalAlignment(Element.ALIGN_MIDDLE);
 
         m_goalsTable.addCell(goalValue);
