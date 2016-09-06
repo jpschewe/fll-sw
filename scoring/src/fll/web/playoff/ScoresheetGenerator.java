@@ -569,9 +569,9 @@ public class ScoresheetGenerator {
     final List<AbstractGoal> goals = new ArrayList<>(performanceElement.getGoals());
 
     final float[] relativeWidths = new float[3];
-    relativeWidths[0] = 10;
-    relativeWidths[1] = 45;
-    relativeWidths[2] = 45;
+    relativeWidths[0] = 4;
+    relativeWidths[1] = 48;
+    relativeWidths[2] = 48;
     m_goalsTable = new PdfPTable(relativeWidths);
 
     String prevCategory = null;
@@ -579,8 +579,6 @@ public class ScoresheetGenerator {
       final AbstractGoal goal = goals.get(goalIndex);
       if (!goal.isComputed()) {
         final String category = goal.getCategory();
-
-        // FIXME add top and bottom borders to categories
 
         // add category cell if needed
         boolean firstRowInCategory = false;
