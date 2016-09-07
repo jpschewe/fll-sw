@@ -36,6 +36,9 @@
   <property name="findbugs.home" value="${dir.lib}/findbugs-3.0.1" />
   <property name="dir.lib.findbugs" value="${findbugs.home}/lib" />
 
+  <!-- default the offline property to false, will be set to true by check-internet if there is no network connection -->
+  <property name="offline" value="false" />
+
   <import file="${basedir}/buildscript-imports.xml" />
 
   <taskdef name="findbugs" classpath="${dir.lib.findbugs}/findbugs-ant.jar" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" />
@@ -274,11 +277,9 @@
     <echo message="Checking if connected to the internet" />
 
 
-    <condition property="offline" value="true" else="false">
-      <not>
-        <http url="http://jpschewe.github.io/fll-sw/" />
-      </not>
-    </condition>
+    <waitfor maxwait="5" maxwaitunit="second" timeoutproperty="offline">
+      <http url="http://jpschewe.github.io/fll-sw/" />
+    </waitfor>
 
     <echo message="offline=${offline}" />
 
