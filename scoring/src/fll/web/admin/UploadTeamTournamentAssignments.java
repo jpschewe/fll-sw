@@ -7,7 +7,6 @@ package fll.web.admin;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -58,11 +57,6 @@ public final class UploadTeamTournamentAssignments extends BaseFLLServlet {
       final String sheetName = SessionAttributes.getAttribute(session, UploadSpreadsheet.SHEET_NAME_KEY, String.class);
 
       putHeadersInSession(file, sheetName, session);
-    } catch (final SQLException sqle) {
-      message.append("<p class='error'>Error saving advancment data into the database: "
-          + sqle.getMessage() + "</p>");
-      LOGGER.error(sqle, sqle);
-      throw new RuntimeException("Error saving advancment data into the database", sqle);
     } catch (final Exception e) {
       message.append("<p class='error'>Error saving advancment data into the database: "
           + e.getMessage() + "</p>");
@@ -86,7 +80,7 @@ public final class UploadTeamTournamentAssignments extends BaseFLLServlet {
   public static void putHeadersInSession(final File file,
                                          final String sheetName,
                                          final HttpSession session)
-      throws SQLException, IOException, InvalidFormatException {
+      throws IOException, InvalidFormatException {
     final CellFileReader reader = CellFileReader.createCellReader(file, sheetName);
 
     // parse out the first non-blank line as the names of the columns
