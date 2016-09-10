@@ -114,7 +114,7 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
         file.deleteOnExit();
       }
       SQLFunctions.close(connection);
-      
+
       response.sendRedirect(response.encodeRedirectURL("index.jsp"));
     }
   }

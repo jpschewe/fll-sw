@@ -356,6 +356,25 @@
       </form>
     </li>
 
+    <li>
+      <form
+        id='uploadTeamInformation'
+        ACTION="<c:url value='/UploadSpreadsheet'/>"
+        METHOD="POST"
+        ENCTYPE="multipart/form-data">
+        Upload CSV or Excel of updated information for teams <input
+          type="file"
+          size="32"
+          name="file" /> <input
+          type='hidden'
+          name='uploadRedirect'
+          value="<c:url value='/admin/UploadTeamInformation'/>" /> <input
+          type="submit"
+          value="Upload" />
+      </form>
+    </li>
+
+
   </ul>
 
 </body>

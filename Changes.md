@@ -1,3 +1,4 @@
+* #451 - Add support for uploading team information changes in batch from a spreadsheet
 * #378 - Allow one to delete non-numeric categories and non-numeric nominees
 * #513 - Add support for groups to the performance score sheet and performance score entry
 * #516 - Add instructions to the dialog in the scheduler when choosing a challenge description
