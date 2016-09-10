@@ -9,9 +9,10 @@ package fll.util;
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -51,24 +52,23 @@ public abstract class CellFileReader implements Closeable {
    * @throws InvalidFormatException
    */
   public static CellFileReader createCellReader(final File file,
-                                                final String sheetName) throws InvalidFormatException, IOException {
+                                                final String sheetName)
+      throws InvalidFormatException, IOException {
+    return createCellReader(file.toPath(), sheetName);
+  }
+
+  public static CellFileReader createCellReader(final Path file,
+                                                final String sheetName)
+      throws InvalidFormatException, IOException {
     if (ExcelCellReader.isExcelFile(file)) {
-      FileInputStream fis = null;
-      try {
-        fis = new FileInputStream(file);
+      try (final InputStream fis = Files.newInputStream(file)) {
         return new ExcelCellReader(fis, sheetName);
-      } finally {
-        if (null != fis) {
-          fis.close();
-        }
       }
     } else {
       // determine if the file is tab separated or comma separated, check the
       // first line for tabs and if they aren't found, assume it's comma
       // separated
-      final BufferedReader breader = new BufferedReader(new InputStreamReader(new FileInputStream(file),
-                                                                              Utilities.DEFAULT_CHARSET));
-      try {
+      try (final BufferedReader breader = Files.newBufferedReader(file, Utilities.DEFAULT_CHARSET)) {
         final String firstLine = breader.readLine();
         if (null == firstLine) {
           LOGGER.warn("Empty file");
@@ -79,8 +79,6 @@ public abstract class CellFileReader implements Closeable {
         } else {
           return new CSVCellReader(file);
         }
-      } finally {
-        breader.close();
       }
     }
 
