@@ -23,6 +23,7 @@ import fll.util.CellFileReader;
 import fll.util.LogUtils;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.UploadSpreadsheet;
 
 /**
  * Upload the teams to be advanced.
@@ -33,20 +34,28 @@ public final class UploadTeamTournamentAssignments extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
+  /**
+   * Key in the session to get the {@link String} object that is the spreadsheet
+   * to load.
+   */
+  public static final String ADVANCE_FILE_KEY = "advanceFile";
+
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
 
     final StringBuilder message = new StringBuilder();
 
-    final String fileName = SessionAttributes.getNonNullAttribute(session, "spreadsheetFile", String.class);
+    final String fileName = SessionAttributes.getNonNullAttribute(session, UploadSpreadsheet.SPREADSHEET_FILE_KEY,
+                                                                  String.class);
     final File file = new File(fileName);
     try {
       // keep track of for later
-      session.setAttribute("advanceFile", file.getAbsolutePath());
+      session.setAttribute(ADVANCE_FILE_KEY, file.getAbsolutePath());
 
-      final String sheetName = SessionAttributes.getAttribute(session, "sheetName", String.class);
+      final String sheetName = SessionAttributes.getAttribute(session, UploadSpreadsheet.SHEET_NAME_KEY, String.class);
 
       putHeadersInSession(file, sheetName, session);
     } catch (final SQLException sqle) {
@@ -76,8 +85,8 @@ public final class UploadTeamTournamentAssignments extends BaseFLLServlet {
    */
   public static void putHeadersInSession(final File file,
                                          final String sheetName,
-                                         final HttpSession session) throws SQLException, IOException,
-      InvalidFormatException {
+                                         final HttpSession session)
+      throws SQLException, IOException, InvalidFormatException {
     final CellFileReader reader = CellFileReader.createCellReader(file, sheetName);
 
     // parse out the first non-blank line as the names of the columns

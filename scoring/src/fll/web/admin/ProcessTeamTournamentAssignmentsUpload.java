@@ -34,6 +34,7 @@ import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.UploadSpreadsheet;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -47,10 +48,13 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
 
     final StringBuilder message = new StringBuilder();
-    final String advanceFile = SessionAttributes.getNonNullAttribute(session, "advanceFile", String.class);
+    final String advanceFile = SessionAttributes.getNonNullAttribute(session,
+                                                                     UploadTeamTournamentAssignments.ADVANCE_FILE_KEY,
+                                                                     String.class);
     final File file = new File(advanceFile);
     Connection connection = null;
     try {
@@ -76,13 +80,10 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
 
-      final String sheetName = SessionAttributes.getAttribute(session, "sheetName", String.class);
+      final String sheetName = SessionAttributes.getAttribute(session, UploadSpreadsheet.SHEET_NAME_KEY, String.class);
 
       processFile(connection, message, file, sheetName, teamNumberColumnName, tournamentColumnName,
                   eventDivisionColumnName, judgingStationColumnName);
-
-      session.setAttribute("message", message.toString());
-      response.sendRedirect(response.encodeRedirectURL("index.jsp"));
 
       if (!file.delete()) {
         if (LOGGER.isDebugEnabled()) {
@@ -113,6 +114,8 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
         file.deleteOnExit();
       }
       SQLFunctions.close(connection);
+      
+      response.sendRedirect(response.encodeRedirectURL("index.jsp"));
     }
   }
 
@@ -129,7 +132,7 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
                                  final String tournamentColumnName,
                                  final String eventDivisionColumnName,
                                  final String judgingStationColumnName)
-                                     throws SQLException, IOException, ParseException, InvalidFormatException {
+      throws SQLException, IOException, ParseException, InvalidFormatException {
 
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("File name: "
@@ -209,22 +212,22 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
                   + tournamentName + "'</p>");
             }
           }
-          
+
           final String eventDivision;
-          if(eventDivisionColumnIdx < 0) {
+          if (eventDivisionColumnIdx < 0) {
             eventDivision = GenerateDB.DEFAULT_TEAM_DIVISION;
           } else {
             eventDivision = data[eventDivisionColumnIdx];
           }
           final String judgingStation;
-          if(judgingStationColumnIdx < 0) {
+          if (judgingStationColumnIdx < 0) {
             judgingStation = GenerateDB.DEFAULT_TEAM_DIVISION;
           } else {
             judgingStation = data[judgingStationColumnIdx];
           }
-          
 
-          Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), eventDivision, judgingStation);
+          Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), eventDivision,
+                                      judgingStation);
           ++rowsProcessed;
         }
       }
