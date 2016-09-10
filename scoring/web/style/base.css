@@ -1,12 +1,12 @@
-td.center {
+.center {
     text-align: center;
 }
 
-td.left {
+.left {
     text-align: left;
 }
 
-td.right {
+.right {
     text-align: right;
 }
 
@@ -60,10 +60,6 @@ td.right {
     text-overflow: ellipsis;
 }
   
-.center {
-    text-align: center;
-}
-
 
 /* use div tags for tables */
 .rTable {
