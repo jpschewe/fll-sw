@@ -11,6 +11,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import au.com.bytecode.opencsv.CSVReader;
 import fll.Utilities;
@@ -23,18 +25,28 @@ public class CSVCellReader extends CellFileReader {
   private final CSVReader delegate;
 
   /**
-   * @see CSVReader#CSVReader(java.io.Reader, char)
-   */
-  public CSVCellReader(final File file,
-                       final char separator) throws FileNotFoundException {
-    delegate = new CSVReader(new InputStreamReader(new FileInputStream(file), Utilities.DEFAULT_CHARSET), separator);
-  }
-
-  /**
    * @see CSVReader#CSVReader(java.io.Reader)
    */
   public CSVCellReader(final File file) throws FileNotFoundException {
     delegate = new CSVReader(new InputStreamReader(new FileInputStream(file), Utilities.DEFAULT_CHARSET));
+  }
+
+  /**
+   * @throws IOException
+   * @see CSVReader#CSVReader(java.io.Reader, char)
+   */
+  public CSVCellReader(final Path file,
+                       final char separator)
+      throws IOException {
+    delegate = new CSVReader(Files.newBufferedReader(file, Utilities.DEFAULT_CHARSET), separator);
+  }
+
+  /**
+   * @throws IOException
+   * @see CSVReader#CSVReader(java.io.Reader)
+   */
+  public CSVCellReader(final Path file) throws IOException {
+    delegate = new CSVReader(Files.newBufferedReader(file, Utilities.DEFAULT_CHARSET));
   }
 
   /**

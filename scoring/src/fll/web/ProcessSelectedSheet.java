@@ -16,7 +16,6 @@ import javax.servlet.http.HttpSession;
 
 /**
  * Grap the sheetName parameter and put it into the session.
- * 
  */
 @WebServlet("/ProcessSelectedSheet")
 public final class ProcessSelectedSheet extends BaseFLLServlet {
@@ -24,15 +23,16 @@ public final class ProcessSelectedSheet extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
 
     final StringBuilder message = new StringBuilder();
-    
+
     final String sheetName = request.getParameter("sheetName");
     if (null == sheetName) {
       throw new RuntimeException("Missing parameter 'sheetName'");
     }
-    session.setAttribute("sheetName", sheetName);
+    session.setAttribute(UploadSpreadsheet.SHEET_NAME_KEY, sheetName);
 
     final String uploadRedirect = SessionAttributes.getAttribute(session, "uploadRedirect", String.class);
 

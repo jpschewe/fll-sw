@@ -26,30 +26,43 @@ import fll.util.LogUtils;
 
 /**
  * Handle uploading a spreadsheet (csv or Excel). The filename is stored in the
- * session attribute "spreadsheetFile". This file needs to be deleted once it's
+ * session attribute {@link #SPREADSHEET_FILE_KEY}. This file needs to be
+ * deleted once it's
  * been processed. The file is expected to be in the request parameter "file".
  * The page to redirect to when done is expected to be in the request parameter
  * "uploadRedirect". The sheet name will be stored in the session attribute
- * "sheetName".
-
+ * {@link #SHEET_NAME_KEY}.
  */
 @WebServlet("/UploadSpreadsheet")
 public final class UploadSpreadsheet extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
+  /**
+   * Session key for the name of the file that was saved as a {@link String}.
+   */
+  public static final String SPREADSHEET_FILE_KEY = "spreadsheetFile";
+
+  /**
+   * Session key for the name of the sheet in the spreadsheet to load.
+   * This will be null if a CSV file was loaded.
+   */
+  public static final String SHEET_NAME_KEY = "sheetName";
+
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
 
     final StringBuilder message = new StringBuilder();
     String nextPage;
     try {
       UploadProcessor.processUpload(request);
-      final String uploadRedirect = (String)request.getAttribute("uploadRedirect");
+      final String uploadRedirect = (String) request.getAttribute("uploadRedirect");
       if (null == uploadRedirect) {
-        throw new RuntimeException("Missing parameter 'uploadRedirect' params: " + request.getParameterMap());
+        throw new RuntimeException("Missing parameter 'uploadRedirect' params: "
+            + request.getParameterMap());
       }
       session.setAttribute("uploadRedirect", uploadRedirect);
 
@@ -61,7 +74,7 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
             + file.getAbsolutePath());
       }
       fileItem.write(file);
-      session.setAttribute("spreadsheetFile", file.getAbsolutePath());
+      session.setAttribute(SPREADSHEET_FILE_KEY, file.getAbsolutePath());
 
       if (ExcelCellReader.isExcelFile(file)) {
         final List<String> sheetNames = ExcelCellReader.getAllSheetNames(file);
@@ -69,7 +82,7 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
           session.setAttribute("sheetNames", sheetNames);
           nextPage = "promptForSheetName.jsp";
         } else {
-          session.setAttribute("sheetName", sheetNames.get(0));
+          session.setAttribute(SHEET_NAME_KEY, sheetNames.get(0));
           nextPage = uploadRedirect;
         }
       } else {
@@ -87,7 +100,7 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
       LOGGER.error(e, e);
       throw new RuntimeException("Error saving team data into the database", e);
     }
-    
+
     session.setAttribute("message", message.toString());
     response.sendRedirect(response.encodeRedirectURL(nextPage));
   }
