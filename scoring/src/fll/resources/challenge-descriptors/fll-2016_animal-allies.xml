@@ -237,9 +237,24 @@
         score="0" />
     </goal>
 
+
+    <restriction
+      lowerBound="0"
+      upperBound="0"
+      message="Cannot milk on ramp and milk in base">
+      <term>
+        <goalRef
+          goal="m13_milk"
+          scoreType="raw" />
+        <goalRef
+          goal="m14_milk_ramp"
+          scoreType="computed" />
+      </term>
+    </restriction>
+
     <computedGoal
       name="m15_all_samples"
-      title="M15 All Samples">
+      title="M15 All Manure in T &amp; R Bonus">
       <switch>
         <case>
           <condition>
@@ -296,9 +311,9 @@
 
 
   <subjectiveCategory
-  name="project"
-  title="Project"
-  weight="1.0">
+    name="project"
+    title="Project"
+    weight="1.0">
     <goal
       initialValue="0"
       max="12"
