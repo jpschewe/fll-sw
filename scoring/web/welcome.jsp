@@ -4,6 +4,12 @@
 
 <html>
 <head>
+
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="<c:url value='/style/base.css'/>" />
+
 <meta
   http-equiv='refresh'
   content='90' />
@@ -32,7 +38,7 @@ body {
 
 <body>
 
-  <center>
+  <div class='center'>
     <h1>${challengeDescription.title }</h1>
 
     <!--img height="40%" align='middle' src='<c:url value="/images/logo.gif"/>' /><br /-->
@@ -55,7 +61,9 @@ body {
       </tr>
     </table>
 
-  </center>
+    <h2>${ScorePageText }</h2>
+
+  </div>
 
 </body>
 </html>

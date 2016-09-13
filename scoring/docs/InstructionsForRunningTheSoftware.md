@@ -1,8 +1,8 @@
-# FLL Instructions
+# FLL-SW Instructions
 
 It is best to go through this documentation the first time from the server so that you can follow the links.
 When you click on a link you should right click on it and open it in a new tab or window. 
-This way you won't loose the documentation that you're reading.
+This way you won't loose the this document.
 
 
 ## Setup of tournament
@@ -11,11 +11,12 @@ Links in this section are also found on the [admin index](http://localhost:9080/
 
   1. You will need to provide a challenge description, either one from the software itself or a custom one or from a saved database ([instructions below](#loading-from-a-saved-database))
   1. Once the database is initialized, go to the [admin index](http://localhost:9080/fll-sw/admin/index.jsp) and upload the team datafile. This takes in a tab delimited file and uses that information to determine what teams will exist in the database. Note the sizes and datatypes of columns. If the columns in your datafile are too large the text will be truncated.
+    * Files may be tab delimited, comma delimited or Excel spreadsheets
     * Any tournament that is listed as the initial tournament for a team during upload is automatically created 
   1. If the team data doesn't look quite right you can edit it by following the link to [Edit Team](http://localhost:9080/fll-sw/admin/select_team.jsp) on the admin index.
   1. If you'd like to change some of the information about the tournaments you can [edit the tournament list](http://localhost:9080/fll-sw/admin/tournaments.jsp).
   1. Set the current tournament on the [admin index](http://localhost:9080/fll-sw/admin/index.jsp)
-  1. At this point you can just use this computer, or you can download the database file from the admin page and import that into another computer at the tournament from the setup page. In Minnesota we typically have one person create the database that contains all tournament data and then distribute that database to all of the regional tournaments.  
+  1. At this point you can just use this computer, or you can download the database file from the admin page and import that into another computer at the tournament from the setup page. In Minnesota we typically have one person create the database that contains the data for all regional tournaments and then that database is distributed to all of the regional tournaments.  
 
 
 ## Loading from a saved database
@@ -48,10 +49,12 @@ When you get to the brackets page this team will show up as last place and will 
 You may need to enter a dummy score for the team that competes against the no show team and a no show for the team that isn't there for the brackets to properly advance the team.
   
 ### Display Computer
+
 On the display computer bring up the Big Screen Display page. This will display the welcome page, the scoreboard and the playoff brackets as needed. This page is controlled by the Remote Control Page found under administration. **Important note**: Do not close the background window that launched the fullscreen window. This background window actually controls the fullscreen window. Note that when the scoreboard comes up the All Teams column will be blank until any scores are entered.
 Once the page comes up , use F11 to make the web page go full screen without the address bar and title bar
     
 ### Performance score entry
+
 Enter scores for the performance rounds on the [score entry](http://localhost:9080/fll-sw/scoreEntry/select_team.jsp) page. This page is linked from the main index.
 
 I suggest at least two people entering scores. 
@@ -61,6 +64,7 @@ This has caught many data entry errors in previous tournaments.
 [Detailed performance score entry instructions](performance-entry-instructions.md)
 
 ### Subjective Score Entry
+
 [Subjective score entry instructions](subjective-instructions.md)
     
 
@@ -71,11 +75,26 @@ This has caught many data entry errors in previous tournaments.
   * You can goto the printable bracket page and then keep refreshing the page. As scores are entered the bracket will fill out. Clicking the print scoresheets button at the top will create a PDF of the score sheets for the rounds that can be determined and haven't been printed yet. If you want to reprint some scoresheets you just check the box next to the round to print and then click the print scoresheets button.
   * Scores are entered per the [Performance Score Entry Instructions](performance-entry-instructions.md)
 
+## End of subjective judging
+
+  * If using the stand-alone subjective scoring application, make sure you upload all data from the subjective scoring computers via the [admin index](http://localhost:9080/fll-sw/admin/index.jsp).
+  * If using the web based subjective scoring application (usually on tablets), make sure that all devices have uploaded their scores.
+  * Follow the compute summarized scores link on the [reporting page](http://localhost:9080/fll-sw/report/index.jsp) to summarize the scores. Make sure the judges shown are the ones you'd expect and that the number of teams seen by each judge are correct.
+  * [View the reports](http://localhost:9080/fll-sw/report/index.jsp) and print them out through your web browser. You can visit these pages as many times as you like. Each time you visit them the report page will be recomputed. So if you find any missing scores, just enter them and goto the reporting pages again and make sure you compute summarized scores before going to the reports.
+  
+### Finalist Scheduling
+
+If the tournament has multiple judging groups in the same award group, then finalist judging must be done to determine the winner in each subjective category.
+This usually involves selecting the top 1 or 2 teams from each judging group and judging them again.
+
+To aide in the scheduling of this final judging there is a finalist scheduling feature on the [reporting page](http://localhost:9080/fll-sw/report/index.jsp).
+Once all of the subjective scores are entered and the initial playoff brackets have been created you should follow the link to schedule finalists.
+Once the page has loaded you can disconnect from the network and finish the scheduling somewhere else and then reconnect when you are ready to store the finalist schedule.
+Once the finalist schedule has been stored, the schedule can be printed or displayed on the big screen display.
+
+
 ## End of tournament
 
-  * Make sure you upload all data from the subjective scoring computers via the [admin index](http://localhost:9080/fll-sw/admin/index.jsp).
-  * Follow the compute summarized scores link on the [reporting page](http://localhost:9080/fll-sw/report/index.jsp) to summarize the scores. Make sure the score groups shown are the ones you'd expect and that the number of teams seen by each score group are correct.
-  * [View the reports](http://localhost:9080/fll-sw/report/index.jsp) and print them out through your web browser. You can visit these pages as many times as you like. Each time you visit them the report page will be recomputed. So if you find any missing scores, just enter them and goto the reporting pages again and make sure you compute summarized scores before going to the reports.
   * Download the database from the admin page and send it to your head computer person.
 
 ## Troubleshooting
