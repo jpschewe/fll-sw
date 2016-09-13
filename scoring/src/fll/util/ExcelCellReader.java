@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,14 +51,24 @@ public class ExcelCellReader extends CellFileReader {
 
   /**
    * Check if we believe this file to be an Excel file.
-   * @throws IOException 
+   * 
+   * @throws IOException
    */
   public static boolean isExcelFile(final File file) throws IOException {
+    return isExcelFile(file.toPath());
+  }
 
-    final String contentType = Files.probeContentType(file.toPath());
+  /**
+   * Check if we believe this file to be an Excel file.
+   * 
+   * @throws IOException
+   */
+  public static boolean isExcelFile(final Path path) throws IOException {
+    final String contentType = Files.probeContentType(path);
 
     final boolean isCsvFile;
-    if (null != contentType && contentType.startsWith("text/")) {
+    if (null != contentType
+        && contentType.startsWith("text/")) {
       isCsvFile = true;
     } else {
       isCsvFile = false;
@@ -98,19 +109,17 @@ public class ExcelCellReader extends CellFileReader {
   }
 
   private static Workbook createWorkbook(final InputStream file) throws IOException, InvalidFormatException {
-    final InputStream stream = new PushbackInputStream(file);
-    try {
+    try (final InputStream stream = new PushbackInputStream(file)) {
       final Workbook workbook = WorkbookFactory.create(stream);
       return workbook;
-    } finally {
-      stream.close();
     }
   }
 
   /**
    * Read an excel file from the specified stream.
    * 
-   * @param file where to read the excel file from
+   * @param file where to read the excel file from, this is read into memory and
+   *          then can be closed after the constructor is finished
    * @param sheetName the sheet to read
    * @throws IOException
    * @throws InvalidFormatException

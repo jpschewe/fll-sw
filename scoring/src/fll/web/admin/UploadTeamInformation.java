@@ -5,8 +5,9 @@
  */
 package fll.web.admin;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -25,19 +26,20 @@ import fll.web.SessionAttributes;
 import fll.web.UploadSpreadsheet;
 
 /**
- * Upload the teams to be advanced.
- * Pass off to chooseAdvancementColumns.jsp.
+ * Upload team information to be updated.
+ * Pass off to chooseTeamInformationColumns.jsp.
  */
-@WebServlet("/admin/UploadTeamTournamentAssignments")
-public final class UploadTeamTournamentAssignments extends BaseFLLServlet {
+@WebServlet("/admin/UploadTeamInformation")
+public final class UploadTeamInformation extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
   /**
-   * Key in the session to get the {@link String} object that is the spreadsheet
+   * Key in the session to get the {@link String} filename that is the
+   * spreadsheet
    * to load.
    */
-  public static final String ADVANCE_FILE_KEY = "advanceFile";
+  public static final String FILENAME_KEY = "advanceFile";
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -49,10 +51,10 @@ public final class UploadTeamTournamentAssignments extends BaseFLLServlet {
 
     final String fileName = SessionAttributes.getNonNullAttribute(session, UploadSpreadsheet.SPREADSHEET_FILE_KEY,
                                                                   String.class);
-    final File file = new File(fileName);
+    final Path file = Paths.get(fileName);
     try {
       // keep track of for later
-      session.setAttribute(ADVANCE_FILE_KEY, file.getAbsolutePath());
+      session.setAttribute(FILENAME_KEY, file.toAbsolutePath().toString());
 
       final String sheetName = SessionAttributes.getAttribute(session, UploadSpreadsheet.SHEET_NAME_KEY, String.class);
 
@@ -64,7 +66,7 @@ public final class UploadTeamTournamentAssignments extends BaseFLLServlet {
       throw new RuntimeException("Error reading headers from file", e);
     }
     session.setAttribute(SessionAttributes.MESSAGE, message.toString());
-    response.sendRedirect(response.encodeRedirectURL("chooseAdvancementColumns.jsp"));
+    response.sendRedirect(response.encodeRedirectURL("chooseTeamInformationColumns.jsp"));
 
   }
 
@@ -77,7 +79,7 @@ public final class UploadTeamTournamentAssignments extends BaseFLLServlet {
    * @throws IOException if an error occurs reading from file
    * @throws InvalidFormatException
    */
-  public static void putHeadersInSession(final File file,
+  public static void putHeadersInSession(final Path file,
                                          final String sheetName,
                                          final HttpSession session)
       throws IOException, InvalidFormatException {

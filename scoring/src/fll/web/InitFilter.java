@@ -246,7 +246,7 @@ public class InitFilter implements Filter {
 
         // set some default text
         if (null == application.getAttribute(ApplicationAttributes.SCORE_PAGE_TEXT)) {
-          application.setAttribute(ApplicationAttributes.SCORE_PAGE_TEXT, "FLL");
+          application.setAttribute(ApplicationAttributes.SCORE_PAGE_TEXT, "");
         }
 
         initDataSource(application);
