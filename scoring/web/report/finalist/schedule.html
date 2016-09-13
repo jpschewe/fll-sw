@@ -3,32 +3,16 @@
 <head>
 <title>Finalist Scheduling</title>
 
-<script
-  type='text/javascript'
-  src='../../extlib/jquery-1.11.1.min.js'></script>
-<script
-  type='text/javascript'
-  src='../../extlib/jquery.json-2.5-pre.min.js'></script>
-<script
-  type='text/javascript'
-  src='../../extlib/jstorage-0.4.11.min.js'></script>
-<script
-  type='text/javascript'
-  src='../../extlib/string-functions.js'></script>
-<script
-  type='text/javascript'
-  src='../../js/fll-objects.js'></script>
-<script
-  type='text/javascript'
-  src='finalist.js'></script>
-<script
-  type='text/javascript'
-  src='schedule.js'></script>
+<script type='text/javascript' src='../../extlib/jquery-1.11.1.min.js'></script>
+<script type='text/javascript'
+	src='../../extlib/jquery.json-2.5-pre.min.js'></script>
+<script type='text/javascript' src='../../extlib/jstorage-0.4.11.min.js'></script>
+<script type='text/javascript' src='../../extlib/string-functions.js'></script>
+<script type='text/javascript' src='../../js/fll-objects.js'></script>
+<script type='text/javascript' src='finalist.js'></script>
+<script type='text/javascript' src='schedule.js'></script>
 
-<link
-  rel="stylesheet"
-  type="text/css"
-  href="../../style/base.css" />
+<link rel="stylesheet" type="text/css" href="../../style/base.css" />
 
 <style>
 
@@ -57,88 +41,67 @@ and mark draggable things as movable. */
 </head>
 
 <body>
-  <div id='navbar'></div>
-  <hr />
+	<div id='navbar'></div>
+	<hr />
 
-  <h1>Finalist schedule</h1>
+	<h1>Finalist schedule</h1>
 
-  <h2>
-    Award Group: <select id='divisions'></select>
-  </h2>
+	<h2>
+		Award Group: <select id='divisions'></select>
+	</h2>
 
-  <div
-    class='rTable'
-    id='schedule'>
+	<div class='rTable' id='schedule'>
 
-    <div
-      class='rTableHeading'
-      id='schedule_header'></div>
+		<div class='rTableHeading' id='schedule_header'></div>
 
-    <div
-      class='rTableBody'
-      id='schedule_body'></div>
+		<div class='rTableBody' id='schedule_body'></div>
 
-  </div>
-  <button
-    type="button"
-    id="add_timeslot">Add time slot</button>
-  <br />
+	</div>
+	<button type="button" id="add_timeslot">Add time slot</button>
+	<br />
 
-  <br />
+	<br />
 
-  <!--  legend -->
-  <div class='rTable'>
+	<!--  legend -->
+	<div class='rTable'>
 
-    <div class='rTableHeading'>
-      <div class='rTableHead'>Legend</div>
-    </div>
+		<div class='rTableHeading'>
+			<div class='rTableHead'>Legend</div>
+		</div>
 
-    <div class='rTableBody'>
+		<div class='rTableBody'>
 
-      <div class='rTableRow'>
-        <div class='rTableCell, overlap-schedule'>Team is being
-          judged in 2 categories at the same time</div>
-      </div>
+			<div class='rTableRow'>
+				<div class='rTableCell, overlap-schedule'>Team is being judged
+					in 2 categories at the same time</div>
+			</div>
 
-      <div class='rTableRow'>
-        <div class='rTableCell, overlap-playoff'>Team is scheduled
-          to be in playoffs</div>
-      </div>
+			<div class='rTableRow'>
+				<div class='rTableCell, overlap-playoff'>Team is scheduled to
+					be in playoffs</div>
+			</div>
 
-    </div>
+		</div>
 
-  </div>
-  <!--  end legend -->
+	</div>
+	<!--  end legend -->
 
-  <br />
+	<br />
 
-  <button
-    type="button"
-    id="regenerate_schedule">Regenerate Schedule</button>
-  <br />
+	<button type="button" id="regenerate_schedule">Regenerate
+		Schedule</button>
+	<br />
 
-  <form
-    id='get_sched_data'
-    method='POST'
-    action='StoreFinalistSchedule'>
+	<form id='get_sched_data' method='POST' action='StoreFinalistSchedule'>
 
-    <input
-      type='hidden'
-      id='sched_data'
-      name='sched_data' /> <input
-      type='hidden'
-      id='category_data'
-      name='category_data' /> <input
-      type='hidden'
-      id='division_data'
-      name='division_data' /> <input
-      type='hidden'
-      id='non-numeric-nominees_data'
-      name='non-numeric-nominees_data' /> <input
-      type='submit'
-      value='Send Data To Server' />
-
-  </form>
+		<input type='hidden' id='sched_data' name='sched_data' /> <input
+			type='hidden' id='category_data' name='category_data' /> <input
+			type='hidden' id='division_data' name='division_data' /> <input
+			type='hidden' id='non-numeric-nominees_data'
+			name='non-numeric-nominees_data' /> <input type='submit'
+			value='Send Data To Server' /> once the schedule is finished and you
+		are connected to the network.
+	</form>
 
 </body>
 </html>
