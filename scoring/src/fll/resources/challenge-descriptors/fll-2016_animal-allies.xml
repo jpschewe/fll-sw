@@ -2,7 +2,7 @@
 <fll
   title="2016 FIRST LEGO League - Animal Allies"
   copyright="2016 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST&#174;) and The LEGO Group. Used by special permission. All rights reserved."
-  revision="1"
+  revision="2"
   schemaVersion="2">
 
   <Performance
@@ -13,7 +13,7 @@
     <goal
       initialValue="0"
       name="m01_shark_target"
-      title="M01 - Shark Shipment">
+      title="M01 - Shark and Tank Delivered">
       <value
         score="10"
         title="Target 2"
@@ -24,14 +24,14 @@
         value="target1" />
       <value
         score="0"
-        title="None"
+        title="No"
         value="none" />
     </goal>
 
     <goal
       initialValue="0"
       name="m01_shark_bonus"
-      title="M01 - Shark Shipment Bonus"
+      title="M01 - Shark Not Touching Wall Bonus"
       min="0"
       max="1"
       multiplier="20" />
@@ -56,7 +56,7 @@
 
     <goal
       name="m02_service_dog"
-      title="M02 Service Dog Action"
+      title="M02 - Service Dog Warning Fence Down"
       initialValue="0"
       min="0"
       max="1"
@@ -65,14 +65,14 @@
     <goal
       initialValue="0"
       name="m03_animal_conservation"
-      title="M03 Animal Conservation"
+      title="M03 - Pairs of Animals on Same Side"
       min="0"
       max="5"
       multiplier="20" />
 
     <goal
       name="m04_feeding"
-      title="M04 Feeding"
+      title="M04 - Food in Four Animal Areas (one color only)"
       initialValue="0"
       min="0"
       max="8"
@@ -80,7 +80,7 @@
 
     <goal
       name="m05_biomimicry_gecko"
-      title="M05 Biomimicry Gecko"
+      title="M05 - Gecko Hanging on Wall"
       initialValue="0"
       min="0"
       max="1"
@@ -88,36 +88,17 @@
 
     <goal
       name="m05_biomimicry_robot"
-      title="M05 Biomimicry Robot"
+      title="M05 - Robot Hanging on Wall"
       initialValue="0"
       min="0"
       max="1"
       multiplier="32" />
 
-    <goal
-      name="m06_milking_automation"
-      title="M06 Milking Automation"
-      initialValue="0">
-      <value
-        value="milk"
-        title="Milk NO Manure"
-        score="20" />
 
-      <value
-        value="milk_manure"
-        title="Milk &amp; Manure"
-        score="15" />
-
-      <value
-        value="none"
-        title="None"
-        score="0" />
-
-    </goal>
 
     <goal
       name="m07_panda_release"
-      title="M07 Panda Release"
+      title="M07 - Panda Habitat Fully Rotated Open"
       initialValue="0"
       min="0"
       max="1"
@@ -125,15 +106,25 @@
 
     <goal
       name="m08_camera_recovery"
-      title="M08 Camera Recovery"
+      title="M08 Camera in Base"
       initialValue="0"
       min="0"
       max="1"
       multiplier="15" />
 
+
+    <goal
+      name="m12_seal"
+      title="M12 - Seal in Base"
+      initialValue="0"
+      min="0"
+      max="1"
+      multiplier="1" />
+
+
     <goal
       name="m09_training_dog_trainer"
-      title="M09 Training - Dog &amp; Trainer"
+      title="M09 - Dog and Trainer in T &amp; R Area"
       initialValue="0"
       min="0"
       max="1"
@@ -141,7 +132,7 @@
 
     <goal
       name="m09_training_zoologist"
-      title="M09 Training - Zoologist"
+      title="M09 - Zoologist in T &amp; R Area"
       initialValue="0"
       min="0"
       max="1"
@@ -149,7 +140,7 @@
 
     <goal
       name="m09_training_manure"
-      title="M09 Training - Manure"
+      title="M09 - Manure in T &amp; R Area"
       initialValue="0"
       min="0"
       max="7"
@@ -157,7 +148,7 @@
 
     <goal
       name="m10_beekeeping"
-      title="M10 Beekeeping"
+      title="M10 - Beekeeping"
       initialValue="0">
       <value
         value="honey_base"
@@ -179,37 +170,49 @@
 
     <goal
       name="m11_prosthesis"
-      title="M11 Prosthesis"
+      title="M11 - Pig Prothesis"
       initialValue="0">
       <value
         value="farm"
-        title="Pet in Farm"
+        title="Fitted to Pig and in Farm"
         score="15" />
 
       <value
         value="fitted"
-        title="Fitted to Pet, not in Farm"
+        title="Fitted to Pig, not in Farm"
         score="9" />
 
       <value
         value="none"
-        title="None"
+        title="No"
         score="0" />
 
     </goal>
 
     <goal
-      name="m12_seal"
-      title="M12 Seal in Base"
-      initialValue="0"
-      min="0"
-      max="1"
-      multiplier="1" />
+      name="m06_milking_automation"
+      title="M06 - Milk Machine Rotated"
+      initialValue="0">
+      <value
+        value="milk"
+        title="Milk NO Manure"
+        score="20" />
 
+      <value
+        value="milk_manure"
+        title="Milk &amp; Manure"
+        score="15" />
+
+      <value
+        value="none"
+        title="No"
+        score="0" />
+
+    </goal>
 
     <goal
       name="m13_milk"
-      title="M13 Milk in Base"
+      title="M13 - All Three Milks in Base"
       initialValue="0"
       min="0"
       max="1"
@@ -217,15 +220,15 @@
 
     <goal
       name="m14_milk_ramp"
-      title="M14 Milk on Ramp"
+      title="M14 - All Three Milks on Ramp"
       initialValue="0">
       <value
         value="standing"
-        title="All Standing"
+        title="Standing Alone and Supported by Ramp"
         score="4" />
       <value
         value="only_things_ramp"
-        title="Only things on Ramp"
+        title="Alone and Supported by Ramp"
         score="3" />
       <value
         value="supported_ramp"
@@ -233,7 +236,7 @@
         score="2" />
       <value
         value="none"
-        title="None"
+        title="No"
         score="0" />
     </goal>
 
@@ -241,7 +244,7 @@
     <restriction
       lowerBound="0"
       upperBound="0"
-      message="Cannot milk on ramp and milk in base">
+      message="Cannot have milk on ramp and milk in base">
       <term>
         <goalRef
           goal="m13_milk"
