@@ -298,18 +298,6 @@
       max="5"
       multiplier="-6" />
 
-
-    <!-- FIXME need a tie breaker -->
-    <tiebreaker>
-
-      <test winner="HIGH">
-        <term>
-          <goalRef
-            goal="m15_all_samples"
-            scoreType="computed" />
-        </term>
-      </test>
-    </tiebreaker>
   </Performance>
 
 
