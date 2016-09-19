@@ -106,7 +106,7 @@
 
     <goal
       name="m08_camera_recovery"
-      title="M08 Camera in Base"
+      title="M08 - Camera in Base"
       initialValue="0"
       min="0"
       max="1"
