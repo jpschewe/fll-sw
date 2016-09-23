@@ -2,7 +2,7 @@
 <fll
   title="2016 Minnesota FIRST LEGO League - Animal Allies"
   copyright="2016 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST&#174;) and The LEGO Group. Used by special permission. All rights reserved."
-  revision="2"
+  revision="3"
   schemaVersion="2">
 
   <Performance
@@ -16,11 +16,11 @@
       title="M01 - Shark and Tank Delivered">
       <value
         score="10"
-        title="Target 2"
+        title="Target 2 (EAST)"
         value="target2" />
       <value
         score="7"
-        title="Target 1"
+        title="Target 1 (WEST)"
         value="target1" />
       <value
         score="0"
@@ -299,16 +299,43 @@
       multiplier="-6" />
 
 
-    <!-- FIXME need a tie breaker -->
     <tiebreaker>
 
       <test winner="HIGH">
         <term>
           <goalRef
-            goal="m15_all_samples"
+            goal="m09_training_manure"
             scoreType="computed" />
         </term>
       </test>
+
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="m06_milking_automation"
+            scoreType="computed" />
+        </term>
+        <term>
+          <goalRef
+            goal="m13_milk"
+            scoreType="computed" />
+        </term>
+        <term>
+          <goalRef
+            goal="m14_milk_ramp"
+            scoreType="computed" />
+        </term>
+      </test>
+
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="m04_feeding"
+            scoreType="computed" />
+        </term>
+      </test>
+
+
     </tiebreaker>
   </Performance>
 
