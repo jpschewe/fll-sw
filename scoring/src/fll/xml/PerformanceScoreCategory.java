@@ -10,11 +10,11 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
-
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import fll.web.playoff.TeamScore;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**
  * Description of the performance.
@@ -34,10 +34,13 @@ public class PerformanceScoreCategory extends ScoreCategory {
     mRestrictions = Collections.unmodifiableList(restrictions);
 
     final List<TiebreakerTest> tiebreakers = new LinkedList<TiebreakerTest>();
-    final Element tiebreakerElement = (Element) ele.getElementsByTagName("tiebreaker").item(0);
-    for (final Element testElement : new NodelistElementCollectionAdapter(tiebreakerElement.getChildNodes())) {
-      final TiebreakerTest tie = new TiebreakerTest(testElement, this);
-      tiebreakers.add(tie);
+    final NodeList tiebreakerElements = ele.getElementsByTagName("tiebreaker");
+    if (0 != tiebreakerElements.getLength()) {
+      final Element tiebreakerElement = (Element) tiebreakerElements.item(0);
+      for (final Element testElement : new NodelistElementCollectionAdapter(tiebreakerElement.getChildNodes())) {
+        final TiebreakerTest tie = new TiebreakerTest(testElement, this);
+        tiebreakers.add(tie);
+      }
     }
     mTiebreaker = Collections.unmodifiableList(tiebreakers);
 
