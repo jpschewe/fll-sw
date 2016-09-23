@@ -1,3 +1,8 @@
+Release 11.0
+============
+
+This is the first release for the 2016 season.
+
 * #178 - Add the score page text to the welcome page
 * #451 - Add support for uploading team information changes in batch from a spreadsheet
 * #378 - Allow one to delete non-numeric categories and non-numeric nominees
