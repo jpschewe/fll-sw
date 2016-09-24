@@ -22,16 +22,16 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import javax.sql.DataSource;
-
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 import org.hsqldb.jdbc.JDBCDataSource;
@@ -41,6 +41,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.ImportDB;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Some handy utilities.
@@ -398,6 +399,19 @@ public final class Utilities {
   };
 
   /**
+   * Find all graphic files in the specified directory
+   * 
+   * @param directory which directory to search in
+   * @return paths to all files, sorted
+   */
+  public static List<String> getGraphicFiles(final File directory) {
+    final List<String> logoFiles = new ArrayList<>();
+    buildGraphicFileList("", logoFiles, directory);
+    Collections.sort(logoFiles);
+    return logoFiles;
+  }
+
+  /**
    * Build a list of file found in the specified directories. This
    * method will search recursively.
    * 
@@ -405,9 +419,9 @@ public final class Utilities {
    * @param directories directories to look in
    * @param output the list of image files (output parameter)
    */
-  public static void buildGraphicFileList(final String prefix,
-                                          final File[] directories,
-                                          final Collection<String> output) {
+  private static void buildGraphicFileList(final String prefix,
+                                           final Collection<String> output,
+                                           final File... directories) {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("buildGraphicFileList("
           + prefix + "," + Arrays.toString(directories) + "," + output.toString() + ")");
@@ -437,7 +451,7 @@ public final class Utilities {
               + Arrays.toString(dirs));
         }
         java.util.Arrays.sort(dirs);
-        buildGraphicFileList(np, dirs, output);
+        buildGraphicFileList(np, output, dirs);
       } else {
         LOGGER.debug("dirs: null");
       }
@@ -698,8 +712,8 @@ public final class Utilities {
       strings = str.substring(lbracket
           + 1, rbracket).split(",");
     }
-    
-    for(int i=0; i<strings.length; ++i) {
+
+    for (int i = 0; i < strings.length; ++i) {
       strings[i] = strings[i].trim();
     }
 
