@@ -3,6 +3,10 @@
 
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
+<%
+  fll.web.scoreboard.AllTeams.populateContext(application, session, pageContext);
+%>
+
 <%@ page import="java.sql.PreparedStatement"%>
 <%@ page import="java.sql.ResultSet"%>
 <%@ page import="java.sql.Connection"%>
@@ -41,25 +45,6 @@
 			prep.setInt(2, maxScoreboardRound);
 			final ResultSet rs = prep.executeQuery();
 			final List<String> divisions = Queries.getAwardGroups(connection);
-%>
-
-<%
-  //All logos shall be located under sponsor_logos in the fll web folder.
-			String imagePath = application.getRealPath("/sponsor_logos");
-			File[] directories = {new File(imagePath)};
-			List<String> logoFiles = new ArrayList<String>();
-			Utilities.buildGraphicFileList("", directories, logoFiles);
-
-			//This varible holds the index of the last image, relative to imagePath
-			int lastLogoIndex;
-			final int numLogos = logoFiles.size();
-			if (numLogos < 1) {
-				lastLogoIndex = -1;
-			} else if (null != session.getAttribute("lastLogoIndex")) {
-				lastLogoIndex = ((Integer) session.getAttribute("lastLogoIndex")).intValue();
-			} else {
-				lastLogoIndex = numLogos - 1;
-			}
 %>
 
 <html>
@@ -128,11 +113,13 @@ TABLE.B {
     var="colorStr"
     value="A" />
 
+  <c:set
+    var="teamIndex"
+    value="0" />
+
   <%
     if (rs.next()) {
       boolean done = false;
-      final int scoresBetweenLogos = 2;
-      int currentScoreIndex = 0;
       while (!done) {
   %>
   <table
@@ -147,26 +134,26 @@ TABLE.B {
         height='15'
         width='1' /></td>
     </tr>
-      <%
-        final String divisionStr = rs.getString("event_division");
-            final Iterator<String> divisionIter = divisions.iterator();
-            boolean found = false;
-            int index = 0;
-            while (divisionIter.hasNext()
-                && !found) {
-              final String div = divisionIter.next();
-              if (divisionStr.equals(div)) {
-                found = true;
-              } else {
-                index++;
-              }
+    <%
+      final String divisionStr = rs.getString("event_division");
+          final Iterator<String> divisionIter = divisions.iterator();
+          boolean found = false;
+          int index = 0;
+          while (divisionIter.hasNext()
+              && !found) {
+            final String div = divisionIter.next();
+            if (divisionStr.equals(div)) {
+              found = true;
+            } else {
+              index++;
             }
-            final String headerColor = Queries.getColorForIndex(index);
-      %>
-    <tr class='left' bgcolor='<%=headerColor%>'>
-      <td
-        width='25%'
-        >&nbsp;&nbsp;<%=divisionStr%>&nbsp;&nbsp;
+          }
+          final String headerColor = Queries.getColorForIndex(index);
+    %>
+    <tr
+      class='left'
+      bgcolor='<%=headerColor%>'>
+      <td width='25%'>&nbsp;&nbsp;<%=divisionStr%>&nbsp;&nbsp;
       </td>
       <td class='right'>Team&nbsp;#:&nbsp;<%=rs.getInt("TeamNumber")%>&nbsp;&nbsp;
       </td>
@@ -238,44 +225,33 @@ TABLE.B {
         </table>
       </td>
     </tr>
-    <%
-      currentScoreIndex++;
-          if (numLogos > 0
-              && (currentScoreIndex == scoresBetweenLogos
-                  || done)) {
-            currentScoreIndex = 0;
-            // display the next logo
-    %>
-    <tr style='background-color: white'>
-      <td
-        width='50%'
-        style='vertical-align: middle'
-        class="right">This tournament sponsored by:</td>
-      <td
-        width='50%'
-        style='vertical-align: middle; padding: 3px'
-        class="left">
-        <%
-          lastLogoIndex = (lastLogoIndex
-                    + 1)
-                    % numLogos;
-                out.print("<img src='../"
-                    + logoFiles.get(lastLogoIndex) + "'/>");
-        %>
-      </td>
-    </tr>
-    <%
-      } else {
-    %>
-    <tr>
-      <td colspan='2'><img
-        src='<c:url value="/images/blank.gif"/>'
-        width='1'
-        height='15' /></td>
-    </tr>
-    <%
-      }
-    %>
+
+    <c:choose>
+      <c:when test="${(teamIndex mod teamsBetweenLogos) == 1}">
+        <tr style='background-color: white'>
+          <td
+            width='50%'
+            style='vertical-align: middle; color: black'
+            class="right">This tournament sponsored by:</td>
+
+          <td
+            width='50%'
+            style='vertical-align: middle; padding: 3px'
+            class="left"><img
+            src='../${sponsorLogos[(teamIndex / teamsBetweenLogos) mod fn:length(sponsorLogos)] }' />
+
+          </td>
+        </tr>
+      </c:when>
+      <c:otherwise>
+        <tr>
+          <td colspan='2'><img
+            src='<c:url value="/images/blank.gif"/>'
+            width='1'
+            height='15' /></td>
+        </tr>
+      </c:otherwise>
+    </c:choose>
   </table>
 
   <c:choose>
@@ -291,9 +267,13 @@ TABLE.B {
     </c:otherwise>
   </c:choose>
 
+  <c:set
+    var="teamIndex"
+    value="${teamIndex + 1 }" />
+
   <%
     } //end while(!done)
-      session.setAttribute("lastLogoIndex", lastLogoIndex); // save the last logo displayed so next reload starts with next sponsor
+        //session.setAttribute("lastLogoIndex", lastLogoIndex); // save the last logo displayed so next reload starts with next sponsor
     } else {
       // no scores to display - put a table up with logos in it
     }

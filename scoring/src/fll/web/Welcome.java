@@ -28,11 +28,8 @@ public class Welcome {
                                  final JspWriter out) {
     // All logos shall be located under sponsor_logos in the fll web folder.
     final String imagePath = application.getRealPath("/sponsor_logos");
-    final File[] directories = { new File(imagePath) };
 
-    final List<String> logoFiles = new LinkedList<String>();
-    Utilities.buildGraphicFileList("", directories, logoFiles);
-    Collections.sort(logoFiles);
+    final List<String> logoFiles = Utilities.getGraphicFiles(new File(imagePath));
 
     final int numColumns = (int) Math.ceil((double) logoFiles.size()
         / (double) MAX_NUM_LOGOS_PER_COLUMN);
