@@ -147,7 +147,6 @@ TABLE.B {
         height='15'
         width='1' /></td>
     </tr>
-    <tr class='left'>
       <%
         final String divisionStr = rs.getString("event_division");
             final Iterator<String> divisionIter = divisions.iterator();
@@ -164,9 +163,10 @@ TABLE.B {
             }
             final String headerColor = Queries.getColorForIndex(index);
       %>
+    <tr class='left' bgcolor='<%=headerColor%>'>
       <td
         width='25%'
-        bgcolor='<%=headerColor%>'>&nbsp;&nbsp;<%=divisionStr%>&nbsp;&nbsp;
+        >&nbsp;&nbsp;<%=divisionStr%>&nbsp;&nbsp;
       </td>
       <td class='right'>Team&nbsp;#:&nbsp;<%=rs.getInt("TeamNumber")%>&nbsp;&nbsp;
       </td>
