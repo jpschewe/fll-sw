@@ -215,12 +215,7 @@ public final class Queries {
   }
 
   /**
-   * Get the list of event divisions at this tournament as a List of Strings.
-   * Uses getCurrentTournament to determine the tournament.
-   * 
-   * @param connection the database connection
-   * @return the List of divisions. List of strings.
-   * @throws SQLException on a database error
+   * @see #getAwardGroups(Connection, int)
    * @see #getCurrentTournament(Connection)
    */
   public static List<String> getAwardGroups(final Connection connection) throws SQLException {
@@ -233,7 +228,7 @@ public final class Queries {
    * Strings.
    * 
    * @param connection the database connection
-   * @return the List of divisions. List of strings.
+   * @return the List of divisions. List of strings. Sorted by name.
    * @throws SQLException on a database error
    * @see #getCurrentTournament(Connection)
    */
@@ -2288,7 +2283,8 @@ public final class Queries {
   }
 
   /**
-   * Get the color for a division index. Below are the colors used.
+   * Colors for index into a list.
+   * Below are the colors used.
    * <table>
    * <td>
    * <td bgcolor="#800000">0 - #800000</td>
@@ -2309,7 +2305,7 @@ public final class Queries {
    * 
    * @param index the division index
    */
-  public static String getColorForDivisionIndex(final int index) throws SQLException {
+  public static String getColorForIndex(final int index) throws SQLException {
     final int idx = index
         % 4;
     switch (idx) {
