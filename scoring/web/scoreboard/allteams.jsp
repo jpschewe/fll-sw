@@ -135,6 +135,7 @@ TABLE.B {
            }
          }
          final String headerColor = Queries.getColorForDivisionIndex(index);
+        final String headerColor = Queries.getColorForIndex(index);
    %>
    <td width='25%' bgcolor='<%=headerColor%>'>&nbsp;&nbsp;<%=divisionStr%>&nbsp;&nbsp;
     </td>
