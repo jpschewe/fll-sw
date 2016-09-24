@@ -1,3 +1,5 @@
+* #450 - Refactor allteams.jsp
+
 Release 11.0
 ============
 
