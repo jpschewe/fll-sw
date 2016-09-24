@@ -117,7 +117,7 @@ TABLE.B {
   class='<c:out value="${colorStr}" />'>
   <tr>
    <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
-    height='15' width='1'></td>
+    height='15' width='1'/></td>
   </tr>
   <tr class='left'>
    <%
