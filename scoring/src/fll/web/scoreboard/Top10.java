@@ -120,7 +120,7 @@ public class Top10 extends BaseFLLServlet {
           --numColumns;
         }
         formatter.format("<th colspan='%d' bgcolor='%s'>Top Performance Scores: %s</th>", numColumns,
-                         Queries.getColorForDivisionIndex(divisionIndex), divisions.get(divisionIndex));
+                         Queries.getColorForIndex(divisionIndex), divisions.get(divisionIndex));
         formatter.format("</tr>%n");
 
         final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);

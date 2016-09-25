@@ -88,7 +88,7 @@ public class AdminIndex {
       message.append("<p class='error'>Error talking to the database: "
           + sqle.getMessage() + "</p>");
       LOGGER.error(sqle, sqle);
-      throw new RuntimeException("Error saving team data into the database", sqle);
+      throw new RuntimeException("Error talking to the database", sqle);
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(rs2);
