@@ -22,18 +22,17 @@ import javax.servlet.ServletContext;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.ComparisonUtils;
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
 import fll.Utilities;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
+import fll.web.InitFilter;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;
+import net.mtu.eggplant.util.ComparisonUtils;
 
 /**
  * Utilities for /setup/index.jsp.
@@ -46,7 +45,6 @@ public class SetupIndex {
    * Populate the page context with information for the jsp.
    * pageContext:
    * descriptions - List<DescriptionInfo> (sorted by title)
-   * 
    * dbinitialized - boolean if the database has been initialized
    */
   public static void populateContext(final ServletContext application,
@@ -56,16 +54,14 @@ public class SetupIndex {
 
     pageContext.setAttribute("descriptions", descriptions);
 
+    InitFilter.initDataSource(application);
+
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (final Connection connection = datasource.getConnection()) {
       pageContext.setAttribute("dbinitialized", Utilities.testDatabaseInitialized(connection));
     } catch (final SQLException sqle) {
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error saving team data into the database", sqle);
-    } finally {
-      SQLFunctions.close(connection);
     }
   }
 

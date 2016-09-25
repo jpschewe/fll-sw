@@ -95,13 +95,12 @@ public final class ApplicationAttributes {
         || clazz.isInstance(o)) {
       return clazz.cast(o);
     } else {
-      throw new RuntimeException(
-                                 String.format("Expecting application attribute '%s' to be of type '%s', but was of type '%s'",
+      throw new RuntimeException(String.format("Expecting application attribute '%s' to be of type '%s', but was of type '%s'",
                                                attribute, clazz, o.getClass()));
     }
   }
 
-  public static DataSource getDataSource(ServletContext application) {
+  public static DataSource getDataSource(final ServletContext application) {
     return getAttribute(application, ApplicationAttributes.DATASOURCE, DataSource.class);
   }
 
