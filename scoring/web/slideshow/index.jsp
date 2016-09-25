@@ -20,9 +20,7 @@ if(null != session.getAttribute("slideShowLastImage")) {
   lastImage = "";
 }
 
-File[] directories = {new  File(imagePath)};
-List<String> files = new ArrayList<String>();
-Utilities.buildGraphicFileList("", directories, files);
+List<String> files = Utilities.getGraphicFiles(new File(imagePath));
 
 if(files.size() == 0) {
   lastImage = "";
@@ -59,7 +57,7 @@ html {
   margin-right: 5px;
 }    
   </style>
-  <script language=javascript>
+  <script type='text/javascript'>
     window.setInterval("location.href='index.jsp'",<%=slideShowInterval %>);
     function sizeImage() {
       var d,x,y,i, ox, oy;
