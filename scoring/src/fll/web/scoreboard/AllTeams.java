@@ -121,6 +121,8 @@ public class AllTeams {
           + sqle.getMessage() + "</p>");
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);
+    } finally {
+      session.setAttribute(SessionAttributes.MESSAGE, message.toString());
     }
 
   }
