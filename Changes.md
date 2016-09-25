@@ -1,3 +1,4 @@
+* #450 - Refactor allteams.jsp
 * Fix bug where the datasource doesn't get initialized before the setup page is loaded
 
 Release 11.0
