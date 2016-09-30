@@ -18,8 +18,9 @@
   src='../extlib/jquery-1.11.1.min.js'></script>
 
 <script type='text/javascript'>
-  $(document).ready(function() {
+  var numSelected = 0;
 
+  $(document).ready(function() {
     <c:forEach items="${judgingStations }" var="station" varStatus="idx">
     $("#station_select_${idx.count }").change(function() {
       <c:forEach items="${playoff_data.tournamentTeamsValues }" var="team">
@@ -27,6 +28,7 @@
       $("#select_${team.teamNumber}").prop("checked", $(this).is(":checked"));
       </c:if>
       </c:forEach>
+      updateTeamsSelected();
     });
     </c:forEach>
 
@@ -37,9 +39,34 @@
       $("#select_${team.teamNumber}").prop("checked", $(this).is(":checked"));
       </c:if>
       </c:forEach>
+      updateTeamsSelected();
+    });
+    </c:forEach>
+
+    <c:forEach
+    items="${playoff_data.tournamentTeamsValues }"
+    var="team">
+    $("#select_${team.teamNumber }").change(function() {
+      if ($(this).is(":checked")) {
+        numSelected = numSelected + 1;
+      } else {
+        numSelected = numSelected - 1;
+      }
+      $("#numTeams").text(numSelected);
     });
     </c:forEach>
   });
+
+  // called when we don't know how many check boxes just changed and we need to recompute
+  function updateTeamsSelected() {
+    numSelected = 0;
+    <c:forEach items="${playoff_data.tournamentTeamsValues }" var="team">
+    if ($("#select_${team.teamNumber }").is(":checked")) {
+      numSelected = numSelected + 1;
+    }
+    </c:forEach>
+    $("#numTeams").text(numSelected);
+  }
 </script>
 
 </head>
@@ -133,7 +160,8 @@
     <input
       type='submit'
       name='selected_teams'
-      value='Create Playoff Bracket with selected teams' /><br />
+      value='Create Playoff Bracket with selected teams' /> Number of
+    teams selected: <span id='numTeams'>0</span><br />
 
     <table border='1'>
 
