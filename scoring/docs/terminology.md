@@ -53,19 +53,18 @@ Goals in a subjective category are scored within a range by a judge.
 Each judge may use different parts of the range and therefore may come up with a different score for the same team than another judge.
 For this reason, to determine the winner in a subjective category a single judge must see all teams in an award group or finalist judging must be used.
 
-Playoffs
-========
+Head to Head
+============
 
 This is an optional part of a tournament.
 
-Playoffs are a single elimination competition bracket.
-Sometimes referred to as head to head.
+Head to Head is a single elimination competition bracket.
 
-Each playoff bracket contains a group of teams that will compete against each other to determine a playoff winner.
-In most cases, a playoff bracket correlates directly to an award group.
-However at some large tournaments where finalist judging is used an award group may be split into two or more playoff brackets.
+Each head to head bracket contains a group of teams that will compete against each other to determine a head to head winner.
+In most cases, a head to head bracket correlates directly to an award group.
+However at some large tournaments where finalist judging is used an award group may be split into two or more head to head brackets.
 These teams will then compete and determine a winner.
-Then the top teams or teams in each playoff bracket will compete in another playoff bracket to determine the award group winner of the playoffs.
+Then the top teams or teams in each head to head bracket will compete in another head to head bracket to determine the award group winner of head to head.
 
 Teams are seeded into the bracket based on some criteria; usually this is based on the scores from the performance rounds.
 A team then competes against the team across the table from them in a match.

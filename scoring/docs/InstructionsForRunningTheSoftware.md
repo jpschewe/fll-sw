@@ -33,7 +33,7 @@ If you, or someone else, setup the database previously you can then load that da
   * Make sure there is a VGA cable to connect the display computer to the projector. If your display computer doesn't have a VGA connector, make sure you have the appropriate adapter.
   * Bring or already have a couple of volunteers to help enter scores depending on the size of your tournament
   * Make sure you have something to write with for each performance score entry computer to write on the scoresheets
-  * A paper cutter is handy for the score sheets during playoffs as many times they are printed off 2 to a page and the page needs to be cut in half  
+  * A paper cutter is handy for the score sheets during head to head as many times they are printed off 2 to a page and the page needs to be cut in half  
 
 
 ## Tournament day
@@ -42,7 +42,7 @@ For the most part you can just walk down the links on the [admin index](http://l
 
 The other computers on the network will need to know the address of the server. You can find this information at the bottom of the main page.
   
-The scoreboard, welcome page and playoff brackets have a place at the top for text to be displayed, this can be changed from the [admin index](http://localhost:9080/fll-sw/admin/). It's labeled Score Display Text.
+The scoreboard, welcome page and head to head brackets have a place at the top for text to be displayed, this can be changed from the [admin index](http://localhost:9080/fll-sw/admin/). It's labeled Score Display Text.
   
 If a team does not show up you should mark that team as a No Show in both the subjective application and in all performance runs. 
 When you get to the brackets page this team will show up as last place and will still be placed on the brackets. 
@@ -50,7 +50,7 @@ You may need to enter a dummy score for the team that competes against the no sh
   
 ### Display Computer
 
-On the display computer bring up the Big Screen Display page. This will display the welcome page, the scoreboard and the playoff brackets as needed. This page is controlled by the Remote Control Page found under administration. **Important note**: Do not close the background window that launched the fullscreen window. This background window actually controls the fullscreen window. Note that when the scoreboard comes up the All Teams column will be blank until any scores are entered.
+On the display computer bring up the Big Screen Display page. This will display the welcome page, the scoreboard and the head to head brackets as needed. This page is controlled by the Remote Control Page found under administration. **Important note**: Do not close the background window that launched the fullscreen window. This background window actually controls the fullscreen window. Note that when the scoreboard comes up the All Teams column will be blank until any scores are entered.
 Once the page comes up , use F11 to make the web page go full screen without the address bar and title bar
     
 ### Performance score entry
@@ -68,10 +68,10 @@ This has caught many data entry errors in previous tournaments.
 [Subjective score entry instructions](subjective-instructions.md)
     
 
-### Playoffs
-  * When it comes time to do the playoffs, make sure you intialize the brackets on the [playoff page](http://localhost:9080/fll-sw/playoff/index.jsp) before entering scores. If you attempt to enter playoff scores before initializing the brackets, you will get an error message. Don't worry, nothing is broken, you just need to initialize the brackets first.
-    * When you initialize the playoffs you will be asked how to seed the teams into the brackets. In most cases you want to choose "Use the best score from the seeding rounds".
-  * You can print out the brackets by going to the admin/printable bracket page, under the Playoffs link on the main index, for each division and printing that out.
+### Head to Head
+  * When it comes time to do head to head, make sure you initialize the brackets on the [head to head page](http://localhost:9080/fll-sw/playoff/index.jsp) before entering scores. If you attempt to enter head to head scores before initializing the brackets, you will get an error message. Don't worry, nothing is broken, you just need to initialize the brackets first.
+    * When you initialize head to head brackets you will be asked how to seed the teams into the brackets. In most cases you want to choose "Use the best score from the seeding rounds".
+  * You can print out the brackets by going to the admin/printable bracket page, under the Head to Head link on the main index, for each division and printing that out.
   * You can goto the printable bracket page and then keep refreshing the page. As scores are entered the bracket will fill out. Clicking the print scoresheets button at the top will create a PDF of the score sheets for the rounds that can be determined and haven't been printed yet. If you want to reprint some scoresheets you just check the box next to the round to print and then click the print scoresheets button.
   * Scores are entered per the [Performance Score Entry Instructions](performance-entry-instructions.md)
 
@@ -88,7 +88,7 @@ If the tournament has multiple judging groups in the same award group, then fina
 This usually involves selecting the top 1 or 2 teams from each judging group and judging them again.
 
 To aide in the scheduling of this final judging there is a finalist scheduling feature on the [reporting page](http://localhost:9080/fll-sw/report/index.jsp).
-Once all of the subjective scores are entered and the initial playoff brackets have been created you should follow the link to schedule finalists.
+Once all of the subjective scores are entered and the initial head to head brackets have been created you should follow the link to schedule finalists.
 Once the page has loaded you can disconnect from the network and finish the scheduling somewhere else and then reconnect when you are ready to store the finalist schedule.
 Once the finalist schedule has been stored, the schedule can be printed or displayed on the big screen display.
 
