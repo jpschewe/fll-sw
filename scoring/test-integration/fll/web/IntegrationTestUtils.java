@@ -528,7 +528,7 @@ public final class IntegrationTestUtils {
    */
   public static WebDriver createWebDriver() {
     setupWebDriver();
-    
+
     final DesiredCapabilities capabilities = DesiredCapabilities.firefox();
     capabilities.setCapability("marionette", false);
     final WebDriver selenium = new FirefoxDriver(capabilities);
@@ -551,9 +551,9 @@ public final class IntegrationTestUtils {
     loadPage(selenium, TestUtils.URL_ROOT
         + "playoff");
 
-    selenium.findElement(By.linkText("Create playoff bracket")).click();
+    selenium.findElement(By.linkText("Create head to head bracket")).click();
 
-    selenium.findElement(By.xpath("//input[@value='Create Playoff Bracket for Award Group "
+    selenium.findElement(By.xpath("//input[@value='Create Head to Head Bracket for Award Group "
         + awardGroup + "']")).click();
     Assert.assertTrue("Error creating bracket for award group: "
         + awardGroup, isElementPresent(selenium, By.id("success")));
