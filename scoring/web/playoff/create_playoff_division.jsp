@@ -65,7 +65,7 @@
           <input
             type='submit'
             name='create_award_group_${idx.count}'
-            value='Create Playoff Bracket for Award Group ${awardGroup }' />
+            value='Create Head to Head Bracket for Award Group ${awardGroup }' />
           <input
             type='hidden'
             name='award_group_${idx.count}'
@@ -84,7 +84,7 @@
           <input
             type='submit'
             name='create_judging_group_${idx.count}'
-            value='Create Playoff Bracket for Judging Group ${station }' />
+            value='Create Head to Head Bracket for Judging Group ${station }' />
           <input
             type='hidden'
             name='judging_group_${idx.count}'
