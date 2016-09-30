@@ -82,13 +82,8 @@
 
 <body>
 
- <p>
-  If you are going to create custom playoff divisions and you want to
-  use them to do finalist scheduling you need to create the playoff
-  divisions before starting the finalist scheduling app. If you are
-  going to do this you should visit the <a
-   href="<c:url value='/playoff'/>">Playoffs Page</a>, create the custom
-  playoff divisions and then come back to this page.
+ <p>You should create all head to head brackets using the  <a
+   href="<c:url value='/playoff'/>">Head to Head Page</a> before entering finalist information.
  </p>
 
  <div id='choose_clear'>

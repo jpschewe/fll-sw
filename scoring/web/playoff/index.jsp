@@ -20,11 +20,11 @@
   }
 </script>
 
-<title>Head to head</title>
+<title>Head to Head</title>
 </head>
 
 <body>
-  <h1>Head to head menu</h1>
+  <h1>Head to Head menu</h1>
 
   <div class='status-message'>${message}</div>
   <%-- clear out the message, so that we don't see it again --%>

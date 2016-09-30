@@ -163,7 +163,7 @@ END DEBUG --%>
    </tr> <!--  Scoreboard -->
 
    <tr>
-    <th>Playoffs <i>WARNING: Do not select brackets until all
+    <th>Head to Head <i>WARNING: Do not select brackets until all
       seeding runs have been recorded!</i>
     </th>
     <td><c:if test='${displayPage == "playoffs"}'
@@ -173,7 +173,7 @@ END DEBUG --%>
      </c:if> <c:if test='${not playoffsPage}'>
       <input type='radio' id='playoffs' name='remotePage'
        value='playoffs' />
-     </c:if> Playoff Bracket: <select name='playoffDivision'>
+     </c:if> Head to Head Bracket: <select name='playoffDivision'>
       <c:forEach items="${divisions}" var="division">
        <c:choose>
         <c:when test="${division == playoffDivision}">
@@ -184,7 +184,7 @@ END DEBUG --%>
         </c:otherwise>
        </c:choose>
       </c:forEach>
-    </select> <br /> Playoff Round: <select name='playoffRoundNumber'>
+    </select> <br /> Head to Head Round: <select name='playoffRoundNumber'>
       <c:forEach begin="1" end="${numPlayoffRounds}" var="numRounds">
        <c:choose>
         <c:when test="${numRounds == playoffRoundNumber}">
@@ -212,7 +212,7 @@ END DEBUG --%>
          <input type='radio' name="${displayName.key}_remotePage"
           value='playoffs' />
         </c:otherwise>
-       </c:choose> Playoff Bracket: <select name='${displayName.key}_playoffDivision'>
+       </c:choose> Head to Head Bracket: <select name='${displayName.key}_playoffDivision'>
         <c:forEach items="${divisions}" var="division">
          <c:choose>
           <c:when
@@ -224,7 +224,7 @@ END DEBUG --%>
           </c:otherwise>
          </c:choose>
         </c:forEach>
-      </select> <br /> Playoff Round: <select
+      </select> <br /> Head to Head Round: <select
        name='${displayName.key}_playoffRoundNumber'>
         <c:forEach begin="1" end="${numPlayoffRounds}" var="numRounds">
          <c:choose>
