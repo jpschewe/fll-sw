@@ -43,7 +43,8 @@ public class GatherScoreEntryData extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     Connection connection = null;
     try {
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
@@ -65,7 +66,8 @@ public class GatherScoreEntryData extends BaseFLLServlet {
         // teamNumber - runNumber
         final String teamStr = lTeamNum.substring(0, dashIndex);
         teamNumber = Integer.parseInt(teamStr);
-        runNumberStr = lTeamNum.substring(dashIndex + 1);
+        runNumberStr = lTeamNum.substring(dashIndex
+            + 1);
       } else {
         runNumberStr = request.getParameter("RunNumber");
         teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(lTeamNum).intValue();
@@ -96,7 +98,8 @@ public class GatherScoreEntryData extends BaseFLLServlet {
         }
         final int runNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(runNumberStr).intValue();
         if (runNumber == 0) {
-          lRunNumber = nextRunNumber - 1;
+          lRunNumber = nextRunNumber
+              - 1;
           if (lRunNumber < 1) {
             session.setAttribute(SessionAttributes.MESSAGE,
                                  "<p name='error' class='error'>Selected team has no performance score for this tournament.</p>");
@@ -115,18 +118,18 @@ public class GatherScoreEntryData extends BaseFLLServlet {
         }
       } else {
         if (nextRunNumber > numSeedingRounds) {
-          if (null == Playoff.involvedInUnfinishedPlayoff(connection, tournament, Collections.singletonList(teamNumber))) {
-            session.setAttribute(SessionAttributes.MESSAGE,
-                                 "<p name='error' class='error'>Selected team ("
-                                     + teamNumber
-                                     + ") is not involved in an unfinished playoff bracket. Please double check that the playoff brackets were properly initialized"
-                                     + " If you were intending to double check a score, you probably just forgot to check"
-                                     + " the box for doing so.</p>");
+          if (null == Playoff.involvedInUnfinishedPlayoff(connection, tournament,
+                                                          Collections.singletonList(teamNumber))) {
+            session.setAttribute(SessionAttributes.MESSAGE, "<p name='error' class='error'>Selected team ("
+                + teamNumber
+                + ") is not involved in an unfinished head to head bracket. Please double check that the head to head brackets were properly initialized"
+                + " If you were intending to double check a score, you probably just forgot to check"
+                + " the box for doing so.</p>");
             response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
             return;
           } else if (!Queries.didTeamReachPlayoffRound(connection, nextRunNumber, teamNumber)) {
             session.setAttribute(SessionAttributes.MESSAGE,
-                                 "<p name='error' class='error'>Selected team has not advanced to the next playoff round.</p>");
+                                 "<p name='error' class='error'>Selected team has not advanced to the next head to head round.</p>");
             response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
             return;
           }
@@ -162,7 +165,8 @@ public class GatherScoreEntryData extends BaseFLLServlet {
       // check if previous run is verified
       final boolean previousVerified;
       if (lRunNumber > 1) {
-        previousVerified = Queries.isVerified(connection, tournament, teamNumber, lRunNumber - 1);
+        previousVerified = Queries.isVerified(connection, tournament, teamNumber, lRunNumber
+            - 1);
       } else {
         previousVerified = true;
       }

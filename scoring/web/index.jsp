@@ -56,7 +56,7 @@
  <ul>
   <li><a href="admin/index.jsp">Administration</a></li>
 
-  <li><a href="playoff/index.jsp">Playoffs</a></li>
+  <li><a href="playoff/index.jsp">Head to head</a></li>
 
   <li><a href="report/index.jsp">Tournament reporting</a></li>
  </ul>

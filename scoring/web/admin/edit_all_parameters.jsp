@@ -107,7 +107,7 @@
 						<div id='SeedingRoundsHelp' class='help' style='display: none'>
 							This parameter specifies the number of seeding rounds. The
 							seeding rounds are used for the performance score in the final
-							report and are used to rank teams for the initial playoff round.
+							report and are used to rank teams for the initial head to head round.
 							<a href='javascript:hide("SeedingRoundsHelp")'>[hide]</a>
 						</div>
 					</th>

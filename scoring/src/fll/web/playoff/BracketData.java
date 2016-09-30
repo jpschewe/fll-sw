@@ -808,7 +808,7 @@ public class BracketData {
     sb.append("<tr>\n");
     for (int i = _firstRound; i <= _lastRound
         && i <= _finalsRound; i++) {
-      sb.append("  <th colspan='2'>Playoff Round "
+      sb.append("  <th colspan='2'>Head to Head Round "
           + i + "</th>\n");
     }
     sb.append("</tr>\n");
@@ -1109,7 +1109,7 @@ public class BracketData {
         while (it.hasNext()) {
           final Integer firstTeamRow = it.next();
           if (!it.hasNext()) {
-            throw new RuntimeException("Mismatched team in playoff brackets. Check database for corruption.");
+            throw new RuntimeException("Mismatched team in head to head brackets. Check database for corruption.");
           }
           final Integer secondTeamRow = it.next();
           rows.add(new Integer[] { firstTeamRow, secondTeamRow });
