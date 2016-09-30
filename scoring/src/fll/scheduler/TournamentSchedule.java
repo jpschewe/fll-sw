@@ -1099,7 +1099,7 @@ public class TournamentSchedule implements Serializable {
       scoresheets.setRound(sheetIndex, String.valueOf(round
           + 1));
       scoresheets.setNumber(sheetIndex, si.getTeamNumber());
-      scoresheets.setDivision(sheetIndex, si.getAwardGroup());
+      scoresheets.setDivision(sheetIndex, ScoresheetGenerator.AWARD_GROUP_LABEL, si.getAwardGroup());
       scoresheets.setName(sheetIndex, si.getTeamName());
 
       ++sheetIndex;
