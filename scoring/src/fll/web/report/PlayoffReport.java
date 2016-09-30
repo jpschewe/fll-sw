@@ -74,12 +74,12 @@ public class PlayoffReport extends BaseFLLServlet {
       final Document document = new Document(PageSize.LETTER);
       final ByteArrayOutputStream baos = new ByteArrayOutputStream();
       final PdfWriter writer = PdfWriter.getInstance(document, baos);
-      writer.setPageEvent(new ReportPageEventHandler(HEADER_FONT, "Playoff Winners", challengeDescription.getTitle(),
+      writer.setPageEvent(new ReportPageEventHandler(HEADER_FONT, "Head to Head Winners", challengeDescription.getTitle(),
                                                      tournament.getName()));
 
       document.open();
 
-      document.addTitle("Playoff Report");
+      document.addTitle("Head to Head Report");
 
       final List<String> playoffDivisions = Playoff.getPlayoffBrackets(connection, tournament.getTournamentID());
       for (final String division : playoffDivisions) {
@@ -130,7 +130,7 @@ public class PlayoffReport extends BaseFLLServlet {
     try {
       final Paragraph para = new Paragraph();
       para.add(Chunk.NEWLINE);
-      para.add(new Chunk("Results for playoff bracket "
+      para.add(new Chunk("Results for head to head bracket "
           + division, TITLE_FONT));
       para.add(Chunk.NEWLINE);
 

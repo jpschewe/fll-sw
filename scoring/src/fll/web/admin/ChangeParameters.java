@@ -112,7 +112,7 @@ public class ChangeParameters extends BaseFLLServlet {
 
         if (valueSet) {
           if (Queries.isPlayoffDataInitialized(connection, tournament.getTournamentID())) {
-            message.append("<p class='error'>You cannot change the number of seeding rounds once the playoffs are initialized. Tournament: "
+            message.append("<p class='error'>You cannot change the number of seeding rounds once the head to head brackets are initialized. Tournament: "
                 + tournament.getName() + "</p>");
           } else {
             TournamentParameters.unsetNumSeedingRounds(connection, tournament.getTournamentID());
@@ -123,7 +123,7 @@ public class ChangeParameters extends BaseFLLServlet {
         if (!valueSet
             || value != currentValue) {
           if (Queries.isPlayoffDataInitialized(connection, tournament.getTournamentID())) {
-            message.append("<p class='error'>You cannot change the number of seeding rounds once the playoffs are initialized. Tournament: "
+            message.append("<p class='error'>You cannot change the number of seeding rounds once the head to head brackets are initialized. Tournament: "
                 + tournament.getName() + "</p>");
           } else {
             TournamentParameters.setNumSeedingRounds(connection, tournament.getTournamentID(), value);

@@ -60,7 +60,7 @@ function updateHeader() {
 
   headerRow.append($("<div class='rTableHead'>Time Slot</div>"));
 
-  headerRow.append($("<div class='rTableHead'>Playoffs</div>"));
+  headerRow.append($("<div class='rTableHead'>Head to Head</div>"));
 
   $.each($.finalist.getAllCategories(), function(i, category) {
     var room = $.finalist.getRoom(category, $.finalist.getCurrentDivision());
