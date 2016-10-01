@@ -107,7 +107,7 @@ public class TestPlayoffs {
       // selenium.isElementPresent("name=error"));
       final String text = selenium.getPageSource();
       Assert.assertTrue("Should have errors",
-                        text.contains("Selected team has not advanced to the next playoff round."));
+                        text.contains("Selected team has not advanced to the next head to head round."));
     } catch (final IOException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
