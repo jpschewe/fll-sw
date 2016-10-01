@@ -43,7 +43,7 @@
 			each team.</li>
 
 		<li><a href="PlayoffReport" target="_blank">Winners of each
-				playoff bracket</a>. This is useful for the awards ceremony.</li>
+				head to head bracket</a>. This is useful for the awards ceremony.</li>
 
 	</ol>
 
@@ -64,7 +64,7 @@
 
 		<li><a href="finalist/load.jsp" target="_blank">Schedule
 				Finalists</a>. Before visiting this page, all subjective scores need to
-			be uploaded and any playoff brackets that will occur during the
+			be uploaded and any head to head brackets that will occur during the
 			finalist judging should be created to avoid scheduling conflicts.</li>
 
 		<li>

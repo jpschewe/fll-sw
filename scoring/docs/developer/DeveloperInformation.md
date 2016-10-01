@@ -167,6 +167,7 @@ Any display of the old terms is already replaced by the new term, however there 
 |-----------------|---------------|------------|
 | event division  | award group   | |
 | judging station | judging group | judging station is still used internally to refer to the location that judging for a particular category takes place |
+| playoff         | head to head  | |
 
 # Design Documents
 
