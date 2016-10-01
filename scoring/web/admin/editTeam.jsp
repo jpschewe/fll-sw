@@ -147,8 +147,8 @@ $("#judging_station_${tournament.tournamentID}").change(function() {
   </c:choose>
 
   <p>Note that teams cannot be added to or removed from a tournament
-    that has the playoffs initialized. Also teams cannot be deleted that
-    are involved in any initialized playoffs.</p>
+    that has head to head initialized. Also teams cannot be deleted that
+    are involved in any initialized head to head brackets.</p>
 
   <form
     action="CommitTeam"
@@ -301,7 +301,7 @@ $("#judging_station_${tournament.tournamentID}").change(function() {
     <c:if test="${not addTeam}">
       <c:choose>
         <c:when test="${inPlayoffs}">
-          <p>Teams cannot be deleted once they are in the playoff
+          <p>Teams cannot be deleted once they are in the head to head
             data table for any tournament.</p>
         </c:when>
         <c:otherwise>

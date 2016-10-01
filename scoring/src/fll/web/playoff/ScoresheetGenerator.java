@@ -32,6 +32,7 @@ import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
+import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfReader;
@@ -131,6 +132,7 @@ public class ScoresheetGenerator {
         m_table[i] = SHORT_BLANK;
         m_name[i] = LONG_BLANK;
         m_round[i] = SHORT_BLANK;
+        m_divisionLabel[i] = AWARD_GROUP_LABEL;
         m_division[i] = SHORT_BLANK;
         m_number[i] = null;
         m_time[i] = null;
@@ -195,6 +197,7 @@ public class ScoresheetGenerator {
                 + i);
 
             final int performanceRunA = Playoff.getRunNumber(connection, division, teamA.getTeamNumber(), iRound);
+            m_divisionLabel[j] = HEAD_TO_HEAD_LABEL;
             m_division[j] = division;
             final int bracketA = Playoff.getBracketNumber(connection, tournament, teamA.getTeamNumber(),
                                                           performanceRunA);
@@ -222,6 +225,7 @@ public class ScoresheetGenerator {
                 + i);
 
             final int performanceRunB = Playoff.getRunNumber(connection, division, teamB.getTeamNumber(), iRound);
+            m_divisionLabel[j] = HEAD_TO_HEAD_LABEL;
             m_division[j] = division;
             final int bracketB = Playoff.getBracketNumber(connection, tournament, teamB.getTeamNumber(),
                                                           performanceRunB);
@@ -256,6 +260,7 @@ public class ScoresheetGenerator {
     m_name = new String[m_numSheets];
     m_round = new String[m_numSheets];
     m_number = new Integer[m_numSheets];
+    m_divisionLabel = new String[m_numSheets];
     m_division = new String[m_numSheets];
     m_time = new String[m_numSheets];
   }
@@ -373,19 +378,22 @@ public class ScoresheetGenerator {
 
       // This table is a single score sheet
       final PdfPTable scoreSheet = new PdfPTable(2);
-      scoreSheet.getDefaultCell().setBorder(0);
+      // scoreSheet.getDefaultCell().setBorder(Rectangle.LEFT | Rectangle.BOTTOM
+      // | Rectangle.RIGHT | Rectangle.TOP); //FIXME DEBUG should be NO_BORDER
+      scoreSheet.getDefaultCell().setBorder(Rectangle.NO_BORDER);
+      scoreSheet.getDefaultCell().setPaddingRight(1);
+      scoreSheet.getDefaultCell().setPaddingLeft(0);
 
       scoreSheet.addCell(head);
 
       final PdfPTable teamInfo = new PdfPTable(7);
       teamInfo.setWidthPercentage(100);
-      teamInfo.setWidths(new float[] { 1f, .75f, 1f, 1f, .75f, 1f, 1f });
+      teamInfo.setWidths(new float[] { 1f, 1f, 1f, 1f, 1f, 1f, .9f });
 
       // Time label cell
       final Paragraph timeP = new Paragraph("Time:", ARIAL_10PT_NORMAL);
       timeP.setAlignment(Element.ALIGN_RIGHT);
       final PdfPCell timeLc = new PdfPCell(scoreSheet.getDefaultCell());
-      timeLc.setPaddingRight(2);
       timeLc.addElement(timeP);
       teamInfo.addCell(timeLc);
       // Time value cell
@@ -398,7 +406,6 @@ public class ScoresheetGenerator {
       final Paragraph tblP = new Paragraph("Table:", ARIAL_10PT_NORMAL);
       tblP.setAlignment(Element.ALIGN_RIGHT);
       final PdfPCell tblLc = new PdfPCell(scoreSheet.getDefaultCell());
-      tblLc.setPaddingRight(2);
       tblLc.addElement(tblP);
       teamInfo.addCell(tblLc);
       // Table value cell
@@ -411,7 +418,6 @@ public class ScoresheetGenerator {
       final Paragraph rndP = new Paragraph("Round:", ARIAL_10PT_NORMAL);
       rndP.setAlignment(Element.ALIGN_RIGHT);
       final PdfPCell rndlc = new PdfPCell(scoreSheet.getDefaultCell());
-      rndlc.setPaddingRight(2);
       rndlc.addElement(rndP);
       teamInfo.addCell(rndlc);
       // Round number value cell
@@ -430,7 +436,6 @@ public class ScoresheetGenerator {
       final Paragraph nbrP = new Paragraph("Team #:", ARIAL_10PT_NORMAL);
       nbrP.setAlignment(Element.ALIGN_RIGHT);
       final PdfPCell nbrlc = new PdfPCell(scoreSheet.getDefaultCell());
-      nbrlc.setPaddingRight(2);
       nbrlc.addElement(nbrP);
       teamInfo.addCell(nbrlc);
       // Team number value cell
@@ -441,16 +446,16 @@ public class ScoresheetGenerator {
       teamInfo.addCell(nbrVc);
 
       // Team division label cell
-      final Paragraph divP = new Paragraph("Playoff Bracket:", ARIAL_10PT_NORMAL);
+      final Paragraph divP = new Paragraph(m_divisionLabel[i], ARIAL_10PT_NORMAL);
       divP.setAlignment(Element.ALIGN_RIGHT);
       final PdfPCell divlc = new PdfPCell(scoreSheet.getDefaultCell());
-      divlc.setPaddingRight(2);
       divlc.addElement(divP);
+      divlc.setColspan(2);
       teamInfo.addCell(divlc);
       // Team division value cell
       final Paragraph divV = new Paragraph(m_division[i], COURIER_10PT_NORMAL);
       final PdfPCell divVc = new PdfPCell(scoreSheet.getDefaultCell());
-      divVc.setColspan(3);
+      divVc.setColspan(2);
       divVc.addElement(divV);
       teamInfo.addCell(divVc);
 
@@ -463,7 +468,6 @@ public class ScoresheetGenerator {
       final Paragraph nameP = new Paragraph("Team Name:", ARIAL_10PT_NORMAL);
       nameP.setAlignment(Element.ALIGN_RIGHT);
       final PdfPCell namelc = new PdfPCell(scoreSheet.getDefaultCell());
-      namelc.setPaddingRight(9);
       namelc.setColspan(2);
       namelc.addElement(nameP);
       teamInfo.addCell(namelc);
@@ -604,7 +608,7 @@ public class ScoresheetGenerator {
             categoryCell.setBorderWidthTop(1);
             categoryCell.setBorderWidthBottom(0);
             categoryCell.setBorderWidthLeft(0);
-            categoryCell.setBorderWidthRight(0);            
+            categoryCell.setBorderWidthRight(0);
             categoryCell.setVerticalAlignment(Element.ALIGN_CENTER);
             categoryCell.setHorizontalAlignment(Element.ALIGN_CENTER);
             categoryCell.setRotation(90);
@@ -723,6 +727,12 @@ public class ScoresheetGenerator {
 
   private Integer[] m_number;
 
+  public static final String HEAD_TO_HEAD_LABEL = "Head to head Bracket:";
+
+  public static final String AWARD_GROUP_LABEL = "Award Group:";
+
+  private String[] m_divisionLabel;
+
   private String[] m_division;
 
   private String[] m_time;
@@ -763,10 +773,14 @@ public class ScoresheetGenerator {
    * 
    * @param i The 0-based index of the scoresheet to which to assign this table
    *          label.
-   * @param table A string with the division for the specified scoresheet.
+   * @param divisionLabel the label to use for this division should be
+   *          {@link #HEAD_TO_HEAD_LABEL} or {@link #AWARD_GROUP_LABEL}
+   * @param division the string to display in the division section of the score
+   *          sheet
    * @throws IllegalArgumentException Thrown if the index is out of valid range.
    */
   public void setDivision(final int i,
+                          final String divisionLabel,
                           final String division)
       throws IllegalArgumentException {
     if (i < 0) {
@@ -776,6 +790,7 @@ public class ScoresheetGenerator {
       throw new IllegalArgumentException("Index must be < "
           + m_numSheets);
     }
+    m_divisionLabel[i] = divisionLabel;
     m_division[i] = division;
   }
 

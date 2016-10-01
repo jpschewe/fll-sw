@@ -1,8 +1,8 @@
 Notes about things to remember in Minnesota
 ===========================================
 
-  * Make sure to have a computer on the performance floor for use by the MCs so they can see the playoffs when the screens are showing the video
-  * Make sure we have at least 1 screen at state dedicated to scores during the playoffs, otherwise people can't see all of the information before it flips to the video
+  * Make sure to have a computer on the performance floor for use by the MCs so they can see the head to head brackets when the screens are showing the video
+  * Make sure we have at least 1 screen at state dedicated to scores during the head to head brackets, otherwise people can't see all of the information before it flips to the video
   * When scheduling state make one division finish subjective before lunch so that we get all of the scoresheets for that division before lunch. This helps spread out the score entry.
 
 Public Wireless

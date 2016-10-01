@@ -48,7 +48,7 @@ fll.web.playoff.ScoregenBrackets.populateContext(application,
 <head>
 <link rel="stylesheet" type="text/css"
  href="<c:url value='/style/fll-sw.css'/>" />
-<title>${division} - Playoff Bracket</title>
+<title>${division} - Head to head Bracket</title>
 
 <style type='text/css'>
 TD.Leaf {
@@ -123,9 +123,9 @@ FONT.TIE {
 
 
 <body>
- <h2>Playoff Bracket: ${division }</h2>
+ <h2>Head to head Bracket: ${division }</h2>
  <p>
-  <a href="index.jsp">Return to Playoff menu</a>
+  <a href="index.jsp">Return to Head to head menu</a>
  </p>
  
  <form name='printScoreSheets' method='post' action='ScoresheetServlet'
@@ -139,7 +139,7 @@ FONT.TIE {
   <%=bracketInfo.outputBrackets(BracketData.TopRightCornerStyle.MEET_BOTTOM_OF_CELL)%>
 
   <p>
-   <a href="index.jsp">Return to Playoff menu</a>
+   <a href="index.jsp">Return to Head to head menu</a>
   </p>
  </form>
 

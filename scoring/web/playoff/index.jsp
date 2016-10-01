@@ -20,11 +20,11 @@
   }
 </script>
 
-<title>Playoff's</title>
+<title>Head to Head</title>
 </head>
 
 <body>
-  <h1>Playoff menu</h1>
+  <h1>Head to Head menu</h1>
 
   <div class='status-message'>${message}</div>
   <%-- clear out the message, so that we don't see it again --%>
@@ -44,11 +44,11 @@
   </p>
 
   <p>
-    Scores for the playoff brackets are entered just like the scores for
+    Scores for the head to head brackets are entered just like the scores for
     the seeding rounds using the <a
       href='<c:url value="/scoreEntry/select_team.jsp"/>'
       target='_new'>Score Entry</a> page. If a team leaves the
-    tournament before the playoffs, they should be entered as a No Show
+    tournament before head to head, they should be entered as a No Show
     on the Score Entry page. If a tie occurs in a match; print out the
     score sheets again and run the teams a second time. Then change the
     scores for the teams to be the new scores.
@@ -56,7 +56,7 @@
 
   <ol>
 
-    <li><a href="create_playoff_division.jsp">Create playoff
+    <li><a href="create_playoff_division.jsp">Create head to head
         bracket</a></li>
 
     <li>
@@ -79,7 +79,7 @@
         name='initialize'
         action='StorePlayoffParameters'
         method='POST'>
-        <b>WARNING: Do not initialize any playoff brackets until all
+        <b>WARNING: Do not initialize any head to head brackets until all
           seeding runs have been recorded!</b> Doing so will automatically
         add bye runs to the teams that don't have enough seeding runs.<br />
         Select Bracket: <select
@@ -102,9 +102,9 @@
           id='InitializeBracketHelp'
           class='help'
           style='display: none'>
-          Initializing a playoff bracket allows it to be run. A playoff
+          Initializing a head to head bracket allows it to be run. A head to head
           bracket cannot be initialized if any teams that are to compete
-          in the playoff bracket Are still competing in a playoff
+          in the head to head bracket Are still competing in a head to head
           bracket that has not been run to completion. The 3rd/4th place
           match is need if you want to know not only 1st and 2nd place
           in the bracket, but 3rd and 4th place as well. This will add a
@@ -126,12 +126,11 @@
         Select Bracket: <select
           id='printable.division'
           name='division'>
-          <c:forEach
-            items="${playoff_data.initializedBrackets }"
-            var="division">
-            <option value='${division}'>${division}</option>
-          </c:forEach>
-        </select>
+          <c:forEach items="${playoff_data.initializedBrackets }"
+						var="division">
+						<option value='${division}'>${division}</option>
+					</c:forEach>
+				</select>
 
         <%-- select rounds --%>
         from round <select name='firstRound'>
@@ -183,7 +182,7 @@
           class='help'
           style='display: none'>
           This page is used to print out score sheets for the specified
-          playoff bracket. This page will automatically assign the
+          head to head bracket. This page will automatically assign the
           matches to the tables specified in on the table assignment
           page. The assigned tables can be changed before printing if
           desired. <a href='javascript:hide("ScoreGenBracketsHelp")'>[hide]</a>
@@ -278,16 +277,16 @@
           type='submit'
           id='uninitialize_playoff-submit'
           value='Submit'
-          onclick='return confirm("Are you absolutly sure you want to delete all scores associated with this playoff bracket?")' />
+          onclick='return confirm("Are you absolutly sure you want to delete all scores associated with this head to head bracket?")' />
 
         <a href='javascript:display("UninitializeBracketsHelp")'>[help]</a>
         <div
           id='UninitializeBracketsHelp'
           class='help'
           style='display: none'>
-          This link is used to uninitialize a playoff bracket. In most
+          This link is used to uninitialize a head to head bracket. In most
           cases this link should not be used. It may be useful if a
-          playoff bracket was initialized by mistake and a different one
+          head to head bracket was initialized by mistake and a different one
           should be run first. Any scores that have been entered for
           this bracket will be deleted.<a
             href='javascript:hide("UninitializeBracketsHelp")'>[hide]</a>
@@ -303,14 +302,14 @@
     <h2>Other useful pages</h2>
     <ul>
 
-      <li><a href="remoteMain.jsp">Scrolling Playoff Bracket</a>
+      <li><a href="remoteMain.jsp">Scrolling Head to head Bracket</a>
         (as on big screen display)<br /> Bracket and round must be
         selected from the big screen display <a
         href="<c:url value='/admin/remoteControl.jsp'/>">remote
           control</a> page.</li>
 
       <li><a href="remoteControlBrackets.jsp?scroll=false">Non-Scrolling
-          Playoff Bracket</a> (as on big screen display)<br /> Bracket and
+          Head to head Bracket</a> (as on big screen display)<br /> Bracket and
         round must be selected from the big screen display <a
         href="<c:url value='/admin/remoteControl.jsp'/>">remote
           control</a> page.</li>

@@ -41,7 +41,7 @@
     <li><a href='<c:url value="/scoreboard/Top10"/>'>Top 10
         performance scores</a></li>
 
-    <li><a href='<c:url value="/playoff/remoteMain.jsp"/>'>Playoff
+    <li><a href='<c:url value="/playoff/remoteMain.jsp"/>'>Head to head
         brackets that are currently on the big screen</a></li>
 
     <li>

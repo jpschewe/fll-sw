@@ -267,7 +267,7 @@
     <li><c:if test="${tablesAssigned}">
         <span class='completed'>DONE </span>
       </c:if> <a href='<c:url value="tables.jsp"/>'>Assign Table Labels</a>
-      (for scoresheet printing during playoffs)</li>
+      (for scoresheet printing during head to head)</li>
 
 
 
@@ -314,7 +314,7 @@
     <li>Once the seeding rounds have been completed you will need
       to setup the <a
       href="../playoff"
-      target="_new">playoffs</a>.
+      target="_new">head to head brackets</a>.
     </li>
 
   </ol>
