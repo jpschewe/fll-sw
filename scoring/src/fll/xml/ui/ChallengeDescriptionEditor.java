@@ -20,6 +20,19 @@ import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.ChallengeParserTest;
 
+/*
+ * TODO
+ * - Support modifying the ChallengeDescription, should there be an immutable version?
+ *   - Make sure all Collections are copied or marked unmodifiable or documented properly
+ * - save support
+ * - Determine where TransferHandler class needs to live based on what it needs to know (perhaps a stand alone class)
+ *   - maybe just put in up/down arrows; this would be much easier to implement
+ * - How to reorder goals in the UI, needs to be used in TransferHandler.exportDone
+ * - choose challenge description to edit
+ * - close handler on editor to exit when run stand alone
+ * 
+ */
+
 /**
  * Application to edit {@link ChallengeDescription} objects.
  */
