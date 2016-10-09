@@ -6,6 +6,7 @@
 
 package fll.xml;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,42 +27,114 @@ public class PerformanceScoreCategory extends ScoreCategory {
 
     mMinimumScore = Double.valueOf(ele.getAttribute("minimumScore"));
 
-    final List<Restriction> restrictions = new LinkedList<Restriction>();
+    mRestrictions = new LinkedList<Restriction>();
     for (final Element restrictEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName("restriction"))) {
       final Restriction restrict = new Restriction(restrictEle, this);
-      restrictions.add(restrict);
+      mRestrictions.add(restrict);
     }
-    mRestrictions = Collections.unmodifiableList(restrictions);
 
-    final List<TiebreakerTest> tiebreakers = new LinkedList<TiebreakerTest>();
+    mTiebreaker = new LinkedList<TiebreakerTest>();
     final NodeList tiebreakerElements = ele.getElementsByTagName("tiebreaker");
     if (0 != tiebreakerElements.getLength()) {
       final Element tiebreakerElement = (Element) tiebreakerElements.item(0);
       for (final Element testElement : new NodelistElementCollectionAdapter(tiebreakerElement.getChildNodes())) {
         final TiebreakerTest tie = new TiebreakerTest(testElement, this);
-        tiebreakers.add(tie);
+        mTiebreaker.add(tie);
       }
     }
-    mTiebreaker = Collections.unmodifiableList(tiebreakers);
 
   }
 
-  private final List<Restriction> mRestrictions;
+  private final Collection<Restriction> mRestrictions;
 
-  public List<Restriction> getRestrictions() {
-    return mRestrictions;
+  /**
+   * Get the restrictions.
+   * 
+   * @return unmodifiable collection
+   */
+  public Collection<Restriction> getRestrictions() {
+    return Collections.unmodifiableCollection(mRestrictions);
+  }
+
+  /**
+   * Add a restriction.
+   * 
+   * @param v the restriction to add
+   */
+  public void addRestriction(final Restriction v) {
+    mRestrictions.add(v);
+  }
+
+  /**
+   * Remove a restriction.
+   * 
+   * @param v the restriction to remove
+   * @return if the restriction was removed
+   */
+  public boolean removeRestriction(final Restriction v) {
+    return mRestrictions.remove(v);
   }
 
   private final List<TiebreakerTest> mTiebreaker;
 
+  /**
+   * Get the tiebreaker tests. These are checked in order.
+   * 
+   * @return unmodifiable list
+   */
   public List<TiebreakerTest> getTiebreaker() {
-    return mTiebreaker;
+    return Collections.unmodifiableList(mTiebreaker);
   }
 
-  private final double mMinimumScore;
+  /**
+   * Add a test to the end of the tiebreaker list.
+   * 
+   * @param v the test to add
+   */
+  public void addTiebreakerTest(final TiebreakerTest v) {
+    mTiebreaker.add(v);
+  }
+
+  /**
+   * Add a test at the specified index in the tiebreaker list.
+   * 
+   * @param index the index to add the test at
+   * @param v the test to add
+   */
+  public void addTiebreakerTest(final int index,
+                                final TiebreakerTest v)
+      throws IndexOutOfBoundsException {
+    mTiebreaker.add(index, v);
+  }
+
+  /**
+   * Remove the specified test from the list of tiebreakers.
+   * 
+   * @param v the tiebreaker to remove
+   * @return if the tiebreaker was removed
+   */
+  public boolean removeTiebreakerTest(final TiebreakerTest v) {
+    return mTiebreaker.remove(v);
+  }
+
+  /**
+   * Remove the tiebreaker test at the specified index.
+   * 
+   * @param index the index to remove at
+   * @return the test that was removed
+   */
+  public TiebreakerTest removeTiebreakerTest(final int index) {
+    return mTiebreaker.remove(index);
+  }
+
+  private double mMinimumScore;
 
   public double getMinimumScore() {
     return mMinimumScore;
+  }
+
+  public void setMinimumScore(final double v) {
+    mMinimumScore = v;
   }
 
   @Override

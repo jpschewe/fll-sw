@@ -20,10 +20,14 @@ public class Variable extends BasicPolynomial {
     mName = ele.getAttribute("name");
   }
 
-  private final String mName;
+  private String mName;
 
   public String getName() {
     return mName;
+  }
+
+  public void setName(final String v) {
+    mName = v;
   }
 
 }

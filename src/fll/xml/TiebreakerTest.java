@@ -13,15 +13,20 @@ import org.w3c.dom.Element;
  */
 public class TiebreakerTest extends BasicPolynomial {
 
-  public TiebreakerTest(final Element ele, final GoalScope goalScope) {
+  public TiebreakerTest(final Element ele,
+                        final GoalScope goalScope) {
     super(ele, goalScope);
     mWinner = XMLUtils.getWinnerCriteria(ele);
   }
 
-  private final WinnerType mWinner;
+  private WinnerType mWinner;
 
   public WinnerType getWinner() {
     return mWinner;
+  }
+
+  public void setWinner(final WinnerType v) {
+    mWinner = v;
   }
 
 }

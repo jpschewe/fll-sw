@@ -7,6 +7,7 @@
 package fll.xml;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -40,13 +41,17 @@ public abstract class AbstractGoal implements Serializable {
     mCategory = ele.getAttribute("category");
   }
 
-  private final String mCategory;
+  private String mCategory;
 
   public String getCategory() {
     return mCategory;
   }
 
-  private final boolean mRequired;
+  public void setCategory(final String v) {
+    mCategory = v;
+  }
+
+  private boolean mRequired;
 
   /**
    * True if the goal is required for award consideration.
@@ -55,25 +60,41 @@ public abstract class AbstractGoal implements Serializable {
     return mRequired;
   }
 
-  private final String mName;
+  public void setRequired(final boolean v) {
+    mRequired = v;
+  }
+
+  private String mName;
 
   public String getName() {
     return mName;
   }
 
-  private final String mTitle;
+  public void setName(final String v) {
+    mName = v;
+  }
+
+  private String mTitle;
 
   public String getTitle() {
     return mTitle;
   }
 
-  private final String mDescription;
+  public void setTitle(final String v) {
+    mTitle = v;
+  }
+
+  private String mDescription;
 
   /**
    * @return the description, may be null
    */
   public String getDescription() {
     return mDescription;
+  }
+
+  public void setDescription(final String v) {
+    mDescription = v;
   }
 
   /**
@@ -95,9 +116,9 @@ public abstract class AbstractGoal implements Serializable {
   public abstract boolean isEnumerated();
 
   /**
-   * Read-only list of the values.
+   * Read-only collection of the values.
    */
-  public abstract List<EnumeratedValue> getValues();
+  public abstract Collection<EnumeratedValue> getValues();
 
   /**
    * Get the enumerated values from the goal and sort them for display.

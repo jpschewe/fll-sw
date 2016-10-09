@@ -7,13 +7,12 @@
 package fll.xml;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
-
 import org.w3c.dom.Element;
+
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**
  * The description of a tournament.
@@ -40,15 +39,14 @@ public class ChallengeDescription implements Serializable {
     final Element performanceElement = (Element) ele.getElementsByTagName("Performance").item(0);
     mPerformance = new PerformanceScoreCategory(performanceElement);
 
-    final List<ScoreCategory> subjCats = new LinkedList<ScoreCategory>();
+    mSubjectiveCategories = new LinkedList<ScoreCategory>();
     for (final Element subjEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName("subjectiveCategory"))) {
       final ScoreCategory subj = new ScoreCategory(subjEle);
-      subjCats.add(subj);
+      mSubjectiveCategories.add(subj);
     }
-    mSubjectiveCategories = Collections.unmodifiableList(subjCats);
   }
 
-  private final String mCopyright;
+  private String mCopyright;
 
   /**
    * Copyright statement for the challenge.
@@ -59,28 +57,54 @@ public class ChallengeDescription implements Serializable {
     return mCopyright;
   }
 
-  private final String mTitle;
+  public void setCopyright(final String v) {
+    mCopyright = v;
+  }
+
+  private String mTitle;
 
   public String getTitle() {
     return mTitle;
   }
 
-  private final String mRevision;
+  public void setTitle(final String v) {
+    mTitle = v;
+  }
+
+  private String mRevision;
 
   public String getRevision() {
     return mRevision;
   }
 
-  private final WinnerType mWinner;
+  public void setRevision(final String v) {
+    mRevision = v;
+  }
+
+  private WinnerType mWinner;
 
   public WinnerType getWinner() {
     return mWinner;
   }
 
-  private final PerformanceScoreCategory mPerformance;
+  public void setWinner(final WinnerType v) {
+    mWinner = v;
+  }
+
+  private PerformanceScoreCategory mPerformance;
 
   public PerformanceScoreCategory getPerformance() {
     return mPerformance;
+  }
+
+  /**
+   * Since {@link PerformanceScoreCategory} is mutable, this should not be
+   * needed except to add or remove the performance element.
+   * 
+   * @param v setting the value to null will remove the element
+   */
+  public void setPerformance(final PerformanceScoreCategory v) {
+    mPerformance = v;
   }
 
   private final List<ScoreCategory> mSubjectiveCategories;
@@ -90,6 +114,67 @@ public class ChallengeDescription implements Serializable {
    */
   public List<ScoreCategory> getSubjectiveCategories() {
     return mSubjectiveCategories;
+  }
+
+  /**
+   * Add a subjective category to the end of the list.
+   * Since {@link ScoreCategory} is mutable, this does not check that the names
+   * are unique. That needs to be done by a higher level class.
+   * 
+   * @param v the category to add
+   * @throws IllegalArgumentException if the argument is an instance of
+   *           {@link PerformanceScoreCategory}
+   */
+  public void addSubjectiveCategory(final ScoreCategory v) throws IllegalArgumentException {
+    if (v instanceof PerformanceScoreCategory) {
+      throw new IllegalArgumentException("Cannot add a performance category to the subjective categories");
+    }
+    mSubjectiveCategories.add(v);
+  }
+
+  /**
+   * Add a subjective category at the specified index.
+   * Since {@link ScoreCategory} is mutable, this does not check that the names
+   * are unique. That needs to be done by a higher level class.
+   * 
+   * @param v the category to add
+   * @param index the index to add the category at
+   * @throws IllegalArgumentException if the argument is an instance of
+   *           {@link PerformanceScoreCategory}
+   */
+  public void addSubjectiveCategory(final int index,
+                                    final ScoreCategory v)
+      throws IndexOutOfBoundsException {
+    if (v instanceof PerformanceScoreCategory) {
+      throw new IllegalArgumentException("Cannot add a performance category to the subjective categories");
+    }
+    mSubjectiveCategories.add(index, v);
+  }
+
+  /**
+   * Remove a subjective category.
+   * 
+   * @param v the category to remove
+   * @return if the category was removed
+   * @see List#remove(Object)
+   * @throws IllegalArgumentException if the argument is an instance of
+   *           {@Link PerformanceScoreCategory}
+   */
+  public boolean removeSubjectiveCategory(final ScoreCategory v) throws IllegalArgumentException {
+    if (v instanceof PerformanceScoreCategory) {
+      throw new IllegalArgumentException("Cannot remove a performance category from the subjective categories");
+    }
+    return mSubjectiveCategories.remove(v);
+  }
+
+  /**
+   * Remove the subjective category at the specified index.
+   * 
+   * @param index the index to remove the element from
+   * @return the category that was removed
+   */
+  public ScoreCategory removeSubjectiveCategory(final int index) throws IndexOutOfBoundsException {
+    return mSubjectiveCategories.remove(index);
   }
 
   /**

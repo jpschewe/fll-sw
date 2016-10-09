@@ -45,13 +45,17 @@ public class RubricRange implements Serializable {
     return result;
   }
 
-  private final String mTitle;
+  private String mTitle;
 
   public String getTitle() {
     return mTitle;
   }
 
-  private final String mDescription;
+  public void setTitle(final String v) {
+    mTitle = v;
+  }
+
+  private String mDescription;
 
   /**
    * The long description, may be null.
@@ -62,13 +66,21 @@ public class RubricRange implements Serializable {
     return mDescription;
   }
 
-  private final String mShortDescription;
+  public void setDescription(final String v) {
+    mDescription = removeExtraWhitespace(v);
+  }
+
+  private String mShortDescription;
 
   /**
    * Short description, typically 1 line. May be null.
    */
   public String getShortDescription() {
     return mShortDescription;
+  }
+
+  public void setShortDescription(final String v) {
+    mShortDescription = v;
   }
 
   /**
@@ -80,7 +92,8 @@ public class RubricRange implements Serializable {
     final StringBuilder sb = new StringBuilder();
     final String shortDescription = getShortDescription();
 
-    if (null != shortDescription && !shortDescription.trim().isEmpty()) {
+    if (null != shortDescription
+        && !shortDescription.trim().isEmpty()) {
       sb.append(shortDescription.trim());
       if (!shortDescription.endsWith(".")
           && !shortDescription.endsWith("!") && !shortDescription.endsWith("?")) {
@@ -99,16 +112,24 @@ public class RubricRange implements Serializable {
     return sb.toString();
   }
 
-  private final int mMin;
+  private int mMin;
 
   public int getMin() {
     return mMin;
   }
 
-  private final int mMax;
+  public void setMin(final int v) {
+    mMin = v;
+  }
+
+  private int mMax;
 
   public int getMax() {
     return mMax;
+  }
+
+  public void setMax(final int v) {
+    mMax = v;
   }
 
 }

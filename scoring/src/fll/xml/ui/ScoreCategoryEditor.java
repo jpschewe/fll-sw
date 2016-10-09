@@ -20,16 +20,6 @@ import fll.util.LogUtils;
 import fll.xml.AbstractGoal;
 import fll.xml.ScoreCategory;
 
-/*
- * TODO
- * - Determine where TransferHandler class needs to live based on what it needs to know (perhaps a stand alone class)
- * - How to reorder goals in the UI, needs to be used in TransferHandler.exportDone
- * - Support modifying the ChallengeDescription, should there be an immutable version?
- * - Think about how the model, view, controller should work with ChallengeDescription
- * 
- * 
- */
-
 /**
  * Editor for {@link ScoreCategory} objects.
  */
