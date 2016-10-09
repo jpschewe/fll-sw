@@ -50,15 +50,61 @@ public class Term extends AbstractTerm {
     }
 
   }
-
+  
   private final Collection<GoalRef> mGoals = new LinkedList<GoalRef>();
+  /**
+   * 
+   * @return unmodifiable collection
+   */
   public Collection<GoalRef> getGoals() {
     return Collections.unmodifiableCollection(mGoals);
   }
+  
+  /**
+   * Add a goal reference.
+   * 
+   * @param v the goal reference to add
+   */
+  public void addGoal(final GoalRef v) {
+    mGoals.add(v);
+  }
+  
+  /**
+   * Remove a goal reference.
+   * 
+   * @param v the goal to remove
+   * @return if the goal reference was found and removed
+   */
+  public boolean removeGoal(final GoalRef v) {
+    return mGoals.remove(v);
+  }
 
   private final List<VariableRef> mVariables = new LinkedList<VariableRef>();
+  /**
+   * 
+   * @return unmodifiable collection
+   */
   public Collection<VariableRef> getVariables() {
     return Collections.unmodifiableCollection(mVariables);
+  }
+  
+  /**
+   * Add a variable reference.
+   * 
+   * @param var the variable reference to add
+   */
+  public void addVariable(final VariableRef var) {
+    mVariables.add(var);
+  }
+  
+  /**
+   * Remove a variable reference
+   * 
+   * @param var the variable reference to remove
+   * @return if the variable reference was found and removed
+   */
+  public boolean removeVariable(final VariableRef var) {
+    return mVariables.remove(var);
   }
 
   @Override

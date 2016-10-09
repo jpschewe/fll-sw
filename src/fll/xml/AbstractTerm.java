@@ -17,6 +17,10 @@ import org.w3c.dom.Element;
  */
 public abstract class AbstractTerm implements Evaluatable, Serializable {
 
+  /**
+   * Collapses all constant elements into a single coefficient.
+   * @param ele the element to parse
+   */
   public AbstractTerm(final Element ele) {
     double coefficient = 1;
     for (final Element constantEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName("constant"))) {
@@ -28,10 +32,14 @@ public abstract class AbstractTerm implements Evaluatable, Serializable {
     mCoefficient = coefficient;
   }
 
-  private final double mCoefficient;
+  private double mCoefficient;
 
   public double getCoefficient() {
     return mCoefficient;
+  }
+  
+  public void setCoefficient(final double v) {
+    mCoefficient = v;
   }
 
 }

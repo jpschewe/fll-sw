@@ -24,11 +24,11 @@ public class SwitchStatement implements Evaluatable, Serializable {
                          final GoalScope goalScope,
                          final VariableScope variableScope) {
     ComplexPolynomial defaultCase = null;
-    final List<CaseStatement> cases = new LinkedList<CaseStatement>();
+    mCases = new LinkedList<CaseStatement>();
     for (final Element caseEle : new NodelistElementCollectionAdapter(ele.getChildNodes())) {
       if ("case".equals(caseEle.getNodeName())) {
         final CaseStatement cs = new CaseStatement(caseEle, goalScope, variableScope);
-        cases.add(cs);
+        mCases.add(cs);
       } else if ("default".equals(caseEle.getNodeName())) {
         defaultCase = new ComplexPolynomial(caseEle, goalScope, variableScope);
       } else {
@@ -36,14 +36,55 @@ public class SwitchStatement implements Evaluatable, Serializable {
             + caseEle.getNodeName() + "'");
       }
     }
-    mCases = Collections.unmodifiableList(cases);
     mDefaultCase = defaultCase;
   }
 
   private final List<CaseStatement> mCases;
 
   public List<CaseStatement> getCases() {
-    return mCases;
+    return Collections.unmodifiableList(mCases);
+  }
+
+  /**
+   * Add a case statement to the end of the case statements.
+   * 
+   * @param v the case statement to add
+   */
+  public void addCase(final CaseStatement v) {
+    mCases.add(v);
+  }
+
+  /**
+   * Add a case statement at the specified position.
+   * 
+   * @param index the index to add the case statement at
+   * @param v the case statement to add
+   */
+  public void addCase(final int index,
+                      final CaseStatement v)
+      throws IndexOutOfBoundsException {
+    mCases.add(index, v);
+  }
+
+  /**
+   * Remove a case statement
+   * 
+   * @param v the case statement to remove
+   * @return true if the case statement was removed
+   */
+  public boolean removeCase(final CaseStatement v) {
+    return mCases.remove(v);
+  }
+
+  /**
+   * Remove a case statement at a specified position
+   * 
+   * @param index the position to remove from
+   * @return the case statement that was removed
+   * @throws IndexOutOfBoundsException
+   */
+  public CaseStatement removeCase(final int index) throws IndexOutOfBoundsException {
+    return mCases.remove(index);
   }
 
   private final ComplexPolynomial mDefaultCase;

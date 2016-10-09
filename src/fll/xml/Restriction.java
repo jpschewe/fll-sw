@@ -19,22 +19,34 @@ public class Restriction extends BasicPolynomial {
     mMessage = ele.getAttribute("message");
   }
 
-  private final double mLowerBound;
+  private double mLowerBound;
 
   public double getLowerBound() {
     return mLowerBound;
   }
+  
+  public void setLowerBound(final double v) {
+    mLowerBound = v;
+  }
 
-  private final double mUpperBound;
+  private double mUpperBound;
 
   public double getUpperBound() {
     return mUpperBound;
   }
 
-  private final String mMessage;
+  public void setUpperBound(final double v) {
+    mUpperBound = v;
+  }
+  
+  private String mMessage;
 
   public String getMessage() {
     return mMessage;
+  }
+
+  public void setMessage(final String v) {
+    mMessage = v;
   }
 
 }

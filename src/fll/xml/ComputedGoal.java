@@ -8,15 +8,13 @@ package fll.xml;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.w3c.dom.Element;
 
 import fll.web.playoff.TeamScore;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 public class ComputedGoal extends AbstractGoal implements VariableScope {
 
@@ -24,21 +22,39 @@ public class ComputedGoal extends AbstractGoal implements VariableScope {
                       final GoalScope goalScope) {
     super(ele);
 
-    final Map<String, Variable> variables = new HashMap<String, Variable>();
+    mVariables = new LinkedList<>();
     for (final Element varEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName("variable"))) {
       final Variable var = new Variable(varEle, goalScope);
-      variables.put(var.getName(), var);
+      mVariables.add(var);
     }
-    mVariables = Collections.unmodifiableMap(variables);
 
     final Element switchEle = new NodelistElementCollectionAdapter(ele.getElementsByTagName("switch")).next();
     mSwitch = new SwitchStatement(switchEle, goalScope, this);
   }
 
-  private final Map<String, Variable> mVariables;
+  private final Collection<Variable> mVariables;
 
   public Collection<Variable> getVariables() {
-    return mVariables.values();
+    return Collections.unmodifiableCollection(mVariables);
+  }
+
+  /**
+   * Add a variable.
+   * 
+   * @param v the variable to add
+   */
+  public void addVariable(final Variable v) {
+    mVariables.add(v);
+  }
+
+  /**
+   * Remove a variable.
+   * 
+   * @param v the variable to remove
+   * @return true if the variable was removed
+   */
+  public boolean removeVariable(final Variable v) {
+    return mVariables.remove(v);
   }
 
   private final SwitchStatement mSwitch;
@@ -48,12 +64,13 @@ public class ComputedGoal extends AbstractGoal implements VariableScope {
   }
 
   public Variable getVariable(final String name) throws ScopeException {
-    if (mVariables.containsKey(name)) {
-      return mVariables.get(name);
-    } else {
-      throw new ScopeException("Cannot find variable '"
-          + name + "'");
+    for (final Variable var : mVariables) {
+      if (var.getName().equals(name)) {
+        return var;
+      }
     }
+    throw new ScopeException("Cannot find variable '"
+        + name + "'");
   }
 
   public double getRawScore(final TeamScore teamScore) {

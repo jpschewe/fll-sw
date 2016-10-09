@@ -6,6 +6,7 @@
 
 package fll.xml;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -28,31 +29,26 @@ public class Goal extends AbstractGoal {
 
     mScoreType = XMLUtils.getScoreType(ele);
 
-    final List<RubricRange> rubric = new LinkedList<RubricRange>();
-    final NodelistElementCollectionAdapter rubricEles = new NodelistElementCollectionAdapter(
-                                                                                             ele.getElementsByTagName("rubric"));
+    mRubric = new LinkedList<RubricRange>();
+    final NodelistElementCollectionAdapter rubricEles = new NodelistElementCollectionAdapter(ele.getElementsByTagName("rubric"));
     if (rubricEles.hasNext()) {
       final Element rubricEle = rubricEles.next();
       for (final Element rangeEle : new NodelistElementCollectionAdapter(rubricEle.getElementsByTagName("range"))) {
         final RubricRange range = new RubricRange(rangeEle);
-        rubric.add(range);
+        mRubric.add(range);
       }
     }
-    
+
     // sort so that the lowest range is first
-    Collections.sort(rubric, LEAST_RUBRIC_RANGE);
+    Collections.sort(mRubric, LEAST_RUBRIC_RANGE);
 
-    mRubric = Collections.unmodifiableList(rubric);
-
-    final List<EnumeratedValue> values = new LinkedList<EnumeratedValue>();
+    mValues = new LinkedList<EnumeratedValue>();
     for (final Element valueEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName("value"))) {
       final EnumeratedValue value = new EnumeratedValue(valueEle);
-      values.add(value);
+      mValues.add(value);
     }
-    mValues = Collections.unmodifiableList(values);
 
   }
-
 
   private static final Comparator<RubricRange> LEAST_RUBRIC_RANGE = new Comparator<RubricRange>() {
     public int compare(final RubricRange one,
@@ -60,55 +56,115 @@ public class Goal extends AbstractGoal {
       return Integer.compare(one.getMin(), two.getMin());
     }
   };
-  
+
   private final List<RubricRange> mRubric;
 
   /**
-   * 
    * @return unmodifiable list, sorted with lowest range first
    */
   public List<RubricRange> getRubric() {
-    return mRubric;
+    return Collections.unmodifiableList(mRubric);
   }
-
-  private final List<EnumeratedValue> mValues;
 
   /**
+   * Remove a rubric range
    * 
-   * @return unmodifiable list
+   * @param v the rubric range to remove
+   * @return if the rubric range was removed
    */
-  public List<EnumeratedValue> getValues() {
-    return mValues;
+  public boolean removeRubricRange(final RubricRange v) {
+    return mRubric.remove(v);
   }
 
-  private final double mMin;
+  /**
+   * Add a rubric range.
+   * 
+   * @param v the rubric range to add
+   */
+  public void addRubricRange(final RubricRange v) {
+    mRubric.add(v);
+
+    // sort so that the lowest range is first
+    Collections.sort(mRubric, LEAST_RUBRIC_RANGE);
+  }
+
+  private final Collection<EnumeratedValue> mValues;
+
+  /**
+   * @return unmodifiable collection
+   */
+  public Collection<EnumeratedValue> getValues() {
+    return Collections.unmodifiableCollection(mValues);
+  }
+
+  /**
+   * Add an enumerated value
+   * 
+   * @param v the value to add
+   */
+  public void addValue(final EnumeratedValue v) {
+    mValues.add(v);
+  }
+
+  /**
+   * Remove an enumted value, if all enumted values are removed the goal
+   * is no longer an enumerated goal.
+   * 
+   * @param v the value to remove
+   * @return if the value was removed
+   */
+  public boolean removeValue(final EnumeratedValue v) {
+    return mValues.remove(v);
+  }
+
+  private double mMin;
 
   public double getMin() {
     return mMin;
   }
 
-  private final double mMax;
+  public void setMin(final double v) {
+    mMin = v;
+  }
+  
+  private double mMax;
 
   public double getMax() {
     return mMax;
   }
+  
+  public void setMax(final double v) {
+    mMax = v;
+  }
 
-  private final double mMultiplier;
+  private double mMultiplier;
 
   public double getMultiplier() {
     return mMultiplier;
   }
 
-  private final double mInitialValue;
+  public void setMultiplier(final double v) {
+    mMultiplier = v;
+  }
+
+  private double mInitialValue;
 
   public double getInitialValue() {
     return mInitialValue;
   }
 
-  private final ScoreType mScoreType;
+  public void setInitialValue(final double v) {
+    mInitialValue = v;
+  }
+
+  private ScoreType mScoreType;
 
   public ScoreType getScoreType() {
     return mScoreType;
+  }
+
+  public void setScoreType(final ScoreType v) {
+    mScoreType = v;
   }
 
   public boolean isEnumerated() {

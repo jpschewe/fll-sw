@@ -22,15 +22,26 @@ import fll.xml.ChallengeParserTest;
 
 /*
  * TODO
- * - Support modifying the ChallengeDescription, should there be an immutable version?
- *   - Make sure all Collections are copied or marked unmodifiable or documented properly
- * - save support
- * - Determine where TransferHandler class needs to live based on what it needs to know (perhaps a stand alone class)
- *   - maybe just put in up/down arrows; this would be much easier to implement
- * - How to reorder goals in the UI, needs to be used in TransferHandler.exportDone
+ * - Support modifying the ChallengeDescription
+ *   - CaseStatement
+ *   - AbstractConditionStatement ...
+ * - Be able to create all elements without an XML element
+ * - add validity check somewhere to ensure that all names are unique, perhaps this is part of the UI
+ *   - look at the XML validation code
+ *   - unique names for goals in each category
+ *   - unique names for categories
+ *   - Goal min/max
+ *   - Restriction upperBound/lowerBound
+ *   - RubricRange min/max
+ *   - unique variable names inside ComputedGoal
+ *   - SwitchStatement must have something in the default case
+ * - save to XML
+ * - UI support for reordering
+ *   - just put in up/down arrows; this would be much easier to implement than DnD
  * - choose challenge description to edit
  * - close handler on editor to exit when run stand alone
- * 
+ * - support grouping of goals, this is where DnD might be useful 
+ *   - all goals in a group must be consecutive
  */
 
 /**

@@ -39,10 +39,14 @@ public abstract class AbstractConditionStatement implements Serializable {
     }
   }
 
-  private final InequalityComparison mComparison;
+  private InequalityComparison mComparison;
 
   public InequalityComparison getComparison() {
     return mComparison;
+  }
+
+  public void setCompariton(final InequalityComparison v) {
+    mComparison = v;
   }
 
   /**

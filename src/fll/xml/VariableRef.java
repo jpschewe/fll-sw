@@ -14,8 +14,19 @@ import fll.web.playoff.TeamScore;
 
 public class VariableRef implements Evaluatable, Serializable {
 
+  /**
+   * Create a new variable reference.
+   * 
+   * @param ele
+   * @param scope
+   * @throws NullPointerException if scope or ele are null
+   */
   public VariableRef(final Element ele,
                      final VariableScope scope) {
+    if(null == scope) {
+      throw new NullPointerException("Scope must not be null");
+    }
+    
     mVariableName = ele.getAttribute("variable");
     mVariableScope = scope;
   }
