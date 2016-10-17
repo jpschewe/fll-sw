@@ -23,9 +23,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -37,14 +34,9 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
-import net.mtu.eggplant.io.IOUtils;
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
-
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
@@ -52,6 +44,8 @@ import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.util.FP;
 import fll.util.LogUtils;
+import net.mtu.eggplant.io.IOUtils;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**
  * Parse challenge description and generate script/text for scoreEntry page.
@@ -183,7 +177,7 @@ public final class ChallengeParser {
     try {
       final Source stylesheet = new StreamSource(transform);
 
-      final Document oldDocument = parseXMLDocument(new StringReader(content));
+      final Document oldDocument = net.mtu.eggplant.xml.XMLUtils.parseXMLDocument(new StringReader(content));
 
       // Use a Transformer for output
       final TransformerFactory tFactory = TransformerFactory.newInstance();
@@ -234,7 +228,7 @@ public final class ChallengeParser {
    * @throws SAXException
    */
   private static int determineSchemaVersion(final String content) throws SAXException, IOException {
-    final Document document = parseXMLDocument(new StringReader(content));
+    final Document document = net.mtu.eggplant.xml.XMLUtils.parseXMLDocument(new StringReader(content));
     final Element rootElement = document.getDocumentElement();
     if (!"fll".equals(rootElement.getTagName())) {
       throw new ChallengeXMLException("Not a fll challenge description file");
@@ -505,47 +499,6 @@ public final class ChallengeParser {
     }
 
     return goalDefs;
-  }
-
-  /**
-   * Parse xmlDoc an XML document. Just does basic parsing, no validity checks.
-   * Does not close the stream after parsing. Warnings are output to the logger
-   * for this class.
-   * TODO: move this to JonsInfra.
-   * 
-   * @throws IOException if there is an error reading the stream
-   * @throws SAXException if the document is found to be invalid
-   * @throws RuntimeException if there is an error configuring the XML parser,
-   *           this shouldn't happen
-   */
-  private static Document parseXMLDocument(final Reader xmlDocStream) throws SAXException, IOException {
-    try {
-      final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      factory.setNamespaceAware(true);
-      factory.setIgnoringComments(true);
-      factory.setIgnoringElementContentWhitespace(true);
-
-      final DocumentBuilder parser = factory.newDocumentBuilder();
-      parser.setErrorHandler(new ErrorHandler() {
-        public void error(final SAXParseException spe) throws SAXParseException {
-          throw spe;
-        }
-
-        public void fatalError(final SAXParseException spe) throws SAXParseException {
-          throw spe;
-        }
-
-        public void warning(final SAXParseException spe) throws SAXParseException {
-          LOG.error(spe.getMessage());
-        }
-      });
-
-      final String content = IOUtils.readIntoString(xmlDocStream);
-      final Document document = parser.parse(new InputSource(new StringReader(content)));
-      return document;
-    } catch (final ParserConfigurationException pce) {
-      throw new RuntimeException("Error configuring the XML parser", pce);
-    }
   }
 
 }
