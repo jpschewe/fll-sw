@@ -705,7 +705,7 @@
   <macrodef name="delete-database">
     <sequential>
       <!-- delete existing database -->
-      <delete>
+      <delete failonerror="false" deleteonexit="true">
         <fileset dir="${dir.web}/WEB-INF">
           <include name="flldb.*" />
         </fileset>
