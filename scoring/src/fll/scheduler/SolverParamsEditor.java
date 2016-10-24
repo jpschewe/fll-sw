@@ -188,7 +188,7 @@ public class SolverParamsEditor extends JPanel {
     params.setStartTime(startTimeEditor.getTime());
     params.setAlternateTables(alternateTables.isSelected());
     params.setPerformanceMinutes((Integer) performanceDuration.getValue());
-    params.setChangetimeMinutes((Integer) performanceChangeDuration.getValue());
+    params.setChangetimeMinutes((Integer) changeDuration.getValue());
     params.setPerformanceChangetimeMinutes((Integer) performanceChangeDuration.getValue());
 
     params.setSubjectiveStations(subjectiveStations.getStations());
