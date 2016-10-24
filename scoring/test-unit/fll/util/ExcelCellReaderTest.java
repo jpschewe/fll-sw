@@ -12,6 +12,7 @@ import java.text.ParseException;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import fll.Utilities;
@@ -20,6 +21,11 @@ import fll.Utilities;
  * Test for {@link ExcelCellReader}.
  */
 public class ExcelCellReaderTest {
+
+  @Before
+  public void setUp() {
+    LogUtils.initializeLogging();
+  }
 
   @Test
   public void testEmptyCells() throws InvalidFormatException, IOException, ParseException {
