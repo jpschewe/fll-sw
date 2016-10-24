@@ -704,6 +704,9 @@
   <!-- ==================== Tests  ==================== -->
   <macrodef name="delete-database">
     <sequential>
+      <!-- give the operating system a chance to release locks -->
+      <sleep seconds="1" />
+      
       <!-- delete existing database -->
       <delete failonerror="false" deleteonexit="true">
         <fileset dir="${dir.web}/WEB-INF">
