@@ -71,7 +71,7 @@ public class TableOptimizer {
 
   /**
    * The best schedule found so far. Starts out at null and
-   * is modified by {@link #optimize(CheckCanceled))}.
+   * is modified by {@link #optimize(CheckCanceled)}.
    * 
    * @return the file containing the best schedule or null if no such schedule
    *         has been found

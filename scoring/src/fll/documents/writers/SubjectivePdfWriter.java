@@ -126,7 +126,7 @@ public class SubjectivePdfWriter {
    * @param doc where to write to
    * @param teamInfo the team information to use when writing
    * @param font the font to use for comments and the rubric
-   * @param commmentHeight number of rows to put in the comment section
+   * @param commentHeight number of rows to put in the comment section
    * @throws MalformedURLException
    * @throws IOException
    * @throws DocumentException
