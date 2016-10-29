@@ -21,10 +21,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * The static state of a team. This does not include information about the team
- * at a given tournament. Note that the {@link #getAwardGroup() division}
- * attribute represents the division the team is registered in, which may not be
- * the same division that the team is competing in at a tournament (called
- * {@link fll.db.Queries#getEventDivision(Connection, int) event division}). If
+ * at a given tournament. If
  * someone changes the database, this object does not notice the changes. It's a
  * snapshot in time from when the object was created.
  */
@@ -106,7 +103,8 @@ public class Team implements Serializable {
    * @throws SQLException on a database access error.
    */
   public static Team getTeamFromDatabase(final Connection connection,
-                                         final int teamNumber) throws SQLException {
+                                         final int teamNumber)
+      throws SQLException {
     // First, handle known non-database team numbers...
     if (teamNumber == NULL_TEAM_NUMBER) {
       return NULL;

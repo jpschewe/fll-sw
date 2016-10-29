@@ -25,7 +25,7 @@ import com.itextpdf.text.pdf.PdfWriter;
  */
 public final class ReportPageEventHandler extends PdfPageEventHelper {
   /**
-   * @param headerFont font to use for the footer
+   * @param font font to use for the footer
    * @param reportTitle title of the report
    * @param challengeTitle title of the challenge
    * @param tournament the tournament name

@@ -187,7 +187,6 @@ public final class Tournament implements Serializable {
   /**
    * Check if this tournament needs the score summarization code to run.
    * 
-   * @param tournamentID the tournament to check
    * @return true if an update is needed
    * @throws SQLException
    */
@@ -371,7 +370,6 @@ public final class Tournament implements Serializable {
    * 
    * @param connection
    * @param tournamentID tournament to delete
-   * @return true if the tournament can be deleted, false if it contains scores
    * @throws SQLException If there is a database error such as scores existing.
    */
   public static void deleteTournament(final Connection connection,

@@ -277,7 +277,7 @@ public class SolverParams extends SchedParams {
   /**
    * If a performance round cannot be scheduled at a time, how many
    * minutes later should the next time to try be.
-   * Defaults to {@link #getTimeIncrement()}.
+   * Defaults to 1.
    */
   public final int getPerformanceAttemptOffsetMinutes() {
     return this.perfAttemptOffsetMinutes;
@@ -295,7 +295,7 @@ public class SolverParams extends SchedParams {
   /**
    * If a subjective round cannot be scheduled at a time, how many
    * minutes later should the next time to try be.
-   * Defaults to {@link #getTimeIncrement()}.
+   * Defaults to 1.
    */
   public final int getSubjectiveAttemptOffsetMinutes() {
     return this.subjectiveAttemptOffsetMinutes;

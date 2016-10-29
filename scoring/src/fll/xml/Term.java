@@ -28,7 +28,7 @@ public class Term extends AbstractTerm {
    * @param ele the XML element that represents the term 
    * @param goalScope the scope to lookup goals in
    * @param variableScope the scope to lookup variables in, may be null
-   * @throw VariablRefNotAllowedException
+   * @throws VariablRefNotAllowedException
    */
   public Term(final Element ele,
               final GoalScope goalScope,
