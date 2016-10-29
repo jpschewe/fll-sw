@@ -86,7 +86,7 @@ public class SchedParams implements Serializable {
   /**
    * Load the parameters from a properties object.
    * 
-   * @param properies where to load the parameters from
+   * @param properties where to load the parameters from
    */
   public void load(final Properties properties) throws ParseException {
     final String subjDurationStr = properties.getProperty(SUBJ_MINUTES_KEY);
