@@ -71,7 +71,7 @@ public class TableOptimizer {
 
   /**
    * The best schedule found so far. Starts out at null and
-   * is modified by {@link #optimize()}.
+   * is modified by {@link #optimize(CheckCanceled))}.
    * 
    * @return the file containing the best schedule or null if no such schedule
    *         has been found
@@ -664,10 +664,6 @@ public class TableOptimizer {
    * @param params the schedule parameters
    * @param schedule the schedule to optimize (will be modified)
    * @param basedir the directory to store better schedules in
-   * @param tableColors the colors of the tables, if alternating tables, this is
-   *          only half of the tables
-   * @param tableColorsAlternate if alternating tables, this is the second half
-   *          of the tables, otherwise this is empty
    * @throws IllegalArgumentException if the schedule has hard constraint
    *           violations
    */

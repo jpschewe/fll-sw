@@ -118,8 +118,6 @@ public class GreedySolver {
 
   /**
    * File that contains the best schedule found.
-   * 
-   * @return
    */
   public File getBestSchedule() {
     return mBestSchedule;
@@ -421,7 +419,6 @@ public class GreedySolver {
    * Generated name for a subjective station.
    * 
    * @param station index used to generate the name
-   * @return
    */
   public static String getSubjectiveColumnName(final int station) {
     return String.format("%s%d", SUBJECTIVE_COLUMN_PREFIX, station

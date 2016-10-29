@@ -17,7 +17,6 @@ public final class SubjectiveTime implements Serializable {
   /**
    * @param name name of the column in the schedule
    * @param time the time
-   * @param category the subjective category this maps to
    */
   public SubjectiveTime(final String name,
                         final LocalTime time) {
