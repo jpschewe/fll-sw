@@ -37,6 +37,7 @@ import java.util.zip.ZipInputStream;
 
 import javax.swing.table.TableModel;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Assert;
@@ -441,7 +442,17 @@ public class FullTournamentTest {
   private void assignTableLabels() throws IOException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "admin/tables.jsp");
-    // table labels are assigned by the schedule, just check that the page doesn't error out
+
+    final WebElement sidea0 = selenium.findElement(By.name("SideA0"));
+    final WebElement sideb0 = selenium.findElement(By.name("SideB0"));
+    if (StringUtils.isEmpty(sidea0.getAttribute("value"))
+        && StringUtils.isEmpty(sideb0.getAttribute("value"))) {
+      // Table labels should be assigned by the schedule, but may not be. If
+      // they're not assigned, then assign them.
+      sidea0.sendKeys("red");
+      sideb0.sendKeys("blue");
+    }
+
     selenium.findElement(By.id("finished")).click();
 
     Assert.assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.id("error")));
