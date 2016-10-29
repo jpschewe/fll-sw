@@ -441,8 +441,7 @@ public class FullTournamentTest {
   private void assignTableLabels() throws IOException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "admin/tables.jsp");
-    selenium.findElement(By.name("SideA0")).sendKeys("red");
-    selenium.findElement(By.name("SideB0")).sendKeys("blue");
+    // table labels are assigned by the schedule, just check that the page doesn't error out
     selenium.findElement(By.id("finished")).click();
 
     Assert.assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.id("error")));
