@@ -854,13 +854,14 @@ public class FullTournamentTest {
   /**
    * Enter a teams performance score. Data is pulled from testDataConn and
    * pushed to the website.
+   * @throws InterruptedException 
    */
   private void enterPerformanceScore(final Connection testDataConn,
                                      final PerformanceScoreCategory performanceElement,
                                      final Tournament sourceTournament,
                                      final int runNumber,
                                      final int teamNumber)
-      throws SQLException, IOException, MalformedURLException, ParseException {
+      throws SQLException, IOException, MalformedURLException, ParseException, InterruptedException {
 
     if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Setting score for "
@@ -957,6 +958,8 @@ public class FullTournamentTest {
 
             selenium.findElement(By.id("submit")).click();
           } // not NoShow
+
+          Thread.sleep(50);
 
           final Alert confirmScoreChange = selenium.switchTo().alert();
           if (LOGGER.isTraceEnabled()) {
@@ -1069,6 +1072,8 @@ public class FullTournamentTest {
             // submit score
             selenium.findElement(By.id("submit")).click();
           } // not NoShow
+
+          Thread.sleep(50);
 
           LOGGER.debug("Checking for an alert");
 
