@@ -37,6 +37,7 @@ import java.util.zip.ZipInputStream;
 
 import javax.swing.table.TableModel;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Assert;
@@ -91,10 +92,19 @@ public class FullTournamentTest {
 
   private WebDriver selenium;
 
+  public void setUp(final IntegrationTestUtils.WebDriverType driver) {
+    selenium = IntegrationTestUtils.createWebDriver(driver);
+  }
+
+  /**
+   * Uses the firefox driver.
+   * 
+   * @throws Exception
+   */
   @Before
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
-    selenium = IntegrationTestUtils.createWebDriver();
+    setUp(IntegrationTestUtils.WebDriverType.FIREFOX);
   }
 
   @After
@@ -441,8 +451,17 @@ public class FullTournamentTest {
   private void assignTableLabels() throws IOException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "admin/tables.jsp");
-    selenium.findElement(By.name("SideA0")).sendKeys("red");
-    selenium.findElement(By.name("SideB0")).sendKeys("blue");
+
+    final WebElement sidea0 = selenium.findElement(By.name("SideA0"));
+    final WebElement sideb0 = selenium.findElement(By.name("SideB0"));
+    if (StringUtils.isEmpty(sidea0.getAttribute("value"))
+        && StringUtils.isEmpty(sideb0.getAttribute("value"))) {
+      // Table labels should be assigned by the schedule, but may not be. If
+      // they're not assigned, then assign them.
+      sidea0.sendKeys("red");
+      sideb0.sendKeys("blue");
+    }
+
     selenium.findElement(By.id("finished")).click();
 
     Assert.assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.id("error")));
@@ -844,13 +863,15 @@ public class FullTournamentTest {
   /**
    * Enter a teams performance score. Data is pulled from testDataConn and
    * pushed to the website.
+   * 
+   * @throws InterruptedException
    */
   private void enterPerformanceScore(final Connection testDataConn,
                                      final PerformanceScoreCategory performanceElement,
                                      final Tournament sourceTournament,
                                      final int runNumber,
                                      final int teamNumber)
-      throws SQLException, IOException, MalformedURLException, ParseException {
+      throws SQLException, IOException, MalformedURLException, ParseException, InterruptedException {
 
     if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Setting score for "
@@ -947,6 +968,8 @@ public class FullTournamentTest {
 
             selenium.findElement(By.id("submit")).click();
           } // not NoShow
+
+          Thread.sleep(50);
 
           final Alert confirmScoreChange = selenium.switchTo().alert();
           if (LOGGER.isTraceEnabled()) {
@@ -1060,7 +1083,9 @@ public class FullTournamentTest {
             selenium.findElement(By.id("submit")).click();
           } // not NoShow
 
-          LOGGER.info("Checking for an alert");
+          Thread.sleep(50);
+
+          LOGGER.debug("Checking for an alert");
 
           // confirm selection, not going to bother checking the text
           final Alert confirmScoreChange = selenium.switchTo().alert();

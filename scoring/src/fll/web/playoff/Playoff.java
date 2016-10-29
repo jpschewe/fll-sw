@@ -664,7 +664,7 @@ public final class Playoff {
   /**
    * Get max performance run number for playoff division.
    * 
-   * @param playofDivision the division to check
+   * @param playoffDivision the division to check
    * @return performance round, -1 if there are no playoff rounds for this
    *         division
    */

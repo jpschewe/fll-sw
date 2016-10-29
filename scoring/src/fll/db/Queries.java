@@ -260,7 +260,6 @@ public final class Queries {
    * @param connection
    * @param tournament
    * @param division
-   * @return
    * @throws SQLException
    */
   public static Set<Integer> getTeamNumbersInEventDivision(final Connection connection,
