@@ -92,10 +92,19 @@ public class FullTournamentTest {
 
   private WebDriver selenium;
 
+  public void setUp(final IntegrationTestUtils.WebDriverType driver) {
+    selenium = IntegrationTestUtils.createWebDriver(driver);
+  }
+
+  /**
+   * Uses the firefox driver.
+   * 
+   * @throws Exception
+   */
   @Before
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
-    selenium = IntegrationTestUtils.createWebDriver();
+    setUp(IntegrationTestUtils.WebDriverType.FIREFOX);
   }
 
   @After
@@ -854,7 +863,8 @@ public class FullTournamentTest {
   /**
    * Enter a teams performance score. Data is pulled from testDataConn and
    * pushed to the website.
-   * @throws InterruptedException 
+   * 
+   * @throws InterruptedException
    */
   private void enterPerformanceScore(final Connection testDataConn,
                                      final PerformanceScoreCategory performanceElement,

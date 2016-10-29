@@ -28,6 +28,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.http.Header;
@@ -48,6 +50,7 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.Select;
@@ -61,6 +64,7 @@ import fll.util.FLLInternalException;
 import fll.util.LogUtils;
 import fll.web.api.TournamentsServlet;
 import fll.xml.BracketSortType;
+import io.github.bonigarcia.wdm.ChromeDriverManager;
 import io.github.bonigarcia.wdm.MarionetteDriverManager;
 import net.mtu.eggplant.xml.XMLUtils;
 
@@ -514,27 +518,65 @@ public final class IntegrationTestUtils {
     Assert.assertNotNull(selenium.findElement(By.id("success")));
   }
 
-  private static boolean WEB_DRIVER_SETUP = false;
-
-  private static synchronized void setupWebDriver() {
-    if (!WEB_DRIVER_SETUP) {
-      MarionetteDriverManager.getInstance().setup();
-      WEB_DRIVER_SETUP = true;
-    }
+  /**
+   * Create firefox web driver used for most integration tests.
+   * 
+   * @see #createWebDriver(WebDriverType)
+   */
+  public static WebDriver createWebDriver() {
+    return createWebDriver(WebDriverType.FIREFOX);
   }
+
+  public enum WebDriverType {
+    FIREFOX, CHROME
+  }
+
+  private static Set<WebDriverType> mInitializedWebDrivers = new HashSet<>();
 
   /**
    * Create a web driver and set appropriate timeouts on it.
    */
-  public static WebDriver createWebDriver() {
-    setupWebDriver();
+  public static WebDriver createWebDriver(final WebDriverType type) {
+    final WebDriver selenium;
+    switch (type) {
+    case FIREFOX:
+      selenium = createFirefoxWebDriver();
+      break;
+    case CHROME:
+      selenium = createChromeWebDriver();
+      break;
+    default:
+      throw new IllegalArgumentException("Unknown web driver type: "
+          + type);
+    }
+
+    selenium.manage().timeouts().implicitlyWait(500, TimeUnit.MILLISECONDS);
+    selenium.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
+
+    return selenium;
+  }
+
+  private static WebDriver createFirefoxWebDriver() {
+    if (!mInitializedWebDrivers.contains(WebDriverType.FIREFOX)) {
+      MarionetteDriverManager.getInstance().setup();
+      mInitializedWebDrivers.add(WebDriverType.FIREFOX);
+    }
 
     final DesiredCapabilities capabilities = DesiredCapabilities.firefox();
     capabilities.setCapability("marionette", false);
     final WebDriver selenium = new FirefoxDriver(capabilities);
 
-    selenium.manage().timeouts().implicitlyWait(500, TimeUnit.MILLISECONDS);
-    selenium.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
+    return selenium;
+  }
+
+  private static WebDriver createChromeWebDriver() {
+    if (!mInitializedWebDrivers.contains(WebDriverType.CHROME)) {
+      ChromeDriverManager.getInstance().setup();
+      mInitializedWebDrivers.add(WebDriverType.CHROME);
+    }
+
+    final WebDriver selenium = new ChromeDriver();
+
     return selenium;
   }
 

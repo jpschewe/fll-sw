@@ -70,14 +70,28 @@ public class ReplayTournament {
 
         // choose output directory
         final Path outputDirectory = chooseOutputDirectory();
+        if (null == outputDirectory) {
+          // canceled selection
+          return;
+        }
 
         // choose tournament
         final Tournament testTournament = selectTournament(testDataConn);
+        if (null == testTournament) {
+          // canceled selection
+          return;
+        }
+
+        final IntegrationTestUtils.WebDriverType driver = selectWebDriver();
+        if (null == driver) {
+          // canceled selection
+          return;
+        }
 
         // run
         final FullTournamentTest replay = new FullTournamentTest();
         try {
-          replay.setUp();
+          replay.setUp(driver);
 
           replay.replayTournament(testDataConn, testTournament.getName(), outputDirectory);
 
@@ -94,6 +108,18 @@ public class ReplayTournament {
       System.exit(1);
     }
 
+  }
+
+  private static IntegrationTestUtils.WebDriverType selectWebDriver() {
+    final IntegrationTestUtils.WebDriverType[] drivers = IntegrationTestUtils.WebDriverType.values();
+    final IntegrationTestUtils.WebDriverType selected = (IntegrationTestUtils.WebDriverType) JOptionPane.showInputDialog(null,
+                                                                                                                         "Select the web driver to use",
+                                                                                                                         "Select Web Driver",
+                                                                                                                         JOptionPane.QUESTION_MESSAGE,
+                                                                                                                         null,
+                                                                                                                         drivers,
+                                                                                                                         null);
+    return selected;
   }
 
   private static Tournament selectTournament(final Connection testDataConn) throws SQLException {
