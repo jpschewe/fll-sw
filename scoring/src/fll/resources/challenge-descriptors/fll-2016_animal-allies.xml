@@ -67,7 +67,7 @@
       name="m03_animal_conservation"
       title="M03 - Pairs of Animals on Same Side"
       min="0"
-      max="5"
+      max="6"
       multiplier="20" />
 
     <goal
@@ -140,12 +140,21 @@
 
     <goal
       name="m09_training_manure"
-      title="M09 - Manure in T &amp; R Area"
+      title="M09 - Manure in T &amp; R Area - transported individually"
       initialValue="0"
       min="0"
       max="7"
       multiplier="5" />
 
+    <goal
+      name="m15_all_samples"
+      title="M15 All Manure in T &amp; R Bonus"
+      intialValue="0"
+      min="0"
+      max="1"
+      multiplier="5"
+      />
+    
     <goal
       name="m10_beekeeping"
       title="M10 - Beekeeping"
@@ -254,41 +263,6 @@
           scoreType="computed" />
       </term>
     </restriction>
-
-    <computedGoal
-      name="m15_all_samples"
-      title="M15 All Manure in T &amp; R Bonus">
-      <switch>
-        <case>
-          <condition>
-            <left>
-              <term>
-                <goalRef
-                  goal="m09_training_manure"
-                  scoreType="raw" />
-              </term>
-            </left>
-            <equal-to />
-            <right>
-              <term>
-                <constant value="7" />
-              </term>
-            </right>
-          </condition>
-          <result>
-            <term>
-              <constant value="5" />
-            </term>
-          </result>
-        </case>
-        <default>
-          <term>
-            <constant value="0" />
-          </term>
-        </default>
-      </switch>
-    </computedGoal>
-
 
     <goal
       name="penalties"
