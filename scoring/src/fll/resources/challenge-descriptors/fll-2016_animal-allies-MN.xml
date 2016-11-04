@@ -148,7 +148,7 @@
 
     <goal
       name="m15_all_samples"
-      title="M15 All Manure in T &amp; R Bonus"
+      title="M15 All 7 Manure in T &amp; R Bonus"
       initialValue="0"
       min="0"
       max="1"
