@@ -1,3 +1,9 @@
+Release 11.2
+============
+
+* Updated challenge description for scoring change
+
+
 Release 11.1
 ============
 
