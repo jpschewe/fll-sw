@@ -10,8 +10,8 @@
 <%@ page import="java.util.ArrayList" %>
       
 <%
-// All images shall be located under slideshow/images in the fll web folder.
-String imagePath = application.getRealPath("/slideshow/images");
+// All images shall be located under slideshow/ in the fll web folder.
+String imagePath = application.getRealPath("/slideshow");
 // This varible holds the name of the last image, relative to imagePath
 String lastImage;
 if(null != session.getAttribute("slideShowLastImage")) {
@@ -46,6 +46,7 @@ if(slideShowInterval < 1) {
 }
 %>
 
+<!-- <%=lastImage%> -->
 <html>
 <head>
   <style>
@@ -102,7 +103,7 @@ html {
       <img id='image' src='<c:url value="../images/logo.gif"/>'/>
     </c:when>
     <c:otherwise>
-      <img id='image' src='<c:url value="${lastImage}"/>'/>
+      <img id='image' src='<c:url value="/${lastImage}"/>'/>
     </c:otherwise>
   </c:choose>
   </div>
