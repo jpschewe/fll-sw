@@ -137,7 +137,7 @@ In version 4 of the software we added the ability to have sponsor logos displaye
 Slideshow
 =========
 There is an option to display a slide show on the big screen display.
-This option shows all image files (`.jpg`, `.jpeg`, `.gif`, `.png`) from the directory `tomcat/webapps/fll-sw/slideshow/images`.
+This option shows all image files (`.jpg`, `.jpeg`, `.gif`, `.png`) from the directory `tomcat/webapps/fll-sw/slideshow`.
 The images are displayed in order, so naming them starting with 2 or 3 numbers helps to know what order they will be displayed in.
 
 
