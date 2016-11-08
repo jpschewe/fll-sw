@@ -1,3 +1,6 @@
+Release 11.3
+============
+
 * Change location of slideshow images to be just slideshow, no images
     directory required.
 
