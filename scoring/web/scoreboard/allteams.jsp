@@ -41,6 +41,10 @@ TABLE.B {
   function reload() {
     location.reload(true);
   }
+  function bottomReload() {
+    // show the last scores for a bit and then reload
+    setTimeout(reload, 3000);
+  }
 </script>
 
 <c:if test="${param.allTeamsScroll}">
@@ -53,7 +57,7 @@ TABLE.B {
                 $.scrollTo($("#bottom"), {
                   duration : scrollDuration,
                   easing : 'linear',
-                  onAfter : reload,
+                  onAfter : bottomReload,
                 });
               }
 
