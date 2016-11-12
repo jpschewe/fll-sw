@@ -1,3 +1,5 @@
+* Make sure that the PDF and HTML score sheets have the enumerated goals sorted the same
+
 Release 11.3
 ============
 
