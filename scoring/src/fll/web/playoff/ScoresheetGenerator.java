@@ -656,9 +656,6 @@ public class ScoresheetGenerator {
           // replace spaces with "no-break" spaces
           boolean first = true;
           final List<EnumeratedValue> values = goal.getSortedValues();
-          Collections.reverse(values); // reverse as we want the bottom value
-                                       // from the score entry page to be on the
-                                       // left end
           for (final EnumeratedValue value : values) {
             if (!first) {
               choices.append(" /"

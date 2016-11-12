@@ -104,7 +104,7 @@ public abstract class AbstractGoal implements Serializable {
    */
   public List<EnumeratedValue> getSortedValues() {
     final List<EnumeratedValue> values = new LinkedList<>(getValues());
-    Collections.sort(values, EnumeratedValueHighestFirst.INSTANCE);
+    Collections.sort(values, EnumeratedValueLowestFirst.INSTANCE);
     return values;
   }
 
@@ -149,6 +149,18 @@ public abstract class AbstractGoal implements Serializable {
                        final EnumeratedValue two) {
       return -1
           * Double.compare(one.getScore(), two.getScore());
+    }
+  }
+
+  private static final class EnumeratedValueLowestFirst implements Comparator<EnumeratedValue>, Serializable {
+    public static final EnumeratedValueLowestFirst INSTANCE = new EnumeratedValueLowestFirst();
+
+    private EnumeratedValueLowestFirst() {
+    }
+
+    public int compare(final EnumeratedValue one,
+                       final EnumeratedValue two) {
+      return Double.compare(one.getScore(), two.getScore());
     }
   }
 
