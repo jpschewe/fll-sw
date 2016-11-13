@@ -562,10 +562,11 @@ public final class IntegrationTestUtils {
       mInitializedWebDrivers.add(WebDriverType.FIREFOX);
     }
 
-    final DesiredCapabilities capabilities = DesiredCapabilities.firefox();
-    capabilities.setCapability("marionette", false);
-    final WebDriver selenium = new FirefoxDriver(capabilities);
+//    final DesiredCapabilities capabilities = DesiredCapabilities.firefox();
+//    capabilities.setCapability("marionette", true);
+//    final WebDriver selenium = new FirefoxDriver(capabilities);
 
+    final WebDriver selenium = new FirefoxDriver();
     return selenium;
   }
 
