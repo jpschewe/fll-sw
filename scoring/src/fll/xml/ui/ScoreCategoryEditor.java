@@ -6,13 +6,8 @@
 
 package fll.xml.ui;
 
-import java.awt.datatransfer.StringSelection;
-import java.awt.datatransfer.Transferable;
-
 import javax.swing.BoxLayout;
-import javax.swing.JComponent;
 import javax.swing.JPanel;
-import javax.swing.TransferHandler;
 
 import org.apache.log4j.Logger;
 
@@ -28,37 +23,11 @@ public class ScoreCategoryEditor extends JPanel {
   private static final Logger LOGGER = LogUtils.getLogger();
   
   public ScoreCategoryEditor(final ScoreCategory category) {
-    setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-
+    setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+         
     for (final AbstractGoal goal : category.getGoals()) {
       final AbstractGoalEditor editor = new AbstractGoalEditor(goal);
       add(editor);
-    }
-  }
-
-  private static final class SCETransferHandler extends TransferHandler {
-    @Override
-    public int getSourceActions(final JComponent jc) {
-      if (jc instanceof DragHandle) {
-        return MOVE;
-      } else {
-        return 0;
-      }
-    }
-
-    @Override
-    public Transferable createTransferable(final JComponent c) {
-      // needs to be set
-      return new StringSelection("FIXME needs implementation");
-    }
-
-    @Override
-    public void exportDone(final JComponent c,
-                           final Transferable t,
-                           final int action) {
-      if (action == MOVE) {
-        LOGGER.info("Doing move - NOT IMPLEMENTED");
-      }
     }
   }
 
