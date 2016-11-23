@@ -50,9 +50,10 @@ public class TestPlayoffs {
    * sent back to the select team page.
    * 
    * @throws IOException
+   * @throws InterruptedException 
    */
   @Test
-  public void testNotAdvanced() throws IOException {
+  public void testNotAdvanced() throws IOException, InterruptedException {
     try {
       // initialize database using simple challenge descriptor that just has 1
       // goal from 1 - 100
@@ -120,7 +121,7 @@ public class TestPlayoffs {
     }
   }
 
-  private void enterTeamScore(final int teamNumber) throws IOException {
+  private void enterTeamScore(final int teamNumber) throws IOException, InterruptedException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "scoreEntry/select_team.jsp");
     

@@ -41,9 +41,11 @@ public class WebTest {
 
   /**
    * Basic load of the pages.
+   * 
+   * @throws InterruptedException
    */
   @Test
-  public void testPages() throws SAXException, MalformedURLException, IOException {
+  public void testPages() throws SAXException, MalformedURLException, IOException, InterruptedException {
     try {
       final String[] pages = new String[] { //
                                             "", //
@@ -83,9 +85,10 @@ public class WebTest {
    * Test changing tournaments to DUMMY and then back to State.
    * 
    * @throws IOException
+   * @throws InterruptedException
    */
   @Test
-  public void testChangeTournament() throws IOException {
+  public void testChangeTournament() throws IOException, InterruptedException {
     try {
       IntegrationTestUtils.initializeDatabaseFromDump(selenium,
                                                       TestUtils.class.getResourceAsStream("/fll/data/testdb.flldb"));

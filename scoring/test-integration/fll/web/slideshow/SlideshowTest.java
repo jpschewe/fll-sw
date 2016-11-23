@@ -50,9 +50,10 @@ public class SlideshowTest {
    * Test setting slideshow interval and make sure it doesn't error.
    * 
    * @throws IOException
+   * @throws InterruptedException 
    */
   @Test
-  public void testSlideshowInterval() throws IOException {
+  public void testSlideshowInterval() throws IOException, InterruptedException {
     LOGGER.info("Top testSlideshowInterval");
     try {
       final InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml");
