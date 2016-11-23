@@ -52,7 +52,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.Select;
 import org.w3c.dom.Document;
 
@@ -75,11 +74,14 @@ public final class IntegrationTestUtils {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  public static final String WAIT_FOR_PAGE_TIMEOUT = "60000";
-
   public static final String TEST_USERNAME = "fll";
 
   public static final String TEST_PASSWORD = "Lego";
+
+  /**
+   * How long to wait for pages to load before checking for elements.
+   */
+  public static final long WAIT_FOR_PAGE_LOAD_MS = 500;
 
   private IntegrationTestUtils() {
     // no instances
@@ -106,11 +108,14 @@ public final class IntegrationTestUtils {
    * @param selenium the test controller
    * @param url the page to load
    * @throws IOException
+   * @throws InterruptedException 
    */
   public static void loadPage(final WebDriver selenium,
                               final String url)
-      throws IOException {
+      throws IOException, InterruptedException {
     selenium.get(url);
+
+    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
 
     assertNoException(selenium);
   }
@@ -442,6 +447,7 @@ public final class IntegrationTestUtils {
 
   /**
    * Add a team to a tournament.
+   * @throws InterruptedException 
    */
   public static void addTeam(final WebDriver selenium,
                              final int teamNumber,
@@ -449,7 +455,7 @@ public final class IntegrationTestUtils {
                              final String organization,
                              final String division,
                              final String tournamentName)
-      throws IOException {
+      throws IOException, InterruptedException {
     final Tournament tournament = getTournamentByName(tournamentName);
 
     loadPage(selenium, TestUtils.URL_ROOT
@@ -485,10 +491,11 @@ public final class IntegrationTestUtils {
    * @param tournamentName the name of the tournament to make the current
    *          tournament
    * @throws IOException
+   * @throws InterruptedException 
    */
   public static void setTournament(final WebDriver selenium,
                                    final String tournamentName)
-      throws IOException {
+      throws IOException, InterruptedException {
     loadPage(selenium, TestUtils.URL_ROOT
         + "admin/index.jsp");
 
@@ -550,7 +557,7 @@ public final class IntegrationTestUtils {
           + type);
     }
 
-    selenium.manage().timeouts().implicitlyWait(500, TimeUnit.MILLISECONDS);
+    selenium.manage().timeouts().implicitlyWait(WAIT_FOR_PAGE_LOAD_MS, TimeUnit.MILLISECONDS);
     selenium.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
 
     return selenium;
@@ -562,9 +569,9 @@ public final class IntegrationTestUtils {
       mInitializedWebDrivers.add(WebDriverType.FIREFOX);
     }
 
-//    final DesiredCapabilities capabilities = DesiredCapabilities.firefox();
-//    capabilities.setCapability("marionette", true);
-//    final WebDriver selenium = new FirefoxDriver(capabilities);
+    // final DesiredCapabilities capabilities = DesiredCapabilities.firefox();
+    // capabilities.setCapability("marionette", true);
+    // final WebDriver selenium = new FirefoxDriver(capabilities);
 
     final WebDriver selenium = new FirefoxDriver();
     return selenium;
@@ -583,14 +590,14 @@ public final class IntegrationTestUtils {
 
   public static void initializePlayoffsForAwardGroup(final WebDriver selenium,
                                                      final String awardGroup)
-      throws IOException {
+      throws IOException, InterruptedException {
     initializePlayoffsForAwardGroup(selenium, awardGroup, BracketSortType.SEEDING);
   }
 
   public static void initializePlayoffsForAwardGroup(final WebDriver selenium,
                                                      final String awardGroup,
                                                      final BracketSortType bracketSort)
-      throws IOException {
+      throws IOException, InterruptedException {
     loadPage(selenium, TestUtils.URL_ROOT
         + "playoff");
 
@@ -645,11 +652,12 @@ public final class IntegrationTestUtils {
    * @param newValue
    * @throws NoSuchElementException if there was a problem changing the value
    * @throws IOException if there is an error talking to selenium
+   * @throws InterruptedException 
    */
   public static void changeNumSeedingRounds(final WebDriver selenium,
                                             final int tournamentId,
                                             final int newValue)
-      throws NoSuchElementException, IOException {
+      throws NoSuchElementException, IOException, InterruptedException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "admin/edit_all_parameters.jsp");
     final Select seedingRoundsSelection = new Select(selenium.findElement(By.name("seeding_rounds_"
@@ -664,8 +672,9 @@ public final class IntegrationTestUtils {
    * Get the id of the current tournament
    * 
    * @throws IOException
+   * @throws InterruptedException 
    */
-  public static int getCurrentTournamentId(final WebDriver selenium) throws IOException {
+  public static int getCurrentTournamentId(final WebDriver selenium) throws IOException, InterruptedException {
     loadPage(selenium, TestUtils.URL_ROOT
         + "admin/index.jsp");
 
