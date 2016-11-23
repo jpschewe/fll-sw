@@ -55,12 +55,11 @@ import fll.xml.ui.MovableExpandablePanel.MoveEvent.MoveDirection;
  *   - unique variable names inside ComputedGoal
  *   - SwitchStatement must have something in the default case
  * - save to XML
- * - UI support for reordering
- *   - just put in up/down arrows; this would be much easier to implement than DnD
  * - choose challenge description to edit
- * - close handler on editor to exit when run stand alone
  * - support grouping of goals, this is where DnD might be useful 
  *   - all goals in a group must be consecutive
+ * - how to handle when being run from the launcher so that it doesn't exit?
+ *   - maybe have a method that is called from main that creates everything
  */
 
 /**
