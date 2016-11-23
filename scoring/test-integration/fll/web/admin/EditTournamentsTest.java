@@ -40,7 +40,7 @@ public class EditTournamentsTest {
   }
 
   @Test
-  public void testAddTournament() throws IOException {
+  public void testAddTournament() throws IOException, InterruptedException {
     try {
       final InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml");
       IntegrationTestUtils.initializeDatabase(selenium, challengeStream);
