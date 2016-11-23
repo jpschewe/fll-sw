@@ -160,6 +160,9 @@
     <!-- writing out database diagrams -->
     <pathelement location="${dir.lib}/schemaSpy_5.0.0.jar" />
 
+    <!-- better dns lookup -->
+    <pathelement location="${dir.lib}/dnsjava-2.1.7.jar" />
+
   </path>
 
   <path id="application.classpath">
@@ -701,7 +704,7 @@
     <sequential>
       <!-- give the operating system a chance to release locks -->
       <sleep seconds="1" />
-      
+
       <!-- delete existing database -->
       <delete failonerror="false" deleteonexit="true">
         <fileset dir="${dir.web}/WEB-INF">
