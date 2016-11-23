@@ -98,6 +98,8 @@
         to generate the database diagram</a> - <a
       href="schemaspy-license.txt">License</a></li>
 
+    <li><a href="http://www.dnsjava.org/">dnsjava</a> - BSD License</li>
+
   </ul>
 
 
