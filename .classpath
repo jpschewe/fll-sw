@@ -104,5 +104,6 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/fll-sw/scoring/lib/source/itext-xtra-5.5.9-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="scoring/lib/dnsjava-2.1.7.jar"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>
