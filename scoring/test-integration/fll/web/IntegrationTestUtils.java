@@ -133,10 +133,11 @@ public final class IntegrationTestUtils {
    * @param driver the test controller
    * @param challengeDocument the challenge descriptor
    * @throws IOException
+   * @throws InterruptedException 
    */
   public static void initializeDatabase(final WebDriver driver,
                                         final Document challengeDocument)
-      throws IOException {
+      throws IOException, InterruptedException {
     Assert.assertNotNull(challengeDocument);
 
     final Path challengeFile = Files.createTempFile("fll", ".xml");
@@ -156,10 +157,11 @@ public final class IntegrationTestUtils {
    * @param driver the test controller
    * @param challengeStream the challenge descriptor
    * @throws IOException
+   * @throws InterruptedException 
    */
   public static void initializeDatabase(final WebDriver driver,
                                         final InputStream challengeStream)
-      throws IOException {
+      throws IOException, InterruptedException {
     Assert.assertNotNull(challengeStream);
 
     final Path challengeFile = Files.createTempFile("fll", ".xml");
@@ -177,19 +179,22 @@ public final class IntegrationTestUtils {
    * @param driver the test controller
    * @param challengeFile a file to read the challenge description from. This
    *          file will not be deleted.
+   * @throws InterruptedException 
    * @throws IOException
    */
   public static void initializeDatabase(final WebDriver driver,
-                                        final Path challengeFile) {
+                                        final Path challengeFile) throws InterruptedException {
 
     driver.get(TestUtils.URL_ROOT
         + "setup/");
-
+    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
+    
     if (isElementPresent(driver, By.name("submit_login"))) {
       login(driver);
 
       driver.get(TestUtils.URL_ROOT
           + "setup/");
+      Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
     }
 
     final WebElement fileEle = driver.findElement(By.name("xmldocument"));
@@ -198,6 +203,8 @@ public final class IntegrationTestUtils {
     final WebElement reinitDB = driver.findElement(By.name("reinitializeDatabase"));
     reinitDB.click();
 
+    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
+    
     try {
       final Alert confirmCreateDB = driver.switchTo().alert();
       LOGGER.info("Confirmation text: "
@@ -209,6 +216,8 @@ public final class IntegrationTestUtils {
       }
     }
 
+    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
+    
     driver.findElement(By.id("success"));
 
     // setup user
