@@ -232,6 +232,7 @@ public final class IntegrationTestUtils {
 
     final WebElement submitElement = driver.findElement(By.name("submit_create_user"));
     submitElement.click();
+    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
 
     driver.findElement(By.id("success-create-user"));
 
@@ -246,10 +247,11 @@ public final class IntegrationTestUtils {
    * @param inputStream input stream that has database to load in it, this input
    *          stream is closed by this method upon successful completion
    * @throws IOException
+   * @throws InterruptedException 
    */
   public static void initializeDatabaseFromDump(final WebDriver selenium,
                                                 final InputStream inputStream)
-      throws IOException {
+      throws IOException, InterruptedException {
     Assert.assertNotNull(inputStream);
     final File dumpFile = IntegrationTestUtils.storeInputStreamToFile(inputStream);
     try {
@@ -388,8 +390,9 @@ public final class IntegrationTestUtils {
 
   /**
    * Login to fll
+   * @throws InterruptedException 
    */
-  public static void login(final WebDriver driver) {
+  public static void login(final WebDriver driver) throws InterruptedException {
     driver.get(TestUtils.URL_ROOT
         + "login.jsp");
 
@@ -401,6 +404,8 @@ public final class IntegrationTestUtils {
 
     final WebElement submitElement = driver.findElement(By.name("submit_login"));
     submitElement.click();
+    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
+
   }
 
   private static String readAll(final Reader rd) throws IOException {
