@@ -276,6 +276,7 @@ public class GreedySolver {
             + table + " start to " + performanceTables[table]);
       }
     } else {
+      // all performance runs can start at time 0
       Arrays.fill(performanceTables, 0);
     }
 
@@ -479,6 +480,8 @@ public class GreedySolver {
                                 final int team,
                                 final int timeslot,
                                 final int duration) {
+    // check [timeslot - changetime, timeslot + duration + changetime) for
+    // conflicts
     for (int slot = Math.max(0, timeslot
         - getChangetime()); slot < Math.min(getNumTimeslots(),
                                             timeslot
@@ -1131,10 +1134,11 @@ public class GreedySolver {
       return false;
     }
 
-    // try possible values
     if ((solverParameters.getSubjectiveFirst()
         && !subjectiveFinished())
         || (nextAvailableSubjSlot <= nextAvailablePerfSlot)) {
+      // schedule a subjective station
+
       for (int i = 0; i < possibleSubjectiveStations.size(); ++i) {
         final int station = possibleSubjectiveStations.get(i);
         final int group = subjectiveGroups.get(i);
@@ -1144,6 +1148,9 @@ public class GreedySolver {
               + group + " station: " + station + " next available: " + nextAvailableSubjSlot);
         }
 
+        // mark the subjective station as used at this timeslot and advance the
+        // next available slot
+        // TODO: maybe should set value to nextAvailableSubjSlot + offset...
         subjectiveStations[group][station] += getSubjectiveAttemptOffset();
         if (checkSubjectiveBreaks(station, nextAvailableSubjSlot)) {
           final boolean result = schedSubj(group, station, nextAvailableSubjSlot);
@@ -1163,12 +1170,21 @@ public class GreedySolver {
         }
       }
     } else {
+      // schedule a performance station
+
       for (final int table : possiblePerformanceTables) {
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("performance table: "
               + table + " next available: " + nextAvailablePerfSlot);
         }
 
+        // mark the performance station as used at this timeslot and advance the
+        // next available slot, the slot is not unmarked as available if the
+        // scheduling fails because we try all teams inside schedPerf, so
+        // there's no point in trying this timeslot again.
+        // TODO: maybe should set value to nextAvailablePerfSlot + offset...
+        // TODO: this is where we'd need to alternate based on the 7/8 minute
+        // intervals
         performanceTables[table] += getPerformanceAttemptOffset();
         if (checkPerformanceBreaks(nextAvailablePerfSlot)) {
           final boolean result = schedPerf(table, nextAvailablePerfSlot);
@@ -1208,6 +1224,14 @@ public class GreedySolver {
 
   }
 
+  /**
+   * Find the earliest performance slot available on a table.
+   * 
+   * @param possiblePerformanceTables return value that will contain the tables
+   *          that are available at the returned timeslot
+   * @return the next available timeslot or Integer.MAX_VALUE if no slot was
+   *         found
+   */
   private int findNextAvailablePerformanceSlot(final List<Integer> possiblePerformanceTables) {
     int nextAvailablePerfSlot = Integer.MAX_VALUE;
     for (int table = 0; table < solverParameters.getNumTables(); ++table) {
@@ -1223,6 +1247,17 @@ public class GreedySolver {
     return nextAvailablePerfSlot;
   }
 
+  /**
+   * Find the earliest subjective slot available.
+   * 
+   * @param possibleSubjectiveStations return value that will contain the
+   *          subjective stations
+   *          that are available at the returned timeslot
+   * @param subjectiveGroups return value that will contain the subjective
+   *          groups that are available at the returned timeslot
+   * @return the next available timeslot or Integer.MAX_VALUE if no slot was
+   *         found
+   */
   private int findNextAvailableSubjectiveSlot(final List<Integer> possibleSubjectiveStations,
                                               final List<Integer> subjectiveGroups) {
     int nextAvailableSubjSlot = Integer.MAX_VALUE;
