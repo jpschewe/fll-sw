@@ -10,6 +10,7 @@ import java.io.Serializable;
 
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
@@ -17,12 +18,26 @@ import org.w3c.dom.Element;
  */
 public class RubricRange implements Serializable {
 
-  public RubricRange(final Element ele) {
-    mTitle = ele.getAttribute("title");
-    mMin = Integer.parseInt(ele.getAttribute("min"));
-    mMax = Integer.parseInt(ele.getAttribute("max"));
+  public static final String RUBRIC_TAG_NAME = "rubric";
 
-    final NodelistElementCollectionAdapter descriptions = new NodelistElementCollectionAdapter(ele.getElementsByTagName("description"));
+  public static final String TAG_NAME = "range";
+
+  public static final String TITLE_ATTRIBUTE = "title";
+
+  public static final String MIN_ATTRIBUTE = "min";
+
+  public static final String MAX_ATTRIBUTE = "max";
+
+  public static final String DESCRIPTION_TAG_NAME = "description";
+
+  public static final String SHORT_DESCRIPTION_ATTRIBUTE = "shortDescription";
+
+  public RubricRange(final Element ele) {
+    mTitle = ele.getAttribute(TITLE_ATTRIBUTE);
+    mMin = Integer.parseInt(ele.getAttribute(MIN_ATTRIBUTE));
+    mMax = Integer.parseInt(ele.getAttribute(MAX_ATTRIBUTE));
+
+    final NodelistElementCollectionAdapter descriptions = new NodelistElementCollectionAdapter(ele.getElementsByTagName(DESCRIPTION_TAG_NAME));
     if (descriptions.hasNext()) {
       final Element descriptionEle = descriptions.next();
       mDescription = removeExtraWhitespace(descriptionEle.getTextContent());
@@ -30,7 +45,7 @@ public class RubricRange implements Serializable {
       mDescription = null;
     }
 
-    mShortDescription = ele.getAttribute("shortDescription");
+    mShortDescription = ele.getAttribute(SHORT_DESCRIPTION_ATTRIBUTE);
   }
 
   private static String removeExtraWhitespace(final String str) {
@@ -130,6 +145,23 @@ public class RubricRange implements Serializable {
 
   public void setMax(final int v) {
     mMax = v;
+  }
+
+  public Element toXml(final Document doc) {
+    final Element ele = doc.createElement(TAG_NAME);
+    ele.setAttribute(TITLE_ATTRIBUTE, mTitle);
+    ele.setAttribute(MIN_ATTRIBUTE, Integer.toString(mMin));
+    ele.setAttribute(MAX_ATTRIBUTE, Integer.toString(mMax));
+
+    if (null != mDescription) {
+      final Element descriptionEle = doc.createElement(DESCRIPTION_TAG_NAME);
+      descriptionEle.appendChild(doc.createTextNode(mDescription));
+      ele.appendChild(descriptionEle);
+    }
+
+    ele.setAttribute(SHORT_DESCRIPTION_ATTRIBUTE, mShortDescription);
+
+    return ele;
   }
 
 }

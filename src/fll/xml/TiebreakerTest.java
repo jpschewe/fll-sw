@@ -6,12 +6,15 @@
 
 package fll.xml;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
  * One of the test statements in a tiebreaker.
  */
 public class TiebreakerTest extends BasicPolynomial {
+
+  public static final String TAG_NAME = "test";
 
   public TiebreakerTest(final Element ele,
                         final GoalScope goalScope) {
@@ -29,4 +32,10 @@ public class TiebreakerTest extends BasicPolynomial {
     mWinner = v;
   }
 
+  public Element toXml(final Document doc) {
+    final Element ele = doc.createElement(TAG_NAME);
+    populateXml(doc, ele);
+    ele.setAttribute(XMLUtils.WINNER_ATTRIBUTE, mWinner.toString());
+    return ele;
+  }
 }

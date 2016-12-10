@@ -32,10 +32,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.ComparisonUtils;
-import net.mtu.eggplant.util.sql.SQLFunctions;
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
-
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.io.IOUtils;
@@ -59,7 +55,11 @@ import fll.web.UploadProcessor;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
 import fll.xml.XMLUtils;
+import net.mtu.eggplant.util.ComparisonUtils;
+import net.mtu.eggplant.util.sql.SQLFunctions;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**
  * Java code behind uploading subjective scores
@@ -263,7 +263,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
       }
 
       ScoreCategory categoryElement = null;
-      for (final ScoreCategory cat : challengeDescription.getSubjectiveCategories()) {
+      for (final SubjectiveScoreCategory cat : challengeDescription.getSubjectiveCategories()) {
         if (cat.getName().equals(categoryName)) {
           categoryElement = cat;
         }
@@ -294,7 +294,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
                                               final int tournamentId,
                                               final ChallengeDescription challengeDescription)
       throws SQLException {
-    for (final ScoreCategory cat : challengeDescription.getSubjectiveCategories()) {
+    for (final SubjectiveScoreCategory cat : challengeDescription.getSubjectiveCategories()) {
       removeNullRows(tournamentId, connection, cat.getName(), cat);
     }
   }

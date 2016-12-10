@@ -15,8 +15,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
@@ -28,8 +26,9 @@ import fll.util.LogUtils;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
-import fll.xml.ScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
 import fll.xml.XMLUtils;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Generate tables for tournament from XML document
@@ -245,7 +244,7 @@ public final class GenerateDB {
       finalScores.append("CREATE TABLE FinalScores (");
       finalScores.append("TeamNumber integer NOT NULL,");
       finalScores.append("Tournament INTEGER NOT NULL,");
-      for (final ScoreCategory categoryElement : description.getSubjectiveCategories()) {
+      for (final SubjectiveScoreCategory categoryElement : description.getSubjectiveCategories()) {
         createStatement.setLength(0);
 
         final String tableName = categoryElement.getName();

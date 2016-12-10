@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.web.playoff.TeamScore;
@@ -18,17 +19,19 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 public class ComputedGoal extends AbstractGoal implements VariableScope {
 
+  public static final String TAG_NAME = "computedGoal";
+
   public ComputedGoal(final Element ele,
                       final GoalScope goalScope) {
     super(ele);
 
     mVariables = new LinkedList<>();
-    for (final Element varEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName("variable"))) {
+    for (final Element varEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(Variable.TAG_NAME))) {
       final Variable var = new Variable(varEle, goalScope);
       mVariables.add(var);
     }
 
-    final Element switchEle = new NodelistElementCollectionAdapter(ele.getElementsByTagName("switch")).next();
+    final Element switchEle = new NodelistElementCollectionAdapter(ele.getElementsByTagName(SwitchStatement.TAG_NAME)).next();
     mSwitch = new SwitchStatement(switchEle, goalScope, this);
   }
 
@@ -109,8 +112,26 @@ public class ComputedGoal extends AbstractGoal implements VariableScope {
         * Double.MAX_VALUE;
   }
 
+  @Override
   public double getMax() {
     return Double.MAX_VALUE;
+  }
+
+  @Override
+  public Element toXml(final Document doc) {
+    final Element ele = doc.createElement(TAG_NAME);
+    
+    populateXml(doc, ele);
+    
+    for (final Variable var : mVariables) {
+      final Element varEle = var.toXml(doc);
+      ele.appendChild(varEle);
+    }
+
+    final Element switchEle = mSwitch.toXml(doc);
+    ele.appendChild(switchEle);
+
+    return ele;
   }
 
 }

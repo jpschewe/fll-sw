@@ -8,11 +8,16 @@ package fll.xml;
 
 import java.io.Serializable;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.web.playoff.TeamScore;
 
 public class VariableRef implements Evaluatable, Serializable {
+
+  public static final String TAG_NAME = "variableRef";
+
+  public static final String VARIABLE_ATTRIBUTE = "variable";
 
   /**
    * Create a new variable reference.
@@ -23,15 +28,16 @@ public class VariableRef implements Evaluatable, Serializable {
    */
   public VariableRef(final Element ele,
                      final VariableScope scope) {
-    if(null == scope) {
+    if (null == scope) {
       throw new NullPointerException("Scope must not be null");
     }
-    
-    mVariableName = ele.getAttribute("variable");
+
+    mVariableName = ele.getAttribute(VARIABLE_ATTRIBUTE);
     mVariableScope = scope;
   }
 
   private final String mVariableName;
+
   public String getVariableName() {
     return mVariableName;
   }
@@ -47,4 +53,9 @@ public class VariableRef implements Evaluatable, Serializable {
     return getVariable().evaluate(teamScore);
   }
 
+  public Element toXml(final Document doc) {
+    final Element ele = doc.createElement(TAG_NAME);
+    ele.setAttribute(VARIABLE_ATTRIBUTE, mVariableName);
+    return ele;
+  }
 }

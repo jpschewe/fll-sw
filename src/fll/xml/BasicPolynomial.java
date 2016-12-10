@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.util.FLLInternalException;
@@ -22,6 +23,8 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
  */
 public class BasicPolynomial implements Evaluatable, Serializable {
 
+  public static final String FLOATING_POINT_ATTRIBUTE = "floatingPoint";
+  
   public BasicPolynomial(final Element ele,
                          final GoalScope goalScope) {
     this(ele, goalScope, null);
@@ -35,11 +38,11 @@ public class BasicPolynomial implements Evaluatable, Serializable {
                             final VariableScope variableScope) {
 
     mTerms = new LinkedList<Term>();
-    for (final Element termEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName("term"))) {
+    for (final Element termEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(Term.TAG_NAME))) {
       final Term term = new Term(termEle, goalScope, variableScope);
       mTerms.add(term);
     }
-    mFloatingPoint = FloatingPointType.fromString(ele.getAttribute("floatingPoint"));
+    mFloatingPoint = FloatingPointType.fromString(ele.getAttribute(FLOATING_POINT_ATTRIBUTE));
   }
 
   private FloatingPointType mFloatingPoint;
@@ -129,6 +132,15 @@ public class BasicPolynomial implements Evaluatable, Serializable {
       score += val;
     }
     return applyFloatingPointType(score);
+  }
+  
+  public void populateXml(final Document doc, final Element ele) {
+    for(final Term term : mTerms) {
+      final Element termEle = term.toXml(doc);
+      ele.appendChild(termEle);
+    }
+    
+    ele.setAttribute(FLOATING_POINT_ATTRIBUTE, mFloatingPoint.toXmlString());
   }
 
 }

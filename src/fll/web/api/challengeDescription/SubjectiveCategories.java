@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.web.ApplicationAttributes;
 import fll.xml.ChallengeDescription;
-import fll.xml.ScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
 
 @WebServlet("/api/ChallengeDescription/SubjectiveCategories/*")
 public class SubjectiveCategories extends HttpServlet {
@@ -38,7 +38,7 @@ public class SubjectiveCategories extends HttpServlet {
     final ObjectMapper jsonMapper = new ObjectMapper();
 
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
-    final List<ScoreCategory> categories = challengeDescription.getSubjectiveCategories();
+    final List<SubjectiveScoreCategory> categories = challengeDescription.getSubjectiveCategories();
 
     jsonMapper.writeValue(writer, categories);
   }

@@ -89,6 +89,7 @@ import fll.util.SimpleFooterHandler;
 import fll.web.playoff.ScoresheetGenerator;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
 import fll.xml.XMLUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -1099,7 +1100,7 @@ public class TournamentSchedule implements Serializable {
       throws DocumentException, MalformedURLException, IOException {
 
     // setup the sheets from the sucked in xml
-    for (final ScoreCategory category : description.getSubjectiveCategories()) {
+    for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
       final SheetElement sheetElement = createSubjectiveSheetElement(category);
       final String suffix = filenameSuffixes.get(category);
 
@@ -1128,7 +1129,7 @@ public class TournamentSchedule implements Serializable {
     }
   }
 
-  public static SheetElement createSubjectiveSheetElement(final ScoreCategory sc) {
+  public static SheetElement createSubjectiveSheetElement(final SubjectiveScoreCategory sc) {
     // Get the info from the .xml sheet for the specific subjective category
     // An sc == a subjective category
     final SheetElement sheet = new SheetElement(sc);

@@ -15,14 +15,14 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
-import fll.xml.ScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Does score standardization routines from the web.
@@ -111,7 +111,7 @@ public final class ScoreStandardization {
         }
 
         // subjective
-        for (final ScoreCategory catElement : description.getSubjectiveCategories()) {
+        for (final SubjectiveScoreCategory catElement : description.getSubjectiveCategories()) {
           final String catName = catElement.getName();
 
           // insert rows from the current tournament and category, keeping team
@@ -168,7 +168,7 @@ public final class ScoreStandardization {
       final double sigma = GlobalParameters.getStandardizedSigma(connection);
 
       // subjective categories
-      for (final ScoreCategory catElement : description.getSubjectiveCategories()) {
+      for (final SubjectiveScoreCategory catElement : description.getSubjectiveCategories()) {
         final String category = catElement.getName();
 
         /*
@@ -253,7 +253,7 @@ public final class ScoreStandardization {
     PreparedStatement perfSelect = null;
     final Collection<PreparedStatement> subjectiveSelects = new LinkedList<PreparedStatement>();
     try {
-      for (final ScoreCategory catElement : description.getSubjectiveCategories()) {
+      for (final SubjectiveScoreCategory catElement : description.getSubjectiveCategories()) {
         final String catName = catElement.getName();
         final double catWeight = catElement.getWeight();
         final PreparedStatement prep = connection.prepareStatement("SELECT "

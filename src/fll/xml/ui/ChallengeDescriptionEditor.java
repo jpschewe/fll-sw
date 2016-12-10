@@ -9,35 +9,50 @@ package fll.xml.ui;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Writer;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.filechooser.FileFilter;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.Utilities;
 import fll.util.GuiExceptionHandler;
 import fll.util.LogUtils;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
-import fll.xml.ChallengeParserTest;
-import fll.xml.ScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
+import fll.xml.XMLUtils;
 import fll.xml.ui.MovableExpandablePanel.MoveEvent;
-import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 import fll.xml.ui.MovableExpandablePanel.MoveEvent.MoveDirection;
+import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
+import net.mtu.eggplant.util.BasicFileFilter;
+import net.mtu.eggplant.util.gui.GraphicsUtils;
 
 /*
  * TODO
@@ -54,7 +69,6 @@ import fll.xml.ui.MovableExpandablePanel.MoveEvent.MoveDirection;
  *   - RubricRange min/max
  *   - unique variable names inside ComputedGoal
  *   - SwitchStatement must have something in the default case
- * - save to XML
  * - choose challenge description to edit
  * - support grouping of goals, this is where DnD might be useful 
  *   - all goals in a group must be consecutive
@@ -94,7 +108,7 @@ public class ChallengeDescriptionEditor extends JFrame {
 
     // FIXME will need to allow the user to choose the description
     try (
-        final InputStream stream = ChallengeParserTest.class.getResourceAsStream("/fll/resources/challenge-descriptors/fll-2016_animal-allies-MN.xml")) {
+        final InputStream stream = ChallengeDescriptionEditor.class.getResourceAsStream("/fll/resources/challenge-descriptors/fll-2016_animal-allies-MN.xml")) {
 
       final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(stream));
 
@@ -131,17 +145,22 @@ public class ChallengeDescriptionEditor extends JFrame {
     }
   }
 
+  private final ChallengeDescription mDescription;
+
   public ChallengeDescriptionEditor(final ChallengeDescription description) {
     super("Challenge Description Editor");
+    mDescription = description;
 
     final Container cpane = getContentPane();
     cpane.setLayout(new BorderLayout());
+
+    cpane.add(createToolBar(), BorderLayout.PAGE_START);
 
     final JPanel topPanel = new JPanel();
     topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.PAGE_AXIS));
     topPanel.setAlignmentX(LEFT_ALIGNMENT);
 
-    final ScoreCategoryEditor performanceEditor = new ScoreCategoryEditor(description.getPerformance());
+    final ScoreCategoryEditor performanceEditor = new ScoreCategoryEditor(mDescription.getPerformance());
     final MovableExpandablePanel performance = new MovableExpandablePanel("Performance", performanceEditor, false);
     topPanel.add(performance);
 
@@ -178,27 +197,30 @@ public class ChallengeDescriptionEditor extends JFrame {
           newIndex = oldIndex
               - 1;
         }
-        
-        if(newIndex < 0 || newIndex >= subjective.getComponentCount()) {
-          if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Can't move component outside the container oldIndex: " + oldIndex + " newIndex: " + newIndex);
+
+        if (newIndex < 0
+            || newIndex >= subjective.getComponentCount()) {
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Can't move component outside the container oldIndex: "
+                + oldIndex + " newIndex: " + newIndex);
           }
           return;
         }
-        
+
         subjective.add(e.getComponent(), newIndex);
         subjective.validate();
-        
-        //FIXME need to update the order in the challenge description
+
+        // FIXME need to update the order in the challenge description
       }
 
     };
-    for (final ScoreCategory cat : description.getSubjectiveCategories()) {
+
+    for (final SubjectiveScoreCategory cat : mDescription.getSubjectiveCategories()) {
       final ScoreCategoryEditor editor = new ScoreCategoryEditor(cat);
 
       final MovableExpandablePanel container = new MovableExpandablePanel(cat.getTitle(), editor);
       container.addMoveEventListener(subjectiveMoveListener);
-      
+
       subjective.add(container);
     }
 
@@ -208,4 +230,68 @@ public class ChallengeDescriptionEditor extends JFrame {
     pack();
   }
 
+  private final Action mSaveAction = new AbstractAction("Save As...") {
+    {
+      putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/SaveAs16.gif"));
+      putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/SaveAs24.gif"));
+      putValue(SHORT_DESCRIPTION, "Save the challenge description file with a new name");
+      putValue(MNEMONIC_KEY, KeyEvent.VK_A);
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK
+          | ActionEvent.SHIFT_MASK));
+    }
+
+    @Override
+    public void actionPerformed(final ActionEvent ae) {
+      saveChallengeDescription();
+    }
+  };
+
+  private void saveChallengeDescription() {
+    //FIXME needs work!!!
+    
+    // final String startingDirectory =
+    // PREFS.get(DESCRIPTION_STARTING_DIRECTORY_PREF, null);
+
+    final JFileChooser fileChooser = new JFileChooser();
+    final FileFilter filter = new BasicFileFilter("FLL Challenge Description (xml)", new String[] { "xml" });
+    fileChooser.setFileFilter(filter);
+    // if (null != startingDirectory) {
+    // fileChooser.setCurrentDirectory(new File(startingDirectory));
+    // }
+
+    final int returnVal = fileChooser.showSaveDialog(this);
+    if (returnVal == JFileChooser.APPROVE_OPTION) {
+      // final File currentDirectory = fileChooser.getCurrentDirectory();
+      // PREFS.put(DESCRIPTION_STARTING_DIRECTORY_PREF,
+      // currentDirectory.getAbsolutePath());
+
+      final File file = fileChooser.getSelectedFile();
+      // mDescriptionFilename.setText(mScheduleDescriptionFile.getName());
+
+      try (final Writer writer = new FileWriter(file)) {
+        final Document saveDoc = mDescription.toXml();
+        XMLUtils.writeXML(saveDoc, writer, Utilities.DEFAULT_CHARSET.name());
+      } catch(final IOException e) {
+        LOGGER.error("Error writing document", e);
+        
+        JOptionPane.showMessageDialog(null,
+                                      "An unexpected error occurred. Please send the log file and a description of what you were doing to the developer. Error message: "
+                                          + e.getMessage(),
+                                      "Error", JOptionPane.ERROR_MESSAGE);
+      }
+
+    } else {
+      // user canceled
+      return;
+    }
+  }
+
+  private JToolBar createToolBar() {
+    final JToolBar toolbar = new JToolBar();
+    toolbar.setFloatable(false);
+
+    toolbar.add(mSaveAction);
+
+    return toolbar;
+  }
 }

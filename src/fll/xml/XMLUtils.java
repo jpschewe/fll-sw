@@ -88,17 +88,19 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
     return "computedGoal".equals(element.getNodeName());
   }
 
+  public static final String WINNER_ATTRIBUTE = "winner";
+  
   /**
    * Get the winner criteria for a particular element.
    */
   public static WinnerType getWinnerCriteria(final Element element) {
-    if (element.hasAttribute("winner")) {
-      final String str = element.getAttribute("winner");
+    if (element.hasAttribute(WINNER_ATTRIBUTE)) {
+      final String str = element.getAttribute(WINNER_ATTRIBUTE);
       final String sortStr;
       if (!str.isEmpty()) {
         sortStr = str.toUpperCase();
       } else {
-        sortStr = "HIGH";
+        sortStr = WinnerType.HIGH.toString();
       }
       return Enum.valueOf(WinnerType.class, sortStr);
     } else {
@@ -106,17 +108,19 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
     }
   }
 
+  public static final String SCORE_TYPE_ATTRIBUTE = "scoreType";
+  
   /**
    * Get the score type for a particular element.
    */
   public static ScoreType getScoreType(final Element element) {
-    if (element.hasAttribute("scoreType")) {
-      final String str = element.getAttribute("scoreType");
+    if (element.hasAttribute(SCORE_TYPE_ATTRIBUTE)) {
+      final String str = element.getAttribute(SCORE_TYPE_ATTRIBUTE);
       final String sortStr;
       if (!str.isEmpty()) {
         sortStr = str.toUpperCase();
       } else {
-        sortStr = "INTEGER";
+        sortStr = ScoreType.INTEGER.toString();
       }
       return Enum.valueOf(ScoreType.class, sortStr);
     } else {

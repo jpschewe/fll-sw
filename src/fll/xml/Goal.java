@@ -12,28 +12,48 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.Utilities;
 import fll.web.playoff.TeamScore;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 public class Goal extends AbstractGoal {
 
+  public static final String TAG_NAME = "goal";
+
+  public static final String MIN_ATTRIBUTE = "min";
+
+  public static final String MAX_ATTRIBUTE = "max";
+
+  public static final String MULTIPLIER_ATTRIBUTE = "multiplier";
+
+  public static final String INITIAL_VALUE_ATTRIBUTE = "initialValue";
+
+  public static final String REQUIRED_ATTRIBUTE = "required";
+
   public Goal(final Element ele) {
     super(ele);
 
-    mMin = Double.valueOf(ele.getAttribute("min"));
-    mMax = Double.valueOf(ele.getAttribute("max"));
-    mMultiplier = Double.valueOf(ele.getAttribute("multiplier"));
-    mInitialValue = Double.valueOf(ele.getAttribute("initialValue"));
+    mMin = Double.valueOf(ele.getAttribute(MIN_ATTRIBUTE));
+    mMax = Double.valueOf(ele.getAttribute(MAX_ATTRIBUTE));
+    mMultiplier = Double.valueOf(ele.getAttribute(MULTIPLIER_ATTRIBUTE));
+    mInitialValue = Double.valueOf(ele.getAttribute(INITIAL_VALUE_ATTRIBUTE));
 
     mScoreType = XMLUtils.getScoreType(ele);
 
+    if (ele.hasAttribute(REQUIRED_ATTRIBUTE)) {
+      mRequired = Boolean.valueOf(ele.getAttribute(REQUIRED_ATTRIBUTE));
+    } else {
+      mRequired = false;
+    }
+
     mRubric = new LinkedList<RubricRange>();
-    final NodelistElementCollectionAdapter rubricEles = new NodelistElementCollectionAdapter(ele.getElementsByTagName("rubric"));
+    final NodelistElementCollectionAdapter rubricEles = new NodelistElementCollectionAdapter(ele.getElementsByTagName(RubricRange.RUBRIC_TAG_NAME));
     if (rubricEles.hasNext()) {
       final Element rubricEle = rubricEles.next();
-      for (final Element rangeEle : new NodelistElementCollectionAdapter(rubricEle.getElementsByTagName("range"))) {
+      for (final Element rangeEle : new NodelistElementCollectionAdapter(rubricEle.getElementsByTagName(RubricRange.TAG_NAME))) {
         final RubricRange range = new RubricRange(rangeEle);
         mRubric.add(range);
       }
@@ -43,7 +63,7 @@ public class Goal extends AbstractGoal {
     Collections.sort(mRubric, LEAST_RUBRIC_RANGE);
 
     mValues = new LinkedList<EnumeratedValue>();
-    for (final Element valueEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName("value"))) {
+    for (final Element valueEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(EnumeratedValue.TAG_NAME))) {
       final EnumeratedValue value = new EnumeratedValue(valueEle);
       mValues.add(value);
     }
@@ -126,13 +146,13 @@ public class Goal extends AbstractGoal {
   public void setMin(final double v) {
     mMin = v;
   }
-  
+
   private double mMax;
 
   public double getMax() {
     return mMax;
   }
-  
+
   public void setMax(final double v) {
     mMax = v;
   }
@@ -200,6 +220,54 @@ public class Goal extends AbstractGoal {
   @Override
   public boolean isComputed() {
     return false;
+  }
+
+  private boolean mRequired;
+
+  /**
+   * True if the goal is required for award consideration.
+   */
+  public boolean isRequired() {
+    return mRequired;
+  }
+
+  public void setRequired(final boolean v) {
+    mRequired = v;
+  }
+
+  @Override
+  public Element toXml(final Document doc) {
+    final Element ele = doc.createElementNS(null, TAG_NAME);
+
+    populateXml(doc, ele);
+
+    if (!isEnumerated()) {
+      ele.setAttribute(MIN_ATTRIBUTE, Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mMin));
+      ele.setAttribute(MAX_ATTRIBUTE, Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mMax));
+      ele.setAttribute(MULTIPLIER_ATTRIBUTE, Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mMultiplier));
+    }
+    ele.setAttribute(INITIAL_VALUE_ATTRIBUTE, Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mInitialValue));
+
+    ele.setAttribute(XMLUtils.SCORE_TYPE_ATTRIBUTE, mScoreType.toXmlString());
+    ele.setAttribute(REQUIRED_ATTRIBUTE, Boolean.toString(mRequired));
+
+    if (!mRubric.isEmpty()) {
+      final Element rubricEle = doc.createElement(RubricRange.RUBRIC_TAG_NAME);
+      for (final RubricRange range : mRubric) {
+        final Element rangeEle = range.toXml(doc);
+        rubricEle.appendChild(rangeEle);
+      }
+      ele.appendChild(rubricEle);
+    }
+
+    if (!mValues.isEmpty()) {
+      for (final EnumeratedValue value : mValues) {
+        final Element valueEle = value.toXml(doc);
+        ele.appendChild(valueEle);
+      }
+    }
+
+    return ele;
   }
 
 }

@@ -8,14 +8,25 @@ package fll.xml;
 
 import java.io.Serializable;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import fll.Utilities;
 
 public class EnumeratedValue implements Serializable {
 
+  public static final String TITLE_ATTRIBUTE = "title";
+
+  public static final String SCORE_ATTRIBUTE = "score";
+
+  public static final String VALUE_ATTRIBUTE = "value";
+
+  public static final String TAG_NAME = "value";
+
   public EnumeratedValue(final Element ele) {
-    mScore = Double.valueOf(ele.getAttribute("score"));
-    mTitle = ele.getAttribute("title");
-    mValue = ele.getAttribute("value");
+    mScore = Double.valueOf(ele.getAttribute(SCORE_ATTRIBUTE));
+    mTitle = ele.getAttribute(TITLE_ATTRIBUTE);
+    mValue = ele.getAttribute(VALUE_ATTRIBUTE);
   }
 
   private final double mScore;
@@ -34,6 +45,14 @@ public class EnumeratedValue implements Serializable {
 
   public String getValue() {
     return mValue;
+  }
+
+  public Element toXml(final Document document) {
+    final Element ele = document.createElement(TAG_NAME);
+    ele.setAttribute(SCORE_ATTRIBUTE, Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mScore));
+    ele.setAttribute(TITLE_ATTRIBUTE, mTitle);
+    ele.setAttribute(VALUE_ATTRIBUTE, mValue);
+    return ele;
   }
 
 }

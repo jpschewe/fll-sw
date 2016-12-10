@@ -14,11 +14,16 @@ public enum GoalScoreType {
    * Defaults to "RAW" if nothing matches.
    */
   public static GoalScoreType fromString(final String str) {
-    if ("computed".equalsIgnoreCase(str)) {
+    if (COMPUTED.toString().equalsIgnoreCase(str)) {
       return COMPUTED;
     } else {
       return RAW;
     }
+  }
+  
+  public String toXmlString() {
+    // XML is all lowercase
+    return toString().toLowerCase();
   }
 
 }

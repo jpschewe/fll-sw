@@ -84,7 +84,7 @@ import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.Goal;
 import fll.xml.PerformanceScoreCategory;
-import fll.xml.ScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
 
 /**
  * Test a full tournament.
@@ -814,7 +814,7 @@ public class FullTournamentTest {
     subjective.load(subjectiveZip.toFile());
 
     // insert scores into zip
-    for (final ScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
+    for (final SubjectiveScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
       final String category = subjectiveElement.getName();
       final String title = subjectiveElement.getTitle();
 

@@ -11,8 +11,10 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.Utilities;
 import fll.web.playoff.TeamScore;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
@@ -21,23 +23,17 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
  */
 public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
 
-  public ScoreCategory(final Element ele) {
-    this(ele, ele.getAttribute("name"), ele.getAttribute("title"));
-  }
+  public static final String WEIGHT_ATTRIBUTE = "weight";
 
-  protected ScoreCategory(final Element ele,
-                          final String name,
-                          final String title) {
-    mName = name;
-    mTitle = title;
-    mWeight = Double.valueOf(ele.getAttribute("weight"));
+  protected ScoreCategory(final Element ele) {
+    mWeight = Double.valueOf(ele.getAttribute(WEIGHT_ATTRIBUTE));
 
     mGoals = new LinkedList<AbstractGoal>();
     for (final Element goalEle : new NodelistElementCollectionAdapter(ele.getChildNodes())) {
-      if ("goal".equals(goalEle.getNodeName())) {
+      if (Goal.TAG_NAME.equals(goalEle.getNodeName())) {
         final Goal goal = new Goal(goalEle);
         mGoals.add(goal);
-      } else if ("computedGoal".equals(goalEle.getNodeName())) {
+      } else if (ComputedGoal.TAG_NAME.equals(goalEle.getNodeName())) {
         final ComputedGoal compGoal = new ComputedGoal(goalEle, this);
         mGoals.add(compGoal);
       }
@@ -98,22 +94,6 @@ public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
     return mGoals.remove(index);
   }
 
-  private final String mName;
-
-  public String getName() {
-    return mName;
-  }
-
-  private String mTitle;
-
-  public String getTitle() {
-    return mTitle;
-  }
-
-  public void setTitle(final String v) {
-    mTitle = v;
-  }
-
   private double mWeight;
 
   public double getWeight() {
@@ -161,6 +141,16 @@ public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
   public ScoreType getScoreType() {
     final boolean hasFloatingPointGoals = getGoals().stream().anyMatch(g -> g.getScoreType() == ScoreType.FLOAT);
     return hasFloatingPointGoals ? ScoreType.FLOAT : ScoreType.INTEGER;
+  }
+
+  public void populateXml(final Document doc,
+                          final Element ele) {
+    ele.setAttribute(WEIGHT_ATTRIBUTE, Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mWeight));
+
+    for (final AbstractGoal goal : mGoals) {
+      final Element goalEle = goal.toXml(doc);
+      ele.appendChild(goalEle);
+    }
   }
 
 }

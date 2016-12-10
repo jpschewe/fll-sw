@@ -11,9 +11,11 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import fll.Utilities;
 import fll.web.playoff.TeamScore;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
@@ -22,19 +24,25 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
  */
 public class PerformanceScoreCategory extends ScoreCategory {
 
-  public PerformanceScoreCategory(final Element ele) {
-    super(ele, "performance", "Performance"); // element,name, title
+  public static final String TAG_NAME = "Performance";
 
-    mMinimumScore = Double.valueOf(ele.getAttribute("minimumScore"));
+  public static final String TIE_BREAKER_TAG_NAME = "tiebreaker";
+
+  public static final String MINIMUM_SCORE_ATTRIBUTE = "minimumScore";
+
+  public PerformanceScoreCategory(final Element ele) {
+    super(ele);
+
+    mMinimumScore = Double.valueOf(ele.getAttribute(MINIMUM_SCORE_ATTRIBUTE));
 
     mRestrictions = new LinkedList<Restriction>();
-    for (final Element restrictEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName("restriction"))) {
+    for (final Element restrictEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(Restriction.TAG_NAME))) {
       final Restriction restrict = new Restriction(restrictEle, this);
       mRestrictions.add(restrict);
     }
 
     mTiebreaker = new LinkedList<TiebreakerTest>();
-    final NodeList tiebreakerElements = ele.getElementsByTagName("tiebreaker");
+    final NodeList tiebreakerElements = ele.getElementsByTagName(TIE_BREAKER_TAG_NAME);
     if (0 != tiebreakerElements.getLength()) {
       final Element tiebreakerElement = (Element) tiebreakerElements.item(0);
       for (final Element testElement : new NodelistElementCollectionAdapter(tiebreakerElement.getChildNodes())) {
@@ -146,6 +154,32 @@ public class PerformanceScoreCategory extends ScoreCategory {
     } else {
       return score;
     }
+  }
+
+  public Element toXml(final Document doc) {
+    final Element ele = doc.createElement(TAG_NAME);
+
+    populateXml(doc, ele);
+
+    ele.setAttribute(MINIMUM_SCORE_ATTRIBUTE, Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mMinimumScore));
+
+    for (final Restriction restrict : mRestrictions) {
+      final Element restrictEle = restrict.toXml(doc);
+      ele.appendChild(restrictEle);
+    }
+
+    if (!mTiebreaker.isEmpty()) {
+      final Element tiebreakerEle = doc.createElement(TIE_BREAKER_TAG_NAME);
+
+      for (final TiebreakerTest test : mTiebreaker) {
+        final Element testEle = test.toXml(doc);
+        tiebreakerEle.appendChild(testEle);
+      }
+
+      ele.appendChild(tiebreakerEle);
+    }
+
+    return ele;
   }
 
 }

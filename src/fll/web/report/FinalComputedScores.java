@@ -62,6 +62,7 @@ import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreCategory;
 import fll.xml.ScoreType;
+import fll.xml.SubjectiveScoreCategory;
 import fll.xml.WinnerType;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -224,8 +225,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
       while (agIter.hasNext()) {
         final String awardGroup = agIter.next();
 
-        final ScoreCategory[] subjectiveCategories = challengeDescription.getSubjectiveCategories()
-                                                                         .toArray(new ScoreCategory[0]);
+        final SubjectiveScoreCategory[] subjectiveCategories = challengeDescription.getSubjectiveCategories()
+                                                                                   .toArray(new SubjectiveScoreCategory[0]);
 
         // Figure out how many subjective categories have weights > 0.
         final double[] weights = new double[subjectiveCategories.length];
@@ -363,7 +364,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
    */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name and winner criteria determines the sort")
   private Map<ScoreCategory, Map<String, Map<Integer, Integer>>> gatherRankedSubjectiveTeams(final Connection connection,
-                                                                                             final ScoreCategory[] subjectiveCategories,
+                                                                                             final SubjectiveScoreCategory[] subjectiveCategories,
                                                                                              final WinnerType winnerCriteria,
                                                                                              final Tournament tournament,
                                                                                              final String awardGroup)
@@ -435,7 +436,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table name")
   private void writeScores(final Connection connection,
-                           final ScoreCategory[] subjectiveCategories,
+                           final SubjectiveScoreCategory[] subjectiveCategories,
                            final ScoreType performanceScoreType,
                            final double[] weights,
                            final float[] relativeWidths,
@@ -713,7 +714,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
    * @throws ParseException
    */
   private void writeColumnHeaders(final double[] weights,
-                                  final ScoreCategory[] subjectiveCategories,
+                                  final SubjectiveScoreCategory[] subjectiveCategories,
                                   final float[] relativeWidths,
                                   final ChallengeDescription challengeDescription,
                                   final PdfPTable divTable)
@@ -823,7 +824,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
   private void insertRawScoreColumns(final Connection connection,
                                      final Tournament tournament,
                                      final String ascDesc,
-                                     final ScoreCategory[] subjectiveCategories,
+                                     final SubjectiveScoreCategory[] subjectiveCategories,
                                      final double[] weights,
                                      final int teamNumber,
                                      final PdfPTable curteam)
@@ -834,7 +835,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
       // Next, one column containing the raw score for each subjective
       // category with weight > 0
       for (int catIndex = 0; catIndex < subjectiveCategories.length; catIndex++) {
-        final ScoreCategory catElement = subjectiveCategories[catIndex];
+        final SubjectiveScoreCategory catElement = subjectiveCategories[catIndex];
         final double catWeight = weights[catIndex];
         if (catWeight > 0.0) {
           final String catName = catElement.getName();

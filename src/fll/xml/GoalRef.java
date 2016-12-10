@@ -8,6 +8,7 @@ package fll.xml;
 
 import java.io.Serializable;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.util.FLLInternalException;
@@ -18,12 +19,18 @@ import fll.web.playoff.TeamScore;
  */
 public class GoalRef implements Evaluatable, Serializable {
 
+  public static final String TAG_NAME = "goalRef";
+
+  public static final String SCORE_TYPE_ATTRIBUTE = "scoreType";
+
+  public static final String GOAL_ATTRIBUTE = "goal";
+
   public GoalRef(final Element ele,
                  final GoalScope scope) {
-    mScoreType = GoalScoreType.fromString(ele.getAttribute("scoreType"));
+    mScoreType = GoalScoreType.fromString(ele.getAttribute(SCORE_TYPE_ATTRIBUTE));
 
     mGoalScope = scope;
-    mGoalName = ele.getAttribute("goal");
+    mGoalName = ele.getAttribute(GOAL_ATTRIBUTE);
   }
 
   private final String mGoalName;
@@ -60,5 +67,12 @@ public class GoalRef implements Evaluatable, Serializable {
     }
 
     return value;
+  }
+
+  public Element toXml(final Document doc) {
+    final Element ele = doc.createElement(TAG_NAME);
+    ele.setAttribute(SCORE_TYPE_ATTRIBUTE, mScoreType.toXmlString());
+    ele.setAttribute(GOAL_ATTRIBUTE, mGoalName);
+    return ele;
   }
 }
