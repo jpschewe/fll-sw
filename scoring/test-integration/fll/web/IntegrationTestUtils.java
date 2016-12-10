@@ -81,7 +81,7 @@ public final class IntegrationTestUtils {
   /**
    * How long to wait for pages to load before checking for elements.
    */
-  public static final long WAIT_FOR_PAGE_LOAD_MS = 500;
+  public static final long WAIT_FOR_PAGE_LOAD_MS = 1000;
 
   private IntegrationTestUtils() {
     // no instances
@@ -572,7 +572,7 @@ public final class IntegrationTestUtils {
     }
 
     selenium.manage().timeouts().implicitlyWait(WAIT_FOR_PAGE_LOAD_MS, TimeUnit.MILLISECONDS);
-    selenium.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
+    selenium.manage().timeouts().pageLoadTimeout(60, TimeUnit.SECONDS);
 
     return selenium;
   }
