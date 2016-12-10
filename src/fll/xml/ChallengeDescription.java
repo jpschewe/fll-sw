@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
@@ -19,6 +20,14 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
  */
 public class ChallengeDescription implements Serializable {
 
+  public static final String TITLE_ATTRIBUTE = "title";
+
+  public static final String REVISION_ATTRIBUTE = "revision";
+
+  public static final String COPYRIGHT_ATTRIBUTE = "copyright";
+
+  public static final String SCHEMA_VERSION_ATTRIBUTE = "schemaVersion";
+
   /**
    * It's assumed that this element is the root element from the Document from
    * {@link ChallengeParser#parse(java.io.Reader)}.
@@ -26,22 +35,22 @@ public class ChallengeDescription implements Serializable {
    * @param ele the challenge description
    */
   public ChallengeDescription(final Element ele) {
-    mTitle = ele.getAttribute("title");
-    mRevision = ele.getAttribute("revision");
+    mTitle = ele.getAttribute(TITLE_ATTRIBUTE);
+    mRevision = ele.getAttribute(REVISION_ATTRIBUTE);
     mWinner = XMLUtils.getWinnerCriteria(ele);
 
-    if (ele.hasAttribute("copyright")) {
-      mCopyright = ele.getAttribute("copyright");
+    if (ele.hasAttribute(COPYRIGHT_ATTRIBUTE)) {
+      mCopyright = ele.getAttribute(COPYRIGHT_ATTRIBUTE);
     } else {
       mCopyright = null;
     }
 
-    final Element performanceElement = (Element) ele.getElementsByTagName("Performance").item(0);
+    final Element performanceElement = (Element) ele.getElementsByTagName(PerformanceScoreCategory.TAG_NAME).item(0);
     mPerformance = new PerformanceScoreCategory(performanceElement);
 
-    mSubjectiveCategories = new LinkedList<ScoreCategory>();
-    for (final Element subjEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName("subjectiveCategory"))) {
-      final ScoreCategory subj = new ScoreCategory(subjEle);
+    mSubjectiveCategories = new LinkedList<>();
+    for (final Element subjEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(SubjectiveScoreCategory.TAG_NAME))) {
+      final SubjectiveScoreCategory subj = new SubjectiveScoreCategory(subjEle);
       mSubjectiveCategories.add(subj);
     }
   }
@@ -107,12 +116,12 @@ public class ChallengeDescription implements Serializable {
     mPerformance = v;
   }
 
-  private final List<ScoreCategory> mSubjectiveCategories;
+  private final List<SubjectiveScoreCategory> mSubjectiveCategories;
 
   /**
    * @return unmodifiable list
    */
-  public List<ScoreCategory> getSubjectiveCategories() {
+  public List<SubjectiveScoreCategory> getSubjectiveCategories() {
     return mSubjectiveCategories;
   }
 
@@ -122,13 +131,8 @@ public class ChallengeDescription implements Serializable {
    * are unique. That needs to be done by a higher level class.
    * 
    * @param v the category to add
-   * @throws IllegalArgumentException if the argument is an instance of
-   *           {@link PerformanceScoreCategory}
    */
-  public void addSubjectiveCategory(final ScoreCategory v) throws IllegalArgumentException {
-    if (v instanceof PerformanceScoreCategory) {
-      throw new IllegalArgumentException("Cannot add a performance category to the subjective categories");
-    }
+  public void addSubjectiveCategory(final SubjectiveScoreCategory v) {
     mSubjectiveCategories.add(v);
   }
 
@@ -139,15 +143,10 @@ public class ChallengeDescription implements Serializable {
    * 
    * @param v the category to add
    * @param index the index to add the category at
-   * @throws IllegalArgumentException if the argument is an instance of
-   *           {@link PerformanceScoreCategory}
    */
   public void addSubjectiveCategory(final int index,
-                                    final ScoreCategory v)
+                                    final SubjectiveScoreCategory v)
       throws IndexOutOfBoundsException {
-    if (v instanceof PerformanceScoreCategory) {
-      throw new IllegalArgumentException("Cannot add a performance category to the subjective categories");
-    }
     mSubjectiveCategories.add(index, v);
   }
 
@@ -157,13 +156,8 @@ public class ChallengeDescription implements Serializable {
    * @param v the category to remove
    * @return if the category was removed
    * @see List#remove(Object)
-   * @throws IllegalArgumentException if the argument is an instance of
-   *           {@Link PerformanceScoreCategory}
    */
-  public boolean removeSubjectiveCategory(final ScoreCategory v) throws IllegalArgumentException {
-    if (v instanceof PerformanceScoreCategory) {
-      throw new IllegalArgumentException("Cannot remove a performance category from the subjective categories");
-    }
+  public boolean removeSubjectiveCategory(final SubjectiveScoreCategory v) {
     return mSubjectiveCategories.remove(v);
   }
 
@@ -173,7 +167,7 @@ public class ChallengeDescription implements Serializable {
    * @param index the index to remove the element from
    * @return the category that was removed
    */
-  public ScoreCategory removeSubjectiveCategory(final int index) throws IndexOutOfBoundsException {
+  public SubjectiveScoreCategory removeSubjectiveCategory(final int index) throws IndexOutOfBoundsException {
     return mSubjectiveCategories.remove(index);
   }
 
@@ -181,13 +175,43 @@ public class ChallengeDescription implements Serializable {
    * @param name category name
    * @return the category or null if not found
    */
-  public ScoreCategory getSubjectiveCategoryByName(final String name) {
-    for (final ScoreCategory cat : mSubjectiveCategories) {
+  public SubjectiveScoreCategory getSubjectiveCategoryByName(final String name) {
+    for (final SubjectiveScoreCategory cat : mSubjectiveCategories) {
       if (name.equals(cat.getName())) {
         return cat;
       }
     }
     return null;
+  }
+
+  /**
+   * Create the XML for the current state of this challenge description.
+   * 
+   * @return a non-null document.
+   */
+  public Document toXml() {
+    final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
+    final Element fll = document.createElementNS(null, "fll");
+    document.appendChild(fll);
+
+    fll.setAttribute(TITLE_ATTRIBUTE, mTitle);
+    fll.setAttribute(REVISION_ATTRIBUTE, mRevision);
+    fll.setAttribute(XMLUtils.WINNER_ATTRIBUTE, mWinner.toString());
+    fll.setAttribute(SCHEMA_VERSION_ATTRIBUTE, String.valueOf(ChallengeParser.CURRENT_SCHEMA_VERSION));
+
+    if (null != mCopyright) {
+      fll.setAttribute(COPYRIGHT_ATTRIBUTE, mCopyright);
+    }
+
+    final Element performanceElement = mPerformance.toXml(document);
+    fll.appendChild(performanceElement);
+
+    for (final SubjectiveScoreCategory cat : mSubjectiveCategories) {
+      final Element subjEle = cat.toXml(document);
+      fll.appendChild(subjEle);
+    }
+
+    return document;
   }
 
 }

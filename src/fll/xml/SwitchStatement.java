@@ -13,6 +13,7 @@ import java.util.List;
 
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.util.FLLInternalException;
@@ -20,20 +21,24 @@ import fll.web.playoff.TeamScore;
 
 public class SwitchStatement implements Evaluatable, Serializable {
 
+  public static final String TAG_NAME = "switch";
+
+  public static final String DEFAULT_TAG_NAME = "default";
+
   public SwitchStatement(final Element ele,
                          final GoalScope goalScope,
                          final VariableScope variableScope) {
     ComplexPolynomial defaultCase = null;
     mCases = new LinkedList<CaseStatement>();
     for (final Element caseEle : new NodelistElementCollectionAdapter(ele.getChildNodes())) {
-      if ("case".equals(caseEle.getNodeName())) {
+      if (CaseStatement.TAG_NAME.equals(caseEle.getNodeName())) {
         final CaseStatement cs = new CaseStatement(caseEle, goalScope, variableScope);
         mCases.add(cs);
-      } else if ("default".equals(caseEle.getNodeName())) {
+      } else if (DEFAULT_TAG_NAME.equals(caseEle.getNodeName())) {
         defaultCase = new ComplexPolynomial(caseEle, goalScope, variableScope);
       } else {
-        throw new FLLInternalException("Expecting 'case' or 'default', but found '"
-            + caseEle.getNodeName() + "'");
+        throw new FLLInternalException("Expecting '"
+            + CaseStatement.TAG_NAME + "' or '" + DEFAULT_TAG_NAME + "', but found '" + caseEle.getNodeName() + "'");
       }
     }
     mDefaultCase = defaultCase;
@@ -101,6 +106,23 @@ public class SwitchStatement implements Evaluatable, Serializable {
       }
     }
     return getDefaultCase().evaluate(teamScore);
+  }
+
+  public Element toXml(final Document doc) {
+    final Element ele = doc.createElement(TAG_NAME);
+
+    for (final CaseStatement cs : mCases) {
+      final Element caseEle = cs.toXml(doc);
+      ele.appendChild(caseEle);
+    }
+
+    if (null != mDefaultCase) {
+      final Element defaultEle = doc.createElement(DEFAULT_TAG_NAME);
+      mDefaultCase.populateXml(doc, defaultEle);
+      ele.appendChild(defaultEle);
+    }
+
+    return ele;
   }
 
 }

@@ -6,17 +6,28 @@
 
 package fll.xml;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.Utilities;
+
 public class Restriction extends BasicPolynomial {
+
+  public static final String TAG_NAME = "restriction";
+  
+  public static final String LOWER_BOUND_ATTRIBUTE = "lowerBound";
+
+  public static final String UPPER_BOUND_ATTRIBUTE = "upperBound";
+
+  public static final String MESSAGE_ATTRIBUTE = "message";
 
   public Restriction(final Element ele,
                      final GoalScope goalScope) {
     super(ele, goalScope);
 
-    mLowerBound = Double.valueOf(ele.getAttribute("lowerBound"));
-    mUpperBound = Double.valueOf(ele.getAttribute("upperBound"));
-    mMessage = ele.getAttribute("message");
+    mLowerBound = Double.valueOf(ele.getAttribute(LOWER_BOUND_ATTRIBUTE));
+    mUpperBound = Double.valueOf(ele.getAttribute(UPPER_BOUND_ATTRIBUTE));
+    mMessage = ele.getAttribute(MESSAGE_ATTRIBUTE);
   }
 
   private double mLowerBound;
@@ -24,7 +35,7 @@ public class Restriction extends BasicPolynomial {
   public double getLowerBound() {
     return mLowerBound;
   }
-  
+
   public void setLowerBound(final double v) {
     mLowerBound = v;
   }
@@ -38,7 +49,7 @@ public class Restriction extends BasicPolynomial {
   public void setUpperBound(final double v) {
     mUpperBound = v;
   }
-  
+
   private String mMessage;
 
   public String getMessage() {
@@ -47,6 +58,18 @@ public class Restriction extends BasicPolynomial {
 
   public void setMessage(final String v) {
     mMessage = v;
+  }
+  
+  public Element toXml(final Document doc) {
+    final Element ele = doc.createElement(TAG_NAME);
+    
+    populateXml(doc, ele);
+    
+    ele.setAttribute(LOWER_BOUND_ATTRIBUTE, Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mLowerBound));
+    ele.setAttribute(UPPER_BOUND_ATTRIBUTE, Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mUpperBound));
+    ele.setAttribute(MESSAGE_ATTRIBUTE, mMessage);
+    
+    return ele;
   }
 
 }

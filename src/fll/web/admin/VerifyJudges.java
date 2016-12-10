@@ -22,8 +22,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.log4j.Logger;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -35,7 +33,8 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.xml.ChallengeDescription;
-import fll.xml.ScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Verify the judges information
@@ -49,7 +48,8 @@ public class VerifyJudges extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Top of VerifyJudges.processRequest");
     }
@@ -69,7 +69,7 @@ public class VerifyJudges extends BaseFLLServlet {
 
       // populate a hash where key is category name and value is an empty
       // Set. Use set so there are no duplicates
-      final List<ScoreCategory> subjectiveCategories = challengeDescription.getSubjectiveCategories();
+      final List<SubjectiveScoreCategory> subjectiveCategories = challengeDescription.getSubjectiveCategories();
 
       final int numRows = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(request.getParameter("total_num_rows")).intValue();
       if (LOGGER.isDebugEnabled()) {
@@ -100,7 +100,7 @@ public class VerifyJudges extends BaseFLLServlet {
       // check that each judging station has a judge for each category
       final Collection<String> judgingStations = Queries.getJudgingStations(connection, tournament);
       for (final String jstation : judgingStations) {
-        for (final ScoreCategory cat : subjectiveCategories) {
+        for (final SubjectiveScoreCategory cat : subjectiveCategories) {
           final String categoryName = cat.getName();
           boolean found = false;
 

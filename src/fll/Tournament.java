@@ -23,7 +23,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.GenerateDB;
 import fll.util.LogUtils;
 import fll.xml.ChallengeDescription;
-import fll.xml.ScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
 
 /**
  * The representation of a tournament. If someone changes the database, this
@@ -331,7 +331,7 @@ public final class Tournament implements Serializable {
       return true;
     }
 
-    for (final ScoreCategory category : description.getSubjectiveCategories()) {
+    for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
       if (scoresInTable(connection, category.getName())) {
         return true;
       }

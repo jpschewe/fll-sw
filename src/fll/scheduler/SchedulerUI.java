@@ -100,6 +100,7 @@ import fll.util.ProgressDialog;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.ScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
 import net.mtu.eggplant.util.BasicFileFilter;
 import net.mtu.eggplant.util.gui.GraphicsUtils;
 
@@ -840,7 +841,7 @@ public class SchedulerUI extends JFrame {
               if (!mapDialog.isCanceled()) {
                 final Map<ScoreCategory, String> categoryToSchedule = new HashMap<>();
                 final Map<ScoreCategory, String> filenameSuffixes = new HashMap<>();
-                for (final ScoreCategory scoreCategory : description.getSubjectiveCategories()) {
+                for (final SubjectiveScoreCategory scoreCategory : description.getSubjectiveCategories()) {
                   final String scheduleColumn = mapDialog.getSubjectiveHeaderForCategory(scoreCategory);
                   if (null == scheduleColumn) {
                     throw new FLLInternalException("Did not find a schedule column for "

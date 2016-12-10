@@ -10,7 +10,7 @@ import fll.util.FLLRuntimeException;
 import fll.xml.AbstractGoal;
 import fll.xml.Goal;
 import fll.xml.RubricRange;
-import fll.xml.ScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
 
 /**
  * This object represents the data element between the fll.xml and the
@@ -40,7 +40,7 @@ public class SheetElement {
    */
   private final List<String> categories = new LinkedList<>();
 
-  private final ScoreCategory sheetData;
+  private final SubjectiveScoreCategory sheetData;
 
   private List<String> mMasterRubricRangeTitles = null;
   
@@ -52,11 +52,11 @@ public class SheetElement {
     return mMasterRubricRangeTitles;
   }
 
-  public ScoreCategory getSheetData() {
+  public SubjectiveScoreCategory getSheetData() {
     return this.sheetData;
   }
 
-  public SheetElement(final ScoreCategory sheetData) {
+  public SheetElement(final SubjectiveScoreCategory sheetData) {
     // Sheet name will be Programming, Project, Robot Design or Core Values
     this.sheetName = sheetData.getName();
     this.sheetData = sheetData;

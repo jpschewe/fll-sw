@@ -27,6 +27,7 @@ import javax.swing.JTextField;
 
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
 
 /**
  * Map subjective headers to subjective categories. Also map file suffixes.
@@ -89,7 +90,7 @@ import fll.xml.ScoreCategory;
 
     final String[] scheduleColumns = schedule.getSubjectiveStations().toArray(new String[0]);
 
-    for (final ScoreCategory category : description.getSubjectiveCategories()) {
+    for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
       grid.add(new JLabel(category.getTitle()));
 
       final JComboBox<String> comboBox = new JComboBox<>(scheduleColumns);

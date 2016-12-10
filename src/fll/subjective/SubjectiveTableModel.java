@@ -28,8 +28,8 @@ import fll.util.LogUtils;
 import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.AbstractGoal;
 import fll.xml.EnumeratedValue;
-import fll.xml.ScoreCategory;
 import fll.xml.ScoreType;
+import fll.xml.SubjectiveScoreCategory;
 import fll.xml.XMLUtils;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
@@ -56,7 +56,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
    *          scored along with the judges and the current set of scores
    */
   public SubjectiveTableModel(final Document scoreDocument,
-                              final ScoreCategory subjectiveCategory,
+                              final SubjectiveScoreCategory subjectiveCategory,
                               final TournamentSchedule schedule,
                               final Collection<CategoryColumnMapping> scheduleColumnMappings) {
     _scoreDocument = scoreDocument;
@@ -523,7 +523,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
     }
   }
 
-  private final ScoreCategory _subjectiveCategory;
+  private final SubjectiveScoreCategory _subjectiveCategory;
 
   /**
    * Get the description element for goal at index

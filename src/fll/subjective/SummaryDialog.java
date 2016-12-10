@@ -31,8 +31,6 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -40,7 +38,8 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
-import fll.xml.ScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**
  * Summary dialog for subjective scores.
@@ -78,7 +77,8 @@ import fll.xml.ScoreCategory;
     summaryPanel.add(summaryLabel, BorderLayout.NORTH);
     final JScrollPane summaryTableScroller = new JScrollPane(summaryTable);
     final Dimension sumPrefSize = summaryTable.getPreferredSize();
-    summaryTableScroller.setPreferredSize(new Dimension(sumPrefSize.width, sumPrefSize.height * 2));
+    summaryTableScroller.setPreferredSize(new Dimension(sumPrefSize.width, sumPrefSize.height
+        * 2));
     summaryPanel.add(summaryTableScroller, BorderLayout.CENTER);
     cpane.add(summaryPanel, BorderLayout.NORTH);
 
@@ -102,17 +102,16 @@ import fll.xml.ScoreCategory;
     final Element scoresElement = scoreDocument.getDocumentElement();
     final List<String> columnNames = new LinkedList<String>();
     final Map<Integer, String> teamNumberToDivision = new HashMap<Integer, String>();
-    final List<ScoreCategory> subjectiveCategories = description.getSubjectiveCategories();
+    final List<SubjectiveScoreCategory> subjectiveCategories = description.getSubjectiveCategories();
     for (int catIdx = 0; catIdx < subjectiveCategories.size(); catIdx++) {
-      final ScoreCategory subjectiveElement = subjectiveCategories.get(catIdx);
+      final SubjectiveScoreCategory subjectiveElement = subjectiveCategories.get(catIdx);
       final String category = subjectiveElement.getName();
       final String categoryTitle = subjectiveElement.getTitle();
       columnNames.add(categoryTitle);
 
       final List<AbstractGoal> goals = subjectiveElement.getGoals();
       final Element categoryElement = SubjectiveUtils.getCategoryNode(scoresElement, category);
-      for (final Element scoreElement : new NodelistElementCollectionAdapter(
-                                                                             categoryElement.getElementsByTagName(DownloadSubjectiveData.SCORE_NODE_NAME))) {
+      for (final Element scoreElement : new NodelistElementCollectionAdapter(categoryElement.getElementsByTagName(DownloadSubjectiveData.SCORE_NODE_NAME))) {
         int numValues = 0;
         for (final AbstractGoal goalElement : goals) {
           if (!goalElement.isComputed()) {
@@ -125,7 +124,7 @@ import fll.xml.ScoreCategory;
                 break;
               }
             }
-          }// !computed
+          } // !computed
         } // end foreach goal
 
         final int teamNumber = Integer.parseInt(scoreElement.getAttribute("teamNumber"));
@@ -146,7 +145,7 @@ import fll.xml.ScoreCategory;
         } // end if score
 
       } // end foreach score row
-    }// end foreach category
+    } // end foreach category
 
     // sort the data and map it into an easier form for table consumption
     final Map<String, List<SummaryData>> summaryData = new HashMap<String, List<SummaryData>>();
@@ -166,7 +165,8 @@ import fll.xml.ScoreCategory;
       for (int column = 0; column < counts.length; ++column) {
         // make sure that counts[column] rows exist in summaryData
         final int numScoresForTeam = counts[column];
-        while (divisionSummaryData.size() < numScoresForTeam + 1) {
+        while (divisionSummaryData.size() < numScoresForTeam
+            + 1) {
           final List<Integer> summaryRow = new ArrayList<Integer>();
           for (int i = 0; i < columnNames.size(); ++i) {
             summaryRow.add(0);
@@ -176,7 +176,8 @@ import fll.xml.ScoreCategory;
         }
         final List<Integer> summaryRow = divisionSummaryData.get(numScoresForTeam).getScoreData();
         final int prev = summaryRow.get(column);
-        summaryRow.set(column, prev + 1);
+        summaryRow.set(column, prev
+            + 1);
       }
       final List<Integer> scoreData = new LinkedList<Integer>();
       for (final Integer value : counts) {
@@ -187,7 +188,7 @@ import fll.xml.ScoreCategory;
     }
 
     return new TableModel[] { new CountTableModel(tableData, columnNames),
-                             new SummaryTableModel(summaryData.values(), columnNames) };
+                              new SummaryTableModel(summaryData.values(), columnNames) };
   }
 
   /**
@@ -224,7 +225,8 @@ import fll.xml.ScoreCategory;
     }
 
     public int getColumnCount() {
-      return _columnNames.size() + 2;
+      return _columnNames.size()
+          + 2;
     }
 
     @Override
@@ -235,7 +237,8 @@ import fll.xml.ScoreCategory;
       case 1:
         return "# of scores";
       default:
-        return _columnNames.get(column - 2);
+        return _columnNames.get(column
+            - 2);
       }
     }
 
@@ -249,7 +252,8 @@ import fll.xml.ScoreCategory;
         return data.getTeamNumber();
       default:
         final List<Integer> rowData = data.getScoreData();
-        return rowData.get(column - 2);
+        return rowData.get(column
+            - 2);
       }
     }
   }
@@ -289,7 +293,8 @@ import fll.xml.ScoreCategory;
     }
 
     public int getColumnCount() {
-      return _categoryColumnNames.size() + 2;
+      return _categoryColumnNames.size()
+          + 2;
     }
 
     @Override
@@ -300,7 +305,8 @@ import fll.xml.ScoreCategory;
       case 1:
         return "Award Group";
       default:
-        return _categoryColumnNames.get(column - 2);
+        return _categoryColumnNames.get(column
+            - 2);
       }
     }
 
@@ -313,7 +319,8 @@ import fll.xml.ScoreCategory;
       case 1:
         return rowData.getDivision();
       default:
-        return rowData.getScoreData().get(column - 2);
+        return rowData.getScoreData().get(column
+            - 2);
       }
     }
   }

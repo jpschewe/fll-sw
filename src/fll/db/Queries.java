@@ -52,8 +52,8 @@ import fll.web.scoreEntry.UnverifiedRunsWebSocket;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
-import fll.xml.ScoreCategory;
 import fll.xml.ScoreType;
+import fll.xml.SubjectiveScoreCategory;
 import fll.xml.TiebreakerTest;
 import fll.xml.WinnerType;
 import net.mtu.eggplant.util.ComparisonUtils;
@@ -378,7 +378,7 @@ public final class Queries {
 
     // cache the subjective categories title->dbname
     final Map<String, String> subjectiveCategories = new HashMap<String, String>();
-    for (final ScoreCategory cat : challengeDescription.getSubjectiveCategories()) {
+    for (final SubjectiveScoreCategory cat : challengeDescription.getSubjectiveCategories()) {
       final String title = cat.getTitle();
       final String name = cat.getName();
       subjectiveCategories.put(title, name);
@@ -1730,7 +1730,7 @@ public final class Queries {
       prep = null;
 
       // delete from subjective categories
-      for (final ScoreCategory category : description.getSubjectiveCategories()) {
+      for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
         final String name = category.getName();
         prep = connection.prepareStatement("DELETE FROM "
             + name
@@ -1838,7 +1838,7 @@ public final class Queries {
     ResultSet rs = null;
     try {
       // Subjective ---
-      for (final ScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
+      for (final SubjectiveScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
         final String categoryName = subjectiveElement.getName();
 
         // build up the SQL
@@ -2082,7 +2082,7 @@ public final class Queries {
     PreparedStatement prep = null;
     try {
       // delete from subjective categories
-      for (final ScoreCategory category : description.getSubjectiveCategories()) {
+      for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
         final String name = category.getName();
         prep = connection.prepareStatement("DELETE FROM "
             + name
@@ -2370,7 +2370,7 @@ public final class Queries {
       prep = connection.prepareStatement("SELECT id FROM Judges WHERE Tournament = ? AND category = ?");
       prep.setInt(1, getCurrentTournament(connection));
 
-      for (final ScoreCategory element : challengeDescription.getSubjectiveCategories()) {
+      for (final SubjectiveScoreCategory element : challengeDescription.getSubjectiveCategories()) {
         final String categoryName = element.getName();
         prep.setString(2, categoryName);
         rs = prep.executeQuery();

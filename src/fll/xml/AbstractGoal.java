@@ -13,6 +13,8 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.util.FLLInternalException;
@@ -21,16 +23,19 @@ import fll.web.playoff.TeamScore;
 
 public abstract class AbstractGoal implements Serializable {
 
-  public AbstractGoal(final Element ele) {
-    mName = ele.getAttribute("name");
-    mTitle = ele.getAttribute("title");
-    if (ele.hasAttribute("required")) {
-      mRequired = Boolean.valueOf(ele.getAttribute("required"));
-    } else {
-      mRequired = false;
-    }
+  public static final String CATEGORY_ATTRIBUTE = "category";
 
-    final List<Element> descEles = XMLUtils.getChildElementsByTagName(ele, "description");
+  public static final String TITLE_ATTRIBUTE = "title";
+
+  public static final String NAME_ATTRIBUTE = "name";
+
+  public static final String DESCRIPTION_TAG_NAME = "description";
+
+  public AbstractGoal(final Element ele) {
+    mName = ele.getAttribute(NAME_ATTRIBUTE);
+    mTitle = ele.getAttribute(TITLE_ATTRIBUTE);
+
+    final List<Element> descEles = XMLUtils.getChildElementsByTagName(ele, DESCRIPTION_TAG_NAME);
     if (descEles.size() > 0) {
       final Element descEle = descEles.get(0);
       mDescription = descEle.getTextContent();
@@ -38,7 +43,7 @@ public abstract class AbstractGoal implements Serializable {
       mDescription = null;
     }
 
-    mCategory = ele.getAttribute("category");
+    mCategory = ele.getAttribute(CATEGORY_ATTRIBUTE);
   }
 
   private String mCategory;
@@ -49,19 +54,6 @@ public abstract class AbstractGoal implements Serializable {
 
   public void setCategory(final String v) {
     mCategory = v;
-  }
-
-  private boolean mRequired;
-
-  /**
-   * True if the goal is required for award consideration.
-   */
-  public boolean isRequired() {
-    return mRequired;
-  }
-
-  public void setRequired(final boolean v) {
-    mRequired = v;
   }
 
   private String mName;
@@ -161,6 +153,22 @@ public abstract class AbstractGoal implements Serializable {
     }
   }
 
+  protected void populateXml(final Document document,
+                             final Element ele) {
+    ele.setAttribute(NAME_ATTRIBUTE, mName);
+    ele.setAttribute(TITLE_ATTRIBUTE, mTitle);
+
+    if (!StringUtils.isEmpty(mDescription)) {
+      final Element descriptionEle = document.createElement(DESCRIPTION_TAG_NAME);
+      descriptionEle.appendChild(document.createTextNode(mDescription));
+      ele.appendChild(descriptionEle);
+    }
+
+    if (!StringUtils.isEmpty(mCategory)) {
+      ele.setAttribute(CATEGORY_ATTRIBUTE, mCategory);
+    }
+  }
+
   private static final class EnumeratedValueHighestFirst implements Comparator<EnumeratedValue>, Serializable {
     public static final EnumeratedValueHighestFirst INSTANCE = new EnumeratedValueHighestFirst();
 
@@ -185,5 +193,7 @@ public abstract class AbstractGoal implements Serializable {
       return Double.compare(one.getScore(), two.getScore());
     }
   }
+
+  public abstract Element toXml(final Document doc);
 
 }

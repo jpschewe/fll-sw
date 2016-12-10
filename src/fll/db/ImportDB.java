@@ -57,7 +57,7 @@ import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.PerformanceScoreCategory;
-import fll.xml.ScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
 import fll.xml.XMLUtils;
 import net.mtu.eggplant.io.IOUtils;
 import net.mtu.eggplant.util.ComparisonUtils;
@@ -503,7 +503,7 @@ public final class ImportDB {
     final Map<String, String> finalScores = new HashMap<String, String>();
     finalScores.put("TeamNumber".toLowerCase(), "integer");
     finalScores.put("Tournament".toLowerCase(), "varchar(128)");
-    for (final ScoreCategory categoryElement : description.getSubjectiveCategories()) {
+    for (final SubjectiveScoreCategory categoryElement : description.getSubjectiveCategories()) {
       final String tableName = categoryElement.getName();
 
       final Map<String, String> subjective = new HashMap<String, String>();
@@ -635,7 +635,7 @@ public final class ImportDB {
 
       final Document document = GlobalParameters.getChallengeDocument(connection);
       final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
-      for (final ScoreCategory categoryElement : description.getSubjectiveCategories()) {
+      for (final SubjectiveScoreCategory categoryElement : description.getSubjectiveCategories()) {
         final String tableName = categoryElement.getName();
 
         stmt.executeUpdate("ALTER TABLE "
@@ -655,7 +655,7 @@ public final class ImportDB {
    * @param scheduleColumns the schedule columns
    * @return the column name or null if no mapping can be found
    */
-  private static String findScheduleColumnForCategory(final ScoreCategory category,
+  private static String findScheduleColumnForCategory(final SubjectiveScoreCategory category,
                                                       final Collection<String> scheduleColumns) {
 
     // first see if there is an exact match to the name or title
@@ -817,7 +817,7 @@ public final class ImportDB {
     }
 
     final Set<String> challengeSubjectiveCategories = new HashSet<>();
-    for (final ScoreCategory cat : description.getSubjectiveCategories()) {
+    for (final SubjectiveScoreCategory cat : description.getSubjectiveCategories()) {
       challengeSubjectiveCategories.add(cat.getTitle());
     }
 
@@ -929,7 +929,7 @@ public final class ImportDB {
           LOGGER.trace(String.format("Tournament %d has %s schedule columns", tournament, scheduleColumns.toString()));
         }
 
-        for (final ScoreCategory category : description.getSubjectiveCategories()) {
+        for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
           final String column = findScheduleColumnForCategory(category, scheduleColumns);
 
           if (LOGGER.isTraceEnabled()) {
@@ -1620,7 +1620,7 @@ public final class ImportDB {
     PreparedStatement destPrep = null;
     try {
       // loop over each subjective category
-      for (final ScoreCategory categoryElement : description.getSubjectiveCategories()) {
+      for (final SubjectiveScoreCategory categoryElement : description.getSubjectiveCategories()) {
         final String tableName = categoryElement.getName();
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug("Importing "

@@ -8,39 +8,44 @@ package fll.xml;
 
 import java.io.Serializable;
 
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
-
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.util.FLLInternalException;
 import fll.web.playoff.TeamScore;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 public class CaseStatement implements Evaluatable, Serializable {
+
+  public static final String TAG_NAME = "case";
+
+  public static final String RESULT_TAG_NAME = "result";
 
   public CaseStatement(final Element ele,
                        final GoalScope goalScope,
                        final VariableScope variableScope) {
     final NodelistElementCollectionAdapter children = new NodelistElementCollectionAdapter(ele.getChildNodes());
     final Element condEle = children.next();
-    if ("condition".equals(condEle.getNodeName())) {
+    if (ConditionStatement.TAG_NAME.equals(condEle.getNodeName())) {
       mCondition = new ConditionStatement(condEle, goalScope, variableScope);
-    } else if ("enumCondition".equals(condEle.getNodeName())) {
+    } else if (EnumConditionStatement.TAG_NAME.equals(condEle.getNodeName())) {
       mCondition = new EnumConditionStatement(condEle, goalScope);
     } else {
-      throw new FLLInternalException("Expecting 'condition' or 'enumCondition', but found '"
+      throw new FLLInternalException("Expecting '"
+          + ConditionStatement.TAG_NAME + "' or '" + EnumConditionStatement.TAG_NAME + "', but found '"
           + condEle.getNodeName() + "'");
     }
 
     final Element resultEle = children.next();
-    if ("result".equals(resultEle.getNodeName())) {
+    if (RESULT_TAG_NAME.equals(resultEle.getNodeName())) {
       mResultPoly = new ComplexPolynomial(resultEle, goalScope, variableScope);
       mResultSwitch = null;
-    } else if ("switch".equals(resultEle.getNodeName())) {
+    } else if (SwitchStatement.TAG_NAME.equals(resultEle.getNodeName())) {
       mResultSwitch = new SwitchStatement(resultEle, goalScope, variableScope);
       mResultPoly = null;
     } else {
-      throw new FLLInternalException("Expecting 'switch' or 'result', but found '"
-          + resultEle.getNodeName() + "'");
+      throw new FLLInternalException("Expecting '"
+          + SwitchStatement.TAG_NAME + "' or '" + RESULT_TAG_NAME + "', but found '" + resultEle.getNodeName() + "'");
     }
 
   }
@@ -71,7 +76,7 @@ public class CaseStatement implements Evaluatable, Serializable {
 
   @Override
   public double evaluate(final TeamScore teamScore) {
-    
+
     if (getCondition().isTrue(teamScore)) {
       if (null != getResultPoly()) {
         return getResultPoly().evaluate(teamScore);
@@ -81,6 +86,24 @@ public class CaseStatement implements Evaluatable, Serializable {
     } else {
       return 0;
     }
+  }
+
+  public Element toXml(final Document doc) {
+    final Element ele = doc.createElement(TAG_NAME);
+
+    final Element conditionElement = mCondition.toXml(doc);
+    ele.appendChild(conditionElement);
+
+    final Element resultEle;
+    if (null != mResultPoly) {
+      resultEle = doc.createElement(RESULT_TAG_NAME);
+      mResultPoly.populateXml(doc, resultEle);
+    } else {
+      resultEle = mResultSwitch.toXml(doc);
+    }
+    ele.appendChild(resultEle);
+
+    return ele;
   }
 
 }
