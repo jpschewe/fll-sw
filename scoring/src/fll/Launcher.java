@@ -150,6 +150,12 @@ public class Launcher extends JFrame {
     });
     buttonBox.add(mainPage);
 
+    final JButton docsPage = new JButton("View the documentation");
+    docsPage.addActionListener(ae -> {
+      loadDocsHtml();
+    });
+    buttonBox.add(docsPage);
+
     final JButton schedulerButton = new JButton("Scheduler");
     schedulerButton.addActionListener(ae -> {
       launchScheduler();
@@ -365,6 +371,42 @@ public class Launcher extends JFrame {
     return null;
   }
 
+  /**
+   * Open up the main page.
+   */
+  private void loadDocsHtml() {
+    final String docsHtml = getDocsHtmlFile();
+    if (null == docsHtml) {
+      JOptionPane.showMessageDialog(this, "Cannot find docs index.html, you will need to open this is your browser.");
+      return;
+    }
+    final File htmlFile = new File(docsHtml);
+    try {
+      Desktop.getDesktop().browse(htmlFile.toURI());
+    } catch (final IOException e) {
+      LOGGER.error("Unable to open web browser", e);
+      JOptionPane.showMessageDialog(this, "Cannot open docs index.html, you will need to open this is your browser.");
+    }
+  }
+
+  /**
+   * Find the path to index.html in the docs directory.
+   * 
+   * @return null if the file cannot be found
+   */
+  private String getDocsHtmlFile() {
+    final String[] possibleLocations = { "docs", "web/documentation", "build/docs", "scoring/build/docs", "." };
+    for (final String location : possibleLocations) {
+      final File f = new File(location
+          + "/index.html");
+      if (f.exists()
+          && f.isFile()) {
+        return f.getAbsolutePath();
+      }
+    }
+    return null;
+  }
+  
   private static boolean isWindows() {
     final boolean windows = System.getProperty("os.name").startsWith("Windows");
     return windows;
