@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,7 @@ import au.com.bytecode.opencsv.CSVWriter;
 import fll.Utilities;
 import fll.scheduler.SchedParams.InvalidParametersException;
 import fll.util.CheckCanceled;
+import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 
@@ -104,7 +106,7 @@ public class GreedySolver {
   /**
    * next available time for table
    */
-  private final int[] performanceTables;
+  private final Map<Integer, List<Integer>> performanceTables = new HashMap<>();
 
   /**
    * Names of judging groups, indexed the same as the *z variables.
@@ -238,10 +240,6 @@ public class GreedySolver {
       throw new InvalidParametersException(parameterErrors);
     }
 
-    performanceAttemptOffset = solverParameters.getPerformanceAttemptOffsetMinutes();
-    LOGGER.debug("Performance attempt offset: "
-        + performanceAttemptOffset);
-
     subjectiveAttemptOffset = solverParameters.getSubjectiveAttemptOffsetMinutes();
 
     numTimeslots = (solverParameters.getTMaxHours()
@@ -261,23 +259,45 @@ public class GreedySolver {
     subjectiveScheduled = new boolean[solverParameters.getNumGroups()][][];
     subjectiveStations = new int[solverParameters.getNumGroups()][getNumSubjectiveStations()];
     performanceScheduled = new int[solverParameters.getNumGroups()][];
-    performanceTables = new int[solverParameters.getNumTables()];
-    if (solverParameters.getAlternateTables()) {
-      for (int table = 0; table < performanceTables.length; ++table) {
+    
+    final List<Integer> performanceOffsets = new ArrayList<Integer>();
+    performanceOffsets.addAll(solverParameters.getPerformanceAttemptOffsetMinutes());
+    
+    for (int table = 0; table < solverParameters.getNumTables(); ++table) {
+      int timeslot;
+
+      // determine the first timeslot for the table
+      if (solverParameters.getAlternateTables()) {
         // even is 0, odd is 1/2 performance duration
         if ((table
             & 1) == 1) {
-          performanceTables[table] = performanceDuration
+          timeslot = performanceDuration
               / 2;
         } else {
-          performanceTables[table] = 0;
+          timeslot = 0;
         }
         LOGGER.debug("Setting table "
-            + table + " start to " + performanceTables[table]);
+            + table + " start to " + timeslot);
+      } else {
+        timeslot = 0;
       }
-    } else {
-      // all performance runs can start at time 0
-      Arrays.fill(performanceTables, 0);
+
+      // compute all possible performance time slots for the table
+      List<Integer> possibleTimeSlots = new LinkedList<>();
+      int perfOffsetIndex = 0;
+      while (timeslot < getNumTimeslots()) {
+        possibleTimeSlots.add(timeslot);
+        
+        final int perfOffset = performanceOffsets.get(perfOffsetIndex);
+        timeslot += perfOffset;
+        
+        // cycle through the pattern for performance offset
+        ++perfOffsetIndex;
+        if(perfOffsetIndex >= performanceOffsets.size()) {
+          perfOffsetIndex = 0;
+        }
+      }
+      performanceTables.put(table, possibleTimeSlots);
     }
 
     final Map<String, Integer> judgingGroups = solverParameters.getJudgingGroups();
@@ -1179,13 +1199,12 @@ public class GreedySolver {
         }
 
         // mark the performance station as used at this timeslot and advance the
-        // next available slot, the slot is not unmarked as available if the
-        // scheduling fails because we try all teams inside schedPerf, so
-        // there's no point in trying this timeslot again.
-        // TODO: maybe should set value to nextAvailablePerfSlot + offset...
-        // TODO: this is where we'd need to alternate based on the 7/8 minute
-        // intervals
-        performanceTables[table] += getPerformanceAttemptOffset();
+        // next available slot
+        final int checkTimeslot = performanceTables.get(table).remove(0);
+        if (checkTimeslot != nextAvailablePerfSlot) {
+          throw new FLLInternalException(String.format("Error the next available timeslot for the table (%d) doesn't match the one computed (%d)",
+                                                       checkTimeslot, nextAvailablePerfSlot));
+        }
         if (checkPerformanceBreaks(nextAvailablePerfSlot)) {
           final boolean result = schedPerf(table, nextAvailablePerfSlot);
           if (result) {
@@ -1216,7 +1235,7 @@ public class GreedySolver {
         }
       } else {
         for (final int table : possiblePerformanceTables) {
-          performanceTables[table] -= getPerformanceAttemptOffset();
+          performanceTables.get(table).add(0, nextAvailablePerfSlot);
         }
       }
     }
@@ -1235,13 +1254,17 @@ public class GreedySolver {
   private int findNextAvailablePerformanceSlot(final List<Integer> possiblePerformanceTables) {
     int nextAvailablePerfSlot = Integer.MAX_VALUE;
     for (int table = 0; table < solverParameters.getNumTables(); ++table) {
-      if (performanceTables[table] <= nextAvailablePerfSlot) {
-        if (performanceTables[table] < nextAvailablePerfSlot) {
-          // previous values are no longer valid
-          possiblePerformanceTables.clear();
+      if (!performanceTables.get(table).isEmpty()) {
+        final int tableNextAvailable = performanceTables.get(table).get(0);
+
+        if (tableNextAvailable <= nextAvailablePerfSlot) {
+          if (tableNextAvailable < nextAvailablePerfSlot) {
+            // previous values are no longer valid
+            possiblePerformanceTables.clear();
+          }
+          nextAvailablePerfSlot = tableNextAvailable;
+          possiblePerformanceTables.add(table);
         }
-        nextAvailablePerfSlot = performanceTables[table];
-        possiblePerformanceTables.add(table);
       }
     }
     return nextAvailablePerfSlot;
@@ -1359,16 +1382,6 @@ public class GreedySolver {
   }
 
   private final int subjectiveAttemptOffset;
-
-  /**
-   * Number of timeslots to increment by when trying the next performance time
-   * slot. To try all possible combinations, this should be set to 1.
-   */
-  private int getPerformanceAttemptOffset() {
-    return performanceAttemptOffset;
-  }
-
-  private final int performanceAttemptOffset;
 
   private int numTimeslots;
 
