@@ -551,7 +551,7 @@ public final class IntegrationTestUtils {
     }
 
     selenium.manage().timeouts().implicitlyWait(500, TimeUnit.MILLISECONDS);
-    selenium.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
+    selenium.manage().timeouts().pageLoadTimeout(60, TimeUnit.SECONDS);
 
     return selenium;
   }
