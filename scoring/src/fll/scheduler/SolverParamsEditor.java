@@ -10,6 +10,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.Map;
 
+import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
@@ -39,7 +40,7 @@ public class SolverParamsEditor extends JPanel {
 
   private final JCheckBox subjectiveFirst;
 
-  private final JFormattedTextField perfAttemptOffsetMinutes;
+  private final DurationListEditor perfAttemptOffsetMinutes;
 
   private final JFormattedTextField subjectiveAttemptOffsetMinutes;
 
@@ -66,7 +67,7 @@ public class SolverParamsEditor extends JPanel {
     addRow(alternateTables);
 
     performanceDuration = FormatterUtils.createIntegerField(1, 1000);
-    performanceDuration.setToolTipText("The number of minutes between performance runs");
+    performanceDuration.setToolTipText("The amount of time that the team is expected to be at the table");
     addRow(new JLabel("Performance duration:"), performanceDuration);
 
     subjectiveStations = new SubjectiveStationListEditor();
@@ -89,9 +90,10 @@ public class SolverParamsEditor extends JPanel {
     subjectiveFirst = new JCheckBox("Schedule subjective before performance");
     addRow(subjectiveFirst);
 
-    perfAttemptOffsetMinutes = FormatterUtils.createIntegerField(1, 1000);
-    perfAttemptOffsetMinutes.setToolTipText("How many minutes later to try to find a new performance time slot when no team can be scheduled at a time.");
-    addRow(new JLabel("Number of minutes between performance attempts "), perfAttemptOffsetMinutes);
+    perfAttemptOffsetMinutes = new DurationListEditor();
+    perfAttemptOffsetMinutes.setBorder(BorderFactory.createTitledBorder("Number of minutes between performance attempts"));
+    perfAttemptOffsetMinutes.setToolTipText("If a performance round cannot be scheduled at a time, how many minutes later should the next time to try be. This is a list specifying the pattern. In most cases this list should only contain one element. However some tournaments may want to specify a pattern such as 7 and then 8 so that there are 2 timeslots available every 15 minutes.");
+    addRow(perfAttemptOffsetMinutes);
 
     subjectiveAttemptOffsetMinutes = FormatterUtils.createIntegerField(1, 1000);
     subjectiveAttemptOffsetMinutes.setToolTipText("How many minutes later to try to find a new subjective time slot when no team can be scheduled at a time.");
@@ -164,7 +166,7 @@ public class SolverParamsEditor extends JPanel {
 
     numPerformanceRounds.setValue(params.getNumPerformanceRounds());
     subjectiveFirst.setSelected(params.getSubjectiveFirst());
-    perfAttemptOffsetMinutes.setValue(params.getPerformanceAttemptOffsetMinutes());
+    perfAttemptOffsetMinutes.setDurations(params.getPerformanceAttemptOffsetMinutes());
     subjectiveAttemptOffsetMinutes.setValue(params.getSubjectiveAttemptOffsetMinutes());
     numTables.setValue(params.getNumTables());
 
@@ -198,7 +200,7 @@ public class SolverParamsEditor extends JPanel {
 
     params.setNumPerformanceRounds((Integer) numPerformanceRounds.getValue());
     params.setSubjectiveFirst(subjectiveFirst.isSelected());
-    params.setPerformanceAttemptOffsetMinutes((Integer) perfAttemptOffsetMinutes.getValue());
+    params.setPerformanceAttemptOffsetMinutes(perfAttemptOffsetMinutes.getDurations());
     params.setSubjectiveAttemptOffsetMinutes((Integer) subjectiveAttemptOffsetMinutes.getValue());
     params.setNumTables((Integer) numTables.getValue());
 

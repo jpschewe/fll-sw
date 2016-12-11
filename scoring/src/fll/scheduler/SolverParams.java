@@ -79,6 +79,7 @@ public class SolverParams extends SchedParams {
    * Create the object with all default values.
    */
   public SolverParams() {
+    perfAttemptOffsetMinutes.add(1);
   }
 
   /**
@@ -121,8 +122,21 @@ public class SolverParams extends SchedParams {
     LOGGER.debug("Subjective first is: "
         + this.subjectiveFirst);
 
-    this.perfAttemptOffsetMinutes = Utilities.readIntProperty(properties, PERF_ATTEMPT_OFFSET_MINUTES_KEY,
-                                                              this.perfAttemptOffsetMinutes);
+    final String perfOffsetStr = properties.getProperty(PERF_ATTEMPT_OFFSET_MINUTES_KEY, null);
+    if (null != perfOffsetStr) {
+      this.perfAttemptOffsetMinutes.clear();
+      try {
+        // try single value first to handle old properties files
+        final Integer duration = Integer.parseInt(perfOffsetStr.trim());
+        this.perfAttemptOffsetMinutes.add(duration);
+      } catch (final NumberFormatException e) {
+        // assume list
+        int[] perfOffset = Utilities.parseListOfIntegers(perfOffsetStr);
+        for (final int offset : perfOffset) {
+          this.perfAttemptOffsetMinutes.add(offset);
+        }
+      }
+    }
 
     this.subjectiveAttemptOffsetMinutes = Utilities.readIntProperty(properties, SUBJECTIVE_ATTEMPT_OFFSET_MINUTES_KEY,
                                                                     this.subjectiveAttemptOffsetMinutes);
@@ -160,7 +174,8 @@ public class SolverParams extends SchedParams {
 
     properties.setProperty(SUBJECTIVE_FIRST_KEY, Boolean.toString(this.subjectiveFirst));
 
-    properties.setProperty(PERF_ATTEMPT_OFFSET_MINUTES_KEY, Integer.toString(this.perfAttemptOffsetMinutes));
+    final Integer[] perfOffset = this.perfAttemptOffsetMinutes.toArray(new Integer[0]);
+    properties.setProperty(PERF_ATTEMPT_OFFSET_MINUTES_KEY, Arrays.toString(perfOffset));
 
     properties.setProperty(SUBJECTIVE_ATTEMPT_OFFSET_MINUTES_KEY,
                            Integer.toString(this.subjectiveAttemptOffsetMinutes));
@@ -272,22 +287,29 @@ public class SolverParams extends SchedParams {
     this.subjectiveFirst = v;
   }
 
-  private int perfAttemptOffsetMinutes = 1;
+  private final List<Integer> perfAttemptOffsetMinutes = new LinkedList<>();
 
   /**
    * If a performance round cannot be scheduled at a time, how many
    * minutes later should the next time to try be.
-   * Defaults to 1.
+   * This is a list specifying the pattern. In most cases this list
+   * should only contain one element. However some tournaments may want to
+   * specify a pattern such as 7 and then 8 so that there are 2 timeslots
+   * available every 15 minutes.
+   * Defaults to a list with a single element of 1.
+   * 
+   * @return read-only list of the performance offset times
    */
-  public final int getPerformanceAttemptOffsetMinutes() {
-    return this.perfAttemptOffsetMinutes;
+  public final List<Integer> getPerformanceAttemptOffsetMinutes() {
+    return Collections.unmodifiableList(this.perfAttemptOffsetMinutes);
   }
 
   /**
    * @see #getPerformanceAttemptOffsetMinutes()
    */
-  public final void setPerformanceAttemptOffsetMinutes(final int v) {
-    this.perfAttemptOffsetMinutes = v;
+  public final void setPerformanceAttemptOffsetMinutes(final List<Integer> v) {
+    this.perfAttemptOffsetMinutes.clear();
+    this.perfAttemptOffsetMinutes.addAll(v);
   }
 
   private int subjectiveAttemptOffsetMinutes = 1;

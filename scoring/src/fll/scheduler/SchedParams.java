@@ -138,7 +138,8 @@ public class SchedParams implements Serializable {
   private int mPerformanceMinutes = DEFAULT_PERFORMANCE_MINUTES;
 
   /**
-   * Number of minutes per performance run.
+   * Number of minutes per performance run. This is how long the team is
+   * expected to be at the table.
    * Defaults to {@link #DEFAULT_PERFORMANCE_MINUTES}
    */
   public final int getPerformanceMinutes() {
