@@ -1,3 +1,5 @@
+* #526 - Add support for generating schedules using alternating 7 and 8 minute performance intervals
+
 Release 11.4
 ============
 
