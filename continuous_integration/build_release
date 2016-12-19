@@ -18,16 +18,6 @@ git_branch=$(git show -s --pretty=%d HEAD | awk -F, '{print $2}' | awk -F')' '{p
 git_version=$(git describe --always)
 log "BRANCH: ${git_branch} GIT_VERSION: ${git_version}"
 
-if [ -n "${DEVEL_BUILD}" ]; then
-    if [ "${DEVEL_BUILD}" = "1" ]; then
-        # setup version identifier
-        cd "${fllsw_root}"/scoring
-        echo "app.version=devel-${BUILD_ID}" > override.properties
-    fi
-fi
-
-
-
 # get wiki documentation
 #cd "${fllsw_root}"/scoring/docs
 #"${fllsw_root}"/scoring/scripts/markdown-to-html.py *.md \

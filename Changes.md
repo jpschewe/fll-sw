@@ -1,3 +1,8 @@
+* #526 - Add support for generating schedules using alternating 7 and 8 minute performance intervals
+
+Release 11.4
+============
+
 * Pause at the bottom of the all teams scores
 * Make sure that the PDF and HTML score sheets have the enumerated goals sorted the same
 
