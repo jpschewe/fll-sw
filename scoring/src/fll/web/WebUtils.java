@@ -81,7 +81,8 @@ public final class WebUtils {
    */
   public static void sendRedirect(final ServletContext application,
                                   final HttpServletResponse response,
-                                  final String url) throws IOException {
+                                  final String url)
+      throws IOException {
     final String newURL;
     if (null != url
         && url.startsWith("/")) {
@@ -111,25 +112,21 @@ public final class WebUtils {
           final String url = "http://"
               + addrStr + ":" + request.getLocalPort() + "/" + request.getContextPath();
           urls.add(url);
+
+          // check for a name
+          try {
+            final String name = org.xbill.DNS.Address.getHostName(address);
+            
+            final String nameurl = "http://"
+                + name + ":" + request.getLocalPort() + request.getContextPath();
+            urls.add(nameurl);
+          } catch (final UnknownHostException e) {
+            LOGGER.trace("Could not resolve IP: " + addrStr, e);
+          }
         }
       }
     }
     return urls;
-  }
-
-  public static Collection<String> getAllIPStrings() {
-    final Collection<String> ips = new LinkedList<String>();
-    for (final InetAddress address : getAllIPs()) {
-      String addr = address.getHostAddress();
-
-      // remove IPv6 zone information
-      if (addr.contains("%")) {
-        addr = addr.substring(0, addr.indexOf('%'));
-      }
-
-      ips.add(addr);
-    }
-    return ips;
   }
 
   /**
@@ -175,7 +172,8 @@ public final class WebUtils {
       return "\"\"";
     } else {
       final Matcher escapeMatcher = WebUtils.needsEscape.matcher(str);
-      return '"' + escapeMatcher.replaceAll("\\\\$0") + '"';
+      return '"'
+          + escapeMatcher.replaceAll("\\\\$0") + '"';
     }
   }
 
@@ -218,8 +216,7 @@ public final class WebUtils {
     }
 
     if (null == datasource) {
-      throw new FLLRuntimeException(
-                                    "Database is not initialized and security is required, you must initialize the database from localhost");
+      throw new FLLRuntimeException("Database is not initialized and security is required, you must initialize the database from localhost");
     }
 
     Connection connection = null;

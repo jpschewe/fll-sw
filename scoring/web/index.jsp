@@ -53,7 +53,11 @@
  </ul>
 
  <h2>Pages for the head computer person</h2>
- <ul>
+ <ul>   
+  <li><a href="documentation/index.html">Documentation</a></li>
+
+  <li><a href="<c:url value='/setup'/>">Database setup</a> - Use this link to upload a saved database</li>
+
   <li><a href="admin/index.jsp">Administration</a></li>
 
   <li><a href="playoff/index.jsp">Head to head</a></li>
@@ -75,18 +79,12 @@
   <li><a href="DoLogout">Log out</a> Log a computer out so that
    they need to enter the password again to change scores.</li>
 
-  <li><a href="documentation/index.html">Documentation</a></li>
-
   <li><a href='scoreboard/index.jsp'>Scoreboard</a></li>
-
 
   <li><a href='playoff/ScoresheetServlet'>Blank scoresheet for
     printing (PDF format)</a></li>
 
   <li><a href='challenge.xml'>Challenge Descriptor</a></li>
-
-
-  <li><a href="<c:url value='/setup'/>">Go to database setup</a></li>
 
   <li><a href="developer/index.jsp">Developer page</a></li>
 
