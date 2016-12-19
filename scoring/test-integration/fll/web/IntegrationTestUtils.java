@@ -616,7 +616,8 @@ public final class IntegrationTestUtils {
         + "playoff");
 
     selenium.findElement(By.linkText("Create head to head bracket")).click();
-
+    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
+    
     selenium.findElement(By.xpath("//input[@value='Create Head to Head Bracket for Award Group "
         + awardGroup + "']")).click();
     Assert.assertTrue("Error creating bracket for award group: "
@@ -625,11 +626,13 @@ public final class IntegrationTestUtils {
     final Select initDiv = new Select(selenium.findElement(By.id("initialize-division")));
     initDiv.selectByValue(awardGroup);
     selenium.findElement(By.id("initialize_brackets")).click();
+    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
     Assert.assertFalse("Error loading page", isElementPresent(selenium, By.id("exception-handler")));
 
     final Select sort = new Select(selenium.findElement(By.id("sort")));
     sort.selectByValue(bracketSort.name());
     selenium.findElement(By.id("submit")).click();
+    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
     Assert.assertFalse("Error loading page", isElementPresent(selenium, By.id("exception-handler")));
   }
 
