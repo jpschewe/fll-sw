@@ -343,7 +343,7 @@
     <delete file="${dir.build}/fll-sw.bat" />
 
     <!-- create windows executable -->
-    <launch4j bindir="${dir.tools}/launch4j/bin-${arch}" tmpdir="${dir.build}" configFile="${basedir}/launch4j.xml" outfile="${dir.build}/fll-sw.exe" fileVersion="${app.version.short}.0.0" txtFileVersion="${app.version.long}" productVersion="${app.version.short}.0.0" txtProductVersion="${app.version.long}" />
+    <launch4j bindir="${dir.tools}/launch4j/bin-${arch}" tmpdir="${dir.build}" configFile="${basedir}/launch4j.xml" outfile="${dir.build}/fll-sw.exe" fileVersion="${app.version.short}" txtFileVersion="${app.version.long}" productVersion="${app.version.short}" txtProductVersion="${app.version.long}" />
 
     <!-- copy libraries over -->
     <copy todir="${dir.build}/lib">
