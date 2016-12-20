@@ -1,168 +1,471 @@
 <?xml version="1.0"?>
-<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" title="Paul
-Keeny (Anoka) 2014: Power Puzzle"
-xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd"
-revision="2" schemaVersion="1">
+<fll
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  title="Paul Keeny (Anoka) 2014: Power Puzzle"
+  xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd"
+  revision="2"
+  schemaVersion="1">
 
- <Performance minimumScore="0" weight="1.0">
+  <Performance
+    minimumScore="0"
+    weight="1.0">
 
-  <goal name="roof_solar_panel" title="Solar Panel ON Roof" multiplier="15"/>
+    <goal
+      name="roof_solar_panel"
+      title="Solar Panel ON Roof"
+      multiplier="15" />
 
-  <goal name="personal_vehicle_choice" title="Car IN House property &amp; Truck IN Farm or Parking Lot" multiplier="25"/>
+    <goal
+      name="personal_vehicle_choice"
+      title="Car IN House property &amp; Truck IN Farm or Parking Lot"
+      multiplier="25" />
 
-  <goal name="hydro_dam" title="Hydro-Dam TOUCHING banks" multiplier="25"/>
+    <goal
+      name="hydro_dam"
+      title="Hydro-Dam TOUCHING banks"
+      multiplier="25" />
 
-  <goal name="flood_house" title="Houses TOUCHED by Dam or Flood" multiplier="-10"/>
+    <goal
+      name="flood_house"
+      title="Houses TOUCHED by Dam or Flood"
+      multiplier="-10" />
 
-  <goal name="wind_turbines" title="Wind Turbines TOUCHING Communities" multiplier="15" max="2"/>
+    <goal
+      name="wind_turbines"
+      title="Wind Turbines TOUCHING Communities"
+      multiplier="15"
+      max="2" />
 
-  <goal name="grid_connection" title="Grid Connection TOUCHING Communities" multiplier="5" max="3"/>
+    <goal
+      name="grid_connection"
+      title="Grid Connection TOUCHING Communities"
+      multiplier="5"
+      max="3" />
 
-  <goal name="alt_fuel_community" title="Communities with Grid AND (Dam or Windmill)" multiplier="5" max="3"/>
-  <restriction lowerBound="0" upperBound="3" message="You cannot have more communities with alternate fuel than communities connected to the grid.">
-   <term><goalRef goal="grid_connection" scoreType="raw"/></term>
-   <term><constant value="-1"/><goalRef goal="alt_fuel_community" scoreType="raw"/></term>
-  </restriction>
+    <goal
+      name="alt_fuel_community"
+      title="Communities with Grid AND (Dam or Windmill)"
+      multiplier="5"
+      max="3" />
+    <restriction
+      lowerBound="0"
+      upperBound="3"
+      message="You cannot have more communities with alternate fuel than communities connected to the grid.">
+      <term>
+        <goalRef
+          goal="grid_connection"
+          scoreType="raw" />
+      </term>
+      <term>
+        <constant value="-1" />
+        <goalRef
+          goal="alt_fuel_community"
+          scoreType="raw" />
+      </term>
+    </restriction>
 
-  <goal name="solar_power_satellite" title="Solar Power Satellite" multiplier="15"/>
+    <goal
+      name="solar_power_satellite"
+      title="Solar Power Satellite"
+      multiplier="15" />
 
-  <goal name="solar_power_satellite_bonus" title="First to Satellite" multiplier="5"/>
-  <restriction lowerBound="0" upperBound="1" message="You cannot have the satellite bonus without having the satellite score">
-   <term><constant value="1"/><goalRef goal="solar_power_satellite" scoreType="raw"/></term>
-   <term><constant value="-1"/><goalRef goal="solar_power_satellite_bonus" scoreType="raw"/></term>
-  </restriction>
-
-
-  <goal name="wave_turbine" title="Wave Turbine IN Ocean" multiplier="25"/>
-
-  <goal name="coal_mining" title="Coal Car Retrieved to Base" multiplier="10"/>
-
-  <goal name="oil_drilling" title="Oil Barrels OFF platform" multiplier="10"/>
-
-  <goal name="corn_harvest" title="Corn IN Base AND Oil IN Farm" multiplier="25"/>
-
-  <goal name="uranium_mining" title="Uranium OUT Of Farm" multiplier="15"/>
-
-  <goal name="tree_planting" title="Trees Planted UPRIGHT &amp; IN area North of river" multiplier="10" max="4"/>
-
-  <goal name="power_plant_supply_tree" title="Trees IN Power Plant (Limit 1 per planted tree &amp; No Red Fuel)" multiplier="10" max="2"/>
-  <restriction lowerBound="0" upperBound="4" message="There must be one tree planted for each used as fuel">
-   <term><constant value="1"/><goalRef goal="tree_planting" scoreType="raw"/></term>
-   <term><constant value="-1"/><goalRef goal="power_plant_supply_tree" scoreType="raw"/></term>
-  </restriction>
-
-  <restriction lowerBound="0" upperBound="4" message="There are only 4 trees on the field!">
-   <term><constant value="1"/><goalRef goal="tree_planting" scoreType="raw"/></term>
-   <term><constant value="1"/><goalRef goal="power_plant_supply_tree" scoreType="raw"/></term>
-  </restriction>
-
-  <goal name="power_plant_supply_coal" title="Black Coal IN Power Plant ()at least 10 pieces &amp; No Red Fuel" multiplier="10"/>
-
-  <goal name="power_plant_supply_uranium" title="Green Uranium IN Power Plant &amp; No Red Fuel" multiplier="10" max="2"/>
-
-  <goal name="power_plant_supply_oil" title="White Oil Barrels IN Power Plant &amp; No Red Fuel" multiplier="5" max="7"/>
-
-  <goal name="oil_barrels_base" title="Oil Barrels IN base" multiplier="10" max="11"/>
-
-  <restriction lowerBound="0" upperBound="11" message="There are only 11 oil barrels on the field">
-   <term><constant value="1"/><goalRef goal="power_plant_supply_oil" scoreType="raw"/></term>
-   <term><constant value="1"/><goalRef goal="oil_barrels_base" scoreType="raw"/></term>
-   <term><constant value="1"/><goalRef goal="corn_harvest" scoreType="raw"/></term>
-  </restriction>
-
-
-  <goal name="pollution_deduction" title="Oil Barrels TOUCHING Water or House Property" multiplier="-40"/>
-
-  <goal name="junk_penalties_large" title="Large Strategic Objects Outside Base" multiplier="-13" max="50"/>
-
-  <goal name="junk_penalties_small" title="Small Strategic Objects Outside Base" multiplier="-5" max="50"/>
-
-
-  <tiebreaker>
-   <test winner="HIGH">
-    <term><goalRef goal="solar_power_satellite_bonus" scoreType="computed"/></term>
-   </test>
-   <test winner="HIGH">
-    <term><goalRef goal="solar_power_satellite" scoreType="computed"/></term>
-   </test>
-   <test winner="LOW">
-    <term><goalRef goal="pollution_deduction" scoreType="computed"/></term>
-   </test>
-   <test winner="HIGH">
-    <term><goalRef goal="roof_solar_panel" scoreType="computed"/></term>
-   </test>
-   <test winner="HIGH">
-    <term><goalRef goal="personal_vehicle_choice" scoreType="computed"/></term>
-   </test>
-   <test winner="HIGH">
-    <term><goalRef goal="tree_planting" scoreType="computed"/></term>
-   </test>
-   <test winner="HIGH">
-    <term><goalRef goal="wind_turbines" scoreType="computed"/></term>
-   </test>
-   <test winner="HIGH">
-    <term><goalRef goal="corn_harvest" scoreType="computed"/></term>
-   </test>
-   <test winner="HIGH">
-    <term><goalRef goal="uranium_mining" scoreType="computed"/></term>
-   </test>
-   <test winner="HIGH">
-    <term><goalRef goal="wave_turbine" scoreType="computed"/></term>
-   </test>
-   <test winner="HIGH">
-    <term><goalRef goal="grid_connection" scoreType="computed"/></term>
-   </test>
-   <test winner="HIGH">
-    <term><goalRef goal="hydro_dam" scoreType="computed"/></term>
-   </test>
-   <test winner="HIGH">
-    <term><goalRef goal="oil_barrels_base" scoreType="computed"/></term>
-   </test>
+    <goal
+      name="solar_power_satellite_bonus"
+      title="First to Satellite"
+      multiplier="5" />
+    <restriction
+      lowerBound="0"
+      upperBound="1"
+      message="You cannot have the satellite bonus without having the satellite score">
+      <term>
+        <constant value="1" />
+        <goalRef
+          goal="solar_power_satellite"
+          scoreType="raw" />
+      </term>
+      <term>
+        <constant value="-1" />
+        <goalRef
+          goal="solar_power_satellite_bonus"
+          scoreType="raw" />
+      </term>
+    </restriction>
 
 
-  </tiebreaker>
+    <goal
+      name="wave_turbine"
+      title="Wave Turbine IN Ocean"
+      multiplier="25" />
 
- </Performance>
+    <goal
+      name="coal_mining"
+      title="Coal Car Retrieved to Base"
+      multiplier="10" />
 
- <subjectiveCategory name="teamwork" title="Teamwork" weight="1.0">
-  <goal initialValue="0" max="20" min="0" multiplier="1" name="roles" title="Roles and Responsibilities">
-  </goal>
-  <goal initialValue="0" max="20" min="0" multiplier="1" name="professionalism" title="Gracious Professionalism">
-  </goal>
-  <goal initialValue="0" max="20" min="0" multiplier="1" name="dynamics" title="Problem Solving &amp; Team Dynamics &amp; Communications">
-  </goal>
-  <goal initialValue="0" max="20" min="0" multiplier="1" name="confidence" title="Confidence &amp; Enthusiasm">
-  </goal>
-  <goal initialValue="0" max="20" min="0" multiplier="1" name="fll_values" title="FLL Values">
-  </goal>
- </subjectiveCategory>
+    <goal
+      name="oil_drilling"
+      title="Oil Barrels OFF platform"
+      multiplier="10" />
+
+    <goal
+      name="corn_harvest"
+      title="Corn IN Base AND Oil IN Farm"
+      multiplier="25" />
+
+    <goal
+      name="uranium_mining"
+      title="Uranium OUT Of Farm"
+      multiplier="15" />
+
+    <goal
+      name="tree_planting"
+      title="Trees Planted UPRIGHT &amp; IN area North of river"
+      multiplier="10"
+      max="4" />
+
+    <goal
+      name="power_plant_supply_tree"
+      title="Trees IN Power Plant (Limit 1 per planted tree &amp; No Red Fuel)"
+      multiplier="10"
+      max="2" />
+    <restriction
+      lowerBound="0"
+      upperBound="4"
+      message="There must be one tree planted for each used as fuel">
+      <term>
+        <constant value="1" />
+        <goalRef
+          goal="tree_planting"
+          scoreType="raw" />
+      </term>
+      <term>
+        <constant value="-1" />
+        <goalRef
+          goal="power_plant_supply_tree"
+          scoreType="raw" />
+      </term>
+    </restriction>
+
+    <restriction
+      lowerBound="0"
+      upperBound="4"
+      message="There are only 4 trees on the field!">
+      <term>
+        <constant value="1" />
+        <goalRef
+          goal="tree_planting"
+          scoreType="raw" />
+      </term>
+      <term>
+        <constant value="1" />
+        <goalRef
+          goal="power_plant_supply_tree"
+          scoreType="raw" />
+      </term>
+    </restriction>
+
+    <goal
+      name="power_plant_supply_coal"
+      title="Black Coal IN Power Plant ()at least 10 pieces &amp; No Red Fuel"
+      multiplier="10" />
+
+    <goal
+      name="power_plant_supply_uranium"
+      title="Green Uranium IN Power Plant &amp; No Red Fuel"
+      multiplier="10"
+      max="2" />
+
+    <goal
+      name="power_plant_supply_oil"
+      title="White Oil Barrels IN Power Plant &amp; No Red Fuel"
+      multiplier="5"
+      max="7" />
+
+    <goal
+      name="oil_barrels_base"
+      title="Oil Barrels IN base"
+      multiplier="10"
+      max="11" />
+
+    <restriction
+      lowerBound="0"
+      upperBound="11"
+      message="There are only 11 oil barrels on the field">
+      <term>
+        <constant value="1" />
+        <goalRef
+          goal="power_plant_supply_oil"
+          scoreType="raw" />
+      </term>
+      <term>
+        <constant value="1" />
+        <goalRef
+          goal="oil_barrels_base"
+          scoreType="raw" />
+      </term>
+      <term>
+        <constant value="1" />
+        <goalRef
+          goal="corn_harvest"
+          scoreType="raw" />
+      </term>
+    </restriction>
 
 
- <subjectiveCategory name="robustdesign" title="Design" weight="1.0">
-  <goal initialValue="0" max="20" min="0" multiplier="1" name="strategy" title="Strategy, Process, Problem Solving">
-  </goal>
-  <goal initialValue="0" max="20" min="0" multiplier="1" name="locomotion" title="Locomotion and Navigation">
-  </goal>
-  <goal initialValue="0" max="20" min="0" multiplier="1" name="design_kids" title="Kids Did the Work">
-  </goal>
-  <goal initialValue="0" max="20" min="0" multiplier="1" name="structural" title="Structural">
-  </goal>
-  <goal initialValue="0" max="20" min="0" multiplier="1" name="overall_design" title="Overall Design">
-  </goal>
- </subjectiveCategory>
+    <goal
+      name="pollution_deduction"
+      title="Oil Barrels TOUCHING Water or House Property"
+      multiplier="-40" />
+
+    <goal
+      name="junk_penalties_large"
+      title="Large Strategic Objects Outside Base"
+      multiplier="-13"
+      max="50" />
+
+    <goal
+      name="junk_penalties_small"
+      title="Small Strategic Objects Outside Base"
+      multiplier="-5"
+      max="50" />
 
 
- <subjectiveCategory name="programming" title="Programming" weight="1.0">
-  <goal initialValue="0" max="20" min="0" multiplier="1" name="programming_strategy" title="Strategy, Process, Problem Solving"/>
-  <goal initialValue="0" max="20" min="0" multiplier="1" name="useoflanguage" title="Language Use, Modularity/Abstraction">
-  </goal>
-  <goal initialValue="0" max="20" min="0" multiplier="1" name="programming_kids" title="Kids Did the Work">
-  </goal>
-  <goal initialValue="0" max="20" min="0" multiplier="1" name="sensorcontrol" title="Sensor Control">
-  </goal>
-  <goal initialValue="0" max="20" min="0" multiplier="1" name="design" title="Overall Design">
-  </goal>
- </subjectiveCategory>
+    <tiebreaker>
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="solar_power_satellite_bonus"
+            scoreType="computed" />
+        </term>
+      </test>
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="solar_power_satellite"
+            scoreType="computed" />
+        </term>
+      </test>
+      <test winner="LOW">
+        <term>
+          <goalRef
+            goal="pollution_deduction"
+            scoreType="computed" />
+        </term>
+      </test>
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="roof_solar_panel"
+            scoreType="computed" />
+        </term>
+      </test>
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="personal_vehicle_choice"
+            scoreType="computed" />
+        </term>
+      </test>
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="tree_planting"
+            scoreType="computed" />
+        </term>
+      </test>
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="wind_turbines"
+            scoreType="computed" />
+        </term>
+      </test>
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="corn_harvest"
+            scoreType="computed" />
+        </term>
+      </test>
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="uranium_mining"
+            scoreType="computed" />
+        </term>
+      </test>
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="wave_turbine"
+            scoreType="computed" />
+        </term>
+      </test>
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="grid_connection"
+            scoreType="computed" />
+        </term>
+      </test>
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="hydro_dam"
+            scoreType="computed" />
+        </term>
+      </test>
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="oil_barrels_base"
+            scoreType="computed" />
+        </term>
+      </test>
+
+
+    </tiebreaker>
+
+  </Performance>
+
+  <subjectiveCategory
+    name="teamwork"
+    title="Teamwork"
+    weight="1.0">
+    <goal
+      initialValue="0"
+      max="20"
+      min="0"
+      multiplier="1"
+      name="roles"
+      title="Roles and Responsibilities">
+    </goal>
+    <goal
+      initialValue="0"
+      max="20"
+      min="0"
+      multiplier="1"
+      name="professionalism"
+      title="Gracious Professionalism">
+    </goal>
+    <goal
+      initialValue="0"
+      max="20"
+      min="0"
+      multiplier="1"
+      name="dynamics"
+      title="Problem Solving &amp; Team Dynamics &amp; Communications">
+    </goal>
+    <goal
+      initialValue="0"
+      max="20"
+      min="0"
+      multiplier="1"
+      name="confidence"
+      title="Confidence &amp; Enthusiasm">
+    </goal>
+    <goal
+      initialValue="0"
+      max="20"
+      min="0"
+      multiplier="1"
+      name="fll_values"
+      title="FLL Values">
+    </goal>
+  </subjectiveCategory>
+
+
+  <subjectiveCategory
+    name="robustdesign"
+    title="Design"
+    weight="1.0">
+    <goal
+      initialValue="0"
+      max="20"
+      min="0"
+      multiplier="1"
+      name="strategy"
+      title="Strategy, Process, Problem Solving">
+    </goal>
+    <goal
+      initialValue="0"
+      max="20"
+      min="0"
+      multiplier="1"
+      name="locomotion"
+      title="Locomotion and Navigation">
+    </goal>
+    <goal
+      initialValue="0"
+      max="20"
+      min="0"
+      multiplier="1"
+      name="design_kids"
+      title="Kids Did the Work">
+    </goal>
+    <goal
+      initialValue="0"
+      max="20"
+      min="0"
+      multiplier="1"
+      name="structural"
+      title="Structural">
+    </goal>
+    <goal
+      initialValue="0"
+      max="20"
+      min="0"
+      multiplier="1"
+      name="overall_design"
+      title="Overall Design">
+    </goal>
+  </subjectiveCategory>
+
+
+  <subjectiveCategory
+    name="programming"
+    title="Programming"
+    weight="1.0">
+    <goal
+      initialValue="0"
+      max="20"
+      min="0"
+      multiplier="1"
+      name="programming_strategy"
+      title="Strategy, Process, Problem Solving" />
+    <goal
+      initialValue="0"
+      max="20"
+      min="0"
+      multiplier="1"
+      name="useoflanguage"
+      title="Language Use, Modularity/Abstraction">
+    </goal>
+    <goal
+      initialValue="0"
+      max="20"
+      min="0"
+      multiplier="1"
+      name="programming_kids"
+      title="Kids Did the Work">
+    </goal>
+    <goal
+      initialValue="0"
+      max="20"
+      min="0"
+      multiplier="1"
+      name="sensorcontrol"
+      title="Sensor Control">
+    </goal>
+    <goal
+      initialValue="0"
+      max="20"
+      min="0"
+      multiplier="1"
+      name="design"
+      title="Overall Design">
+    </goal>
+  </subjectiveCategory>
 
 
 </fll>

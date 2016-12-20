@@ -1,447 +1,927 @@
 <?xml version="1.0"?>
-<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" title="All
-elements"
-xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd"
-schemaVersion="1">
+<fll
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  title="All elements"
+  xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd"
+  schemaVersion="1">
 
-	<Performance minimumScore="0" weight="1.0">
-		<!-- comment here at the top -->
-		<goal initialValue="0" max="1" min="0" multiplier="40" name="pump_station" title="Protect the Pump Station"/>
+  <Performance
+    minimumScore="0"
+    weight="1.0">
+    <!-- comment here at the top -->
+    <goal
+      initialValue="0"
+      max="1"
+      min="0"
+      multiplier="40"
+      name="pump_station"
+      title="Protect the Pump Station" />
 
-		<!-- comment in the middle -->
-		<goal initialValue="0" max="1" min="0" multiplier="30" name="flags" title="Transect Flags: Any Flags"/>
+    <!-- comment in the middle -->
+    <goal
+      initialValue="0"
+      max="1"
+      min="0"
+      multiplier="30"
+      name="flags"
+      title="Transect Flags: Any Flags" />
 
-		<goal initialValue="0" max="3" min="0" multiplier="15" name="flags_rows" title="Transect Flags: Number of Rows"/>
+    <goal
+      initialValue="0"
+      max="3"
+      min="0"
+      multiplier="15"
+      name="flags_rows"
+      title="Transect Flags: Number of Rows" />
 
-		<goal initialValue="0" max="1" min="0" multiplier="1" name="archaeological" title="Archaeological Artifacts">
-			<value score="35" title="In Base" value="in_base"/>
-			<value score="25" title="Off Ship" value="off_ship"/>
-			<value score="0" title="No" value="no"/>
-		</goal>
-
-
-		<goal initialValue="0" max="1" min="0" multiplier="25" name="dolphin" title="Release Dolphin"/>
-
-		<goal initialValue="0" max="1" min="0" multiplier="35" name="sample_species" title="Sample Species (Grey Fish Only)"/>
-
-		<goal initialValue="0" max="1" min="0" multiplier="1" name="submarine" title="Deploy The Submarine">
-			<value score="40" title="Yes Upright" value="upright"/>
-			<value score="35" title="Yes Not Upright" value="yes"/>
-			<value score="0" title="No" value="no"/>
-		</goal>
-
-
-		<goal initialValue="0" max="1" min="0" multiplier="40" name="artifical_reef" title="Artifical Reef"/>
-
-		<goal initialValue="0" max="1" min="0" multiplier="40" name="pipeline" title="Service The Pipeline"/>
-
-		<goal initialValue="0" max="1" min="0" multiplier="30" name="shipping_container" title="Shipping Container at Base"/>
-
-		<goal initialValue="0" max="8" min="0" multiplier="5" name="crates_base" title="Crates in Base"/>
-
-		<goal initialValue="0" max="8" min="0" multiplier="2" name="crates" title="Crates Elsewhere on Table"/>
-
-		<goal name="robot_type" title="Robot Type" multiplier="0" initialValue="1">
-			<value score="1" title="RCX" value="rcx"/>
-			<value score="2" title="NXT" value="nxt"/>
-		</goal>
-
-
-		<computedGoal name="computed" title="Test computed goal">
-			<variable name="subtotal">
-				<term><goalRef goal="pump_station" scoreType="computed"/></term>
-				<term><goalRef goal="flags" scoreType="computed"/></term>
-				<term><goalRef goal="flags_rows" scoreType="computed"/></term>
-				<term><goalRef goal="archaeological" scoreType="computed"/></term>
-				<term><goalRef goal="dolphin" scoreType="computed"/></term>
-				<term><goalRef goal="sample_species" scoreType="computed"/></term>
-				<term><goalRef goal="submarine" scoreType="computed"/></term>
-				<term><goalRef goal="artifical_reef" scoreType="computed"/></term>
-				<term><goalRef goal="pipeline" scoreType="computed"/></term>
-				<term><goalRef goal="shipping_container" scoreType="computed"/></term>
-				<term><goalRef goal="crates_base" scoreType="computed"/></term>
-				<term><goalRef goal="crates" scoreType="computed"/></term>
-			</variable>
-			<switch>
-				<case>
-					<enumCondition>
-						<left>
-							<enumGoalRef goal="robot_type"/>
-						</left>
-						<equal-to/>
-						<right>
-							<stringConstant value="rcx"/>
-						</right>
-					</enumCondition>
-					<switch>
-						<case>
-							<condition>
-								<left>
-									<term><variableRef variable="subtotal"/></term>
-								</left>
-								<less-than/> <!-- any inequality -->
-								<right>
-									<term><constant value="300"/></term>
-								</right>
-							</condition>
-							<result>
-								<term><goalRef goal="pump_station" scoreType="computed"/></term>
-								<term><goalRef goal="flags" scoreType="computed"/></term>
-								<term><goalRef goal="flags_rows" scoreType="computed"/></term>
-								<term><constant value="60"/></term>
-							</result>
-						</case>
-						<default> <!-- default case is required, the default just has a result -->
-							<term><constant value="240"/></term>
-							<term><constant value="0.4"/><goalRef goal="pump_station" scoreType="computed"/></term>
-							<term><constant value="0.4"/><goalRef goal="flags" scoreType="computed"/></term>
-							<term><constant value="0.4"/><goalRef goal="flags_rows" scoreType="computed"/></term>
-						</default>
-					</switch>
-				</case>
-				<default>
-					<term><constant value="0"/></term>
-				</default>
-			</switch>
-		</computedGoal>
-
-		<restriction lowerBound="0" message="There are a maximum of 8 crates on the table" upperBound="8">
-			<term><constant value="1"/><goalRef goal="crates_base" scoreType="raw"/></term>
-			<term><constant value="1"/><goalRef goal="crates" scoreType="raw"/></term>
-			<term><constant value="1"/></term>
-		</restriction>
-
-		<tiebreaker>
-			<test winner="HIGH">
-				<term><goalRef goal="crates_base" scoreType="raw"/></term>
-			</test>
-			<test winner="HIGH">
-				<term><goalRef goal="crates" scoreType="raw"/></term>
-			</test>
-			<test winner="HIGH">
-				<term><goalRef goal="dolphin" scoreType="raw"/></term>
-			</test>
-			<test winner="HIGH">
-				<term><goalRef goal="flags_rows" scoreType="raw"/></term>
-			</test>
-			<test winner="HIGH">
-				<term><goalRef goal="flags" scoreType="raw"/></term>
-			</test>
-			<test winner="HIGH">
-				<term><goalRef goal="submarine" scoreType="computed"/></term>
-			</test>
-			<test winner="HIGH">
-				<term><goalRef goal="archaeological" scoreType="computed"/></term>
-			</test>
-			<test winner="HIGH">
-				<term><goalRef goal="shipping_container" scoreType="raw"/></term>
-			</test>
-			<test winner="HIGH">
-				<term><goalRef goal="pump_station" scoreType="raw"/></term>
-			</test>
-			<test winner="HIGH">
-				<term><goalRef goal="pipeline" scoreType="raw"/></term>
-			</test>
-			<test winner="HIGH">
-				<term><goalRef goal="sample_species" scoreType="raw"/></term>
-			</test>
-			<test winner="HIGH">
-				<term><goalRef goal="artifical_reef" scoreType="raw"/></term>
-			</test>
-			<test winner="HIGH">
-				<term><goalRef goal="computed" scoreType="computed"/></term>
-				<term><constant value="10"/></term>
-			</test>
-		</tiebreaker>
-
-	</Performance>
+    <goal
+      initialValue="0"
+      max="1"
+      min="0"
+      multiplier="1"
+      name="archaeological"
+      title="Archaeological Artifacts">
+      <value
+        score="35"
+        title="In Base"
+        value="in_base" />
+      <value
+        score="25"
+        title="Off Ship"
+        value="off_ship" />
+      <value
+        score="0"
+        title="No"
+        value="no" />
+    </goal>
 
 
+    <goal
+      initialValue="0"
+      max="1"
+      min="0"
+      multiplier="25"
+      name="dolphin"
+      title="Release Dolphin" />
 
- <subjectiveCategory name="robot_design" title="Robot Design" weight="0.5">
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="durability" title="Durability" category="Mechanical Design">
-   <description>Evidence of structural integrity; ability to withstand
+    <goal
+      initialValue="0"
+      max="1"
+      min="0"
+      multiplier="35"
+      name="sample_species"
+      title="Sample Species (Grey Fish Only)" />
+
+    <goal
+      initialValue="0"
+      max="1"
+      min="0"
+      multiplier="1"
+      name="submarine"
+      title="Deploy The Submarine">
+      <value
+        score="40"
+        title="Yes Upright"
+        value="upright" />
+      <value
+        score="35"
+        title="Yes Not Upright"
+        value="yes" />
+      <value
+        score="0"
+        title="No"
+        value="no" />
+    </goal>
+
+
+    <goal
+      initialValue="0"
+      max="1"
+      min="0"
+      multiplier="40"
+      name="artifical_reef"
+      title="Artifical Reef" />
+
+    <goal
+      initialValue="0"
+      max="1"
+      min="0"
+      multiplier="40"
+      name="pipeline"
+      title="Service The Pipeline" />
+
+    <goal
+      initialValue="0"
+      max="1"
+      min="0"
+      multiplier="30"
+      name="shipping_container"
+      title="Shipping Container at Base" />
+
+    <goal
+      initialValue="0"
+      max="8"
+      min="0"
+      multiplier="5"
+      name="crates_base"
+      title="Crates in Base" />
+
+    <goal
+      initialValue="0"
+      max="8"
+      min="0"
+      multiplier="2"
+      name="crates"
+      title="Crates Elsewhere on Table" />
+
+    <goal
+      name="robot_type"
+      title="Robot Type"
+      multiplier="0"
+      initialValue="1">
+      <value
+        score="1"
+        title="RCX"
+        value="rcx" />
+      <value
+        score="2"
+        title="NXT"
+        value="nxt" />
+    </goal>
+
+
+    <computedGoal
+      name="computed"
+      title="Test computed goal">
+      <variable name="subtotal">
+        <term>
+          <goalRef
+            goal="pump_station"
+            scoreType="computed" />
+        </term>
+        <term>
+          <goalRef
+            goal="flags"
+            scoreType="computed" />
+        </term>
+        <term>
+          <goalRef
+            goal="flags_rows"
+            scoreType="computed" />
+        </term>
+        <term>
+          <goalRef
+            goal="archaeological"
+            scoreType="computed" />
+        </term>
+        <term>
+          <goalRef
+            goal="dolphin"
+            scoreType="computed" />
+        </term>
+        <term>
+          <goalRef
+            goal="sample_species"
+            scoreType="computed" />
+        </term>
+        <term>
+          <goalRef
+            goal="submarine"
+            scoreType="computed" />
+        </term>
+        <term>
+          <goalRef
+            goal="artifical_reef"
+            scoreType="computed" />
+        </term>
+        <term>
+          <goalRef
+            goal="pipeline"
+            scoreType="computed" />
+        </term>
+        <term>
+          <goalRef
+            goal="shipping_container"
+            scoreType="computed" />
+        </term>
+        <term>
+          <goalRef
+            goal="crates_base"
+            scoreType="computed" />
+        </term>
+        <term>
+          <goalRef
+            goal="crates"
+            scoreType="computed" />
+        </term>
+      </variable>
+      <switch>
+        <case>
+          <enumCondition>
+            <left>
+              <enumGoalRef goal="robot_type" />
+            </left>
+            <equal-to />
+            <right>
+              <stringConstant value="rcx" />
+            </right>
+          </enumCondition>
+          <switch>
+            <case>
+              <condition>
+                <left>
+                  <term>
+                    <variableRef variable="subtotal" />
+                  </term>
+                </left>
+                <less-than /> <!-- any inequality -->
+                <right>
+                  <term>
+                    <constant value="300" />
+                  </term>
+                </right>
+              </condition>
+              <result>
+                <term>
+                  <goalRef
+                    goal="pump_station"
+                    scoreType="computed" />
+                </term>
+                <term>
+                  <goalRef
+                    goal="flags"
+                    scoreType="computed" />
+                </term>
+                <term>
+                  <goalRef
+                    goal="flags_rows"
+                    scoreType="computed" />
+                </term>
+                <term>
+                  <constant value="60" />
+                </term>
+              </result>
+            </case>
+            <default> <!-- default case is required, the default just has a result -->
+              <term>
+                <constant value="240" />
+              </term>
+              <term>
+                <constant value="0.4" />
+                <goalRef
+                  goal="pump_station"
+                  scoreType="computed" />
+              </term>
+              <term>
+                <constant value="0.4" />
+                <goalRef
+                  goal="flags"
+                  scoreType="computed" />
+              </term>
+              <term>
+                <constant value="0.4" />
+                <goalRef
+                  goal="flags_rows"
+                  scoreType="computed" />
+              </term>
+            </default>
+          </switch>
+        </case>
+        <default>
+          <term>
+            <constant value="0" />
+          </term>
+        </default>
+      </switch>
+    </computedGoal>
+
+    <restriction
+      lowerBound="0"
+      message="There are a maximum of 8 crates on the table"
+      upperBound="8">
+      <term>
+        <constant value="1" />
+        <goalRef
+          goal="crates_base"
+          scoreType="raw" />
+      </term>
+      <term>
+        <constant value="1" />
+        <goalRef
+          goal="crates"
+          scoreType="raw" />
+      </term>
+      <term>
+        <constant value="1" />
+      </term>
+    </restriction>
+
+    <tiebreaker>
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="crates_base"
+            scoreType="raw" />
+        </term>
+      </test>
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="crates"
+            scoreType="raw" />
+        </term>
+      </test>
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="dolphin"
+            scoreType="raw" />
+        </term>
+      </test>
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="flags_rows"
+            scoreType="raw" />
+        </term>
+      </test>
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="flags"
+            scoreType="raw" />
+        </term>
+      </test>
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="submarine"
+            scoreType="computed" />
+        </term>
+      </test>
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="archaeological"
+            scoreType="computed" />
+        </term>
+      </test>
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="shipping_container"
+            scoreType="raw" />
+        </term>
+      </test>
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="pump_station"
+            scoreType="raw" />
+        </term>
+      </test>
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="pipeline"
+            scoreType="raw" />
+        </term>
+      </test>
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="sample_species"
+            scoreType="raw" />
+        </term>
+      </test>
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="artifical_reef"
+            scoreType="raw" />
+        </term>
+      </test>
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="computed"
+            scoreType="computed" />
+        </term>
+        <term>
+          <constant value="10" />
+        </term>
+      </test>
+    </tiebreaker>
+
+  </Performance>
+
+
+
+  <subjectiveCategory
+    name="robot_design"
+    title="Robot Design"
+    weight="0.5">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="durability"
+      title="Durability"
+      category="Mechanical Design">
+      <description>Evidence of structural integrity; ability to withstand
     rigors of competition
    </description>
-   <rubric>
-    <range title="Beginning" min="1" max="3">
-     <description>Quite fragile; breaks a lot
+      <rubric>
+        <range
+          title="Beginning"
+          min="1"
+          max="3">
+          <description>Quite fragile; breaks a lot
       Base weak, falls apart when handled or run
       Difficult to assemble
      </description>
-    </range>
-    <range title="Developing" min="4" max="6">
-     <description>frequent or significant faults/repairs
+        </range>
+        <range
+          title="Developing"
+          min="4"
+          max="6">
+          <description>frequent or significant faults/repairs
       Robot has some stability
       Assembles with few errors
      </description>
-    </range>
-    <range title="Accomplished" min="7" max="9">
-     <description>rare faults/repairs
+        </range>
+        <range
+          title="Accomplished"
+          min="7"
+          max="9">
+          <description>rare faults/repairs
       Robot stable, but not robust
       Assembles with no errors
      </description>
-    </range>
-    <range title="Exemplary" min="10" max="12">
-     <description>sound construction, no repairs
+        </range>
+        <range
+          title="Exemplary"
+          min="10"
+          max="12">
+          <description>sound construction, no repairs
       Robot stable and robust
       Robot assembles easily
      </description>
-    </range>
-   </rubric>
-  </goal>
+        </range>
+      </rubric>
+    </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="mechanical_efficiency" title="Mechanical Efficiency" category="Mechanical Design">
-   <description>Economic use of parts and time; easy to repair and
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="mechanical_efficiency"
+      title="Mechanical Efficiency"
+      category="Mechanical Design">
+      <description>Economic use of parts and time; easy to repair and
     modify
     Components work together
    </description>
-   <rubric>
-    <range title="Beginning" min="1" max="3">
-     <description>Excessive parts or time to repair/modify
+      <rubric>
+        <range
+          title="Beginning"
+          min="1"
+          max="3">
+          <description>Excessive parts or time to repair/modify
       Robot lacks critical design components: works, stays together,
       efficient part use
       Few components work together, belong together
      </description>
-    </range>
-    <range title="Developing" min="4" max="6">
-     <description>Inefficient parts or time to repair/modify
+        </range>
+        <range
+          title="Developing"
+          min="4"
+          max="6">
+          <description>Inefficient parts or time to repair/modify
       Robot lacks some critical design components: works, stays together,
       efficient parts use
       Some components work or belong together
      </description>
-    </range>
-    <range title="Accomplished" min="7" max="9">
-     <description>Appropriate use of parts and time to repair/modify
+        </range>
+        <range
+          title="Accomplished"
+          min="7"
+          max="9">
+          <description>Appropriate use of parts and time to repair/modify
       Robot lacks few critical design components: works, stays together,
       efficient parts use
       Most components work and belong together
      </description>
-    </range>
-    <range title="Exemplary" min="10" max="12">
-     <description>Streamlined use of parts and time to repair/modify
+        </range>
+        <range
+          title="Exemplary"
+          min="10"
+          max="12">
+          <description>Streamlined use of parts and time to repair/modify
       Robot is elegant, complete.
       All components work together and look like they belong together.
      </description>
-    </range>
-   </rubric>
-  </goal>
+        </range>
+      </rubric>
+    </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="mechanization" title="Mechanization" category="Mechanical Design">
-   <description>Ability of robot mechanisms to move or act with
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="mechanization"
+      title="Mechanization"
+      category="Mechanical Design">
+      <description>Ability of robot mechanisms to move or act with
     appropriate speed, strength and accuracy for intended tasks
     (propulsion and execution)
    </description>
-   <rubric>
-    <range title="Beginning" min="1" max="3">
-     <description>Imbalance of speed, strength and accuracy on most
+      <rubric>
+        <range
+          title="Beginning"
+          min="1"
+          max="3">
+          <description>Imbalance of speed, strength and accuracy on most
       tasks
       Difficulty going same distance repeatedly, turns inaccurate or inconsistent
       Too fast for accuracy, too slow to complete mission
      </description>
-    </range>
-    <range title="Developing" min="4" max="6">
-     <description>Imbalance of speed, strength and accuracy on some
+        </range>
+        <range
+          title="Developing"
+          min="4"
+          max="6">
+          <description>Imbalance of speed, strength and accuracy on some
       tasks.
       Goes defined distances and turns sometimes.
       Somewhat too fast for accuracy, or too slow to complete mission
      </description>
-    </range>
-    <range title="Accomplished" min="7" max="9">
-     <description>Appropriate balance of speed, strength and accuracy on
+        </range>
+        <range
+          title="Accomplished"
+          min="7"
+          max="9">
+          <description>Appropriate balance of speed, strength and accuracy on
       most tasks.
       Goes defined distance and turns reasonable accurately and
       consistently. Good speed balance.
      </description>
-    </range>
-    <range title="Exemplary" min="10" max="12">
-     <description>Appropriate balance of speed, strength and accuracy on
+        </range>
+        <range
+          title="Exemplary"
+          min="10"
+          max="12">
+          <description>Appropriate balance of speed, strength and accuracy on
       every task.
       Goes defined distance and turns accurately, efficiently and
       consistently.
       Adjusts speed for optimum control.
      </description>
-    </range>
-   </rubric>
-  </goal>
+        </range>
+      </rubric>
+    </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="attachments" title="Attachments and Sensors" category="MN Design">
-   <description>Attachments and Sensors, if used, are an integrated part
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="attachments"
+      title="Attachments and Sensors"
+      category="MN Design">
+      <description>Attachments and Sensors, if used, are an integrated part
     of the design, they are used appropriately and achieve consistent
     results.
    </description>
-   <rubric>
-    <range title="Beginning" min="1" max="3">
-     <description>Sensors used incorrectly, Weak or poorly designed
+      <rubric>
+        <range
+          title="Beginning"
+          min="1"
+          max="3">
+          <description>Sensors used incorrectly, Weak or poorly designed
       attachments, difficult to add/remove.
      </description>
-    </range>
-    <range title="Developing" min="4" max="6">
-     <description>Sensor use inconsistent. Not modular or consistent
+        </range>
+        <range
+          title="Developing"
+          min="4"
+          max="6">
+          <description>Sensor use inconsistent. Not modular or consistent
       attachments, attachments awkward to add/remove. Not repeatable.
      </description>
-    </range>
-    <range title="Accomplished" min="7" max="9">
-     <description>Sensors used appropriately. Attachments somewhat
+        </range>
+        <range
+          title="Accomplished"
+          min="7"
+          max="9">
+          <description>Sensors used appropriately. Attachments somewhat
       modular and work as expected. Easy to add/remove. Somewhat
       repeatable.
      </description>
-    </range>
-    <range title="Exemplary" min="10" max="12">
-     <description>Sensor use precise and repeatable. Attachments modular
+        </range>
+        <range
+          title="Exemplary"
+          min="10"
+          max="12">
+          <description>Sensor use precise and repeatable. Attachments modular
       and work as expected, repeatedly. They look like they belong to
       the robot.
      </description>
-    </range>
-   </rubric>
-  </goal>
+        </range>
+      </rubric>
+    </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="kids_work" title="Kids Did the Work" category="MN Design">
-   <description>Appropriate balance between team responsibility and
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="kids_work"
+      title="Kids Did the Work"
+      category="MN Design">
+      <description>Appropriate balance between team responsibility and
     coach guidance
    </description>
-   <rubric>
-    <range title="Beginning" min="1" max="3">
-     <description>Excessive coach guidance AND limited team
+      <rubric>
+        <range
+          title="Beginning"
+          min="1"
+          max="3">
+          <description>Excessive coach guidance AND limited team
       responsibility. Little knowledge of why parts are as they are on
       robot. Little or no understanding of what pieces do what.
      </description>
-    </range>
-    <range title="Developing" min="4" max="6">
-     <description>Excessive coach guidance OR limited team
+        </range>
+        <range
+          title="Developing"
+          min="4"
+          max="6">
+          <description>Excessive coach guidance OR limited team
       responsibility. Minimal understanding of underlying design,
       technology, strategy and robot structure.
      </description>
-    </range>
-    <range title="Accomplished" min="7" max="9">
-     <description>Good balance between team responsibility and coach
+        </range>
+        <range
+          title="Accomplished"
+          min="7"
+          max="9">
+          <description>Good balance between team responsibility and coach
       guidance. Moderate understanding of robot structure, underlying
       design, strategy and technology.
      </description>
-    </range>
-    <range title="Exemplary" min="10" max="12">
-     <description>Team independence with minimal coach guidance.
+        </range>
+        <range
+          title="Exemplary"
+          min="10"
+          max="12">
+          <description>Team independence with minimal coach guidance.
       Thorough understanding of robot structure, underlying design,
       strategy and technology.
      </description>
-    </range>
-   </rubric>
-  </goal>
+        </range>
+      </rubric>
+    </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="design_process" title="Design Process" category="Strategy and Innovation">
-   <description>Ability to develop and explain improvement cycles where
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="design_process"
+      title="Design Process"
+      category="Strategy and Innovation">
+      <description>Ability to develop and explain improvement cycles where
     alternatives are considered and narrowed, selections tested, design
     improved.
    </description>
-   <rubric>
-    <range title="Beginning" min="1" max="3">
-     <description>Disorganized AND poorly explained improvement cycles.
+      <rubric>
+        <range
+          title="Beginning"
+          min="1"
+          max="3">
+          <description>Disorganized AND poorly explained improvement cycles.
       Uses standard design. No design process (concept build test
       refine)
      </description>
-    </range>
-    <range title="Developing" min="4" max="6">
-     <description>Disorganized OR poorly explained improvement cycles.
+        </range>
+        <range
+          title="Developing"
+          min="4"
+          max="6">
+          <description>Disorganized OR poorly explained improvement cycles.
       Some forethought in initial design. Refinement of robot not well
       communicated.
      </description>
-    </range>
-    <range title="Accomplished" min="7" max="9">
-     <description>Systematic and well-explained improvement cycle. Basic
+        </range>
+        <range
+          title="Accomplished"
+          min="7"
+          max="9">
+          <description>Systematic and well-explained improvement cycle. Basic
       understanding of design process, evidence of concept planning,
       building, testing, refining
      </description>
-    </range>
-    <range title="Exemplary" min="10" max="12">
-     <description>Systematic, well-explained and well-documented
+        </range>
+        <range
+          title="Exemplary"
+          min="10"
+          max="12">
+          <description>Systematic, well-explained and well-documented
       improvement cycle. Good communication of complete design process.
      </description>
-    </range>
-   </rubric>
-  </goal>
+        </range>
+      </rubric>
+    </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="mission_strategy" title="Mission Strategy" category="Strategy and Innovations">
-   <description>Ability to clearly define and describe the team’s game
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="mission_strategy"
+      title="Mission Strategy"
+      category="Strategy and Innovations">
+      <description>Ability to clearly define and describe the team’s game
     strategy.
    </description>
-   <rubric>
-    <range title="Beginning" min="1" max="3">
-     <description>No clear goals AND no clear strategy. Strategy based
+      <rubric>
+        <range
+          title="Beginning"
+          min="1"
+          max="3">
+          <description>No clear goals AND no clear strategy. Strategy based
       only on ease of task – no combined missions or maximizing
       time/effort.
      </description>
-    </range>
-    <range title="Developing" min="4" max="6">
-     <description>No clear goals OR no clear strategy. Strategy based on
+        </range>
+        <range
+          title="Developing"
+          min="4"
+          max="6">
+          <description>No clear goals OR no clear strategy. Strategy based on
       ease of tasks, few risks. Some consideration or
       time/efforts/points.
      </description>
-    </range>
-    <range title="Accomplished" min="7" max="9">
-     <description>Clear strategy to accomplish the team’s well defined
+        </range>
+        <range
+          title="Accomplished"
+          min="7"
+          max="9">
+          <description>Clear strategy to accomplish the team’s well defined
       goals. Effective strategic planning, combining of missions,
       routes, attachments.
      </description>
-    </range>
-    <range title="Exemplary" min="10" max="12">
-     <description>Clear strategy to accomplish most/all game missions
+        </range>
+        <range
+          title="Exemplary"
+          min="10"
+          max="12">
+          <description>Clear strategy to accomplish most/all game missions
       and team goals. Excellent/innovative strategy, combining missions,
       routes, points.
      </description>
-    </range>
-   </rubric>
-  </goal>
+        </range>
+      </rubric>
+    </goal>
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="innovation" title="Innovation" category="Strategy and Innovations">
-   <description>Creation of new, unique or unexpected features (in
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="innovation"
+      title="Innovation"
+      category="Strategy and Innovations">
+      <description>Creation of new, unique or unexpected features (in
     design, programming, strategy or applications) that are beneficial
     in performing the tasks.
    </description>
-   <rubric>
-    <range title="Beginning" min="1" max="3">
-     <description>Original features with no added value or potential.
+      <rubric>
+        <range
+          title="Beginning"
+          min="1"
+          max="3">
+          <description>Original features with no added value or potential.
       Design, drive, structure are standard. Expected sensor use only.
      </description>
-    </range>
-    <range title="Developing" min="4" max="6">
-     <description>Original features with some added value or potential.
+        </range>
+        <range
+          title="Developing"
+          min="4"
+          max="6">
+          <description>Original features with some added value or potential.
       Either design creative, unique use of drive train or structure, or
       unique mission strategy.
      </description>
-    </range>
-    <range title="Accomplished" min="7" max="9">
-     <description>Original features with the potential to add
+        </range>
+        <range
+          title="Accomplished"
+          min="7"
+          max="9">
+          <description>Original features with the potential to add
       significant value. More than one unique design, drive train,
       structure, or mission strategy.
      </description>
-    </range>
-    <range title="Exemplary" min="10" max="12">
-     <description>Original features that add significant value.
+        </range>
+        <range
+          title="Exemplary"
+          min="10"
+          max="12">
+          <description>Original features that add significant value.
       Extremely unique/creative design, drive train, structure and/or
       mission strategy.
      </description>
-    </range>
-   </rubric>
-  </goal>
+        </range>
+      </rubric>
+    </goal>
 
- </subjectiveCategory>
+  </subjectiveCategory>
 
 
-	<subjectiveCategory name="programming" title="Robust Programming" weight="0.5">
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="useoflanguage" title="Use of Language"/>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="modularity" title="Modularity/Abstraction"/>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="sensorcontrol" title="Sensor Control"/>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="design" title="Design"/>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="programming_kids" title="Kids Did the Work"/>
-	</subjectiveCategory>
+  <subjectiveCategory
+    name="programming"
+    title="Robust Programming"
+    weight="0.5">
+    <goal
+      initialValue="0"
+      max="20"
+      min="1"
+      multiplier="1"
+      name="useoflanguage"
+      title="Use of Language" />
+    <goal
+      initialValue="0"
+      max="20"
+      min="1"
+      multiplier="1"
+      name="modularity"
+      title="Modularity/Abstraction" />
+    <goal
+      initialValue="0"
+      max="20"
+      min="1"
+      multiplier="1"
+      name="sensorcontrol"
+      title="Sensor Control" />
+    <goal
+      initialValue="0"
+      max="20"
+      min="1"
+      multiplier="1"
+      name="design"
+      title="Design" />
+    <goal
+      initialValue="0"
+      max="20"
+      min="1"
+      multiplier="1"
+      name="programming_kids"
+      title="Kids Did the Work" />
+  </subjectiveCategory>
 
-	<subjectiveCategory name="research" title="Research Project Assessment" weight="1.0">
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="questions" title="Questions, Language Use"/>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="completeness" title="Completeness, Teamwork"/>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="background" title="Background, Data, and Graphics"/>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="analysis" title="Analysis and Conclusions"/>
-		<goal initialValue="0" max="20" min="1" multiplier="1" name="style" title="Style"/>
-	</subjectiveCategory>
+  <subjectiveCategory
+    name="research"
+    title="Research Project Assessment"
+    weight="1.0">
+    <goal
+      initialValue="0"
+      max="20"
+      min="1"
+      multiplier="1"
+      name="questions"
+      title="Questions, Language Use" />
+    <goal
+      initialValue="0"
+      max="20"
+      min="1"
+      multiplier="1"
+      name="completeness"
+      title="Completeness, Teamwork" />
+    <goal
+      initialValue="0"
+      max="20"
+      min="1"
+      multiplier="1"
+      name="background"
+      title="Background, Data, and Graphics" />
+    <goal
+      initialValue="0"
+      max="20"
+      min="1"
+      multiplier="1"
+      name="analysis"
+      title="Analysis and Conclusions" />
+    <goal
+      initialValue="0"
+      max="20"
+      min="1"
+      multiplier="1"
+      name="style"
+      title="Style" />
+  </subjectiveCategory>
 
 
 </fll>

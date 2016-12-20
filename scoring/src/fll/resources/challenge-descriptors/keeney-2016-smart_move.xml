@@ -1,92 +1,186 @@
 <?xml version="1.0"?>
-<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" title="Paul
-Keeny (Anoka) 2016: Smart Move"
-xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd"
-revision="Rev: 351" schemaVersion="1">
+<fll
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  title="Paul Keeny (Anoka) 2016: Smart Move"
+  xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd"
+  revision="Rev: 351"
+  schemaVersion="1">
 
-  <Performance minimumScore="0" weight="1.0">
+  <Performance
+    minimumScore="0"
+    weight="1.0">
 
-    <goal name="access_places" title="Gain Access To Places - Drive wheels touching" initialValue="0">
-      <value score="25" title="Target Spot" value="target_spot"/>
-      <value score="25" title="Red Deck" value="vehicle_sharing"/>
-      <value score="20" title="Yellow Bridge Deck" value="bridge_deck"/>
-      <value score="0" title="None" value="none"/>
+    <goal
+      name="access_places"
+      title="Gain Access To Places - Drive wheels touching"
+      initialValue="0">
+      <value
+        score="25"
+        title="Target Spot"
+        value="target_spot" />
+      <value
+        score="25"
+        title="Red Deck"
+        value="vehicle_sharing" />
+      <value
+        score="20"
+        title="Yellow Bridge Deck"
+        value="bridge_deck" />
+      <value
+        score="0"
+        title="None"
+        value="none" />
     </goal>
 
-    <goal name="access_markers" title="Gain Access To Things: Access Markers Down" multiplier="25" max="4"/>
+    <goal
+      name="access_markers"
+      title="Gain Access To Things: Access Markers Down"
+      multiplier="25"
+      max="4" />
 
-    <goal name="loops" title="Gain Access To Things: Loops in safety" multiplier="10" max="11"/>
+    <goal
+      name="loops"
+      title="Gain Access To Things: Loops in safety"
+      multiplier="10"
+      max="11" />
 
-    <goal name="warning_beacons" title="Avoid Impacts: Warning Beacons Standing" multiplier="10" max="8" initialValue="8"/>
+    <goal
+      name="warning_beacons"
+      title="Avoid Impacts: Warning Beacons Standing"
+      multiplier="10"
+      max="8"
+      initialValue="8" />
 
-    <goal name="walls_remaining_up" title="Number of walls upright" multiplier="0" max="5" initialValue="4"/>
+    <goal
+      name="walls_remaining_up"
+      title="Number of walls upright"
+      multiplier="0"
+      max="5"
+      initialValue="4" />
 
-    <goal name="vehicle_impact_test" title="Survive Impacts: Vehicle Release Test" multiplier="20"/>
+    <goal
+      name="vehicle_impact_test"
+      title="Survive Impacts: Vehicle Release Test"
+      multiplier="20" />
 
-    <goal name="passenger_restraint_test" title="Survive Impacts: Single Passenger Restraint Test" multiplier="15"/>
+    <goal
+      name="passenger_restraint_test"
+      title="Survive Impacts: Single Passenger Restraint Test"
+      multiplier="15" />
 
-    <goal name="multiple_safety_test" title="Passenger Safety Test - 4 People in Target" multiplier="10"/>
+    <goal
+      name="multiple_safety_test"
+      title="Passenger Safety Test - 4 People in Target"
+      multiplier="10" />
 
-    <computedGoal name="avoid_sensor_walls" title="Avoid Impacts: Sensor Walls">
+    <computedGoal
+      name="avoid_sensor_walls"
+      title="Avoid Impacts: Sensor Walls">
       <switch>
         <case>
           <condition>
             <left>
-              <term><goalRef goal="walls_remaining_up" scoreType="raw"/></term>
+              <term>
+                <goalRef
+                  goal="walls_remaining_up"
+                  scoreType="raw" />
+              </term>
             </left>
-            <greater-than/>
+            <greater-than />
             <right>
-              <term><goalRef goal="access_markers" scoreType="raw"/></term>
+              <term>
+                <goalRef
+                  goal="access_markers"
+                  scoreType="raw" />
+              </term>
             </right>
           </condition>
           <result>
-            <term><constant value="10"/><goalRef goal="access_markers" scoreType="raw"/></term>
+            <term>
+              <constant value="10" />
+              <goalRef
+                goal="access_markers"
+                scoreType="raw" />
+            </term>
           </result>
         </case>
         <default>
-          <term><constant value="10"/><goalRef goal="walls_remaining_up" scoreType="raw"/></term>
+          <term>
+            <constant value="10" />
+            <goalRef
+              goal="walls_remaining_up"
+              scoreType="raw" />
+          </term>
         </default>
       </switch>
     </computedGoal>
-    
 
-    <computedGoal name="survive_sensor_walls" title="Survive Impacts: Sensor Walls">
+
+    <computedGoal
+      name="survive_sensor_walls"
+      title="Survive Impacts: Sensor Walls">
       <switch>
         <case>
           <condition>
             <left>
-              <term><goalRef goal="walls_remaining_up" scoreType="raw"/></term>
+              <term>
+                <goalRef
+                  goal="walls_remaining_up"
+                  scoreType="raw" />
+              </term>
             </left>
-            <equal-to/>
+            <equal-to />
             <right>
-              <term><constant value="0"/></term>
+              <term>
+                <constant value="0" />
+              </term>
             </right>
           </condition>
           <result>
-            <term><constant value="40"/></term>
+            <term>
+              <constant value="40" />
+            </term>
           </result>
         </case>
         <default>
-          <term><constant value="0"/></term>
+          <term>
+            <constant value="0" />
+          </term>
         </default>
       </switch>
     </computedGoal>
 
     <tiebreaker>
       <test winner="HIGH">
-        <term><goalRef goal="access_places" scoreType="computed"/></term>
+        <term>
+          <goalRef
+            goal="access_places"
+            scoreType="computed" />
+        </term>
       </test>
       <test winner="HIGH">
-        <term><goalRef goal="loops" scoreType="computed"/></term>
+        <term>
+          <goalRef
+            goal="loops"
+            scoreType="computed" />
+        </term>
       </test>
       <test winner="HIGH">
-        <term><goalRef goal="survive_sensor_walls" scoreType="computed"/></term>
+        <term>
+          <goalRef
+            goal="survive_sensor_walls"
+            scoreType="computed" />
+        </term>
       </test>
       <test winner="HIGH">
-        <term><goalRef goal="warning_beacons" scoreType="computed"/></term>
+        <term>
+          <goalRef
+            goal="warning_beacons"
+            scoreType="computed" />
+        </term>
       </test>
     </tiebreaker>
-    
+
   </Performance>
 
 

@@ -1,74 +1,212 @@
 <?xml version="1.0"?>
-<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-title="Minnesota Renewable Energy Challenge: 2016"
-xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd"
-revision="1" schemaVersion="1">
+<fll
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  title="Minnesota Renewable Energy Challenge: 2016"
+  xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd"
+  revision="1"
+  schemaVersion="1">
 
-  <Performance minimumScore="0" weight="0.35">
+  <Performance
+    minimumScore="0"
+    weight="0.35">
 
-    <goal name="energy" title="Energy Output mWs" max="150000"/>
-    
+    <goal
+      name="energy"
+      title="Energy Output mWs"
+      max="150000" />
+
     <tiebreaker>
       <!-- should be empty, but not allowed by the schema -->
       <test winner="HIGH">
-        <term><goalRef goal="energy" scoreType="computed"/></term>
+        <term>
+          <goalRef
+            goal="energy"
+            scoreType="computed" />
+        </term>
       </test>
     </tiebreaker>
 
   </Performance>
 
-  <subjectiveCategory name="sail_car" title="Sail Car Challenge" weight="0.10">
-    <goal initialValue="0" max="10" min="0" multiplier="10" name="construction" title="Construction">
+  <subjectiveCategory
+    name="sail_car"
+    title="Sail Car Challenge"
+    weight="0.10">
+    <goal
+      initialValue="0"
+      max="10"
+      min="0"
+      multiplier="10"
+      name="construction"
+      title="Construction">
     </goal>
-    <goal initialValue="0" max="30" min="0" multiplier="1" name="distance" title="Farthest Distance Traveled" scoreType="FLOAT">
-    </goal>
-  </subjectiveCategory>
-
-  <subjectiveCategory name="turbine_documentation" title="Turbine Documentation" weight="0.15">
-    <goal initialValue="0" max="10" min="0" multiplier="1" name="knowledge" title="Demonstrated Knowledge">
-    </goal>
-    <goal initialValue="0" max="10" min="0" multiplier="1" name="statement" title="Design Statement">
-    </goal>
-  </subjectiveCategory>
-
-  <subjectiveCategory name="turbine_technical" title="Turbine Technical Review" weight="0.15">
-    <goal initialValue="0" max="10" min="0" multiplier="1" name="blades" title="Blades">
-    </goal>
-    <goal initialValue="0" max="10" min="0" multiplier="1" name="drivetrain" title="Drive Train">
-    </goal>
-    <goal initialValue="0" max="10" min="0" multiplier="1" name="overall" title="Overall Construction Quality">
-    </goal>
-    <goal initialValue="0" max="10" min="0" multiplier="1" name="innovation" title="Innovation">
-    </goal>
-    <goal initialValue="0" max="10" min="0" multiplier="1" name="material" title="Material Selection">
-    </goal>
-  </subjectiveCategory>
-  
-  <subjectiveCategory name="weightlifter" title="Weightlifter Challenge" weight="0.10">
-    <goal initialValue="0" max="75" min="0" multiplier="1" name="washers" title="Number of washers lifted">
-    </goal>
-    <goal initialValue="0" max="10" min="0" multiplier="7.5" name="construction" title="Construction">
-    </goal>
-    <goal initialValue="0" max="10" min="0" multiplier="15" name="teamwork" title="Teamwork">
-    </goal>
-  </subjectiveCategory>
-  
-  <subjectiveCategory name="wind_farm" title="Wind Farm Siting Challenge" weight="0.15">
-    <goal initialValue="0" max="10" min="0" multiplier="1" name="team_dynamics" title="Team Dynamics">
-    </goal>
-    <goal initialValue="0" max="10" min="0" multiplier="1" name="integraion" title="Integration of Physical/Environmental Data">
-    </goal>
-    <goal initialValue="0" max="10" min="0" multiplier="1" name="political" title="Use of political, human built, environmental issues">
+    <goal
+      initialValue="0"
+      max="30"
+      min="0"
+      multiplier="1"
+      name="distance"
+      title="Farthest Distance Traveled"
+      scoreType="FLOAT">
     </goal>
   </subjectiveCategory>
 
-  <subjectiveCategory name="solar_fountain" title="Solar Fountain" weight="0.03">
-    <goal initialValue="0" max="50" min="0" multiplier="1" name="height" title="How high were you able to make the water move?">
+  <subjectiveCategory
+    name="turbine_documentation"
+    title="Turbine Documentation"
+    weight="0.15">
+    <goal
+      initialValue="0"
+      max="10"
+      min="0"
+      multiplier="1"
+      name="knowledge"
+      title="Demonstrated Knowledge">
     </goal>
-    <goal initialValue="0" max="10" min="0" multiplier="5" name="creativity" title="Creativity">
-    </goal>
-    <goal initialValue="0" max="5" min="0" multiplier="5" name="materials" title="Materials">
+    <goal
+      initialValue="0"
+      max="10"
+      min="0"
+      multiplier="1"
+      name="statement"
+      title="Design Statement">
     </goal>
   </subjectiveCategory>
-  
+
+  <subjectiveCategory
+    name="turbine_technical"
+    title="Turbine Technical Review"
+    weight="0.15">
+    <goal
+      initialValue="0"
+      max="10"
+      min="0"
+      multiplier="1"
+      name="blades"
+      title="Blades">
+    </goal>
+    <goal
+      initialValue="0"
+      max="10"
+      min="0"
+      multiplier="1"
+      name="drivetrain"
+      title="Drive Train">
+    </goal>
+    <goal
+      initialValue="0"
+      max="10"
+      min="0"
+      multiplier="1"
+      name="overall"
+      title="Overall Construction Quality">
+    </goal>
+    <goal
+      initialValue="0"
+      max="10"
+      min="0"
+      multiplier="1"
+      name="innovation"
+      title="Innovation">
+    </goal>
+    <goal
+      initialValue="0"
+      max="10"
+      min="0"
+      multiplier="1"
+      name="material"
+      title="Material Selection">
+    </goal>
+  </subjectiveCategory>
+
+  <subjectiveCategory
+    name="weightlifter"
+    title="Weightlifter Challenge"
+    weight="0.10">
+    <goal
+      initialValue="0"
+      max="75"
+      min="0"
+      multiplier="1"
+      name="washers"
+      title="Number of washers lifted">
+    </goal>
+    <goal
+      initialValue="0"
+      max="10"
+      min="0"
+      multiplier="7.5"
+      name="construction"
+      title="Construction">
+    </goal>
+    <goal
+      initialValue="0"
+      max="10"
+      min="0"
+      multiplier="15"
+      name="teamwork"
+      title="Teamwork">
+    </goal>
+  </subjectiveCategory>
+
+  <subjectiveCategory
+    name="wind_farm"
+    title="Wind Farm Siting Challenge"
+    weight="0.15">
+    <goal
+      initialValue="0"
+      max="10"
+      min="0"
+      multiplier="1"
+      name="team_dynamics"
+      title="Team Dynamics">
+    </goal>
+    <goal
+      initialValue="0"
+      max="10"
+      min="0"
+      multiplier="1"
+      name="integraion"
+      title="Integration of Physical/Environmental Data">
+    </goal>
+    <goal
+      initialValue="0"
+      max="10"
+      min="0"
+      multiplier="1"
+      name="political"
+      title="Use of political, human built, environmental issues">
+    </goal>
+  </subjectiveCategory>
+
+  <subjectiveCategory
+    name="solar_fountain"
+    title="Solar Fountain"
+    weight="0.03">
+    <goal
+      initialValue="0"
+      max="50"
+      min="0"
+      multiplier="1"
+      name="height"
+      title="How high were you able to make the water move?">
+    </goal>
+    <goal
+      initialValue="0"
+      max="10"
+      min="0"
+      multiplier="5"
+      name="creativity"
+      title="Creativity">
+    </goal>
+    <goal
+      initialValue="0"
+      max="5"
+      min="0"
+      multiplier="5"
+      name="materials"
+      title="Materials">
+    </goal>
+  </subjectiveCategory>
+
 </fll>

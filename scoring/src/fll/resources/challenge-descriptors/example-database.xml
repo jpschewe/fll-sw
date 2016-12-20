@@ -1,149 +1,285 @@
 <?xml version="1.0"?>
-<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" title="Sample
-Database - used to generate schema"
-xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd"
-schemaVersion="2">
+<fll
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  title="Sample Database - used to generate schema"
+  xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd"
+  schemaVersion="2">
 
- <Performance minimumScore="0" weight="1.0">
-  <goal initialValue="0" max="1" min="0" multiplier="40" name="aaa_example_count" title="Standard goal with count and multiplier"/>
+  <Performance
+    minimumScore="0"
+    weight="1.0">
+    <goal
+      initialValue="0"
+      max="1"
+      min="0"
+      multiplier="40"
+      name="aaa_example_count"
+      title="Standard goal with count and multiplier" />
 
-  <goal initialValue="0" max="1" min="0" multiplier="30" name="aaa_example_boolean" title="Standard boolean goal"/>
+    <goal
+      initialValue="0"
+      max="1"
+      min="0"
+      multiplier="30"
+      name="aaa_example_boolean"
+      title="Standard boolean goal" />
 
-  <goal initialValue="0" max="1" min="0" multiplier="1" name="aaa_example_enum" title="Enumerated goal">
-   <value score="35" title="In Base" value="in_base"/>
-   <value score="25" title="Off Ship" value="off_ship"/>
-   <value score="0" title="No" value="no"/>
-  </goal>
+    <goal
+      initialValue="0"
+      max="1"
+      min="0"
+      multiplier="1"
+      name="aaa_example_enum"
+      title="Enumerated goal">
+      <value
+        score="35"
+        title="In Base"
+        value="in_base" />
+      <value
+        score="25"
+        title="Off Ship"
+        value="off_ship" />
+      <value
+        score="0"
+        title="No"
+        value="no" />
+    </goal>
 
-  <goal name="bbb_example_robot_type" title="Robot Type" multiplier="0" initialValue="1">
-   <value score="1" title="RCX" value="rcx"/>
-   <value score="2" title="NXT" value="nxt"/>
-  </goal>
+    <goal
+      name="bbb_example_robot_type"
+      title="Robot Type"
+      multiplier="0"
+      initialValue="1">
+      <value
+        score="1"
+        title="RCX"
+        value="rcx" />
+      <value
+        score="2"
+        title="NXT"
+        value="nxt" />
+    </goal>
 
-  <computedGoal name="bbb_computed" title="Test computed goal">
-   <variable name="subtotal">
-    <term><goalRef goal="aaa_example_count" scoreType="computed"/></term>
-    <term><goalRef goal="aaa_example_boolean" scoreType="computed"/></term>
-    <term><goalRef goal="aaa_example_enum" scoreType="computed"/></term>
-   </variable>
-   <switch>
-    <case>
-     <enumCondition>
-      <left>
-       <enumGoalRef goal="bbb_example_robot_type"/>
-      </left>
-      <equal-to/>
-      <right>
-       <stringConstant value="rcx"/>
-      </right>
-     </enumCondition>
-     <switch>
-      <case>
-       <condition>
-        <left>
-         <term><variableRef variable="subtotal"/></term>
-        </left>
-        <less-than/> <!-- any inequality -->
-        <right>
-         <term><constant value="300"/></term>
-        </right>
-       </condition>
-       <result>
-        <term><goalRef goal="aaa_example_count" scoreType="computed"/></term>
-        <term><goalRef goal="aaa_example_boolean" scoreType="computed"/></term>
-        <term><goalRef goal="aaa_example_enum" scoreType="computed"/></term>
-        <term><constant value="60"/></term>
-       </result>
-      </case>
-      <default> <!-- default case is required, the default just has a result -->
-       <term><constant value="240"/></term>
-       <term><constant value="0.4"/><goalRef goal="aaa_example_count" scoreType="computed"/></term>
-       <term><constant value="0.4"/><goalRef goal="aaa_example_boolean" scoreType="computed"/></term>
-       <term><constant value="0.4"/><goalRef goal="aaa_example_enum" scoreType="computed"/></term>
-      </default>
-     </switch>
-    </case>
-    <default>
-     <term><constant value="0"/></term>
-    </default>
-   </switch>
-  </computedGoal>
+    <computedGoal
+      name="bbb_computed"
+      title="Test computed goal">
+      <variable name="subtotal">
+        <term>
+          <goalRef
+            goal="aaa_example_count"
+            scoreType="computed" />
+        </term>
+        <term>
+          <goalRef
+            goal="aaa_example_boolean"
+            scoreType="computed" />
+        </term>
+        <term>
+          <goalRef
+            goal="aaa_example_enum"
+            scoreType="computed" />
+        </term>
+      </variable>
+      <switch>
+        <case>
+          <enumCondition>
+            <left>
+              <enumGoalRef goal="bbb_example_robot_type" />
+            </left>
+            <equal-to />
+            <right>
+              <stringConstant value="rcx" />
+            </right>
+          </enumCondition>
+          <switch>
+            <case>
+              <condition>
+                <left>
+                  <term>
+                    <variableRef variable="subtotal" />
+                  </term>
+                </left>
+                <less-than /> <!-- any inequality -->
+                <right>
+                  <term>
+                    <constant value="300" />
+                  </term>
+                </right>
+              </condition>
+              <result>
+                <term>
+                  <goalRef
+                    goal="aaa_example_count"
+                    scoreType="computed" />
+                </term>
+                <term>
+                  <goalRef
+                    goal="aaa_example_boolean"
+                    scoreType="computed" />
+                </term>
+                <term>
+                  <goalRef
+                    goal="aaa_example_enum"
+                    scoreType="computed" />
+                </term>
+                <term>
+                  <constant value="60" />
+                </term>
+              </result>
+            </case>
+            <default> <!-- default case is required, the default just has a result -->
+              <term>
+                <constant value="240" />
+              </term>
+              <term>
+                <constant value="0.4" />
+                <goalRef
+                  goal="aaa_example_count"
+                  scoreType="computed" />
+              </term>
+              <term>
+                <constant value="0.4" />
+                <goalRef
+                  goal="aaa_example_boolean"
+                  scoreType="computed" />
+              </term>
+              <term>
+                <constant value="0.4" />
+                <goalRef
+                  goal="aaa_example_enum"
+                  scoreType="computed" />
+              </term>
+            </default>
+          </switch>
+        </case>
+        <default>
+          <term>
+            <constant value="0" />
+          </term>
+        </default>
+      </switch>
+    </computedGoal>
 
-  <tiebreaker>
-   <test winner="HIGH">
-    <term><goalRef goal="aaa_example_count" scoreType="raw"/></term>
-   </test>
-  </tiebreaker>
+    <tiebreaker>
+      <test winner="HIGH">
+        <term>
+          <goalRef
+            goal="aaa_example_count"
+            scoreType="raw" />
+        </term>
+      </test>
+    </tiebreaker>
 
- </Performance>
+  </Performance>
 
- <subjectiveCategory name="aaa_example_subjective_category" title="Example subjective category" weight="0.5">
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="aaa_example_goal" title="Durability" category="Mechanical Design">
-   <description>Evidence of structural integrity; ability to withstand
+  <subjectiveCategory
+    name="aaa_example_subjective_category"
+    title="Example subjective category"
+    weight="0.5">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="aaa_example_goal"
+      title="Durability"
+      category="Mechanical Design">
+      <description>Evidence of structural integrity; ability to withstand
     rigors of competition
    </description>
-   <rubric>
-    <range title="Beginning" min="1" max="3">
-     <description>Quite fragile; breaks a lot
+      <rubric>
+        <range
+          title="Beginning"
+          min="1"
+          max="3">
+          <description>Quite fragile; breaks a lot
       Base weak, falls apart when handled or run
       Difficult to assemble
      </description>
-    </range>
-    <range title="Developing" min="4" max="6">
-     <description>frequent or significant faults/repairs
+        </range>
+        <range
+          title="Developing"
+          min="4"
+          max="6">
+          <description>frequent or significant faults/repairs
       Robot has some stability
       Assembles with few errors
      </description>
-    </range>
-    <range title="Accomplished" min="7" max="9">
-     <description>rare faults/repairs
+        </range>
+        <range
+          title="Accomplished"
+          min="7"
+          max="9">
+          <description>rare faults/repairs
       Robot stable, but not robust
       Assembles with no errors
      </description>
-    </range>
-    <range title="Exemplary" min="10" max="12">
-     <description>sound construction, no repairs
+        </range>
+        <range
+          title="Exemplary"
+          min="10"
+          max="12">
+          <description>sound construction, no repairs
       Robot stable and robust
       Robot assembles easily
      </description>
-    </range>
-   </rubric>
-  </goal>
+        </range>
+      </rubric>
+    </goal>
 
 
-  <goal initialValue="0" max="12" min="0" multiplier="1" name="aaa_example_goal2" title="Kids Did the Work" category="MN Design">
-   <description>Appropriate balance between team responsibility and
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="aaa_example_goal2"
+      title="Kids Did the Work"
+      category="MN Design">
+      <description>Appropriate balance between team responsibility and
     coach guidance
    </description>
-   <rubric>
-    <range title="Beginning" min="1" max="3">
-     <description>Excessive coach guidance AND limited team
+      <rubric>
+        <range
+          title="Beginning"
+          min="1"
+          max="3">
+          <description>Excessive coach guidance AND limited team
       responsibility. Little knowledge of why parts are as they are on
       robot. Little or no understanding of what pieces do what.
      </description>
-    </range>
-    <range title="Developing" min="4" max="6">
-     <description>Excessive coach guidance OR limited team
+        </range>
+        <range
+          title="Developing"
+          min="4"
+          max="6">
+          <description>Excessive coach guidance OR limited team
       responsibility. Minimal understanding of underlying design,
       technology, strategy and robot structure.
      </description>
-    </range>
-    <range title="Accomplished" min="7" max="9">
-     <description>Good balance between team responsibility and coach
+        </range>
+        <range
+          title="Accomplished"
+          min="7"
+          max="9">
+          <description>Good balance between team responsibility and coach
       guidance. Moderate understanding of robot structure, underlying
       design, strategy and technology.
      </description>
-    </range>
-    <range title="Exemplary" min="10" max="12">
-     <description>Team independence with minimal coach guidance.
+        </range>
+        <range
+          title="Exemplary"
+          min="10"
+          max="12">
+          <description>Team independence with minimal coach guidance.
       Thorough understanding of robot structure, underlying design,
       strategy and technology.
      </description>
-    </range>
-   </rubric>
-  </goal>
+        </range>
+      </rubric>
+    </goal>
 
- </subjectiveCategory>
+  </subjectiveCategory>
 
 
 </fll>
