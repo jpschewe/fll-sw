@@ -275,7 +275,7 @@
         data</a></li>
 
 
-    <li><a href='remoteControl.jsp'>Remote control of display</a></li>
+    <li><a id='remote-control' href='remoteControl.jsp'>Remote control of display</a></li>
 
     <li><h3>Subjective Scoring</h3>
       <ul>
