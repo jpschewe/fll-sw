@@ -97,7 +97,7 @@
           href='javascript:hide("AddTeamHelp")'>[hide]</a>
       </div></li>
 
-    <li><a href='<c:url value="tournaments.jsp"/>'>Add or Edit
+    <li><a id='add-edit-tournaments' href='<c:url value="tournaments.jsp"/>'>Add or Edit
         Tournaments</a> <a href='javascript:display("EditTournamentHelp")'>[help]</a>
       <div
         id='EditTournamentHelp'
