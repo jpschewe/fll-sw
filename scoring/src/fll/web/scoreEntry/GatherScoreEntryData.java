@@ -129,7 +129,7 @@ public class GatherScoreEntryData extends BaseFLLServlet {
             return;
           } else if (!Queries.didTeamReachPlayoffRound(connection, nextRunNumber, teamNumber)) {
             session.setAttribute(SessionAttributes.MESSAGE,
-                                 "<p name='error' class='error'>Selected team has not advanced to the next head to head round.</p>");
+                                 "<p name='error' class='error' id='error-not-advanced'>Selected team has not advanced to the next head to head round.</p>");
             response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
             return;
           }

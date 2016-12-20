@@ -30,7 +30,7 @@ import fll.web.IntegrationTestUtils;
 public class TestPlayoffs {
 
   private static final Logger LOGGER = LogUtils.getLogger();
-  
+
   private WebDriver selenium;
 
   @Before
@@ -50,7 +50,7 @@ public class TestPlayoffs {
    * sent back to the select team page.
    * 
    * @throws IOException
-   * @throws InterruptedException 
+   * @throws InterruptedException
    */
   @Test
   public void testNotAdvanced() throws IOException, InterruptedException {
@@ -81,7 +81,7 @@ public class TestPlayoffs {
 
       // initialize playoffs
       IntegrationTestUtils.initializePlayoffsForAwardGroup(selenium, "1");
-      
+
       IntegrationTestUtils.assertNoException(selenium);
 
       // enter score for teams 3 and 0 with 3 winning
@@ -104,11 +104,13 @@ public class TestPlayoffs {
       selenium.findElement(By.id("enter_submit")).click();
 
       // check for error message
-      // Assert.assertTrue("Should have errors",
-      // selenium.isElementPresent("name=error"));
-      final String text = selenium.getPageSource();
       Assert.assertTrue("Should have errors",
-                        text.contains("Selected team has not advanced to the next head to head round."));
+                        IntegrationTestUtils.isElementPresent(selenium, By.id("error-not-advanced")));
+
+      // final String text = selenium.getPageSource();
+      // Assert.assertTrue("Should have errors",
+      // text.contains("Selected team has not advanced to the next head to head
+      // round."));
     } catch (final IOException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
@@ -124,10 +126,10 @@ public class TestPlayoffs {
   private void enterTeamScore(final int teamNumber) throws IOException, InterruptedException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "scoreEntry/select_team.jsp");
-    
+
     final Select teamSelect = new Select(selenium.findElement(By.id("select-teamnumber")));
     teamSelect.selectByValue(String.valueOf(teamNumber));
-    
+
     selenium.findElement(By.id("enter_submit")).click();
 
     selenium.findElement(By.name("g1")).sendKeys(String.valueOf(teamNumber));
