@@ -1041,6 +1041,7 @@ public class FullTournamentTest {
 
             // submit the page
             selenium.findElement(By.id("verify_submit")).click();
+            Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
 
             // walk over challenge descriptor to get all element names and then
             // use the values from rs
@@ -1096,7 +1097,7 @@ public class FullTournamentTest {
             selenium.findElement(By.id("submit")).click();
           } // not NoShow
 
-          Thread.sleep(50);
+          Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
 
           LOGGER.debug("Checking for an alert");
 
@@ -1109,7 +1110,7 @@ public class FullTournamentTest {
           confirmScoreChange.accept();
 
           // give the web server a chance to catch up
-          Thread.sleep(1500);
+          Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
 
           // check for errors
           // Gives trouble too often
