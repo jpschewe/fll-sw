@@ -64,9 +64,10 @@ public class SlideshowTest {
       // add a dummy team so that we have something in the database
       IntegrationTestUtils.addTeam(selenium, 1, "team", "org", "1", GenerateDB.DUMMY_TOURNAMENT_NAME);
 
-      selenium.findElement(By.linkText("Admin Index")).click();
+      IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+                                   + "/admin/");
 
-      selenium.findElement(By.linkText("Remote control of display")).click();
+      selenium.findElement(By.id("remote-control")).click();
 
       selenium.findElement(By.id("slideshow")).click();
       selenium.findElement(By.name("slideInterval")).sendKeys("5");
