@@ -232,7 +232,7 @@ public final class IntegrationTestUtils {
 
     final WebElement submitElement = driver.findElement(By.name("submit_create_user"));
     submitElement.click();
-    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
+    Thread.sleep(2 * WAIT_FOR_PAGE_LOAD_MS);
 
     driver.findElement(By.id("success-create-user"));
 
