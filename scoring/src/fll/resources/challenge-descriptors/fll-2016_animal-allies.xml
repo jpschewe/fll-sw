@@ -152,9 +152,8 @@
       initialValue="0"
       min="0"
       max="1"
-      multiplier="5"
-      />
-    
+      multiplier="5" />
+
     <goal
       name="m10_beekeeping"
       title="M10 - Beekeeping"

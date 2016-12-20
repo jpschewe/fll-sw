@@ -1,232 +1,607 @@
 <?xml version="1.0"?>
-<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" title="2011
-Boston Scientific MN State FIRST LEGO League Tournament"
-xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd"
-revision="Rev: 1" schemaVersion="1">
+<fll
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  title="2011 Boston Scientific MN State FIRST LEGO League Tournament"
+  xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd"
+  revision="Rev: 1"
+  schemaVersion="1">
 
-  <Performance minimumScore="0" weight="1.0">
+  <Performance
+    minimumScore="0"
+    weight="1.0">
 
-    <goal name="pollution_reversal" title="Pollution Balls touching Mat" multiplier="4" max="2"/>
+    <goal
+      name="pollution_reversal"
+      title="Pollution Balls touching Mat"
+      multiplier="4"
+      max="2" />
 
-    <goal name="corn_harvest" title="Corn Harvest (one piece)" initialValue="0">
-      <value score="9" title="In Base" value="in_base"/>
-      <value score="5" title="On Mat" value="on_mat"/>
-      <value score="0" title="None" value="none"/>
+    <goal
+      name="corn_harvest"
+      title="Corn Harvest (one piece)"
+      initialValue="0">
+      <value
+        score="9"
+        title="In Base"
+        value="in_base" />
+      <value
+        score="5"
+        title="On Mat"
+        value="on_mat" />
+      <value
+        score="0"
+        title="None"
+        value="none" />
     </goal>
 
-    <goal name="fishing" title="Big Fish in Base" multiplier="3" max="3"/>
+    <goal
+      name="fishing"
+      title="Big Fish in Base"
+      multiplier="3"
+      max="3" />
 
-    <goal name="pizza_ice_cream" title="Pizza and Ice Cream in Base" multiplier="7" max="2"/>
+    <goal
+      name="pizza_ice_cream"
+      title="Pizza and Ice Cream in Base"
+      multiplier="7"
+      max="2" />
 
-    <goal name="farm_fresh_produce" title="Yellow Truck in Base" multiplier="9"/>
+    <goal
+      name="farm_fresh_produce"
+      title="Yellow Truck in Base"
+      multiplier="9" />
 
-    <goal name="distant_travel" title="Distant Travel" multiplier="9"/>
+    <goal
+      name="distant_travel"
+      title="Distant Travel"
+      multiplier="9" />
 
-    <goal name="cooking_time" title="Cooking Timer pointing Red" multiplier="14"/>
+    <goal
+      name="cooking_time"
+      title="Cooking Timer pointing Red"
+      multiplier="14" />
 
-    <goal name="storage_temperature" title="Storage Temperature" multiplier="20"/>
+    <goal
+      name="storage_temperature"
+      title="Storage Temperature"
+      multiplier="20" />
 
-    <goal name="pest_removal" title="Pest Removal (Rats in Base)" multiplier="15" max="2"/>
+    <goal
+      name="pest_removal"
+      title="Pest Removal (Rats in Base)"
+      multiplier="15"
+      max="2" />
 
-    <goal name="refrig_ground_transport" title="Refrigerated Ground Transport" initialValue="0">
-      <value score="20" title="Dock" value="dock"/>
-      <value score="12" title="Base" value="base"/>
-      <value score="0" title="None" value="none"/>
+    <goal
+      name="refrig_ground_transport"
+      title="Refrigerated Ground Transport"
+      initialValue="0">
+      <value
+        score="20"
+        title="Dock"
+        value="dock" />
+      <value
+        score="12"
+        title="Base"
+        value="base" />
+      <value
+        score="0"
+        title="None"
+        value="none" />
     </goal>
-    <goal name="fish_inside_trailer" title="Fish Inside Trailer (Only at Dock)" multiplier="0" max="3"/>
+    <goal
+      name="fish_inside_trailer"
+      title="Fish Inside Trailer (Only at Dock)"
+      multiplier="0"
+      max="3" />
     <!-- need to have the trailer on the dock to get the fish bonus -->
-    <computedGoal name="fish_trailer_bonus" title="Fish Trailer Bonus">
+    <computedGoal
+      name="fish_trailer_bonus"
+      title="Fish Trailer Bonus">
       <switch>
         <case>
           <enumCondition>
             <left>
-              <enumGoalRef goal="refrig_ground_transport"/>
+              <enumGoalRef goal="refrig_ground_transport" />
             </left>
-            <equal-to/>
+            <equal-to />
             <right>
-              <stringConstant value="dock"/>
+              <stringConstant value="dock" />
             </right>
           </enumCondition>
           <result>
-            <term><constant value="6"/><goalRef goal="fish_inside_trailer" scoreType="raw"/></term>
+            <term>
+              <constant value="6" />
+              <goalRef
+                goal="fish_inside_trailer"
+                scoreType="raw" />
+            </term>
           </result>
         </case>
         <default>
-          <term><constant value="0"/></term>
+          <term>
+            <constant value="0" />
+          </term>
         </default>
       </switch>
     </computedGoal>
 
-    <goal name="groceries" title="Groceries on Table" multiplier="2" max="12"/>
+    <goal
+      name="groceries"
+      title="Groceries on Table"
+      multiplier="2"
+      max="12" />
 
     <!-- multiplier is 7 or 12 depending on if bacteria is outside base -->
-    <goal name="disinfect" title="Disinfect Dispensers Empty" multiplier="0" max="4"/>
-    <goal name="bacteria_outside_base" title="Bacteria Touching Mat Outside Base" multiplier="0"/>
-    <computedGoal name="disinfect_score" title="Disinfect Score">
+    <goal
+      name="disinfect"
+      title="Disinfect Dispensers Empty"
+      multiplier="0"
+      max="4" />
+    <goal
+      name="bacteria_outside_base"
+      title="Bacteria Touching Mat Outside Base"
+      multiplier="0" />
+    <computedGoal
+      name="disinfect_score"
+      title="Disinfect Score">
       <switch>
         <case>
           <condition>
             <left>
-              <term><goalRef goal="bacteria_outside_base" scoreType="raw"/></term>
+              <term>
+                <goalRef
+                  goal="bacteria_outside_base"
+                  scoreType="raw" />
+              </term>
             </left>
-            <greater-than/>
+            <greater-than />
             <right>
-              <term><constant value="0"/></term>
+              <term>
+                <constant value="0" />
+              </term>
             </right>
           </condition>
           <result>
-            <term><constant value="7"/><goalRef goal="disinfect" scoreType="raw"/></term>
+            <term>
+              <constant value="7" />
+              <goalRef
+                goal="disinfect"
+                scoreType="raw" />
+            </term>
           </result>
         </case>
         <default>
-          <term><constant value="12"/><goalRef goal="disinfect" scoreType="raw"/></term>
+          <term>
+            <constant value="12" />
+            <goalRef
+              goal="disinfect"
+              scoreType="raw" />
+          </term>
         </default>
       </switch>
     </computedGoal>
 
-    <goal name="hand_wash_bacterial" title="Hand Wash/Bacterial in Sink" multiplier="3" max="60"/>
+    <goal
+      name="hand_wash_bacterial"
+      title="Hand Wash/Bacterial in Sink"
+      multiplier="3"
+      max="60" />
 
-    <goal name="hand_wash_viral" title="Number Virus in Sink" multiplier="0" max="16"/>
-    <computedGoal name="hand_wash_viral_score" title="Hand Wash/Viral">
+    <goal
+      name="hand_wash_viral"
+      title="Number Virus in Sink"
+      multiplier="0"
+      max="16" />
+    <computedGoal
+      name="hand_wash_viral_score"
+      title="Hand Wash/Viral">
       <switch>
         <case>
           <condition>
             <left>
-              <term><goalRef goal="hand_wash_viral" scoreType="raw"/></term>
+              <term>
+                <goalRef
+                  goal="hand_wash_viral"
+                  scoreType="raw" />
+              </term>
             </left>
-            <greater-than-or-equal/>
+            <greater-than-or-equal />
             <right>
-              <term><constant value="9"/></term>
+              <term>
+                <constant value="9" />
+              </term>
             </right>
           </condition>
           <result>
-            <term><constant value="13"/></term>
+            <term>
+              <constant value="13" />
+            </term>
           </result>
         </case>
         <case>
           <condition>
             <left>
-              <term><goalRef goal="hand_wash_viral" scoreType="raw"/></term>
+              <term>
+                <goalRef
+                  goal="hand_wash_viral"
+                  scoreType="raw" />
+              </term>
             </left>
-            <greater-than-or-equal/>
+            <greater-than-or-equal />
             <right>
-              <term><constant value="1"/></term>
+              <term>
+                <constant value="1" />
+              </term>
             </right>
           </condition>
           <result>
-            <term><constant value="6"/></term>
+            <term>
+              <constant value="6" />
+            </term>
           </result>
         </case>
         <default>
-          <term><constant value="0"/></term>
+          <term>
+            <constant value="0" />
+          </term>
         </default>
       </switch>
     </computedGoal>
 
-    <goal name="good_bacteria" title="Yellow Bacteria in Base" multiplier="6" max="12"/>
+    <goal
+      name="good_bacteria"
+      title="Yellow Bacteria in Base"
+      multiplier="6"
+      max="12" />
 
 
-    <restriction lowerBound="0" upperBound="3" message="There are only 3 big fish on the table">
-      <term><goalRef goal="fishing" scoreType="raw"/></term>
-      <term><goalRef goal="fish_inside_trailer" scoreType="raw"/></term>
+    <restriction
+      lowerBound="0"
+      upperBound="3"
+      message="There are only 3 big fish on the table">
+      <term>
+        <goalRef
+          goal="fishing"
+          scoreType="raw" />
+      </term>
+      <term>
+        <goalRef
+          goal="fish_inside_trailer"
+          scoreType="raw" />
+      </term>
     </restriction>
-    
+
     <tiebreaker>
       <test winner="HIGH">
-        <term><goalRef goal="groceries" scoreType="computed"/></term>
+        <term>
+          <goalRef
+            goal="groceries"
+            scoreType="computed" />
+        </term>
       </test>
 
       <test winner="HIGH">
-        <term><goalRef goal="disinfect_score" scoreType="computed"/></term>
+        <term>
+          <goalRef
+            goal="disinfect_score"
+            scoreType="computed" />
+        </term>
       </test>
 
       <test winner="HIGH">
-        <term><goalRef goal="hand_wash_bacterial" scoreType="computed"/></term>
+        <term>
+          <goalRef
+            goal="hand_wash_bacterial"
+            scoreType="computed" />
+        </term>
       </test>
-      
+
     </tiebreaker>
 
   </Performance>
 
-  <subjectiveCategory name="core_values" title="Core Values" weight="1.0">
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="discovery" title="Discovery">
+  <subjectiveCategory
+    name="core_values"
+    title="Core Values"
+    weight="1.0">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="discovery"
+      title="Discovery">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="team_spirit" title="Team Spirit">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="team_spirit"
+      title="Team Spirit">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="integration" title="Integration">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="integration"
+      title="Integration">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="effectiveness" title="Effectiveness">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="effectiveness"
+      title="Effectiveness">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="efficiency" title="Efficiency">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="efficiency"
+      title="Efficiency">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="kids_work" title="Kids Do the Work">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="kids_work"
+      title="Kids Do the Work">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="inclusion" title="Inclusion">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="inclusion"
+      title="Inclusion">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="respect" title="Respect">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="respect"
+      title="Respect">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="coopertition" title="Coopertition">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="coopertition"
+      title="Coopertition">
     </goal>
   </subjectiveCategory>
 
 
-  <subjectiveCategory name="project" title="Project" weight="1.0">
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="problem_identification" title="Problem Identification">
+  <subjectiveCategory
+    name="project"
+    title="Project"
+    weight="1.0">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="problem_identification"
+      title="Problem Identification">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="sources_information" title="Sources of Information">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="sources_information"
+      title="Sources of Information">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="problem_analysis" title="Problem Analysis">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="problem_analysis"
+      title="Problem Analysis">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="review" title="Review Existing Solutions">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="review"
+      title="Review Existing Solutions">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="team_solution" title="Team Solution">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="team_solution"
+      title="Team Solution">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="innovation" title="Innovation">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="innovation"
+      title="Innovation">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="implementation" title="Implementation">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="implementation"
+      title="Implementation">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="presentation_effectiveness" title="Presentation Effectiveness">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="presentation_effectiveness"
+      title="Presentation Effectiveness">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="creativity" title="Creativity">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="creativity"
+      title="Creativity">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="sharing" title="Sharing">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="sharing"
+      title="Sharing">
     </goal>
   </subjectiveCategory>
 
-  <subjectiveCategory name="robot_design" title="Robot Design" weight="0.5">
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="durability" title="Durability"/>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="mechanical_efficiency" title="Mechanical Efficiency">
+  <subjectiveCategory
+    name="robot_design"
+    title="Robot Design"
+    weight="0.5">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="durability"
+      title="Durability" />
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="mechanical_efficiency"
+      title="Mechanical Efficiency">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="mechanization" title="Mechanization">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="mechanization"
+      title="Mechanization">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="attachments" title="Attachments and Sensors">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="attachments"
+      title="Attachments and Sensors">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="kids_work" title="Kids Did the Work">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="kids_work"
+      title="Kids Did the Work">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="design_process" title="Design Process">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="design_process"
+      title="Design Process">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="mission_strategy" title="Mission Strategy">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="mission_strategy"
+      title="Mission Strategy">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="innovation" title="Innovation">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="innovation"
+      title="Innovation">
     </goal>
   </subjectiveCategory>
 
-  <subjectiveCategory name="robot_programming" title="Robot Programming" weight="0.5">
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="code_structure" title="Code Structure and Reuse">
+  <subjectiveCategory
+    name="robot_programming"
+    title="Robot Programming"
+    weight="0.5">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="code_structure"
+      title="Code Structure and Reuse">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="kids_work" title="Kids Did the Work">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="kids_work"
+      title="Kids Did the Work">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="quality" title="Programming Quality">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="quality"
+      title="Programming Quality">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="efficiency" title="Programming Efficiency">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="efficiency"
+      title="Programming Efficiency">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="automation" title="Automation/Navigation">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="automation"
+      title="Automation/Navigation">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="design_process" title="Design Process">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="design_process"
+      title="Design Process">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="mission_strategy" title="Mission Strategy">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="mission_strategy"
+      title="Mission Strategy">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="innovation" title="Innovation">
+    <goal
+      initialValue="0"
+      max="12"
+      min="0"
+      multiplier="1"
+      name="innovation"
+      title="Innovation">
     </goal>
   </subjectiveCategory>
 
