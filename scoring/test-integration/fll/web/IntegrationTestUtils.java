@@ -615,7 +615,7 @@ public final class IntegrationTestUtils {
     loadPage(selenium, TestUtils.URL_ROOT
         + "playoff");
 
-    selenium.findElement(By.linkText("Create head to head bracket")).click();
+    selenium.findElement(By.id("create-bracket")).click();
     Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
     
     selenium.findElement(By.xpath("//input[@value='Create Head to Head Bracket for Award Group "
