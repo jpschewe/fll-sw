@@ -187,7 +187,7 @@ public final class IntegrationTestUtils {
 
     driver.get(TestUtils.URL_ROOT
         + "setup/");
-    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
+    Thread.sleep(1 * WAIT_FOR_PAGE_LOAD_MS);
     
     if (isElementPresent(driver, By.name("submit_login"))) {
       login(driver);
@@ -216,7 +216,7 @@ public final class IntegrationTestUtils {
       }
     }
 
-    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
+    Thread.sleep(2 * WAIT_FOR_PAGE_LOAD_MS);
     
     driver.findElement(By.id("success"));
 
