@@ -201,7 +201,7 @@
       </c:if></li>
 
 
-    <li><a href='edit_event_division.jsp'>Change award group
+    <li><a id='change-award-groups' href='edit_event_division.jsp'>Change award group
         assignments for the current tournament</a>. <a
       href='javascript:display("EventDivisionHelp")'>[help]</a>
       <div
