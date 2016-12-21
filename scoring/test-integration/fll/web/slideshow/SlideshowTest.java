@@ -68,10 +68,12 @@ public class SlideshowTest {
                                    + "/admin/");
 
       selenium.findElement(By.id("remote-control")).click();
+      Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
 
       selenium.findElement(By.id("slideshow")).click();
       selenium.findElement(By.name("slideInterval")).sendKeys("5");
       selenium.findElement(By.name("submit")).click();
+      Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
 
       selenium.findElement(By.id("success"));
 
