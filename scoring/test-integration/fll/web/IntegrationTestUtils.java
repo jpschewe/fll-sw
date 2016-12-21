@@ -476,6 +476,7 @@ public final class IntegrationTestUtils {
         + "admin/index.jsp");
 
     selenium.findElement(By.linkText("Add a team")).click();
+    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
 
     selenium.findElement(By.name("teamNumber")).sendKeys(String.valueOf(teamNumber));
     selenium.findElement(By.name("teamName")).sendKeys(teamName);
@@ -483,6 +484,7 @@ public final class IntegrationTestUtils {
 
     selenium.findElement(By.id("tournament_"
         + tournament.getTournamentID())).click();
+    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
 
     final WebElement eventDivision = selenium.findElement(By.id("event_division_"
         + tournament.getTournamentID()));
@@ -495,6 +497,7 @@ public final class IntegrationTestUtils {
     judgingStationSel.selectByValue(division);
 
     selenium.findElement(By.name("commit")).click();
+    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
 
     selenium.findElement(By.id("success"));
   }
