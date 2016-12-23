@@ -71,7 +71,7 @@
 	<classpathentry kind="lib" path="scoring/lib/findbugs-3.0.1/lib/annotations.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/htmlunit-2.22.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/commons-lang3-3.4.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/test/webdrivermanager/webdrivermanager-1.4.8.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/webdrivermanager/webdrivermanager-1.5.0.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/junit-4.12.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/cssparser-0.9.19.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/htmlunit/htmlunit-core-js-2.22.jar"/>
