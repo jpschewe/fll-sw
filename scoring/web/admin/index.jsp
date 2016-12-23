@@ -97,7 +97,7 @@
           href='javascript:hide("AddTeamHelp")'>[hide]</a>
       </div></li>
 
-    <li><a href='<c:url value="tournaments.jsp"/>'>Add or Edit
+    <li><a id='add-edit-tournaments' href='<c:url value="tournaments.jsp"/>'>Add or Edit
         Tournaments</a> <a href='javascript:display("EditTournamentHelp")'>[help]</a>
       <div
         id='EditTournamentHelp'
@@ -201,7 +201,7 @@
       </c:if></li>
 
 
-    <li><a href='edit_event_division.jsp'>Change award group
+    <li><a id='change-award-groups' href='edit_event_division.jsp'>Change award group
         assignments for the current tournament</a>. <a
       href='javascript:display("EventDivisionHelp")'>[help]</a>
       <div
@@ -275,7 +275,7 @@
         data</a></li>
 
 
-    <li><a href='remoteControl.jsp'>Remote control of display</a></li>
+    <li><a id='remote-control' href='remoteControl.jsp'>Remote control of display</a></li>
 
     <li><h3>Subjective Scoring</h3>
       <ul>

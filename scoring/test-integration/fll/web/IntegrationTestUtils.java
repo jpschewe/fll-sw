@@ -52,7 +52,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.Select;
 import org.w3c.dom.Document;
 
@@ -75,11 +74,14 @@ public final class IntegrationTestUtils {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  public static final String WAIT_FOR_PAGE_TIMEOUT = "60000";
-
   public static final String TEST_USERNAME = "fll";
 
   public static final String TEST_PASSWORD = "Lego";
+
+  /**
+   * How long to wait for pages to load before checking for elements.
+   */
+  public static final long WAIT_FOR_PAGE_LOAD_MS = 2000;
 
   private IntegrationTestUtils() {
     // no instances
@@ -106,11 +108,14 @@ public final class IntegrationTestUtils {
    * @param selenium the test controller
    * @param url the page to load
    * @throws IOException
+   * @throws InterruptedException 
    */
   public static void loadPage(final WebDriver selenium,
                               final String url)
-      throws IOException {
+      throws IOException, InterruptedException {
     selenium.get(url);
+
+    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
 
     assertNoException(selenium);
   }
@@ -128,10 +133,11 @@ public final class IntegrationTestUtils {
    * @param driver the test controller
    * @param challengeDocument the challenge descriptor
    * @throws IOException
+   * @throws InterruptedException 
    */
   public static void initializeDatabase(final WebDriver driver,
                                         final Document challengeDocument)
-      throws IOException {
+      throws IOException, InterruptedException {
     Assert.assertNotNull(challengeDocument);
 
     final Path challengeFile = Files.createTempFile("fll", ".xml");
@@ -151,10 +157,11 @@ public final class IntegrationTestUtils {
    * @param driver the test controller
    * @param challengeStream the challenge descriptor
    * @throws IOException
+   * @throws InterruptedException 
    */
   public static void initializeDatabase(final WebDriver driver,
                                         final InputStream challengeStream)
-      throws IOException {
+      throws IOException, InterruptedException {
     Assert.assertNotNull(challengeStream);
 
     final Path challengeFile = Files.createTempFile("fll", ".xml");
@@ -172,19 +179,22 @@ public final class IntegrationTestUtils {
    * @param driver the test controller
    * @param challengeFile a file to read the challenge description from. This
    *          file will not be deleted.
+   * @throws InterruptedException 
    * @throws IOException
    */
   public static void initializeDatabase(final WebDriver driver,
-                                        final Path challengeFile) {
+                                        final Path challengeFile) throws InterruptedException {
 
     driver.get(TestUtils.URL_ROOT
         + "setup/");
-
+    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
+    
     if (isElementPresent(driver, By.name("submit_login"))) {
       login(driver);
 
       driver.get(TestUtils.URL_ROOT
           + "setup/");
+      Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
     }
 
     final WebElement fileEle = driver.findElement(By.name("xmldocument"));
@@ -193,6 +203,8 @@ public final class IntegrationTestUtils {
     final WebElement reinitDB = driver.findElement(By.name("reinitializeDatabase"));
     reinitDB.click();
 
+    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
+    
     try {
       final Alert confirmCreateDB = driver.switchTo().alert();
       LOGGER.info("Confirmation text: "
@@ -204,6 +216,8 @@ public final class IntegrationTestUtils {
       }
     }
 
+    Thread.sleep(2 * WAIT_FOR_PAGE_LOAD_MS);
+    
     driver.findElement(By.id("success"));
 
     // setup user
@@ -218,6 +232,7 @@ public final class IntegrationTestUtils {
 
     final WebElement submitElement = driver.findElement(By.name("submit_create_user"));
     submitElement.click();
+    Thread.sleep(2 * WAIT_FOR_PAGE_LOAD_MS);
 
     driver.findElement(By.id("success-create-user"));
 
@@ -232,10 +247,11 @@ public final class IntegrationTestUtils {
    * @param inputStream input stream that has database to load in it, this input
    *          stream is closed by this method upon successful completion
    * @throws IOException
+   * @throws InterruptedException 
    */
   public static void initializeDatabaseFromDump(final WebDriver selenium,
                                                 final InputStream inputStream)
-      throws IOException {
+      throws IOException, InterruptedException {
     Assert.assertNotNull(inputStream);
     final File dumpFile = IntegrationTestUtils.storeInputStreamToFile(inputStream);
     try {
@@ -374,8 +390,9 @@ public final class IntegrationTestUtils {
 
   /**
    * Login to fll
+   * @throws InterruptedException 
    */
-  public static void login(final WebDriver driver) {
+  public static void login(final WebDriver driver) throws InterruptedException {
     driver.get(TestUtils.URL_ROOT
         + "login.jsp");
 
@@ -387,6 +404,8 @@ public final class IntegrationTestUtils {
 
     final WebElement submitElement = driver.findElement(By.name("submit_login"));
     submitElement.click();
+    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
+
   }
 
   private static String readAll(final Reader rd) throws IOException {
@@ -442,6 +461,7 @@ public final class IntegrationTestUtils {
 
   /**
    * Add a team to a tournament.
+   * @throws InterruptedException 
    */
   public static void addTeam(final WebDriver selenium,
                              final int teamNumber,
@@ -449,13 +469,14 @@ public final class IntegrationTestUtils {
                              final String organization,
                              final String division,
                              final String tournamentName)
-      throws IOException {
+      throws IOException, InterruptedException {
     final Tournament tournament = getTournamentByName(tournamentName);
 
     loadPage(selenium, TestUtils.URL_ROOT
         + "admin/index.jsp");
 
     selenium.findElement(By.linkText("Add a team")).click();
+    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
 
     selenium.findElement(By.name("teamNumber")).sendKeys(String.valueOf(teamNumber));
     selenium.findElement(By.name("teamName")).sendKeys(teamName);
@@ -463,6 +484,7 @@ public final class IntegrationTestUtils {
 
     selenium.findElement(By.id("tournament_"
         + tournament.getTournamentID())).click();
+    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
 
     final WebElement eventDivision = selenium.findElement(By.id("event_division_"
         + tournament.getTournamentID()));
@@ -475,6 +497,7 @@ public final class IntegrationTestUtils {
     judgingStationSel.selectByValue(division);
 
     selenium.findElement(By.name("commit")).click();
+    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
 
     selenium.findElement(By.id("success"));
   }
@@ -485,10 +508,11 @@ public final class IntegrationTestUtils {
    * @param tournamentName the name of the tournament to make the current
    *          tournament
    * @throws IOException
+   * @throws InterruptedException 
    */
   public static void setTournament(final WebDriver selenium,
                                    final String tournamentName)
-      throws IOException {
+      throws IOException, InterruptedException {
     loadPage(selenium, TestUtils.URL_ROOT
         + "admin/index.jsp");
 
@@ -550,7 +574,7 @@ public final class IntegrationTestUtils {
           + type);
     }
 
-    selenium.manage().timeouts().implicitlyWait(500, TimeUnit.MILLISECONDS);
+    selenium.manage().timeouts().implicitlyWait(WAIT_FOR_PAGE_LOAD_MS, TimeUnit.MILLISECONDS);
     selenium.manage().timeouts().pageLoadTimeout(60, TimeUnit.SECONDS);
 
     return selenium;
@@ -562,10 +586,11 @@ public final class IntegrationTestUtils {
       mInitializedWebDrivers.add(WebDriverType.FIREFOX);
     }
 
-    final DesiredCapabilities capabilities = DesiredCapabilities.firefox();
-    capabilities.setCapability("marionette", false);
-    final WebDriver selenium = new FirefoxDriver(capabilities);
+    // final DesiredCapabilities capabilities = DesiredCapabilities.firefox();
+    // capabilities.setCapability("marionette", true);
+    // final WebDriver selenium = new FirefoxDriver(capabilities);
 
+    final WebDriver selenium = new FirefoxDriver();
     return selenium;
   }
 
@@ -582,19 +607,20 @@ public final class IntegrationTestUtils {
 
   public static void initializePlayoffsForAwardGroup(final WebDriver selenium,
                                                      final String awardGroup)
-      throws IOException {
+      throws IOException, InterruptedException {
     initializePlayoffsForAwardGroup(selenium, awardGroup, BracketSortType.SEEDING);
   }
 
   public static void initializePlayoffsForAwardGroup(final WebDriver selenium,
                                                      final String awardGroup,
                                                      final BracketSortType bracketSort)
-      throws IOException {
+      throws IOException, InterruptedException {
     loadPage(selenium, TestUtils.URL_ROOT
         + "playoff");
 
-    selenium.findElement(By.linkText("Create head to head bracket")).click();
-
+    selenium.findElement(By.id("create-bracket")).click();
+    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
+    
     selenium.findElement(By.xpath("//input[@value='Create Head to Head Bracket for Award Group "
         + awardGroup + "']")).click();
     Assert.assertTrue("Error creating bracket for award group: "
@@ -603,11 +629,13 @@ public final class IntegrationTestUtils {
     final Select initDiv = new Select(selenium.findElement(By.id("initialize-division")));
     initDiv.selectByValue(awardGroup);
     selenium.findElement(By.id("initialize_brackets")).click();
+    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
     Assert.assertFalse("Error loading page", isElementPresent(selenium, By.id("exception-handler")));
 
     final Select sort = new Select(selenium.findElement(By.id("sort")));
     sort.selectByValue(bracketSort.name());
     selenium.findElement(By.id("submit")).click();
+    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
     Assert.assertFalse("Error loading page", isElementPresent(selenium, By.id("exception-handler")));
   }
 
@@ -644,11 +672,12 @@ public final class IntegrationTestUtils {
    * @param newValue
    * @throws NoSuchElementException if there was a problem changing the value
    * @throws IOException if there is an error talking to selenium
+   * @throws InterruptedException 
    */
   public static void changeNumSeedingRounds(final WebDriver selenium,
                                             final int tournamentId,
                                             final int newValue)
-      throws NoSuchElementException, IOException {
+      throws NoSuchElementException, IOException, InterruptedException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "admin/edit_all_parameters.jsp");
     final Select seedingRoundsSelection = new Select(selenium.findElement(By.name("seeding_rounds_"
@@ -663,8 +692,9 @@ public final class IntegrationTestUtils {
    * Get the id of the current tournament
    * 
    * @throws IOException
+   * @throws InterruptedException 
    */
-  public static int getCurrentTournamentId(final WebDriver selenium) throws IOException {
+  public static int getCurrentTournamentId(final WebDriver selenium) throws IOException, InterruptedException {
     loadPage(selenium, TestUtils.URL_ROOT
         + "admin/index.jsp");
 

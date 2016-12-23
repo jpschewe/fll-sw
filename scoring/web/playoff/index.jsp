@@ -56,7 +56,7 @@
 
   <ol>
 
-    <li><a href="create_playoff_division.jsp">Create head to head
+    <li><a id='create-bracket' href="create_playoff_division.jsp">Create head to head
         bracket</a></li>
 
     <li>

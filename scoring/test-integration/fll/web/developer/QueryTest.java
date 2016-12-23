@@ -35,7 +35,7 @@ public class QueryTest {
   }
 
   @Test
-  public void test0() throws IOException, SAXException {
+  public void test0() throws IOException, SAXException, InterruptedException {
     try {
       IntegrationTestUtils.initializeDatabaseFromDump(selenium,
                                                       TestUtils.class.getResourceAsStream("/fll/data/testdb.flldb"));
