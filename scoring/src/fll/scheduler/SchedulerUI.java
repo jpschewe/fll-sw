@@ -185,6 +185,9 @@ public class SchedulerUI extends JFrame {
     final JScrollPane editorScroller = new JScrollPane(mScheduleDescriptionEditor);
     scheduleDescriptionPanel.add(editorScroller, BorderLayout.CENTER);
 
+    // start out with default values
+    mScheduleDescriptionEditor.setParams(new SolverParams());
+
     final JPanel schedulePanel = new JPanel(new BorderLayout());
     mTabbedPane.addTab("Schedule", schedulePanel);
 
