@@ -81,7 +81,7 @@ public final class IntegrationTestUtils {
   /**
    * How long to wait for pages to load before checking for elements.
    */
-  public static final long WAIT_FOR_PAGE_LOAD_MS = 1000;
+  public static final long WAIT_FOR_PAGE_LOAD_MS = 1500;
 
   private IntegrationTestUtils() {
     // no instances
@@ -187,7 +187,7 @@ public final class IntegrationTestUtils {
 
     driver.get(TestUtils.URL_ROOT
         + "setup/");
-    Thread.sleep(1 * WAIT_FOR_PAGE_LOAD_MS);
+    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
     
     if (isElementPresent(driver, By.name("submit_login"))) {
       login(driver);
