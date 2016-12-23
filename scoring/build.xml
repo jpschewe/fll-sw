@@ -36,9 +36,6 @@
   <property name="findbugs.home" value="${dir.lib}/findbugs-3.0.1" />
   <property name="dir.lib.findbugs" value="${findbugs.home}/lib" />
 
-  <!-- default the offline property to false, will be set to true by check-internet if there is no network connection -->
-  <property name="offline" value="false" />
-
   <import file="${basedir}/buildscript-imports.xml" />
 
   <taskdef name="findbugs" classpath="${dir.lib.findbugs}/findbugs-ant.jar" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" />
@@ -241,7 +238,7 @@
   </target>
 
   <!-- ==================== Setup/Prepare/Clean ==================== -->
-  <target name="init" depends="git.revision,check-internet">
+  <target name="init" depends="git.revision">
     <tstamp>
       <format property="TODAY" pattern="yyyy-MM-dd_HH:mm:ss" />
     </tstamp>
@@ -272,18 +269,6 @@
     <mkdir dir="${dir.build}" />
 
     <echo message="Long version ${app.version.long} short version ${app.version.short}" />
-
-  </target>
-
-  <target name="check-internet" description="Check if this computer is connected to the internet">
-    <echo message="Checking if connected to the internet" />
-
-
-    <waitfor maxwait="5" maxwaitunit="second" timeoutproperty="offline">
-      <http url="http://jpschewe.github.io/fll-sw/" />
-    </waitfor>
-
-    <echo message="offline=${offline}" />
 
   </target>
 
@@ -750,8 +735,6 @@
       <junit fork="yes" haltonfailure="false" dir="@{working-dir}" failureproperty="test.failed">
         <sysproperty key="net.sourceforge.cobertura.datafile" value="${dir.coverage}/cobertura.ser" />
 
-        <sysproperty key="wdm.forceCache" value="${offline}" />
-
         <classpath>
           <path refid="test.classpath" />
         </classpath>
@@ -777,8 +760,6 @@
     <mkdir dir="${dir.build}/screenshots" />
 
     <junit fork="yes" haltonfailure="false" dir="${dir.build}" failureproperty="test.failed">
-
-      <sysproperty key="wdm.forceCache" value="${offline}" />
 
       <classpath>
         <path refid="test.classpath" />
