@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
-import java.io.Writer;
 import java.text.ParseException;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
@@ -126,12 +125,6 @@ public class GreedySolver {
   }
 
   private int solutionsFound = 0;
-
-  private File mBestObjectiveFile = null;
-
-  public File getBestObjectiveFile() {
-    return mBestObjectiveFile;
-  }
 
   private ObjectiveValue bestObjective = null;
 
@@ -1304,8 +1297,6 @@ public class GreedySolver {
   private boolean outputCurrentSolution() {
     final File scheduleFile = new File(Utilities.extractAbsoluteBasename(datafile)
         + "-" + solutionsFound + ".csv");
-    final File objectiveFile = new File(Utilities.extractAbsoluteBasename(datafile)
-        + "-" + solutionsFound + ".obj.txt");
 
     try {
       outputSchedule(scheduleFile);
@@ -1330,27 +1321,12 @@ public class GreedySolver {
       LOGGER.info("Schedule provides a better objective value");
       bestObjective = objective;
 
-      try (final Writer objectiveWriter = new OutputStreamWriter(new FileOutputStream(objectiveFile),
-                                                                 Utilities.DEFAULT_CHARSET)) {
-        objectiveWriter.write(objective.toString());
-        objectiveWriter.close();
-      } catch (final IOException e) {
-        throw new FLLRuntimeException("Error writing objective", e);
-      }
-
       if (null != mBestSchedule) {
         if (!mBestSchedule.delete()) {
           mBestSchedule.deleteOnExit();
         }
       }
       mBestSchedule = scheduleFile;
-
-      if (null != mBestObjectiveFile) {
-        if (!mBestObjectiveFile.delete()) {
-          mBestObjectiveFile.deleteOnExit();
-        }
-      }
-      mBestObjectiveFile = objectiveFile;
 
       // tighten down the constraints so that we find a better solution
       final int newNumTimeslots = objective.getLatestPerformanceTime()
