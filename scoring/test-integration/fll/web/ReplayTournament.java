@@ -203,12 +203,12 @@ public class ReplayTournament {
 
     final int returnVal = fileChooser.showOpenDialog(null);
     if (returnVal == JFileChooser.APPROVE_OPTION) {
-      final File currentDirectory = fileChooser.getCurrentDirectory();
-      PREFS.put(OUTPUT_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
-
       final File selectedFile = fileChooser.getSelectedFile();
       if (null != selectedFile
           && selectedFile.isDirectory() && selectedFile.canWrite()) {
+
+        PREFS.put(OUTPUT_DIRECTORY_PREF, selectedFile.getAbsolutePath());
+
         return selectedFile.toPath();
       } else if (null != selectedFile) {
         JOptionPane.showMessageDialog(null,

@@ -40,16 +40,21 @@ public class EditTournamentsTest {
   }
 
   @Test
-  public void testAddTournament() throws IOException {
+  public void testAddTournament() throws IOException, InterruptedException {
     try {
       final InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml");
       IntegrationTestUtils.initializeDatabase(selenium, challengeStream);
+      Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
+      
       selenium.findElement(By.linkText("Admin Index")).click();
+      Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
 
-      selenium.findElement(By.linkText("Add or Edit Tournaments")).click();
-
+      selenium.findElement(By.id("add-edit-tournaments")).click();
+      Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
+      
       selenium.findElement(By.name("addRow")).click();
-
+      Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
+      
       // get num rows
       final WebElement numRowsEle = selenium.findElement(By.name("numRows"));
       final String numRowsStr = numRowsEle.getAttribute("value");

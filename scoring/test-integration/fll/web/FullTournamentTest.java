@@ -323,7 +323,8 @@ public class FullTournamentTest {
             enterPerformanceScore(testDataConn, performanceElement, sourceTournament, runNumber, teamNumber);
 
             // give the web server a chance to catch up
-            Thread.sleep(100);
+            Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
+
             verifyPerformanceScore(testDataConn, performanceElement, sourceTournament, runNumber, teamNumber);
           }
         }
@@ -357,11 +358,12 @@ public class FullTournamentTest {
    * @param sourceTournament
    * @throws SQLException
    * @throws IOException
+   * @throws InterruptedException
    */
   private void uploadSchedule(final Connection testDataConn,
                               final Tournament sourceTournament,
                               final Path outputDirectory)
-      throws SQLException, IOException {
+      throws SQLException, IOException, InterruptedException {
     if (TournamentSchedule.scheduleExistsInDatabase(testDataConn, sourceTournament.getTournamentID())) {
 
       final TournamentSchedule schedule = new TournamentSchedule(testDataConn, sourceTournament.getTournamentID());
@@ -390,20 +392,29 @@ public class FullTournamentTest {
       }
       selenium.findElement(By.id("submit")).click();
 
+      Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
+
       // check that we don't have hard violations and skip past soft
       // violations
       assertThat(selenium.getCurrentUrl(), not(containsString("displayHardViolations")));
       if (selenium.getCurrentUrl().contains("displaySoftViolations")) {
         selenium.findElement(By.id("yes")).click();
+
+        Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
       }
 
       // set event divisions
-      assertThat(selenium.getCurrentUrl(), containsString("promptForEventDivision"));
-      selenium.findElement(By.id("yes")).click();
+      if (selenium.getCurrentUrl().contains("promptForEventDivision")) {
+        selenium.findElement(By.id("yes")).click();
 
-      // assume the values are fine
-      assertThat(selenium.getCurrentUrl(), containsString("displayEventDivisionConfirmation"));
-      selenium.findElement(By.id("yes")).click();
+        Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
+
+        // assume the values are fine
+        assertThat(selenium.getCurrentUrl(), containsString("displayEventDivisionConfirmation"));
+        selenium.findElement(By.id("yes")).click();
+
+        Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
+      }
 
       // check that it all worked
       Assert.assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.id("error")));
@@ -413,8 +424,9 @@ public class FullTournamentTest {
 
   /**
    * Make sure there are no teams with more or less than seeding rounds.
+   * @throws InterruptedException 
    */
-  private void checkSeedingRounds() throws IOException {
+  private void checkSeedingRounds() throws IOException, InterruptedException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "playoff");
     selenium.findElement(By.id("check_seeding_rounds")).click();
@@ -427,12 +439,13 @@ public class FullTournamentTest {
    * Get the award groups in this tournament.
    * 
    * @throws IOException
+   * @throws InterruptedException 
    */
-  private Set<String> getAwardGroups() throws IOException {
+  private Set<String> getAwardGroups() throws IOException, InterruptedException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "admin/index.jsp");
 
-    selenium.findElement(By.partialLinkText("Change award group assignments")).click();
+    selenium.findElement(By.id("change-award-groups")).click();
 
     final Set<String> awardGroups = new HashSet<>();
     final List<WebElement> inputs = selenium.findElements(By.cssSelector("input:checked[type='radio']"));
@@ -448,7 +461,7 @@ public class FullTournamentTest {
     return awardGroups;
   }
 
-  private void assignTableLabels() throws IOException {
+  private void assignTableLabels() throws IOException, InterruptedException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "admin/tables.jsp");
 
@@ -472,7 +485,7 @@ public class FullTournamentTest {
                            final String category,
                            final String station,
                            final int judgeIndex)
-      throws IOException {
+      throws IOException, InterruptedException {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Assigning judge '"
           + id + "' cat: '" + category + "' station: '" + station + "' index: " + judgeIndex);
@@ -487,11 +500,9 @@ public class FullTournamentTest {
         IntegrationTestUtils.storeScreenshot(selenium);
       }
       selenium.findElement(By.id("add_rows")).click();
-      try {
-        Thread.sleep(2000); // let the javascript do it's work
-      } catch (final InterruptedException e) {
-        throw new RuntimeException(e);
-      }
+
+      // let the javascript do it's work
+      Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
     }
 
     selenium.findElement(By.name("id"
@@ -509,7 +520,7 @@ public class FullTournamentTest {
 
   private void assignJudges(final Connection testDataConn,
                             final Tournament sourceTournament)
-      throws IOException, SQLException {
+      throws IOException, SQLException, InterruptedException {
 
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "admin/index.jsp");
@@ -561,11 +572,12 @@ public class FullTournamentTest {
    *          case a temp file will be used
    * @throws IOException
    * @throws SQLException
+   * @throws InterruptedException 
    */
   private void loadTeams(final Connection testDataConnection,
                          final Tournament sourceTournament,
                          final Path outputDirectory)
-      throws IOException, SQLException {
+      throws IOException, SQLException, InterruptedException {
 
     final Path teamsFile = outputDirectory.resolve(sanitizeFilename(sourceTournament.getName())
         + "_teams.csv");
@@ -611,7 +623,7 @@ public class FullTournamentTest {
     Assert.assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
   }
 
-  private void computeFinalScores() throws IOException {
+  private void computeFinalScores() throws IOException, InterruptedException {
     // compute final scores
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "report/summarizePhase1.jsp");
@@ -621,7 +633,7 @@ public class FullTournamentTest {
     Assert.assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
   }
 
-  private void checkReports() throws IOException, SAXException {
+  private void checkReports() throws IOException, SAXException, InterruptedException {
     // generate reports
 
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
@@ -760,12 +772,13 @@ public class FullTournamentTest {
    * @param challengeDocument the challenge descriptor
    * @throws SQLException
    * @throws SAXException
+   * @throws InterruptedException 
    */
   private void enterSubjectiveScores(final Connection testDataConn,
                                      final ChallengeDescription description,
                                      final Tournament sourceTournament,
                                      final Path outputDirectory)
-      throws SQLException, IOException, MalformedURLException, ParseException, SAXException {
+      throws SQLException, IOException, MalformedURLException, ParseException, SAXException, InterruptedException {
 
     final Path subjectiveZip = outputDirectory.resolve(sanitizeFilename(sourceTournament.getName())
         + "_subjective-data.fll");
@@ -1028,6 +1041,7 @@ public class FullTournamentTest {
 
             // submit the page
             selenium.findElement(By.id("verify_submit")).click();
+            Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
 
             // walk over challenge descriptor to get all element names and then
             // use the values from rs
@@ -1083,7 +1097,7 @@ public class FullTournamentTest {
             selenium.findElement(By.id("submit")).click();
           } // not NoShow
 
-          Thread.sleep(50);
+          Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
 
           LOGGER.debug("Checking for an alert");
 
@@ -1096,7 +1110,7 @@ public class FullTournamentTest {
           confirmScoreChange.accept();
 
           // give the web server a chance to catch up
-          Thread.sleep(1500);
+          Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
 
           // check for errors
           // Gives trouble too often
@@ -1117,8 +1131,9 @@ public class FullTournamentTest {
    * Check display pages that aren't shown otherwise.
    * 
    * @throws IOException
+   * @throws InterruptedException 
    */
-  private void checkDisplays() throws IOException {
+  private void checkDisplays() throws IOException, InterruptedException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "scoreboard/main.jsp");
 
