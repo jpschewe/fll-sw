@@ -76,7 +76,7 @@ END DEBUG --%>
    </tr>
 
    <tr>
-    <th>Delete Named Display</th>
+    <th>Delete Named Display (This won't effect the display itself, just the list of displays on the server. The display will come back if it's still alive.)</th>
     <td>&nbsp;</td>
     <c:if test="${not empty displayNames}">
      <c:forEach items="${displayNames}" var="displayName">
@@ -407,7 +407,18 @@ END DEBUG --%>
 
  </form>
 
+<h2>Troubleshooting</h2>
 
+<p>If you have a display that is stale. Look at the seen @ time in the table. If it's more than a few minutes in the past (note the time on the server computer).
+Then click the delete checkbox and then submit. This will remove the display name from the list and it won't come back until the
+display computer checks in with the server again; usually about every 30 seconds.</p>
+
+<p>If a display isn't updating, even after 2 minutes; walk over to the display computer and refresh the page with F5 or ctrl+r. Also
+use Alt-Tab (or Atl-` on some computers) to switch to the other browser window that has the name on it. Refresh that page also. 
+At this point the display should be behaving. If it isn't, then close the browser on the display computer and start it again.</p>
+
+<p>If you are seeing extra columns in the table above. Click the delete checkbox and then submit. Sometimes you might want to delete all
+of them. Don't worry about deleting an active display, it will still come back when it checks in with the server again.</p>
 
 </body>
 </html>
