@@ -39,6 +39,7 @@ TABLE.B {
 
 <script type="text/javascript">
   function reload() {
+    $.scrollTo($("#top"));
     location.reload(true);
   }
   function bottomReload() {
@@ -81,6 +82,7 @@ TABLE.B {
 </head>
 
 <body class='scoreboard'>
+  <span id="top">&nbsp;</span>
 
   <br />
   <br />

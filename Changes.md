@@ -1,3 +1,4 @@
+* Make sure that the all teams scoreboard page scrolls to the top before reloading  
 * Add troubleshooting documentation to remote control page  
 * Make sure that the scheduler UI has default parameters set at the start so that saving a new schedule description works
 * #526 - Add support for generating schedules using alternating 7 and 8 minute performance intervals
