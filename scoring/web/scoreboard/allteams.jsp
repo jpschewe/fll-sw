@@ -186,7 +186,7 @@ TABLE.B {
           </tr>
 
           <c:choose>
-            <c:when test="${(teamIndex mod teamsBetweenLogos) == 1}">
+            <c:when test="${not empty sponsorLogos and (teamIndex mod teamsBetweenLogos) == 1}">
               <tr style='background-color: white'>
                 <td
                   width='50%'
@@ -232,7 +232,7 @@ TABLE.B {
       <!-- foreach team -->
 
     </c:when>
-    <c:otherwise>
+    <c:when test="${not empty sponsorLogos}">
       <table
         class="center"
         style='background-color: white; color: black'
@@ -249,7 +249,7 @@ TABLE.B {
           </tr>
         </c:forEach>
       </table>
-    </c:otherwise>
+    </c:when>
   </c:choose>
 
   <table
