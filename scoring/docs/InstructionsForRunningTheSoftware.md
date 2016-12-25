@@ -4,8 +4,11 @@ It is best to go through this documentation the first time from the server so th
 When you click on a link you should right click on it and open it in a new tab or window. 
 This way you won't loose the this document.
 
+## Loading from a saved database
 
-## Setup of tournament
+If you, or someone else, setup the database previously you can then load that database onto the server. To do that visit http://localhost:9080/fll-sw/setup on the server and then use the middle section of the page to specify a database to load. If you connect from the server you don't need to know the username and password.
+
+## Setup of tournament without a saved database
 
 Links in this section are also found on the [admin index](http://localhost:9080/fll-sw/admin/index.jsp). Not all of these things need to be done the day before, you can do them the morning of, but it helps to prepare as much as you can the first few tournaments you do. You can skip this section if you were provided a database dump to load.
 
@@ -17,11 +20,6 @@ Links in this section are also found on the [admin index](http://localhost:9080/
   1. If you'd like to change some of the information about the tournaments you can [edit the tournament list](http://localhost:9080/fll-sw/admin/tournaments.jsp).
   1. Set the current tournament on the [admin index](http://localhost:9080/fll-sw/admin/index.jsp)
   1. At this point you can just use this computer, or you can download the database file from the admin page and import that into another computer at the tournament from the setup page. In Minnesota we typically have one person create the database that contains the data for all regional tournaments and then that database is distributed to all of the regional tournaments.  
-
-
-## Loading from a saved database
-
-If you, or someone else, setup the database previously you can then load that database onto the server. To do that visit http://localhost:9080/fll-sw/setup and then use the last box on the page to specify a database to load. If you connect from the server you don't need to know the username and password.
 
 
 ## Things to bring to the tournament
@@ -107,5 +105,8 @@ In most cases when an error occurs you will be prompted to submit a bug report.
 This packages up the logs and the database into a zip file that can be attached to the ticket. 
 After entering a description of what was happening when the error occurred, click submit and you'll be told where to find the zip file.
 
+### missing password
 
-
+If you are at a tournament and someone else has set the password for the server and you don't know it you can create a new username and password from the admin index. 
+Use the "Create User" option under "User Management".
+Once you create a new user, both that use and the new user will be able to edit scores.
