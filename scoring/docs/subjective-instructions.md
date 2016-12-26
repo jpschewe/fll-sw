@@ -35,3 +35,9 @@ By looking at this you can quickly tell which scores haven't been entered or if 
 ## Web Application
 
 The web application can be used on a desktop, laptop, phone, or tablet. Although a phone screen might be a little small to be useful. Judges names do not need to be entered before using the subjective web application. This application is accessible from the main index and from the admin index. The app is intended to be self explanatory as the user is guided through the judging.
+
+# Checking entered scores
+
+Once scores have been uploaded from the tablets or via the Java application it is a good idea to check that all scores are entered. 
+One way to do this is to download the subjective data file and open it up in the subjective Java application and see that all of the expected scores appear.
+The other way to check is to visit the subjective web application from the server and check the scores there.
