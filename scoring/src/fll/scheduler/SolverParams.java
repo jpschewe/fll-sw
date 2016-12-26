@@ -270,11 +270,11 @@ public class SolverParams extends SchedParams {
     numPerformanceRounds = v;
   }
 
-  private boolean subjectiveFirst = false;
+  private boolean subjectiveFirst = true;
 
   /**
    * If true, schedule the subjective stations before the performance.
-   * Defaults to false.
+   * Defaults to true.
    */
   public final boolean getSubjectiveFirst() {
     return this.subjectiveFirst;
