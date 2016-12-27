@@ -252,10 +252,10 @@ public class GreedySolver {
     subjectiveScheduled = new boolean[solverParameters.getNumGroups()][][];
     subjectiveStations = new int[solverParameters.getNumGroups()][getNumSubjectiveStations()];
     performanceScheduled = new int[solverParameters.getNumGroups()][];
-    
+
     final List<Integer> performanceOffsets = new ArrayList<Integer>();
     performanceOffsets.addAll(solverParameters.getPerformanceAttemptOffsetMinutes());
-    
+
     for (int table = 0; table < solverParameters.getNumTables(); ++table) {
       int timeslot;
 
@@ -280,13 +280,13 @@ public class GreedySolver {
       int perfOffsetIndex = 0;
       while (timeslot < getNumTimeslots()) {
         possibleTimeSlots.add(timeslot);
-        
+
         final int perfOffset = performanceOffsets.get(perfOffsetIndex);
         timeslot += perfOffset;
-        
+
         // cycle through the pattern for performance offset
         ++perfOffsetIndex;
-        if(perfOffsetIndex >= performanceOffsets.size()) {
+        if (perfOffsetIndex >= performanceOffsets.size()) {
           perfOffsetIndex = 0;
         }
       }
@@ -328,6 +328,8 @@ public class GreedySolver {
 
       ++group;
     } // foreach judging group
+
+    populatePerfEarliestTimes();
 
     // sort list of teams to make sure that the scheduler is deterministic
     Collections.sort(teams, lowestTeamIndex);
@@ -679,7 +681,7 @@ public class GreedySolver {
   private boolean schedPerf(final int table,
                             final int timeslot)
       throws InterruptedException {
-    final List<SchedTeam> teams = getPossiblePerformanceTeams();
+    final List<SchedTeam> teams = getPossiblePerformanceTeams(timeslot);
     SchedTeam team1 = null;
 
     final List<SchedTeam> possibleValues = new LinkedList<SchedTeam>();
@@ -904,15 +906,39 @@ public class GreedySolver {
     return possibles;
   }
 
+  private long[] perfEarliestTimes;
+
+  /**
+   * Populate {@link #perfEarliestTimes} to cache performance earliest start
+   * times.
+   */
+  private void populatePerfEarliestTimes() {
+    final List<LocalTime> times = solverParameters.getPerformanceRoundEarliestStartTimes();
+    perfEarliestTimes = new long[times.size()];
+    for (int i = 0; i < perfEarliestTimes.length; ++i) {
+      final LocalTime time = times.get(i);
+      if (null != time) {
+        final long offset = ChronoUnit.MINUTES.between(solverParameters.getStartTime(), time);
+        perfEarliestTimes[i] = offset;
+      } else {
+        perfEarliestTimes[i] = Long.MAX_VALUE;
+      }
+    }
+  }
+
   /**
    * Get all teams that need scheduling in performance sorted by number of
-   * assignments.
+   * assignments. Only include those teams that can be scheduled at the
+   * specified timeslot.
    */
-  private List<SchedTeam> getPossiblePerformanceTeams() {
+  private List<SchedTeam> getPossiblePerformanceTeams(final int timeslot) {
     List<SchedTeam> possibles = new LinkedList<SchedTeam>();
     for (final SchedTeam team : getAllTeams()) {
-      if (performanceScheduled[team.getGroup()][team.getIndex()] < solverParameters.getNumPerformanceRounds()) {
-        possibles.add(team);
+      final int teamNextRound = performanceScheduled[team.getGroup()][team.getIndex()];
+      if (teamNextRound < perfEarliestTimes.length) {
+        if (timeslot >= perfEarliestTimes[teamNextRound]) {
+          possibles.add(team);
+        }
       }
     }
     Collections.sort(possibles, fewestAssignments);
