@@ -82,7 +82,7 @@ public class SolverParams extends SchedParams {
    * Create the object with all default values.
    */
   public SolverParams() {
-    perfAttemptOffsetMinutes.add(1);
+    perfAttemptOffsetMinutes.add(5);
 
     // default to 3 rounds with no limmits
     performanceEarliestStarts.add(null);
@@ -341,7 +341,7 @@ public class SolverParams extends SchedParams {
    * should only contain one element. However some tournaments may want to
    * specify a pattern such as 7 and then 8 so that there are 2 timeslots
    * available every 15 minutes.
-   * Defaults to a list with a single element of 1.
+   * Defaults to a list with a single element of 5.
    * 
    * @return read-only list of the performance offset times
    */
@@ -357,12 +357,12 @@ public class SolverParams extends SchedParams {
     this.perfAttemptOffsetMinutes.addAll(v);
   }
 
-  private int subjectiveAttemptOffsetMinutes = 1;
+  private int subjectiveAttemptOffsetMinutes = 5;
 
   /**
    * If a subjective round cannot be scheduled at a time, how many
    * minutes later should the next time to try be.
-   * Defaults to 1.
+   * Defaults to 5.
    */
   public final int getSubjectiveAttemptOffsetMinutes() {
     return this.subjectiveAttemptOffsetMinutes;
