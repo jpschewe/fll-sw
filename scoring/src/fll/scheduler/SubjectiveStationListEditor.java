@@ -37,7 +37,7 @@ import fll.util.LogUtils;
     super();
     setLayout(new BorderLayout());
 
-    setBorder(BorderFactory.createTitledBorder("Subjective Judging"));
+    setBorder(BorderFactory.createTitledBorder("Subjective Judging Stations"));
 
     tableModel = new SubjectiveStationModel();
     table = new JTable(this.tableModel);
