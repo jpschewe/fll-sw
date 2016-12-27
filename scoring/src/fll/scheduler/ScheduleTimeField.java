@@ -11,6 +11,8 @@ import java.text.ParseException;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.InputVerifier;
 import javax.swing.JComponent;
@@ -38,6 +40,8 @@ import fll.util.LogUtils;
 
   /**
    * Default constructor, sets time to now.
+   * 
+   * @param nullAllowed if true allow null times
    */
   public ScheduleTimeField() {
     this(LocalTime.now());
@@ -63,7 +67,7 @@ import fll.util.LogUtils;
   /**
    * Retrieve the current value as a {@link LocalTime} object
    * 
-   * @return Current value as a {@link LocalTime} object
+   * @return Current value as a {@link LocalTime} object, may be null
    * @throws java.text.ParseException
    */
   public LocalTime getTime() {
@@ -82,11 +86,15 @@ import fll.util.LogUtils;
   /**
    * Set the current value.
    * 
-   * @param time the new value, cannot be null
+   * @param time the new value
    */
   public void setTime(final LocalTime time) {
-    final String formatted = TIME_FORMAT.format(time);
-    setValue(formatted);
+    if (null != time) {
+      final String formatted = TIME_FORMAT.format(time);
+      setValue(formatted);
+    } else {
+      setValue(null);
+    }
   }
 
   /**
@@ -95,15 +103,24 @@ import fll.util.LogUtils;
    * single digit.
    * 
    * @param raw the raw string
-   * @return the string without the leading underscore
+   * @return the string without the leading underscore, may be null
    */
   private static String getTimeText(final String raw) {
-    if (raw.startsWith("_")) {
-      return raw.substring(1);
+    if (null == raw) {
+      return null;
     } else {
-      return raw;
+      final Matcher emptyMatch = EMPTY_FIELD_PATTERN.matcher(raw);
+      if (emptyMatch.matches()) {
+        return null;
+      } else if (raw.startsWith("_")) {
+        return raw.substring(1);
+      } else {
+        return raw;
+      }
     }
   }
+
+  private static final Pattern EMPTY_FIELD_PATTERN = Pattern.compile("^_+:_+$");
 
   /**
    * Input verifier to be used with {@link ScheduleTimeField}.
@@ -116,6 +133,12 @@ import fll.util.LogUtils;
 
     public static final Color VALID_COLOR = Color.black;
 
+    private final boolean nullAllowed;
+
+    public TimeVerifier(final boolean pNullAllowed) {
+      this.nullAllowed = pNullAllowed;
+    }
+
     /**
      * Check if the contents of the component are a valid schedule time.
      */
@@ -125,9 +148,13 @@ import fll.util.LogUtils;
         final JFormattedTextField field = (JFormattedTextField) input;
         try {
           final String text = getTimeText(field.getText());
-          TournamentSchedule.parseTime(text);
-          input.setForeground(VALID_COLOR);
-          return true;
+          if (null == text) {
+            return nullAllowed;
+          } else {
+            TournamentSchedule.parseTime(text);
+            input.setForeground(VALID_COLOR);
+            return true;
+          }
         } catch (final DateTimeParseException e) {
           if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Unable to parse schedule time", e);

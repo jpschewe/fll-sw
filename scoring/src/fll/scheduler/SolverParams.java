@@ -40,7 +40,8 @@ public class SolverParams extends SchedParams {
 
   public static final String SUBJECTIVE_ATTEMPT_OFFSET_MINUTES_KEY = "subjective_attempt_offset_minutes";
 
-  public static final String NROUNDS_KEY = "NRounds";
+  @Deprecated
+  private static final String NROUNDS_KEY = "NRounds";
 
   public static final String NTABLES_KEY = "NTables";
 
@@ -51,6 +52,8 @@ public class SolverParams extends SchedParams {
   public static final String GROUP_COUNTS_KEY = "group_counts";
 
   public static final String GROUP_NAMES_KEY = "group_names";
+
+  public static final String PERF_EARLIEST_START_KEY = "perf_earliest_start";
 
   /**
    * Format for the number of breaks property. Expected to be
@@ -79,7 +82,13 @@ public class SolverParams extends SchedParams {
    * Create the object with all default values.
    */
   public SolverParams() {
-    perfAttemptOffsetMinutes.add(1);
+    perfAttemptOffsetMinutes.add(5);
+
+    // default to 3 rounds with no limmits
+    performanceEarliestStarts.add(null);
+    performanceEarliestStarts.add(null);
+    performanceEarliestStarts.add(null);
+
   }
 
   /**
@@ -116,7 +125,7 @@ public class SolverParams extends SchedParams {
     LOGGER.debug("Alternate is: "
         + alternate);
 
-    this.numPerformanceRounds = Utilities.readIntProperty(properties, NROUNDS_KEY, this.numPerformanceRounds);
+    loadPerformanceRounds(properties);
 
     this.subjectiveFirst = Utilities.readBooleanProperty(properties, SUBJECTIVE_FIRST_KEY, false);
     LOGGER.debug("Subjective first is: "
@@ -147,7 +156,6 @@ public class SolverParams extends SchedParams {
     this.tmaxMinutes = Utilities.readIntProperty(properties, TMAX_MINUTES_KEY);
 
     parseBreaks(properties);
-
   }
 
   @Override
@@ -170,7 +178,7 @@ public class SolverParams extends SchedParams {
 
     properties.setProperty(ALTERNATE_TABLES_KEY, Boolean.toString(this.alternate));
 
-    properties.setProperty(NROUNDS_KEY, Integer.toString(this.numPerformanceRounds));
+    savePerformanceRounds(properties);
 
     properties.setProperty(SUBJECTIVE_FIRST_KEY, Boolean.toString(this.subjectiveFirst));
 
@@ -186,7 +194,36 @@ public class SolverParams extends SchedParams {
     properties.setProperty(TMAX_MINUTES_KEY, Integer.toString(this.tmaxMinutes));
 
     saveBreaks(properties);
+  }
 
+  /**
+   * @param properties
+   */
+  private void savePerformanceRounds(final Properties properties) {
+    final String[] timeStr = performanceEarliestStarts.stream().map(time -> TournamentSchedule.formatTime(time))
+                                                      .toArray(size -> new String[size]);
+    final String str = Arrays.toString(timeStr);
+    properties.setProperty(PERF_EARLIEST_START_KEY, str);
+  }
+
+  private void loadPerformanceRounds(final Properties properties) {
+    final String earliestStartStr = properties.getProperty(PERF_EARLIEST_START_KEY, null);
+    if (null == earliestStartStr) {
+      final int numRounds = Utilities.readIntProperty(properties, NROUNDS_KEY, getNumPerformanceRounds());
+
+      performanceEarliestStarts.clear();
+      for (int i = 0; i < numRounds; ++i) {
+        performanceEarliestStarts.add(null);
+      }
+    } else {
+      final String[] timesStr = Utilities.parseListOfStrings(earliestStartStr);
+
+      performanceEarliestStarts.clear();
+      for (final String str : timesStr) {
+        final LocalTime time = TournamentSchedule.parseTime(str);
+        performanceEarliestStarts.add(time);
+      }
+    }
   }
 
   private LocalTime startTime = LocalTime.of(8, 0);
@@ -253,28 +290,36 @@ public class SolverParams extends SchedParams {
     this.alternate = v;
   }
 
-  private int numPerformanceRounds = 3;
+  private final List<LocalTime> performanceEarliestStarts = new LinkedList<>();
 
   /**
    * The number of performance rounds.
    * Defaults to 3.
    */
   public final int getNumPerformanceRounds() {
-    return numPerformanceRounds;
+    return performanceEarliestStarts.size();
   }
 
   /**
-   * @see #getNumPerformanceRounds()
+   * The earliest start time for each performance round.
+   * 
+   * @return unmodifiable list, index is round number, value is the earliest
+   *         start time (may be null, meaning no limit)
    */
-  public final void setNumPerformanceRounds(final int v) {
-    numPerformanceRounds = v;
+  public List<LocalTime> getPerformanceRoundEarliestStartTimes() {
+    return Collections.unmodifiableList(performanceEarliestStarts);
   }
 
-  private boolean subjectiveFirst = false;
+  public void setPerformanceRoundEarliestStartTimes(final List<LocalTime> v) {
+    performanceEarliestStarts.clear();
+    performanceEarliestStarts.addAll(v);
+  }
+
+  private boolean subjectiveFirst = true;
 
   /**
    * If true, schedule the subjective stations before the performance.
-   * Defaults to false.
+   * Defaults to true.
    */
   public final boolean getSubjectiveFirst() {
     return this.subjectiveFirst;
@@ -296,7 +341,7 @@ public class SolverParams extends SchedParams {
    * should only contain one element. However some tournaments may want to
    * specify a pattern such as 7 and then 8 so that there are 2 timeslots
    * available every 15 minutes.
-   * Defaults to a list with a single element of 1.
+   * Defaults to a list with a single element of 5.
    * 
    * @return read-only list of the performance offset times
    */
@@ -312,12 +357,12 @@ public class SolverParams extends SchedParams {
     this.perfAttemptOffsetMinutes.addAll(v);
   }
 
-  private int subjectiveAttemptOffsetMinutes = 1;
+  private int subjectiveAttemptOffsetMinutes = 5;
 
   /**
    * If a subjective round cannot be scheduled at a time, how many
    * minutes later should the next time to try be.
-   * Defaults to 1.
+   * Defaults to 5.
    */
   public final int getSubjectiveAttemptOffsetMinutes() {
     return this.subjectiveAttemptOffsetMinutes;
