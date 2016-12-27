@@ -16,6 +16,7 @@ import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
 
 import fll.util.FormatterUtils;
 
@@ -36,8 +37,6 @@ public class SolverParamsEditor extends JPanel {
 
   private final JFormattedTextField performanceChangeDuration;
 
-  private final JFormattedTextField numPerformanceRounds;
-
   private final JCheckBox subjectiveFirst;
 
   private final DurationListEditor perfAttemptOffsetMinutes;
@@ -50,6 +49,8 @@ public class SolverParamsEditor extends JPanel {
 
   private final JudgingGroupListEditor judgingGroups;
 
+  private final PerformanceRoundsEditor performanceRounds;
+
   private final ScheduledBreakListEditor subjectiveBreaks;
 
   private final ScheduledBreakListEditor performanceBreaks;
@@ -60,18 +61,12 @@ public class SolverParamsEditor extends JPanel {
     GridBagConstraints gbc;
 
     startTimeEditor = new ScheduleTimeField();
-    startTimeEditor.setInputVerifier(new ScheduleTimeField.TimeVerifier());
+    startTimeEditor.setInputVerifier(new ScheduleTimeField.TimeVerifier(false));
     addRow(new JLabel("Start Time:"), startTimeEditor);
 
-    alternateTables = new JCheckBox("Alternate tables");
-    addRow(alternateTables);
-
-    performanceDuration = FormatterUtils.createIntegerField(1, 1000);
-    performanceDuration.setToolTipText("The amount of time that the team is expected to be at the table");
-    addRow(new JLabel("Performance duration:"), performanceDuration);
-
-    subjectiveStations = new SubjectiveStationListEditor();
-    addRow(subjectiveStations);
+    maxTime = new ScheduleDurationField();
+    maxTime.setToolTipText("Maximum duration of the tournament hours:minutes");
+    addRow(new JLabel("Maximum length of the tournament"), maxTime);
 
     changeDuration = FormatterUtils.createIntegerField(0, 1000);
     changeDuration.setToolTipText("The number of minutes that a team has between any 2 activities");
@@ -81,36 +76,51 @@ public class SolverParamsEditor extends JPanel {
     performanceChangeDuration.setToolTipText("The number of minutes that a team has between any 2 performance runs");
     addRow(new JLabel("Performance change time duration:"), performanceChangeDuration);
 
+    addRow(new JSeparator());
+    // ---------------
+
     judgingGroups = new JudgingGroupListEditor();
     addRow(judgingGroups);
 
-    numPerformanceRounds = FormatterUtils.createIntegerField(0, 10);
-    addRow(new JLabel("Number of performance rounds:"), numPerformanceRounds);
+    subjectiveStations = new SubjectiveStationListEditor();
+    addRow(subjectiveStations);
 
-    subjectiveFirst = new JCheckBox("Schedule subjective before performance");
-    addRow(subjectiveFirst);
+    subjectiveBreaks = new ScheduledBreakListEditor("Subjective Breaks");
+    addRow(subjectiveBreaks);
+
+    subjectiveAttemptOffsetMinutes = FormatterUtils.createIntegerField(1, 1000);
+    subjectiveAttemptOffsetMinutes.setToolTipText("How many minutes later to try to find a new subjective time slot when no team can be scheduled at a time.");
+    addRow(new JLabel("Number of minutes between subjective attempts"), subjectiveAttemptOffsetMinutes);
+
+    addRow(new JSeparator());
+    // ----------------
+
+    numTables = FormatterUtils.createIntegerField(1, 1000);
+    addRow(new JLabel("Number of performance tables"), numTables);
+
+    alternateTables = new JCheckBox("Alternate tables");
+    addRow(alternateTables);
+
+    performanceDuration = FormatterUtils.createIntegerField(1, 1000);
+    performanceDuration.setToolTipText("The amount of time that the team is expected to be at the table");
+    addRow(new JLabel("Performance duration:"), performanceDuration);
+
+    performanceRounds = new PerformanceRoundsEditor();
+    addRow(performanceRounds);
+
+    performanceBreaks = new ScheduledBreakListEditor("Performance Breaks");
+    addRow(performanceBreaks);
 
     perfAttemptOffsetMinutes = new DurationListEditor();
     perfAttemptOffsetMinutes.setBorder(BorderFactory.createTitledBorder("Number of minutes between performance attempts"));
     perfAttemptOffsetMinutes.setToolTipText("If a performance round cannot be scheduled at a time, how many minutes later should the next time to try be. This is a list specifying the pattern. In most cases this list should only contain one element. However some tournaments may want to specify a pattern such as 7 and then 8 so that there are 2 timeslots available every 15 minutes.");
     addRow(perfAttemptOffsetMinutes);
 
-    subjectiveAttemptOffsetMinutes = FormatterUtils.createIntegerField(1, 1000);
-    subjectiveAttemptOffsetMinutes.setToolTipText("How many minutes later to try to find a new subjective time slot when no team can be scheduled at a time.");
-    addRow(new JLabel("Number of minutes between subjective attempts"), subjectiveAttemptOffsetMinutes);
+    addRow(new JSeparator());
+    // -------------
 
-    numTables = FormatterUtils.createIntegerField(1, 1000);
-    addRow(new JLabel("Number of performance tables"), numTables);
-
-    maxTime = new ScheduleDurationField();
-    maxTime.setToolTipText("Maximum duration of the tournament hours:minutes");
-    addRow(new JLabel("Maximum length of the tournament"), maxTime);
-
-    subjectiveBreaks = new ScheduledBreakListEditor("Subjective Breaks");
-    addRow(subjectiveBreaks);
-
-    performanceBreaks = new ScheduledBreakListEditor("Performance Breaks");
-    addRow(performanceBreaks);
+    subjectiveFirst = new JCheckBox("Schedule subjective before performance");
+    addRow(subjectiveFirst);
 
     // end of form spacer
     gbc = new GridBagConstraints();
@@ -164,7 +174,8 @@ public class SolverParamsEditor extends JPanel {
 
     judgingGroups.setJudgingGroups(params.getJudgingGroups());
 
-    numPerformanceRounds.setValue(params.getNumPerformanceRounds());
+    performanceRounds.setRounds(params.getPerformanceRoundEarliestStartTimes());
+
     subjectiveFirst.setSelected(params.getSubjectiveFirst());
     perfAttemptOffsetMinutes.setDurations(params.getPerformanceAttemptOffsetMinutes());
     subjectiveAttemptOffsetMinutes.setValue(params.getSubjectiveAttemptOffsetMinutes());
@@ -198,7 +209,8 @@ public class SolverParamsEditor extends JPanel {
     final Map<String, Integer> judgingGroupMap = judgingGroups.getJudgingGroups();
     params.setJudgingGroups(judgingGroupMap);
 
-    params.setNumPerformanceRounds((Integer) numPerformanceRounds.getValue());
+    params.setPerformanceRoundEarliestStartTimes(performanceRounds.getLimits());
+
     params.setSubjectiveFirst(subjectiveFirst.isSelected());
     params.setPerformanceAttemptOffsetMinutes(perfAttemptOffsetMinutes.getDurations());
     params.setSubjectiveAttemptOffsetMinutes((Integer) subjectiveAttemptOffsetMinutes.getValue());

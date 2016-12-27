@@ -1,3 +1,4 @@
+* #531 - Add support for the earliest start time for a performance round to the scheduler.
 * Make sure that the all teams scoreboard page scrolls to the top before reloading  
 * Add troubleshooting documentation to remote control page  
 * Make sure that the scheduler UI has default parameters set at the start so that saving a new schedule description works
