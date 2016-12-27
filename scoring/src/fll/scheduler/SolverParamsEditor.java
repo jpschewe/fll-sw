@@ -36,8 +36,6 @@ public class SolverParamsEditor extends JPanel {
 
   private final JFormattedTextField performanceChangeDuration;
 
-  private final JFormattedTextField numPerformanceRounds;
-
   private final JCheckBox subjectiveFirst;
 
   private final DurationListEditor perfAttemptOffsetMinutes;
@@ -50,6 +48,8 @@ public class SolverParamsEditor extends JPanel {
 
   private final JudgingGroupListEditor judgingGroups;
 
+  private final PerformanceRoundsEditor performanceRounds;
+  
   private final ScheduledBreakListEditor subjectiveBreaks;
 
   private final ScheduledBreakListEditor performanceBreaks;
@@ -60,7 +60,7 @@ public class SolverParamsEditor extends JPanel {
     GridBagConstraints gbc;
 
     startTimeEditor = new ScheduleTimeField();
-    startTimeEditor.setInputVerifier(new ScheduleTimeField.TimeVerifier());
+    startTimeEditor.setInputVerifier(new ScheduleTimeField.TimeVerifier(false));
     addRow(new JLabel("Start Time:"), startTimeEditor);
 
     alternateTables = new JCheckBox("Alternate tables");
@@ -84,8 +84,8 @@ public class SolverParamsEditor extends JPanel {
     judgingGroups = new JudgingGroupListEditor();
     addRow(judgingGroups);
 
-    numPerformanceRounds = FormatterUtils.createIntegerField(0, 10);
-    addRow(new JLabel("Number of performance rounds:"), numPerformanceRounds);
+    performanceRounds = new PerformanceRoundsEditor();
+    addRow(performanceRounds);
 
     subjectiveFirst = new JCheckBox("Schedule subjective before performance");
     addRow(subjectiveFirst);
@@ -111,7 +111,7 @@ public class SolverParamsEditor extends JPanel {
 
     performanceBreaks = new ScheduledBreakListEditor("Performance Breaks");
     addRow(performanceBreaks);
-
+    
     // end of form spacer
     gbc = new GridBagConstraints();
     gbc.fill = GridBagConstraints.BOTH;
@@ -164,7 +164,8 @@ public class SolverParamsEditor extends JPanel {
 
     judgingGroups.setJudgingGroups(params.getJudgingGroups());
 
-    numPerformanceRounds.setValue(params.getNumPerformanceRounds());
+    performanceRounds.setRounds(params.getPerformanceRoundEarliestStartTimes());
+
     subjectiveFirst.setSelected(params.getSubjectiveFirst());
     perfAttemptOffsetMinutes.setDurations(params.getPerformanceAttemptOffsetMinutes());
     subjectiveAttemptOffsetMinutes.setValue(params.getSubjectiveAttemptOffsetMinutes());
@@ -198,7 +199,8 @@ public class SolverParamsEditor extends JPanel {
     final Map<String, Integer> judgingGroupMap = judgingGroups.getJudgingGroups();
     params.setJudgingGroups(judgingGroupMap);
 
-    params.setNumPerformanceRounds((Integer) numPerformanceRounds.getValue());
+    params.setPerformanceRoundEarliestStartTimes(performanceRounds.getLimits());
+
     params.setSubjectiveFirst(subjectiveFirst.isSelected());
     params.setPerformanceAttemptOffsetMinutes(perfAttemptOffsetMinutes.getDurations());
     params.setSubjectiveAttemptOffsetMinutes((Integer) subjectiveAttemptOffsetMinutes.getValue());

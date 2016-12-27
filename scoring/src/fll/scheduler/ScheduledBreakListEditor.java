@@ -42,7 +42,7 @@ import fll.util.LogUtils;
 
     tableModel = new ScheduledBreakModel();
     table = new JTable(this.tableModel);
-    table.setDefaultEditor(LocalTime.class, new ScheduleTimeCellEditor());
+    table.setDefaultEditor(LocalTime.class, new ScheduleTimeCellEditor(false));
     table.setDefaultEditor(Integer.class, new IntegerCellEditor(1, 1000));
 
     new ButtonColumn(table, deleteAction, 2);

@@ -181,12 +181,17 @@ public class TournamentSchedule implements Serializable {
    * has an hour before {@link #EARLIEST_HOUR} the time is assumed to be in the
    * afternoon.
    * 
-   * @param str a string representing a schedule time
+   * @param str a string representing a schedule time, if null the return value
+   *          is null, if empty the return value is null
    * @return the {@link LocalTime} object for the string
    * @throws DateTimeParseException if the string could not be parsed as a time
    *           for a schedule
    */
   public static LocalTime parseTime(final String str) throws DateTimeParseException {
+    if (null == str || str.trim().isEmpty()) {
+      return null;
+    }
+
     try {
       // first try with the generic parser
       final LocalTime time = LocalTime.parse(str);
@@ -209,8 +214,18 @@ public class TournamentSchedule implements Serializable {
     }
   }
 
+  /**
+   * Conver the time to a string that will be parsed by {@link #parseTime(String)}.
+   * 
+   * @param time the time to format, may be null
+   * @return the formatted time, null converts to ""
+   */
   public static String formatTime(final LocalTime time) {
-    return time.format(OUTPUT_TIME_FORMAT);
+    if (null == time) {
+      return "";
+    } else {
+      return time.format(OUTPUT_TIME_FORMAT);
+    }
   }
 
   public static final ThreadLocal<DateFormat> DATE_FORMAT_AM_PM_SS = new ThreadLocal<DateFormat>() {

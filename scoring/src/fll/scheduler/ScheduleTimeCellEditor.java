@@ -20,14 +20,18 @@ import javax.swing.table.TableCellEditor;
 /* package */ final class ScheduleTimeCellEditor extends AbstractCellEditor implements TableCellEditor {
 
   private final ScheduleTimeField delegate;
-  private transient final ScheduleTimeField.TimeVerifier verifier = new ScheduleTimeField.TimeVerifier();
+
+  private transient final ScheduleTimeField.TimeVerifier verifier;
 
   /**
    * Create a cell editor for schedule times.
+   * 
+   * @param allowNull if true, allow null values
    */
-  public ScheduleTimeCellEditor() {
+  public ScheduleTimeCellEditor(final boolean allowNull) {
     super();
     delegate = new ScheduleTimeField();
+    verifier = new ScheduleTimeField.TimeVerifier(allowNull);
   }
 
   @Override
@@ -41,7 +45,7 @@ import javax.swing.table.TableCellEditor;
     boolean stop;
 
     // attempt to get the value, JPS 6/3/2016 - not sure if this is needed
-    //this.getCellEditorValue();
+    // this.getCellEditorValue();
     stop = verifier.verify(delegate);
 
     if (stop) {
