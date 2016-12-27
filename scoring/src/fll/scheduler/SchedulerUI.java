@@ -38,8 +38,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.StringJoiner;
 import java.util.concurrent.ExecutionException;
 import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -266,10 +268,18 @@ public class SchedulerUI extends JFrame {
     try (final Writer writer = new OutputStreamWriter(new FileOutputStream(mScheduleDescriptionFile),
                                                       Utilities.DEFAULT_CHARSET)) {
       final SolverParams params = mScheduleDescriptionEditor.getParams();
-
-      final Properties properties = new Properties();
-      params.save(properties);
-      properties.store(writer, null);
+      final List<String> errors = params.isValid();
+      if (!errors.isEmpty()) {
+        final String formattedErrors = errors.stream().collect(Collectors.joining("\n"));
+        JOptionPane.showMessageDialog(SchedulerUI.this,
+                                      "There are errors that need to be corrected before the description can be saved: "
+                                          + formattedErrors,
+                                      "Error saving file", JOptionPane.ERROR_MESSAGE);
+      } else {
+        final Properties properties = new Properties();
+        params.save(properties);
+        properties.store(writer, null);
+      }
     } catch (final IOException e) {
       final Formatter errorFormatter = new Formatter();
       errorFormatter.format("Error saving file: %s", e.getMessage());
