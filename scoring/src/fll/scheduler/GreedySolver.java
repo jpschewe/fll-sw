@@ -383,7 +383,7 @@ public class GreedySolver {
     }
 
     if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("SUCCESS");
+      LOGGER.trace("    SUCCESS");
     }
     return true;
   }
@@ -921,7 +921,7 @@ public class GreedySolver {
         final long offset = ChronoUnit.MINUTES.between(solverParameters.getStartTime(), time);
         perfEarliestTimes[i] = offset;
       } else {
-        perfEarliestTimes[i] = Long.MAX_VALUE;
+        perfEarliestTimes[i] = 0; // can start right away
       }
     }
   }
