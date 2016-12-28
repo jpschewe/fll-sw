@@ -1,3 +1,6 @@
+Release 11.5
+============
+
 * #531 - Add support for the earliest start time for a performance round to the scheduler.
 * Make sure that the all teams scoreboard page scrolls to the top before reloading  
 * Add troubleshooting documentation to remote control page  
