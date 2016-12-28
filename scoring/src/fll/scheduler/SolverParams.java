@@ -34,7 +34,7 @@ public class SolverParams extends SchedParams {
 
   public static final String ALTERNATE_TABLES_KEY = "alternate_tables";
 
-  public static final String SUBJECTIVE_FIRST_KEY = "sujective_first";
+  public static final String SUBJECTIVE_FIRST_KEY = "subjective_first";
 
   public static final String PERF_ATTEMPT_OFFSET_MINUTES_KEY = "perf_attempt_offset_minutes";
 
