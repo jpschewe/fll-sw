@@ -12,7 +12,6 @@ the change which tables each team runs on there is a table optimizer. This
 just swaps around which table and side each team is on trying to minimize
 the number of warnings.
 
-
 ## SchedulerUI
 
  1. [Install the server software](InstallServerSoftware.md) on your computer
@@ -23,9 +22,9 @@ the number of warnings.
 
 ### Description tab
 
-The description tab is used to load and edit a file with schedule parameters. The edited file can be saved with the disk icon. The lightbulb icon runs the scheduler and table optimizer on the resulting schedule and then loads it in the schedule tab.
+The description tab is used to load and edit a file with schedule parameters. The edited file can be saved with the disk icon. The lightbulb icon runs the scheduler and optionally the table optimizer on the resulting schedule and then loads it in the schedule tab.
 
-You can find more examples in our [previous datafiles](../../scheduling/blank-schedules). Look for the properties files. You can start with one of these and modify them.
+You can find some examples in our [previous datafiles](../../scheduling/blank-schedules). Look for the properties files. You can start with one of these and modify them.
 
 ### Schedule tab
 
@@ -42,69 +41,14 @@ The scroll icon is used to display information about the general schedule.
 The file being asked for is a spreadsheet of your schedule. At this point only Excel spreadsheets can be read and they must match the expected format. The easiest way to get this format is to take one of our [blank schedules](../../scheduling/datafiles) and just fill it in with your team information. The schedules are named `#-#.xls` to state how many teams are in each judging group. Unless you're running a large tournament with finalist judging you need to have all teams for a given division seen by the same judge. So the schedule named `11-6.xls` is a schedule that has 11 teams in one judging group and 6 teams in the other judging group. Do not change the "Team #" header loading into the `SchedulerUI`.
 
 
-## Configurable Parameters
+## Videos on running the scheduler
 
-With the user interface you mostly don't need to worry about these, but if you end up looking at the resulting properties file here is what the variables mean.
+1. [Creating a 32 team schedule](https://vimeo.com/album/4327453/video/197293207) (external)
+1. [Scheduler outputs](https://vimeo.com/197305835) (external)
+1. [Adding breaks to a schedule](https://vimeo.com/album/4327453/video/197294593) (external)
+1. [Advanced scheduling techniques](https://vimeo.com/album/4327453/video/197298274) (external)
+1. [Populating a schedule](https://vimeo.com/172255789) (external) - The scheduler creates a template schedule without specific team information. This explains how to create a fully populated schedule from the template.
 
-TInc - Time increment in minutes. Generally leave at 1. Must be an integer.
-
-TMax\_hours, TMax\_minutes - The longest that the tournament can run.
-
-NSubjective - The number of subjective stations to schedule.
-
-subj\_minutes - Array stating the number of minutes that each team is at
-each of the subjective judging stations. The number of elements in this
-array *must* match NSubjective.
-
-NRounds - The number of performance rounds each team needs to be scheduled for.
-
-NTables - The number for performance tables that can  be scheduled.
-
-NGroups - The number of judging groups. Each judging group can see a team in a subjective judging station at the same time.
-
-group_counts - Array showing the number of teams in each judging group. The number of elements in this array *must* match NGroups.
-
-alpha\_perf\_minutes - The amount of time between performance runs on a table.
-
-alternate\_tables - 0 to use all tables at the same time, 1 to alternate
-sets of tables. Alternating tables means that the number of tables and the
-performance duration both must be even. Then half of the tables are
-scheduled right away and the other half are scheduled at half the
-performance duration. This is sometimes used at our state tournaments to
-decrease the amount of time the tournament takes and keep the tables full
-longer and give the refs more time to reset the tables.
-
-perf\_attempt\_offset\_minutes - What interval to try scheduling the tables
-on. Setting this to 5 will ensure that tables are only scheduled at 8:05,
-8:10, 8:15, ...
-
-subjective\_attempt\_offset\_minutes - What interval to try scheduling the
-subjective judging on. Setting this to 5 will ensure that rooms are only
-scheduled at 8:05, 8:10, 8:15, ...
-
-start\_time - The start time of the first scheduled event. Use a 24 hour clock.
-
-ct\_minutes - Change time in minutes. A team must have at least this much time from the end of one event to the start of their next event.
-
-pct\_minutes - Performance change time in minutes. A team must have at least this much time from the end of one performance run to the start of their next.
-
-### Breaks
-
-Breaks can be forced into the schedule. This is useful to allow the judges
-or refs to catch up or to schedule a lunch break. There are subjective
-breaks and performance breaks. It is suggested to make lunch breaks at
-least 45 minutes long. Less than that and the judges and refs are typically
-rushed for lunch.
-
-num\_subjective\_breaks - The number of subjective breaks
-
-subjective\_break\_0\_start - The start time of the first subjective break
-
-subjective\_break\_0\_duration - The minute of minutes in the first subjective break
-
-performance\_break\_0\_start - The start time of the first performance break
-
-performance\_break\_0\_duration - The minute of minutes in the first performance break
 
 ## Assumptions
 
@@ -121,3 +65,9 @@ this scheduler can be used for non-FLL schedules.
 If you would like to use the scheduler for a non-FLL tournament chances are
 that you want to set the number of performance rounds to 0 and just use the
 subjective judging stations.
+
+## Detailed file format
+
+The [details of the file format](scheduler-file-format.md) are available for those that want to edit the description file by hand.
+
+
