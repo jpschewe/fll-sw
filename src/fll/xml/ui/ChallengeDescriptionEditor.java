@@ -207,10 +207,13 @@ public class ChallengeDescriptionEditor extends JFrame {
           return;
         }
 
+        // update the UI
         subjective.add(e.getComponent(), newIndex);
         subjective.validate();
 
-        // FIXME need to update the order in the challenge description
+        // update the order in the challenge description
+        final SubjectiveScoreCategory category = mDescription.removeSubjectiveCategory(oldIndex);
+        mDescription.addSubjectiveCategory(newIndex, category);
       }
 
     };
