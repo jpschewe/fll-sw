@@ -6,12 +6,14 @@
 
 package fll.xml.ui;
 
-import javax.swing.BoxLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+
+import javax.swing.JFormattedTextField;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import org.apache.log4j.Logger;
-
-import fll.util.LogUtils;
+import fll.util.FormatterUtils;
 import fll.xml.AbstractGoal;
 import fll.xml.ScoreCategory;
 
@@ -20,14 +22,39 @@ import fll.xml.ScoreCategory;
  */
 public class ScoreCategoryEditor extends JPanel {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
-  
   public ScoreCategoryEditor(final ScoreCategory category) {
-    setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-         
+    setLayout(new GridBagLayout());
+
+    GridBagConstraints gbc;
+
+    gbc = new GridBagConstraints();
+    gbc.weightx = 0;
+    gbc.anchor = GridBagConstraints.LINE_END;
+    add(new JLabel("weight: "), gbc);
+
+    final JFormattedTextField weight = FormatterUtils.createDoubleField();
+    gbc = new GridBagConstraints();
+    gbc.weightx = 1;
+    gbc.anchor = GridBagConstraints.LINE_START;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    add(weight, gbc);
+
+    weight.setValue(category.getWeight());
+    weight.addPropertyChangeListener("value", e -> {
+      final double newWeight = ((Number) weight.getValue()).doubleValue();
+      category.setWeight(newWeight);
+    });
+
     for (final AbstractGoal goal : category.getGoals()) {
       final AbstractGoalEditor editor = new AbstractGoalEditor(goal);
-      add(editor);
+
+      gbc = new GridBagConstraints();
+      gbc.weightx = 1;
+      gbc.anchor = GridBagConstraints.LINE_START;
+      gbc.gridwidth = GridBagConstraints.REMAINDER;
+
+      add(editor, gbc);
     }
   }
 
