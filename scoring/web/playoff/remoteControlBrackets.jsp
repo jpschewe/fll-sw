@@ -163,31 +163,33 @@ SPAN.TIE {
               //First and foremost, make sure rounds haven't advanced and the division is the same.
               if (mainData.refresh == "true") {
                   window.location.reload();
-              }
-              if (data.leaf.team.teamNumber < 0) {
-                  if (data.leaf.team.teamNumber == -3) {
-                      return;
-                  }
-                  $("#" + lid).html(displayStrings.getSpecialString(lid, data.leaf));
-                  return;
-              } else if (lid.split("-")[1] != finalRound)/*Don't show final results!*/ { // /if team number meant a bye
-                  var score;
-                  //table label?
-                  placeTableLabel(lid, data.leaf.table, data.leaf.dbline);
-                  var scoreData = data.score;
-                  if (scoreData >= 0) {
-                      $("#" + lid).html(displayStrings.getTeamNameAndScoreString(lid, data.leaf, scoreData));
-                      return;
-                  } else if (scoreData == -2) {
-                      $("#" + lid).html(displayStrings.getTeamNameAndScoreString(lid, data.leaf, "No Show"));
-                      return;
-                  } else if (scoreData == -1) {
-                      $("#" + lid).html(displayStrings.getTeamNameString(lid, data.leaf));
-                      return;
-                  } // /else
-                  //}); // /.done
-              } // /if team num not a bye
-          }); // /.each of data
+              } else {
+                  if(data.leaf.team) {
+                      if (data.leaf.team.teamNumber < 0) {
+                          if (data.leaf.team.teamNumber == -3) {
+                              return;
+                          }
+                          $("#" + lid).html(displayStrings.getSpecialString(lid, data.leaf));
+                          return;
+                      } else if (lid.split("-")[1] != finalRound)/*Don't show final results!*/ { // /if team number meant a bye
+                          var score;
+                          //table label?
+                          placeTableLabel(lid, data.leaf.table, data.leaf.dbline);
+                          var scoreData = data.score;
+                          if (scoreData >= 0) {
+                              $("#" + lid).html(displayStrings.getTeamNameAndScoreString(lid, data.leaf, scoreData));
+                              return;
+                          } else if (scoreData == -2) {
+                              $("#" + lid).html(displayStrings.getTeamNameAndScoreString(lid, data.leaf, "No Show"));
+                              return;
+                          } else if (scoreData == -1) {
+                              $("#" + lid).html(displayStrings.getTeamNameString(lid, data.leaf));
+                              return;
+                          } // /else
+                      } // else if team num not a bye
+                  } // have a team number
+              } // not refresh
+          }); // each of data
           colorTableLabels();
       }).error(function (xhr, errstring, err) { 
           window.location.reload();
