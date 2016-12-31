@@ -166,14 +166,20 @@ END DEBUG --%>
     <th>Head to Head <i>WARNING: Do not select brackets until all
       seeding runs have been recorded!</i>
     </th>
-    <td><c:if test='${displayPage == "playoffs"}'
-      var='playoffsPage'>
+    <td>
+    <c:choose>
+    <c:when test='${displayPage == "playoffs"}'>
       <input type='radio' id='playoffs' name='remotePage'
        value='playoffs' checked />
-     </c:if> <c:if test='${not playoffsPage}'>
+     </c:when> 
+     <c:otherwise>
       <input type='radio' id='playoffs' name='remotePage'
        value='playoffs' />
-     </c:if> Head to Head Bracket: <select name='playoffDivision'>
+     </c:otherwise>
+     </c:choose> 
+     <br/>
+     
+     Bracket: <select name='playoffDivision'>
       <c:forEach items="${divisions}" var="division">
        <c:choose>
         <c:when test="${division == playoffDivision}">
@@ -184,7 +190,9 @@ END DEBUG --%>
         </c:otherwise>
        </c:choose>
       </c:forEach>
-    </select> <br /> Head to Head Round: <select name='playoffRoundNumber'>
+    </select> <br /> 
+    
+     Round: <select name='playoffRoundNumber'>
       <c:forEach begin="1" end="${numPlayoffRounds}" var="numRounds">
        <c:choose>
         <c:when test="${numRounds == playoffRoundNumber}">
@@ -195,7 +203,8 @@ END DEBUG --%>
         </c:otherwise>
        </c:choose>
       </c:forEach>
-    </select></td>
+    </select>   
+    </td>
 
     <c:if test="${not empty displayNames}">
      <c:forEach items="${displayNames}" var="displayName">
@@ -212,7 +221,9 @@ END DEBUG --%>
          <input type='radio' name="${displayName.key}_remotePage"
           value='playoffs' />
         </c:otherwise>
-       </c:choose> Head to Head Bracket: <select name='${displayName.key}_playoffDivision'>
+       </c:choose><br/>
+       
+       Bracket: <select name='${displayName.key}_playoffDivision'>
         <c:forEach items="${divisions}" var="division">
          <c:choose>
           <c:when
@@ -224,7 +235,9 @@ END DEBUG --%>
           </c:otherwise>
          </c:choose>
         </c:forEach>
-      </select> <br /> Head to Head Round: <select
+      </select> <br /> 
+      
+      Round: <select
        name='${displayName.key}_playoffRoundNumber'>
         <c:forEach begin="1" end="${numPlayoffRounds}" var="numRounds">
          <c:choose>
@@ -242,7 +255,7 @@ END DEBUG --%>
      </c:forEach>
     </c:if>
 
-   </tr> <!--  Playoffs -->
+   </tr> <!--  Head to Head -->
 
    <tr>
     <th>Finalist Schedule</th>
