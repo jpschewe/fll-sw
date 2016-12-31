@@ -307,6 +307,8 @@ SPAN.TIE {
 <br/>
 <br/>
 
+<div class='center'>Head to Head Bracket ${bracket}</div>
+                        
   <c:if test="${playoffRoundNumber <= numPlayoffRounds }">
    <%=bracketInfo.outputBrackets(BracketData.TopRightCornerStyle.MEET_TOP_OF_CELL)%>
   </c:if>
