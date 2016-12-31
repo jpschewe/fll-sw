@@ -121,7 +121,6 @@ SPAN.TIE {
 <script type="text/javascript">
   var ajaxURL = '<c:url value="/ajax/"/>';
   var currentRound = <%=playoffRoundNumber-1%>;
-  var foundNewest = false;
   var rows = <%=bracketInfo.getNumRows()%>;
   var finalRound = <%=Queries.getNumPlayoffRounds(connection, division)+1%>;
   var maxNameLength = <%=Team.MAX_TEAM_NAME_LEN%>;
@@ -135,36 +134,22 @@ SPAN.TIE {
           return team;
       }
   }
-  displayStrings.getSpecialString = function (id, data, newest) {
-      if (newest) {
-          return "<a name=\"newest\" id=\""+id+"-n\"></a><span class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</span>";
-      } else {
-          return "<span class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</span>";
-      }
+  displayStrings.getSpecialString = function (id, data) {
+      return "<span class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</span>";
   }
-  displayStrings.getTeamNameString = function (id, data, newest) {
-      if (newest) {
-          return "<a name=\"newest\" id=\""+id+"-n\"></a><span class=\"TeamNumber\">#" + data.team.teamNumber + "</span> <span class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</span>";
-      } else {
-          return "<span class=\"TeamNumber\">#" + data.team.teamNumber + "</span> <span class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</span>";
-      }
+  displayStrings.getTeamNameString = function (id, data) {
+      return "<span class=\"TeamNumber\">#" + data.team.teamNumber + "</span> <span class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</span>";
   }
-  displayStrings.getTeamNameAndScoreString = function (id, data, scoreData, newest) {
+  displayStrings.getTeamNameAndScoreString = function (id, data, scoreData) {
       if (scoreData != "No Show") {
           scoreData += ".0";
       }
-      if (newest) {
-          return "<a name=\"newest\" id=\""+id+"-n\"></a><span class=\"TeamNumber\">#" + data.team.teamNumber + "</span> <span class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</span><span class=\"TeamScore\"> Score: " + scoreData + "</span>";
-      } else {
-          return "<span class=\"TeamNumber\">#" + data.team.teamNumber + "</span> <span class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</span><span class=\"TeamScore\"> Score: " + scoreData + "</span>";
-      }
+      return "<span class=\"TeamNumber\">#" + data.team.teamNumber + "</span> <span class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</span><span class=\"TeamScore\"> Score: " + scoreData + "</span>";
   }
 
   var ajaxList;
   
   function iterate() {
-      foundNewest = false;
-      $("a[name=newest]").remove();
       $.ajax({
           url: ajaxURL + "BracketQuery?division=" + division + "&multi=" + ajaxList,
           dataType: "json",
@@ -183,12 +168,7 @@ SPAN.TIE {
                   if (data.leaf.team.teamNumber == -3) {
                       return;
                   }
-                  if ($("#" + lid).html() != displayStrings.getSpecialString(lid, data.leaf, false) && !foundNewest) {
-                      $("#" + lid).html(displayStrings.getSpecialString(lid, data.leaf, true));
-                      foundNewest = true;
-                  } else {
-                      $("#" + lid).html(displayStrings.getSpecialString(lid, data.leaf, false));
-                  }
+                  $("#" + lid).html(displayStrings.getSpecialString(lid, data.leaf));
                   return;
               } else if (lid.split("-")[1] != finalRound)/*Don't show final results!*/ { // /if team number meant a bye
                   var score;
@@ -196,28 +176,13 @@ SPAN.TIE {
                   placeTableLabel(lid, data.leaf.table, data.leaf.dbline);
                   var scoreData = data.score;
                   if (scoreData >= 0) {
-                      if ($("#" + lid).html() != displayStrings.getTeamNameAndScoreString(lid, data.leaf, scoreData, false) && !foundNewest) {
-                          $("#" + lid).html(displayStrings.getTeamNameAndScoreString(lid, data.leaf, scoreData, true));
-                          foundNewest = true;
-                      } else {
-                          $("#" + lid).html(displayStrings.getTeamNameAndScoreString(lid, data.leaf, scoreData, false));
-                      }
+                      $("#" + lid).html(displayStrings.getTeamNameAndScoreString(lid, data.leaf, scoreData));
                       return;
                   } else if (scoreData == -2) {
-                      if ($("#" + lid).html() != displayStrings.getTeamNameAndScoreString(lid, data.leaf, "No Show", false) && !foundNewest) {
-                          $("#" + lid).html(displayStrings.getTeamNameAndScoreString(lid, data.leaf, "No Show", true));
-                          foundNewest = true;
-                      } else {
-                          $("#" + lid).html(displayStrings.getTeamNameAndScoreString(lid, data.leaf, "No Show", false));
-                      }
+                      $("#" + lid).html(displayStrings.getTeamNameAndScoreString(lid, data.leaf, "No Show"));
                       return;
                   } else if (scoreData == -1) {
-                      if ($("#" + lid).html() != displayStrings.getTeamNameString(lid, data.leaf, false) && !foundNewest) {
-                          $("#" + lid).html(displayStrings.getTeamNameString(lid, data.leaf, true));
-                          foundNewest = true;
-                      } else {
-                          $("#" + lid).html(displayStrings.getTeamNameString(lid, data.leaf, false));
-                      }
+                      $("#" + lid).html(displayStrings.getTeamNameString(lid, data.leaf));
                       return;
                   } // /else
                   //}); // /.done
