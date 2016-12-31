@@ -72,6 +72,10 @@
   
   pageContext.setAttribute("playoffRoundNumber", playoffRoundNumber);
   pageContext.setAttribute("numPlayoffRounds", numPlayoffRounds);
+  pageContext.setAttribute("bracket", division);
+  pageContext.setAttribute("maxNameLength", Team.MAX_TEAM_NAME_LEN);
+  pageContext.setAttribute("numRows", bracketInfo.getNumRows());
+  pageContext.setAttribute("finalRound", Queries.getNumPlayoffRounds(connection, division)+1);
 %>
 
 <html>
@@ -79,7 +83,7 @@
 <link rel="stylesheet" type="text/css" href="<c:url value='/style/fll-sw.css'/>" />
 <link rel="stylesheet" type="text/css" href="<c:url value='/scoreboard/score_style.css'/>" />
 
-<title>Head to Head Round <%=playoffRoundNumber%>, Head to Head Bracket <%=division%></title>
+<title>Head to Head Round ${playoffRoundNumber}, Head to Head Bracket ${bracket}</title>
 <style type='text/css'>
 TD.Leaf {
 	color: #ffffff;
@@ -120,11 +124,11 @@ SPAN.TIE {
 <script type="text/javascript" src="<c:url value='/extlib/jquery.scrollTo-2.1.2.min.js'/>"></script>
 <script type="text/javascript">
   var ajaxURL = '<c:url value="/ajax/"/>';
-  var currentRound = <%=playoffRoundNumber-1%>;
-  var rows = <%=bracketInfo.getNumRows()%>;
-  var finalRound = <%=Queries.getNumPlayoffRounds(connection, division)+1%>;
-  var maxNameLength = <%=Team.MAX_TEAM_NAME_LEN%>;
-  var division = "<%=division%>";
+  var currentRound = ${playoffRoundNumber}-1;
+  var rows = ${numRows};
+  var finalRound = ${finalRound};
+  var maxNameLength = ${maxNameLength};
+  var division = "${bracket}";
   
   var displayStrings = new Object();
   displayStrings.parseTeamName = function (team) {
