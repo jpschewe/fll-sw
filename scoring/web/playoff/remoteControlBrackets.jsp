@@ -252,14 +252,16 @@ SPAN.TIE {
   }
 
   function buildAJAXList() {
+      ajaxList = ""; // initialize to empty string
+      
       $(".js-leaf").each(function () {
-          if (typeof $(this).attr('id') == 'string') {
+          if (typeof $(this).attr('id') == 'string') { // non-null id
               ajaxList = ajaxList + $(this).attr('id') + "|";
           }
       });
+
       //remove last pipe
       ajaxList = ajaxList.slice(0, ajaxList.length - 1);
-      ajaxList = ajaxList.replace(new RegExp("[a-z]", "g"), "");
   }
 
   function scrollToBottom() {   
