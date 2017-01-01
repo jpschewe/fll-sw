@@ -64,7 +64,7 @@ import fll.util.LogUtils;
 import fll.web.api.TournamentsServlet;
 import fll.xml.BracketSortType;
 import io.github.bonigarcia.wdm.ChromeDriverManager;
-import io.github.bonigarcia.wdm.MarionetteDriverManager;
+import io.github.bonigarcia.wdm.FirefoxDriverManager;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
@@ -582,7 +582,7 @@ public final class IntegrationTestUtils {
 
   private static WebDriver createFirefoxWebDriver() {
     if (!mInitializedWebDrivers.contains(WebDriverType.FIREFOX)) {
-      MarionetteDriverManager.getInstance().setup();
+      FirefoxDriverManager.getInstance().setup();
       mInitializedWebDrivers.add(WebDriverType.FIREFOX);
     }
 
