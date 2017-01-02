@@ -33,6 +33,8 @@ public final class DisplayNames {
     if (null == str
         || "".equals(str)) {
       return null;
+    } else if("default".equalsIgnoreCase(str)) {
+      return "_default"; // make sure this display doesn't conflict with the internal default
     } else {
       String ret = str;
       final Matcher illegalCharMatcher = ILLEGAL_CHAR_PATTERN.matcher(ret);
