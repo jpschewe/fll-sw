@@ -480,7 +480,7 @@ END DEBUG --%>
                     value='finalistSchedule' />
                 </c:otherwise>
 
-              </c:choose> Division: <select
+              </c:choose> Award Group: <select
               name='${displayName.key}_finalistDivision'>
 
                 <c:forEach
