@@ -42,7 +42,7 @@ public final class DisplayNames {
     }
   }
 
-  private static final Pattern ILLEGAL_CHAR_PATTERN = Pattern.compile("[^A-Za-z0-9_-]");
+  private static final Pattern ILLEGAL_CHAR_PATTERN = Pattern.compile("[^A-Za-z0-9_]");
 
   /**
    * Add a display name to the list of known displays.
