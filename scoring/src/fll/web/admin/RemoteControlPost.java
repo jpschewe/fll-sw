@@ -35,7 +35,8 @@ public class RemoteControlPost extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     final Set<String> displayNames = DisplayNames.getDisplayNames(application);
 
     if (LOGGER.isTraceEnabled()) {
@@ -43,10 +44,16 @@ public class RemoteControlPost extends BaseFLLServlet {
           + request.getParameter("remotePage"));
       LOGGER.trace("remoteURL "
           + request.getParameter("remoteURL"));
-      LOGGER.trace("playoffDivision "
-          + request.getParameter("playoffDivision"));
-      LOGGER.trace("playoffRoundNumber "
-          + request.getParameter("playoffRoundNumber"));
+      LOGGER.trace("numBrackets "
+          + request.getParameter("numBrackets"));
+      for (int i = 0; i < Integer.parseInt(request.getParameter("numBrackets")); ++i) {
+        LOGGER.trace("playoffDivision "
+            + i + ": " + request.getParameter("playoffDivision_"
+                + i));
+        LOGGER.trace("playoffRoundNumber "
+            + i + ": " + request.getParameter("playoffRoundNumber_"
+                + i));
+      }
       LOGGER.trace("finalistDivision "
           + request.getParameter("finalistDivision"));
 
@@ -60,15 +67,22 @@ public class RemoteControlPost extends BaseFLLServlet {
           LOGGER.trace("\tremoteURL "
               + request.getParameter(displayName
                   + "_remoteURL"));
-          LOGGER.trace("\tplayoffDivision "
-              + request.getParameter(displayName
-                  + "_playoffDivision"));
-          LOGGER.trace("\tplayoffRoundNumber "
-              + request.getParameter(displayName
-                  + "_playoffRoundNumber"));
+          
+          for (int i = 0; i < Integer.parseInt(request.getParameter(displayName + "_numBrackets")); ++i) {
+            LOGGER.trace("\tplayoffDivision "
+                + i + ": " + request.getParameter(displayName + "_playoffDivision_"
+                    + i));
+            LOGGER.trace("\tplayoffRoundNumber "
+                + i + ": " + request.getParameter(displayName + "_playoffRoundNumber_"
+                    + i));
+          }
           LOGGER.trace("\tdelete? "
               + request.getParameter(displayName
                   + "_delete"));
+          
+          LOGGER.trace("\tfinalistDivision "
+              + request.getParameter(displayName + "_finalistDivision"));
+
         }
       }
     } // if trace enabled
