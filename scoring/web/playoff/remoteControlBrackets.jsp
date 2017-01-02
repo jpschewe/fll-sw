@@ -308,11 +308,12 @@ SPAN.TIE {
 <br/>
 
 <div class='center'>Head to Head Bracket ${bracket}</div>
+                        <br/>
                         
   <c:if test="${playoffRoundNumber <= numPlayoffRounds }">
    <%=bracketInfo.outputBrackets(BracketData.TopRightCornerStyle.MEET_TOP_OF_CELL)%>
   </c:if>
-  
+
   <span id="bottom">&nbsp;</span>
 </div>
 
