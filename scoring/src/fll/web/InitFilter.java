@@ -22,8 +22,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
@@ -32,6 +30,7 @@ import fll.db.GlobalParameters;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.xml.ChallengeDescription;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Initialize web attributes.
@@ -54,7 +53,8 @@ public class InitFilter implements Filter {
    */
   public void doFilter(final ServletRequest request,
                        final ServletResponse response,
-                       final FilterChain chain) throws IOException, ServletException {
+                       final FilterChain chain)
+      throws IOException, ServletException {
     if (response instanceof HttpServletResponse
         && request instanceof HttpServletRequest) {
       final HttpServletResponse httpResponse = (HttpServletResponse) response;
@@ -130,12 +130,13 @@ public class InitFilter implements Filter {
                 + "/subjective") //
             || path.startsWith(contextPath
                 + "/setup") //
-    )) {
+        )) {
       if (path.startsWith(contextPath
           + "/report/finalist/PublicFinalistDisplaySchedule")) {
         // this report is public
         return false;
-      } else if(path.startsWith(contextPath + "/report/finalist/FinalistTeams")) {
+      } else if (path.startsWith(contextPath
+          + "/report/finalist/FinalistTeams")) {
         // allow the list of finalist teams to be public
         return false;
       } else if (path.startsWith(contextPath
@@ -195,7 +196,8 @@ public class InitFilter implements Filter {
   private boolean checkSecurity(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException {
+                                final HttpSession session)
+      throws IOException {
 
     if (WebUtils.checkAuthenticated(request, application)) {
       return true;
@@ -238,7 +240,8 @@ public class InitFilter implements Filter {
   private static boolean initialize(final HttpServletRequest request,
                                     final HttpServletResponse response,
                                     final HttpSession session,
-                                    final ServletContext application) throws IOException, RuntimeException {
+                                    final ServletContext application)
+      throws IOException, RuntimeException {
 
     try {
 
@@ -248,6 +251,9 @@ public class InitFilter implements Filter {
         if (null == application.getAttribute(ApplicationAttributes.SCORE_PAGE_TEXT)) {
           application.setAttribute(ApplicationAttributes.SCORE_PAGE_TEXT, "");
         }
+
+        // make sure the default display object exists
+        DisplayInfo.getDisplayInformation(application);
 
         initDataSource(application);
         final DataSource datasource = ApplicationAttributes.getDataSource(application);

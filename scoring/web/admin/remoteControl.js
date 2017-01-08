@@ -8,9 +8,10 @@
 
 /**
  * The prefix used on variables based on the display name.
+ * Needs to match DisplayInfo.getFormParamPrefix() in the Java code. 
  * 
  * @param displayName
- *          string display name from the dictionary numBrackets
+ *          string display name from the list displayNames
  * @returns
  */
 function displayPrefix(displayName) {
@@ -21,9 +22,33 @@ function displayPrefix(displayName) {
   }
 }
 
+/**
+ * Get the number of brackets for the specified display.
+ * 
+ * @param displayName the name of the display
+ * @returns an integer number of brackets
+ */
+function getNumBracketsForDisplay(displayName) {
+  var lDisplayPrefix = displayPrefix(displayName);
+  var numBrackets = parseInt($("#" + lDisplayPrefix + "numBrackets").val());
+  return numBrackets;
+}
+
+/**
+ * Set the number of brackets for the specified display.
+ * 
+ * @param displayName the name of the display
+ * @param numBrackets the number of brackets
+ */
+function setNumBracketsForDisplay(displayName, numBrackets) {
+  var lDisplayPrefix = displayPrefix(displayName);
+  $("#" + lDisplayPrefix + "numBrackets").val(numBrackets);
+}
+
 function updateButtonStates() {
-  $.each(numBrackets, function(displayName, nBrackets) {
+  $.each(displayNames, function(index, displayName) {
     var remove_button_id = displayPrefix(displayName) + "remove_bracket";
+    var nBrackets = getNumBracketsForDisplay(displayName);
     if (nBrackets < 2) {
       $("#" + remove_button_id).prop('disabled', true);
     } else {
@@ -32,9 +57,14 @@ function updateButtonStates() {
   });
 }
 
+/**
+ * Add a bracket to the specified display.
+ * 
+ * @param displayName the name of the display
+ */
 function addBracket(displayName) {
   var lDisplayPrefix = displayPrefix(displayName);
-  var bracketIndex = numBrackets[displayName];
+  var bracketIndex = getNumBracketsForDisplay(displayName);
   var div = $("<div id='" + lDisplayPrefix + "bracket_" + bracketIndex
       + "'></div>");
   $("#" + lDisplayPrefix + "bracket_selection").append(div);
@@ -63,32 +93,31 @@ function addBracket(displayName) {
 
   div.append($("<hr/>"));
 
-  // now one more bracket defined
-  numBrackets[displayName] = bracketIndex + 1;
-  $("#" + lDisplayPrefix + "numBrackets").val(numBrackets[displayName]);
-
+  setNumBracketsForDisplay(displayName, bracketIndex+1);
   updateButtonStates();
 }
 
+/**
+ * Remove the last bracket for the specified display.
+ * 
+ * @param displayName the name of the display
+ */
 function removeBracket(displayName) {
-  var nBrackets = numBrackets[displayName];
+  var nBrackets = getNumBracketsForDisplay(displayName);
   var lastBracketIndex = nBrackets - 1;
   var lDisplayPrefix = displayPrefix(displayName);
   var div = $("#" + lDisplayPrefix + "bracket_" + lastBracketIndex);
 
   div.remove();
 
-  // now one less bracket defined
-  numBrackets[displayName] = nBrackets - 1;
-  $("#" + lDisplayPrefix + "numBrackets").val(numBrackets[displayName]);
-
+  setNumBracketsForDisplay(displayName, bracketIndex-1);
   updateButtonStates();
 }
 
 $(document).ready(function() {
   updateButtonStates();
 
-  $.each(numBrackets, function(displayName, nBrackets) {
+  $.each(displayNames, function(index, displayName) {
     $("#" + displayPrefix(displayName) + "add_bracket").click(function() {
       addBracket(displayName);
     });
