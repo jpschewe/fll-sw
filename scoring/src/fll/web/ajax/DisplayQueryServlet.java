@@ -26,7 +26,7 @@ import fll.Utilities;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
-import fll.web.DisplayNames;
+import fll.web.DisplayInfo;
 import fll.web.SessionAttributes;
 
 /**
@@ -39,12 +39,15 @@ public class DisplayQueryServlet extends BaseFLLServlet {
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
+    final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
+    //FIXME start here
+    
     final String localDisplayPage;
     final String localDisplayURL;
     final String displayName = SessionAttributes.getAttribute(session, "displayName", String.class);
     if (displayName != null) {
       // update last seen time
-      DisplayNames.appendDisplayName(application, session, displayName);
+      DisplayInfo.appendDisplayName(application, session, displayName);
 
       final String myDisplayPage = ApplicationAttributes.getAttribute(application, displayName
           + "_displayPage", String.class);

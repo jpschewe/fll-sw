@@ -1,6 +1,6 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<%@ page import="fll.web.DisplayNames"%>
+<%@ page import="fll.web.DisplayInfo"%>
 
 
 <html>
@@ -83,7 +83,7 @@
 
   <c:if test="${not empty param.name}">
     <%
-      DisplayNames.appendDisplayName(application, session, request.getParameter("name"));
+      DisplayInfo.appendDisplayName(application, session, request.getParameter("name"));
     %>
     <p>Display set to ${displayName}</p>
   </c:if>

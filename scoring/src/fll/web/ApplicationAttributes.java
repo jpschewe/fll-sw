@@ -30,10 +30,9 @@ public final class ApplicationAttributes {
 
   /**
    * Application attribute to hold names of all displays. Type is
-   * Map&lt;String, Date&gt;. Key is the name of the display, the value
-   * is when the display was last seen.
+   * SortedSet&lt;{@link DisplayInfo}&gt;. The default display is sorted first.
    */
-  public static final String DISPLAY_NAMES = "displayNames";
+  public static final String DISPLAY_INFORMATION = "displayInformation";
 
   private ApplicationAttributes() {
     // no instances

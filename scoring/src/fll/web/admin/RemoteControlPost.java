@@ -7,9 +7,9 @@
 package fll.web.admin;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -21,9 +21,8 @@ import javax.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
 import org.icepush.PushContext;
 
-import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
-import fll.web.DisplayNames;
+import fll.web.DisplayInfo;
 import fll.web.SessionAttributes;
 
 @WebServlet("/admin/RemoteControlPost")
@@ -37,13 +36,9 @@ public class RemoteControlPost extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
-    final Set<String> displayNames = DisplayNames.getDisplayNames(application);
+    final Collection<DisplayInfo> displays = DisplayInfo.getDisplayInformation(application);
 
     if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("remotePage "
-          + request.getParameter("remotePage"));
-      LOGGER.trace("remoteURL "
-          + request.getParameter("remoteURL"));
       LOGGER.trace("numBrackets "
           + request.getParameter("numBrackets"));
       for (int i = 0; i < Integer.parseInt(request.getParameter("numBrackets")); ++i) {
@@ -57,99 +52,78 @@ public class RemoteControlPost extends BaseFLLServlet {
       LOGGER.trace("finalistDivision "
           + request.getParameter("finalistDivision"));
 
-      if (null != displayNames) {
-        for (final String displayName : displayNames) {
-          LOGGER.trace("display "
-              + displayName);
-          LOGGER.trace("\tremotePage "
-              + request.getParameter(displayName
-                  + "_remotePage"));
-          LOGGER.trace("\tremoteURL "
-              + request.getParameter(displayName
-                  + "_remoteURL"));
-          
-          for (int i = 0; i < Integer.parseInt(request.getParameter(displayName + "_numBrackets")); ++i) {
-            LOGGER.trace("\tplayoffDivision "
-                + i + ": " + request.getParameter(displayName + "_playoffDivision_"
-                    + i));
-            LOGGER.trace("\tplayoffRoundNumber "
-                + i + ": " + request.getParameter(displayName + "_playoffRoundNumber_"
-                    + i));
-          }
-          LOGGER.trace("\tdelete? "
-              + request.getParameter(displayName
-                  + "_delete"));
-          
-          LOGGER.trace("\tfinalistDivision "
-              + request.getParameter(displayName + "_finalistDivision"));
+      for (final DisplayInfo display : displays) {
+        final String displayName = display.getName();
 
+        LOGGER.trace("display "
+            + displayName);
+        LOGGER.trace("\tremotePage "
+            + request.getParameter(display.getRemotePageFormParamName()));
+        LOGGER.trace("\tremoteURL "
+            + request.getParameter(display.getRemoteUrlFormParamName()));
+
+        for (int i = 0; i < Integer.parseInt(request.getParameter(display.getHead2HeadNumBracketsFormParamName())); ++i) {
+          LOGGER.trace("\tplayoffDivision "
+              + i + ": " + request.getParameter(displayName
+                  + "_playoffDivision_" + i));
+          LOGGER.trace("\tplayoffRoundNumber "
+              + i + ": " + request.getParameter(displayName
+                  + "_playoffRoundNumber_" + i));
         }
-      }
+        LOGGER.trace("\tdelete? "
+            + request.getParameter(display.getDeleteFormParamName()));
+
+        LOGGER.trace("\tfinalistDivision "
+            + request.getParameter(display.getFinalistScheduleAwardGroupFormParamName()));
+
+      } // foreach display
     } // if trace enabled
 
-    // default display
     final String slideIntervalStr = request.getParameter("slideInterval");
     if (null != slideIntervalStr) {
       application.setAttribute("slideShowInterval", Integer.valueOf(slideIntervalStr));
     }
-    application.setAttribute(ApplicationAttributes.DISPLAY_PAGE, request.getParameter("remotePage"));
-    application.setAttribute("displayURL", request.getParameter("remoteURL"));
-    final String playoffRoundNumberStr = request.getParameter("playoffRoundNumber");
-    if (null != playoffRoundNumberStr) {
-      application.setAttribute("playoffRoundNumber", Integer.valueOf(playoffRoundNumberStr));
-    }
-    application.setAttribute("playoffDivision", request.getParameter("playoffDivision"));
 
-    application.setAttribute("finalistDivision", request.getParameter("finalistDivision"));
-
-    // named displays
-    if (null != displayNames) {
-
-      final List<String> toDelete = new LinkedList<>();
-      for (final String displayName : displayNames) {
-        if (null != request.getParameter(displayName
-            + "_delete")) {
-          toDelete.add(displayName);
-        } else if ("default".equals(request.getParameter(displayName
-            + "_remotePage"))) {
-          application.removeAttribute(displayName
-              + "_displayPage");
-          application.removeAttribute(displayName
-              + "_displayURL");
-          application.removeAttribute(displayName
-              + "_playoffRoundNumber");
-          application.removeAttribute(displayName
-              + "_playoffDivision");
-          application.removeAttribute(displayName
-              + "_finalistDivision");
+    final List<DisplayInfo> toDelete = new LinkedList<>();
+    for (final DisplayInfo display : displays) {
+      if (null != request.getParameter(display.getDeleteFormParamName())) {
+        toDelete.add(display);
+      } else {
+        if (DisplayInfo.DEFAULT_DISPLAY_NAME.equals(request.getParameter(display.getRemotePageFormParamName()))) {
+          display.setFollowDefault();
         } else {
-          application.setAttribute(displayName
-              + "_displayPage", request.getParameter(displayName
-                  + "_remotePage"));
-          application.setAttribute(displayName
-              + "_displayURL", request.getParameter("remoteURL"));
-          final String displayPlayoffRoundNumberStr = request.getParameter(displayName
-              + "_playoffRoundNumber");
-          if (null != displayPlayoffRoundNumberStr) {
-
-            application.setAttribute(displayName
-                + "_playoffRoundNumber", Integer.valueOf(displayPlayoffRoundNumberStr));
-          }
-          application.setAttribute(displayName
-              + "_playoffDivision", request.getParameter(displayName
-                  + "_playoffDivision"));
-          application.setAttribute(displayName
-              + "_finalistDivision",
-                                   request.getParameter(displayName
-                                       + "_finalistDivision"));
+          display.setRemotePage(request.getParameter(display.getRemotePageFormParamName()));
         }
-      } // foreach display
 
-      for (final String displayName : toDelete) {
-        DisplayNames.deleteNamedDisplay(application, displayName);
+        display.setSpecialUrl(request.getParameter(display.getSpecialUrlFormParamName()));
+
+        display.setFinalistScheduleAwardGroup(request.getParameter(display.getFinalistScheduleAwardGroupFormParamName()));
+
+        final List<DisplayInfo.H2HBracketDisplay> brackets = new LinkedList<>();
+        final int numBrackets = Integer.parseInt(request.getParameter(display.getHead2HeadNumBracketsFormParamName()));
+        for (int bracketIdx = 0; bracketIdx < numBrackets; ++bracketIdx) {
+          final String bracket = request.getParameter(display.getHead2HeadBracketFormParamName(bracketIdx));
+
+          final String firstRoundStr = request.getParameter(display.getHead2HeadFirstRoundFormParamName(bracketIdx));
+          final int firstRound;
+          if (null == firstRoundStr) {
+            // there are no head to head rounds yet, just use 1
+            firstRound = 1;
+          } else {
+            firstRound = Integer.parseInt(firstRoundStr);
+          }
+
+          final DisplayInfo.H2HBracketDisplay bracketInfo = new DisplayInfo.H2HBracketDisplay(display, bracketIdx,
+                                                                                              bracket, firstRound);
+          brackets.add(bracketInfo);
+        }
+        display.setBrackets(brackets);
       }
+    }
 
-    } // if non-null display names
+    for (final DisplayInfo display : toDelete) {
+      DisplayInfo.deleteDisplay(application, display);
+    }
 
     PushContext pc = PushContext.getInstance(application);
     pc.push("playoffs");
