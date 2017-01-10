@@ -17,12 +17,9 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
-
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
@@ -30,7 +27,8 @@ import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
-import fll.web.SessionAttributes;
+import fll.web.DisplayInfo;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Support for PublicFinalistDisplaySchedule.jsp.
@@ -39,11 +37,15 @@ public class PublicFinalistDisplaySchedule {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  public static void populateContext(final HttpServletRequest request,
-                                     final ServletContext application,
+  public static void populateContext(final ServletContext application,
                                      final HttpSession session,
                                      final PageContext pageContext) {
-    final String division = getDivision(request, session);
+    DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
+    if(displayInfo.isFollowDefault()) {
+      displayInfo = DisplayInfo.findOrCreateDefaultDisplay(application);
+    }
+    
+    final String division = displayInfo.getFinalistScheduleAwardGroup();
 
     Connection connection = null;
     Statement stmt = null;
@@ -67,6 +69,7 @@ public class PublicFinalistDisplaySchedule {
       pageContext.setAttribute("publicCategories", publicCategories);
       pageContext.setAttribute("publicSchedules", publicSchedules);
       pageContext.setAttribute("rooms", schedule.getRooms());
+      pageContext.setAttribute("division", division);
 
       final Map<Integer, TournamentTeam> allTeams = Queries.getTournamentTeams(connection, tournament);
       pageContext.setAttribute("allTeams", allTeams);
@@ -80,19 +83,4 @@ public class PublicFinalistDisplaySchedule {
       SQLFunctions.close(connection);
     }
   }
-
-  /**
-   * Get the division and store it in the session.
-   */
-  private static String getDivision(final HttpServletRequest request,
-                                    final HttpSession session) {
-    String division = request.getParameter("division");
-    if (null == division
-        || "".equals(division)) {
-      division = SessionAttributes.getNonNullAttribute(session, "division", String.class);
-    }
-    session.setAttribute("division", division);
-    return division;
-  }
-
 }
