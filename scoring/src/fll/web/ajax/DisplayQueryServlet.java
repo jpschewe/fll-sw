@@ -8,8 +8,6 @@ package fll.web.ajax;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -22,12 +20,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import fll.Utilities;
-import fll.util.FLLInternalException;
-import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.DisplayInfo;
-import fll.web.SessionAttributes;
 
 /**
  * Send big screen display data via JavaScript, to avoid network-timeout induced
@@ -38,34 +32,15 @@ public class DisplayQueryServlet extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
-    final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
-    //FIXME start here
-    
-    final String localDisplayPage;
-    final String localDisplayURL;
-    final String displayName = SessionAttributes.getAttribute(session, "displayName", String.class);
-    if (displayName != null) {
-      // update last seen time
-      DisplayInfo.appendDisplayName(application, session, displayName);
-
-      final String myDisplayPage = ApplicationAttributes.getAttribute(application, displayName
-          + "_displayPage", String.class);
-      final String myDisplayURL = ApplicationAttributes.getAttribute(application, displayName
-          + "_displayURL", String.class);
-
-      localDisplayPage = myDisplayPage != null ? myDisplayPage
-          : ApplicationAttributes.getAttribute(application, ApplicationAttributes.DISPLAY_PAGE, String.class);
-
-      localDisplayURL = myDisplayURL != null ? myDisplayURL
-          : ApplicationAttributes.getAttribute(application, "displayURL", String.class);
-    } else {
-      localDisplayPage = ApplicationAttributes.getAttribute(application, ApplicationAttributes.DISPLAY_PAGE,
-                                                            String.class);
-      localDisplayURL = ApplicationAttributes.getAttribute(application, "displayURL", String.class);
+                                final HttpSession session)
+      throws IOException, ServletException {
+    DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
+    if (null == displayInfo
+        || displayInfo.isFollowDefault()) {
+      displayInfo = DisplayInfo.findOrCreateDefaultDisplay(application);
     }
 
-    final String url = pickURL(request, localDisplayPage, localDisplayURL, application, session);
+    final String url = pickURL(displayInfo, request);
     final DisplayResponse displayResponse = new DisplayResponse(url);
 
     final ObjectMapper jsonMapper = new ObjectMapper();
@@ -82,51 +57,32 @@ public class DisplayQueryServlet extends BaseFLLServlet {
    * values
    * of the "remotePage" radio buttons in remoteControl.jsp.
    */
-  private String pickURL(final HttpServletRequest request,
-                         final String displayPage,
-                         final String displayURL,
-                         final ServletContext application,
-                         final HttpSession session) {
+  private String pickURL(final DisplayInfo displayInfo,
+                         final HttpServletRequest request) {
     final String contextPath = request.getContextPath();
 
-    if (null == displayPage) {
+    if (displayInfo.isWelcome()) {
       return contextPath
           + "/welcome.jsp";
-    } else if ("scoreboard".equals(displayPage)) {
+    } else if (displayInfo.isScoreboard()) {
       return contextPath
           + "/scoreboard/main.jsp";
-    } else if ("slideshow".equals(displayPage)) {
+    } else if (displayInfo.isSlideshow()) {
       return contextPath
           + "/slideshow/index.jsp";
-    } else if ("playoffs".equals(displayPage)) {
+    } else if (displayInfo.isHeadToHead()) {
       return contextPath
           + "/playoff/remoteMain.jsp";
-    } else if ("finalistSchedule".equals(displayPage)) {
-      try {
-        String finalistScheduleDivision = null;
-
-        final String displayName = SessionAttributes.getAttribute(session, "displayName", String.class);
-        if (null != displayName) {
-          finalistScheduleDivision = ApplicationAttributes.getAttribute(application, displayName
-              + "_finalistScheduleDivision", String.class);
-        }
-
-        if (null == finalistScheduleDivision) {
-          finalistScheduleDivision = ApplicationAttributes.getAttribute(application, "finalistDivision", String.class);
-        }
-
-        return String.format("%s/report/finalist/PublicFinalistDisplaySchedule.jsp?finalistScheduleScroll=true&division=%s",
-                             contextPath,
-                             URLEncoder.encode(finalistScheduleDivision, Utilities.DEFAULT_CHARSET.name()));
-      } catch (final UnsupportedEncodingException e) {
-        throw new FLLInternalException("Cannot encode using default charset?", e);
-      }
-    } else if ("finalistTeams".equals(displayPage)) {
+    } else if (displayInfo.isFinalistSchedule()
+        && null != displayInfo.getFinalistScheduleAwardGroup()) {
+      return String.format("%s/report/finalist/PublicFinalistDisplaySchedule.jsp?finalistScheduleScroll=true",
+                           contextPath);
+    } else if (displayInfo.isFinalistTeams()) {
       return contextPath
           + "/report/finalist/FinalistTeams.jsp?finalistTeamsScroll=true";
-    } else if ("special".equals(displayPage)) {
+    } else if (displayInfo.isSpecial()) {
       return contextPath
-          + "/" + displayURL;
+          + "/" + displayInfo.getSpecialUrl();
     } else {
       return contextPath
           + "/welcome.jsp";
