@@ -130,6 +130,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
 
   /**
    * Get the appropriate {@link DisplayInfo} object for the session.
+   * If the named display is following the default display, then the default display is returned.
    * 
    * @param application used to get all of the displays
    * @param session where to find the display name
@@ -140,7 +141,11 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
     final String displayName = SessionAttributes.getAttribute(session, "displayName", String.class);
     for (final DisplayInfo display : getDisplayInformation(application)) {
       if (display.getName().equals(displayName)) {
-        return display;
+        if(display.isFollowDefault()) {
+          return findOrCreateDefaultDisplay(application);
+        } else {
+          return display;
+        }
       }
     }
 

@@ -40,10 +40,7 @@ public class PublicFinalistDisplaySchedule {
   public static void populateContext(final ServletContext application,
                                      final HttpSession session,
                                      final PageContext pageContext) {
-    DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
-    if(displayInfo.isFollowDefault()) {
-      displayInfo = DisplayInfo.findOrCreateDefaultDisplay(application);
-    }
+    final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
     
     final String division = displayInfo.getFinalistScheduleAwardGroup();
 
