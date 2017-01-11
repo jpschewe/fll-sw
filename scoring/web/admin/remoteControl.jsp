@@ -212,7 +212,7 @@
             type='hidden'
             id="${displayInfo.formParamPrefix}numBrackets"
             name="${displayInfo.head2HeadNumBracketsFormParamName}"
-            value='${fn:length(brackets)}' /> <c:choose>
+            value="${fn:length(brackets)}" /> <c:choose>
               <c:when test="${displayInfo.headToHead}">
                 <input
                   type='radio'
@@ -228,16 +228,16 @@
               </c:otherwise>
             </c:choose>
 
-            <div id='${displayInfo.formParamPrefix}bracket_selection'>
+            <div id="${displayInfo.formParamPrefix}bracket_selection">
 
               <c:forEach
                 items="${brackets}"
                 var="bracketInfo">
 
                 <div
-                  id='${displayInfo.formParamPrefix}bracket_${bracketInfo.index}'>
+                  id="${displayInfo.formParamPrefix}bracket_${bracketInfo.index}">
                   Bracket: <select
-                    name='${bracketInfo.head2HeadBracketFormParamName}'>
+                    name="${bracketInfo.head2HeadBracketFormParamName}">
 
                     <c:forEach
                       items="${divisions}"
@@ -256,7 +256,7 @@
                     </c:forEach>
 
                   </select> <br /> Round: <select
-                    name='${bracket.head2HeadFirstRoundFormParamName}'>
+                    name="${bracketInfo.head2HeadFirstRoundFormParamName}">
 
                     <c:forEach
                       begin="1"

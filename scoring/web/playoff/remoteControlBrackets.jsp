@@ -12,6 +12,7 @@
 <%@ page import="java.sql.Connection" %>
 <%@ page import="fll.Team" %>
 <%@ page import="fll.web.playoff.Playoff" %>
+<%@ page import="fll.web.DisplayInfo" %>
 
 <%
   /*
@@ -20,6 +21,9 @@
   playoffRoundNumber - Integer for the playoff round number, counted from the 1st playoff round
    */
 
+   final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
+      final DisplayInfo.H2HBracketDisplay h2hBracket = displayInfo.getBrackets().get(0); //HACK just for now
+      
    final DataSource datasource = ApplicationAttributes.getDataSource(application);
    final Connection connection = datasource.getConnection();
   final int currentTournament = Queries.getCurrentTournament(connection);
@@ -40,42 +44,21 @@
     sessionRoundNumber = null;
   }
 
-  final String division;
-  if (null != sessionDivision) {
-    division = sessionDivision;
-  } else if (null == application.getAttribute(divisionKey)) {
-    final List<String> divisions = Playoff.getPlayoffBrackets(connection, currentTournament);
-    if (!divisions.isEmpty()) {
-  division = divisions.get(0);
-    } else {
-  throw new RuntimeException("No head to head bracket specified and no head to head brackets in the database!");
-    }
-  } else {
-    division = ApplicationAttributes.getAttribute(application, divisionKey, String.class);
-  }
-
-  final int playoffRoundNumber;
-  if (null != sessionRoundNumber) {
-    playoffRoundNumber = sessionRoundNumber.intValue();
-  } else if (null == application.getAttribute(roundNumberKey)) {
-    playoffRoundNumber = 1;
-  } else {
-    playoffRoundNumber = ApplicationAttributes.getAttribute(application, roundNumberKey, Number.class).intValue();
-  }
+  final String division = h2hBracket.getBracket();
 
   final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection, division);
 
-  final BracketData bracketInfo = new BracketData(connection, division, playoffRoundNumber, playoffRoundNumber + 2, 4, false, true);
+  final BracketData bracketInfo = new BracketData(connection, h2hBracket.getBracket(), h2hBracket.getFirstRound(), h2hBracket.getFirstRound() + 2, 4, false, true);
 
-  bracketInfo.addBracketLabels(playoffRoundNumber);
+  bracketInfo.addBracketLabels(h2hBracket.getFirstRound());
   bracketInfo.addStaticTableLabels();
   
-  pageContext.setAttribute("playoffRoundNumber", playoffRoundNumber);
-  pageContext.setAttribute("numPlayoffRounds", numPlayoffRounds);
-  pageContext.setAttribute("bracket", division);
+  pageContext.setAttribute("playoffRoundNumber", h2hBracket.getFirstRound());
+  pageContext.setAttribute("numPlayoffRounds", numPlayoffRounds); // used to limit when the output function is called, could probably be handled in said function
+  pageContext.setAttribute("bracket", h2hBracket.getBracket());
   pageContext.setAttribute("maxNameLength", Team.MAX_TEAM_NAME_LEN);
-  pageContext.setAttribute("numRows", bracketInfo.getNumRows());
-  pageContext.setAttribute("finalRound", Queries.getNumPlayoffRounds(connection, division)+1);
+  pageContext.setAttribute("numRows", bracketInfo.getNumRows()); // needs to be the sum of numRows for all brackets
+  pageContext.setAttribute("finalRound", Queries.getNumPlayoffRounds(connection, division)+1); // +1 for the extra winner, used to make sure we don't show final scores
 %>
 
 <html>
@@ -125,7 +108,7 @@ SPAN.TIE {
 <script type="text/javascript">
   var ajaxURL = '<c:url value="/ajax/"/>';
   var currentRound = ${playoffRoundNumber}-1;
-  var rows = ${numRows};
+  var rows = ${numRows}; // need total number of rows for scrolling
   var finalRound = ${finalRound};
   var maxNameLength = ${maxNameLength};
   var division = "${bracket}";

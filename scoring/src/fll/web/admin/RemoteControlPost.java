@@ -39,16 +39,6 @@ public class RemoteControlPost extends BaseFLLServlet {
     final Collection<DisplayInfo> displays = DisplayInfo.getDisplayInformation(application);
 
     if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("numBrackets "
-          + request.getParameter("numBrackets"));
-      for (int i = 0; i < Integer.parseInt(request.getParameter("numBrackets")); ++i) {
-        LOGGER.trace("playoffDivision "
-            + i + ": " + request.getParameter("playoffDivision_"
-                + i));
-        LOGGER.trace("playoffRoundNumber "
-            + i + ": " + request.getParameter("playoffRoundNumber_"
-                + i));
-      }
       LOGGER.trace("finalistDivision "
           + request.getParameter("finalistDivision"));
 
@@ -62,13 +52,14 @@ public class RemoteControlPost extends BaseFLLServlet {
         LOGGER.trace("\tremoteURL "
             + request.getParameter(display.getRemoteUrlFormParamName()));
 
-        for (int i = 0; i < Integer.parseInt(request.getParameter(display.getHead2HeadNumBracketsFormParamName())); ++i) {
-          LOGGER.trace("\tplayoffDivision "
-              + i + ": " + request.getParameter(displayName
-                  + "_playoffDivision_" + i));
-          LOGGER.trace("\tplayoffRoundNumber "
-              + i + ": " + request.getParameter(displayName
-                  + "_playoffRoundNumber_" + i));
+        final int numBrackets = Integer.parseInt(request.getParameter(display.getHead2HeadNumBracketsFormParamName()));
+        LOGGER.trace("\tnum brackets:");
+        for (int i = 0; i < numBrackets; ++i) {
+          LOGGER.trace("\t\tplayoffDivision "
+              + i + ": " + request.getParameter(display.getHead2HeadBracketFormParamName(i)));
+
+          LOGGER.trace("\t\tplayoffRoundNumber "
+              + i + ": " + request.getParameter(display.getHead2HeadFirstRoundFormParamName(i)));
         }
         LOGGER.trace("\tdelete? "
             + request.getParameter(display.getDeleteFormParamName()));
