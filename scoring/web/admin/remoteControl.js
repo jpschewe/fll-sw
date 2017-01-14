@@ -15,7 +15,7 @@
  * @returns
  */
 function displayPrefix(displayName) {
-  if ("default" == displayName) {
+  if ("Default" == displayName) {
     return "";
   } else {
     return displayName + "_";
@@ -118,11 +118,12 @@ $(document).ready(function() {
   updateButtonStates();
 
   $.each(displayNames, function(index, displayName) {
-    $("#" + displayPrefix(displayName) + "add_bracket").click(function() {
+    var prefix = displayPrefix(displayName);
+    $("#" + prefix + "add_bracket").click(function() {
       addBracket(displayName);
     });
 
-    $("#" + displayPrefix(displayName) + "remove_bracket").click(function() {
+    $("#" + prefix + "remove_bracket").click(function() {
       removeBracket(displayName);
     });
 
