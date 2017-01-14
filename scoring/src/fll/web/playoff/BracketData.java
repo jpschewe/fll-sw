@@ -119,8 +119,24 @@ public class BracketData {
    * to store a color associated with the given table.
    */
   public static class BigScreenTableAssignmentCell extends BracketDataType {
-    public BigScreenTableAssignmentCell(final String table) {
+    public BigScreenTableAssignmentCell(final int round,
+                                        final int row,
+                                        final String table) {
+      _round = round;
+      _row = row;
       _table = table;
+    }
+
+    private final int _round;
+
+    public int getRound() {
+      return _round;
+    }
+
+    private final int _row;
+
+    public int getRow() {
+      return _row;
     }
 
     private final String _table;
@@ -342,7 +358,8 @@ public class BracketData {
                      final String pDivision,
                      final int pFirstRound,
                      final int pLastRound,
-                     final int pRowsPerTeam) throws SQLException {
+                     final int pRowsPerTeam)
+      throws SQLException {
     super();
     _connection = pConnection;
     _division = pDivision;
@@ -505,7 +522,8 @@ public class BracketData {
                      final int pFirstRound,
                      final int pLastRound,
                      final int pRowsPerTeam,
-                     final boolean pShowFinals) throws SQLException {
+                     final boolean pShowFinals)
+      throws SQLException {
     this(connection, division, pFirstRound, pLastRound, pRowsPerTeam);
     _showFinalScores = pShowFinals;
   }
@@ -526,7 +544,8 @@ public class BracketData {
                      final int pLastRound,
                      final int pRowsPerTeam,
                      final boolean pShowFinals,
-                     final boolean pShowOnlyVerifiedScores) throws SQLException {
+                     final boolean pShowOnlyVerifiedScores)
+      throws SQLException {
     this(connection, division, pFirstRound, pLastRound, pRowsPerTeam);
     _showFinalScores = pShowFinals;
     _showOnlyVerifiedScores = pShowOnlyVerifiedScores;
@@ -602,7 +621,8 @@ public class BracketData {
    */
   private void appendHtmlCell(final StringBuilder sb,
                               final int row,
-                              final int round) throws SQLException {
+                              final int round)
+      throws SQLException {
     final SortedMap<Integer, BracketDataType> roundData = _bracketData.get(round);
     if (roundData == null) {
       sb.append("<td>ERROR: No data for round "
@@ -620,8 +640,11 @@ public class BracketData {
             + comment + "-->");
       }
     } else if (d instanceof TeamBracketCell) {
+      final String leafId = row
+          + "-" + round;
+
       sb.append("<td width='400' class='Leaf js-leaf' id='"
-          + row + "-" + round + "'>");
+          + leafId + "'>");
       if (round == _finalsRound) {
         sb.append(getDisplayString(_currentTournament, round
             + _baseRunNumber, ((TeamBracketCell) d).getTeam(), _showFinalScores, _showOnlyVerifiedScores));
@@ -700,8 +723,20 @@ public class BracketData {
         sb.append("</td>\n");
       }
     } else if (d instanceof BigScreenTableAssignmentCell) {
-      sb.append("<td align='right' style='padding-right:30px'><span class='table_assignment'>");
-      sb.append(((BigScreenTableAssignmentCell) d).getTable());
+      final BigScreenTableAssignmentCell tableCell = (BigScreenTableAssignmentCell) d;
+      final String table = tableCell.getTable();
+
+      // reference the row and round for the leaf that the table is for
+      final String leafId = tableCell.getRow()
+          + "-" + tableCell.getRound();
+
+      // always setup the html for a table assignment, just don't put the data
+      // in it until it's available
+      sb.append("<td align='right' style='padding-right:30px'><span class='table_assignment' id='"
+          + leafId + "-table'>");
+      if (null != table) {
+        sb.append(table);
+      }
       sb.append("</span></td>\n");
     }
 
@@ -1058,10 +1093,8 @@ public class BracketData {
           // Get the table assignment from cell info
           final String table = Queries.getAssignedTable(_connection, _currentTournament, _division, round.intValue(),
                                                         dblinenum);
-          if (table != null) {
-            newCells.put(lineNumber.intValue()
-                + tablelinemod, new BigScreenTableAssignmentCell(table));
-          }
+          newCells.put(lineNumber.intValue()
+              + tablelinemod, new BigScreenTableAssignmentCell(round.intValue(), lineNumber, table));
         }
       }
       // Merge the new cells into the roundData
@@ -1081,16 +1114,18 @@ public class BracketData {
    */
   public int addBracketLabelsAndScoreGenFormElements(final Connection pConnection,
                                                      final int tournament,
-                                                     final String division) throws SQLException {
+                                                     final String division)
+      throws SQLException {
     // Get the list of tournament tables
     final List<TableInformation> tournamentTables = TableInformation.getTournamentTableInformation(pConnection,
                                                                                                    tournament,
                                                                                                    division);
 
-    if(LOG.isDebugEnabled()) {
-      LOG.debug("Tables: " + tournamentTables);
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Tables: "
+          + tournamentTables);
     }
-    
+
     // Prevent divide by 0 errors if no tables were set in the database.
     if (tournamentTables.isEmpty()) {
       tournamentTables.add(new TableInformation(0, "Table 1", "Table 2", true));
@@ -1177,16 +1212,18 @@ public class BracketData {
                 tAssignIt = tournamentTables.iterator();
               }
               TableInformation info = tAssignIt.next();
-              while(!info.getUse() && tAssignIt.hasNext()) {
+              while (!info.getUse()
+                  && tAssignIt.hasNext()) {
                 info = tAssignIt.next();
               }
-              
-              if(!info.getUse() && !tAssignIt.hasNext()) {
-                 LOG.warn("No tables can be used, this is odd");
-                 tAssignIt = tournamentTables.iterator();
-                 info = tAssignIt.next();
+
+              if (!info.getUse()
+                  && !tAssignIt.hasNext()) {
+                LOG.warn("No tables can be used, this is odd");
+                tAssignIt = tournamentTables.iterator();
+                info = tAssignIt.next();
               }
-              
+
               tableA = info.getSideA();
               tableB = info.getSideB();
             }
@@ -1239,7 +1276,8 @@ public class BracketData {
                                   final int runNumber,
                                   final Team team,
                                   final boolean showScore,
-                                  final boolean showOnlyVerifiedScores) throws IllegalArgumentException, SQLException {
+                                  final boolean showOnlyVerifiedScores)
+      throws IllegalArgumentException, SQLException {
     if (Team.BYE.equals(team)) {
       return "<span class='TeamName'>BYE</span>";
     } else if (Team.TIE.equals(team)) {
