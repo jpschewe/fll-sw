@@ -22,6 +22,9 @@
    */
 
    final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
+      // store the brackets to know when a refresh is required
+      session.setAttribute("brackets", displayInfo.getBrackets());
+      
       final DisplayInfo.H2HBracketDisplay h2hBracket = displayInfo.getBrackets().get(0); //HACK just for now
       
    final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -55,10 +58,9 @@
   
   pageContext.setAttribute("playoffRoundNumber", h2hBracket.getFirstRound());
   pageContext.setAttribute("numPlayoffRounds", numPlayoffRounds); // used to limit when the output function is called, could probably be handled in said function
-  pageContext.setAttribute("bracket", h2hBracket.getBracket());
+  pageContext.setAttribute("bracketName", h2hBracket.getBracket());
   pageContext.setAttribute("maxNameLength", Team.MAX_TEAM_NAME_LEN);
   pageContext.setAttribute("numRows", bracketInfo.getNumRows()); // needs to be the sum of numRows for all brackets
-  pageContext.setAttribute("finalRound", Queries.getNumPlayoffRounds(connection, division)+1); // +1 for the extra winner, used to make sure we don't show final scores
 %>
 
 <html>
@@ -99,7 +101,7 @@ SPAN.TIE {
 	font-size: small;
 	background-color: white;
 	padding-left: 5%;
-	padding-right: 5%
+	padding-right: 5%;
 }
 </style>
 <script type="text/javascript" src="<c:url value='/playoff/code.icepush'/>"></script>
@@ -107,11 +109,8 @@ SPAN.TIE {
 <script type="text/javascript" src="<c:url value='/extlib/jquery.scrollTo-2.1.2.min.js'/>"></script>
 <script type="text/javascript">
   var ajaxURL = '<c:url value="/ajax/"/>';
-  var currentRound = ${playoffRoundNumber}-1;
   var rows = ${numRows}; // need total number of rows for scrolling
-  var finalRound = ${finalRound};
   var maxNameLength = ${maxNameLength};
-  var division = "${bracket}";
   
   var displayStrings = new Object();
   displayStrings.parseTeamName = function (team) {
@@ -138,7 +137,7 @@ SPAN.TIE {
   
   function iterate() {
       $.ajax({
-          url: ajaxURL + "BracketQuery?division=" + division + "&multi=" + ajaxList,
+          url: ajaxURL + "BracketQuery?multi=" + ajaxList,
           dataType: "json",
           cache: false,
           beforeSend: function (xhr) {
@@ -153,12 +152,15 @@ SPAN.TIE {
               } else {
                   if(data.leaf.team) {
                       if (data.leaf.team.teamNumber < 0) {
+                        // internal teams 
+                        
                           if (data.leaf.team.teamNumber == -3) {
+                            // NULL team number
                               return;
                           }
                           $("#" + lid).html(displayStrings.getSpecialString(lid, data.leaf));
                           return;
-                      } else if (lid.split("-")[1] != finalRound)/*Don't show final results!*/ { // /if team number meant a bye
+                      } else {
                           var score;
                           //table label?
                           placeTableLabel(lid, data.leaf.table, data.leaf.dbline);
@@ -208,19 +210,7 @@ SPAN.TIE {
 
   function placeTableLabel(lid, table, dbLine) {
       if (table != undefined) {
-          var row;
-          //Are we on the top of a bracket or the bottom?
-          if (dbLine % 2 == 1) {
-              row = $("#" + lid).parent().next();
-          } else {
-              row = $("#" + lid).parent().prev();
-          }
-          //Selector is SUPPOSED to pick the nth cell with widths of 400, but I have to use this lazy switch to account for bridges, since it doesn't want to work.
-          var nthcell = ((parseInt(lid.split("-")[1]) - currentRound));
-          if (nthcell == 3) {
-              nthcell = 4;
-          } 
-              row.find("td[width=\"400\"]:nth-child(" +  nthcell + ")").eq(0).css('padding-right', '30px').attr('align', 'right').html('<span class="table_assignment">' + table + '</span><!-- '+lid+' -->');
+          $("#" + lid + "-table").text(table);
       }
   }
 
@@ -290,12 +280,10 @@ SPAN.TIE {
 <br/>
 <br/>
 
-<div class='center'>Head to Head Bracket ${bracket}</div>
+<div class='center'>Head to Head Bracket ${bracketName}</div>
                         <br/>
                         
-  <c:if test="${playoffRoundNumber <= numPlayoffRounds }">
    <%=bracketInfo.outputBrackets(BracketData.TopRightCornerStyle.MEET_TOP_OF_CELL)%>
-  </c:if>
 
   <span id="bottom">&nbsp;</span>
 </div>

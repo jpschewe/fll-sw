@@ -16,35 +16,75 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-import fll.db.Queries;
+import org.apache.log4j.Logger;
+
 import fll.util.JsonUtilities;
+import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.web.DisplayInfo;
+import fll.web.DisplayInfo.H2HBracketDisplay;
 import fll.web.SessionAttributes;
 import fll.web.playoff.BracketData;
-import fll.web.playoff.Playoff;
 import fll.xml.ChallengeDescription;
+import net.mtu.eggplant.util.ComparisonUtils;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Talk to client brackets in json.
  */
 @WebServlet("/ajax/BracketQuery")
 public class AJAXBracketQueryServlet extends BaseFLLServlet {
+
+  private static final Logger LOGGER = LogUtils.getLogger();
+
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
+
+    final PrintWriter writer = response.getWriter();
+
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     try {
       connection = datasource.getConnection();
-      final PrintWriter writer = response.getWriter();
+
+      final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
+
+      // can't put types inside a session
+      @SuppressWarnings("unchecked")
+      final List<DisplayInfo.H2HBracketDisplay> storedBrackets = SessionAttributes.getAttribute(session, "brackets",
+                                                                                                List.class);
+      final boolean bracketsSame = compareBrackets(storedBrackets, displayInfo.getBrackets());
+      if (!bracketsSame) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Session bracket information is different than application bracket information, forcing refresh");
+        }
+
+        response.reset();
+        response.setContentType("application/json");
+        writer.print("{\"refresh\":\"true\"}");
+        return;
+      }
+
+      final DisplayInfo.H2HBracketDisplay bracketInfo = displayInfo.getBrackets().get(0); // HACK
+                                                                                          // just
+                                                                                          // for
+                                                                                          // now
+
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("Displaying bracket: "
+            + bracketInfo.getBracket());
+      }
+
       final String multiParam = request.getParameter("multi");
-      final String division = request.getParameter("division");
+      final String division = bracketInfo.getBracket();
       if (multiParam != null) {
         // Send off request to helpers
-        handleMultipleQuery(parseInputToMap(multiParam), division, writer, application, session, response, connection);
+        handleMultipleQuery(bracketInfo, parseInputToMap(multiParam), division, writer, application, response,
+                            connection);
       } else {
         response.reset();
         response.setContentType("application/json");
@@ -55,6 +95,31 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
     } finally {
       SQLFunctions.close(connection);
     }
+  }
+
+  /**
+   * Compare 2 sets of brackets
+   * 
+   * @return true if they are the same
+   */
+  private boolean compareBrackets(final List<H2HBracketDisplay> storedBrackets,
+                                  final List<H2HBracketDisplay> brackets) {
+    if (storedBrackets.size() != brackets.size()) {
+      return false;
+    }
+    for (int i = 0; i < storedBrackets.size(); ++i) {
+      final H2HBracketDisplay one = storedBrackets.get(i);
+      final H2HBracketDisplay two = brackets.get(i);
+
+      if (one.getFirstRound() != two.getFirstRound()) {
+        return false;
+      }
+      if (!ComparisonUtils.safeEquals(one.getBracket(), two.getBracket())) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   private Map<Integer, Integer> parseInputToMap(final String param) {
@@ -71,89 +136,29 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
     return pairedMap;
   }
 
-  private void handleMultipleQuery(final Map<Integer, Integer> pairedMap,
+  private void handleMultipleQuery(final H2HBracketDisplay bracketInfo,
+                                   final Map<Integer, Integer> pairedMap,
                                    final String division,
                                    final PrintWriter writer,
                                    final ServletContext application,
-                                   final HttpSession session,
                                    final HttpServletResponse response,
-                                   final Connection connection) throws SQLException {
+                                   final Connection connection)
+      throws SQLException {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
 
-    BracketData bd = constructBracketData(division, connection, session, application);
-    if (bd == null) {
-      response.reset();
-      response.setContentType("application/json");
-      writer.print("{\"refresh\":\"true\"}");
-      return;
-    }
-
-    final boolean showOnlyVerifiedScores = true;
-    final boolean showFinalsScores = false;
-    response.reset();
-    response.setContentType("application/json");
-    writer.print(JsonUtilities.generateJsonBracketInfo(division, pairedMap, connection, description.getPerformance(), bd,
-                                                       showOnlyVerifiedScores, showFinalsScores));
-  }
-
-  private BracketData constructBracketData(final String queryDivision,
-                                           final Connection connection,
-                                           final HttpSession session,
-                                           final ServletContext application) throws SQLException {
-    final String divisionKey = "playoffDivision";
-    final String roundNumberKey = "playoffRoundNumber";
-    final String displayNameKey = "displayName";
-    final String displayName = SessionAttributes.getAttribute(session, displayNameKey, String.class);
-    final String sessionDivision;
-    final Number sessionRoundNumber;
-    if (null != displayName) {
-      sessionDivision = ApplicationAttributes.getAttribute(application, displayName
-          + "_" + divisionKey, String.class);
-      sessionRoundNumber = ApplicationAttributes.getAttribute(application, displayName
-          + "_" + roundNumberKey, Number.class);
-    } else {
-      sessionDivision = null;
-      sessionRoundNumber = null;
-    }
-    final int tournament = Queries.getCurrentTournament(connection);
-    final String division;
-    if (null != sessionDivision) {
-      division = sessionDivision;
-    } else if (null == ApplicationAttributes.getAttribute(application, divisionKey, String.class)) {
-      try {
-        final List<String> divisions = Playoff.getPlayoffBrackets(connection, tournament);
-        if (!divisions.isEmpty()) {
-          division = divisions.get(0);
-        } else {
-          throw new RuntimeException("No division specified and no divisions in the database!");
-        }
-      } catch (SQLException e) {
-        throw new RuntimeException(e);
-      }
-    } else {
-      division = ApplicationAttributes.getAttribute(application, divisionKey, String.class);
-    }
-    if (!division.equals(queryDivision)) {
-      return null; // The divisions have switched on us, return null so we force
-                   // the display to refresh
-    }
-    final int playoffRoundNumber;
-    if (null != sessionRoundNumber) {
-      playoffRoundNumber = sessionRoundNumber.intValue();
-    } else if (null == ApplicationAttributes.getAttribute(application, roundNumberKey, Number.class)) {
-      playoffRoundNumber = 1;
-    } else {
-      playoffRoundNumber = ApplicationAttributes.getAttribute(application, roundNumberKey, Number.class).intValue();
-    }
+    final int playoffRoundNumber = bracketInfo.getFirstRound();
     final int roundsLong = 3;
     final int rowsPerTeam = 4;
     final boolean showFinalsScores = false;
-    final boolean onlyShowVerifiedScores = true;
-    try {
-      return new BracketData(connection, division, playoffRoundNumber, playoffRoundNumber
-          + roundsLong - 1, rowsPerTeam, showFinalsScores, onlyShowVerifiedScores);
-    } catch (final SQLException e) {
-      throw new RuntimeException(e);
-    }
+    final boolean showOnlyVerifiedScores = true;
+
+    final BracketData bd = new BracketData(connection, bracketInfo.getBracket(), playoffRoundNumber, playoffRoundNumber
+        + roundsLong - 1, rowsPerTeam, showFinalsScores, showOnlyVerifiedScores);
+
+    response.reset();
+    response.setContentType("application/json");
+    writer.print(JsonUtilities.generateJsonBracketInfo(division, pairedMap, connection, description.getPerformance(),
+                                                       bd, showOnlyVerifiedScores, showFinalsScores));
   }
+
 }
