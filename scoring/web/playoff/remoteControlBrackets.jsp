@@ -3,64 +3,10 @@
 
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<%@ page import="fll.web.playoff.BracketData"%>
-<%@ page import="fll.web.SessionAttributes" %>
-<%@ page import="fll.web.ApplicationAttributes" %>
-<%@ page import="javax.sql.DataSource" %>
-<%@ page import="java.util.List"%>
-<%@ page import="fll.db.Queries" %>
-<%@ page import="java.sql.Connection" %>
-<%@ page import="fll.Team" %>
-<%@ page import="fll.web.playoff.Playoff" %>
-<%@ page import="fll.web.DisplayInfo" %>
+<%@ page import="fll.web.playoff.RemoteControlBrackets" %>
 
 <%
-  /*
-  application parameters
-  playoffDivision - String for the division
-  playoffRoundNumber - Integer for the playoff round number, counted from the 1st playoff round
-   */
-
-   final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
-      // store the brackets to know when a refresh is required
-      session.setAttribute("brackets", displayInfo.getBrackets());
-      
-      final DisplayInfo.H2HBracketDisplay h2hBracket = displayInfo.getBrackets().get(0); //HACK just for now
-      
-   final DataSource datasource = ApplicationAttributes.getDataSource(application);
-   final Connection connection = datasource.getConnection();
-  final int currentTournament = Queries.getCurrentTournament(connection);
-
-  final String divisionKey = "playoffDivision";
-  final String roundNumberKey = "playoffRoundNumber";
-  final String displayName = SessionAttributes.getAttribute(session, "displayName", String.class);
-
-  final String sessionDivision;
-  final Number sessionRoundNumber;
-  if (null != displayName) {
-    sessionDivision = ApplicationAttributes.getAttribute(application, displayName
-    + "_" + divisionKey, String.class);
-    sessionRoundNumber = ApplicationAttributes.getAttribute(application, displayName
-    + "_" + roundNumberKey, Number.class);
-  } else {
-    sessionDivision = null;
-    sessionRoundNumber = null;
-  }
-
-  final String division = h2hBracket.getBracket();
-
-  final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection, division);
-
-  final BracketData bracketInfo = new BracketData(connection, h2hBracket.getBracket(), h2hBracket.getFirstRound(), h2hBracket.getFirstRound() + 2, 4, false, true);
-
-  bracketInfo.addBracketLabels(h2hBracket.getFirstRound());
-  bracketInfo.addStaticTableLabels();
-  
-  pageContext.setAttribute("playoffRoundNumber", h2hBracket.getFirstRound());
-  pageContext.setAttribute("numPlayoffRounds", numPlayoffRounds); // used to limit when the output function is called, could probably be handled in said function
-  pageContext.setAttribute("bracketName", h2hBracket.getBracket());
-  pageContext.setAttribute("maxNameLength", Team.MAX_TEAM_NAME_LEN);
-  pageContext.setAttribute("numRows", bracketInfo.getNumRows()); // needs to be the sum of numRows for all brackets
+RemoteControlBrackets.populateContext(application, session, pageContext);  
 %>
 
 <html>
@@ -68,7 +14,6 @@
 <link rel="stylesheet" type="text/css" href="<c:url value='/style/fll-sw.css'/>" />
 <link rel="stylesheet" type="text/css" href="<c:url value='/scoreboard/score_style.css'/>" />
 
-<title>Head to Head Round ${playoffRoundNumber}, Head to Head Bracket ${bracket}</title>
 <style type='text/css'>
 TD.Leaf {
 	color: #ffffff;
@@ -264,7 +209,7 @@ SPAN.TIE {
 <icep:register group="playoffs" callback="function(){iterate();}"/>
 </head>
 <body>
-<!-- dummy tag and some blank lines for scolling -->
+<!-- dummy tag and some blank lines for scrolling -->
 <span id="top"></span>
 <div id="dummy" style="position: absolute"><br/>
 <br/>
@@ -280,10 +225,10 @@ SPAN.TIE {
 <br/>
 <br/>
 
-<div class='center'>Head to Head Bracket ${bracketName}</div>
+<div class='center'>Head to Head Round ${bracketInfo.firstRound}, Head to Head Bracket ${bracketInfo.bracketDivision}</div>
                         <br/>
                         
-   <%=bracketInfo.outputBrackets(BracketData.TopRightCornerStyle.MEET_TOP_OF_CELL)%>
+   ${bracketInfo.topRightBracketOutput}
 
   <span id="bottom">&nbsp;</span>
 </div>

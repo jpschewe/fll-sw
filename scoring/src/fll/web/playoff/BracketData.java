@@ -339,6 +339,10 @@ public class BracketData {
 
   private final String _division;
 
+  public String getBracketDivision() {
+    return _division;
+  }
+
   private final int _currentTournament;
 
   /**
@@ -531,6 +535,8 @@ public class BracketData {
   /**
    * Constructor including explicit show scores flag.
    * 
+   * @param connection the database connection to use for this object, the
+   *          object owns the connection and will clean it up
    * @param pShowFinals True if the final scores should be displayed (e.g. for
    *          the administrative brackets) or false if they should not (e.g. for
    *          the big screen display).
@@ -591,7 +597,7 @@ public class BracketData {
     }
   }
 
-  private int getFirstRound() {
+  public int getFirstRound() {
     return _firstRound;
   }
 
@@ -808,6 +814,14 @@ public class BracketData {
     sb.append("</table>\n");
 
     return sb.toString();
+  }
+
+  /**
+   * Calls {@link #outputBrackets(TopRightCornerStyle)} with {@link TopRightCornerStyle#MEET_BOTTOM_OF_CELL}.
+   * @throws SQLException
+   */
+  public String getTopRightBracketOutput() throws SQLException {
+    return outputBrackets(BracketData.TopRightCornerStyle.MEET_TOP_OF_CELL);
   }
 
   private void outputTableSelect(final StringBuilder sb,
@@ -1325,6 +1339,12 @@ public class BracketData {
       }
       return sb.toString();
     }
+  }
+
+  @Override
+  protected void finalize() throws Throwable {
+    // cleanup connection object
+    _connection.close();
   }
 
 }
