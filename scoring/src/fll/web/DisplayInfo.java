@@ -29,6 +29,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
 
   /**
    * Name used for the default display when a name is needed.
+   * Needs to match remoteControl.js
    */
   public static final String DEFAULT_DISPLAY_NAME = "Default";
 
@@ -130,7 +131,8 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
 
   /**
    * Get the appropriate {@link DisplayInfo} object for the session.
-   * If the named display is following the default display, then the default display is returned.
+   * If the named display is following the default display, then the default
+   * display is returned.
    * 
    * @param application used to get all of the displays
    * @param session where to find the display name
@@ -141,7 +143,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
     final String displayName = SessionAttributes.getAttribute(session, "displayName", String.class);
     for (final DisplayInfo display : getDisplayInformation(application)) {
       if (display.getName().equals(displayName)) {
-        if(display.isFollowDefault()) {
+        if (display.isFollowDefault()) {
           return findOrCreateDefaultDisplay(application);
         } else {
           return display;
@@ -279,6 +281,12 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
     mRemotePage = v;
   }
 
+  /**
+   * Get the prefix for form parameters for this display.
+   * Needs to match remoteControl.js
+   * 
+   * @return
+   */
   public String getFormParamPrefix() {
     if (isDefaultDisplay()) {
       return "";
