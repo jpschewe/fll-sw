@@ -8,6 +8,8 @@ package fll.web.playoff;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
@@ -32,13 +34,9 @@ public class RemoteControlBrackets {
                                      final HttpSession session,
                                      final PageContext pageContext) {
     final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
+
     // store the brackets to know when a refresh is required
     session.setAttribute("brackets", displayInfo.getBrackets());
-
-    final DisplayInfo.H2HBracketDisplay h2hBracket = displayInfo.getBrackets().get(0); // HACK
-                                                                                       // just
-                                                                                       // for
-                                                                                       // now
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
@@ -49,19 +47,27 @@ public class RemoteControlBrackets {
 
       pageContext.setAttribute("maxNameLength", Team.MAX_TEAM_NAME_LEN);
 
-      // FIXME will need a list of these eventually
-      final BracketData bracketInfo = new BracketData(connection, h2hBracket.getBracket(), h2hBracket.getFirstRound(),
-                                                      h2hBracket.getFirstRound()
-                                                          + 2,
-                                                      4, false, true);
+      final List<BracketData> allBracketInfo = new LinkedList<>();
 
-      bracketInfo.addBracketLabels(h2hBracket.getFirstRound());
-      bracketInfo.addStaticTableLabels();
+      int numRows = 0;
+      for (final DisplayInfo.H2HBracketDisplay h2hBracket : displayInfo.getBrackets()) {
+        final BracketData bracketInfo = new BracketData(connection, h2hBracket.getBracket(), h2hBracket.getFirstRound(),
+                                                        h2hBracket.getFirstRound()
+                                                            + 2,
+                                                        4, false, true, h2hBracket.getIndex());
 
-      pageContext.setAttribute("bracketInfo", bracketInfo);
+        bracketInfo.addBracketLabels(h2hBracket.getFirstRound());
+        bracketInfo.addStaticTableLabels();
 
-      // FIXME needs to be the sum of numRows for all brackets
-      pageContext.setAttribute("numRows", bracketInfo.getNumRows());
+        numRows += bracketInfo.getNumRows();
+
+        allBracketInfo.add(bracketInfo);
+      }
+
+      pageContext.setAttribute("allBracketInfo", allBracketInfo);
+
+      // used for scroll control
+      pageContext.setAttribute("numRows", numRows);
 
     } catch (final SQLException sqle) {
       LOGGER.error("Error talking to the database", sqle);

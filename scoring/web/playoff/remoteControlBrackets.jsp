@@ -3,16 +3,22 @@
 
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<%@ page import="fll.web.playoff.RemoteControlBrackets" %>
+<%@ page import="fll.web.playoff.RemoteControlBrackets"%>
 
 <%
-RemoteControlBrackets.populateContext(application, session, pageContext);  
+  RemoteControlBrackets.populateContext(application, session, pageContext);
 %>
 
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="<c:url value='/style/fll-sw.css'/>" />
-<link rel="stylesheet" type="text/css" href="<c:url value='/scoreboard/score_style.css'/>" />
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="<c:url value='/style/fll-sw.css'/>" />
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="<c:url value='/scoreboard/score_style.css'/>" />
 
 <style type='text/css'>
 TD.Leaf {
@@ -49,88 +55,107 @@ SPAN.TIE {
 	padding-right: 5%;
 }
 </style>
-<script type="text/javascript" src="<c:url value='/playoff/code.icepush'/>"></script>
-<script type="text/javascript" src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
-<script type="text/javascript" src="<c:url value='/extlib/jquery.scrollTo-2.1.2.min.js'/>"></script>
+<script
+  type="text/javascript"
+  src="<c:url value='/playoff/code.icepush'/>"></script>
+<script
+  type="text/javascript"
+  src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
+<script
+  type="text/javascript"
+  src="<c:url value='/extlib/jquery.scrollTo-2.1.2.min.js'/>"></script>
 <script type="text/javascript">
   var ajaxURL = '<c:url value="/ajax/"/>';
-  var rows = ${numRows}; // need total number of rows for scrolling
-  var maxNameLength = ${maxNameLength};
-  
+  var numRows = parseInt("${numRows}"); // could be here directly as an intger, but the JSTL and auto-formatting don't agree
+  var maxNameLength = parseInt("${maxNameLength}"); // could be here directly as an intger, but the JSTL and auto-formatting don't agree
+
   var displayStrings = new Object();
-  displayStrings.parseTeamName = function (team) {
-      if (team.length > maxNameLength) {
-          return team.substring(0, maxNameLength-3)+"...";
-      } else {
-          return team;
-      }
+  displayStrings.parseTeamName = function(team) {
+    if (team.length > maxNameLength) {
+      return team.substring(0, maxNameLength - 3) + "...";
+    } else {
+      return team;
+    }
   }
-  displayStrings.getSpecialString = function (id, data) {
-      return "<span class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</span>";
+  displayStrings.getSpecialString = function(id, data) {
+    return "<span class=\"TeamName\">"
+        + displayStrings.parseTeamName(data.team.teamName) + "</span>";
   }
-  displayStrings.getTeamNameString = function (id, data) {
-      return "<span class=\"TeamNumber\">#" + data.team.teamNumber + "</span> <span class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</span>";
+  displayStrings.getTeamNameString = function(id, data) {
+    return "<span class=\"TeamNumber\">#" + data.team.teamNumber
+        + "</span> <span class=\"TeamName\">"
+        + displayStrings.parseTeamName(data.team.teamName) + "</span>";
   }
-  displayStrings.getTeamNameAndScoreString = function (id, data, scoreData) {
-      if (scoreData != "No Show") {
-          scoreData += ".0";
-      }
-      return "<span class=\"TeamNumber\">#" + data.team.teamNumber + "</span> <span class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</span><span class=\"TeamScore\"> Score: " + scoreData + "</span>";
+  displayStrings.getTeamNameAndScoreString = function(id, data, scoreData) {
+    if (scoreData != "No Show") {
+      scoreData += ".0";
+    }
+    return "<span class=\"TeamNumber\">#" + data.team.teamNumber
+        + "</span> <span class=\"TeamName\">"
+        + displayStrings.parseTeamName(data.team.teamName)
+        + "</span><span class=\"TeamScore\"> Score: " + scoreData + "</span>";
   }
 
   var ajaxList;
-  
+
   function iterate() {
-      $.ajax({
-          url: ajaxURL + "BracketQuery?multi=" + ajaxList,
-          dataType: "json",
-          cache: false,
-          beforeSend: function (xhr) {
-              xhr.overrideMimeType('text/plain');
-          }
-      }).done(function (mainData) {
-          $.each(mainData, function (index, data) {
-              var lid = data.originator;
-              //First and foremost, make sure rounds haven't advanced and the division is the same.
-              if (mainData.refresh == "true") {
-                  window.location.reload();
-              } else {
-                  if(data.leaf.team) {
-                      if (data.leaf.team.teamNumber < 0) {
-                        // internal teams 
-                        
-                          if (data.leaf.team.teamNumber == -3) {
-                            // NULL team number
-                              return;
-                          }
-                          $("#" + lid).html(displayStrings.getSpecialString(lid, data.leaf));
-                          return;
-                      } else {
-                          var score;
-                          //table label?
-                          placeTableLabel(lid, data.leaf.table, data.leaf.dbline);
-                          var scoreData = data.score;
-                          if (scoreData >= 0) {
-                              $("#" + lid).html(displayStrings.getTeamNameAndScoreString(lid, data.leaf, scoreData));
-                              return;
-                          } else if (scoreData == -2) {
-                              $("#" + lid).html(displayStrings.getTeamNameAndScoreString(lid, data.leaf, "No Show"));
-                              return;
-                          } else if (scoreData == -1) {
-                              $("#" + lid).html(displayStrings.getTeamNameString(lid, data.leaf));
-                              return;
-                          } // /else
-                      } // else if team num not a bye
-                  } // have a team number
-              } // not refresh
+    $.ajax({
+      url : ajaxURL + "BracketQuery?multi=" + ajaxList,
+      dataType : "json",
+      cache : false,
+      beforeSend : function(xhr) {
+        xhr.overrideMimeType('text/plain');
+      }
+    }).done(
+        function(mainData) {
+          $.each(mainData, function(index, data) {
+            var lid = data.originator;
+            //First and foremost, make sure rounds haven't advanced and the division is the same.
+            if (mainData.refresh == "true") {
+              window.location.reload();
+            } else {
+              if (data.leaf.team) {
+                if (data.leaf.team.teamNumber < 0) {
+                  // internal teams 
+
+                  if (data.leaf.team.teamNumber == -3) {
+                    // NULL team number
+                    return;
+                  }
+                  $("#" + lid).html(
+                      displayStrings.getSpecialString(lid, data.leaf));
+                  return;
+                } else {
+                  var score;
+                  //table label?
+                  placeTableLabel(lid, data.leaf.table, data.leaf.dbline);
+                  var scoreData = data.score;
+                  if (scoreData >= 0) {
+                    $("#" + lid).html(
+                        displayStrings.getTeamNameAndScoreString(lid,
+                            data.leaf, scoreData));
+                    return;
+                  } else if (scoreData == -2) {
+                    $("#" + lid).html(
+                        displayStrings.getTeamNameAndScoreString(lid,
+                            data.leaf, "No Show"));
+                    return;
+                  } else if (scoreData == -1) {
+                    $("#" + lid).html(
+                        displayStrings.getTeamNameString(lid, data.leaf));
+                    return;
+                  } // /else
+                } // else if team num not a bye
+              } // have a team number
+            } // not refresh
           }); // each of data
           colorTableLabels();
-      }).error(function (xhr, errstring, err) { 
-          window.location.reload();
-          console.log(xhr);
-          console.log(errstring);
-          console.log(err);
-      }); // /first .ajax
+        }).error(function(xhr, errstring, err) {
+      window.location.reload();
+      console.log(xhr);
+      console.log(errstring);
+      console.log(err);
+    }); // /first .ajax
   } // /iterate()
 
   var validColors = new Array();
@@ -154,85 +179,98 @@ SPAN.TIE {
   //colors sourced from http://www.w3.org/TR/CSS2/syndata.html#color-units
 
   function placeTableLabel(lid, table, dbLine) {
-      if (table != undefined) {
-          $("#" + lid + "-table").text(table);
-      }
+    if (table != undefined) {
+      $("#" + lid + "-table").text(table);
+    }
   }
 
   function colorTableLabels() {
-      $(".table_assignment").each(function(index, label) {
+    $(".table_assignment").each(
+        function(index, label) {
           //Sane color? Let's start by splitting the label text
-          if ($.inArray(label.innerHTML.split(" ")[0].toLowerCase(), validColors) > 0) {
-              label.style.borderColor = label.innerHTML.split(" ")[0];
-              label.style.borderStyle = "solid";
+          if ($.inArray(label.innerHTML.split(" ")[0].toLowerCase(),
+              validColors) > 0) {
+            label.style.borderColor = label.innerHTML.split(" ")[0];
+            label.style.borderStyle = "solid";
           }
-      });
+        });
   }
 
   function buildAJAXList() {
-      ajaxList = ""; // initialize to empty string
-      
-      $(".js-leaf").each(function () {
-          if (typeof $(this).attr('id') == 'string') { // non-null id
-              ajaxList = ajaxList + $(this).attr('id') + "|";
-          }
-      });
+    ajaxList = ""; // initialize to empty string
 
-      //remove last pipe
-      ajaxList = ajaxList.slice(0, ajaxList.length - 1);
+    $(".js-leaf").each(function() {
+      if (typeof $(this).attr('id') == 'string') { // non-null id
+        ajaxList = ajaxList + $(this).attr('id') + "|";
+      }
+    });
+
+    //remove last pipe
+    ajaxList = ajaxList.slice(0, ajaxList.length - 1);
   }
 
-  function scrollToBottom() {   
+  function scrollToBottom() {
     $.scrollTo($("#bottom"), {
-      duration: rows * 1000,
-      easing: 'linear',
-      onAfter: scrollToTop,
-  });    
+      duration : rows * 1000,
+      easing : 'linear',
+      onAfter : scrollToTop,
+    });
   }
-  
+
   function scrollToTop() {
     $.scrollTo($("#top"), {
-      duration: rows * 1000,
-      easing: 'linear',
-      onAfter: scrollToBottom,
-  });    
+      duration : rows * 1000,
+      easing : 'linear',
+      onAfter : scrollToBottom,
+    });
   }
-  
+
   $(document).ready(function() {
-      buildAJAXList();
-      <c:if test="${empty param.scroll}">
-      scrollToBottom();
-      </c:if>
-      colorTableLabels();
+    buildAJAXList();
+    <c:if test="${empty param.scroll}">
+    scrollToBottom();
+    </c:if>
+    colorTableLabels();
   });
 </script>
-<icep:register group="playoffs" callback="function(){iterate();}"/>
+<icep:register
+  group="playoffs"
+  callback="function(){iterate();}" />
 </head>
 <body>
-<!-- dummy tag and some blank lines for scrolling -->
-<span id="top"></span>
-<div id="dummy" style="position: absolute"><br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
+  <!-- dummy tag and some blank lines for scrolling -->
+  <span id="top"></span>
+  <div
+    id="dummy"
+    style="position: absolute">
+    <br />
 
-<div class='center'>Head to Head Round ${bracketInfo.firstRound}, Head to Head Bracket ${bracketInfo.bracketDivision}</div>
-                        <br/>
+    <c:forEach
+      items="${allBracketInfo}"
+      var="bracketInfo">
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+
+      <div class='center'>Head to Head Round
+        ${bracketInfo.firstRound}, Head to Head Bracket
+        ${bracketInfo.bracketDivision}</div>
+      <br />
                         
    ${bracketInfo.topRightBracketOutput}
+</c:forEach>
 
-  <span id="bottom">&nbsp;</span>
-</div>
-
+    <span id="bottom">&nbsp;</span>
+  </div>
 
 </body>
 </html>

@@ -12,8 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.log4j.Logger;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.Queries;
@@ -30,6 +29,9 @@ import fll.xml.PerformanceScoreCategory;
  * @author jjkoletar
  */
 public final class JsonUtilities {
+  
+  private static final Logger LOGGER = LogUtils.getLogger();
+  
   private JsonUtilities() {
   }
 
@@ -83,22 +85,29 @@ public final class JsonUtilities {
     }
   }
 
-  public static String generateJsonBracketInfo(final String division,
-                                               final Map<Integer, Integer> ids,
-                                               final Connection connection,
-                                               final PerformanceScoreCategory perf,
-                                               final BracketData bracketData,
-                                               final boolean showOnlyVerifiedScores,
-                                               final boolean showFinalsScores) {
-    List<BracketLeafResultSet> datalist = new LinkedList<BracketLeafResultSet>();
+  /**
+   * @return the list of bracket leaves or null if a refresh is required
+   */
+  public static List<BracketLeafResultSet> generateJsonBracketInfo(final String division,
+                                                                   final Map<Integer, Integer> ids,
+                                                                   final Connection connection,
+                                                                   final PerformanceScoreCategory perf,
+                                                                   final BracketData bracketData,
+                                                                   final boolean showOnlyVerifiedScores,
+                                                                   final boolean showFinalsScores) {
+    final List<BracketLeafResultSet> datalist = new LinkedList<BracketLeafResultSet>();
     try {
       final int currentTournament = Queries.getCurrentTournament(connection);
       for (Map.Entry<Integer, Integer> entry : ids.entrySet()) {
         final int row = entry.getKey();
         final int playoffRound = entry.getValue();
+
         final TeamBracketCell tbc = (TeamBracketCell) bracketData.getData(playoffRound, row);
         if (tbc == null) {
-          return "{\"refresh\":\"true\"}";
+          if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug(String.format("Didn't find data for round: %d row %d, returning null to force refresh", playoffRound, row));
+          }
+          return null;
         }
         final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
         final int teamNumber = tbc.getTeam().getTeamNumber();
@@ -107,14 +116,16 @@ public final class JsonUtilities {
                                                           connection);
         final double computedTeamScore = perf.evaluate(teamScore);
         final boolean realScore = !Double.isNaN(computedTeamScore);
-        final boolean noShow = Queries.isNoShow(connection, currentTournament, tbc.getTeam().getTeamNumber(), runNumber);
+        final boolean noShow = Queries.isNoShow(connection, currentTournament, tbc.getTeam().getTeamNumber(),
+                                                runNumber);
         // Sane request checks
         if (noShow) {
           datalist.add(new BracketLeafResultSet(tbc, -2.0, row
               + "-" + playoffRound));
         } else if (!realScore
             || !showOnlyVerifiedScores || Queries.isVerified(connection, currentTournament, teamNumber, runNumber)) {
-          if ((playoffRound == numPlayoffRounds && !showFinalsScores)
+          if ((playoffRound == numPlayoffRounds
+              && !showFinalsScores)
               || !realScore) {
             datalist.add(new BracketLeafResultSet(tbc, -1.0, row
                 + "-" + playoffRound));
@@ -131,12 +142,7 @@ public final class JsonUtilities {
       // Add some data, JSON is happy
       datalist.add(new BracketLeafResultSet());
     }
-    try {
-      final ObjectMapper jsonMapper = new ObjectMapper();
-      return jsonMapper.writeValueAsString(datalist);
-    } catch (final JsonProcessingException e) {
-      throw new RuntimeException(e);
-    }
+    return datalist;
   }
 
 }

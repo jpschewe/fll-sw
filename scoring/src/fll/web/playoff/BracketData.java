@@ -15,7 +15,9 @@ import java.util.TreeMap;
 import net.mtu.eggplant.util.StringUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.log4j.Logger;
+import org.openxmlformats.schemas.drawingml.x2006.main.ThemeDocument;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
@@ -331,9 +333,9 @@ public class BracketData {
     return _finalsRound;
   }
 
-  private boolean _showFinalScores;
+  private final boolean _showFinalScores;
 
-  private boolean _showOnlyVerifiedScores;
+  private final boolean _showOnlyVerifiedScores;
 
   private final Connection _connection;
 
@@ -344,6 +346,29 @@ public class BracketData {
   }
 
   private final int _currentTournament;
+
+  private final int _bracketIndex;
+
+  /**
+   * If this object is in a list, the index in the list.
+   */
+  public int getBracketIndex() {
+    return _bracketIndex;
+  }
+
+  /**
+   * Constructor that assumes the object is not in a list.
+   */
+  public BracketData(final Connection pConnection,
+                     final String pDivision,
+                     final int pFirstRound,
+                     final int pLastRound,
+                     final int pRowsPerTeam,
+                     final boolean pShowFinals,
+                     final boolean pShowOnlyVerifiedScores)
+      throws SQLException {
+    this(pConnection, pDivision, pFirstRound, pLastRound, pRowsPerTeam, pShowFinals, pShowOnlyVerifiedScores, 0);
+  }
 
   /**
    * Constructs a bracket data object with playoff data from the database.
@@ -356,17 +381,25 @@ public class BracketData {
    * @param pRowsPerTeam A positive, even number defining how many rows will be
    *          allocated for each team in the first round. This determines
    *          overall spacing for the entire table. Recommended value: 4.
+   * @param bracketIndex the index of this bracket in a list, if not in a list,
+   *          this should be 0
    * @throws SQLException
    */
   public BracketData(final Connection pConnection,
                      final String pDivision,
                      final int pFirstRound,
                      final int pLastRound,
-                     final int pRowsPerTeam)
+                     final int pRowsPerTeam,
+                     final boolean pShowFinals,
+                     final boolean pShowOnlyVerifiedScores,
+                     final int bracketIndex)
       throws SQLException {
     super();
     _connection = pConnection;
     _division = pDivision;
+    _showFinalScores = pShowFinals;
+    _showOnlyVerifiedScores = pShowOnlyVerifiedScores;
+    _bracketIndex = bracketIndex;
 
     if (pRowsPerTeam
         % 2 != 0
@@ -379,9 +412,6 @@ public class BracketData {
 
     _rowsPerTeam = pRowsPerTeam;
     _firstRoundSize = Queries.getFirstPlayoffRoundSize(_connection, _division);
-
-    _showFinalScores = true;
-    _showOnlyVerifiedScores = true;
 
     if (pFirstRound < 1) {
       _firstRound = 1;
@@ -514,50 +544,6 @@ public class BracketData {
   }
 
   /**
-   * Constructor including explicit show scores flag.
-   * 
-   * @param pShowFinals True if the final scores should be displayed (e.g. for
-   *          the administrative brackets) or false if they should not (e.g. for
-   *          the big screen display).
-   * @throws SQLException
-   */
-  public BracketData(final Connection connection,
-                     final String division,
-                     final int pFirstRound,
-                     final int pLastRound,
-                     final int pRowsPerTeam,
-                     final boolean pShowFinals)
-      throws SQLException {
-    this(connection, division, pFirstRound, pLastRound, pRowsPerTeam);
-    _showFinalScores = pShowFinals;
-  }
-
-  /**
-   * Constructor including explicit show scores flag.
-   * 
-   * @param connection the database connection to use for this object, the
-   *          object owns the connection and will clean it up
-   * @param pShowFinals True if the final scores should be displayed (e.g. for
-   *          the administrative brackets) or false if they should not (e.g. for
-   *          the big screen display).
-   * @param pShowOnlyVerifiedScores True if only verified scores should be
-   *          displayed, false if all scores should be displayed.
-   * @throws SQLException
-   */
-  public BracketData(final Connection connection,
-                     final String division,
-                     final int pFirstRound,
-                     final int pLastRound,
-                     final int pRowsPerTeam,
-                     final boolean pShowFinals,
-                     final boolean pShowOnlyVerifiedScores)
-      throws SQLException {
-    this(connection, division, pFirstRound, pLastRound, pRowsPerTeam);
-    _showFinalScores = pShowFinals;
-    _showOnlyVerifiedScores = pShowOnlyVerifiedScores;
-  }
-
-  /**
    * Returns the playoff meta data for a specified location in the brackets.
    * 
    * @param round The column of the playoff data table, otherwise known as the
@@ -614,6 +600,35 @@ public class BracketData {
   }
 
   /**
+   * The inverse of {@link #constructLeafId(int, int)}
+   * 
+   * @param lid the leaf id to parse
+   * @return (bracket index, row, round) or null if it's not parsable
+   */
+  public static ImmutableTriple<Integer, Integer, Integer> parseLeafId(final String lid) {
+    final String[] pieces = lid.split("\\-");
+    if (pieces.length >= 3) {
+      final String bracketIdxStr = pieces[0];
+      final String rowStr = pieces[1];
+      final String roundStr = pieces[2];
+
+      return new ImmutableTriple<>(Integer.parseInt(bracketIdxStr), Integer.parseInt(rowStr),
+                                   Integer.parseInt(roundStr));
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Needs to match {@link #parseLeafId(String)}
+   */
+  private String constructLeafId(final int row,
+                                 final int round) {
+    return _bracketIndex
+        + "-" + row + "-" + round;
+  }
+
+  /**
    * Formats the HTML code to insert for a single table cell of one of the
    * playoff bracket display pages (both administrative and scrolling). All
    * cells are generated with a specified width of 400 pixels. If the cell
@@ -646,8 +661,7 @@ public class BracketData {
             + comment + "-->");
       }
     } else if (d instanceof TeamBracketCell) {
-      final String leafId = row
-          + "-" + round;
+      final String leafId = constructLeafId(row, round);
 
       sb.append("<td width='400' class='Leaf js-leaf' id='"
           + leafId + "'>");
@@ -733,8 +747,7 @@ public class BracketData {
       final String table = tableCell.getTable();
 
       // reference the row and round for the leaf that the table is for
-      final String leafId = tableCell.getRow()
-          + "-" + tableCell.getRound();
+      final String leafId = constructLeafId(tableCell.getRow(), tableCell.getRound());
 
       // always setup the html for a table assignment, just don't put the data
       // in it until it's available
@@ -817,7 +830,9 @@ public class BracketData {
   }
 
   /**
-   * Calls {@link #outputBrackets(TopRightCornerStyle)} with {@link TopRightCornerStyle#MEET_BOTTOM_OF_CELL}.
+   * Calls {@link #outputBrackets(TopRightCornerStyle)} with
+   * {@link TopRightCornerStyle#MEET_BOTTOM_OF_CELL}.
+   * 
    * @throws SQLException
    */
   public String getTopRightBracketOutput() throws SQLException {
@@ -1323,16 +1338,14 @@ public class BracketData {
         if (!scoreVerified) {
           sb.append("<span style='color:red'>");
         }
-        sb.append("<span class='TeamScore'>&nbsp;Score: <span id='");
-        sb.append(team.getTeamNumber()
-            + "-" + runNumber + "-score'>");
+        sb.append("<span class='TeamScore'>&nbsp;Score: ");
         if (Playoff.isNoShow(_connection, currentTournament, team, runNumber)) {
           sb.append("No Show");
         } else {
           // only display score if it's not a bye
           sb.append(Playoff.getPerformanceScore(_connection, currentTournament, team, runNumber));
         }
-        sb.append("</span></span>");
+        sb.append("</span>");
         if (!scoreVerified) {
           sb.append("</span>");
         }
