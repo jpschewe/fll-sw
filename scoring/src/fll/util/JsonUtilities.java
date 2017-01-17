@@ -15,6 +15,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.db.GenerateDB;
 import fll.db.Queries;
 import fll.web.playoff.BracketData;
 import fll.web.playoff.BracketData.TeamBracketCell;
@@ -29,9 +30,9 @@ import fll.xml.PerformanceScoreCategory;
  * @author jjkoletar
  */
 public final class JsonUtilities {
-  
+
   private static final Logger LOGGER = LogUtils.getLogger();
-  
+
   private JsonUtilities() {
   }
 
@@ -104,16 +105,17 @@ public final class JsonUtilities {
 
         final TeamBracketCell tbc = (TeamBracketCell) bracketData.getData(playoffRound, row);
         if (tbc == null) {
-          if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug(String.format("Didn't find data for round: %d row %d, returning null to force refresh", playoffRound, row));
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(String.format("Didn't find data for round: %d row %d, returning null to force refresh",
+                                       playoffRound, row));
           }
           return null;
         }
         final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
         final int teamNumber = tbc.getTeam().getTeamNumber();
         final int runNumber = Playoff.getRunNumber(connection, division, teamNumber, playoffRound);
-        final TeamScore teamScore = new DatabaseTeamScore("Performance", currentTournament, teamNumber, runNumber,
-                                                          connection);
+        final TeamScore teamScore = new DatabaseTeamScore(GenerateDB.PERFORMANCE_TABLE_NAME, currentTournament,
+                                                          teamNumber, runNumber, connection);
         final double computedTeamScore = perf.evaluate(teamScore);
         final boolean realScore = !Double.isNaN(computedTeamScore);
         final boolean noShow = Queries.isNoShow(connection, currentTournament, tbc.getTeam().getTeamNumber(),
