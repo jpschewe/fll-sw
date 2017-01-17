@@ -1,3 +1,5 @@
+* 454 - Add support for multiple playoff brackets on a single big screen display
+
 Release 11.5
 ============
 

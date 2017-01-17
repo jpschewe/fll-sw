@@ -12,12 +12,8 @@ import java.util.NoSuchElementException;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import net.mtu.eggplant.util.StringUtils;
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.log4j.Logger;
-import org.openxmlformats.schemas.drawingml.x2006.main.ThemeDocument;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
@@ -25,6 +21,8 @@ import fll.db.Queries;
 import fll.db.TableInformation;
 import fll.db.TournamentParameters;
 import fll.util.LogUtils;
+import net.mtu.eggplant.util.StringUtils;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Class to provide convenient access to the contents of the PlayoffData table.

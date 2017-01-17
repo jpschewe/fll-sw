@@ -117,16 +117,6 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
 
     displayInformation.remove(displayInfo);
     application.setAttribute(ApplicationAttributes.DISPLAY_INFORMATION, displayInformation);
-
-    // FIXME will go away
-    application.removeAttribute(displayInfo.getName()
-        + "_displayPage");
-    application.removeAttribute(displayInfo.getName()
-        + "_displayURL");
-    application.removeAttribute(displayInfo.getName()
-        + "_playoffRoundNumber");
-    application.removeAttribute(displayInfo.getName()
-        + "_playoffDivision");
   }
 
   /**
