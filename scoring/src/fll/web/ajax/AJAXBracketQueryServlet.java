@@ -177,7 +177,7 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
       final int round = parsed.right;
 
       if(LOGGER.isTraceEnabled()) {
-        LOGGER.trace(String.format("lid: '%s' bracketIdx: %d row: %d round: %d", bracketIdx, row, round));
+        LOGGER.trace(String.format("lid: '%s' bracketIdx: %d row: %d round: %d", lid, bracketIdx, row, round));
       }
       if (bracketIdx < 0
           || bracketIdx >= allBrackets.size()) {
