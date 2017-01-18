@@ -34,11 +34,7 @@ public class DisplayQueryServlet extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
-    DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
-    if (null == displayInfo
-        || displayInfo.isFollowDefault()) {
-      displayInfo = DisplayInfo.findOrCreateDefaultDisplay(application);
-    }
+    final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
 
     final String url = pickURL(displayInfo, request);
     final DisplayResponse displayResponse = new DisplayResponse(url);
