@@ -71,8 +71,7 @@ public class SlideshowTest {
       selenium.findElement(By.id("remote-control")).click();
       Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
 
-      selenium.findElement(By.xpath("//input[@name='remotePage' and @value='" + DisplayInfo.SLIDESHOW_REMOTE_PAGE + "']"));
-      selenium.findElement(By.id("slideshow")).click();
+      selenium.findElement(By.xpath("//input[@name='remotePage' and @value='" + DisplayInfo.SLIDESHOW_REMOTE_PAGE + "']")).click();
       selenium.findElement(By.name("slideInterval")).sendKeys("5");
       selenium.findElement(By.name("submit")).click();
       Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
