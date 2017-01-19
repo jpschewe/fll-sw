@@ -81,7 +81,7 @@ public final class IntegrationTestUtils {
   /**
    * How long to wait for pages to load before checking for elements.
    */
-  public static final long WAIT_FOR_PAGE_LOAD_MS = 2000;
+  public static final long WAIT_FOR_PAGE_LOAD_MS = 2500;
 
   private IntegrationTestUtils() {
     // no instances
