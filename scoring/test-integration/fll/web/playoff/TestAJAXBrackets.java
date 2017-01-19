@@ -142,7 +142,7 @@ public class TestAJAXBrackets {
       // enter unverified score for team 1
       enterScore(scoreEntryWindow, "4", 1);
 
-      final String scoreTextBefore = bracketsWindow.findElement(By.id("9-1")).getText();
+      final String scoreTextBefore = bracketsWindow.findElement(By.id("0-9-1")).getText();
       // final String scoreTextBefore =
       // String.valueOf(bracketsWindowJS.executeScript("window.document.getElementById('9-1').innerHTML"));
       if (LOGGER.isDebugEnabled()) {
@@ -174,7 +174,7 @@ public class TestAJAXBrackets {
       // give the web server a chance to catch up
       Thread.sleep(30000);
 
-      final String scoreTextAfter = bracketsWindow.findElement(By.id("9-1")).getText();
+      final String scoreTextAfter = bracketsWindow.findElement(By.id("0-9-1")).getText();
       // final String scoreTextAfter =
       // String.valueOf(seleniumJS.executeScript("window.document.getElementById('1-2').innerHTML"));
       if (LOGGER.isDebugEnabled()) {

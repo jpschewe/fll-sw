@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
+import fll.db.GenerateDB;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.util.FLLRuntimeException;
@@ -163,8 +164,8 @@ public final class Playoff {
                                 final TeamScore teamBScore,
                                 final int runNumber)
       throws SQLException, ParseException {
-    final TeamScore teamAScore = new DatabaseTeamScore("Performance", tournament, teamA.getTeamNumber(), runNumber,
-                                                       connection);
+    final TeamScore teamAScore = new DatabaseTeamScore(GenerateDB.PERFORMANCE_TABLE_NAME, tournament,
+                                                       teamA.getTeamNumber(), runNumber, connection);
     final Team retval = pickWinner(performanceElement, tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB,
                                    teamBScore);
     teamAScore.cleanup();
@@ -200,8 +201,8 @@ public final class Playoff {
                                 final Team teamB,
                                 final int runNumber)
       throws SQLException, ParseException {
-    final TeamScore teamAScore = new DatabaseTeamScore("Performance", tournament, teamA.getTeamNumber(), runNumber,
-                                                       connection);
+    final TeamScore teamAScore = new DatabaseTeamScore(GenerateDB.PERFORMANCE_TABLE_NAME, tournament,
+                                                       teamA.getTeamNumber(), runNumber, connection);
     final TeamScore teamBScore = new DatabaseTeamScore("Performance", tournament, teamB.getTeamNumber(), runNumber,
                                                        connection);
     final Team retval = pickWinner(performanceElement, tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB,

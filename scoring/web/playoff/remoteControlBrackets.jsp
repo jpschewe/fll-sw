@@ -3,83 +3,23 @@
 
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<%@ page import="fll.web.playoff.BracketData"%>
-<%@ page import="fll.web.SessionAttributes" %>
-<%@ page import="fll.web.ApplicationAttributes" %>
-<%@ page import="javax.sql.DataSource" %>
-<%@ page import="java.util.List"%>
-<%@ page import="fll.db.Queries" %>
-<%@ page import="java.sql.Connection" %>
-<%@ page import="fll.Team" %>
-<%@ page import="fll.web.playoff.Playoff" %>
+<%@ page import="fll.web.playoff.RemoteControlBrackets"%>
 
 <%
-  /*
-  application parameters
-  playoffDivision - String for the division
-  playoffRoundNumber - Integer for the playoff round number, counted from the 1st playoff round
-   */
-
-   final DataSource datasource = ApplicationAttributes.getDataSource(application);
-   final Connection connection = datasource.getConnection();
-  final int currentTournament = Queries.getCurrentTournament(connection);
-
-  final String divisionKey = "playoffDivision";
-  final String roundNumberKey = "playoffRoundNumber";
-  final String displayName = SessionAttributes.getAttribute(session, "displayName", String.class);
-
-  final String sessionDivision;
-  final Number sessionRoundNumber;
-  if (null != displayName) {
-    sessionDivision = ApplicationAttributes.getAttribute(application, displayName
-    + "_" + divisionKey, String.class);
-    sessionRoundNumber = ApplicationAttributes.getAttribute(application, displayName
-    + "_" + roundNumberKey, Number.class);
-  } else {
-    sessionDivision = null;
-    sessionRoundNumber = null;
-  }
-
-  final String division;
-  if (null != sessionDivision) {
-    division = sessionDivision;
-  } else if (null == application.getAttribute(divisionKey)) {
-    final List<String> divisions = Playoff.getPlayoffBrackets(connection, currentTournament);
-    if (!divisions.isEmpty()) {
-  division = divisions.get(0);
-    } else {
-  throw new RuntimeException("No head to head bracket specified and no head to head brackets in the database!");
-    }
-  } else {
-    division = ApplicationAttributes.getAttribute(application, divisionKey, String.class);
-  }
-
-  final int playoffRoundNumber;
-  if (null != sessionRoundNumber) {
-    playoffRoundNumber = sessionRoundNumber.intValue();
-  } else if (null == application.getAttribute(roundNumberKey)) {
-    playoffRoundNumber = 1;
-  } else {
-    playoffRoundNumber = ApplicationAttributes.getAttribute(application, roundNumberKey, Number.class).intValue();
-  }
-
-  final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection, division);
-
-  final BracketData bracketInfo = new BracketData(connection, division, playoffRoundNumber, playoffRoundNumber + 2, 4, false, true);
-
-  bracketInfo.addBracketLabels(playoffRoundNumber);
-  bracketInfo.addStaticTableLabels();
-  
-  pageContext.setAttribute("playoffRoundNumber", playoffRoundNumber);
-  pageContext.setAttribute("numPlayoffRounds", numPlayoffRounds);
+  RemoteControlBrackets.populateContext(application, session, pageContext);
 %>
 
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="<c:url value='/style/fll-sw.css'/>" />
-<link rel="stylesheet" type="text/css" href="<c:url value='/scoreboard/score_style.css'/>" />
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="<c:url value='/style/fll-sw.css'/>" />
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="<c:url value='/scoreboard/score_style.css'/>" />
 
-<title>Head to Head Round <%=playoffRoundNumber%>, Head to Head Bracket <%=division%></title>
 <style type='text/css'>
 TD.Leaf {
 	color: #ffffff;
@@ -112,124 +52,110 @@ SPAN.TIE {
 	font-size: small;
 	background-color: white;
 	padding-left: 5%;
-	padding-right: 5%
+	padding-right: 5%;
 }
 </style>
-<script type="text/javascript" src="<c:url value='/playoff/code.icepush'/>"></script>
-<script type="text/javascript" src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
-<script type="text/javascript" src="<c:url value='/extlib/jquery.scrollTo-2.1.2.min.js'/>"></script>
+<script
+  type="text/javascript"
+  src="<c:url value='/playoff/code.icepush'/>"></script>
+<script
+  type="text/javascript"
+  src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
+<script
+  type="text/javascript"
+  src="<c:url value='/extlib/jquery.scrollTo-2.1.2.min.js'/>"></script>
 <script type="text/javascript">
   var ajaxURL = '<c:url value="/ajax/"/>';
-  var currentRound = <%=playoffRoundNumber-1%>;
-  var foundNewest = false;
-  var rows = <%=bracketInfo.getNumRows()%>;
-  var finalRound = <%=Queries.getNumPlayoffRounds(connection, division)+1%>;
-  var maxNameLength = <%=Team.MAX_TEAM_NAME_LEN%>;
-  var division = "<%=division%>";
-  
+  var numRows = parseInt("${numRows}"); // could be here directly as an intger, but the JSTL and auto-formatting don't agree
+  var maxNameLength = parseInt("${maxNameLength}"); // could be here directly as an intger, but the JSTL and auto-formatting don't agree
+
   var displayStrings = new Object();
-  displayStrings.parseTeamName = function (team) {
-      if (team.length > maxNameLength) {
-          return team.substring(0, maxNameLength-3)+"...";
-      } else {
-          return team;
-      }
+  displayStrings.parseTeamName = function(team) {
+    if (team.length > maxNameLength) {
+      return team.substring(0, maxNameLength - 3) + "...";
+    } else {
+      return team;
+    }
   }
-  displayStrings.getSpecialString = function (id, data, newest) {
-      if (newest) {
-          return "<a name=\"newest\" id=\""+id+"-n\"></a><span class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</span>";
-      } else {
-          return "<span class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</span>";
-      }
+  displayStrings.getSpecialString = function(id, data) {
+    return "<span class=\"TeamName\">"
+        + displayStrings.parseTeamName(data.team.teamName) + "</span>";
   }
-  displayStrings.getTeamNameString = function (id, data, newest) {
-      if (newest) {
-          return "<a name=\"newest\" id=\""+id+"-n\"></a><span class=\"TeamNumber\">#" + data.team.teamNumber + "</span> <span class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</span>";
-      } else {
-          return "<span class=\"TeamNumber\">#" + data.team.teamNumber + "</span> <span class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</span>";
-      }
+  displayStrings.getTeamNameString = function(id, data) {
+    return "<span class=\"TeamNumber\">#" + data.team.teamNumber
+        + "</span> <span class=\"TeamName\">"
+        + displayStrings.parseTeamName(data.team.teamName) + "</span>";
   }
-  displayStrings.getTeamNameAndScoreString = function (id, data, scoreData, newest) {
-      if (scoreData != "No Show") {
-          scoreData += ".0";
-      }
-      if (newest) {
-          return "<a name=\"newest\" id=\""+id+"-n\"></a><span class=\"TeamNumber\">#" + data.team.teamNumber + "</span> <span class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</span><span class=\"TeamScore\"> Score: " + scoreData + "</span>";
-      } else {
-          return "<span class=\"TeamNumber\">#" + data.team.teamNumber + "</span> <span class=\"TeamName\">" + displayStrings.parseTeamName(data.team.teamName) + "</span><span class=\"TeamScore\"> Score: " + scoreData + "</span>";
-      }
+  displayStrings.getTeamNameAndScoreString = function(id, data, scoreData) {
+    if (scoreData != "No Show") {
+      scoreData += ".0";
+    }
+    return "<span class=\"TeamNumber\">#" + data.team.teamNumber
+        + "</span> <span class=\"TeamName\">"
+        + displayStrings.parseTeamName(data.team.teamName)
+        + "</span><span class=\"TeamScore\"> Score: " + scoreData + "</span>";
   }
 
   var ajaxList;
-  
+
   function iterate() {
-      foundNewest = false;
-      $("a[name=newest]").remove();
-      $.ajax({
-          url: ajaxURL + "BracketQuery?division=" + division + "&multi=" + ajaxList,
-          dataType: "json",
-          cache: false,
-          beforeSend: function (xhr) {
-              xhr.overrideMimeType('text/plain');
-          }
-      }).done(function (mainData) {
-          $.each(mainData, function (index, data) {
-              var lid = data.originator;
-              //First and foremost, make sure rounds haven't advanced and the division is the same.
-              if (mainData.refresh == "true") {
-                  window.location.reload();
-              }
-              if (data.leaf.team.teamNumber < 0) {
+    $.ajax({
+      url : ajaxURL + "BracketQuery?multi=" + ajaxList,
+      dataType : "json",
+      cache : false,
+      beforeSend : function(xhr) {
+        xhr.overrideMimeType('text/plain');
+      }
+    }).done(
+        function(mainData) {
+          $.each(mainData, function(index, data) {
+            var lid = data.originator;
+            //First and foremost, make sure rounds haven't advanced and the division is the same.
+            if (mainData.refresh == "true") {
+              window.location.reload();
+            } else {
+              if (data.leaf.team) {
+                if (data.leaf.team.teamNumber < 0) {
+                  // internal teams 
+
                   if (data.leaf.team.teamNumber == -3) {
-                      return;
+                    // NULL team number
+                    return;
                   }
-                  if ($("#" + lid).html() != displayStrings.getSpecialString(lid, data.leaf, false) && !foundNewest) {
-                      $("#" + lid).html(displayStrings.getSpecialString(lid, data.leaf, true));
-                      foundNewest = true;
-                  } else {
-                      $("#" + lid).html(displayStrings.getSpecialString(lid, data.leaf, false));
-                  }
+                  $("#" + lid).html(
+                      displayStrings.getSpecialString(lid, data.leaf));
                   return;
-              } else if (lid.split("-")[1] != finalRound)/*Don't show final results!*/ { // /if team number meant a bye
+                } else {
                   var score;
                   //table label?
                   placeTableLabel(lid, data.leaf.table, data.leaf.dbline);
                   var scoreData = data.score;
                   if (scoreData >= 0) {
-                      if ($("#" + lid).html() != displayStrings.getTeamNameAndScoreString(lid, data.leaf, scoreData, false) && !foundNewest) {
-                          $("#" + lid).html(displayStrings.getTeamNameAndScoreString(lid, data.leaf, scoreData, true));
-                          foundNewest = true;
-                      } else {
-                          $("#" + lid).html(displayStrings.getTeamNameAndScoreString(lid, data.leaf, scoreData, false));
-                      }
-                      return;
+                    $("#" + lid).html(
+                        displayStrings.getTeamNameAndScoreString(lid,
+                            data.leaf, scoreData));
+                    return;
                   } else if (scoreData == -2) {
-                      if ($("#" + lid).html() != displayStrings.getTeamNameAndScoreString(lid, data.leaf, "No Show", false) && !foundNewest) {
-                          $("#" + lid).html(displayStrings.getTeamNameAndScoreString(lid, data.leaf, "No Show", true));
-                          foundNewest = true;
-                      } else {
-                          $("#" + lid).html(displayStrings.getTeamNameAndScoreString(lid, data.leaf, "No Show", false));
-                      }
-                      return;
+                    $("#" + lid).html(
+                        displayStrings.getTeamNameAndScoreString(lid,
+                            data.leaf, "No Show"));
+                    return;
                   } else if (scoreData == -1) {
-                      if ($("#" + lid).html() != displayStrings.getTeamNameString(lid, data.leaf, false) && !foundNewest) {
-                          $("#" + lid).html(displayStrings.getTeamNameString(lid, data.leaf, true));
-                          foundNewest = true;
-                      } else {
-                          $("#" + lid).html(displayStrings.getTeamNameString(lid, data.leaf, false));
-                      }
-                      return;
+                    $("#" + lid).html(
+                        displayStrings.getTeamNameString(lid, data.leaf));
+                    return;
                   } // /else
-                  //}); // /.done
-              } // /if team num not a bye
-          }); // /.each of data
+                } // else if team num not a bye
+              } // have a team number
+            } // not refresh
+          }); // each of data
           colorTableLabels();
-      }).error(function (xhr, errstring, err) { 
-          window.location.reload();
-          console.log(xhr);
-          console.log(errstring);
-          console.log(err);
-      }); // /first .ajax
+        }).error(function(xhr, errstring, err) {
+      window.location.reload();
+      console.log(xhr);
+      console.log(errstring);
+      console.log(err);
+    }); // /first .ajax
   } // /iterate()
 
   var validColors = new Array();
@@ -253,94 +179,98 @@ SPAN.TIE {
   //colors sourced from http://www.w3.org/TR/CSS2/syndata.html#color-units
 
   function placeTableLabel(lid, table, dbLine) {
-      if (table != undefined) {
-          var row;
-          //Are we on the top of a bracket or the bottom?
-          if (dbLine % 2 == 1) {
-              row = $("#" + lid).parent().next();
-          } else {
-              row = $("#" + lid).parent().prev();
-          }
-          //Selector is SUPPOSED to pick the nth cell with widths of 400, but I have to use this lazy switch to account for bridges, since it doesn't want to work.
-          var nthcell = ((parseInt(lid.split("-")[1]) - currentRound));
-          if (nthcell == 3) {
-              nthcell = 4;
-          } 
-              row.find("td[width=\"400\"]:nth-child(" +  nthcell + ")").eq(0).css('padding-right', '30px').attr('align', 'right').html('<span class="table_assignment">' + table + '</span><!-- '+lid+' -->');
-      }
+    if (table != undefined) {
+      $("#" + lid + "-table").text(table);
+    }
   }
 
   function colorTableLabels() {
-      $(".table_assignment").each(function(index, label) {
+    $(".table_assignment").each(
+        function(index, label) {
           //Sane color? Let's start by splitting the label text
-          if ($.inArray(label.innerHTML.split(" ")[0].toLowerCase(), validColors) > 0) {
-              label.style.borderColor = label.innerHTML.split(" ")[0];
-              label.style.borderStyle = "solid";
+          if ($.inArray(label.innerHTML.split(" ")[0].toLowerCase(),
+              validColors) > 0) {
+            label.style.borderColor = label.innerHTML.split(" ")[0];
+            label.style.borderStyle = "solid";
           }
-      });
+        });
   }
 
   function buildAJAXList() {
-      $(".js-leaf").each(function () {
-          if (typeof $(this).attr('id') == 'string') {
-              ajaxList = ajaxList + $(this).attr('id') + "|";
-          }
-      });
-      //remove last pipe
-      ajaxList = ajaxList.slice(0, ajaxList.length - 1);
-      ajaxList = ajaxList.replace(new RegExp("[a-z]", "g"), "");
+    ajaxList = ""; // initialize to empty string
+
+    $(".js-leaf").each(function() {
+      if (typeof $(this).attr('id') == 'string') { // non-null id
+        ajaxList = ajaxList + $(this).attr('id') + "|";
+      }
+    });
+
+    //remove last pipe
+    ajaxList = ajaxList.slice(0, ajaxList.length - 1);
   }
 
-  function scrollToBottom() {   
+  function scrollToBottom() {
     $.scrollTo($("#bottom"), {
-      duration: rows * 1000,
-      easing: 'linear',
-      onAfter: scrollToTop,
-  });    
+      duration : rows * 1000,
+      easing : 'linear',
+      onAfter : scrollToTop,
+    });
   }
-  
+
   function scrollToTop() {
     $.scrollTo($("#top"), {
-      duration: rows * 1000,
-      easing: 'linear',
-      onAfter: scrollToBottom,
-  });    
+      duration : rows * 1000,
+      easing : 'linear',
+      onAfter : scrollToBottom,
+    });
   }
-  
+
   $(document).ready(function() {
-      buildAJAXList();
-      <c:if test="${empty param.scroll}">
-      scrollToBottom();
-      </c:if>
-      colorTableLabels();
+    buildAJAXList();
+    <c:if test="${empty param.scroll}">
+    scrollToBottom();
+    </c:if>
+    colorTableLabels();
   });
 </script>
-<icep:register group="playoffs" callback="function(){iterate();}"/>
+<icep:register
+  group="playoffs"
+  callback="function(){iterate();}" />
 </head>
 <body>
-<!-- dummy tag and some blank lines for scolling -->
-<span id="top"></span>
-<div id="dummy" style="position: absolute"><br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
+  <!-- dummy tag and some blank lines for scrolling -->
+  <span id="top"></span>
+  <div
+    id="dummy"
+    style="position: absolute">
+    <br />
 
-  <c:if test="${playoffRoundNumber <= numPlayoffRounds }">
-   <%=bracketInfo.outputBrackets(BracketData.TopRightCornerStyle.MEET_TOP_OF_CELL)%>
-  </c:if>
-  
-  <span id="bottom">&nbsp;</span>
-</div>
+    <c:forEach
+      items="${allBracketInfo}"
+      var="bracketInfo">
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
 
+      <div class='center'>Head to Head Round
+        ${bracketInfo.firstRound}, Head to Head Bracket
+        ${bracketInfo.bracketDivision}</div>
+      <br />
+                        
+   ${bracketInfo.topRightBracketOutput}
+</c:forEach>
+
+    <span id="bottom">&nbsp;</span>
+  </div>
 
 </body>
 </html>

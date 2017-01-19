@@ -65,13 +65,10 @@ public class JsonBracketDataTests {
     // shouldn't be able to access out of context rounds
     Map<Integer, Integer> query = new HashMap<Integer, Integer>();
     query.put(4, 1);
-    Assert.assertEquals("{\"refresh\":\"true\"}", JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query,
-                                                                                        playoff.getConnection(),
-                                                                                        playoff.getDescription()
-                                                                                               .getPerformance(),
-                                                                                        playoff.getBracketData(),
-                                                                                        SHOW_ONLY_VERIFIED,
-                                                                                        SHOW_FINAL_ROUNDS));
+    Assert.assertNull(JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, playoff.getConnection(),
+                                                            playoff.getDescription().getPerformance(),
+                                                            playoff.getBracketData(), SHOW_ONLY_VERIFIED,
+                                                            SHOW_FINAL_ROUNDS));
     // done
     SQLFunctions.close(playoff.getConnection());
   }
@@ -110,10 +107,13 @@ public class JsonBracketDataTests {
     query.put(row, 1);
     final ObjectMapper jsonMapper = new ObjectMapper();
 
-    String jsonOut = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, playoff.getConnection(),
-                                                           playoff.getDescription().getPerformance(),
-                                                           playoff.getBracketData(), SHOW_ONLY_VERIFIED,
-                                                           SHOW_FINAL_ROUNDS);
+    List<BracketLeafResultSet> leaves = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query,
+                                                                              playoff.getConnection(),
+                                                                              playoff.getDescription().getPerformance(),
+                                                                              playoff.getBracketData(),
+                                                                              SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
+    Assert.assertNotNull(leaves);
+    String jsonOut = jsonMapper.writeValueAsString(leaves);
     List<BracketLeafResultSet> result = jsonMapper.readValue(jsonOut, BracketLeafResultSetTypeInformation.INSTANCE);
 
     // assert score is -1, indicating no score
@@ -128,9 +128,11 @@ public class JsonBracketDataTests {
     // ask for round we just entered score for
     row = playoff.getBracketData().getRowNumberForLine(2, 2);
     query.put(row, 2);
-    jsonOut = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, playoff.getConnection(), playoff.getDescription()
-                                                                                                     .getPerformance(),
-                                                    playoff.getBracketData(), SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
+    leaves = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, playoff.getConnection(),
+                                                   playoff.getDescription().getPerformance(), playoff.getBracketData(),
+                                                   SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
+    Assert.assertNotNull(leaves);
+    jsonOut = jsonMapper.writeValueAsString(leaves);
     result = jsonMapper.readValue(jsonOut, BracketLeafResultSetTypeInformation.INSTANCE);
     Assert.assertEquals(result.get(0).leaf.getTeam().getTeamNumber(), Team.NULL_TEAM_NUMBER);
 
@@ -142,9 +144,11 @@ public class JsonBracketDataTests {
 
     row = playoff.getBracketData().getRowNumberForLine(1, 3);
     query.put(row, 1);
-    jsonOut = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, playoff.getConnection(), playoff.getDescription()
-                                                                                                     .getPerformance(),
-                                                    playoff.getBracketData(), SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
+    leaves = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, playoff.getConnection(),
+                                                   playoff.getDescription().getPerformance(), playoff.getBracketData(),
+                                                   SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
+    Assert.assertNotNull(leaves);
+    jsonOut = jsonMapper.writeValueAsString(leaves);
     result = jsonMapper.readValue(jsonOut, BracketLeafResultSetTypeInformation.INSTANCE);
     Assert.assertEquals(result.get(0).score, 5D, 0.0);
 
@@ -165,11 +169,15 @@ public class JsonBracketDataTests {
     // json shouldn't tell us the score for the finals round
     query.clear();
     final int finalsRound = playoff.getBracketData().getFinalsRound();
-    row = playoff.getBracketData().getRowNumberForLine(finalsRound + 1, 1);
-    query.put(row, finalsRound + 1);
-    jsonOut = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, playoff.getConnection(), playoff.getDescription()
-                                                                                                     .getPerformance(),
-                                                    playoff.getBracketData(), SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
+    row = playoff.getBracketData().getRowNumberForLine(finalsRound
+        + 1, 1);
+    query.put(row, finalsRound
+        + 1);
+    leaves = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, playoff.getConnection(),
+                                                   playoff.getDescription().getPerformance(), playoff.getBracketData(),
+                                                   SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
+    Assert.assertNotNull(leaves);
+    jsonOut = jsonMapper.writeValueAsString(leaves);
     result = jsonMapper.readValue(jsonOut, BracketLeafResultSetTypeInformation.INSTANCE);
     Assert.assertEquals(result.get(0).score, -1.0D, 0.0);
 
@@ -181,7 +189,8 @@ public class JsonBracketDataTests {
                            final int team,
                            final int run,
                            final boolean verified,
-                           final double score) throws SQLException {
+                           final double score)
+      throws SQLException {
     PreparedStatement ps = null;
     try {
       ps = connection.prepareStatement("INSERT INTO Performance (TeamNumber, Tournament, RunNumber, NoShow, Bye, Verified, Score, ComputedTotal)"
@@ -200,7 +209,8 @@ public class JsonBracketDataTests {
   // TODO switch to using methods in Queries
   private void verifyScore(final Connection connection,
                            final int team,
-                           final int run) throws SQLException {
+                           final int run)
+      throws SQLException {
     PreparedStatement ps = null;
     try {
       ps = connection.prepareStatement("UPDATE Performance SET Verified = ? WHERE TeamNumber = ? AND RunNumber = ?");
@@ -274,7 +284,8 @@ public class JsonBracketDataTests {
     TournamentParameters.setNumSeedingRounds(connection, tournament, 0);
     // make teams
     for (int i = 0; i < teamNames.length; ++i) {
-      final int teamNumber = i+1;
+      final int teamNumber = i
+          + 1;
       final String teamName = teamNames[i];
       final String org = "htk";
       Assert.assertNull(Queries.addTeam(connection, teamNumber, teamName, org));

@@ -4,9 +4,11 @@
 
 <%@ page import="fll.web.ApplicationAttributes"%>
 <%@ page import="fll.db.Queries"%>
+<%@ page import="fll.db.TableInformation"%>
 <%@ page import="java.sql.Connection"%>
 <%@ page import="javax.sql.DataSource"%>
 <%@ page import="org.w3c.dom.Document"%>
+<%@ page import="java.util.List" %>
 
 <script type='text/javascript' src='../extlib/jquery-1.11.1.min.js'></script>
 
@@ -42,6 +44,12 @@ fll.web.playoff.ScoregenBrackets.populateContext(application,
 			final int numMatches = bracketInfo
 					.addBracketLabelsAndScoreGenFormElements(connection,
 							currentTournament, divisionStr);
+      
+      final List<TableInformation> tableInfo = TableInformation.getTournamentTableInformation(connection,
+                                                                                              currentTournament,
+                                                                                              bracketInfo.getBracketDivision());
+      pageContext.setAttribute("tableInfo", tableInfo);
+
 %>
 
 <html>
