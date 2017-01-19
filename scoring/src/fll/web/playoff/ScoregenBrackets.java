@@ -49,44 +49,43 @@ public class ScoregenBrackets {
         division = (String) request.getAttribute("division");
 
         if (null == division) {
-          throw new RuntimeException(
-                                     "No playoff bracket specified, please go back to the <a href='index.jsp'>playoff main page</a> and start again.");
+          throw new RuntimeException("No playoff bracket specified, please go back to the <a href='index.jsp'>playoff main page</a> and start again.");
         }
       }
       pageContext.setAttribute("division", division);
 
-
       int firstRound;
       String firstRoundStr = request.getParameter("firstRound");
-      if(null == firstRoundStr) {
-        firstRound =1 ;
+      if (null == firstRoundStr) {
+        firstRound = 1;
       } else {
         try {
           firstRound = Integer.parseInt(firstRoundStr);
         } catch (NumberFormatException nfe) {
           firstRound = 1;
-        }        
+        }
       }
 
-      final int lastColumn = 1 + Queries.getNumPlayoffRounds(connection, division);
+      final int lastColumn = 1
+          + Queries.getNumPlayoffRounds(connection, division);
 
       int lastRound;
       String lastRoundStr = request.getParameter("lastRound");
-      if(null == lastRoundStr) {
-        lastRound =1 ;
+      if (null == lastRoundStr) {
+        lastRound = 1;
       } else {
         try {
           lastRound = Integer.parseInt(lastRoundStr);
         } catch (NumberFormatException nfe) {
           lastRound = lastColumn;
-        }        
+        }
       }
-      
+
       // Sanity check that the last round is valid
       if (lastRound < 2) {
         lastRound = 2;
       }
-      
+
       if (lastRound > lastColumn) {
         lastRound = lastColumn;
       }
@@ -97,7 +96,8 @@ public class ScoregenBrackets {
       }
       if (firstRound > 1
           && firstRound >= lastRound) {
-        firstRound = lastRound - 1; // force the display of at least 2 rounds
+        firstRound = lastRound
+            - 1; // force the display of at least 2 rounds
       }
 
       request.setAttribute("firstRound", Integer.valueOf(firstRound));

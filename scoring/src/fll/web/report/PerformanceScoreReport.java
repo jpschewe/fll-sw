@@ -42,6 +42,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
+import fll.db.GenerateDB;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.util.FP;
@@ -79,7 +80,8 @@ public class PerformanceScoreReport extends BaseFLLServlet {
   protected void processRequest(HttpServletRequest request,
                                 HttpServletResponse response,
                                 ServletContext application,
-                                HttpSession session) throws IOException, ServletException {
+                                HttpSession session)
+      throws IOException, ServletException {
     Connection connection = null;
     try {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -153,7 +155,8 @@ public class PerformanceScoreReport extends BaseFLLServlet {
                           final Tournament tournament,
                           final ChallengeDescription challenge,
                           final int numSeedingRounds,
-                          final TournamentTeam team) throws DocumentException, SQLException {
+                          final TournamentTeam team)
+      throws DocumentException, SQLException {
     // output first row for header
     final PdfPTable table = new PdfPTable(numSeedingRounds
         + 1);
@@ -290,12 +293,13 @@ public class PerformanceScoreReport extends BaseFLLServlet {
   private TeamScore[] getScores(final Connection connection,
                                 final Tournament tournament,
                                 final TournamentTeam team,
-                                final int numSeedingRounds) throws SQLException {
+                                final int numSeedingRounds)
+      throws SQLException {
     final TeamScore[] scores = new TeamScore[numSeedingRounds];
     for (int runNumber = 1; runNumber <= numSeedingRounds; ++runNumber) {
       scores[runNumber
-          - 1] = new DatabaseTeamScore("Performance", tournament.getTournamentID(), team.getTeamNumber(), runNumber,
-                                       connection);
+          - 1] = new DatabaseTeamScore(GenerateDB.PERFORMANCE_TABLE_NAME, tournament.getTournamentID(),
+                                       team.getTeamNumber(), runNumber, connection);
     }
     return scores;
   }
@@ -372,7 +376,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
         final PdfPCell teamInformation = new PdfPCell(para);
         teamInformation.setBorder(0);
         teamInformation.setColspan(2);
-        
+
         header.addCell(teamInformation);
       }
 

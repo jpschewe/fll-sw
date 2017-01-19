@@ -58,6 +58,8 @@ public final class GenerateDB {
   public static final int INTERNAL_TOURNAMENT_ID = -1;
 
   public static final String INTERNAL_TOURNAMENT_NAME = "INTERNAL";
+  
+  public static final String PERFORMANCE_TABLE_NAME = "Performance";
 
   /**
    * Generate a completely new DB from document. This also stores the document
@@ -195,7 +197,7 @@ public final class GenerateDB {
       // below
       {
         final PerformanceScoreCategory performanceElement = description.getPerformance();
-        final String tableName = "Performance";
+        final String tableName = PERFORMANCE_TABLE_NAME;
         stmt.executeUpdate("DROP VIEW IF EXISTS performance_seeding_max CASCADE");
         stmt.executeUpdate("DROP TABLE IF EXISTS "
             + tableName + " CASCADE");

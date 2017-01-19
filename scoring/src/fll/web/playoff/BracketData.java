@@ -12,9 +12,7 @@ import java.util.NoSuchElementException;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import net.mtu.eggplant.util.StringUtils;
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.log4j.Logger;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -23,6 +21,8 @@ import fll.db.Queries;
 import fll.db.TableInformation;
 import fll.db.TournamentParameters;
 import fll.util.LogUtils;
+import net.mtu.eggplant.util.StringUtils;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Class to provide convenient access to the contents of the PlayoffData table.
@@ -119,8 +119,24 @@ public class BracketData {
    * to store a color associated with the given table.
    */
   public static class BigScreenTableAssignmentCell extends BracketDataType {
-    public BigScreenTableAssignmentCell(final String table) {
+    public BigScreenTableAssignmentCell(final int round,
+                                        final int row,
+                                        final String table) {
+      _round = round;
+      _row = row;
       _table = table;
+    }
+
+    private final int _round;
+
+    public int getRound() {
+      return _round;
+    }
+
+    private final int _row;
+
+    public int getRow() {
+      return _row;
     }
 
     private final String _table;
@@ -315,15 +331,42 @@ public class BracketData {
     return _finalsRound;
   }
 
-  private boolean _showFinalScores;
+  private final boolean _showFinalScores;
 
-  private boolean _showOnlyVerifiedScores;
+  private final boolean _showOnlyVerifiedScores;
 
   private final Connection _connection;
 
   private final String _division;
 
+  public String getBracketDivision() {
+    return _division;
+  }
+
   private final int _currentTournament;
+
+  private final int _bracketIndex;
+
+  /**
+   * If this object is in a list, the index in the list.
+   */
+  public int getBracketIndex() {
+    return _bracketIndex;
+  }
+
+  /**
+   * Constructor that assumes the object is not in a list.
+   */
+  public BracketData(final Connection pConnection,
+                     final String pDivision,
+                     final int pFirstRound,
+                     final int pLastRound,
+                     final int pRowsPerTeam,
+                     final boolean pShowFinals,
+                     final boolean pShowOnlyVerifiedScores)
+      throws SQLException {
+    this(pConnection, pDivision, pFirstRound, pLastRound, pRowsPerTeam, pShowFinals, pShowOnlyVerifiedScores, 0);
+  }
 
   /**
    * Constructs a bracket data object with playoff data from the database.
@@ -336,16 +379,25 @@ public class BracketData {
    * @param pRowsPerTeam A positive, even number defining how many rows will be
    *          allocated for each team in the first round. This determines
    *          overall spacing for the entire table. Recommended value: 4.
+   * @param bracketIndex the index of this bracket in a list, if not in a list,
+   *          this should be 0
    * @throws SQLException
    */
   public BracketData(final Connection pConnection,
                      final String pDivision,
                      final int pFirstRound,
                      final int pLastRound,
-                     final int pRowsPerTeam) throws SQLException {
+                     final int pRowsPerTeam,
+                     final boolean pShowFinals,
+                     final boolean pShowOnlyVerifiedScores,
+                     final int bracketIndex)
+      throws SQLException {
     super();
     _connection = pConnection;
     _division = pDivision;
+    _showFinalScores = pShowFinals;
+    _showOnlyVerifiedScores = pShowOnlyVerifiedScores;
+    _bracketIndex = bracketIndex;
 
     if (pRowsPerTeam
         % 2 != 0
@@ -358,9 +410,6 @@ public class BracketData {
 
     _rowsPerTeam = pRowsPerTeam;
     _firstRoundSize = Queries.getFirstPlayoffRoundSize(_connection, _division);
-
-    _showFinalScores = true;
-    _showOnlyVerifiedScores = true;
 
     if (pFirstRound < 1) {
       _firstRound = 1;
@@ -493,46 +542,6 @@ public class BracketData {
   }
 
   /**
-   * Constructor including explicit show scores flag.
-   * 
-   * @param pShowFinals True if the final scores should be displayed (e.g. for
-   *          the administrative brackets) or false if they should not (e.g. for
-   *          the big screen display).
-   * @throws SQLException
-   */
-  public BracketData(final Connection connection,
-                     final String division,
-                     final int pFirstRound,
-                     final int pLastRound,
-                     final int pRowsPerTeam,
-                     final boolean pShowFinals) throws SQLException {
-    this(connection, division, pFirstRound, pLastRound, pRowsPerTeam);
-    _showFinalScores = pShowFinals;
-  }
-
-  /**
-   * Constructor including explicit show scores flag.
-   * 
-   * @param pShowFinals True if the final scores should be displayed (e.g. for
-   *          the administrative brackets) or false if they should not (e.g. for
-   *          the big screen display).
-   * @param pShowOnlyVerifiedScores True if only verified scores should be
-   *          displayed, false if all scores should be displayed.
-   * @throws SQLException
-   */
-  public BracketData(final Connection connection,
-                     final String division,
-                     final int pFirstRound,
-                     final int pLastRound,
-                     final int pRowsPerTeam,
-                     final boolean pShowFinals,
-                     final boolean pShowOnlyVerifiedScores) throws SQLException {
-    this(connection, division, pFirstRound, pLastRound, pRowsPerTeam);
-    _showFinalScores = pShowFinals;
-    _showOnlyVerifiedScores = pShowOnlyVerifiedScores;
-  }
-
-  /**
    * Returns the playoff meta data for a specified location in the brackets.
    * 
    * @param round The column of the playoff data table, otherwise known as the
@@ -572,7 +581,7 @@ public class BracketData {
     }
   }
 
-  private int getFirstRound() {
+  public int getFirstRound() {
     return _firstRound;
   }
 
@@ -589,6 +598,35 @@ public class BracketData {
   }
 
   /**
+   * The inverse of {@link #constructLeafId(int, int)}
+   * 
+   * @param lid the leaf id to parse
+   * @return (bracket index, row, round) or null if it's not parsable
+   */
+  public static ImmutableTriple<Integer, Integer, Integer> parseLeafId(final String lid) {
+    final String[] pieces = lid.split("\\-");
+    if (pieces.length >= 3) {
+      final String bracketIdxStr = pieces[0];
+      final String rowStr = pieces[1];
+      final String roundStr = pieces[2];
+
+      return new ImmutableTriple<>(Integer.parseInt(bracketIdxStr), Integer.parseInt(rowStr),
+                                   Integer.parseInt(roundStr));
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Needs to match {@link #parseLeafId(String)}
+   */
+  private String constructLeafId(final int row,
+                                 final int round) {
+    return _bracketIndex
+        + "-" + row + "-" + round;
+  }
+
+  /**
    * Formats the HTML code to insert for a single table cell of one of the
    * playoff bracket display pages (both administrative and scrolling). All
    * cells are generated with a specified width of 400 pixels. If the cell
@@ -602,7 +640,8 @@ public class BracketData {
    */
   private void appendHtmlCell(final StringBuilder sb,
                               final int row,
-                              final int round) throws SQLException {
+                              final int round)
+      throws SQLException {
     final SortedMap<Integer, BracketDataType> roundData = _bracketData.get(round);
     if (roundData == null) {
       sb.append("<td>ERROR: No data for round "
@@ -620,8 +659,10 @@ public class BracketData {
             + comment + "-->");
       }
     } else if (d instanceof TeamBracketCell) {
+      final String leafId = constructLeafId(row, round);
+
       sb.append("<td width='400' class='Leaf js-leaf' id='"
-          + row + "-" + round + "'>");
+          + leafId + "'>");
       if (round == _finalsRound) {
         sb.append(getDisplayString(_currentTournament, round
             + _baseRunNumber, ((TeamBracketCell) d).getTeam(), _showFinalScores, _showOnlyVerifiedScores));
@@ -700,8 +741,19 @@ public class BracketData {
         sb.append("</td>\n");
       }
     } else if (d instanceof BigScreenTableAssignmentCell) {
-      sb.append("<td align='right' style='padding-right:30px'><span class='table_assignment'>");
-      sb.append(((BigScreenTableAssignmentCell) d).getTable());
+      final BigScreenTableAssignmentCell tableCell = (BigScreenTableAssignmentCell) d;
+      final String table = tableCell.getTable();
+
+      // reference the row and round for the leaf that the table is for
+      final String leafId = constructLeafId(tableCell.getRow(), tableCell.getRound());
+
+      // always setup the html for a table assignment, just don't put the data
+      // in it until it's available
+      sb.append("<td align='right' style='padding-right:30px'><span class='table_assignment' id='"
+          + leafId + "-table'>");
+      if (null != table) {
+        sb.append(table);
+      }
       sb.append("</span></td>\n");
     }
 
@@ -773,6 +825,16 @@ public class BracketData {
     sb.append("</table>\n");
 
     return sb.toString();
+  }
+
+  /**
+   * Calls {@link #outputBrackets(TopRightCornerStyle)} with
+   * {@link TopRightCornerStyle#MEET_BOTTOM_OF_CELL}.
+   * 
+   * @throws SQLException
+   */
+  public String getTopRightBracketOutput() throws SQLException {
+    return outputBrackets(BracketData.TopRightCornerStyle.MEET_TOP_OF_CELL);
   }
 
   private void outputTableSelect(final StringBuilder sb,
@@ -1058,10 +1120,8 @@ public class BracketData {
           // Get the table assignment from cell info
           final String table = Queries.getAssignedTable(_connection, _currentTournament, _division, round.intValue(),
                                                         dblinenum);
-          if (table != null) {
-            newCells.put(lineNumber.intValue()
-                + tablelinemod, new BigScreenTableAssignmentCell(table));
-          }
+          newCells.put(lineNumber.intValue()
+              + tablelinemod, new BigScreenTableAssignmentCell(round.intValue(), lineNumber, table));
         }
       }
       // Merge the new cells into the roundData
@@ -1081,16 +1141,18 @@ public class BracketData {
    */
   public int addBracketLabelsAndScoreGenFormElements(final Connection pConnection,
                                                      final int tournament,
-                                                     final String division) throws SQLException {
+                                                     final String division)
+      throws SQLException {
     // Get the list of tournament tables
     final List<TableInformation> tournamentTables = TableInformation.getTournamentTableInformation(pConnection,
                                                                                                    tournament,
                                                                                                    division);
 
-    if(LOG.isDebugEnabled()) {
-      LOG.debug("Tables: " + tournamentTables);
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Tables: "
+          + tournamentTables);
     }
-    
+
     // Prevent divide by 0 errors if no tables were set in the database.
     if (tournamentTables.isEmpty()) {
       tournamentTables.add(new TableInformation(0, "Table 1", "Table 2", true));
@@ -1177,16 +1239,18 @@ public class BracketData {
                 tAssignIt = tournamentTables.iterator();
               }
               TableInformation info = tAssignIt.next();
-              while(!info.getUse() && tAssignIt.hasNext()) {
+              while (!info.getUse()
+                  && tAssignIt.hasNext()) {
                 info = tAssignIt.next();
               }
-              
-              if(!info.getUse() && !tAssignIt.hasNext()) {
-                 LOG.warn("No tables can be used, this is odd");
-                 tAssignIt = tournamentTables.iterator();
-                 info = tAssignIt.next();
+
+              if (!info.getUse()
+                  && !tAssignIt.hasNext()) {
+                LOG.warn("No tables can be used, this is odd");
+                tAssignIt = tournamentTables.iterator();
+                info = tAssignIt.next();
               }
-              
+
               tableA = info.getSideA();
               tableB = info.getSideB();
             }
@@ -1239,7 +1303,8 @@ public class BracketData {
                                   final int runNumber,
                                   final Team team,
                                   final boolean showScore,
-                                  final boolean showOnlyVerifiedScores) throws IllegalArgumentException, SQLException {
+                                  final boolean showOnlyVerifiedScores)
+      throws IllegalArgumentException, SQLException {
     if (Team.BYE.equals(team)) {
       return "<span class='TeamName'>BYE</span>";
     } else if (Team.TIE.equals(team)) {
@@ -1271,22 +1336,26 @@ public class BracketData {
         if (!scoreVerified) {
           sb.append("<span style='color:red'>");
         }
-        sb.append("<span class='TeamScore'>&nbsp;Score: <span id='");
-        sb.append(team.getTeamNumber()
-            + "-" + runNumber + "-score'>");
+        sb.append("<span class='TeamScore'>&nbsp;Score: ");
         if (Playoff.isNoShow(_connection, currentTournament, team, runNumber)) {
           sb.append("No Show");
         } else {
           // only display score if it's not a bye
           sb.append(Playoff.getPerformanceScore(_connection, currentTournament, team, runNumber));
         }
-        sb.append("</span></span>");
+        sb.append("</span>");
         if (!scoreVerified) {
           sb.append("</span>");
         }
       }
       return sb.toString();
     }
+  }
+
+  @Override
+  protected void finalize() throws Throwable {
+    // cleanup connection object
+    _connection.close();
   }
 
 }
