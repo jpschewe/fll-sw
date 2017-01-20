@@ -47,7 +47,7 @@ public class TestAJAXBrackets {
 
   private WebDriver scoresheetWindow;
 
-  @Before
+  //@Before
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
     selenium = IntegrationTestUtils.createWebDriver();
@@ -64,7 +64,7 @@ public class TestAJAXBrackets {
     scoresheetWindow = IntegrationTestUtils.createWebDriver();
   }
 
-  @After
+  //@After
   public void tearDown() {
     selenium.quit();
     bracketsWindow.quit();
