@@ -73,7 +73,7 @@ public class TestAJAXBrackets {
   }
 
   // This test just isn't working
-  //@Test
+  //@XTest
   public void testAJAXBracketsInFull() throws IOException, SAXException, InterruptedException {
     try {
       // Setup our playoffs
