@@ -1,8 +1,9 @@
 Release 11.6
 ============
 
+* #538 - Correct final computed scores queries
 * Fix the syncing of the table names on the score sheet generation page
-* 454 - Add support for multiple playoff brackets on a single big screen display
+* #454 - Add support for multiple playoff brackets on a single big screen display
 
 Release 11.5
 ============
