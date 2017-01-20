@@ -320,6 +320,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
       prep = connection.prepareStatement("SELECT FinalScores.TeamNumber, FinalScores.performance"
           + " FROM FinalScores, TournamentTeams" //
           + " WHERE FinalScores.Tournament = ?" //
+          + " AND TournamentTeams.Tournament = FinalScores.Tournament" //
           + " AND TournamentTeams.event_division = ?"//
           + " AND TournamentTeams.TeamNumber = FinalScores.TeamNumber"//
           + " ORDER BY FinalScores.performance " + winnerCriteria.getSortString());
@@ -380,6 +381,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           + catName //
           + " FROM FinalScores, TournamentTeams" //
           + " WHERE FinalScores.Tournament = ?" //
+          + " AND TournamentTeams.Tournament = FinalScores.Tournament" //
           + " AND TournamentTeams.event_division = ?"//
           + " AND TournamentTeams.TeamNumber = FinalScores.TeamNumber"//
           + " AND TournamentTeams.judging_station = ?" //
