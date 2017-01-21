@@ -925,7 +925,7 @@
       <arg value="${git.tag}..HEAD" />
     </exec>
 
-    <condition property="app.version.short" value="${git.tag}.0.${git.commits-since-tag}" else="unknown">
+    <condition property="app.version.short" value="${git.tag}.${git.commits-since-tag}" else="0.0.0.0">
       <and>
         <isset property="git.tag" />
         <length string="${git.tag}" trim="yes" length="0" when="greater" />
