@@ -67,6 +67,10 @@ public class ExcelCellReader extends CellFileReader {
    * @throws IOException
    */
   public static boolean isExcelFile(final Path path) throws IOException {
+    if (null == path) {
+      throw new NullPointerException("Path cannot be null");
+    }
+
     final String contentType = Files.probeContentType(path);
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Detected content type: "
@@ -79,8 +83,13 @@ public class ExcelCellReader extends CellFileReader {
       isCsvFile = true;
     } else {
       // fall back to checking the extension
-      isCsvFile = !path.getFileName().endsWith(".xls")
-          && !path.getFileName().endsWith(".xlsx");
+      final Path filename = path.getFileName();
+      if (null == filename) {
+        isCsvFile = true;
+      } else {
+        isCsvFile = !filename.toString().endsWith(".xls")
+            && !filename.toString().endsWith(".xlsx");
+      }
     }
     return !isCsvFile;
   }
