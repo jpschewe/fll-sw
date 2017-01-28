@@ -567,7 +567,7 @@ public final class UploadTeams extends BaseFLLServlet {
     } else if ("constraint".equalsIgnoreCase(str)) {
       return "CONSTRAINT_";
     } else {
-      String ret = str;
+      String ret = str.trim();
       final Matcher illegalCharMatcher = ILLEGAL_CHAR_PATTERN.matcher(ret);
       ret = illegalCharMatcher.replaceAll("_");
 
