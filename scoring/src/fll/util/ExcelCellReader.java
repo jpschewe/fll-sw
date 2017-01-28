@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -38,6 +39,8 @@ import fll.scheduler.TournamentSchedule;
  * Read Excel files.
  */
 public class ExcelCellReader extends CellFileReader {
+
+  private static Logger LOGGER = LogUtils.getLogger();
 
   private final DataFormatter formatter;
 
@@ -65,13 +68,19 @@ public class ExcelCellReader extends CellFileReader {
    */
   public static boolean isExcelFile(final Path path) throws IOException {
     final String contentType = Files.probeContentType(path);
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Detected content type: "
+          + contentType + " for " + path);
+    }
 
     final boolean isCsvFile;
     if (null != contentType
         && contentType.startsWith("text/")) {
       isCsvFile = true;
     } else {
-      isCsvFile = false;
+      // fall back to checking the extension
+      isCsvFile = !path.getFileName().endsWith(".xls")
+          && !path.getFileName().endsWith(".xlsx");
     }
     return !isCsvFile;
   }
