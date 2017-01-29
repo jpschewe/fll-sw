@@ -60,7 +60,9 @@ public class SummarizePhase1 {
 
       final Collection<JudgeSummary> summary = new LinkedList<JudgeSummary>();
 
-      getJudges = connection.prepareStatement("SELECT id, category, station from Judges WHERE Tournament = ?");
+      getJudges = connection.prepareStatement("SELECT id, category, station from Judges"
+              + " WHERE Tournament = ?"
+              + " ORDER BY category ASC, station ASC");
       getJudges.setInt(1, tournament);
       judges = getJudges.executeQuery();
       while (judges.next()) {
