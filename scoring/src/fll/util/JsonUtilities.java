@@ -91,6 +91,7 @@ public final class JsonUtilities {
    */
   public static List<BracketLeafResultSet> generateJsonBracketInfo(final String division,
                                                                    final Map<Integer, Integer> ids,
+                                                                   final int bracketIdx,
                                                                    final Connection connection,
                                                                    final PerformanceScoreCategory perf,
                                                                    final BracketData bracketData,
@@ -122,17 +123,17 @@ public final class JsonUtilities {
                                                 runNumber);
         // Sane request checks
         if (noShow) {
-          datalist.add(new BracketLeafResultSet(tbc, -2.0, row
+          datalist.add(new BracketLeafResultSet(tbc, -2.0, bracketIdx + "-" + row
               + "-" + playoffRound));
         } else if (!realScore
             || !showOnlyVerifiedScores || Queries.isVerified(connection, currentTournament, teamNumber, runNumber)) {
           if ((playoffRound == numPlayoffRounds
               && !showFinalsScores)
               || !realScore) {
-            datalist.add(new BracketLeafResultSet(tbc, -1.0, row
+            datalist.add(new BracketLeafResultSet(tbc, -1.0, bracketIdx + "-" + row
                 + "-" + playoffRound));
           } else {
-            datalist.add(new BracketLeafResultSet(tbc, computedTeamScore, row
+            datalist.add(new BracketLeafResultSet(tbc, computedTeamScore, bracketIdx + "-" + row
                 + "-" + playoffRound));
           }
         }
