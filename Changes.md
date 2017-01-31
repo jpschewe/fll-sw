@@ -1,3 +1,6 @@
+* #547 - sort computed scores summary by category and then by station
+* #544 - remove extra whitespace from the top of the head to head brackets
+
 Release 11.6
 ============
 
