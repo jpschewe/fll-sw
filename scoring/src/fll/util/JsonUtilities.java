@@ -122,19 +122,17 @@ public final class JsonUtilities {
         final boolean noShow = Queries.isNoShow(connection, currentTournament, tbc.getTeam().getTeamNumber(),
                                                 runNumber);
         // Sane request checks
+        final String leafId = BracketData.constructLeafId(bracketIdx, row, playoffRound);
         if (noShow) {
-          datalist.add(new BracketLeafResultSet(tbc, -2.0, bracketIdx + "-" + row
-              + "-" + playoffRound));
+          datalist.add(new BracketLeafResultSet(tbc, -2.0, leafId));
         } else if (!realScore
             || !showOnlyVerifiedScores || Queries.isVerified(connection, currentTournament, teamNumber, runNumber)) {
           if ((playoffRound == numPlayoffRounds
               && !showFinalsScores)
               || !realScore) {
-            datalist.add(new BracketLeafResultSet(tbc, -1.0, bracketIdx + "-" + row
-                + "-" + playoffRound));
+            datalist.add(new BracketLeafResultSet(tbc, -1.0, leafId));
           } else {
-            datalist.add(new BracketLeafResultSet(tbc, computedTeamScore, bracketIdx + "-" + row
-                + "-" + playoffRound));
+            datalist.add(new BracketLeafResultSet(tbc, computedTeamScore, leafId));
           }
         }
       }
