@@ -1,3 +1,5 @@
+* #543 - correct error in the head to head bracket dynamic updates where the wrong HTML id was used
+
 Release 11.6
 ============
 
