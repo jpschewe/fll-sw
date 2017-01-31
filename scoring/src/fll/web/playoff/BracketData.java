@@ -618,11 +618,20 @@ public class BracketData {
   }
 
   /**
-   * Needs to match {@link #parseLeafId(String)}
+   * @see #constructLeafId(int, int, int)
    */
   private String constructLeafId(final int row,
                                  final int round) {
-    return _bracketIndex
+    return constructLeafId(_bracketIndex, row, round);
+  }
+
+  /**
+   * Inverse operation of {@link #parseLeafId(String)}.
+   */
+  public static String constructLeafId(final int bracketIndex,
+                                       final int row,
+                                       final int round) {
+    return bracketIndex
         + "-" + row + "-" + round;
   }
 
