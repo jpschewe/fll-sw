@@ -97,11 +97,6 @@ public class BracketData {
    * Cell for bracket labels.
    */
   public static class BracketLabelCell extends BracketDataType {
-    public BracketLabelCell(final int num) {
-      _label = "Match "
-          + num;
-    }
-
     public BracketLabelCell(final String lbl) {
       _label = lbl;
     }
@@ -1069,15 +1064,20 @@ public class BracketData {
 
       if (roundNumber == _finalsRound) {
         it = rows.iterator();
-        roundData.put(it.next(), new BracketLabelCell("1st/2nd Place"));
+        roundData.put(it.next(), new BracketLabelCell(formatBracketLabel(_division, 1, roundNumber)));
         if (it.hasNext()) {
-          roundData.put(it.next(), new BracketLabelCell("3rd/4th Place"));
+          // 3rd and 4th place is always the second match
+          roundData.put(it.next(), new BracketLabelCell(formatBracketLabel(_division, 2, roundNumber)));
         }
       } else {
         int bracketNumber = 1;
         it = rows.iterator();
         while (it.hasNext()) {
-          roundData.put(it.next(), new BracketLabelCell(bracketNumber++));
+          final String bracketLabel = formatBracketLabel(_division, bracketNumber, roundNumber);
+
+          roundData.put(it.next(), new BracketLabelCell(bracketLabel));
+
+          ++bracketNumber;
         }
       }
     }
@@ -1130,6 +1130,31 @@ public class BracketData {
   }
 
   /**
+   * Create the label that shows between the brackets.
+   * 
+   * @param division the head to head bracket name
+   * @param bracketNumber the match number
+   * @param roundNumber the round number
+   * @return the label to display
+   */
+  private String formatBracketLabel(final String division,
+                                    final int bracketNumber,
+                                    final int roundNumber) {
+    final String bracketLabel;
+    if (roundNumber == _finalsRound
+        && bracketNumber == 1) {
+      bracketLabel = "1st/2nd Place";
+    } else if (roundNumber == _finalsRound
+        && bracketNumber == 2) {
+      bracketLabel = "3rd/4th Place";
+    } else {
+      bracketLabel = String.format("%s Round %d Match %d", division, roundNumber, bracketNumber);
+    }
+
+    return bracketLabel;
+  }
+
+  /**
    * Populates all rounds of the bracket with labels and HTML form elements for
    * table assignment and scoresheet generation. If this function is used,
    * addBracketLabels must not be used.
@@ -1162,9 +1187,9 @@ public class BracketData {
 
     // Build the cells...
     int matchNum = 1;
-    for (int i = _firstRound; i <= _lastRound
-        && i <= _finalsRound; i++) {
-      final SortedMap<Integer, BracketDataType> roundData = _bracketData.get(i);
+    for (int roundNumber = _firstRound; roundNumber <= _lastRound
+        && roundNumber <= _finalsRound; roundNumber++) {
+      final SortedMap<Integer, BracketDataType> roundData = _bracketData.get(roundNumber);
       if (roundData != null) {
         final List<Integer[]> rows = new LinkedList<Integer[]>();
         final Iterator<Integer> it = roundData.keySet().iterator();
@@ -1180,18 +1205,8 @@ public class BracketData {
         int bracketNumber = 1;
         final Iterator<Integer[]> rit = rows.iterator();
         Integer[] curArray;
-        String bracketLabel;
         while (rit.hasNext()) {
-          if (i == _finalsRound
-              && bracketNumber == 1) {
-            bracketLabel = "1st/2nd Place";
-          } else if (i == _finalsRound
-              && bracketNumber == 2) {
-            bracketLabel = "3rd/4th Place";
-          } else {
-            bracketLabel = "Match "
-                + bracketNumber;
-          }
+          final String bracketLabel = formatBracketLabel(division, bracketNumber, roundNumber);
           curArray = rit.next();
           // Build the cell - if both teams are not present, just do a normal
           // bracket label cell
