@@ -244,22 +244,9 @@ SPAN.TIE {
     id="dummy"
     style="position: absolute">
     <br />
-
     <c:forEach
       items="${allBracketInfo}"
       var="bracketInfo">
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
 
       <div class='center'>Head to Head Round
         ${bracketInfo.firstRound}, Head to Head Bracket
@@ -267,6 +254,13 @@ SPAN.TIE {
       <br />
                         
    ${bracketInfo.topRightBracketOutput}
+     <c:if test="${allBracketInfo.size() > 1}">
+       <br />
+       <br />
+       <hr />
+       <br />
+       <br />
+     </c:if>
 </c:forEach>
 
     <span id="bottom">&nbsp;</span>
