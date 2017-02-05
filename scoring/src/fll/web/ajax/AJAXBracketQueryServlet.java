@@ -198,7 +198,7 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
   }
 
   /**
-   * @see JsonUtilities#generateJsonBracketInfo(String, Map, Connection,
+   * @see JsonUtilities#generateJsonBracketInfo(String, Map, int, Connection,
    *      fll.xml.PerformanceScoreCategory, BracketData, boolean, boolean)
    * @throws SQLException
    */
@@ -222,7 +222,7 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
     final BracketData bd = new BracketData(connection, bracketInfo.getBracket(), playoffRoundNumber, playoffRoundNumber
         + roundsLong - 1, rowsPerTeam, showFinalsScores, showOnlyVerifiedScores, bracketInfo.getIndex());
 
-    return JsonUtilities.generateJsonBracketInfo(bracketInfo.getBracket(), pairedMap, connection,
+    return JsonUtilities.generateJsonBracketInfo(bracketInfo.getBracket(), pairedMap, bracketInfo.getIndex(), connection,
                                                  description.getPerformance(), bd, showOnlyVerifiedScores,
                                                  showFinalsScores);
   }
