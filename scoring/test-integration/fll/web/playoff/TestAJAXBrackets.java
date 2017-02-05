@@ -72,6 +72,7 @@ public class TestAJAXBrackets {
     scoresheetWindow.quit();
   }
 
+  // This test just isn't working
   @Test
   public void testAJAXBracketsInFull() throws IOException, SAXException, InterruptedException {
     try {
@@ -100,6 +101,12 @@ public class TestAJAXBrackets {
       final String division = "1";
 
       IntegrationTestUtils.initializePlayoffsForAwardGroup(selenium, division, BracketSortType.ALPHA_TEAM);
+
+      // set display to show the head to head brackets
+      IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT + "admin/remoteControl.jsp");
+      selenium.findElement(By.cssSelector("[type='radio'][name='remotePage'][value='playoffs']")).click();
+      selenium.findElement(By.name("submit")).click();
+      Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
 
       // open brackets
       IntegrationTestUtils.loadPage(bracketsWindow, TestUtils.URL_ROOT
