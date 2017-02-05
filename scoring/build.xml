@@ -793,14 +793,17 @@
   </target>
 
   <target name="sloccount" description="Run sloccount on the code">
-    <exec executable="sloccount" dir="${basedir}" output="${basedir}/sloccount.sc">
-      <arg value="--wide" />
-      <arg value="--details" />
+    <exec executable="cloc" dir="${basedir}">
+      <arg value="--by-file" />
+      <arg value="--xml" />
+      <arg value="--out=${basedir}/cloc.xml" />
       <arg value="src" />
       <arg value="test-integration" />
       <arg value="test-unit" />
       <arg value="web" />
     </exec>
+    
+    <xslt style="${basedir}/cloc2sloccount.xsl" in="${basedir}/cloc.xml" out="${basedir}/sloccount.sc"></xslt>
   </target>
 
   <target name="doc.workflow.generate" description="Generate the workflow documents">
