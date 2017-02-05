@@ -33,6 +33,7 @@ If there is a tie during head to head the software will attempt to break it with
 However if this is not possible TIE will be shown as the winner of a round on the head to head bracket. 
 This means that these two teams need to compete again. 
 The process to handle the tie is as follows:
+
   1. Use the score edit page to delete the scores for the 2 teams that competed.
   1. Use the score sheet generation page to reprint the score sheet. You will need to check the box for this pairing as the software knows that the score sheet has already bee printed once.
   1. The teams will compete again and the new scores entered. 

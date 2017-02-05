@@ -66,7 +66,7 @@ SPAN.TIE {
   src="<c:url value='/extlib/jquery.scrollTo-2.1.2.min.js'/>"></script>
 <script type="text/javascript">
   var ajaxURL = '<c:url value="/ajax/"/>';
-  var numRows = parseInt("${numRows}"); // could be here directly as an intger, but the JSTL and auto-formatting don't agree
+  var rows = parseInt("${numRows}"); // could be here directly as an intger, but the JSTL and auto-formatting don't agree
   var maxNameLength = parseInt("${maxNameLength}"); // could be here directly as an intger, but the JSTL and auto-formatting don't agree
 
   var displayStrings = new Object();
@@ -244,22 +244,9 @@ SPAN.TIE {
     id="dummy"
     style="position: absolute">
     <br />
-
     <c:forEach
       items="${allBracketInfo}"
       var="bracketInfo">
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
 
       <div class='center'>Head to Head Round
         ${bracketInfo.firstRound}, Head to Head Bracket
@@ -267,6 +254,13 @@ SPAN.TIE {
       <br />
                         
    ${bracketInfo.topRightBracketOutput}
+     <c:if test="${allBracketInfo.size() > 1}">
+       <br />
+       <br />
+       <hr />
+       <br />
+       <br />
+     </c:if>
 </c:forEach>
 
     <span id="bottom">&nbsp;</span>

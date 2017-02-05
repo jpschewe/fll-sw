@@ -1,5 +1,14 @@
+* #539 - Add bracket name and round number to the head to head match information displayed on the screen
+* #543 - correct error in the head to head bracket dynamic updates where the wrong HTML id was used
+* #547 - sort computed scores summary by category and then by station
+* #544 - remove extra whitespace from the top of the head to head brackets
+
+Release 11.6
+============
+
+* #538 - Correct final computed scores queries
 * Fix the syncing of the table names on the score sheet generation page
-* 454 - Add support for multiple playoff brackets on a single big screen display
+* #454 - Add support for multiple playoff brackets on a single big screen display
 
 Release 11.5
 ============
