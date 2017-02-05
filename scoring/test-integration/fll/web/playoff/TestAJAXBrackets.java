@@ -47,7 +47,7 @@ public class TestAJAXBrackets {
 
   private WebDriver scoresheetWindow;
 
-  //@Before
+  @Before
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
     selenium = IntegrationTestUtils.createWebDriver();
@@ -64,7 +64,7 @@ public class TestAJAXBrackets {
     scoresheetWindow = IntegrationTestUtils.createWebDriver();
   }
 
-  //@After
+  @After
   public void tearDown() {
     selenium.quit();
     bracketsWindow.quit();
@@ -73,7 +73,7 @@ public class TestAJAXBrackets {
   }
 
   // This test just isn't working
-  //@XTest
+  @Test
   public void testAJAXBracketsInFull() throws IOException, SAXException, InterruptedException {
     try {
       // Setup our playoffs
@@ -101,6 +101,12 @@ public class TestAJAXBrackets {
       final String division = "1";
 
       IntegrationTestUtils.initializePlayoffsForAwardGroup(selenium, division, BracketSortType.ALPHA_TEAM);
+
+      // set display to show the head to head brackets
+      IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT + "admin/remoteControl.jsp");
+      selenium.findElement(By.cssSelector("[type='radio'][name='remotePage'][value='playoffs']")).click();
+      selenium.findElement(By.name("submit")).click();
+      Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
 
       // open brackets
       IntegrationTestUtils.loadPage(bracketsWindow, TestUtils.URL_ROOT
