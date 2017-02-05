@@ -504,6 +504,9 @@
       <fileset dir="${dir.reports}" />
     </copy>
 
+    <!-- Let the filesystem catch up -->
+    <sleep seconds="2" />
+
     <!-- clean everything out before a distribution is made -->
     <antcall target="clean" />
 
@@ -802,8 +805,9 @@
       <arg value="test-unit" />
       <arg value="web" />
     </exec>
-    
-    <xslt style="${basedir}/cloc2sloccount.xsl" in="${basedir}/cloc.xml" out="${basedir}/sloccount.sc"></xslt>
+
+    <xslt style="${basedir}/cloc2sloccount.xsl" in="${basedir}/cloc.xml" out="${basedir}/sloccount.sc">
+    </xslt>
   </target>
 
   <target name="doc.workflow.generate" description="Generate the workflow documents">
@@ -921,7 +925,7 @@
       <arg value="--abbrev=0" />
       <arg value="HEAD" />
     </exec>
-    
+
     <exec executable="git" outputproperty="git.commits-since-tag" failifexecutionfails="false" errorproperty="">
       <arg value="rev-list" />
       <arg value="--count" />
