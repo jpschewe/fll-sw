@@ -505,7 +505,7 @@
     </copy>
 
     <!-- Let the filesystem catch up -->
-    <sleep seconds="2" />
+    <sleep minutes="1" />
 
     <!-- clean everything out before a distribution is made -->
     <antcall target="clean" />
