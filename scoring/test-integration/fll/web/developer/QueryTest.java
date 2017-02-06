@@ -9,6 +9,7 @@ package fll.web.developer;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
@@ -32,6 +33,11 @@ public class QueryTest {
   public void setUp() {
     LogUtils.initializeLogging();
     selenium = IntegrationTestUtils.createWebDriver();
+  }
+
+  @After
+  public void tearDown() {
+    selenium.quit();
   }
 
   @Test
