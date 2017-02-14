@@ -15,6 +15,7 @@
 
   <property name="dir.dist" value="dist" />
   <property name="dir.web" value="${dir.tomcat}/webapps/${app.name}" />
+  <property name="tmp.dir.web" value="${basedir}/tmp-web" />
 
   <property name="dir.classes" value="${dir.web}/WEB-INF/classes" />
   <property name="dir.classes.test" value="${dir.build}/classes/test" />
@@ -391,7 +392,18 @@
   <target name="generate.jsp" depends="prepare" description="Generate Java sources for JSP files" unless="jsp.notRequired">
     <mkdir dir="${dir.src.jsp}" />
 
-    <jasper validateXml="false" uriroot="${dir.web}" webXmlFragment="${dir.src.jsp}/generated_web.xml" outputDir="${dir.src.jsp}" poolingEnabled="false"/>
+
+    <!-- copy the web directory as the jasper task hangs onto the lib files and prevents clean from executing after this task, thus breaking the dist target -->
+    <mkdir dir="${tmp.dir.web}" />
+    <copy todir="${tmp.dir.web}">
+      <fileset dir="${dir.web}" />
+    </copy>
+
+    <mkdir dir="${dir.src.jsp}" />
+
+    <jasper validateXml="false" uriroot="${tmp.dir.web}" webXmlFragment="${dir.src.jsp}/generated_web.xml" outputDir="${dir.src.jsp}" poolingEnabled="false" />
+
+    <delete dir="${tmp.dir.web}" deleteonexit="true" failonerror="false" />
 
     <touch file="${dir.src.jsp}/.timestamp" />
   </target>
