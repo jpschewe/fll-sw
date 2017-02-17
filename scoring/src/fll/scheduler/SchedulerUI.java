@@ -864,7 +864,7 @@ public class SchedulerUI extends JFrame {
                                 final List<SubjectiveStation> subjectiveStations) {
     FileInputStream fis = null;
     try {
-      final boolean csv = selectedFile.getName().endsWith("csv");
+      final boolean csv = !ExcelCellReader.isExcelFile(selectedFile);
       final CellFileReader reader;
       final String sheetName;
       if (csv) {
