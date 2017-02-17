@@ -78,10 +78,7 @@ public class ExcelCellReader extends CellFileReader {
     }
 
     final boolean isCsvFile;
-    if (null != contentType
-        && contentType.startsWith("text/")) {
-      isCsvFile = true;
-    } else {
+    if (null == contentType) {
       // fall back to checking the extension
       final Path filename = path.getFileName();
       if (null == filename) {
@@ -90,6 +87,10 @@ public class ExcelCellReader extends CellFileReader {
         isCsvFile = !filename.toString().endsWith(".xls")
             && !filename.toString().endsWith(".xlsx");
       }
+    } else if (contentType.startsWith("text/")) {
+      isCsvFile = true;
+    } else {
+      isCsvFile = false;
     }
     return !isCsvFile;
   }
