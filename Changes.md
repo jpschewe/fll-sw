@@ -1,3 +1,6 @@
+Release 11.7
+============
+
 * #539 - Add bracket name and round number to the head to head match information displayed on the screen
 * #543 - correct error in the head to head bracket dynamic updates where the wrong HTML id was used
 * #547 - sort computed scores summary by category and then by station
