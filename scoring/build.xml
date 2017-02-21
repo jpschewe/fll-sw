@@ -335,6 +335,13 @@
     <copy todir="${dir.build}/lib">
       <fileset dir="${dir.lib}" />
     </copy>
+    
+    <!-- fix line endings -->
+    <fixcrlf srcdir="${dir.build}/bin" includes="*.sh" eol="unix"/>
+    <fixcrlf srcdir="${dir.build}/bin" includes="*.bat" eol="dos"/>   
+    <fixcrlf srcdir="${dir.build}/tomcat/bin" includes="*.sh" eol="unix"/>
+    <fixcrlf srcdir="${dir.build}/tomcat/bin" includes="*.bat" eol="dos"/>
+    <fixcrlf file="${dir.build}/fll-sw.sh" eol="unix"/>
 
   </target>
 
