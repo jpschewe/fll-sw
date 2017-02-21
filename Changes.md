@@ -1,3 +1,5 @@
+* Ensure that shell scripts have unix line endings and batch files have dos line endings
+
 Release 11.7
 ============
 
