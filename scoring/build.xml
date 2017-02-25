@@ -294,16 +294,6 @@
     <copy todir="${dir.build}/bin">
       <fileset dir="script-templates" />
     </copy>
-    <chmod perm="+x">
-      <fileset dir="${dir.build}/bin">
-        <include name="*.sh" />
-      </fileset>
-    </chmod>
-    <chmod perm="+x">
-      <fileset dir="${dir.build}/tomcat/bin">
-        <include name="*.sh" />
-      </fileset>
-    </chmod>
 
     <one-jar destfile="${dir.web}/subjective-app.jar">
       <manifest>
@@ -335,15 +325,44 @@
     <copy todir="${dir.build}/lib">
       <fileset dir="${dir.lib}" />
     </copy>
-    
-    <!-- fix line endings -->
-    <fixcrlf srcdir="${dir.build}/bin" includes="*.sh" eol="unix"/>
-    <fixcrlf srcdir="${dir.build}/bin" includes="*.bat" eol="dos"/>   
-    <fixcrlf srcdir="${dir.build}/tomcat/bin" includes="*.sh" eol="unix"/>
-    <fixcrlf srcdir="${dir.build}/tomcat/bin" includes="*.bat" eol="dos"/>
-    <fixcrlf file="${dir.build}/fll-sw.sh" eol="unix"/>
 
+    <fix-scripts dir="${dir.build}"/>
   </target>
+
+  <macrodef name="fix-scripts" description="Fix script permissions and line endings">
+    <attribute name="dir" />
+    
+    <sequential>
+      <fixcrlf srcdir="${dir}/bin" includes="*.sh" eol="unix" />
+      <fixcrlf srcdir="${dir}/bin" includes="*.bat" eol="dos" />
+      <fixcrlf srcdir="${dir}/tomcat/bin" includes="*.sh" eol="unix" />
+      <fixcrlf srcdir="${dir}/tomcat/bin" includes="*.bat" eol="dos" />
+      <fixcrlf file="${dir}/fll-sw.sh" eol="unix" />
+      
+      <chmod perm="+x">
+        <fileset dir="${dir}/tomcat/bin">
+          <include name="*.sh" />
+        </fileset>
+      </chmod>
+
+      <chmod perm="+x">
+        <fileset dir="${dir}/bin">
+          <include name="*.sh" />
+        </fileset>
+        <fileset dir="${dir}">
+          <include name="fll-sw.sh" />
+          <include name="fll-sw.exe" />
+        </fileset>
+      </chmod>
+
+      <chmod perm="+x">
+        <fileset dir="${dir}/menu-entries">
+          <include name="*.sh" />
+        </fileset>
+      </chmod>
+
+    </sequential>
+  </macrodef>
 
   <macrodef name="compile">
     <attribute name="dir.dest" />
@@ -584,27 +603,15 @@
         <include name="fll-sw.sh" />
       </fileset>
     </copy>
-    <chmod perm="+x">
-      <fileset dir="${dir.dist}/bin">
-        <include name="*.sh" />
-      </fileset>
-      <fileset dir="${dir.dist}">
-        <include name="fll-sw.sh" />
-        <include name="fll-sw.exe" />
-      </fileset>
-    </chmod>
-
+    
+    <fix-scripts dir="${dir.dist}"/>
+    
     <!-- copy web stuff -->
     <copy todir="${dir.dist}">
       <fileset dir="${dir.build}">
         <include name="tomcat/**" />
       </fileset>
     </copy>
-    <chmod perm="+x">
-      <fileset dir="${dir.dist}/tomcat/bin">
-        <include name="*.sh" />
-      </fileset>
-    </chmod>
 
     <!-- copy menu entry stuff -->
     <copy todir="${dir.dist}">
@@ -612,11 +619,6 @@
         <include name="menu-entries/**" />
       </fileset>
     </copy>
-    <chmod perm="+x">
-      <fileset dir="${dir.dist}/menu-entries">
-        <include name="*.sh" />
-      </fileset>
-    </chmod>
 
     <zip zipfile="${dir.build}/${app.name}-${app.version.short}.zip">
       <zipfileset dir="${dir.dist}" prefix="${app.name}-${app.version.short}" filemode="755">
