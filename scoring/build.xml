@@ -603,9 +603,7 @@
         <include name="fll-sw.sh" />
       </fileset>
     </copy>
-    
-    <fix-scripts dir="${dir.dist}"/>
-    
+        
     <!-- copy web stuff -->
     <copy todir="${dir.dist}">
       <fileset dir="${dir.build}">
@@ -619,6 +617,8 @@
         <include name="menu-entries/**" />
       </fileset>
     </copy>
+
+    <fix-scripts dir="${dir.dist}"/>
 
     <zip zipfile="${dir.build}/${app.name}-${app.version.short}.zip">
       <zipfileset dir="${dir.dist}" prefix="${app.name}-${app.version.short}" filemode="755">
