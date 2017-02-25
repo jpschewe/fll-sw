@@ -333,31 +333,31 @@
     <attribute name="dir" />
     
     <sequential>
-      <fixcrlf srcdir="${dir}/bin" includes="*.sh" eol="unix" />
-      <fixcrlf srcdir="${dir}/bin" includes="*.bat" eol="dos" />
-      <fixcrlf srcdir="${dir}/tomcat/bin" includes="*.sh" eol="unix" />
-      <fixcrlf srcdir="${dir}/tomcat/bin" includes="*.bat" eol="dos" />
-      <fixcrlf file="${dir}/fll-sw.sh" eol="unix" />
+      <fixcrlf srcdir="@{dir}/bin" includes="*.sh" eol="unix" />
+      <fixcrlf srcdir="@{dir}/bin" includes="*.bat" eol="dos" />
+      <fixcrlf srcdir="@{dir}/tomcat/bin" includes="*.sh" eol="unix" />
+      <fixcrlf srcdir="@{dir}/tomcat/bin" includes="*.bat" eol="dos" />
+      <fixcrlf file="@{dir}/fll-sw.sh" eol="unix" />
       
       <chmod perm="+x">
-        <fileset dir="${dir}/tomcat/bin">
+        <fileset dir="@{dir}/tomcat/bin">
           <include name="*.sh" />
         </fileset>
       </chmod>
 
       <chmod perm="+x">
-        <fileset dir="${dir}/bin">
+        <fileset dir="@{dir}/bin">
           <include name="*.sh" />
         </fileset>
-        <fileset dir="${dir}">
+        <fileset dir="@{dir}">
           <include name="fll-sw.sh" />
           <include name="fll-sw.exe" />
         </fileset>
       </chmod>
 
       <chmod perm="+x">
-        <fileset dir="${dir}/menu-entries">
-          <include name="*.sh" />
+        <fileset dir="@{dir}">
+          <include name="menu-entries/*.sh" />
         </fileset>
       </chmod>
 
