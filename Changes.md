@@ -1,4 +1,4 @@
-Release 11.7.1
+Release 11.7.2
 ============
 
 * Ensure that shell scripts have unix line endings and batch files have dos line endings
