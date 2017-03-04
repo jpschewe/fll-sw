@@ -1,5 +1,5 @@
 <!DOCTYPE html SYSTEM "about:legacy-compat">
-<html lang="en"><head><META http-equiv="Content-Type" content="text/html; charset=UTF-8"><link href="../images/docs-stylesheet.css" rel="stylesheet" type="text/css"><title>Apache Tomcat 8 Configuration Reference (8.0.9) - The Manager Component</title><meta name="author" content="Craig R. McClanahan"><meta name="author" content="Yoav Shapira"><script type="application/javascript" data-comments-identifier="tomcat-8.0-doc/config/manager">
+<html lang="en"><head><META http-equiv="Content-Type" content="text/html; charset=UTF-8"><link href="../images/docs-stylesheet.css" rel="stylesheet" type="text/css"><title>Apache Tomcat 8 Configuration Reference (8.5.11) - The Manager Component</title><meta name="author" content="Craig R. McClanahan"><meta name="author" content="Yoav Shapira"><script type="application/javascript" data-comments-identifier="tomcat-8.5-doc/config/manager">
     "use strict"; // Enable strict mode
 
     (function() {
@@ -29,9 +29,9 @@
         })(window, document);
       }), false);
     })();
-  </script></head><body><div id="wrapper"><header><div id="header"><div><div><div class="logo noPrint"><a href="http://tomcat.apache.org/"><img alt="Tomcat Home" src="../images/tomcat.png"></a></div><div style="height: 1px;"></div><div class="asfLogo noPrint"><a href="http://www.apache.org/" target="_blank"><img src="../images/asf-feather.png" alt="The Apache Software Foundation" style="width: 266px; height: 83px;"></a></div><h1>Apache Tomcat 8 Configuration Reference</h1><div class="versionInfo">
-          Version 8.0.9,
-          <time datetime="2014-06-19">Jun 19 2014</time></div><div style="height: 1px;"></div><div style="clear: left;"></div></div></div></div></header><div id="middle"><div><div id="mainLeft" class="noprint"><div><nav><div><h2>Links</h2><ul><li><a href="../index.html">Docs Home</a></li><li><a href="index.html">Config Ref. Home</a></li><li><a href="http://wiki.apache.org/tomcat/FAQ">FAQ</a></li><li><a href="#comments_section">User Comments</a></li></ul></div><div><h2>Top Level Elements</h2><ul><li><a href="server.html">Server</a></li><li><a href="service.html">Service</a></li></ul></div><div><h2>Executors</h2><ul><li><a href="executor.html">Executor</a></li></ul></div><div><h2>Connectors</h2><ul><li><a href="http.html">HTTP</a></li><li><a href="ajp.html">AJP</a></li></ul></div><div><h2>Containers</h2><ul><li><a href="context.html">Context</a></li><li><a href="engine.html">Engine</a></li><li><a href="host.html">Host</a></li><li><a href="cluster.html">Cluster</a></li></ul></div><div><h2>Nested Components</h2><ul><li><a href="globalresources.html">Global Resources</a></li><li><a href="jar-scanner.html">JarScanner</a></li><li><a href="jar-scan-filter.html">JarScanFilter</a></li><li><a href="listeners.html">Listeners</a></li><li><a href="loader.html">Loader</a></li><li><a href="manager.html">Manager</a></li><li><a href="realm.html">Realm</a></li><li><a href="resources.html">Resources</a></li><li><a href="valve.html">Valve</a></li></ul></div><div><h2>Cluster Elements</h2><ul><li><a href="cluster.html">Cluster</a></li><li><a href="cluster-manager.html">Manager</a></li><li><a href="cluster-channel.html">Channel</a></li><li><a href="cluster-membership.html">Channel/Membership</a></li><li><a href="cluster-sender.html">Channel/Sender</a></li><li><a href="cluster-receiver.html">Channel/Receiver</a></li><li><a href="cluster-interceptor.html">Channel/Interceptor</a></li><li><a href="cluster-valve.html">Valve</a></li><li><a href="cluster-deployer.html">Deployer</a></li><li><a href="cluster-listener.html">ClusterListener</a></li></ul></div><div><h2>web.xml</h2><ul><li><a href="filter.html">Filter</a></li></ul></div><div><h2>Other</h2><ul><li><a href="systemprops.html">System properties</a></li></ul></div></nav></div></div><div id="mainRight"><div id="content"><h2>The Manager Component</h2><h3 id="Table_of_Contents">Table of Contents</h3><div class="text">
+  </script></head><body><div id="wrapper"><header><div id="header"><div><div><div class="logo noPrint"><a href="http://tomcat.apache.org/"><img alt="Tomcat Home" src="../images/tomcat.png"></a></div><div style="height: 1px;"></div><div class="asfLogo noPrint"><a href="http://www.apache.org/" target="_blank"><img src="../images/asf-logo.svg" alt="The Apache Software Foundation" style="width: 266px; height: 83px;"></a></div><h1>Apache Tomcat 8 Configuration Reference</h1><div class="versionInfo">
+          Version 8.5.11,
+          <time datetime="2017-01-10">Jan 10 2017</time></div><div style="height: 1px;"></div><div style="clear: left;"></div></div></div></div></header><div id="middle"><div><div id="mainLeft" class="noprint"><div><nav><div><h2>Links</h2><ul><li><a href="../index.html">Docs Home</a></li><li><a href="index.html">Config Ref. Home</a></li><li><a href="http://wiki.apache.org/tomcat/FAQ">FAQ</a></li><li><a href="#comments_section">User Comments</a></li></ul></div><div><h2>Top Level Elements</h2><ul><li><a href="server.html">Server</a></li><li><a href="service.html">Service</a></li></ul></div><div><h2>Executors</h2><ul><li><a href="executor.html">Executor</a></li></ul></div><div><h2>Connectors</h2><ul><li><a href="http.html">HTTP/1.1</a></li><li><a href="http2.html">HTTP/2</a></li><li><a href="ajp.html">AJP</a></li></ul></div><div><h2>Containers</h2><ul><li><a href="context.html">Context</a></li><li><a href="engine.html">Engine</a></li><li><a href="host.html">Host</a></li><li><a href="cluster.html">Cluster</a></li></ul></div><div><h2>Nested Components</h2><ul><li><a href="cookie-processor.html">CookieProcessor</a></li><li><a href="credentialhandler.html">CredentialHandler</a></li><li><a href="globalresources.html">Global Resources</a></li><li><a href="jar-scanner.html">JarScanner</a></li><li><a href="jar-scan-filter.html">JarScanFilter</a></li><li><a href="listeners.html">Listeners</a></li><li><a href="loader.html">Loader</a></li><li><a href="manager.html">Manager</a></li><li><a href="realm.html">Realm</a></li><li><a href="resources.html">Resources</a></li><li><a href="sessionidgenerator.html">SessionIdGenerator</a></li><li><a href="valve.html">Valve</a></li></ul></div><div><h2>Cluster Elements</h2><ul><li><a href="cluster.html">Cluster</a></li><li><a href="cluster-manager.html">Manager</a></li><li><a href="cluster-channel.html">Channel</a></li><li><a href="cluster-membership.html">Channel/Membership</a></li><li><a href="cluster-sender.html">Channel/Sender</a></li><li><a href="cluster-receiver.html">Channel/Receiver</a></li><li><a href="cluster-interceptor.html">Channel/Interceptor</a></li><li><a href="cluster-valve.html">Valve</a></li><li><a href="cluster-deployer.html">Deployer</a></li><li><a href="cluster-listener.html">ClusterListener</a></li></ul></div><div><h2>web.xml</h2><ul><li><a href="filter.html">Filter</a></li></ul></div><div><h2>Other</h2><ul><li><a href="systemprops.html">System properties</a></li><li><a href="jaspic.html">JASPIC</a></li></ul></div></nav></div></div><div id="mainRight"><div id="content"><h2>The Manager Component</h2><h3 id="Table_of_Contents">Table of Contents</h3><div class="text">
 <ul><li><a href="#Introduction">Introduction</a></li><li><a href="#Attributes">Attributes</a><ol><li><a href="#Common_Attributes">Common Attributes</a></li><li><a href="#Standard_Implementation">Standard Implementation</a></li></ol></li><li><a href="#Nested_Components">Nested Components</a></li><li><a href="#Special_Features">Special Features</a><ol><li><a href="#Persistence_Across_Restarts">Persistence Across Restarts</a></li><li><a href="#Disable_Session_Persistence">Disable Session Persistence</a></li></ol></li></ul>
 </div><h3 id="Introduction">Introduction</h3><div class="text">
 
@@ -61,18 +61,6 @@
         <p>Java class name of the implementation to use.  This class must
         implement the <code>org.apache.catalina.Manager</code> interface.
         If not specified, the standard value (defined below) will be used.</p>
-      </td></tr><tr><td><code class="attributeName">distributable</code></td><td>
-        <p>Set to <code>true</code> to ask the session manager to enforce
-        the restrictions described in the Servlet Specification on
-        distributable applications (primarily, this would mean that all
-        session attributes must implement <code>java.io.Serializable</code>).
-        Set to <code>false</code> (the default) to not enforce these
-        restrictions.</p>
-
-        <p><strong>NOTE</strong> - The value for this property is inherited
-        automatically based on the presence or absence of the
-        <code>&lt;distributable&gt;</code> element in the web application
-        deployment descriptor (<code>/WEB-INF/web.xml</code>).</p>
       </td></tr><tr><td><code class="attributeName">maxActiveSessions</code></td><td>
         <p>The maximum number of active sessions that will be created by
         this Manager, or <code>-1</code> (the default) for no limit.</p>
@@ -80,21 +68,6 @@
         <p>When the limit is reached, any attempt to create a new session
         (e.g. with <code>HttpServletRequest.getSession()</code> call)
         will fail with an <code>IllegalStateException</code>.</p>
-      </td></tr><tr><td><code class="attributeName">maxInactiveInterval</code></td><td>
-        <p>The initial maximum time interval, in seconds,
-        between client requests before a session is invalidated. A negative value
-        will result in sessions never timing out. If the attribute is not provided,
-        a default of 1800 seconds (30 minutes) is used.</p>
-
-        <p>This attribute provides the initial value whenever a
-        new session is created, but the interval may be dynamically
-        varied by a servlet via the
-        <code>setMaxInactiveInterval</code> method of the <code>HttpSession</code> object.</p>
-      </td></tr><tr><td><code class="attributeName">sessionIdLength</code></td><td>
-       <p>The length of session ids created by this Manager, measured in bytes,
-        excluding subsequent conversion to a hexadecimal string and
-        excluding any JVM route information used for load balancing.
-        The default is 16.</p>
       </td></tr></table>
 
   </div></div>
@@ -154,6 +127,34 @@
         To specify that the platform default should be used, do not set the
         secureRandomProvider attribute and set this attribute to the empty
         string.</p>
+      </td></tr><tr><td><code class="attributeName">sessionAttributeNameFilter</code></td><td>
+        <p>A regular expression used to filter which session attributes will be
+        distributed. An attribute will only be distributed if its name matches
+        this pattern. If the pattern is zero length or <code>null</code>, all
+        attributes are eligible for distribution. The pattern is anchored so the
+        session attribute name must fully match the pattern. As an example, the
+        value <code>(userName|sessionHistory)</code> will only distribute the
+        two session attributes named <code>userName</code> and
+        <code>sessionHistory</code>. If not specified, the default value of
+        <code>null</code> will be used.</p>
+      </td></tr><tr><td><code class="attributeName">sessionAttributeValueClassNameFilter</code></td><td>
+        <p>A regular expression used to filter which session attributes will be
+        distributed. An attribute will only be distributed if the implementation
+        class name of the value matches this pattern. If the pattern is zero
+        length or <code>null</code>, all attributes are eligible for
+        distribution. The pattern is anchored so the fully qualified class name
+        must fully match the pattern. If not specified, the default value of
+        <code>null</code> will be used unless a <code>SecurityManager</code> is
+        enabled in which case the default will be
+        <code>java\\.lang\\.(?:Boolean|Integer|Long|Number|String)</code>.</p>
+      </td></tr><tr><td><code class="attributeName">warnOnSessionAttributeFilterFailure</code></td><td>
+        <p>If <strong>sessionAttributeNameFilter</strong> or
+        <strong>sessionAttributeValueClassNameFilter</strong> blocks an
+        attribute, should this be logged at <code>WARN</code> level? If
+        <code>WARN</code> level logging is disabled then it will be logged at
+        <code>DEBUG</code>. The default value of this attribute is
+        <code>false</code> unless a <code>SecurityManager</code> is enabled in
+        which case the default will be <code>true</code>.</p>
       </td></tr></table>
 
     <h3>Persistent Manager Implementation</h3>
@@ -194,19 +195,19 @@
         <code>-1</code> to disable this feature.  By default, this feature is
         disabled.</p>
       </td></tr><tr><td><code class="attributeName">maxIdleSwap</code></td><td>
-        <p>The time interval (in seconds) since the last access to a session
-        before it should be persisted to the session store, and
-        passivated out of the server's memory, or <code>-1</code> to disable
-        this feature.  If this feature is enabled, the time interval specified
-        here should be equal to or longer than the value specified for
-        <code>maxIdleBackup</code>.  By default, this feature is disabled.</p>
+        <p>The maximum time a session may be idle before it is eligible to be
+        swapped to disk due to inactivity. Setting this to <code>-1</code> means
+        sessions should not be swapped out just because of inactivity. If this
+        feature is enabled, the time interval specified here should be equal to
+        or longer than the value specified for <code>maxIdleBackup</code>. By
+        default, this feature is disabled.</p>
       </td></tr><tr><td><code class="attributeName">minIdleSwap</code></td><td>
-        <p>The time interval (in seconds) since the last access to a session
-        before it will be eligible to be persisted to the session store, and
-        passivated out of the server's memory, or <code>-1</code> for this
-        swapping to be available at any time.  If specified, this value should
-        be less than that specified by <code>maxIdleSwap</code>.  By default,
-        this value is set to <code>-1</code>.</p>
+        <p>The minimum time in seconds a session must be idle before it is
+        eligible to be swapped to disk to keep the active session count below
+        maxActiveSessions. Setting to <code>-1</code> means sessions will not be
+        swapped out to keep the active session count down. If specified, this
+        value should be less than that specified by <code>maxIdleSwap</code>.
+        By default, this value is set to <code>-1</code>.</p>
       </td></tr><tr><td><code class="attributeName">processExpiresFrequency</code></td><td>
         <p>It is the same as described above for the
         <code>org.apache.catalina.session.StandardManager</code> class.
@@ -227,6 +228,34 @@
         <p>It is the same as described above for the
         <code>org.apache.catalina.session.StandardManager</code> class.
         </p>
+      </td></tr><tr><td><code class="attributeName">sessionAttributeNameFilter</code></td><td>
+        <p>A regular expression used to filter which session attributes will be
+        distributed. An attribute will only be distributed if its name matches
+        this pattern. If the pattern is zero length or <code>null</code>, all
+        attributes are eligible for distribution. The pattern is anchored so the
+        session attribute name must fully match the pattern. As an example, the
+        value <code>(userName|sessionHistory)</code> will only distribute the
+        two session attributes named <code>userName</code> and
+        <code>sessionHistory</code>. If not specified, the default value of
+        <code>null</code> will be used.</p>
+      </td></tr><tr><td><code class="attributeName">sessionAttributeValueClassNameFilter</code></td><td>
+        <p>A regular expression used to filter which session attributes will be
+        distributed. An attribute will only be distributed if the implementation
+        class name of the value matches this pattern. If the pattern is zero
+        length or <code>null</code>, all attributes are eligible for
+        distribution. The pattern is anchored so the fully qualified class name
+        must fully match the pattern. If not specified, the default value of
+        <code>null</code> will be used unless a <code>SecurityManager</code> is
+        enabled in which case the default will be
+        <code>java\\.lang\\.(?:Boolean|Integer|Long|Number|String)</code>.</p>
+      </td></tr><tr><td><code class="attributeName">warnOnSessionAttributeFilterFailure</code></td><td>
+        <p>If <strong>sessionAttributeNameFilter</strong> or
+        <strong>sessionAttributeValueClassNameFilter</strong> blocks an
+        attribute, should this be logged at <code>WARN</code> level? If
+        <code>WARN</code> level logging is disabled then it will be logged at
+        <code>DEBUG</code>. The default value of this attribute is
+        <code>false</code> unless a <code>SecurityManager</code> is enabled in
+        which case the default will be <code>true</code>.</p>
       </td></tr></table>
 
     <p>In order to successfully use a PersistentManager, you must nest inside
@@ -237,11 +266,24 @@
 
 </div><h3 id="Nested_Components">Nested Components</h3><div class="text">
 
-  <h3>Standard Manager Implementation</h3>
+  <h3>All Manager Implementations</h3>
 
-  <p>If you are using the <em>Standard Manager Implementation</em>
-  as described above, no elements may be nested inside your
-  <strong>&lt;Manager&gt;</strong> element.</p>
+  <p>All Manager implementations allow nesting of a
+  <strong>&lt;SessionIdGenerator&gt;</strong> element. It defines
+  the behavior of session id generation.  All implementations
+  of the <a href="sessionidgenerator.html">SessionIdGenerator</a> allow the
+  following attributes:
+  </p>
+
+  <table class="defaultTable"><tr><th style="width: 15%;">
+          Attribute
+        </th><th style="width: 85%;">
+          Description
+        </th></tr><tr><td><code class="attributeName">sessionIdLength</code></td><td>
+      <p>The length of the session ID may be changed with the
+      <strong>sessionIdLength</strong> attribute.
+      </p>
+    </td></tr></table>
 
   <h3>Persistent Manager Implementation</h3>
 
@@ -268,11 +310,7 @@
           Attribute
         </th><th style="width: 85%;">
           Description
-        </th></tr><tr><td><code class="attributeName">checkInterval</code></td><td>
-      <p>The interval (in seconds) between checks for expired sessions
-      among those sessions that are currently swapped out.  By default,
-      this interval is set to 60 seconds (one minute).</p>
-    </td></tr><tr><td><strong><code class="attributeName">className</code></strong></td><td>
+        </th></tr><tr><td><strong><code class="attributeName">className</code></strong></td><td>
       <p>Java class name of the implementation to use.  This class must
       implement the <code>org.apache.catalina.Store</code> interface.  You
       <strong>must</strong> specify
@@ -302,16 +340,18 @@
           Attribute
         </th><th style="width: 85%;">
           Description
-        </th></tr><tr><td><code class="attributeName">checkInterval</code></td><td>
-      <p>The interval (in seconds) between checks for expired sessions
-      among those sessions that are currently swapped out.  By default,
-      this interval is set to 60 seconds (one minute).</p>
-    </td></tr><tr><td><strong><code class="attributeName">className</code></strong></td><td>
+        </th></tr><tr><td><strong><code class="attributeName">className</code></strong></td><td>
       <p>Java class name of the implementation to use.  This class must
       implement the <code>org.apache.catalina.Store</code> interface.  You
       <strong>must</strong> specify
       <code>org.apache.catalina.session.JDBCStore</code>
       to use this implementation.</p>
+    </td></tr><tr><td><strong><code class="attributeName">connectionName</code></strong></td><td>
+      <p>The user name that will be handed to the configured JDBC driver to
+      establish a connection to the database containing the session table.</p>
+    </td></tr><tr><td><strong><code class="attributeName">connectionPassword</code></strong></td><td>
+      <p>The password that will be handed to the configured JDBC driver to
+      establish a connection to the database containing the session table.</p>
     </td></tr><tr><td><strong><code class="attributeName">connectionURL</code></strong></td><td>
       <p>The connection URL that will be handed to the configured JDBC
       driver to establish a connection to the database containing our
@@ -319,47 +359,53 @@
     </td></tr><tr><td><code class="attributeName">dataSourceName</code></td><td>
       <p>Name of the JNDI resource for a JDBC DataSource-factory. If this option
       is given and a valid JDBC resource can be found, it will be used and any
-      direct configuration of a JDBC connection via <code>connectionURL</code>
-      and <code>driverName</code> will be ignored. Since this code uses prepared
+      direct configuration of a JDBC connection via <code>connectionURL</code>,
+      <code>connectionName</code>, <code>connectionPassword</code> and
+      <code>driverName</code> will be ignored. Since this code uses prepared
       statements, you might want to configure pooled prepared statements as
       shown in <a href="../jndi-resources-howto.html">the JNDI resources
       HOW-TO</a>.</p>
     </td></tr><tr><td><strong><code class="attributeName">driverName</code></strong></td><td>
       <p>Java class name of the JDBC driver to be used.</p>
-    </td></tr><tr><td><strong><code class="attributeName">sessionAppCol</code></strong></td><td>
-      <p>Name of the database column, contained in the specified session
-      table, that contains the Engine, Host, and Web Application Context
-      name in the format <code>/Engine/Host/Context</code>.</p>
-    </td></tr><tr><td><strong><code class="attributeName">sessionDataCol</code></strong></td><td>
-      <p>Name of the database column, contained in the specified
-      session table, that contains the serialized form of all session
-      attributes for a swapped out session.  The column type must accept
-      a binary object (typically called a BLOB).</p>
-    </td></tr><tr><td><strong><code class="attributeName">sessionIdCol</code></strong></td><td>
-      <p>Name of the database column, contained in the specified
-      session table, that contains the session identifier of the
-      swapped out session.  The column type must accept character
-      string data of at least as many characters as are contained
-      in session identifiers created by Tomcat (typically 32).</p>
-    </td></tr><tr><td><strong><code class="attributeName">sessionLastAccessedCol</code></strong></td><td>
-      <p>Name of the database column, contained in the specified
-      session table, that contains the <code>lastAccessedTime</code>
-      property of this session.  The column type must accept a
-      Java <code>long</code> (64 bits).</p>
-    </td></tr><tr><td><strong><code class="attributeName">sessionMaxInactiveCol</code></strong></td><td>
-      <p>Name of the database column, contained in the specified
-      session table, that contains the <code>maxInactiveInterval</code>
-      property of this session.  The column type must accept a
-      Java <code>integer</code> (32 bits).</p>
-    </td></tr><tr><td><strong><code class="attributeName">sessionTable</code></strong></td><td>
-      <p>Name of the database table to be used for storing swapped out
-      sessions.  This table must contain (at least) the database columns
-      that are configured by the other attributes of this element.</p>
-    </td></tr><tr><td><strong><code class="attributeName">sessionValidCol</code></strong></td><td>
-      <p>Name of the database column, contained in the specified
-      session table, that contains a flag indicating whether this
-      swapped out session is still valid or not.  The column type
-      must accept a single character.</p>
+    </td></tr><tr><td><code class="attributeName">sessionAppCol</code></td><td>
+      <p>Name of the database column, contained in the specified session table,
+      that contains the Engine, Host, and Web Application Context name in the
+      format <code>/Engine/Host/Context</code>. If not specified the default
+      value of <code>app</code> will be used.</p>
+    </td></tr><tr><td><code class="attributeName">sessionDataCol</code></td><td>
+      <p>Name of the database column, contained in the specified session table,
+      that contains the serialized form of all session attributes for a swapped
+      out session. The column type must accept a binary object (typically called
+      a BLOB). If not specified the default value of <code>data</code> will be
+      used.</p>
+    </td></tr><tr><td><code class="attributeName">sessionIdCol</code></td><td>
+      <p>Name of the database column, contained in the specified session table,
+      that contains the session identifier of the swapped out session. The
+      column type must accept character string data of at least as many
+      characters as are contained in session identifiers created by Tomcat
+      (typically 32). If not specified the default value of <code>id</code> will
+      be used.</p>
+    </td></tr><tr><td><code class="attributeName">sessionLastAccessedCol</code></td><td>
+      <p>Name of the database column, contained in the specified session table,
+      that contains the <code>lastAccessedTime</code> property of this session.
+      The column type must accept a Java <code>long</code> (64 bits). If not
+      specified the default value of <code>maxinactive</code> will be used.</p>
+    </td></tr><tr><td><code class="attributeName">sessionMaxInactiveCol</code></td><td>
+      <p>Name of the database column, contained in the specified session table,
+      that contains the <code>maxInactiveInterval</code> property of this
+      session. The column type must accept a Java <code>integer</code> (32
+      bits). If not specified, the default value of <code>maxinactive</code>
+      will be used.</p>
+    </td></tr><tr><td><code class="attributeName">sessionTable</code></td><td>
+      <p>Name of the database table to be used for storing swapped out sessions.
+      This table must contain (at least) the database columns that are
+      configured by the other attributes of this element. If not specified the
+      default value of <code>tomcat$sessions</code> will be used.</p>
+    </td></tr><tr><td><code class="attributeName">sessionValidCol</code></td><td>
+      <p>Name of the database column, contained in the specified session table,
+      that contains a flag indicating whether this swapped out session is still
+      valid or not. The column type must accept a single character. If not
+      specified the default value of <code>valid</code> will be used.</p>
     </td></tr></table>
 
   <p>Before attempting to use the JDBC Based Store for the first time,
@@ -376,6 +422,10 @@
   session_data   mediumblob,
   KEY kapp_name(app_name)
 );</code></pre></div>
+
+  <p>Note: The SQL command above does not use the default names for either the
+  table or the columns so the JDBC Store would need to be configured to reflect
+  this.</p>
 
   <p>In order for the JDBC Based Store to successfully connect to your
   database, the JDBC driver you configure must be visible to Tomcat's
@@ -400,6 +450,13 @@
     interface.  You MAY cause the Manager to enforce this restriction by
     including the <code>&lt;distributable&gt;</code> element in your web
     application deployment descriptor (<code>/WEB-INF/web.xml</code>).</p>
+
+    <p>The persistence across restarts provided by the
+    <strong>StandardManager</strong> is a simpler implementation than that
+    provided by the <strong>PersistentManager</strong>. If robust, production
+    quality persistence across restarts is required then the
+    <strong>PersistentManager</strong> should be used with an appropriate
+    configuration.</p>
 
   </div></div>
 
@@ -427,5 +484,5 @@
                     Comments may be removed by our moderators if they are either
                     implemented or considered invalid/off-topic.
                   </p><div id="comments_thread"></div></div></div></div></div></div></div><footer><div id="footer">
-    Copyright &copy; 1999-2014, The Apache Software Foundation
+    Copyright &copy; 1999-2017, The Apache Software Foundation
   </div></footer></div></body></html>

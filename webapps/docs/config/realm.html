@@ -1,5 +1,5 @@
 <!DOCTYPE html SYSTEM "about:legacy-compat">
-<html lang="en"><head><META http-equiv="Content-Type" content="text/html; charset=UTF-8"><link href="../images/docs-stylesheet.css" rel="stylesheet" type="text/css"><title>Apache Tomcat 8 Configuration Reference (8.0.9) - The Realm Component</title><meta name="author" content="Craig R. McClanahan"><script type="application/javascript" data-comments-identifier="tomcat-8.0-doc/config/realm">
+<html lang="en"><head><META http-equiv="Content-Type" content="text/html; charset=UTF-8"><link href="../images/docs-stylesheet.css" rel="stylesheet" type="text/css"><title>Apache Tomcat 8 Configuration Reference (8.5.11) - The Realm Component</title><meta name="author" content="Craig R. McClanahan"><script type="application/javascript" data-comments-identifier="tomcat-8.5-doc/config/realm">
     "use strict"; // Enable strict mode
 
     (function() {
@@ -29,10 +29,10 @@
         })(window, document);
       }), false);
     })();
-  </script></head><body><div id="wrapper"><header><div id="header"><div><div><div class="logo noPrint"><a href="http://tomcat.apache.org/"><img alt="Tomcat Home" src="../images/tomcat.png"></a></div><div style="height: 1px;"></div><div class="asfLogo noPrint"><a href="http://www.apache.org/" target="_blank"><img src="../images/asf-feather.png" alt="The Apache Software Foundation" style="width: 266px; height: 83px;"></a></div><h1>Apache Tomcat 8 Configuration Reference</h1><div class="versionInfo">
-          Version 8.0.9,
-          <time datetime="2014-06-19">Jun 19 2014</time></div><div style="height: 1px;"></div><div style="clear: left;"></div></div></div></div></header><div id="middle"><div><div id="mainLeft" class="noprint"><div><nav><div><h2>Links</h2><ul><li><a href="../index.html">Docs Home</a></li><li><a href="index.html">Config Ref. Home</a></li><li><a href="http://wiki.apache.org/tomcat/FAQ">FAQ</a></li><li><a href="#comments_section">User Comments</a></li></ul></div><div><h2>Top Level Elements</h2><ul><li><a href="server.html">Server</a></li><li><a href="service.html">Service</a></li></ul></div><div><h2>Executors</h2><ul><li><a href="executor.html">Executor</a></li></ul></div><div><h2>Connectors</h2><ul><li><a href="http.html">HTTP</a></li><li><a href="ajp.html">AJP</a></li></ul></div><div><h2>Containers</h2><ul><li><a href="context.html">Context</a></li><li><a href="engine.html">Engine</a></li><li><a href="host.html">Host</a></li><li><a href="cluster.html">Cluster</a></li></ul></div><div><h2>Nested Components</h2><ul><li><a href="globalresources.html">Global Resources</a></li><li><a href="jar-scanner.html">JarScanner</a></li><li><a href="jar-scan-filter.html">JarScanFilter</a></li><li><a href="listeners.html">Listeners</a></li><li><a href="loader.html">Loader</a></li><li><a href="manager.html">Manager</a></li><li><a href="realm.html">Realm</a></li><li><a href="resources.html">Resources</a></li><li><a href="valve.html">Valve</a></li></ul></div><div><h2>Cluster Elements</h2><ul><li><a href="cluster.html">Cluster</a></li><li><a href="cluster-manager.html">Manager</a></li><li><a href="cluster-channel.html">Channel</a></li><li><a href="cluster-membership.html">Channel/Membership</a></li><li><a href="cluster-sender.html">Channel/Sender</a></li><li><a href="cluster-receiver.html">Channel/Receiver</a></li><li><a href="cluster-interceptor.html">Channel/Interceptor</a></li><li><a href="cluster-valve.html">Valve</a></li><li><a href="cluster-deployer.html">Deployer</a></li><li><a href="cluster-listener.html">ClusterListener</a></li></ul></div><div><h2>web.xml</h2><ul><li><a href="filter.html">Filter</a></li></ul></div><div><h2>Other</h2><ul><li><a href="systemprops.html">System properties</a></li></ul></div></nav></div></div><div id="mainRight"><div id="content"><h2>The Realm Component</h2><h3 id="Table_of_Contents">Table of Contents</h3><div class="text">
-<ul><li><a href="#Introduction">Introduction</a></li><li><a href="#Attributes">Attributes</a><ol><li><a href="#Common_Attributes">Common Attributes</a></li><li><a href="#JDBC_Database_Realm_-_org.apache.catalina.realm.JDBCRealm">JDBC Database Realm - org.apache.catalina.realm.JDBCRealm</a></li><li><a href="#DataSource_Database_Realm_-_org.apache.catalina.realm.DataSourceRealm">DataSource Database Realm - org.apache.catalina.realm.DataSourceRealm</a></li><li><a href="#JNDI_Directory_Realm_-_org.apache.catalina.realm.JNDIRealm">JNDI Directory Realm - org.apache.catalina.realm.JNDIRealm</a></li><li><a href="#UserDatabase_Realm_-_org.apache.catalina.realm.UserDatabaseRealm">UserDatabase Realm - org.apache.catalina.realm.UserDatabaseRealm</a></li><li><a href="#Memory_Based_Realm_-_org.apache.catalina.realm.MemoryRealm">Memory Based Realm - org.apache.catalina.realm.MemoryRealm</a></li><li><a href="#JAAS_Realm_-_org.apache.catalina.realm.JAASRealm">JAAS Realm - org.apache.catalina.realm.JAASRealm</a></li><li><a href="#Combined_Realm_-_org.apache.catalina.realm.CombinedRealm">Combined Realm - org.apache.catalina.realm.CombinedRealm</a></li><li><a href="#LockOut_Realm_-_org.apache.catalina.realm.LockOutRealm">LockOut Realm - org.apache.catalina.realm.LockOutRealm</a></li></ol></li><li><a href="#Nested_Components">Nested Components</a></li><li><a href="#Special_Features">Special Features</a></li></ul>
+  </script></head><body><div id="wrapper"><header><div id="header"><div><div><div class="logo noPrint"><a href="http://tomcat.apache.org/"><img alt="Tomcat Home" src="../images/tomcat.png"></a></div><div style="height: 1px;"></div><div class="asfLogo noPrint"><a href="http://www.apache.org/" target="_blank"><img src="../images/asf-logo.svg" alt="The Apache Software Foundation" style="width: 266px; height: 83px;"></a></div><h1>Apache Tomcat 8 Configuration Reference</h1><div class="versionInfo">
+          Version 8.5.11,
+          <time datetime="2017-01-10">Jan 10 2017</time></div><div style="height: 1px;"></div><div style="clear: left;"></div></div></div></div></header><div id="middle"><div><div id="mainLeft" class="noprint"><div><nav><div><h2>Links</h2><ul><li><a href="../index.html">Docs Home</a></li><li><a href="index.html">Config Ref. Home</a></li><li><a href="http://wiki.apache.org/tomcat/FAQ">FAQ</a></li><li><a href="#comments_section">User Comments</a></li></ul></div><div><h2>Top Level Elements</h2><ul><li><a href="server.html">Server</a></li><li><a href="service.html">Service</a></li></ul></div><div><h2>Executors</h2><ul><li><a href="executor.html">Executor</a></li></ul></div><div><h2>Connectors</h2><ul><li><a href="http.html">HTTP/1.1</a></li><li><a href="http2.html">HTTP/2</a></li><li><a href="ajp.html">AJP</a></li></ul></div><div><h2>Containers</h2><ul><li><a href="context.html">Context</a></li><li><a href="engine.html">Engine</a></li><li><a href="host.html">Host</a></li><li><a href="cluster.html">Cluster</a></li></ul></div><div><h2>Nested Components</h2><ul><li><a href="cookie-processor.html">CookieProcessor</a></li><li><a href="credentialhandler.html">CredentialHandler</a></li><li><a href="globalresources.html">Global Resources</a></li><li><a href="jar-scanner.html">JarScanner</a></li><li><a href="jar-scan-filter.html">JarScanFilter</a></li><li><a href="listeners.html">Listeners</a></li><li><a href="loader.html">Loader</a></li><li><a href="manager.html">Manager</a></li><li><a href="realm.html">Realm</a></li><li><a href="resources.html">Resources</a></li><li><a href="sessionidgenerator.html">SessionIdGenerator</a></li><li><a href="valve.html">Valve</a></li></ul></div><div><h2>Cluster Elements</h2><ul><li><a href="cluster.html">Cluster</a></li><li><a href="cluster-manager.html">Manager</a></li><li><a href="cluster-channel.html">Channel</a></li><li><a href="cluster-membership.html">Channel/Membership</a></li><li><a href="cluster-sender.html">Channel/Sender</a></li><li><a href="cluster-receiver.html">Channel/Receiver</a></li><li><a href="cluster-interceptor.html">Channel/Interceptor</a></li><li><a href="cluster-valve.html">Valve</a></li><li><a href="cluster-deployer.html">Deployer</a></li><li><a href="cluster-listener.html">ClusterListener</a></li></ul></div><div><h2>web.xml</h2><ul><li><a href="filter.html">Filter</a></li></ul></div><div><h2>Other</h2><ul><li><a href="systemprops.html">System properties</a></li><li><a href="jaspic.html">JASPIC</a></li></ul></div></nav></div></div><div id="mainRight"><div id="content"><h2>The Realm Component</h2><h3 id="Table_of_Contents">Table of Contents</h3><div class="text">
+<ul><li><a href="#Introduction">Introduction</a></li><li><a href="#Attributes">Attributes</a><ol><li><a href="#Common_Attributes">Common Attributes</a></li><li><a href="#JDBC_Database_Realm_-_org.apache.catalina.realm.JDBCRealm">JDBC Database Realm - org.apache.catalina.realm.JDBCRealm</a></li><li><a href="#DataSource_Database_Realm_-_org.apache.catalina.realm.DataSourceRealm">DataSource Database Realm - org.apache.catalina.realm.DataSourceRealm</a></li><li><a href="#JNDI_Directory_Realm_-_org.apache.catalina.realm.JNDIRealm">JNDI Directory Realm - org.apache.catalina.realm.JNDIRealm</a></li><li><a href="#UserDatabase_Realm_-_org.apache.catalina.realm.UserDatabaseRealm">UserDatabase Realm - org.apache.catalina.realm.UserDatabaseRealm</a></li><li><a href="#Memory_Based_Realm_-_org.apache.catalina.realm.MemoryRealm">Memory Based Realm - org.apache.catalina.realm.MemoryRealm</a></li><li><a href="#JAAS_Realm_-_org.apache.catalina.realm.JAASRealm">JAAS Realm - org.apache.catalina.realm.JAASRealm</a></li><li><a href="#Combined_Realm_-_org.apache.catalina.realm.CombinedRealm">Combined Realm - org.apache.catalina.realm.CombinedRealm</a></li><li><a href="#LockOut_Realm_-_org.apache.catalina.realm.LockOutRealm">LockOut Realm - org.apache.catalina.realm.LockOutRealm</a></li><li><a href="#Null_Realm_-_org.apache.catalina.realm.NullRealm">Null Realm - org.apache.catalina.realm.NullRealm</a></li></ol></li><li><a href="#Nested_Components">Nested Components</a></li><li><a href="#Special_Features">Special Features</a></li></ul>
 </div><h3 id="Introduction">Introduction</h3><div class="text">
 
   <p>A <strong>Realm</strong> element represents a "database" of usernames,
@@ -49,8 +49,9 @@
   this one Realm may itself contain multiple nested Realms). In addition, the
   Realm associated with an Engine or a Host is automatically inherited by
   lower-level containers unless the lower level container explicitly defines its
-  own Realm.
-  </p>
+  own Realm. If no Realm is configured for the Engine, an instance of the
+  <a href="#Null_Realm_-_org.apache.catalina.realm.NullRealm">Null Realm</a>
+  will be configured for the Engine automatically.</p>
 
   <p>For more in-depth information about container managed security in web
   applications, as well as more information on configuring and using the
@@ -130,13 +131,6 @@
       </td></tr><tr><td><strong><code class="attributeName">connectionURL</code></strong></td><td>
         <p>The connection URL to be passed to the JDBC driver when
         establishing a database connection.</p>
-      </td></tr><tr><td><code class="attributeName">digest</code></td><td>
-        <p>The name of the <code>MessageDigest</code> algorithm used
-        to encode user passwords stored in the database.  If not specified,
-        user passwords are assumed to be stored in clear-text.</p>
-      </td></tr><tr><td><code class="attributeName">digestEncoding</code></td><td>
-        <p>The charset for encoding digests.  If not specified, the platform
-        default will be used.</p>
       </td></tr><tr><td><strong><code class="attributeName">driverName</code></strong></td><td>
         <p>Fully qualified Java class name of the JDBC driver to be
         used to connect to the authentication database.</p>
@@ -150,10 +144,15 @@
         <p>When processing users authenticated via the GSS-API, this attribute
         controls if any "@..." is removed from the end of the user
         name. If not specified, the default is <code>true</code>.</p>
+      </td></tr><tr><td><code class="attributeName">transportGuaranteeRedirectStatus</code></td><td>
+        <p>The HTTP status code to use when the container needs to issue an HTTP
+           redirect to meet the requirements of a configured transport
+           guarantee. The provided status code is not validated. If not
+           specified, the default value of <code>302</code> is used.</p>
       </td></tr><tr><td><strong><code class="attributeName">userCredCol</code></strong></td><td>
         <p>Name of the column, in the "users" table, which contains
-        the user's credentials (i.e. password).  If a value for the
-        <code>digest</code> attribute is specified, this component
+        the user's credentials (i.e. password).  If a
+        <code>CredentialHandler</code> is specified, this component
         will assume that the passwords have been encoded with the
         specified algorithm.  Otherwise, they will be assumed to be
         in clear text.</p>
@@ -231,10 +230,6 @@
         Realm.</p>
       </td></tr><tr><td><strong><code class="attributeName">dataSourceName</code></strong></td><td>
         <p>The name of the JNDI JDBC DataSource for this Realm.</p>
-      </td></tr><tr><td><code class="attributeName">digest</code></td><td>
-        <p>The name of the <code>MessageDigest</code> algorithm used
-        to encode user passwords stored in the database.  If not specified,
-        user passwords are assumed to be stored in clear-text.</p>
       </td></tr><tr><td><code class="attributeName">localDataSource</code></td><td>
         <p>When the realm is nested inside a Context element, this allows the
         realm to use a DataSource defined for the Context rather than a global
@@ -246,14 +241,19 @@
         <p>This attribute is <strong>required</strong> in majority of
         configurations. See <strong>allRolesMode</strong> attribute for
         a rare case when it can be omitted.</p>
+      </td></tr><tr><td><code class="attributeName">transportGuaranteeRedirectStatus</code></td><td>
+        <p>The HTTP status code to use when the container needs to issue an HTTP
+           redirect to meet the requirements of a configured transport
+           guarantee. The provided status code is not validated. If not
+           specified, the default value of <code>302</code> is used.</p>
       </td></tr><tr><td><code class="attributeName">stripRealmForGss</code></td><td>
         <p>When processing users authenticated via the GSS-API, this attribute
         controls if any "@..." is removed from the end of the user
         name. If not specified, the default is <code>true</code>.</p>
       </td></tr><tr><td><strong><code class="attributeName">userCredCol</code></strong></td><td>
         <p>Name of the column, in the "users" table, which contains
-        the user's credentials (i.e. password).  If a value for the
-        <code>digest</code> attribute is specified, this component
+        the user's credentials (i.e. password).  If a
+        <code>CredentialHandler</code> is specified, this component
         will assume that the passwords have been encoded with the
         specified algorithm.  Otherwise, they will be assumed to be
         in clear text.</p>
@@ -346,13 +346,18 @@
         are defined in web.xml in which case the user must be assigned at least
         one of those roles.</p>
       </td></tr><tr><td><code class="attributeName">alternateURL</code></td><td>
-        <p>If a socket connection can not be made to the provider at
+        <p>If a socket connection cannot be made to the provider at
         the <code>connectionURL</code> an attempt will be made to use the
         <code>alternateURL</code>.</p>
       </td></tr><tr><td><code class="attributeName">authentication</code></td><td>
         <p>A string specifying the type of authentication to use.
         "none", "simple", "strong" or a provider specific definition
         can be used. If no value is given the providers default is used.</p>
+      </td></tr><tr><td><code class="attributeName">cipherSuites</code></td><td>
+        <p>Specify which cipher suites are allowed when trying to open
+        a secured connection using StartTLS. The allowed cipher suites
+        are specified by a comma separated list. The default is to use the
+        cipher suites of the JVM.</p>
       </td></tr><tr><td><code class="attributeName">commonRole</code></td><td>
         <p>A role name assigned to each successfully authenticated user in
         addition to the roles retrieved from LDAP. If not specified, only
@@ -384,13 +389,13 @@
         <p>A string specifying how aliases are to be dereferenced during
         search operations. The allowed values are "always", "never",
         "finding" and "searching". If not specified, "always" is used.</p>
-      </td></tr><tr><td><code class="attributeName">digest</code></td><td>
-        <p>The digest algorithm to apply to the plaintext password offered
-        by the user before comparing it with the value retrieved from the
-        directory.  Valid values are those accepted for the algorithm name
-        by the <code>java.security.MessageDigest</code> class. If not
-        specified the plaintext password is assumed to be retrieved. Not
-        required unless <code>userPassword</code> is specified</p>
+      </td></tr><tr><td><code class="attributeName">hostnameVerifierClassName</code></td><td>
+        <p>The name of the class to use for hostname verification when
+        using StartTLS for securing the connection to the ldap server.
+        The default constructor will be used to construct an instance of
+        the verifier class. The default is to accept only those hostnames,
+        that are valid according to the peer certificate of the ldap
+        server.</p>
       </td></tr><tr><td><code class="attributeName">protocol</code></td><td>
          <p>A string specifying the security protocol to use. If not given
          the providers default is used.</p>
@@ -478,6 +483,15 @@
         selected from <code>auth-conf</code>, <code>auth-int</code> and
         <code>auth</code>. See <a href="http://docs.oracle.com/javase/7/docs/api/javax/security/sasl/Sasl.html#QOP" rel="nofollow">Java documentation</a> for more details.</p>
         <p>The default value is <code>auth-conf</code>.</p>
+      </td></tr><tr><td><code class="attributeName">sslProtocol</code></td><td>
+        <p>Specifies which ssl protocol should be used, when connecting with
+        StartTLS. The default is to let the jre decide. If you need even more
+        control, you can specify the <code>SSLSocketFactory</code> to use.</p>
+      </td></tr><tr><td><code class="attributeName">sslSocketFactory</code></td><td>
+        <p>Specifies which <code>SSLSocketFactory</code> to use when connecting
+        to the ldap server using StartTLS. An instance of the class will be
+        constructed using the default constructor. If none class name is given
+        the default jre <code>SSLSocketFactory</code> will be used.</p>
       </td></tr><tr><td><code class="attributeName">stripRealmForGss</code></td><td>
         <p>When processing users authenticated via the GSS-API, this attribute
         controls if any "@..." is removed from the end of the user
@@ -487,6 +501,11 @@
         returned when using the <code>userSearch</code> attribute. If not
         specified, the default of <code>0</code> is used which indicates no
         limit.</p>
+      </td></tr><tr><td><code class="attributeName">transportGuaranteeRedirectStatus</code></td><td>
+        <p>The HTTP status code to use when the container needs to issue an HTTP
+           redirect to meet the requirements of a configured transport
+           guarantee. The provided status code is not validated. If not
+           specified, the default value of <code>302</code> is used.</p>
       </td></tr><tr><td><code class="attributeName">useDelegatedCredential</code></td><td>
         <p>When the JNDIRealm is used with the SPNEGO authenticator, delegated
         credentials for the user may be available. If such credentials are
@@ -546,6 +565,14 @@
         <code>userSubtree</code> properties) instead of
         <code>userPattern</code> to search the directory for the
         user's entry.</p>
+      </td></tr><tr><td><code class="attributeName">userSearchAsUser</code></td><td>
+        <p> When searching for a user's entry, should the search be performed as
+        the user currently being authenticated? If false,
+        <code>connectionName</code> and <code>connectionPassword</code> will be
+        used if specified, else an anonymous. If not specified, the default
+        value of <code>false</code> is used. Note that when accessing the
+        directory using delegated credentials, this attribute is always ignored
+        and the search is performed using the delegated credentials.</p>
       </td></tr><tr><td><code class="attributeName">userSubtree</code></td><td>
         <p>Set to <code>true</code> if you want to search the entire
         subtree of the element specified by the <code>userBase</code>
@@ -553,6 +580,10 @@
         <code>false</code> causes only the top level to be searched.
         Not used if you are using the <code>userPattern</code>
         expression.</p>
+      </td></tr><tr><td><code class="attributeName">useStartTls</code></td><td>
+        <p>Set to <code>true</code> if you want to use StartTLS for securing
+        the connection to the ldap server. The default value is <code>false</code>.
+        </p>
       </td></tr><tr><td><code class="attributeName">X509UsernameRetrieverClassName</code></td><td>
         <p>When using X509 client certificates, this specifies the class name
         that will be used to retrieve the user name from the certificate.
@@ -596,6 +627,11 @@
       </td></tr><tr><td><strong><code class="attributeName">resourceName</code></strong></td><td>
         <p>The name of the global <code>UserDatabase</code> resource
         that this realm will use for user, password and role information.</p>
+      </td></tr><tr><td><code class="attributeName">transportGuaranteeRedirectStatus</code></td><td>
+        <p>The HTTP status code to use when the container needs to issue an HTTP
+           redirect to meet the requirements of a configured transport
+           guarantee. The provided status code is not validated. If not
+           specified, the default value of <code>302</code> is used.</p>
       </td></tr><tr><td><code class="attributeName">X509UsernameRetrieverClassName</code></td><td>
         <p>When using X509 client certificates, this specifies the class name
         that will be used to retrieve the user name from the certificate.
@@ -643,20 +679,20 @@
         authenticated and no check will be made for assigned roles unless roles
         are defined in web.xml in which case the user must be assigned at least
         one of those roles.</p>
-      </td></tr><tr><td><code class="attributeName">digest</code></td><td>
-        <p>The digest algorithm used to store passwords in non-plaintext
-        formats. Valid values are those accepted for the algorithm name by the
-        <code>java.security.MessageDigest</code> class. If not specified,
-        passwords are stored in clear text.</p>
       </td></tr><tr><td><code class="attributeName">pathname</code></td><td>
-        <p>Absolute or relative (to $CATALINA_BASE) pathname to the XML file
-        containing our user information.  See below for details on the
+        <p>URL, absolute path or relative path (to $CATALINA_BASE) for the XML
+        file containing our user information.  See below for details on the
         XML element format required.  If no pathname is specified, the
         default value is <code>conf/tomcat-users.xml</code>.</p>
       </td></tr><tr><td><code class="attributeName">stripRealmForGss</code></td><td>
         <p>When processing users authenticated via the GSS-API, this attribute
         controls if any "@..." is removed from the end of the user
         name. If not specified, the default is <code>true</code>.</p>
+      </td></tr><tr><td><code class="attributeName">transportGuaranteeRedirectStatus</code></td><td>
+        <p>The HTTP status code to use when the container needs to issue an HTTP
+           redirect to meet the requirements of a configured transport
+           guarantee. The provided status code is not validated. If not
+           specified, the default value of <code>302</code> is used.</p>
       </td></tr><tr><td><code class="attributeName">X509UsernameRetrieverClassName</code></td><td>
         <p>When using X509 client certificates, this specifies the class name
         that will be used to retrieve the user name from the certificate.
@@ -754,6 +790,11 @@
         <p>When processing users authenticated via the GSS-API, this attribute
         controls if any "@..." is removed from the end of the user
         name. If not specified, the default is <code>true</code>.</p>
+      </td></tr><tr><td><code class="attributeName">transportGuaranteeRedirectStatus</code></td><td>
+        <p>The HTTP status code to use when the container needs to issue an HTTP
+           redirect to meet the requirements of a configured transport
+           guarantee. The provided status code is not validated. If not
+           specified, the default value of <code>302</code> is used.</p>
       </td></tr><tr><td><code class="attributeName">useContextClassLoader</code></td><td>
         <p>Instructs JAASRealm to use the context class loader for loading the
         user-specified <code>LoginModule</code> class and associated
@@ -816,6 +857,11 @@
         authenticated and no check will be made for assigned roles unless roles
         are defined in web.xml in which case the user must be assigned at least
         one of those roles.</p>
+      </td></tr><tr><td><code class="attributeName">transportGuaranteeRedirectStatus</code></td><td>
+        <p>The HTTP status code to use when the container needs to issue an HTTP
+           redirect to meet the requirements of a configured transport
+           guarantee. The provided status code is not validated. If not
+           specified, the default value of <code>302</code> is used.</p>
       </td></tr></table>
   </div></div>
 
@@ -874,7 +920,16 @@
        locked out. Defaults to 5.</p>
       </td></tr><tr><td><code class="attributeName">lockOutTime</code></td><td>
        <p>The time (in seconds) a user is locked out for after too many
-       authentication failures. Defaults to 300 (5 minutes).</p>
+       authentication failures. Defaults to 300 (5 minutes). Further
+       authentication failures during the lock out time will cause the lock out
+       timer to reset to zero, effectively extending the lock out time. Valid
+       authentication attempts during the lock out period will not succeed but
+       will also not reset the lock out time.</p>
+      </td></tr><tr><td><code class="attributeName">transportGuaranteeRedirectStatus</code></td><td>
+        <p>The HTTP status code to use when the container needs to issue an HTTP
+           redirect to meet the requirements of a configured transport
+           guarantee. The provided status code is not validated. If not
+           specified, the default value of <code>302</code> is used.</p>
       </td></tr></table>
 
     <p>See the <a href="../realm-howto.html">Container-Managed Security
@@ -883,17 +938,45 @@
 
   </div></div>
 
+  <div class="subsection"><h4 id="Null_Realm_-_org.apache.catalina.realm.NullRealm">Null Realm - org.apache.catalina.realm.NullRealm</h4><div class="text">
+
+    <p><strong>NullRealm</strong> is a minimal implementation of the Tomcat
+    <code>Realm</code> interface that always returns null when an attempt is
+    made to validate a user name and associated credentials. It is intended to
+    be used as a default Realm implementation when no other Realm is
+    specified.</p>
+
+    <p>The NullRealm implementation supports the following additional
+    attributes.</p>
+
+    <table class="defaultTable"><tr><th style="width: 15%;">
+          Attribute
+        </th><th style="width: 85%;">
+          Description
+        </th></tr><tr><td><code class="attributeName">transportGuaranteeRedirectStatus</code></td><td>
+        <p>The HTTP status code to use when the container needs to issue an HTTP
+           redirect to meet the requirements of a configured transport
+           guarantee. The provided status code is not validated. If not
+           specified, the default value of <code>302</code> is used.</p>
+      </td></tr></table>
+
+  </div></div>
+
 </div><h3 id="Nested_Components">Nested Components</h3><div class="text">
 
-  <h3>CombinedRealm Implementation</h3>
-
-  <p>If you are using the <em>CombinedRealm Implementation</em> or a Realm
-  that extends the CombinedRealm, e.g. the LockOutRealm,
-  <strong>&lt;Realm&gt;</strong> elements may be nested inside it.</p>
-
-  <h3>Other Realm Implementations</h3>
-
-  <p>No other Realm implementation supports nested components.</p>
+  <p>You can nest the following components by nesting the corresponding element
+  inside your <strong>Realm</strong> element:</p>
+  <ul>
+  <li><strong>CombinedRealm Implementation</strong> - If you are using the
+    <em>CombinedRealm Implementation</em> or a Realm
+    that extends the CombinedRealm, e.g. the LockOutRealm, one or more
+    <strong>&lt;Realm&gt;</strong> elements may be nested inside it.</li>
+  <li><a href="credentialhandler.html"><strong>CredentialHandler</strong></a> -
+      You may nest at most one instance of this element inside a Realm. This
+      configures the credential handler that will be used to validate provided
+      credentials with those stored by the Realm. If not specified a default
+      <em>MessageDigestCredentialHandler</em> will be configured.</li>
+  </ul>
 
 </div><h3 id="Special_Features">Special Features</h3><div class="text">
 
@@ -913,5 +996,5 @@
                     Comments may be removed by our moderators if they are either
                     implemented or considered invalid/off-topic.
                   </p><div id="comments_thread"></div></div></div></div></div></div></div><footer><div id="footer">
-    Copyright &copy; 1999-2014, The Apache Software Foundation
+    Copyright &copy; 1999-2017, The Apache Software Foundation
   </div></footer></div></body></html>

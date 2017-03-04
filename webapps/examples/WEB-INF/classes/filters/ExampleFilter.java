@@ -91,7 +91,7 @@ public final class ExampleFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response,
                          FilterChain chain)
-        throws IOException, ServletException {
+            throws IOException, ServletException {
 
         // Store ourselves as a request attribute (if requested)
         if (attribute != null)
@@ -104,7 +104,6 @@ public final class ExampleFilter implements Filter {
         filterConfig.getServletContext().log
             (this.toString() + ": " + (stopTime - startTime) +
              " milliseconds");
-
     }
 
 
@@ -118,7 +117,6 @@ public final class ExampleFilter implements Filter {
 
         this.filterConfig = fConfig;
         this.attribute = fConfig.getInitParameter("attribute");
-
     }
 
 
@@ -134,9 +132,6 @@ public final class ExampleFilter implements Filter {
         sb.append(filterConfig);
         sb.append(")");
         return (sb.toString());
-
     }
-
-
 }
 

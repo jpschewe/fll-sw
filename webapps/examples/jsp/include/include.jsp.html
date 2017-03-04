@@ -22,14 +22,9 @@
 
 &lt;%@ page buffer="5kb" autoFlush="false" %>
 
-&lt;p>In place evaluation of another JSP which gives you the current time:
+&lt;p>In place evaluation of another JSP which gives you the current time: &lt;%@ include file="foo.jsp" %>
 
-&lt;%@ include file="foo.jsp" %>
-
-&lt;p> &lt;jsp:include page="foo.html" flush="true"/> by including the output of another JSP:
-
-&lt;jsp:include page="foo.jsp" flush="true"/>
-
+&lt;p> &lt;jsp:include page="foo.html" flush="true"/> by including the output of another JSP: &lt;jsp:include page="foo.jsp" flush="true"/>
 :-)
 
 &lt;/html>

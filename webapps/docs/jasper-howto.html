@@ -1,5 +1,5 @@
 <!DOCTYPE html SYSTEM "about:legacy-compat">
-<html lang="en"><head><META http-equiv="Content-Type" content="text/html; charset=UTF-8"><link href="./images/docs-stylesheet.css" rel="stylesheet" type="text/css"><title>Apache Tomcat 8 (8.0.9) - Jasper 2 JSP Engine How To</title><meta name="author" content="Glenn L. Nielsen"><meta name="author" content="Peter Rossbach"><script type="application/javascript" data-comments-identifier="tomcat-8.0-doc/jasper-howto">
+<html lang="en"><head><META http-equiv="Content-Type" content="text/html; charset=UTF-8"><link href="./images/docs-stylesheet.css" rel="stylesheet" type="text/css"><title>Apache Tomcat 8 (8.5.11) - Jasper 2 JSP Engine How To</title><meta name="author" content="Glenn L. Nielsen"><meta name="author" content="Peter Rossbach"><script type="application/javascript" data-comments-identifier="tomcat-8.5-doc/jasper-howto">
     "use strict"; // Enable strict mode
 
     (function() {
@@ -29,13 +29,13 @@
         })(window, document);
       }), false);
     })();
-  </script></head><body><div id="wrapper"><header><div id="header"><div><div><div class="logo noPrint"><a href="http://tomcat.apache.org/"><img alt="Tomcat Home" src="./images/tomcat.png"></a></div><div style="height: 1px;"></div><div class="asfLogo noPrint"><a href="http://www.apache.org/" target="_blank"><img src="./images/asf-feather.png" alt="The Apache Software Foundation" style="width: 266px; height: 83px;"></a></div><h1>Apache Tomcat 8</h1><div class="versionInfo">
-          Version 8.0.9,
-          <time datetime="2014-06-19">Jun 19 2014</time></div><div style="height: 1px;"></div><div style="clear: left;"></div></div></div></div></header><div id="middle"><div><div id="mainLeft" class="noprint"><div><nav><div><h2>Links</h2><ul><li><a href="index.html">Docs Home</a></li><li><a href="http://wiki.apache.org/tomcat/FAQ">FAQ</a></li><li><a href="#comments_section">User Comments</a></li></ul></div><div><h2>User Guide</h2><ul><li><a href="introduction.html">1) Introduction</a></li><li><a href="setup.html">2) Setup</a></li><li><a href="appdev/index.html">3) First webapp</a></li><li><a href="deployer-howto.html">4) Deployer</a></li><li><a href="manager-howto.html">5) Manager</a></li><li><a href="realm-howto.html">6) Realms and AAA</a></li><li><a href="security-manager-howto.html">7) Security Manager</a></li><li><a href="jndi-resources-howto.html">8) JNDI Resources</a></li><li><a href="jndi-datasource-examples-howto.html">9) JDBC DataSources</a></li><li><a href="class-loader-howto.html">10) Classloading</a></li><li><a href="jasper-howto.html">11) JSPs</a></li><li><a href="ssl-howto.html">12) SSL</a></li><li><a href="ssi-howto.html">13) SSI</a></li><li><a href="cgi-howto.html">14) CGI</a></li><li><a href="proxy-howto.html">15) Proxy Support</a></li><li><a href="mbeans-descriptor-howto.html">16) MBean Descriptor</a></li><li><a href="default-servlet.html">17) Default Servlet</a></li><li><a href="cluster-howto.html">18) Clustering</a></li><li><a href="balancer-howto.html">19) Load Balancer</a></li><li><a href="connectors.html">20) Connectors</a></li><li><a href="monitoring.html">21) Monitoring and Management</a></li><li><a href="logging.html">22) Logging</a></li><li><a href="apr.html">23) APR/Native</a></li><li><a href="virtual-hosting-howto.html">24) Virtual Hosting</a></li><li><a href="aio.html">25) Advanced IO</a></li><li><a href="extras.html">26) Additional Components</a></li><li><a href="maven-jars.html">27) Mavenized</a></li><li><a href="security-howto.html">28) Security Considerations</a></li><li><a href="windows-service-howto.html">29) Windows Service</a></li><li><a href="windows-auth-howto.html">30) Windows Authentication</a></li><li><a href="jdbc-pool.html">31) Tomcat's JDBC Pool</a></li><li><a href="web-socket-howto.html">32) WebSocket</a></li><li><a href="rewrite.html">33) Rewrite</a></li></ul></div><div><h2>Reference</h2><ul><li><a href="RELEASE-NOTES.txt">Release Notes</a></li><li><a href="config/index.html">Configuration</a></li><li><a href="api/index.html">Tomcat Javadocs</a></li><li><a href="servletapi/index.html">Servlet Javadocs</a></li><li><a href="jspapi/index.html">JSP 2.3 Javadocs</a></li><li><a href="elapi/index.html">EL 3.0 Javadocs</a></li><li><a href="websocketapi/index.html">WebSocket 1.0 Javadocs</a></li><li><a href="http://tomcat.apache.org/connectors-doc/">JK 1.2 Documentation</a></li></ul></div><div><h2>Apache Tomcat Development</h2><ul><li><a href="building.html">Building</a></li><li><a href="changelog.html">Changelog</a></li><li><a href="http://wiki.apache.org/tomcat/TomcatVersions">Status</a></li><li><a href="developers.html">Developers</a></li><li><a href="architecture/index.html">Architecture</a></li><li><a href="funcspecs/index.html">Functional Specs.</a></li><li><a href="tribes/introduction.html">Tribes</a></li></ul></div></nav></div></div><div id="mainRight"><div id="content"><h2>Jasper 2 JSP Engine How To</h2><h3 id="Table_of_Contents">Table of Contents</h3><div class="text">
+  </script></head><body><div id="wrapper"><header><div id="header"><div><div><div class="logo noPrint"><a href="http://tomcat.apache.org/"><img alt="Tomcat Home" src="./images/tomcat.png"></a></div><div style="height: 1px;"></div><div class="asfLogo noPrint"><a href="http://www.apache.org/" target="_blank"><img src="./images/asf-logo.svg" alt="The Apache Software Foundation" style="width: 266px; height: 83px;"></a></div><h1>Apache Tomcat 8</h1><div class="versionInfo">
+          Version 8.5.11,
+          <time datetime="2017-01-10">Jan 10 2017</time></div><div style="height: 1px;"></div><div style="clear: left;"></div></div></div></div></header><div id="middle"><div><div id="mainLeft" class="noprint"><div><nav><div><h2>Links</h2><ul><li><a href="index.html">Docs Home</a></li><li><a href="http://wiki.apache.org/tomcat/FAQ">FAQ</a></li><li><a href="#comments_section">User Comments</a></li></ul></div><div><h2>User Guide</h2><ul><li><a href="introduction.html">1) Introduction</a></li><li><a href="setup.html">2) Setup</a></li><li><a href="appdev/index.html">3) First webapp</a></li><li><a href="deployer-howto.html">4) Deployer</a></li><li><a href="manager-howto.html">5) Manager</a></li><li><a href="realm-howto.html">6) Realms and AAA</a></li><li><a href="security-manager-howto.html">7) Security Manager</a></li><li><a href="jndi-resources-howto.html">8) JNDI Resources</a></li><li><a href="jndi-datasource-examples-howto.html">9) JDBC DataSources</a></li><li><a href="class-loader-howto.html">10) Classloading</a></li><li><a href="jasper-howto.html">11) JSPs</a></li><li><a href="ssl-howto.html">12) SSL/TLS</a></li><li><a href="ssi-howto.html">13) SSI</a></li><li><a href="cgi-howto.html">14) CGI</a></li><li><a href="proxy-howto.html">15) Proxy Support</a></li><li><a href="mbeans-descriptors-howto.html">16) MBeans Descriptors</a></li><li><a href="default-servlet.html">17) Default Servlet</a></li><li><a href="cluster-howto.html">18) Clustering</a></li><li><a href="balancer-howto.html">19) Load Balancer</a></li><li><a href="connectors.html">20) Connectors</a></li><li><a href="monitoring.html">21) Monitoring and Management</a></li><li><a href="logging.html">22) Logging</a></li><li><a href="apr.html">23) APR/Native</a></li><li><a href="virtual-hosting-howto.html">24) Virtual Hosting</a></li><li><a href="aio.html">25) Advanced IO</a></li><li><a href="extras.html">26) Additional Components</a></li><li><a href="maven-jars.html">27) Mavenized</a></li><li><a href="security-howto.html">28) Security Considerations</a></li><li><a href="windows-service-howto.html">29) Windows Service</a></li><li><a href="windows-auth-howto.html">30) Windows Authentication</a></li><li><a href="jdbc-pool.html">31) Tomcat's JDBC Pool</a></li><li><a href="web-socket-howto.html">32) WebSocket</a></li><li><a href="rewrite.html">33) Rewrite</a></li></ul></div><div><h2>Reference</h2><ul><li><a href="RELEASE-NOTES.txt">Release Notes</a></li><li><a href="config/index.html">Configuration</a></li><li><a href="api/index.html">Tomcat Javadocs</a></li><li><a href="servletapi/index.html">Servlet Javadocs</a></li><li><a href="jspapi/index.html">JSP 2.3 Javadocs</a></li><li><a href="elapi/index.html">EL 3.0 Javadocs</a></li><li><a href="websocketapi/index.html">WebSocket 1.1 Javadocs</a></li><li><a href="http://tomcat.apache.org/connectors-doc/">JK 1.2 Documentation</a></li></ul></div><div><h2>Apache Tomcat Development</h2><ul><li><a href="building.html">Building</a></li><li><a href="changelog.html">Changelog</a></li><li><a href="http://wiki.apache.org/tomcat/TomcatVersions">Status</a></li><li><a href="developers.html">Developers</a></li><li><a href="architecture/index.html">Architecture</a></li><li><a href="funcspecs/index.html">Functional Specs.</a></li><li><a href="tribes/introduction.html">Tribes</a></li></ul></div></nav></div></div><div id="mainRight"><div id="content"><h2>Jasper 2 JSP Engine How To</h2><h3 id="Table_of_Contents">Table of Contents</h3><div class="text">
 <ul><li><a href="#Introduction">Introduction</a></li><li><a href="#Configuration">Configuration</a></li><li><a href="#Known_issues">Known issues</a></li><li><a href="#Production_Configuration">Production Configuration</a></li><li><a href="#Web_Application_Compilation">Web Application Compilation</a></li><li><a href="#Optimisation">Optimisation</a></li></ul>
 </div><h3 id="Introduction">Introduction</h3><div class="text">
 
-<p>Tomcat 8.0 uses the Jasper 2 JSP Engine to implement
+<p>Tomcat 8.5 uses the Jasper 2 JSP Engine to implement
 the <a href="http://wiki.apache.org/tomcat/Specifications">JavaServer Pages 2.3</a>
 specification.</p>
 
@@ -129,7 +129,7 @@ default <code>true</code>.
 
 <li><strong>engineOptionsClass</strong> - Allows specifying the Options class
 used to configure Jasper. If not present, the default EmbeddedServletOptions
-will be used.
+will be used. This option is ignored if running under a SecurityManager.
 </li>
 
 <li><strong>errorOnUseBeanInvalidClassAttribute</strong> - Should Jasper issue
@@ -182,7 +182,7 @@ may be expensive and could lead to excessive resource usage.</li>
 
 <li><strong>scratchdir</strong> - What scratch directory should we use when
 compiling JSP pages? Default is the work directory for the current web
-application.</li>
+application. This option is ignored if running under a SecurityManager.</li>
 
 <li><strong>suppressSmap</strong> - Should the generation of SMAP info for JSR45
 debugging be suppressed? <code>true</code> or <code>false</code>, default
@@ -194,8 +194,17 @@ actions or directives be trimmed ?, default <code>false</code>.</li>
 <li><strong>xpoweredBy</strong> - Determines whether X-Powered-By response
 header is added by generated servlet. <code>true</code> or <code>false</code>,
 default <code>false</code>.</li>
-</ul>
 
+<li><strong>strictQuoteEscaping</strong> - When scriptlet expressions are used
+for attribute values, should the rules in JSP.1.6 for the escaping of quote
+characters be strictly applied? <code>true</code> or <code>false</code>, default
+<code>true</code>.</li>
+
+<li><strong>quoteAttributeEL</strong> - When EL is used in an attribute value
+on a JSP page, should the rules for quoting of attributes described in JSP.1.6
+be applied to the expression? <code>true</code> or <code>false</code>, default
+<code>true</code>.</li>
+</ul>
 
 <p>The Java compiler from Eclipse JDT in included as the default compiler. It is
 an advanced Java compiler which will load all dependencies from the Tomcat class
@@ -210,7 +219,7 @@ of the new compiler by configuring the compiler attribute as explained above.
 </div><h3 id="Known_issues">Known issues</h3><div class="text">
 
 <p>As described in
-<a href="https://issues.apache.org/bugzilla/show_bug.cgi?id=39089">
+<a href="https://bz.apache.org/bugzilla/show_bug.cgi?id=39089">
 bug 39089</a>, a known JVM issue,
 <a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6294277">
 bug 6294277</a>, may cause a
@@ -344,8 +353,8 @@ without debug info <code>debug="off"</code>.
 <p>
 When you don't want to stop the jsp generation at first jsp syntax error, use
 <code>failOnError="false"</code>and with
-<code>showSuccess="true"</code> all successfull <i>jsp to java</i>
-generation are printed out. Sometimes it is very helpfull, when you cleanup the
+<code>showSuccess="true"</code> all successful <i>jsp to java</i>
+generation are printed out. Sometimes it is very helpful, when you cleanup the
 generate java source files at <code>${webapp.path}/WEB-INF/src</code>
 and the compile jsp servlet classes at
 <code>${webapp.path}/WEB-INF/classes/org/apache/jsp</code>.
@@ -395,5 +404,5 @@ alternative EL interpreter.
                     Comments may be removed by our moderators if they are either
                     implemented or considered invalid/off-topic.
                   </p><div id="comments_thread"></div></div></div></div></div></div></div><footer><div id="footer">
-    Copyright &copy; 1999-2014, The Apache Software Foundation
+    Copyright &copy; 1999-2017, The Apache Software Foundation
   </div></footer></div></body></html>

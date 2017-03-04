@@ -1,5 +1,5 @@
 <!DOCTYPE html SYSTEM "about:legacy-compat">
-<html lang="en"><head><META http-equiv="Content-Type" content="text/html; charset=UTF-8"><link href="../images/docs-stylesheet.css" rel="stylesheet" type="text/css"><title>Apache Tomcat 8 Configuration Reference (8.0.9) - The ClusterManager object</title><meta name="author" content="Filip Hanik"><script type="application/javascript" data-comments-identifier="tomcat-8.0-doc/config/cluster-manager">
+<html lang="en"><head><META http-equiv="Content-Type" content="text/html; charset=UTF-8"><link href="../images/docs-stylesheet.css" rel="stylesheet" type="text/css"><title>Apache Tomcat 8 Configuration Reference (8.5.11) - The ClusterManager object</title><meta name="author" content="Filip Hanik"><script type="application/javascript" data-comments-identifier="tomcat-8.5-doc/config/cluster-manager">
     "use strict"; // Enable strict mode
 
     (function() {
@@ -29,10 +29,10 @@
         })(window, document);
       }), false);
     })();
-  </script></head><body><div id="wrapper"><header><div id="header"><div><div><div class="logo noPrint"><a href="http://tomcat.apache.org/"><img alt="Tomcat Home" src="../images/tomcat.png"></a></div><div style="height: 1px;"></div><div class="asfLogo noPrint"><a href="http://www.apache.org/" target="_blank"><img src="../images/asf-feather.png" alt="The Apache Software Foundation" style="width: 266px; height: 83px;"></a></div><h1>Apache Tomcat 8 Configuration Reference</h1><div class="versionInfo">
-          Version 8.0.9,
-          <time datetime="2014-06-19">Jun 19 2014</time></div><div style="height: 1px;"></div><div style="clear: left;"></div></div></div></div></header><div id="middle"><div><div id="mainLeft" class="noprint"><div><nav><div><h2>Links</h2><ul><li><a href="../index.html">Docs Home</a></li><li><a href="index.html">Config Ref. Home</a></li><li><a href="http://wiki.apache.org/tomcat/FAQ">FAQ</a></li><li><a href="#comments_section">User Comments</a></li></ul></div><div><h2>Top Level Elements</h2><ul><li><a href="server.html">Server</a></li><li><a href="service.html">Service</a></li></ul></div><div><h2>Executors</h2><ul><li><a href="executor.html">Executor</a></li></ul></div><div><h2>Connectors</h2><ul><li><a href="http.html">HTTP</a></li><li><a href="ajp.html">AJP</a></li></ul></div><div><h2>Containers</h2><ul><li><a href="context.html">Context</a></li><li><a href="engine.html">Engine</a></li><li><a href="host.html">Host</a></li><li><a href="cluster.html">Cluster</a></li></ul></div><div><h2>Nested Components</h2><ul><li><a href="globalresources.html">Global Resources</a></li><li><a href="jar-scanner.html">JarScanner</a></li><li><a href="jar-scan-filter.html">JarScanFilter</a></li><li><a href="listeners.html">Listeners</a></li><li><a href="loader.html">Loader</a></li><li><a href="manager.html">Manager</a></li><li><a href="realm.html">Realm</a></li><li><a href="resources.html">Resources</a></li><li><a href="valve.html">Valve</a></li></ul></div><div><h2>Cluster Elements</h2><ul><li><a href="cluster.html">Cluster</a></li><li><a href="cluster-manager.html">Manager</a></li><li><a href="cluster-channel.html">Channel</a></li><li><a href="cluster-membership.html">Channel/Membership</a></li><li><a href="cluster-sender.html">Channel/Sender</a></li><li><a href="cluster-receiver.html">Channel/Receiver</a></li><li><a href="cluster-interceptor.html">Channel/Interceptor</a></li><li><a href="cluster-valve.html">Valve</a></li><li><a href="cluster-deployer.html">Deployer</a></li><li><a href="cluster-listener.html">ClusterListener</a></li></ul></div><div><h2>web.xml</h2><ul><li><a href="filter.html">Filter</a></li></ul></div><div><h2>Other</h2><ul><li><a href="systemprops.html">System properties</a></li></ul></div></nav></div></div><div id="mainRight"><div id="content"><h2>The ClusterManager object</h2><h3 id="Table_of_Contents">Table of Contents</h3><div class="text">
-<ul><li><a href="#Introduction">Introduction</a></li><li><a href="#The_<Manager>">The &lt;Manager&gt;</a></li><li><a href="#Attributes">Attributes</a><ol><li><a href="#Common_Attributes">Common Attributes</a></li><li><a href="#org.apache.catalina.ha.session.DeltaManager_Attributes">org.apache.catalina.ha.session.DeltaManager Attributes</a></li><li><a href="#org.apache.catalina.ha.session.BackupManager_Attributes">org.apache.catalina.ha.session.BackupManager Attributes</a></li></ol></li></ul>
+  </script></head><body><div id="wrapper"><header><div id="header"><div><div><div class="logo noPrint"><a href="http://tomcat.apache.org/"><img alt="Tomcat Home" src="../images/tomcat.png"></a></div><div style="height: 1px;"></div><div class="asfLogo noPrint"><a href="http://www.apache.org/" target="_blank"><img src="../images/asf-logo.svg" alt="The Apache Software Foundation" style="width: 266px; height: 83px;"></a></div><h1>Apache Tomcat 8 Configuration Reference</h1><div class="versionInfo">
+          Version 8.5.11,
+          <time datetime="2017-01-10">Jan 10 2017</time></div><div style="height: 1px;"></div><div style="clear: left;"></div></div></div></div></header><div id="middle"><div><div id="mainLeft" class="noprint"><div><nav><div><h2>Links</h2><ul><li><a href="../index.html">Docs Home</a></li><li><a href="index.html">Config Ref. Home</a></li><li><a href="http://wiki.apache.org/tomcat/FAQ">FAQ</a></li><li><a href="#comments_section">User Comments</a></li></ul></div><div><h2>Top Level Elements</h2><ul><li><a href="server.html">Server</a></li><li><a href="service.html">Service</a></li></ul></div><div><h2>Executors</h2><ul><li><a href="executor.html">Executor</a></li></ul></div><div><h2>Connectors</h2><ul><li><a href="http.html">HTTP/1.1</a></li><li><a href="http2.html">HTTP/2</a></li><li><a href="ajp.html">AJP</a></li></ul></div><div><h2>Containers</h2><ul><li><a href="context.html">Context</a></li><li><a href="engine.html">Engine</a></li><li><a href="host.html">Host</a></li><li><a href="cluster.html">Cluster</a></li></ul></div><div><h2>Nested Components</h2><ul><li><a href="cookie-processor.html">CookieProcessor</a></li><li><a href="credentialhandler.html">CredentialHandler</a></li><li><a href="globalresources.html">Global Resources</a></li><li><a href="jar-scanner.html">JarScanner</a></li><li><a href="jar-scan-filter.html">JarScanFilter</a></li><li><a href="listeners.html">Listeners</a></li><li><a href="loader.html">Loader</a></li><li><a href="manager.html">Manager</a></li><li><a href="realm.html">Realm</a></li><li><a href="resources.html">Resources</a></li><li><a href="sessionidgenerator.html">SessionIdGenerator</a></li><li><a href="valve.html">Valve</a></li></ul></div><div><h2>Cluster Elements</h2><ul><li><a href="cluster.html">Cluster</a></li><li><a href="cluster-manager.html">Manager</a></li><li><a href="cluster-channel.html">Channel</a></li><li><a href="cluster-membership.html">Channel/Membership</a></li><li><a href="cluster-sender.html">Channel/Sender</a></li><li><a href="cluster-receiver.html">Channel/Receiver</a></li><li><a href="cluster-interceptor.html">Channel/Interceptor</a></li><li><a href="cluster-valve.html">Valve</a></li><li><a href="cluster-deployer.html">Deployer</a></li><li><a href="cluster-listener.html">ClusterListener</a></li></ul></div><div><h2>web.xml</h2><ul><li><a href="filter.html">Filter</a></li></ul></div><div><h2>Other</h2><ul><li><a href="systemprops.html">System properties</a></li><li><a href="jaspic.html">JASPIC</a></li></ul></div></nav></div></div><div id="mainRight"><div id="content"><h2>The ClusterManager object</h2><h3 id="Table_of_Contents">Table of Contents</h3><div class="text">
+<ul><li><a href="#Introduction">Introduction</a></li><li><a href="#The_<Manager>">The &lt;Manager&gt;</a></li><li><a href="#Attributes">Attributes</a><ol><li><a href="#Common_Attributes">Common Attributes</a></li><li><a href="#org.apache.catalina.ha.session.DeltaManager_Attributes">org.apache.catalina.ha.session.DeltaManager Attributes</a></li><li><a href="#org.apache.catalina.ha.session.BackupManager_Attributes">org.apache.catalina.ha.session.BackupManager Attributes</a></li></ol></li><li><a href="#Nested_Components">Nested Components</a></li></ul>
 </div><h3 id="Introduction">Introduction</h3><div class="text">
   <p>A cluster manager is an extension to Tomcat's session manager interface,
   <code>org.apache.catalina.Manager</code>.
@@ -73,29 +73,6 @@
         Set to <code>true</code> if you wish to have session listeners notified
         when session attributes are being replicated or removed across Tomcat
         nodes in the cluster.
-      </td></tr><tr><td><code class="attributeName">sessionAttributeFilter</code></td><td>
-        A regular expression used to filter, which session attributes will
-        be replicated. An attribute will only be replicated, if its name
-        matches this pattern. If the pattern is not set (default), all
-        attributes are eligible for replication. As an example, the value
-        <code>^(userName|sessionHistory)$</code> will only replicate the two
-        session attributes named <code>userName</code> and
-        <code>sessionHistory</code>.
-      </td></tr><tr><td><code class="attributeName">maxInactiveInterval</code></td><td>
-        <p>The initial maximum time interval, in seconds,
-        between client requests before a session is invalidated. A negative value
-        will result in sessions never timing out. If the attribute is not provided,
-        a default of 1800 seconds (30 minutes) is used.</p>
-
-        <p>This attribute provides the initial value whenever a
-        new session is created, but the interval may be dynamically
-        varied by a servlet via the
-        <code>setMaxInactiveInterval</code> method of the <code>HttpSession</code> object.</p>
-      </td></tr><tr><td><code class="attributeName">sessionIdLength</code></td><td>
-       <p>The length of session ids created by this Manager, measured in bytes,
-        excluding subsequent conversion to a hexadecimal string and
-        excluding any JVM route information used for load balancing.
-        The default is 16.</p>
       </td></tr><tr><td><code class="attributeName">processExpiresFrequency</code></td><td>
         <p>Frequency of the session expiration, and related manager operations.
         Manager operations will be done once for the specified amount of
@@ -123,6 +100,12 @@
         To specify that the platform default should be used, do not set the
         secureRandomProvider attribute and set this attribute to the empty
         string.</p>
+      </td></tr><tr><td><code class="attributeName">recordAllActions</code></td><td>
+        <p>Flag whether send all actions for session across Tomcat cluster
+        nodes. If set to false, if already done something to the same attribute,
+        make sure don't send multiple actions across Tomcat cluster nodes.
+        In that case, sends only the actions that have been added at last.
+        Default is <code>false</code>.</p>
       </td></tr></table>
   </div></div>
   <div class="subsection"><h4 id="org.apache.catalina.ha.session.DeltaManager_Attributes">org.apache.catalina.ha.session.DeltaManager Attributes</h4><div class="text">
@@ -165,6 +148,26 @@
         Wait time between sending of session block messages. This value is
         effective only when <code>sendAllSessions</code> is <code>false</code>.
         Default is <code>2000</code> milliseconds.
+      </td></tr><tr><td><code class="attributeName">sessionAttributeNameFilter</code></td><td>
+        <p>A regular expression used to filter which session attributes will be
+        replicated. An attribute will only be replicated if its name matches
+        this pattern. If the pattern is zero length or <code>null</code>, all
+        attributes are eligible for replication. The pattern is anchored so the
+        session attribute name must fully match the pattern. As an example, the
+        value <code>(userName|sessionHistory)</code> will only replicate the
+        two session attributes named <code>userName</code> and
+        <code>sessionHistory</code>. If not specified, the default value of
+        <code>null</code> will be used.</p>
+      </td></tr><tr><td><code class="attributeName">sessionAttributeValueClassNameFilter</code></td><td>
+        <p>A regular expression used to filter which session attributes will be
+        replicated. An attribute will only be replicated if the implementation
+        class name of the value matches this pattern. If the pattern is zero
+        length or <code>null</code>, all attributes are eligible for
+        replication. The pattern is anchored so the fully qualified class name
+        must fully match the pattern. If not specified, the default value of
+        <code>null</code> will be used unless a <code>SecurityManager</code> is
+        enabled in which case the default will be
+        <code>java\\.lang\\.(?:Boolean|Integer|Long|Number|String)</code>.</p>
       </td></tr><tr><td><code class="attributeName">stateTimestampDrop</code></td><td>
         When this node sends a <code>GET_ALL_SESSIONS</code> message to other
         node, all session messages that are received as a response are queued.
@@ -175,6 +178,14 @@
         the timestamp of our <code>GET_ALL_SESSIONS</code> message.
         If set to <code>false</code>, all queued session messages are handled.
         Default is <code>true</code>.
+      </td></tr><tr><td><code class="attributeName">warnOnSessionAttributeFilterFailure</code></td><td>
+        <p>If <strong>sessionAttributeNameFilter</strong> or
+        <strong>sessionAttributeValueClassNameFilter</strong> blocks an
+        attribute, should this be logged at <code>WARN</code> level? If
+        <code>WARN</code> level logging is disabled then it will be logged at
+        <code>DEBUG</code>. The default value of this attribute is
+        <code>false</code> unless a <code>SecurityManager</code> is enabled in
+        which case the default will be <code>true</code>.</p>
       </td></tr></table>
   </div></div>
   <div class="subsection"><h4 id="org.apache.catalina.ha.session.BackupManager_Attributes">org.apache.catalina.ha.session.BackupManager Attributes</h4><div class="text">
@@ -198,14 +209,59 @@
         Timeout for RPC message used for broadcast and transfer state from
         another map.
         Default value is <code>15000</code> milliseconds.
+      </td></tr><tr><td><code class="attributeName">sessionAttributeNameFilter</code></td><td>
+        <p>A regular expression used to filter which session attributes will be
+        replicated. An attribute will only be replicated if its name matches
+        this pattern. If the pattern is zero length or <code>null</code>, all
+        attributes are eligible for replication. The pattern is anchored so the
+        session attribute name must fully match the pattern. As an example, the
+        value <code>(userName|sessionHistory)</code> will only replicate the
+        two session attributes named <code>userName</code> and
+        <code>sessionHistory</code>. If not specified, the default value of
+        <code>null</code> will be used.</p>
+      </td></tr><tr><td><code class="attributeName">sessionAttributeValueClassNameFilter</code></td><td>
+        <p>A regular expression used to filter which session attributes will be
+        replicated. An attribute will only be replicated if the implementation
+        class name of the value matches this pattern. If the pattern is zero
+        length or <code>null</code>, all attributes are eligible for
+        replication. The pattern is anchored so the fully qualified class name
+        must fully match the pattern. If not specified, the default value of
+        <code>null</code> will be used unless a <code>SecurityManager</code> is
+        enabled in which case the default will be
+        <code>java\\.lang\\.(?:Boolean|Integer|Long|Number|String)</code>.</p>
       </td></tr><tr><td><code class="attributeName">terminateOnStartFailure</code></td><td>
         Set to true if you wish to terminate replication map when replication
         map fails to start. If replication map is terminated, associated context
         will fail to start. If you set this attribute to false, replication map
         does not end. It will try to join the map membership in the heartbeat.
         Default value is <code>false</code> .
+      </td></tr><tr><td><code class="attributeName">warnOnSessionAttributeFilterFailure</code></td><td>
+        <p>If <strong>sessionAttributeNameFilter</strong> or
+        <strong>sessionAttributeValueClassNameFilter</strong> blocks an
+        attribute, should this be logged at <code>WARN</code> level? If
+        <code>WARN</code> level logging is disabled then it will be logged at
+        <code>DEBUG</code>. The default value of this attribute is
+        <code>false</code> unless a <code>SecurityManager</code> is enabled in
+        which case the default will be <code>true</code>.</p>
       </td></tr></table>
   </div></div>
+</div><h3 id="Nested_Components">Nested Components</h3><div class="text">
+  <h3>All Manager Implementations</h3>
+  <p>All Manager implementations allow nesting of a
+  <strong>&lt;SessionIdGenerator&gt;</strong> element. It defines
+  the behavior of session id generation.  All implementations
+  of the <a href="sessionidgenerator.html">SessionIdGenerator</a> allow the
+  following attributes:
+  </p>
+  <table class="defaultTable"><tr><th style="width: 15%;">
+          Attribute
+        </th><th style="width: 85%;">
+          Description
+        </th></tr><tr><td><code class="attributeName">sessionIdLength</code></td><td>
+      <p>The length of the session ID may be changed with the
+      <strong>sessionIdLength</strong> attribute.
+      </p>
+    </td></tr></table>
 </div><div class="noprint"><h3 id="comments_section">
                   Comments
                 </h3><div class="text"><p class="notice"><strong>Notice: </strong>This comments section collects your suggestions
@@ -219,5 +275,5 @@
                     Comments may be removed by our moderators if they are either
                     implemented or considered invalid/off-topic.
                   </p><div id="comments_thread"></div></div></div></div></div></div></div><footer><div id="footer">
-    Copyright &copy; 1999-2014, The Apache Software Foundation
+    Copyright &copy; 1999-2017, The Apache Software Foundation
   </div></footer></div></body></html>

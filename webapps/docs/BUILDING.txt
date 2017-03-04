@@ -16,12 +16,12 @@
 ================================================================================
 
             ====================================================
-            Building The Apache Tomcat 8.0 Servlet/JSP Container
+            Building The Apache Tomcat 8.5 Servlet/JSP Container
             ====================================================
 
-This subproject contains the source code for Tomcat 8.0, a container that
-implements the Servlet 3.1, JSP 2.3, EL 3.0 and WebSocket 1.0 specifications
-from the Java Community Process <http://www.jcp.org/>.
+This subproject contains the source code for Tomcat 8.5, a container that
+implements the Servlet 3.1, JSP 2.3, EL 3.0, WebSocket 1.1 and JASPIC 1.1
+specifications from the Java Community Process <http://www.jcp.org/>.
 
 Note: If you just need to run Apache Tomcat, it is not necessary to build
 it. You may simply download a binary distribution. It is cross-platform.
@@ -35,7 +35,7 @@ source distribution, do the following:
 
  1. If the JDK is already installed, skip to (2).
 
- 2. Download a version 7 of Java Development Kit (JDK) release (use the
+ 2. Download a version 8 of Java Development Kit (JDK) release (use the
     latest update available for your chosen version) from one of:
 
         http://www.oracle.com/technetwork/java/javase/downloads/index.html
@@ -64,9 +64,10 @@ source distribution, do the following:
     into which you installed the JDK release.
 
 
-(2) Install Apache Ant version 1.8.2 or later on your computer
+(2) Install Apache Ant version 1.9.5 or later on your computer.
 
- 1. If Apache Ant version 1.8.2 or later is already installed on your computer, skip to (3).
+ 1. If Apache Ant version 1.9.5 or later is already installed on your
+    computer, skip to (3).
 
  2. Download a binary distribution of Ant from:
 
@@ -88,9 +89,9 @@ source distribution, do the following:
     available, which will be used to actually perform the build.
 
 
-(3) Building Tomcat 8.0
+(3) Building Tomcat 8.5
 
-(3.1) Checkout or obtain the source code for Tomcat 8.0
+(3.1) Checkout or obtain the source code for Tomcat 8.5
 
 Checkout the source using SVN, selecting a tag for released version or
 trunk for the current development code, or download and unpack a source
@@ -98,7 +99,7 @@ package.
 
  *  Tomcat SVN repository URL:
 
-        http://svn.apache.org/repos/asf/tomcat/tc8.0.x/trunk/
+        http://svn.apache.org/repos/asf/tomcat/tc8.5.x/trunk/
 
  *  Source packages can be downloaded from:
 
@@ -106,6 +107,18 @@ package.
 
 The location where the source has been placed will be further referred as
 ${tomcat.source}.
+
+The Tomcat local build process does not modify line-endings. The svn repository
+is configured so that all files will be checked out with the line-ending
+appropriate for the current platform. When using a source package you should
+ensure that you use the source package that has the appropriate line-ending
+for your platform:
+
+  zip    -> CRLF
+  tar.gz -> LF
+
+Note that the release build process does modify line-endings to ensure that
+each release package has the appropriate line-endings.
 
 (3.2) Building
 
@@ -129,14 +142,9 @@ ${tomcat.source}.
     directory outside of the source tree, so that you do not waste your
     time re-downloading the libraries.
 
-* WARNING: The default value of base.path property makes the build script
-  to download libraries required to build Tomcat to the /usr/share/java
-  directory. On a typical Linux or MacOX system an ordinary user will not
-  have access to write to this directory. Even if you do have access to
-  that directory, it is likely not appropriate for you to write there.
-
-  On Windows this usually corresponds to the "C:\usr\share\java"
-  directory, unless Cygwin is used.
+* NOTE: The default value of the base.path property configures the build script
+  to download the libraries required to build Tomcat to the
+  ${user.home}/tomcat-build-libs directory.
 
 * NOTE: Users accessing the Internet through a proxy must use the properties
   file to indicate to Ant the proxy configuration.
@@ -144,7 +152,7 @@ ${tomcat.source}.
   The following properties should be added to the ${tomcat.source}/build.properties
   file.
 
-        proxy.use=on
+        proxy.use=true
         proxy.host=proxy.domain
         proxy.port=8080
         proxy.user=username
@@ -175,7 +183,7 @@ ${tomcat.source}.
 
 (4) Updating sources and rebuilding
 
-It is recommended that you regularly update the downloaded Tomcat 8.0
+It is recommended that you regularly update the downloaded Tomcat 8.5
 sources using your SVN client.
 
 For a quick rebuild of only modified code you can use:
@@ -245,7 +253,7 @@ You can build them by using the following commands:
 
     A full release includes the Windows installer which requires a Windows
     environment to be available to create it. If not building in a Windows
-    environment, the build scripts assume that WINE is available. If this is not
+    environment, the build scripts assume that Wine is available. If this is not
     the case, the skip.installer property may be set to skip the creation of the
     Windows installer.
 
@@ -266,7 +274,37 @@ You can build them by using the following commands:
     You will be prompted for the GPG passphrase when the release build
     starts, unless "gpg.passphrase" property is set.
 
- 2. Build the release:
+ 2. If building the Windows installer
+
+    If running the build in a UAC enabled environment, building the Windows
+    installer requires elevated privileges. The simplest way to do this is to
+    open the command prompt used for the build with the "Run as administrator"
+    option.
+
+ 3. Configure the code signing service
+
+    ASF committers performing official releases will need to configure the code
+    signing service so that the Windows installer is signed during the build
+    process. The following properties need to be added to the build.properties
+    file:
+
+        # Location of GPG executable (used only for releases)
+        # Code signing of Windows installer
+        do.codesigning=true
+        codesigning.user=request-via-pmc
+        codesigning.pwd=request-via-pmc
+        codesigning.partnercode=request-via-pmc
+        codesigning.service=Microsoft Windows Signing
+
+    Release managers will be provided with the necessary credentials by the PMC.
+    It will also be necessary to enable TLS 1.1 and TLS 1.2 by default (they are
+    disabled by default on Java 7) for the build process to communicate with the
+    code signing service. The simplest way is by setting the ANT_OPTS
+    environment variable. E.g. (for Windows):
+
+    set ANT_OPTS=-Dhttps.protocols=TLSv1,TLSv1.1,TLSv1.2
+
+ 4. Build the release:
 
     cd ${tomcat.source}
     ant release
@@ -292,15 +330,14 @@ directory:
 
     output/build/logs
 
-By default the testsuite is run four times to test 4 different
-implementations of Tomcat connectors: BIO, NIO, NIO2 and APR. (If you are not
+By default the testsuite is run three times to test 3 different
+implementations of Tomcat connectors: NIO, NIO2 and APR. (If you are not
 familiar with Tomcat connectors, see config/http.html in documentation for
 details).
 
-The 4 runs are enabled and disabled individually by the following
+The 3 runs are enabled and disabled individually by the following
 properties, which all are "true" by default:
 
-    execute.test.bio=true
     execute.test.nio=true
     execute.test.nio2=true
     execute.test.apr=true
@@ -336,8 +373,7 @@ For example:
 
 It is possible to further limit such run to a number of selected test
 methods by adding "test.entry.methods" property. The property specifies a
-comma-separated list of test case methods. (This feature requires
-Apache Ant 1.8.2 or later).
+comma-separated list of test case methods.
 
 For example:
 
@@ -345,7 +381,24 @@ For example:
     test.entry.methods=testMultiply01,testMultiply02
 
 
-(7.3) Other configuration options
+(7.3) Running a set of tests
+
+It is possible to run a set of JUnit test classes by adding the "test.name"
+property to the build.properties file. The property specifies an Ant
+includes pattern for the fileset of test class files to run.
+
+The default value is "**/Test*.java", so all test classes are being
+executed (with few exceptions - see build.xml for several exclude patterns).
+
+You can include multiple patterns by concatenating them with a comma (",")
+as the separator.
+
+For example:
+
+    test.name=**/TestSsl.java,**/TestWebSocketFrameClientSSL.java
+
+
+(7.4) Other configuration options
 
  1. It is possible to configure the directory where JUnit reports are
  written to. It is configured by "test.reports" property. The default
@@ -381,26 +434,67 @@ For example:
 
         junit.formatter.usefile=false
 
- 5. Optional support is provided for the Cobertura code coverage tool. It
- can be enabled using the following property:
+ 5. It is possible to speed up testing by letting JUnit to run several
+ tests in parallel.
+
+ This is configured by setting "test.threads" property. The recommended
+ value is one thread per core.
+
+ 6. Optional support is provided for the Cobertura code coverage tool.
+
+NOTE: Cobertura is licensed under GPL v2 with parts of it being under
+      Apache License v1.1. See http://cobertura.sf.net for details. Using it
+      during Tomcat build is optional and is off by default.
+
+ Cobertura can be enabled using the following properties:
 
         test.cobertura=true
+        test.threads=1
+
+ Using Cobertura currently requires setting test.threads configuration
+ property to the value of 1. Setting that property to a different value
+ will disable code coverage.
 
  The report files by default are written to
 
         output/coverage
 
-* NOTE: Cobertura is licensed under GPL v2 with parts of it being under
-  Apache License v1.1. See http://cobertura.sf.net for details. Using it
-  during Tomcat build is optional and is off by default.
+ 7. The performance tests are written to run reasonably powerful machines (such
+    as a developer may use day to day) assuming no other resource hungry
+    processes are running.
 
+    These assumptions are not always true (e.g. on CI systems running in a
+    virtual machine) so the performance tests may be disabled by using the
+    following property:
+
+        test.excludePerformance=true
+
+ 8. Some tests include checks that the access log valve entries are as expected.
+    These checks include timings. On slower / loaded systems these checks will
+    often fail. The checks may be relaxed by using the following property:
+
+        test.relaxTiming=true
+
+ 9. It is known that some platforms (e.g. OSX El Capitan) require IPv4 to
+    be the default for the multicast tests to work. This is configured by
+    the following property:
+
+        java.net.preferIPv4Stack=true
+
+ 10. It is possible to control whether the output of the tests is displayed
+     on the console or not. By default it is displayed and can be disabled
+     by the following property:
+
+        test.verbose=true
 
 (8) Source code checks
 
 (8.1) Checkstyle
 
-* NOTE: Checkstyle is licensed under LGPL. Using Checkstyle during Tomcat
-  build is optional and is off by default.
+NOTE: Checkstyle is licensed under LGPL. Using Checkstyle during Tomcat
+      build is optional and is off by default.
+
+      See http://checkstyle.sourceforge.net/ for more information.
 
 Tomcat comes with a Checkstyle configuration that tests its source code
 for certain conventions, like presence of the license header.
@@ -417,14 +511,36 @@ is located in the following directory:
 
     output/res/checkstyle
 
-It is possible to run the check separately by invoking the "validate"
+It is possible to run the check separately by calling the "validate"
 target. The command is:
 
     cd ${tomcat.source}
     ant -Dexecute.validate=true validate
 
 
-(8.2) End-of-line conventions check
+(8.2) FindBugs
+
+NOTE: FindBugs is licensed under LGPL. Using Findbugs during Tomcat build is
+      optional and is off by default.
+
+      See http://findbugs.sourceforge.net/ for more information.
+
+To enable FindBugs, add the following property to build.properties file:
+
+    execute.findbugs=true
+
+To compile Tomcat classes and generate a FindBugs report, call the
+"findbugs" target. For example:
+
+    cd ${tomcat.source}
+    ant -Dexecute.findbugs=true findbugs
+
+The report file by default is written to
+
+    output/findbugs
+
+
+(8.3) End-of-line conventions check
 
 You usually would not need to run this check. You can skip this section.
 

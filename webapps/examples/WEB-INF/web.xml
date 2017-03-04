@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
@@ -122,10 +122,6 @@
       <servlet-class>ServletToJsp</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>ChatServlet</servlet-name>
-        <servlet-class>chat.ChatServlet</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>CompressionFilterTestServlet</servlet-name>
         <servlet-class>compressionFilters.CompressionFilterTestServlet</servlet-class>
     </servlet>
@@ -154,10 +150,6 @@
         <servlet-class>SessionExample</servlet-class>
     </servlet>
 
-    <servlet-mapping>
-        <servlet-name>ChatServlet</servlet-name>
-        <url-pattern>/servlets/chat/chat</url-pattern>
-    </servlet-mapping>
     <servlet-mapping>
         <servlet-name>CompressionFilterTestServlet</servlet-name>
         <url-pattern>/CompressionTest</url-pattern>
@@ -385,6 +377,16 @@
     <servlet-mapping>
       <servlet-name>numberwriter</servlet-name>
       <url-pattern>/servlets/nonblocking/numberwriter</url-pattern>
+    </servlet-mapping>
+
+    <!-- Server Push examples -->
+    <servlet>
+      <servlet-name>simpleimagepush</servlet-name>
+      <servlet-class>http2.SimpleImagePush</servlet-class>
+    </servlet>
+    <servlet-mapping>
+      <servlet-name>simpleimagepush</servlet-name>
+      <url-pattern>/servlets/serverpush/simpleimage</url-pattern>
     </servlet-mapping>
 
     <welcome-file-list>

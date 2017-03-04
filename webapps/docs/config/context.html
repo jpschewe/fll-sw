@@ -1,5 +1,5 @@
 <!DOCTYPE html SYSTEM "about:legacy-compat">
-<html lang="en"><head><META http-equiv="Content-Type" content="text/html; charset=UTF-8"><link href="../images/docs-stylesheet.css" rel="stylesheet" type="text/css"><title>Apache Tomcat 8 Configuration Reference (8.0.9) - The Context Container</title><meta name="author" content="Craig R. McClanahan"><script type="application/javascript" data-comments-identifier="tomcat-8.0-doc/config/context">
+<html lang="en"><head><META http-equiv="Content-Type" content="text/html; charset=UTF-8"><link href="../images/docs-stylesheet.css" rel="stylesheet" type="text/css"><title>Apache Tomcat 8 Configuration Reference (8.5.11) - The Context Container</title><meta name="author" content="Craig R. McClanahan"><script type="application/javascript" data-comments-identifier="tomcat-8.5-doc/config/context">
     "use strict"; // Enable strict mode
 
     (function() {
@@ -29,9 +29,9 @@
         })(window, document);
       }), false);
     })();
-  </script></head><body><div id="wrapper"><header><div id="header"><div><div><div class="logo noPrint"><a href="http://tomcat.apache.org/"><img alt="Tomcat Home" src="../images/tomcat.png"></a></div><div style="height: 1px;"></div><div class="asfLogo noPrint"><a href="http://www.apache.org/" target="_blank"><img src="../images/asf-feather.png" alt="The Apache Software Foundation" style="width: 266px; height: 83px;"></a></div><h1>Apache Tomcat 8 Configuration Reference</h1><div class="versionInfo">
-          Version 8.0.9,
-          <time datetime="2014-06-19">Jun 19 2014</time></div><div style="height: 1px;"></div><div style="clear: left;"></div></div></div></div></header><div id="middle"><div><div id="mainLeft" class="noprint"><div><nav><div><h2>Links</h2><ul><li><a href="../index.html">Docs Home</a></li><li><a href="index.html">Config Ref. Home</a></li><li><a href="http://wiki.apache.org/tomcat/FAQ">FAQ</a></li><li><a href="#comments_section">User Comments</a></li></ul></div><div><h2>Top Level Elements</h2><ul><li><a href="server.html">Server</a></li><li><a href="service.html">Service</a></li></ul></div><div><h2>Executors</h2><ul><li><a href="executor.html">Executor</a></li></ul></div><div><h2>Connectors</h2><ul><li><a href="http.html">HTTP</a></li><li><a href="ajp.html">AJP</a></li></ul></div><div><h2>Containers</h2><ul><li><a href="context.html">Context</a></li><li><a href="engine.html">Engine</a></li><li><a href="host.html">Host</a></li><li><a href="cluster.html">Cluster</a></li></ul></div><div><h2>Nested Components</h2><ul><li><a href="globalresources.html">Global Resources</a></li><li><a href="jar-scanner.html">JarScanner</a></li><li><a href="jar-scan-filter.html">JarScanFilter</a></li><li><a href="listeners.html">Listeners</a></li><li><a href="loader.html">Loader</a></li><li><a href="manager.html">Manager</a></li><li><a href="realm.html">Realm</a></li><li><a href="resources.html">Resources</a></li><li><a href="valve.html">Valve</a></li></ul></div><div><h2>Cluster Elements</h2><ul><li><a href="cluster.html">Cluster</a></li><li><a href="cluster-manager.html">Manager</a></li><li><a href="cluster-channel.html">Channel</a></li><li><a href="cluster-membership.html">Channel/Membership</a></li><li><a href="cluster-sender.html">Channel/Sender</a></li><li><a href="cluster-receiver.html">Channel/Receiver</a></li><li><a href="cluster-interceptor.html">Channel/Interceptor</a></li><li><a href="cluster-valve.html">Valve</a></li><li><a href="cluster-deployer.html">Deployer</a></li><li><a href="cluster-listener.html">ClusterListener</a></li></ul></div><div><h2>web.xml</h2><ul><li><a href="filter.html">Filter</a></li></ul></div><div><h2>Other</h2><ul><li><a href="systemprops.html">System properties</a></li></ul></div></nav></div></div><div id="mainRight"><div id="content"><h2>The Context Container</h2><h3 id="Table_of_Contents">Table of Contents</h3><div class="text">
+  </script></head><body><div id="wrapper"><header><div id="header"><div><div><div class="logo noPrint"><a href="http://tomcat.apache.org/"><img alt="Tomcat Home" src="../images/tomcat.png"></a></div><div style="height: 1px;"></div><div class="asfLogo noPrint"><a href="http://www.apache.org/" target="_blank"><img src="../images/asf-logo.svg" alt="The Apache Software Foundation" style="width: 266px; height: 83px;"></a></div><h1>Apache Tomcat 8 Configuration Reference</h1><div class="versionInfo">
+          Version 8.5.11,
+          <time datetime="2017-01-10">Jan 10 2017</time></div><div style="height: 1px;"></div><div style="clear: left;"></div></div></div></div></header><div id="middle"><div><div id="mainLeft" class="noprint"><div><nav><div><h2>Links</h2><ul><li><a href="../index.html">Docs Home</a></li><li><a href="index.html">Config Ref. Home</a></li><li><a href="http://wiki.apache.org/tomcat/FAQ">FAQ</a></li><li><a href="#comments_section">User Comments</a></li></ul></div><div><h2>Top Level Elements</h2><ul><li><a href="server.html">Server</a></li><li><a href="service.html">Service</a></li></ul></div><div><h2>Executors</h2><ul><li><a href="executor.html">Executor</a></li></ul></div><div><h2>Connectors</h2><ul><li><a href="http.html">HTTP/1.1</a></li><li><a href="http2.html">HTTP/2</a></li><li><a href="ajp.html">AJP</a></li></ul></div><div><h2>Containers</h2><ul><li><a href="context.html">Context</a></li><li><a href="engine.html">Engine</a></li><li><a href="host.html">Host</a></li><li><a href="cluster.html">Cluster</a></li></ul></div><div><h2>Nested Components</h2><ul><li><a href="cookie-processor.html">CookieProcessor</a></li><li><a href="credentialhandler.html">CredentialHandler</a></li><li><a href="globalresources.html">Global Resources</a></li><li><a href="jar-scanner.html">JarScanner</a></li><li><a href="jar-scan-filter.html">JarScanFilter</a></li><li><a href="listeners.html">Listeners</a></li><li><a href="loader.html">Loader</a></li><li><a href="manager.html">Manager</a></li><li><a href="realm.html">Realm</a></li><li><a href="resources.html">Resources</a></li><li><a href="sessionidgenerator.html">SessionIdGenerator</a></li><li><a href="valve.html">Valve</a></li></ul></div><div><h2>Cluster Elements</h2><ul><li><a href="cluster.html">Cluster</a></li><li><a href="cluster-manager.html">Manager</a></li><li><a href="cluster-channel.html">Channel</a></li><li><a href="cluster-membership.html">Channel/Membership</a></li><li><a href="cluster-sender.html">Channel/Sender</a></li><li><a href="cluster-receiver.html">Channel/Receiver</a></li><li><a href="cluster-interceptor.html">Channel/Interceptor</a></li><li><a href="cluster-valve.html">Valve</a></li><li><a href="cluster-deployer.html">Deployer</a></li><li><a href="cluster-listener.html">ClusterListener</a></li></ul></div><div><h2>web.xml</h2><ul><li><a href="filter.html">Filter</a></li></ul></div><div><h2>Other</h2><ul><li><a href="systemprops.html">System properties</a></li><li><a href="jaspic.html">JASPIC</a></li></ul></div></nav></div></div><div id="mainRight"><div id="content"><h2>The Context Container</h2><h3 id="Table_of_Contents">Table of Contents</h3><div class="text">
 <ul><li><a href="#Introduction">Introduction</a><ol><li><a href="#Parallel_deployment">Parallel deployment</a></li><li><a href="#Naming">Naming</a></li><li><a href="#Defining_a_context">Defining a context</a></li></ol></li><li><a href="#Attributes">Attributes</a><ol><li><a href="#Common_Attributes">Common Attributes</a></li><li><a href="#Standard_Implementation">Standard Implementation</a></li></ol></li><li><a href="#Nested_Components">Nested Components</a></li><li><a href="#Special_Features">Special Features</a><ol><li><a href="#Logging">Logging</a></li><li><a href="#Access_Logs">Access Logs</a></li><li><a href="#Automatic_Context_Configuration">Automatic Context Configuration</a></li><li><a href="#Context_Parameters">Context Parameters</a></li><li><a href="#Environment_Entries">Environment Entries</a></li><li><a href="#Lifecycle_Listeners">Lifecycle Listeners</a></li><li><a href="#Request_Filters">Request Filters</a></li><li><a href="#Resource_Definitions">Resource Definitions</a></li><li><a href="#Resource_Links">Resource Links</a></li><li><a href="#Transaction">Transaction</a></li></ol></li></ul>
 </div><h3 id="Introduction">Introduction</h3><div class="text">
 
@@ -101,7 +101,7 @@
 
   <p>If no version is specified then the <em>context name</em> is always the
   same as the <em>context path</em>. If the <em>context path</em> is the empty
-  string them the <em>base name</em> will be ROOT (always in upper case)
+  string then the <em>base name</em> will be ROOT (always in upper case)
   otherwise the <em>base name</em> will be the <em>context path</em> with the
   leading '/' removed and any remaining '/' characters replaced with '#'.</p>
 
@@ -319,6 +319,12 @@
         symbolic link will only be effective after a Tomcat restart or
         by undeploying and redeploying the context. A context reload is not
         sufficient.</p>
+      </td></tr><tr><td><code class="attributeName">dispatchersUseEncodedPaths</code></td><td>
+        <p>Controls whether paths used in calls to obtain a request dispatcher
+        ares expected to be encoded. This affects both how Tomcat handles calls
+        to obtain a request dispatcher as well as how Tomcat generates paths
+        used to obtain request dispatchers internally. If not specified, the
+        default value of <code>true</code> is used.</p>
       </td></tr><tr><td><code class="attributeName">failCtxIfServletStartFails</code></td><td>
         <p>Set to <code>true</code> to have the context fail its startup if any
         servlet that has load-on-startup &gt;=0 fails its own startup.</p>
@@ -338,6 +344,18 @@
         starts. The effective web.xml is the result of combining the
         application's web.xml with any defaults configured by Tomcat and any
         web-fragment.xml files and annotations discovered. If not specified, the
+        default value of <code>false</code> is used.</p>
+      </td></tr><tr><td><code class="attributeName">mapperContextRootRedirectEnabled</code></td><td>
+        <p>If enabled, requests for a web application context root will be
+        redirected (adding a trailing slash) if necessary by the Mapper rather
+        than the default Servlet. This is more efficient but has the side effect
+        of confirming that the context path exists. If not specified, the
+        default value of <code>true</code> is used.</p>
+      </td></tr><tr><td><code class="attributeName">mapperDirectoryRedirectEnabled</code></td><td>
+        <p>If enabled, requests for a web application directory will be
+        redirected (adding a trailing slash) if necessary by the Mapper rather
+        than the default Servlet. This is more efficient but has the side effect
+        of confirming that the directory is exists. If not specified, the
         default value of <code>false</code> is used.</p>
       </td></tr><tr><td><code class="attributeName">override</code></td><td>
         <p>Set to <code>true</code> to ignore any settings in both the global
@@ -435,15 +453,23 @@
         difficult and requires custom, Tomcat specific code to change the
         session ID shared by the multiple applications.</p>
       </td></tr><tr><td><code class="attributeName">sessionCookiePathUsesTrailingSlash</code></td><td>
-        <p>Some browsers, such as IE, will send a session cookie for a context
-        with a path of /foo with a request to /foobar. To prevent this, Tomcat
-        will add a trailing slash to the path associated with the session cookie
-        so, in the above example, the cookie path becomes /foo/. However, with a
-        cookie path of /foo/, IE will no longer send the cookie with a request
-        to /foo. This should not be a problem unless there is a servlet mapped
-        to /*. In this case this feature will need to be disabled. The default
-        value for this attribute is <code>true.</code> To disable this feature,
-        set the attribute to <code>false</code>.</p>
+        <p>Some browsers, such as Internet Explorer, Safari and Edge, will send
+        a session cookie for a context with a path of <code>/foo</code> with a
+        request to <code>/foobar</code> in violation of RFC6265. This could
+        expose a session ID from an application deployed at <code>/foo</code> to
+        an application deployed at <code>/foobar</code>. If the application
+        deployed at <code>/foobar</code> is untrusted, this could create a
+        security risk. However, it should be noted that RFC 6265, section 8.5
+        makes clear that path alone should not be view as sufficient to prevent
+        untrusted applications accessing cookies from other applications. To
+        mitigate this risk, this attribute may be set to <code>true</code> and
+        Tomcat will add a trailing slash to the path associated with the session
+        cookie so, in the above example, the cookie path becomes /foo/. However,
+        with a cookie path of /foo/, browsers will no longer send the cookie
+        with a request to /foo. This should not be a problem unless there is a
+        servlet mapped to /*. In this case this attribute will need to be set to
+        <code>false</code> to disable this feature. The default value for this
+        attribute is <code>false</code>.</p>
       </td></tr><tr><td><code class="attributeName">swallowAbortedUploads</code></td><td>
         <p>Set to false if Tomcat should <b>not</b> read any additional request
         body data for aborted uploads and instead abort the client connection.
@@ -459,7 +485,7 @@
         <p>
         Not reading the additional data will free the request processing thread
         more quickly. Unfortunately most HTTP clients will not read the response
-        if they can not write the full request.</p>
+        if they cannot write the full request.</p>
         <p>The default is <code>true</code>, so additional data will be
         read.</p>
         <p>Note if an error occurs during the request processing that triggers
@@ -484,6 +510,39 @@
        <p>Should the HttpOnly flag be set on session cookies to prevent client
           side script from accessing the session ID? Defaults to
           <code>true</code>.</p>
+      </td></tr><tr><td><code class="attributeName">useRelativeRedirects</code></td><td>
+        <p>Controls whether HTTP 1.1 and later location headers generated by a
+        call to
+        <code>javax.servlet.http.HttpServletResponse#sendRedirect(String)</code>
+        will use relative or absolute redirects. Relative redirects are more
+        efficient but may not work with reverse proxies that change the context
+        path. It should be noted that it is not recommended to use a reverse
+        proxy to change the context path because of the multiple issues it
+        creates. Absolute redirects should work with reverse proxies that change
+        the context path but may cause issues with the
+        <code>org.apache.catalina.filters.RemoteIpFilter</code> if the filter is
+         changing the scheme and/or port. If the
+        <code>org.apache.catalina.STRICT_SERVLET_COMPLIANCE</code>
+        <a href="systemprops.html">system property</a> is set to
+        <code>true</code>, the default value of this attribute will be
+        <code>false</code>, else the default value will be <code>true</code>.
+        </p>
+      </td></tr><tr><td><code class="attributeName">validateClientProvidedNewSessionId</code></td><td>
+        <p>When a client provides the ID for a new session, this attribute
+        controls whether that ID is validated. The only use case for using a
+        client provided session ID is to have a common session ID across
+        multiple web applications. Therefore, any client provided session ID
+        should already exist in another web application. If this check is
+        enabled, the client provided session ID will only be used if the session
+        ID exists in at least one other web application for the current host.
+        Note that the following additional tests are always applied,
+        irrespective of this setting:</p>
+        <ul>
+          <li>The session ID is provided by a cookie</li>
+          <li>The session cookie has a path of {@code /}</li>
+        </ul>
+        <p>If not specified, the default value of <code>true</code> will be
+        used.</p>
       </td></tr><tr><td><code class="attributeName">wrapperClass</code></td><td>
         <p>Java class name of the <code>org.apache.catalina.Wrapper</code>
         implementation class that will be used for servlets managed by this
@@ -554,7 +613,7 @@
 
         <p>Please note that setting this to <code>true</code> has some side
         effects, including the disabling of JSP reloading in a running server:
-        see <a href="http://issues.apache.org/bugzilla/show_bug.cgi?id=37668">
+        see <a href="http://bz.apache.org/bugzilla/show_bug.cgi?id=37668">
         Bugzilla 37668</a>.</p>
 
         <p>Please note that setting this flag to true in applications that are
@@ -567,21 +626,19 @@
         <p>If <code>true</code> and an <code>sun.net.www.http.HttpClient</code>
         keep-alive timer thread has been started by this web application and is
         still running, Tomcat will change the context class loader for that
-        thread from the current <code>WebappClassLoader</code> to
-        <code>WebappClassLoader#parent</code> to prevent a memory leak. Note
-        that the keep-alive timer thread will stop on its own once the
-        keep-alives all expire however, on a busy system that might not happen
-        for some time. If not specified, the default value of
-        <code>true</code> will be used.</p>
-      </td></tr><tr><td><code class="attributeName">clearReferencesStatic</code></td><td>
-        <p>If <code>true</code>, Tomcat attempts to null out any static or final
-        fields from loaded classes when a web application is stopped as a work
-        around for apparent garbage collection bugs and application coding
-        errors. There have been some issues reported with log4j when this
-        is <code>true</code>. Applications without memory leaks using recent
-        JVMs should operate correctly with this attribute set to
-        <code>false</code>. If not specified, the default value of
-        <code>false</code> will be used.</p>
+        thread from the web application class loader to the parent of the web
+        application class loader to prevent a memory leak. Note that the
+        keep-alive timer thread will stop on its own once the keep-alives all
+        expire however, on a busy system that might not happen for some time. If
+        not specified, the default value of <code>true</code> will be used.</p>
+      </td></tr><tr><td><code class="attributeName">clearReferencesRmiTargets</code></td><td>
+        <p>If <code>true</code>, Tomcat looks for memory leaks associated with
+        RMI Targets and clears any it finds. This feature uses reflection to
+        identify the leaks and therefore requires that the command line option
+        <code>-XaddExports:java.rmi/sun.rmi.transport=ALL-UNNAMED</code> is set
+        when running on Java 9 and above. Applications without memory leaks
+        should operate correctly with this attribute set to <code>false</code>.
+        If not specified, the default value of <code>true</code> will be used.</p>
       </td></tr><tr><td><code class="attributeName">clearReferencesStopThreads</code></td><td>
         <p>If <code>true</code>, Tomcat attempts to terminate threads that have
         been started by the web application. Stopping threads is performed via
@@ -624,10 +681,6 @@
         and methods that return values will return <code>null</code>. If not
         specified, the specification compliant default of <code>true</code> will
         be used.</p>
-      </td></tr><tr><td><code class="attributeName">processTlds</code></td><td>
-        <p>Whether the context should process TLDs on startup.  The default
-        is true.  The false setting is intended for special cases
-        that know in advance TLDs are not part of the webapp.</p>
       </td></tr><tr><td><code class="attributeName">renewThreadsWhenStoppingContext</code></td><td>
         <p>If <code>true</code>, when this context is stopped, Tomcat renews all
         the threads from the thread pool that was used to serve this context.
@@ -645,9 +698,7 @@
         file will not be unpacked. If <code>true</code>, the value of the owning
         <a href="host.html">Host</a>'s <strong>unpackWARs</strong>
         attribute will determine if the WAR is unpacked. If not specified, the
-        default value is <code>true</code>. Note that WAR files located outside
-        of a <a href="host.html">Host</a>'s <strong>appBase</strong> are
-        never unpacked.</p>
+        default value is <code>true</code>.</p>
       </td></tr><tr><td><code class="attributeName">useNaming</code></td><td>
         <p>Set to <code>true</code> (the default) to have Catalina enable a
         JNDI <code>InitialContext</code> for this web application that is
@@ -673,6 +724,8 @@
   by nesting a corresponding element inside your <strong>Context</strong>
   element:</p>
   <ul>
+  <li><a href="cookie-processor.html"><strong>Cookie Processor</strong></a> -
+      Configure parsing and generation of HTTP cookie headers.</li>
   <li><a href="loader.html"><strong>Loader</strong></a> -
       Configure the web application class loader that will be used to load
       servlet and bean classes for this web application.  Normally, the
@@ -695,6 +748,13 @@
       specified static resource of the web application for updates, and will
       reload the web application if it is updated. The content of this element
       must be a string.</li>
+  <li><a href="jar-scanner.html"><strong>JarScanner</strong></a> -
+      Configure the Jar Scanner that will be used to scan the web application
+      for JAR files and directories of class files. It is typically used during
+      web application start to identify configuration files such as TLDs o
+      web-fragment.xml files that must be processed as part of the web
+      application initialisation.  Normally, the default Jar Scanner
+      configuration will be sufficient.</li>
   </ul>
 
 </div><h3 id="Special_Features">Special Features</h3><div class="text">
@@ -726,7 +786,7 @@
 <div class="codeBox"><pre><code>&lt;Context&gt;
   ...
   &lt;Valve className="org.apache.catalina.valves.AccessLogValve"
-         prefix="localhost_access_log." suffix=".txt"
+         prefix="localhost_access_log" suffix=".txt"
          pattern="common"/&gt;
   ...
 &lt;/Context&gt;</code></pre></div>
@@ -967,7 +1027,7 @@
           Description
         </th></tr><tr><td><code class="attributeName">auth</code></td><td>
         <p>Specify whether the web Application code signs on to the
-        corresponding resource manager programatically, or whether the
+        corresponding resource manager programmatically, or whether the
         Container will sign on to the resource manager on behalf of the
         application.  The value of this attribute must be
         <code>Application</code> or <code>Container</code>.  This
@@ -980,7 +1040,7 @@
         it is no longer required. This is intended to speed up clean-up of
         resources that would otherwise happen as part of garbage collection.
         This attribute is ignored if the <code>singleton</code> attribute is
-        false. If not specificed, no default is defined and no close method will
+        false. If not specified, no default is defined and no close method will
         be called.</p>
         <p>For Apache Commons DBCP and Apache Tomcat JDBC connection pools
         you can use <code>closeMethod="close"</code>.</p>
@@ -1155,5 +1215,5 @@ for details.</p>
                     Comments may be removed by our moderators if they are either
                     implemented or considered invalid/off-topic.
                   </p><div id="comments_thread"></div></div></div></div></div></div></div><footer><div id="footer">
-    Copyright &copy; 1999-2014, The Apache Software Foundation
+    Copyright &copy; 1999-2017, The Apache Software Foundation
   </div></footer></div></body></html>

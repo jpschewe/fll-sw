@@ -42,12 +42,6 @@ import javax.servlet.http.HttpServletResponse;
 public class CompressionFilter implements Filter {
 
     /**
-     * The filter configuration object we are associated with.  If this value
-     * is null, this filter instance is not currently configured.
-     */
-    private FilterConfig config = null;
-
-    /**
      * Minimal reasonable threshold.
      */
     private final int minThreshold = 128;
@@ -85,62 +79,61 @@ public class CompressionFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) {
 
-        config = filterConfig;
         if (filterConfig != null) {
             String value = filterConfig.getInitParameter("debug");
             if (value!=null) {
                 debug = Integer.parseInt(value);
-            }
+        }
 
             String str = filterConfig.getInitParameter("compressionThreshold");
-            if (str!=null) {
-                compressionThreshold = Integer.parseInt(str);
-                if (compressionThreshold != 0 && compressionThreshold < minThreshold) {
-                    if (debug > 0) {
-                        System.out.println("compressionThreshold should be either 0 - no compression or >= " + minThreshold);
-                        System.out.println("compressionThreshold set to " + minThreshold);
-                    }
-                    compressionThreshold = minThreshold;
-                }
-            }
-
-            str = filterConfig.getInitParameter("compressionBuffer");
-            if (str!=null) {
-                compressionBuffer = Integer.parseInt(str);
-                if (compressionBuffer < minBuffer) {
-                    if (debug > 0) {
-                        System.out.println("compressionBuffer should be >= " + minBuffer);
-                        System.out.println("compressionBuffer set to " + minBuffer);
-                    }
-                    compressionBuffer = minBuffer;
-                }
-            }
-
-            str = filterConfig.getInitParameter("compressionMimeTypes");
-            if (str!=null) {
-                List<String> values = new ArrayList<>();
-                StringTokenizer st = new StringTokenizer(str, ",");
-
-                while (st.hasMoreTokens()) {
-                    String token = st.nextToken().trim();
-                    if (token.length() > 0) {
-                        values.add(token);
-                    }
-                }
-
-                if (values.size() > 0) {
-                    compressionMimeTypes = values.toArray(
-                            new String[values.size()]);
-                } else {
-                    compressionMimeTypes = null;
-                }
-
+        if (str != null) {
+            compressionThreshold = Integer.parseInt(str);
+            if (compressionThreshold != 0 && compressionThreshold < minThreshold) {
                 if (debug > 0) {
-                    System.out.println("compressionMimeTypes set to " +
-                            Arrays.toString(compressionMimeTypes));
+                    System.out.println("compressionThreshold should be either 0 - no compression or >= " + minThreshold);
+                    System.out.println("compressionThreshold set to " + minThreshold);
                 }
+                compressionThreshold = minThreshold;
             }
         }
+
+            str = filterConfig.getInitParameter("compressionBuffer");
+        if (str != null) {
+            compressionBuffer = Integer.parseInt(str);
+            if (compressionBuffer < minBuffer) {
+                if (debug > 0) {
+                    System.out.println("compressionBuffer should be >= " + minBuffer);
+                    System.out.println("compressionBuffer set to " + minBuffer);
+                }
+                compressionBuffer = minBuffer;
+            }
+        }
+
+            str = filterConfig.getInitParameter("compressionMimeTypes");
+        if (str != null) {
+            List<String> values = new ArrayList<>();
+            StringTokenizer st = new StringTokenizer(str, ",");
+
+            while (st.hasMoreTokens()) {
+                String token = st.nextToken().trim();
+                if (token.length() > 0) {
+                    values.add(token);
+                }
+            }
+
+            if (values.size() > 0) {
+                compressionMimeTypes = values.toArray(
+                        new String[values.size()]);
+            } else {
+                compressionMimeTypes = null;
+            }
+
+            if (debug > 0) {
+                System.out.println("compressionMimeTypes set to " +
+                        Arrays.toString(compressionMimeTypes));
+            }
+        }
+    }
 
     }
 
@@ -149,9 +142,6 @@ public class CompressionFilter implements Filter {
     */
     @Override
     public void destroy() {
-
-        this.config = null;
-
     }
 
     /**
@@ -171,8 +161,8 @@ public class CompressionFilter implements Filter {
      * (<code>chain.doFilter()</code>), <br>
      **/
     @Override
-    public void doFilter ( ServletRequest request, ServletResponse response,
-                        FilterChain chain ) throws IOException, ServletException {
+    public void doFilter (ServletRequest request, ServletResponse response, FilterChain chain )
+            throws IOException, ServletException {
 
         if (debug > 0) {
             System.out.println("@doFilter");
@@ -180,7 +170,7 @@ public class CompressionFilter implements Filter {
 
         if (compressionThreshold == 0) {
             if (debug > 0) {
-                System.out.println("doFilter got called, but compressionTreshold is set to 0 - no compression");
+                System.out.println("doFilter got called, but compressionThreshold is set to 0 - no compression");
             }
             chain.doFilter(request, response);
             return;
@@ -245,24 +235,5 @@ public class CompressionFilter implements Filter {
             return;
         }
     }
-
-    /**
-     * Set filter config
-     * This function is equivalent to init. Required by Weblogic 6.1
-     *
-     * @param filterConfig The filter configuration object
-     */
-    public void setFilterConfig(FilterConfig filterConfig) {
-        init(filterConfig);
-    }
-
-    /**
-     * Return filter config
-     * Required by Weblogic 6.1
-     */
-    public FilterConfig getFilterConfig() {
-        return config;
-    }
-
 }
 

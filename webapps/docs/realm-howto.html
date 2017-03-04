@@ -1,5 +1,5 @@
 <!DOCTYPE html SYSTEM "about:legacy-compat">
-<html lang="en"><head><META http-equiv="Content-Type" content="text/html; charset=UTF-8"><link href="./images/docs-stylesheet.css" rel="stylesheet" type="text/css"><title>Apache Tomcat 8 (8.0.9) - Realm Configuration HOW-TO</title><meta name="author" content="Craig R. McClanahan"><meta name="author" content="Yoav Shapira"><meta name="author" content="Andrew R. Jaquith"><script type="application/javascript" data-comments-identifier="tomcat-8.0-doc/realm-howto">
+<html lang="en"><head><META http-equiv="Content-Type" content="text/html; charset=UTF-8"><link href="./images/docs-stylesheet.css" rel="stylesheet" type="text/css"><title>Apache Tomcat 8 (8.5.11) - Realm Configuration HOW-TO</title><meta name="author" content="Craig R. McClanahan"><meta name="author" content="Yoav Shapira"><meta name="author" content="Andrew R. Jaquith"><script type="application/javascript" data-comments-identifier="tomcat-8.5-doc/realm-howto">
     "use strict"; // Enable strict mode
 
     (function() {
@@ -29,9 +29,9 @@
         })(window, document);
       }), false);
     })();
-  </script></head><body><div id="wrapper"><header><div id="header"><div><div><div class="logo noPrint"><a href="http://tomcat.apache.org/"><img alt="Tomcat Home" src="./images/tomcat.png"></a></div><div style="height: 1px;"></div><div class="asfLogo noPrint"><a href="http://www.apache.org/" target="_blank"><img src="./images/asf-feather.png" alt="The Apache Software Foundation" style="width: 266px; height: 83px;"></a></div><h1>Apache Tomcat 8</h1><div class="versionInfo">
-          Version 8.0.9,
-          <time datetime="2014-06-19">Jun 19 2014</time></div><div style="height: 1px;"></div><div style="clear: left;"></div></div></div></div></header><div id="middle"><div><div id="mainLeft" class="noprint"><div><nav><div><h2>Links</h2><ul><li><a href="index.html">Docs Home</a></li><li><a href="http://wiki.apache.org/tomcat/FAQ">FAQ</a></li><li><a href="#comments_section">User Comments</a></li></ul></div><div><h2>User Guide</h2><ul><li><a href="introduction.html">1) Introduction</a></li><li><a href="setup.html">2) Setup</a></li><li><a href="appdev/index.html">3) First webapp</a></li><li><a href="deployer-howto.html">4) Deployer</a></li><li><a href="manager-howto.html">5) Manager</a></li><li><a href="realm-howto.html">6) Realms and AAA</a></li><li><a href="security-manager-howto.html">7) Security Manager</a></li><li><a href="jndi-resources-howto.html">8) JNDI Resources</a></li><li><a href="jndi-datasource-examples-howto.html">9) JDBC DataSources</a></li><li><a href="class-loader-howto.html">10) Classloading</a></li><li><a href="jasper-howto.html">11) JSPs</a></li><li><a href="ssl-howto.html">12) SSL</a></li><li><a href="ssi-howto.html">13) SSI</a></li><li><a href="cgi-howto.html">14) CGI</a></li><li><a href="proxy-howto.html">15) Proxy Support</a></li><li><a href="mbeans-descriptor-howto.html">16) MBean Descriptor</a></li><li><a href="default-servlet.html">17) Default Servlet</a></li><li><a href="cluster-howto.html">18) Clustering</a></li><li><a href="balancer-howto.html">19) Load Balancer</a></li><li><a href="connectors.html">20) Connectors</a></li><li><a href="monitoring.html">21) Monitoring and Management</a></li><li><a href="logging.html">22) Logging</a></li><li><a href="apr.html">23) APR/Native</a></li><li><a href="virtual-hosting-howto.html">24) Virtual Hosting</a></li><li><a href="aio.html">25) Advanced IO</a></li><li><a href="extras.html">26) Additional Components</a></li><li><a href="maven-jars.html">27) Mavenized</a></li><li><a href="security-howto.html">28) Security Considerations</a></li><li><a href="windows-service-howto.html">29) Windows Service</a></li><li><a href="windows-auth-howto.html">30) Windows Authentication</a></li><li><a href="jdbc-pool.html">31) Tomcat's JDBC Pool</a></li><li><a href="web-socket-howto.html">32) WebSocket</a></li><li><a href="rewrite.html">33) Rewrite</a></li></ul></div><div><h2>Reference</h2><ul><li><a href="RELEASE-NOTES.txt">Release Notes</a></li><li><a href="config/index.html">Configuration</a></li><li><a href="api/index.html">Tomcat Javadocs</a></li><li><a href="servletapi/index.html">Servlet Javadocs</a></li><li><a href="jspapi/index.html">JSP 2.3 Javadocs</a></li><li><a href="elapi/index.html">EL 3.0 Javadocs</a></li><li><a href="websocketapi/index.html">WebSocket 1.0 Javadocs</a></li><li><a href="http://tomcat.apache.org/connectors-doc/">JK 1.2 Documentation</a></li></ul></div><div><h2>Apache Tomcat Development</h2><ul><li><a href="building.html">Building</a></li><li><a href="changelog.html">Changelog</a></li><li><a href="http://wiki.apache.org/tomcat/TomcatVersions">Status</a></li><li><a href="developers.html">Developers</a></li><li><a href="architecture/index.html">Architecture</a></li><li><a href="funcspecs/index.html">Functional Specs.</a></li><li><a href="tribes/introduction.html">Tribes</a></li></ul></div></nav></div></div><div id="mainRight"><div id="content"><h2>Realm Configuration HOW-TO</h2><h3 id="Table_of_Contents">Table of Contents</h3><div class="text">
+  </script></head><body><div id="wrapper"><header><div id="header"><div><div><div class="logo noPrint"><a href="http://tomcat.apache.org/"><img alt="Tomcat Home" src="./images/tomcat.png"></a></div><div style="height: 1px;"></div><div class="asfLogo noPrint"><a href="http://www.apache.org/" target="_blank"><img src="./images/asf-logo.svg" alt="The Apache Software Foundation" style="width: 266px; height: 83px;"></a></div><h1>Apache Tomcat 8</h1><div class="versionInfo">
+          Version 8.5.11,
+          <time datetime="2017-01-10">Jan 10 2017</time></div><div style="height: 1px;"></div><div style="clear: left;"></div></div></div></div></header><div id="middle"><div><div id="mainLeft" class="noprint"><div><nav><div><h2>Links</h2><ul><li><a href="index.html">Docs Home</a></li><li><a href="http://wiki.apache.org/tomcat/FAQ">FAQ</a></li><li><a href="#comments_section">User Comments</a></li></ul></div><div><h2>User Guide</h2><ul><li><a href="introduction.html">1) Introduction</a></li><li><a href="setup.html">2) Setup</a></li><li><a href="appdev/index.html">3) First webapp</a></li><li><a href="deployer-howto.html">4) Deployer</a></li><li><a href="manager-howto.html">5) Manager</a></li><li><a href="realm-howto.html">6) Realms and AAA</a></li><li><a href="security-manager-howto.html">7) Security Manager</a></li><li><a href="jndi-resources-howto.html">8) JNDI Resources</a></li><li><a href="jndi-datasource-examples-howto.html">9) JDBC DataSources</a></li><li><a href="class-loader-howto.html">10) Classloading</a></li><li><a href="jasper-howto.html">11) JSPs</a></li><li><a href="ssl-howto.html">12) SSL/TLS</a></li><li><a href="ssi-howto.html">13) SSI</a></li><li><a href="cgi-howto.html">14) CGI</a></li><li><a href="proxy-howto.html">15) Proxy Support</a></li><li><a href="mbeans-descriptors-howto.html">16) MBeans Descriptors</a></li><li><a href="default-servlet.html">17) Default Servlet</a></li><li><a href="cluster-howto.html">18) Clustering</a></li><li><a href="balancer-howto.html">19) Load Balancer</a></li><li><a href="connectors.html">20) Connectors</a></li><li><a href="monitoring.html">21) Monitoring and Management</a></li><li><a href="logging.html">22) Logging</a></li><li><a href="apr.html">23) APR/Native</a></li><li><a href="virtual-hosting-howto.html">24) Virtual Hosting</a></li><li><a href="aio.html">25) Advanced IO</a></li><li><a href="extras.html">26) Additional Components</a></li><li><a href="maven-jars.html">27) Mavenized</a></li><li><a href="security-howto.html">28) Security Considerations</a></li><li><a href="windows-service-howto.html">29) Windows Service</a></li><li><a href="windows-auth-howto.html">30) Windows Authentication</a></li><li><a href="jdbc-pool.html">31) Tomcat's JDBC Pool</a></li><li><a href="web-socket-howto.html">32) WebSocket</a></li><li><a href="rewrite.html">33) Rewrite</a></li></ul></div><div><h2>Reference</h2><ul><li><a href="RELEASE-NOTES.txt">Release Notes</a></li><li><a href="config/index.html">Configuration</a></li><li><a href="api/index.html">Tomcat Javadocs</a></li><li><a href="servletapi/index.html">Servlet Javadocs</a></li><li><a href="jspapi/index.html">JSP 2.3 Javadocs</a></li><li><a href="elapi/index.html">EL 3.0 Javadocs</a></li><li><a href="websocketapi/index.html">WebSocket 1.1 Javadocs</a></li><li><a href="http://tomcat.apache.org/connectors-doc/">JK 1.2 Documentation</a></li></ul></div><div><h2>Apache Tomcat Development</h2><ul><li><a href="building.html">Building</a></li><li><a href="changelog.html">Changelog</a></li><li><a href="http://wiki.apache.org/tomcat/TomcatVersions">Status</a></li><li><a href="developers.html">Developers</a></li><li><a href="architecture/index.html">Architecture</a></li><li><a href="funcspecs/index.html">Functional Specs.</a></li><li><a href="tribes/introduction.html">Tribes</a></li></ul></div></nav></div></div><div id="mainRight"><div id="content"><h2>Realm Configuration HOW-TO</h2><h3 id="Table_of_Contents">Table of Contents</h3><div class="text">
 <ul><li><a href="#Quick_Start">Quick Start</a></li><li><a href="#Overview">Overview</a><ol><li><a href="#What_is_a_Realm?">What is a Realm?</a></li><li><a href="#Configuring_a_Realm">Configuring a Realm</a></li></ol></li><li><a href="#Common_Features">Common Features</a><ol><li><a href="#Digested_Passwords">Digested Passwords</a></li><li><a href="#Example_Application">Example Application</a></li><li><a href="#Manager_Application">Manager Application</a></li><li><a href="#Realm_Logging">Realm Logging</a></li></ol></li><li><a href="#Standard_Realm_Implementations">Standard Realm Implementations</a><ol><li><a href="#JDBCRealm">JDBCRealm</a></li><li><a href="#DataSourceRealm">DataSourceRealm</a></li><li><a href="#JNDIRealm">JNDIRealm</a></li><li><a href="#UserDatabaseRealm">UserDatabaseRealm</a></li><li><a href="#MemoryRealm">MemoryRealm</a></li><li><a href="#JAASRealm">JAASRealm</a></li><li><a href="#CombinedRealm">CombinedRealm</a></li><li><a href="#LockOutRealm">LockOutRealm</a></li></ol></li></ul>
 </div><h3 id="Quick_Start">Quick Start</h3><div class="text">
 
@@ -104,7 +104,7 @@ and integrate it with Tomcat.  To do so, you need to:</p>
   <li>Implement <code>org.apache.catalina.Realm</code>,</li>
   <li>Place your compiled realm in $CATALINA_HOME/lib,</li>
   <li>Declare your realm as described in the "Configuring a Realm" section below,</li>
-  <li>Declare your realm to the <a href="mbeans-descriptor-howto.html">MBeans Descriptor</a>.</li>
+  <li>Declare your realm to the <a href="mbeans-descriptors-howto.html">MBeans Descriptors</a>.</li>
 </ul>
 
 </div></div>
@@ -160,13 +160,15 @@ authentication.</p>
 
 <p>When a standard realm authenticates by retrieving the stored
 password and comparing it with the value presented by the user, you
-can select digested passwords by specifying the <code>digest</code>
-attribute on your <code>&lt;Realm&gt;</code> element.  The value for
-this attribute must be one of the digest algorithms supported by the
-<code>java.security.MessageDigest</code> class (SHA, MD2, or MD5).
-When you select this option, the contents of the password that is
-stored in the <code>Realm</code> must be the cleartext version of the
-password, as digested by the specified algorithm.</p>
+can select digested passwords by placing a <a href="config/credentialhandler.html">
+<code>CredentialHandler</code></a> element inside your <code>&lt;Realm&gt;</code>
+element. An easy choice to support one of the algorithms SSHA, SHA or MD5
+would be the usage of the <code>MessageDigestCredentialHandler</code>.
+This element must be configured to one of the digest algorithms supported
+by the <code>java.security.MessageDigest</code> class (SSHA, SHA or MD5).
+When you select this option, the contents of the password that is stored
+in the <code>Realm</code> must be the cleartext version of the password,
+as digested by the specified algorithm.</p>
 
 <p>When the <code>authenticate()</code> method of the Realm is called, the
 (cleartext) password specified by the user is itself digested by the same
@@ -181,8 +183,8 @@ techniques are supported:</p>
 <li>If you are writing an application that needs to calculate digested
     passwords dynamically, call the static <code>Digest()</code> method of the
     <code>org.apache.catalina.realm.RealmBase</code> class, passing the
-    cleartext password and the digest algorithm name as arguments.  This
-    method will return the digested password.</li>
+    cleartext password, the digest algorithm name and the encoding as arguments.
+    This method will return the digested password.</li>
 <li>If you want to execute a command line utility to calculate the digested
     password, simply execute
 <div class="codeBox"><pre><code>CATALINA_HOME/bin/digest.[bat|sh] -a {algorithm} {cleartext-password}</code></pre></div>
@@ -191,23 +193,57 @@ techniques are supported:</p>
 </ul>
 
 <p>If using digested passwords with DIGEST authentication, the cleartext used
-   to generate the digest is different and the digest must use the MD5
-   algorithm. In the examples above <code>{cleartext-password}</code> must be
-   replaced with <code>{username}:{realm}:{cleartext-password}</code>. For
-   example, in a development environment this might take the form
+   to generate the digest is different and the digest must use one iteration of
+   the MD5 algorithm with no salt. In the examples above
+   <code>{cleartext-password}</code> must be replaced with
+   <code>{username}:{realm}:{cleartext-password}</code>. For example, in a
+   development environment this might take the form
    <code>testUser:Authentication required:testPassword</code>. The value for
    <code>{realm}</code> is taken from the <code>&lt;realm-name&gt;</code>
    element of the web application's <code>&lt;login-config&gt;</code>. If
    not specified in web.xml, the default value of <code>Authentication
    required</code> is used.</p>
 
-<p>Non-ASCII usernames and/or passwords are supported using</p>
+<p>Usernames and/or passwords using encodings other than the platform default
+are supported using</p>
 <div class="codeBox"><pre><code>CATALINA_HOME/bin/digest.[bat|sh] -a {algorithm} -e {encoding} {input}</code></pre></div>
-<p>but care is required to ensure that the non-ASCII input is
-correctly passed to the digester.
-The digester returns <code>{input}:{digest}</code>. If the input appears
-corrupted in the return, the digest will be invalid.</p>
+<p>but care is required to ensure that the input is correctly passed to the
+digester. The digester returns <code>{input}:{digest}</code>. If the input
+appears corrupted in the return, the digest will be invalid.</p>
 
+<p>The output format of the digest is <code>{salt}${iterations}${digest}</code>.
+If the salt length is zero and the iteration count is one, the output is
+simplified to <code>{digest}</code>.</p>
+
+<p>The full syntax of <code>CATALINA_HOME/bin/digest.[bat|sh]</code> is:</p>
+<div class="codeBox"><pre><code>CATALINA_HOME/bin/digest.[bat|sh] [-a &lt;algorithm&gt;] [-e &lt;encoding&gt;]
+        [-i &lt;iterations&gt;] [-s &lt;salt-length&gt;] [-k &lt;key-length&gt;]
+        [-h &lt;handler-class-name&gt;] &lt;credentials&gt;
+</code></pre></div>
+<ul>
+<li><b>-a</b> - The algorithm to use to generate the stored
+                credential. If not specified, the default for the handler will
+                be used. If neither handler nor algorithm is specified then a
+                default of <code>SHA-512</code> will be used</li>
+<li><b>-e</b> - The encoding to use for any byte to/from character
+                conversion that may be necessary. If not specified, the
+                system encoding (<code>Charset#defaultCharset()</code>) will
+                be used.</li>
+<li><b>-i</b> - The number of iterations to use when generating the
+                stored credential. If not specified, the default for the
+                CredentialHandler will be used.</li>
+<li><b>-s</b> - The length (in bytes) of salt to generate and store as
+                part of the credential. If not specified, the default for
+                the CredentialHandler will be used.</li>
+<li><b>-k</b> - The length (in bits) of the key(s), if any, created while
+                generating the credential. If not specified, the default
+                for the CredentialHandler will be used.</li>
+<li><b>-h</b> - The fully qualified class name of the CredentialHandler
+                to use. If not specified, the built-in handlers will be
+                tested in turn (MessageDigestCredentialHandler then
+                SecretKeyCredentialHandler) and the first one to accept the
+                specified algorithm will be used.</li>
+</ul>
 </div></div>
 
 
@@ -406,8 +442,11 @@ as your database structure conforms to the following requirements:</p>
     at least read only access to the tables described above.  (Tomcat will
     never attempt to write to these tables.)</li>
 <li>Configure a JNDI named JDBC DataSource for your database.  Refer to the
-    <a href="jndi-datasource-examples-howto.html">JNDI DataSource Example HOW-TO</a>
-    for information on how to configure a JNDI named JDBC DataSource.</li>
+    <a href="jndi-datasource-examples-howto.html">JNDI DataSource Example
+    HOW-TO</a> for information on how to configure a JNDI named JDBC DataSource.
+    Be sure to set the <code>Realm</code>'s <code>localDataSource</code>
+    attribute appropriately, depending on where the JNDI DataSource is
+    defined.</li>
 <li>Set up a <code>&lt;Realm&gt;</code> element, as described below, in your
     <code>$CATALINA_BASE/conf/server.xml</code> file.</li>
 <li>Restart Tomcat if it is already running.</li>
@@ -490,7 +529,7 @@ to, and optionally the port number and distinguished name (DN) of the
 required root naming context.</p>
 
 <p>If you have more than one provider you can configure an
-<strong>alternateURL</strong>.  If a socket connection can not be
+<strong>alternateURL</strong>.  If a socket connection cannot be
 made to the provider at the <strong>connectionURL</strong> an
 attempt will be made to use the <strong>alternateURL</strong>.</p>
 
@@ -1006,7 +1045,7 @@ When developing your LoginModule, note that JAASRealm's built-in <code>CallbackH
 only recognizes the <code>NameCallback</code> and <code>PasswordCallback</code> at present.
           </li>
           <li>Although not specified in JAAS, you should create
-seperate classes to distinguish between users and roles, extending <code>javax.security.Principal</code>,
+separate classes to distinguish between users and roles, extending <code>javax.security.Principal</code>,
 so that Tomcat can tell which Principals returned from your login
 module are users and which are roles (see <code>org.apache.catalina.realm.JAASRealm</code>).
 Regardless, the first Principal returned is <em>always</em> treated as the user Principal.
@@ -1180,5 +1219,5 @@ functionality to a UserDatabase Realm.</p>
                     Comments may be removed by our moderators if they are either
                     implemented or considered invalid/off-topic.
                   </p><div id="comments_thread"></div></div></div></div></div></div></div><footer><div id="footer">
-    Copyright &copy; 1999-2014, The Apache Software Foundation
+    Copyright &copy; 1999-2017, The Apache Software Foundation
   </div></footer></div></body></html>
