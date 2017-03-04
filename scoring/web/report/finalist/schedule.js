@@ -280,7 +280,7 @@ function moveTeam(team, category, newSlot) {
     // check old position to clear warnings
     checkForTimeOverlap(destSlot, oldTeamNumber);
 
-    if ($.finalist.hasPlayoffConflict(oldteam, srcSlot)) {
+    if ($.finalist.hasPlayoffConflict(oldTeam, srcSlot)) {
       srcCell.addClass("overlap-playoff");
     }
   }
