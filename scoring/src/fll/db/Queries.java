@@ -42,6 +42,7 @@ import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.playoff.DatabaseTeamScore;
+import fll.web.playoff.H2HUpdateWebSocket;
 import fll.web.playoff.HttpTeamScore;
 import fll.web.playoff.Playoff;
 import fll.web.playoff.TeamScore;
@@ -1017,10 +1018,14 @@ public final class Queries {
                 && Queries.isVerified(connection, currentTournament, teamB, runNumber))) {
           removePlayoffScore(connection, division, currentTournament, runNumber, ptLine);
         } else {
-          updatePlayoffTable(connection, newWinner.getTeamNumber(), division, currentTournament, (runNumber
-              + 1), ((ptLine
-                  + 1)
-                  / 2));
+          final int nextRun = runNumber
+              + 1;
+          // the line number where the winner will go
+          final int winnerLineNumber = ((ptLine
+              + 1)
+              / 2);
+          updatePlayoffTable(connection, newWinner.getTeamNumber(), division, currentTournament, nextRun,
+                             winnerLineNumber);
           final int playoffRun = Playoff.getPlayoffRound(connection, division, runNumber);
           final int semiFinalRound = getNumPlayoffRounds(connection, division)
               - 1;
@@ -1032,10 +1037,13 @@ public final class Queries {
             } else {
               newLoser = teamA;
             }
-            updatePlayoffTable(connection, newLoser.getTeamNumber(), division, currentTournament, (runNumber
-                + 1), ((ptLine
-                    + 5)
-                    / 2));
+
+            // the line number where the losing team goes to playoff for 3rd place
+            final int thirdPlaceBracketLineNumber = ((ptLine
+                + 5)
+                / 2);
+            updatePlayoffTable(connection, newLoser.getTeamNumber(), division, currentTournament, nextRun,
+                               thirdPlaceBracketLineNumber);
           }
         }
       }
