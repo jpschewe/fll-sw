@@ -101,13 +101,15 @@ public final class JsonUtilities {
     try {
       final int currentTournament = Queries.getCurrentTournament(connection);
       for (Map.Entry<Integer, Integer> entry : ids.entrySet()) {
-        final int row = entry.getKey();
+        final int dbLine = entry.getKey();
         final int playoffRound = entry.getValue();
+
+        final int row = bracketData.getRowNumberForLine(playoffRound, dbLine);
 
         final TeamBracketCell tbc = (TeamBracketCell) bracketData.getData(playoffRound, row);
         if (tbc == null) {
           if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(String.format("Didn't find data for round: %d row %d, returning null to force refresh",
+            LOGGER.debug(String.format("Didn't find data for round: %d row: %d, returning null to force refresh",
                                        playoffRound, row));
           }
           return null;
@@ -122,7 +124,7 @@ public final class JsonUtilities {
         final boolean noShow = Queries.isNoShow(connection, currentTournament, tbc.getTeam().getTeamNumber(),
                                                 runNumber);
         // Sane request checks
-        final String leafId = BracketData.constructLeafId(bracketIdx, row, playoffRound);
+        final String leafId = BracketData.constructLeafId(bracketIdx, dbLine, playoffRound);
         if (noShow) {
           datalist.add(new BracketLeafResultSet(tbc, -2.0, leafId));
         } else if (!realScore

@@ -42,7 +42,6 @@ import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.playoff.DatabaseTeamScore;
-import fll.web.playoff.H2HUpdateWebSocket;
 import fll.web.playoff.HttpTeamScore;
 import fll.web.playoff.Playoff;
 import fll.web.playoff.TeamScore;
