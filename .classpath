@@ -100,9 +100,9 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/fll-sw/scoring/lib/source/itext-xtra-5.5.9-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="scoring/lib/test/selenium/selenium-server-standalone-3.0.1.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/test/selenium/client-combined-3.0.1-nodeps.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/log4jdbc4-1.2.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/dnsjava-2.1.7.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/selenium/client-combined-3.2.0-nodeps.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/selenium/selenium-server-standalone-3.2.0.jar"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>
