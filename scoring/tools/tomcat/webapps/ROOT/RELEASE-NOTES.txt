@@ -16,7 +16,7 @@
 ================================================================================
 
 
-                     Apache Tomcat Version 8.0.9
+                     Apache Tomcat Version 8.5.11
                             Release Notes
 
 
@@ -38,27 +38,29 @@ CONTENTS:
 ===================
 Dependency Changes:
 ===================
-Tomcat 8.0 is designed to run on Java SE 7 and later.
+Tomcat 8.5 is designed to run on Java SE 7 and later.
 
 
 ==============
 API Stability:
 ==============
 
-*** This is an alpha release. Currently no guarantees are made regarding API ***
-*** stability.                                                               ***
-
 The public interfaces for the following classes are fixed and will not be
 changed at all during the remaining lifetime of the 8.x series:
-- None
+- All classes in the javax namespace
 
 The public interfaces for the following classes may be added to in order to
-resolve bugs and/or add new features. No existing interface will be removed or
-changed although it may be deprecated.
-- None
+resolve bugs and/or add new features. No existing interface method will be
+removed or changed although it may be deprecated.
+- org.apache.catalina.* (excluding sub-packages)
 
 Note: As Tomcat 8 matures, the above list will be added to. The list is not
       considered complete at this time.
+
+Note: A large number of deprecated methods, fields and configuration options
+      were removed in the transition from 8.0.x to 8.5.x. If any of those
+      removals triggers significant problems for the user community that the
+      deletion may be reverted in a later point release.
 
 The remaining classes are considered part of the Tomcat internals and may change
 without notice between point releases.
@@ -67,7 +69,7 @@ without notice between point releases.
 =============
 Bundled APIs:
 =============
-A standard installation of Tomcat 8.0 makes all of the following APIs available
+A standard installation of Tomcat 8.5 makes all of the following APIs available
 for use by web applications (by placing them in "lib"):
 * annotations-api.jar (Annotations package)
 * catalina.jar (Tomcat Catalina implementation)
@@ -75,7 +77,7 @@ for use by web applications (by placing them in "lib"):
 * catalina-ha.jar (High availability package)
 * catalina-storeconfig.jar (Generation of XML configuration from current state)
 * catalina-tribes.jar (Group communication)
-* ecj-4.4RC4.jar (Eclipse JDT Java compiler)
+* ecj-4.5.1.jar (Eclipse JDT Java compiler)
 * el-api.jar (EL 3.0 API)
 * jasper.jar (Jasper 2 Compiler and Runtime)
 * jasper-el.jar (Jasper 2 EL implementation)
@@ -86,18 +88,17 @@ for use by web applications (by placing them in "lib"):
 * tomcat-dbcp.jar (package renamed database connection pool based on Commons DBCP)
 * tomcat-jdbc.jar (Tomcat's database connection pooling solution)
 * tomcat-jni.jar (Interface to the native component of the APR/native connector)
-* tomcat-spdy.jar (SPDY implementation)
 * tomcat-util.jar (Various utilities)
-* tomcat-websocket.jar (WebSocket 1.0 implementation)
-* websocket-api.jar (WebSocket 1.0 API)
+* tomcat-websocket.jar (WebSocket 1.1 implementation)
+* websocket-api.jar (WebSocket 1.1 API)
 
 You can make additional APIs available to all of your web applications by
 putting unpacked classes into a "classes" directory (not created by default),
 or by placing them in JAR files in the "lib" directory.
 
-To override the XML parser implementation or interfaces, use the endorsed
-mechanism of the JVM. The default configuration defines JARs located in
-"endorsed" as endorsed.
+To override the XML parser implementation or interfaces, use the appropriate
+feature for your JVM. For Java <= 8 use the endorsed standards override
+feature. For Java 9+ use the upgradeable modules feature.
 
 
 ================================================================

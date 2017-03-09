@@ -186,12 +186,13 @@ grant {
     permission java.util.PropertyPermission
      "org.apache.tomcat.util.http.ServerCookie.FWD_SLASH_IS_SEPARATOR", "read";
 
-    // Applications using Comet need to be able to access this package
-    permission java.lang.RuntimePermission "accessClassInPackage.org.apache.catalina.comet";
-
     // Applications using WebSocket need to be able to access these packages
     permission java.lang.RuntimePermission "accessClassInPackage.org.apache.tomcat.websocket";
     permission java.lang.RuntimePermission "accessClassInPackage.org.apache.tomcat.websocket.server";
+
+    // Applications need to access these packages to use the Servlet 4.0 Preview
+    permission java.lang.RuntimePermission "accessClassInPackage.org.apache.catalina.servlet4preview";
+    permission java.lang.RuntimePermission "accessClassInPackage.org.apache.catalina.servlet4preview.http";
 };
 
 
@@ -248,3 +249,13 @@ grant codeBase "file:${catalina.home}/webapps/manager/-" {
 //      permission java.net.SocketPermission "*.noaa.gov:80", "connect";
 // };
 
+// To grant permissions for web applications using packed WAR files, use the
+// Tomcat specific WAR url scheme.
+//
+// The permissions granted to the entire web application
+// grant codeBase "war:file:${catalina.base}/webapps/examples.war*/-" {
+// };
+//
+// The permissions granted to a specific JAR
+// grant codeBase "war:file:${catalina.base}/webapps/examples.war*/WEB-INF/lib/foo.jar" {
+// };
