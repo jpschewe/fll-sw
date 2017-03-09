@@ -64,7 +64,7 @@ public class JsonBracketDataTests {
 
     // shouldn't be able to access out of context rounds
     Map<Integer, Integer> query = new HashMap<Integer, Integer>();
-    query.put(4, 1);
+    query.put(3, 1);
     Assert.assertNull(JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, 0, playoff.getConnection(),
                                                             playoff.getDescription().getPerformance(),
                                                             playoff.getBracketData(), SHOW_ONLY_VERIFIED,
@@ -103,8 +103,8 @@ public class JsonBracketDataTests {
     // See what json tells us
     Map<Integer, Integer> query = new HashMap<Integer, Integer>();
     // Ask for round 1 leaf 1
-    int row = playoff.getBracketData().getRowNumberForLine(1, 3);
-    query.put(row, 1);
+    int dbLine = 3;
+    query.put(dbLine, 1);
     final ObjectMapper jsonMapper = new ObjectMapper();
 
     List<BracketLeafResultSet> leaves = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query,
