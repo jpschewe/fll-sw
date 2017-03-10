@@ -107,8 +107,8 @@ public class JsonBracketDataTests {
     query.put(dbLine, 1);
     final ObjectMapper jsonMapper = new ObjectMapper();
 
-    List<BracketLeafResultSet> leaves = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query,
-                                                                              0, playoff.getConnection(),
+    List<BracketLeafResultSet> leaves = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, 0,
+                                                                              playoff.getConnection(),
                                                                               playoff.getDescription().getPerformance(),
                                                                               playoff.getBracketData(),
                                                                               SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
@@ -126,8 +126,8 @@ public class JsonBracketDataTests {
     query.clear();
 
     // ask for round we just entered score for
-    row = playoff.getBracketData().getRowNumberForLine(2, 2);
-    query.put(row, 2);
+    dbLine = 2;
+    query.put(dbLine, 2);
     leaves = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, 0, playoff.getConnection(),
                                                    playoff.getDescription().getPerformance(), playoff.getBracketData(),
                                                    SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
@@ -142,8 +142,8 @@ public class JsonBracketDataTests {
     verifyScore(playoff.getConnection(), 4, 1);
     verifyScore(playoff.getConnection(), 5, 1);
 
-    row = playoff.getBracketData().getRowNumberForLine(1, 3);
-    query.put(row, 1);
+    dbLine = 3;
+    query.put(dbLine, 1);
     leaves = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, 0, playoff.getConnection(),
                                                    playoff.getDescription().getPerformance(), playoff.getBracketData(),
                                                    SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
@@ -169,9 +169,8 @@ public class JsonBracketDataTests {
     // json shouldn't tell us the score for the finals round
     query.clear();
     final int finalsRound = playoff.getBracketData().getFinalsRound();
-    row = playoff.getBracketData().getRowNumberForLine(finalsRound
-        + 1, 1);
-    query.put(row, finalsRound
+    dbLine = 1;
+    query.put(dbLine, finalsRound
         + 1);
     leaves = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, 0, playoff.getConnection(),
                                                    playoff.getDescription().getPerformance(), playoff.getBracketData(),
