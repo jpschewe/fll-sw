@@ -6,10 +6,34 @@
 
 "use strict";
 
+function constructLeafId(pBracketIndex, dbLine, round) {
+  return pBracketIndex + "-" + dbLine + "-" + round;
+}
+
+function populateLeaf(leafId, teamNumber, teamName, score) {
+  var text = "";
+  if (null != teamNumber) {
+    text = "<span class='TeamNumber'>#" + teamNumber + "</span>";
+
+    text = text + "<span class='TeamName'>" + teamName + "</span>";
+
+    if (null != score) {
+      text = text + "<span class='TeamScore'>&nbsp;Score: " + score + "</span>";
+    }
+  }
+
+  $("#" + leafId).html(text);
+}
+
 function messageReceived(event) {
 
   console.log("received: " + event.data);
+  var bracketUpdate = JSON.parse(event.data);
+  var leafId = constructLeafId(bracketIndex, bracketUpdate.dbLine,
+      bracketUpdate.playoffRound);
 
+  populateLeaf(leafId, bracketUpdate.teamNumber, bracketUpdate.teamName,
+      bracketUpdate.score);
 }
 
 function socketOpened(event) {

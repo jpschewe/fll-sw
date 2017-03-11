@@ -79,7 +79,7 @@
 
 <script type="text/javascript">
   var bracketName = '${bracketName}';
-  var bracketIndex = 1; // only a single bracket is displayed
+  var bracketIndex = 0; // only a single bracket is displayed
   var firstRound = parseInt("${firstRound}");
   var lastRound = parseInt("${lastRound}");
 </script>
