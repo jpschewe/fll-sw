@@ -755,6 +755,14 @@ public final class Queries {
         }
         updatePlayoffScore(connection, request, currentTournament, winnerCriteria, performanceElement,
                            tiebreakerElement, teamNumber, runNumber, teamScore);
+      } else {
+        // send H2H update that this team's score is entered
+        final String bracketName = Playoff.getPlayoffDivision(connection, teamNumber, runNumber);
+        final int dbLine = getPlayoffTableLineNumber(connection, currentTournament, teamNumber, runNumber);
+        final Team team = Team.getTeamFromDatabase(connection, teamNumber);
+        final int playoffRound = Playoff.getPlayoffRound(connection, bracketName, runNumber);
+        final double score = performanceElement.evaluate(teamScore);
+        H2HUpdateWebSocket.updateBracket(bracketName, dbLine, playoffRound, teamNumber, team.getTeamName(), score, false);
       }
     } else {
       tournament.recordPerformanceSeedingModified(connection);
@@ -1151,6 +1159,10 @@ public final class Queries {
             // next run column in the bracket
             removePlayoffScore(connection, division, currentTournament, irunNumber, ptLine);
 
+            // send H2H update that this team's score is now null
+            final Team team = Team.getTeamFromDatabase(connection, teamNumber);
+            final int playoffRound = Playoff.getPlayoffRound(connection, division, irunNumber);
+            H2HUpdateWebSocket.updateBracket(division, ptLine, playoffRound, teamNumber, team.getTeamName(), null, true);
           }
         } else {
           // Do nothing - team didn't get entered into the PlayoffData table.
@@ -1192,7 +1204,7 @@ public final class Queries {
                                          final String division,
                                          final int currentTournament,
                                          final int runNumber,
-                                         final int lineNumber,
+                                         final int lineNumber,                                         
                                          final Double score,
                                          final boolean verified)
       throws SQLException {
@@ -1216,7 +1228,19 @@ public final class Queries {
       SQLFunctions.close(prep);
     }
 
-    H2HUpdateWebSocket.updateBracket(division, lineNumber, runNumber, team.getTeamNumber(), team.getTeamName(), score,
+    final int playoffRound = Playoff.getPlayoffRound(connection, division, runNumber);
+    
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Sending H2H update" //
+          + " team: " + team.getTeamNumber() //
+          + " bracket: " + division //
+          + " dbLine: " + lineNumber //
+          + " score: " + score //
+          + " playoffRound: " + playoffRound //
+      );
+
+    }
+    H2HUpdateWebSocket.updateBracket(division, lineNumber, playoffRound, team.getTeamNumber(), team.getTeamName(), score,
                                      verified);
   }
 
