@@ -1247,6 +1247,76 @@ public final class Queries {
   }
 
   /**
+   * Get head to head bracket update data for initializing a display.
+   * 
+   * @param connection the database connection
+   * @param bracketName the bracket name
+   * @param firstPlayoffRound the first playoff round to include
+   * @param lastPlayoffRound the last playoff round to include
+   * @return the updates to send to the display
+   * @throws SQLException
+   */
+  public static Collection<H2HUpdateWebSocket.BracketUpdate> getH2HBracketData(final Connection connection,
+                                                                               final int currentTournament,
+                                                                               final String bracketName,
+                                                                               final int firstPlayoffRound,
+                                                                               final int lastPlayoffRound)
+      throws SQLException {
+    final Collection<H2HUpdateWebSocket.BracketUpdate> updates = new LinkedList<>();
+    try (
+        final PreparedStatement prep = connection.prepareStatement("SELECT PlayoffData.PlayoffRound,PlayoffData.LineNumber, Teams.TeamNumber, Teams.TeamName,Performance.ComputedTotal, Performance.Verified" //
+            + " FROM PlayoffData" //
+            + " JOIN Teams ON (PlayoffData.team = Teams.TeamNumber)"//
+            + " LEFT OUTER JOIN Performance ON (Performance.TeamNumber = PlayoffData.team"//
+            + " AND Performance.Tournament = PlayoffData.Tournament"//
+            + " AND Performance.RunNumber = PlayoffData.run_number)"//
+            + " WHERE PlayoffData.Tournament = ?" //
+            + " AND PlayoffData.event_division = ?" //
+            + " AND PlayoffData.PlayoffRound >= ?" //
+            + " AND PlayoffData.PlayoffRound <= ?" //
+        )) {
+      prep.setInt(1, currentTournament);
+      prep.setString(2, bracketName);
+      prep.setInt(3, firstPlayoffRound);
+      prep.setInt(4, lastPlayoffRound);
+
+      try (final ResultSet rs = prep.executeQuery()) {
+        while (rs.next()) {
+          final H2HUpdateWebSocket.BracketUpdate update = new H2HUpdateWebSocket.BracketUpdate();
+          update.bracketName = bracketName;
+          update.playoffRound = rs.getInt(1);
+          update.dbLine = rs.getInt(2);
+          update.teamNumber = rs.getInt(3);
+          if (rs.wasNull()
+              || update.teamNumber == Team.NULL_TEAM_NUMBER) {
+            update.teamNumber = null;
+            update.teamName = null;
+          } else {
+            if (update.teamNumber == Team.TIE_TEAM_NUMBER) {
+              update.teamName = Team.TIE.getTeamName();
+            } else {
+              update.teamName = rs.getString(4);
+            }
+          }
+          final double score = rs.getDouble(5);
+          if (rs.wasNull()) {
+            update.score = null;
+            update.verified = true;
+          } else {
+            // TODO #528 update this with the appropriate number formatter
+            update.score = fll.Utilities.NUMBER_FORMAT_INSTANCE.format(score);
+            update.verified = rs.getBoolean(6);
+          }
+
+          updates.add(update);
+        } // foreach result
+      } // try ResultSet
+    } // try PreparedStatement
+
+    return updates;
+  }
+
+  /**
    * Get the division that a team is in for the current tournament.
    * 
    * @param teamNumber the team's number
