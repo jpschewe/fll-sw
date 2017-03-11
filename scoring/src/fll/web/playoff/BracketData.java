@@ -626,7 +626,7 @@ public class BracketData {
   /**
    * Inverse operation of {@link #parseLeafId(String)}.
    * 
-   * Needs to match code in adminbrackets.js that constructs a leaf ID as well.
+   * Needs to match code in playoff/h2hutils.js that constructs a leaf ID as well.
    */
   public static String constructLeafId(final int bracketIndex,
                                        final int dbLine,

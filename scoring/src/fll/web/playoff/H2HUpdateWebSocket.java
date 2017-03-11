@@ -27,7 +27,6 @@ import org.apache.log4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.itextpdf.text.Utilities;
 
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -47,7 +46,7 @@ public class H2HUpdateWebSocket {
 
   private static void addSession(final Session session,
                                  final Collection<String> bracketNames) {
-        synchronized (SESSIONS_LOCK) {
+    synchronized (SESSIONS_LOCK) {
       for (final String bracketName : bracketNames) {
         if (!SESSIONS.containsKey(bracketName)) {
           SESSIONS.put(bracketName, new HashSet<Session>());
@@ -123,25 +122,23 @@ public class H2HUpdateWebSocket {
       throw new FLLRuntimeException("Error parsing string array", e);
     }
 
-//    // just echo for testing
-//    try {
-//      if (session.isOpen()) {
-//        LOGGER.trace("Sending back text message: "
-//            + msg);
-//        session.getBasicRemote().sendText(msg);
-//      } else {
-//        LOGGER.error("Session is not open");
-//      }
-//    } catch (IOException e) {
-//      LOGGER.error("Error sending text message, closing socket", e);
-//      try {
-//        session.close();
-//      } catch (IOException e1) {
-//        // Ignore
-//      }
-//    }
-
-    LOGGER.trace("Bottom of message received");
+    // // just echo for testing
+    // try {
+    // if (session.isOpen()) {
+    // LOGGER.trace("Sending back text message: "
+    // + msg);
+    // session.getBasicRemote().sendText(msg);
+    // } else {
+    // LOGGER.error("Session is not open");
+    // }
+    // } catch (IOException e) {
+    // LOGGER.error("Error sending text message, closing socket", e);
+    // try {
+    // session.close();
+    // } catch (IOException e1) {
+    // // Ignore
+    // }
+    // }
   }
 
   /**
@@ -160,8 +157,10 @@ public class H2HUpdateWebSocket {
                                    final int playoffRound,
                                    final Integer teamNumber,
                                    final String teamName,
-                                   final Double score) {
-    final BracketUpdate update = new BracketUpdate(bracketName, dbLine, playoffRound, teamNumber, teamName, score);
+                                   final Double score,
+                                   final boolean verified) {
+    final BracketUpdate update = new BracketUpdate(bracketName, dbLine, playoffRound, teamNumber, teamName, score,
+                                                   verified);
 
     synchronized (SESSIONS_LOCK) {
       if (!SESSIONS.containsKey(bracketName)) {
@@ -228,19 +227,26 @@ public class H2HUpdateWebSocket {
      */
     public final String score;
 
+    /**
+     * True if the information has been verified.
+     */
+    public final boolean verified;
+
     public BracketUpdate(final String bracketName,
                          final int dbLine,
                          final int playoffRound,
                          final Integer teamNumber,
                          final String teamName,
-                         final Double score) {
+                         final Double score,
+                         final boolean verified) {
       this.bracketName = bracketName;
       this.dbLine = dbLine;
       this.playoffRound = playoffRound;
       this.teamNumber = teamNumber;
       this.teamName = teamName;
-      //TODO #528 update this with the appropriate number formatter
+      // TODO #528 update this with the appropriate number formatter
       this.score = null == score ? "" : fll.Utilities.NUMBER_FORMAT_INSTANCE.format(score);
+      this.verified = verified;
     }
   }
 

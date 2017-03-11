@@ -90,6 +90,9 @@
   src='../extlib/jquery-1.11.1.min.js'></script>
 <script
   type='text/javascript'
+  src='h2hutils.js'></script>
+<script
+  type='text/javascript'
   src='adminbrackets.js'></script>
 
 <style type='text/css'>

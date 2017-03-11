@@ -6,11 +6,7 @@
 
 "use strict";
 
-function constructLeafId(pBracketIndex, dbLine, round) {
-  return pBracketIndex + "-" + dbLine + "-" + round;
-}
-
-function populateLeaf(leafId, teamNumber, teamName, score) {
+function populateLeaf(leafId, teamNumber, teamName, score, verified) {
   var text = "";
   if (null != teamNumber) {
     text = "<span class='TeamNumber'>#" + teamNumber + "</span>";
@@ -18,7 +14,16 @@ function populateLeaf(leafId, teamNumber, teamName, score) {
     text = text + "<span class='TeamName'>" + teamName + "</span>";
 
     if (null != score) {
+      if (!verified) {
+        text = text + "<span style='color:red'>";
+      }
+
       text = text + "<span class='TeamScore'>&nbsp;Score: " + score + "</span>";
+
+      if (!verified) {
+        text = text + "</span>";
+      }
+
     }
   }
 
@@ -33,7 +38,7 @@ function messageReceived(event) {
       bracketUpdate.playoffRound);
 
   populateLeaf(leafId, bracketUpdate.teamNumber, bracketUpdate.teamName,
-      bracketUpdate.score);
+      bracketUpdate.score, bracketUpdate.verified);
 }
 
 function socketOpened(event) {
