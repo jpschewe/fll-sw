@@ -27,6 +27,7 @@ import org.apache.log4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.itextpdf.text.Utilities;
 
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -122,23 +123,23 @@ public class H2HUpdateWebSocket {
       throw new FLLRuntimeException("Error parsing string array", e);
     }
 
-    // just echo for testing
-    try {
-      if (session.isOpen()) {
-        LOGGER.trace("Sending back text message: "
-            + msg);
-        session.getBasicRemote().sendText(msg);
-      } else {
-        LOGGER.error("Session is not open");
-      }
-    } catch (IOException e) {
-      LOGGER.error("Error sending text message, closing socket", e);
-      try {
-        session.close();
-      } catch (IOException e1) {
-        // Ignore
-      }
-    }
+//    // just echo for testing
+//    try {
+//      if (session.isOpen()) {
+//        LOGGER.trace("Sending back text message: "
+//            + msg);
+//        session.getBasicRemote().sendText(msg);
+//      } else {
+//        LOGGER.error("Session is not open");
+//      }
+//    } catch (IOException e) {
+//      LOGGER.error("Error sending text message, closing socket", e);
+//      try {
+//        session.close();
+//      } catch (IOException e1) {
+//        // Ignore
+//      }
+//    }
 
     LOGGER.trace("Bottom of message received");
   }
@@ -222,7 +223,10 @@ public class H2HUpdateWebSocket {
 
     public final Integer teamNumber;
 
-    public final Double score;
+    /**
+     * Non-null string that reprpesents the score.
+     */
+    public final String score;
 
     public BracketUpdate(final String bracketName,
                          final int dbLine,
@@ -235,7 +239,8 @@ public class H2HUpdateWebSocket {
       this.playoffRound = playoffRound;
       this.teamNumber = teamNumber;
       this.teamName = teamName;
-      this.score = score;
+      //TODO #528 update this with the appropriate number formatter
+      this.score = null == score ? "" : fll.Utilities.NUMBER_FORMAT_INSTANCE.format(score);
     }
   }
 
