@@ -15,6 +15,8 @@ import java.util.TreeMap;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.log4j.Logger;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.db.Queries;
@@ -53,10 +55,10 @@ public class BracketData {
    */
   public static class TeamBracketCell extends BracketDataType {
 
-    public TeamBracketCell(final Team team,
-                           final String table,
-                           final int dbLine,
-                           final boolean printed) {
+    public TeamBracketCell(@JsonProperty("team") final Team team,
+                           @JsonProperty("table") final String table,
+                           @JsonProperty("dbline") final int dbLine,
+                           @JsonProperty("printed") final boolean printed) {
       _team = team;
       _table = table;
       _dbLine = dbLine;
@@ -597,7 +599,7 @@ public class BracketData {
    * The inverse of {@link #constructLeafId(int, int)}
    * 
    * @param lid the leaf id to parse
-   * @return (bracket index, dbLine, round) or null if it's not parsable
+   * @return (bracket index, dbLine, playoffRound) or null if it's not parsable
    */
   public static ImmutableTriple<Integer, Integer, Integer> parseLeafId(final String lid) {
     final String[] pieces = lid.split("\\-");
