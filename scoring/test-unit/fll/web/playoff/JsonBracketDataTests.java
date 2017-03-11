@@ -117,7 +117,7 @@ public class JsonBracketDataTests {
     List<BracketLeafResultSet> result = jsonMapper.readValue(jsonOut, BracketLeafResultSetTypeInformation.INSTANCE);
 
     // assert score is -1, indicating no score
-    Assert.assertEquals(result.get(0).score, -1.0D, 0.0);
+    Assert.assertEquals(-1.0D, result.get(0).score, 0.0);
 
     // test to make sure 2 unverified scores for opposing teams produces no
     // result
@@ -134,7 +134,7 @@ public class JsonBracketDataTests {
     Assert.assertNotNull(leaves);
     jsonOut = jsonMapper.writeValueAsString(leaves);
     result = jsonMapper.readValue(jsonOut, BracketLeafResultSetTypeInformation.INSTANCE);
-    Assert.assertEquals(result.get(0).leaf.getTeam().getTeamNumber(), Team.NULL_TEAM_NUMBER);
+    Assert.assertEquals(Team.NULL_TEAM_NUMBER, result.get(0).leaf.getTeam().getTeamNumber());
 
     // verify a score that has been entered as unverified and make sure we
     // get data from it
@@ -142,6 +142,7 @@ public class JsonBracketDataTests {
     verifyScore(playoff.getConnection(), 4, 1);
     verifyScore(playoff.getConnection(), 5, 1);
 
+    query.clear();
     dbLine = 3;
     query.put(dbLine, 1);
     leaves = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, 0, playoff.getConnection(),
@@ -150,7 +151,7 @@ public class JsonBracketDataTests {
     Assert.assertNotNull(leaves);
     jsonOut = jsonMapper.writeValueAsString(leaves);
     result = jsonMapper.readValue(jsonOut, BracketLeafResultSetTypeInformation.INSTANCE);
-    Assert.assertEquals(result.get(0).score, 5D, 0.0);
+    Assert.assertEquals(5D, result.get(0).score, 0.0);
 
     // advance 1 and 6 all the way to finals
     insertScore(playoff.getConnection(), 3, 1, true, 5D);
@@ -178,7 +179,7 @@ public class JsonBracketDataTests {
     Assert.assertNotNull(leaves);
     jsonOut = jsonMapper.writeValueAsString(leaves);
     result = jsonMapper.readValue(jsonOut, BracketLeafResultSetTypeInformation.INSTANCE);
-    Assert.assertEquals(result.get(0).score, -1.0D, 0.0);
+    Assert.assertEquals(-1.0D, result.get(0).score, 0.0);
 
     SQLFunctions.close(playoff.getConnection());
   }
