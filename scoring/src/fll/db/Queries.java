@@ -923,6 +923,8 @@ public final class Queries {
           + teamNumber + " run: " + runNumber);
     }
 
+    final boolean verified = "1".equals(request.getParameter("Verified"));
+
     final Team team = Team.getTeamFromDatabase(connection, teamNumber);
 
     final int ptLine = getPlayoffTableLineNumber(connection, currentTournament, teamNumber, runNumber);
@@ -936,8 +938,14 @@ public final class Queries {
       final int playoffRun = Playoff.getPlayoffRound(connection, division, runNumber);
 
       final double score = performanceElement.evaluate(teamScore);
+
+      // this makes sure that scores get pushed through to the displays
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("Sending H2HUpdate with score: "
+            + score);
+      }
       H2HUpdateWebSocket.updateBracket(division, ptLine, playoffRun, teamNumber, team.getTeamName(),
-                                       Double.isNaN(score) ? null : score);
+                                       Double.isNaN(score) ? null : score, verified);
 
       final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division, (ptLine
           % 2 == 0
@@ -1019,28 +1027,19 @@ public final class Queries {
 
         // If the second-check flag is NO or the opposing team is not
         // verified, we set the match "winner" (possibly back) to NULL.
-        if ("0".equals(request.getParameter("Verified"))
+        if (!verified
             || !(Queries.performanceScoreExists(connection, teamB, runNumber)
                 && Queries.isVerified(connection, currentTournament, teamB, runNumber))) {
           removePlayoffScore(connection, division, currentTournament, runNumber, ptLine);
-
-          H2HUpdateWebSocket.updateBracket(division, ptLine, playoffRun, null, null, null);
-
         } else {
           final int nextRun = runNumber
-              + 1;
-          final int nextPlayoffRound = playoffRun
               + 1;
 
           // the line number where the winner will go
           final int winnerLineNumber = ((ptLine
               + 1)
               / 2);
-          updatePlayoffTable(connection, newWinner.getTeamNumber(), division, currentTournament, nextRun,
-                             winnerLineNumber);
-
-          H2HUpdateWebSocket.updateBracket(division, winnerLineNumber, nextPlayoffRound, newWinner.getTeamNumber(),
-                                           newWinner.getTeamName(), null);
+          updatePlayoffTable(connection, newWinner, division, currentTournament, nextRun, winnerLineNumber, null, true);
 
           final int semiFinalRound = getNumPlayoffRounds(connection, division)
               - 1;
@@ -1058,12 +1057,8 @@ public final class Queries {
             final int thirdPlaceBracketLineNumber = ((ptLine
                 + 5)
                 / 2);
-            updatePlayoffTable(connection, newLoser.getTeamNumber(), division, currentTournament, nextRun,
-                               thirdPlaceBracketLineNumber);
-
-            H2HUpdateWebSocket.updateBracket(division, thirdPlaceBracketLineNumber, nextPlayoffRound,
-                                             newLoser.getTeamNumber(), newLoser.getTeamName(), null);
-
+            updatePlayoffTable(connection, newLoser, division, currentTournament, nextRun, thirdPlaceBracketLineNumber,
+                               null, true);
           }
         }
       }
@@ -1193,11 +1188,13 @@ public final class Queries {
    * LineNumber).
    */
   private static void updatePlayoffTable(final Connection connection,
-                                         final int teamNumber,
+                                         final Team team,
                                          final String division,
                                          final int currentTournament,
                                          final int runNumber,
-                                         final int lineNumber)
+                                         final int lineNumber,
+                                         final Double score,
+                                         final boolean verified)
       throws SQLException {
     PreparedStatement prep = null;
     try {
@@ -1208,7 +1205,7 @@ public final class Queries {
           + " AND Tournament = ?" //
           + " AND run_number = ?" //
           + " AND LineNumber = ?");
-      prep.setInt(1, teamNumber);
+      prep.setInt(1, team.getTeamNumber());
       prep.setBoolean(2, false);
       prep.setString(3, division);
       prep.setInt(4, currentTournament);
@@ -1218,28 +1215,34 @@ public final class Queries {
     } finally {
       SQLFunctions.close(prep);
     }
+
+    H2HUpdateWebSocket.updateBracket(division, lineNumber, runNumber, team.getTeamNumber(), team.getTeamName(), score,
+                                     verified);
   }
 
+  /**
+   * Remove the playoff score for the next run.
+   */
   private static void removePlayoffScore(final Connection connection,
                                          final String division,
                                          final int currentTournament,
                                          final int runNumber,
                                          final int ptLine)
       throws SQLException {
-    updatePlayoffTable(connection, Team.NULL_TEAM_NUMBER, division, currentTournament, (runNumber
+    updatePlayoffTable(connection, Team.NULL, division, currentTournament, (runNumber
         + 1), ((ptLine
             + 1)
-            / 2));
+            / 2), null, true);
 
     final int semiFinalRound = getNumPlayoffRounds(connection, division)
         - 1;
     final int playoffRun = Playoff.getPlayoffRound(connection, division, runNumber);
     if (playoffRun == semiFinalRound
         && isThirdPlaceEnabled(connection, division)) {
-      updatePlayoffTable(connection, Team.NULL_TEAM_NUMBER, division, currentTournament, (runNumber
+      updatePlayoffTable(connection, Team.NULL, division, currentTournament, (runNumber
           + 1), ((ptLine
               + 5)
-              / 2));
+              / 2), null, true);
     }
   }
 
