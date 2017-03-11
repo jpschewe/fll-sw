@@ -8,12 +8,12 @@
 
 function populateLeaf(leafId, teamNumber, teamName, score, verified) {
   var text = "";
-  if (null != teamNumber) {
+  if (null != teamNumber && "" != teamNumber && teamNumber >= 0) {
     text = "<span class='TeamNumber'>#" + teamNumber + "</span>";
 
-    text = text + "<span class='TeamName'>" + teamName + "</span>";
+    text = text + "&nbsp;<span class='TeamName'>" + teamName + "</span>";
 
-    if (null != score) {
+    if (null != score && "" != score) {
       if (!verified) {
         text = text + "<span style='color:red'>";
       }
@@ -23,7 +23,6 @@ function populateLeaf(leafId, teamNumber, teamName, score, verified) {
       if (!verified) {
         text = text + "</span>";
       }
-
     }
   }
 
