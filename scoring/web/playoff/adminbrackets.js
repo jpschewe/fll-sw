@@ -44,11 +44,13 @@ function messageReceived(event) {
 function socketOpened(event) {
   console.log("Socket opened");
 
-  var bracketInfo = {
-    bracketNames : [ bracketName ],
+  // needs to match H2HUpdateWebSocket.BracketInfo
+  var bracketInfo = [ {
+    bracketName : bracketName,
     firstRound : firstRound,
     lastRound : lastRound
-  };
+  } ];
+
   var str = JSON.stringify(bracketInfo);
   this.send(str);
 }
