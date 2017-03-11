@@ -65,10 +65,12 @@ public class JsonBracketDataTests {
     // shouldn't be able to access out of context rounds
     Map<Integer, Integer> query = new HashMap<Integer, Integer>();
     query.put(3, 1);
-    Assert.assertNull(JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, 0, playoff.getConnection(),
+    List<BracketLeafResultSet> leaves = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, 0, playoff.getConnection(),
                                                             playoff.getDescription().getPerformance(),
                                                             playoff.getBracketData(), SHOW_ONLY_VERIFIED,
-                                                            SHOW_FINAL_ROUNDS));
+                                                            SHOW_FINAL_ROUNDS);    
+    Assert.assertEquals(-1.0D, leaves.get(0).score, 0.0);
+    
     // done
     SQLFunctions.close(playoff.getConnection());
   }
@@ -81,22 +83,6 @@ public class JsonBracketDataTests {
   public void testScoreRepression() throws SQLException, ParseException, IOException, InstantiationException,
       ClassNotFoundException, IllegalAccessException {
     final PlayoffContainer playoff = makePlayoffs();
-
-    /*
-     * Initial bracket order:
-     * 
-     * 1A
-     * BYE
-     * 
-     * 4D
-     * 5E
-     * 
-     * 3C
-     * 6F
-     * 
-     * BYE
-     * 2B
-     */
 
     // Start with adding some scores
     insertScore(playoff.getConnection(), 4, 1, false, 5D);
@@ -260,6 +246,21 @@ public class JsonBracketDataTests {
 
   }
 
+  /*
+   * Initial bracket order:
+   * 
+   * 1A
+   * BYE
+   * 
+   * 4D
+   * 5E
+   * 
+   * 3C
+   * 6F
+   * 
+   * BYE
+   * 2B
+   */
   private PlayoffContainer makePlayoffs() throws IllegalAccessException, SQLException, ClassNotFoundException,
       InstantiationException, ParseException, IOException {
     final String div = "1";
