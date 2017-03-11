@@ -42,6 +42,7 @@ import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.playoff.DatabaseTeamScore;
+import fll.web.playoff.H2HUpdateWebSocket;
 import fll.web.playoff.HttpTeamScore;
 import fll.web.playoff.Playoff;
 import fll.web.playoff.TeamScore;
@@ -932,6 +933,12 @@ public final class Queries {
 
     final String division = Playoff.getPlayoffDivision(connection, teamNumber, runNumber);
     if (ptLine > 0) {
+      final int playoffRun = Playoff.getPlayoffRound(connection, division, runNumber);
+
+      final double score = performanceElement.evaluate(teamScore);
+      H2HUpdateWebSocket.updateBracket(division, ptLine, playoffRun, teamNumber, team.getTeamName(),
+                                       Double.isNaN(score) ? null : score);
+
       final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division, (ptLine
           % 2 == 0
               ? ptLine
@@ -1016,16 +1023,25 @@ public final class Queries {
             || !(Queries.performanceScoreExists(connection, teamB, runNumber)
                 && Queries.isVerified(connection, currentTournament, teamB, runNumber))) {
           removePlayoffScore(connection, division, currentTournament, runNumber, ptLine);
+
+          H2HUpdateWebSocket.updateBracket(division, ptLine, playoffRun, null, null, null);
+
         } else {
           final int nextRun = runNumber
               + 1;
+          final int nextPlayoffRound = playoffRun
+              + 1;
+
           // the line number where the winner will go
           final int winnerLineNumber = ((ptLine
               + 1)
               / 2);
           updatePlayoffTable(connection, newWinner.getTeamNumber(), division, currentTournament, nextRun,
                              winnerLineNumber);
-          final int playoffRun = Playoff.getPlayoffRound(connection, division, runNumber);
+
+          H2HUpdateWebSocket.updateBracket(division, winnerLineNumber, nextPlayoffRound, newWinner.getTeamNumber(),
+                                           newWinner.getTeamName(), null);
+
           final int semiFinalRound = getNumPlayoffRounds(connection, division)
               - 1;
           if (playoffRun == semiFinalRound
@@ -1037,15 +1053,21 @@ public final class Queries {
               newLoser = teamA;
             }
 
-            // the line number where the losing team goes to playoff for 3rd place
+            // the line number where the losing team goes to playoff for 3rd
+            // place
             final int thirdPlaceBracketLineNumber = ((ptLine
                 + 5)
                 / 2);
             updatePlayoffTable(connection, newLoser.getTeamNumber(), division, currentTournament, nextRun,
                                thirdPlaceBracketLineNumber);
+
+            H2HUpdateWebSocket.updateBracket(division, thirdPlaceBracketLineNumber, nextPlayoffRound,
+                                             newLoser.getTeamNumber(), newLoser.getTeamName(), null);
+
           }
         }
       }
+
     } else {
       throw new FLLRuntimeException("Team "
           + teamNumber + " could not be found in the playoff table for performance run " + runNumber);
