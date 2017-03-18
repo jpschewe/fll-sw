@@ -1,3 +1,4 @@
+* upgrade to selenium 3.3.0, this supports version 0.15.0 of geckodriver 
 * #536 - allow the admin bracketes to update automatically
 * Upgrade to tomcat 8.5.11 - this includes new features for WebSockets
 
