@@ -1,3 +1,4 @@
+* #536 - allow the admin bracketes to update automatically
 * Upgrade to tomcat 8.5.11 - this includes new features for WebSockets
 
 Release 11.7.2
