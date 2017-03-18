@@ -114,6 +114,8 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
         }
 
       } else {
+        LOGGER.error("No parameters");
+        
         response.reset();
         response.setContentType("application/json");
         writer.print("{\"_rmsg\": \"Error: No Params\"}");
@@ -173,11 +175,11 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
     for (final String lid : lids) {
       final ImmutableTriple<Integer, Integer, Integer> parsed = BracketData.parseLeafId(lid);
       final int bracketIdx = parsed.left;
-      final int row = parsed.middle;
+      final int dbLine = parsed.middle;
       final int round = parsed.right;
 
       if(LOGGER.isTraceEnabled()) {
-        LOGGER.trace(String.format("lid: '%s' bracketIdx: %d row: %d round: %d", lid, bracketIdx, row, round));
+        LOGGER.trace(String.format("lid: '%s' bracketIdx: %d dbLine: %d round: %d", lid, bracketIdx, dbLine, round));
       }
       if (bracketIdx < 0
           || bracketIdx >= allBrackets.size()) {
@@ -192,7 +194,7 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
       }
 
       final Map<Integer, Integer> pairedMap = retval.get(bracket);
-      pairedMap.put(row, round);
+      pairedMap.put(dbLine, round);
     }
     return retval;
   }

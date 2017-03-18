@@ -72,7 +72,6 @@ public class TestAJAXBrackets {
     scoresheetWindow.quit();
   }
 
-  // This test just isn't working
   @Test
   public void testAJAXBracketsInFull() throws IOException, SAXException, InterruptedException {
     try {
@@ -146,12 +145,12 @@ public class TestAJAXBrackets {
       // JPS may need to add some wait calls to replace this
       // bracketsWindow.setSpeed("300");
 
-      // enter unverified score for team 1
+      // enter unverified score for team 4
       enterScore(scoreEntryWindow, "4", 1);
 
-      final String scoreTextBefore = bracketsWindow.findElement(By.id("0-9-1")).getText();
+      final String scoreTextBefore = bracketsWindow.findElement(By.id("0-3-1")).getText();
       // final String scoreTextBefore =
-      // String.valueOf(bracketsWindowJS.executeScript("window.document.getElementById('9-1').innerHTML"));
+      // String.valueOf(bracketsWindowJS.executeScript("window.document.getElementById('0-3-1').innerHTML"));
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Score text before: "
             + scoreTextBefore);
@@ -181,9 +180,9 @@ public class TestAJAXBrackets {
       // give the web server a chance to catch up
       Thread.sleep(30000);
 
-      final String scoreTextAfter = bracketsWindow.findElement(By.id("0-9-1")).getText();
+      final String scoreTextAfter = bracketsWindow.findElement(By.id("0-3-1")).getText();
       // final String scoreTextAfter =
-      // String.valueOf(seleniumJS.executeScript("window.document.getElementById('1-2').innerHTML"));
+      // String.valueOf(seleniumJS.executeScript("window.document.getElementById('0-3-1').innerHTML"));
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Score text after: "
             + scoreTextAfter);
