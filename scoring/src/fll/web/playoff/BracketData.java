@@ -15,6 +15,8 @@ import java.util.TreeMap;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.log4j.Logger;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.db.Queries;
@@ -52,44 +54,39 @@ public class BracketData {
    * Team bracket cells.
    */
   public static class TeamBracketCell extends BracketDataType {
-    private Team _team;
+
+    public TeamBracketCell(@JsonProperty("team") final Team team,
+                           @JsonProperty("table") final String table,
+                           @JsonProperty("dbline") final int dbLine,
+                           @JsonProperty("printed") final boolean printed) {
+      _team = team;
+      _table = table;
+      _dbLine = dbLine;
+      _printed = printed;
+    }
+
+    private final Team _team;
 
     public Team getTeam() {
       return _team;
     }
 
-    public void setTeam(final Team t) {
-      _team = t;
-    }
-
-    private String _table;
+    private final String _table;
 
     public String getTable() {
       return _table;
     }
 
-    public void setTable(final String t) {
-      _table = t;
-    }
-
-    private int _dbLine;
+    private final int _dbLine;
 
     public int getDBLine() {
       return _dbLine;
     }
 
-    public void setDBLine(final int v) {
-      _dbLine = v;
-    }
-
-    private boolean _printed;
+    private final boolean _printed;
 
     public boolean getPrinted() {
       return _printed;
-    }
-
-    public void setPrinted(final boolean b) {
-      _printed = b;
     }
   }
 
@@ -116,10 +113,18 @@ public class BracketData {
   public static class BigScreenTableAssignmentCell extends BracketDataType {
     public BigScreenTableAssignmentCell(final int round,
                                         final int row,
-                                        final String table) {
+                                        final String table,
+                                        final int dbLine) {
       _round = round;
       _row = row;
       _table = table;
+      _dbLine = dbLine;
+    }
+
+    private final int _dbLine;
+
+    public int getDbLine() {
+      return _dbLine;
     }
 
     private final int _round;
@@ -300,7 +305,8 @@ public class BracketData {
     }
   }
 
-  // Map of round number to map of line number (of the conceptual table - not
+  // Map of round number to map of row number (of the conceptual HTML table -
+  // not
   // the column of the PlayoffData table) to playoff meta data for that
   // round number and line number.
   private final Map<Integer, SortedMap<Integer, BracketDataType>> _bracketData;
@@ -451,17 +457,14 @@ public class BracketData {
       while (rs.next()) {
         final int round = rs.getInt(1);
         final int line = rs.getInt(2);
-        final int team = rs.getInt(3);
+        final int teamNumber = rs.getInt(3);
         final String table = rs.getString(4);
         final boolean printed = rs.getBoolean(5);
 
         final SortedMap<Integer, BracketDataType> roundData = _bracketData.get(round);
 
-        final TeamBracketCell d = new TeamBracketCell();
-        d.setTable(table);
-        d.setTeam(Team.getTeamFromDatabase(_connection, team));
-        d.setDBLine(line);
-        d.setPrinted(printed);
+        final Team team = Team.getTeamFromDatabase(_connection, teamNumber);
+        final TeamBracketCell d = new TeamBracketCell(team, table, line, printed);
 
         final int row = getRowNumberForLine(round, line);
         if (LOG.isDebugEnabled()) {
@@ -596,16 +599,16 @@ public class BracketData {
    * The inverse of {@link #constructLeafId(int, int)}
    * 
    * @param lid the leaf id to parse
-   * @return (bracket index, row, round) or null if it's not parsable
+   * @return (bracket index, dbLine, playoffRound) or null if it's not parsable
    */
   public static ImmutableTriple<Integer, Integer, Integer> parseLeafId(final String lid) {
     final String[] pieces = lid.split("\\-");
     if (pieces.length >= 3) {
       final String bracketIdxStr = pieces[0];
-      final String rowStr = pieces[1];
+      final String dbLineStr = pieces[1];
       final String roundStr = pieces[2];
 
-      return new ImmutableTriple<>(Integer.parseInt(bracketIdxStr), Integer.parseInt(rowStr),
+      return new ImmutableTriple<>(Integer.parseInt(bracketIdxStr), Integer.parseInt(dbLineStr),
                                    Integer.parseInt(roundStr));
     } else {
       return null;
@@ -615,19 +618,21 @@ public class BracketData {
   /**
    * @see #constructLeafId(int, int, int)
    */
-  private String constructLeafId(final int row,
+  private String constructLeafId(final int dbLine,
                                  final int round) {
-    return constructLeafId(_bracketIndex, row, round);
+    return constructLeafId(_bracketIndex, dbLine, round);
   }
 
   /**
    * Inverse operation of {@link #parseLeafId(String)}.
+   * 
+   * Needs to match code in playoff/h2hutils.js that constructs a leaf ID as well.
    */
   public static String constructLeafId(final int bracketIndex,
-                                       final int row,
+                                       final int dbLine,
                                        final int round) {
     return bracketIndex
-        + "-" + row + "-" + round;
+        + "-" + dbLine + "-" + round;
   }
 
   /**
@@ -663,18 +668,20 @@ public class BracketData {
             + comment + "-->");
       }
     } else if (d instanceof TeamBracketCell) {
-      final String leafId = constructLeafId(row, round);
+      final TeamBracketCell tbc = (TeamBracketCell) d;
+      final int dbLine = tbc.getDBLine();
+      final String leafId = constructLeafId(dbLine, round);
 
       sb.append("<td width='400' class='Leaf js-leaf' id='"
           + leafId + "'>");
       if (round == _finalsRound) {
         sb.append(getDisplayString(_currentTournament, round
-            + _baseRunNumber, ((TeamBracketCell) d).getTeam(), _showFinalScores, _showOnlyVerifiedScores));
+            + _baseRunNumber, tbc.getTeam(), _showFinalScores, _showOnlyVerifiedScores));
       } else if (_showFinalScores
           || round != _finalsRound
               + 1) {
         sb.append(getDisplayString(_currentTournament, round
-            + _baseRunNumber, ((TeamBracketCell) d).getTeam(), true, _showOnlyVerifiedScores));
+            + _baseRunNumber, tbc.getTeam(), true, _showOnlyVerifiedScores));
       }
       sb.append("</td>\n");
 
@@ -1117,7 +1124,7 @@ public class BracketData {
       int tablelinemod = -1;
       final SortedMap<Integer, BracketDataType> roundData = bracketEntry.getValue();
       for (final Map.Entry<Integer, BracketDataType> entry : roundData.entrySet()) {
-        final Integer lineNumber = entry.getKey();
+        final Integer rowNumber = entry.getKey();
         final BracketDataType cell = entry.getValue();
         if (cell != null
             && cell instanceof TeamBracketCell) {
@@ -1129,8 +1136,8 @@ public class BracketData {
           // Get the table assignment from cell info
           final String table = Queries.getAssignedTable(_connection, _currentTournament, _division, round.intValue(),
                                                         dblinenum);
-          newCells.put(lineNumber.intValue()
-              + tablelinemod, new BigScreenTableAssignmentCell(round.intValue(), lineNumber, table));
+          newCells.put(rowNumber.intValue()
+              + tablelinemod, new BigScreenTableAssignmentCell(round.intValue(), rowNumber, table, dblinenum));
         }
       }
       // Merge the new cells into the roundData

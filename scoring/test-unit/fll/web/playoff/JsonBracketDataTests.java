@@ -64,11 +64,13 @@ public class JsonBracketDataTests {
 
     // shouldn't be able to access out of context rounds
     Map<Integer, Integer> query = new HashMap<Integer, Integer>();
-    query.put(4, 1);
-    Assert.assertNull(JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, 0, playoff.getConnection(),
+    query.put(3, 1);
+    List<BracketLeafResultSet> leaves = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, 0, playoff.getConnection(),
                                                             playoff.getDescription().getPerformance(),
                                                             playoff.getBracketData(), SHOW_ONLY_VERIFIED,
-                                                            SHOW_FINAL_ROUNDS));
+                                                            SHOW_FINAL_ROUNDS);    
+    Assert.assertEquals(-1.0D, leaves.get(0).score, 0.0);
+    
     // done
     SQLFunctions.close(playoff.getConnection());
   }
@@ -82,33 +84,17 @@ public class JsonBracketDataTests {
       ClassNotFoundException, IllegalAccessException {
     final PlayoffContainer playoff = makePlayoffs();
 
-    /*
-     * Initial bracket order:
-     * 
-     * 1A
-     * BYE
-     * 
-     * 4D
-     * 5E
-     * 
-     * 3C
-     * 6F
-     * 
-     * BYE
-     * 2B
-     */
-
     // Start with adding some scores
     insertScore(playoff.getConnection(), 4, 1, false, 5D);
     // See what json tells us
     Map<Integer, Integer> query = new HashMap<Integer, Integer>();
     // Ask for round 1 leaf 1
-    int row = playoff.getBracketData().getRowNumberForLine(1, 3);
-    query.put(row, 1);
+    int dbLine = 3;
+    query.put(dbLine, 1);
     final ObjectMapper jsonMapper = new ObjectMapper();
 
-    List<BracketLeafResultSet> leaves = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query,
-                                                                              0, playoff.getConnection(),
+    List<BracketLeafResultSet> leaves = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, 0,
+                                                                              playoff.getConnection(),
                                                                               playoff.getDescription().getPerformance(),
                                                                               playoff.getBracketData(),
                                                                               SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
@@ -117,7 +103,7 @@ public class JsonBracketDataTests {
     List<BracketLeafResultSet> result = jsonMapper.readValue(jsonOut, BracketLeafResultSetTypeInformation.INSTANCE);
 
     // assert score is -1, indicating no score
-    Assert.assertEquals(result.get(0).score, -1.0D, 0.0);
+    Assert.assertEquals(-1.0D, result.get(0).score, 0.0);
 
     // test to make sure 2 unverified scores for opposing teams produces no
     // result
@@ -126,15 +112,15 @@ public class JsonBracketDataTests {
     query.clear();
 
     // ask for round we just entered score for
-    row = playoff.getBracketData().getRowNumberForLine(2, 2);
-    query.put(row, 2);
+    dbLine = 2;
+    query.put(dbLine, 2);
     leaves = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, 0, playoff.getConnection(),
                                                    playoff.getDescription().getPerformance(), playoff.getBracketData(),
                                                    SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
     Assert.assertNotNull(leaves);
     jsonOut = jsonMapper.writeValueAsString(leaves);
     result = jsonMapper.readValue(jsonOut, BracketLeafResultSetTypeInformation.INSTANCE);
-    Assert.assertEquals(result.get(0).leaf.getTeam().getTeamNumber(), Team.NULL_TEAM_NUMBER);
+    Assert.assertEquals(Team.NULL_TEAM_NUMBER, result.get(0).leaf.getTeam().getTeamNumber());
 
     // verify a score that has been entered as unverified and make sure we
     // get data from it
@@ -142,15 +128,16 @@ public class JsonBracketDataTests {
     verifyScore(playoff.getConnection(), 4, 1);
     verifyScore(playoff.getConnection(), 5, 1);
 
-    row = playoff.getBracketData().getRowNumberForLine(1, 3);
-    query.put(row, 1);
+    query.clear();
+    dbLine = 3;
+    query.put(dbLine, 1);
     leaves = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, 0, playoff.getConnection(),
                                                    playoff.getDescription().getPerformance(), playoff.getBracketData(),
                                                    SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
     Assert.assertNotNull(leaves);
     jsonOut = jsonMapper.writeValueAsString(leaves);
     result = jsonMapper.readValue(jsonOut, BracketLeafResultSetTypeInformation.INSTANCE);
-    Assert.assertEquals(result.get(0).score, 5D, 0.0);
+    Assert.assertEquals(5D, result.get(0).score, 0.0);
 
     // advance 1 and 6 all the way to finals
     insertScore(playoff.getConnection(), 3, 1, true, 5D);
@@ -169,9 +156,8 @@ public class JsonBracketDataTests {
     // json shouldn't tell us the score for the finals round
     query.clear();
     final int finalsRound = playoff.getBracketData().getFinalsRound();
-    row = playoff.getBracketData().getRowNumberForLine(finalsRound
-        + 1, 1);
-    query.put(row, finalsRound
+    dbLine = 1;
+    query.put(dbLine, finalsRound
         + 1);
     leaves = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, 0, playoff.getConnection(),
                                                    playoff.getDescription().getPerformance(), playoff.getBracketData(),
@@ -179,7 +165,7 @@ public class JsonBracketDataTests {
     Assert.assertNotNull(leaves);
     jsonOut = jsonMapper.writeValueAsString(leaves);
     result = jsonMapper.readValue(jsonOut, BracketLeafResultSetTypeInformation.INSTANCE);
-    Assert.assertEquals(result.get(0).score, -1.0D, 0.0);
+    Assert.assertEquals(-1.0D, result.get(0).score, 0.0);
 
     SQLFunctions.close(playoff.getConnection());
   }
@@ -260,6 +246,21 @@ public class JsonBracketDataTests {
 
   }
 
+  /*
+   * Initial bracket order:
+   * 
+   * 1A
+   * BYE
+   * 
+   * 4D
+   * 5E
+   * 
+   * 3C
+   * 6F
+   * 
+   * BYE
+   * 2B
+   */
   private PlayoffContainer makePlayoffs() throws IllegalAccessException, SQLException, ClassNotFoundException,
       InstantiationException, ParseException, IOException {
     final String div = "1";
