@@ -6,6 +6,8 @@
 
 package fll.web.playoff;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.LinkedList;
@@ -18,7 +20,10 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import fll.Team;
+import fll.util.FLLInternalException;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.DisplayInfo;
@@ -65,6 +70,17 @@ public class RemoteControlBrackets {
       }
 
       pageContext.setAttribute("allBracketInfo", allBracketInfo);
+
+      // expose all bracketInfo to the javascript
+      final ObjectMapper jsonMapper = new ObjectMapper();
+      final StringWriter writer = new StringWriter();
+      try {
+        jsonMapper.writeValue(writer, allBracketInfo);
+      } catch (final IOException e) {
+        throw new FLLInternalException("Error writing JSON for allBracketInfo", e);
+      }
+      final String allBracketInfoJson = writer.toString();
+      pageContext.setAttribute("allBracketInfoJson", allBracketInfoJson);
 
       // used for scroll control
       pageContext.setAttribute("numRows", numRows);

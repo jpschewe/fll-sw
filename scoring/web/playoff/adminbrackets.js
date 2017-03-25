@@ -33,7 +33,7 @@ function messageReceived(event) {
 
   console.log("received: " + event.data);
   var bracketUpdate = JSON.parse(event.data);
-  var leafId = constructLeafId(bracketIndex, bracketUpdate.dbLine,
+  var leafId = constructLeafId(bracketInfo.bracketIndex, bracketUpdate.dbLine,
       bracketUpdate.playoffRound);
 
   populateLeaf(leafId, bracketUpdate.teamNumber, bracketUpdate.teamName,
@@ -43,14 +43,9 @@ function messageReceived(event) {
 function socketOpened(event) {
   console.log("Socket opened");
 
-  // needs to match H2HUpdateWebSocket.BracketInfo
-  var bracketInfo = [ {
-    bracketName : bracketName,
-    firstRound : firstRound,
-    lastRound : lastRound
-  } ];
+  var allBracketInfo = [ bracketInfo ];
 
-  var str = JSON.stringify(bracketInfo);
+  var str = JSON.stringify(allBracketInfo);
   this.send(str);
 }
 

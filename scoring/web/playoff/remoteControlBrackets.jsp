@@ -64,6 +64,12 @@ SPAN.TIE {
 <script
   type="text/javascript"
   src="<c:url value='/extlib/jquery.scrollTo-2.1.2.min.js'/>"></script>
+  
+<script type="text/javascript">
+  var allBracketInfo = ${allBracketInfoJson};  
+</script>
+
+  
 <script type="text/javascript">
   var ajaxURL = '<c:url value="/ajax/"/>';
   var rows = parseInt("${numRows}"); // could be here directly as an intger, but the JSTL and auto-formatting don't agree
@@ -250,7 +256,7 @@ SPAN.TIE {
 
       <div class='center'>Head to Head Round
         ${bracketInfo.firstRound}, Head to Head Bracket
-        ${bracketInfo.bracketDivision}</div>
+        ${bracketInfo.bracketName}</div>
       <br />
                         
    ${bracketInfo.displayBracketOutput}

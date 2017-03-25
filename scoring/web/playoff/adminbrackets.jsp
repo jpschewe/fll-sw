@@ -10,14 +10,11 @@
   rel="stylesheet"
   type="text/css"
   href="<c:url value='/style/fll-sw.css'/>" />
-<title>${bracketInfo.bracketDivision}PrintablePlayoff Bracket</title>
+<title>${bracketInfo.bracketName}PrintablePlayoff Bracket</title>
 </head>
 
 <script type="text/javascript">
-  var bracketIndex = parseInt("${bracketInfo.bracketIndex}");
-  var bracketName = '${bracketInfo.bracketDivision}';
-  var firstRound = parseInt("${bracketInfo.firstRound}");
-  var lastRound = parseInt("${bracketInfo.lastRound}");
+  var bracketInfo = ${bracketInfoJson};  
 </script>
 
 
@@ -86,7 +83,7 @@ FONT.TIE {
 
 <body>
 
-  <h2>Playoff Bracket: ${bracketInfo.bracketDivision}</h2>
+  <h2>Playoff Bracket: ${bracketInfo.bracketName}</h2>
 
   ${bracketInfo.adminBracketOutput}
 

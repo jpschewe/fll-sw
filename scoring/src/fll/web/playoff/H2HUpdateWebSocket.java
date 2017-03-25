@@ -29,6 +29,7 @@ import javax.websocket.server.ServerEndpoint;
 import org.apache.log4j.Logger;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.db.Queries;
@@ -69,18 +70,18 @@ public class H2HUpdateWebSocket {
 
       for (final BracketInfo bracketInfo : allBracketInfo) {
 
-        if (!SESSIONS.containsKey(bracketInfo.bracketName)) {
-          SESSIONS.put(bracketInfo.bracketName, new HashSet<Session>());
+        if (!SESSIONS.containsKey(bracketInfo.getBracketName())) {
+          SESSIONS.put(bracketInfo.getBracketName(), new HashSet<Session>());
         }
 
-        SESSIONS.get(bracketInfo.bracketName).add(session);
+        SESSIONS.get(bracketInfo.getBracketName()).add(session);
 
         // send the current information for the bracket to the session so that
         // it's current
         final Collection<BracketUpdate> updates = Queries.getH2HBracketData(connection, currentTournament,
-                                                                            bracketInfo.bracketName,
-                                                                            bracketInfo.firstRound,
-                                                                            bracketInfo.lastRound);
+                                                                            bracketInfo.getBracketName(),
+                                                                            bracketInfo.getFirstRound(),
+                                                                            bracketInfo.getLastRound());
         for (final BracketUpdate update : updates) {
 
           final StringWriter writer = new StringWriter();
@@ -147,13 +148,18 @@ public class H2HUpdateWebSocket {
 
     try {
       final ObjectMapper jsonMapper = new ObjectMapper();
+      
+      // may get passed a javascript object with extra fields, just ignore them
+      // this happens when BracketInfo is subclassed and the subclass is passed in
+      jsonMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
       final Collection<BracketInfo> allBracketInfo = jsonMapper.readValue(reader, BracketInfoTypeInformation.INSTANCE);
 
       if (LOGGER.isTraceEnabled()) {
         for (final BracketInfo bracketInfo : allBracketInfo) {
           LOGGER.trace("Bracket name: "
-              + bracketInfo.bracketName + " first: " + bracketInfo.firstRound + " last: " + bracketInfo.lastRound);
+              + bracketInfo.getBracketName() + " first: " + bracketInfo.getFirstRound() + " last: "
+              + bracketInfo.getLastRound());
         }
       }
 
@@ -303,15 +309,6 @@ public class H2HUpdateWebSocket {
       this.score = null == score ? "" : fll.Utilities.NUMBER_FORMAT_INSTANCE.format(score);
       this.verified = verified;
     }
-  }
-
-  private static final class BracketInfo implements Serializable {
-
-    public int firstRound;
-
-    public int lastRound;
-
-    public String bracketName;
   }
 
   private static final class BracketInfoTypeInformation extends TypeReference<Collection<BracketInfo>> {
