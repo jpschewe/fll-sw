@@ -1,5 +1,6 @@
 package fll.web.playoff;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,6 +16,7 @@ import java.util.TreeMap;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.log4j.Logger;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -40,7 +42,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  * 
  * @author Dan Churchill
  */
-public class BracketData {
+public class BracketData extends BracketInfo implements Serializable {
 
   private static final Logger LOG = LogUtils.getLogger();
 
@@ -311,10 +313,6 @@ public class BracketData {
   // round number and line number.
   private final Map<Integer, SortedMap<Integer, BracketDataType>> _bracketData;
 
-  private int _firstRound;
-
-  private final int _lastRound;
-
   private final int _firstRoundSize;
 
   /**
@@ -337,12 +335,6 @@ public class BracketData {
   private final boolean _showOnlyVerifiedScores;
 
   private final Connection _connection;
-
-  private final String _division;
-
-  public String getBracketDivision() {
-    return _division;
-  }
 
   private final int _currentTournament;
 
@@ -393,9 +385,8 @@ public class BracketData {
                      final boolean pShowOnlyVerifiedScores,
                      final int bracketIndex)
       throws SQLException {
-    super();
+    super(pDivision, pFirstRound < 1 ? 1 : pFirstRound, pLastRound);
     _connection = pConnection;
-    _division = pDivision;
     _showFinalScores = pShowFinals;
     _showOnlyVerifiedScores = pShowOnlyVerifiedScores;
     _bracketIndex = bracketIndex;
@@ -410,20 +401,12 @@ public class BracketData {
     _currentTournament = Queries.getCurrentTournament(_connection);
 
     _rowsPerTeam = pRowsPerTeam;
-    _firstRoundSize = Queries.getFirstPlayoffRoundSize(_connection, _division);
+    _firstRoundSize = Queries.getFirstPlayoffRoundSize(_connection, getBracketName());
 
-    if (pFirstRound < 1) {
-      _firstRound = 1;
-    } else {
-      _firstRound = pFirstRound;
-    }
-
-    _lastRound = pLastRound;
-
-    _finalsRound = Queries.getNumPlayoffRounds(_connection, _division);
+    _finalsRound = Queries.getNumPlayoffRounds(_connection, getBracketName());
 
     _bracketData = new TreeMap<Integer, SortedMap<Integer, BracketDataType>>();
-    for (int i = _firstRound; i <= _lastRound; i++) {
+    for (int i = getFirstRound(); i <= getLastRound(); i++) {
       _bracketData.put(i, new TreeMap<Integer, BracketDataType>());
     }
 
@@ -433,7 +416,7 @@ public class BracketData {
     ResultSet minRunNumber = null;
     try {
       minRunNumberPrep = _connection.prepareStatement("select MIN(run_number) from PlayoffData WHERE event_division = ? AND Tournament = ?");
-      minRunNumberPrep.setString(1, _division);
+      minRunNumberPrep.setString(1, getBracketName());
       minRunNumberPrep.setInt(2, _currentTournament);
       minRunNumber = minRunNumberPrep.executeQuery();
       if (minRunNumber.next()) {
@@ -450,9 +433,9 @@ public class BracketData {
           + " AND PlayoffRound>= ?" //
           + " AND PlayoffRound<= ?");
       stmt.setInt(1, _currentTournament);
-      stmt.setString(2, _division);
-      stmt.setInt(3, _firstRound);
-      stmt.setInt(4, _lastRound);
+      stmt.setString(2, getBracketName());
+      stmt.setInt(3, getFirstRound());
+      stmt.setInt(4, getLastRound());
       rs = stmt.executeQuery();
       while (rs.next()) {
         final int round = rs.getInt(1);
@@ -475,7 +458,7 @@ public class BracketData {
           throw new RuntimeException("Error - Map keys were not unique - PlayoffData "
               + "might be inconsistent (you should verify that there are not multiple teams"
               + " occupying the same round and row for tournament:'" + _currentTournament + "' and" + " division:'"
-              + _division + "')");
+              + getBracketName() + "')");
         }
       }
 
@@ -510,16 +493,16 @@ public class BracketData {
   public int getRowNumberForLine(final int round,
                                  final int line) {
     final int adjustedRound = round
-        - _firstRound;
+        - getFirstRound();
     final int row;
-    if (_firstRound < _finalsRound
+    if (getFirstRound() < _finalsRound
         && round == _finalsRound && line == 3) {
       row = topRowOfConsolationBracket();
-    } else if (_firstRound < _finalsRound
+    } else if (getFirstRound() < _finalsRound
         && round == _finalsRound && line == 4) {
       row = topRowOfConsolationBracket()
           + _rowsPerTeam;
-    } else if (_firstRound < _finalsRound
+    } else if (getFirstRound() < _finalsRound
         && round == _finalsRound
             + 1
         && line == 2) {
@@ -566,25 +549,17 @@ public class BracketData {
    */
   public int getNumRows() {
     try {
-      if (_firstRound < _finalsRound
-          && _lastRound >= _finalsRound) {
+      if (getFirstRound() < _finalsRound
+          && getLastRound() >= _finalsRound) {
         final int sfr = _bracketData.get(_finalsRound).lastKey();
-        final int fr = _bracketData.get(_firstRound).lastKey();
+        final int fr = _bracketData.get(getFirstRound()).lastKey();
         return sfr > fr ? sfr : fr;
       } else {
-        return _bracketData.get(_firstRound).lastKey().intValue();
+        return _bracketData.get(getFirstRound()).lastKey().intValue();
       }
     } catch (final NoSuchElementException e) {
       return 0;
     }
-  }
-
-  public int getFirstRound() {
-    return _firstRound;
-  }
-
-  public int getLastRound() {
-    return _lastRound;
   }
 
   private int getFirstRoundSize() {
@@ -625,8 +600,8 @@ public class BracketData {
 
   /**
    * Inverse operation of {@link #parseLeafId(String)}.
-   * 
-   * Needs to match code in playoff/h2hutils.js that constructs a leaf ID as well.
+   * Needs to match code in playoff/h2hutils.js that constructs a leaf ID as
+   * well.
    */
   public static String constructLeafId(final int bracketIndex,
                                        final int dbLine,
@@ -844,6 +819,7 @@ public class BracketData {
    * 
    * @throws SQLException
    */
+  @JsonIgnore
   public String getDisplayBracketOutput() throws SQLException {
     return outputBrackets(BracketData.TopRightCornerStyle.MEET_TOP_OF_CELL);
   }
@@ -854,6 +830,7 @@ public class BracketData {
    * 
    * @throws SQLException
    */
+  @JsonIgnore
   public String getAdminBracketOutput() throws SQLException {
     return outputBrackets(BracketData.TopRightCornerStyle.MEET_BOTTOM_OF_CELL);
   }
@@ -889,7 +866,7 @@ public class BracketData {
    */
   private void appendHtmlHeaderRow(final StringBuilder sb) {
     sb.append("<tr>\n");
-    for (int i = _firstRound; i <= _lastRound
+    for (int i = getFirstRound(); i <= getLastRound()
         && i <= _finalsRound; i++) {
       sb.append("  <th colspan='2'>Head to Head Round "
           + i + "</th>\n");
@@ -915,8 +892,8 @@ public class BracketData {
                                     final int round,
                                     final TopRightCornerStyle cs) {
     final int ar = round
-        - _firstRound;
-    if (_firstRound < _finalsRound
+        - getFirstRound();
+    if (getFirstRound() < _finalsRound
         && rowIsInConsolationBracket(row)) {
       if (round != _finalsRound) {
         // This is a bridge cell before (or after!) the 3rd/4th place brackets -
@@ -1046,7 +1023,7 @@ public class BracketData {
    */
   private boolean rowIsInConsolationBracket(final int row) {
     final int firstDisplayedRoundSize = (getFirstRoundSize()
-        / ((int) Math.round(Math.pow(2, _firstRound
+        / ((int) Math.round(Math.pow(2, getFirstRound()
             - 1))));
     return row > (1
         + (firstDisplayedRoundSize
@@ -1056,7 +1033,7 @@ public class BracketData {
 
   private int topRowOfConsolationBracket() {
     final int firstDisplayedRoundSize = (getFirstRoundSize()
-        / ((int) Math.round(Math.pow(2, _firstRound
+        / ((int) Math.round(Math.pow(2, getFirstRound()
             - 1))));
     return 3
         + (firstDisplayedRoundSize
@@ -1090,16 +1067,16 @@ public class BracketData {
 
       if (roundNumber == _finalsRound) {
         it = rows.iterator();
-        roundData.put(it.next(), new BracketLabelCell(formatBracketLabel(_division, 1, roundNumber)));
+        roundData.put(it.next(), new BracketLabelCell(formatBracketLabel(getBracketName(), 1, roundNumber)));
         if (it.hasNext()) {
           // 3rd and 4th place is always the second match
-          roundData.put(it.next(), new BracketLabelCell(formatBracketLabel(_division, 2, roundNumber)));
+          roundData.put(it.next(), new BracketLabelCell(formatBracketLabel(getBracketName(), 2, roundNumber)));
         }
       } else {
         int bracketNumber = 1;
         it = rows.iterator();
         while (it.hasNext()) {
-          final String bracketLabel = formatBracketLabel(_division, bracketNumber, roundNumber);
+          final String bracketLabel = formatBracketLabel(getBracketName(), bracketNumber, roundNumber);
 
           roundData.put(it.next(), new BracketLabelCell(bracketLabel));
 
@@ -1144,8 +1121,8 @@ public class BracketData {
             tablelinemod = -1;
           }
           // Get the table assignment from cell info
-          final String table = Queries.getAssignedTable(_connection, _currentTournament, _division, round.intValue(),
-                                                        dblinenum);
+          final String table = Queries.getAssignedTable(_connection, _currentTournament, getBracketName(),
+                                                        round.intValue(), dblinenum);
           newCells.put(rowNumber.intValue()
               + tablelinemod, new BigScreenTableAssignmentCell(round.intValue(), rowNumber, table, dblinenum));
         }
@@ -1213,7 +1190,7 @@ public class BracketData {
 
     // Build the cells...
     int matchNum = 1;
-    for (int roundNumber = _firstRound; roundNumber <= _lastRound
+    for (int roundNumber = getFirstRound(); roundNumber <= getLastRound()
         && roundNumber <= _finalsRound; roundNumber++) {
       final SortedMap<Integer, BracketDataType> roundData = _bracketData.get(roundNumber);
       if (roundData != null) {
