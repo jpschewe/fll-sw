@@ -1,71 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<%@ page import="fll.web.playoff.BracketData"%>
-<%@ page import="fll.web.ApplicationAttributes"%>
-<%@ page import="java.sql.Connection"%>
-<%@ page import="fll.db.Queries"%>
-<%@ page import="javax.sql.DataSource"%>
-
 <%
-  /*
-			Parameters:
-			division - String for the division
-			*/
-
-			final DataSource datasource = ApplicationAttributes.getDataSource(application);
-			final Connection connection = datasource.getConnection();
-			final int currentTournament = Queries.getCurrentTournament(connection);
-
-			final String divisionStr = request.getParameter("division");
-			if (null == divisionStr) {
-				throw new RuntimeException(
-						"No playoff bracket specified, please go back to the <a href='index.jsp'>playoff main page</a> and start again.");
-			}
-			pageContext.setAttribute("bracketName", divisionStr);
-
-			final String specifiedFirstRound = request.getParameter("firstRound");
-			final String specifiedLastRound = request.getParameter("lastRound");
-			int firstRound;
-			try {
-				firstRound = Integer.parseInt(specifiedFirstRound);
-			} catch (NumberFormatException nfe) {
-				firstRound = 1;
-			}
-
-			final int lastColumn = 1 + Queries.getNumPlayoffRounds(connection, divisionStr);
-
-			int lastRound;
-			try {
-				lastRound = Integer.parseInt(specifiedLastRound);
-			} catch (NumberFormatException nfe) {
-				lastRound = lastColumn;
-			}
-
-			// Sanity check that the last round is valid
-			if (lastRound < 2) {
-				lastRound = 2;
-			}
-			if (lastRound > lastColumn) {
-				lastRound = lastColumn;
-			}
-			// Sanity check that the first round is valid
-			if (firstRound < 1) {
-				firstRound = 1;
-			}
-			if (firstRound > 1 && firstRound >= lastRound) {
-				firstRound = lastRound - 1; // force the display of at least 2 rounds
-			}
-
-			pageContext.setAttribute("firstRound", firstRound);
-			pageContext.setAttribute("lastRound", lastRound);
-
-			final BracketData bracketInfo = new BracketData(connection, divisionStr, firstRound, lastRound, 4, true,
-					false);
-
-			for (int i = 1; i < lastColumn; i++) {
-				bracketInfo.addBracketLabels(i);
-			}
-			bracketInfo.addStaticTableLabels();
+  fll.web.playoff.AdminBrackets.populateContext(request, application, pageContext);
 %>
 
 <html>
@@ -74,14 +10,14 @@
   rel="stylesheet"
   type="text/css"
   href="<c:url value='/style/fll-sw.css'/>" />
-<title><%=divisionStr%> Printable Playoff Bracket</title>
+<title>${bracketInfo.bracketDivision}PrintablePlayoff Bracket</title>
 </head>
 
 <script type="text/javascript">
-  var bracketName = '${bracketName}';
-  var bracketIndex = 0; // only a single bracket is displayed
-  var firstRound = parseInt("${firstRound}");
-  var lastRound = parseInt("${lastRound}");
+  var bracketIndex = parseInt("${bracketInfo.bracketIndex}");
+  var bracketName = '${bracketInfo.bracketDivision}';
+  var firstRound = parseInt("${bracketInfo.firstRound}");
+  var lastRound = parseInt("${bracketInfo.lastRound}");
 </script>
 
 
@@ -150,11 +86,9 @@ FONT.TIE {
 
 <body>
 
-  <h2>
-    Playoff Bracket:
-    <%=divisionStr%></h2>
+  <h2>Playoff Bracket: ${bracketInfo.bracketDivision}</h2>
 
-  <%=bracketInfo.outputBrackets(BracketData.TopRightCornerStyle.MEET_BOTTOM_OF_CELL)%>
+  ${bracketInfo.adminBracketOutput}
 
 </body>
 </html>

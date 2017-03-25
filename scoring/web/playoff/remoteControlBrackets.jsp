@@ -253,7 +253,7 @@ SPAN.TIE {
         ${bracketInfo.bracketDivision}</div>
       <br />
                         
-   ${bracketInfo.topRightBracketOutput}
+   ${bracketInfo.displayBracketOutput}
      <c:if test="${allBracketInfo.size() > 1}">
        <br />
        <br />

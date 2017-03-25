@@ -583,7 +583,7 @@ public class BracketData {
     return _firstRound;
   }
 
-  private int getLastRound() {
+  public int getLastRound() {
     return _lastRound;
   }
 
@@ -840,12 +840,22 @@ public class BracketData {
 
   /**
    * Calls {@link #outputBrackets(TopRightCornerStyle)} with
+   * {@link TopRightCornerStyle#MEET_TOP_OF_CELL}.
+   * 
+   * @throws SQLException
+   */
+  public String getDisplayBracketOutput() throws SQLException {
+    return outputBrackets(BracketData.TopRightCornerStyle.MEET_TOP_OF_CELL);
+  }
+
+  /**
+   * Calls {@link #outputBrackets(TopRightCornerStyle)} with
    * {@link TopRightCornerStyle#MEET_BOTTOM_OF_CELL}.
    * 
    * @throws SQLException
    */
-  public String getTopRightBracketOutput() throws SQLException {
-    return outputBrackets(BracketData.TopRightCornerStyle.MEET_TOP_OF_CELL);
+  public String getAdminBracketOutput() throws SQLException {
+    return outputBrackets(BracketData.TopRightCornerStyle.MEET_BOTTOM_OF_CELL);
   }
 
   private void outputTableSelect(final StringBuilder sb,
