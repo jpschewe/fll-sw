@@ -853,7 +853,7 @@
         <include name="*.md" />
       </fileset>
 
-      <mapper type="glob" from="*.md" to="*.pdf" />
+      <mapper type="glob" from="*.md" to="*.html" />
 
     </apply>
 
