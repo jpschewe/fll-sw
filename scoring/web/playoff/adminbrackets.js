@@ -33,6 +33,11 @@ function messageReceived(event) {
 
   console.log("received: " + event.data);
   var bracketUpdate = JSON.parse(event.data);
+  if(bracketUpdate.bracketName != bracketInfo.bracketName) {
+    // not for us
+    return;
+  }
+  
   var leafId = constructLeafId(bracketInfo.bracketIndex, bracketUpdate.dbLine,
       bracketUpdate.playoffRound);
 
