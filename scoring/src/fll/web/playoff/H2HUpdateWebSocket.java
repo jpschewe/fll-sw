@@ -209,6 +209,7 @@ public class H2HUpdateWebSocket {
    *          may be null
    * @param teamName team name, may be null
    * @param score the score for the team, may be null
+   * @param table the table for the team, may be null
    */
   public static void updateBracket(final String bracketName,
                                    final int dbLine,
@@ -216,9 +217,10 @@ public class H2HUpdateWebSocket {
                                    final Integer teamNumber,
                                    final String teamName,
                                    final Double score,
-                                   final boolean verified) {
+                                   final boolean verified,
+                                   final String table) {
     final BracketUpdate update = new BracketUpdate(bracketName, dbLine, playoffRound, teamNumber, teamName, score,
-                                                   verified);
+                                                   verified, table);
 
     synchronized (SESSIONS_LOCK) {
       if (!SESSIONS.containsKey(bracketName)) {
@@ -289,6 +291,11 @@ public class H2HUpdateWebSocket {
      * True if the information has been verified.
      */
     public boolean verified;
+    
+    /**
+     * The table may be null if one has not yet been assigned.
+     */
+    public String table;
 
     public BracketUpdate() {
     }
@@ -299,7 +306,8 @@ public class H2HUpdateWebSocket {
                          final Integer teamNumber,
                          final String teamName,
                          final Double score,
-                         final boolean verified) {
+                         final boolean verified,
+                         final String table) {
       this.bracketName = bracketName;
       this.dbLine = dbLine;
       this.playoffRound = playoffRound;
@@ -308,6 +316,7 @@ public class H2HUpdateWebSocket {
       // TODO #528 update this with the appropriate number formatter
       this.score = null == score ? "" : fll.Utilities.NUMBER_FORMAT_INSTANCE.format(score);
       this.verified = verified;
+      this.table = table;
     }
   }
 
