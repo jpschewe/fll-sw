@@ -57,9 +57,6 @@ SPAN.TIE {
 </style>
 <script
   type="text/javascript"
-  src="<c:url value='/playoff/code.icepush'/>"></script>
-<script
-  type="text/javascript"
   src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
 <script
   type="text/javascript"
@@ -102,68 +99,6 @@ SPAN.TIE {
         + "</span><span class=\"TeamScore\"> Score: " + scoreData + "</span>";
   }
 
-  var ajaxList;
-
-  function iterate() {
-    $.ajax({
-      url : ajaxURL + "BracketQuery?multi=" + ajaxList,
-      dataType : "json",
-      cache : false,
-      beforeSend : function(xhr) {
-        xhr.overrideMimeType('text/plain');
-      }
-    }).done(
-        function(mainData) {
-          $.each(mainData, function(index, data) {
-            var lid = data.originator;
-            //First and foremost, make sure rounds haven't advanced and the division is the same.
-            if (mainData.refresh == "true") {
-              window.location.reload();
-            } else {
-              if (data.leaf.team) {
-                if (data.leaf.team.teamNumber < 0) {
-                  // internal teams 
-
-                  if (data.leaf.team.teamNumber == -3) {
-                    // NULL team number
-                    return;
-                  }
-                  $("#" + lid).html(
-                      displayStrings.getSpecialString(lid, data.leaf));
-                  return;
-                } else {
-                  var score;
-                  //table label?
-                  placeTableLabel(lid, data.leaf.table, data.leaf.dbline);
-                  var scoreData = data.score;
-                  if (scoreData >= 0) {
-                    $("#" + lid).html(
-                        displayStrings.getTeamNameAndScoreString(lid,
-                            data.leaf, scoreData));
-                    return;
-                  } else if (scoreData == -2) {
-                    $("#" + lid).html(
-                        displayStrings.getTeamNameAndScoreString(lid,
-                            data.leaf, "No Show"));
-                    return;
-                  } else if (scoreData == -1) {
-                    $("#" + lid).html(
-                        displayStrings.getTeamNameString(lid, data.leaf));
-                    return;
-                  } // /else
-                } // else if team num not a bye
-              } // have a team number
-            } // not refresh
-          }); // each of data
-          colorTableLabels();
-        }).error(function(xhr, errstring, err) {
-      window.location.reload();
-      console.log(xhr);
-      console.log(errstring);
-      console.log(err);
-    }); // /first .ajax
-  } // /iterate()
-
   var validColors = new Array();
   validColors[0] = "maroon";
   validColors[1] = "red";
@@ -202,19 +137,6 @@ SPAN.TIE {
         });
   }
 
-  function buildAJAXList() {
-    ajaxList = ""; // initialize to empty string
-
-    $(".js-leaf").each(function() {
-      if (typeof $(this).attr('id') == 'string') { // non-null id
-        ajaxList = ajaxList + $(this).attr('id') + "|";
-      }
-    });
-
-    //remove last pipe
-    ajaxList = ajaxList.slice(0, ajaxList.length - 1);
-  }
-
   function scrollToBottom() {
     $.scrollTo($("#bottom"), {
       duration : rows * 1000,
@@ -232,16 +154,12 @@ SPAN.TIE {
   }
 
   $(document).ready(function() {
-    buildAJAXList();
     <c:if test="${empty param.scroll}">
     scrollToBottom();
     </c:if>
     colorTableLabels();
   });
 </script>
-<icep:register
-  group="playoffs"
-  callback="function(){iterate();}" />
 </head>
 <body>
   <!-- dummy tag and some blank lines for scrolling -->
