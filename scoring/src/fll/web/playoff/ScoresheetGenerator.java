@@ -40,6 +40,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 import fll.Team;
 import fll.Utilities;
 import fll.Version;
+import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.util.FP;
@@ -183,7 +184,7 @@ public class ScoresheetGenerator {
           if (checkedMatches[i]) {
             final String round = request.getParameter("round"
                 + i);
-            final int iRound = Integer.parseInt(round);
+            final int playoffRound = Integer.parseInt(round);
 
             // Get teamA info
             final Team teamA = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("teamA"
@@ -195,7 +196,7 @@ public class ScoresheetGenerator {
             m_table[j] = request.getParameter("tableA"
                 + i);
 
-            final int performanceRunA = Playoff.getRunNumber(connection, division, teamA.getTeamNumber(), iRound);
+            final int performanceRunA = Playoff.getRunNumber(connection, division, teamA.getTeamNumber(), playoffRound);
             m_divisionLabel[j] = HEAD_TO_HEAD_LABEL;
             m_division[j] = division;
             final int bracketA = Playoff.getBracketNumber(connection, tournament, teamA.getTeamNumber(),
@@ -205,11 +206,17 @@ public class ScoresheetGenerator {
 
             updatePrep.setString(1, m_table[j]);
             updatePrep.setString(2, division);
-            updatePrep.setInt(4, iRound);
+            updatePrep.setInt(4, playoffRound);
             updatePrep.setInt(5, teamA.getTeamNumber());
             if (updatePrep.executeUpdate() < 1) {
               LOGGER.warn(String.format("Could not update playoff table and print flags for team: %s playoff round: %s playoff bracket: %s",
-                                        teamA.getTeamNumber(), iRound, division));
+                                        teamA.getTeamNumber(), playoffRound, division));
+            } else {
+              // update the brackets with the table name
+              final int dbLine = Queries.getPlayoffTableLineNumber(connection, tournament, teamA.getTeamNumber(),
+                                                                   performanceRunA);
+              H2HUpdateWebSocket.updateBracket(division, dbLine, playoffRound, teamA.getTeamNumber(),
+                                               teamA.getTeamName(), null, true, m_table[j]);
             }
             j++;
 
@@ -223,7 +230,7 @@ public class ScoresheetGenerator {
             m_table[j] = request.getParameter("tableB"
                 + i);
 
-            final int performanceRunB = Playoff.getRunNumber(connection, division, teamB.getTeamNumber(), iRound);
+            final int performanceRunB = Playoff.getRunNumber(connection, division, teamB.getTeamNumber(), playoffRound);
             m_divisionLabel[j] = HEAD_TO_HEAD_LABEL;
             m_division[j] = division;
             final int bracketB = Playoff.getBracketNumber(connection, tournament, teamB.getTeamNumber(),
@@ -233,11 +240,17 @@ public class ScoresheetGenerator {
 
             updatePrep.setString(1, m_table[j]);
             updatePrep.setString(2, division);
-            updatePrep.setInt(4, iRound);
+            updatePrep.setInt(4, playoffRound);
             updatePrep.setInt(5, teamB.getTeamNumber());
             if (updatePrep.executeUpdate() < 1) {
               LOGGER.warn(String.format("Could not update playoff table and print flags for team: %s playoff round: %s playoff bracket: %s",
-                                        teamB.getTeamNumber(), iRound, division));
+                                        teamB.getTeamNumber(), playoffRound, division));
+            } else {
+              // update the brackets with the table name
+              final int dbLine = Queries.getPlayoffTableLineNumber(connection, tournament, teamB.getTeamNumber(),
+                                                                   performanceRunB);
+              H2HUpdateWebSocket.updateBracket(division, dbLine, playoffRound, teamA.getTeamNumber(),
+                                               teamA.getTeamName(), null, true, m_table[j]);
             }
             j++;
           }
