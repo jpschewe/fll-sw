@@ -762,7 +762,12 @@ public final class Queries {
         final Team team = Team.getTeamFromDatabase(connection, teamNumber);
         final int playoffRound = Playoff.getPlayoffRound(connection, bracketName, runNumber);
         final double score = performanceElement.evaluate(teamScore);
-        H2HUpdateWebSocket.updateBracket(bracketName, dbLine, playoffRound, teamNumber, team.getTeamName(), score, false);
+
+        final String table = Queries.getAssignedTable(connection, tournament.getTournamentID(), bracketName,
+                                                      playoffRound, dbLine);
+
+        H2HUpdateWebSocket.updateBracket(bracketName, dbLine, playoffRound, teamNumber, team.getTeamName(), score,
+                                         false, table);
       }
     } else {
       tournament.recordPerformanceSeedingModified(connection);
@@ -952,8 +957,10 @@ public final class Queries {
         LOGGER.trace("Sending H2HUpdate with score: "
             + score);
       }
+
+      final String table = Queries.getAssignedTable(connection, currentTournament, division, playoffRun, ptLine);
       H2HUpdateWebSocket.updateBracket(division, ptLine, playoffRun, teamNumber, team.getTeamName(),
-                                       Double.isNaN(score) ? null : score, verified);
+                                       Double.isNaN(score) ? null : score, verified, table);
 
       final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division, (ptLine
           % 2 == 0
@@ -1162,7 +1169,12 @@ public final class Queries {
             // send H2H update that this team's score is now null
             final Team team = Team.getTeamFromDatabase(connection, teamNumber);
             final int playoffRound = Playoff.getPlayoffRound(connection, division, irunNumber);
-            H2HUpdateWebSocket.updateBracket(division, ptLine, playoffRound, teamNumber, team.getTeamName(), null, true);
+
+            final String table = Queries.getAssignedTable(connection, currentTournament, division, playoffRound,
+                                                          ptLine);
+
+            H2HUpdateWebSocket.updateBracket(division, ptLine, playoffRound, teamNumber, team.getTeamName(), null, true,
+                                             table);
           }
         } else {
           // Do nothing - team didn't get entered into the PlayoffData table.
@@ -1204,7 +1216,7 @@ public final class Queries {
                                          final String division,
                                          final int currentTournament,
                                          final int runNumber,
-                                         final int lineNumber,                                         
+                                         final int lineNumber,
                                          final Double score,
                                          final boolean verified)
       throws SQLException {
@@ -1229,7 +1241,7 @@ public final class Queries {
     }
 
     final int playoffRound = Playoff.getPlayoffRound(connection, division, runNumber);
-    
+
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Sending H2H update" //
           + " team: " + team.getTeamNumber() //
@@ -1240,8 +1252,10 @@ public final class Queries {
       );
 
     }
-    H2HUpdateWebSocket.updateBracket(division, lineNumber, playoffRound, team.getTeamNumber(), team.getTeamName(), score,
-                                     verified);
+
+    final String table = Queries.getAssignedTable(connection, currentTournament, division, playoffRound, lineNumber);
+    H2HUpdateWebSocket.updateBracket(division, lineNumber, playoffRound, team.getTeamNumber(), team.getTeamName(),
+                                     score, verified, table);
   }
 
   /**
@@ -2723,8 +2737,9 @@ public final class Queries {
   }
 
   /**
-   * Returns the table assignment string for the given tournament, event
-   * division, round number, and line number. If the table assignment is NULL,
+   * Returns the table assignment string for the given tournament, bracket name,
+   * playoff round number, and database line number. If the table assignment is
+   * NULL,
    * returns null.
    */
   public static String getAssignedTable(final Connection connection,
