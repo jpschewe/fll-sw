@@ -163,7 +163,7 @@ SPAN.TIE {
 </head>
 <body>
   <!-- dummy tag and some blank lines for scrolling -->
-  <span id="top"></span>
+  <span id="top">&nbsp;</span>
   <div
     id="dummy"
     style="position: absolute">
