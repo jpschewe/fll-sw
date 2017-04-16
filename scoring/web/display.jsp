@@ -41,8 +41,8 @@
 		if (!connected) {
 			connected = true;
 
-			// display index for a second so that the browser doesn't cache
-			displayPage('<c:url value="/public"/>');
+			// display welcome for a second so that the browser doesn't cache the page currenty displayed
+			displayPage('<c:url value="/welcome.jsp"/>');
 
 			// display the page that we want to see
 			setTimeout(function() {
