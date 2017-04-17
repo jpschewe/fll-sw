@@ -66,7 +66,13 @@ SPAN.TIE {
   var allBracketInfo = ${allBracketInfoJson};  
 </script>
 
-  
+<script
+  type='text/javascript'
+  src='h2hutils.js'></script>
+<script
+  type='text/javascript'
+  src='remoteControlBrackets.js'></script>
+
 <script type="text/javascript">
   var rows = parseInt("${numRows}"); // could be here directly as an intger, but the JSTL and auto-formatting don't agree
   var maxNameLength = parseInt("${maxNameLength}"); // could be here directly as an intger, but the JSTL and auto-formatting don't agree

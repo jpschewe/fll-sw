@@ -32,17 +32,26 @@ function populateLeaf(leafId, teamNumber, teamName, score, verified) {
 function messageReceived(event) {
 
   console.log("received: " + event.data);
-  var bracketUpdate = JSON.parse(event.data);
-  if(bracketUpdate.bracketName != bracketInfo.bracketName) {
-    // not for us
-    return;
-  }
-  
-  var leafId = constructLeafId(bracketInfo.bracketIndex, bracketUpdate.dbLine,
-      bracketUpdate.playoffRound);
+  var bracketMessage = JSON.parse(event.data);
+  if (bracketMessage.isBracketUpdate) {
+    if (bracketMessage.bracketUpdate.bracketName != bracketInfo.bracketName) {
+      // not for us
+      return;
+    }
 
-  populateLeaf(leafId, bracketUpdate.teamNumber, bracketUpdate.teamName,
-      bracketUpdate.score, bracketUpdate.verified);
+    var leafId = constructLeafId(bracketInfo.bracketIndex,
+        bracketMessage.bracketUpdate.dbLine,
+        bracketMessage.bracketUpdate.playoffRound);
+
+    populateLeaf(leafId, breacketMessage.bracketUpdate.teamNumber,
+        bracketMessage.bracketUpdate.teamName,
+        bracketMessage.bracketUpdate.score,
+        bracketMessage.bracketUpdate.verified);
+  }
+  if(bracketMessage.isDisplayUpdate) {
+    // currently ignored, but may be useful in the future
+    //console.log("Display update: " + bracketMessage.allBracketInfo);
+  }
 }
 
 function socketOpened(event) {
@@ -76,6 +85,5 @@ function openSocket() {
 }
 
 $(document).ready(function() {
-  console.log("Top of ready");
   openSocket();
 });
