@@ -16,6 +16,8 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -37,6 +39,7 @@ import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
+import fll.web.DisplayInfo;
 import fll.web.GetHttpSessionConfigurator;
 
 /**
@@ -48,6 +51,8 @@ public class H2HUpdateWebSocket {
   private static final Logger LOGGER = LogUtils.getLogger();
 
   private static final Map<String, Set<Session>> SESSIONS = new HashMap<>();
+
+  private static final Set<Session> ALL_SESSIONS = new HashSet<>();
 
   private static final Object SESSIONS_LOCK = new Object();
 
@@ -68,6 +73,10 @@ public class H2HUpdateWebSocket {
     synchronized (SESSIONS_LOCK) {
       final ObjectMapper jsonMapper = new ObjectMapper();
 
+      ALL_SESSIONS.add(session);
+
+      updateDisplayedBracket(session);
+
       for (final BracketInfo bracketInfo : allBracketInfo) {
 
         if (!SESSIONS.containsKey(bracketInfo.getBracketName())) {
@@ -84,56 +93,21 @@ public class H2HUpdateWebSocket {
                                                                             bracketInfo.getLastRound());
         for (final BracketUpdate update : updates) {
 
+          final BracketMessage message = new BracketMessage();
+          message.isBracketUpdate = true;
+          message.bracketUpdate = update;
+
           final StringWriter writer = new StringWriter();
           try {
-            jsonMapper.writeValue(writer, update);
+            jsonMapper.writeValue(writer, message);
           } catch (final IOException e) {
             throw new FLLInternalException("Error writing JSON for brackets", e);
           }
-          final String message = writer.toString();
-          session.getBasicRemote().sendText(message);
+          session.getBasicRemote().sendText(writer.toString());
         } // foreach update
+
       }
     }
-  }
-
-  public static void sendMessage(final String bracketName,
-                                 final String message) {
-    synchronized (SESSIONS_LOCK) {
-      if (!SESSIONS.containsKey(bracketName)) {
-        return;
-      }
-
-      final Set<Session> toRemove = new HashSet<>();
-
-      final Set<Session> sessions = SESSIONS.get(bracketName);
-      for (final Session session : sessions) {
-        if (session.isOpen()) {
-          try {
-            session.getBasicRemote().sendText(message);
-          } catch (final IOException ioe) {
-            LOGGER.error("Got error sending message to session ("
-                + session.getId() + "), dropping session", ioe);
-            toRemove.add(session);
-          }
-        } else {
-          toRemove.add(session);
-        }
-      } // foreach session
-
-      // cleanup dead sessions
-      for (final Session session : toRemove) {
-        try {
-          session.close();
-        } catch (final IOException ioe) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Got error closing session, ignoring", ioe);
-          }
-        }
-        sessions.remove(session);
-      } // foreach session to remove
-
-    } // end lock
   }
 
   @OnMessage
@@ -148,9 +122,10 @@ public class H2HUpdateWebSocket {
 
     try {
       final ObjectMapper jsonMapper = new ObjectMapper();
-      
+
       // may get passed a javascript object with extra fields, just ignore them
-      // this happens when BracketInfo is subclassed and the subclass is passed in
+      // this happens when BracketInfo is subclassed and the subclass is passed
+      // in
       jsonMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
       final Collection<BracketInfo> allBracketInfo = jsonMapper.readValue(reader, BracketInfoTypeInformation.INSTANCE);
@@ -181,6 +156,53 @@ public class H2HUpdateWebSocket {
     }
   }
 
+  private static void updateDisplayedBracket(final Session session) {
+
+    if (session.isOpen()) {
+
+      final HttpSession httpSession = (HttpSession) session.getUserProperties()
+                                                           .get(GetHttpSessionConfigurator.HTTP_SESSION_KEY);
+      final ServletContext httpApplication = httpSession.getServletContext();
+
+      final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(httpApplication, httpSession);
+
+      final BracketMessage message = new BracketMessage();
+      message.isDisplayUpdate = true;
+
+      for (final DisplayInfo.H2HBracketDisplay h2hBracket : displayInfo.getBrackets()) {
+        final BracketInfo bracketInfo = new BracketInfo(h2hBracket.getBracket(), h2hBracket.getFirstRound(),
+                                                        h2hBracket.getFirstRound()
+                                                            + 2);
+
+        message.allBracketInfo.add(bracketInfo);
+      } // foreach h2h bracket
+
+      // expose all bracketInfo to the javascript
+      final ObjectMapper jsonMapper = new ObjectMapper();
+      try (final StringWriter writer = new StringWriter()) {
+        jsonMapper.writeValue(writer, message);
+        final String allBracketInfoJson = writer.toString();
+
+        session.getBasicRemote().sendText(allBracketInfoJson);
+      } catch (final IOException e) {
+        throw new FLLInternalException("Error writing JSON for allBracketInfo", e);
+      }
+    } // open session
+  }
+
+  /**
+   * Send each display the most recent bracket information to show.
+   */
+  public static void updateDisplayedBracket() {
+    synchronized (SESSIONS_LOCK) {
+      for (final Session session : ALL_SESSIONS) {
+        updateDisplayedBracket(session);
+      } // foreach session
+
+    } // sessions lock
+
+  }
+
   /**
    * Update the head to head display.
    * 
@@ -201,8 +223,10 @@ public class H2HUpdateWebSocket {
                                    final Double score,
                                    final boolean verified,
                                    final String table) {
-    final BracketUpdate update = new BracketUpdate(bracketName, dbLine, playoffRound, teamNumber, teamName, score,
-                                                   verified, table);
+    final BracketMessage message = new BracketMessage();
+    message.isBracketUpdate = true;
+    message.bracketUpdate = new BracketUpdate(bracketName, dbLine, playoffRound, teamNumber, teamName, score, verified,
+                                              table);
 
     synchronized (SESSIONS_LOCK) {
       if (!SESSIONS.containsKey(bracketName)) {
@@ -216,17 +240,17 @@ public class H2HUpdateWebSocket {
       final StringWriter writer = new StringWriter();
 
       try {
-        jsonMapper.writeValue(writer, update);
+        jsonMapper.writeValue(writer, message);
       } catch (final IOException e) {
         throw new FLLInternalException("Error writing JSON for brackets", e);
       }
-      final String message = writer.toString();
+      final String messageText = writer.toString();
 
       final Set<Session> sessions = SESSIONS.get(bracketName);
       for (final Session session : sessions) {
         if (session.isOpen()) {
           try {
-            session.getBasicRemote().sendText(message);
+            session.getBasicRemote().sendText(messageText);
           } catch (final IOException ioe) {
             LOGGER.error("Got error sending message to session ("
                 + session.getId() + "), dropping session", ioe);
@@ -246,10 +270,33 @@ public class H2HUpdateWebSocket {
             LOGGER.debug("Got error closing session, ignoring", ioe);
           }
         }
+
         sessions.remove(session);
+        ALL_SESSIONS.remove(session);
       } // foreach session to remove
 
     } // end lock
+
+  }
+
+  /**
+   * Message sent on the WebSocket.
+   */
+  public static final class BracketMessage implements Serializable {
+
+    /**
+     * If true, then {@link #bracketUpdate} must be populated.
+     */
+    public boolean isBracketUpdate = false;
+
+    public BracketUpdate bracketUpdate;
+
+    /**
+     * If true then {@link #allBracketInfo} must be populated.
+     */
+    public boolean isDisplayUpdate = false;
+
+    public List<BracketInfo> allBracketInfo = new LinkedList<>();
 
   }
 
@@ -273,7 +320,7 @@ public class H2HUpdateWebSocket {
      * True if the information has been verified.
      */
     public boolean verified;
-    
+
     /**
      * The table may be null if one has not yet been assigned.
      */
