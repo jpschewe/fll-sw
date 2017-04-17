@@ -68,7 +68,6 @@ SPAN.TIE {
 
   
 <script type="text/javascript">
-  var ajaxURL = '<c:url value="/ajax/"/>';
   var rows = parseInt("${numRows}"); // could be here directly as an intger, but the JSTL and auto-formatting don't agree
   var maxNameLength = parseInt("${maxNameLength}"); // could be here directly as an intger, but the JSTL and auto-formatting don't agree
 
