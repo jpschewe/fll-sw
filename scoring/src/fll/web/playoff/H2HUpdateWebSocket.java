@@ -179,24 +179,6 @@ public class H2HUpdateWebSocket {
       LOGGER.error("Error getting playoffdata from the database", e);
       throw new FLLRuntimeException("Error getting playoff data from the database", e);
     }
-
-    // // just echo for testing
-    // try {
-    // if (session.isOpen()) {
-    // LOGGER.trace("Sending back text message: "
-    // + msg);
-    // session.getBasicRemote().sendText(msg);
-    // } else {
-    // LOGGER.error("Session is not open");
-    // }
-    // } catch (IOException e) {
-    // LOGGER.error("Error sending text message, closing socket", e);
-    // try {
-    // session.close();
-    // } catch (IOException e1) {
-    // // Ignore
-    // }
-    // }
   }
 
   /**
