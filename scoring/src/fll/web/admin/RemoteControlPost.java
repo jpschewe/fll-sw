@@ -121,7 +121,6 @@ public class RemoteControlPost extends BaseFLLServlet {
     H2HUpdateWebSocket.updateDisplayedBracket();
 
     PushContext pc = PushContext.getInstance(application);
-    pc.push("playoffs");
     pc.push("display");
     session.setAttribute(SessionAttributes.MESSAGE, "<i id='success'>Successfully set remote control parameters</i>");
 

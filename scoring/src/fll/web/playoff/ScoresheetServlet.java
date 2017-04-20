@@ -18,10 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.log4j.Logger;
-import org.icepush.PushContext;
 
 import com.itextpdf.text.DocumentException;
 
@@ -31,6 +28,7 @@ import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.xml.ChallengeDescription;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 @WebServlet("/playoff/ScoresheetServlet")
 public class ScoresheetServlet extends BaseFLLServlet {
@@ -51,9 +49,6 @@ public class ScoresheetServlet extends BaseFLLServlet {
       response.reset();
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=scoreSheet.pdf");
-
-      PushContext pc = PushContext.getInstance(application);
-      pc.push("playoffs");
 
       final boolean orientationIsPortrait = ScoresheetGenerator.guessOrientation(challengeDescription);
 
