@@ -34,6 +34,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import fll.Team;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -221,12 +222,13 @@ public class H2HUpdateWebSocket {
                                    final Integer teamNumber,
                                    final String teamName,
                                    final Double score,
+                                   final boolean noShow,
                                    final boolean verified,
                                    final String table) {
     final BracketMessage message = new BracketMessage();
     message.isBracketUpdate = true;
-    message.bracketUpdate = new BracketUpdate(bracketName, dbLine, playoffRound, teamNumber, teamName, score, verified,
-                                              table);
+    message.bracketUpdate = new BracketUpdate(bracketName, dbLine, playoffRound, teamNumber, teamName, score, noShow,
+                                              verified, table);
 
     synchronized (SESSIONS_LOCK) {
       if (!SESSIONS.containsKey(bracketName)) {
@@ -321,6 +323,8 @@ public class H2HUpdateWebSocket {
      */
     public boolean verified;
 
+    public boolean noShow;
+
     /**
      * The table may be null if one has not yet been assigned.
      */
@@ -335,17 +339,20 @@ public class H2HUpdateWebSocket {
                          final Integer teamNumber,
                          final String teamName,
                          final Double score,
+                         final boolean noShow,
                          final boolean verified,
                          final String table) {
       this.bracketName = bracketName;
       this.dbLine = dbLine;
       this.playoffRound = playoffRound;
-      this.teamNumber = teamNumber;
+      this.teamNumber = null != teamNumber
+          && Team.NULL_TEAM_NUMBER == teamNumber ? null : teamNumber;
       this.teamName = teamName;
       // TODO #528 update this with the appropriate number formatter
       this.score = null == score ? "" : fll.Utilities.NUMBER_FORMAT_INSTANCE.format(score);
       this.verified = verified;
       this.table = table;
+      this.noShow = noShow;
     }
   }
 
