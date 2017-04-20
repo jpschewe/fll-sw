@@ -46,41 +46,41 @@ public class RemoteControlBrackets {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
     // can't close the database connection here as it's used inside
-    // bracketInfo to create the output, which is called after this scope exits
+    // bracketData to create the output, which is called after this scope exits
     try {
       final Connection connection = datasource.getConnection();
 
       pageContext.setAttribute("maxNameLength", Team.MAX_TEAM_NAME_LEN);
 
-      final List<BracketData> allBracketInfo = new LinkedList<>();
+      final List<BracketData> allBracketData = new LinkedList<>();
 
       int numRows = 0;
       for (final DisplayInfo.H2HBracketDisplay h2hBracket : displayInfo.getBrackets()) {
-        final BracketData bracketInfo = new BracketData(connection, h2hBracket.getBracket(), h2hBracket.getFirstRound(),
+        final BracketData bracketData = new BracketData(connection, h2hBracket.getBracket(), h2hBracket.getFirstRound(),
                                                         h2hBracket.getFirstRound()
                                                             + 2,
                                                         4, false, true, h2hBracket.getIndex());
 
-        bracketInfo.addBracketLabels(h2hBracket.getFirstRound());
-        bracketInfo.addStaticTableLabels();
+        bracketData.addBracketLabels(h2hBracket.getFirstRound());
+        bracketData.addStaticTableLabels();
 
-        numRows += bracketInfo.getNumRows();
+        numRows += bracketData.getNumRows();
 
-        allBracketInfo.add(bracketInfo);
+        allBracketData.add(bracketData);
       }
 
-      pageContext.setAttribute("allBracketInfo", allBracketInfo);
+      pageContext.setAttribute("allBracketData", allBracketData);
 
-      // expose all bracketInfo to the javascript
+      // expose allBracketData to the javascript
       final ObjectMapper jsonMapper = new ObjectMapper();
       final StringWriter writer = new StringWriter();
       try {
-        jsonMapper.writeValue(writer, allBracketInfo);
+        jsonMapper.writeValue(writer, allBracketData);
       } catch (final IOException e) {
-        throw new FLLInternalException("Error writing JSON for allBracketInfo", e);
+        throw new FLLInternalException("Error writing JSON for allBracketData", e);
       }
-      final String allBracketInfoJson = writer.toString();
-      pageContext.setAttribute("allBracketInfoJson", allBracketInfoJson);
+      final String allBracketDataJson = writer.toString();
+      pageContext.setAttribute("allBracketDataJson", allBracketDataJson);
 
       // used for scroll control
       pageContext.setAttribute("numRows", numRows);

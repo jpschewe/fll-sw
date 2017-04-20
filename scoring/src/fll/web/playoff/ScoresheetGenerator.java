@@ -216,7 +216,7 @@ public class ScoresheetGenerator {
               final int dbLine = Queries.getPlayoffTableLineNumber(connection, tournament, teamA.getTeamNumber(),
                                                                    performanceRunA);
               H2HUpdateWebSocket.updateBracket(division, dbLine, playoffRound, teamA.getTeamNumber(),
-                                               teamA.getTeamName(), null, true, m_table[j]);
+                                               teamA.getTeamName(), null, false, true, m_table[j]);
             }
             j++;
 
@@ -250,7 +250,7 @@ public class ScoresheetGenerator {
               final int dbLine = Queries.getPlayoffTableLineNumber(connection, tournament, teamB.getTeamNumber(),
                                                                    performanceRunB);
               H2HUpdateWebSocket.updateBracket(division, dbLine, playoffRound, teamA.getTeamNumber(),
-                                               teamA.getTeamName(), null, true, m_table[j]);
+                                               teamA.getTeamName(), null, false, true, m_table[j]);
             }
             j++;
           }

@@ -731,7 +731,7 @@ public class BracketData extends BracketInfo implements Serializable {
       final String table = tableCell.getTable();
 
       // reference the row and round for the leaf that the table is for
-      final String leafId = constructLeafId(tableCell.getRow(), tableCell.getRound());
+      final String leafId = constructLeafId(tableCell.getDbLine(), tableCell.getRound());
 
       // always setup the html for a table assignment, just don't put the data
       // in it until it's available
