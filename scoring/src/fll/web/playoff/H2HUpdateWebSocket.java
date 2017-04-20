@@ -24,6 +24,7 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
+import javax.websocket.OnError;
 import javax.websocket.OnMessage;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
@@ -34,7 +35,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import fll.Team;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -210,6 +210,7 @@ public class H2HUpdateWebSocket {
    * @param bracketName the bracket being updated
    * @param dbLine the line in the database
    * @param playoffRound the playoff round
+   * @param maxPlayoffRound the last playoff round for the bracket
    * @param teamNumber the team that is at the specified row and playoff round,
    *          may be null
    * @param teamName team name, may be null
@@ -219,6 +220,7 @@ public class H2HUpdateWebSocket {
   public static void updateBracket(final String bracketName,
                                    final int dbLine,
                                    final int playoffRound,
+                                   final int maxPlayoffRound,
                                    final Integer teamNumber,
                                    final String teamName,
                                    final Double score,
@@ -227,8 +229,8 @@ public class H2HUpdateWebSocket {
                                    final String table) {
     final BracketMessage message = new BracketMessage();
     message.isBracketUpdate = true;
-    message.bracketUpdate = new BracketUpdate(bracketName, dbLine, playoffRound, teamNumber, teamName, score, noShow,
-                                              verified, table);
+    message.bracketUpdate = new BracketUpdate(bracketName, dbLine, playoffRound, maxPlayoffRound, teamNumber, teamName,
+                                              score, noShow, verified, table);
 
     synchronized (SESSIONS_LOCK) {
       if (!SESSIONS.containsKey(bracketName)) {
@@ -281,6 +283,11 @@ public class H2HUpdateWebSocket {
 
   }
 
+  @OnError
+  public void error(@SuppressWarnings("unused") final Session session, final Throwable t) {
+    LOGGER.error("Caught websocket error", t);
+  }
+  
   /**
    * Message sent on the WebSocket.
    */
@@ -300,60 +307,6 @@ public class H2HUpdateWebSocket {
 
     public List<BracketInfo> allBracketInfo = new LinkedList<>();
 
-  }
-
-  public static final class BracketUpdate implements Serializable {
-    public String bracketName;
-
-    public int dbLine;
-
-    public int playoffRound;
-
-    public String teamName;
-
-    public Integer teamNumber;
-
-    /**
-     * Non-null string that represents the score.
-     */
-    public String score;
-
-    /**
-     * True if the information has been verified.
-     */
-    public boolean verified;
-
-    public boolean noShow;
-
-    /**
-     * The table may be null if one has not yet been assigned.
-     */
-    public String table;
-
-    public BracketUpdate() {
-    }
-
-    public BracketUpdate(final String bracketName,
-                         final int dbLine,
-                         final int playoffRound,
-                         final Integer teamNumber,
-                         final String teamName,
-                         final Double score,
-                         final boolean noShow,
-                         final boolean verified,
-                         final String table) {
-      this.bracketName = bracketName;
-      this.dbLine = dbLine;
-      this.playoffRound = playoffRound;
-      this.teamNumber = null != teamNumber
-          && Team.NULL_TEAM_NUMBER == teamNumber ? null : teamNumber;
-      this.teamName = teamName;
-      // TODO #528 update this with the appropriate number formatter
-      this.score = null == score ? "" : fll.Utilities.NUMBER_FORMAT_INSTANCE.format(score);
-      this.verified = verified;
-      this.table = table;
-      this.noShow = noShow;
-    }
   }
 
   private static final class BracketInfoTypeInformation extends TypeReference<Collection<BracketInfo>> {

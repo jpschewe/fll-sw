@@ -53,19 +53,28 @@ function getTeamNameAndScoreString(teamNumber, teamName, scoreData) {
       + "</span><span class=\"TeamScore\"> Score: " + scoreData + "</span>";
 }
 
-function populateLeaf(leafId, teamNumber, teamName, scoreData, noShow, verified) {
+function populateLeaf(leafId, bracketUpdate) {
   var text = "";
-  if (verified && null != teamNumber && "" != teamNumber) {
-    if (teamNumber < 0) {
+  if (bracketUpdate.verified && null != bracketUpdate.teamNumber
+      && "" != bracketUpdate.teamNumber) {
+    if (bracketUpdate.teamNumber < 0) {
       // tie or bye
-      text = getSpecialString(teamName);
+      text = getSpecialString(bracketUpdate.teamName);
     } else {
-      if (null == scoreData || "" == scoreData) {
-        text = getTeamNameString(teamNumber, teamName);
-      } else if (noShow) {
-        text = getTeamNameAndScoreString(teamNumber, teamName, "No Show");
+      if (bracketUpdate.playoffRound >= bracketUpdate.maxPlayoffRound) {
+        // finals
+        text = "";
+      } else if (null == bracketUpdate.score || "" == bracketUpdate.score
+          || bracketUpdate.playoffRound == bracketUpdate.maxPlayoffRound - 1) {
+        // no score or don't display because will show finals
+        text = getTeamNameString(bracketUpdate.teamNumber,
+            bracketUpdate.teamName);
+      } else if (bracketUpdate.noShow) {
+        text = getTeamNameAndScoreString(bracketUpdate.teamNumber,
+            bracketUpdate.teamName, "No Show");
       } else {
-        text = getTeamNameAndScoreString(teamNumber, teamName, scoreData);
+        text = getTeamNameAndScoreString(bracketUpdate.teamNumber,
+            bracketUpdate.teamName, bracketUpdate.scoreData);
       }
     }
   }
@@ -127,8 +136,7 @@ function handleBracketUpdate(bracketUpdate) {
       console.log("Update for bracket: " + bracketData.bracketName + " index: "
           + index + " leafId: " + leafId);
 
-      populateLeaf(leafId, bracketUpdate.teamNumber, bracketUpdate.teamName,
-          bracketUpdate.score, bracketUpdate.noShow, bracketUpdate.verified);
+      populateLeaf(leafId, bracketUpdate);
 
       placeTableLabel(leafId, bracketUpdate.table);
 

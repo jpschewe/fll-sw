@@ -663,6 +663,30 @@ public final class Playoff {
   }
 
   /**
+   * Maximum playoff round, this is the final winner.
+   * 
+   * @param connection
+   * @param tournament the tournament
+   * @param playoffDivision the bracket name
+   * @return max playoff round, -1 if there are no playoff rounds for this
+   *         bracket
+   * @throws SQLException
+   */
+  public static int getMaxPlayoffRound(final Connection connection,
+                                       final int tournament,
+                                       final String playoffDivision)
+      throws SQLException {
+    LOGGER.info("HERE...");
+    final int maxPerformanceRound = getMaxPerformanceRound(connection, tournament, playoffDivision);
+    LOGGER.info("Max performance round: " + maxPerformanceRound);
+    if (maxPerformanceRound < 0) {
+      return -1;
+    } else {
+      return getPlayoffRound(connection, playoffDivision, maxPerformanceRound);
+    }
+  }
+
+  /**
    * Get max performance run number for playoff division.
    * 
    * @param playoffDivision the division to check
@@ -789,34 +813,6 @@ public final class Playoff {
       SQLFunctions.close(prep);
     }
     return list;
-  }
-
-  /**
-   * Get the max run number for a given playoff division.
-   * This run number specifies the winner of the playoff division.
-   * 
-   * @return the run max run number or -1 if not found
-   */
-  public static int getMaxRunNumber(final Connection connection,
-                                    final int tournament,
-                                    final String division)
-      throws SQLException {
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = connection.prepareStatement("SELECT MAX(run_number) FROM PlayoffData WHERE event_division = ? AND Tournament = ?");
-      prep.setString(1, division);
-      prep.setInt(2, tournament);
-      rs = prep.executeQuery();
-      if (rs.next()) {
-        return rs.getInt(1);
-      } else {
-        return -1;
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
   }
 
   /**
