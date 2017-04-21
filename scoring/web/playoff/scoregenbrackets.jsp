@@ -47,7 +47,7 @@ fll.web.playoff.ScoregenBrackets.populateContext(application,
       
       final List<TableInformation> tableInfo = TableInformation.getTournamentTableInformation(connection,
                                                                                               currentTournament,
-                                                                                              bracketInfo.getBracketDivision());
+                                                                                              bracketInfo.getBracketName());
       pageContext.setAttribute("tableInfo", tableInfo);
 
 %>

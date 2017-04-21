@@ -61,7 +61,8 @@ public class PlayoffReport extends BaseFLLServlet {
   protected void processRequest(HttpServletRequest request,
                                 HttpServletResponse response,
                                 ServletContext application,
-                                HttpSession session) throws IOException, ServletException {
+                                HttpSession session)
+      throws IOException, ServletException {
     Connection connection = null;
     try {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -74,8 +75,8 @@ public class PlayoffReport extends BaseFLLServlet {
       final Document document = new Document(PageSize.LETTER);
       final ByteArrayOutputStream baos = new ByteArrayOutputStream();
       final PdfWriter writer = PdfWriter.getInstance(document, baos);
-      writer.setPageEvent(new ReportPageEventHandler(HEADER_FONT, "Head to Head Winners", challengeDescription.getTitle(),
-                                                     tournament.getName()));
+      writer.setPageEvent(new ReportPageEventHandler(HEADER_FONT, "Head to Head Winners",
+                                                     challengeDescription.getTitle(), tournament.getName()));
 
       document.open();
 
@@ -122,7 +123,8 @@ public class PlayoffReport extends BaseFLLServlet {
    */
   private Paragraph processDivision(final Connection connection,
                                     final Tournament tournament,
-                                    final String division) throws SQLException {
+                                    final String division)
+      throws SQLException {
     PreparedStatement teamPrep = null;
     ResultSet teamResult = null;
     PreparedStatement scorePrep = null;
@@ -134,7 +136,7 @@ public class PlayoffReport extends BaseFLLServlet {
           + division, TITLE_FONT));
       para.add(Chunk.NEWLINE);
 
-      final int maxRun = Playoff.getMaxRunNumber(connection, tournament.getTournamentID(), division);
+      final int maxRun = Playoff.getMaxPerformanceRound(connection, tournament.getTournamentID(), division);
 
       if (maxRun < 1) {
         para.add("Cannot determine max run number for this playoff bracket. This is an internal error");
@@ -160,9 +162,11 @@ public class PlayoffReport extends BaseFLLServlet {
         // figure out the last teams
         final List<String> lastTeams = new LinkedList<>();
 
-        teamPrep.setInt(3, maxRun - 1);
+        teamPrep.setInt(3, maxRun
+            - 1);
         scorePrep.setInt(1, tournament.getTournamentID());
-        scorePrep.setInt(3, maxRun - 1);
+        scorePrep.setInt(3, maxRun
+            - 1);
         teamResult = teamPrep.executeQuery();
         while (teamResult.next()) {
           final int teamNumber = teamResult.getInt(1);
@@ -195,7 +199,9 @@ public class PlayoffReport extends BaseFLLServlet {
           final int teamNumber = teamResult.getInt(1);
           final String teamName = teamResult.getString(2);
 
-          para.add(String.format("Competing for places %d and %d", lastTeamsIndex + 1, lastTeamsIndex + 2));
+          para.add(String.format("Competing for places %d and %d", lastTeamsIndex
+              + 1, lastTeamsIndex
+                  + 2));
           para.add(Chunk.NEWLINE);
           if (lastTeamsIndex < lastTeams.size()) {
             para.add(lastTeams.get(lastTeamsIndex));
