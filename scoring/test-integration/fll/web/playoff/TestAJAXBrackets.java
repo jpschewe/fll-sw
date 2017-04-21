@@ -16,7 +16,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.Select;
@@ -41,8 +40,6 @@ public class TestAJAXBrackets {
 
   private WebDriver bracketsWindow;
 
-  private JavascriptExecutor bracketsWindowJS;
-
   private WebDriver scoreEntryWindow;
 
   private WebDriver scoresheetWindow;
@@ -53,11 +50,6 @@ public class TestAJAXBrackets {
     selenium = IntegrationTestUtils.createWebDriver();
 
     bracketsWindow = IntegrationTestUtils.createWebDriver();
-    if (bracketsWindow instanceof JavascriptExecutor) {
-      bracketsWindowJS = (JavascriptExecutor) bracketsWindow;
-    } else {
-      throw new RuntimeException("WebDriver is not capable of Javascript execution");
-    }
 
     scoreEntryWindow = IntegrationTestUtils.createWebDriver();
 
@@ -170,12 +162,6 @@ public class TestAJAXBrackets {
       LOGGER.info("Confirmation text: "
           + confirmVerifyChange.getText());
       confirmVerifyChange.accept();
-
-      // give the web server a chance to catch up
-      Thread.sleep(1000);
-
-      // run the javascript to refresh everything
-      bracketsWindowJS.executeScript("window.iterate();");
 
       // give the web server a chance to catch up
       Thread.sleep(30000);

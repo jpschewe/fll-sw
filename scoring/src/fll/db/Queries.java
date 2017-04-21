@@ -41,6 +41,7 @@ import fll.Utilities;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
+import fll.web.playoff.BracketUpdate;
 import fll.web.playoff.DatabaseTeamScore;
 import fll.web.playoff.H2HUpdateWebSocket;
 import fll.web.playoff.HttpTeamScore;
@@ -762,7 +763,14 @@ public final class Queries {
         final Team team = Team.getTeamFromDatabase(connection, teamNumber);
         final int playoffRound = Playoff.getPlayoffRound(connection, bracketName, runNumber);
         final double score = performanceElement.evaluate(teamScore);
-        H2HUpdateWebSocket.updateBracket(bracketName, dbLine, playoffRound, teamNumber, team.getTeamName(), score, false);
+
+        final String table = Queries.getAssignedTable(connection, tournament.getTournamentID(), bracketName,
+                                                      playoffRound, dbLine);
+
+        final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, currentTournament, bracketName);
+
+        H2HUpdateWebSocket.updateBracket(bracketName, dbLine, playoffRound, maxPlayoffRound, teamNumber,
+                                         team.getTeamName(), score, teamScore.isNoShow(), false, table);
       }
     } else {
       tournament.recordPerformanceSeedingModified(connection);
@@ -952,8 +960,13 @@ public final class Queries {
         LOGGER.trace("Sending H2HUpdate with score: "
             + score);
       }
-      H2HUpdateWebSocket.updateBracket(division, ptLine, playoffRun, teamNumber, team.getTeamName(),
-                                       Double.isNaN(score) ? null : score, verified);
+
+      final String table = Queries.getAssignedTable(connection, currentTournament, division, playoffRun, ptLine);
+
+      final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, currentTournament, division);
+
+      H2HUpdateWebSocket.updateBracket(division, ptLine, playoffRun, maxPlayoffRound, teamNumber, team.getTeamName(),
+                                       Double.isNaN(score) ? null : score, teamScore.isNoShow(), verified, table);
 
       final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division, (ptLine
           % 2 == 0
@@ -1047,7 +1060,7 @@ public final class Queries {
           final int winnerLineNumber = ((ptLine
               + 1)
               / 2);
-          updatePlayoffTable(connection, newWinner, division, currentTournament, nextRun, winnerLineNumber, null, true);
+          updatePlayoffTable(connection, newWinner, division, currentTournament, nextRun, winnerLineNumber);
 
           final int semiFinalRound = getNumPlayoffRounds(connection, division)
               - 1;
@@ -1065,8 +1078,7 @@ public final class Queries {
             final int thirdPlaceBracketLineNumber = ((ptLine
                 + 5)
                 / 2);
-            updatePlayoffTable(connection, newLoser, division, currentTournament, nextRun, thirdPlaceBracketLineNumber,
-                               null, true);
+            updatePlayoffTable(connection, newLoser, division, currentTournament, nextRun, thirdPlaceBracketLineNumber);
           }
         }
       }
@@ -1162,7 +1174,14 @@ public final class Queries {
             // send H2H update that this team's score is now null
             final Team team = Team.getTeamFromDatabase(connection, teamNumber);
             final int playoffRound = Playoff.getPlayoffRound(connection, division, irunNumber);
-            H2HUpdateWebSocket.updateBracket(division, ptLine, playoffRound, teamNumber, team.getTeamName(), null, true);
+
+            final String table = Queries.getAssignedTable(connection, currentTournament, division, playoffRound,
+                                                          ptLine);
+
+            final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, currentTournament, division);
+
+            H2HUpdateWebSocket.updateBracket(division, ptLine, playoffRound, maxPlayoffRound, teamNumber,
+                                             team.getTeamName(), null, false, true, table);
           }
         } else {
           // Do nothing - team didn't get entered into the PlayoffData table.
@@ -1204,9 +1223,7 @@ public final class Queries {
                                          final String division,
                                          final int currentTournament,
                                          final int runNumber,
-                                         final int lineNumber,                                         
-                                         final Double score,
-                                         final boolean verified)
+                                         final int lineNumber)
       throws SQLException {
     PreparedStatement prep = null;
     try {
@@ -1229,19 +1246,23 @@ public final class Queries {
     }
 
     final int playoffRound = Playoff.getPlayoffRound(connection, division, runNumber);
-    
+
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Sending H2H update" //
           + " team: " + team.getTeamNumber() //
           + " bracket: " + division //
           + " dbLine: " + lineNumber //
-          + " score: " + score //
           + " playoffRound: " + playoffRound //
       );
 
     }
-    H2HUpdateWebSocket.updateBracket(division, lineNumber, playoffRound, team.getTeamNumber(), team.getTeamName(), score,
-                                     verified);
+
+    final String table = Queries.getAssignedTable(connection, currentTournament, division, playoffRound, lineNumber);
+
+    final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, currentTournament, division);
+
+    H2HUpdateWebSocket.updateBracket(division, lineNumber, playoffRound, maxPlayoffRound, team.getTeamNumber(),
+                                     team.getTeamName(), null, false, true, table);
   }
 
   /**
@@ -1256,7 +1277,7 @@ public final class Queries {
     updatePlayoffTable(connection, Team.NULL, division, currentTournament, (runNumber
         + 1), ((ptLine
             + 1)
-            / 2), null, true);
+            / 2));
 
     final int semiFinalRound = getNumPlayoffRounds(connection, division)
         - 1;
@@ -1266,7 +1287,7 @@ public final class Queries {
       updatePlayoffTable(connection, Team.NULL, division, currentTournament, (runNumber
           + 1), ((ptLine
               + 5)
-              / 2), null, true);
+              / 2));
     }
   }
 
@@ -1280,15 +1301,17 @@ public final class Queries {
    * @return the updates to send to the display
    * @throws SQLException
    */
-  public static Collection<H2HUpdateWebSocket.BracketUpdate> getH2HBracketData(final Connection connection,
-                                                                               final int currentTournament,
-                                                                               final String bracketName,
-                                                                               final int firstPlayoffRound,
-                                                                               final int lastPlayoffRound)
+  public static Collection<BracketUpdate> getH2HBracketData(final Connection connection,
+                                                            final int currentTournament,
+                                                            final String bracketName,
+                                                            final int firstPlayoffRound,
+                                                            final int lastPlayoffRound)
       throws SQLException {
-    final Collection<H2HUpdateWebSocket.BracketUpdate> updates = new LinkedList<>();
+    final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, currentTournament, bracketName);
+
+    final Collection<BracketUpdate> updates = new LinkedList<>();
     try (
-        final PreparedStatement prep = connection.prepareStatement("SELECT PlayoffData.PlayoffRound,PlayoffData.LineNumber, Teams.TeamNumber, Teams.TeamName,Performance.ComputedTotal, Performance.Verified" //
+        final PreparedStatement prep = connection.prepareStatement("SELECT PlayoffData.PlayoffRound, PlayoffData.LineNumber, Teams.TeamNumber, Teams.TeamName, Performance.ComputedTotal, Performance.Verified, PlayoffData.AssignedTable, Performance.NoShow" //
             + " FROM PlayoffData" //
             + " JOIN Teams ON (PlayoffData.team = Teams.TeamNumber)"//
             + " LEFT OUTER JOIN Performance ON (Performance.TeamNumber = PlayoffData.team"//
@@ -1306,31 +1329,35 @@ public final class Queries {
 
       try (final ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {
-          final H2HUpdateWebSocket.BracketUpdate update = new H2HUpdateWebSocket.BracketUpdate();
-          update.bracketName = bracketName;
-          update.playoffRound = rs.getInt(1);
-          update.dbLine = rs.getInt(2);
-          update.teamNumber = rs.getInt(3);
+          final int playoffRound = rs.getInt(1);
+          final int dbLine = rs.getInt(2);
+          final String teamName;
+          Integer teamNumber = rs.getInt(3);
           if (rs.wasNull()
-              || update.teamNumber == Team.NULL_TEAM_NUMBER) {
-            update.teamNumber = null;
-            update.teamName = null;
+              || teamNumber == Team.NULL_TEAM_NUMBER) {
+            teamNumber = null;
+            teamName = null;
           } else {
-            if (update.teamNumber == Team.TIE_TEAM_NUMBER) {
-              update.teamName = Team.TIE.getTeamName();
+            if (teamNumber == Team.TIE_TEAM_NUMBER) {
+              teamName = Team.TIE.getTeamName();
             } else {
-              update.teamName = rs.getString(4);
+              teamName = rs.getString(4);
             }
           }
-          final double score = rs.getDouble(5);
+          Double score = rs.getDouble(5);
+          final boolean verified;
           if (rs.wasNull()) {
-            update.score = null;
-            update.verified = true;
+            score = null;
+            verified = true;
           } else {
-            // TODO #528 update this with the appropriate number formatter
-            update.score = fll.Utilities.NUMBER_FORMAT_INSTANCE.format(score);
-            update.verified = rs.getBoolean(6);
+            verified = rs.getBoolean(6);
           }
+
+          final String table = rs.getString(7);
+          final boolean noShow = rs.getBoolean(8);
+
+          final BracketUpdate update = new BracketUpdate(bracketName, dbLine, playoffRound, maxPlayoffRound, teamNumber,
+                                                         teamName, score, noShow, verified, table);
 
           updates.add(update);
         } // foreach result
@@ -2723,8 +2750,9 @@ public final class Queries {
   }
 
   /**
-   * Returns the table assignment string for the given tournament, event
-   * division, round number, and line number. If the table assignment is NULL,
+   * Returns the table assignment string for the given tournament, bracket name,
+   * playoff round number, and database line number. If the table assignment is
+   * NULL,
    * returns null.
    */
   public static String getAssignedTable(final Connection connection,

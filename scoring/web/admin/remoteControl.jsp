@@ -103,6 +103,17 @@
           var="displayInfo">
           <td>
             <!-- name: ${displayInfo.name} default:  ${displayInfo.defaultDisplay} -->
+            <!-- form prefix: ${displayInfo.formParamPrefix} -->
+            <!-- followDefault: ${displayInfo.followDefault} -->
+            <!-- welcome: ${displayInfo.welcome} -->
+            <!-- scoreboard: ${displayInfo.scoreboard} -->
+            <!-- remotePageFormParamName: ${displayInfo.remotePageFormParamName} -->
+            <!-- headToHead: ${displayInfo.headToHead} -->
+            <!-- finalistSchedule: ${displayInfo.finalistSchedule} -->
+            <!-- finalistTeams: ${displayInfo.finalistTeams} --> 
+            <!-- slideshow: ${displayInfo.slideshow} -->
+            <!-- special: ${displayInfo.special} -->
+
             <c:choose>
               <c:when test="${displayInfo.defaultDisplay}">
           &nbsp;
