@@ -1,3 +1,4 @@
+* #552 - use web sockets to update the remote control brackets page 
 * upgrade to selenium 3.3.0
 * #536 - allow the admin bracketes to update automatically
 * Upgrade to tomcat 8.5.11 - this includes new features for WebSockets
