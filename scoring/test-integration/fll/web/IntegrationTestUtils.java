@@ -44,6 +44,7 @@ import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.OutputType;
@@ -52,6 +53,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.Select;
 import org.w3c.dom.Document;
 
@@ -108,7 +110,7 @@ public final class IntegrationTestUtils {
    * @param selenium the test controller
    * @param url the page to load
    * @throws IOException
-   * @throws InterruptedException 
+   * @throws InterruptedException
    */
   public static void loadPage(final WebDriver selenium,
                               final String url)
@@ -133,7 +135,7 @@ public final class IntegrationTestUtils {
    * @param driver the test controller
    * @param challengeDocument the challenge descriptor
    * @throws IOException
-   * @throws InterruptedException 
+   * @throws InterruptedException
    */
   public static void initializeDatabase(final WebDriver driver,
                                         final Document challengeDocument)
@@ -157,7 +159,7 @@ public final class IntegrationTestUtils {
    * @param driver the test controller
    * @param challengeStream the challenge descriptor
    * @throws IOException
-   * @throws InterruptedException 
+   * @throws InterruptedException
    */
   public static void initializeDatabase(final WebDriver driver,
                                         final InputStream challengeStream)
@@ -179,16 +181,17 @@ public final class IntegrationTestUtils {
    * @param driver the test controller
    * @param challengeFile a file to read the challenge description from. This
    *          file will not be deleted.
-   * @throws InterruptedException 
+   * @throws InterruptedException
    * @throws IOException
    */
   public static void initializeDatabase(final WebDriver driver,
-                                        final Path challengeFile) throws InterruptedException {
+                                        final Path challengeFile)
+      throws InterruptedException {
 
     driver.get(TestUtils.URL_ROOT
         + "setup/");
     Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
-    
+
     if (isElementPresent(driver, By.name("submit_login"))) {
       login(driver);
 
@@ -204,7 +207,7 @@ public final class IntegrationTestUtils {
     reinitDB.click();
 
     Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
-    
+
     try {
       final Alert confirmCreateDB = driver.switchTo().alert();
       LOGGER.info("Confirmation text: "
@@ -216,8 +219,9 @@ public final class IntegrationTestUtils {
       }
     }
 
-    Thread.sleep(2 * WAIT_FOR_PAGE_LOAD_MS);
-    
+    Thread.sleep(2
+        * WAIT_FOR_PAGE_LOAD_MS);
+
     driver.findElement(By.id("success"));
 
     // setup user
@@ -232,7 +236,8 @@ public final class IntegrationTestUtils {
 
     final WebElement submitElement = driver.findElement(By.name("submit_create_user"));
     submitElement.click();
-    Thread.sleep(2 * WAIT_FOR_PAGE_LOAD_MS);
+    Thread.sleep(2
+        * WAIT_FOR_PAGE_LOAD_MS);
 
     driver.findElement(By.id("success-create-user"));
 
@@ -247,7 +252,7 @@ public final class IntegrationTestUtils {
    * @param inputStream input stream that has database to load in it, this input
    *          stream is closed by this method upon successful completion
    * @throws IOException
-   * @throws InterruptedException 
+   * @throws InterruptedException
    */
   public static void initializeDatabaseFromDump(final WebDriver selenium,
                                                 final InputStream inputStream)
@@ -390,7 +395,8 @@ public final class IntegrationTestUtils {
 
   /**
    * Login to fll
-   * @throws InterruptedException 
+   * 
+   * @throws InterruptedException
    */
   public static void login(final WebDriver driver) throws InterruptedException {
     driver.get(TestUtils.URL_ROOT
@@ -461,7 +467,8 @@ public final class IntegrationTestUtils {
 
   /**
    * Add a team to a tournament.
-   * @throws InterruptedException 
+   * 
+   * @throws InterruptedException
    */
   public static void addTeam(final WebDriver selenium,
                              final int teamNumber,
@@ -508,7 +515,7 @@ public final class IntegrationTestUtils {
    * @param tournamentName the name of the tournament to make the current
    *          tournament
    * @throws IOException
-   * @throws InterruptedException 
+   * @throws InterruptedException
    */
   public static void setTournament(final WebDriver selenium,
                                    final String tournamentName)
@@ -577,6 +584,18 @@ public final class IntegrationTestUtils {
     selenium.manage().timeouts().implicitlyWait(WAIT_FOR_PAGE_LOAD_MS, TimeUnit.MILLISECONDS);
     selenium.manage().timeouts().pageLoadTimeout(60, TimeUnit.SECONDS);
 
+    LOGGER.info("Selenium driver: "
+        + selenium.getClass());
+    if (selenium instanceof RemoteWebDriver) {
+      final Capabilities cap = ((RemoteWebDriver) selenium).getCapabilities();
+      LOGGER.info("Browser: "
+          + cap.getBrowserName());
+      LOGGER.info("Platform: "
+          + cap.getPlatform().toString());
+      LOGGER.info("Version: "
+          + cap.getVersion());
+    }
+
     return selenium;
   }
 
@@ -620,7 +639,7 @@ public final class IntegrationTestUtils {
 
     selenium.findElement(By.id("create-bracket")).click();
     Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
-    
+
     selenium.findElement(By.xpath("//input[@value='Create Head to Head Bracket for Award Group "
         + awardGroup + "']")).click();
     Assert.assertTrue("Error creating bracket for award group: "
@@ -672,7 +691,7 @@ public final class IntegrationTestUtils {
    * @param newValue
    * @throws NoSuchElementException if there was a problem changing the value
    * @throws IOException if there is an error talking to selenium
-   * @throws InterruptedException 
+   * @throws InterruptedException
    */
   public static void changeNumSeedingRounds(final WebDriver selenium,
                                             final int tournamentId,
@@ -692,7 +711,7 @@ public final class IntegrationTestUtils {
    * Get the id of the current tournament
    * 
    * @throws IOException
-   * @throws InterruptedException 
+   * @throws InterruptedException
    */
   public static int getCurrentTournamentId(final WebDriver selenium) throws IOException, InterruptedException {
     loadPage(selenium, TestUtils.URL_ROOT
