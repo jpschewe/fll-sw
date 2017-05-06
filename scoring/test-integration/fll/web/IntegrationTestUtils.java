@@ -45,6 +45,7 @@ import org.junit.Assert;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.OutputType;
@@ -584,16 +585,14 @@ public final class IntegrationTestUtils {
     selenium.manage().timeouts().implicitlyWait(WAIT_FOR_PAGE_LOAD_MS, TimeUnit.MILLISECONDS);
     selenium.manage().timeouts().pageLoadTimeout(60, TimeUnit.SECONDS);
 
+    // get some information from the driver
     LOGGER.info("Selenium driver: "
-        + selenium.getClass());
-    if (selenium instanceof RemoteWebDriver) {
-      final Capabilities cap = ((RemoteWebDriver) selenium).getCapabilities();
-      LOGGER.info("Browser: "
-          + cap.getBrowserName());
-      LOGGER.info("Platform: "
-          + cap.getPlatform().toString());
-      LOGGER.info("Version: "
-          + cap.getVersion());
+        + selenium.getClass().getName());
+    if (selenium instanceof JavascriptExecutor) {
+      final JavascriptExecutor jsSelenium = (JavascriptExecutor) selenium;
+      final String uAgent = jsSelenium.executeScript("return navigator.userAgent;").toString();
+      LOGGER.info("User agent: "
+          + uAgent);
     }
 
     return selenium;
