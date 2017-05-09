@@ -12,7 +12,6 @@
    OPTION {color:#e0e0e0; }
    .dark_bg  {font-size:10pt; font-weight:bold; background-color:black; color:#e0e0e0; }
   </style>
-<script type="text/javascript" src="<c:url value='/playoff/code.icepush'/>"></script>
 <script type="text/javascript" src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
 <script type='text/javascript'>
 
@@ -38,12 +37,45 @@ function reloadRuns() {
 }
 
 
+function messageReceived(event) {
+  console.log("received: " + event.data);
+  
+  // data doesn't matter, just reload runs on any message
+  reloadRuns();
+}
+
+function socketOpened(event) {
+  console.log("Socket opened");
+}
+
+function socketClosed(event) {
+  console.log("Socket closed");
+
+  // open the socket a second later
+  setTimeout(openSocket, 1000);
+}
+
+function openSocket() {
+  console.log("opening socket");
+
+  var url = window.location.pathname;
+  var directory = url.substring(0, url.lastIndexOf('/'));
+  var webSocketAddress = "ws://" + window.location.host + directory
+      + "/UnverifiedRunsWebSocket";
+
+  var socket = new WebSocket(webSocketAddress);
+  socket.onmessage = messageReceived;
+  socket.onopen = socketOpened;
+  socket.onclose = socketClosed;
+}
+
 $(document).ready(function() {
   editFlagBoxClicked();
   reloadRuns();
+  
+  openSocket();
 });
 </script>
-<icep:register group="dataentry" callback="function(){reloadRuns();}"/>
   </head>
   <body>
   
