@@ -33,9 +33,6 @@ final Connection connection = datasource.getConnection();
         <%Queries.insertOrUpdatePerformanceScore(challengeDescription, connection, request);%>
       </c:otherwise>
     </c:choose>
-    <icep:push group="dataentry"/>
-    <c:redirect url="select_team.jsp"/>
-                        
-
+    <c:redirect url="select_team.jsp"/>                    
   </body>
 </html>
