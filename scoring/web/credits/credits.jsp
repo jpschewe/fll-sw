@@ -25,11 +25,14 @@
     <li>Mark Schleusner</li>
   </ul>
 
-  <p>Testers (besides the developers):</p>
+  <p>Testing and Documentation (besides the developers):</p>
   <ul>
     <li>Chuck Davis</li>
+    <li><a href="http://cwirth.com/">Celia Wirth</a></li>
+    <li><a href="http://www.yourdevelopmentteam.com">Vince Jacobson</a></li>
+    <li>Chuck Rudolph</li>
   </ul>
-
+  
   <p>The following software packages are used in the application:</p>
   <ul>
     <li><a href="http://mtu.net/~jpschewe/JonsInfra/index.html">JonsInfra</a>
