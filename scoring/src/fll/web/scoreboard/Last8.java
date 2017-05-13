@@ -20,8 +20,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.log4j.Logger;
 
 import fll.Utilities;
@@ -30,6 +28,9 @@ import fll.db.TournamentParameters;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.xml.ChallengeDescription;
+import fll.xml.ScoreType;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 @WebServlet("/scoreboard/Last8")
 public class Last8 extends BaseFLLServlet {
@@ -39,11 +40,14 @@ public class Last8 extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Entering doPost");
     }
 
+    final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
+    final ScoreType performanceScoreType = challengeDescription.getPerformance().getScoreType();
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final Formatter formatter = new Formatter(response.getWriter());
     final String showOrgStr = request.getParameter("showOrganization");
@@ -130,7 +134,8 @@ public class Last8 extends BaseFLLServlet {
         } else if (rs.getBoolean("Bye")) {
           formatter.format("Bye");
         } else {
-          formatter.format("%s", Utilities.NUMBER_FORMAT_INSTANCE.format(rs.getDouble("ComputedTotal")));
+          formatter.format("%s",
+                           Utilities.getFormatForScoreType(performanceScoreType).format(rs.getDouble("ComputedTotal")));
         }
         formatter.format("</td>%n");
         formatter.format("</tr>%n");

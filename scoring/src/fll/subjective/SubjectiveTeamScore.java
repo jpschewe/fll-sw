@@ -25,7 +25,7 @@ import fll.web.playoff.TeamScore;
    * @param scoreElement the score element that describes the team score
    */
   public SubjectiveTeamScore(final Element scoreEle) throws ParseException {
-    super(Utilities.NUMBER_FORMAT_INSTANCE.parse(scoreEle.getAttribute("teamNumber")).intValue());
+    super(Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(scoreEle.getAttribute("teamNumber")).intValue());
     _scoreEle = scoreEle;
   }
 
@@ -59,7 +59,7 @@ import fll.web.playoff.TeamScore;
         return Double.NaN;
       }
       try {
-        return Utilities.NUMBER_FORMAT_INSTANCE.parse(value).doubleValue();
+        return Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(value).doubleValue();
       } catch (final ParseException pe) {
         throw new RuntimeException(pe);
       }

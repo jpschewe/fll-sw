@@ -22,7 +22,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.db.Queries;
@@ -30,7 +29,9 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreCategory;
+import fll.xml.ScoreType;
 import fll.xml.WinnerType;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Display the report for scores by score group.
@@ -42,7 +43,8 @@ public class CategorizedScores extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session, "/report/CategorizedScores")) {
       return;
     }
@@ -55,11 +57,13 @@ public class CategorizedScores extends BaseFLLServlet {
     writer.format("<html><body>");
 
     // cache the subjective categories title->dbname
-    final Map<String, String> subjectiveCategories = new HashMap<String, String>();
+    final Map<String, String> subjectiveCategories = new HashMap<>();
+    final Map<String, ScoreType> categoryScoreType = new HashMap<>();
     for (final ScoreCategory subjectiveElement : challengeDescription.getSubjectiveCategories()) {
       final String title = subjectiveElement.getTitle();
       final String name = subjectiveElement.getName();
       subjectiveCategories.put(title, name);
+      categoryScoreType.put(name, subjectiveElement.getScoreType());
     }
 
     ResultSet rs = null;
@@ -83,6 +87,7 @@ public class CategorizedScores extends BaseFLLServlet {
         for (final Map.Entry<String, String> entry : subjectiveCategories.entrySet()) {
           final String categoryTitle = entry.getKey();
           final String categoryName = entry.getValue();
+          final ScoreType scoreType = categoryScoreType.get(categoryName);
 
           writer.format("<h3>%s Award Group: %s</h3>", categoryTitle, division);
           writer.format("<table border='0'>");
@@ -150,7 +155,7 @@ public class CategorizedScores extends BaseFLLServlet {
               if (rawScoreRS.wasNull()) {
                 writer.format("<span class='warn'>No Score</span>");
               } else {
-                writer.format(Utilities.NUMBER_FORMAT_INSTANCE.format(rawScore));
+                writer.format(Utilities.getFormatForScoreType(scoreType).format(rawScore));
               }
             }
             SQLFunctions.close(rawScoreRS);
@@ -159,7 +164,7 @@ public class CategorizedScores extends BaseFLLServlet {
             // scaled score
             if (!scoreWasNull) {
               writer.format("<td>");
-              writer.format(Utilities.NUMBER_FORMAT_INSTANCE.format(score));
+              writer.format(Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(score));
             } else {
               writer.format("<td align='center' class='warn'>No Score");
             }

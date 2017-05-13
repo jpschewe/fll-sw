@@ -43,6 +43,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.playoff.Playoff;
 import fll.xml.ChallengeDescription;
+import fll.xml.ScoreType;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -85,7 +86,8 @@ public class PlayoffReport extends BaseFLLServlet {
       final List<String> playoffDivisions = Playoff.getPlayoffBrackets(connection, tournament.getTournamentID());
       for (final String division : playoffDivisions) {
 
-        Paragraph para = processDivision(connection, tournament, division);
+        Paragraph para = processDivision(connection, tournament, division,
+                                         challengeDescription.getPerformance().getScoreType());
         document.add(para);
       }
 
@@ -123,7 +125,8 @@ public class PlayoffReport extends BaseFLLServlet {
    */
   private Paragraph processDivision(final Connection connection,
                                     final Tournament tournament,
-                                    final String division)
+                                    final String division,
+                                    final ScoreType performanceScoreType)
       throws SQLException {
     PreparedStatement teamPrep = null;
     ResultSet teamResult = null;
@@ -177,7 +180,7 @@ public class PlayoffReport extends BaseFLLServlet {
           scoreResult = scorePrep.executeQuery();
           final String scoreStr;
           if (scoreResult.next()) {
-            scoreStr = Utilities.NUMBER_FORMAT_INSTANCE.format(scoreResult.getDouble(1));
+            scoreStr = Utilities.getFormatForScoreType(performanceScoreType).format(scoreResult.getDouble(1));
           } else {
             scoreStr = "unknown";
           }

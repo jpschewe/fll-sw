@@ -175,7 +175,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
                            final int column) {
     try {
       final Element scoreEle = getScoreElement(row);
-      final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(scoreEle.getAttribute("teamNumber")).intValue();
+      final int teamNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(scoreEle.getAttribute("teamNumber")).intValue();
       switch (column) {
       case 0:
         if (scoreEle.hasAttribute("teamNumber")) {
@@ -413,7 +413,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
 
           final ScoreType scoreType = goalDescription.getScoreType();
           try {
-            final Number parsedValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(value.toString());
+            final Number parsedValue = Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(value.toString());
             if (parsedValue.doubleValue() > max
                 || parsedValue.doubleValue() < min) {
               error = true;
@@ -486,7 +486,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
     try {
       for (int index = 0; index < _scoreElements.length; ++index) {
         final Element scoreEle = _scoreElements[index];
-        final int num = Utilities.NUMBER_FORMAT_INSTANCE.parse(scoreEle.getAttribute("teamNumber")).intValue();
+        final int num = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(scoreEle.getAttribute("teamNumber")).intValue();
         final String j = scoreEle.getAttribute("judge");
         if (teamNumber == num
             && judge.equals(j)) {

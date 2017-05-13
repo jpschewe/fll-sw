@@ -9,6 +9,7 @@ package fll.web.playoff;
 import java.io.Serializable;
 
 import fll.Team;
+import fll.xml.ScoreType;
 
 /**
  * An update to the playoff brackets display.
@@ -50,6 +51,7 @@ public final class BracketUpdate implements Serializable {
                        final Integer teamNumber,
                        final String teamName,
                        final Double score,
+                       final ScoreType performanceScoreType,
                        final boolean noShow,
                        final boolean verified,
                        final String table) {
@@ -60,8 +62,7 @@ public final class BracketUpdate implements Serializable {
     this.teamNumber = null != teamNumber
         && Team.NULL_TEAM_NUMBER == teamNumber ? null : teamNumber;
     this.teamName = teamName;
-    // TODO #528 update this with the appropriate number formatter
-    this.score = null == score ? "" : fll.Utilities.NUMBER_FORMAT_INSTANCE.format(score);
+    this.score = null == score ? "" : fll.Utilities.getFormatForScoreType(performanceScoreType).format(score);
     this.verified = verified;
     this.table = table;
     this.noShow = noShow;

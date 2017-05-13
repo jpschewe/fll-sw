@@ -36,6 +36,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.xml.ChallengeDescription;
+import fll.xml.ScoreType;
 import fll.xml.WinnerType;
 
 @WebServlet("/scoreboard/Top10")
@@ -57,11 +58,14 @@ public class Top10 extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Entering doPost");
     }
 
+    final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
+    final ScoreType performanceScoreType = challengeDescription.getPerformance().getScoreType();
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final Formatter formatter = new Formatter(response.getWriter());
     final String showOrgStr = request.getParameter("showOrganization");
@@ -123,7 +127,6 @@ public class Top10 extends BaseFLLServlet {
                          Queries.getColorForIndex(divisionIndex), divisions.get(divisionIndex));
         formatter.format("</tr>%n");
 
-        final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
         final WinnerType winnerCriteria = challengeDescription.getWinner();
 
         prep = connection.prepareStatement("SELECT Teams.TeamName, Teams.Organization, Teams.TeamNumber, T2.MaxOfComputedScore" //
@@ -166,7 +169,8 @@ public class Top10 extends BaseFLLServlet {
             }
             formatter.format("<td class='left truncate'>%s</td>%n", organization);
           }
-          formatter.format("<td class='right'>%s</td>%n", Utilities.NUMBER_FORMAT_INSTANCE.format(score));
+          formatter.format("<td class='right'>%s</td>%n",
+                           Utilities.getFormatForScoreType(performanceScoreType).format(score));
 
           formatter.format("</tr>");
 
