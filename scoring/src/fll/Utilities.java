@@ -41,6 +41,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.ImportDB;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
+import fll.xml.ScoreType;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -51,14 +52,25 @@ public final class Utilities {
   private static final Logger LOGGER = LogUtils.getLogger();
 
   /**
-   * Single instance of the default NumberFormat instance to save on overhead
+   * Single instance of the floating point NumberFormat instance to save on
+   * overhead
    * and to use for consistency of formatting.
    */
-  public static final NumberFormat NUMBER_FORMAT_INSTANCE = NumberFormat.getInstance();
+  public static final NumberFormat FLOATING_POINT_NUMBER_FORMAT_INSTANCE = NumberFormat.getInstance();
   static {
     // setup the number format instance to be 2 decimal places
-    NUMBER_FORMAT_INSTANCE.setMaximumFractionDigits(2);
-    NUMBER_FORMAT_INSTANCE.setMinimumFractionDigits(2);
+    FLOATING_POINT_NUMBER_FORMAT_INSTANCE.setMaximumFractionDigits(2);
+    FLOATING_POINT_NUMBER_FORMAT_INSTANCE.setMinimumFractionDigits(2);
+  }
+
+  /**
+   * Single instance of the integer NumberFormat instance to save on overhead
+   * and to use for consistency of formatting.
+   */
+  public static final NumberFormat INTEGER_NUMBER_FORMAT_INSTANCE = NumberFormat.getIntegerInstance();
+
+  public static NumberFormat getFormatForScoreType(final ScoreType type) {
+    return type == ScoreType.FLOAT ? FLOATING_POINT_NUMBER_FORMAT_INSTANCE : INTEGER_NUMBER_FORMAT_INSTANCE;
   }
 
   /**

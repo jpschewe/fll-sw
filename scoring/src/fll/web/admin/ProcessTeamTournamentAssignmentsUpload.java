@@ -196,7 +196,7 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
         final String teamNumStr = data[teamNumColumnIdx];
         if (null != teamNumStr
             && !"".equals(teamNumStr.trim())) {
-          final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumStr).intValue();
+          final int teamNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(teamNumStr).intValue();
 
           final String tournamentName = data[tournamentColumnIdx];
           Tournament tournament = Tournament.findTournamentByName(connection, tournamentName);

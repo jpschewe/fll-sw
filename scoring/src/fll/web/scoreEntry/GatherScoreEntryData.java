@@ -70,7 +70,7 @@ public class GatherScoreEntryData extends BaseFLLServlet {
             + 1);
       } else {
         runNumberStr = request.getParameter("RunNumber");
-        teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(lTeamNum).intValue();
+        teamNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(lTeamNum).intValue();
       }
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
@@ -96,7 +96,7 @@ public class GatherScoreEntryData extends BaseFLLServlet {
           response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
           return;
         }
-        final int runNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(runNumberStr).intValue();
+        final int runNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(runNumberStr).intValue();
         if (runNumber == 0) {
           lRunNumber = nextRunNumber
               - 1;

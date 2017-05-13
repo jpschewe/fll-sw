@@ -188,7 +188,8 @@ public class TournamentSchedule implements Serializable {
    *           for a schedule
    */
   public static LocalTime parseTime(final String str) throws DateTimeParseException {
-    if (null == str || str.trim().isEmpty()) {
+    if (null == str
+        || str.trim().isEmpty()) {
       return null;
     }
 
@@ -215,7 +216,8 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
-   * Conver the time to a string that will be parsed by {@link #parseTime(String)}.
+   * Conver the time to a string that will be parsed by
+   * {@link #parseTime(String)}.
    * 
    * @param time the time to format, may be null
    * @return the formatted time, null converts to ""
@@ -238,7 +240,7 @@ public class TournamentSchedule implements Serializable {
   // time->table->team
   private final HashMap<LocalTime, Map<String, List<TeamScheduleInfo>>> _matches = new HashMap<>();
 
-      /* package */Map<LocalTime, Map<String, List<TeamScheduleInfo>>> getMatches() {
+  /* package */Map<LocalTime, Map<String, List<TeamScheduleInfo>>> getMatches() {
     // TODO should make read-only somehow
     return _matches;
   }
@@ -1566,7 +1568,7 @@ public class TournamentSchedule implements Serializable {
         return null;
       }
 
-      final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue();
+      final int teamNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue();
       final TeamScheduleInfo ti = new TeamScheduleInfo(getNumberOfRounds(), teamNumber);
       ti.setTeamName(line[ci.getTeamNameColumn()]);
       ti.setOrganization(line[ci.getOrganizationColumn()]);
@@ -1600,8 +1602,8 @@ public class TournamentSchedule implements Serializable {
         }
         final LocalTime perf1Time = parseTime(perf1Str);
         final PerformanceTime performance = new PerformanceTime(perf1Time, tablePieces[0],
-                                                                Utilities.NUMBER_FORMAT_INSTANCE.parse(tablePieces[1])
-                                                                                                .intValue());
+                                                                Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(tablePieces[1])
+                                                                                                        .intValue());
         ti.setPerf(perfNum, performance);
         if (ti.getPerfTableSide(perfNum) > 2
             || ti.getPerfTableSide(perfNum) < 1) {

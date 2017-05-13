@@ -266,12 +266,12 @@ public final class ChallengeParser {
           simpleGoals.put(name, element);
 
           // check initial values
-          final double initialValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("initialValue"))
+          final double initialValue = Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("initialValue"))
                                                                       .doubleValue();
           if (XMLUtils.isEnumeratedGoal(element)) {
             boolean foundMatch = false;
             for (final Element valueEle : new NodelistElementCollectionAdapter(element.getChildNodes())) {
-              final double score = Utilities.NUMBER_FORMAT_INSTANCE.parse(valueEle.getAttribute("score")).doubleValue();
+              final double score = Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(valueEle.getAttribute("score")).doubleValue();
               if (FP.equals(score, initialValue, INITIAL_VALUE_TOLERANCE)) {
                 foundMatch = true;
               }
@@ -283,8 +283,8 @@ public final class ChallengeParser {
             }
 
           } else {
-            final double min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).doubleValue();
-            final double max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).doubleValue();
+            final double min = Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).doubleValue();
+            final double max = Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).doubleValue();
             if (FP.lessThan(initialValue, min, INITIAL_VALUE_TOLERANCE)) {
               throw new InvalidInitialValue(String.format("Initial value for %s(%f) is less than min(%f)", name,
                                                           initialValue, min));

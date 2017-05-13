@@ -42,6 +42,7 @@ import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.DisplayInfo;
 import fll.web.GetHttpSessionConfigurator;
+import fll.xml.ScoreType;
 
 /**
  * Provide updates on the state of head to head brackets.
@@ -215,6 +216,7 @@ public class H2HUpdateWebSocket {
    *          may be null
    * @param teamName team name, may be null
    * @param score the score for the team, may be null
+   * @param performanceScoreType used to format the score
    * @param table the table for the team, may be null
    */
   public static void updateBracket(final String bracketName,
@@ -224,13 +226,14 @@ public class H2HUpdateWebSocket {
                                    final Integer teamNumber,
                                    final String teamName,
                                    final Double score,
+                                   final ScoreType performanceScoreType,
                                    final boolean noShow,
                                    final boolean verified,
                                    final String table) {
     final BracketMessage message = new BracketMessage();
     message.isBracketUpdate = true;
     message.bracketUpdate = new BracketUpdate(bracketName, dbLine, playoffRound, maxPlayoffRound, teamNumber, teamName,
-                                              score, noShow, verified, table);
+                                              score, performanceScoreType, noShow, verified, table);
 
     synchronized (SESSIONS_LOCK) {
       if (!SESSIONS.containsKey(bracketName)) {
@@ -284,10 +287,11 @@ public class H2HUpdateWebSocket {
   }
 
   @OnError
-  public void error(@SuppressWarnings("unused") final Session session, final Throwable t) {
+  public void error(@SuppressWarnings("unused") final Session session,
+                    final Throwable t) {
     LOGGER.error("Caught websocket error", t);
   }
-  
+
   /**
    * Message sent on the WebSocket.
    */

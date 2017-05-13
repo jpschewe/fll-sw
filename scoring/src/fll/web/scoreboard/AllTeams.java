@@ -30,6 +30,8 @@ import fll.db.TournamentParameters;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
+import fll.xml.ChallengeDescription;
+import fll.xml.ScoreType;
 
 /**
  * Support for allteams.jsp.
@@ -48,6 +50,9 @@ public class AllTeams {
     if (null != existingMessage) {
       message.append(existingMessage);
     }
+
+    final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
+    final boolean floatingPointScores = challengeDescription.getPerformance().getScoreType() == ScoreType.FLOAT;
 
     int numScores = 0;
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -82,8 +87,8 @@ public class AllTeams {
         final List<ComputedPerformanceScore> teamScores = new LinkedList<>();
         try (final ResultSet rs = prep.executeQuery()) {
           while (rs.next()) {
-            final ComputedPerformanceScore score = new ComputedPerformanceScore(rs.getInt(1), rs.getBoolean(2),
-                                                                                rs.getDouble(3));
+            final ComputedPerformanceScore score = new ComputedPerformanceScore(floatingPointScores, rs.getInt(1),
+                                                                                rs.getBoolean(2), rs.getDouble(3));
             teamScores.add(score);
 
             ++numScores;
@@ -141,14 +146,19 @@ public class AllTeams {
   }
 
   public static final class ComputedPerformanceScore {
-    public ComputedPerformanceScore(final int runNumber,
+    public ComputedPerformanceScore(final boolean floatingPointScores,
+                                    final int runNumber,
                                     final boolean isNoShow,
                                     final double score) {
       mRunNumber = runNumber;
       if (isNoShow) {
         mScoreString = "No Show";
       } else {
-        mScoreString = Utilities.NUMBER_FORMAT_INSTANCE.format(score);
+        if (floatingPointScores) {
+          mScoreString = Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(score);
+        } else {
+          mScoreString = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.format(score);
+        }
       }
     }
 

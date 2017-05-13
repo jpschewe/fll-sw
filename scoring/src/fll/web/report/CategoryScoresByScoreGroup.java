@@ -53,7 +53,8 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session,
                                                     "/report/CategoryScoresByScoreGroup")) {
       return;
@@ -89,7 +90,8 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
   private void generateReport(final Connection connection,
                               final Document pdfDoc,
                               final ChallengeDescription challengeDescription,
-                              final Tournament tournament) throws SQLException, DocumentException {
+                              final Tournament tournament)
+      throws SQLException, DocumentException {
 
     PreparedStatement prep = null;
     ResultSet rs = null;
@@ -147,7 +149,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
               if (Double.isNaN(score)) {
                 table.addCell(PdfUtils.createCell("No Score"));
               } else {
-                table.addCell(PdfUtils.createCell(Utilities.NUMBER_FORMAT_INSTANCE.format(score)));
+                table.addCell(PdfUtils.createCell(Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(score)));
               }
             }
 
@@ -177,7 +179,8 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
                             final String catTitle,
                             final String division,
                             final String judgingGroup,
-                            final Tournament tournament) throws BadElementException {
+                            final Tournament tournament)
+      throws BadElementException {
     final PdfPCell tournamentCell = PdfUtils.createHeaderCell(String.format("%s - %s", challengeTitle,
                                                                             tournament.getName()));
     tournamentCell.setColspan(4);
