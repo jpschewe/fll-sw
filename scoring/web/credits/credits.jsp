@@ -88,9 +88,6 @@
     <li><a href="https://github.com/flesler/jquery.scrollTo">jQuery
         ScrollTo</a> - <a href="jQuery-ScrollTo-LICENSE.txt">License</a></li>
 
-    <li><a href="http://icepush.org/">ICEpush</a> - <a
-      href="icepush-license.txt">License</a></li>
-
     <li><a href="https://github.com/jpschewe/opencsv-jps">OpenCSV</a>
       - <a href="opencsv-license.txt">License</a></li>
 
