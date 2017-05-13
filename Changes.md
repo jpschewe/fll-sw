@@ -1,3 +1,4 @@
+* #533 - Handle disconnect and reconnect in the display pages
 * #566 - Use web sockets for the unverified runs update
 * #552 - use web sockets to update the remote control brackets page 
 * upgrade to selenium 3.3.0
