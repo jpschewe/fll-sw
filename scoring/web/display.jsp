@@ -64,9 +64,6 @@
 
   function onLoad() {
     openSocket();
-    
-    update();
-    setInterval(update, 60000);
   }
   $(document).ready(onLoad);
 </script>
@@ -102,6 +99,8 @@
     socket.onmessage = messageReceived;
     socket.onopen = socketOpened;
     socket.onclose = socketClosed;
+
+    update();
   }
 </script>
 </head>
