@@ -1,87 +1,98 @@
-**Please fully read all instructions before you find the computers to use or going through with actual installation of software**
+**Please READ ALL INSTRUCTIONS before choosing computers or installing software**
 
 Required files
 ==============
-To follow these instructions you will need the following files:
 
-  * The latest version of the software
+  * Download the latest version of the software
 
-Types of Computers
+Roles of Computers
 ==================
-To run a tournament 4 types of computers will be required. These types define what software is to run on the computers and how they are used. The software required for each type of machine is listed below the description of the machine as links to pieces of this document.
+
+Tournament computers perform 4 Roles:  Server, Display, Performance Score Entry, and Subjective Score Entry. These Roles define which software is required on each computer. Below you will find a description of each Role and links to required software and supporting documentation.
 
 Server
 ------
-This computer is the brains behind the whole system. It contains the database and the webserver. This is also the computer that requires the most horsepower. The minimum hardware that I've successfully run the server on is a Pentium 166Mhz with 64MB of memory, however it was rather slow. 
-I would suggest something with a 1Ghz processor and at least 512MB of RAM, preferably 1GB, just to be comfortable.
-This computer must have a network connection and be able to be networked to the performance score entry computers and the display computer.
 
-This computer requires the [Java JRE](InstallJava.md) and the [server software](InstallServerSoftware.md) and a [Supported Web browser](SupportedWebBrowsers.md).
+This Role is the brains behind the whole system. **The Server holds the database and the web server**. The Server computer requires the most horsepower. **Suggested hardware**: something with a 1Ghz processor and 1GB RAM. This computer must have a network connection (Ethernet or wi-fi) and be able to connect to the performance score entry computers and the display computer(s).
 
-This computer is also the one that is used to print out reports. So it needs to have a printer attached. Technically any computer on the network can be used for printing, but the server is usually a logical choice. I would stick with a small laser printer as they print reasonably fast and everything is black and white. Any printer will work though, it just may get slow during the head to head competition.
+The Server is also used to print reports so it needs to have a printer attached. Technically any computer on the network can be used for printing, but the Server is usually a logical choice. I would stick with a small laser printer as they print reasonably fast and it is only necessary to print in black and white. Any printer will work, though a higher page-per-minute speed will be appreciated during head to head competition.
+ 
+**Required Software**:  The Server requires the [Java JRE](InstallJava.md), the [server software](InstallServerSoftware.md), a [Supported Web browser](SupportedWebBrowsers.md), and appropriate printer drivers.
+
 
 Display
 -------
-This computer is used to display scores, either on it's screen or on an LCD projector. LCD projector is recommended. I've used a Pentium 133Mhz with 32MB RAM for this function at the state tournament without problems, so anything that powerful or greater would work fine. The important part here is that the display be good. The monitor/projector and video card need to be capable of at least 800x600 resolution, 1024x768 is better, however I understand that LCD projectors of this resolution are rather expensive. Anything bigger than 1024x768 really won't buy you much though. This computer needs to be networked to the server.
 
-The only software required on this computer is a [Supported Web browser](SupportedWebBrowsers.md). 
+The Display Computer is **used to display scores**, either on the Display Computer's screen or on an LCD projector. **LCD projector is recommended**.  **Suggested hardware**: something with a 1Ghz processor and 1GB RAM. The important part is that the display be good and the scrolling of web pages can keep up. The monitor/projector and video card need to be capable of at least 800x600 resolution.  **Suggested resolution:  1024x768**, however I understand that LCD projectors of this resolution may be expensive. There is no added benefit from projectors of resolution greater than 1024x768. This computer needs to be networked to the server. The Display Computer should have it's screen saver disabled and any power mangement screen blanking settings turned off. 
 
-When setting up the tournament, make sure there is a good place for teams to see the scores. A large white wall high up in a gym works pretty well, provided the gym is dark enough. At larger tournaments we've tapped into the building's TV monitors or setup extra large monitors with extra computers around the performance and pit areas.
+**Required Software**: [Supported Web browser](SupportedWebBrowsers.md). 
+
+**Notes on where to display**:
+When setting up the tournament, make sure there is a good place for teams to see the scores. A large white wall high up in a gym works pretty well, provided the gym is dark enough. At larger tournaments we've tapped into the building's TV monitors or setup extra-large monitors with extra computers around the performance and pit areas.
 
 
 Performance Score Entry
 -----------------------
 
-This computer is used to enter performance scores. The hardware requirements are the same as the display computer with the exception that output to an LCD projector is not needed. Users will just be using a web browser to enter scores. So a reasonable size screen is nice and a good mouse is a plus, but trackpads on laptops work fine too.
+The Performance Score Entry computer is used to enter performance scores. The hardware requirements are the same as the Display Computer with the exception that output to an LCD projector is not needed. Users will use a web browser to enter scores.  **Suggested**:  A reasonable size screen is nice and a good mouse is a plus, but trackpads on laptops work fine too.
 
-The only software required on this computer is a [Supported Web browser](SupportedWebBrowsers.md). 
+**Required Software**: [Supported Web browser](SupportedWebBrowsers.md). 
+
 
 Subjective Score Entry
 -----------------------
-This computer is used to enter the scores from subjective judging. A Pentium 166Mhz with 32MB of RAM running Windows 95 would be ok. I'd suggest a Pentium II 266Mhz or better if possible though as this computer needs to do a little more work than the Performance score entry computer. The display is also important here. 1024x768 is the recommended display, although it should work with 800x600 as well. A network card is not required for this machine if floppies or USB drives are used to transfer the scores to a networked machine. Otherwise this computer needs to be networked to the server and have a [Supported Web browser](SupportedWebBrowsers.md).
 
-This computer requires the [Java JRE](InstallJava.md) and the [subjective software](InstallSubjective.md).
+The Subjective Score Entry Computer is used to enter the scores from subjective judging. The hardware requirements are the same as the Display Computer with the exception that output to an LCD projector is not needed.  **Suggested resolution**:  1024x768. This computer needs to be networked to the server.
+
+**Required Software**: [Java JRE](InstallJava.md) and [subjective software](InstallSubjective.md) OR Subjective Web App and a [Supported Web browser](SupportedWebBrowsers.md). 
 
 
 Number of computers
 ===================
-Of course now that you know which types of computer you need and what hardware is required you'll want to know how many computers you really need. It is conceivable that a tournament be run all on one computer (this would not include a display computer) and all other software would be installed on this one computer, although that's not suggested. You'll also need one person per computer (except the display computer) for the whole tournament, this is sometimes handled by taking shifts.
 
-Minimum
--------
-The smallest tournament I've run has been an 8 team tournament with 2 computers. The configuration looks like this:
+Of course, now that you know the Roles to be performed and the hardware requirements, you'll want to know how many computers you really need. It is possible to run a tournament all on one computer (this would not include a display computer) with all software installed on this one computer, although that's not suggested. You'll also need one person per computer (except the display computer) for the entire tournament, which is sometimes handled by taking shifts.
 
-  * 1 computer that is used for a server, performance score entry, and subjective score entry.
-  * 1 display computer
+Minimum number of computers
+---------------------------
 
-Average
---------
-An average tournament that has between 16 and 32 teams runs pretty well with the following configuration.
+The smallest tournament I've run has been an 8-team tournament with 2 computers. The configuration looks like this:
 
-  * 1 Server that is also used for subjective score entry
-  * 2 performance score entry computers. In this case I'm assuming that 2 full tables are being used (4 teams competing simultaneously). If more tables are used I would have one performance score entry computer for each full table.
+  * 1 computer that is used as the Server, Performance Score Entry, and Subjective Score Entry.
+  * 1 Display Computer
+
+Average number of computers
+---------------------------
+
+An average tournament has between 16 and 32 teams runs pretty well with the following configuration.
+
+  * 1 Server that is also used for Subjective Score Sntry
+  * 2 Performance Score Entry computers. Assuming 2 full performance tables are being used (4 teams competing simultaneously). If more tables are used add one Performance Score Entry computer for each full table.
   * 1 Display computer The bigger the tournament the more important it is to have a 1024x768 display and a good place to display the scores.
 
-Large
------
-Our state tournaments tend to be rather large, so I use this for the large tournament example. In Minnesota this is between 64 and 75 teams and has thousands of people and lots of hype and pressure, so it's really nice to have extra computers.
+Large number of computers
+-------------------------
+
+The Minnesota state tournaments tend to be rather large, so I use this for the large tournament example. Large is between 64 and 75 teams and has thousands of people and lots of hype and pressure, so it's really nice to have extra computers.
 
   * 1 Server
-  * 1 performance score entry computer for each full table. A full table is one in which two teams compete simultaneously. Our state tournaments typically have 4 tables and therefore 4 of these computers.
-  * 1 Display computer, and a nice AV guy that that send the display to all of the LCD projectors. At this point you should really have a computer and LCD projector combination that is capable of 1024x768 and big screens. Ours are about 10 feet on a side.
-  * 1 subjective score entry computer for each subjective category. At the time of this writing, this is 4. You may think this is overkill, but I have each of the 4 major subjective categories on a dedicated computer (in the case of the research category this tends to be 3 categories on the same computer though). This seems to be a nice way to break up duties and keeps the score entry people busy without getting them too stressed out towards the end of the tournament when all of the scores come in and need to be checked.
-
+  * 1 Performance Score Entry computer for each full table. A full table is one in which two teams compete simultaneously. State tournaments typically have 4 tables and 4 Performance Score Entry computers.
+  * 1 Display computer and a nice AV guy who can send the display to all of the LCD projectors. At this point you should really have a computer and LCD projector combination that is capable of projecting at 1024x768 resolution and filling a 10 foot screen. 
+  * 1 Subjective Score Entry computer for each subjective category. At the time of this writing, this is 4. You may think this is overkill, but I have each of the 4 major subjective categories on a dedicated computer (in the case of the research category this tends to be 3 categories on the same computer though). This seems to be a nice way to break up duties and keeps the score entry people busy without getting them too stressed out towards the end of the tournament when all of the scores come in and need to be checked.
+    * If using tablets for subjective scoring, then the Subjective Score Entry computer is not required
+   
 
 Extra computers that are nice to have
 -------------------------------------
-  * 1 computer that is capable of being used to lookup scores and print reports while any issues/problems are being worked out on the server. Sometimes 2 printers are useful, one on the server and one on this machine because one person wants to print out head to head brackets while another person wants the score report printed for determining medals at the same instant (I speak from experience). I've not actually had this computer at a tournament, but have definitely seen the need for it.
-  * 1 computer that is capable of being used by the refs only for looking up performance scores for disputes and for displaying the admin version of the brackets to keep track of what's going on during the head to head brackets. I've not actually had this computer at a tournament, but during the 2002 state tournament I found that having such a computer for the refs to use to show the head to head brackets was quite useful.
-  * 1 or more extra display computers that just have monitors on them and can be looked at by teams around the performance area or, if a good network is available, placed around the tournament site. This idea has yet to have been tried and is by no means required for a tournament, but if used one could get away with only a single LCD projector and just have these computers scattered around. I'd make sure to remove the keyboard and mouse from these machines so that people don't get into them and mess with the scores. Better yet, build a password into the score entry web pages so that this isn't a problem. Now if someone would write it...
+
+  * 1 computer that is capable of looking up scores and printing reports while issues or problems are being worked out on the Server. Sometimes 2 printers are useful, one on the Server and one on the extra computer.  It does happen that one person wants to print head to head brackets at the same instant another person wants to print the score report used for medal determination (I speak from experience).
+  * 1 computer, tablet or phone that is capable of being used by the refs only for looking up performance scores for disputes and for displaying the admin version of the brackets to keep track of what's going on during the head to head brackets.
+  * 1 or more extra display computers that just have monitors on them and can be looked at by teams around the performance area or, if a good network is available, placed around the tournament site. If used one could get away with only a single LCD projector. Make sure to remove the keyboard and mouse so people don't get into them and mess with the scores. 
 
 Install Instructions
 ====================
-These instructions are geared towards Windows 2K and XP, if installing on Linux the instructions are mostly the same, with the exception of getting prompted for installation locations. In these instructions locations are given for all installs, these are not hard coded into the software anywhere, but it'll make things a lot easier for me to debug over the phone if you use the same directories.
-It is assumed that you have the computers used for the server, scoreboard display and performance score entry are already networked and you MUST know the IP address of the computer that is the server.
+
+These instructions are geared towards Windows, if installing on Linux the instructions are mostly the same, with the exception of getting prompted for installation locations. In these instructions locations are given for all installs, these are not hard coded into the software anywhere, but it'll make things a lot easier for me to debug over the phone if you use the same directories.
+**Assumption:  the Server, Display and Performance Score Entry computers are already networked and you KNOW THE IP address of the Server.**
 You can download the current version of the software by clicking on the button below.
 [[download_button]] 
 Unzipping this file will create a directory called fll-sw that contains the various zip files referenced here.
@@ -132,12 +143,14 @@ If you do not have a zip tool to open up the archives you can use the jar tool t
 
 Sponsor Logos
 =============
+
 In version 4 of the software we added the ability to have sponsor logos displayed. These logos are displayed on the main welcome page, in between team scores on the scoreboard and on the bottom of the head to head brackets page. Any files with image extensions (currently the list is: `.jpg`, `.jpeg`, `.gif`, `.png`) put into the directory `tomcat/webapps/fll-sw/sponsor_logos` will be displayed on these pages. See the `README.txt` file in this directory for information about sizing. The welcome page lists the logos sorted by filename, so you can to show the sponsors in a particular order, say by amount donated. The logos are displayed randomly on the other pages.    
 
 Slideshow
 =========
+
 There is an option to display a slide show on the big screen display.
 This option shows all image files (`.jpg`, `.jpeg`, `.gif`, `.png`) from the directory `tomcat/webapps/fll-sw/slideshow`.
-The images are displayed in order, so naming them starting with 2 or 3 numbers helps to know what order they will be displayed in.
+The images are displayed in order, so naming them starting with 2-digit or 3-digit numbers helps to know the order in which they will be displayed in.
 
 
