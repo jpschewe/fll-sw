@@ -5,7 +5,7 @@
 
 <%
   fll.web.report.finalist.PublicFinalistDisplaySchedule
-					.populateContext(application, session, pageContext);
+					.populateContext(request, application, pageContext);
 %>
 
 <html>
