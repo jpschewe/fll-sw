@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
@@ -25,9 +25,9 @@ import org.apache.log4j.Logger;
 
 import fll.TournamentTeam;
 import fll.db.Queries;
+import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
-import fll.web.DisplayInfo;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -37,12 +37,14 @@ public class PublicFinalistDisplaySchedule {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  public static void populateContext(final ServletContext application,
-                                     final HttpSession session,
+  public static void populateContext(final HttpServletRequest request,
+                                     final ServletContext application,
                                      final PageContext pageContext) {
-    final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
-    
-    final String division = displayInfo.getFinalistScheduleAwardGroup();
+    final String division = request.getParameter("division");
+    if (null == division
+        || "".equals(division)) {
+      throw new FLLRuntimeException("Parameter 'division' cannot be null");
+    }
 
     Connection connection = null;
     Statement stmt = null;

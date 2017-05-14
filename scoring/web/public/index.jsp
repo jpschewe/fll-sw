@@ -41,8 +41,24 @@
     <li><a href='<c:url value="/scoreboard/Top10"/>'>Top 10
         performance scores</a></li>
 
-    <li><a href='<c:url value="/playoff/remoteMain.jsp"/>'>Head to head
-        brackets that are currently on the big screen</a></li>
+    <li><a href='<c:url value="/playoff/remoteMain.jsp"/>'>Head
+        to head brackets that are currently on the big screen</a></li>
+
+    <li>
+      <form
+        ACTION='<c:url value="/report/finalist/PublicFinalistDisplaySchedule.jsp"/>'
+        METHOD='POST'>
+        <select name='division'>
+          <c:forEach
+            var="division"
+            items="${finalistDivisions }">
+            <option value='${division }'>${division }</option>
+          </c:forEach>
+        </select> <input
+          type='submit'
+          value='Finalist Schedule - HTML' />
+      </form>
+    </li>
 
     <li>
       <form
