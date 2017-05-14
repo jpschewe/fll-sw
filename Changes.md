@@ -1,3 +1,4 @@
+* #533 - Handle disconnect and reconnect in the display pages
 * #565 - Use web sockets to update the display pages
 * #535 - Don't let the user try to initialize a bracket when there are
          no brackets to initialize
