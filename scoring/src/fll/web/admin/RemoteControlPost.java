@@ -19,10 +19,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
-import org.icepush.PushContext;
 
 import fll.web.BaseFLLServlet;
 import fll.web.DisplayInfo;
+import fll.web.DisplayWebSocket;
 import fll.web.SessionAttributes;
 import fll.web.playoff.H2HUpdateWebSocket;
 
@@ -116,12 +116,11 @@ public class RemoteControlPost extends BaseFLLServlet {
     for (final DisplayInfo display : toDelete) {
       DisplayInfo.deleteDisplay(application, display);
     }
-    
+
     // notify brackets that there may be changes
     H2HUpdateWebSocket.updateDisplayedBracket();
 
-    PushContext pc = PushContext.getInstance(application);
-    pc.push("display");
+    DisplayWebSocket.notifyToUpdate();
     session.setAttribute(SessionAttributes.MESSAGE, "<i id='success'>Successfully set remote control parameters</i>");
 
     response.sendRedirect(response.encodeRedirectURL("remoteControl.jsp"));

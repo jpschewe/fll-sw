@@ -1,3 +1,4 @@
+* #565 - Use web sockets to update the display pages
 * #535 - Don't let the user try to initialize a bracket when there are
          no brackets to initialize
 * #554 - Update public HTML finalist schedule to work on report and

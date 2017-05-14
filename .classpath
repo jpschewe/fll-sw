@@ -19,9 +19,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="scoring/lib/JonsInfra-1.6.jar" sourcepath="scoring/lib/source/JonsInfra-1.6-src.zip"/>
-	<classpathentry kind="lib" path="scoring/lib/icepush-2.0.0-alpha3.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/jstl-1.2.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/icepush-jsp-2.0.0-alpha3.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/opencsv-jps-2.4.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/commons-io-2.5.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/oro-2.0.8.jar"/>
