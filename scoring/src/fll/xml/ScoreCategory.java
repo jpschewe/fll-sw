@@ -103,4 +103,17 @@ public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
     return total;
   }
 
+  /**
+   * Determines the {@link ScoreType} for this category.
+   * This is done by walking all of the goals and checking their score type.
+   * If any goal is floating point, then this category can have a floating
+   * point score.
+   * 
+   * @return not null
+   */
+  public ScoreType getScoreType() {
+    final boolean hasFloatingPointGoals = getGoals().stream().anyMatch(g -> g.getScoreType() == ScoreType.FLOAT);
+    return hasFloatingPointGoals ? ScoreType.FLOAT : ScoreType.INTEGER;
+  }
+
 }

@@ -22,7 +22,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.db.Queries;
@@ -30,7 +29,9 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreCategory;
+import fll.xml.ScoreType;
 import fll.xml.WinnerType;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Display the report for scores by score group.
@@ -42,7 +43,8 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session, "/report/CategoryScoresByJudge")) {
       return;
     }
@@ -56,11 +58,13 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
     writer.write("<html><body>");
 
     // cache the subjective categories title->dbname
-    final Map<String, String> subjectiveCategories = new HashMap<String, String>();
+    final Map<String, String> subjectiveCategories = new HashMap<>();
+    final Map<String, ScoreType> categoryScoreType = new HashMap<>();
     for (final ScoreCategory subjectiveElement : challengeDescription.getSubjectiveCategories()) {
       final String title = subjectiveElement.getTitle();
       final String name = subjectiveElement.getName();
       subjectiveCategories.put(title, name);
+      categoryScoreType.put(name, subjectiveElement.getScoreType());
     }
 
     ResultSet rs = null;
@@ -85,12 +89,11 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
         for (final Map.Entry<String, String> entry : subjectiveCategories.entrySet()) {
           final String categoryTitle = entry.getKey();
           final String categoryName = entry.getValue();
+          final ScoreType scoreType = categoryScoreType.get(categoryName);
 
           judgesPrep = connection.prepareStatement("SELECT DISTINCT "
-              + categoryName
-              + ".Judge"//
-              + " FROM " + categoryName
-              + ",current_tournament_teams"//
+              + categoryName + ".Judge"//
+              + " FROM " + categoryName + ",current_tournament_teams"//
               + " WHERE " + categoryName + ".TeamNumber = current_tournament_teams.TeamNumber" + " AND " + categoryName
               + ".Tournament = ?" + " AND current_tournament_teams.event_division = ?");
           judgesPrep.setInt(1, currentTournament);
@@ -132,7 +135,7 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
               final String name = rs.getString(3);
               final double score = rs.getDouble(4);
               final boolean scoreWasNull = rs.wasNull();
-              final double rawScore = rs.getDouble(5);
+              final double standardizedScore = rs.getDouble(5);
               final boolean rawScoreWasNull = rs.wasNull();
 
               writer.write("<tr>");
@@ -156,7 +159,7 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
 
               if (!scoreWasNull) {
                 writer.write("<td>");
-                writer.write(Utilities.NUMBER_FORMAT_INSTANCE.format(score));
+                writer.write(Utilities.getFormatForScoreType(scoreType).format(score));
               } else {
                 writer.write("<td align='center' class='warn'>No Score");
               }
@@ -164,24 +167,24 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
 
               if (!rawScoreWasNull) {
                 writer.write("<td>");
-                writer.write(Utilities.NUMBER_FORMAT_INSTANCE.format(rawScore));
+                writer.write(Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(standardizedScore));
               } else {
                 writer.write("<td align='center' class='warn'>No Score");
               }
               writer.write("</td>");
 
               writer.write("</tr>");
-            }// foreach team
+            } // foreach team
             writer.write("<tr><td colspan='5'><hr/></td></tr>");
             writer.write("</table>");
             SQLFunctions.close(rs);
             SQLFunctions.close(prep);
-          }// foreach judge
+          } // foreach judge
           SQLFunctions.close(judgesRS);
           SQLFunctions.close(judgesPrep);
-        }// foreach category
+        } // foreach category
 
-      }// foreach division
+      } // foreach division
 
     } catch (final SQLException sqle) {
       throw new RuntimeException(sqle);

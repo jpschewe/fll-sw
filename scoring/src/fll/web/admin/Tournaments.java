@@ -70,7 +70,7 @@ public final class Tournaments {
         numRows = 0;
       } else {
         try {
-          numRows = Utilities.NUMBER_FORMAT_INSTANCE.parse(numRowsStr).intValue();
+          numRows = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(numRowsStr).intValue();
         } catch (final ParseException nfe) {
           numRows = 0;
         }

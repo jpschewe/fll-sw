@@ -27,6 +27,8 @@ import fll.Utilities;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.xml.ChallengeDescription;
+import fll.xml.ScoreType;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -38,12 +40,16 @@ public class PerformanceScoreDump extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     CSVWriter csv = null;
     Connection connection = null;
     try {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
+
+      final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
+      final ScoreType performanceScoreType = challengeDescription.getPerformance().getScoreType();
 
       final int tournamentID = Queries.getCurrentTournament(connection);
 
@@ -54,7 +60,7 @@ public class PerformanceScoreDump extends BaseFLLServlet {
       csv = new CSVWriter(response.getWriter());
 
       writeHeader(csv);
-      writeData(connection, tournamentID, csv);
+      writeData(connection, tournamentID, performanceScoreType, csv);
 
     } catch (final SQLException e) {
       throw new RuntimeException(e);
@@ -74,7 +80,9 @@ public class PerformanceScoreDump extends BaseFLLServlet {
    */
   private void writeData(final Connection connection,
                          final int tournamentID,
-                         final CSVWriter csv) throws SQLException {
+                         final ScoreType performanceScoreType,
+                         final CSVWriter csv)
+      throws SQLException {
 
     PreparedStatement getScores = null;
     ResultSet scores = null;
@@ -100,8 +108,8 @@ public class PerformanceScoreDump extends BaseFLLServlet {
         final String judgingStation = scores.getString(6);
 
         final String[] row = new String[] { Integer.toString(teamNumber), teamName, Integer.toString(runNumber),
-                                            Utilities.NUMBER_FORMAT_INSTANCE.format(score), eventDivision,
-                                            judgingStation };
+                                            Utilities.getFormatForScoreType(performanceScoreType).format(score),
+                                            eventDivision, judgingStation };
         csv.writeNext(row);
       }
 

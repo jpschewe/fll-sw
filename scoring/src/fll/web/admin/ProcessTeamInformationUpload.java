@@ -160,7 +160,7 @@ public final class ProcessTeamInformationUpload extends BaseFLLServlet {
         final String teamNumStr = data[teamNumColumnIdx];
         if (null != teamNumStr
             && !"".equals(teamNumStr.trim())) {
-          final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumStr).intValue();
+          final int teamNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(teamNumStr).intValue();
 
           final Team team = Team.getTeamFromDatabase(connection, teamNumber);
 

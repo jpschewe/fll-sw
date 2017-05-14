@@ -49,6 +49,7 @@ import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.EnumeratedValue;
 import fll.xml.PerformanceScoreCategory;
+import fll.xml.ScoreType;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -217,7 +218,9 @@ public class ScoresheetGenerator {
                                                                    performanceRunA);
               final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, tournament, division);
               H2HUpdateWebSocket.updateBracket(division, dbLine, playoffRound, maxPlayoffRound, teamA.getTeamNumber(),
-                                               teamA.getTeamName(), null, false, true, m_table[j]);
+                                               teamA.getTeamName(), null, ScoreType.INTEGER, // doesn't
+                                                                                             // matter
+                                               false, true, m_table[j]);
             }
             j++;
 
@@ -252,7 +255,9 @@ public class ScoresheetGenerator {
                                                                    performanceRunB);
               final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, tournament, division);
               H2HUpdateWebSocket.updateBracket(division, dbLine, playoffRound, maxPlayoffRound, teamA.getTeamNumber(),
-                                               teamA.getTeamName(), null, false, true, m_table[j]);
+                                               teamA.getTeamName(), null, ScoreType.INTEGER, // doesn't
+                                                                                             // matter
+                                               false, true, m_table[j]);
             }
             j++;
           }

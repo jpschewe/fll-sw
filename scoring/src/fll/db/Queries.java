@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.CategoryRank;
@@ -52,6 +53,7 @@ import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreCategory;
+import fll.xml.ScoreType;
 import fll.xml.TiebreakerTest;
 import fll.xml.WinnerType;
 import net.mtu.eggplant.util.ComparisonUtils;
@@ -674,13 +676,13 @@ public final class Queries {
     if (null == teamNumberStr) {
       throw new RuntimeException("Missing parameter: TeamNumber");
     }
-    final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue();
+    final int teamNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue();
 
     final String runNumberStr = request.getParameter("RunNumber");
     if (null == runNumberStr) {
       throw new RuntimeException("Missing parameter: RunNumber");
     }
-    final int runNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(runNumberStr).intValue();
+    final int runNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(runNumberStr).intValue();
 
     final String noShow = request.getParameter("NoShow");
     if (null == noShow) {
@@ -774,7 +776,8 @@ public final class Queries {
         final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, currentTournament, bracketName);
 
         H2HUpdateWebSocket.updateBracket(bracketName, dbLine, playoffRound, maxPlayoffRound, teamNumber,
-                                         team.getTeamName(), score, teamScore.isNoShow(), false, table);
+                                         team.getTeamName(), score, performanceElement.getScoreType(),
+                                         teamScore.isNoShow(), false, table);
       }
     } else {
       tournament.recordPerformanceSeedingModified(connection);
@@ -835,13 +838,13 @@ public final class Queries {
     if (null == teamNumberStr) {
       throw new FLLRuntimeException("Missing parameter: TeamNumber");
     }
-    final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue();
+    final int teamNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue();
 
     final String runNumberStr = request.getParameter("RunNumber");
     if (null == runNumberStr) {
       throw new FLLRuntimeException("Missing parameter: RunNumber");
     }
-    final int runNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(runNumberStr).intValue();
+    final int runNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(runNumberStr).intValue();
 
     final String noShow = request.getParameter("NoShow");
     if (null == noShow) {
@@ -970,7 +973,8 @@ public final class Queries {
       final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, currentTournament, division);
 
       H2HUpdateWebSocket.updateBracket(division, ptLine, playoffRun, maxPlayoffRound, teamNumber, team.getTeamName(),
-                                       Double.isNaN(score) ? null : score, teamScore.isNoShow(), verified, table);
+                                       Double.isNaN(score) ? null : score, performanceElement.getScoreType(),
+                                       teamScore.isNoShow(), verified, table);
 
       final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division, (ptLine
           % 2 == 0
@@ -1110,13 +1114,13 @@ public final class Queries {
     if (null == teamNumberStr) {
       throw new RuntimeException("Missing parameter: TeamNumber");
     }
-    final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue();
+    final int teamNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue();
 
     final String runNumber = request.getParameter("RunNumber");
     if (null == runNumber) {
       throw new RuntimeException("Missing parameter: RunNumber");
     }
-    final int irunNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(runNumber).intValue();
+    final int irunNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(runNumber).intValue();
     final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournament);
 
     // Check if we need to update the PlayoffData table
@@ -1185,7 +1189,9 @@ public final class Queries {
             final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, currentTournament, division);
 
             H2HUpdateWebSocket.updateBracket(division, ptLine, playoffRound, maxPlayoffRound, teamNumber,
-                                             team.getTeamName(), null, false, true, table);
+                                             team.getTeamName(), null, ScoreType.INTEGER // doesn't
+                                                                                         // matter
+                                             , false, true, table);
           }
         } else {
           // Do nothing - team didn't get entered into the PlayoffData table.
@@ -1269,7 +1275,9 @@ public final class Queries {
     final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, currentTournament, division);
 
     H2HUpdateWebSocket.updateBracket(division, lineNumber, playoffRound, maxPlayoffRound, team.getTeamNumber(),
-                                     team.getTeamName(), null, false, true, table);
+                                     team.getTeamName(), null, ScoreType.INTEGER, // doesn't
+                                                                                  // matter
+                                     false, true, table);
   }
 
   /**
@@ -1315,6 +1323,10 @@ public final class Queries {
                                                             final int lastPlayoffRound)
       throws SQLException {
     final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, currentTournament, bracketName);
+
+    final Document document = GlobalParameters.getChallengeDocument(connection);
+    final ChallengeDescription challengeDescription = new ChallengeDescription(document.getDocumentElement());
+    final ScoreType performanceScoreType = challengeDescription.getPerformance().getScoreType();
 
     final Collection<BracketUpdate> updates = new LinkedList<>();
     try (
@@ -1364,7 +1376,8 @@ public final class Queries {
           final boolean noShow = rs.getBoolean(8);
 
           final BracketUpdate update = new BracketUpdate(bracketName, dbLine, playoffRound, maxPlayoffRound, teamNumber,
-                                                         teamName, score, noShow, verified, table);
+                                                         teamName, score, performanceScoreType, noShow, verified,
+                                                         table);
 
           updates.add(update);
         } // foreach result
