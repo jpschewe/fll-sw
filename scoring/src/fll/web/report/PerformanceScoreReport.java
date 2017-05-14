@@ -215,13 +215,13 @@ public class PerformanceScoreReport extends BaseFLLServlet {
                 }
               } else {
                 final double rawValue = goal.getRawScore(score);
-                cellStr.append(Utilities.NUMBER_FORMAT_INSTANCE.format(rawValue)
+                cellStr.append(Utilities.getFormatForScoreType(goal.getScoreType()).format(rawValue)
                     + " -> ");
               }
             } // not enumerated
           } // not computed
 
-          cellStr.append(Utilities.NUMBER_FORMAT_INSTANCE.format(computedValue));
+          cellStr.append(Utilities.getFormatForScoreType(performance.getScoreType()).format(computedValue));
           if (FP.equals(bestScore, computedValue, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
             table.addCell(new Phrase(cellStr.toString(), BEST_SCORE_FONT));
           } else {
@@ -246,9 +246,11 @@ public class PerformanceScoreReport extends BaseFLLServlet {
         final double totalScore = performance.evaluate(score);
 
         if (FP.equals(bestTotalScore, totalScore, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
-          table.addCell(new Phrase(Utilities.NUMBER_FORMAT_INSTANCE.format(totalScore), BEST_SCORE_FONT));
+          table.addCell(new Phrase(Utilities.getFormatForScoreType(performance.getScoreType()).format(totalScore),
+                                   BEST_SCORE_FONT));
         } else {
-          table.addCell(new Phrase(Utilities.NUMBER_FORMAT_INSTANCE.format(totalScore), SCORE_FONT));
+          table.addCell(new Phrase(Utilities.getFormatForScoreType(performance.getScoreType()).format(totalScore),
+                                   SCORE_FONT));
         }
       }
 

@@ -61,6 +61,7 @@ import fll.web.BaseFLLServlet;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreCategory;
+import fll.xml.ScoreType;
 import fll.xml.WinnerType;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -282,8 +283,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
         writeColumnHeaders(schedule, weights, subjectiveCategories, relativeWidths, challengeDescription, divTable);
 
-        writeScores(connection, subjectiveCategories, weights, relativeWidths, awardGroup, winnerCriteria, tournament,
-                    divTable, bestTeams);
+        writeScores(connection, subjectiveCategories, challengeDescription.getPerformance().getScoreType(), weights,
+                    relativeWidths, awardGroup, winnerCriteria, tournament, divTable, bestTeams);
 
         // Add the division table to the document
         pdfDoc.add(divTable);
@@ -434,6 +435,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table name")
   private void writeScores(final Connection connection,
                            final ScoreCategory[] subjectiveCategories,
+                           final ScoreType performanceScoreType,
                            final double[] weights,
                            final float[] relativeWidths,
                            final String awardGroup,
@@ -537,8 +539,14 @@ public final class FinalComputedScores extends BaseFLLServlet {
         } else {
           rawScore = Double.NaN;
         }
-        PdfPCell pCell = new PdfPCell((Double.isNaN(rawScore) ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED)
-            : new Phrase(Utilities.NUMBER_FORMAT_INSTANCE.format(rawScore), ARIAL_8PT_NORMAL)));
+        final Phrase scorePhrase;
+        if (Double.isNaN(rawScore)) {
+          scorePhrase = new Phrase("No Score", ARIAL_8PT_NORMAL_RED);
+        } else {
+          scorePhrase = new Phrase(Utilities.getFormatForScoreType(performanceScoreType).format(rawScore),
+                                   ARIAL_8PT_NORMAL);
+        }
+        PdfPCell pCell = new PdfPCell(scorePhrase);
         pCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
         pCell.setBorder(0);
         curteam.addCell(pCell);
@@ -601,7 +609,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
                   + rankText;
               scoreFont = ARIAL_8PT_NORMAL_RED;
             } else {
-              scoreText = Utilities.NUMBER_FORMAT_INSTANCE.format(scaledScore)
+              scoreText = Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(scaledScore)
                   + rankText;
             }
 
@@ -643,7 +651,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
             scaledScoreStr = "No Score"
                 + rankText;
           } else {
-            scaledScoreStr = Utilities.NUMBER_FORMAT_INSTANCE.format(scaledScore)
+            scaledScoreStr = Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(scaledScore)
                 + rankText;
           }
 
@@ -663,7 +671,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
         pCell = new PdfPCell((Double.isNaN(totalScore) ? new Phrase("No Score"
             + overallScoreSuffix, ARIAL_8PT_NORMAL_RED)
-            : new Phrase(Utilities.NUMBER_FORMAT_INSTANCE.format(totalScore)
+            : new Phrase(Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(totalScore)
                 + overallScoreSuffix, ARIAL_8PT_NORMAL)));
         pCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
         pCell.setBorder(0);
@@ -846,7 +854,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
               } else {
                 scoreSeen = true;
               }
-              rawScoreText.append(Utilities.NUMBER_FORMAT_INSTANCE.format(v));
+              rawScoreText.append(Utilities.getFormatForScoreType(catElement.getScoreType()).format(v));
             }
           }
           final PdfPCell subjCell = new PdfPCell((!scoreSeen ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED)

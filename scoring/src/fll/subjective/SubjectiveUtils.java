@@ -201,10 +201,10 @@ public final class SubjectiveUtils {
   private static Element findCorrespondingScoreElement(final Element masterScore,
                                                        final List<Element> compareScores) {
     try {
-      final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(masterScore.getAttribute("teamNumber")).intValue();
+      final int teamNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(masterScore.getAttribute("teamNumber")).intValue();
       final String judge = masterScore.getAttribute("judge");
       for (final Element compareScore : compareScores) {
-        final int compareTeamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(compareScore.getAttribute("teamNumber"))
+        final int compareTeamNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(compareScore.getAttribute("teamNumber"))
                                                                       .intValue();
         final String compareJudge = compareScore.getAttribute("judge");
         if (teamNumber == compareTeamNumber
@@ -226,7 +226,7 @@ public final class SubjectiveUtils {
     final String categoryTitle = categoryDescription.getAttribute("title");
 
     try {
-      final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(masterScore.getAttribute("teamNumber")).intValue();
+      final int teamNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(masterScore.getAttribute("teamNumber")).intValue();
       final String judge = masterScore.getAttribute("judge");
 
       final Boolean masterNoShow = XMLUtils.getBooleanAttributeValue(masterScore, "NoShow");

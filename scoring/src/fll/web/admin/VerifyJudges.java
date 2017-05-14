@@ -71,7 +71,7 @@ public class VerifyJudges extends BaseFLLServlet {
       // Set. Use set so there are no duplicates
       final List<ScoreCategory> subjectiveCategories = challengeDescription.getSubjectiveCategories();
 
-      final int numRows = Utilities.NUMBER_FORMAT_INSTANCE.parse(request.getParameter("total_num_rows")).intValue();
+      final int numRows = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(request.getParameter("total_num_rows")).intValue();
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Found num rows: "
             + numRows);

@@ -40,7 +40,7 @@ public class ExcelCellReaderTest {
           continue;
         }
         // find a line 19 and check that column 2 is null
-        final Number lineNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(values[0]);
+        final Number lineNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(values[0]);
         if (19 == lineNumber.intValue()) {
           found = true;
           Assert.assertNull("line 19 should have null for column 2", values[2]);
@@ -63,7 +63,7 @@ public class ExcelCellReaderTest {
           continue;
         }
         // find a line 3 and check that column 1 is null
-        final Number lineNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(values[1]);
+        final Number lineNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(values[1]);
         if (3 == lineNumber.intValue()) {
           found = true;
           Assert.assertNull("line 3 should have null for column 1", values[0]);
