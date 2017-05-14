@@ -27,7 +27,8 @@
       + width
       + ',toolbar=0,menubar=0,scrollbars=0,location=0,directories=0,status=0,resizable=0,fullscreen=1,left=0,screenX=0,top=0,screenY=0';
   var connected = true;
-
+  var socket = null;
+  
   function displayPage(url) {
     if (null == newWindow || newWindow.location.pathname != url) {
       newWindow = window.open(url, 'displayWindow', str);
@@ -52,6 +53,18 @@
 
   function pollFailure() {
     connected = false;
+
+    console.log("Got failure getting current display page, reconnecting...");
+
+    if (null != socket) {
+      socket.onclose = function() {
+      }; // ensure that the closeSocket method doesn't get called and cause a race
+      socket.close();
+      socket = null;
+    }
+
+    // open the socket a second later
+    setTimeout(openSocket, 1000);
   };
 
   function update() {
@@ -95,7 +108,7 @@
     var webSocketAddress = "ws://" + window.location.host + directory
         + "/DisplayWebSocket";
 
-    var socket = new WebSocket(webSocketAddress);
+    socket = new WebSocket(webSocketAddress);
     socket.onmessage = messageReceived;
     socket.onopen = socketOpened;
     socket.onclose = socketClosed;
