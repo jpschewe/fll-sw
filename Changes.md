@@ -1,3 +1,5 @@
+* #535 - Don't let the user try to initialize a bracket when there are
+         no brackets to initialize
 * #566 - Use web sockets for the unverified runs update
 * #552 - use web sockets to update the remote control brackets page 
 * upgrade to selenium 3.3.0
