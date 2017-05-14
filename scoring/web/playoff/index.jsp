@@ -82,21 +82,32 @@
         <b>WARNING: Do not initialize any head to head brackets until all
           seeding runs have been recorded!</b> Doing so will automatically
         add bye runs to the teams that don't have enough seeding runs.<br />
-        Select Bracket: <select
+        Select Bracket: 
+        <c:set var="init_disabled" value="disabled"/>
+        <select
           id='initialize-division'
           name='division'>
           <c:forEach
             items="${playoff_data.uninitializedBrackets }"
             var="division">
             <option value='${division}'>${division}</option>
+            
+            <c:set var="init_disabled" value=""/>
+             
           </c:forEach>
         </select><br> <input
           type='checkbox'
           name='enableThird'
-          value='yes' />Check to enable 3rd/4th place match<br> <input
+          value='yes' />Check to enable 3rd/4th place match<br> 
+          
+          <input
           type='submit'
           id='initialize_brackets'
-          value='Initialize Bracket' /> <a
+          value='Initialize Bracket'
+          ${init_disabled } 
+          />
+          
+           <a
           href='javascript:display("InitializeBracketHelp")'>[help]</a>
         <div
           id='InitializeBracketHelp'
