@@ -88,14 +88,14 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
   public static void appendDisplayName(final ServletContext application,
                                        final HttpSession session,
                                        final String name) {
-    session.removeAttribute("displayName");
+    session.removeAttribute(SessionAttributes.DISPLAY_NAME);
 
     final String sanitized = sanitizeDisplayName(name);
     if (null == sanitized) {
       // nothing to store
       return;
     }
-    session.setAttribute("displayName", sanitized);
+    session.setAttribute(SessionAttributes.DISPLAY_NAME, sanitized);
 
     synchronized (DisplayInfo.class) {
       final Collection<DisplayInfo> displayInformation = internalGetDisplayInformation(application);
@@ -120,23 +120,38 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
   }
 
   /**
-   * Get the appropriate {@link DisplayInfo} object for the session.
-   * If the named display is following the default display, then the default
-   * display is returned.
-   * 
    * @param application used to get all of the displays
-   * @param session where to find the display name
-   * @return a non-null DisplayInfo object
+   * @param session used to get the display name
+   * @return a non-null {@link DisplayInfo} object
+   * @see #getInfoForDisplay(ServletContext, String)
    */
   public static DisplayInfo getInfoForDisplay(final ServletContext application,
                                               final HttpSession session) {
-    final String displayName = SessionAttributes.getAttribute(session, "displayName", String.class);
-    for (final DisplayInfo display : getDisplayInformation(application)) {
-      if (display.getName().equals(displayName)) {
-        if (display.isFollowDefault()) {
-          return findOrCreateDefaultDisplay(application);
-        } else {
-          return display;
+    final String displayName = SessionAttributes.getDisplayName(session);
+    return getInfoForDisplay(application, displayName);
+  }
+
+  /**
+   * Get the appropriate {@link DisplayInfo} object for the name.
+   * If the named display is following the default display or doesn't have a
+   * name, then the default
+   * display is returned.
+   * 
+   * @param application used to get all of the displays
+   * @param displayName the name of the display, may be null
+   * @return a non-null {@link DisplayInfo} object
+   */
+  public static DisplayInfo getInfoForDisplay(final ServletContext application,
+                                              final String displayName) {
+    if (null != displayName
+        && !displayName.trim().isEmpty()) {
+      for (final DisplayInfo display : getDisplayInformation(application)) {
+        if (display.getName().equals(displayName)) {
+          if (display.isFollowDefault()) {
+            return findOrCreateDefaultDisplay(application);
+          } else {
+            return display;
+          }
         }
       }
     }

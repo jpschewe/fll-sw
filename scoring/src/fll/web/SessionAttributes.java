@@ -77,16 +77,43 @@ public final class SessionAttributes {
    */
   public static final String MESSAGE = "message";
 
+  /**
+   * @param session where to get the information
+   * @return the message to display to the user
+   */
   public static String getMessage(final HttpSession session) {
     return getAttribute(session, MESSAGE, String.class);
   }
 
+  /**
+   * Key in the session used to store the URL to redirect to after the current operation completes.
+   */
   public static final String REDIRECT_URL = "redirect_url";
 
+  /**
+   * @param session where to get the information
+   * @return the URL to send the user to after the current operation completes
+   */
   public static String getRedirectURL(final HttpSession session) {
     return getAttribute(session, REDIRECT_URL, String.class);
   }
 
+  /**
+   * Key in the session used to store the display name.
+   * @see fll.web.DisplayInfo
+   */
+  public static final String DISPLAY_NAME = "displayName";
+  
+  /**
+   * Get the name for the current display.
+   *  
+   * @param session where to get the information from
+   * @return may be null
+   */
+  public static String getDisplayName(final HttpSession session) {
+    return getAttribute(session, DISPLAY_NAME, String.class);
+  }
+  
   /**
    * Get session attribute and send appropriate error if type is wrong. Note
    * that null is always valid.
