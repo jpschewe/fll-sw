@@ -23,54 +23,6 @@ public final class SessionAttributes {
     // no instances
   }
 
-  static {
-    final String classname = SessionAttributes.class.getName();
-    final int idx = classname.lastIndexOf('.');
-    ID = classname.substring(idx + 1);
-  }
-
-  /**
-   * The basename of the class.
-   */
-  public static final String ID;
-
-  /** "Cache" holding all public static fields by it's field name */
-  private static Map<String, Object> nameToValueMap = createNameToValueMap();
-
-  /**
-   * Puts all public static fields via introspection into the resulting Map.
-   * Uses the name of the field as key to reference it's in the Map.
-   * 
-   * @return a Map of field names to field values of all public static fields of
-   *         this class
-   */
-  private static Map<String, Object> createNameToValueMap() {
-    final Map<String, Object> result = new HashMap<String, Object>();
-    final Field[] publicFields = SessionAttributes.class.getFields();
-    for (int i = 0; i < publicFields.length; i++) {
-      final Field field = publicFields[i];
-      final String name = field.getName();
-      try {
-        result.put(name, field.get(null));
-      } catch (final IllegalArgumentException e) {
-        throw new RuntimeException("Error initializing constants cache", e);
-      } catch (IllegalAccessException e) {
-        throw new RuntimeException("Error initializing constants cache", e);
-      }
-    }
-    return result;
-  }
-
-  /**
-   * Gets the Map of all public static fields. The field name is used as key for
-   * the value of the field itself.
-   * 
-   * @return the Map of all public static fields
-   */
-  public static Map<String, Object> getNameToValueMap() {
-    return nameToValueMap;
-  }
-
   /**
    * A {@link String} that is a message to display. This is set in many pages
    * and servlets to pass a message onto the next page to display to the user.
