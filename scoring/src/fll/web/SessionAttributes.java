@@ -5,10 +5,6 @@
  */
 package fll.web;
 
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.servlet.http.HttpSession;
 
 /**
