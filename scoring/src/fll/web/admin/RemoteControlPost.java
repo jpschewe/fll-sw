@@ -120,7 +120,7 @@ public class RemoteControlPost extends BaseFLLServlet {
     // notify brackets that there may be changes
     H2HUpdateWebSocket.updateDisplayedBracket();
 
-    DisplayWebSocket.notifyToUpdate();
+    DisplayWebSocket.notifyToUpdate(application);
     session.setAttribute(SessionAttributes.MESSAGE, "<i id='success'>Successfully set remote control parameters</i>");
 
     response.sendRedirect(response.encodeRedirectURL("remoteControl.jsp"));
