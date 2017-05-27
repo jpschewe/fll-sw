@@ -7,9 +7,13 @@
 package fll.web;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpSession;
 import javax.websocket.OnError;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
@@ -22,42 +26,70 @@ import fll.util.LogUtils;
 /**
  * Handle updating the big screen display pages.
  */
-@ServerEndpoint(value = "/DisplayWebSocket")
+@ServerEndpoint(value = "/DisplayWebSocket", configurator = GetHttpSessionConfigurator.class)
 public class DisplayWebSocket {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  private static final Set<Session> ALL_SESSIONS = new HashSet<>();
+  /**
+   * session -> display name
+   */
+  private static final Map<Session, String> ALL_SESSIONS = new HashMap<>();
 
   private static final Object SESSIONS_LOCK = new Object();
 
   @OnOpen
   public void onOpen(final Session session) {
+    final HttpSession httpSession = (HttpSession) session.getUserProperties()
+                                                         .get(GetHttpSessionConfigurator.HTTP_SESSION_KEY);
+    final String displayName = SessionAttributes.getDisplayName(httpSession);
+
     synchronized (SESSIONS_LOCK) {
-      ALL_SESSIONS.add(session);
+      ALL_SESSIONS.put(session, displayName);
+
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("Adding session "
+            + session + " display: " + displayName);
+      }
     }
   }
 
   /**
    * Notify all clients that they should update.
    */
-  public static void notifyToUpdate() {
+  public static void notifyToUpdate(final ServletContext httpApplication) {
     synchronized (SESSIONS_LOCK) {
       final Set<Session> toRemove = new HashSet<>();
 
       final String messageText = "update"; // message text doesn't matter
-      for (final Session session : ALL_SESSIONS) {
-        if (session.isOpen()) {
-          try {
-            session.getBasicRemote().sendText(messageText);
-          } catch (final IOException ioe) {
-            LOGGER.error("Got error sending message to session ("
-                + session.getId() + "), dropping session", ioe);
+      for (final Map.Entry<Session, String> entry : ALL_SESSIONS.entrySet()) {
+        final Session session = entry.getKey();
+        final String displayName = entry.getValue();
+
+        final DisplayInfo displayInfo = DisplayInfo.getNamedDisplay(httpApplication, displayName);
+        if (null != displayInfo) {
+          if (session.isOpen()) {
+
+            try {
+              session.getBasicRemote().sendText(messageText);
+
+              if (LOGGER.isTraceEnabled()) {
+                LOGGER.trace("Updating last seen time for display: "
+                    + displayName + " display: " + displayInfo.getName());
+              }
+
+              displayInfo.updateLastSeen(httpApplication);
+            } catch (final IOException ioe) {
+              LOGGER.error("Got error sending message to session ("
+                  + session.getId() + "), dropping session", ioe);
+              toRemove.add(session);
+              DisplayInfo.deleteDisplay(httpApplication, displayInfo);
+            }
+          } else {
             toRemove.add(session);
+            DisplayInfo.deleteDisplay(httpApplication, displayInfo);
           }
-        } else {
-          toRemove.add(session);
-        }
+        } // non-null DisplayInfo
       } // foreach session
 
       // cleanup dead sessions

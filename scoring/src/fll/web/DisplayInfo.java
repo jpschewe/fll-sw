@@ -17,10 +17,15 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import fll.util.FLLRuntimeException;
+import fll.util.LogUtils;
 
 /**
  * Information about a display.
@@ -52,9 +57,14 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
 
   public static final String SPECIAL_REMOTE_PAGE = "special";
 
+  private static final Object LOCK = new Object();
+
+  private static final Logger LOGGER = LogUtils.getLogger();
+
   /**
    * Create a string that's a valid HTML name.
    */
+  @CheckForNull
   private static String sanitizeDisplayName(final String str) {
     if (null == str
         || "".equals(str)) {
@@ -85,19 +95,19 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
    * @param name the name to set for the display, may be different from what is
    *          stored
    */
-  public static void appendDisplayName(final ServletContext application,
-                                       final HttpSession session,
+  public static void appendDisplayName(@Nonnull final ServletContext application,
+                                       @Nonnull final HttpSession session,
                                        final String name) {
-    session.removeAttribute("displayName");
+    session.removeAttribute(SessionAttributes.DISPLAY_NAME);
 
     final String sanitized = sanitizeDisplayName(name);
     if (null == sanitized) {
       // nothing to store
       return;
     }
-    session.setAttribute("displayName", sanitized);
+    session.setAttribute(SessionAttributes.DISPLAY_NAME, sanitized);
 
-    synchronized (DisplayInfo.class) {
+    synchronized (LOCK) {
       final Collection<DisplayInfo> displayInformation = internalGetDisplayInformation(application);
       final DisplayInfo check = new DisplayInfo(sanitized);
       if (!displayInformation.contains(check)) {
@@ -110,43 +120,62 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
   /**
    * Delete a display. It will reappear if the display is still active.
    * Also cleans up the related application attributes.
+   * If <code>displayInfo</code> is the default display this method does nothing
+   * as the default display cannot be deleted.
+   * 
+   * @param application where the displays are stored
+   * @param displayInfo the display to be deleted
    */
-  public static void deleteDisplay(final ServletContext application,
-                                   final DisplayInfo displayInfo) {
-    final Collection<DisplayInfo> displayInformation = internalGetDisplayInformation(application);
+  public static void deleteDisplay(@Nonnull final ServletContext application,
+                                   @Nonnull final DisplayInfo displayInfo) {
+    if (!displayInfo.isDefaultDisplay()) {
+      synchronized (LOCK) {
+        final SortedSet<DisplayInfo> displayInformation = internalGetDisplayInformation(application);
 
-    displayInformation.remove(displayInfo);
-    application.setAttribute(ApplicationAttributes.DISPLAY_INFORMATION, displayInformation);
+        displayInformation.remove(displayInfo);
+        application.setAttribute(ApplicationAttributes.DISPLAY_INFORMATION, displayInformation);
+      }
+    }
   }
 
   /**
-   * Get the appropriate {@link DisplayInfo} object for the session.
-   * If the named display is following the default display, then the default
-   * display is returned.
+   * @param application used to get all of the displays
+   * @param session used to get the display name
+   * @return a non-null {@link DisplayInfo} object
+   * @see #getInfoForDisplay(ServletContext, String)
+   */
+  @Nonnull
+  public static DisplayInfo getInfoForDisplay(@Nonnull final ServletContext application,
+                                              @Nonnull final HttpSession session) {
+    final String displayName = SessionAttributes.getDisplayName(session);
+    return getInfoForDisplay(application, displayName);
+  }
+
+  /**
+   * Get the appropriate {@link DisplayInfo} object for the name.
+   * If the named display is following the default display or doesn't have a
+   * name, then the default display is returned.
    * 
    * @param application used to get all of the displays
-   * @param session where to find the display name
-   * @return a non-null DisplayInfo object
+   * @param displayName the name of the display, may be null
+   * @return a non-null {@link DisplayInfo} object
    */
-  public static DisplayInfo getInfoForDisplay(final ServletContext application,
-                                              final HttpSession session) {
-    final String displayName = SessionAttributes.getAttribute(session, "displayName", String.class);
-    for (final DisplayInfo display : getDisplayInformation(application)) {
-      if (display.getName().equals(displayName)) {
-        if (display.isFollowDefault()) {
-          return findOrCreateDefaultDisplay(application);
-        } else {
-          return display;
-        }
-      }
+  @Nonnull
+  public static DisplayInfo getInfoForDisplay(@Nonnull final ServletContext application,
+                                              final String displayName) {
+    final DisplayInfo display = getNamedDisplay(application, displayName);
+    if (null == display
+        || display.isFollowDefault()) {
+      return findOrCreateDefaultDisplay(application);
+    } else {
+      return display;
     }
-
-    return findOrCreateDefaultDisplay(application);
   }
 
   /**
    * Create a {@link DisplayInfo} object with {@link #DEFAULT_DISPLAY_NAME}.
    */
+  @Nonnull
   private static DisplayInfo createDefault() {
     final DisplayInfo def = new DisplayInfo(DEFAULT_DISPLAY_NAME);
     def.setRemotePage(WELCOME_REMOTE_PAGE);
@@ -160,11 +189,13 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
    * @return an unmodifiable collection sorted by display name with the default
    *         display first
    */
-  public static Collection<DisplayInfo> getDisplayInformation(final ServletContext application) {
+  @Nonnull
+  public static Collection<DisplayInfo> getDisplayInformation(@Nonnull final ServletContext application) {
     return Collections.unmodifiableCollection(internalGetDisplayInformation(application));
   }
 
-  private static SortedSet<DisplayInfo> internalGetDisplayInformation(final ServletContext application) {
+  @Nonnull
+  private static SortedSet<DisplayInfo> internalGetDisplayInformation(@Nonnull final ServletContext application) {
     @SuppressWarnings("unchecked")
     SortedSet<DisplayInfo> displayInformation = ApplicationAttributes.getAttribute(application,
                                                                                    ApplicationAttributes.DISPLAY_INFORMATION,
@@ -189,7 +220,8 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
    * @param application where to find display information
    * @return a non-null {@link DisplayInfo} object
    */
-  public static DisplayInfo findOrCreateDefaultDisplay(final ServletContext application) {
+  @Nonnull
+  public static DisplayInfo findOrCreateDefaultDisplay(@Nonnull final ServletContext application) {
     final Collection<DisplayInfo> displayInformation = getDisplayInformation(application);
     for (final DisplayInfo info : displayInformation) {
       if (info.getName().equals(DEFAULT_DISPLAY_NAME)) {
@@ -211,7 +243,8 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
    * @param name the name of the display to find
    * @return the display or null if not known
    */
-  public static DisplayInfo getNamedDisplay(final ServletContext application,
+  @CheckForNull
+  public static DisplayInfo getNamedDisplay(@Nonnull final ServletContext application,
                                             final String name) {
     final Collection<DisplayInfo> displayInformation = getDisplayInformation(application);
     for (final DisplayInfo info : displayInformation) {
@@ -247,8 +280,40 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
   /**
    * @return when the display was last seen
    */
+  @Nonnull
   public LocalTime getLastSeen() {
     return mLastSeen;
+  }
+
+  /**
+   * Update the last seen time to be now.
+   * 
+   * @param application used to store the updated {@link DisplayInfo} object.
+   */
+  public void updateLastSeen(@Nonnull final ServletContext application) {
+    mLastSeen = LocalTime.now();
+
+    LOGGER.trace("updateLastSeen: "
+        + getName() + " -> " + mLastSeen + " default: " + isDefaultDisplay());
+
+    if (!isDefaultDisplay()) {
+      synchronized (LOCK) {
+        final SortedSet<DisplayInfo> displayInformation = internalGetDisplayInformation(application);
+
+        final boolean removed = displayInformation.remove(this); // remove
+                                                                 // possible
+                                                                 // outdated
+                                                                 // copy
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("updateLastSeen: removed display  "
+              + getName() + "? " + removed);
+        }
+
+        displayInformation.add(this); // insert updated version
+
+        application.setAttribute(ApplicationAttributes.DISPLAY_INFORMATION, displayInformation);
+      }
+    }
   }
 
   /**
