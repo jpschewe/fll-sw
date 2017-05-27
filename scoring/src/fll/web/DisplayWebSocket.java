@@ -67,29 +67,29 @@ public class DisplayWebSocket {
         final String displayName = entry.getValue();
 
         final DisplayInfo displayInfo = DisplayInfo.getNamedDisplay(httpApplication, displayName);
-        if (session.isOpen()) {
+        if (null != displayInfo) {
+          if (session.isOpen()) {
 
-          try {
-            session.getBasicRemote().sendText(messageText);
+            try {
+              session.getBasicRemote().sendText(messageText);
 
-            // FIXME not sure this is working, probably need to write back to
-            // the application
-            if (LOGGER.isTraceEnabled()) {
-              LOGGER.trace("Updating last seen time for display: "
-                  + displayName + " display: " + displayInfo.getName());
+              if (LOGGER.isTraceEnabled()) {
+                LOGGER.trace("Updating last seen time for display: "
+                    + displayName + " display: " + displayInfo.getName());
+              }
+
+              displayInfo.updateLastSeen(httpApplication);
+            } catch (final IOException ioe) {
+              LOGGER.error("Got error sending message to session ("
+                  + session.getId() + "), dropping session", ioe);
+              toRemove.add(session);
+              DisplayInfo.deleteDisplay(httpApplication, displayInfo);
             }
-
-            displayInfo.updateLastSeen(httpApplication);
-          } catch (final IOException ioe) {
-            LOGGER.error("Got error sending message to session ("
-                + session.getId() + "), dropping session", ioe);
+          } else {
             toRemove.add(session);
             DisplayInfo.deleteDisplay(httpApplication, displayInfo);
           }
-        } else {
-          toRemove.add(session);
-          DisplayInfo.deleteDisplay(httpApplication, displayInfo);
-        }
+        } // non-null DisplayInfo
       } // foreach session
 
       // cleanup dead sessions
