@@ -1,3 +1,4 @@
+* #553 - Make sure to update the last seen time for the remote control of displays
 * #528 - Only display floating point scores when needed, otherwise display integers
 * #533 - Handle disconnect and reconnect in the display pages
 * #565 - Use web sockets to update the display pages
