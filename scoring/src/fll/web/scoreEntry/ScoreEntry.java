@@ -12,19 +12,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.util.Collection;
 import java.util.Formatter;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspWriter;
 import javax.sql.DataSource;
-
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -59,6 +53,7 @@ import fll.xml.SwitchStatement;
 import fll.xml.Term;
 import fll.xml.Variable;
 import fll.xml.VariableRef;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Java code used in scoreEntry.jsp.
@@ -333,18 +328,7 @@ public final class ScoreEntry {
 
     final PerformanceScoreCategory performanceElement = description.getPerformance();
 
-    final Collection<String> goalsWithRestrictions = new LinkedList<String>();
     final List<Restriction> restrictions = performanceElement.getRestrictions();
-
-    // find out which goals are involved in restrictions
-    for (final Restriction restrictEle : restrictions) {
-      goalsWithRestrictions.addAll(getGoalsInRestriction(restrictEle));
-    }
-
-    // output variable declaration for each goal
-    for (final String goalName : goalsWithRestrictions) {
-      formatter.format("  var %s = \"\";%n", getElementIDForError(goalName));
-    }
 
     // output actual check of restriction
     for (int restrictIdx = 0; restrictIdx < restrictions.size(); ++restrictIdx) {
@@ -357,36 +341,12 @@ public final class ScoreEntry {
       final String restrictValStr = String.format("restriction_%d_value", restrictIdx);
       formatter.format("  var %s = %s;%n", restrictValStr, polyString);
       formatter.format("  if(%s > %f || %s < %f) {%n", restrictValStr, upperBound, restrictValStr, lowerBound);
-      // append error text to each error cell if the restriction is violated
-      for (final String goalName : getGoalsInRestriction(restrictEle)) {
-        final String errorId = getElementIDForError(goalName);
-        formatter.format("    %s = %s + \" \" + \"%s\";%n", errorId, errorId, message);
-      }
+      
+      // add error text to score-errors div
+      formatter.format("    $('#score-errors').append('<div>%s</div>');%n", message);
       formatter.format("    error_found = true;%n");
       formatter.format("  }%n");
     }
-
-    // output text assignment for each goal involved in a restriction
-    for (final String goalName : goalsWithRestrictions) {
-      final String errorId = getElementIDForError(goalName);
-      formatter.format("  replaceText(\"%s\", %s);%n", errorId, errorId);
-      formatter.format("  if(%s.length > 0) {%n", errorId);
-      formatter.format("    var el = document.getElementById(\"%s\");%n", errorId);
-      formatter.format("  }%n");
-      formatter.format("  replaceText(\"%s\", %s);%n", errorId, errorId);
-      formatter.format("%n");
-    }
-  }
-
-  private static Set<String> getGoalsInRestriction(final Restriction restrictEle) {
-    final Set<String> goals = new HashSet<String>();
-    for (final Term termEle : restrictEle.getTerms()) {
-      for (final GoalRef goal : termEle.getGoals()) {
-        final String goalName = goal.getGoalName();
-        goals.add(goalName);
-      }
-    }
-    return goals;
   }
 
   /**
@@ -816,16 +776,6 @@ public final class ScoreEntry {
    */
   private static String getComputedMethodName(final String goalName) {
     return "compute_"
-        + goalName;
-  }
-
-  /**
-   * The ID of the element that holds errors for the specified goal. This name
-   * is also used for the name of the variable that holds the error text for the
-   * goal in check_restrictions.
-   */
-  private static String getElementIDForError(final String goalName) {
-    return "error_"
         + goalName;
   }
 
