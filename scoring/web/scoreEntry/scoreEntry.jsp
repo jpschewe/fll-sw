@@ -16,25 +16,45 @@
       <link rel="stylesheet" type="text/css" href="<c:url value='/style/fll-sw.css'/>" />
 
     <style type='text/css'>
-      TD {font-family: arial}
-      table#top_info {   
-      background-color: ${top_info_color};   
-      }
-      
-      body { 
-      background-color: ${body_background};
-      }
-      
-      table .score-entry {     
-table-layout: fixed;
-width: 100%;
+TD {
+	font-family: arial
+}
+
+table#top_info {
+	background-color: ${top_info_color
+}
+
+;
+}
+body {
+	background-color: ${body_background
+}
+
+;
+}
+table .score-entry {
+	table-layout: fixed;
+	width: 100%;
 }
 
 td .score-error {
-  width: 100px;
+	width: 100px;
 }
-      
-    </style>
+
+#score-errors {
+	font-size: 200%;
+	position: fixed;
+	top: 0px;
+	left: 0%;
+	z-index: 99;
+	border: 1px solid black;
+	padding: 5px;
+	background-color: red;
+}
+
+</style>
+
+<script type='text/javascript' src='../extlib/jquery-1.11.1.min.js'></script>
 
 <script language="javascript">
     <c:if test="${not isBye}">
@@ -92,13 +112,16 @@ function refresh() {
 
 function check_restrictions() {
   var error_found = false;
-
+  $("#score-errors").empty();
+  
 <%ScoreEntry.generateCheckRestrictionsBody(out, application);%>
 
   if(error_found) {
-    document.getElementById("submit").disabled = true;
+    $("#submit").attr('disabled', true);
+    $("#score-errors").show();
   } else {
-    document.getElementById("submit").disabled = false;
+    $("#submit").attr('disabled', false);
+    $("#score-errors").hide();
   }
 }
 
@@ -167,7 +190,10 @@ return m;
   </head>
 
 <body onload="init()">
-    <form action="submit.jsp" method="POST" name="scoreEntry">
+
+  <div id="score-errors"></div>
+
+  <form action="submit.jsp" method="POST" name="scoreEntry">
       <input type='hidden' name='NoShow' value="false"/>
 
       <c:if test="${1 == EditFlag}">
