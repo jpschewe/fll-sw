@@ -193,9 +193,9 @@ public final class ScoreEntry {
     formatter.format("function %s(newValue) {%n", getSetMethodName("Verified"));
     formatter.format("  Verified = newValue;%n");
     formatter.format("  if (newValue == 1 && document.getElementsByName('EditFlag').length == 0) {");
-    formatter.format("    replaceText('verification_error', 'Are you sure this score has been Verified?');");
+    formatter.format("    $('#verification-warning').show();");
     formatter.format("  } else if (newValue == 0) {");
-    formatter.format("    replaceText('verification_error', '');");
+    formatter.format("    $('#verification-warning').hide();");
     formatter.format("  }");
     formatter.format("  refresh();%n");
     formatter.format("}%n%n%n");
@@ -341,7 +341,7 @@ public final class ScoreEntry {
       final String restrictValStr = String.format("restriction_%d_value", restrictIdx);
       formatter.format("  var %s = %s;%n", restrictValStr, polyString);
       formatter.format("  if(%s > %f || %s < %f) {%n", restrictValStr, upperBound, restrictValStr, lowerBound);
-      
+
       // add error text to score-errors div
       formatter.format("    $('#score-errors').append('<div>%s</div>');%n", message);
       formatter.format("    error_found = true;%n");
@@ -407,7 +407,6 @@ public final class ScoreEntry {
     generateYesNoButtons("Verified", writer);
     writer.println("      </tr></table></td>");
     writer.println("      <td colspan='2'>&nbsp;</td>");
-    writer.println("      <td class='error' id='verification_error'>&nbsp;</td>");
     writer.println("    </tr>");
   }
 
@@ -418,7 +417,6 @@ public final class ScoreEntry {
                                         final ServletContext application)
       throws IOException {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
-    final Formatter formatter = new Formatter(writer);
 
     String prevCategory = null;
     final PerformanceScoreCategory performanceElement = description.getPerformance();
@@ -430,9 +428,9 @@ public final class ScoreEntry {
       try {
 
         if (!StringUtils.equals(prevCategory, category)) {
-          writer.println("<tr><td colspan='5'>&nbsp;</td></tr>");
+          writer.println("<tr><td colspan='4'>&nbsp;</td></tr>");
           if (!StringUtils.isEmpty(category)) {
-            writer.println("<tr><td colspan='5' class='center'><b>"
+            writer.println("<tr><td colspan='4' class='center'><b>"
                 + category + "</b></td></tr>");
           }
         }
@@ -465,9 +463,6 @@ public final class ScoreEntry {
         writer.println("    <input type='text' name='score_"
             + name + "' size='3' align='right' readonly tabindex='-1'>");
         writer.println("  </td>");
-
-        // error message
-        formatter.format("  <td class='error score-error' id='error_%s'>&nbsp;</td>%n", name);
 
         writer.println("</tr>");
         writer.println("<!-- end "
