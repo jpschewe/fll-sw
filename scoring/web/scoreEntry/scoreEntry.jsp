@@ -33,7 +33,6 @@ body {
 ;
 }
 table .score-entry {
-	table-layout: fixed;
 	width: 100%;
 }
 
