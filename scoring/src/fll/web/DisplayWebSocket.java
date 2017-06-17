@@ -67,29 +67,34 @@ public class DisplayWebSocket {
         final String displayName = entry.getValue();
 
         final DisplayInfo displayInfo = DisplayInfo.getNamedDisplay(httpApplication, displayName);
-        if (null != displayInfo) {
-          if (session.isOpen()) {
+        if (session.isOpen()) {
 
-            try {
-              session.getBasicRemote().sendText(messageText);
-
-              if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace("Updating last seen time for display: "
-                    + displayName + " display: " + displayInfo.getName());
-              }
-
-              displayInfo.updateLastSeen(httpApplication);
-            } catch (final IOException ioe) {
-              LOGGER.error("Got error sending message to session ("
-                  + session.getId() + "), dropping session", ioe);
-              toRemove.add(session);
+          try {
+            session.getBasicRemote().sendText(messageText);
+          } catch (final IOException ioe) {
+            LOGGER.error("Got error sending message to session ("
+                + session.getId() + "), dropping session", ioe);
+            toRemove.add(session);
+            if (null != displayInfo) {
               DisplayInfo.deleteDisplay(httpApplication, displayInfo);
             }
-          } else {
-            toRemove.add(session);
+          }
+
+          // if this is a named display, update the time last seen
+          if (null != displayInfo) {
+            if (LOGGER.isTraceEnabled()) {
+              LOGGER.trace("Updating last seen time for display: "
+                  + displayName + " display: " + displayInfo.getName());
+            }
+
+            displayInfo.updateLastSeen(httpApplication);
+          } // non-null DisplayInfo
+        } else {
+          toRemove.add(session);
+          if (null != displayInfo) {
             DisplayInfo.deleteDisplay(httpApplication, displayInfo);
           }
-        } // non-null DisplayInfo
+        }
       } // foreach session
 
       // cleanup dead sessions
