@@ -144,7 +144,16 @@ If you do not have a zip tool to open up the archives you can use the jar tool t
 Sponsor Logos
 =============
 
-In version 4 of the software we added the ability to have sponsor logos displayed. These logos are displayed on the main welcome page, in between team scores on the scoreboard and on the bottom of the head to head brackets page. Any files with image extensions (currently the list is: `.jpg`, `.jpeg`, `.gif`, `.png`) put into the directory `tomcat/webapps/fll-sw/sponsor_logos` will be displayed on these pages. See the `README.txt` file in this directory for information about sizing. The welcome page lists the logos sorted by filename, so you can to show the sponsors in a particular order, say by amount donated. The logos are displayed randomly on the other pages.    
+In version 4 of the software we added the ability to have sponsor logos displayed. These logos are displayed on the main welcome page, in between team scores on the scoreboard and on the bottom of the head to head brackets page. Any files with image extensions (currently the list is: `.jpg`, `.jpeg`, `.gif`, `.png`) put into the directory `tomcat/webapps/fll-sw/sponsor_logos` will be displayed on these pages. See the `README.txt` file in this directory for information about sizing. The welcome page lists the logos sorted by filename, so you can to show the sponsors in a particular order, say by amount donated. The logos are displayed the other pages in a random order.
+
+Here are some screenshots of what the pages with logos look like.
+
+![Welcome page](sponsors-welcome.png)
+
+![Scoreboard](sponsors-scoreboard.png)
+
+![Head to Head](sponsors-head-to-head.png)
+
 
 Slideshow
 =========
