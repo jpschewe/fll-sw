@@ -9,6 +9,7 @@ package fll.util;
 import java.text.DecimalFormat;
 
 import javax.swing.JFormattedTextField;
+import javax.swing.text.DefaultFormatter;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.NumberFormatter;
 
@@ -75,6 +76,23 @@ public final class FormatterUtils {
     final JFormattedTextField field = new JFormattedTextField(factory);
     field.setValue(Double.valueOf(min));
     field.setInputVerifier(new DoubleVerifier(min, max));
+    return field;
+  }
+  
+  /**
+   * Create a {@link JFormattedTextField} for editing strings.
+   * This allows editing string fields by inserting text rather than overwrite.
+   * The default value is the empty string.
+   * 
+   * @return text field for editing strings
+   */
+  public static JFormattedTextField createStringField() {
+    final DefaultFormatter format = new DefaultFormatter();
+    format.setOverwriteMode(false);
+    format.setValueClass(String.class);
+    
+    final JFormattedTextField field = new JFormattedTextField(format);
+    field.setValue("");
     return field;
   }
 

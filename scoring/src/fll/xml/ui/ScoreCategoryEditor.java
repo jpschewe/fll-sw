@@ -47,14 +47,20 @@ public class ScoreCategoryEditor extends JPanel {
     });
 
     for (final AbstractGoal goal : category.getGoals()) {
-      final AbstractGoalEditor editor = new AbstractGoalEditor(goal);
+
+      final AbstractGoalEditor editor = new AbstractGoalEditor(goal);      
+      final MovableExpandablePanel panel = new MovableExpandablePanel(goal.getTitle(), editor, true);
+      editor.addPropertyChangeListener("title", e -> {
+        final String newTitle = (String)e.getNewValue();
+        panel.setTitle(newTitle);
+      });
 
       gbc = new GridBagConstraints();
       gbc.weightx = 1;
       gbc.anchor = GridBagConstraints.LINE_START;
       gbc.gridwidth = GridBagConstraints.REMAINDER;
 
-      add(editor, gbc);
+      add(panel, gbc);
     }
   }
 

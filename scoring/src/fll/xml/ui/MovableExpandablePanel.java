@@ -24,6 +24,8 @@ import javax.swing.event.EventListenerList;
 public class MovableExpandablePanel extends JPanel {
 
   private boolean mExpanded = false;
+  
+  private final JLabel mTitleLabel;
 
   /**
    * Creates a panel that is movable.
@@ -48,7 +50,8 @@ public class MovableExpandablePanel extends JPanel {
     final JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));
     add(top, BorderLayout.NORTH);
 
-    top.add(new JLabel(title));
+    mTitleLabel = new JLabel(title);
+    top.add(mTitleLabel);
 
     final JButton expand = new JButton("+");
     top.add(expand);
@@ -128,6 +131,14 @@ public class MovableExpandablePanel extends JPanel {
     for (final MoveEventListener l : mListeners.getListeners(MoveEventListener.class)) {
       l.requestedMove(event);
     }
+  }
+  
+  /**
+   * 
+   * @param text the new title text
+   */
+  public void setTitle(final String text) {
+    mTitleLabel.setText(text);
   }
 
 }
