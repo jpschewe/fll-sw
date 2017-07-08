@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Writer;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -146,6 +148,8 @@ public class ChallengeDescriptionEditor extends JFrame {
   }
 
   private final ChallengeDescription mDescription;
+  private final ScoreCategoryEditor mPerformanceEditor;
+  private final List<ScoreCategoryEditor> mSubjectiveEditors = new LinkedList<>();
 
   public ChallengeDescriptionEditor(final ChallengeDescription description) {
     super("Challenge Description Editor");
@@ -160,8 +164,8 @@ public class ChallengeDescriptionEditor extends JFrame {
     topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.PAGE_AXIS));
     topPanel.setAlignmentX(LEFT_ALIGNMENT);
 
-    final ScoreCategoryEditor performanceEditor = new ScoreCategoryEditor(mDescription.getPerformance());
-    final MovableExpandablePanel performance = new MovableExpandablePanel("Performance", performanceEditor, false);
+    mPerformanceEditor = new ScoreCategoryEditor(mDescription.getPerformance());
+    final MovableExpandablePanel performance = new MovableExpandablePanel("Performance", mPerformanceEditor, false);
     topPanel.add(performance);
 
     final JPanel subjective = new JPanel();
@@ -225,6 +229,8 @@ public class ChallengeDescriptionEditor extends JFrame {
       container.addMoveEventListener(subjectiveMoveListener);
 
       subjective.add(container);
+      
+      mSubjectiveEditors.add(editor);
     }
 
     final JScrollPane scroller = new JScrollPane(topPanel);
@@ -250,6 +256,8 @@ public class ChallengeDescriptionEditor extends JFrame {
   };
 
   private void saveChallengeDescription() {
+    commitChanges();
+    
     //FIXME needs work!!!
     
     // final String startingDirectory =
@@ -297,4 +305,13 @@ public class ChallengeDescriptionEditor extends JFrame {
 
     return toolbar;
   }
+  
+  /**
+   * Force any pending edits to complete.
+   */
+  public void commitChanges() {
+    mPerformanceEditor.commitChanges();
+    mSubjectiveEditors.forEach(e -> e.commitChanges());    
+  }
+  
 }

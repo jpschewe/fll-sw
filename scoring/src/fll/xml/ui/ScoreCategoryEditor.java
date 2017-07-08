@@ -8,12 +8,18 @@ package fll.xml.ui;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.text.ParseException;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.apache.log4j.Logger;
+
 import fll.util.FormatterUtils;
+import fll.util.LogUtils;
 import fll.xml.AbstractGoal;
 import fll.xml.ScoreCategory;
 
@@ -21,6 +27,12 @@ import fll.xml.ScoreCategory;
  * Editor for {@link ScoreCategory} objects.
  */
 public class ScoreCategoryEditor extends JPanel {
+
+  private static final Logger LOGGER = LogUtils.getLogger();
+
+  private final JFormattedTextField mWeight;
+
+  private final List<AbstractGoalEditor> mGoalEditors = new LinkedList<>();
 
   public ScoreCategoryEditor(final ScoreCategory category) {
     setLayout(new GridBagLayout());
@@ -32,26 +44,28 @@ public class ScoreCategoryEditor extends JPanel {
     gbc.anchor = GridBagConstraints.LINE_END;
     add(new JLabel("weight: "), gbc);
 
-    final JFormattedTextField weight = FormatterUtils.createDoubleField();
+    mWeight = FormatterUtils.createDoubleField();
     gbc = new GridBagConstraints();
     gbc.weightx = 1;
     gbc.anchor = GridBagConstraints.LINE_START;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.fill = GridBagConstraints.HORIZONTAL;
-    add(weight, gbc);
+    add(mWeight, gbc);
 
-    weight.setValue(category.getWeight());
-    weight.addPropertyChangeListener("value", e -> {
-      final double newWeight = ((Number) weight.getValue()).doubleValue();
+    mWeight.setValue(category.getWeight());
+    mWeight.addPropertyChangeListener("value", e -> {
+      final double newWeight = ((Number) mWeight.getValue()).doubleValue();
       category.setWeight(newWeight);
     });
 
     for (final AbstractGoal goal : category.getGoals()) {
 
-      final AbstractGoalEditor editor = new AbstractGoalEditor(goal);      
+      //FIXME need to handle the move!
+      
+      final AbstractGoalEditor editor = new AbstractGoalEditor(goal);
       final MovableExpandablePanel panel = new MovableExpandablePanel(goal.getTitle(), editor, true);
       editor.addPropertyChangeListener("title", e -> {
-        final String newTitle = (String)e.getNewValue();
+        final String newTitle = (String) e.getNewValue();
         panel.setTitle(newTitle);
       });
 
@@ -61,7 +75,22 @@ public class ScoreCategoryEditor extends JPanel {
       gbc.gridwidth = GridBagConstraints.REMAINDER;
 
       add(panel, gbc);
+      mGoalEditors.add(editor);
     }
+  }
+
+  /**
+   * Force any pending edits to complete.
+   */
+  public void commitChanges() {
+    try {
+      mWeight.commitEdit();
+    } catch (final ParseException e) {
+      LOGGER.debug("Got parse exception committing changes, assuming bad value and ignoring", e);
+    }
+
+    mGoalEditors.forEach(e -> e.commitChanges());
+
   }
 
 }
