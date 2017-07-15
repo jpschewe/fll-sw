@@ -438,9 +438,7 @@
       name="sources_information"
       title="Sources of Information"
       category="Research">
-      <description>Types (e.g. books, magazines, websites, reports and
-        other resources) and number of quality source cited, including
-        professions in the field
+      <description>Quality and variety of data/evidence and sources cited
       </description>
       <rubric>
         <range
@@ -448,7 +446,7 @@
           min="1"
           max="3"
           shortDescription="One type of information cited; minimal sources">
-          <description>No hard data presented as background.
+          <description>minimal quality; variety limited
           </description>
         </range>
         <range
@@ -456,7 +454,7 @@
           min="4"
           max="6"
           shortDescription="Two types of information cited; several sources">
-          <description>Weak or limited data to support proposal.
+          <description>quality OR variety need improvement; did not include professional(s)
           </description>
         </range>
         <range
@@ -464,7 +462,7 @@
           min="7"
           max="9"
           shortDescription="Three types of information cited; many sources, including professionals">
-          <description>Adequate data supporting problem identification.
+          <description>sufficient quality and variety; included professional(s)
           </description>
         </range>
         <range
@@ -472,7 +470,7 @@
           min="10"
           max="12"
           shortDescription="Four(+) types of information cited, extensive sources, including professionals">
-          <description>Substantial data supporting proposed problem.
+          <description>extensive quality and variety; included multiple professionals
           </description>
         </range>
       </rubric>
@@ -534,64 +532,11 @@
       max="12"
       min="0"
       multiplier="1"
-      name="review"
-      title="Review Existing Solutions"
-      category="Research">
-      <description>Extent to which existing theories and solutions were
-        analyzed by the team, including an effort to verify the
-        originality
-        of the team's solution
-      </description>
-      <rubric>
-        <range
-          title="Beginning"
-          min="1"
-          max="3"
-          shortDescription="Minimal review, no team analysis">
-          <description>No research on existing solutions or technologies
-            used to address the problem.
-          </description>
-        </range>
-        <range
-          title="Developing"
-          min="4"
-          max="6"
-          shortDescription="Minimal review, some team analysis">
-          <description>Limited research on existing solutions/tech. used
-            to address the problem.
-          </description>
-        </range>
-        <range
-          title="Accomplished"
-          min="7"
-          max="9"
-          shortDescription="Sufficient review and analysis by team">
-          <description>Present solutions/techs. researched but not fully
-            considered.
-          </description>
-        </range>
-        <range
-          title="Exemplary"
-          min="10"
-          max="12"
-          shortDescription="Extensive review and analysis by team">
-          <description>Clearly researched existing solutions/techs,
-            applied knowledge and presented the information clearly.
-          </description>
-        </range>
-      </rubric>
-    </goal>
-
-    <goal
-      initialValue="0"
-      max="12"
-      min="0"
-      multiplier="1"
       name="team_solution"
       title="Team Solution"
       category="Innovative Solution"
       required="true">
-      <description>Clear explanation of the proposed solution
+      <description>Clear explanation of the proposed solution and description of how it solves the problem
       </description>
       <rubric>
         <range
@@ -691,37 +636,35 @@
       max="12"
       min="0"
       multiplier="1"
-      name="implementation"
-      title="Implementation"
+      name="solution_development"
+      title="Solution Development"
       category="Innovative Solution">
-      <description>Consideration of factors for implementation (cost,
-        easy
-        of manufacturing, etc.)
+      <description>Systematic process used to select, develop, evaluate, test, and improve the solution (factors for implementation could includle cost, east of manufacturing, etc.)
       </description>
       <rubric>
         <range
           title="Beginning"
           min="1"
           max="3"
-          shortDescription="Minimal factors considered">
+          shortDescription="process AND explanation need improvement">
         </range>
         <range
           title="Developing"
           min="4"
           max="6"
-          shortDescription="Some factors considered">
+          shortDescription="process OR explanation need improvement">
         </range>
         <range
           title="Accomplished"
           min="7"
           max="9"
-          shortDescription="factors well considered; some questions about solution proposed">
+          shortDescription="systematic process included evaluation">
         </range>
         <range
           title="Exemplary"
           min="10"
           max="12"
-          shortDescription="Factors well considered and feasible solution proposed">
+          shortDescription="systematic process included evaluation; implementation considered">
         </range>
       </rubric>
     </goal>
@@ -745,7 +688,7 @@
           title="Beginning"
           min="1"
           max="3"
-          shortDescription="Shared with one individual">
+          shortDescription="shared within the team / relatives">
           <description>Did not consider how their problem might impact
             themselves and others.
           </description>
@@ -754,7 +697,7 @@
           title="Developing"
           min="4"
           max="6"
-          shortDescription="Shared with one group">
+          shortDescription="shared once outside the team">
           <description>Considered how this might impact themselves or
             family, but not others.
           </description>
@@ -763,7 +706,7 @@
           title="Accomplished"
           min="7"
           max="9"
-          shortDescription="Shared with one individual or group who may benefit">
+          shortDescription="shared with one audience who may benefit OR one professional">
           <description>Considered how this might impact themselves and
             family and took that into account.
           </description>
@@ -772,7 +715,7 @@
           title="Exemplary"
           min="10"
           max="12"
-          shortDescription="Shared with multiple individuals or groups who may benefit">
+          shortDescription="shared with multiple audiences who may benefit OR multiple professionals">
           <description>Considered how this impacts others and
             implemented a plan to include those impacts.
           </description>
