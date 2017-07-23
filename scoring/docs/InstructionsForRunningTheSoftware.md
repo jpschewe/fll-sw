@@ -106,7 +106,7 @@ In most cases when an error occurs you will be prompted to submit a bug report.
 This packages up the logs and the database into a zip file that can be attached to the ticket. 
 After entering a description of what was happening when the error occurred, click submit and you'll be told where to find the zip file.
 
-### missing password
+### Missing password
 
 If you are at a tournament and someone else has set the password for the server and you don't know it you can create a new username and password from the admin index. 
 Use the "Create User" option under "User Management".
