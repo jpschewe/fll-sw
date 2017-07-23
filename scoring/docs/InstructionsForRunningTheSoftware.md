@@ -72,6 +72,7 @@ This has caught many data entry errors in previous tournaments.
   * You can print out the brackets by going to the admin/printable bracket page, under the Head to Head link on the main index, for each division and printing that out.
   * You can goto the printable bracket page and then keep refreshing the page. As scores are entered the bracket will fill out. Clicking the print scoresheets button at the top will create a PDF of the score sheets for the rounds that can be determined and haven't been printed yet. If you want to reprint some scoresheets you just check the box next to the round to print and then click the print scoresheets button.
   * Scores are entered per the [Performance Score Entry Instructions](performance-entry-instructions.md)
+  * The final scores of each head to head bracket are not displayed on the screen. This is because they are revealed at the awards ceremony. *Because of this it is critical that the computer person check the final scores and make sure there are no ties at the end of the bracket.*
 
 ## End of subjective judging
 
