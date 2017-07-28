@@ -11,6 +11,8 @@ import java.sql.SQLException;
 
 import javax.annotation.Nonnull;
 
+import org.apache.commons.lang3.StringUtils;
+
 import fll.db.GlobalParameters;
 
 /**
@@ -46,14 +48,30 @@ public class MhubParameters {
   public static String getHostname(@Nonnull final Connection connection) throws SQLException {
     if (GlobalParameters.globalParameterExists(connection, HOST_KEY)) {
       final String value = GlobalParameters.getStringGlobalParameter(connection, HOST_KEY);
-      if (null == value
-          || value.isEmpty()) {
+      if (StringUtils.isBlank(value)) {
         return null;
       } else {
         return value;
       }
     } else {
       return DEFAULT_HOST;
+    }
+  }
+
+  /**
+   * @param connection the database connection
+   * @param hostname the new hostname, may be null
+   * @throws SQLException if there is a problem talking to the database
+   * @see #getHostname(Connection)
+   */
+  public static void setHostname(@Nonnull final Connection connection,
+                                 final String hostname)
+      throws SQLException {
+    if (null == hostname) {
+      // global_parameters table doesn't allow null values
+      GlobalParameters.setStringGlobalParameter(connection, HOST_KEY, "");
+    } else {
+      GlobalParameters.setStringGlobalParameter(connection, HOST_KEY, hostname);
     }
   }
 
@@ -70,4 +88,15 @@ public class MhubParameters {
     }
   }
 
+  /**
+   * @param port the new port number
+   * @throws SQLException if there is a database error
+   * @param connection the database connection
+   * @see #getPort(Connection)
+   */
+  public static void setPort(@Nonnull final Connection connection,
+                             final int port)
+      throws SQLException {
+    GlobalParameters.setIntGlobalParameter(connection, PORT_KEY, port);
+  }
 }
