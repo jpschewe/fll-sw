@@ -2,7 +2,7 @@
 <fll
   title="2017 Minnesota FIRST LEGO League - Hydro Dynamics"
   copyright="2017 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST&#174;) and The LEGO Group. Used by special permission. All rights reserved."
-  revision="0"
+  revision="1"
   schemaVersion="2">
 
   <Performance
@@ -112,7 +112,7 @@
           scoreType="raw" />
       </term>
       <term>
-        <constant value="-1" />
+        <constant value="-2" />
         <goalRef
           goal="m08_manhole_covers_bonus"
           scoreType="raw" />
@@ -132,7 +132,7 @@
 
       <value
         value="partly_in_target"
-        title="Patrly in target"
+        title="Partly in target"
         score="15" />
 
       <value
@@ -165,7 +165,7 @@
 
       <value
         value="partly_in_target"
-        title="Patrly in target"
+        title="Partly in target"
         score="15" />
 
       <value
@@ -236,7 +236,7 @@
 
       <value
         value="partly_in_target"
-        title="Patrly in target"
+        title="Partly in target"
         score="15" />
 
       <value
