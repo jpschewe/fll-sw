@@ -17,7 +17,6 @@ import org.w3c.dom.Document;
 import fll.Utilities;
 import fll.util.FLLRuntimeException;
 import fll.xml.ChallengeParser;
-
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -61,7 +60,8 @@ public final class GlobalParameters {
   }
 
   public static void setUseQuartilesInRankingReport(final Connection connection,
-                                             boolean value) throws SQLException {
+                                                    boolean value)
+      throws SQLException {
     setBooleanGlobalParameter(connection, RANKING_REPORT_USE_QUARTILES, value);
   }
 
@@ -78,7 +78,8 @@ public final class GlobalParameters {
    * @throws SQLException
    */
   private static PreparedStatement getGlobalParameterStmt(final Connection connection,
-                                                          final String paramName) throws SQLException {
+                                                          final String paramName)
+      throws SQLException {
     PreparedStatement prep = null;
     try {
       prep = connection.prepareStatement("SELECT param_value FROM global_parameters WHERE param = ?");
@@ -100,7 +101,8 @@ public final class GlobalParameters {
    * @throws IllegalArgumentException if the parameter cannot be found
    */
   public static double getDoubleGlobalParameter(final Connection connection,
-                                                final String parameter) throws SQLException {
+                                                final String parameter)
+      throws SQLException {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
@@ -110,7 +112,8 @@ public final class GlobalParameters {
         return rs.getDouble(1);
       } else {
         throw new IllegalArgumentException("Can't find '"
-            + parameter + "' in global_parameters");
+            + parameter
+            + "' in global_parameters");
       }
     } finally {
       SQLFunctions.close(rs);
@@ -128,7 +131,8 @@ public final class GlobalParameters {
    * @throws IllegalArgumentException if the parameter cannot be found
    */
   public static int getIntGlobalParameter(final Connection connection,
-                                          final String parameter) throws SQLException {
+                                          final String parameter)
+      throws SQLException {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
@@ -138,7 +142,8 @@ public final class GlobalParameters {
         return rs.getInt(1);
       } else {
         throw new IllegalArgumentException("Can't find '"
-            + parameter + "' in global_parameters");
+            + parameter
+            + "' in global_parameters");
       }
     } finally {
       SQLFunctions.close(rs);
@@ -147,10 +152,33 @@ public final class GlobalParameters {
   }
 
   /**
+   * Get a string global parameter.
+   * 
+   * @return the value of the parameter, may be null
+   * @throws IllegalArgumentException if the parameter cannot be found
+   */
+  public static String getStringGlobalParameter(final Connection connection,
+                                                final String parameter)
+      throws SQLException {
+    try (PreparedStatement prep = getGlobalParameterStmt(connection, parameter)) {
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          return rs.getString(1);
+        } else {
+          throw new IllegalArgumentException("Can't find '"
+              + parameter
+              + "' in global_parameters");
+        }
+      }
+    }
+  }
+
+  /**
    * Check if a value exists for a global parameter.
    */
   public static boolean globalParameterExists(final Connection connection,
-                                              final String paramName) throws SQLException {
+                                              final String paramName)
+      throws SQLException {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
@@ -193,7 +221,8 @@ public final class GlobalParameters {
 
   public static void setStringGlobalParameter(final Connection connection,
                                               final String paramName,
-                                              final String paramValue) throws SQLException {
+                                              final String paramValue)
+      throws SQLException {
     final boolean exists = globalParameterExists(connection, paramName);
     PreparedStatement prep = null;
     try {
@@ -212,7 +241,8 @@ public final class GlobalParameters {
 
   public static void setDoubleGlobalParameter(final Connection connection,
                                               final String paramName,
-                                              final double paramValue) throws SQLException {
+                                              final double paramValue)
+      throws SQLException {
     final boolean exists = globalParameterExists(connection, paramName);
     PreparedStatement prep = null;
     try {
@@ -231,7 +261,8 @@ public final class GlobalParameters {
 
   public static void setIntGlobalParameter(final Connection connection,
                                            final String paramName,
-                                           final int paramValue) throws SQLException {
+                                           final int paramValue)
+      throws SQLException {
     final boolean exists = globalParameterExists(connection, paramName);
     PreparedStatement prep = null;
     try {
@@ -258,7 +289,8 @@ public final class GlobalParameters {
    * @throws IllegalArgumentException if the parameter cannot be found
    */
   public static boolean getBooleanGlobalParameter(final Connection connection,
-                                                  final String parameter) throws SQLException {
+                                                  final String parameter)
+      throws SQLException {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
@@ -268,7 +300,8 @@ public final class GlobalParameters {
         return rs.getBoolean(1);
       } else {
         throw new IllegalArgumentException("Can't find '"
-            + parameter + "' in global_parameters");
+            + parameter
+            + "' in global_parameters");
       }
     } finally {
       SQLFunctions.close(rs);
@@ -278,7 +311,8 @@ public final class GlobalParameters {
 
   public static void setBooleanGlobalParameter(final Connection connection,
                                                final String paramName,
-                                               final boolean paramValue) throws SQLException {
+                                               final boolean paramValue)
+      throws SQLException {
     final boolean exists = globalParameterExists(connection, paramName);
     PreparedStatement prep = null;
     try {
