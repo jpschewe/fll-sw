@@ -43,7 +43,10 @@ import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 
 /**
- * Handle all communication with mhub.
+ * Handle all communication with mhub. This class watches for changes in the
+ * mhub global parameters and starts and stops the web socket as needed
+ * 
+ * @see MhubParameters
  */
 @ClientEndpoint
 @WebListener
