@@ -9,18 +9,15 @@ package fll.flltools.displaySystem;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Duration;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.ThreadSafe;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
 import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 
+import fll.Utilities;
 import fll.db.GlobalParameters;
 import fll.flltools.MhubMessageHandler;
 import fll.flltools.MhubParameters;
@@ -32,35 +29,49 @@ import fll.web.DisplayInfo;
  * Handle updating the display system based on the what is show on the default
  * display.
  */
-@WebListener
-public class DisplaySystemHandler implements ServletContextListener {
+@ThreadSafe
+public class DisplaySystemHandler extends Thread {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
   private boolean listDisplayed = false;
 
-  private ExecutorService executor = null;
-
   private boolean running = false;
 
-  @Override
-  public void contextInitialized(@Nonnull final ServletContextEvent event) {
-    if (null != executor) {
-      throw new IllegalStateException("Handler is already executing, cannot start again");
-    }
+  private final ServletContext application;
 
-    executor = Executors.newSingleThreadExecutor();
-    executor.submit(() -> execute(event.getServletContext()));
+  private final MhubMessageHandler messageHandler;
+
+  /**
+   * Construct the display handler.
+   * 
+   * @param messageHandler used to send messages
+   * @param application used to get the database connection
+   */
+  public DisplaySystemHandler(@Nonnull final MhubMessageHandler messageHandler,
+                              @Nonnull final ServletContext application) {
+    this.messageHandler = messageHandler;
+    this.application = application;
   }
 
-  @Override
-  public void contextDestroyed(@Nonnull final ServletContextEvent ignored) {
+  /**
+   * Stop the thread. If called from another thread, wait for this thread to
+   * stop.
+   */
+  public void shutdown() {
     running = false;
-    executor.shutdown();
-    executor = null;
+    this.interrupt(); // stop any sleep
+    if (Thread.currentThread() != this) {
+      try {
+        this.join();
+      } catch (final InterruptedException e) {
+        LOGGER.warn("Interrupted waiting for shutdown, exiting", e);
+      }
+    }
   }
 
-  private void execute(final ServletContext application) {
+  @Override
+  public void run() {
     running = true;
 
     Duration flipRate = Duration.ofSeconds(GlobalParameters.DIVISION_FLIP_RATE_DEFAULT);
@@ -69,60 +80,61 @@ public class DisplaySystemHandler implements ServletContextListener {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       if (null != datasource) {
         try (Connection connection = datasource.getConnection()) {
-          flipRate = Duration.ofSeconds(GlobalParameters.getIntGlobalParameter(connection,
-                                                                               GlobalParameters.DIVISION_FLIP_RATE));
+          if (Utilities.testDatabaseInitialized(connection)) {
 
-          final String hostname = MhubParameters.getHostname(connection);
-          final MhubMessageHandler handler = MhubMessageHandler.getInstance();
-          if (null != hostname
-              && null != handler) {
+            flipRate = Duration.ofSeconds(GlobalParameters.getIntGlobalParameter(connection,
+                                                                                 GlobalParameters.DIVISION_FLIP_RATE));
 
-            final DisplayInfo displayInfo = DisplayInfo.findOrCreateDefaultDisplay(application);
-            if (LOGGER.isTraceEnabled()) {
-              LOGGER.trace("Found default display. Scoreboard? "
-                  + displayInfo.isScoreboard());
-            }
+            final String hostname = MhubParameters.getHostname(connection);
+            if (null != hostname) {
 
-            if (displayInfo.isScoreboard()
-                && !listDisplayed) {
-              final fll.flltools.BaseMessage msg = new fll.flltools.displaySystem.list.Show();
-
+              final DisplayInfo displayInfo = DisplayInfo.findOrCreateDefaultDisplay(application);
               if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace("Sending show message");
+                LOGGER.trace("Found default display. Scoreboard? "
+                    + displayInfo.isScoreboard());
               }
 
-              if (handler.sendMesasge(msg)) {
-                listDisplayed = true;
-              } else {
-                LOGGER.warn("Could not send show message");
+              if (displayInfo.isScoreboard()
+                  && !listDisplayed) {
+                final fll.flltools.BaseMessage msg = new fll.flltools.displaySystem.list.Show();
+
+                if (LOGGER.isTraceEnabled()) {
+                  LOGGER.trace("Sending show message");
+                }
+
+                if (messageHandler.sendMesasge(msg)) {
+                  listDisplayed = true;
+                } else {
+                  LOGGER.warn("Could not send show message");
+                }
+
+              } else if (!displayInfo.isScoreboard()
+                  && listDisplayed) {
+                final fll.flltools.BaseMessage msg = new fll.flltools.displaySystem.list.Hide();
+
+                if (LOGGER.isTraceEnabled()) {
+                  LOGGER.trace("Sending show message");
+                }
+
+                if (messageHandler.sendMesasge(msg)) {
+                  listDisplayed = false;
+                } else {
+                  LOGGER.warn("Could not send hide message");
+                }
               }
 
-            } else if (!displayInfo.isScoreboard()
-                && listDisplayed) {
-              final fll.flltools.BaseMessage msg = new fll.flltools.displaySystem.list.Hide();
+              // FIXME keep track of which display is showing and cycle through
+              // the
+              // options
 
-              if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace("Sending show message");
-              }
+            } // non-null hostname
 
-              if (handler.sendMesasge(msg)) {
-                listDisplayed = false;
-              } else {
-                LOGGER.warn("Could not send hide message");
-              }
-            }
-
-            // FIXME keep track of which display is showing and cycle through
-            // the
-            // options
-
-          } // non-null hostname and non-null handler
+          } // the database is initialized
 
         } catch (final SQLException e) {
           LOGGER.error("Error talking to the database, will try again later", e);
         }
       } // have a datasource
-
       // wait for a bit
       try {
         Thread.sleep(flipRate.toMillis());

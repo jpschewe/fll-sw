@@ -38,6 +38,7 @@ import org.apache.log4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import fll.flltools.displaySystem.DisplaySystemHandler;
 import fll.util.FLLInternalException;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -73,6 +74,10 @@ public class MhubMessageHandler implements ServletContextListener {
 
   private boolean running = false;
 
+  private DisplaySystemHandler displayHandler = null;
+
+  private ServletContext application = null;
+
   @Override
   public void contextInitialized(@Nonnull final ServletContextEvent event) {
     if (null != instance) {
@@ -83,9 +88,10 @@ public class MhubMessageHandler implements ServletContextListener {
       throw new IllegalStateException("Handler is already executing, cannot start again");
     }
 
+    application = event.getServletContext();
     instance = this;
     executor = Executors.newSingleThreadExecutor();
-    executor.submit(() -> execute(event.getServletContext()));
+    executor.submit(() -> execute());
   }
 
   @Override
@@ -105,10 +111,8 @@ public class MhubMessageHandler implements ServletContextListener {
 
   /**
    * Watch for the mhub parameters to change and create websocket as necessary.
-   * 
-   * @param application where to get the database connection from
    */
-  private void execute(final ServletContext application) {
+  private void execute() {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Starting checking for db parameter changes");
     }
@@ -215,6 +219,11 @@ public class MhubMessageHandler implements ServletContextListener {
       });
       sessionList.clear();
       currentUri = null;
+
+      if (null != displayHandler) {
+        displayHandler.shutdown();
+        displayHandler = null;
+      }
     }
   }
 
@@ -255,6 +264,9 @@ public class MhubMessageHandler implements ServletContextListener {
 
           final WebSocketContainer container = ContainerProvider.getWebSocketContainer();
           container.connectToServer(this, currentUri);
+
+          displayHandler = new DisplaySystemHandler(this, application);
+          displayHandler.start();
         } else {
           if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("URIs are the same, no connection required");
