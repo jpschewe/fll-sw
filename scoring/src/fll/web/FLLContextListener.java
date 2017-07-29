@@ -74,6 +74,8 @@ public class FLLContextListener implements ServletContextListener {
         LOGGER.error("Error getting connection to shutdown the database", e);
       }
     }
+
+    Utilities.unloadDBDriver();
   }
 
   private static void initDataSource(final ServletContext application) {
