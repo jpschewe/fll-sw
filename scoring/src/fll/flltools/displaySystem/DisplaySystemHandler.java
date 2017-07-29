@@ -22,7 +22,7 @@ import javax.sql.DataSource;
 import org.apache.log4j.Logger;
 
 import fll.db.GlobalParameters;
-import fll.flltools.MhubHandler;
+import fll.flltools.MhubMessageHandler;
 import fll.flltools.MhubParameters;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -63,47 +63,77 @@ public class DisplaySystemHandler implements ServletContextListener {
   private void execute(final ServletContext application) {
     running = true;
 
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    try (Connection connection = datasource.getConnection()) {
-      final Duration flipRate = Duration.ofSeconds(GlobalParameters.getIntGlobalParameter(connection,
-                                                                                          GlobalParameters.DIVISION_FLIP_RATE));
+    Duration flipRate = Duration.ofSeconds(GlobalParameters.DIVISION_FLIP_RATE_DEFAULT);
 
-      while (running) {
-        final String hostname = MhubParameters.getHostname(connection);
-        final MhubHandler handler = MhubHandler.getInstance();
-        if (null != hostname
-            && handler != null) {
+    while (running) {
+      final DataSource datasource = ApplicationAttributes.getDataSource(application);
+      if (null != datasource) {
+        try (Connection connection = datasource.getConnection()) {
+          flipRate = Duration.ofSeconds(GlobalParameters.getIntGlobalParameter(connection,
+                                                                               GlobalParameters.DIVISION_FLIP_RATE));
 
-          final DisplayInfo displayInfo = DisplayInfo.findOrCreateDefaultDisplay(application);
-          if (displayInfo.isScoreboard()
-              && !listDisplayed) {
-            listDisplayed = true;
-            final fll.flltools.BaseMessage msg = new fll.flltools.displaySystem.list.Show();
-            handler.sendMesasge(msg);
-          } else if (!displayInfo.isScoreboard()
-              && listDisplayed) {
-            listDisplayed = false;
-            final fll.flltools.BaseMessage msg = new fll.flltools.displaySystem.list.Hide();
-            handler.sendMesasge(msg);
-          }
+          final String hostname = MhubParameters.getHostname(connection);
+          final MhubMessageHandler handler = MhubMessageHandler.getInstance();
+          if (null != hostname
+              && null != handler) {
 
-          // FIXME keep track of which display is showing and cycle through the
-          // options
+            final DisplayInfo displayInfo = DisplayInfo.findOrCreateDefaultDisplay(application);
+            if (LOGGER.isTraceEnabled()) {
+              LOGGER.trace("Found default display. Scoreboard? "
+                  + displayInfo.isScoreboard());
+            }
 
+            if (displayInfo.isScoreboard()
+                && !listDisplayed) {
+              final fll.flltools.BaseMessage msg = new fll.flltools.displaySystem.list.Show();
+
+              if (LOGGER.isTraceEnabled()) {
+                LOGGER.trace("Sending show message");
+              }
+
+              if (handler.sendMesasge(msg)) {
+                listDisplayed = true;
+              } else {
+                LOGGER.warn("Could not send show message");
+              }
+
+            } else if (!displayInfo.isScoreboard()
+                && listDisplayed) {
+              final fll.flltools.BaseMessage msg = new fll.flltools.displaySystem.list.Hide();
+
+              if (LOGGER.isTraceEnabled()) {
+                LOGGER.trace("Sending show message");
+              }
+
+              if (handler.sendMesasge(msg)) {
+                listDisplayed = false;
+              } else {
+                LOGGER.warn("Could not send hide message");
+              }
+            }
+
+            // FIXME keep track of which display is showing and cycle through
+            // the
+            // options
+
+          } // non-null hostname and non-null handler
+
+        } catch (final SQLException e) {
+          LOGGER.error("Error talking to the database, will try again later", e);
         }
+      } // have a datasource
 
-        // wait for a bit
-        try {
-          Thread.sleep(flipRate.toMillis());
-        } catch (final InterruptedException e) {
-          if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Got interrupted, assuming should wake up and possibly exit", e);
-          }
+      // wait for a bit
+      try {
+        Thread.sleep(flipRate.toMillis());
+      } catch (final InterruptedException e) {
+        if (LOGGER.isInfoEnabled()) {
+          LOGGER.info("Got interrupted, assuming should wake up and possibly exit", e);
         }
-      } // while running
-    } catch (final SQLException e) {
-      LOGGER.error("Error talking to the database, mhub display system handler terminated", e);
-    }
+      }
+
+    } // while running
+
   }
 
 }
