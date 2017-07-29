@@ -16,14 +16,10 @@ import java.time.Duration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.ThreadSafe;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
 import javax.sql.DataSource;
 import javax.websocket.ClientEndpoint;
 import javax.websocket.ContainerProvider;
@@ -38,6 +34,7 @@ import org.apache.log4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import fll.Utilities;
 import fll.flltools.displaySystem.DisplaySystemHandler;
 import fll.util.FLLInternalException;
 import fll.util.LogUtils;
@@ -50,61 +47,45 @@ import fll.web.ApplicationAttributes;
  * @see MhubParameters
  */
 @ClientEndpoint
-@WebListener
-public class MhubMessageHandler implements ServletContextListener {
+@ThreadSafe
+public class MhubMessageHandler extends Thread {
 
   private final Object lock = new Object();
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  private static MhubMessageHandler instance = null;
-
-  /**
-   * There is a single instance of {@link MhubMessageHandler} for each servlet
-   * container. This should always be non-null, but can be null when the servlet
-   * container is starting up or shutting down.
-   * 
-   * @return the singleton instance, may be null
-   */
-  public static MhubMessageHandler getInstance() {
-    return instance;
-  }
-
-  private ExecutorService executor = null;
-
   private boolean running = false;
 
   private DisplaySystemHandler displayHandler = null;
 
-  private ServletContext application = null;
+  private final ServletContext application;
 
-  @Override
-  public void contextInitialized(@Nonnull final ServletContextEvent event) {
-    if (null != instance) {
-      throw new IllegalStateException("Cannot have 2 instances of singleton MhubHandler");
-    }
-
-    if (null != executor) {
-      throw new IllegalStateException("Handler is already executing, cannot start again");
-    }
-
-    application = event.getServletContext();
-    instance = this;
-    executor = Executors.newSingleThreadExecutor();
-    executor.submit(() -> execute());
+  /**
+   * Constructs the message handler, but doesn't start it.
+   * 
+   * @param application used to get various parameters
+   */
+  public MhubMessageHandler(@Nonnull final ServletContext application) {
+    this.application = application;
   }
 
-  @Override
-  public void contextDestroyed(@Nonnull final ServletContextEvent ignored) {
-    if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("contextDestroyed");
-    }
-
+  /**
+   * Stop the thread. If called from another thread, wait for this thread to
+   * stop.
+   */
+  public void shutdown() {
     running = false;
-    closeWebSocket();
-    executor.shutdown();
-    executor = null;
-    instance = null;
+    this.interrupt(); // stop any sleep
+
+    closeWebSocket(); // will shutdown display handler as well
+
+    if (Thread.currentThread() != this) {
+      try {
+        this.join();
+      } catch (final InterruptedException e) {
+        LOGGER.warn("Interrupted waiting for shutdown, exiting", e);
+      }
+    }
   }
 
   private static final Duration DB_CHECK_INTERVAL = Duration.ofMinutes(1);
@@ -112,7 +93,8 @@ public class MhubMessageHandler implements ServletContextListener {
   /**
    * Watch for the mhub parameters to change and create websocket as necessary.
    */
-  private void execute() {
+  @Override
+  public void run() {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Starting checking for db parameter changes");
     }
@@ -123,8 +105,9 @@ public class MhubMessageHandler implements ServletContextListener {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       if (null != datasource) {
         try (Connection connection = datasource.getConnection()) {
-          createWebSocket(MhubParameters.getHostname(connection), MhubParameters.getPort(connection));
-
+          if (Utilities.testDatabaseInitialized(connection)) {
+            createWebSocket(MhubParameters.getHostname(connection), MhubParameters.getPort(connection));
+          } // have valid database
         } catch (final SQLException e) {
           LOGGER.error("Error talking to the database, will try again later", e);
         }
@@ -200,7 +183,7 @@ public class MhubMessageHandler implements ServletContextListener {
   private final List<Session> sessionList = new LinkedList<>();
 
   /**
-   * Close the websocket.
+   * Close the websocket and shutdown the display handler thread.
    */
   private void closeWebSocket() {
     if (LOGGER.isTraceEnabled()) {
