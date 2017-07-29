@@ -28,7 +28,6 @@ import org.w3c.dom.Document;
 import fll.Utilities;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
-import fll.web.InitFilter;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;
@@ -53,8 +52,6 @@ public class SetupIndex {
     final List<DescriptionInfo> descriptions = DescriptionInfo.getAllKnownChallengeDescriptionInfo();
 
     pageContext.setAttribute("descriptions", descriptions);
-
-    InitFilter.initDataSource(application);
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (final Connection connection = datasource.getConnection()) {

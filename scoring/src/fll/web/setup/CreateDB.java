@@ -21,8 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.log4j.Logger;
@@ -35,9 +33,9 @@ import fll.util.FLLInternalException;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
-import fll.web.InitFilter;
 import fll.web.UploadProcessor;
 import fll.xml.ChallengeParser;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Create a new database either from an xml descriptor or from a database dump.
@@ -52,10 +50,10 @@ public class CreateDB extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     String redirect;
     final StringBuilder message = new StringBuilder();
-    InitFilter.initDataSource(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     try {
@@ -69,8 +67,8 @@ public class CreateDB extends BaseFLLServlet {
         try {
           final URL descriptionURL = new URL(description);
           final Document document = ChallengeParser.parse(new InputStreamReader(descriptionURL.openStream(),
-                                                                                          Utilities.DEFAULT_CHARSET));
-          
+                                                                                Utilities.DEFAULT_CHARSET));
+
           GenerateDB.generateDB(document, connection);
 
           application.removeAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
@@ -92,7 +90,7 @@ public class CreateDB extends BaseFLLServlet {
           redirect = "/setup";
         } else {
           final Document document = ChallengeParser.parse(new InputStreamReader(xmlFileItem.getInputStream(),
-                                                                                          Utilities.DEFAULT_CHARSET));
+                                                                                Utilities.DEFAULT_CHARSET));
 
           GenerateDB.generateDB(document, connection);
 
@@ -122,23 +120,27 @@ public class CreateDB extends BaseFLLServlet {
 
       } else {
         message.append("<p class='error'>Unknown form state, expected form fields not seen: "
-            + request + "</p>");
+            + request
+            + "</p>");
         redirect = "/setup";
       }
 
     } catch (final FileUploadException fue) {
       message.append("<p class='error'>Error handling the file upload: "
-          + fue.getMessage() + "</p>");
+          + fue.getMessage()
+          + "</p>");
       LOG.error(fue, fue);
       redirect = "/setup";
     } catch (final IOException ioe) {
       message.append("<p class='error'>Error reading challenge descriptor: "
-          + ioe.getMessage() + "</p>");
+          + ioe.getMessage()
+          + "</p>");
       LOG.error(ioe, ioe);
       redirect = "/setup";
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error loading data into the database: "
-          + sqle.getMessage() + "</p>");
+          + sqle.getMessage()
+          + "</p>");
       LOG.error(sqle, sqle);
       redirect = "/setup";
     } finally {

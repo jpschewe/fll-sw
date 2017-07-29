@@ -43,10 +43,11 @@ public class DisplaySystemHandler extends Thread {
   private final MhubMessageHandler messageHandler;
 
   /**
-   * Construct the display handler.
+   * Construct the display handler, but doesn't start it
    * 
    * @param messageHandler used to send messages
-   * @param application used to get the database connection
+   * @param application used to get the database connection and current display
+   *          state
    */
   public DisplaySystemHandler(@Nonnull final MhubMessageHandler messageHandler,
                               @Nonnull final ServletContext application) {
