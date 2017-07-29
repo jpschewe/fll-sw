@@ -11,10 +11,13 @@ import javax.annotation.Nonnull;
 /**
  * Base class for messages sent to the list module.
  */
-/* package */ abstract class BaseMessage extends fll.flltools.BaseMessage {
+/* package */ abstract class BaseMessage extends fll.flltools.PublishMessage {
 
-  public BaseMessage(@Nonnull final String action) {
-    super("list:" + action);
+  public BaseMessage(@Nonnull final String node,
+                     final int seq,
+                     @Nonnull final String action) {
+    super("list:"
+        + action, node, seq);
   }
 
   @Override

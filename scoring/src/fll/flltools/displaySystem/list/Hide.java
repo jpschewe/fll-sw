@@ -11,7 +11,7 @@ package fll.flltools.displaySystem.list;
  */
 public class Hide extends BaseMessage {
   public Hide() {
-    super("hide");
+    super("default", 0, "hide");
   }
 
   /**

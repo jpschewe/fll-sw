@@ -11,7 +11,7 @@ package fll.flltools.displaySystem.list;
  */
 public class Show extends BaseMessage {
   public Show() {
-    super("show");
+    super("default", 0, "show");
   }
 
   /**
