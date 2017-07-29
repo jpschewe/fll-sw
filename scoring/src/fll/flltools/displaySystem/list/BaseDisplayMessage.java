@@ -8,16 +8,17 @@ package fll.flltools.displaySystem.list;
 
 import javax.annotation.Nonnull;
 
+import fll.flltools.PublishMessage;
+
 /**
  * Base class for messages sent to the list module.
  */
-/* package */ abstract class BaseMessage extends fll.flltools.PublishMessage {
+/* package */ abstract class BaseDisplayMessage extends PublishMessage {
 
-  public BaseMessage(@Nonnull final String node,
-                     final int seq,
+  public BaseDisplayMessage(@Nonnull final String node,
                      @Nonnull final String action) {
     super("list:"
-        + action, node, seq);
+        + action, node);
   }
 
   @Override
