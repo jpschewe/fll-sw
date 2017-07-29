@@ -9,9 +9,9 @@ package fll.flltools.displaySystem.list;
 /**
  * A message to tell the list module to display.
  */
-public class Show extends BaseMessage {
+public class Show extends BaseDisplayMessage {
   public Show() {
-    super("default", 0, "show");
+    super("default", "show");
   }
 
   /**

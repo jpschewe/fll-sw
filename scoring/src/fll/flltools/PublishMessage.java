@@ -20,13 +20,11 @@ public abstract class PublishMessage extends BaseMessage {
    * 
    * @param topic passed to parent
    * @param node passed to parent
-   * @param seq passed to parent
    * @see BaseMessage#BaseMessage(String, String, String, int)
    */
   public PublishMessage(@Nonnull @JsonProperty("topic") final String topic,
-                        @Nonnull @JsonProperty("node") final String node,
-                        @JsonProperty("seq") final int seq) {
-    super(topic, TYPE_PUBLISH, node, seq);
+                        @Nonnull @JsonProperty("node") final String node) {
+    super(topic, TYPE_PUBLISH, node);
   }
 
 }
