@@ -20,3 +20,6 @@ You will need to edit all parameters (as specified above) and set `Display node`
 The parameter `Award Group Flip Rate` is used to determine how long to display each list.
 
 
+## Developers
+
+Those interested in expanding this integration should look at the package `fll.flltools`. The class `MhubMessageHandler` takes care of sending and receiving messages.
