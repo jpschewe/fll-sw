@@ -82,6 +82,11 @@ public abstract class BaseMessage {
   public static final String TYPE_PUBLISH_ACK = "puback";
 
   /**
+   * Comes back from the server for an error processing a message.
+   */
+  public static final String TYPE_ERROR = "error";
+  
+  /**
    * @return the type of message, typically "publish" or "subscribe"
    */
   public String getType() {
