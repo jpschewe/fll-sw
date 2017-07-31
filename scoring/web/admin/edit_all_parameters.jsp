@@ -327,7 +327,7 @@
 						</c:choose></td>
 				</tr>
 
-<tr><th colspan="2">FLLTools integration</th></tr>
+<tr><th colspan="2">FLL Tools integration</th></tr>
 
         <tr>
           <th>Mhub hostname<a
