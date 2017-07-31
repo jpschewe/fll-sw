@@ -103,9 +103,11 @@ public class DisplaySystemHandler extends Thread {
                     + displayInfo.isScoreboard());
               }
 
+              final String displayNode = MhubParameters.getDisplayNode(connection);
+
               if (displayInfo.isScoreboard()
                   && !listDisplayed) {
-                final fll.flltools.BaseMessage msg = new fll.flltools.displaySystem.list.Show();
+                final fll.flltools.BaseMessage msg = new fll.flltools.displaySystem.list.Show(displayNode);
 
                 if (LOGGER.isTraceEnabled()) {
                   LOGGER.trace("Sending show message");
@@ -119,7 +121,7 @@ public class DisplaySystemHandler extends Thread {
 
               } else if (!displayInfo.isScoreboard()
                   && listDisplayed) {
-                final fll.flltools.BaseMessage msg = new fll.flltools.displaySystem.list.Hide();
+                final fll.flltools.BaseMessage msg = new fll.flltools.displaySystem.list.Hide(displayNode);
 
                 if (LOGGER.isTraceEnabled()) {
                   LOGGER.trace("Sending show message");

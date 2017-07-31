@@ -6,12 +6,14 @@
 
 package fll.flltools.displaySystem.list;
 
+import javax.annotation.Nonnull;
+
 /**
  * A message to tell the list module to hide.
  */
 public class Hide extends BaseListMessage {
-  public Hide() {
-    super("default", "hide");
+  public Hide(@Nonnull final String node) {
+    super(node, "hide");
   }
 
   /**

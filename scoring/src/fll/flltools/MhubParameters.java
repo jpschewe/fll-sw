@@ -42,6 +42,16 @@ public class MhubParameters {
   public static final int DEFAULT_PORT = 13900;
 
   /**
+   * Key for {@link GlobalParameters} for the display node.
+   */
+  public static final String DISPLAY_NODE_KEY = "mhub.display.node";
+
+  /**
+   * Default node for the display.
+   */
+  public static final String DEFAULT_DISPLAY_NODE = "default";
+
+  /**
    * @return the hostname to talk to mhub at, or null to not talk to mhub
    * @param connection the connection to the database
    */
@@ -99,4 +109,35 @@ public class MhubParameters {
       throws SQLException {
     GlobalParameters.setIntGlobalParameter(connection, PORT_KEY, port);
   }
+
+  /**
+   * @param connection the database connection
+   * @return The node to send display messages to
+   * @throws SQLException if there is a database error
+   * @see fll.flltools.displaySystem.list.BaseListMessage
+   */
+  public static String getDisplayNode(@Nonnull final Connection connection) throws SQLException {
+    if (GlobalParameters.globalParameterExists(connection, DISPLAY_NODE_KEY)) {
+      return GlobalParameters.getStringGlobalParameter(connection, DISPLAY_NODE_KEY);
+    } else {
+      return DEFAULT_DISPLAY_NODE;
+    }
+  }
+
+  /**
+   * @param connection the database connection
+   * @param node the new display noe
+   * @throws SQLException if there is a database error
+   * @see #getDisplayNode(Connection)
+   */
+  public static void setDisplayNode(@Nonnull final Connection connection,
+                                    final String node)
+      throws SQLException {
+    if (StringUtils.isBlank(node)) {
+      GlobalParameters.setStringGlobalParameter(connection, DISPLAY_NODE_KEY, DEFAULT_DISPLAY_NODE);
+    } else {
+      GlobalParameters.setStringGlobalParameter(connection, DISPLAY_NODE_KEY, node);
+    }
+  }
+
 }

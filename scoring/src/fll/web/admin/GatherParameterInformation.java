@@ -92,6 +92,7 @@ public class GatherParameterInformation {
       
       pageContext.setAttribute("gMhubHostname", MhubParameters.getHostname(connection));
       pageContext.setAttribute("gMhubPort", MhubParameters.getPort(connection));
+      pageContext.setAttribute("gMhubDisplayNode", MhubParameters.getDisplayNode(connection));
 
     } finally {
       SQLFunctions.close(connection);

@@ -327,6 +327,7 @@
 						</c:choose></td>
 				</tr>
 
+<tr><th colspan="2">FLLTools integration</th></tr>
 
         <tr>
           <th>Mhub hostname<a
@@ -348,7 +349,6 @@
             name='gMhubHostname' /></td>
         </tr>
 
-
         <tr>
           <th>Mhub port<a href='javascript:display("MhubPortHelp")'>[help]</a>
             <div
@@ -365,6 +365,25 @@
             value="${gMhubPort }"
             id='gMhubPort'
             name='gMhubPort' /></td>
+        </tr>
+
+        <tr>
+          <th>Display node<a
+            href='javascript:display("MhubDisplayNodeHelp")'>[help]</a>
+            <div
+              id='MhubDisplayNodeHelp'
+              class='help'
+              style='display: none'>
+              The node to send display messages to. <a
+                href='javascript:hide("MhubDisplayNodeHelp")'>[hide]</a>
+            </div>
+
+          </th>
+          <td><input
+            type='text'
+            value="${gMhubDisplayNode }"
+            id='gMhubDisplayNode'
+            name='gMhubDisplayNode' /></td>
         </tr>
 
 
