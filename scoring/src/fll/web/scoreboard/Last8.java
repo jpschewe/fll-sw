@@ -29,6 +29,7 @@ import fll.Utilities;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.flltools.displaySystem.list.SetArray;
+import fll.util.FLLInternalException;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
@@ -53,8 +54,6 @@ public class Last8 extends BaseFLLServlet {
       LOGGER.trace("Entering doPost");
     }
 
-    final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
-    final ScoreType performanceScoreType = challengeDescription.getPerformance().getScoreType();
     final Formatter formatter = new Formatter(response.getWriter());
     final String showOrgStr = request.getParameter("showOrganization");
     final boolean showOrg = null == showOrgStr ? true : Boolean.parseBoolean(showOrgStr);
@@ -89,35 +88,32 @@ public class Last8 extends BaseFLLServlet {
     formatter.format("</tr>%n");
 
     // scores here
-    processScores(application, (rs) -> {
-      formatter.format("<tr>%n");
-      formatter.format("<td class='left'>%d</td>%n", rs.getInt("TeamNumber"));
-      String teamName = rs.getString("TeamName");
-      if (null == teamName) {
-        teamName = "&nbsp;";
-      }
-      formatter.format("<td class='left truncate'>%s</td>%n", teamName);
-      if (showOrg) {
-        String organization = rs.getString("Organization");
-        if (null == organization) {
-          organization = "&nbsp;";
+    try {
+      processScores(application, (teamNumber,
+                                  teamName,
+                                  organization,
+                                  awardGroup,
+                                  formattedScore) -> {
+        formatter.format("<tr>%n");
+        formatter.format("<td class='left'>%d</td>%n", teamNumber);
+        if (null == teamName) {
+          teamName = "&nbsp;";
         }
-        formatter.format("<td class='left truncate'>%s</td>%n", organization);
-      }
-      formatter.format("<td class='right truncate'>%s</td>%n", rs.getString("event_division"));
+        formatter.format("<td class='left truncate'>%s</td>%n", teamName);
+        if (showOrg) {
+          if (null == organization) {
+            organization = "&nbsp;";
+          }
+          formatter.format("<td class='left truncate'>%s</td>%n", organization);
+        }
+        formatter.format("<td class='right truncate'>%s</td>%n", awardGroup);
 
-      formatter.format("<td class='right'>");
-      if (rs.getBoolean("NoShow")) {
-        formatter.format("No Show");
-      } else if (rs.getBoolean("Bye")) {
-        formatter.format("Bye");
-      } else {
-        formatter.format("%s",
-                         Utilities.getFormatForScoreType(performanceScoreType).format(rs.getDouble("ComputedTotal")));
-      }
-      formatter.format("</td>%n");
-      formatter.format("</tr>%n");
-    });
+        formatter.format("<td class='right'>%s</td>", formattedScore);
+        formatter.format("</tr>%n");
+      });
+    } catch (final SQLException e) {
+      throw new FLLInternalException("Got an error getting the most recent scores from the database", e);
+    }
 
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Exiting doPost");
@@ -130,34 +126,32 @@ public class Last8 extends BaseFLLServlet {
    * @param application get all of the appropriate parameters
    * @return payload for the set array message
    */
-  public static SetArray.Payload getTableAsList(@Nonnull final ServletContext application) {
-    final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
-    final ScoreType performanceScoreType = challengeDescription.getPerformance().getScoreType();
+  public static SetArray.Payload getTableAsList(@Nonnull final ServletContext application) throws SQLException {
 
     final List<List<String>> data = new LinkedList<>();
-    processScores(application, (rs) -> {
+    processScores(application, (teamNumber,
+                                teamName,
+                                organization,
+                                awardGroup,
+                                formattedScore) -> {
       final List<String> row = new LinkedList<>();
 
-      row.add(String.valueOf(rs.getInt("TeamNumber")));
-      String teamName = rs.getString("TeamName");
+      row.add(String.valueOf(teamNumber));
       if (null == teamName) {
-        teamName = "";
-      }
-      row.add(teamName);
-      String organization = rs.getString("Organization");
-      if (null == organization) {
-        organization = "";
-      }
-      row.add(organization);
-      row.add(rs.getString("event_division"));
-
-      if (rs.getBoolean("NoShow")) {
-        row.add("No Show");
-      } else if (rs.getBoolean("Bye")) {
-        row.add("Bye");
+        row.add("");
       } else {
-        row.add(Utilities.getFormatForScoreType(performanceScoreType).format(rs.getDouble("ComputedTotal")));
+        row.add(teamName);
       }
+
+      if (null == organization) {
+        row.add("");
+      } else {
+        row.add(organization);
+      }
+
+      row.add(awardGroup);
+
+      row.add(formattedScore);
 
       data.add(row);
     });
@@ -166,12 +160,12 @@ public class Last8 extends BaseFLLServlet {
     return payload;
   }
 
-  /**
-   * Used for processing the result of a score query in
-   * {@link Last8#processScores(ServletContext, ProcessScoreEntry)}.
-   */
   private static interface ProcessScoreEntry {
-    public void execute(@Nonnull ResultSet rs) throws SQLException;
+    public void execute(final int teamNumber,
+                        final String teamName,
+                        final String organization,
+                        @Nonnull final String awardGroup,
+                        @Nonnull final String formattedScore);
   }
 
   /**
@@ -181,12 +175,16 @@ public class Last8 extends BaseFLLServlet {
    *          Name, award group, bye, no show, computed total)
    */
   private static void processScores(@Nonnull final ServletContext application,
-                                    @Nonnull final ProcessScoreEntry processor) {
+                                    @Nonnull final ProcessScoreEntry processor)
+      throws SQLException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
       final int currentTournament = Queries.getCurrentTournament(connection);
       final int maxScoreboardRound = TournamentParameters.getMaxScoreboardPerformanceRound(connection,
                                                                                            currentTournament);
+      final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
+      final ScoreType performanceScoreType = challengeDescription.getPerformance().getScoreType();
+
       try (PreparedStatement prep = connection.prepareStatement("SELECT Teams.TeamNumber"
           + ", Teams.Organization" //
           + ", Teams.TeamName" //
@@ -205,13 +203,27 @@ public class Last8 extends BaseFLLServlet {
         prep.setInt(2, maxScoreboardRound);
         try (ResultSet rs = prep.executeQuery()) {
           while (rs.next()) {
-            processor.execute(rs);
+            final int teamNumber = rs.getInt("TeamNumber");
+            final String teamName = rs.getString("TeamName");
+
+            final String organization = rs.getString("Organization");
+            final String awardGroup = rs.getString("event_division");
+
+            final String formattedScore;
+            if (rs.getBoolean("NoShow")) {
+              formattedScore = "No Show";
+            } else if (rs.getBoolean("Bye")) {
+              formattedScore = "Bye";
+            } else {
+              formattedScore = Utilities.getFormatForScoreType(performanceScoreType)
+                                        .format(rs.getDouble("ComputedTotal"));
+            }
+
+            processor.execute(teamNumber, teamName, organization, awardGroup, formattedScore);
           } // end while next
         } // try ResultSet
       } // try PreparedStatement
 
-    } catch (final SQLException e) {
-      throw new RuntimeException("Error talking to the database", e);
-    }
+    } // try connection
   }
 }
