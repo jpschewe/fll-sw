@@ -9,6 +9,7 @@ package fll.flltools.displaySystem;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Duration;
+import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
@@ -19,6 +20,7 @@ import org.apache.log4j.Logger;
 
 import fll.Utilities;
 import fll.db.GlobalParameters;
+import fll.db.Queries;
 import fll.flltools.MhubMessageHandler;
 import fll.flltools.MhubParameters;
 import fll.flltools.displaySystem.list.SetArray;
@@ -26,6 +28,7 @@ import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.DisplayInfo;
 import fll.web.scoreboard.Last8;
+import fll.web.scoreboard.Top10;
 
 /**
  * Handle updating the display system based on the what is show on the default
@@ -79,6 +82,9 @@ public class DisplaySystemHandler extends Thread {
 
     Duration flipRate = Duration.ofSeconds(GlobalParameters.DIVISION_FLIP_RATE_DEFAULT);
 
+    int currentAwardGroupIndex = -1;
+    boolean showingMostRecent = false;
+
     while (running) {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       if (null != datasource) {
@@ -127,18 +133,38 @@ public class DisplaySystemHandler extends Thread {
               }
 
               if (listDisplayed) {
+
+                final SetArray.Payload payload;
+                final List<String> awardGroups = Queries.getAwardGroups(connection);
+
+                if (!showingMostRecent
+                    || awardGroups.isEmpty()) {
+                  // display most recent
+
+                  payload = Last8.getTableAsList(application);
+
+                  showingMostRecent = true;
+                  currentAwardGroupIndex = -1;
+                } else {
+                  // show top 10 for an award group
+                  ++currentAwardGroupIndex;
+                  if (currentAwardGroupIndex >= awardGroups.size()) {
+                    currentAwardGroupIndex = 0;
+                  }
+
+                  final String awardGroupName = awardGroups.get(currentAwardGroupIndex);
+
+                  payload = Top10.getTableAsList(application, awardGroupName);
+
+                  showingMostRecent = false;
+                }
+
                 final SetArray msg = new SetArray();
-                
-                final SetArray.Payload payload = Last8.getTableAsList(application);
                 msg.setPayload(payload);
                 if (!messageHandler.sendMesasge(msg)) {
                   LOGGER.warn("Unable to send setArray message");
                 }
               }
-
-              // FIXME keep track of which display is showing and cycle through
-              // the
-              // options
 
             } // non-null hostname
 
