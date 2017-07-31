@@ -13,9 +13,9 @@ import fll.flltools.PublishMessage;
 /**
  * Base class for messages sent to the list module.
  */
-/* package */ abstract class BaseDisplayMessage extends PublishMessage {
+/* package */ abstract class BaseListMessage extends PublishMessage {
 
-  public BaseDisplayMessage(@Nonnull final String node,
+  public BaseListMessage(@Nonnull final String node,
                      @Nonnull final String action) {
     super("list:"
         + action, node);

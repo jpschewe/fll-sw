@@ -9,6 +9,9 @@ package fll.flltools.displaySystem;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
@@ -21,6 +24,7 @@ import fll.Utilities;
 import fll.db.GlobalParameters;
 import fll.flltools.MhubMessageHandler;
 import fll.flltools.MhubParameters;
+import fll.flltools.displaySystem.list.SetArray;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.DisplayInfo;
@@ -121,6 +125,19 @@ public class DisplaySystemHandler extends Thread {
                   listDisplayed = false;
                 } else {
                   LOGGER.warn("Could not send hide message");
+                }
+              }
+
+              if (listDisplayed) {
+                final SetArray msg = new SetArray();
+                final List<List<String>> listData = new LinkedList<>();
+                listData.add(Arrays.asList("a", "b", "c"));
+                listData.add(Arrays.asList("1", "2", "3"));
+                
+                final SetArray.Payload payload = new SetArray.Payload("Testing", listData);
+                msg.setPayload(payload);
+                if (!messageHandler.sendMesasge(msg)) {
+                  LOGGER.warn("Unable to send setArray message");
                 }
               }
 

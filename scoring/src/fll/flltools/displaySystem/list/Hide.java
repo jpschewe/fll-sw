@@ -9,7 +9,7 @@ package fll.flltools.displaySystem.list;
 /**
  * A message to tell the list module to hide.
  */
-public class Hide extends BaseDisplayMessage {
+public class Hide extends BaseListMessage {
   public Hide() {
     super("default", "hide");
   }
