@@ -15,7 +15,7 @@ import javax.annotation.Nonnull;
 /**
  * Base class for all publish messages
  */
-public abstract class PublishCommand extends BaseMessage {
+public abstract class PublishCommand extends BaseMessage implements SequenceNumberCommand {
 
   /**
    * The type is set to "publish".
@@ -62,6 +62,7 @@ public abstract class PublishCommand extends BaseMessage {
   /**
    * @return sequence number for the message
    */
+  @Override
   public int getSeq() {
     return seq;
   }
@@ -73,6 +74,7 @@ public abstract class PublishCommand extends BaseMessage {
    * 
    * @param seq the new sequence number
    */
+  @Override
   public void setSeq(final int seq) {
     this.seq = seq;
   }

@@ -13,8 +13,11 @@ import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Duration;
+import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
@@ -140,6 +143,11 @@ public class MhubMessageHandler extends Thread {
           LOGGER.debug("Session list is empty, cannot send message");
         }
         return false;
+      }
+
+      if (msg instanceof SequenceNumberCommand) {
+        final SequenceNumberCommand seqCommand = (SequenceNumberCommand) msg;
+        noteSendigSequenceNumberCommand(seqCommand);
       }
 
       final List<Session> toRemove = new LinkedList<>();
@@ -321,16 +329,72 @@ public class MhubMessageHandler extends Thread {
     }
   }
 
+  private int nextSequenceNumber = 0;
+
+  private final Map<Integer, SequenceNumberEntry> pendingMessages = new HashMap<>();
+
+  private final Duration messageTimeout = Duration.ofMinutes(5);
+
+  private void removeTimedOutMessages() {
+    synchronized (lock) {
+      final List<Integer> toRemove = new LinkedList<>();
+
+      final LocalTime now = LocalTime.now();
+      
+      pendingMessages.forEach((seq, entry) -> {
+        final Duration timeSinceSent = Duration.between(entry.getTimeSent(), now);
+        if(timeSinceSent.compareTo(messageTimeout) > 0) {
+          LOGGER.warn("Have not received ACK for message in " + messageTimeout.toString() + ". Message: " + entry.getMessage());
+          toRemove.add(seq);
+        }
+      });
+      
+      toRemove.forEach(seq -> pendingMessages.remove(seq));
+    }
+  }
+
+  /**
+   * Note that a message with a sequence number is being sent.
+   * This sets the sequence number on the message.
+   * 
+   * @param seqCommand the message being sent
+   */
+  private void noteSendigSequenceNumberCommand(final SequenceNumberCommand seqCommand) {
+    synchronized (lock) {
+      seqCommand.setSeq(nextSequenceNumber);
+      ++nextSequenceNumber;
+
+      final SequenceNumberEntry entry = new SequenceNumberEntry(seqCommand);
+      pendingMessages.put(seqCommand.getSeq(), entry);
+
+    }
+    removeTimedOutMessages();
+  }
+
+  private void removeFromPendingSequenceNumbers(final int seq) {
+    synchronized (lock) {
+      if (!pendingMessages.containsKey(seq)) {
+        LOGGER.warn("Got ack for non-pending sequence number: "
+            + seq);
+      } else {
+        pendingMessages.remove(seq);
+      }
+    }
+    removeTimedOutMessages();
+  }
+
   private void handlePublishAck(final PubAckResponse response) {
-    // FIXME implement
-    LOGGER.info("Got ack for sequence number: "
-        + response.getSeq());
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Got ack for sequence number: "
+          + response.getSeq());
+    }
+    removeFromPendingSequenceNumbers(response.getSeq());
   }
 
   private void handleErrorResponse(final ErrorResponse response) {
     LOGGER.error("Got error message: "
         + response.getMessage());
-    // FIXME note that the sequence number has a response
+    removeFromPendingSequenceNumbers(response.getSeq());
   }
 
   @OnMessage
@@ -364,6 +428,33 @@ public class MhubMessageHandler extends Thread {
       LOGGER.error("Error decoding '"
           + msg
           + "' as mhub message. Dropping.", e);
+    }
+  }
+
+  // Inner classes
+  private static final class SequenceNumberEntry {
+
+    public SequenceNumberEntry(@Nonnull final SequenceNumberCommand message) {
+      this.message = message;
+      timeSent = LocalTime.now();
+    }
+
+    /**
+     * @return when the message was sent
+     */
+    public LocalTime getTimeSent() {
+      return timeSent;
+    }
+
+    private final LocalTime timeSent;
+
+    private final SequenceNumberCommand message;
+
+    /**
+     * @return the message that was sent
+     */
+    public SequenceNumberCommand getMessage() {
+      return message;
     }
   }
 
