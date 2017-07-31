@@ -55,7 +55,6 @@ public class Top10 extends BaseFLLServlet {
    */
   public static final int MAX_ORG_NAME = 20;
 
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Determine sort order based upon winner criteria")
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -211,6 +210,7 @@ public class Top10 extends BaseFLLServlet {
 
   }
 
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Determine sort order based upon winner criteria")
   private static void processScores(@Nonnull final ServletContext application,
                                     @Nonnull final String awardGroupName,
                                     @Nonnull final ProcessScoreEntry processor)
