@@ -32,6 +32,10 @@ import fll.xml.ChallengeDescription;
 import fll.xml.ScoreType;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
+/**
+ * Display the most recent scores.
+ * Currently hard coded to 20. This was originally 8, thus the name 'Last8'.
+ */
 @WebServlet("/scoreboard/Last8")
 public class Last8 extends BaseFLLServlet {
 
