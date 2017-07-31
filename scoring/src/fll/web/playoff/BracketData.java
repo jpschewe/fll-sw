@@ -1,6 +1,5 @@
 package fll.web.playoff;
 
-import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -42,7 +41,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  * 
  * @author Dan Churchill
  */
-public class BracketData extends BracketInfo implements Serializable {
+public class BracketData extends BracketInfo {
 
   private static final Logger LOG = LogUtils.getLogger();
 
@@ -53,17 +52,33 @@ public class BracketData extends BracketInfo implements Serializable {
   }
 
   /**
+   * Data type that has a dbLine.
+   */
+  public abstract static class DbBracketDataType extends BracketDataType {
+    public DbBracketDataType(@JsonProperty("dbline") final int dbLine) {
+      _dbLine = dbLine;
+    }
+
+    private final int _dbLine;
+
+    public int getDbLine() {
+      return _dbLine;
+    }
+
+  }
+
+  /**
    * Team bracket cells.
    */
-  public static class TeamBracketCell extends BracketDataType {
+  public static class TeamBracketCell extends DbBracketDataType {
 
     public TeamBracketCell(@JsonProperty("team") final Team team,
                            @JsonProperty("table") final String table,
                            @JsonProperty("dbline") final int dbLine,
                            @JsonProperty("printed") final boolean printed) {
+      super(dbLine);
       _team = team;
       _table = table;
-      _dbLine = dbLine;
       _printed = printed;
     }
 
@@ -77,12 +92,6 @@ public class BracketData extends BracketInfo implements Serializable {
 
     public String getTable() {
       return _table;
-    }
-
-    private final int _dbLine;
-
-    public int getDBLine() {
-      return _dbLine;
     }
 
     private final boolean _printed;
@@ -112,21 +121,15 @@ public class BracketData extends BracketInfo implements Serializable {
    * bracket data cell contains only the string. In the future, we may also wish
    * to store a color associated with the given table.
    */
-  public static class BigScreenTableAssignmentCell extends BracketDataType {
+  public static class BigScreenTableAssignmentCell extends DbBracketDataType {
     public BigScreenTableAssignmentCell(final int round,
                                         final int row,
                                         final String table,
                                         final int dbLine) {
+      super(dbLine);
       _round = round;
       _row = row;
       _table = table;
-      _dbLine = dbLine;
-    }
-
-    private final int _dbLine;
-
-    public int getDbLine() {
-      return _dbLine;
     }
 
     private final int _round;
@@ -395,7 +398,8 @@ public class BracketData extends BracketInfo implements Serializable {
         % 2 != 0
         || pRowsPerTeam < 2) {
       throw new RuntimeException("Error building BracketData structure:"
-          + " Illegal rows-per-team value specified." + " Value must be a multiple of 2 greater than 0.");
+          + " Illegal rows-per-team value specified."
+          + " Value must be a multiple of 2 greater than 0.");
     }
 
     _currentTournament = Queries.getCurrentTournament(_connection);
@@ -452,13 +456,22 @@ public class BracketData extends BracketInfo implements Serializable {
         final int row = getRowNumberForLine(round, line);
         if (LOG.isDebugEnabled()) {
           LOG.debug("Putting team "
-              + d.getTeam() + " with dbLine " + d.getDBLine() + " to row " + row + " of output table\n");
+              + d.getTeam()
+              + " with dbLine "
+              + d.getDbLine()
+              + " to row "
+              + row
+              + " of output table\n");
         }
         if (roundData.put(row, d) != null) {
           throw new RuntimeException("Error - Map keys were not unique - PlayoffData "
               + "might be inconsistent (you should verify that there are not multiple teams"
-              + " occupying the same round and row for tournament:'" + _currentTournament + "' and" + " division:'"
-              + getBracketName() + "')");
+              + " occupying the same round and row for tournament:'"
+              + _currentTournament
+              + "' and"
+              + " division:'"
+              + getBracketName()
+              + "')");
         }
       }
 
@@ -496,10 +509,12 @@ public class BracketData extends BracketInfo implements Serializable {
         - getFirstRound();
     final int row;
     if (getFirstRound() < _finalsRound
-        && round == _finalsRound && line == 3) {
+        && round == _finalsRound
+        && line == 3) {
       row = topRowOfConsolationBracket();
     } else if (getFirstRound() < _finalsRound
-        && round == _finalsRound && line == 4) {
+        && round == _finalsRound
+        && line == 4) {
       row = topRowOfConsolationBracket()
           + _rowsPerTeam;
     } else if (getFirstRound() < _finalsRound
@@ -511,7 +526,8 @@ public class BracketData extends BracketInfo implements Serializable {
               / 2;
     } else {
       row = (int) Math.round(line
-          * _rowsPerTeam * (Math.pow(2, adjustedRound))
+          * _rowsPerTeam
+          * (Math.pow(2, adjustedRound))
           - (_rowsPerTeam
               * Math.pow(2, adjustedRound
                   - 1)
@@ -607,7 +623,10 @@ public class BracketData extends BracketInfo implements Serializable {
                                        final int dbLine,
                                        final int round) {
     return bracketIndex
-        + "-" + dbLine + "-" + round;
+        + "-"
+        + dbLine
+        + "-"
+        + round;
   }
 
   /**
@@ -629,7 +648,8 @@ public class BracketData extends BracketInfo implements Serializable {
     final SortedMap<Integer, BracketDataType> roundData = _bracketData.get(round);
     if (roundData == null) {
       sb.append("<td>ERROR: No data for round "
-          + round + ".</td>\n");
+          + round
+          + ".</td>\n");
       return;
     }
 
@@ -640,15 +660,17 @@ public class BracketData extends BracketInfo implements Serializable {
       final String comment = ((SpannedOverBracketCell) d).getComment();
       if (comment != null) {
         sb.append("<!-- "
-            + comment + "-->");
+            + comment
+            + "-->");
       }
     } else if (d instanceof TeamBracketCell) {
       final TeamBracketCell tbc = (TeamBracketCell) d;
-      final int dbLine = tbc.getDBLine();
+      final int dbLine = tbc.getDbLine();
       final String leafId = constructLeafId(dbLine, round);
 
       sb.append("<td width='400' class='Leaf js-leaf' id='"
-          + leafId + "'>");
+          + leafId
+          + "'>");
       if (round == _finalsRound) {
         sb.append(getDisplayString(_currentTournament, round
             + _baseRunNumber, tbc.getTeam(), _showFinalScores, _showOnlyVerifiedScores));
@@ -671,24 +693,35 @@ public class BracketData extends BracketInfo implements Serializable {
       if (myD.getTeamA().getTeamNumber() > 0
           && myD.getTeamB().getTeamNumber() > 0) {
         sb.append(" rowspan='"
-            + myD.getRowsSpanned() + "'>");
+            + myD.getRowsSpanned()
+            + "'>");
         sb.append("<table>\n  <tr><td colspan='3' align='center'><font size='4'>");
         sb.append(myD.getLabel());
         sb.append("</font></td>\n</tr>\n");
         sb.append("<tr>");
         sb.append("<td rowspan='2' align='center' valign='middle'>");
         sb.append("<input type='checkbox' name='print"
-            + myD.getMatchNum() + "'");
+            + myD.getMatchNum()
+            + "'");
         if (!myD.getPrinted()) {
           sb.append(" checked");
         }
         sb.append("/>");
         sb.append("<input type='hidden' name='teamA"
-            + myD.getMatchNum() + "' value='" + myD.getTeamA().getTeamNumber() + "'/>");
+            + myD.getMatchNum()
+            + "' value='"
+            + myD.getTeamA().getTeamNumber()
+            + "'/>");
         sb.append("<input type='hidden' name='teamB"
-            + myD.getMatchNum() + "' value='" + myD.getTeamB().getTeamNumber() + "'/>");
+            + myD.getMatchNum()
+            + "' value='"
+            + myD.getTeamB().getTeamNumber()
+            + "'/>");
         sb.append("<input type='hidden' name='round"
-            + myD.getMatchNum() + "' value='" + round + "'/>");
+            + myD.getMatchNum()
+            + "' value='"
+            + round
+            + "'/>");
         sb.append("</td>\n");
         sb.append("<td align='right'>Table A: </td>\n");
         sb.append("<td align='left'>");
@@ -720,7 +753,8 @@ public class BracketData extends BracketInfo implements Serializable {
         // not present, but in theory this could be used instead to center just
         // the label in a rowspanned cell.
         sb.append(" rowspan='"
-            + myD.getRowsSpanned() + "' align='center'>");
+            + myD.getRowsSpanned()
+            + "' align='center'>");
         sb.append("<font size='4'>");
         sb.append(myD.getLabel()
             + "</font>");
@@ -736,7 +770,8 @@ public class BracketData extends BracketInfo implements Serializable {
       // always setup the html for a table assignment, just don't put the data
       // in it until it's available
       sb.append("<td align='right' style='padding-right:30px'><span class='table_assignment' id='"
-          + leafId + "-table'>");
+          + leafId
+          + "-table'>");
       if (null != table) {
         sb.append(table);
       }
@@ -840,7 +875,10 @@ public class BracketData extends BracketInfo implements Serializable {
                                  final String assigned,
                                  final List<TableInformation> tableInfo) {
     sb.append("<select name='"
-        + select + "' id='" + select + "' size='1'>");
+        + select
+        + "' id='"
+        + select
+        + "' size='1'>");
 
     for (final TableInformation info : tableInfo) {
       sb.append("<option");
@@ -848,14 +886,16 @@ public class BracketData extends BracketInfo implements Serializable {
         sb.append(" selected");
       }
       sb.append(">"
-          + info.getSideA() + "</option>");
+          + info.getSideA()
+          + "</option>");
 
       sb.append("<option");
       if (info.getSideB().equals(assigned)) {
         sb.append(" selected");
       }
       sb.append(">"
-          + info.getSideB() + "</option>");
+          + info.getSideB()
+          + "</option>");
     }
     sb.append("</select>");
   }
@@ -869,7 +909,8 @@ public class BracketData extends BracketInfo implements Serializable {
     for (int i = getFirstRound(); i <= getLastRound()
         && i <= _finalsRound; i++) {
       sb.append("  <th colspan='2'>Head to Head Round "
-          + i + "</th>\n");
+          + i
+          + "</th>\n");
     }
     sb.append("</tr>\n");
   }
@@ -1279,7 +1320,8 @@ public class BracketData extends BracketInfo implements Serializable {
                 + 1, new ScoreSheetFormBracketCell(tournamentTables, bracketLabel, matchNum++, topCell.getPrinted()
                     && bottomCell.getPrinted(), tableA, tableB, topCell.getTeam(), bottomCell.getTeam(),
                                                    curArray[1].intValue()
-                                                       - curArray[0].intValue() - 1));
+                                                       - curArray[0].intValue()
+                                                       - 1));
             // Put placeholders for the rows that are to be spanned over
             for (int j = curArray[0].intValue()
                 + 2; j < curArray[1].intValue(); j++) {
@@ -1341,14 +1383,17 @@ public class BracketData extends BracketInfo implements Serializable {
 
       final boolean performanceScoreExists = Queries.performanceScoreExists(_connection, team, runNumber);
       sb.append("<!-- performance score exists: "
-          + performanceScoreExists + " -->\n");
+          + performanceScoreExists
+          + " -->\n");
 
       final boolean scoreVerified = Queries.isVerified(_connection, currentTournament, team, runNumber);
       sb.append("<!-- verified: "
-          + scoreVerified + " -->\n");
+          + scoreVerified
+          + " -->\n");
 
       if (showScore
-          && performanceScoreExists && (!showOnlyVerifiedScores
+          && performanceScoreExists
+          && (!showOnlyVerifiedScores
               || scoreVerified)
           && !Playoff.isBye(_connection, currentTournament, team, runNumber)) {
         if (!scoreVerified) {

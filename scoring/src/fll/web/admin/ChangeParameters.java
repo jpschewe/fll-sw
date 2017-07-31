@@ -86,7 +86,7 @@ public class ChangeParameters extends BaseFLLServlet {
         MhubParameters.setHostname(connection, mhubHostname.trim());
       }
 
-      MhubParameters.setPort(connection, Integer.valueOf(request.getParameter("gMhubPort")));
+      MhubParameters.setPort(connection, Integer.parseInt(request.getParameter("gMhubPort")));
 
       MhubParameters.setDisplayNode(connection, request.getParameter("gMhubDisplayNode"));
 
