@@ -327,6 +327,12 @@ public class MhubMessageHandler extends Thread {
         + response.getSeq());
   }
 
+  private void handleErrorResponse(final ErrorResponse response) {
+    LOGGER.error("Got error message: "
+        + response.getMessage());
+    // FIXME note that the sequence number has a response
+  }
+
   @OnMessage
   public void receiveTextMessage(@SuppressWarnings("unused") final Session session,
                                  final String msg) {
@@ -344,11 +350,10 @@ public class MhubMessageHandler extends Thread {
         final PubAckResponse response = mapper.treeToValue(parsed, PubAckResponse.class);
         handlePublishAck(response);
       } else if (MhubMessageType.ERROR_RESPONSE.getType().equals(messageType)) {
-        LOGGER.error("Received error from server: '"
-            + msg
-            + "'");
+        final ErrorResponse response = mapper.treeToValue(parsed, ErrorResponse.class);
+        handleErrorResponse(response);
       } else {
-        LOGGER.error("Unknown message type received. Dropping. Type: "
+        LOGGER.warn("Unknown message type received, ignoring. Type: "
             + messageType
             + " message: '"
             + msg
