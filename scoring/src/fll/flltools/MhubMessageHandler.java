@@ -33,7 +33,7 @@ import javax.websocket.WebSocketContainer;
 
 import org.apache.log4j.Logger;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Utilities;
@@ -321,8 +321,10 @@ public class MhubMessageHandler extends Thread {
     }
   }
 
-  private void handlePublishAck(final DecodedMessage message) {
+  private void handlePublishAck(final PubAckResponse response) {
     // FIXME implement
+    LOGGER.info("Got ack for sequence number: "
+        + response.getSeq());
   }
 
   @OnMessage
@@ -336,17 +338,18 @@ public class MhubMessageHandler extends Thread {
 
     try {
       final ObjectMapper mapper = new ObjectMapper();
-      final DecodedMessage message = mapper.readValue(msg, DecodedMessage.class);
-
-      if (BaseMessage.TYPE_PUBLISH_ACK == message.getType()) {
-        handlePublishAck(message);
-      } else if (BaseMessage.TYPE_ERROR == message.getType()) {
+      final JsonNode parsed = mapper.readTree(msg);
+      final String messageType = parsed.get("type").asText();
+      if (MhubMessageType.PUB_ACK_RESPONSE.getType().equals(messageType)) {
+        final PubAckResponse response = mapper.treeToValue(parsed, PubAckResponse.class);
+        handlePublishAck(response);
+      } else if (MhubMessageType.ERROR_RESPONSE.getType().equals(messageType)) {
         LOGGER.error("Received error from server: '"
             + msg
             + "'");
       } else {
         LOGGER.error("Unknown message type received. Dropping. Type: "
-            + message.getType()
+            + messageType
             + " message: '"
             + msg
             + "'");

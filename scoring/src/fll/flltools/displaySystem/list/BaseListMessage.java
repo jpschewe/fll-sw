@@ -8,12 +8,12 @@ package fll.flltools.displaySystem.list;
 
 import javax.annotation.Nonnull;
 
-import fll.flltools.PublishMessage;
+import fll.flltools.PublishCommand;
 
 /**
  * Base class for messages sent to the list module.
  */
-/* package */ abstract class BaseListMessage extends PublishMessage {
+/* package */ abstract class BaseListMessage extends PublishCommand {
 
   public BaseListMessage(@Nonnull final String node,
                      @Nonnull final String action) {
