@@ -88,6 +88,8 @@ public class ChangeParameters extends BaseFLLServlet {
 
       MhubParameters.setPort(connection, Integer.valueOf(request.getParameter("gMhubPort")));
 
+      MhubParameters.setDisplayNode(connection, request.getParameter("gMhubDisplayNode"));
+
       if (message.length() == 0) {
         message.append("<p id='success'>Parameters saved</p>");
       }

@@ -13,7 +13,7 @@ import fll.flltools.PublishCommand;
 /**
  * Base class for messages sent to the list module.
  */
-/* package */ abstract class BaseListMessage extends PublishCommand {
+public abstract class BaseListMessage extends PublishCommand {
 
   public BaseListMessage(@Nonnull final String node,
                      @Nonnull final String action) {

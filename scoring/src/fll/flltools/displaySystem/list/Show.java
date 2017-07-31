@@ -6,12 +6,14 @@
 
 package fll.flltools.displaySystem.list;
 
+import javax.annotation.Nonnull;
+
 /**
  * A message to tell the list module to display.
  */
 public class Show extends BaseListMessage {
-  public Show() {
-    super("default", "show");
+  public Show(@Nonnull final String node) {
+    super(node, "show");
   }
 
   /**
