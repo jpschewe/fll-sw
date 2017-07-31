@@ -6,5 +6,7 @@
 
 /**
  * Classes for integrating with the flltools project at https://github.com/FirstLegoLeague.
+ * 
+ * See https://github.com/poelstra/mhub/blob/master/src/protocol.ts for the full message specification.
  */
 package fll.flltools;

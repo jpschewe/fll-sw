@@ -147,9 +147,9 @@
     <pathelement location="${dir.lib}/commons-codec-1.10.jar" />
 
     <!-- used to create json out of objects -->
-    <pathelement location="${dir.lib}/jackson-annotations-2.2.3.jar" />
-    <pathelement location="${dir.lib}/jackson-core-2.2.3.jar" />
-    <pathelement location="${dir.lib}/jackson-databind-2.2.3.jar" />
+    <pathelement location="${dir.lib}/jackson-annotations-2.9.0.jar" />
+    <pathelement location="${dir.lib}/jackson-core-2.9.0.jar" />
+    <pathelement location="${dir.lib}/jackson-databind-2.9.0.jar" />
 
     <pathelement location="${dir.lib}/commons-io-2.5.jar" />
 
