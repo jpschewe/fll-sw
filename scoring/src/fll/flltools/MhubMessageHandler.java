@@ -26,12 +26,14 @@ import javax.websocket.ContainerProvider;
 import javax.websocket.DeploymentException;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
+import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
 import org.apache.log4j.Logger;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Utilities;
@@ -316,6 +318,44 @@ public class MhubMessageHandler extends Thread {
 
     synchronized (lock) {
       internalRemoveSession(session);
+    }
+  }
+
+  private void handlePublishAck(final DecodedMessage message) {
+    // FIXME implement
+  }
+
+  @OnMessage
+  public void receiveTextMessage(@SuppressWarnings("unused") final Session session,
+                                 final String msg) {
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Received message '"
+          + msg
+          + "'");
+    }
+
+    try {
+      final ObjectMapper mapper = new ObjectMapper();
+      final DecodedMessage message = mapper.readValue(msg, DecodedMessage.class);
+
+      if (BaseMessage.TYPE_PUBLISH_ACK == message.getType()) {
+        handlePublishAck(message);
+      } else if (BaseMessage.TYPE_ERROR == message.getType()) {
+        LOGGER.error("Received error from server: '"
+            + msg
+            + "'");
+      } else {
+        LOGGER.error("Unknown message type received. Dropping. Type: "
+            + message.getType()
+            + " message: '"
+            + msg
+            + "'");
+      }
+
+    } catch (final IOException e) {
+      LOGGER.error("Error decoding '"
+          + msg
+          + "' as mhub message. Dropping.", e);
     }
   }
 
