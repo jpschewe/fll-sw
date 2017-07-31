@@ -112,14 +112,15 @@ public class MhubMessageHandler extends Thread {
           LOGGER.error("Error talking to the database, will try again later", e);
         }
 
-        try {
-          Thread.sleep(DB_CHECK_INTERVAL.toMillis());
-        } catch (final InterruptedException e) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Interrupted sleeping, will exit if running is false", e);
-          }
-        }
       } // non-null datasource
+
+      try {
+        Thread.sleep(DB_CHECK_INTERVAL.toMillis());
+      } catch (final InterruptedException e) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Interrupted sleeping, will exit if running is false", e);
+        }
+      }
 
     } // while running
   }
