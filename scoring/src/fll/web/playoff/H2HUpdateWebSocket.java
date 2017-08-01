@@ -34,6 +34,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -116,7 +117,8 @@ public class H2HUpdateWebSocket {
                                  final String msg) {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Received message '"
-          + msg + "'");
+          + msg
+          + "'");
     }
 
     final Reader reader = new StringReader(msg);
@@ -134,7 +136,10 @@ public class H2HUpdateWebSocket {
       if (LOGGER.isTraceEnabled()) {
         for (final BracketInfo bracketInfo : allBracketInfo) {
           LOGGER.trace("Bracket name: "
-              + bracketInfo.getBracketName() + " first: " + bracketInfo.getFirstRound() + " last: "
+              + bracketInfo.getBracketName()
+              + " first: "
+              + bracketInfo.getFirstRound()
+              + " last: "
               + bracketInfo.getLastRound());
         }
       }
@@ -259,7 +264,8 @@ public class H2HUpdateWebSocket {
             session.getBasicRemote().sendText(messageText);
           } catch (final IOException ioe) {
             LOGGER.error("Got error sending message to session ("
-                + session.getId() + "), dropping session", ioe);
+                + session.getId()
+                + "), dropping session", ioe);
             toRemove.add(session);
           }
         } else {
@@ -299,15 +305,19 @@ public class H2HUpdateWebSocket {
     /**
      * If true, then {@link #bracketUpdate} must be populated.
      */
+    @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by JSON")
     public boolean isBracketUpdate = false;
 
+    @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by JSON")
     public BracketUpdate bracketUpdate;
 
     /**
      * If true then {@link #allBracketInfo} must be populated.
      */
+    @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by JSON")
     public boolean isDisplayUpdate = false;
 
+    @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by JSON")
     public List<BracketInfo> allBracketInfo = new LinkedList<>();
 
   }
