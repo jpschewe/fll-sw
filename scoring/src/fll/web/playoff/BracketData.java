@@ -55,13 +55,13 @@ public class BracketData extends BracketInfo {
    * Data type that has a dbLine.
    */
   public abstract static class DbBracketDataType extends BracketDataType {
-    public DbBracketDataType(@JsonProperty("dbline") final int dbLine) {
+    public DbBracketDataType(@JsonProperty("dbLine") final int dbLine) {
       _dbLine = dbLine;
     }
 
     private final int _dbLine;
 
-    public int getDbLine() {
+    public int getDBLine() {
       return _dbLine;
     }
 
@@ -458,7 +458,7 @@ public class BracketData extends BracketInfo {
           LOG.debug("Putting team "
               + d.getTeam()
               + " with dbLine "
-              + d.getDbLine()
+              + d.getDBLine()
               + " to row "
               + row
               + " of output table\n");
@@ -665,7 +665,7 @@ public class BracketData extends BracketInfo {
       }
     } else if (d instanceof TeamBracketCell) {
       final TeamBracketCell tbc = (TeamBracketCell) d;
-      final int dbLine = tbc.getDbLine();
+      final int dbLine = tbc.getDBLine();
       final String leafId = constructLeafId(dbLine, round);
 
       sb.append("<td width='400' class='Leaf js-leaf' id='"
@@ -765,7 +765,7 @@ public class BracketData extends BracketInfo {
       final String table = tableCell.getTable();
 
       // reference the row and round for the leaf that the table is for
-      final String leafId = constructLeafId(tableCell.getDbLine(), tableCell.getRound());
+      final String leafId = constructLeafId(tableCell.getDBLine(), tableCell.getRound());
 
       // always setup the html for a table assignment, just don't put the data
       // in it until it's available
