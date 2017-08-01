@@ -13,6 +13,8 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.Driver;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -260,7 +262,8 @@ public final class Utilities {
       }
     } else {
       throw new FLLRuntimeException("Unhandled SQL data type '"
-          + type + "'");
+          + type
+          + "'");
     }
   }
 
@@ -302,11 +305,11 @@ public final class Utilities {
   /**
    * Get the name of the database driver class.
    */
-  public static String getDBDriverName() {
+  private static Driver getDBDriver() {
     if (Boolean.getBoolean("inside.test")) {
-      return "net.sf.log4jdbc.DriverSpy";
+      return new net.sf.log4jdbc.DriverSpy();
     } else {
-      return "org.hsqldb.jdbcDriver";
+      return new org.hsqldb.jdbcDriver();
     }
   }
 
@@ -315,14 +318,21 @@ public final class Utilities {
    */
   public static void loadDBDriver() {
     try {
-      // register the driver
-      Class.forName(Utilities.getDBDriverName()).newInstance();
-    } catch (final ClassNotFoundException e) {
-      throw new RuntimeException("Unable to load driver.", e);
-    } catch (final InstantiationException ie) {
-      throw new RuntimeException("Unable to load driver.", ie);
-    } catch (final IllegalAccessException iae) {
-      throw new RuntimeException("Unable to load driver.", iae);
+      DriverManager.registerDriver(getDBDriver());
+    } catch (final SQLException e) {
+      throw new RuntimeException("Unable to register database driver", e);
+    }
+  }
+
+  /**
+   * Unload the database driver and throw a RuntimeException if there is an
+   * error.
+   */
+  public static void unloadDBDriver() {
+    try {
+      DriverManager.deregisterDriver(getDBDriver());
+    } catch (final SQLException e) {
+      throw new RuntimeException("Unable to unload database driver", e);
     }
   }
 
@@ -389,7 +399,9 @@ public final class Utilities {
                           final String name) {
       final String lowerName = name.toLowerCase();
       if (lowerName.endsWith(".png")
-          || lowerName.endsWith(".jpg") || lowerName.endsWith(".jpeg") || lowerName.endsWith(".gif")) {
+          || lowerName.endsWith(".jpg")
+          || lowerName.endsWith(".jpeg")
+          || lowerName.endsWith(".gif")) {
         return true;
       } else {
         return false;
@@ -436,11 +448,17 @@ public final class Utilities {
                                            final File... directories) {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("buildGraphicFileList("
-          + prefix + "," + Arrays.toString(directories) + "," + output.toString() + ")");
+          + prefix
+          + ","
+          + Arrays.toString(directories)
+          + ","
+          + output.toString()
+          + ")");
     }
     for (final File element : directories) {
-      final String np = (prefix.length() == 0 ? prefix : prefix
-          + "/")
+      final String np = (prefix.length() == 0 ? prefix
+          : prefix
+              + "/")
           + element.getName();
       final String[] files = element.list(GRAPHICS_FILTER);
       if (files != null) {
@@ -451,7 +469,8 @@ public final class Utilities {
         java.util.Arrays.sort(files);
         for (final String file : files) {
           output.add(np
-              + "/" + file);
+              + "/"
+              + file);
         }
       } else {
         LOGGER.debug("files: null");
@@ -561,7 +580,8 @@ public final class Utilities {
     final String value = properties.getProperty(property);
     if (null == value) {
       throw new NullPointerException("Property '"
-          + property + "' doesn't have a value");
+          + property
+          + "' doesn't have a value");
     }
     return Integer.parseInt(value.trim());
   }
@@ -603,7 +623,8 @@ public final class Utilities {
     final String value = properties.getProperty(property);
     if (null == value) {
       throw new NullPointerException("Property '"
-          + property + "' doesn't have a value");
+          + property
+          + "' doesn't have a value");
     } else {
       return "1".equals(value)
           || "true".equalsIgnoreCase(value);
@@ -669,12 +690,14 @@ public final class Utilities {
     int lbracket = str.indexOf('[');
     if (-1 == lbracket) {
       throw new FLLRuntimeException("No '[' found in string: '"
-          + str + "'");
+          + str
+          + "'");
     }
     int rbracket = str.indexOf(']', lbracket);
     if (-1 == rbracket) {
       throw new FLLRuntimeException("No ']' found in string: '"
-          + str + "'");
+          + str
+          + "'");
     }
     final String[] strings;
     if (lbracket
@@ -709,12 +732,14 @@ public final class Utilities {
     int lbracket = str.indexOf('[');
     if (-1 == lbracket) {
       throw new FLLRuntimeException("No '[' found in string: '"
-          + str + "'");
+          + str
+          + "'");
     }
     int rbracket = str.indexOf(']', lbracket);
     if (-1 == rbracket) {
       throw new FLLRuntimeException("No ']' found in string: '"
-          + str + "'");
+          + str
+          + "'");
     }
     final String[] strings;
     if (lbracket

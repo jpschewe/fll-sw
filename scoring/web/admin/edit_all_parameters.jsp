@@ -291,7 +291,7 @@
 				</tr>
 
 				<tr>
-					<th>Award Group Flip Rate <a
+					<th>Award Group Flip Rate (seconds) <a
 						href='javascript:display("DivisionFlipRateHelp")'>[help]</a>
 						<div id='DivisionFlipRateHelp' class='help' style='display: none'>
 							The number of seconds between when the scoreboard's "Top Scores"
@@ -304,7 +304,7 @@
 				</tr>
 
 				<tr>
-					<th>Should the ranking report display quartiles</th>
+					<th>Should the ranking report display quartiles?</th>
 					<td><c:choose>
 							<c:when test="${gUseQuartiles }">
 								<input type='radio' name='gUseQuartiles' id='gUseQuartiles_yes'
@@ -327,8 +327,67 @@
 						</c:choose></td>
 				</tr>
 
+<tr><th colspan="2">FLL Tools integration</th></tr>
 
-			</table>
+        <tr>
+          <th>Mhub hostname<a
+            href='javascript:display("MhubHostnameHelp")'>[help]</a>
+            <div
+              id='MhubHostnameHelp'
+              class='help'
+              style='display: none'>
+              The hostname where mhub is running. Clear to specify that
+              mhub is not in use. <a
+                href='javascript:hide("MhubHostnameHelp")'>[hide]</a>
+            </div>
+
+          </th>
+          <td><input
+            type='text'
+            value="${gMhubHostname }"
+            id='gMhubHostname'
+            name='gMhubHostname' /></td>
+        </tr>
+
+        <tr>
+          <th>Mhub port<a href='javascript:display("MhubPortHelp")'>[help]</a>
+            <div
+              id='MhubPortHelp'
+              class='help'
+              style='display: none'>
+              The port where mhub is running.<a
+                href='javascript:hide("MhubPortHelp")'>[hide]</a>
+            </div>
+
+          </th>
+          <td><input
+            type='text'
+            value="${gMhubPort }"
+            id='gMhubPort'
+            name='gMhubPort' /></td>
+        </tr>
+
+        <tr>
+          <th>Display node<a
+            href='javascript:display("MhubDisplayNodeHelp")'>[help]</a>
+            <div
+              id='MhubDisplayNodeHelp'
+              class='help'
+              style='display: none'>
+              The node to send display messages to. <a
+                href='javascript:hide("MhubDisplayNodeHelp")'>[hide]</a>
+            </div>
+
+          </th>
+          <td><input
+            type='text'
+            value="${gMhubDisplayNode }"
+            id='gMhubDisplayNode'
+            name='gMhubDisplayNode' /></td>
+        </tr>
+
+
+      </table>
 
 
 			<input type='submit' value='Save Changes' id='submit' />

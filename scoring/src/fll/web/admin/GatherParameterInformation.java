@@ -20,6 +20,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import fll.Tournament;
 import fll.db.GlobalParameters;
 import fll.db.TournamentParameters;
+import fll.flltools.MhubParameters;
 import fll.web.ApplicationAttributes;
 
 /**
@@ -88,6 +89,10 @@ public class GatherParameterInformation {
                                GlobalParameters.getIntGlobalParameter(connection, GlobalParameters.DIVISION_FLIP_RATE));
 
       pageContext.setAttribute("gUseQuartiles", GlobalParameters.getUseQuartilesInRankingReport(connection));
+      
+      pageContext.setAttribute("gMhubHostname", MhubParameters.getHostname(connection));
+      pageContext.setAttribute("gMhubPort", MhubParameters.getPort(connection));
+      pageContext.setAttribute("gMhubDisplayNode", MhubParameters.getDisplayNode(connection));
 
     } finally {
       SQLFunctions.close(connection);

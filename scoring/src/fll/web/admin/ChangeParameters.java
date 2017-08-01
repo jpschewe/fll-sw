@@ -21,12 +21,14 @@ import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import fll.Tournament;
 import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
+import fll.flltools.MhubParameters;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
@@ -77,12 +79,24 @@ public class ChangeParameters extends BaseFLLServlet {
       GlobalParameters.setUseQuartilesInRankingReport(connection,
                                                       Boolean.valueOf(request.getParameter("gUseQuartiles")));
 
+      final String mhubHostname = request.getParameter("gMhubHostname");
+      if (StringUtils.isBlank(mhubHostname)) {
+        MhubParameters.setHostname(connection, null);
+      } else {
+        MhubParameters.setHostname(connection, mhubHostname.trim());
+      }
+
+      MhubParameters.setPort(connection, Integer.parseInt(request.getParameter("gMhubPort")));
+
+      MhubParameters.setDisplayNode(connection, request.getParameter("gMhubDisplayNode"));
+
       if (message.length() == 0) {
         message.append("<p id='success'>Parameters saved</p>");
       }
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
-          + sqle.getMessage() + "</p>");
+          + sqle.getMessage()
+          + "</p>");
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error saving team data into the database", sqle);
     } finally {
@@ -113,7 +127,8 @@ public class ChangeParameters extends BaseFLLServlet {
         if (valueSet) {
           if (Queries.isPlayoffDataInitialized(connection, tournament.getTournamentID())) {
             message.append("<p class='error'>You cannot change the number of seeding rounds once the head to head brackets are initialized. Tournament: "
-                + tournament.getName() + "</p>");
+                + tournament.getName()
+                + "</p>");
           } else {
             TournamentParameters.unsetNumSeedingRounds(connection, tournament.getTournamentID());
           }
@@ -124,7 +139,8 @@ public class ChangeParameters extends BaseFLLServlet {
             || value != currentValue) {
           if (Queries.isPlayoffDataInitialized(connection, tournament.getTournamentID())) {
             message.append("<p class='error'>You cannot change the number of seeding rounds once the head to head brackets are initialized. Tournament: "
-                + tournament.getName() + "</p>");
+                + tournament.getName()
+                + "</p>");
           } else {
             TournamentParameters.setNumSeedingRounds(connection, tournament.getTournamentID(), value);
           }
@@ -163,7 +179,8 @@ public class ChangeParameters extends BaseFLLServlet {
       final String str = request.getParameter("performance_advancement_percentage_"
           + tournament.getTournamentID());
       if (null == str
-          || "".equals(str.trim()) || "default".equals(str)) {
+          || "".equals(str.trim())
+          || "default".equals(str)) {
         TournamentParameters.unsetPerformanceAdvancementPercentage(connection, tournament.getTournamentID());
       } else {
         final int value = Integer.parseInt(str);

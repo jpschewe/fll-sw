@@ -11,8 +11,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Formatter;
+import java.util.LinkedList;
 import java.util.List;
 
+import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -21,8 +23,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.log4j.Logger;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -30,6 +30,7 @@ import fll.Utilities;
 import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
+import fll.flltools.displaySystem.list.SetArray;
 import fll.util.FP;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -54,7 +55,6 @@ public class Top10 extends BaseFLLServlet {
    */
   public static final int MAX_ORG_NAME = 20;
 
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Determine sort order based upon winner criteria")
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -64,36 +64,25 @@ public class Top10 extends BaseFLLServlet {
       LOGGER.trace("Entering doPost");
     }
 
-    final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
-    final ScoreType performanceScoreType = challengeDescription.getPerformance().getScoreType();
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final Formatter formatter = new Formatter(response.getWriter());
     final String showOrgStr = request.getParameter("showOrganization");
     final boolean showOrg = null == showOrgStr ? true : Boolean.parseBoolean(showOrgStr);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
-
-      final int currentTournament = Queries.getCurrentTournament(connection);
-      final int maxScoreboardRound = TournamentParameters.getMaxScoreboardPerformanceRound(connection,
-                                                                                           currentTournament);
-
+    try (Connection connection = datasource.getConnection()) {
       final Integer divisionIndexObj = SessionAttributes.getAttribute(session, "divisionIndex", Integer.class);
-      int divisionIndex;
+      int awardGroupIndex;
       if (null == divisionIndexObj) {
-        divisionIndex = 0;
+        awardGroupIndex = 0;
       } else {
-        divisionIndex = divisionIndexObj.intValue();
+        awardGroupIndex = divisionIndexObj.intValue();
       }
-      ++divisionIndex;
-      final List<String> divisions = Queries.getAwardGroups(connection);
-      if (divisionIndex >= divisions.size()) {
-        divisionIndex = 0;
+      ++awardGroupIndex;
+      final List<String> awardGroups = Queries.getAwardGroups(connection);
+      if (awardGroupIndex >= awardGroups.size()) {
+        awardGroupIndex = 0;
       }
-      session.setAttribute("divisionIndex", Integer.valueOf(divisionIndex));
+      session.setAttribute("divisionIndex", Integer.valueOf(awardGroupIndex));
 
       formatter.format("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">%n");
       formatter.format("<html>%n");
@@ -105,6 +94,7 @@ public class Top10 extends BaseFLLServlet {
       formatter.format("</head>%n");
 
       formatter.format("<body class='scoreboard'>%n");
+
       formatter.format("<table border='1' cellpadding='2' cellspacing='0' width='98%%'>%n");
 
       formatter.format("<colgroup>%n");
@@ -117,80 +107,175 @@ public class Top10 extends BaseFLLServlet {
       formatter.format("<col width='70px' />%n");
       formatter.format("</colgroup>%n");
 
-      if (!divisions.isEmpty()) {
+      if (!awardGroups.isEmpty()) {
+        final String awardGroupName = awardGroups.get(awardGroupIndex);
+
         formatter.format("<tr>%n");
         int numColumns = 5;
         if (!showOrg) {
           --numColumns;
         }
         formatter.format("<th colspan='%d' bgcolor='%s'>Top Performance Scores: %s</th>", numColumns,
-                         Queries.getColorForIndex(divisionIndex), divisions.get(divisionIndex));
+                         Queries.getColorForIndex(awardGroupIndex), awardGroupName);
         formatter.format("</tr>%n");
 
-        final WinnerType winnerCriteria = challengeDescription.getWinner();
-
-        prep = connection.prepareStatement("SELECT Teams.TeamName, Teams.Organization, Teams.TeamNumber, T2.MaxOfComputedScore" //
-            + " FROM (SELECT TeamNumber, " //
-            + winnerCriteria.getMinMaxString() + "(ComputedTotal) AS MaxOfComputedScore" //
-            + "  FROM verified_performance WHERE Tournament = ? " + "   AND NoShow = False" //
-            + "   AND Bye = False" //
-            + "   AND RunNumber <= ?" //
-            + "  GROUP BY TeamNumber) AS T2"
-            + " JOIN Teams ON Teams.TeamNumber = T2.TeamNumber, current_tournament_teams"
-            + " WHERE Teams.TeamNumber = current_tournament_teams.TeamNumber" //
-            + " AND current_tournament_teams.event_division = ?" + " ORDER BY T2.MaxOfComputedScore "
-            + winnerCriteria.getSortString());
-        prep.setInt(1, currentTournament);
-        prep.setInt(2, maxScoreboardRound);
-        prep.setString(3, divisions.get(divisionIndex));
-        rs = prep.executeQuery();
-
-        double prevScore = -1;
-        int i = 1;
-        int rank = 0;
-        while (rs.next()) {
-          final double score = rs.getDouble("MaxOfComputedScore");
-          if (!FP.equals(score, prevScore, 1E-6)) {
-            rank = i;
-          }
-
+        processScores(application, awardGroupName, (teamName,
+                                                    teamNumber,
+                                                    organization,
+                                                    formattedScore,
+                                                    rank) -> {
           formatter.format("<tr>%n");
           formatter.format("<td class='center'>%d</td>%n", rank);
-          formatter.format("<td class='right'>%d</td>%n", rs.getInt("TeamNumber"));
-          String teamName = rs.getString("TeamName");
+          formatter.format("<td class='right'>%d</td>%n", teamNumber);
           if (null == teamName) {
             teamName = "&nbsp;";
           }
           formatter.format("<td class='left truncate'>%s</td>%n", teamName);
+
           if (showOrg) {
-            String organization = rs.getString("Organization");
             if (null == organization) {
               organization = "&nbsp;";
             }
             formatter.format("<td class='left truncate'>%s</td>%n", organization);
           }
-          formatter.format("<td class='right'>%s</td>%n",
-                           Utilities.getFormatForScoreType(performanceScoreType).format(score));
-
+          formatter.format("<td class='right'>%s</td>%n", formattedScore);
           formatter.format("</tr>");
+        });
 
-          prevScore = score;
-          ++i;
-        } // end while next
       } // end divisions not empty
-      formatter.format("</table>%n");
-      formatter.format("</body>%n");
-      formatter.format("</html>%n");
+
     } catch (final SQLException e) {
       throw new RuntimeException("Error talking to the database", e);
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-      SQLFunctions.close(connection);
     }
+
+    formatter.format("</table>%n");
+    formatter.format("</body>%n");
+    formatter.format("</html>%n");
 
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Exiting doPost");
     }
   }
+
+  /**
+   * Used for processing the result of a score query.
+   */
+  private static interface ProcessScoreEntry {
+    public void execute(final String teamName,
+                        final int teamNumber,
+                        final String organization,
+                        @Nonnull final String formattedScore,
+                        final int rank);
+  }
+
+  /**
+   * Get the displayed data as a list for flltools.
+   * 
+   * @param awardGroupName the award group to get scores for
+   * @param application get all of the appropriate parameters
+   * @return payload for the set array message
+   * @throws SQLException on a database error
+   */
+  public static SetArray.Payload getTableAsList(@Nonnull final ServletContext application,
+                                                @Nonnull final String awardGroupName)
+      throws SQLException {
+    final List<List<String>> data = new LinkedList<>();
+    processScores(application, awardGroupName, (teamName,
+                                                teamNumber,
+                                                organization,
+                                                formattedScore,
+                                                rank) -> {
+      final List<String> row = new LinkedList<>();
+
+      row.add(String.valueOf(rank));
+      row.add(String.valueOf(teamNumber));
+      if (null == teamName) {
+        row.add("");
+      } else {
+        row.add(teamName);
+      }
+
+      if (null == organization) {
+        row.add("");
+      } else {
+        row.add(organization);
+      }
+      row.add(formattedScore);
+      data.add(row);
+    });
+
+    final SetArray.Payload payload = new SetArray.Payload("Top Performance Scores: "
+        + awardGroupName, data);
+    return payload;
+
+  }
+
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Determine sort order based upon winner criteria")
+  private static void processScores(@Nonnull final ServletContext application,
+                                    @Nonnull final String awardGroupName,
+                                    @Nonnull final ProcessScoreEntry processor)
+      throws SQLException {
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+
+    try (Connection connection = datasource.getConnection()) {
+      final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
+      final ScoreType performanceScoreType = challengeDescription.getPerformance().getScoreType();
+      final WinnerType winnerCriteria = challengeDescription.getWinner();
+
+      final int currentTournament = Queries.getCurrentTournament(connection);
+      final int maxScoreboardRound = TournamentParameters.getMaxScoreboardPerformanceRound(connection,
+                                                                                           currentTournament);
+
+      try (
+          PreparedStatement prep = connection.prepareStatement("SELECT Teams.TeamName, Teams.Organization, Teams.TeamNumber, T2.MaxOfComputedScore" //
+              + " FROM (SELECT TeamNumber, " //
+              + winnerCriteria.getMinMaxString()
+              + "(ComputedTotal) AS MaxOfComputedScore" //
+              + "  FROM verified_performance WHERE Tournament = ? "
+              + "   AND NoShow = False" //
+              + "   AND Bye = False" //
+              + "   AND RunNumber <= ?" //
+              + "  GROUP BY TeamNumber) AS T2"
+              + " JOIN Teams ON Teams.TeamNumber = T2.TeamNumber, current_tournament_teams"
+              + " WHERE Teams.TeamNumber = current_tournament_teams.TeamNumber" //
+              + " AND current_tournament_teams.event_division = ?"
+              + " ORDER BY T2.MaxOfComputedScore "
+              + winnerCriteria.getSortString())) {
+        prep.setInt(1, currentTournament);
+        prep.setInt(2, maxScoreboardRound);
+        prep.setString(3, awardGroupName);
+        try (ResultSet rs = prep.executeQuery()) {
+
+          double prevScore = -1;
+          int i = 1;
+          int rank = 0;
+          while (rs.next()) {
+            final double score = rs.getDouble("MaxOfComputedScore");
+            if (!FP.equals(score, prevScore, 1E-6)) {
+              rank = i;
+            }
+
+            final int teamNumber = rs.getInt("TeamNumber");
+            String teamName = rs.getString("TeamName");
+            if (null == teamName) {
+              teamName = "";
+            }
+
+            String organization = rs.getString("Organization");
+            if (null == organization) {
+              organization = "";
+            }
+
+            final String formattedScore = Utilities.getFormatForScoreType(performanceScoreType).format(score);
+
+            processor.execute(teamName, teamNumber, organization, formattedScore, rank);
+            prevScore = score;
+            ++i;
+          } // end while next
+        } // try ResultSet
+      } // try PreparedStatement
+
+    }
+  }
+
 }

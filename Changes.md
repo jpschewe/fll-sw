@@ -1,3 +1,4 @@
+* #570 - Initial integration with FLL Tools to display scores (not very pretty, but functional)
 * #540 - Handle narrow displays for score entry, also display errors in a floating window
 * #553 - Make sure to update the last seen time for the remote control of displays
 * #528 - Only display floating point scores when needed, otherwise display integers
