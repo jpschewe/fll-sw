@@ -6,14 +6,12 @@
 
 package fll.web.playoff;
 
-import java.io.Serializable;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Basic information for a head to head bracket
  */
-public class BracketInfo implements Serializable {
+public class BracketInfo {
 
   public BracketInfo(@JsonProperty("bracketName") final String bracketName,
                      @JsonProperty("firstRound") final int firstRound,
