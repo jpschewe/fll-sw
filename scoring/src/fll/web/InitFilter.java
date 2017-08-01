@@ -69,7 +69,9 @@ public class InitFilter implements Filter {
       final boolean needsInit = needsInit(httpRequest.getContextPath(), path);
       final boolean needsSecurity = needsSecurity(httpRequest.getContextPath(), path);
       LOGGER.debug("needsInit: "
-          + needsInit + " needsSecurity: " + needsSecurity);
+          + needsInit
+          + " needsSecurity: "
+          + needsSecurity);
 
       if (needsInit) {
         if (!initialize(httpRequest, httpResponse, session, application)) {
@@ -106,7 +108,9 @@ public class InitFilter implements Filter {
   private boolean needsSecurity(final String contextPath,
                                 final String path) {
     LOGGER.debug("Checking contextPath: "
-        + contextPath + " path: " + path);
+        + contextPath
+        + " path: "
+        + path);
     if (null != path
         && (path.startsWith(contextPath
             + "/admin/") //
@@ -217,19 +221,6 @@ public class InitFilter implements Filter {
     // nothing
   }
 
-  public static void initDataSource(final ServletContext application) {
-    final String database = application.getRealPath("/WEB-INF/flldb");
-
-    // initialize the datasource
-    if (null == ApplicationAttributes.getDataSource(application)) {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Datasource not available, creating");
-      }
-      final DataSource datasource = Utilities.createFileDataSource(database);
-      application.setAttribute(ApplicationAttributes.DATASOURCE, datasource);
-    }
-  }
-
   private static final Object initLock = new Object();
 
   /**
@@ -247,15 +238,6 @@ public class InitFilter implements Filter {
 
       synchronized (initLock) {
 
-        // set some default text
-        if (null == application.getAttribute(ApplicationAttributes.SCORE_PAGE_TEXT)) {
-          application.setAttribute(ApplicationAttributes.SCORE_PAGE_TEXT, "");
-        }
-
-        // make sure the default display object exists
-        DisplayInfo.getDisplayInformation(application);
-
-        initDataSource(application);
         final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
         // Initialize the connection
@@ -296,7 +278,8 @@ public class InitFilter implements Filter {
             } catch (final FLLRuntimeException e) {
               LOGGER.error("Error getting challenge document", e);
               session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>"
-                  + e.getMessage() + " Please create the database.</p>");
+                  + e.getMessage()
+                  + " Please create the database.</p>");
               response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
                   + "/setup/index.jsp"));
               return false;
