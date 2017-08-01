@@ -8,7 +8,6 @@ package fll.web.playoff;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.io.Serializable;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.sql.Connection;
@@ -295,7 +294,7 @@ public class H2HUpdateWebSocket {
   /**
    * Message sent on the WebSocket.
    */
-  public static final class BracketMessage implements Serializable {
+  public static final class BracketMessage {
 
     /**
      * If true, then {@link #bracketUpdate} must be populated.
