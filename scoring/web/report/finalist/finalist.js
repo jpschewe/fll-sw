@@ -720,11 +720,12 @@
         return newCategory;
       }
     },
-    
+
     /**
      * Remove the speciifed category.
      * 
-     * @param category a category object
+     * @param category
+     *          a category object
      */
     removeCategory : function(category) {
       delete _categories[category.catId];
@@ -960,19 +961,16 @@
     },
 
     /**
-     * Create the finalist schedule for the specified division.
-     * 
-     * @param currentDivision
-     *          the division to create the schedule for
-     * @return array of timeslots in order from earliest to latest
+     * @param division the division to work with
+     * @return map with key of team number and value is an array of categories
+     *         that the team is being judged in
      */
-    scheduleFinalists : function(currentDivision) {
-      // Create map of teamNum -> [categories]
+    getTeamToCategoryMap : function(division) {
       var finalistsCount = {};
       $.each($.finalist.getAllCategories(), function(i, category) {
         $.each(category.teams, function(j, teamNum) {
           var team = $.finalist.lookupTeam(teamNum);
-          if ($.finalist.isTeamInDivision(team, currentDivision)) {
+          if ($.finalist.isTeamInDivision(team, division)) {
             if (null == finalistsCount[teamNum]) {
               finalistsCount[teamNum] = [];
             }
@@ -980,6 +978,19 @@
           }
         });
       });
+
+      return finalistsCount;
+    },
+
+    /**
+     * Create the finalist schedule for the specified division.
+     * 
+     * @param currentDivision
+     *          the division to create the schedule for
+     * @return array of timeslots in order from earliest to latest
+     */
+    scheduleFinalists : function(currentDivision) {
+      var finalistsCount = $.finalist.getTeamToCategoryMap(currentDivision);
 
       // sort the map so that the team in the most categories is first,
       // this

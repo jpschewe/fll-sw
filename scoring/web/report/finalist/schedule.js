@@ -10,6 +10,10 @@ var draggingTeam = null;
 var draggingCategory = null;
 var draggingTeamDiv = null;
 var schedule = null;
+/**
+ * Mapping of team numbers to categories.
+ */
+var finalistsCount = {};
 
 /**
  * Map time string to map of category id to div cell.
@@ -85,9 +89,11 @@ function updateHeader() {
  * @returns a jquery div object
  */
 function createTeamDiv(team, category) {
+  var teamCategories = finalistsCount[team.num];
+  var numCategories = teamCategories.length;
   var group = team.judgingGroup;
   var teamDiv = $("<div draggable='true'>" + team.num + " - " + team.name
-      + " (" + group + ")</div>");
+      + " (" + group + ", " + numCategories + ")</div>");
 
   teamDiv.on('dragstart', function(e) {
     var rawEvent;
@@ -407,6 +413,7 @@ function updatePage() {
   updateHeader();
 
   schedule = $.finalist.getSchedule($.finalist.getCurrentDivision());
+  finalistsCount = $.finalist.getTeamToCategoryMap($.finalist.getCurrentDivision());
 
   $("#schedule_body").empty();
   $.each(schedule, function(i, slot) {
