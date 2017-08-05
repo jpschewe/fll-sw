@@ -1,3 +1,4 @@
+* #556 - add number of categories a team is being judged in to the finalist schedule
 * #570 - Initial integration with FLL Tools to display scores (not very pretty, but functional)
 * #540 - Handle narrow displays for score entry, also display errors in a floating window
 * #553 - Make sure to update the last seen time for the remote control of displays
