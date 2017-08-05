@@ -79,6 +79,7 @@ import org.w3c.dom.Document;
 import com.itextpdf.text.DocumentException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.Team;
 import fll.Utilities;
 import fll.scheduler.SchedParams.InvalidParametersException;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
@@ -229,7 +230,7 @@ public class SchedulerUI extends JFrame {
       }
 
       final ConstraintViolation selected = getViolationsModel().getViolation(selectedRow);
-      if (ConstraintViolation.NO_TEAM != selected.getTeam()) {
+      if (Team.NULL_TEAM_NUMBER != selected.getTeam()) {
         final int teamIndex = getScheduleModel().getIndexOfTeam(selected.getTeam());
         final int displayIndex = getScheduleTable().convertRowIndexToView(teamIndex);
         getScheduleTable().changeSelection(displayIndex, 1, false, false);
@@ -520,7 +521,8 @@ public class SchedulerUI extends JFrame {
 
         final File selectedFile = fileChooser.getSelectedFile();
         if (null != selectedFile
-            && selectedFile.isFile() && selectedFile.canRead()) {
+            && selectedFile.isFile()
+            && selectedFile.canRead()) {
           loadScheduleDescription(selectedFile);
         } else if (null != selectedFile) {
           JOptionPane.showMessageDialog(SchedulerUI.this,
@@ -764,7 +766,8 @@ public class SchedulerUI extends JFrame {
 
         getScheduleData().outputDetailedSchedules(getSchedParams(), getScheduleFile().getParentFile(), baseFilename);
         JOptionPane.showMessageDialog(SchedulerUI.this, "Detailed schedule written '"
-            + directory.getAbsolutePath() + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
+            + directory.getAbsolutePath()
+            + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
 
         final int answer = JOptionPane.showConfirmDialog(SchedulerUI.this,
                                                          "Would you like to write out the score sheets as well?",
@@ -804,7 +807,8 @@ public class SchedulerUI extends JFrame {
                                                        categoryToSchedule);
 
               JOptionPane.showMessageDialog(SchedulerUI.this, "Scoresheets written '"
-                  + scoresheetFile.getAbsolutePath() + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
+                  + scoresheetFile.getAbsolutePath()
+                  + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
             } // not canceled
           } // valid descriptor location
         } // yes to write score sheets
@@ -914,7 +918,10 @@ public class SchedulerUI extends JFrame {
       setScheduleData(schedule);
 
       setTitle(BASE_TITLE
-          + " - " + mScheduleFile.getName() + ":" + mScheduleSheetName);
+          + " - "
+          + mScheduleFile.getName()
+          + ":"
+          + mScheduleSheetName);
 
       mWriteSchedulesAction.setEnabled(true);
       mDisplayGeneralScheduleAction.setEnabled(true);
@@ -1000,7 +1007,8 @@ public class SchedulerUI extends JFrame {
 
         final File selectedFile = fileChooser.getSelectedFile();
         if (null != selectedFile
-            && selectedFile.isFile() && selectedFile.canRead()) {
+            && selectedFile.isFile()
+            && selectedFile.canRead()) {
           loadScheduleFile(selectedFile, null);
         } else if (null != selectedFile) {
           JOptionPane.showMessageDialog(SchedulerUI.this,
@@ -1044,7 +1052,7 @@ public class SchedulerUI extends JFrame {
   @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This calss isn't going to be serialized")
   private TournamentSchedule mScheduleData;
 
-      /* package */TournamentSchedule getScheduleData() {
+  /* package */TournamentSchedule getScheduleData() {
     return mScheduleData;
   }
 
@@ -1062,7 +1070,7 @@ public class SchedulerUI extends JFrame {
 
   private ViolationTableModel mViolationsModel;
 
-      /* package */ViolationTableModel getViolationsModel() {
+  /* package */ViolationTableModel getViolationsModel() {
     return mViolationsModel;
   }
 
@@ -1130,8 +1138,10 @@ public class SchedulerUI extends JFrame {
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Checking for violations against team: "
             + schedInfo.getTeamNumber() //
-            + " column: " + tmCol //
-            + " row: " + tmRow //
+            + " column: "
+            + tmCol //
+            + " row: "
+            + tmRow //
         );
       }
 
@@ -1141,7 +1151,8 @@ public class SchedulerUI extends JFrame {
         if (violation.getTeam() == schedInfo.getTeamNumber()) {
           Collection<SubjectiveTime> subjectiveTimes = violation.getSubjectiveTimes();
           if (tmCol <= SchedulerTableModel.JUDGE_COLUMN
-              && subjectiveTimes.isEmpty() && null == violation.getPerformance()) {
+              && subjectiveTimes.isEmpty()
+              && null == violation.getPerformance()) {
             // there is an error for this team and the team information fields
             // should be highlighted
             error = true;
@@ -1167,7 +1178,8 @@ public class SchedulerUI extends JFrame {
                 + (round
                     * SchedulerTableModel.NUM_COLUMNS_PER_ROUND);
             final int lastIdx = firstIdx
-                + SchedulerTableModel.NUM_COLUMNS_PER_ROUND - 1;
+                + SchedulerTableModel.NUM_COLUMNS_PER_ROUND
+                - 1;
             if (firstIdx <= tmCol
                 && tmCol <= lastIdx) {
               error = true;
@@ -1177,11 +1189,16 @@ public class SchedulerUI extends JFrame {
             if (LOGGER.isTraceEnabled()) {
               LOGGER.trace("Violation is in performance round: "
                   + round //
-                  + " team: " + schedInfo.getTeamNumber() //
-                  + " firstIdx: " + firstIdx //
-                  + " lastIdx: " + lastIdx //
-                  + " column: " + tmCol //
-                  + " error: " + error //
+                  + " team: "
+                  + schedInfo.getTeamNumber() //
+                  + " firstIdx: "
+                  + firstIdx //
+                  + " lastIdx: "
+                  + lastIdx //
+                  + " column: "
+                  + tmCol //
+                  + " error: "
+                  + error //
               );
             }
           } else {

@@ -17,9 +17,6 @@ import java.util.LinkedList;
  */
 public final class ConstraintViolation implements Serializable {
 
-  // TODO use Team.Null_TEam_number
-  public static final int NO_TEAM = -1;
-
   private final int team;
 
   public int getTeam() {
@@ -46,9 +43,9 @@ public final class ConstraintViolation implements Serializable {
 
   /**
    * @param isHard is this a hard constraint or a soft constraint violation?
-   * @param team the team with the problem, may be {@link #NO_TEAM}
+   * @param team the team with the problem, may be {@link Team#NULL_TEAM_NUMBER}
    * @param subjective1 First subjective time problem, may be null
-   * @param subjective2 econdsubjective time problem, may be null
+   * @param subjective2 second subjective time problem, may be null
    * @param performance if a performance problem, the time of the performance,
    *          may be null
    * @param message message to report

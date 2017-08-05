@@ -20,6 +20,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.Team;
 import fll.util.FLLRuntimeException;
 
 /**
@@ -51,7 +52,7 @@ public class ScheduleChecker {
           final String message = String.format("Too many teams competing on table: %s at time: %s. Teams: %s",
                                                timeEntry.getKey(),
                                                TournamentSchedule.formatTime(dateEntry.getKey()), teams);
-          violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, null, null, null, message));
+          violations.add(new ConstraintViolation(true, Team.NULL_TEAM_NUMBER, null, null, null, message));
         }
       }
     }
@@ -82,7 +83,7 @@ public class ScheduleChecker {
           * 2) {
         final String message = String.format("There are too many teams in performance at %s",
                                              TournamentSchedule.formatTime(entry.getKey()));
-        violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, null, null, null, message));
+        violations.add(new ConstraintViolation(true, Team.NULL_TEAM_NUMBER, null, null, null, message));
       }
     }
   }
@@ -120,7 +121,7 @@ public class ScheduleChecker {
         if (entry.getValue().size() > schedule.getJudgingGroups().size()) {
           final String message = String.format("There are too many teams in %s at %s", topEntry.getKey(),
                                                TournamentSchedule.formatTime(entry.getKey()));
-          violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, null,
+          violations.add(new ConstraintViolation(true, Team.NULL_TEAM_NUMBER, null,
                                                  new SubjectiveTime(topEntry.getKey(), entry.getKey()), null, message));
         }
 
@@ -130,7 +131,7 @@ public class ScheduleChecker {
             final String message = String.format("%s judge %s cannot see more than one team at %s", topEntry.getKey(),
                                                  ti.getJudgingGroup(),
                                                  TournamentSchedule.formatTime(entry.getKey()));
-            violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, null,
+            violations.add(new ConstraintViolation(true, Team.NULL_TEAM_NUMBER, null,
                                                    new SubjectiveTime(topEntry.getKey(), entry.getKey()), null,
                                                    message));
           }
@@ -505,7 +506,7 @@ public class ScheduleChecker {
               final String message = String.format("Overlap in %s for judge %s between %s and %s", category, judge,
                                                    TournamentSchedule.formatTime(prev),
                                                    TournamentSchedule.formatTime(current));
-              violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM,
+              violations.add(new ConstraintViolation(true, Team.NULL_TEAM_NUMBER,
                                                      new SubjectiveTime(category, prev), null, null, message));
             }
           }
@@ -523,7 +524,7 @@ public class ScheduleChecker {
             final String message = String.format("Overlap in performance for table %s between %s and %s",
                                                  entry.getKey(), TournamentSchedule.formatTime(prev),
                                                  TournamentSchedule.formatTime(current));
-            violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, null, null, prev, message));
+            violations.add(new ConstraintViolation(true, Team.NULL_TEAM_NUMBER, null, null, prev, message));
           }
         }
 
