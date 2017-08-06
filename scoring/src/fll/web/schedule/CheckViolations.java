@@ -136,7 +136,7 @@ public class CheckViolations extends BaseFLLServlet {
       } else {
         session.setAttribute("uploadSchedule_violations", violations);
         for (final ConstraintViolation violation : violations) {
-          if (violation.isHard()) {
+          if (ConstraintViolation.Type.HARD == violation.getType()) {
             WebUtils.sendRedirect(application, response, "/schedule/displayHardViolations.jsp");
             return;
           }

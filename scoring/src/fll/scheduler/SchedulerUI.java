@@ -38,6 +38,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
@@ -809,7 +811,8 @@ public class SchedulerUI extends JFrame {
               JOptionPane.showMessageDialog(SchedulerUI.this, "Scoresheets written '"
                   + scoresheetFile.getAbsolutePath()
                   + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
-            } // not canceled
+            } // not
+              // canceled
           } // valid descriptor location
         } // yes to write score sheets
       } catch (final DocumentException e) {
@@ -1145,8 +1148,7 @@ public class SchedulerUI extends JFrame {
         );
       }
 
-      boolean error = false;
-      boolean isHard = false;
+      final SortedSet<ConstraintViolation.Type> violationTypes = new TreeSet<>();
       for (final ConstraintViolation violation : getViolationsModel().getViolations()) {
         if (violation.getTeam() == schedInfo.getTeamNumber()) {
           Collection<SubjectiveTime> subjectiveTimes = violation.getSubjectiveTimes();
@@ -1155,8 +1157,7 @@ public class SchedulerUI extends JFrame {
               && null == violation.getPerformance()) {
             // there is an error for this team and the team information fields
             // should be highlighted
-            error = true;
-            isHard |= violation.isHard();
+            violationTypes.add(violation.getType());
           } else if (null != violation.getPerformance()) {
             // need to check round which round
             int round = 0;
@@ -1182,8 +1183,7 @@ public class SchedulerUI extends JFrame {
                 - 1;
             if (firstIdx <= tmCol
                 && tmCol <= lastIdx) {
-              error = true;
-              isHard |= violation.isHard();
+              violationTypes.add(violation.getType());
             }
 
             if (LOGGER.isTraceEnabled()) {
@@ -1197,15 +1197,14 @@ public class SchedulerUI extends JFrame {
                   + lastIdx //
                   + " column: "
                   + tmCol //
-                  + " error: "
-                  + error //
+                  + " types: "
+                  + violationTypes //
               );
             }
           } else {
             for (final SubjectiveTime subj : subjectiveTimes) {
               if (tmCol == getScheduleModel().getColumnForSubjective(subj.getName())) {
-                error = true;
-                isHard |= violation.isHard();
+                violationTypes.add(violation.getType());
               }
             }
           }
@@ -1215,8 +1214,10 @@ public class SchedulerUI extends JFrame {
       // set the background based on the error state
       setForeground(null);
       setBackground(null);
-      if (error) {
-        final Color violationColor = isHard ? HARD_CONSTRAINT_COLOR : SOFT_CONSTRAINT_COLOR;
+      if (!violationTypes.isEmpty()) {
+        final ConstraintViolation.Type maxViolationType = violationTypes.last(); // highest
+                                                                                 // number
+        final Color violationColor = colorForViolation(maxViolationType);
         if (isSelected) {
           setForeground(violationColor);
         } else {
@@ -1233,6 +1234,18 @@ public class SchedulerUI extends JFrame {
     }
   };
 
+  private static Color colorForViolation(final ConstraintViolation.Type type) {
+    switch (type) {
+    case HARD:
+      return HARD_CONSTRAINT_COLOR;
+    case SOFT:
+      return SOFT_CONSTRAINT_COLOR;
+    default:
+      throw new IllegalArgumentException("Unknown constraint type: "
+          + type);
+    }
+  }
+
   private TableCellRenderer violationTableRenderer = new DefaultTableCellRenderer() {
     @Override
     public Component getTableCellRendererComponent(final JTable table,
@@ -1247,7 +1260,7 @@ public class SchedulerUI extends JFrame {
 
       final ConstraintViolation violation = getViolationsModel().getViolation(tmRow);
 
-      final Color violationColor = violation.isHard() ? HARD_CONSTRAINT_COLOR : SOFT_CONSTRAINT_COLOR;
+      final Color violationColor = colorForViolation(violation.getType());
       setForeground(null);
       setBackground(null);
       if (isSelected) {
