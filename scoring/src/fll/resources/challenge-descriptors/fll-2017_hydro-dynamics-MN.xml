@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <fll
   title="2017 Minnesota FIRST LEGO League - Hydro Dynamics"
-  copyright="2017 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST&#174;) and The LEGO Group. Used by special permission. All rights reserved."
-  revision="1"
+  copyright="2017 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST) and The LEGO Group. Used by special permission. All rights reserved."
+  revision="3"
   schemaVersion="2">
 
   <Performance
@@ -13,31 +13,28 @@
     <goal
       initialValue="0"
       name="m01_pipe_removal"
-      title="M01 - Pipe Removal"
+      title="M01 - Yellow Pipe in Base"
       min="0"
       max="1"
-      multiplier="20"
-      >
+      multiplier="20">
     </goal>
 
     <goal
       initialValue="0"
       name="m02_flow"
-      title="M02 - Flow"
+      title="M02 - Big Water Released (Flow)"
       min="0"
       max="1"
-      multiplier="25"
-      >
+      multiplier="25">
     </goal>
 
     <goal
       initialValue="0"
       name="m03_pump_addition"
-      title="M03 - Pump Addition"
+      title="M03 - Pump Addition Delivered"
       min="0"
       max="1"
-      multiplier="20"
-      >
+      multiplier="20">
     </goal>
 
     <goal
@@ -46,49 +43,44 @@
       title="M04 - Rain"
       min="0"
       max="1"
-      multiplier="20"
-      >
+      multiplier="20">
     </goal>
 
     <goal
       initialValue="0"
       name="m05_filter"
-      title="M05 - Filter"
+      title="M05 - Filter Latched"
       min="0"
       max="1"
-      multiplier="30"
-      >
+      multiplier="30">
     </goal>
 
     <goal
       initialValue="0"
       name="m06_water_treatment"
-      title="M06 - Water Treatment"
+      title="M06 - Treatment Plant - Water Ejected"
       min="0"
       max="1"
-      multiplier="20"
-      >
+      multiplier="20">
     </goal>
-    
+
 
     <goal
       initialValue="0"
       name="m07_fountain"
-      title="M07 - Fountain"
+      title="M07 - Fountain Raised"
       min="0"
       max="1"
-      multiplier="20"
-      >
+      multiplier="20">
     </goal>
 
     <goal
       initialValue="0"
       name="m08_manhole_covers"
-      title="M08 - Manhole Covers"
+      title="M08 - Manhole Covers Flipped"
       min="0"
       max="2"
-      multiplier="15"
-      >
+      multiplier="15">
     </goal>
 
     <goal
@@ -97,8 +89,7 @@
       title="M08 - Both covers completely in separate tripod targets"
       min="0"
       max="1"
-      multiplier="30"
-      >
+      multiplier="30">
     </goal>
 
     <!-- raw(m08_manhole_covers_bonus) <= raw(m08_manhole_covers) <= Infinity -->
@@ -122,8 +113,7 @@
     <goal
       initialValue="0"
       name="m09_tripod"
-      title="M09 - Tripod"
-      >
+      title="M09 - Tripod in Target">
 
       <value
         value="completely_in_target"
@@ -139,7 +129,7 @@
         value="none"
         title="None"
         score="0" />
-      
+
     </goal>
 
     <goal
@@ -148,15 +138,13 @@
       title="M10 - Pipe Replacement"
       min="0"
       max="1"
-      multiplier="20"
-      >
+      multiplier="20">
     </goal>
 
     <goal
       initialValue="0"
       name="m11_pipe_construction"
-      title="M11 - Pipe Construction"
-      >
+      title="M11 - Pipe Construction">
 
       <value
         value="completely_in_target"
@@ -172,27 +160,25 @@
         value="none"
         title="None"
         score="0" />
-      
+
     </goal>
 
     <goal
       initialValue="0"
       name="m12_sludge"
-      title="M12 - Sludge"
+      title="M12 - Sludge Touching Wood"
       min="0"
       max="1"
-      multiplier="30"
-      >
+      multiplier="30">
     </goal>
-    
+
     <goal
       initialValue="0"
       name="m13_flower"
-      title="M13 - Flower"
+      title="M13 - Flower Raised"
       min="0"
       max="1"
-      multiplier="30"
-      >
+      multiplier="30">
     </goal>
 
     <goal
@@ -201,8 +187,7 @@
       title="M13 - Rain in the purple part"
       min="0"
       max="1"
-      multiplier="30"
-      >
+      multiplier="30">
     </goal>
 
     <!-- raw(m13_flower_bonus) <= raw(m13_flower) <= Infinity -->
@@ -226,8 +211,7 @@
     <goal
       initialValue="0"
       name="m14_water_well"
-      title="M14 - Water Well"
-      >
+      title="M14 - Water Well Delivered">
 
       <value
         value="completely_in_target"
@@ -243,17 +227,16 @@
         value="none"
         title="None"
         score="0" />
-      
+
     </goal>
 
     <goal
       initialValue="0"
       name="m15_fire"
-      title="M15 - Fire"
+      title="M15 - Fire Extinguished"
       min="0"
       max="1"
-      multiplier="25"
-      >
+      multiplier="25">
     </goal>
 
     <goal
@@ -262,31 +245,29 @@
       title="M16 - Water Collection - At least one Rain"
       min="0"
       max="1"
-      multiplier="10"
-      >
+      multiplier="10">
     </goal>
 
     <goal
       initialValue="0"
       name="m16_water_collection_big_water"
-      title="M16 - Water Collection Big Water"
+      title="M16 - Water Collection - Big Water"
       min="0"
-      max="3"
-      multiplier="10"
-      >
+      max="5"
+      multiplier="10">
     </goal>
 
     <goal
       initialValue="0"
       name="m16_water_collection_bonus"
-      title="M16 - Big Water on top"
+      title="M16 - Stacked Big Water"
       min="0"
       max="1"
-      multiplier="30"
-      >
+      multiplier="30">
     </goal>
 
-    <!-- raw(m16_water_collection_bonus) <= raw(m16_water_collection_big_water) <= Infinity -->
+    <!-- raw(m16_water_collection_bonus) <= raw(m16_water_collection_big_water) 
+      <= Infinity -->
     <restriction
       lowerBound="0"
       upperBound="100"
@@ -307,21 +288,19 @@
     <goal
       initialValue="0"
       name="m17_slingshot"
-      title="M17 - Slingshot"
+      title="M17 - Slingshot Delivered"
       min="0"
       max="1"
-      multiplier="20"
-      >
+      multiplier="20">
     </goal>
 
     <goal
       initialValue="0"
       name="m17_slingshot_bonus"
-      title="M17 - Dirty Water and Rain in target"
+      title="M17 - Dirty Water AND Rain in Target"
       min="0"
       max="1"
-      multiplier="15"
-      >
+      multiplier="15">
     </goal>
 
     <!-- raw(m17_slingshot_bonus) <= raw(m17_slingshot) <= Infinity -->
@@ -341,15 +320,14 @@
           scoreType="raw" />
       </term>
     </restriction>
-    
+
     <goal
       initialValue="0"
       name="m18_faucet"
-      title="M18 - Faucet"
+      title="M18 - Faucet - Cup Showing Blue"
       min="0"
       max="1"
-      multiplier="25"
-      >
+      multiplier="25">
     </goal>
 
     <goal
@@ -438,7 +416,8 @@
       name="sources_information"
       title="Sources of Information"
       category="Research">
-      <description>Quality and variety of data/evidence and sources cited
+      <description>Quality and variety of data/evidence and sources
+        cited
       </description>
       <rubric>
         <range
@@ -454,7 +433,8 @@
           min="4"
           max="6"
           shortDescription="Two types of information cited; several sources">
-          <description>quality OR variety need improvement; did not include professional(s)
+          <description>quality OR variety need improvement; did not
+            include professional(s)
           </description>
         </range>
         <range
@@ -462,7 +442,8 @@
           min="7"
           max="9"
           shortDescription="Three types of information cited; many sources, including professionals">
-          <description>sufficient quality and variety; included professional(s)
+          <description>sufficient quality and variety; included
+            professional(s)
           </description>
         </range>
         <range
@@ -470,7 +451,8 @@
           min="10"
           max="12"
           shortDescription="Four(+) types of information cited, extensive sources, including professionals">
-          <description>extensive quality and variety; included multiple professionals
+          <description>extensive quality and variety; included multiple
+            professionals
           </description>
         </range>
       </rubric>
@@ -536,7 +518,8 @@
       title="Team Solution"
       category="Innovative Solution"
       required="true">
-      <description>Clear explanation of the proposed solution and description of how it solves the problem
+      <description>Clear explanation of the proposed solution and
+        description of how it solves the problem
       </description>
       <rubric>
         <range
@@ -639,7 +622,9 @@
       name="solution_development"
       title="Solution Development"
       category="Innovative Solution">
-      <description>Systematic process used to select, develop, evaluate, test, and improve the solution (factors for implementation could includle cost, east of manufacturing, etc.)
+      <description>Systematic process used to select, develop, evaluate,
+        test, and improve the solution (factors for implementation could
+        includle cost, east of manufacturing, etc.)
       </description>
       <rubric>
         <range
