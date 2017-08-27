@@ -10,6 +10,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
@@ -48,6 +50,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
@@ -90,6 +93,7 @@ import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
+import fll.util.FormatterUtils;
 import fll.util.GuiExceptionHandler;
 import fll.util.LogUtils;
 import fll.util.ProgressDialog;
@@ -179,6 +183,7 @@ public class SchedulerUI extends JFrame {
     mTabbedPane = new JTabbedPane();
     cpane.add(mTabbedPane, BorderLayout.CENTER);
 
+    // --- schedule description panel
     final JPanel scheduleDescriptionPanel = new JPanel(new BorderLayout());
     mTabbedPane.addTab("Description", scheduleDescriptionPanel);
 
@@ -192,11 +197,14 @@ public class SchedulerUI extends JFrame {
     // start out with default values
     mScheduleDescriptionEditor.setParams(new SolverParams());
 
+    // --- end schedule description panel
+
+    // --- schedule panel
     final JPanel schedulePanel = new JPanel(new BorderLayout());
     mTabbedPane.addTab("Schedule", schedulePanel);
 
     mScheduleFilename = new JLabel("");
-    schedulePanel.add(createScheduleToolbar(), BorderLayout.PAGE_START);
+    schedulePanel.add(createScheduleToolbar(), BorderLayout.NORTH);
 
     mScheduleTable = new JTable();
     mScheduleTable.setAutoCreateRowSorter(true);
@@ -214,11 +222,30 @@ public class SchedulerUI extends JFrame {
     final JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, dataScroller, violationScroller);
     schedulePanel.add(splitPane, BorderLayout.CENTER);
 
+    final JPanel constraintsPanel = new JPanel(new GridBagLayout());
+    schedulePanel.add(constraintsPanel, BorderLayout.SOUTH);
+
+    changeDuration = FormatterUtils.createIntegerField(0, 1000);
+    changeDuration.setToolTipText("The number of minutes that a team has between any 2 activities");
+    addRow(constraintsPanel, new JLabel("Change time duration:"), changeDuration);
+
+    performanceChangeDuration = FormatterUtils.createIntegerField(0, 1000);
+    performanceChangeDuration.setToolTipText("The number of minutes that a team has between any 2 performance runs");
+    addRow(constraintsPanel, new JLabel("Performance change time duration:"), performanceChangeDuration);
+
+    performanceDuration = FormatterUtils.createIntegerField(1, 1000);
+    performanceDuration.setToolTipText("The amount of time that the team is expected to be at the table");
+    addRow(constraintsPanel, new JLabel("Performance duration:"), performanceDuration);
+
+    // --- end schedule panel
+
     // initial state
     mWriteSchedulesAction.setEnabled(false);
     mDisplayGeneralScheduleAction.setEnabled(false);
     mRunOptimizerAction.setEnabled(false);
     mReloadFileAction.setEnabled(false);
+    
+    setSchedParams(new SchedParams());
 
     pack();
   }
@@ -413,6 +440,9 @@ public class SchedulerUI extends JFrame {
                                         JOptionPane.ERROR_MESSAGE);
           return;
         }
+
+        // use the same parameters for checking that the solver used for scheduling
+        setSchedParams(solver.getParameters());
 
         loadScheduleFile(solutionFile, subjectiveStations);
 
@@ -646,7 +676,7 @@ public class SchedulerUI extends JFrame {
     {
       putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Refresh16.gif"));
       putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Refresh24.gif"));
-      putValue(SHORT_DESCRIPTION, "Reload the file");
+      putValue(SHORT_DESCRIPTION, "Reload the file and check for violations");
       // putValue(MNEMONIC_KEY, KeyEvent.VK_X);
     }
 
@@ -899,9 +929,8 @@ public class SchedulerUI extends JFrame {
         fis = null;
       }
 
-      mSchedParams = new SchedParams(newSubjectiveStations, SchedParams.DEFAULT_PERFORMANCE_MINUTES,
-                                     SchedParams.MINIMUM_CHANGETIME_MINUTES,
-                                     SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES);
+      mSchedParams.setSubjectiveStations(newSubjectiveStations);
+
       final List<String> subjectiveHeaders = new LinkedList<String>();
       for (final SubjectiveStation station : newSubjectiveStations) {
         subjectiveHeaders.add(station.getName());
@@ -1012,6 +1041,10 @@ public class SchedulerUI extends JFrame {
         if (null != selectedFile
             && selectedFile.isFile()
             && selectedFile.canRead()) {
+
+          // use default sched params until the user changes them
+          setSchedParams(new SchedParams());
+
           loadScheduleFile(selectedFile, null);
         } else if (null != selectedFile) {
           JOptionPane.showMessageDialog(SchedulerUI.this,
@@ -1065,6 +1098,13 @@ public class SchedulerUI extends JFrame {
     return mSchedParams;
   }
 
+  private void setSchedParams(final SchedParams params) {
+    mSchedParams = params;
+    changeDuration.setValue(mSchedParams.getChangetimeMinutes());
+    performanceChangeDuration.setValue(mSchedParams.getPerformanceChangetimeMinutes());
+    performanceDuration.setValue(mSchedParams.getPerformanceMinutes());
+  }
+
   private SchedulerTableModel mScheduleModel;
 
   SchedulerTableModel getScheduleModel() {
@@ -1093,7 +1133,14 @@ public class SchedulerUI extends JFrame {
   private void checkSchedule() {
     violationTable.clearSelection();
 
-    final ScheduleChecker checker = new ScheduleChecker(getSchedParams(), getScheduleData());
+    // make sure sched params are updated based on the UI elements
+    final SchedParams params = getSchedParams();
+
+    params.setPerformanceMinutes((Integer) performanceDuration.getValue());
+    params.setChangetimeMinutes((Integer) changeDuration.getValue());
+    params.setPerformanceChangetimeMinutes((Integer) performanceChangeDuration.getValue());
+
+    final ScheduleChecker checker = new ScheduleChecker(params, getScheduleData());
     mViolationsModel = new ViolationTableModel(checker.verifySchedule());
     violationTable.setModel(mViolationsModel);
   }
@@ -1344,4 +1391,43 @@ public class SchedulerUI extends JFrame {
     }
     return subjectiveHeaders;
   }
+
+  private final JFormattedTextField changeDuration;
+
+  private final JFormattedTextField performanceChangeDuration;
+
+  private final JFormattedTextField performanceDuration;
+
+  /**
+   * Add a row of components to the specified container and then add a spacer to
+   * the end of the row.
+   * The container must have it's layout set to {@link GridBagLayout}.
+   * 
+   * @param components the components to add
+   * @param container where to add the components to
+   */
+  private static void addRow(final JComponent container,
+                             final JComponent... components) {
+    GridBagConstraints gbc;
+
+    // for (final JComponent comp : components) {
+    for (int i = 0; i < components.length
+        - 1; ++i) {
+      final JComponent comp = components[i];
+      gbc = new GridBagConstraints();
+      gbc.anchor = GridBagConstraints.WEST;
+      gbc.weighty = 0;
+      container.add(comp, gbc);
+    }
+
+    // end of line spacer
+    gbc = new GridBagConstraints();
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.weightx = 1.0;
+    // add(new JPanel(), gbc);
+    container.add(components[components.length
+        - 1], gbc);
+  }
+
 }
