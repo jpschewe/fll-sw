@@ -237,6 +237,8 @@ public class SchedulerUI extends JFrame {
     performanceDuration.setToolTipText("The amount of time that the team is expected to be at the table");
     addRow(constraintsPanel, new JLabel("Performance duration:"), performanceDuration);
 
+    addRow(constraintsPanel, new JLabel("Make sure to pass these values onto your computer person with the schedule!"));
+    
     // --- end schedule panel
 
     // initial state
