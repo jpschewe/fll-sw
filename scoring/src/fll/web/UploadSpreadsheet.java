@@ -39,7 +39,7 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
   private static final Logger LOGGER = LogUtils.getLogger();
 
   /**
-   * Session key for the name of the file that was saved as a {@link String}.
+   * Session key for the name of the file that was saved.
    */
   public static final String SPREADSHEET_FILE_KEY = "spreadsheetFile";
 
