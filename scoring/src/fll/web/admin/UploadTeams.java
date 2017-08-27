@@ -45,6 +45,7 @@ import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.UploadSpreadsheet;
 
 /**
  * Java code for uploading team data to the database. Called from
@@ -76,7 +77,7 @@ public final class UploadTeams extends BaseFLLServlet {
             + file.getAbsolutePath());
       }
 
-      final String sheetName = SessionAttributes.getAttribute(session, "sheetName", String.class);
+      final String sheetName = SessionAttributes.getAttribute(session, UploadSpreadsheet.SHEET_NAME_KEY, String.class);
 
       parseFile(file, sheetName, connection, session);
     } catch (final SQLException sqle) {

@@ -28,7 +28,7 @@ public final class ProcessSelectedSheet extends BaseFLLServlet {
 
     final StringBuilder message = new StringBuilder();
 
-    final String sheetName = request.getParameter("sheetName");
+    final String sheetName = request.getParameter(UploadSpreadsheet.SHEET_NAME_KEY);
     if (null == sheetName) {
       throw new RuntimeException("Missing parameter 'sheetName'");
     }

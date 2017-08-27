@@ -25,6 +25,7 @@ import fll.util.LogUtils;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
+import fll.web.UploadSpreadsheet;
 import fll.web.WebUtils;
 
 /**
@@ -52,7 +53,7 @@ public class UploadSchedule extends BaseFLLServlet {
     session.removeAttribute(SCHEDULE_KEY);
     session.removeAttribute(MAPPINGS_KEY);
     session.removeAttribute(GatherEventDivisionChanges.EVENT_DIVISION_INFO_KEY);
-    session.removeAttribute("sheetName");
+    session.removeAttribute(UploadSpreadsheet.SHEET_NAME_KEY);
     session.removeAttribute("sheetNames");
     session.removeAttribute(CheckViolations.SUBJECTIVE_STATIONS);
     session.removeAttribute(CheckViolations.UNUSED_HEADERS);

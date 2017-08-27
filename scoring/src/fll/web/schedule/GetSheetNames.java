@@ -25,6 +25,7 @@ import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.UploadSpreadsheet;
 import fll.web.WebUtils;
 
 /**
@@ -47,9 +48,9 @@ public class GetSheetNames extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
-    if (null != session.getAttribute("sheetName")) {
+    if (null != session.getAttribute(UploadSpreadsheet.SHEET_NAME_KEY)) {
       // handle case where we're redirected here from picking the sheet
-      session.setAttribute("uploadSchedule_sheet", session.getAttribute("sheetName"));
+      session.setAttribute("uploadSchedule_sheet", session.getAttribute(UploadSpreadsheet.SHEET_NAME_KEY));
       WebUtils.sendRedirect(application, response, "/schedule/CheckViolations");
       return;
     }
