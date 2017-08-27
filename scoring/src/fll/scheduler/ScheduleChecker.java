@@ -19,6 +19,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import javax.annotation.Nonnull;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.util.FLLRuntimeException;
@@ -34,8 +36,14 @@ public class ScheduleChecker {
 
   private final SchedParams params;
 
-  public ScheduleChecker(final SchedParams params,
-                         final TournamentSchedule schedule) {
+  /**
+   * Initialize a scheduler checker.
+   * 
+   * @param params the parameters to use when checking the schedule
+   * @param schedule the schedule to check
+   */
+  public ScheduleChecker(@Nonnull final SchedParams params,
+                         @Nonnull final TournamentSchedule schedule) {
     this.params = params;
     this.schedule = schedule;
   }
