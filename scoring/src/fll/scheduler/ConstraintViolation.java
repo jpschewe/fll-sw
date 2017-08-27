@@ -22,7 +22,17 @@ public final class ConstraintViolation implements Serializable {
    */
   public static enum Type {
     // note that soft has a lower ordinal than hard because it's declared first
-    SOFT, HARD;
+    /**
+     * Soft constraint violations are minor warnings. It would be nice to get rid of
+     * them, but not a real big deal.
+     */
+    SOFT,
+    /**
+     * Hard constraint violations are those that can not be violated and still have
+     * a valid schedule. An example of this type of violation is a team being in 2
+     * places at once.
+     */
+    HARD;
   }
 
   private final int team;
