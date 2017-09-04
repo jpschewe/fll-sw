@@ -17,6 +17,7 @@ import javax.annotation.Nonnull;
 
 import fll.db.CategoryColumnMapping;
 import fll.scheduler.ConstraintViolation;
+import fll.scheduler.SchedParams;
 import fll.scheduler.SubjectiveStation;
 import fll.scheduler.TournamentSchedule;
 
@@ -179,5 +180,27 @@ public class UploadScheduleData implements Serializable {
   public void setUnusedHeaders(final List<String> v) {
     unusedHeaders.clear();
     unusedHeaders.addAll(v);
+  }
+
+  private SchedParams schedParams = new SchedParams();
+
+  /**
+   * This object is used when checking the uploaded schedule for constraint
+   * violations.
+   * It defaults to the result of {@link SchedParams#SchedParams()}.
+   * 
+   * @return the sched params, not that it is mutable and NOT a copy of the
+   *         internal data
+   */
+  @Nonnull
+  public SchedParams getSchedParams() {
+    return schedParams;
+  }
+
+  /**
+   * @param v the new object to use, see {@link #getSchedParams()}
+   */
+  public void setSchedParams(@Nonnull final SchedParams v) {
+    schedParams = v;
   }
 }

@@ -12,11 +12,14 @@ CheckScheduleExists -> "promptForOverwrite.jsp" [label="if schedule exists"];
 CheckScheduleExists -> GetSheetNames;
 
 GetSheetNames -> "admin_index.jsp" [label="if no sheets found"];
-GetSheetNames -> CheckViolations [label="if 1 sheet found or specified sheet in session"];
 GetSheetNames -> "promptForSheetName.jsp" [label="if 2+ sheets found"];
+GetSheetNames -> "scheduleConstraints.jsp" [label="if 1 sheet found or specified sheet selected"];
 
 "promptForSheetName.jsp" -> ProcessSelectedSheet;
 ProcessSelectedSheet -> GetSheetNames;
+
+"scheduleConstraints.jsp" -> ProcessScheduleConstraints;
+ProcessScheduleConstraints -> CheckViolations;
 
 CheckViolations -> "promptForEventDivisions.jsp" [label="if no violations"];
 CheckViolations -> "displayHardViolations.jsp" [label="if hard violations found"];
