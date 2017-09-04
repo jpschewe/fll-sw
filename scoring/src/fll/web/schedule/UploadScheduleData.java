@@ -143,7 +143,7 @@ public class UploadScheduleData implements Serializable {
     eventDivisionInfo.addAll(v);
   }
 
-  private List<SubjectiveStation> subjectiveStations = null;
+  private LinkedList<SubjectiveStation> subjectiveStations = null;
 
   /**
    * @return the subjective stations for the schedule, initially null
@@ -156,10 +156,10 @@ public class UploadScheduleData implements Serializable {
    * @param v see {@link #getSubjectiveStations()}
    */
   public void setSubjectiveStations(final List<SubjectiveStation> v) {
-    subjectiveStations = v;
+    subjectiveStations = null == v ? null : new LinkedList<>(v);
   }
 
-  private final List<String> unusedHeaders = new LinkedList<>();
+  private final LinkedList<String> unusedHeaders = new LinkedList<>();
 
   /**
    * @return the unused headers from the schedule, initially empty, unmodifiable
