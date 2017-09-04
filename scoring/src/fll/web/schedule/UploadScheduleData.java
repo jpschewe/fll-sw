@@ -143,13 +143,11 @@ public class UploadScheduleData implements Serializable {
     eventDivisionInfo.addAll(v);
   }
 
-  private final List<SubjectiveStation> subjectiveStations = new LinkedList<>();
+  private List<SubjectiveStation> subjectiveStations = null;
 
   /**
-   * @return the subjective stations for the schedule, initially empty,
-   *         unmodifiable list
+   * @return the subjective stations for the schedule, initially null
    */
-  @Nonnull
   public List<SubjectiveStation> getSubjectiveStations() {
     return subjectiveStations;
   }
@@ -157,9 +155,8 @@ public class UploadScheduleData implements Serializable {
   /**
    * @param v see {@link #getSubjectiveStations()}
    */
-  public void setSubjectiveStations(@Nonnull final List<SubjectiveStation> v) {
-    subjectiveStations.clear();
-    subjectiveStations.addAll(v);
+  public void setSubjectiveStations(final List<SubjectiveStation> v) {
+    subjectiveStations = v;
   }
 
   private final List<String> unusedHeaders = new LinkedList<>();
