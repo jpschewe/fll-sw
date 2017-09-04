@@ -50,9 +50,6 @@
 	<classpathentry kind="lib" path="scoring/lib/dom4j-1.6.1.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/commons-codec-1.10.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/commons-logging-1.2.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/jackson-annotations-2.9.0-javadoc.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/jackson-core-2.9.0-javadoc.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/jackson-databind-2.9.0-javadoc.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/schemaSpy_5.0.0.jar" sourcepath="scoring/lib/schemaSpy_5.0.0.source.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/asm-5.0.1.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/asm-analysis-5.0.1.jar"/>
