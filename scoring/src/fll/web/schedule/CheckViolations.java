@@ -90,7 +90,6 @@ public class CheckViolations extends BaseFLLServlet {
           // stream.close();
           if (!columnInfo.getUnusedColumns().isEmpty()) {
             uploadScheduleData.setUnusedHeaders(columnInfo.getUnusedColumns());
-            session.setAttribute("default_duration", SchedParams.DEFAULT_SUBJECTIVE_MINUTES);
             WebUtils.sendRedirect(application, response, "/schedule/chooseSubjectiveHeaders.jsp");
             return;
           } else {
