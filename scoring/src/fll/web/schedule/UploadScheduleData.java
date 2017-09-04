@@ -125,7 +125,7 @@ public class UploadScheduleData implements Serializable {
     categoryColumnMappings.addAll(v);
   }
 
-  private final List<EventDivisionInfo> eventDivisionInfo = new LinkedList<>();
+  private final LinkedList<EventDivisionInfo> eventDivisionInfo = new LinkedList<>();
 
   /**
    * @return event division information, initially empty, unmodifiable list
