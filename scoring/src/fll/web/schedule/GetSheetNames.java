@@ -62,7 +62,7 @@ public class GetSheetNames extends BaseFLLServlet {
         // handle case where we're redirected here from picking the sheet
         uploadScheduleData.setSelectedSheet(SessionAttributes.getAttribute(session, UploadSpreadsheet.SHEET_NAME_KEY,
                                                                            String.class));
-        WebUtils.sendRedirect(application, response, "/schedule/CheckViolations");
+        WebUtils.sendRedirect(application, response, "/schedule/scheduleConstraints.jsp");
         return;
       }
 
@@ -74,7 +74,7 @@ public class GetSheetNames extends BaseFLLServlet {
         if (isCsvFile) {
           // must be CSV file
           uploadScheduleData.setSelectedSheet(UploadScheduleData.CSV_SHEET_NAME);
-          WebUtils.sendRedirect(application, response, "/schedule/CheckViolations");
+          WebUtils.sendRedirect(application, response, "/schedule/scheduleConstraints.jsp");
           return;
         } else {
           // get list of sheet names
@@ -87,7 +87,7 @@ public class GetSheetNames extends BaseFLLServlet {
             return;
           } else if (1 == sheetNames.size()) {
             uploadScheduleData.setSelectedSheet(sheetNames.get(0));
-            WebUtils.sendRedirect(application, response, "/schedule/CheckViolations");
+            WebUtils.sendRedirect(application, response, "/schedule/scheduleConstraints.jsp");
             return;
           } else {
             session.setAttribute(ProcessSelectedSheet.SHEET_NAMES_KEY, sheetNames);
