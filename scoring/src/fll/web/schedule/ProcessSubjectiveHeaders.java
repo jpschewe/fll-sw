@@ -41,42 +41,45 @@ public class ProcessSubjectiveHeaders extends BaseFLLServlet {
                                 final HttpSession session)
       throws IOException, ServletException {
 
-    final ChallengeDescription challenge = ApplicationAttributes.getChallengeDescription(application);
+    final UploadScheduleData uploadScheduleData = SessionAttributes.getNonNullAttribute(session, UploadScheduleData.KEY,
+                                                                                        UploadScheduleData.class);
+    try {
+      final ChallengeDescription challenge = ApplicationAttributes.getChallengeDescription(application);
 
-    // J2EE doesn't have things typed yet
-    @SuppressWarnings("unchecked")
-    final List<String> unusedHeaders = SessionAttributes.getNonNullAttribute(session, CheckViolations.UNUSED_HEADERS,
-                                                                             List.class);
+      final List<String> unusedHeaders = uploadScheduleData.getUnusedHeaders();
 
-    final Collection<CategoryColumnMapping> categoryColumns = new LinkedList<CategoryColumnMapping>();
+      final Collection<CategoryColumnMapping> categoryColumns = new LinkedList<CategoryColumnMapping>();
 
-    // get params for subjectiveHeader
-    final List<SubjectiveStation> subjectiveStations = new LinkedList<SubjectiveStation>();
+      // get params for subjectiveHeader
+      final List<SubjectiveStation> subjectiveStations = new LinkedList<SubjectiveStation>();
 
-    for (final ScoreCategory cat : challenge.getSubjectiveCategories()) {
-      final String value = request.getParameter(cat.getName()
-          + ":header");
-      if (null != value) {
-        final int headerIndex = Integer.parseInt(value);
-        final String header = unusedHeaders.get(headerIndex);
+      for (final ScoreCategory cat : challenge.getSubjectiveCategories()) {
+        final String value = request.getParameter(cat.getName()
+            + ":header");
+        if (null != value) {
+          final int headerIndex = Integer.parseInt(value);
+          final String header = unusedHeaders.get(headerIndex);
 
-        final String durationStr = request.getParameter(cat.getName()
-            + ":duration");
+          final String durationStr = request.getParameter(cat.getName()
+              + ":duration");
 
-        //TODO issue:129 validate that duration is not empty and a number
-        
-        final int duration = Integer.parseInt(durationStr);
-        subjectiveStations.add(new SubjectiveStation(header, duration));
+          // TODO issue:129 validate that duration is not empty and a number
 
-        final CategoryColumnMapping mapping = new CategoryColumnMapping(cat.getName(), header);
-        categoryColumns.add(mapping);
+          final int duration = Integer.parseInt(durationStr);
+          subjectiveStations.add(new SubjectiveStation(header, duration));
+
+          final CategoryColumnMapping mapping = new CategoryColumnMapping(cat.getName(), header);
+          categoryColumns.add(mapping);
+        }
+
       }
 
+      uploadScheduleData.setCategoryColumnMappings(categoryColumns);
+      uploadScheduleData.setSubjectiveStations(subjectiveStations);
+
+      WebUtils.sendRedirect(application, response, "/schedule/CheckViolations");
+    } finally {
+      session.setAttribute(UploadScheduleData.KEY, uploadScheduleData);
     }
-
-    session.setAttribute(UploadSchedule.MAPPINGS_KEY, categoryColumns);
-    session.setAttribute(CheckViolations.SUBJECTIVE_STATIONS, subjectiveStations);
-
-    WebUtils.sendRedirect(application, response, "/schedule/CheckViolations");
   }
 }

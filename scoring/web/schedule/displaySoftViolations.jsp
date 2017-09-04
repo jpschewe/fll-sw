@@ -18,7 +18,7 @@ There are some warnings in the schedule.
 </p>
  
 <ul>
-<c:forEach items="${uploadSchedule_violations}" var="violation">
+<c:forEach items="${uploadScheduleData.violations}" var="violation">
   <li class='soft-violation'>${violation.message }</li>
 </c:forEach> 
 </ul>

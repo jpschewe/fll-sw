@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -48,18 +49,14 @@ import fll.web.WebUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
- * Read uploadSchedule_file and uploadSchedule_sheet, then check for constraint
- * violations. Stores the schedule in uploadSchedule_schedule, type
- * {@link TournamentSchedule}.
+ * Read the uploaded file, then check for constraint
+ * violations. Stores the schedule in
+ * {@link UploadScheduleData#setSchedule(TournamentSchedule)}.
  */
 @WebServlet("/schedule/CheckViolations")
 public class CheckViolations extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
-
-  public static final String SUBJECTIVE_STATIONS = "uploadSchedule_subjectiveStations";
-
-  public static final String UNUSED_HEADERS = "uploadSchedule_unusedHeaders";
 
   @Override
   protected void processRequest(final HttpServletRequest request,
@@ -68,8 +65,12 @@ public class CheckViolations extends BaseFLLServlet {
                                 final HttpSession session)
       throws IOException, ServletException {
 
-    final File scheduleFile = SessionAttributes.getNonNullAttribute(session, "uploadSchedule_file", File.class);
-    final String sheetName = SessionAttributes.getNonNullAttribute(session, "uploadSchedule_sheet", String.class);
+    final UploadScheduleData uploadScheduleData = SessionAttributes.getNonNullAttribute(session, UploadScheduleData.KEY,
+                                                                                        UploadScheduleData.class);
+    final File scheduleFile = uploadScheduleData.getScheduleFile();
+    Objects.requireNonNull(scheduleFile);
+
+    final String sheetName = uploadScheduleData.getSelectedSheet();
     Connection connection = null;
     try {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -77,10 +78,7 @@ public class CheckViolations extends BaseFLLServlet {
 
       // if uploadSchedule_subjectiveHeaders is set, then use this as the list
       // of subjective headers
-      // J2EE doesn't have things typed yet
-      @SuppressWarnings("unchecked")
-      List<SubjectiveStation> subjectiveStations = SessionAttributes.getAttribute(session, SUBJECTIVE_STATIONS,
-                                                                                  List.class);
+      List<SubjectiveStation> subjectiveStations = uploadScheduleData.getSubjectiveStations();
 
       final boolean isCsvFile = !ExcelCellReader.isExcelFile(scheduleFile);
 
@@ -91,7 +89,7 @@ public class CheckViolations extends BaseFLLServlet {
           final ColumnInformation columnInfo = TournamentSchedule.findColumns(reader, new LinkedList<String>());
           // stream.close();
           if (!columnInfo.getUnusedColumns().isEmpty()) {
-            session.setAttribute(UNUSED_HEADERS, columnInfo.getUnusedColumns());
+            uploadScheduleData.setUnusedHeaders(columnInfo.getUnusedColumns());
             session.setAttribute("default_duration", SchedParams.DEFAULT_SUBJECTIVE_MINUTES);
             WebUtils.sendRedirect(application, response, "/schedule/chooseSubjectiveHeaders.jsp");
             return;
@@ -121,7 +119,7 @@ public class CheckViolations extends BaseFLLServlet {
           schedule = new TournamentSchedule(name, stream, sheetName, subjectiveHeaders);
         }
       }
-      session.setAttribute(UploadSchedule.SCHEDULE_KEY, schedule);
+      uploadScheduleData.setSchedule(schedule);
 
       final int tournamentID = Queries.getCurrentTournament(connection);
       final Collection<ConstraintViolation> violations = schedule.compareWithDatabase(connection, tournamentID);
@@ -134,7 +132,7 @@ public class CheckViolations extends BaseFLLServlet {
         WebUtils.sendRedirect(application, response, "promptForEventDivisions.jsp");
         return;
       } else {
-        session.setAttribute("uploadSchedule_violations", violations);
+        uploadScheduleData.setViolations(violations);
         for (final ConstraintViolation violation : violations) {
           if (ConstraintViolation.Type.HARD == violation.getType()) {
             WebUtils.sendRedirect(application, response, "/schedule/displayHardViolations.jsp");
@@ -163,6 +161,8 @@ public class CheckViolations extends BaseFLLServlet {
       throw new FLLRuntimeException(message, e);
     } finally {
       SQLFunctions.close(connection);
+
+      session.setAttribute(UploadScheduleData.KEY, uploadScheduleData);
     }
   }
 
