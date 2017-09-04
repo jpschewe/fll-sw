@@ -42,7 +42,7 @@
           <td><select name='${subcat.name}:header'>
 
               <c:forEach
-                items="${uploadSchedule_unusedHeaders }"
+                items="${uploadScheduleData.unusedHeaders }"
                 var="subjHeader"
                 varStatus="loopStatus">
                 <c:if test="${fn:length(subjHeader) > 0 }">

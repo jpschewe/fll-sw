@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -38,7 +39,8 @@ import net.mtu.eggplant.util.Pair;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
- * Commit the schedule in uploadSchedule_schedule to the database for the
+ * Commit the schedule in {@link UploadScheduleData#getSchedule()} to the
+ * database for the
  * current tournament.
  */
 @WebServlet("/schedule/CommitSchedule")
@@ -50,26 +52,26 @@ public class CommitSchedule extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
+
+    final UploadScheduleData uploadScheduleData = SessionAttributes.getNonNullAttribute(session, UploadScheduleData.KEY,
+                                                                                        UploadScheduleData.class);
 
     Connection connection = null;
     try {
       connection = datasource.getConnection();
       final int tournamentID = Queries.getCurrentTournament(connection);
 
-      final TournamentSchedule schedule = SessionAttributes.getNonNullAttribute(session, UploadSchedule.SCHEDULE_KEY,
-                                                                                TournamentSchedule.class);
+      final TournamentSchedule schedule = uploadScheduleData.getSchedule();
+      Objects.requireNonNull(schedule);
 
       schedule.storeSchedule(connection, tournamentID);
 
       assignJudgingGroups(connection, tournamentID, schedule);
 
-      // J2EE doesn't have things typed yet
-      @SuppressWarnings("unchecked")
-      final Collection<CategoryColumnMapping> categoryColumnMappings = SessionAttributes.getAttribute(session,
-                                                                                                      UploadSchedule.MAPPINGS_KEY,
-                                                                                                      Collection.class);
+      final Collection<CategoryColumnMapping> categoryColumnMappings = uploadScheduleData.getCategoryColumnMappings();
 
       CategoryColumnMapping.store(connection, tournamentID, categoryColumnMappings);
 
@@ -82,7 +84,8 @@ public class CommitSchedule extends BaseFLLServlet {
       }
       Tables.replaceTablesForTournament(connection, tournamentID, tables);
 
-      session.setAttribute(SessionAttributes.MESSAGE, "<p id='success' class='success'>Schedule successfully stored in the database</p>");
+      session.setAttribute(SessionAttributes.MESSAGE,
+                           "<p id='success' class='success'>Schedule successfully stored in the database</p>");
       WebUtils.sendRedirect(application, response, "/admin/index.jsp");
       return;
     } catch (final SQLException e) {
@@ -97,8 +100,9 @@ public class CommitSchedule extends BaseFLLServlet {
    * Set judging_station to be the info from the schedule
    */
   private void assignJudgingGroups(final Connection connection,
-                                     final int tournamentID,
-                                     final TournamentSchedule schedule) throws SQLException {
+                                   final int tournamentID,
+                                   final TournamentSchedule schedule)
+      throws SQLException {
 
     for (final TeamScheduleInfo si : schedule.getSchedule()) {
       final String group = si.getJudgingGroup();

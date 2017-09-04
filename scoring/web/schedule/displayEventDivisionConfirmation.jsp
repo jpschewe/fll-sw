@@ -30,7 +30,7 @@
         <th>Award Group</th>
       </tr>
       <c:forEach
-        items="${uploadSchedule_eventDivisionInfo }"
+        items="${uploadScheduleData.eventDivisionInfo }"
         var="info">
         <tr>
           <td>${info.teamNumber}</td>

@@ -30,7 +30,8 @@ import fll.util.LogUtils;
  * deleted once it's
  * been processed. The file is expected to be in the request parameter "file".
  * The page to redirect to when done is expected to be in the request parameter
- * "uploadRedirect". The sheet name will be stored in the session attribute
+ * {@link #UPLOAD_REDIRECT_KEY}. The sheet name will be stored in the session
+ * attribute
  * {@link #SHEET_NAME_KEY}.
  */
 @WebServlet("/UploadSpreadsheet")
@@ -44,8 +45,15 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
   public static final String SPREADSHEET_FILE_KEY = "spreadsheetFile";
 
   /**
+   * Session key for the name of the page to redirect to after the spreadsheet has
+   * been uploaded and the sheet name chosen.
+   */
+  public static final String UPLOAD_REDIRECT_KEY = "uploadRedirect";
+
+  /**
    * Session key for the name of the sheet in the spreadsheet to load.
    * This will be null if a CSV file was loaded.
+   * The data type is {@link String}.
    */
   public static final String SHEET_NAME_KEY = "sheetName";
 
@@ -59,12 +67,14 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
     String nextPage;
     try {
       UploadProcessor.processUpload(request);
-      final String uploadRedirect = (String) request.getAttribute("uploadRedirect");
+      final String uploadRedirect = (String) request.getAttribute(UploadSpreadsheet.UPLOAD_REDIRECT_KEY);
       if (null == uploadRedirect) {
-        throw new RuntimeException("Missing parameter 'uploadRedirect' params: "
+        throw new RuntimeException("Missing parameter '"
+            + UploadSpreadsheet.UPLOAD_REDIRECT_KEY
+            + "' params: "
             + request.getParameterMap());
       }
-      session.setAttribute("uploadRedirect", uploadRedirect);
+      session.setAttribute(UploadSpreadsheet.UPLOAD_REDIRECT_KEY, uploadRedirect);
 
       final FileItem fileItem = (FileItem) request.getAttribute("file");
       final String extension = Utilities.determineExtension(fileItem.getName());
@@ -79,7 +89,7 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
       if (ExcelCellReader.isExcelFile(file)) {
         final List<String> sheetNames = ExcelCellReader.getAllSheetNames(file);
         if (sheetNames.size() > 1) {
-          session.setAttribute("sheetNames", sheetNames);
+          session.setAttribute(ProcessSelectedSheet.SHEET_NAMES_KEY, sheetNames);
           nextPage = "promptForSheetName.jsp";
         } else {
           session.setAttribute(SHEET_NAME_KEY, sheetNames.get(0));
@@ -91,12 +101,14 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
 
     } catch (final FileUploadException e) {
       message.append("<p class='error'>Error processing team data upload: "
-          + e.getMessage() + "</p>");
+          + e.getMessage()
+          + "</p>");
       LOGGER.error(e, e);
       throw new RuntimeException("Error processing team data upload", e);
     } catch (final Exception e) {
       message.append("<p class='error'>Error saving team data into the database: "
-          + e.getMessage() + "</p>");
+          + e.getMessage()
+          + "</p>");
       LOGGER.error(e, e);
       throw new RuntimeException("Error saving team data into the database", e);
     }
