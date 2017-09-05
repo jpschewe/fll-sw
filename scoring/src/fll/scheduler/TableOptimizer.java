@@ -273,13 +273,15 @@ public class TableOptimizer {
           assignments.put(new PerformanceTime(time, tableColor, side1), teamNumber1);
           assignments.put(new PerformanceTime(time, tableColor, side2), teamNumber2);
         } else if (Team.NULL_TEAM_NUMBER != teamNumber1
-            && Team.NULL_TEAM_NUMBER == teamNumber2 && validToHaveNullTeam) {
+            && Team.NULL_TEAM_NUMBER == teamNumber2
+            && validToHaveNullTeam) {
           assignments.put(new PerformanceTime(time, tableColor, side1), teamNumber1);
 
           // can only have 1 uneven pairing at a time
           validToHaveNullTeam = false;
         } else if (Team.NULL_TEAM_NUMBER == teamNumber1
-            && Team.NULL_TEAM_NUMBER != teamNumber2 && validToHaveNullTeam) {
+            && Team.NULL_TEAM_NUMBER != teamNumber2
+            && validToHaveNullTeam) {
           assignments.put(new PerformanceTime(time, tableColor, side2), teamNumber2);
 
           // can only have 1 uneven pairing at a time
@@ -669,7 +671,8 @@ public class TableOptimizer {
    */
   public TableOptimizer(final SchedParams params,
                         final TournamentSchedule schedule,
-                        final File basedir) throws IllegalArgumentException {
+                        final File basedir)
+      throws IllegalArgumentException {
     this.schedule = schedule;
     this.basedir = basedir;
     this.checker = new ScheduleChecker(params, schedule);
@@ -681,7 +684,7 @@ public class TableOptimizer {
 
     final List<ConstraintViolation> violations = checker.verifySchedule();
     for (final ConstraintViolation v : violations) {
-      if (v.isHard()) {
+      if (ConstraintViolation.Type.HARD == v.getType()) {
         throw new IllegalArgumentException("Should not have any hard constraint violations: "
             + v.getMessage());
       }

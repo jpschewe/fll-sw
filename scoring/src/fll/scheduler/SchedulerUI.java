@@ -10,6 +10,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
@@ -38,6 +40,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
@@ -46,6 +50,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
@@ -79,6 +84,7 @@ import org.w3c.dom.Document;
 import com.itextpdf.text.DocumentException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.Team;
 import fll.Utilities;
 import fll.scheduler.SchedParams.InvalidParametersException;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
@@ -87,6 +93,7 @@ import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
+import fll.util.FormatterUtils;
 import fll.util.GuiExceptionHandler;
 import fll.util.LogUtils;
 import fll.util.ProgressDialog;
@@ -176,6 +183,7 @@ public class SchedulerUI extends JFrame {
     mTabbedPane = new JTabbedPane();
     cpane.add(mTabbedPane, BorderLayout.CENTER);
 
+    // --- schedule description panel
     final JPanel scheduleDescriptionPanel = new JPanel(new BorderLayout());
     mTabbedPane.addTab("Description", scheduleDescriptionPanel);
 
@@ -189,11 +197,14 @@ public class SchedulerUI extends JFrame {
     // start out with default values
     mScheduleDescriptionEditor.setParams(new SolverParams());
 
+    // --- end schedule description panel
+
+    // --- schedule panel
     final JPanel schedulePanel = new JPanel(new BorderLayout());
     mTabbedPane.addTab("Schedule", schedulePanel);
 
     mScheduleFilename = new JLabel("");
-    schedulePanel.add(createScheduleToolbar(), BorderLayout.PAGE_START);
+    schedulePanel.add(createScheduleToolbar(), BorderLayout.NORTH);
 
     mScheduleTable = new JTable();
     mScheduleTable.setAutoCreateRowSorter(true);
@@ -211,11 +222,32 @@ public class SchedulerUI extends JFrame {
     final JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, dataScroller, violationScroller);
     schedulePanel.add(splitPane, BorderLayout.CENTER);
 
+    final JPanel constraintsPanel = new JPanel(new GridBagLayout());
+    schedulePanel.add(constraintsPanel, BorderLayout.SOUTH);
+
+    changeDuration = FormatterUtils.createIntegerField(0, 1000);
+    changeDuration.setToolTipText("The number of minutes that a team has between any 2 activities");
+    addRow(constraintsPanel, new JLabel("Change time duration:"), changeDuration);
+
+    performanceChangeDuration = FormatterUtils.createIntegerField(0, 1000);
+    performanceChangeDuration.setToolTipText("The number of minutes that a team has between any 2 performance runs");
+    addRow(constraintsPanel, new JLabel("Performance change time duration:"), performanceChangeDuration);
+
+    performanceDuration = FormatterUtils.createIntegerField(1, 1000);
+    performanceDuration.setToolTipText("The amount of time that the team is expected to be at the table");
+    addRow(constraintsPanel, new JLabel("Performance duration:"), performanceDuration);
+
+    addRow(constraintsPanel, new JLabel("Make sure to pass these values onto your computer person with the schedule!"));
+    
+    // --- end schedule panel
+
     // initial state
     mWriteSchedulesAction.setEnabled(false);
     mDisplayGeneralScheduleAction.setEnabled(false);
     mRunOptimizerAction.setEnabled(false);
     mReloadFileAction.setEnabled(false);
+    
+    setSchedParams(new SchedParams());
 
     pack();
   }
@@ -229,7 +261,7 @@ public class SchedulerUI extends JFrame {
       }
 
       final ConstraintViolation selected = getViolationsModel().getViolation(selectedRow);
-      if (ConstraintViolation.NO_TEAM != selected.getTeam()) {
+      if (Team.NULL_TEAM_NUMBER != selected.getTeam()) {
         final int teamIndex = getScheduleModel().getIndexOfTeam(selected.getTeam());
         final int displayIndex = getScheduleTable().convertRowIndexToView(teamIndex);
         getScheduleTable().changeSelection(displayIndex, 1, false, false);
@@ -411,6 +443,9 @@ public class SchedulerUI extends JFrame {
           return;
         }
 
+        // use the same parameters for checking that the solver used for scheduling
+        setSchedParams(solver.getParameters());
+
         loadScheduleFile(solutionFile, subjectiveStations);
 
         final int result = JOptionPane.showConfirmDialog(SchedulerUI.this, "Would you like to run the table optimizer?",
@@ -520,7 +555,8 @@ public class SchedulerUI extends JFrame {
 
         final File selectedFile = fileChooser.getSelectedFile();
         if (null != selectedFile
-            && selectedFile.isFile() && selectedFile.canRead()) {
+            && selectedFile.isFile()
+            && selectedFile.canRead()) {
           loadScheduleDescription(selectedFile);
         } else if (null != selectedFile) {
           JOptionPane.showMessageDialog(SchedulerUI.this,
@@ -642,7 +678,7 @@ public class SchedulerUI extends JFrame {
     {
       putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Refresh16.gif"));
       putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Refresh24.gif"));
-      putValue(SHORT_DESCRIPTION, "Reload the file");
+      putValue(SHORT_DESCRIPTION, "Reload the file and check for violations");
       // putValue(MNEMONIC_KEY, KeyEvent.VK_X);
     }
 
@@ -764,7 +800,8 @@ public class SchedulerUI extends JFrame {
 
         getScheduleData().outputDetailedSchedules(getSchedParams(), getScheduleFile().getParentFile(), baseFilename);
         JOptionPane.showMessageDialog(SchedulerUI.this, "Detailed schedule written '"
-            + directory.getAbsolutePath() + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
+            + directory.getAbsolutePath()
+            + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
 
         final int answer = JOptionPane.showConfirmDialog(SchedulerUI.this,
                                                          "Would you like to write out the score sheets as well?",
@@ -804,8 +841,10 @@ public class SchedulerUI extends JFrame {
                                                        categoryToSchedule);
 
               JOptionPane.showMessageDialog(SchedulerUI.this, "Scoresheets written '"
-                  + scoresheetFile.getAbsolutePath() + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
-            } // not canceled
+                  + scoresheetFile.getAbsolutePath()
+                  + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
+            } // not
+              // canceled
           } // valid descriptor location
         } // yes to write score sheets
       } catch (final DocumentException e) {
@@ -892,9 +931,8 @@ public class SchedulerUI extends JFrame {
         fis = null;
       }
 
-      mSchedParams = new SchedParams(newSubjectiveStations, SchedParams.DEFAULT_PERFORMANCE_MINUTES,
-                                     SchedParams.MINIMUM_CHANGETIME_MINUTES,
-                                     SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES);
+      mSchedParams.setSubjectiveStations(newSubjectiveStations);
+
       final List<String> subjectiveHeaders = new LinkedList<String>();
       for (final SubjectiveStation station : newSubjectiveStations) {
         subjectiveHeaders.add(station.getName());
@@ -914,7 +952,10 @@ public class SchedulerUI extends JFrame {
       setScheduleData(schedule);
 
       setTitle(BASE_TITLE
-          + " - " + mScheduleFile.getName() + ":" + mScheduleSheetName);
+          + " - "
+          + mScheduleFile.getName()
+          + ":"
+          + mScheduleSheetName);
 
       mWriteSchedulesAction.setEnabled(true);
       mDisplayGeneralScheduleAction.setEnabled(true);
@@ -1000,7 +1041,12 @@ public class SchedulerUI extends JFrame {
 
         final File selectedFile = fileChooser.getSelectedFile();
         if (null != selectedFile
-            && selectedFile.isFile() && selectedFile.canRead()) {
+            && selectedFile.isFile()
+            && selectedFile.canRead()) {
+
+          // use default sched params until the user changes them
+          setSchedParams(new SchedParams());
+
           loadScheduleFile(selectedFile, null);
         } else if (null != selectedFile) {
           JOptionPane.showMessageDialog(SchedulerUI.this,
@@ -1044,7 +1090,7 @@ public class SchedulerUI extends JFrame {
   @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This calss isn't going to be serialized")
   private TournamentSchedule mScheduleData;
 
-      /* package */TournamentSchedule getScheduleData() {
+  /* package */TournamentSchedule getScheduleData() {
     return mScheduleData;
   }
 
@@ -1052,6 +1098,13 @@ public class SchedulerUI extends JFrame {
 
   public SchedParams getSchedParams() {
     return mSchedParams;
+  }
+
+  private void setSchedParams(final SchedParams params) {
+    mSchedParams = params;
+    changeDuration.setValue(mSchedParams.getChangetimeMinutes());
+    performanceChangeDuration.setValue(mSchedParams.getPerformanceChangetimeMinutes());
+    performanceDuration.setValue(mSchedParams.getPerformanceMinutes());
   }
 
   private SchedulerTableModel mScheduleModel;
@@ -1062,7 +1115,7 @@ public class SchedulerUI extends JFrame {
 
   private ViolationTableModel mViolationsModel;
 
-      /* package */ViolationTableModel getViolationsModel() {
+  /* package */ViolationTableModel getViolationsModel() {
     return mViolationsModel;
   }
 
@@ -1082,7 +1135,14 @@ public class SchedulerUI extends JFrame {
   private void checkSchedule() {
     violationTable.clearSelection();
 
-    final ScheduleChecker checker = new ScheduleChecker(getSchedParams(), getScheduleData());
+    // make sure sched params are updated based on the UI elements
+    final SchedParams params = getSchedParams();
+
+    params.setPerformanceMinutes((Integer) performanceDuration.getValue());
+    params.setChangetimeMinutes((Integer) changeDuration.getValue());
+    params.setPerformanceChangetimeMinutes((Integer) performanceChangeDuration.getValue());
+
+    final ScheduleChecker checker = new ScheduleChecker(params, getScheduleData());
     mViolationsModel = new ViolationTableModel(checker.verifySchedule());
     violationTable.setModel(mViolationsModel);
   }
@@ -1130,22 +1190,23 @@ public class SchedulerUI extends JFrame {
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Checking for violations against team: "
             + schedInfo.getTeamNumber() //
-            + " column: " + tmCol //
-            + " row: " + tmRow //
+            + " column: "
+            + tmCol //
+            + " row: "
+            + tmRow //
         );
       }
 
-      boolean error = false;
-      boolean isHard = false;
+      final SortedSet<ConstraintViolation.Type> violationTypes = new TreeSet<>();
       for (final ConstraintViolation violation : getViolationsModel().getViolations()) {
         if (violation.getTeam() == schedInfo.getTeamNumber()) {
           Collection<SubjectiveTime> subjectiveTimes = violation.getSubjectiveTimes();
           if (tmCol <= SchedulerTableModel.JUDGE_COLUMN
-              && subjectiveTimes.isEmpty() && null == violation.getPerformance()) {
+              && subjectiveTimes.isEmpty()
+              && null == violation.getPerformance()) {
             // there is an error for this team and the team information fields
             // should be highlighted
-            error = true;
-            isHard |= violation.isHard();
+            violationTypes.add(violation.getType());
           } else if (null != violation.getPerformance()) {
             // need to check round which round
             int round = 0;
@@ -1167,28 +1228,32 @@ public class SchedulerUI extends JFrame {
                 + (round
                     * SchedulerTableModel.NUM_COLUMNS_PER_ROUND);
             final int lastIdx = firstIdx
-                + SchedulerTableModel.NUM_COLUMNS_PER_ROUND - 1;
+                + SchedulerTableModel.NUM_COLUMNS_PER_ROUND
+                - 1;
             if (firstIdx <= tmCol
                 && tmCol <= lastIdx) {
-              error = true;
-              isHard |= violation.isHard();
+              violationTypes.add(violation.getType());
             }
 
             if (LOGGER.isTraceEnabled()) {
               LOGGER.trace("Violation is in performance round: "
                   + round //
-                  + " team: " + schedInfo.getTeamNumber() //
-                  + " firstIdx: " + firstIdx //
-                  + " lastIdx: " + lastIdx //
-                  + " column: " + tmCol //
-                  + " error: " + error //
+                  + " team: "
+                  + schedInfo.getTeamNumber() //
+                  + " firstIdx: "
+                  + firstIdx //
+                  + " lastIdx: "
+                  + lastIdx //
+                  + " column: "
+                  + tmCol //
+                  + " types: "
+                  + violationTypes //
               );
             }
           } else {
             for (final SubjectiveTime subj : subjectiveTimes) {
               if (tmCol == getScheduleModel().getColumnForSubjective(subj.getName())) {
-                error = true;
-                isHard |= violation.isHard();
+                violationTypes.add(violation.getType());
               }
             }
           }
@@ -1198,8 +1263,10 @@ public class SchedulerUI extends JFrame {
       // set the background based on the error state
       setForeground(null);
       setBackground(null);
-      if (error) {
-        final Color violationColor = isHard ? HARD_CONSTRAINT_COLOR : SOFT_CONSTRAINT_COLOR;
+      if (!violationTypes.isEmpty()) {
+        final ConstraintViolation.Type maxViolationType = violationTypes.last(); // highest
+                                                                                 // number
+        final Color violationColor = colorForViolation(maxViolationType);
         if (isSelected) {
           setForeground(violationColor);
         } else {
@@ -1216,6 +1283,18 @@ public class SchedulerUI extends JFrame {
     }
   };
 
+  private static Color colorForViolation(final ConstraintViolation.Type type) {
+    switch (type) {
+    case HARD:
+      return HARD_CONSTRAINT_COLOR;
+    case SOFT:
+      return SOFT_CONSTRAINT_COLOR;
+    default:
+      throw new IllegalArgumentException("Unknown constraint type: "
+          + type);
+    }
+  }
+
   private TableCellRenderer violationTableRenderer = new DefaultTableCellRenderer() {
     @Override
     public Component getTableCellRendererComponent(final JTable table,
@@ -1230,7 +1309,7 @@ public class SchedulerUI extends JFrame {
 
       final ConstraintViolation violation = getViolationsModel().getViolation(tmRow);
 
-      final Color violationColor = violation.isHard() ? HARD_CONSTRAINT_COLOR : SOFT_CONSTRAINT_COLOR;
+      final Color violationColor = colorForViolation(violation.getType());
       setForeground(null);
       setBackground(null);
       if (isSelected) {
@@ -1314,4 +1393,43 @@ public class SchedulerUI extends JFrame {
     }
     return subjectiveHeaders;
   }
+
+  private final JFormattedTextField changeDuration;
+
+  private final JFormattedTextField performanceChangeDuration;
+
+  private final JFormattedTextField performanceDuration;
+
+  /**
+   * Add a row of components to the specified container and then add a spacer to
+   * the end of the row.
+   * The container must have it's layout set to {@link GridBagLayout}.
+   * 
+   * @param components the components to add
+   * @param container where to add the components to
+   */
+  private static void addRow(final JComponent container,
+                             final JComponent... components) {
+    GridBagConstraints gbc;
+
+    // for (final JComponent comp : components) {
+    for (int i = 0; i < components.length
+        - 1; ++i) {
+      final JComponent comp = components[i];
+      gbc = new GridBagConstraints();
+      gbc.anchor = GridBagConstraints.WEST;
+      gbc.weighty = 0;
+      container.add(comp, gbc);
+    }
+
+    // end of line spacer
+    gbc = new GridBagConstraints();
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.weightx = 1.0;
+    // add(new JPanel(), gbc);
+    container.add(components[components.length
+        - 1], gbc);
+  }
+
 }

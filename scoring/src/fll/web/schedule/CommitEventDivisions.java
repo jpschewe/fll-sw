@@ -19,8 +19,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.log4j.Logger;
 
 import fll.db.Queries;
@@ -30,10 +28,10 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.WebUtils;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
- * Commit the schedule in uploadSchedule_schedule to the database for the
- * current tournament.
+ * Commit the event divisions for the current tournament.
  */
 @WebServlet("/schedule/CommitEventDivisions")
 public class CommitEventDivisions extends BaseFLLServlet {
@@ -44,23 +42,22 @@ public class CommitEventDivisions extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final UploadScheduleData uploadScheduleData = SessionAttributes.getNonNullAttribute(session, UploadScheduleData.KEY,
+                                                                                        UploadScheduleData.class);
 
     Connection connection = null;
     try {
       connection = datasource.getConnection();
       final int tournamentID = Queries.getCurrentTournament(connection);
 
-      // can't put types inside a session
-      @SuppressWarnings("unchecked")
-      final List<EventDivisionInfo> eventDivisionInfo = SessionAttributes.getNonNullAttribute(session,
-                                                                                              GatherEventDivisionChanges.EVENT_DIVISION_INFO_KEY,
-                                                                                              List.class);
+      final List<EventDivisionInfo> eventDivisionInfo = uploadScheduleData.getEventDivisionInfo();
+
       for (final EventDivisionInfo info : eventDivisionInfo) {
         Queries.updateTeamEventDivision(connection, info.getTeamNumber(), tournamentID, info.getEventDivision());
       }
-      session.removeAttribute(GatherEventDivisionChanges.EVENT_DIVISION_INFO_KEY);
 
       WebUtils.sendRedirect(application, response, "/schedule/CommitSchedule");
       return;

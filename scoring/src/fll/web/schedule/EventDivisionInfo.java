@@ -6,10 +6,12 @@
 
 package fll.web.schedule;
 
+import java.io.Serializable;
+
 /**
  * Helper class to gather up information about event division changes.
  */
-public final class EventDivisionInfo {
+public final class EventDivisionInfo implements Serializable {
 
   public EventDivisionInfo(final int teamNumber,
                            final String teamName,
