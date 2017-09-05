@@ -18,7 +18,7 @@ There are some errors with this schedule, please correct them and try again.
 </p>
  
 <ul>
-<c:forEach items="${uploadSchedule_violations}" var="violation">
+<c:forEach items="${uploadScheduleData.violations}" var="violation">
   <c:choose>
     <c:when test="${violation.hard }">
       <li class='hard-violation'>${violation.message }</li>

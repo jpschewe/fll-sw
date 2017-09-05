@@ -270,7 +270,9 @@ public class GreedySolver {
           timeslot = 0;
         }
         LOGGER.debug("Setting table "
-            + table + " start to " + timeslot);
+            + table
+            + " start to "
+            + timeslot);
       } else {
         timeslot = 0;
       }
@@ -341,7 +343,13 @@ public class GreedySolver {
                                    final int timeslot) {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Attempting to assigning subjective group: "
-          + group + " team: " + team + " station: " + station + " time: " + timeslot);
+          + group
+          + " team: "
+          + team
+          + " station: "
+          + station
+          + " time: "
+          + timeslot);
     }
 
     if (timeslot
@@ -448,7 +456,13 @@ public class GreedySolver {
 
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("UN-Assigning subjective group: "
-          + group + " team: " + team + " station: " + station + " time: " + timeslot);
+          + group
+          + " team: "
+          + team
+          + " station: "
+          + station
+          + " time: "
+          + timeslot);
     }
 
     subjectiveScheduled[group][team][station] = false;
@@ -469,9 +483,9 @@ public class GreedySolver {
                                 final int timeslot,
                                 final int duration) {
     for (int slot = Math.max(0, timeslot
-        - getChangetime()); slot < Math.min(getNumTimeslots(),
-                                            timeslot
-                                                + duration + getChangetime()); ++slot) {
+        - getChangetime()); slot < Math.min(getNumTimeslots(), timeslot
+            + duration
+            + getChangetime()); ++slot) {
       if (sy[group][team][station][slot]) {
         return false;
       }
@@ -498,9 +512,9 @@ public class GreedySolver {
     // check [timeslot - changetime, timeslot + duration + changetime) for
     // conflicts
     for (int slot = Math.max(0, timeslot
-        - getChangetime()); slot < Math.min(getNumTimeslots(),
-                                            timeslot
-                                                + duration + getChangetime()); ++slot) {
+        - getChangetime()); slot < Math.min(getNumTimeslots(), timeslot
+            + duration
+            + getChangetime()); ++slot) {
       for (int table = 0; table < solverParameters.getNumTables(); ++table) {
         if (py[group][team][table][0][slot]) {
           return false;
@@ -544,7 +558,16 @@ public class GreedySolver {
                                     final boolean ignoreChangetime) {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Attempting to assigning performance group: "
-          + group + " team: " + team + " table: " + table + " side: " + side + " time: " + timeslot + " doAssignment: "
+          + group
+          + " team: "
+          + team
+          + " table: "
+          + table
+          + " side: "
+          + side
+          + " time: "
+          + timeslot
+          + " doAssignment: "
           + doAssignment);
     }
 
@@ -587,7 +610,15 @@ public class GreedySolver {
     if (doAssignment) {
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Assigning performance group: "
-            + group + " team: " + team + " table: " + table + " side: " + side + " time: " + timeslot);
+            + group
+            + " team: "
+            + team
+            + " table: "
+            + table
+            + " side: "
+            + side
+            + " time: "
+            + timeslot);
       }
 
       ++performanceScheduled[group][team];
@@ -609,10 +640,9 @@ public class GreedySolver {
                                       final int team,
                                       final int timeslot) {
     for (int slot = Math.max(0, timeslot
-        - getPerformanceChangetime()); slot < Math.min(getNumTimeslots(),
-                                                       timeslot
-                                                           + getPerformanceChangetime()
-                                                           + getPerformanceDuration()); ++slot) {
+        - getPerformanceChangetime()); slot < Math.min(getNumTimeslots(), timeslot
+            + getPerformanceChangetime()
+            + getPerformanceDuration()); ++slot) {
       for (int table = 0; table < solverParameters.getNumTables(); ++table) {
         if (py[group][team][table][0][slot]) {
           return false;
@@ -642,7 +672,15 @@ public class GreedySolver {
 
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("UN-Assigning performance group: "
-          + group + " team: " + team + " table: " + table + " side: " + side + " time: " + timeslot);
+          + group
+          + " team: "
+          + team
+          + " table: "
+          + table
+          + " side: "
+          + side
+          + " time: "
+          + timeslot);
     }
 
     --performanceScheduled[group][team];
@@ -675,7 +713,8 @@ public class GreedySolver {
     final boolean oddTeams = (getAllTeams().size()
         & 1) == 1;
     return !dummyPerformanceSlotUsed
-        && oddTeams && oddPerfRounds;
+        && oddTeams
+        && oddPerfRounds;
   }
 
   private boolean schedPerf(final int table,
@@ -740,7 +779,9 @@ public class GreedySolver {
                                   true)) {
               if (LOGGER.isTraceEnabled()) {
                 LOGGER.trace("Choose dummy group: "
-                    + prevTeamOnTable0.getGroup() + " team: " + prevTeamOnTable0.getIndex());
+                    + prevTeamOnTable0.getGroup()
+                    + " team: "
+                    + prevTeamOnTable0.getIndex());
               }
               foundOtherTeam = true;
             }
@@ -751,7 +792,9 @@ public class GreedySolver {
             if (null != prevTeamOnTable1) {
               if (LOGGER.isTraceEnabled()) {
                 LOGGER.trace("Choose dummy group: "
-                    + prevTeamOnTable1.getGroup() + " team: " + prevTeamOnTable1.getIndex());
+                    + prevTeamOnTable1.getGroup()
+                    + " team: "
+                    + prevTeamOnTable1.getIndex());
               }
               if (assignPerformance(prevTeamOnTable1.getGroup(), prevTeamOnTable1.getIndex(), timeslot, table, 1, false,
                                     true)) {
@@ -795,11 +838,16 @@ public class GreedySolver {
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("Partial table assignment, unassigning group: "
               + team1.getGroup() //
-              + " team: " + team1.getIndex() //
-              + " slot: " + timeslot //
-              + " table: " + table //
-              + " prevTeamOnTable null?: " + (null == prevTeamOnTable) //
-              + " partial allowed: " + partialPerformanceAssignmentAllowed() //
+              + " team: "
+              + team1.getIndex() //
+              + " slot: "
+              + timeslot //
+              + " table: "
+              + table //
+              + " prevTeamOnTable null?: "
+              + (null == prevTeamOnTable) //
+              + " partial allowed: "
+              + partialPerformanceAssignmentAllowed() //
           );
         }
         unassignPerformance(team1.getGroup(), team1.getIndex(), timeslot, table, 0);
@@ -1038,7 +1086,8 @@ public class GreedySolver {
       }
     } else {
       LOGGER.info("Found "
-          + solutionsFound + " solutions");
+          + solutionsFound
+          + " solutions");
     }
     return solutionsFound;
   }
@@ -1059,7 +1108,7 @@ public class GreedySolver {
       final ScheduleChecker checker = new ScheduleChecker(this.solverParameters, schedule);
       final List<ConstraintViolation> violations = checker.verifySchedule();
       for (final ConstraintViolation violation : violations) {
-        if (violation.isHard()) {
+        if (ConstraintViolation.Type.HARD == violation.getType()) {
           LOGGER.debug("Found hard constraint violations from autosched: "
               + violation.getMessage());
           return -1;
@@ -1111,7 +1160,8 @@ public class GreedySolver {
       }
     }
     LOGGER.warn("Got to end of findLatestSubjectiveTime("
-        + group + "), this implies that nothing was scheduled");
+        + group
+        + "), this implies that nothing was scheduled");
     return 0;
   }
 
@@ -1184,7 +1234,11 @@ public class GreedySolver {
 
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("subjective group: "
-              + group + " station: " + station + " next available: " + nextAvailableSubjSlot);
+              + group
+              + " station: "
+              + station
+              + " next available: "
+              + nextAvailableSubjSlot);
         }
 
         // mark the subjective station as used at this timeslot and advance the
@@ -1214,7 +1268,9 @@ public class GreedySolver {
       for (final int table : possiblePerformanceTables) {
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("performance table: "
-              + table + " next available: " + nextAvailablePerfSlot);
+              + table
+              + " next available: "
+              + nextAvailablePerfSlot);
         }
 
         // mark the performance station as used at this timeslot and advance the
@@ -1322,7 +1378,9 @@ public class GreedySolver {
 
   private boolean outputCurrentSolution() {
     final File scheduleFile = new File(Utilities.extractAbsoluteBasename(datafile)
-        + "-" + solutionsFound + ".csv");
+        + "-"
+        + solutionsFound
+        + ".csv");
 
     try {
       outputSchedule(scheduleFile);
@@ -1359,7 +1417,9 @@ public class GreedySolver {
           + 1;
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Tightening numTimeslots from "
-            + numTimeslots + " to " + newNumTimeslots);
+            + numTimeslots
+            + " to "
+            + newNumTimeslots);
       }
       numTimeslots = newNumTimeslots;
     } else {
@@ -1434,9 +1494,12 @@ public class GreedySolver {
           final LocalTime time = getTime(sz[team.getGroup()][team.getIndex()][subj], 1);
           if (null == time) {
             throw new RuntimeException("Could not find a subjective start for group: "
-                + groupNames[team.getGroup()] + " team: " + (team.getIndex()
+                + groupNames[team.getGroup()]
+                + " team: "
+                + (team.getIndex()
                     + 1)
-                + " subj: " + station.getName());
+                + " subj: "
+                + station.getName());
           }
           line.add(TournamentSchedule.formatTime(time));
         }
@@ -1460,17 +1523,23 @@ public class GreedySolver {
         }
         if (perfTimes.size() != solverParameters.getNumPerformanceRounds()) {
           throw new FLLRuntimeException("Expecting "
-              + solverParameters.getNumPerformanceRounds() + " performance times, but found " + perfTimes.size()
-              + " group: " + (team.getGroup()
+              + solverParameters.getNumPerformanceRounds()
+              + " performance times, but found "
+              + perfTimes.size()
+              + " group: "
+              + (team.getGroup()
                   + 1)
-              + " team: " + (team.getIndex()
+              + " team: "
+              + (team.getIndex()
                   + 1)
-              + " perfs: " + perfTimes);
+              + " perfs: "
+              + perfTimes);
         }
         for (final PerformanceTime perfTime : perfTimes) {
           line.add(TournamentSchedule.formatTime(perfTime.getTime()));
           line.add(perfTime.getTable()
-              + " " + perfTime.getSide());
+              + " "
+              + perfTime.getSide());
         }
 
         csv.writeNext(line.toArray(new String[line.size()]));

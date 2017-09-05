@@ -14,7 +14,7 @@ If you want to test out the latest code you can do so by [downloading the most r
   1. You can stop tomcat with `./ant.sh tomcat.stop`, the target `tomcat.reload` can be useful when working on servlet code.
   1. We have a continuous integration server running using [Jenkins](http://jenkins-ci.org/). You can access it at [http://mtu.net/jenkins/job/fll-sw/](http://mtu.net/jenkins/job/fll-sw/). The master branch is built by the job 'fll-sw', all other branches are built by 'fll-sw-feature-branches'.
 
-You can edit using your favorite Java IDE. We provide project files for Eclipse.
+You can edit using your favorite Java IDE. We provide project files for Eclipse. See the eclipse folder for the launchers and the code formatter profile.
 
 If running on 64-bit Linux you will need libc6-i386 installed otherwise you will get a cryptic file not found error when the launch4j task runs.
 This is because the launch4j task needs to execute a 32-bit binary.

@@ -240,9 +240,9 @@ public class FullTournamentTest {
     loadTeams(testDataConn, sourceTournament, outputDirectory);
 
     IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
-        + "admin/database.flldb"), "application/zip",
-                                      outputDirectory.resolve(safeTestTournamentName
-                                          + "_01-teams-loaded.flldb"));
+        + "admin/database.flldb"), "application/zip", outputDirectory.resolve(
+                                                                              safeTestTournamentName
+                                                                                  + "_01-teams-loaded.flldb"));
 
     LOGGER.info("Setting current tournament");
     IntegrationTestUtils.setTournament(selenium, sourceTournament.getName());
@@ -250,25 +250,25 @@ public class FullTournamentTest {
     LOGGER.info("Loading the schedule");
     uploadSchedule(testDataConn, sourceTournament, outputDirectory);
     IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
-        + "admin/database.flldb"), "application/zip",
-                                      outputDirectory.resolve(safeTestTournamentName
-                                          + "_02-schedule-loaded.flldb"));
+        + "admin/database.flldb"), "application/zip", outputDirectory.resolve(
+                                                                              safeTestTournamentName
+                                                                                  + "_02-schedule-loaded.flldb"));
 
     LOGGER.info("Assigning judges");
     assignJudges(testDataConn, sourceTournament);
 
     IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
-        + "admin/database.flldb"), "application/zip",
-                                      outputDirectory.resolve(safeTestTournamentName
-                                          + "_03-judges-assigned.flldb"));
+        + "admin/database.flldb"), "application/zip", outputDirectory.resolve(
+                                                                              safeTestTournamentName
+                                                                                  + "_03-judges-assigned.flldb"));
 
     LOGGER.info("Assigning table labels");
     assignTableLabels();
 
     IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
-        + "admin/database.flldb"), "application/zip",
-                                      outputDirectory.resolve(safeTestTournamentName
-                                          + "_04-table-labels-assigned.flldb"));
+        + "admin/database.flldb"), "application/zip", outputDirectory.resolve(
+                                                                              safeTestTournamentName
+                                                                                  + "_04-table-labels-assigned.flldb"));
 
     /*
      * --- Enter 3 runs for each team --- Use data from test data base,
@@ -299,9 +299,9 @@ public class FullTournamentTest {
         if (runNumber > numSeedingRounds) {
           if (!initializedPlayoff) {
             IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
-                + "admin/database.flldb"), "application/zip",
-                                              outputDirectory.resolve(safeTestTournamentName
-                                                  + "_05-seeding-rounds-completed.flldb"));
+                + "admin/database.flldb"), "application/zip", outputDirectory.resolve(
+                                                                                      safeTestTournamentName
+                                                                                          + "_05-seeding-rounds-completed.flldb"));
 
             checkSeedingRounds();
 
@@ -346,9 +346,9 @@ public class FullTournamentTest {
 
       LOGGER.info("Writing final datbaase");
       IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
-          + "admin/database.flldb"), "application/zip",
-                                        outputDirectory.resolve(safeTestTournamentName
-                                            + "_99-final.flldb"));
+          + "admin/database.flldb"), "application/zip", outputDirectory.resolve(
+                                                                                safeTestTournamentName
+                                                                                    + "_99-final.flldb"));
     }
 
   }
@@ -379,6 +379,11 @@ public class FullTournamentTest {
       fileInput.sendKeys(outputFile.toAbsolutePath().toString());
       selenium.findElement(By.id("upload-schedule")).click();
       Assert.assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.id("error")));
+
+      // accept default schedule constraints
+      Assert.assertTrue(selenium.getCurrentUrl().contains("scheduleConstraints"));
+      selenium.findElement(By.id("submit")).click();
+      Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
 
       // check that we're on the choose headers page and set the header
       // mappings
@@ -424,7 +429,8 @@ public class FullTournamentTest {
 
   /**
    * Make sure there are no teams with more or less than seeding rounds.
-   * @throws InterruptedException 
+   * 
+   * @throws InterruptedException
    */
   private void checkSeedingRounds() throws IOException, InterruptedException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
@@ -439,7 +445,7 @@ public class FullTournamentTest {
    * Get the award groups in this tournament.
    * 
    * @throws IOException
-   * @throws InterruptedException 
+   * @throws InterruptedException
    */
   private Set<String> getAwardGroups() throws IOException, InterruptedException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
@@ -488,7 +494,13 @@ public class FullTournamentTest {
       throws IOException, InterruptedException {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Assigning judge '"
-          + id + "' cat: '" + category + "' station: '" + station + "' index: " + judgeIndex);
+          + id
+          + "' cat: '"
+          + category
+          + "' station: '"
+          + station
+          + "' index: "
+          + judgeIndex);
     }
 
     // make sure the row exists
@@ -572,7 +584,7 @@ public class FullTournamentTest {
    *          case a temp file will be used
    * @throws IOException
    * @throws SQLException
-   * @throws InterruptedException 
+   * @throws InterruptedException
    */
   private void loadTeams(final Connection testDataConnection,
                          final Tournament sourceTournament,
@@ -659,7 +671,8 @@ public class FullTournamentTest {
     final String sqlTemplate = "SELECT FinalScores.TeamNumber, FinalScores.OverallScore" //
         + " FROM FinalScores, current_tournament_teams, Tournaments" //
         + " WHERE FinalScores.TeamNumber = current_tournament_teams.TeamNumber" //
-        + " AND Tournaments.Name = '%s'" + " AND FinalScores.Tournament = Tournaments.tournament_id" //
+        + " AND Tournaments.Name = '%s'"
+        + " AND FinalScores.Tournament = Tournaments.tournament_id" //
         + " AND current_tournament_teams.event_division = '%s'" //
         + " ORDER BY FinalScores.OverallScore DESC";
 
@@ -772,7 +785,7 @@ public class FullTournamentTest {
    * @param challengeDocument the challenge descriptor
    * @throws SQLException
    * @throws SAXException
-   * @throws InterruptedException 
+   * @throws InterruptedException
    */
   private void enterSubjectiveScores(final Connection testDataConn,
                                      final ChallengeDescription description,
@@ -806,7 +819,8 @@ public class FullTournamentTest {
       }
 
       try (final PreparedStatement prep = testDataConn.prepareStatement("SELECT * FROM "
-          + category + " WHERE Tournament = ?")) {
+          + category
+          + " WHERE Tournament = ?")) {
         prep.setInt(1, sourceTournament.getTournamentID());
 
         try (final ResultSet rs = prep.executeQuery()) {
@@ -822,8 +836,17 @@ public class FullTournamentTest {
 
               if (LOGGER.isTraceEnabled()) {
                 LOGGER.trace("Checking if "
-                    + teamNumber + " equals " + value + " raw: " + teamNumberRaw + "? " + (value == teamNumber)
-                    + " rowIdx: " + rowIdx + " numRows: " + tableModel.getRowCount());
+                    + teamNumber
+                    + " equals "
+                    + value
+                    + " raw: "
+                    + teamNumberRaw
+                    + "? "
+                    + (value == teamNumber)
+                    + " rowIdx: "
+                    + rowIdx
+                    + " numRows: "
+                    + tableModel.getRowCount());
               }
 
               if (value == teamNumber) {
@@ -832,7 +855,8 @@ public class FullTournamentTest {
               }
             }
             Assert.assertTrue("Can't find team "
-                + teamNumber + " in subjective table model", rowIndex >= 0);
+                + teamNumber
+                + " in subjective table model", rowIndex >= 0);
 
             if (rs.getBoolean("NoShow")) {
               // find column for no show
@@ -848,7 +872,8 @@ public class FullTournamentTest {
                   // find column index for goal and call set
                   final int columnIndex = findColumnByName(tableModel, goalTitle);
                   Assert.assertTrue("Can't find "
-                      + goalTitle + " column in subjective table model", columnIndex >= 0);
+                      + goalTitle
+                      + " column in subjective table model", columnIndex >= 0);
                   final int value = rs.getInt(goalName);
                   tableModel.setValueAt(Integer.valueOf(value), rowIndex, columnIndex);
                 }
@@ -888,7 +913,9 @@ public class FullTournamentTest {
 
     if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Setting score for "
-          + teamNumber + " run: " + runNumber);
+          + teamNumber
+          + " run: "
+          + runNumber);
     }
 
     try (
@@ -929,7 +956,11 @@ public class FullTournamentTest {
                 final double max = goal.getMax();
                 if (LOGGER.isDebugEnabled()) {
                   LOGGER.debug("Setting form parameter: "
-                      + name + " min: " + min + " max: " + max);
+                      + name
+                      + " min: "
+                      + min
+                      + " max: "
+                      + max);
                 }
 
                 if (goal.isEnumerated()) {
@@ -994,7 +1025,9 @@ public class FullTournamentTest {
           Assert.assertFalse("Errors: ", IntegrationTestUtils.isElementPresent(selenium, By.name("error")));
         } else {
           Assert.fail("Cannot find scores for "
-              + teamNumber + " run " + runNumber);
+              + teamNumber
+              + " run "
+              + runNumber);
         }
       } // try ResultSet
     } // try PreparedStatement
@@ -1018,7 +1051,9 @@ public class FullTournamentTest {
 
     if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Verify score for "
-          + teamNumber + " run: " + runNumber);
+          + teamNumber
+          + " run: "
+          + runNumber);
     }
 
     try (
@@ -1037,7 +1072,8 @@ public class FullTournamentTest {
             IntegrationTestUtils.loadPage(selenium, selectTeamPage);
 
             new Select(selenium.findElement(By.id("select-verify-teamnumber"))).selectByValue(teamNumber
-                + "-" + runNumber);
+                + "-"
+                + runNumber);
 
             // submit the page
             selenium.findElement(By.id("verify_submit")).click();
@@ -1120,7 +1156,9 @@ public class FullTournamentTest {
 
         } else {
           Assert.fail("Cannot find scores for "
-              + teamNumber + " run " + runNumber);
+              + teamNumber
+              + " run "
+              + runNumber);
         }
       } // try ResultSet
     } // try PreparedStatement
@@ -1131,7 +1169,7 @@ public class FullTournamentTest {
    * Check display pages that aren't shown otherwise.
    * 
    * @throws IOException
-   * @throws InterruptedException 
+   * @throws InterruptedException
    */
   private void checkDisplays() throws IOException, InterruptedException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT

@@ -23,48 +23,39 @@ import org.apache.log4j.Logger;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.BaseFLLServlet;
+import fll.web.ProcessSelectedSheet;
 import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
+import fll.web.UploadSpreadsheet;
 import fll.web.WebUtils;
 
 /**
- * Saves an uploaded schedule into a temporary file referenced by the session
- * variable "uploadSchedule_file" (type {@link File}).
- * 
+ * The uploaded data is stored in a temporary file.
+ * Stores state in the session key {@link UploadScheduleData#KEY}.
  */
 @WebServlet("/schedule/UploadSchedule")
 public class UploadSchedule extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  public static final String SCHEDULE_KEY = "uploadSchedule_schedule";
-  
-  public static final String MAPPINGS_KEY = "uploadSchedule_mappings";
-  
   /**
    * Clear out session variables used by the schedule upload workflow.
    */
   public static void clearSesionVariables(final HttpSession session) {
-    session.removeAttribute("uploadSchedule_file");
-    session.removeAttribute("uploadSchedule_sheet");
-    session.removeAttribute("uploadSchedule_schedule");
-    session.removeAttribute("uploadSchedule_violations");
-    session.removeAttribute(SCHEDULE_KEY);
-    session.removeAttribute(MAPPINGS_KEY);
-    session.removeAttribute(GatherEventDivisionChanges.EVENT_DIVISION_INFO_KEY);
-    session.removeAttribute("sheetName");
-    session.removeAttribute("sheetNames");
-    session.removeAttribute(CheckViolations.SUBJECTIVE_STATIONS);
-    session.removeAttribute(CheckViolations.UNUSED_HEADERS);
+    session.removeAttribute(UploadScheduleData.KEY);
+    session.removeAttribute(ProcessSelectedSheet.SHEET_NAMES_KEY);
+    session.removeAttribute(UploadSpreadsheet.SHEET_NAME_KEY);
   }
-  
+
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     clearSesionVariables(session);
-    
+    final UploadScheduleData uploadScheduleData = new UploadScheduleData();
+
     final File file = File.createTempFile("fll", null);
     file.deleteOnExit();
     try {
@@ -81,7 +72,8 @@ public class UploadSchedule extends BaseFLLServlet {
         return;
       } else {
         scheduleFileItem.write(file);
-        session.setAttribute("uploadSchedule_file", file);
+
+        uploadScheduleData.setScheduleFile(file);
 
         WebUtils.sendRedirect(application, response, "/schedule/CheckScheduleExists");
         return;
@@ -93,6 +85,8 @@ public class UploadSchedule extends BaseFLLServlet {
       final String message = "There was an error writing the uploaded file to the filesystem";
       LOGGER.error(message, e);
       throw new FLLRuntimeException(message, e);
+    } finally {
+      session.setAttribute(UploadScheduleData.KEY, uploadScheduleData);
     }
 
   }

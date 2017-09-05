@@ -13,53 +13,82 @@ import java.util.Collections;
 import java.util.LinkedList;
 
 /**
- * Constraint violation during scheduling.
+ * A schedule constraint violation.
  */
 public final class ConstraintViolation implements Serializable {
 
-  // TODO use Team.Null_TEam_number
-  public static final int NO_TEAM = -1;
+  /**
+   * The type of constraint.
+   */
+  public static enum Type {
+    // note that soft has a lower ordinal than hard because it's declared first
+    /**
+     * Soft constraint violations are minor warnings. It would be nice to get rid of
+     * them, but not a real big deal.
+     */
+    SOFT,
+    /**
+     * Hard constraint violations are those that can not be violated and still have
+     * a valid schedule. An example of this type of violation is a team being in 2
+     * places at once.
+     */
+    HARD;
+  }
 
   private final int team;
 
+  /**
+   * @return the team with the problem, may be {@link Team#NULL_TEAM_NUMBER}
+   */
   public int getTeam() {
     return team;
   }
 
   private final LocalTime performance;
 
+  /**
+   * @return if a performance problem, the time of the performance,
+   *         otherwise null
+   */
   public LocalTime getPerformance() {
     return performance;
   }
 
   private final String message;
 
+  /**
+   * @return the message for the constraint violation
+   */
   public String getMessage() {
     return message;
   }
 
-  private final boolean isHard;
+  private final Type type;
 
-  public boolean isHard() {
-    return isHard;
+  /**
+   * @return the type of this constraint violation
+   */
+  public Type getType() {
+    return type;
   }
 
   /**
-   * @param isHard is this a hard constraint or a soft constraint violation?
-   * @param team the team with the problem, may be {@link #NO_TEAM}
-   * @param subjective1 First subjective time problem, may be null
-   * @param subjective2 econdsubjective time problem, may be null
-   * @param performance if a performance problem, the time of the performance,
-   *          may be null
-   * @param message message to report
+   * @param type see {@link #getType()}
+   * @param team see {@link #getTeam()}
+   * @param subjective1 First subjective time problem, may be null. Added to
+   *          {@link #getSubjectiveTimes()} if not null.
+   * @param subjective2 second subjective time problem, may be null. Added to
+   *          {@link #getSubjectiveTimes()} if not null.
+   * @param performance see {@link #getPerformance()}
+   * @param message see {@link #getMessage()}
    */
-  public ConstraintViolation(final boolean isHard,
+  public ConstraintViolation(final Type type,
                              final int team,
                              final SubjectiveTime subjective1,
                              final SubjectiveTime subjective2,
                              final LocalTime performance,
                              final String message) {
-    this.isHard = isHard;
+    this.type = type;
     this.team = team;
     if (null != subjective1) {
       subjectiveTimes.add(subjective1);
