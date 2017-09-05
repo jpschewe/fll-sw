@@ -70,7 +70,7 @@ public class UploadScheduleData implements Serializable {
     selectedSheet = v;
   }
 
-  private Collection<ConstraintViolation> violations = new LinkedList<>();
+  private LinkedList<ConstraintViolation> violations = new LinkedList<>();
 
   /**
    * @return the violations found in the uploaded schedule, initially empty,
@@ -106,7 +106,7 @@ public class UploadScheduleData implements Serializable {
     schedule = v;
   }
 
-  private Collection<CategoryColumnMapping> categoryColumnMappings = new LinkedList<>();
+  private LinkedList<CategoryColumnMapping> categoryColumnMappings = new LinkedList<>();
 
   /**
    * @return the mappings of categories to schedule columns, initially empty,
