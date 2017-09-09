@@ -52,7 +52,7 @@ public class Launcher extends JFrame {
   public static void main(final String[] args) {
     LogUtils.initializeLogging();
 
-    Thread.setDefaultUncaughtExceptionHandler(new GuiExceptionHandler());
+    GuiExceptionHandler.registerExceptionHandler();
 
     // Use cross platform look and feel so that things look right all of the
     // time

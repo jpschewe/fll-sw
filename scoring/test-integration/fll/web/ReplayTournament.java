@@ -52,7 +52,7 @@ public class ReplayTournament {
   public static void main(String[] args) {
     LogUtils.initializeLogging();
 
-    Thread.setDefaultUncaughtExceptionHandler(new GuiExceptionHandler());
+    GuiExceptionHandler.registerExceptionHandler();
 
     try {
       // ask for the database to load
