@@ -1,3 +1,4 @@
+* #578 - Make sure to catch exceptions in the event dispatch thread as well as those from other threads
 * #559 - allow one to specify time constraints when checking a schedule
 * #556 - add number of categories a team is being judged in to the finalist schedule
 * #570 - Initial integration with FLL Tools to display scores (not very pretty, but functional)

@@ -17,8 +17,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 /**
  * Display exception information in a dialog and then exit when the dialog is
  * closed.
- * Setup with
- * {@link Thread#setUncaughtExceptionHandler(UncaughtExceptionHandler)}.
  */
 public class GuiExceptionHandler implements UncaughtExceptionHandler {
 
@@ -27,6 +25,15 @@ public class GuiExceptionHandler implements UncaughtExceptionHandler {
   public GuiExceptionHandler() {
   }
 
+  /**
+   * Needed for <code>sun.awt.exception.handler</code>
+   * 
+   * @param throwable
+   */
+  public void handle(final Throwable throwable) {
+    uncaughtException(Thread.currentThread(), throwable);
+  }
+  
   /**
    * @see java.lang.Thread.UncaughtExceptionHandler#uncaughtException(java.lang.Thread,
    *      java.lang.Throwable)
@@ -40,6 +47,14 @@ public class GuiExceptionHandler implements UncaughtExceptionHandler {
     LOGGER.fatal(message, ex);
     JOptionPane.showMessageDialog(null, message, "Unexpected Error", JOptionPane.ERROR_MESSAGE);
     System.exit(1);
+  }
+  
+  /**
+   * Register this class to handle all uncaught exceptions.
+   */
+  public static void registerExceptionHandler() {
+    Thread.setDefaultUncaughtExceptionHandler(new GuiExceptionHandler());
+    System.setProperty("sun.awt.exception.handler", GuiExceptionHandler.class.getName());
   }
 
 }
