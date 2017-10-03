@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <fll title="2017 Minnesota FIRST LEGO League - Hydro Dynamics"
 	copyright="2017 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST) and The LEGO Group. Used by special permission. All rights reserved."
-	revision="5" schemaVersion="2">
+	revision="6" schemaVersion="2">
 
 	<Performance minimumScore="0" weight="1">
 
@@ -220,8 +220,6 @@
 		<goal initialValue="0" max="12" min="0" multiplier="1"
 			name="problem_identification" title="Problem Identification"
 			category="Research" required="true">
-			<description>Clear definition of the problem being studied
-			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3" shortDescription="Unclear, few details">
 					<description>Doesn't relate to FLL theme, no understanding of
@@ -250,9 +248,6 @@
 
 		<goal initialValue="0" max="12" min="0" multiplier="1"
 			name="sources_information" title="Sources of Information" category="Research">
-			<description>Quality and variety of data/evidence and sources
-				cited
-			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
 					shortDescription="minimal quality; variety limited">
@@ -273,9 +268,6 @@
 
 		<goal initialValue="0" max="12" min="0" multiplier="1"
 			name="problem_analysis" title="Problem Analysis" category="Research">
-			<description>Depth to which the problem was studied and analyzed
-				by the team, including extent of analysis of existing solutions
-			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
 					shortDescription="Minimal study; no analysis">
@@ -307,9 +299,6 @@
 		<goal initialValue="0" max="12" min="0" multiplier="1"
 			name="team_solution" title="Team Solution" category="Innovative Solution"
 			required="true">
-			<description>Clear explanation of the proposed solution and
-				description of how it solves the problem
-			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3" shortDescription="Difficult to understand">
 					<description>No solution presented. Team lacks enthusiasm for
@@ -338,12 +327,6 @@
 
 		<goal initialValue="0" max="12" min="0" multiplier="1" name="innovation"
 			title="Innovation" category="Innovative Solution">
-			<description>Degree to which the team's solution makes life better
-				by
-				improving existing options, developing a new application of
-				existing
-				ideas, or solving the problem in a completely new way.
-			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
 					shortDescription="Existing solution/application">
@@ -372,10 +355,6 @@
 
 		<goal initialValue="0" max="12" min="0" multiplier="1"
 			name="solution_development" title="Solution Development" category="Innovative Solution">
-			<description>Systematic process used to select, develop, evaluate,
-				test, and improve the solution (Implementation could include cost,
-				ease of manufacturing, etc.)
-			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
 					shortDescription="process AND explanation need improvement">
@@ -394,11 +373,6 @@
 
 		<goal initialValue="0" max="12" min="0" multiplier="1" name="sharing"
 			title="Sharing" category="Presentation" required="true">
-			<description>Degree to which the team shared their Project before
-				the
-				tournament with others who might benefit from the team's
-				efforts
-			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
 					shortDescription="shared with family / friends">
@@ -429,9 +403,6 @@
 
 		<goal initialValue="0" max="12" min="0" multiplier="1" name="creativity"
 			title="Creativity" category="Presentation">
-			<description>Imagination used to develop and deliver the
-				presentation
-			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
 					shortDescription="Minimally engaging OR unimaginative">
@@ -458,8 +429,6 @@
 		<goal initialValue="0" max="12" min="0" multiplier="1"
 			name="presentation_effectiveness" title="Presentation Effectiveness"
 			category="Presentation">
-			<description>Message delivery and organization of the presentation
-			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3" shortDescription="Unclear OR disorganized">
 					<description>No supporting material, unable to answer judge
