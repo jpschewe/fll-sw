@@ -262,7 +262,7 @@ public final class ImportDB {
     // exist
     final Tournament destTournament = Tournament.findTournamentByName(destConnection, sourceTournament.getName());
     if (null == destTournament) {
-      Tournament.createTournament(destConnection, sourceTournament.getName(), sourceTournament.getLocation());
+      Tournament.createTournament(destConnection, sourceTournament.getName(), sourceTournament.getDescription());
     }
   }
 
