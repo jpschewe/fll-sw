@@ -1104,7 +1104,9 @@ public class TournamentSchedule implements Serializable {
       final ScoreCategory scoreCategory = sheetElement.getSheetData();
       final String schedulerColumn = categoryToSchedule.get(scoreCategory);
 
-      SubjectivePdfWriter.createDocument(filename, description, sheetElement, schedulerColumn, _schedule);
+      try (OutputStream stream = new FileOutputStream(filename)) {
+        SubjectivePdfWriter.createDocument(stream, description, sheetElement, schedulerColumn, _schedule);
+      }
     }
   }
 

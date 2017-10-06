@@ -82,7 +82,13 @@
   <li><a href='scoreboard/index.jsp'>Scoreboard</a></li>
 
   <li><a href='playoff/ScoresheetServlet'>Blank scoresheet for
-    printing (PDF format)</a></li>
+    printing (PDF)</a></li>
+
+		<c:forEach items="${challengeDescription.subjectiveCategories}"
+			var="category">
+			<li><a href="BlankSubjectiveSheet/${category.name}">Blank
+					subjective sheet - ${category.title} (PDF)</a>
+		</c:forEach>
 
   <li><a href='challenge.xml'>Challenge Descriptor</a></li>
 

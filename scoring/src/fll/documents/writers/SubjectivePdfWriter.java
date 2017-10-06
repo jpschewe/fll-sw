@@ -2,8 +2,8 @@ package fll.documents.writers;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalTime;
@@ -514,7 +514,7 @@ public class SubjectivePdfWriter {
   /**
    * Create the document
    * 
-   * @param filename where to write the document
+   * @param stream where to write the document
    * @param sheetElement describes the category to write
    * @param schedulerColumn used to determine the schedule information to output
    * @param schedule the schedule to get team information and time information
@@ -523,7 +523,7 @@ public class SubjectivePdfWriter {
    * @throws IOException
    * @throws MalformedURLException
    */
-  public static void createDocument(final String filename,
+  public static void createDocument(final OutputStream stream,
                                     final ChallengeDescription description,
                                     final SheetElement sheetElement,
                                     final String schedulerColumn,
@@ -536,7 +536,7 @@ public class SubjectivePdfWriter {
 
     com.itextpdf.text.Document pdf = SubjectivePdfWriter.createStandardDocument();
 
-    PdfWriter.getInstance(pdf, new FileOutputStream(filename));
+    PdfWriter.getInstance(pdf, stream);
 
     pdf.open();
 
