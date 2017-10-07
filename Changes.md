@@ -1,3 +1,4 @@
+* #582 - Truncate team names in the performance and subjective sheets instead of allowing them to wrap
 * #462 - Add the ability to output blank subjective sheets
 * #578 - Make sure to catch exceptions in the event dispatch thread as well as those from other threads
 * #559 - allow one to specify time constraints when checking a schedule

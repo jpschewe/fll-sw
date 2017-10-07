@@ -45,6 +45,7 @@ import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.util.FP;
 import fll.util.LogUtils;
+import fll.util.PdfUtils;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.EnumeratedValue;
@@ -491,10 +492,9 @@ public class ScoresheetGenerator {
       namelc.addElement(nameP);
       teamInfo.addCell(namelc);
       // Team name value cell
-      final Paragraph nameV = new Paragraph(m_name[i], COURIER_10PT_NORMAL);
       final PdfPCell nameVc = new PdfPCell(scoreSheet.getDefaultCell());
       nameVc.setColspan(5);
-      nameVc.addElement(nameV);
+      nameVc.setCellEvent(new PdfUtils.TruncateContent(m_name[i], COURIER_10PT_NORMAL));
       teamInfo.addCell(nameVc);
 
       // add team info cell to the team table
