@@ -9,7 +9,7 @@
 					maxOccurs="unbounded" />
 			</xsd:sequence>
             <xsd:attribute name="tournamentName" type="xsd:string" use="required" />
-            <xsd:attribute name="tournamentLocation" type="xsd:string" use="optional" />
+            <xsd:attribute name="tournamentDescription" type="xsd:string" use="optional" />
 		</xsd:complexType>
 	</xsd:element>
 
