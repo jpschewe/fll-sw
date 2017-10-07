@@ -94,7 +94,7 @@ public final class Tournaments {
       } else {
         out.println("<p><b>Tournament name's must be unique.  Tournaments can be removed by erasing the name.</b></p>");
 
-        out.println("<table border='1'><tr><th>Name</th><th>Detailed Name</th></tr>");
+        out.println("<table border='1'><tr><th>Name</th><th>Description</th></tr>");
 
         int row = 0; // keep track of which row we're generating
 
@@ -104,7 +104,7 @@ public final class Tournaments {
           final Iterator<Tournament> tournaments = Tournament.getTournaments(connection).iterator();
           for (row = 0; tournaments.hasNext(); row++) {
             final Tournament tournament = tournaments.next();
-            generateRow(out, row, tournament.getTournamentID(), tournament.getName(), tournament.getLocation());
+            generateRow(out, row, tournament.getTournamentID(), tournament.getName(), tournament.getDescription());
           }
         } else {
           // need to walk the parameters to see what we've been passed
@@ -112,7 +112,7 @@ public final class Tournaments {
               + row);
           String name = request.getParameter("name"
               + row);
-          String location = request.getParameter("location"
+          String location = request.getParameter("description"
               + row);
           while (null != keyStr) {
             final int key = Integer.parseInt(keyStr);
@@ -123,7 +123,7 @@ public final class Tournaments {
                 + row);
             name = request.getParameter("name"
                 + row);
-            location = request.getParameter("location"
+            location = request.getParameter("description"
                 + row);
           }
         }
@@ -155,7 +155,7 @@ public final class Tournaments {
    * @param out where to print
    * @param row the row being generated, used for naming form elements
    * @param name name of tournament, can be null
-   * @param location location of tournament, can be null
+   * @param description description of tournament, can be null
    * @throws SQLException
    * @throws IllegalArgumentException
    */
@@ -163,7 +163,7 @@ public final class Tournaments {
                                   final int row,
                                   final Integer key,
                                   final String name,
-                                  final String location)
+                                  final String description)
       throws IOException, IllegalArgumentException, SQLException {
     out.println("<tr>");
 
@@ -190,11 +190,11 @@ public final class Tournaments {
     }
     out.println(" maxlength='128' size='16'></td>");
 
-    out.print("  <td><input type='text' name='location"
+    out.print("  <td><input type='text' name='description"
         + row + "'");
-    if (null != location) {
+    if (null != description) {
       out.print(" value='"
-          + WebUtils.escapeForHtmlFormValue(location) + "'");
+          + WebUtils.escapeForHtmlFormValue(description) + "'");
     }
     if (GenerateDB.DUMMY_TOURNAMENT_NAME.equals(name)
         || GenerateDB.DROP_TOURNAMENT_NAME.equals(name)) {

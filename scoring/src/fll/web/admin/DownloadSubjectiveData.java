@@ -156,8 +156,8 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
       document.appendChild(top);
 
       top.setAttribute("tournamentName", tournament.getName());
-      if (null != tournament.getLocation()) {
-        top.setAttribute("tournamentLocation", tournament.getLocation());
+      if (null != tournament.getDescription()) {
+        top.setAttribute("tournamentDescription", tournament.getDescription());
       }
 
       for (final ScoreCategory categoryDescription : challengeDescription.getSubjectiveCategories()) {

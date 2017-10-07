@@ -267,7 +267,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
         divTable.getDefaultCell().setBorder(0);
         divTable.setWidthPercentage(100);
 
-        final PdfPTable header = createHeader(challengeTitle, tournament.getName(), awardGroup);
+        final PdfPTable header = createHeader(challengeTitle, tournament.getDescription(), awardGroup);
         final PdfPCell headerCell = new PdfPCell(header);
         headerCell.setColspan(relativeWidths.length);
         divTable.addCell(headerCell);

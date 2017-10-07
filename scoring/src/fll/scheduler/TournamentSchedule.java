@@ -43,6 +43,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import javax.annotation.Nonnull;
 import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
@@ -1074,11 +1075,13 @@ public class TournamentSchedule implements Serializable {
    * @param baseFileName the base name of the files
    * @param description the challenge description
    * @param categoryToSchedule mapping of ScoreCategories to schedule columns
+   * @param tournamentName the name of the tournament to display on the sheets
    * @throws DocumentException
    * @throws MalformedURLException
    * @throws IOException
    */
-  public void outputSubjectiveSheets(final String dir,
+  public void outputSubjectiveSheets(@Nonnull final String tournamentName,
+                                     final String dir,
                                      final String baseFileName,
                                      final ChallengeDescription description,
                                      final Map<ScoreCategory, String> categoryToSchedule)
@@ -1105,7 +1108,8 @@ public class TournamentSchedule implements Serializable {
       final String schedulerColumn = categoryToSchedule.get(scoreCategory);
 
       try (OutputStream stream = new FileOutputStream(filename)) {
-        SubjectivePdfWriter.createDocument(stream, description, sheetElement, schedulerColumn, _schedule);
+        SubjectivePdfWriter.createDocument(stream, description, tournamentName, sheetElement, schedulerColumn,
+                                           _schedule);
       }
     }
   }
@@ -1117,11 +1121,21 @@ public class TournamentSchedule implements Serializable {
     return sheet;
   }
 
-  public void outputPerformanceSheets(final OutputStream output,
-                                      final ChallengeDescription description)
+  /**
+   * 
+   * @param tournamentName the name of the tournament to put in the sheets
+   * @param output where to output
+   * @param description where to get the goals from
+   * @throws DocumentException
+   * @throws SQLException
+   * @throws IOException
+   */
+  public void outputPerformanceSheets(@Nonnull final String tournamentName,
+                                      @Nonnull final OutputStream output,
+                                      @Nonnull final ChallengeDescription description)
       throws DocumentException, SQLException, IOException {
     final ScoresheetGenerator scoresheets = new ScoresheetGenerator(getNumberOfRounds()
-        * _schedule.size(), description);
+        * _schedule.size(), description, tournamentName);
     final SortedMap<PerformanceTime, TeamScheduleInfo> performanceTimes = new TreeMap<PerformanceTime, TeamScheduleInfo>();
     for (int round = 0; round < getNumberOfRounds(); ++round) {
       for (final TeamScheduleInfo si : _schedule) {
