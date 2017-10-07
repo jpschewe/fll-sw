@@ -85,6 +85,7 @@ import com.itextpdf.text.DocumentException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
+import fll.Tournament;
 import fll.Utilities;
 import fll.scheduler.SchedParams.InvalidParametersException;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
@@ -238,7 +239,7 @@ public class SchedulerUI extends JFrame {
     addRow(constraintsPanel, new JLabel("Performance duration:"), performanceDuration);
 
     addRow(constraintsPanel, new JLabel("Make sure to pass these values onto your computer person with the schedule!"));
-    
+
     // --- end schedule panel
 
     // initial state
@@ -246,7 +247,7 @@ public class SchedulerUI extends JFrame {
     mDisplayGeneralScheduleAction.setEnabled(false);
     mRunOptimizerAction.setEnabled(false);
     mReloadFileAction.setEnabled(false);
-    
+
     setSchedParams(new SchedParams());
 
     pack();
@@ -837,12 +838,17 @@ public class SchedulerUI extends JFrame {
                 }
                 categoryToSchedule.put(scoreCategory, scheduleColumn);
               }
-              getScheduleData().outputSubjectiveSheets(directory.getAbsolutePath(), baseFilename, description,
-                                                       categoryToSchedule);
 
-              JOptionPane.showMessageDialog(SchedulerUI.this, "Scoresheets written '"
-                  + scoresheetFile.getAbsolutePath()
-                  + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
+              final String tournamentName = JOptionPane.showInputDialog(SchedulerUI.this,
+                                                                        "What is the name of the tournament?");
+              if (null != tournamentName) {
+                getScheduleData().outputSubjectiveSheets(tournamentName, directory.getAbsolutePath(), baseFilename, description,
+                                                         categoryToSchedule);
+
+                JOptionPane.showMessageDialog(SchedulerUI.this, "Scoresheets written '"
+                    + scoresheetFile.getAbsolutePath()
+                    + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
+              }
             } // not
               // canceled
           } // valid descriptor location
