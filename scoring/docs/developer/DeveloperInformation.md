@@ -2,6 +2,8 @@
 
 If you want to test out the latest code you can do so by [downloading the most recent automated packaged development release](http://mtu.net/jenkins/job/fll-sw-devel-release/). These are built automatically by our continuous integration system. They are a good place to see what features are coming up in the next release and a relatively easy way for people to test if a bug has been fixed as they'd like it.
 
+Documentation on the database schema, API, workflows, etc. for the [current release are available on the continuous integration server](https://mtu.net/jenkins/job/FLL-SW/job/current-release/Documentation/). You can also view the documentation in your working directory by running the ant task `docs` and then looking in `scoring/docs/index.html`. 
+
 
 # Getting started as a developer
 
