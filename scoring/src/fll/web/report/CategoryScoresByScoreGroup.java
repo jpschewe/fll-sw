@@ -182,7 +182,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
                             final Tournament tournament)
       throws BadElementException {
     final PdfPCell tournamentCell = PdfUtils.createHeaderCell(String.format("%s - %s", challengeTitle,
-                                                                            tournament.getName()));
+                                                                            tournament.getDescription()));
     tournamentCell.setColspan(4);
     table.addCell(tournamentCell);
 

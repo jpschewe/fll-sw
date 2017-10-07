@@ -100,7 +100,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
       final PerformanceScoreReportPageEventHandler headerHandler = new PerformanceScoreReportPageEventHandler(HEADER_FONT,
                                                                                                               REPORT_TITLE,
                                                                                                               challengeDescription.getTitle(),
-                                                                                                              tournament.getName());
+                                                                                                              tournament.getDescription());
       writer.setPageEvent(headerHandler);
 
       document.open();
