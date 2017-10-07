@@ -30,14 +30,6 @@ pipeline {
     stage('Generate documentation') {
       steps { 
         fllSwAnt('docs')
-        publishHTML (target: [
-          allowMissing: false,
-          alwaysLinkToLastBuild: false,
-          keepAll: false,
-          reportDir: 'scoring/docs',
-          reportFiles: 'index.html',
-          reportName: 'Documentation'
-        ])
       }
     }
     
@@ -64,6 +56,19 @@ pipeline {
       steps { 
         fllSwAnt('coverage.report')
         step $class: 'CoberturaPublisher', coberturaReportFile: 'scoring/build/docs/reports/coverage/coverage.xml'
+      }
+    }
+    
+    stage('Publish documentation') {
+      steps {    
+          publishHTML (target: [
+            allowMissing: false,
+            alwaysLinkToLastBuild: false,
+            keepAll: false,
+            reportDir: 'scoring/docs',
+            reportFiles: 'index.html',
+            reportName: 'Documentation'
+          ])
       }
     }
     

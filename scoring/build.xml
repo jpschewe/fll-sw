@@ -840,7 +840,7 @@
   </target>
 
   <target name="doc.wiki.render" description="Convert the wiki documentation from markdown to html">
-    <apply executable="python" dest="${basedir}/docs">
+    <apply executable="python" dest="${basedir}/docs" failonerror="true">
       <arg value="${basedir}/scripts/markdown-to-html.py" />
 
       <fileset dir="${basedir}/docs/">
