@@ -140,11 +140,11 @@
                 test="${tournament.tournamentID == currentTournamentID}">
                 <option
                   selected
-                  value='${tournament.tournamentID }'>${tournament.location}
+                  value='${tournament.tournamentID }'>${tournament.description}
                   [ ${tournament.name } ]</option>
               </c:when>
               <c:otherwise>
-                <option value='${tournament.tournamentID }'>${tournament.location}
+                <option value='${tournament.tournamentID }'>${tournament.description}
                   [ ${tournament.name } ]</option>
               </c:otherwise>
             </c:choose>

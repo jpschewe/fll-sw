@@ -1,3 +1,4 @@
+* #583 - Add tournament name to subjective and performance score sheets
 * #462 - Add the ability to output blank subjective sheets
 * #578 - Make sure to catch exceptions in the event dispatch thread as well as those from other threads
 * #559 - allow one to specify time constraints when checking a schedule

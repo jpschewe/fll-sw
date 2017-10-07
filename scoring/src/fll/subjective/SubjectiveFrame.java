@@ -367,9 +367,9 @@ public final class SubjectiveFrame extends JFrame {
     // get the name and location of the tournament
     final Element top = _scoreDocument.getDocumentElement();
     final String tournamentName = top.getAttribute("tournamentName");
-    if (top.hasAttribute("tournamentLocation")) {
-      final String tournamentLocation = top.getAttribute("tournamentName");
-      setTitle(String.format("Subjective Score Entry - %s @ %s", tournamentName, tournamentLocation));
+    if (top.hasAttribute("tournamentDescription")) {
+      final String tournamentDescription = top.getAttribute("tournamentDescription");
+      setTitle(String.format("Subjective Score Entry - %s - %s", tournamentName, tournamentDescription));
     } else {
       setTitle(String.format("Subjective Score Entry - %s", tournamentName));
     }
