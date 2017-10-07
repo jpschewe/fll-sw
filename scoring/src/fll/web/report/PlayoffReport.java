@@ -77,7 +77,7 @@ public class PlayoffReport extends BaseFLLServlet {
       final ByteArrayOutputStream baos = new ByteArrayOutputStream();
       final PdfWriter writer = PdfWriter.getInstance(document, baos);
       writer.setPageEvent(new ReportPageEventHandler(HEADER_FONT, "Head to Head Winners",
-                                                     challengeDescription.getTitle(), tournament.getName()));
+                                                     challengeDescription.getTitle(), tournament.getDescription()));
 
       document.open();
 

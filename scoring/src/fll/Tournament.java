@@ -37,10 +37,10 @@ public final class Tournament implements Serializable {
 
   private Tournament(@JsonProperty("tournamentID") final int tournamentID,
                      @JsonProperty("name") final String name,
-                     @JsonProperty("location") final String location) {
+                     @JsonProperty("description") final String description) {
     this.tournamentID = tournamentID;
     this.name = name;
-    this.location = location;
+    this.description = description;
   }
 
   private final int tournamentID;
@@ -51,14 +51,22 @@ public final class Tournament implements Serializable {
 
   private final String name;
 
+  /**
+   * 
+   * @return a short name for the tournament
+   */
   public String getName() {
     return name;
   }
 
-  private final String location;
+  private final String description;
 
-  public String getLocation() {
-    return location;
+  /**
+   * 
+   * @return a longer description of the tournament
+   */
+  public String getDescription() {
+    return description;
   }
 
   /**
@@ -66,12 +74,12 @@ public final class Tournament implements Serializable {
    */
   public static void createTournament(final Connection connection,
                                       final String tournamentName,
-                                      final String location) throws SQLException {
+                                      final String description) throws SQLException {
     PreparedStatement prep = null;
     try {
       prep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location) VALUES (?, ?)");
       prep.setString(1, tournamentName);
-      prep.setString(2, location);
+      prep.setString(2, description);
       prep.executeUpdate();
     } finally {
       SQLFunctions.close(prep);
@@ -181,7 +189,7 @@ public final class Tournament implements Serializable {
   @Override
   public String toString() {
     return getName()
-        + " (" + getTournamentID() + ") - " + getLocation();
+        + " (" + getTournamentID() + ") - " + getDescription();
   }
 
   /**
