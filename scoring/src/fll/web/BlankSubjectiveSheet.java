@@ -21,6 +21,8 @@ import javax.sql.DataSource;
 
 import com.itextpdf.text.DocumentException;
 
+import fll.Tournament;
+import fll.db.Queries;
 import fll.documents.elements.SheetElement;
 import fll.documents.writers.SubjectivePdfWriter;
 import fll.scheduler.TeamScheduleInfo;
@@ -60,8 +62,11 @@ public class BlankSubjectiveSheet extends HttpServlet {
 
         final TeamScheduleInfo dummy = new TeamScheduleInfo(0, 111111);
 
-        SubjectivePdfWriter.createDocument(response.getOutputStream(), challengeDescription, sheetElement, null,
-                                           Collections.singletonList(dummy));
+        final Tournament tournament = Tournament.findTournamentByID(connection,
+                                                                    Queries.getCurrentTournament(connection));
+
+        SubjectivePdfWriter.createDocument(response.getOutputStream(), challengeDescription, tournament.getName(),
+                                           sheetElement, null, Collections.singletonList(dummy));
 
       } else {
         throw new FLLRuntimeException("You must specify a subjective category name in the URL");

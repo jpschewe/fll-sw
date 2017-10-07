@@ -43,6 +43,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import javax.annotation.Nonnull;
 import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
@@ -1074,11 +1075,13 @@ public class TournamentSchedule implements Serializable {
    * @param baseFileName the base name of the files
    * @param description the challenge description
    * @param categoryToSchedule mapping of ScoreCategories to schedule columns
+   * @param tournamentName the name of the tournament to display on the sheets
    * @throws DocumentException
    * @throws MalformedURLException
    * @throws IOException
    */
-  public void outputSubjectiveSheets(final String dir,
+  public void outputSubjectiveSheets(@Nonnull final String tournamentName,
+                                     final String dir,
                                      final String baseFileName,
                                      final ChallengeDescription description,
                                      final Map<ScoreCategory, String> categoryToSchedule)
@@ -1105,7 +1108,7 @@ public class TournamentSchedule implements Serializable {
       final String schedulerColumn = categoryToSchedule.get(scoreCategory);
 
       try (OutputStream stream = new FileOutputStream(filename)) {
-        SubjectivePdfWriter.createDocument(stream, description, sheetElement, schedulerColumn, _schedule);
+        SubjectivePdfWriter.createDocument(stream, description, tournamentName, sheetElement, schedulerColumn, _schedule);
       }
     }
   }
