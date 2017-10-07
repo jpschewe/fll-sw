@@ -1108,7 +1108,8 @@ public class TournamentSchedule implements Serializable {
       final String schedulerColumn = categoryToSchedule.get(scoreCategory);
 
       try (OutputStream stream = new FileOutputStream(filename)) {
-        SubjectivePdfWriter.createDocument(stream, description, tournamentName, sheetElement, schedulerColumn, _schedule);
+        SubjectivePdfWriter.createDocument(stream, description, tournamentName, sheetElement, schedulerColumn,
+                                           _schedule);
       }
     }
   }
@@ -1120,11 +1121,21 @@ public class TournamentSchedule implements Serializable {
     return sheet;
   }
 
-  public void outputPerformanceSheets(final OutputStream output,
-                                      final ChallengeDescription description)
+  /**
+   * 
+   * @param tournamentName the name of the tournament to put in the sheets
+   * @param output where to output
+   * @param description where to get the goals from
+   * @throws DocumentException
+   * @throws SQLException
+   * @throws IOException
+   */
+  public void outputPerformanceSheets(@Nonnull final String tournamentName,
+                                      @Nonnull final OutputStream output,
+                                      @Nonnull final ChallengeDescription description)
       throws DocumentException, SQLException, IOException {
     final ScoresheetGenerator scoresheets = new ScoresheetGenerator(getNumberOfRounds()
-        * _schedule.size(), description);
+        * _schedule.size(), description, tournamentName);
     final SortedMap<PerformanceTime, TeamScheduleInfo> performanceTimes = new TreeMap<PerformanceTime, TeamScheduleInfo>();
     for (int round = 0; round < getNumberOfRounds(); ++round) {
       for (final TeamScheduleInfo si : _schedule) {
