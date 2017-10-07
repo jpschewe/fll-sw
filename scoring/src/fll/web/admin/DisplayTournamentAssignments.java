@@ -62,7 +62,7 @@ public class DisplayTournamentAssignments extends BaseFLLServlet {
           + " ORDER BY Teams.TeamNumber" //
       );
       for (final Tournament tournament : Tournament.getTournaments(connection)) {
-        formatter.format("<h1>%s</h1>", tournament.getName());
+        formatter.format("<h1>%s</h1>", tournament.getDescription());
 
         formatter.format("<table border='1'>");
         formatter.format("<tr><th>Number</th><th>Name</th><th>Award Group</th><th>Judging Group</th></tr>");

@@ -38,6 +38,7 @@ import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.Team;
+import fll.Tournament;
 import fll.Utilities;
 import fll.Version;
 import fll.db.Queries;
@@ -68,14 +69,20 @@ public class ScoresheetGenerator {
 
   private String m_copyright;
 
+  private final String tournamentName;
+
   /**
    * Create document with the specified number of sheets. Initially all sheets
    * are empty. They should be filled in using the set methods.
    * 
-   * @param numSheets
+   * @param numSheets the number of sheets on a page
+   * @param tournamentName the name of the tournament to display
+   * @param description the challenge description to get the goals from
    */
   public ScoresheetGenerator(final int numSheets,
-                             final ChallengeDescription description) {
+                             final ChallengeDescription description,
+                             final String tournamentName) {
+    this.tournamentName = tournamentName;
     m_numSheets = numSheets;
     initializeArrays();
 
@@ -123,6 +130,9 @@ public class ScoresheetGenerator {
                              final int tournament,
                              final ChallengeDescription description)
       throws SQLException {
+    final Tournament tournamentObj = Tournament.findTournamentByID(connection, tournament);
+    this.tournamentName = tournamentObj.getName();
+
     final String numMatchesStr = request.getParameter("numMatches");
     if (null == numMatchesStr) {
       // must have been called asking for blank
@@ -302,7 +312,7 @@ public class ScoresheetGenerator {
    * @throws IOException
    */
   public static boolean guessOrientation(final ChallengeDescription description) throws DocumentException, IOException {
-    final ScoresheetGenerator gen = new ScoresheetGenerator(1, description);
+    final ScoresheetGenerator gen = new ScoresheetGenerator(1, description, "dummy");
     final ByteArrayOutputStream out = new ByteArrayOutputStream();
     gen.writeFile(out, false);
     final ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
@@ -493,9 +503,16 @@ public class ScoresheetGenerator {
       teamInfo.addCell(namelc);
       // Team name value cell
       final PdfPCell nameVc = new PdfPCell(scoreSheet.getDefaultCell());
-      nameVc.setColspan(5);
+      nameVc.setColspan(4);
       nameVc.setCellEvent(new PdfUtils.TruncateContent(m_name[i], COURIER_10PT_NORMAL));
       teamInfo.addCell(nameVc);
+
+      // add tournament name
+      final Paragraph tournamentNameV = new Paragraph(tournamentName, f6i);
+      tournamentNameV.setAlignment(Element.ALIGN_RIGHT);
+      final PdfPCell tournamentNameVc = new PdfPCell(scoreSheet.getDefaultCell());
+      tournamentNameVc.addElement(tournamentNameV);
+      teamInfo.addCell(tournamentNameVc);
 
       // add team info cell to the team table
       final PdfPCell teamInfoCell = new PdfPCell(scoreSheet.getDefaultCell());
@@ -694,7 +711,10 @@ public class ScoresheetGenerator {
 
           } else {
             final String range = "("
-                + minStr + " - " + maxStr + ")";
+                + minStr
+                + " - "
+                + maxStr
+                + ")";
             final PdfPTable t = new PdfPTable(2);
             t.setHorizontalAlignment(Element.ALIGN_LEFT);
             t.setTotalWidth(1

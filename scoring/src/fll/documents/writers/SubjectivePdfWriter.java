@@ -9,6 +9,8 @@ import java.net.URL;
 import java.time.LocalTime;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import org.apache.log4j.Logger;
 
 import com.itextpdf.text.BaseColor;
@@ -43,6 +45,8 @@ public class SubjectivePdfWriter {
   private static final Logger LOGGER = LogUtils.getLogger();
 
   private final ChallengeDescription description;
+
+  private final String tournamentName;
 
   private final static int NO_BORDERS = 0;
 
@@ -94,11 +98,14 @@ public class SubjectivePdfWriter {
    * @param sheet information about the rubric
    * @param scheduleColumn the column in the schedule used to find the times,
    *          may be null
+   * @param tournamentName the name of the tournament to display on the sheets
    */
-  public SubjectivePdfWriter(final ChallengeDescription description,
-                             final SheetElement sheet,
+  public SubjectivePdfWriter(@Nonnull final ChallengeDescription description,
+                             @Nonnull final String tournamentName,
+                             @Nonnull final SheetElement sheet,
                              final String scheduleColumn) {
     this.description = description;
+    this.tournamentName = tournamentName;
     this.sheetElement = sheet;
     this.scoreCategory = sheetElement.getSheetData();
     this.scheduleColumn = scheduleColumn;
@@ -203,9 +210,10 @@ public class SubjectivePdfWriter {
     final String teamNameText = "Team Name: "
         + teamInfo.getTeamName();
     c.setCellEvent(new PdfUtils.TruncateContent(teamNameText, f12b));
-    c.setColspan(2);
     c.setVerticalAlignment(Element.ALIGN_LEFT);
     pageHeaderTable.addCell(c);
+
+    pageHeaderTable.addCell(createCell(tournamentName, f6i, NO_BORDERS, Element.ALIGN_RIGHT));
 
     // add the instructions to the header
     dirText = "Directions: For each skill area, clearly mark the box that best describes the team's accomplishments.  "
@@ -476,13 +484,15 @@ public class SubjectivePdfWriter {
 
   /**
    * @param sheetElement describes the subjective category to output
+   * @param tournamentName displayed on the sheets
    * @return Font to use and the number of rows for the comment sheet
    * @throws MalformedURLException
    * @throws IOException
    * @throws DocumentException
    */
-  private static Pair<Font, Integer> determineParameters(final ChallengeDescription description,
-                                                         final SheetElement sheetElement)
+  private static Pair<Font, Integer> determineParameters(@Nonnull final ChallengeDescription description,
+                                                         @Nonnull final String tournamentName,
+                                                         @Nonnull final SheetElement sheetElement)
       throws MalformedURLException, IOException, DocumentException {
 
     final TeamScheduleInfo teamInfo = new TeamScheduleInfo(1, 1);
@@ -503,7 +513,7 @@ public class SubjectivePdfWriter {
 
         pdf.open();
 
-        final SubjectivePdfWriter writer = new SubjectivePdfWriter(description, sheetElement, null);
+        final SubjectivePdfWriter writer = new SubjectivePdfWriter(description, tournamentName, sheetElement, null);
 
         writer.writeTeamSubjectivePdf(pdf, teamInfo, font, commentHeight);
 
@@ -529,18 +539,20 @@ public class SubjectivePdfWriter {
    * @param schedulerColumn used to determine the schedule information to output
    * @param schedule the schedule to get team information and time information
    *          from
+   * @param tournamentName tournament name to display on the sheets
    * @throws DocumentException
    * @throws IOException
    * @throws MalformedURLException
    */
-  public static void createDocument(final OutputStream stream,
-                                    final ChallengeDescription description,
-                                    final SheetElement sheetElement,
+  public static void createDocument(@Nonnull final OutputStream stream,
+                                    @Nonnull final ChallengeDescription description,
+                                    @Nonnull final String tournamentName,
+                                    @Nonnull final SheetElement sheetElement,
                                     final String schedulerColumn,
                                     final List<TeamScheduleInfo> schedule)
       throws DocumentException, MalformedURLException, IOException {
 
-    final Pair<Font, Integer> parameters = determineParameters(description, sheetElement);
+    final Pair<Font, Integer> parameters = determineParameters(description, tournamentName, sheetElement);
     final Font font = parameters.getOne();
     final int commentHeight = parameters.getTwo();
 
@@ -550,7 +562,7 @@ public class SubjectivePdfWriter {
 
     pdf.open();
 
-    final SubjectivePdfWriter writer = new SubjectivePdfWriter(description, sheetElement, schedulerColumn);
+    final SubjectivePdfWriter writer = new SubjectivePdfWriter(description, tournamentName, sheetElement, schedulerColumn);
 
     // Go through all of the team schedules and put them all into a pdf
     for (final TeamScheduleInfo teamInfo : schedule) {
