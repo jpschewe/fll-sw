@@ -182,7 +182,8 @@ public class PerformanceScoreReport extends BaseFLLServlet {
 
       for (final TeamScore score : scores) {
         if (!score.scoreExists()
-            || score.isBye() || score.isNoShow()) {
+            || score.isBye()
+            || score.isNoShow()) {
           table.addCell("");
         } else {
           final double computedValue = goal.getComputedScore(score);
@@ -350,13 +351,16 @@ public class PerformanceScoreReport extends BaseFLLServlet {
       final PdfPTable header = new PdfPTable(2);
       final Phrase p = new Phrase();
       final Chunk ck = new Chunk(_challengeTitle
-          + "\n" + _reportTitle, _font);
+          + "\n"
+          + _reportTitle, _font);
       p.add(ck);
       header.getDefaultCell().setBorderWidth(0);
       header.addCell(p);
       header.getDefaultCell().setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
       header.addCell(new Phrase(new Chunk("Tournament: "
-          + _tournament + "\nDate: " + _formattedDate, _font)));
+          + _tournament
+          + "\nDate: "
+          + _formattedDate, _font)));
 
       // horizontal line
       final PdfPCell blankCell = new PdfPCell();
@@ -369,7 +373,11 @@ public class PerformanceScoreReport extends BaseFLLServlet {
         // team information
         final Paragraph para = new Paragraph();
         para.add(new Chunk("Team #"
-            + _team.getTeamNumber() + " " + _team.getTeamName() + " / " + _team.getOrganization(), TITLE_FONT));
+            + _team.getTeamNumber()
+            + " "
+            + _team.getTeamName()
+            + " / "
+            + _team.getOrganization(), TITLE_FONT));
         para.add(Chunk.NEWLINE);
         para.add(new Chunk("Award Group: "
             + _team.getAwardGroup(), TITLE_FONT));

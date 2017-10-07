@@ -85,7 +85,6 @@ import com.itextpdf.text.DocumentException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
-import fll.Tournament;
 import fll.Utilities;
 import fll.scheduler.SchedParams.InvalidParametersException;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
@@ -815,42 +814,42 @@ public class SchedulerUI extends JFrame {
             final Reader descriptorReader = new InputStreamReader(descriptorLocation.openStream(),
                                                                   Utilities.DEFAULT_CHARSET);
 
-            final Document document = ChallengeParser.parse(descriptorReader);
-            final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
+            final String tournamentName = JOptionPane.showInputDialog(SchedulerUI.this,
+                                                                      "What is the name of the tournament to put on the score sheets?");
+            if (null != tournamentName) {
 
-            final File scoresheetFile = new File(directory, baseFilename
-                + "-scoresheets.pdf");
-            scoresheetFos = new FileOutputStream(scoresheetFile);
+              final Document document = ChallengeParser.parse(descriptorReader);
+              final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
 
-            getScheduleData().outputPerformanceSheets(scoresheetFos, description);
+              final File scoresheetFile = new File(directory, baseFilename
+                  + "-scoresheets.pdf");
+              scoresheetFos = new FileOutputStream(scoresheetFile);
 
-            final MapSubjectiveHeaders mapDialog = new MapSubjectiveHeaders(SchedulerUI.this, description,
-                                                                            getScheduleData());
-            mapDialog.setLocationRelativeTo(SchedulerUI.this);
-            mapDialog.setVisible(true);
-            if (!mapDialog.isCanceled()) {
-              final Map<ScoreCategory, String> categoryToSchedule = new HashMap<>();
-              for (final ScoreCategory scoreCategory : description.getSubjectiveCategories()) {
-                final String scheduleColumn = mapDialog.getSubjectiveHeaderForCategory(scoreCategory);
-                if (null == scheduleColumn) {
-                  throw new FLLInternalException("Did not find a schedule column for "
-                      + scoreCategory.getTitle());
+              getScheduleData().outputPerformanceSheets(tournamentName, scoresheetFos, description);
+
+              final MapSubjectiveHeaders mapDialog = new MapSubjectiveHeaders(SchedulerUI.this, description,
+                                                                              getScheduleData());
+              mapDialog.setLocationRelativeTo(SchedulerUI.this);
+              mapDialog.setVisible(true);
+              if (!mapDialog.isCanceled()) {
+                final Map<ScoreCategory, String> categoryToSchedule = new HashMap<>();
+                for (final ScoreCategory scoreCategory : description.getSubjectiveCategories()) {
+                  final String scheduleColumn = mapDialog.getSubjectiveHeaderForCategory(scoreCategory);
+                  if (null == scheduleColumn) {
+                    throw new FLLInternalException("Did not find a schedule column for "
+                        + scoreCategory.getTitle());
+                  }
+                  categoryToSchedule.put(scoreCategory, scheduleColumn);
                 }
-                categoryToSchedule.put(scoreCategory, scheduleColumn);
-              }
 
-              final String tournamentName = JOptionPane.showInputDialog(SchedulerUI.this,
-                                                                        "What is the name of the tournament?");
-              if (null != tournamentName) {
-                getScheduleData().outputSubjectiveSheets(tournamentName, directory.getAbsolutePath(), baseFilename, description,
-                                                         categoryToSchedule);
+                getScheduleData().outputSubjectiveSheets(tournamentName, directory.getAbsolutePath(), baseFilename,
+                                                         description, categoryToSchedule);
 
                 JOptionPane.showMessageDialog(SchedulerUI.this, "Scoresheets written '"
                     + scoresheetFile.getAbsolutePath()
                     + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
-              }
-            } // not
-              // canceled
+              } // not canceled
+            } // tournament name
           } // valid descriptor location
         } // yes to write score sheets
       } catch (final DocumentException e) {
