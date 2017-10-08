@@ -34,6 +34,7 @@ import fll.documents.elements.TableElement;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.util.LogUtils;
+import fll.util.PdfUtils;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.RubricRange;
@@ -204,9 +205,11 @@ public class SubjectivePdfWriter {
 
     pageHeaderTable.addCell(createCell("Judging Room: "
         + teamInfo.getAwardGroup(), f10b, NO_BORDERS, Element.ALIGN_LEFT));
-    PdfPCell c = createCell("Team Name: "
-        + teamInfo.getTeamName(), f12b, NO_BORDERS, Element.ALIGN_LEFT);
-    // c.setColspan(2);
+
+    final PdfPCell c = createCell(null, f12b, NO_BORDERS, Element.ALIGN_LEFT);
+    final String teamNameText = "Team Name: "
+        + teamInfo.getTeamName();
+    c.setCellEvent(new PdfUtils.TruncateContent(teamNameText, f12b));
     c.setVerticalAlignment(Element.ALIGN_LEFT);
     pageHeaderTable.addCell(c);
 
@@ -397,19 +400,19 @@ public class SubjectivePdfWriter {
     }
   }
 
-  private PdfPCell createCell(String text,
-                              Font f,
-                              int borders,
-                              BaseColor color) {
+  private PdfPCell createCell(final String text,
+                              final Font f,
+                              final int borders,
+                              final BaseColor color) {
     PdfPCell result = createCell(text, f, borders);
     result.setBackgroundColor(color);
     return result;
   }
 
-  private PdfPCell createCell(String text,
-                              Font f,
-                              int borders,
-                              int alignment) {
+  private PdfPCell createCell(final String text,
+                              final Font f,
+                              final int borders,
+                              final int alignment) {
     PdfPCell result = createCell(text, f, borders);
     result.setHorizontalAlignment(alignment);
     return result;
@@ -418,7 +421,12 @@ public class SubjectivePdfWriter {
   private PdfPCell createCell(final String text,
                               final Font f,
                               final int borders) {
-    final PdfPCell result = new PdfPCell(new Paragraph(text, f));
+    final PdfPCell result;
+    if (null == text) {
+      result = new PdfPCell();
+    } else {
+      result = new PdfPCell(new Paragraph(text, f));
+    }
     switch (borders) {
     case NO_BORDERS:
       result.setBorder(0);
@@ -487,6 +495,12 @@ public class SubjectivePdfWriter {
                                                          @Nonnull final SheetElement sheetElement)
       throws MalformedURLException, IOException, DocumentException {
 
+    final TeamScheduleInfo teamInfo = new TeamScheduleInfo(1, 1);
+    teamInfo.setDivision("dummy");
+    teamInfo.setJudgingGroup("Dummy");
+    teamInfo.setOrganization("Dummy");
+    teamInfo.setTeamName("Dummy");
+
     for (int commentHeight = 2; commentHeight > 0; --commentHeight) {
       for (int pointSize = 12; pointSize >= 6; --pointSize) {
         final Font font = new Font(Font.FontFamily.HELVETICA, pointSize);
@@ -501,11 +515,6 @@ public class SubjectivePdfWriter {
 
         final SubjectivePdfWriter writer = new SubjectivePdfWriter(description, tournamentName, sheetElement, null);
 
-        final TeamScheduleInfo teamInfo = new TeamScheduleInfo(1, 1);
-        teamInfo.setDivision("dummy");
-        teamInfo.setJudgingGroup("Dummy");
-        teamInfo.setOrganization("Dummy");
-        teamInfo.setTeamName("Dummy");
         writer.writeTeamSubjectivePdf(pdf, teamInfo, font, commentHeight);
 
         pdf.close();
