@@ -61,6 +61,10 @@ public class BlankSubjectiveSheet extends HttpServlet {
         final SheetElement sheetElement = new SheetElement(category);
 
         final TeamScheduleInfo dummy = new TeamScheduleInfo(0, 111111);
+        dummy.setTeamName("Really long team name, something that is really really long");
+        dummy.setOrganization("Some organization");
+        dummy.setDivision("State");
+        dummy.setJudgingGroup("Lakes");
 
         final Tournament tournament = Tournament.findTournamentByID(connection,
                                                                     Queries.getCurrentTournament(connection));
