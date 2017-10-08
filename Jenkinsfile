@@ -83,8 +83,24 @@ pipeline {
       
       emailext recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']], 
           to: 'jpschewe@mtu.net',
-          subject: '$DEFAULT_SUBJECT', 
-          body: '$DEFAULT_CONTENT'
+          subject: '${PROJECT_NAME} - Build # ${BUILD_NUMBER} - ${BUILD_STATUS}!', 
+          body: '''${PROJECT_NAME} - Build # ${BUILD_NUMBER} - ${BUILD_STATUS}
+
+Changes:
+${CHANGES}
+
+
+Failed Tests:
+${FAILED_TESTS}
+
+Check console output at ${BUILD_URL} to view the full results.
+
+Find more details at: ${JENKINS_URL}
+
+Duplicate code: ${DRY_RESULT}
+
+Findbugs: ${FINDBUGS_RESULT}
+'''
                 
     } // always
   } // post
