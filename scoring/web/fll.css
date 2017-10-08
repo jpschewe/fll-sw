@@ -42,7 +42,7 @@ rubric * {
 }
 
 range:before {
-	content: attr(title) " (" attr(min) " - " attr(max) ")";
+	content: attr(title) " (" attr(min) " - " attr(max) ") '" attr(shortDescription) "'";
 	font-weight: bold;
 	text-align: center;
 	display: table-caption;
