@@ -661,7 +661,10 @@ public class ScoresheetGenerator {
         final Paragraph p = new Paragraph(title, ARIAL_10PT_NORMAL);
         final PdfPCell goalLabel = new PdfPCell(p);
         goalLabel.setHorizontalAlignment(Element.ALIGN_RIGHT);
-        goalLabel.setVerticalAlignment(Element.ALIGN_CENTER);
+        // align bottom, otherwise we don't line up with the goalValues. For some reason
+        // the vertical alignment isn't used when adding elements to a PdfPCell, so the
+        // goal values end up always aligned to the bottom of the cell.
+        goalLabel.setVerticalAlignment(Element.ALIGN_BOTTOM);
         if (firstRowInCategory) {
           goalLabel.setBorderWidthTop(1);
           goalLabel.setBorderWidthBottom(0);
@@ -671,11 +674,11 @@ public class ScoresheetGenerator {
           goalLabel.setBorder(0);
         }
         goalLabel.setPaddingRight(9);
-        goalLabel.setVerticalAlignment(Element.ALIGN_TOP);
         if (StringUtils.isEmpty(category)) {
           // category column and goal label column
           goalLabel.setColspan(2);
         }
+
         m_goalsTable.addCell(goalLabel);
 
         // define the value cell
@@ -687,6 +690,7 @@ public class ScoresheetGenerator {
         // If element has child nodes, then we have an enumerated list
         // of choices. Otherwise it is either yes/no or a numeric field.
         final PdfPCell goalValue = new PdfPCell();
+
         final Chunk choices = new Chunk("", COURIER_10PT_NORMAL);
         if (goal.isEnumerated()) {
           // replace spaces with "no-break" spaces
@@ -737,7 +741,6 @@ public class ScoresheetGenerator {
         } else {
           goalValue.setBorder(0);
         }
-        goalValue.setVerticalAlignment(Element.ALIGN_MIDDLE);
 
         m_goalsTable.addCell(goalValue);
 
