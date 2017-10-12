@@ -553,7 +553,7 @@
     <antcall target="dist.real" />
   </target>
 
-  <target name="docs" depends="javadoc,doc.workflow.generate,doc.wiki.render,doc.database-diagram" description="Generate all documentation">
+  <target name="docs" depends="javadoc,doc.workflow.generate,doc.markdown.render,doc.database-diagram" description="Generate all documentation">
     <copy todir="${basedir}/docs" file="${basedir}/web/documentation/index.html" />
   </target>
 
@@ -839,12 +839,12 @@
     </apply>
   </target>
 
-  <target name="doc.wiki.render" description="Convert the wiki documentation from markdown to html">
+  <target name="doc.markdown.render" description="Convert the wiki documentation from markdown to html">
     <apply executable="python" dest="${basedir}/docs" failonerror="true">
       <arg value="${basedir}/scripts/markdown-to-html.py" />
 
       <fileset dir="${basedir}/docs/">
-        <include name="*.md" />
+        <include name="**/*.md" />
       </fileset>
 
       <mapper type="glob" from="*.md" to="*.html" />
