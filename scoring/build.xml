@@ -185,15 +185,24 @@
 	</path>
 
 	<!-- ==================== Code coverage ==================== -->
-	<target name="coverage.instr" depends="compile" description="Instrument files for code coverage">
+	<target name="create.test.webapp" depends="compile">
+		<copy todir="${coverage.dir.web}">
+			<fileset dir="${dir.web}" />
+		</copy>
+	</target>
+
+	<target name="coverage.instr" depends="create.test.webapp" description="Instrument files for code coverage">
 		<mkdir dir="${dir.coverage}" />
 
-		<cobertura-instrument datafile="${dir.coverage}/cobertura.ser" todir="${coverage.dir.classes}">
+
+		<!-- don't use todir because only classes are copied to the destination, not interfaces.
+			So instead copy all of the files over and then instrument them. -->
+		<cobertura-instrument datafile="${dir.coverage}/cobertura.ser">
 			<auxClasspath>
 				<path refid="application.classpath" />
 				<path refid="cobertura.classpath" />
 			</auxClasspath>
-			<fileset dir="${dir.classes}">
+			<fileset dir="${coverage.dir.classes}">
 				<include name="**/*.class" />
 			</fileset>
 		</cobertura-instrument>
@@ -702,10 +711,6 @@
 		<copy-web-files webdir="${dir.web}" />
 	</target>
 
-	<target name="coverage.copy.web.files" depends="init,tomcat.expand" description="prepare the coverage web directory">
-		<copy-web-files webdir="${coverage.dir.web}" />
-	</target>
-
 	<!-- ==================== Tests  ==================== -->
 	<macrodef name="delete-database">
 		<sequential>
@@ -775,7 +780,7 @@
 	</macrodef>
 
 	<!-- one shot tests -->
-	<target name="test.single" depends="compile,compile.test.all" description="Run a single unit test specified by junit.test.class property.">
+	<target name="test.single" depends="compile,compile.test.all,coverage.instr" description="Run a single unit test specified by junit.test.class property.">
 		<antcall target="tomcat.start" />
 		<delete-database />
 
@@ -799,7 +804,7 @@
 	</target>
 
 	<!-- integration tests -->
-	<target name="test.integration" depends="compile,compile.test.integration,coverage.instr,coverage.copy.web.files" description="Run the integration tests">
+	<target name="test.integration" depends="compile,compile.test.integration,coverage.instr" description="Run the integration tests">
 
 		<!-- setup cobertura flush application -->
 		<copy file="${dir.lib}/cobertura/coberturaFlush.war" todir="${dir.tomcat}/webapps" />
