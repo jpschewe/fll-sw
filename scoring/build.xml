@@ -182,6 +182,8 @@
 		</fileset>
 
 		<pathelement location="${coverage.dir.classes}" />
+
+		<path refid="cobertura.classpath" />
 	</path>
 
 	<!-- ==================== Code coverage ==================== -->
