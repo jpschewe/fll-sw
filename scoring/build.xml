@@ -175,7 +175,8 @@
 	</path>
 
 	<path id="test.classpath">
-		<path refid="application.classpath" />
+		<!-- this classpath cannot contain the uninstrumented classes -->
+		<path refid="base.classpath" />
 
 		<fileset dir="${dir.lib}/test">
 			<include name="**/*.jar" />
