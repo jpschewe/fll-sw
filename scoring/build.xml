@@ -174,7 +174,17 @@
 		<pathelement location="${dir.classes}" />
 	</path>
 
+	<!-- used to build the tests into the uninstrumented output directory -->
 	<path id="test.classpath">
+		<path refid="application.classpath" />
+
+		<fileset dir="${dir.lib}/test">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<!-- used to run tests against the instrumented output directory -->
+	<path id="coverage.test.classpath">
 		<!-- this classpath cannot contain the uninstrumented classes -->
 		<path refid="base.classpath" />
 
@@ -766,7 +776,7 @@
 				<sysproperty key="net.sourceforge.cobertura.datafile" value="${dir.coverage}/cobertura.ser" />
 
 				<classpath>
-					<path refid="test.classpath" />
+					<path refid="coverage.test.classpath" />
 				</classpath>
 
 				<formatter type="brief" usefile="false" />
@@ -792,7 +802,7 @@
 		<junit fork="yes" haltonfailure="false" dir="${dir.build}" failureproperty="test.failed">
 
 			<classpath>
-				<path refid="test.classpath" />
+				<path refid="coverage.test.classpath" />
 			</classpath>
 			<formatter type="plain" usefile="false" />
 			<test name="${junit.test.class}" if="junit.test.class" todir="${dir.build}/test-results" />
