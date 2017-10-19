@@ -212,7 +212,7 @@
 			So instead copy all of the files over and then instrument them. -->
 		<cobertura-instrument datafile="${dir.coverage}/cobertura.ser">
 			<auxClasspath>
-				<path refid="application.classpath" />
+				<path refid="test.classpath" />
 				<path refid="cobertura.classpath" />
 			</auxClasspath>
 			<fileset dir="${coverage.dir.classes}">
