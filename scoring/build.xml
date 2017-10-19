@@ -95,6 +95,7 @@
 		<fileset dir="${dir.lib}/cobertura">
 			<include name="lib/logback*.jar" />
 		</fileset>
+		<pathelement location="${dir.lib}/commons-lang3-3.4.jar" />
 	</path>
 
 	<taskdef classpathref="cobertura.task.classpath" resource="tasks.properties" />
