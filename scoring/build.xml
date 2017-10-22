@@ -571,6 +571,10 @@
 	</target>
 
 	<target name="dist" depends="compile,docs,test.all,coverage.report,test.report" description="Create distribution">
+		<!-- make sure we start with a clean dist directory -->
+		<delete dir="${dir.dist}" />
+		<mkdir dir="${dir.dist}" />
+
 		<!-- copy docs to the web -->
 		<copy todir="${dir.web}/documentation">
 			<fileset dir="${basedir}/docs" />
@@ -616,7 +620,7 @@
 		<copy todir="${dir.dist}">
 			<fileset dir="${dir.build}">
 				<include name="tomcat/**" />
-				<exclude name="tomcat/webapps/TEST-${app.name}" />
+				<exclude name="tomcat/webapps/TEST-${app.name}/**" />
 			</fileset>
 		</copy>
 
