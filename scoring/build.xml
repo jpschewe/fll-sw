@@ -532,7 +532,7 @@
 	<!--
   ==================== Dist Target =====================================
   -->
-	<target name="dist" description="Create distribution">
+	<target name="dist.old">
 		<!-- ensure things are clean before testing -->
 		<antcall target="clean" />
 		<!-- make sure the tests pass -->
@@ -570,7 +570,7 @@
 		<copy todir="${basedir}/docs" file="${basedir}/web/documentation/index.html" />
 	</target>
 
-	<target name="dist.real" depends="compile,docs">
+	<target name="dist" depends="compile,docs,test.all,coverage.report,test.report" description="Create distribution">
 		<!-- copy docs to the web -->
 		<copy todir="${dir.web}/documentation">
 			<fileset dir="${basedir}/docs" />
