@@ -570,7 +570,7 @@
 		<copy todir="${basedir}/docs" file="${basedir}/web/documentation/index.html" />
 	</target>
 
-	<target name="dist" depends="compile,docs,test.all,coverage.report,test.report" description="Create distribution">
+	<target name="dist" depends="compile,docs,test.all,coverage.report,test.report,findbugs.html" description="Create distribution">
 		<!-- make sure we start with a clean dist directory -->
 		<delete dir="${dir.dist}" />
 		<mkdir dir="${dir.dist}" />
@@ -923,13 +923,13 @@
 	</target>
 
 	<target name="findbugs.html" depends="compile" description="Executes findbugs to look for problems in the source.">
-		<mkdir dir="${dir.build}/findbugs" />
-		<findbugs home="${findbugs.home}" output="html" outputFile="${dir.build}/findbugs/report.html" effort="max" jvmargs="-Xmx1024m" reportLevel="low" excludeFilter="${basedir}/findbugs-filters.xml">
+		<mkdir dir="${dir.reports}/findbugs" />
+		<findbugs home="${findbugs.home}" output="html" outputFile="${dir.reports}/findbugs/index.html" effort="max" jvmargs="-Xmx1024m" reportLevel="low" excludeFilter="${basedir}/findbugs-filters.xml">
 			<auxClasspath refid="application.classpath" />
 			<sourcePath path="${dir.src}" />
 			<class location="${dir.classes}" />
 		</findbugs>
-		<echo message="See ${dir.build}/findbugs/report.html for the findbugs report" />
+		<echo message="See ${dir.reports}/findbugs/index.html for the findbugs report" />
 	</target>
 
 	<target name="cpd.text" description="Run Copy Paste Detector on the source and produce a text output" depends="init">
