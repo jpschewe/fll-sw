@@ -107,9 +107,9 @@ def fllSwAnt(target) {
   withAnt(installation: 'FLL-SW') {
     dir("scoring") {
       if (isUnix()) {
-        sh script: "ant ${target}", returnStdout: true
+        sh script: "ant ${target}"
       } else {
-        bat script: "ant ${target}", returnStdout: true
+        bat script: "ant ${target}"
       }
     }
   }
