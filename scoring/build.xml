@@ -529,46 +529,96 @@
 	</macrodef>
 
 
+	<target name="tomcat.check-logs" description="Check for errors in the tomcat logs">
+		<fileset id="matches" dir="${dir.tomcat}/logs">
+			<patternset id="files">
+				<include name="localhost*.log" />
+			</patternset>
+			<containsregexp expression="(SEVERE)|(ERROR)" />
+		</fileset>
+
+		<fail message="Errors found in the tomcat logs">
+			<condition>
+				<resourcecount when="greater" count="0" refid="matches" />
+			</condition>
+		</fail>
+
+	</target>
+
+	<!--
+  ==================== Docs Target =====================================
+  -->
+	<target name="docs" depends="javadoc,doc.workflow.generate,doc.wiki.render,doc.database-diagram" description="Generate all documentation">
+
+		<copy todir="${dir.web}/documentation">
+		  <fileset dir="${dir.build}/docs" />
+		</copy>
+	</target>
+
+
+	<target name="doc.workflow.generate" description="Generate the workflow documents">
+		<mkdir dir="${dir.build}/docs/workflows"/>
+		
+		<copy todir="${dir.build}/docs/workflows">
+		  <fileset dir="${dir.build}/docs/workflows" />
+		</copy>
+
+			<apply executable="dot" dest="${dir.build}/docs/workflows">
+			<arg value="-Tpdf" />
+			<arg value="-O" />
+
+			<fileset dir="${dir.build}/docs/workflows">
+				<include name="*.dot" />
+			</fileset>
+
+			<mapper type="glob" from="*.dot" to="*.dot.pdf" />
+		</apply>
+	</target>
+
+	<target name="doc.wiki.render" description="Convert the wiki documentation from markdown to html">
+		<copy todir="${dir.build}/docs">
+			<fileset dir="${basedir}/docs" />
+		</copy>
+
+		<apply executable="python" dest="${dir.build}/docs" failonerror="true">
+			<arg value="${basedir}/scripts/markdown-to-html.py" />
+
+			<fileset dir="${dir.build}/docs/">
+				<include name="**/*.md" />
+			</fileset>
+
+			<mapper type="glob" from="*.md" to="*.html" />
+
+		</apply>
+
+	</target>
+
+	<target name="doc.database-diagram" description="Generate database diagram" depends="compile">
+		<!-- need fork set to true otherwise the classloader inside SchemaSpy doesn't see the database driver -->
+		<java classname="fll.db.GenerateDatabaseDiagram" taskname="SchemaSpy" classpathref="application.classpath" fork="true" failonerror="true">
+			<arg line="${dir.build}/docs/database-diagram" />
+		</java>
+	</target>
+
+	<target name="javadoc" description="Create Javadoc API documentation">
+
+		<mkdir dir="${dir.build}/docs/api" />
+		<javadoc sourcepath="src" windowtitle="${app.name}" destdir="${dir.build}/docs/api" packagenames="fll.*" use="true" splitindex="true" breakiterator="yes">
+			<classpath>
+				<path refid="application.classpath" />
+				<pathelement location="${dir.src}" />
+			</classpath>
+
+		</javadoc>
+
+		<echo message="API documentation is in ${dir.build}/docs/api/index.html" />
+
+	</target>
+
+
 	<!--
   ==================== Dist Target =====================================
   -->
-	<target name="dist.old">
-		<!-- ensure things are clean before testing -->
-		<antcall target="clean" />
-		<!-- make sure the tests pass -->
-		<antcall target="test.all.pass" />
-
-
-		<!--
-    create & copy the coverage & test reports to the side so that the
-    clean doesn't remove it
-    -->
-		<antcall target="coverage.report" />
-		<antcall target="test.report" />
-		<mkdir dir="dist-save" />
-		<copy todir="dist-save">
-			<fileset dir="${dir.reports}" />
-		</copy>
-
-		<!-- Let the filesystem catch up -->
-		<sleep minutes="1" />
-
-		<!-- clean everything out before a distribution is made -->
-		<antcall target="clean" />
-
-		<!-- copy the reports back -->
-		<mkdir dir="${dir.reports}" />
-		<copy todir="${dir.reports}">
-			<fileset dir="dist-save" />
-		</copy>
-		<delete dir="dist-save" />
-
-		<antcall target="dist.real" />
-	</target>
-
-	<target name="docs" depends="javadoc,doc.workflow.generate,doc.wiki.render,doc.database-diagram" description="Generate all documentation">
-		<copy todir="${basedir}/docs" file="${basedir}/web/documentation/index.html" />
-	</target>
 
 	<target name="dist" depends="compile,docs,test.all,coverage.report,test.report,findbugs.html" description="Create distribution">
 		<!-- make sure we start with a clean dist directory -->
@@ -642,22 +692,6 @@
 			</zipfileset>
 		</zip>
 		<echo message="The distribution file is ${dir.build}/${app.name}-${app.version.short}.zip" />
-	</target>
-
-	<!--
-  ==================== Javadoc Target ==================================
-  -->
-	<target name="javadoc" description="Create Javadoc API documentation">
-
-		<mkdir dir="${basedir}/docs/api" />
-		<javadoc sourcepath="src" windowtitle="${app.name}" destdir="${basedir}/docs/api" packagenames="fll.*" use="true" splitindex="true" breakiterator="yes">
-			<classpath>
-				<path refid="application.classpath" />
-				<pathelement location="${dir.src}" />
-			</classpath>
-
-		</javadoc>
-
 	</target>
 
 
@@ -850,56 +884,6 @@
 
 		<xslt style="${basedir}/cloc2sloccount.xsl" in="${basedir}/cloc.xml" out="${basedir}/sloccount.sc">
 		</xslt>
-	</target>
-
-	<target name="doc.workflow.generate" description="Generate the workflow documents">
-		<apply executable="dot" dest="${basedir}/docs/workflows">
-			<arg value="-Tpdf" />
-			<arg value="-O" />
-
-			<fileset dir="${basedir}/docs/workflows">
-				<include name="*.dot" />
-			</fileset>
-
-			<mapper type="glob" from="*.dot" to="*.dot.pdf" />
-		</apply>
-	</target>
-
-	<target name="doc.wiki.render" description="Convert the wiki documentation from markdown to html">
-		<apply executable="python" dest="${basedir}/docs" failonerror="true">
-			<arg value="${basedir}/scripts/markdown-to-html.py" />
-
-			<fileset dir="${basedir}/docs/">
-				<include name="*.md" />
-			</fileset>
-
-			<mapper type="glob" from="*.md" to="*.html" />
-
-		</apply>
-
-	</target>
-
-	<target name="doc.database-diagram" description="Generate database diagram" depends="compile">
-		<!-- need fork set to true otherwise the classloader inside SchemaSpy doesn't see the database drive -->
-		<java classname="fll.db.GenerateDatabaseDiagram" taskname="SchemaSpy" classpathref="application.classpath" fork="true" failonerror="true">
-			<arg line="${basedir}/docs/database-diagram" />
-		</java>
-	</target>
-
-	<target name="tomcat.check-logs" description="Check for errors in the tomcat logs">
-		<fileset id="matches" dir="${dir.tomcat}/logs">
-			<patternset id="files">
-				<include name="localhost*.log" />
-			</patternset>
-			<containsregexp expression="(SEVERE)|(ERROR)" />
-		</fileset>
-
-		<fail message="Errors found in the tomcat logs">
-			<condition>
-				<resourcecount when="greater" count="0" refid="matches" />
-			</condition>
-		</fail>
-
 	</target>
 
 	<target name="continuous" description="Runs the continuous integration build">
