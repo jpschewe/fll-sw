@@ -65,7 +65,7 @@ pipeline {
             allowMissing: false,
             alwaysLinkToLastBuild: false,
             keepAll: false,
-            reportDir: 'scoring/docs',
+            reportDir: 'scoring/build/docs',
             reportFiles: 'index.html',
             reportName: 'Documentation'
           ])
