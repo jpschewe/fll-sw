@@ -550,20 +550,28 @@
   -->
 	<target name="docs" depends="javadoc,doc.workflow.generate,doc.wiki.render,doc.database-diagram" description="Generate all documentation">
 
+		<copy todir="${dir.build}/docs">
+			<fileset dir="${basedir}/..">
+				<include name="LICENSE" />
+			</fileset>
+		</copy>
+		
+		<copy todir="${dir.build}/docs" file="${basedir}/../Changes.md" />
+
 		<copy todir="${dir.web}/documentation">
-		  <fileset dir="${dir.build}/docs" />
+			<fileset dir="${dir.build}/docs" />
 		</copy>
 	</target>
 
 
 	<target name="doc.workflow.generate" description="Generate the workflow documents">
-		<mkdir dir="${dir.build}/docs/workflows"/>
-		
+		<mkdir dir="${dir.build}/docs/workflows" />
+
 		<copy todir="${dir.build}/docs/workflows">
-		  <fileset dir="${dir.build}/docs/workflows" />
+			<fileset dir="${dir.build}/docs/workflows" />
 		</copy>
 
-			<apply executable="dot" dest="${dir.build}/docs/workflows">
+		<apply executable="dot" dest="${dir.build}/docs/workflows">
 			<arg value="-Tpdf" />
 			<arg value="-O" />
 
@@ -625,28 +633,10 @@
 		<delete dir="${dir.dist}" />
 		<mkdir dir="${dir.dist}" />
 
-		<!-- copy docs to the web -->
-		<copy todir="${dir.web}/documentation">
-			<fileset dir="${basedir}/docs" />
-			<fileset dir="${basedir}/..">
-				<include name="LICENSE" />
-			</fileset>
-		</copy>
-
 		<!-- copy docs -->
 		<mkdir dir="${dir.dist}/docs" />
 		<copy todir="${dir.dist}/docs">
-			<fileset dir="${basedir}/docs" />
-			<fileset dir="${basedir}/..">
-				<include name="LICENSE" />
-			</fileset>
-		</copy>
-		<copy todir="${dir.dist}/docs" file="${basedir}/../Changes.md" />
-
-		<!-- copy reports -->
-		<mkdir dir="${dir.dist}/docs/reports" />
-		<copy failonerror="false" todir="${dir.dist}/docs/reports">
-			<fileset dir="${dir.reports}" />
+			<fileset dir="${dir.build}/docs" />
 		</copy>
 
 		<!-- copy scripts -->
