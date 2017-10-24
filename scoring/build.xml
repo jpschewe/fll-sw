@@ -548,7 +548,7 @@
 	<!--
   ==================== Docs Target =====================================
   -->
-	<target name="docs" depends="javadoc,doc.workflow.generate,doc.wiki.render,doc.database-diagram" description="Generate all documentation">
+	<target name="docs" depends="javadoc,doc.workflow.generate,doc.markdown.render,doc.database-diagram" description="Generate all documentation">
 
 		<copy todir="${dir.build}/docs">
 			<fileset dir="${basedir}/..">
@@ -583,7 +583,7 @@
 		</apply>
 	</target>
 
-	<target name="doc.wiki.render" description="Convert the wiki documentation from markdown to html">
+	<target name="doc.markdown.render" description="Convert the markdown documentation to html">
 		<copy todir="${dir.build}/docs">
 			<fileset dir="${basedir}/docs" />
 		</copy>
