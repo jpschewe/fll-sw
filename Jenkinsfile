@@ -40,12 +40,12 @@ pipeline {
       }
     }
     
-    stage('Test') {
+    stage('Build, Test, Distribution') {
       steps {
         throttle(['fll-sw']) { 
           timestamps {
-            fllSwAnt('test.all')
-            junit "scoring/build/test-results/TEST-*.xml"
+            fllSwAnt('dist')
+            junit testResults: "scoring/build/test-results/TEST-*.xml", keepLongStdio: true
             fllSwAnt('tomcat.check-logs')
           } // timestamps
         } // throttle
@@ -65,7 +65,7 @@ pipeline {
             allowMissing: false,
             alwaysLinkToLastBuild: false,
             keepAll: false,
-            reportDir: 'scoring/docs',
+            reportDir: 'scoring/build/docs',
             reportFiles: 'index.html',
             reportName: 'Documentation'
           ])
@@ -76,7 +76,7 @@ pipeline {
     
   post {
     always {
-      archiveArtifacts artifacts: 'scoring/build/screenshots/,scoring/build/tomcat/webapps/fll-sw/fllweb*,scoring/build/tomcat/logs/,scoring/build/docs/reports/'           
+      archiveArtifacts artifacts: 'scoring/build/screenshots/,scoring/build/tomcat/webapps/fll-sw/fllweb*,scoring/build/tomcat/logs/,scoring/build/docs/reports/,scoring/build/fll-sw*.zip'           
                         
       openTasks defaultEncoding: '', excludePattern: 'scoring/checkstyle*.xml,**/ChatServlet.java', healthy: '', high: 'FIXME,HACK', low: '', normal: 'TODO', pattern: '**/*.java,**/*.jsp,**/*.jspf,**/*.xml', unHealthy: ''
       warnings categoriesPattern: '', consoleParsers: [[parserName: 'Java Compiler (javac)']], defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', messagesPattern: '', unHealthy: ''
@@ -96,10 +96,6 @@ ${FAILED_TESTS}
 Check console output at ${BUILD_URL} to view the full results.
 
 Find more details at: ${JENKINS_URL}
-
-Duplicate code: ${DRY_RESULT}
-
-Findbugs: ${FINDBUGS_RESULT}
 '''
                 
     } // always
@@ -111,9 +107,9 @@ def fllSwAnt(target) {
   withAnt(installation: 'FLL-SW') {
     dir("scoring") {
       if (isUnix()) {
-        sh "ant ${target}"
+        sh script: "ant ${target}"
       } else {
-        bat "ant ${target}"
+        bat script: "ant ${target}"
       }
     }
   }
