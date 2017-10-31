@@ -1,3 +1,4 @@
+* #602 - fix error with undefined showing up in the head to head display
 * #601 - Use "award group" instead of "division" in the ranking report
 
 Release 12.0.0
