@@ -1,3 +1,5 @@
+* #601 - Use "award group" instead of "division" in the ranking report
+
 Release 12.0.0
 ==============
 
