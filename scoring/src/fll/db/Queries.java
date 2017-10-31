@@ -408,7 +408,7 @@ public final class Queries {
 
             prep.setInt(1, tournament);
             rs = prep.executeQuery();
-            final String rankingGroup = String.format("division %s judging group %s", division, sgEntry.getKey());
+            final String rankingGroup = String.format("award group %s judging group %s", division, sgEntry.getKey());
 
             processTeamRankings(teamRankings, categoryTitle, rankingGroup, rs);
           } // end foreach score group
@@ -453,7 +453,7 @@ public final class Queries {
       for (final String division : divisions) {
         prep.setString(2, division);
         rs = prep.executeQuery();
-        final String rankingGroup = String.format("division %s", division);
+        final String rankingGroup = String.format("award group %s", division);
         processTeamRankings(teamRankings, CategoryRank.OVERALL_CATEGORY_NAME, rankingGroup, rs);
       }
     } finally {
@@ -551,7 +551,7 @@ public final class Queries {
       for (final String division : divisions) {
         prep.setString(2, division);
         rs = prep.executeQuery();
-        final String rankingGroup = String.format("division %s", division);
+        final String rankingGroup = String.format("award group %s", division);
         processTeamRankings(teamRankings, CategoryRank.PERFORMANCE_CATEGORY_NAME, rankingGroup, rs);
       }
     } finally {
