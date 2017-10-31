@@ -74,7 +74,7 @@ function populateLeaf(leafId, bracketUpdate) {
             bracketUpdate.teamName, "No Show");
       } else {
         text = getTeamNameAndScoreString(bracketUpdate.teamNumber,
-            bracketUpdate.teamName, bracketUpdate.scoreData);
+            bracketUpdate.teamName, bracketUpdate.score);
       }
     }
   }
