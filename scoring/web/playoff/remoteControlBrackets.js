@@ -6,9 +6,9 @@
 
 "use strict";
 
-function isDisplayInfoDifferent(newBracketInfo) {
+function isDisplayInfoDifferent(newAllBracketData) {
 
-  if (allBracketData.length != newBracketInfo.length) {
+  if (allBracketData.length != newAllBracketData.length) {
     return true;
   }
 
@@ -16,7 +16,7 @@ function isDisplayInfoDifferent(newBracketInfo) {
   for (var i = 0; i < length; i++) {
     // Check if we have nested arrays
     var oldBracketInfo = allBracketData[i];
-    var newBracketInfo = newBracketInfo[i];
+    var newBracketInfo = newAllBracketData[i];
 
     if (oldBracketInfo.bracketName != newBracketInfo.bracketName) {
       return true;
