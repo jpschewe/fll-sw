@@ -286,17 +286,10 @@ public class ScheduleChecker {
           }
         }
       } else {
-        // only a problem if this is not the last round and we don't have an odd
-        // number of teams
-        if (!(round == schedule.getNumberOfRounds()
-            - 1
-            && (schedule.getSchedule().size()
-                % 2) == 1)) {
-          final String message = String.format("Team %d has no opponent for round %d", ti.getTeamNumber(), (round
-              + 1));
-          violations.add(new ConstraintViolation(ConstraintViolation.Type.SOFT, ti.getTeamNumber(), null, null,
-                                                 ti.getPerfTime(round), message));
-        }
+        final String message = String.format("Team %d has no opponent for round %d", ti.getTeamNumber(), (round
+            + 1));
+        violations.add(new ConstraintViolation(ConstraintViolation.Type.SOFT, ti.getTeamNumber(), null, null,
+                                               ti.getPerfTime(round), message));
       }
     }
   }
