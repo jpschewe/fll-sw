@@ -71,6 +71,9 @@ public abstract class AbstractGoal implements Serializable {
 
   private final String mDescription;
 
+  /**
+   * @return the description, may be null
+   */
   public String getDescription() {
     return mDescription;
   }

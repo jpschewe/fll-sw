@@ -38,7 +38,7 @@ public class RowElement {
 
   public RowElement(final Goal goal) {
     this.goal = goal;
-    this.rowDescription = goal.getDescription().trim().replaceAll("\\s+", " ");
+    this.rowDescription = null == goal.getDescription() ? "" : goal.getDescription().trim().replaceAll("\\s+", " ");
   }
 
   public String toString() {
