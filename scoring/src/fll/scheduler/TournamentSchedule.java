@@ -1185,7 +1185,7 @@ public class TournamentSchedule implements Serializable {
     table.addCell(tournamentCell);
 
     table.addCell(PdfUtils.createHeaderCell(TEAM_NUMBER_HEADER));
-    table.addCell(PdfUtils.createHeaderCell(DIVISION_HEADER));
+    table.addCell(PdfUtils.createHeaderCell(AWARD_GROUP_HEADER));
     table.addCell(PdfUtils.createHeaderCell(ORGANIZATION_HEADER));
     table.addCell(PdfUtils.createHeaderCell(TEAM_NAME_HEADER));
     table.addCell(PdfUtils.createHeaderCell("Time"));
