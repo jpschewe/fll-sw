@@ -110,7 +110,7 @@ function removeBracket(displayName) {
 
   div.remove();
 
-  setNumBracketsForDisplay(displayName, bracketIndex-1);
+  setNumBracketsForDisplay(displayName, lastBracketIndex);
   updateButtonStates();
 }
 
