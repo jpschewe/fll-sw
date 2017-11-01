@@ -1173,7 +1173,7 @@ public class TournamentSchedule implements Serializable {
     }
 
     // list of teams staying around to even up the teams
-    final List<TeamScheduleInfo> teamsStaying = new LinkedList<TeamScheduleInfo>();
+    final List<TeamScheduleInfo> teamsMissingOpponents = new LinkedList<TeamScheduleInfo>();
 
     final PdfPTable table = PdfUtils.createTable(7);
     table.setWidths(new float[] { 2, 1, 3, 3, 2, 2, 2 });
@@ -1185,7 +1185,7 @@ public class TournamentSchedule implements Serializable {
     table.addCell(tournamentCell);
 
     table.addCell(PdfUtils.createHeaderCell(TEAM_NUMBER_HEADER));
-    table.addCell(PdfUtils.createHeaderCell(DIVISION_HEADER));
+    table.addCell(PdfUtils.createHeaderCell(AWARD_GROUP_HEADER));
     table.addCell(PdfUtils.createHeaderCell(ORGANIZATION_HEADER));
     table.addCell(PdfUtils.createHeaderCell(TEAM_NAME_HEADER));
     table.addCell(PdfUtils.createHeaderCell("Time"));
@@ -1198,10 +1198,10 @@ public class TournamentSchedule implements Serializable {
       final TeamScheduleInfo si = entry.getValue();
       final int round = si.computeRound(performance);
 
-      // check if team needs to stay and color the cell magenta if they do
+      // check if team is missing an opponent
       final BaseColor backgroundColor;
-      if (null != checkIfTeamNeedsToStay(si, round)) {
-        teamsStaying.add(si);
+      if (null == findOpponent(si, round)) {
+        teamsMissingOpponents.add(si);
         backgroundColor = BaseColor.MAGENTA;
       } else {
         backgroundColor = null;
@@ -1222,10 +1222,10 @@ public class TournamentSchedule implements Serializable {
     detailedSchedules.add(table);
 
     // output teams staying
-    if (!teamsStaying.isEmpty()) {
-      final String formatString = "Team %d will please stay at the table and compete again - score will not count.";
+    if (!teamsMissingOpponents.isEmpty()) {
+      final String formatString = "Team %d does not have an opponent.";
       final PdfPTable stayingTable = PdfUtils.createTable(1);
-      for (final TeamScheduleInfo si : teamsStaying) {
+      for (final TeamScheduleInfo si : teamsMissingOpponents) {
         stayingTable.addCell(PdfUtils.createCell(new Formatter().format(formatString, si.getTeamNumber()).toString(),
                                                  BaseColor.MAGENTA));
       }
