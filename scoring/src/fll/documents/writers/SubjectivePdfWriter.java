@@ -168,7 +168,12 @@ public class SubjectivePdfWriter {
     Phrase text = null;
 
     // set up the header for proper spacing
-    pageHeaderTable = new PdfPTable(4);
+    final float[] headerRelativeWidths = new float[4];
+    headerRelativeWidths[0] = 1f; // image
+    headerRelativeWidths[1] = 1.3f; // title/room
+    headerRelativeWidths[2] = 2f; // team number/name
+    headerRelativeWidths[3] = 0.75f; // time/tournament
+    pageHeaderTable = new PdfPTable(headerRelativeWidths);
     pageHeaderTable.setSpacingAfter(5f);
     pageHeaderTable.setWidthPercentage(100f);
     pageHeaderTable.setSpacingBefore(0f);
@@ -189,9 +194,12 @@ public class SubjectivePdfWriter {
 
     // put the rest of the header cells on the table
     pageHeaderTable.addCell(headerCell);
-    pageHeaderTable.addCell(createCell(scoreCategory.getTitle(), f20b, NO_BORDERS, Element.ALIGN_LEFT));
-    pageHeaderTable.addCell(createCell("Team Number: "
-        + teamInfo.getTeamNumber(), f12b, NO_BORDERS, Element.ALIGN_LEFT));
+    final PdfPCell titleCell = createCell(scoreCategory.getTitle(), f20b, NO_BORDERS, Element.ALIGN_LEFT);
+    titleCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+    pageHeaderTable.addCell(titleCell);
+    final PdfPCell teamNumberCell = createCell("Team Number: "
+        + teamInfo.getTeamNumber(), f12b, NO_BORDERS, Element.ALIGN_LEFT);
+    pageHeaderTable.addCell(teamNumberCell);
 
     final String scheduledTimeStr;
     if (null == scheduleColumn) {
@@ -203,15 +211,17 @@ public class SubjectivePdfWriter {
     pageHeaderTable.addCell(createCell("Time: "
         + scheduledTimeStr, f12b, NO_BORDERS, Element.ALIGN_RIGHT));
 
-    pageHeaderTable.addCell(createCell("Judging Room: "
-        + teamInfo.getAwardGroup(), f10b, NO_BORDERS, Element.ALIGN_LEFT));
+    final PdfPCell roomCell = createCell("Judging Room: "
+        + teamInfo.getAwardGroup(), f10b, NO_BORDERS, Element.ALIGN_LEFT);
+    roomCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+    pageHeaderTable.addCell(roomCell);
 
-    final PdfPCell c = createCell(null, f12b, NO_BORDERS, Element.ALIGN_LEFT);
+    final PdfPCell teamNameCell = createCell(null, f12b, NO_BORDERS, Element.ALIGN_LEFT);
     final String teamNameText = "Team Name: "
         + teamInfo.getTeamName();
-    c.setCellEvent(new PdfUtils.TruncateContent(teamNameText, f12b));
-    c.setVerticalAlignment(Element.ALIGN_LEFT);
-    pageHeaderTable.addCell(c);
+    teamNameCell.setCellEvent(new PdfUtils.TruncateContent(teamNameText, f12b));
+    teamNameCell.setVerticalAlignment(Element.ALIGN_LEFT);
+    pageHeaderTable.addCell(teamNameCell);
 
     pageHeaderTable.addCell(createCell(tournamentName, f6i, NO_BORDERS, Element.ALIGN_RIGHT));
 
@@ -562,7 +572,8 @@ public class SubjectivePdfWriter {
 
     pdf.open();
 
-    final SubjectivePdfWriter writer = new SubjectivePdfWriter(description, tournamentName, sheetElement, schedulerColumn);
+    final SubjectivePdfWriter writer = new SubjectivePdfWriter(description, tournamentName, sheetElement,
+                                                               schedulerColumn);
 
     // Go through all of the team schedules and put them all into a pdf
     for (final TeamScheduleInfo teamInfo : schedule) {
