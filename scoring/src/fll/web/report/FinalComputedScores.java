@@ -49,6 +49,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.Utilities;
+import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.scheduler.TournamentSchedule;
@@ -104,6 +105,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
         performanceHurdle = 0;
       }
 
+      final double standardMean = GlobalParameters.getStandardizedMean(connection);
+      final double standardSigma = GlobalParameters.getStandardizedSigma(connection);
+
       final Set<Integer> bestTeams = determineTeamsMeetingPerformanceHurdle(performanceHurdle, connection, tournamentID,
                                                                             challengeDescription.getWinner());
 
@@ -112,7 +116,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
       response.setHeader("Content-Disposition", "filename=finalComputedScores.pdf");
 
       final String challengeTitle = challengeDescription.getTitle();
-      final FooterHandler pageHandler = new FooterHandler(percentageHurdle);
+      final FooterHandler pageHandler = new FooterHandler(percentageHurdle, standardMean, standardSigma);
 
       generateReport(connection, response.getOutputStream(), challengeDescription, challengeTitle, tournament,
                      pageHandler, bestTeams);
@@ -154,7 +158,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
           + " WHERE performance_seeding_max.TeamNumber = TournamentTeams.TeamNumber" //
           + "  AND TournamentTeams.Tournament = ?" //
           + "  AND TournamentTeams.event_division = ?" //
-          + " ORDER by performance_seeding_max.score " + winnerCriteria.getSortString());
+          + " ORDER by performance_seeding_max.score "
+          + winnerCriteria.getSortString());
       prep.setInt(1, tournament);
 
       for (final String division : Queries.getAwardGroups(connection)) {
@@ -249,14 +254,16 @@ public final class FinalComputedScores extends BaseFLLServlet {
         final int numColumnsLeftOfSubjective = 3;
         final int numColumnsRightOfSubjective = 2;
         final float[] relativeWidths = new float[numColumnsLeftOfSubjective
-            + nonZeroWeights + numColumnsRightOfSubjective];
+            + nonZeroWeights
+            + numColumnsRightOfSubjective];
         relativeWidths[0] = 3f;
         relativeWidths[1] = 1.0f;
         relativeWidths[2] = 1.0f;
         relativeWidths[relativeWidths.length
             - numColumnsRightOfSubjective] = 1.5f;
         relativeWidths[relativeWidths.length
-            - numColumnsRightOfSubjective + 1] = 1.5f;
+            - numColumnsRightOfSubjective
+            + 1] = 1.5f;
         for (int i = numColumnsLeftOfSubjective; i < numColumnsLeftOfSubjective
             + nonZeroWeights; i++) {
           relativeWidths[i] = 1.5f;
@@ -277,7 +284,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
               + relativeWidths.length);
           for (int i = 0; i < relativeWidths.length; ++i) {
             LOGGER.trace("\twidth["
-                + i + "] = " + relativeWidths[i]);
+                + i
+                + "] = "
+                + relativeWidths[i]);
           }
         }
 
@@ -324,7 +333,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
           + " AND TournamentTeams.Tournament = FinalScores.Tournament" //
           + " AND TournamentTeams.event_division = ?"//
           + " AND TournamentTeams.TeamNumber = FinalScores.TeamNumber"//
-          + " ORDER BY FinalScores.performance " + winnerCriteria.getSortString());
+          + " ORDER BY FinalScores.performance "
+          + winnerCriteria.getSortString());
       prep.setInt(1, tournament.getTournamentID());
       prep.setString(2, awawrdGroup);
 
@@ -386,7 +396,10 @@ public final class FinalComputedScores extends BaseFLLServlet {
           + " AND TournamentTeams.event_division = ?"//
           + " AND TournamentTeams.TeamNumber = FinalScores.TeamNumber"//
           + " AND TournamentTeams.judging_station = ?" //
-          + " ORDER BY FinalScores." + catName + " " + winnerCriteria.getSortString())) {
+          + " ORDER BY FinalScores."
+          + catName
+          + " "
+          + winnerCriteria.getSortString())) {
         prep.setInt(1, tournament.getTournamentID());
         prep.setString(2, awardGroup);
 
@@ -474,7 +487,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
       query.append(" AND current_tournament_teams.event_division = ?");
       query.append(" AND current_tournament_teams.TeamNumber = Teams.TeamNumber");
       query.append(" ORDER BY FinalScores.OverallScore "
-          + winnerCriteria.getSortString() + ", Teams.TeamNumber");
+          + winnerCriteria.getSortString()
+          + ", Teams.TeamNumber");
       teamPrep = connection.prepareStatement(query.toString());
       teamPrep.setInt(1, tournament.getTournamentID());
       teamPrep.setString(2, awardGroup);
@@ -558,7 +572,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
         // The second row of the team table...
         // First column contains the team # and name
         final PdfPCell teamNameCol = new PdfPCell(new Phrase(Integer.toString(teamNumber)
-            + " " + teamName, ARIAL_8PT_NORMAL));
+            + " "
+            + teamName, ARIAL_8PT_NORMAL));
         teamNameCol.setBorder(0);
         teamNameCol.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_LEFT);
         curteam.addCell(teamNameCol);
@@ -579,7 +594,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
           if (catWeight > 0.0) {
             final double scaledScore;
             final double v = teamsRS.getDouble(6
-                + cat + 1);
+                + cat
+                + 1);
             if (teamsRS.wasNull()) {
               scaledScore = Double.NaN;
             } else {
@@ -840,7 +856,10 @@ public final class FinalComputedScores extends BaseFLLServlet {
         if (catWeight > 0.0) {
           final String catName = catElement.getName();
           prep = connection.prepareStatement("SELECT ComputedTotal"
-              + " FROM " + catName + " WHERE TeamNumber = ? AND Tournament = ? ORDER BY ComputedTotal " + ascDesc);
+              + " FROM "
+              + catName
+              + " WHERE TeamNumber = ? AND Tournament = ? ORDER BY ComputedTotal "
+              + ascDesc);
           prep.setInt(1, teamNumber);
           prep.setInt(2, tournament.getTournamentID());
           rs = prep.executeQuery();
@@ -907,14 +926,19 @@ public final class FinalComputedScores extends BaseFLLServlet {
     /**
      * @param percentageHurdle percentage as an integer between 0 and 100
      */
-    public FooterHandler(final int percentageHurdle) {
+    public FooterHandler(final int percentageHurdle,
+                         final double standardMean,
+                         final double standardSigma) {
+      final String hurdleText;
       if (percentageHurdle > 0
           && percentageHurdle < 100) {
-        _legendText = String.format("* - teams in the top %d%% of performance scores, bold - top team in a category & judging group",
-                                    percentageHurdle);
+        hurdleText = String.format("* - teams in the top %d%% of performance scores, ", percentageHurdle);
       } else {
-        _legendText = "bold - top team in a category & judging group";
+        hurdleText = "";
       }
+
+      _legendText = String.format("%sbold - top team in a category & judging group, %.2f == average ; %.2f = 1 standard deviation",
+                                  hurdleText, standardMean, standardSigma);
     }
 
     @Override
@@ -943,7 +967,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
       final float adjust = _headerFooterFont.getWidthPoint("0", 12);
       cb.setTextMatrix(document.right()
-          - textSize - adjust, textBase);
+          - textSize
+          - adjust, textBase);
       cb.showText(_legendText);
       cb.endText();
       cb.addTemplate(_tpl, document.right()
