@@ -21,6 +21,8 @@ You can edit using your favorite Java IDE. We provide project files for Eclipse.
 If running on 64-bit Linux you will need libc6-i386 installed otherwise you will get a cryptic file not found error when the launch4j task runs.
 This is because the launch4j task needs to execute a 32-bit binary.
 
+The labels that are green are good places for a new developer to start. One is the documentation tasks. It's always nice to have new people help with documentation because they have an outside perspective on how the software works. Another is new-developer. These are tasks that should be fairly easy to implement and will give a developer a start on learning the codebase.
+
 # Copyright
 
 All of the code is currently Copyrighted by INSciTE.
