@@ -12,6 +12,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import javax.annotation.Nonnull;
+
 import org.w3c.dom.Document;
 
 import fll.Utilities;
@@ -327,6 +329,34 @@ public final class GlobalParameters {
     } finally {
       SQLFunctions.close(prep);
     }
+  }
+
+  /**
+   * Get the standardized mean used for normalization. All scores are normalized
+   * such that the mean of the scores is this value.
+   * 
+   * @param connection the database connection
+   * @return the value (should be greater than 0)
+   * @throws SQLException if there is an error talking to the database
+   * @see {@link #STANDARDIZED_MEAN}
+   * @see {@link #STANDARDIZED_MEAN_DEFAULT}
+   */
+  public static double getStandardizedMean(@Nonnull final Connection connection) throws SQLException {
+    return getDoubleGlobalParameter(connection, STANDARDIZED_MEAN);
+  }
+
+  /**
+   * Get the standardized sigma. During normalization this value specifies how the
+   * number of points for 1 standard deviation from the mean.
+   * 
+   * @param connection the database connection
+   * @return the value (should be greater than 0)
+   * @throws SQLException if there is an error talking to the database
+   * @see {@link #STANDARDIZED_SIGMA}
+   * @see {@link #STANDARDIZED_SIGMA_DEFAULT}
+   */
+  public static double getStandardizedSigma(@Nonnull final Connection connection) throws SQLException {
+    return getDoubleGlobalParameter(connection, STANDARDIZED_SIGMA);
   }
 
 }

@@ -65,8 +65,8 @@ public final class ScoreStandardization {
       deletePrep.executeUpdate();
 
       // performance
-      final double mean = getStandardizedMean(connection);
-      final double sigma = getStandardizedSigma(connection);
+      final double mean = GlobalParameters.getStandardizedMean(connection);
+      final double sigma = GlobalParameters.getStandardizedSigma(connection);
 
       insertPrep = connection.prepareStatement("INSERT INTO FinalScores "//
           + " ( TeamNumber, Tournament, performance ) " //
@@ -133,14 +133,6 @@ public final class ScoreStandardization {
     }
   }
 
-  private static double getStandardizedMean(final Connection connection) throws SQLException {
-    return GlobalParameters.getDoubleGlobalParameter(connection, GlobalParameters.STANDARDIZED_MEAN);
-  }
-
-  private static double getStandardizedSigma(final Connection connection) throws SQLException {
-    return GlobalParameters.getDoubleGlobalParameter(connection, GlobalParameters.STANDARDIZED_SIGMA);
-  }
-
   /**
    * Populate the StandardizedScore column of each subjective table.
    */
@@ -153,8 +145,8 @@ public final class ScoreStandardization {
     PreparedStatement updatePrep = null;
     PreparedStatement selectPrep = null;
     try {
-      final double mean = getStandardizedMean(connection);
-      final double sigma = getStandardizedSigma(connection);
+      final double mean = GlobalParameters.getStandardizedMean(connection);
+      final double sigma = GlobalParameters.getStandardizedSigma(connection);
 
       // subjective categories
       for (final ScoreCategory catElement : description.getSubjectiveCategories()) {
