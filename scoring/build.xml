@@ -166,6 +166,9 @@
 
 		<!-- file upload -->
 		<pathelement location="${dir.lib}/commons-fileupload-1.3.jar" />
+		
+		<!-- parse mime types -->
+		<pathelement location="${dir.lib}/tika-core-1.16.jar" />
 
 	</path>
 
