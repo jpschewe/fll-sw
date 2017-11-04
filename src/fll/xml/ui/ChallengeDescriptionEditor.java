@@ -23,6 +23,7 @@ import java.io.InputStreamReader;
 import java.io.Writer;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -148,7 +149,9 @@ public class ChallengeDescriptionEditor extends JFrame {
   }
 
   private final ChallengeDescription mDescription;
+
   private final ScoreCategoryEditor mPerformanceEditor;
+
   private final List<ScoreCategoryEditor> mSubjectiveEditors = new LinkedList<>();
 
   public ChallengeDescriptionEditor(final ChallengeDescription description) {
@@ -206,7 +209,9 @@ public class ChallengeDescriptionEditor extends JFrame {
             || newIndex >= subjective.getComponentCount()) {
           if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Can't move component outside the container oldIndex: "
-                + oldIndex + " newIndex: " + newIndex);
+                + oldIndex
+                + " newIndex: "
+                + newIndex);
           }
           return;
         }
@@ -229,7 +234,7 @@ public class ChallengeDescriptionEditor extends JFrame {
       container.addMoveEventListener(subjectiveMoveListener);
 
       subjective.add(container);
-      
+
       mSubjectiveEditors.add(editor);
     }
 
@@ -255,36 +260,39 @@ public class ChallengeDescriptionEditor extends JFrame {
     }
   };
 
+  private static final Preferences PREFS = Preferences.userNodeForPackage(ChallengeDescriptionEditor.class);
+
+  private static final String DESCRIPTION_STARTING_DIRECTORY_PREF = "descriptionStartingDirectory";
+
   private void saveChallengeDescription() {
     commitChanges();
-    
-    //FIXME needs work!!!
-    
-    // final String startingDirectory =
-    // PREFS.get(DESCRIPTION_STARTING_DIRECTORY_PREF, null);
+
+    final String startingDirectory = PREFS.get(DESCRIPTION_STARTING_DIRECTORY_PREF, null);
 
     final JFileChooser fileChooser = new JFileChooser();
     final FileFilter filter = new BasicFileFilter("FLL Challenge Description (xml)", new String[] { "xml" });
     fileChooser.setFileFilter(filter);
-    // if (null != startingDirectory) {
-    // fileChooser.setCurrentDirectory(new File(startingDirectory));
-    // }
+    if (null != startingDirectory) {
+      fileChooser.setCurrentDirectory(new File(startingDirectory));
+    }
 
     final int returnVal = fileChooser.showSaveDialog(this);
     if (returnVal == JFileChooser.APPROVE_OPTION) {
-      // final File currentDirectory = fileChooser.getCurrentDirectory();
-      // PREFS.put(DESCRIPTION_STARTING_DIRECTORY_PREF,
-      // currentDirectory.getAbsolutePath());
+      final File currentDirectory = fileChooser.getCurrentDirectory();
+      PREFS.put(DESCRIPTION_STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
 
-      final File file = fileChooser.getSelectedFile();
-      // mDescriptionFilename.setText(mScheduleDescriptionFile.getName());
+      File file = fileChooser.getSelectedFile();
+      if (!file.getName().endsWith(".xml")) {
+        file = new File(file.getAbsolutePath()
+            + ".xml");
+      }
 
       try (final Writer writer = new FileWriter(file)) {
         final Document saveDoc = mDescription.toXml();
         XMLUtils.writeXML(saveDoc, writer, Utilities.DEFAULT_CHARSET.name());
-      } catch(final IOException e) {
+      } catch (final IOException e) {
         LOGGER.error("Error writing document", e);
-        
+
         JOptionPane.showMessageDialog(null,
                                       "An unexpected error occurred. Please send the log file and a description of what you were doing to the developer. Error message: "
                                           + e.getMessage(),
@@ -305,13 +313,13 @@ public class ChallengeDescriptionEditor extends JFrame {
 
     return toolbar;
   }
-  
+
   /**
    * Force any pending edits to complete.
    */
   public void commitChanges() {
     mPerformanceEditor.commitChanges();
-    mSubjectiveEditors.forEach(e -> e.commitChanges());    
+    mSubjectiveEditors.forEach(e -> e.commitChanges());
   }
-  
+
 }
