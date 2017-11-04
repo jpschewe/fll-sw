@@ -1,3 +1,4 @@
+* #480 - Add standard mean and sigma to the final scores legend
 * #534 - Always warn about teams missing opponents.
 * #603 - Allow one to remove brackets from the display
 * #602 - Fix error with undefined showing up in the head to head display
