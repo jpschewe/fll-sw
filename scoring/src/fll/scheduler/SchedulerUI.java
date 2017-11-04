@@ -474,8 +474,8 @@ public class SchedulerUI extends JFrame {
   private final class OptimizerWorker extends SwingWorker<Void, Void> {
     private final TableOptimizer optimizer;
 
-    public OptimizerWorker() {
-      this.optimizer = new TableOptimizer(mSchedParams, mScheduleData, mScheduleFile.getAbsoluteFile().getParentFile());
+    public OptimizerWorker(final TableOptimizer optimizer) {
+      this.optimizer = optimizer;
     }
 
     @Override
@@ -881,20 +881,33 @@ public class SchedulerUI extends JFrame {
    * file.
    */
   private void runTableOptimizer() {
-    final OptimizerWorker optimizerWorker = new OptimizerWorker();
+    try {
+      final TableOptimizer optimizer = new TableOptimizer(mSchedParams, mScheduleData,
+                                                          mScheduleFile.getAbsoluteFile().getParentFile());
 
-    // make sure the task doesn't start until the window is up
-    _progressDialog.addComponentListener(new ComponentAdapter() {
-      @Override
-      public void componentShown(final ComponentEvent e) {
-        _progressDialog.removeComponentListener(this);
-        optimizerWorker.execute();
+      final OptimizerWorker optimizerWorker = new OptimizerWorker(optimizer);
+
+      // make sure the task doesn't start until the window is up
+      _progressDialog.addComponentListener(new ComponentAdapter() {
+        @Override
+        public void componentShown(final ComponentEvent e) {
+          _progressDialog.removeComponentListener(this);
+          optimizerWorker.execute();
+        }
+      });
+
+      _progressDialog.setLocationRelativeTo(SchedulerUI.this);
+      _progressDialog.setNote("Running Table Optimizer");
+      _progressDialog.setVisible(true);
+    } catch (final IllegalArgumentException e) {
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug(e, e);
       }
-    });
+      JOptionPane.showMessageDialog(SchedulerUI.this,
+                                    "There are errors in the schedule, the table optimizer cannot be run: "
+                                        + e.getMessage());
+    }
 
-    _progressDialog.setLocationRelativeTo(SchedulerUI.this);
-    _progressDialog.setNote("Running Table Optimizer");
-    _progressDialog.setVisible(true);
   }
 
   /**
