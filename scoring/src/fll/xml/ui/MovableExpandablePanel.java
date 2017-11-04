@@ -7,10 +7,10 @@
 package fll.xml.ui;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.util.EventListener;
 import java.util.EventObject;
 
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -47,7 +47,7 @@ public class MovableExpandablePanel extends JPanel {
                                 final boolean movable) {
     super(new BorderLayout());
 
-    final JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    final JComponent top = Box.createHorizontalBox();
     add(top, BorderLayout.NORTH);
 
     mTitleLabel = new JLabel(title);

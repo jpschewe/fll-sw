@@ -28,16 +28,17 @@ import java.util.prefs.Preferences;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
+import javax.swing.Box;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.border.EtchedBorder;
 import javax.swing.filechooser.FileFilter;
 
 import org.apache.log4j.Logger;
@@ -163,17 +164,16 @@ public class ChallengeDescriptionEditor extends JFrame {
 
     cpane.add(createToolBar(), BorderLayout.PAGE_START);
 
-    final JPanel topPanel = new JPanel();
-    topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.PAGE_AXIS));
+    final JComponent topPanel = Box.createVerticalBox();
     topPanel.setAlignmentX(LEFT_ALIGNMENT);
 
     mPerformanceEditor = new ScoreCategoryEditor(mDescription.getPerformance());
+    mPerformanceEditor.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
     final MovableExpandablePanel performance = new MovableExpandablePanel("Performance", mPerformanceEditor, false);
     topPanel.add(performance);
-
-    final JPanel subjective = new JPanel();
+    
+    final JComponent subjective = Box.createVerticalBox();
     subjective.setBorder(BorderFactory.createTitledBorder("Subjective"));
-    subjective.setLayout(new BoxLayout(subjective, BoxLayout.PAGE_AXIS));
     topPanel.add(subjective);
 
     final MoveEventListener subjectiveMoveListener = new MoveEventListener() {
@@ -229,6 +229,7 @@ public class ChallengeDescriptionEditor extends JFrame {
 
     for (final SubjectiveScoreCategory cat : mDescription.getSubjectiveCategories()) {
       final ScoreCategoryEditor editor = new ScoreCategoryEditor(cat);
+      editor.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
 
       final MovableExpandablePanel container = new MovableExpandablePanel(cat.getTitle(), editor);
       container.addMoveEventListener(subjectiveMoveListener);
@@ -238,6 +239,9 @@ public class ChallengeDescriptionEditor extends JFrame {
       mSubjectiveEditors.add(editor);
     }
 
+    // fill in the bottom of the panel
+    topPanel.add(Box.createVerticalGlue());
+    
     final JScrollPane scroller = new JScrollPane(topPanel);
     cpane.add(scroller, BorderLayout.CENTER);
 

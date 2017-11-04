@@ -12,9 +12,11 @@ import java.text.ParseException;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.border.EtchedBorder;
 
 import org.apache.log4j.Logger;
 
@@ -41,13 +43,13 @@ public class ScoreCategoryEditor extends JPanel {
 
     gbc = new GridBagConstraints();
     gbc.weightx = 0;
-    gbc.anchor = GridBagConstraints.LINE_END;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_END;
     add(new JLabel("weight: "), gbc);
 
     mWeight = FormatterUtils.createDoubleField();
     gbc = new GridBagConstraints();
     gbc.weightx = 1;
-    gbc.anchor = GridBagConstraints.LINE_START;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     add(mWeight, gbc);
@@ -60,9 +62,10 @@ public class ScoreCategoryEditor extends JPanel {
 
     for (final AbstractGoal goal : category.getGoals()) {
 
-      //FIXME need to handle the move!
-      
+      // FIXME need to handle the move!
+
       final AbstractGoalEditor editor = new AbstractGoalEditor(goal);
+      editor.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
       final MovableExpandablePanel panel = new MovableExpandablePanel(goal.getTitle(), editor, true);
       editor.addPropertyChangeListener("title", e -> {
         final String newTitle = (String) e.getNewValue();
@@ -71,7 +74,7 @@ public class ScoreCategoryEditor extends JPanel {
 
       gbc = new GridBagConstraints();
       gbc.weightx = 1;
-      gbc.anchor = GridBagConstraints.LINE_START;
+      gbc.anchor = GridBagConstraints.FIRST_LINE_START;
       gbc.gridwidth = GridBagConstraints.REMAINDER;
 
       add(panel, gbc);
