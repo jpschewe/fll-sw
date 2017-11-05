@@ -62,9 +62,18 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
  * TODO
  * - Support modifying the ChallengeDescription
  *   - CaseStatement
- *   - AbstractConditionStatement ...
+ *   - ConditionStatement
+ *   - EnumConditionStatement
+ *   - ChallengeDescription
+ *     - title
+ *     - revision
+ *     - copyright
  * - Be able to create all elements without an XML element
+ *   * SwitchStatement
+ *   * AbstractGoal
  * - add validity check somewhere to ensure that all names are unique, perhaps this is part of the UI
+ *   - non-null name for AbstractGoal title and name
+ *   - SwitchStatement must have a default case
  *   - look at the XML validation code
  *   - unique names for goals in each category
  *   - unique names for categories
@@ -78,6 +87,8 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
  *   - all goals in a group must be consecutive
  * - how to handle when being run from the launcher so that it doesn't exit?
  *   - maybe have a method that is called from main that creates everything
+ * - track the name of the file and support save functionality
+ * 
  */
 
 /**

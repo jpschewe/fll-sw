@@ -21,6 +21,13 @@ public class CaseStatement implements Evaluatable, Serializable {
 
   public static final String RESULT_TAG_NAME = "result";
 
+  /**
+   * Construct from an XML document.
+   * 
+   * @param ele the element to parse
+   * @param goalScope where to lookup referenced goals
+   * @param variableScope where to lookup referenced variables
+   */
   public CaseStatement(final Element ele,
                        final GoalScope goalScope,
                        final VariableScope variableScope) {
@@ -32,8 +39,12 @@ public class CaseStatement implements Evaluatable, Serializable {
       mCondition = new EnumConditionStatement(condEle, goalScope);
     } else {
       throw new FLLInternalException("Expecting '"
-          + ConditionStatement.TAG_NAME + "' or '" + EnumConditionStatement.TAG_NAME + "', but found '"
-          + condEle.getNodeName() + "'");
+          + ConditionStatement.TAG_NAME
+          + "' or '"
+          + EnumConditionStatement.TAG_NAME
+          + "', but found '"
+          + condEle.getNodeName()
+          + "'");
     }
 
     final Element resultEle = children.next();
@@ -45,7 +56,12 @@ public class CaseStatement implements Evaluatable, Serializable {
       mResultPoly = null;
     } else {
       throw new FLLInternalException("Expecting '"
-          + SwitchStatement.TAG_NAME + "' or '" + RESULT_TAG_NAME + "', but found '" + resultEle.getNodeName() + "'");
+          + SwitchStatement.TAG_NAME
+          + "' or '"
+          + RESULT_TAG_NAME
+          + "', but found '"
+          + resultEle.getNodeName()
+          + "'");
     }
 
   }

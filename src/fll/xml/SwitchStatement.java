@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
@@ -25,6 +26,18 @@ public class SwitchStatement implements Evaluatable, Serializable {
 
   public static final String DEFAULT_TAG_NAME = "default";
 
+  public SwitchStatement() {
+    mCases = new LinkedList<>();
+    mDefaultCase = null;
+  }
+
+  /**
+   * Construct a switch statement from an XML document.
+   * 
+   * @param ele the element to parse
+   * @param goalScope where to lookup goals
+   * @param variableScope where to lookup variables
+   */
   public SwitchStatement(final Element ele,
                          final GoalScope goalScope,
                          final VariableScope variableScope) {
@@ -38,8 +51,17 @@ public class SwitchStatement implements Evaluatable, Serializable {
         defaultCase = new ComplexPolynomial(caseEle, goalScope, variableScope);
       } else {
         throw new FLLInternalException("Expecting '"
-            + CaseStatement.TAG_NAME + "' or '" + DEFAULT_TAG_NAME + "', but found '" + caseEle.getNodeName() + "'");
+            + CaseStatement.TAG_NAME
+            + "' or '"
+            + DEFAULT_TAG_NAME
+            + "', but found '"
+            + caseEle.getNodeName()
+            + "'");
       }
+    }
+
+    if (null == defaultCase) {
+      throw new FLLInternalException("All switch statements must have a default case");
     }
     mDefaultCase = defaultCase;
   }
@@ -92,10 +114,25 @@ public class SwitchStatement implements Evaluatable, Serializable {
     return mCases.remove(index);
   }
 
-  private final ComplexPolynomial mDefaultCase;
+  private ComplexPolynomial mDefaultCase;
 
+  /**
+   * The default case for this switch statement.
+   * This may be null until {@link #toXml(Document)} or
+   * {@link #evaluate(TeamScore)} are called.
+   * 
+   * @return the polynomial, may be null
+   */
   public ComplexPolynomial getDefaultCase() {
     return mDefaultCase;
+  }
+
+  /**
+   * @param v the new default case
+   * @see #getDefaultCase()
+   */
+  public void setDefaultCase(final ComplexPolynomial v) {
+    mDefaultCase = v;
   }
 
   @Override
@@ -105,6 +142,8 @@ public class SwitchStatement implements Evaluatable, Serializable {
         return cs.evaluate(teamScore);
       }
     }
+
+    Objects.requireNonNull(mDefaultCase, "Switch statement must have a default case to be evaluated");
     return getDefaultCase().evaluate(teamScore);
   }
 
@@ -116,11 +155,10 @@ public class SwitchStatement implements Evaluatable, Serializable {
       ele.appendChild(caseEle);
     }
 
-    if (null != mDefaultCase) {
-      final Element defaultEle = doc.createElement(DEFAULT_TAG_NAME);
-      mDefaultCase.populateXml(doc, defaultEle);
-      ele.appendChild(defaultEle);
-    }
+    Objects.requireNonNull(mDefaultCase, "Switch statement must have a default case to be saved");
+    final Element defaultEle = doc.createElement(DEFAULT_TAG_NAME);
+    mDefaultCase.populateXml(doc, defaultEle);
+    ele.appendChild(defaultEle);
 
     return ele;
   }
