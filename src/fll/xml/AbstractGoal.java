@@ -31,6 +31,21 @@ public abstract class AbstractGoal implements Serializable {
 
   public static final String DESCRIPTION_TAG_NAME = "description";
 
+  /**
+   * Default constructor for creating a new goal.
+   */
+  public AbstractGoal() {
+    mName = null;
+    mTitle = null;
+    mDescription = null;
+    mCategory = null;
+  }
+  
+  /**
+   * Constructor for reading from an XML document.
+   * 
+   * @param ele the XML element to parse
+   */
   public AbstractGoal(final Element ele) {
     mName = ele.getAttribute(NAME_ATTRIBUTE);
     mTitle = ele.getAttribute(TITLE_ATTRIBUTE);
