@@ -287,8 +287,13 @@ public class SchedulerUI extends JFrame {
       if (returnVal == JFileChooser.APPROVE_OPTION) {
         final File currentDirectory = fileChooser.getCurrentDirectory();
         PREFS.put(DESCRIPTION_STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
+        
+        File selectedFile = fileChooser.getSelectedFile();
+        if(!selectedFile.getName().endsWith(".properties")) {
+          selectedFile = new File(selectedFile.getAbsolutePath() + ".properties");
+        }
 
-        mScheduleDescriptionFile = fileChooser.getSelectedFile();
+        mScheduleDescriptionFile = selectedFile;
         mDescriptionFilename.setText(mScheduleDescriptionFile.getName());
       } else {
         // user canceled
