@@ -1,3 +1,6 @@
+Release 12.1.0
+==============
+
 * #480 - Add standard mean and sigma to the final scores legend
 * Give reasonable error message when the user tries to run the table optimizer with errors in the schedule
 * Use the Tika library to determine mime types to avoid issues with windows file associations
