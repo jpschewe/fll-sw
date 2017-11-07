@@ -97,5 +97,6 @@
 	<classpathentry kind="lib" path="scoring/tools/tomcat/lib/websocket-api.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/selenium/client-combined-3.3.0-nodeps.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/selenium/selenium-server-standalone-3.3.0.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/tika-core-1.16.jar"/>
 	<classpathentry kind="output" path="scoring/bin/"/>
 </classpath>

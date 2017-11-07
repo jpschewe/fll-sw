@@ -11,7 +11,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
 import java.util.LinkedList;
@@ -31,6 +30,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.tika.Tika;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.scheduler.TournamentSchedule;
@@ -71,7 +71,7 @@ public class ExcelCellReader extends CellFileReader {
       throw new NullPointerException("Path cannot be null");
     }
 
-    final String contentType = Files.probeContentType(path);
+    final String contentType = new Tika().detect(path);
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Detected content type: "
           + contentType + " for " + path);
