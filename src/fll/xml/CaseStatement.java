@@ -7,6 +7,7 @@
 package fll.xml;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -66,32 +67,70 @@ public class CaseStatement implements Evaluatable, Serializable {
 
   }
 
-  private final AbstractConditionStatement mCondition;
+  private AbstractConditionStatement mCondition;
 
+  /**
+   * The condition to evaluate.
+   * 
+   * @return may not be null at evaluation time
+   */
   public AbstractConditionStatement getCondition() {
     return mCondition;
   }
 
-  private final ComplexPolynomial mResultPoly;
+  /**
+   * Specify a new condition statement.
+   * 
+   * @param v see {@link #getCondition()}
+   */
+  public void setCondition(final AbstractConditionStatement v) {
+    mCondition = v;
+  }
+
+  private ComplexPolynomial mResultPoly;
 
   /**
-   * May be null, but then resultSwitch cannot be null.
+   * May be null, but then resultSwitch cannot be null at evaluation time.
    */
   public ComplexPolynomial getResultPoly() {
     return mResultPoly;
   }
 
-  private final SwitchStatement mResultSwitch;
+  /**
+   * @param v see {@link #getResultPoly()}
+   */
+  public void setResultPoly(final ComplexPolynomial v) {
+    mResultPoly = v;
+  }
+
+  private SwitchStatement mResultSwitch;
 
   /**
-   * May be null, but then resultPoly cannot be null.
+   * May be null, but then resultPoly cannot be null at evaluation time.
    */
   public SwitchStatement getResultSwitch() {
     return mResultSwitch;
   }
 
+  /**
+   * @param v see {@link #getResultSwitch()}
+   */
+  public void setResultSwitch(final SwitchStatement v) {
+    mResultSwitch = v;
+  }
+
+  /**
+   * @see fll.xml.Evaluatable#evaluate(fll.web.playoff.TeamScore)
+   * @throws NullPointerException if the {@link #getCondition()} is null or both
+   *           {@link #getResultPoly()} and {@link #getResultSwitch()} are null.
+   */
   @Override
   public double evaluate(final TeamScore teamScore) {
+    Objects.requireNonNull(getCondition(), "Condition must not be null");
+    if (null == getResultPoly()
+        && null == getResultSwitch()) {
+      throw new NullPointerException("Both result poly and result switch cannot be null");
+    }
 
     if (getCondition().isTrue(teamScore)) {
       if (null != getResultPoly()) {

@@ -61,7 +61,6 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
 /*
  * TODO
  * - Support modifying the ChallengeDescription
- *   - CaseStatement
  *   - ChallengeDescription
  *     - title
  *     - revision
