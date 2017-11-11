@@ -8,6 +8,8 @@ package fll.xml;
 
 import java.io.Serializable;
 
+import javax.annotation.Nonnull;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -33,6 +35,19 @@ public class GoalRef implements Evaluatable, Serializable {
     mGoalName = ele.getAttribute(GOAL_ATTRIBUTE);
   }
 
+  /**
+   * @param goalName see {@link #getGoalName()}
+   * @param scope the scope to use to find the goal at evaluation time
+   * @param scoreType see {@link #getScoreType()}
+   */
+  public GoalRef(final String goalName,
+                 final GoalScope scope,
+                 final GoalScoreType scoreType) {
+    mScoreType = scoreType;
+    mGoalScope = scope;
+    mGoalName = goalName;
+  }
+
   private final String mGoalName;
 
   public String getGoalName() {
@@ -41,6 +56,13 @@ public class GoalRef implements Evaluatable, Serializable {
 
   private final GoalScope mGoalScope;
 
+  /**
+   * Resolve the goal name against the goal scope
+   * 
+   * @return the goal
+   * @throws ScopeException if the goal cannot be found
+   */
+  @Nonnull
   public AbstractGoal getGoal() {
     return mGoalScope.getGoal(mGoalName);
   }

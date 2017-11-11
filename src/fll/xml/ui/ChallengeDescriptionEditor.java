@@ -62,8 +62,6 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
  * TODO
  * - Support modifying the ChallengeDescription
  *   - CaseStatement
- *   - ConditionStatement
- *   - EnumConditionStatement
  *   - ChallengeDescription
  *     - title
  *     - revision
@@ -71,6 +69,7 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
  * - Be able to create all elements without an XML element
  *   * SwitchStatement
  *   * AbstractGoal
+ *   - ComplexPolynomial - allow one to create it empty and then add terms and variables
  * - add validity check somewhere to ensure that all names are unique, perhaps this is part of the UI
  *   - non-null name for AbstractGoal title and name
  *   - SwitchStatement must have a default case
