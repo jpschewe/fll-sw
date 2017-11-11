@@ -61,10 +61,24 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
 /*
  * TODO
  * - Be able to create all elements without an XML element
- *   * SwitchStatement
- *   * AbstractGoal
- *   - ComplexPolynomial - allow one to create it empty and then add terms and variables
+ *   - ChallengeDescription
+ *   - SubjectiveScoreCategory
+ *   - PerformanceScoreCategory
+ *   - Restriction
+ *   - TieBreakerTest
+ *   - Term
+ *   - Goal
+ *   - ComputedGoal
+ *   - VariableRef
+ *   - Variable
+ *   - GoalRef
+ *   - RubricRange
+ *   - EnumeratedValue
+ *   - CaseStatement
+ *   - EnumConditionStatement
+ *   - ConditionStatement
  * - add validity check somewhere to ensure that all names are unique, perhaps this is part of the UI
+ *   - see the validity check that is run after parsing the XML
  *   - non-null name for AbstractGoal title and name
  *   - SwitchStatement must have a default case
  *   - look at the XML validation code
@@ -81,6 +95,10 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
  * - how to handle when being run from the launcher so that it doesn't exit?
  *   - maybe have a method that is called from main that creates everything
  * - track the name of the file and support save functionality
+ * - Note that one can create a BasicPolynomial with variable references.
+ *   - Perhaps BasicPolynomial and ComplexPolynomial can be merged?
+ *   - What effect does this have on the XML? Is there always a scope available?
+ *   - If we can't do this, then the UI needs to enforce the restriction.
  * 
  */
 
@@ -175,7 +193,7 @@ public class ChallengeDescriptionEditor extends JFrame {
     mPerformanceEditor.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
     final MovableExpandablePanel performance = new MovableExpandablePanel("Performance", mPerformanceEditor, false);
     topPanel.add(performance);
-    
+
     final JComponent subjective = Box.createVerticalBox();
     subjective.setBorder(BorderFactory.createTitledBorder("Subjective"));
     topPanel.add(subjective);
@@ -245,7 +263,7 @@ public class ChallengeDescriptionEditor extends JFrame {
 
     // fill in the bottom of the panel
     topPanel.add(Box.createVerticalGlue());
-    
+
     final JScrollPane scroller = new JScrollPane(topPanel);
     cpane.add(scroller, BorderLayout.CENTER);
 

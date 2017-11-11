@@ -11,6 +11,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -24,7 +26,7 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 public class BasicPolynomial implements Evaluatable, Serializable {
 
   public static final String FLOATING_POINT_ATTRIBUTE = "floatingPoint";
-  
+
   public BasicPolynomial(final Element ele,
                          final GoalScope goalScope) {
     this(ele, goalScope, null);
@@ -45,13 +47,25 @@ public class BasicPolynomial implements Evaluatable, Serializable {
     mFloatingPoint = FloatingPointType.fromString(ele.getAttribute(FLOATING_POINT_ATTRIBUTE));
   }
 
+  /**
+   * @param floatingPoint see {@link #getFloatingPoint()}
+   */
+  public BasicPolynomial(@Nonnull final FloatingPointType floatingPoint) {
+    mTerms = new LinkedList<Term>();
+    mFloatingPoint = floatingPoint;
+  }
+
   private FloatingPointType mFloatingPoint;
 
+  @Nonnull
   public FloatingPointType getFloatingPoint() {
     return mFloatingPoint;
   }
-  
-  public void setFloatingPoint(final FloatingPointType v) {
+
+  /**
+   * @param v see {@link #getFloatingPoint()}
+   */
+  public void setFloatingPoint(@Nonnull final FloatingPointType v) {
     mFloatingPoint = v;
   }
 
@@ -72,13 +86,12 @@ public class BasicPolynomial implements Evaluatable, Serializable {
   private final List<Term> mTerms;
 
   /**
-   * 
    * @return unmodifiable list
    */
   public List<Term> getTerms() {
     return Collections.unmodifiableList(mTerms);
   }
-  
+
   /**
    * Add a term to the end of the polynomial.
    * 
@@ -87,7 +100,7 @@ public class BasicPolynomial implements Evaluatable, Serializable {
   public void addTerm(final Term term) {
     mTerms.add(term);
   }
-  
+
   /**
    * Add a term at the specified index in the polynomial
    * 
@@ -95,10 +108,12 @@ public class BasicPolynomial implements Evaluatable, Serializable {
    * @param v the term to add
    * @throws IndexOutOfBoundsException
    */
-  public void addTerm(final int index, final Term v) throws IndexOutOfBoundsException {
+  public void addTerm(final int index,
+                      final Term v)
+      throws IndexOutOfBoundsException {
     mTerms.add(index, v);
   }
-  
+
   /**
    * Remove a term.
    * 
@@ -108,7 +123,7 @@ public class BasicPolynomial implements Evaluatable, Serializable {
   public boolean removeTerm(final Term term) {
     return mTerms.remove(term);
   }
-  
+
   /**
    * Remove the term at the specified index.
    * 
@@ -133,13 +148,14 @@ public class BasicPolynomial implements Evaluatable, Serializable {
     }
     return applyFloatingPointType(score);
   }
-  
-  public void populateXml(final Document doc, final Element ele) {
-    for(final Term term : mTerms) {
+
+  public void populateXml(final Document doc,
+                          final Element ele) {
+    for (final Term term : mTerms) {
       final Element termEle = term.toXml(doc);
       ele.appendChild(termEle);
     }
-    
+
     ele.setAttribute(FLOATING_POINT_ATTRIBUTE, mFloatingPoint.toXmlString());
   }
 
