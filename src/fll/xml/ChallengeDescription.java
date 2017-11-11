@@ -10,6 +10,8 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -66,27 +68,50 @@ public class ChallengeDescription implements Serializable {
     return mCopyright;
   }
 
+  /**
+   * @param v see {@link #getCopyright()}
+   */
   public void setCopyright(final String v) {
     mCopyright = v;
   }
 
   private String mTitle;
 
+  /**
+   * The name of the challenge description, it cannot be null, but may be the
+   * empty string, although this is not advised.
+   * 
+   * @return the title of the tournament
+   */
+  @Nonnull
   public String getTitle() {
     return mTitle;
   }
 
-  public void setTitle(final String v) {
+  /**
+   * @param v see {@link #getTitle()}
+   */
+  public void setTitle(@Nonnull final String v) {
     mTitle = v;
   }
 
   private String mRevision;
 
+  /**
+   * This is used to keep track of changes, it can be an empty string, but not
+   * null.
+   * 
+   * @return the revision of the description
+   */
+  @Nonnull
   public String getRevision() {
     return mRevision;
   }
 
-  public void setRevision(final String v) {
+  /**
+   * @param v see {@link #setRevision(String)}
+   */
+  public void setRevision(@Nonnull final String v) {
     mRevision = v;
   }
 

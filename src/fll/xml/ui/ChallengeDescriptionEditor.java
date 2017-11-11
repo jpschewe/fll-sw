@@ -60,11 +60,6 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
 
 /*
  * TODO
- * - Support modifying the ChallengeDescription
- *   - ChallengeDescription
- *     - title
- *     - revision
- *     - copyright
  * - Be able to create all elements without an XML element
  *   * SwitchStatement
  *   * AbstractGoal
