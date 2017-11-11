@@ -13,6 +13,8 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -40,13 +42,13 @@ public abstract class AbstractGoal implements Serializable {
     mDescription = null;
     mCategory = null;
   }
-  
+
   /**
    * Constructor for reading from an XML document.
    * 
    * @param ele the XML element to parse
    */
-  public AbstractGoal(final Element ele) {
+  public AbstractGoal(@Nonnull final Element ele) {
     mName = ele.getAttribute(NAME_ATTRIBUTE);
     mTitle = ele.getAttribute(TITLE_ATTRIBUTE);
 
@@ -61,32 +63,61 @@ public abstract class AbstractGoal implements Serializable {
     mCategory = ele.getAttribute(CATEGORY_ATTRIBUTE);
   }
 
+  /**
+   * @param name see {@link #getName()}
+   */
+  public AbstractGoal(final String name) {
+    mName = name;
+    mTitle = null;
+    mDescription = null;
+    mCategory = null;
+  }
+
   private String mCategory;
 
+  /**
+   * @return the category of the goal, may be null
+   */
   public String getCategory() {
     return mCategory;
   }
 
+  /**
+   * @param v see {@link #getCategory()}
+   */
   public void setCategory(final String v) {
     mCategory = v;
   }
 
   private String mName;
 
+  /**
+   * @return the name of the goal
+   */
+  @Nonnull
   public String getName() {
     return mName;
   }
 
-  public void setName(final String v) {
+  /**
+   * @param v see {@link #getName()}
+   */
+  public void setName(@Nonnull final String v) {
     mName = v;
   }
 
   private String mTitle;
 
+  /**
+   * @return the title of the goal, may be null.
+   */
   public String getTitle() {
     return mTitle;
   }
 
+  /**
+   * @param v see {@link #getTitle()}
+   */
   public void setTitle(final String v) {
     mTitle = v;
   }
@@ -100,6 +131,9 @@ public abstract class AbstractGoal implements Serializable {
     return mDescription;
   }
 
+  /**
+   * @param v see {@link #getDescription()}
+   */
   public void setDescription(final String v) {
     mDescription = v;
   }
@@ -181,19 +215,6 @@ public abstract class AbstractGoal implements Serializable {
 
     if (!StringUtils.isEmpty(mCategory)) {
       ele.setAttribute(CATEGORY_ATTRIBUTE, mCategory);
-    }
-  }
-
-  private static final class EnumeratedValueHighestFirst implements Comparator<EnumeratedValue>, Serializable {
-    public static final EnumeratedValueHighestFirst INSTANCE = new EnumeratedValueHighestFirst();
-
-    private EnumeratedValueHighestFirst() {
-    }
-
-    public int compare(final EnumeratedValue one,
-                       final EnumeratedValue two) {
-      return -1
-          * Double.compare(one.getScore(), two.getScore());
     }
   }
 

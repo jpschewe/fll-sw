@@ -12,6 +12,8 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -59,15 +61,30 @@ public class Goal extends AbstractGoal {
       }
     }
 
-    // sort so that the lowest range is first
-    Collections.sort(mRubric, LEAST_RUBRIC_RANGE);
-
     mValues = new LinkedList<EnumeratedValue>();
     for (final Element valueEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(EnumeratedValue.TAG_NAME))) {
       final EnumeratedValue value = new EnumeratedValue(valueEle);
       mValues.add(value);
     }
 
+  }
+
+  /**
+   * Create a goal with default values for min (0), max (1), multiplier (1),
+   * required (false), empty rubric and empty enumerated values
+   * initial value (0).
+   * 
+   * @param name see {@link #getName()}
+   */
+  public Goal(@Nonnull final String name) {
+    super(name);
+    mMin = 0;
+    mMax = 1;
+    mMultiplier = 1;
+    mInitialValue = 0;
+    mRequired = false;
+    mRubric = new LinkedList<RubricRange>();
+    mValues = new LinkedList<EnumeratedValue>();
   }
 
   private static final Comparator<RubricRange> LEAST_RUBRIC_RANGE = new Comparator<RubricRange>() {
@@ -83,6 +100,9 @@ public class Goal extends AbstractGoal {
    * @return unmodifiable list, sorted with lowest range first
    */
   public List<RubricRange> getRubric() {
+    // sort so that the lowest range is first
+    Collections.sort(mRubric, LEAST_RUBRIC_RANGE);
+
     return Collections.unmodifiableList(mRubric);
   }
 
@@ -251,17 +271,19 @@ public class Goal extends AbstractGoal {
     ele.setAttribute(XMLUtils.SCORE_TYPE_ATTRIBUTE, mScoreType.toXmlString());
     ele.setAttribute(REQUIRED_ATTRIBUTE, Boolean.toString(mRequired));
 
-    if (!mRubric.isEmpty()) {
+    final List<RubricRange> rubric = getRubric();
+    if (!rubric.isEmpty()) {
       final Element rubricEle = doc.createElement(RubricRange.RUBRIC_TAG_NAME);
-      for (final RubricRange range : mRubric) {
+      for (final RubricRange range : rubric) {
         final Element rangeEle = range.toXml(doc);
         rubricEle.appendChild(rangeEle);
       }
       ele.appendChild(rubricEle);
     }
 
-    if (!mValues.isEmpty()) {
-      for (final EnumeratedValue value : mValues) {
+    final Collection<EnumeratedValue> values = getValues();
+    if (!values.isEmpty()) {
+      for (final EnumeratedValue value : values) {
         final Element valueEle = value.toXml(doc);
         ele.appendChild(valueEle);
       }

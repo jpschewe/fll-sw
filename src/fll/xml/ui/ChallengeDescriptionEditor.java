@@ -67,11 +67,8 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
  *   - Restriction
  *   - TieBreakerTest
  *   - Term
- *   - Goal
  *   - ComputedGoal
- *   - VariableRef
  *   - Variable
- *   - GoalRef
  *   - RubricRange
  *   - EnumeratedValue
  *   - CaseStatement
