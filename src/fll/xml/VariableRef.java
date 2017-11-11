@@ -8,6 +8,8 @@ package fll.xml;
 
 import java.io.Serializable;
 
+import javax.annotation.Nonnull;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -22,32 +24,46 @@ public class VariableRef implements Evaluatable, Serializable {
   /**
    * Create a new variable reference.
    * 
-   * @param ele
-   * @param scope
-   * @throws NullPointerException if scope or ele are null
+   * @param ele the XML element to parse the information from
+   * @param scope the scope to lookup the variable in at evaluation time
    */
-  public VariableRef(final Element ele,
-                     final VariableScope scope) {
-    if (null == scope) {
-      throw new NullPointerException("Scope must not be null");
-    }
+  public VariableRef(@Nonnull final Element ele,
+                     @Nonnull final VariableScope scope) {
+    this(ele.getAttribute(VARIABLE_ATTRIBUTE), scope);
+  }
 
-    mVariableName = ele.getAttribute(VARIABLE_ATTRIBUTE);
+  public VariableRef(@Nonnull final String variableName,
+                     @Nonnull final VariableScope scope) {
+    mVariableName = variableName;
     mVariableScope = scope;
   }
 
   private final String mVariableName;
 
+  /**
+   * @return the variable name to reference
+   */
+  @Nonnull
   public String getVariableName() {
     return mVariableName;
   }
 
   private final VariableScope mVariableScope;
 
+  /**
+   * @return the variable
+   * @throws ScopeException if the variable cannot be found in the scope
+   * @see VariableScope#getVariable(String)
+   */
+  @Nonnull
   public Variable getVariable() {
     return mVariableScope.getVariable(mVariableName);
   }
 
+  /**
+   * @see fll.xml.Evaluatable#evaluate(fll.web.playoff.TeamScore)
+   * @see #getVariable()
+   */
   @Override
   public double evaluate(final TeamScore teamScore) {
     return getVariable().evaluate(teamScore);
