@@ -46,7 +46,7 @@ public abstract class AbstractConditionStatement implements Serializable {
     return mComparison;
   }
 
-  public void setCompariton(final InequalityComparison v) {
+  public void setComparison(final InequalityComparison v) {
     mComparison = v;
   }
 

@@ -36,9 +36,8 @@ public class ConditionStatement extends AbstractConditionStatement {
 
     final Element rightEle = new NodelistElementCollectionAdapter(ele.getElementsByTagName(RIGHT_TAG_NAME)).next();
     mRight = new ComplexPolynomial(rightEle, goalScope, variableScope);
-
   }
-
+  
   private final ComplexPolynomial mLeft;
 
   public ComplexPolynomial getLeft() {
