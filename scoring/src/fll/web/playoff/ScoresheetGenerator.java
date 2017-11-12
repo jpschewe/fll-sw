@@ -265,8 +265,8 @@ public class ScoresheetGenerator {
               final int dbLine = Queries.getPlayoffTableLineNumber(connection, tournament, teamB.getTeamNumber(),
                                                                    performanceRunB);
               final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, tournament, division);
-              H2HUpdateWebSocket.updateBracket(division, dbLine, playoffRound, maxPlayoffRound, teamA.getTeamNumber(),
-                                               teamA.getTeamName(), null, ScoreType.INTEGER, // doesn't
+              H2HUpdateWebSocket.updateBracket(division, dbLine, playoffRound, maxPlayoffRound, teamB.getTeamNumber(),
+                                               teamB.getTeamName(), null, ScoreType.INTEGER, // doesn't
                                                                                              // matter
                                                false, true, m_table[j]);
             }

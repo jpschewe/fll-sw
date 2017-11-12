@@ -676,9 +676,7 @@ public final class Playoff {
                                        final int tournament,
                                        final String playoffDivision)
       throws SQLException {
-    LOGGER.info("HERE...");
     final int maxPerformanceRound = getMaxPerformanceRound(connection, tournament, playoffDivision);
-    LOGGER.info("Max performance round: " + maxPerformanceRound);
     if (maxPerformanceRound < 0) {
       return -1;
     } else {
