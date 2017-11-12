@@ -1,3 +1,5 @@
+* #606 - Fix bug where the wrong team is sent to the head to head display in a dynamic update 
+
 Release 12.1.0
 ==============
 
