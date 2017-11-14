@@ -26,7 +26,7 @@
       <c:forEach
         var="tournament"
         items="${tournaments}">
-        <option value="${tournament.name}">${tournament.location}
+        <option value="${tournament.name}">${tournament.description}
           [ ${tournament.name} ]</option>
       </c:forEach>
     </select> <input
