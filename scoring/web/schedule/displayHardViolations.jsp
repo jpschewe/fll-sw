@@ -20,7 +20,7 @@ There are some errors with this schedule, please correct them and try again.
 <ul>
 <c:forEach items="${uploadScheduleData.violations}" var="violation">
   <c:choose>
-    <c:when test="${violation.hard }">
+    <c:when test="${violation.type == 'HARD' }">
       <li class='hard-violation'>${violation.message }</li>
     </c:when>
     <c:otherwise>
