@@ -1122,7 +1122,6 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
-   * 
    * @param tournamentName the name of the tournament to put in the sheets
    * @param output where to output
    * @param description where to get the goals from
@@ -1666,7 +1665,7 @@ public class TournamentSchedule implements Serializable {
       }
 
       return ti;
-    } catch (final ParseException pe) {
+    } catch (final ParseException | NumberFormatException pe) {
       LOGGER.error("Error parsing line: "
           + Arrays.toString(line), pe);
       throw pe;
