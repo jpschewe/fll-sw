@@ -55,6 +55,13 @@ public class Term extends AbstractTerm {
 
   }
 
+  /**
+   * Creates a {@link Term} without any variables or goals.
+   */
+  public Term() {
+    super();
+  }
+  
   private final Collection<GoalRef> mGoals = new LinkedList<GoalRef>();
 
   /**

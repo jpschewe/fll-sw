@@ -39,6 +39,13 @@ public abstract class AbstractTerm implements Evaluatable, Serializable {
     mCoefficient = coefficient;
   }
 
+  /**
+   * Default constructor. {@link #getCoefficient()} is set to 1.
+   */
+  public AbstractTerm() {
+    mCoefficient = 1;
+  }
+
   private double mCoefficient;
 
   public double getCoefficient() {
@@ -48,7 +55,7 @@ public abstract class AbstractTerm implements Evaluatable, Serializable {
   public void setCoefficient(final double v) {
     mCoefficient = v;
   }
-  
+
   protected Element createConstantElement(final Document doc) {
     final Element ele = doc.createElement(CONSTANT_TAG_NAME);
     ele.setAttribute(CONSTANT_VALUE_ATTRIBUTE, Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mCoefficient));
