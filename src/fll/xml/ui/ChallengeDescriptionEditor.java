@@ -66,7 +66,6 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
  *   - PerformanceScoreCategory
  *   - ComputedGoal
  *   - RubricRange
- *   - EnumeratedValue
  *   - CaseStatement
  *   - EnumConditionStatement
  *   - ConditionStatement
