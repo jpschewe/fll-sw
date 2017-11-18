@@ -64,8 +64,6 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
  *   - ChallengeDescription
  *   - SubjectiveScoreCategory
  *   - PerformanceScoreCategory
- *   - Restriction
- *   - TieBreakerTest
  *   - ComputedGoal
  *   - RubricRange
  *   - EnumeratedValue
