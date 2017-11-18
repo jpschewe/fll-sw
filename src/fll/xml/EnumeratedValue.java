@@ -8,6 +8,8 @@ package fll.xml;
 
 import java.io.Serializable;
 
+import javax.annotation.Nonnull;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -23,10 +25,25 @@ public class EnumeratedValue implements Serializable {
 
   public static final String TAG_NAME = "value";
 
+  /**
+   * @param ele XML element used to get the values
+   */
   public EnumeratedValue(final Element ele) {
-    mScore = Double.valueOf(ele.getAttribute(SCORE_ATTRIBUTE));
-    mTitle = ele.getAttribute(TITLE_ATTRIBUTE);
-    mValue = ele.getAttribute(VALUE_ATTRIBUTE);
+    this(ele.getAttribute(TITLE_ATTRIBUTE), ele.getAttribute(VALUE_ATTRIBUTE),
+         Double.valueOf(ele.getAttribute(SCORE_ATTRIBUTE)));
+  }
+
+  /**
+   * @param title see {@link #getTitle()}
+   * @param value see {@link #getValue()}
+   * @param score see {@link #getScore()}
+   */
+  public EnumeratedValue(@Nonnull final String title,
+                         @Nonnull final String value,
+                         final double score) {
+    mScore = score;
+    mTitle = title;
+    mValue = value;
   }
 
   private final double mScore;
