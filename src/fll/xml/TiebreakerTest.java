@@ -22,6 +22,14 @@ public class TiebreakerTest extends BasicPolynomial {
     mWinner = XMLUtils.getWinnerCriteria(ele);
   }
 
+  /**
+   * Default constructor uses {@link WinnerType#HIGH} as {@link #getWinner()}.
+   */
+  public TiebreakerTest() {
+    super();
+    mWinner = WinnerType.HIGH;
+  }
+
   private WinnerType mWinner;
 
   public WinnerType getWinner() {

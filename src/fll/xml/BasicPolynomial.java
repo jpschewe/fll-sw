@@ -48,6 +48,15 @@ public class BasicPolynomial implements Evaluatable, Serializable {
   }
 
   /**
+   * Default construction uses {@link FloatingPointType#TRUNCATE} as the floating
+   * point type. The terms list is empty.
+   */
+  protected BasicPolynomial() {
+    mTerms = new LinkedList<>();
+    mFloatingPoint = FloatingPointType.TRUNCATE;
+  }
+
+  /**
    * @param floatingPoint see {@link #getFloatingPoint()}
    */
   public BasicPolynomial(@Nonnull final FloatingPointType floatingPoint) {
