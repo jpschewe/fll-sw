@@ -11,7 +11,7 @@ Documentation on the database schema, API, workflows, etc. for the [current rele
   1. Get the source code from git
     * git clone git@github.com:jpschewe/fll-sw (read-only)
     * Or you can create a fork and then submit a pull request when you have changes to merge in
-  1. Build by changing to the fll-sw directory and running `./ant.sh`
+  1. Build by changing to `fll-sw/scoring` and running `./ant.sh`
   1. You can start tomcat with `./ant.sh tomcat.start`
   1. You can stop tomcat with `./ant.sh tomcat.stop`, the target `tomcat.reload` can be useful when working on servlet code.
   1. We have a continuous integration server running using [Jenkins](http://jenkins-ci.org/). You can access it at [http://mtu.net/jenkins/job/fll-sw/](http://mtu.net/jenkins/job/fll-sw/). The master branch is built by the job 'fll-sw', all other branches are built by 'fll-sw-feature-branches'.
