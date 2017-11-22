@@ -1,3 +1,5 @@
+* #608 - be able to edit teams with a null organization
+
 Release 12.1.1
 ==============
 
