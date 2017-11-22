@@ -75,9 +75,6 @@ public class DisplayWebSocket {
             LOGGER.error("Got error sending message to session ("
                 + session.getId() + "), dropping session", ioe);
             toRemove.add(session);
-            if (null != displayInfo) {
-              DisplayInfo.deleteDisplay(httpApplication, displayInfo);
-            }
           }
 
           // if this is a named display, update the time last seen
