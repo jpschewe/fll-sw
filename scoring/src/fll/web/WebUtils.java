@@ -110,18 +110,26 @@ public final class WebUtils {
         // Tomcat to listen on IPv6
         if (!address.isLoopbackAddress()) {
           final String url = "http://"
-              + addrStr + ":" + request.getLocalPort() + "/" + request.getContextPath();
+              + addrStr
+              + ":"
+              + request.getLocalPort()
+              + "/"
+              + request.getContextPath();
           urls.add(url);
 
           // check for a name
           try {
             final String name = org.xbill.DNS.Address.getHostName(address);
-            
+
             final String nameurl = "http://"
-                + name + ":" + request.getLocalPort() + request.getContextPath();
+                + name
+                + ":"
+                + request.getLocalPort()
+                + request.getContextPath();
             urls.add(nameurl);
           } catch (final UnknownHostException e) {
-            LOGGER.trace("Could not resolve IP: " + addrStr, e);
+            LOGGER.trace("Could not resolve IP: "
+                + addrStr, e);
           }
         }
       }
@@ -173,7 +181,8 @@ public final class WebUtils {
     } else {
       final Matcher escapeMatcher = WebUtils.needsEscape.matcher(str);
       return '"'
-          + escapeMatcher.replaceAll("\\\\$0") + '"';
+          + escapeMatcher.replaceAll("\\\\$0")
+          + '"';
     }
   }
 
@@ -232,7 +241,9 @@ public final class WebUtils {
       final String user = Queries.checkValidLogin(connection, loginKeys);
       if (null != user) {
         LOGGER.debug("Returning true from checkSecurity for valid login: "
-            + loginKeys + " user: " + user);
+            + loginKeys
+            + " user: "
+            + user);
         return true;
       } else {
         LOGGER.debug("Returning false from checkAuthenticated");
@@ -249,7 +260,11 @@ public final class WebUtils {
    * Escape the string to be used in the value of a form field.
    */
   public static String escapeForHtmlFormValue(final String str) {
-    return str.replace("'", "&apos;");
+    if (null == str) {
+      return str;
+    } else {
+      return str.replace("'", "&apos;");
+    }
   }
 
 }
