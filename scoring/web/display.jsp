@@ -85,7 +85,7 @@
   function messageReceived(event) {
     console.log("received: " + event.data);
 
-    // data doesn't matter, just reload runs on any message
+    // data doesn't matter, just execute reload on any message
     update();
   }
 
