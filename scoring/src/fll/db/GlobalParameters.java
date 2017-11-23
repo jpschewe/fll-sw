@@ -393,4 +393,38 @@ public final class GlobalParameters {
     setIntGlobalParameter(connection, ALL_TEAMS_MS_PER_ROW, value);
   }
 
+  public static final String HEAD_TO_HEAD_MS_PER_ROW = "HeadToHeadMsPerRow";
+
+  public static final int HEAD_TO_HEAD_MS_PER_ROW_DEFAULT = 1000;
+
+  /**
+   * Some control over the scroll rate of the head to head brackets.
+   * The value is nominally the number of milliseconds to display each row of the
+   * display for.
+   * 
+   * @param connection the database connection
+   * @return the nominal scroll rate
+   * @throws SQLException if there is a problem talking to the database
+   */
+  public static int getHeadToHeadMsPerRow(@Nonnull final Connection connection) throws SQLException {
+    if (!globalParameterExists(connection, HEAD_TO_HEAD_MS_PER_ROW)) {
+      return HEAD_TO_HEAD_MS_PER_ROW_DEFAULT;
+    } else {
+      return getIntGlobalParameter(connection, HEAD_TO_HEAD_MS_PER_ROW);
+    }
+  }
+
+  /**
+   * See {@link #getHeadToHeadMsPerRow(Connection)}.
+   * 
+   * @param connection the database connection
+   * @param value the new value
+   * @throws SQLException if there is a problem talking to the database
+   */
+  public static void setHeadToHeadMsPerRow(@Nonnull final Connection connection,
+                                           final int value)
+      throws SQLException {
+    setIntGlobalParameter(connection, HEAD_TO_HEAD_MS_PER_ROW, value);
+  }
+
 }

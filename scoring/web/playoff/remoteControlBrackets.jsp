@@ -64,7 +64,7 @@ SPAN.TIE {
   
 <script type="text/javascript">
   var allBracketData = ${allBracketDataJson};
-  var rows = parseInt("${numRows}"); // could be here directly as an intger, but the JSTL and auto-formatting don't agree
+  var scrollDuration = parseInt("${scrollDuration}"); // could be here directly as an intger, but the JSTL and auto-formatting don't agree
   var maxNameLength = parseInt("${maxNameLength}"); // could be here directly as an intger, but the JSTL and auto-formatting don't agree
 </script>
 
@@ -79,7 +79,7 @@ SPAN.TIE {
 
   function scrollToBottom() {
     $.scrollTo($("#bottom"), {
-      duration : rows * 1000,
+      duration : scrollDuration,
       easing : 'linear',
       onAfter : scrollToTop,
     });
@@ -87,7 +87,7 @@ SPAN.TIE {
 
   function scrollToTop() {
     $.scrollTo($("#top"), {
-      duration : rows * 1000,
+      duration : scrollDuration,
       easing : 'linear',
       onAfter : scrollToBottom,
     });
@@ -102,7 +102,6 @@ SPAN.TIE {
 </script>
 </head>
 <body>
-  <!-- dummy tag and some blank lines for scrolling -->
   <span id="top">&nbsp;</span>
   <div
     id="dummy"
