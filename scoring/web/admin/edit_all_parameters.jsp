@@ -107,8 +107,8 @@
 						<div id='SeedingRoundsHelp' class='help' style='display: none'>
 							This parameter specifies the number of seeding rounds. The
 							seeding rounds are used for the performance score in the final
-							report and are used to rank teams for the initial head to head round.
-							<a href='javascript:hide("SeedingRoundsHelp")'>[hide]</a>
+							report and are used to rank teams for the initial head to head
+							round. <a href='javascript:hide("SeedingRoundsHelp")'>[hide]</a>
 						</div>
 					</th>
 
@@ -304,6 +304,32 @@
 				</tr>
 
 				<tr>
+					<th>All teams scroll rate control. <a
+						href='javascript:display("gAllTeamsMsPerRowHelp")'>[help]</a>
+						<div id='gAllTeamsMsPerRowHelp' class='help' style='display: none'>The
+							value is nominally the number of milliseconds to display each row
+							of the page.</div>
+					</th>
+
+					<td><input type='text' value="${gAllTeamsMsPerRow }"
+						id='gAllTeamsMsPerRow' name='gAllTeamsMsPerRow' /></td>
+				</tr>
+
+				<tr>
+					<th>Head to head scroll rate control. <a
+						href='javascript:display("gHeadToHeadMsPerRowHelp")'>[help]</a>
+						<div id='gHeadToHeadMsPerRowHelp' class='help'
+							style='display: none'>The value is nominally the number of
+							milliseconds to display each row of the page. The remote control
+							brackets page needs to be refreshed for this parameter to take
+							effect.</div>
+					</th>
+
+					<td><input type='text' value="${gHeadToHeadMsPerRow }"
+						id='gHeadToHeadMsPerRow' name='gHeadToHeadMsPerRow' /></td>
+				</tr>
+
+				<tr>
 					<th>Should the ranking report display quartiles?</th>
 					<td><c:choose>
 							<c:when test="${gUseQuartiles }">
@@ -327,67 +353,50 @@
 						</c:choose></td>
 				</tr>
 
-<tr><th colspan="2">FLL Tools integration</th></tr>
+				<tr>
+					<th colspan="2">FLL Tools integration</th>
+				</tr>
 
-        <tr>
-          <th>Mhub hostname<a
-            href='javascript:display("MhubHostnameHelp")'>[help]</a>
-            <div
-              id='MhubHostnameHelp'
-              class='help'
-              style='display: none'>
-              The hostname where mhub is running. Clear to specify that
-              mhub is not in use. <a
-                href='javascript:hide("MhubHostnameHelp")'>[hide]</a>
-            </div>
+				<tr>
+					<th>Mhub hostname<a
+						href='javascript:display("MhubHostnameHelp")'>[help]</a>
+						<div id='MhubHostnameHelp' class='help' style='display: none'>
+							The hostname where mhub is running. Clear to specify that mhub is
+							not in use. <a href='javascript:hide("MhubHostnameHelp")'>[hide]</a>
+						</div>
 
-          </th>
-          <td><input
-            type='text'
-            value="${gMhubHostname }"
-            id='gMhubHostname'
-            name='gMhubHostname' /></td>
-        </tr>
+					</th>
+					<td><input type='text' value="${gMhubHostname }"
+						id='gMhubHostname' name='gMhubHostname' /></td>
+				</tr>
 
-        <tr>
-          <th>Mhub port<a href='javascript:display("MhubPortHelp")'>[help]</a>
-            <div
-              id='MhubPortHelp'
-              class='help'
-              style='display: none'>
-              The port where mhub is running.<a
-                href='javascript:hide("MhubPortHelp")'>[hide]</a>
-            </div>
+				<tr>
+					<th>Mhub port<a href='javascript:display("MhubPortHelp")'>[help]</a>
+						<div id='MhubPortHelp' class='help' style='display: none'>
+							The port where mhub is running.<a
+								href='javascript:hide("MhubPortHelp")'>[hide]</a>
+						</div>
 
-          </th>
-          <td><input
-            type='text'
-            value="${gMhubPort }"
-            id='gMhubPort'
-            name='gMhubPort' /></td>
-        </tr>
+					</th>
+					<td><input type='text' value="${gMhubPort }" id='gMhubPort'
+						name='gMhubPort' /></td>
+				</tr>
 
-        <tr>
-          <th>Display node<a
-            href='javascript:display("MhubDisplayNodeHelp")'>[help]</a>
-            <div
-              id='MhubDisplayNodeHelp'
-              class='help'
-              style='display: none'>
-              The node to send display messages to. <a
-                href='javascript:hide("MhubDisplayNodeHelp")'>[hide]</a>
-            </div>
+				<tr>
+					<th>Display node<a
+						href='javascript:display("MhubDisplayNodeHelp")'>[help]</a>
+						<div id='MhubDisplayNodeHelp' class='help' style='display: none'>
+							The node to send display messages to. <a
+								href='javascript:hide("MhubDisplayNodeHelp")'>[hide]</a>
+						</div>
 
-          </th>
-          <td><input
-            type='text'
-            value="${gMhubDisplayNode }"
-            id='gMhubDisplayNode'
-            name='gMhubDisplayNode' /></td>
-        </tr>
+					</th>
+					<td><input type='text' value="${gMhubDisplayNode }"
+						id='gMhubDisplayNode' name='gMhubDisplayNode' /></td>
+				</tr>
 
 
-      </table>
+			</table>
 
 
 			<input type='submit' value='Save Changes' id='submit' />
