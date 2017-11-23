@@ -308,11 +308,25 @@
 						href='javascript:display("gAllTeamsMsPerRowHelp")'>[help]</a>
 						<div id='gAllTeamsMsPerRowHelp' class='help' style='display: none'>The
 							value is nominally the number of milliseconds to display each row
-							of the display for.</div>
+							of the page.</div>
 					</th>
 
 					<td><input type='text' value="${gAllTeamsMsPerRow }"
 						id='gAllTeamsMsPerRow' name='gAllTeamsMsPerRow' /></td>
+				</tr>
+
+				<tr>
+					<th>Head to head scroll rate control. <a
+						href='javascript:display("gHeadToHeadMsPerRowHelp")'>[help]</a>
+						<div id='gHeadToHeadMsPerRowHelp' class='help'
+							style='display: none'>The value is nominally the number of
+							milliseconds to display each row of the page. The remote control
+							brackets page needs to be refreshed for this parameter to take
+							effect.</div>
+					</th>
+
+					<td><input type='text' value="${gHeadToHeadMsPerRow }"
+						id='gHeadToHeadMsPerRow' name='gHeadToHeadMsPerRow' /></td>
 				</tr>
 
 				<tr>

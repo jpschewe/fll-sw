@@ -23,6 +23,7 @@ import org.apache.log4j.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Team;
+import fll.db.GlobalParameters;
 import fll.util.FLLInternalException;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -83,8 +84,11 @@ public class RemoteControlBrackets {
       pageContext.setAttribute("allBracketDataJson", allBracketDataJson);
 
       // used for scroll control
-      pageContext.setAttribute("numRows", numRows);
+      final int msPerRow = GlobalParameters.getHeadToHeadMsPerRow(connection);
+      final int scrollDuration = numRows
+          * msPerRow;
 
+      pageContext.setAttribute("scrollDuration", scrollDuration);
     } catch (final SQLException sqle) {
       LOGGER.error("Error talking to the database", sqle);
       throw new RuntimeException("Error talking to the database", sqle);

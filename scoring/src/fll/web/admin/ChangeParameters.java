@@ -81,6 +81,8 @@ public class ChangeParameters extends BaseFLLServlet {
 
       GlobalParameters.setAllTeamsMsPerRow(connection, Integer.valueOf(request.getParameter("gAllTeamsMsPerRow")));
 
+      GlobalParameters.setHeadToHeadMsPerRow(connection, Integer.valueOf(request.getParameter("gHeadToHeadMsPerRow")));
+
       final String mhubHostname = request.getParameter("gMhubHostname");
       if (StringUtils.isBlank(mhubHostname)) {
         MhubParameters.setHostname(connection, null);
