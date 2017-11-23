@@ -1,3 +1,4 @@
+* #611 - allow the user to edit the scroll rate on the all teams display and the head to head brackets
 * #608 - be able to edit teams with a null organization
 
 Release 12.1.1
