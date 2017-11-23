@@ -90,6 +90,9 @@ public class GatherParameterInformation {
 
       pageContext.setAttribute("gUseQuartiles", GlobalParameters.getUseQuartilesInRankingReport(connection));
       
+      pageContext.setAttribute("gAllTeamsMsPerRow", GlobalParameters.getAllTeamsMsPerRow(connection));
+      
+      
       pageContext.setAttribute("gMhubHostname", MhubParameters.getHostname(connection));
       pageContext.setAttribute("gMhubPort", MhubParameters.getPort(connection));
       pageContext.setAttribute("gMhubDisplayNode", MhubParameters.getDisplayNode(connection));

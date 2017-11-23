@@ -62,7 +62,7 @@ public final class GlobalParameters {
   }
 
   public static void setUseQuartilesInRankingReport(final Connection connection,
-                                                    boolean value)
+                                                    final boolean value)
       throws SQLException {
     setBooleanGlobalParameter(connection, RANKING_REPORT_USE_QUARTILES, value);
   }
@@ -357,6 +357,40 @@ public final class GlobalParameters {
    */
   public static double getStandardizedSigma(@Nonnull final Connection connection) throws SQLException {
     return getDoubleGlobalParameter(connection, STANDARDIZED_SIGMA);
+  }
+
+  public static final String ALL_TEAMS_MS_PER_ROW = "AllTeamsMsPerRow";
+
+  public static final int ALL_TEAMS_MS_PER_ROW_DEFAULT = 1000;
+
+  /**
+   * Some control over the scroll rate of the all teams part of the score board.
+   * The value is nominally the number of milliseconds to display each row of the
+   * display for.
+   * 
+   * @param connection the database connection
+   * @return the nominal scroll rate
+   * @throws SQLException if there is a problem talking to the database
+   */
+  public static int getAllTeamsMsPerRow(@Nonnull final Connection connection) throws SQLException {
+    if (!globalParameterExists(connection, ALL_TEAMS_MS_PER_ROW)) {
+      return ALL_TEAMS_MS_PER_ROW_DEFAULT;
+    } else {
+      return getIntGlobalParameter(connection, ALL_TEAMS_MS_PER_ROW);
+    }
+  }
+
+  /**
+   * See {@link #getAllTeamsMsPerRow(Connection)}.
+   * 
+   * @param connection the database connection
+   * @param value the new value
+   * @throws SQLException if there is a problem talking to the database
+   */
+  public static void setAllTeamsMsPerRow(@Nonnull final Connection connection,
+                                         final int value)
+      throws SQLException {
+    setIntGlobalParameter(connection, ALL_TEAMS_MS_PER_ROW, value);
   }
 
 }

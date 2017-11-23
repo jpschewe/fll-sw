@@ -79,6 +79,8 @@ public class ChangeParameters extends BaseFLLServlet {
       GlobalParameters.setUseQuartilesInRankingReport(connection,
                                                       Boolean.valueOf(request.getParameter("gUseQuartiles")));
 
+      GlobalParameters.setAllTeamsMsPerRow(connection, Integer.valueOf(request.getParameter("gAllTeamsMsPerRow")));
+
       final String mhubHostname = request.getParameter("gMhubHostname");
       if (StringUtils.isBlank(mhubHostname)) {
         MhubParameters.setHostname(connection, null);
