@@ -127,6 +127,8 @@ FONT.TIE {
 	});
 </script>
 
+<script type='text/javascript' src='scoregenbrackets.js'></script>
+
 </head>
 
 
@@ -140,7 +142,7 @@ FONT.TIE {
   target='_new'>
   <input type='hidden' name='division' value='<%=divisionStr%>' /> <input
    type='hidden' name='numMatches' value='<%=numMatches%>' /> <input
-   type='submit' value='Print scoresheets' id='print_scoresheets' /> - <b>Print the
+   type='submit' value='Print scoresheets' id='print_scoresheets' onclick='return checkSomethingToPrint()'/> - <b>Print the
    scoresheets for the matches that have their boxes checked.</b>
 
 

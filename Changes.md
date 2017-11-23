@@ -1,3 +1,4 @@
+* #607 - don't let the score sheet print page submit with no check boxes checked
 * #611 - allow the user to edit the scroll rate on the all teams display and the head to head brackets
 * #608 - be able to edit teams with a null organization
 
