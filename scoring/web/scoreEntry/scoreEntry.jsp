@@ -60,7 +60,7 @@ table .score-entry {
   type='text/javascript'
   src='../extlib/jquery-1.11.1.min.js'></script>
 
-<script language="javascript">
+<script type="text/javascript">
     <c:if test="${not isBye}">
 
 
