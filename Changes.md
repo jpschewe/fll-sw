@@ -1,4 +1,4 @@
-* #612 - Align goal titles to the right on the score entry page to match the printed score sheet
+* #613 - Align goal titles to the right on the score entry page to match the printed score sheet
 * #607 - don't let the score sheet print page submit with no check boxes checked
 * #611 - allow the user to edit the scroll rate on the all teams display and the head to head brackets
 * #608 - be able to edit teams with a null organization
