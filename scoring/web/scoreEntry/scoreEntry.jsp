@@ -24,16 +24,11 @@ TD {
 }
 
 table#top_info {
-	background-color: ${top_info_color
-}
+	background-color: ${top_info_color};
 
-;
 }
 body {
-	background-color: ${body_background
-}
-
-;
+	background-color: ${body_background};
 }
 table .score-entry {
 	width: 100%;
