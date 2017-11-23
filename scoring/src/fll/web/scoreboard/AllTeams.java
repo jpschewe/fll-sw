@@ -25,6 +25,7 @@ import org.apache.log4j.Logger;
 
 import fll.TournamentTeam;
 import fll.Utilities;
+import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.util.LogUtils;
@@ -105,7 +106,8 @@ public class AllTeams {
       final List<String> sponsorLogos = getSponsorLogos(application);
 
       // estimate how many rows there are
-      final int scrollDuration = 1000 // 1 second per row
+      final int msPerRow = GlobalParameters.getAllTeamsMsPerRow(connection);
+      final int scrollDuration = msPerRow // ms per row
           * (1
               * teamsWithScores.size() // award group, organization, team
                                        // name, hr, scores header
@@ -123,7 +125,8 @@ public class AllTeams {
 
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
-          + sqle.getMessage() + "</p>");
+          + sqle.getMessage()
+          + "</p>");
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);
     } finally {
