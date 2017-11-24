@@ -91,14 +91,22 @@ public final class ScoreEntry {
         final double max = goal.getMax();
 
         writer.println("  <!-- "
-            + name + " -->");
+            + name
+            + " -->");
         if (goal.isEnumerated()) {
           // enumerated
           writer.println("  <!-- nothing to check -->");
         } else {
           final String rawVarName = getVarNameForRawScore(name);
           writer.println("  if("
-              + rawVarName + " < " + min + " || " + rawVarName + " > " + max + ") {");
+              + rawVarName
+              + " < "
+              + min
+              + " || "
+              + rawVarName
+              + " > "
+              + max
+              + ") {");
           writer.println("    return false;");
           writer.println("  }");
         }
@@ -373,7 +381,10 @@ public final class ScoreEntry {
             final double valueScore = valueEle.getScore();
             if (FP.equals(valueScore, initialValue, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
               writer.println("  "
-                  + getVarNameForRawScore(name) + " = \"" + value + "\";");
+                  + getVarNameForRawScore(name)
+                  + " = \""
+                  + value
+                  + "\";");
               found = true;
             }
           }
@@ -382,12 +393,18 @@ public final class ScoreEntry {
             LOG.warn(String.format("Initial value for enum goal '%s' does not match the score of any enum value",
                                    name));
             writer.println("  "
-                + getVarNameForRawScore(name) + " = \"" + values.get(0).getValue() + "\";");
+                + getVarNameForRawScore(name)
+                + " = \""
+                + values.get(0).getValue()
+                + "\";");
           }
 
         } else {
           writer.println("  "
-              + getVarNameForRawScore(name) + " = " + initialValue + ";");
+              + getVarNameForRawScore(name)
+              + " = "
+              + initialValue
+              + ";");
         }
       } // !computed
     } // foreach goal
@@ -431,16 +448,19 @@ public final class ScoreEntry {
           writer.println("<tr><td colspan='4'>&nbsp;</td></tr>");
           if (!StringUtils.isEmpty(category)) {
             writer.println("<tr><td colspan='4' class='center'><b>"
-                + category + "</b></td></tr>");
+                + category
+                + "</b></td></tr>");
           }
         }
 
         writer.println("<!-- "
-            + name + " -->");
+            + name
+            + " -->");
         writer.println("<tr>");
-        writer.println("  <td>");
-        writer.println("    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='3'><b>"
-            + title + ":</b></font>");
+        writer.println("  <td class='goal-title'>");
+        writer.println("    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            + title
+            + ":");
         writer.println("  </td>");
 
         if (goalEle.isComputed()) {
@@ -461,12 +481,14 @@ public final class ScoreEntry {
         // computed score
         writer.println("  <td align='right'>");
         writer.println("    <input type='text' name='score_"
-            + name + "' size='3' align='right' readonly tabindex='-1'>");
+            + name
+            + "' size='3' align='right' readonly tabindex='-1'>");
         writer.println("  </td>");
 
         writer.println("</tr>");
         writer.println("<!-- end "
-            + name + " -->");
+            + name
+            + " -->");
         writer.newLine();
       } catch (final ParseException pe) {
         throw new RuntimeException("FATAL: min/max not parsable for goal: "
@@ -537,11 +559,15 @@ public final class ScoreEntry {
     if (FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE)
         && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
       writer.println("    <input type='text' name='"
-          + name + "_radioValue' size='3' align='right' readonly tabindex='-1'>");
+          + name
+          + "_radioValue' size='3' align='right' readonly tabindex='-1'>");
     } else {
       // allow these to be editable
       writer.println("    <input type='text' name='"
-          + name + "' size='3' align='right' onChange='" + getCheckMethodName(name) + "()'>");
+          + name
+          + "' size='3' align='right' onChange='"
+          + getCheckMethodName(name)
+          + "()'>");
     }
   }
 
@@ -559,8 +585,14 @@ public final class ScoreEntry {
     final String buttonID = getIncDecButtonID(name, increment);
     writer.println("        <td>");
     writer.println("          <input id='"
-        + buttonID + "' type='button' value='" + buttonName + "' onclick='" + getIncrementMethodName(name) + "("
-        + increment + ")'>");
+        + buttonID
+        + "' type='button' value='"
+        + buttonName
+        + "' onclick='"
+        + getIncrementMethodName(name)
+        + "("
+        + increment
+        + ")'>");
     writer.println("        </td>");
   }
 
@@ -568,7 +600,10 @@ public final class ScoreEntry {
                                          final int increment) {
     final String incdec = (increment < 0 ? "dec" : "inc");
     return incdec
-        + "_" + name + "_" + String.valueOf(Math.abs(increment));
+        + "_"
+        + name
+        + "_"
+        + String.valueOf(Math.abs(increment));
   }
 
   /**
@@ -582,16 +617,28 @@ public final class ScoreEntry {
     // order of yes/no buttons needs to match order in generateRefreshBody
     writer.println("        <td>");
     writer.println("          <input type='radio' id='"
-        + name + "_no' name='" + name + "' value='0' onclick='" + getSetMethodName(name) + "(0)'>");
+        + name
+        + "_no' name='"
+        + name
+        + "' value='0' onclick='"
+        + getSetMethodName(name)
+        + "(0)'>");
     writer.println("          <label for='"
-        + name + "_no'>No</label>");
+        + name
+        + "_no'>No</label>");
 
     writer.println("          &nbsp;&nbsp;");
 
     writer.println("          <input type='radio' id='"
-        + name + "_yes' name='" + name + "' value='1' onclick='" + getSetMethodName(name) + "(1)'>");
+        + name
+        + "_yes' name='"
+        + name
+        + "' value='1' onclick='"
+        + getSetMethodName(name)
+        + "(1)'>");
     writer.println("          <label for='"
-        + name + "_yes'>Yes</label>");
+        + name
+        + "_yes'>Yes</label>");
     writer.println("        </td>");
   }
 
@@ -641,27 +688,39 @@ public final class ScoreEntry {
                 final String value = valueElement.getValue();
                 if (value.equals(storedValue)) {
                   writer.println("  "
-                      + rawVarName + " = \"" + value + "\";");
+                      + rawVarName
+                      + " = \""
+                      + value
+                      + "\";");
                   found = true;
                 }
               }
               if (!found) {
                 throw new RuntimeException("Found enumerated value in the database that's not in the XML document, goal: "
-                    + name + " value: " + storedValue);
+                    + name
+                    + " value: "
+                    + storedValue);
               }
             } else {
               // just use the value that is stored in the database
               writer.println("  "
-                  + rawVarName + " = " + rs.getString(name) + ";");
+                  + rawVarName
+                  + " = "
+                  + rs.getString(name)
+                  + ";");
             }
           } // !computed
         } // foreach goal
         // Always init the special double-check column
         writer.println("  Verified = "
-            + rs.getBoolean("Verified") + ";");
+            + rs.getBoolean("Verified")
+            + ";");
       } else {
         throw new RuntimeException("Cannot find TeamNumber and RunNumber in Performance table"
-            + " TeamNumber: " + teamNumber + " RunNumber: " + runNumber);
+            + " TeamNumber: "
+            + teamNumber
+            + " RunNumber: "
+            + runNumber);
       }
     } finally {
       SQLFunctions.close(rs);
@@ -683,11 +742,20 @@ public final class ScoreEntry {
       writer.println("      <tr>");
       writer.println("        <td>");
       writer.println("          <input type='radio' name='"
-          + goalName + "' value='" + value + "' id='" + id + "' ' onclick='" + getSetMethodName(goalName) + "(\""
-          + value + "\")'>");
+          + goalName
+          + "' value='"
+          + value
+          + "' id='"
+          + id
+          + "' ' onclick='"
+          + getSetMethodName(goalName)
+          + "(\""
+          + value
+          + "\")'>");
       writer.println("        </td>");
       writer.println("        <td><label for='"
-          + id + "'/>");
+          + id
+          + "'/>");
       writer.println("          "
           + valueTitle);
       writer.println("        </td>");
@@ -698,7 +766,8 @@ public final class ScoreEntry {
 
     writer.println("  <td align='right'>");
     writer.println("    <input type='text' name='"
-        + goalName + "_radioValue' size='10' align='right' readonly tabindex='-1'>");
+        + goalName
+        + "_radioValue' size='10' align='right' readonly tabindex='-1'>");
 
   }
 
@@ -718,7 +787,8 @@ public final class ScoreEntry {
   public static String getIDForEnumRadio(final String goalName,
                                          final String value) {
     return goalName
-        + "_" + value;
+        + "_"
+        + value;
   }
 
   /**
@@ -916,10 +986,12 @@ public final class ScoreEntry {
       return value;
     case ROUND:
       return "Math.round("
-          + value + ")";
+          + value
+          + ")";
     case TRUNCATE:
       return "parseInt("
-          + value + ")";
+          + value
+          + ")";
     default:
       throw new RuntimeException("Unexpected floating point type: "
           + floatingPoint);
@@ -969,7 +1041,8 @@ public final class ScoreEntry {
         leftStr = getVarNameForRawScore(cond.getLeftGoal().getName());
       } else {
         leftStr = "'"
-            + cond.getLeftString() + "'";
+            + cond.getLeftString()
+            + "'";
       }
 
       final String rightStr;
@@ -977,7 +1050,8 @@ public final class ScoreEntry {
         rightStr = getVarNameForRawScore(cond.getRightGoal().getName());
       } else {
         rightStr = "'"
-            + cond.getLeftString() + "'";
+            + cond.getLeftString()
+            + "'";
       }
 
       formatter.format("%s %s %s", leftStr, ineqToString(ele.getComparison()), rightStr);

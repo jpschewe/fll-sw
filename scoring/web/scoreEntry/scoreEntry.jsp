@@ -18,46 +18,19 @@
   type="text/css"
   href="<c:url value='/style/fll-sw.css'/>" />
 
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="scoreEntry.css" />
+
+<!-- a couple of things come from the JSP, so need to be inline -->
 <style type='text/css'>
-TD {
-	font-family: arial
-}
-
 table#top_info {
-	background-color: ${top_info_color
-}
+	background-color: ${top_info_color};
 
-;
 }
 body {
-	background-color: ${body_background
-}
-
-;
-}
-table .score-entry {
-	width: 100%;
-}
-
-#floating-messages {
-	position: fixed;
-	top: 0px;
-	left: 0%;
-	z-index: 99;
-}
-
-#score-errors {
-	font-size: 200%;
-	border: 1px solid black;
-	padding: 5px;
-	background-color: red;
-}
-
-#verification-warning {
-	font-size: 200%;
-	border: 1px solid black;
-	padding: 5px;
-	background-color: yellow;
+	background-color: ${body_background};
 }
 </style>
 
@@ -65,7 +38,7 @@ table .score-entry {
   type='text/javascript'
   src='../extlib/jquery-1.11.1.min.js'></script>
 
-<script language="javascript">
+<script type="text/javascript">
     <c:if test="${not isBye}">
 
 
