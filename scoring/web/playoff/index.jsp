@@ -131,7 +131,7 @@
       <form
         name='printable'
         action='scoregenbrackets.jsp'
-        method='get'>
+        method='get' target="_blank">
         Score sheet Generation Brackets<br />
         <%-- bracket --%>
         Select Bracket: <select
@@ -207,7 +207,7 @@
       <form
         name='admin'
         action='adminbrackets.jsp'
-        method='get'>
+        method='get' target="_blank">
         Select Bracket to print: <select name='division'>
           <c:forEach
             items="${playoff_data.initializedBrackets }"
