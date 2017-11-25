@@ -9,6 +9,7 @@ package fll.xml;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
@@ -57,6 +58,23 @@ public class ChallengeDescription implements Serializable {
     }
   }
 
+  /**
+   * Default constructor uses the empty string for {@link #getRevision()},
+   * {@link WinnerType#HIGH} for {@link #getWinner()}, null for
+   * {@link #getCopyright()}, an empty {@link #getPerformance()} and no
+   * {@link #getSubjectiveCategories()}.
+   * 
+   * @param title the title of the challenge
+   */
+  public ChallengeDescription(@Nonnull final String title) {
+    mTitle = title;
+    mRevision = "";
+    mWinner = WinnerType.HIGH;
+    mCopyright = null;
+    mPerformance = new PerformanceScoreCategory();
+    mSubjectiveCategories = new LinkedList<>();
+  }
+
   private String mCopyright;
 
   /**
@@ -92,6 +110,7 @@ public class ChallengeDescription implements Serializable {
    * @param v see {@link #getTitle()}
    */
   public void setTitle(@Nonnull final String v) {
+    Objects.requireNonNull(v);
     mTitle = v;
   }
 
@@ -112,6 +131,7 @@ public class ChallengeDescription implements Serializable {
    * @param v see {@link #setRevision(String)}
    */
   public void setRevision(@Nonnull final String v) {
+    Objects.requireNonNull(v);
     mRevision = v;
   }
 

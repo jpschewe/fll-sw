@@ -19,7 +19,8 @@ import fll.web.playoff.TeamScore;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**
- * 
+ * Base for {@link SubjectiveScoreCategory} and
+ * {@link PerformanceScoreCategory}.
  */
 public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
 
@@ -38,6 +39,15 @@ public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
         mGoals.add(compGoal);
       }
     }
+  }
+
+  /**
+   * Default constructor creates an object with no {@link #getGoals()} and a
+   * {@link #getWeight()} of 1.
+   */
+  protected ScoreCategory() {
+    mGoals = new LinkedList<>();
+    mWeight = 1;
   }
 
   private final List<AbstractGoal> mGoals;
@@ -112,7 +122,8 @@ public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
       }
     }
     throw new ScopeException("Cannot find goal named '"
-        + name + "'");
+        + name
+        + "'");
   }
 
   @Override

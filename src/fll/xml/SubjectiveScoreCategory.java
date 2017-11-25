@@ -6,6 +6,8 @@
 
 package fll.xml;
 
+import javax.annotation.Nonnull;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -20,10 +22,28 @@ public class SubjectiveScoreCategory extends ScoreCategory {
 
   public static final String TITLE_ATTRIBUTE = "title";
 
+  /**
+   * Construct from the provided XML element.
+   * 
+   * @param ele where to get the information from
+   */
   public SubjectiveScoreCategory(final Element ele) {
     super(ele);
     mName = ele.getAttribute(NAME_ATTRIBUTE);
     mTitle = ele.getAttribute(TITLE_ATTRIBUTE);
+  }
+
+  /**
+   * Default constructor when no XML element is available.
+   * 
+   * @param name see {@link #getName()}
+   * @param title see {@link #getTitle()}
+   */
+  public SubjectiveScoreCategory(@Nonnull final String name,
+                                 @Nonnull final String title) {
+    super();
+    mName = name;
+    mTitle = title;
   }
 
   private final String mName;
@@ -34,6 +54,10 @@ public class SubjectiveScoreCategory extends ScoreCategory {
 
   private String mTitle;
 
+  /**
+   * @return the title of the category
+   */
+  @Nonnull
   public String getTitle() {
     return mTitle;
   }

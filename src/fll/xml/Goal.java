@@ -71,7 +71,7 @@ public class Goal extends AbstractGoal {
 
   /**
    * Create a goal with default values for min (0), max (1), multiplier (1),
-   * required (false), empty rubric and empty enumerated values
+   * required (false), empty rubric, empty enumerated values and
    * initial value (0).
    * 
    * @param name see {@link #getName()}

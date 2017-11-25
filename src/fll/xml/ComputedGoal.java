@@ -11,6 +11,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -33,6 +35,18 @@ public class ComputedGoal extends AbstractGoal implements VariableScope {
 
     final Element switchEle = new NodelistElementCollectionAdapter(ele.getElementsByTagName(SwitchStatement.TAG_NAME)).next();
     mSwitch = new SwitchStatement(switchEle, goalScope, this);
+  }
+
+  /**
+   * Default constructor, creates an object with no variables and a default switch
+   * statement.
+   * 
+   * @param name see {@link #getName()}
+   */
+  public ComputedGoal(@Nonnull final String name) {
+    super(name);
+    mVariables = new LinkedList<>();
+    mSwitch = new SwitchStatement();
   }
 
   private final Collection<Variable> mVariables;
@@ -73,7 +87,8 @@ public class ComputedGoal extends AbstractGoal implements VariableScope {
       }
     }
     throw new ScopeException("Cannot find variable '"
-        + name + "'");
+        + name
+        + "'");
   }
 
   public double getRawScore(final TeamScore teamScore) {
@@ -120,9 +135,9 @@ public class ComputedGoal extends AbstractGoal implements VariableScope {
   @Override
   public Element toXml(final Document doc) {
     final Element ele = doc.createElement(TAG_NAME);
-    
+
     populateXml(doc, ele);
-    
+
     for (final Variable var : mVariables) {
       final Element varEle = var.toXml(doc);
       ele.appendChild(varEle);

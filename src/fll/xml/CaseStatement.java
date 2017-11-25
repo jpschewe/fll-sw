@@ -67,6 +67,16 @@ public class CaseStatement implements Evaluatable, Serializable {
 
   }
 
+  /**
+   * Default constructor. All values are null, they must be set before
+   * {@link #evaluate(TeamScore)} is called.
+   */
+  public CaseStatement() {
+    mCondition = null;
+    mResultPoly = null;
+    mResultSwitch = null;
+  }
+
   private AbstractConditionStatement mCondition;
 
   /**
@@ -106,7 +116,8 @@ public class CaseStatement implements Evaluatable, Serializable {
   private SwitchStatement mResultSwitch;
 
   /**
-   * May be null, but then resultPoly cannot be null at evaluation time.
+   * May be null, but then {@link #getResultPoly()} cannot be null at evaluation
+   * time.
    */
   public SwitchStatement getResultSwitch() {
     return mResultSwitch;

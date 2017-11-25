@@ -8,10 +8,12 @@ package fll.xml;
 
 import java.io.Serializable;
 
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
+import javax.annotation.Nonnull;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**
  * Represents a rubric range.
@@ -46,6 +48,21 @@ public class RubricRange implements Serializable {
     }
 
     mShortDescription = ele.getAttribute(SHORT_DESCRIPTION_ATTRIBUTE);
+  }
+
+  /**
+   * Default constructor. {@link #getDescription()} is null,
+   * {@link #getShortDescription()} is null, {@link #getMin()} is 0,
+   * {@Link #getMax()} is 1.
+   * 
+   * @param title the title of the range
+   */
+  public RubricRange(@Nonnull final String title) {
+    mTitle = title;
+    mMin = 0;
+    mMax = 1;
+    mDescription = null;
+    mShortDescription = null;
   }
 
   private static String removeExtraWhitespace(final String str) {
@@ -111,7 +128,8 @@ public class RubricRange implements Serializable {
         && !shortDescription.trim().isEmpty()) {
       sb.append(shortDescription.trim());
       if (!shortDescription.endsWith(".")
-          && !shortDescription.endsWith("!") && !shortDescription.endsWith("?")) {
+          && !shortDescription.endsWith("!")
+          && !shortDescription.endsWith("?")) {
         sb.append(".");
       }
     }
