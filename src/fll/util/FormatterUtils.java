@@ -7,7 +7,12 @@
 package fll.util;
 
 import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
+import javax.annotation.Nonnull;
 import javax.swing.JFormattedTextField;
 import javax.swing.text.DefaultFormatter;
 import javax.swing.text.DefaultFormatterFactory;
@@ -78,7 +83,7 @@ public final class FormatterUtils {
     field.setInputVerifier(new DoubleVerifier(min, max));
     return field;
   }
-  
+
   /**
    * Create a {@link JFormattedTextField} for editing strings.
    * This allows editing string fields by inserting text rather than overwrite.
@@ -90,10 +95,80 @@ public final class FormatterUtils {
     final DefaultFormatter format = new DefaultFormatter();
     format.setOverwriteMode(false);
     format.setValueClass(String.class);
-    
+
     final JFormattedTextField field = new JFormattedTextField(format);
     field.setValue("");
     return field;
   }
 
+  /**
+   * Create a {@link JFormattedTextField} for editing database names.
+   * The default value is the empty string.
+   * The XML pattern is "\p{L}[\p{L}\p{Nd}_]*".
+   * 
+   * @return text field for editing database names
+   */
+  public static JFormattedTextField createDatabaseNameField() {
+    final RegexFormatter format = new RegexFormatter("[a-zA-Z]\\w*");
+    format.setOverwriteMode(false);
+    format.setValueClass(String.class);
+
+    final JFormattedTextField field = new JFormattedTextField(format);
+    field.setValue("");
+    return field;
+  }
+
+  /**
+   * Allows one to use regular expressions to specify the format of a
+   * {@link JFormattedTextField}.
+   * Based on code from http://www.oracle.com/technetwork/java/reftf-138955.html
+   * and
+   * http://www.java2s.com/Tutorial/Java/0240__Swing/RegexFormatterwithaJFormattedTextField.htm.
+   */
+  private static class RegexFormatter extends DefaultFormatter {
+    private final Pattern pattern;
+
+    /**
+     * Creates a regular expression based AbstractFormatter.
+     * pattern specifies the regular expression that will be used
+     * to determine if a value is legal.
+     */
+    public RegexFormatter(@Nonnull final String pattern) throws PatternSyntaxException {
+      this.pattern = Pattern.compile(pattern);
+    }
+
+
+    /**
+     * Returns the Pattern used to determine if a value is legal.
+     */
+    public Pattern getPattern() {
+      return pattern;
+    }
+
+    /**
+     * Parses text returning an arbitrary Object. Some formatters
+     * may return null.
+     * If a Pattern has been specified and the text completely
+     * matches the regular expression this will invoke setMatcher.
+     * 
+     * @throws ParseException
+     *           if there is an error in the conversion
+     * @param text
+     *          String to convert
+     * @return Object representation of text
+     */
+    public Object stringToValue(String text) throws ParseException {
+      final Pattern pattern = getPattern();
+
+      if (pattern != null) {
+        final Matcher matcher = pattern.matcher(text);
+
+        if (matcher.matches()) {
+          return super.stringToValue(text);
+        }
+        throw new ParseException("Pattern did not match", 0);
+      }
+      return text;
+    }
+  }
 }

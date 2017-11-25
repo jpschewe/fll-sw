@@ -128,7 +128,7 @@ public abstract class AbstractGoal implements Serializable {
    * @return the description, may be null
    */
   public String getDescription() {
-    return mDescription;
+    return null == mDescription ? null : mDescription.trim().replaceAll("\\s+", " ");
   }
 
   /**
@@ -204,17 +204,17 @@ public abstract class AbstractGoal implements Serializable {
 
   protected void populateXml(final Document document,
                              final Element ele) {
-    ele.setAttribute(NAME_ATTRIBUTE, mName);
-    ele.setAttribute(TITLE_ATTRIBUTE, mTitle);
+    ele.setAttribute(NAME_ATTRIBUTE, getName());
+    ele.setAttribute(TITLE_ATTRIBUTE, getTitle());
 
-    if (!StringUtils.isEmpty(mDescription)) {
+    if (!StringUtils.isEmpty(getDescription())) {
       final Element descriptionEle = document.createElement(DESCRIPTION_TAG_NAME);
-      descriptionEle.appendChild(document.createTextNode(mDescription));
+      descriptionEle.appendChild(document.createTextNode(getDescription()));
       ele.appendChild(descriptionEle);
     }
 
-    if (!StringUtils.isEmpty(mCategory)) {
-      ele.setAttribute(CATEGORY_ATTRIBUTE, mCategory);
+    if (!StringUtils.isEmpty(getCategory())) {
+      ele.setAttribute(CATEGORY_ATTRIBUTE, getCategory());
     }
   }
 

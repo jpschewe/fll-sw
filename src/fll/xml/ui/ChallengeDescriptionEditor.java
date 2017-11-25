@@ -90,8 +90,12 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
  *   - unique variable names inside ComputedGoal
  *   - SwitchStatement must have something in the default case
  * - edit goals
+ *   - edit rubrics
+ * - edit restrictions
+ * - edit tie breaker
  * - ability to add subjective categories
  * - Ability to add goals
+ * - edit computed goals
  * - Note that one can create a BasicPolynomial with variable references.
  *   - Perhaps BasicPolynomial and ComplexPolynomial can be merged?
  *   - What effect does this have on the XML? Is there always a scope available?
