@@ -84,7 +84,7 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
  *   - look at the XML validation code
  *   - unique names for goals in each category
  *   - unique names for categories
- *   - Goal min/max
+ *   - Goal min/max and initial value
  *   - Restriction upperBound/lowerBound
  *   - RubricRange min/max
  *   - unique variable names inside ComputedGoal

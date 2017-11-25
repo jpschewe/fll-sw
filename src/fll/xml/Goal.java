@@ -157,6 +157,13 @@ public class Goal extends AbstractGoal {
     return mValues.remove(v);
   }
 
+  /**
+   * Clear all of the values, makes this goal no longer enumerated.
+   */
+  public void removeAllValues() {
+    mValues.clear();
+  }
+
   private double mMin;
 
   public double getMin() {
