@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -36,7 +37,11 @@ public class ScoreCategoryEditor extends JPanel {
 
   private final List<AbstractGoalEditor> mGoalEditors = new LinkedList<>();
 
-  public ScoreCategoryEditor(final ScoreCategory category) {
+  private final Box mGoalEditorContainer;
+
+  private ScoreCategory mCategory = null;
+
+  public ScoreCategoryEditor() {
     setLayout(new GridBagLayout());
 
     GridBagConstraints gbc;
@@ -54,31 +59,54 @@ public class ScoreCategoryEditor extends JPanel {
     gbc.fill = GridBagConstraints.HORIZONTAL;
     add(mWeight, gbc);
 
-    mWeight.setValue(category.getWeight());
     mWeight.addPropertyChangeListener("value", e -> {
-      final double newWeight = ((Number) mWeight.getValue()).doubleValue();
-      category.setWeight(newWeight);
+      if (null != mCategory) {
+        final Number value = (Number) mWeight.getValue();
+        if (null != value) {
+          final double newWeight = value.doubleValue();
+          mCategory.setWeight(newWeight);
+        }
+      }
     });
 
-    for (final AbstractGoal goal : category.getGoals()) {
+    mGoalEditorContainer = Box.createVerticalBox();
+    gbc = new GridBagConstraints();
+    gbc.weightx = 1;
+    gbc.weighty = 1;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.fill = GridBagConstraints.BOTH;
+    add(mGoalEditorContainer, gbc);
+  }
 
-      // FIXME need to handle the move!
+  /**
+   * @param category the category to edit, may be null to clear the object
+   */
+  public void setCategory(final ScoreCategory category) {
+    mCategory = category;
 
-      final AbstractGoalEditor editor = new AbstractGoalEditor(goal);
-      editor.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
-      final MovableExpandablePanel panel = new MovableExpandablePanel(goal.getTitle(), editor, true);
-      editor.addPropertyChangeListener("title", e -> {
-        final String newTitle = (String) e.getNewValue();
-        panel.setTitle(newTitle);
-      });
+    mWeight.setValue(null);
+    mGoalEditorContainer.removeAll();
+    mGoalEditors.clear();
 
-      gbc = new GridBagConstraints();
-      gbc.weightx = 1;
-      gbc.anchor = GridBagConstraints.FIRST_LINE_START;
-      gbc.gridwidth = GridBagConstraints.REMAINDER;
+    if (null != mCategory) {
+      mWeight.setValue(mCategory.getWeight());
 
-      add(panel, gbc);
-      mGoalEditors.add(editor);
+      for (final AbstractGoal goal : mCategory.getGoals()) {
+
+        // FIXME need to handle the move!
+
+        final AbstractGoalEditor editor = new AbstractGoalEditor(goal);
+        editor.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
+        final MovableExpandablePanel panel = new MovableExpandablePanel(goal.getTitle(), editor, true);
+        editor.addPropertyChangeListener("title", e -> {
+          final String newTitle = (String) e.getNewValue();
+          panel.setTitle(newTitle);
+        });
+
+        mGoalEditorContainer.add(panel);
+        mGoalEditors.add(editor);
+      }
     }
   }
 
@@ -93,7 +121,6 @@ public class ScoreCategoryEditor extends JPanel {
     }
 
     mGoalEditors.forEach(e -> e.commitChanges());
-
   }
 
 }
