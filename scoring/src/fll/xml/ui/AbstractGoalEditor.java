@@ -40,7 +40,7 @@ import fll.xml.AbstractGoal;
     gbc = new GridBagConstraints();
     gbc.weightx = 0;
     gbc.anchor = GridBagConstraints.FIRST_LINE_END;
-    add(new JLabel("title: "), gbc);
+    add(new JLabel("Title: "), gbc);
 
     mTitleEditor = FormatterUtils.createStringField();
     gbc = new GridBagConstraints();
