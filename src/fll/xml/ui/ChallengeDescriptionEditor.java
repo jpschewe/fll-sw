@@ -356,6 +356,7 @@ public class ChallengeDescriptionEditor extends JFrame {
     topPanel.add(Box.createVerticalGlue());
 
     final JScrollPane scroller = new JScrollPane(topPanel);
+    scroller.getVerticalScrollBar().setUnitIncrement(20);
     cpane.add(scroller, BorderLayout.CENTER);
 
     setSize(800, 600);
