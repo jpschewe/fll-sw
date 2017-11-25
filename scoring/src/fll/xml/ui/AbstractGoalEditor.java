@@ -35,6 +35,8 @@ import fll.xml.AbstractGoal;
 
   private final JFormattedTextField mDescriptionEditor;
 
+  private final JFormattedTextField mCategoryEditor;
+
   public AbstractGoalEditor(final AbstractGoal goal) {
     super(new GridBagLayout());
     mGoal = goal;
@@ -95,9 +97,28 @@ import fll.xml.AbstractGoal;
     add(mDescriptionEditor, gbc);
     mDescriptionEditor.setValue(goal.getDescription());
 
-    mTitleEditor.addPropertyChangeListener("value", e -> {
+    mDescriptionEditor.addPropertyChangeListener("value", e -> {
       final String newValue = mDescriptionEditor.getText();
       goal.setDescription(newValue);
+    });
+
+    gbc = new GridBagConstraints();
+    gbc.weightx = 0;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_END;
+    add(new JLabel("Category: "), gbc);
+
+    mCategoryEditor = FormatterUtils.createStringField();
+    gbc = new GridBagConstraints();
+    gbc.weightx = 1;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    add(mCategoryEditor, gbc);
+    mCategoryEditor.setValue(goal.getCategory());
+
+    mCategoryEditor.addPropertyChangeListener("value", e -> {
+      final String newValue = mCategoryEditor.getText();
+      goal.setCategory(newValue);
     });
 
   }
