@@ -6,13 +6,16 @@
 
 package fll.xml.ui;
 
+import java.awt.CardLayout;
 import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.text.ParseException;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
 
@@ -20,7 +23,6 @@ import fll.util.FormatterUtils;
 import fll.util.LogUtils;
 import fll.xml.Goal;
 import fll.xml.ScoreType;
-import fll.xml.WinnerType;
 
 /**
  * Editor for {@link Goal} objects.
@@ -35,6 +37,18 @@ public class GoalEditor extends AbstractGoalEditor {
 
   private final JComboBox<ScoreType> mScoreTypeEditor;
 
+  private static final String COUNT_PANEL_KEY = "count";
+
+  private static final String ENUMERATED_PANEL_KEY = "enumerated";
+
+  private final JCheckBox mEnumerated;
+
+  private final JFormattedTextField mMinEditor;
+
+  private final JFormattedTextField mMaxEditor;
+
+  private final JFormattedTextField mInitialValueEditor;
+
   /**
    * @param goal the goal to edit
    */
@@ -48,7 +62,7 @@ public class GoalEditor extends AbstractGoalEditor {
     gbc.anchor = GridBagConstraints.FIRST_LINE_END;
     add(new JLabel("Multiplier: "), gbc);
 
-    mMultiplierEditor = FormatterUtils.createStringField();
+    mMultiplierEditor = FormatterUtils.createDoubleField();
     gbc = new GridBagConstraints();
     gbc.weightx = 1;
     gbc.anchor = GridBagConstraints.FIRST_LINE_START;
@@ -99,8 +113,118 @@ public class GoalEditor extends AbstractGoalEditor {
       final ScoreType value = mScoreTypeEditor.getItemAt(mScoreTypeEditor.getSelectedIndex());
       getGoal().setScoreType(value);
     });
+
+    gbc = new GridBagConstraints();
+    gbc.weightx = 0;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_END;
+    add(new JLabel("Enumerated: "), gbc);
+
+    mEnumerated = new JCheckBox();
+    gbc = new GridBagConstraints();
+    gbc.weightx = 1;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    add(mEnumerated, gbc);
+
+    final CardLayout cardLayout = new CardLayout();
+    final JPanel cardPanel = new JPanel(cardLayout);
+    gbc = new GridBagConstraints();
+    gbc.weightx = 1;
+    gbc.weighty = 1;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.fill = GridBagConstraints.BOTH;
+    add(cardPanel);
+
+    final JPanel countPanel = new JPanel(new GridBagLayout());
+    cardPanel.add(countPanel, COUNT_PANEL_KEY);
+
+    gbc = new GridBagConstraints();
+    gbc.weightx = 0;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_END;
+    countPanel.add(new JLabel("Minimum Value: "), gbc);
+
+    mMinEditor = FormatterUtils.createDoubleField();
+    gbc = new GridBagConstraints();
+    gbc.weightx = 1;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    countPanel.add(mMinEditor, gbc);
+    mMinEditor.setValue(goal.getMin());
+
+    mMinEditor.addPropertyChangeListener("value", e -> {
+      final Number value = (Number) mMinEditor.getValue();
+      if (null != value) {
+        final double newValue = value.doubleValue();
+        getGoal().setMin(newValue);
+      }
+    });
+
+    gbc = new GridBagConstraints();
+    gbc.weightx = 0;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_END;
+    countPanel.add(new JLabel("Maximum Value: "), gbc);
+
+    mMaxEditor = FormatterUtils.createDoubleField();
+    gbc = new GridBagConstraints();
+    gbc.weightx = 1;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    countPanel.add(mMaxEditor, gbc);
+    mMaxEditor.setValue(goal.getMin());
+
+    mMaxEditor.addPropertyChangeListener("value", e -> {
+      final Number value = (Number) mMinEditor.getValue();
+      if (null != value) {
+        final double newValue = value.doubleValue();
+        getGoal().setMax(newValue);
+      }
+    });
+
+    gbc = new GridBagConstraints();
+    gbc.weightx = 0;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_END;
+    countPanel.add(new JLabel("Initial Value: "), gbc);
+
+    mInitialValueEditor = FormatterUtils.createDoubleField();
+    gbc = new GridBagConstraints();
+    gbc.weightx = 1;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    countPanel.add(mInitialValueEditor, gbc);
+    mInitialValueEditor.setValue(goal.getMin());
+
+    mInitialValueEditor.addPropertyChangeListener("value", e -> {
+      final Number value = (Number) mMinEditor.getValue();
+      if (null != value) {
+        final double newValue = value.doubleValue();
+        getGoal().setInitialValue(newValue);
+      }
+    });
+
+    final JPanel enumPanel = new JPanel(new GridBagLayout());
+    cardPanel.add(enumPanel, ENUMERATED_PANEL_KEY);
+
+    cardLayout.show(cardPanel, getGoal().isEnumerated() ? ENUMERATED_PANEL_KEY : COUNT_PANEL_KEY);
+
+    mEnumerated.addActionListener(e -> {
+      cardLayout.show(cardPanel, mEnumerated.isSelected() ? ENUMERATED_PANEL_KEY : COUNT_PANEL_KEY);
+    });
+    mEnumerated.setSelected(getGoal().isEnumerated());
+
   }
 
+  /**
+   * If the enumerated box is unselected, then all values are removed from the
+   * goal to ensure that {@link Goal#isEnumerated()} is consistent with the state
+   * of the object.
+   * 
+   * @see fll.xml.ui.AbstractGoalEditor#commitChanges()
+   */
   @Override
   public void commitChanges() {
     super.commitChanges();
@@ -111,6 +235,10 @@ public class GoalEditor extends AbstractGoalEditor {
       LOGGER.debug("Got parse exception committing changes to multiplier, assuming bad value and ignoring", e);
     }
 
+    if (!mEnumerated.isSelected()) {
+      // clear all values
+      getGoal().removeAllValues();
+    }
   }
 
   @Override
