@@ -67,8 +67,6 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
  *   - ComputedGoal
  *   - RubricRange
  *   - CaseStatement
- *   - EnumConditionStatement
- *   - ConditionStatement
  * - add validity check somewhere to ensure that all names are unique, perhaps this is part of the UI
  *   - see the validity check that is run after parsing the XML
  *   - non-null name for AbstractGoal title and name

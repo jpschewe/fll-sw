@@ -6,8 +6,6 @@
 
 package fll.xml;
 
-import javax.annotation.Nonnull;
-
 import org.w3c.dom.Element;
 
 /**
@@ -22,10 +20,10 @@ public class ComplexPolynomial extends BasicPolynomial {
   }
 
   /**
-   * see {@link BasicPolynomial#BasicPolynomial(FloatingPointType)}
+   * see {@link BasicPolynomial#BasicPolynomial()}
    */
-  public ComplexPolynomial(@Nonnull final FloatingPointType floatingPoint) {
-    super(floatingPoint);
+  public ComplexPolynomial() {
+    super();
   }
 
 }
