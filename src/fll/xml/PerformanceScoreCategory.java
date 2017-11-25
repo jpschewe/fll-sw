@@ -53,6 +53,17 @@ public class PerformanceScoreCategory extends ScoreCategory {
 
   }
 
+  /**
+   * Default constructor has a {@link #getMinimumScore()} of 0, no
+   * {@link #getRestrictions()} and no {@link #getTiebreaker()}.
+   */
+  public PerformanceScoreCategory() {
+    super();
+    mMinimumScore = 0;
+    mRestrictions = new LinkedList<>();
+    mTiebreaker = new LinkedList<>();
+  }
+
   private final Collection<Restriction> mRestrictions;
 
   /**

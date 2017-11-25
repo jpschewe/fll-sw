@@ -26,6 +26,10 @@ public class SwitchStatement implements Evaluatable, Serializable {
 
   public static final String DEFAULT_TAG_NAME = "default";
 
+  /**
+   * Default constructor creates an object with no {@link #getCases()} and a null
+   * {@link #getDefaultCase()}.
+   */
   public SwitchStatement() {
     mCases = new LinkedList<>();
     mDefaultCase = null;

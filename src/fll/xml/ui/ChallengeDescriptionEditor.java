@@ -60,13 +60,7 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
 
 /*
  * TODO
- * - Be able to create all elements without an XML element
- *   - ChallengeDescription
- *   - SubjectiveScoreCategory
- *   - PerformanceScoreCategory
- *   - ComputedGoal
- *   - RubricRange
- *   - CaseStatement
+ * * Be able to create all elements without an XML element
  * - add validity check somewhere to ensure that all names are unique, perhaps this is part of the UI
  *   - see the validity check that is run after parsing the XML
  *   - non-null name for AbstractGoal title and name
