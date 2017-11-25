@@ -25,6 +25,7 @@ import org.apache.log4j.Logger;
 import fll.util.FormatterUtils;
 import fll.util.LogUtils;
 import fll.xml.AbstractGoal;
+import fll.xml.Goal;
 import fll.xml.ScoreCategory;
 import fll.xml.ui.MovableExpandablePanel.MoveEvent;
 import fll.xml.ui.MovableExpandablePanel.MoveEvent.MoveDirection;
@@ -151,7 +152,12 @@ public class ScoreCategoryEditor extends JPanel {
 
       for (final AbstractGoal goal : mCategory.getGoals()) {
 
-        final AbstractGoalEditor editor = new AbstractGoalEditor(goal);
+        final AbstractGoalEditor editor;
+        if (goal instanceof Goal) {
+          editor = new GoalEditor((Goal) goal);
+        } else {
+          editor = new AbstractGoalEditor(goal);
+        }
         editor.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
         final MovableExpandablePanel panel = new MovableExpandablePanel(goal.getTitle(), editor, true);
         editor.addPropertyChangeListener("title", e -> {

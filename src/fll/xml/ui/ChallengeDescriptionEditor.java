@@ -90,7 +90,7 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
  *   - unique variable names inside ComputedGoal
  *   - SwitchStatement must have something in the default case
  * - edit goals
- *   - edit rubrics
+ * - edit rubrics
  * - edit restrictions
  * - edit tie breaker
  * - ability to add subjective categories
