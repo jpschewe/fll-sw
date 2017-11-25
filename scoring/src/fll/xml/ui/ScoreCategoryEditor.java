@@ -6,6 +6,7 @@
 
 package fll.xml.ui;
 
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.text.ParseException;
@@ -25,6 +26,9 @@ import fll.util.FormatterUtils;
 import fll.util.LogUtils;
 import fll.xml.AbstractGoal;
 import fll.xml.ScoreCategory;
+import fll.xml.ui.MovableExpandablePanel.MoveEvent;
+import fll.xml.ui.MovableExpandablePanel.MoveEvent.MoveDirection;
+import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 
 /**
  * Editor for {@link ScoreCategory} objects.
@@ -41,6 +45,8 @@ public class ScoreCategoryEditor extends JPanel {
 
   private ScoreCategory mCategory = null;
 
+  private final MoveEventListener mGoalMoveListener;
+
   public ScoreCategoryEditor() {
     setLayout(new GridBagLayout());
 
@@ -49,7 +55,7 @@ public class ScoreCategoryEditor extends JPanel {
     gbc = new GridBagConstraints();
     gbc.weightx = 0;
     gbc.anchor = GridBagConstraints.FIRST_LINE_END;
-    add(new JLabel("weight: "), gbc);
+    add(new JLabel("Weight: "), gbc);
 
     mWeight = FormatterUtils.createDoubleField();
     gbc = new GridBagConstraints();
@@ -77,6 +83,57 @@ public class ScoreCategoryEditor extends JPanel {
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.fill = GridBagConstraints.BOTH;
     add(mGoalEditorContainer, gbc);
+
+    mGoalMoveListener = new MoveEventListener() {
+
+      @Override
+      public void requestedMove(final MoveEvent e) {
+        // find index of e.component in subjective
+        int oldIndex = -1;
+        for (int i = 0; oldIndex < 0
+            && i < mGoalEditorContainer.getComponentCount(); ++i) {
+          final Component c = mGoalEditorContainer.getComponent(i);
+          if (c == e.getComponent()) {
+            oldIndex = i;
+          }
+        }
+        if (oldIndex < 0) {
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Unable to find source of move event in goal container");
+            return;
+          }
+        }
+
+        final int newIndex;
+        if (e.getDirection() == MoveDirection.DOWN) {
+          newIndex = oldIndex
+              + 1;
+        } else {
+          newIndex = oldIndex
+              - 1;
+        }
+
+        if (newIndex < 0
+            || newIndex >= mGoalEditorContainer.getComponentCount()) {
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Can't move component outside the container oldIndex: "
+                + oldIndex
+                + " newIndex: "
+                + newIndex);
+          }
+          return;
+        }
+
+        // update the UI
+        mGoalEditorContainer.add(e.getComponent(), newIndex);
+        mGoalEditorContainer.validate();
+
+        // update the order in the challenge description
+        final AbstractGoal goal = mCategory.removeGoal(oldIndex);
+        mCategory.addGoal(newIndex, goal);
+      }
+    };
+
   }
 
   /**
@@ -94,8 +151,6 @@ public class ScoreCategoryEditor extends JPanel {
 
       for (final AbstractGoal goal : mCategory.getGoals()) {
 
-        // FIXME need to handle the move!
-
         final AbstractGoalEditor editor = new AbstractGoalEditor(goal);
         editor.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
         final MovableExpandablePanel panel = new MovableExpandablePanel(goal.getTitle(), editor, true);
@@ -103,6 +158,7 @@ public class ScoreCategoryEditor extends JPanel {
           final String newTitle = (String) e.getNewValue();
           panel.setTitle(newTitle);
         });
+        panel.addMoveEventListener(mGoalMoveListener);
 
         mGoalEditorContainer.add(panel);
         mGoalEditors.add(editor);
