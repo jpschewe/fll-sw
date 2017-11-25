@@ -138,7 +138,7 @@ public class Goal extends AbstractGoal {
   }
 
   /**
-   * Add an enumerated value
+   * Add an enumerated value.
    * 
    * @param v the value to add
    */
@@ -147,7 +147,7 @@ public class Goal extends AbstractGoal {
   }
 
   /**
-   * Remove an enumted value, if all enumted values are removed the goal
+   * Remove an enumerated value, if all enumerated values are removed the goal
    * is no longer an enumerated goal.
    * 
    * @param v the value to remove
