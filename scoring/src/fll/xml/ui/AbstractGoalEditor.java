@@ -145,6 +145,12 @@ import fll.xml.AbstractGoal;
       LOGGER.debug("Got parse exception committing changes to description, assuming bad value and ignoring", e);
     }
 
+    try {
+      mCategoryEditor.commitEdit();
+    } catch (final ParseException e) {
+      LOGGER.debug("Got parse exception committing changes to category, assuming bad value and ignoring", e);
+    }
+
   }
 
   protected void fireTitleChange(final String oldTitle,
