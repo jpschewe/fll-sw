@@ -31,6 +31,10 @@ import fll.xml.AbstractGoal;
 
   private final JFormattedTextField mTitleEditor;
 
+  private final JFormattedTextField mNameEditor;
+
+  private final JFormattedTextField mDescriptionEditor;
+
   public AbstractGoalEditor(final AbstractGoal goal) {
     super(new GridBagLayout());
     mGoal = goal;
@@ -58,6 +62,44 @@ import fll.xml.AbstractGoal;
       fireTitleChange(oldTitle, newTitle);
     });
 
+    gbc = new GridBagConstraints();
+    gbc.weightx = 0;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_END;
+    add(new JLabel("Name: "), gbc);
+
+    mNameEditor = FormatterUtils.createDatabaseNameField();
+    gbc = new GridBagConstraints();
+    gbc.weightx = 1;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    add(mNameEditor, gbc);
+    mNameEditor.setValue(goal.getName());
+
+    mNameEditor.addPropertyChangeListener("value", e -> {
+      final String newValue = mNameEditor.getText();
+      goal.setName(newValue);
+    });
+
+    gbc = new GridBagConstraints();
+    gbc.weightx = 0;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_END;
+    add(new JLabel("Description: "), gbc);
+
+    mDescriptionEditor = FormatterUtils.createStringField();
+    gbc = new GridBagConstraints();
+    gbc.weightx = 1;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    add(mDescriptionEditor, gbc);
+    mDescriptionEditor.setValue(goal.getDescription());
+
+    mTitleEditor.addPropertyChangeListener("value", e -> {
+      final String newValue = mDescriptionEditor.getText();
+      goal.setDescription(newValue);
+    });
+
   }
 
   /**
@@ -67,8 +109,21 @@ import fll.xml.AbstractGoal;
     try {
       mTitleEditor.commitEdit();
     } catch (final ParseException e) {
-      LOGGER.debug("Got parse exception committing changes, assuming bad value and ignoring", e);
+      LOGGER.debug("Got parse exception committing changes to title, assuming bad value and ignoring", e);
     }
+
+    try {
+      mNameEditor.commitEdit();
+    } catch (final ParseException e) {
+      LOGGER.debug("Got parse exception committing changes to name, assuming bad value and ignoring", e);
+    }
+
+    try {
+      mDescriptionEditor.commitEdit();
+    } catch (final ParseException e) {
+      LOGGER.debug("Got parse exception committing changes to description, assuming bad value and ignoring", e);
+    }
+
   }
 
   protected void fireTitleChange(final String oldTitle,
