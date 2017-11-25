@@ -89,6 +89,7 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
  *   - RubricRange min/max
  *   - unique variable names inside ComputedGoal
  *   - SwitchStatement must have something in the default case
+ * - edit goals
  * - ability to add subjective categories
  * - Ability to add goals
  * - Note that one can create a BasicPolynomial with variable references.
@@ -132,7 +133,6 @@ public class ChallengeDescriptionEditor extends JFrame {
       LOGGER.warn("Cross platform look and feel unsupported?", e);
     }
 
-    // FIXME will need to allow the user to choose the description
     try (
         final InputStream stream = ChallengeDescriptionEditor.class.getResourceAsStream("/fll/resources/challenge-descriptors/fll-2016_animal-allies-MN.xml")) {
 
@@ -346,7 +346,6 @@ public class ChallengeDescriptionEditor extends JFrame {
         final SubjectiveScoreCategory category = mDescription.removeSubjectiveCategory(oldIndex);
         mDescription.addSubjectiveCategory(newIndex, category);
       }
-
     };
 
     // fill in the bottom of the panel
@@ -477,21 +476,34 @@ public class ChallengeDescriptionEditor extends JFrame {
   }
 
   /**
-   * @param file the file that the challenge was loaded from, may be null
-   * @param description the description to edit, if null create a new challenge
-   *          description
+   * Set the current file. Separate from
+   * {@link #setChallengeDescription(File, ChallengeDescription)} for working with
+   * {@link #mSaveAsAction}
+   * 
+   * @param file the file where the challenge is saved
    */
-  private void setChallengeDescription(final File file,
-                                       final ChallengeDescription description) {
+  private void setCurrentFile(final File file) {
     mCurrentFile = file;
-    mDescription = description == null ? new ChallengeDescription("New Challenge") : description;
 
     if (null != mCurrentFile) {
       setTitle(mCurrentFile.getName());
     } else {
       setTitle("<no file>");
     }
-    
+  }
+
+  /**
+   * @param file the file that the challenge was loaded from, may be null; passed
+   *          to {@link #setCurrentFile(File)}
+   * @param description the description to edit, if null create a new challenge
+   *          description
+   */
+  private void setChallengeDescription(final File file,
+                                       final ChallengeDescription description) {
+    setCurrentFile(file);
+
+    mDescription = description == null ? new ChallengeDescription("New Challenge") : description;
+
     mTitleEditor.setValue(mDescription.getTitle());
     mRevisionEditor.setValue(mDescription.getRevision());
     mCopyrightEditor.setValue(mDescription.getCopyright());
@@ -641,7 +653,7 @@ public class ChallengeDescriptionEditor extends JFrame {
         final Document saveDoc = mDescription.toXml();
         XMLUtils.writeXML(saveDoc, writer, Utilities.DEFAULT_CHARSET.name());
 
-        mCurrentFile = file;
+        setCurrentFile(file);
       } catch (final IOException e) {
         LOGGER.error("Error writing document", e);
 
