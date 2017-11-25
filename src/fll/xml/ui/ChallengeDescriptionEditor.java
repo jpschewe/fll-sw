@@ -9,6 +9,8 @@ package fll.xml.ui;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -23,6 +25,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Writer;
+import java.text.ParseException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.prefs.Preferences;
@@ -31,12 +34,16 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
@@ -50,12 +57,14 @@ import org.w3c.dom.Document;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
+import fll.util.FormatterUtils;
 import fll.util.GuiExceptionHandler;
 import fll.util.LogUtils;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.ChallengeXMLException;
 import fll.xml.SubjectiveScoreCategory;
+import fll.xml.WinnerType;
 import fll.xml.XMLUtils;
 import fll.xml.ui.MovableExpandablePanel.MoveEvent;
 import fll.xml.ui.MovableExpandablePanel.MoveEvent.MoveDirection;
@@ -167,6 +176,14 @@ public class ChallengeDescriptionEditor extends JFrame {
 
   private File mCurrentFile = null;
 
+  private final JFormattedTextField mTitleEditor;
+
+  private final JFormattedTextField mRevisionEditor;
+
+  private final JFormattedTextField mCopyrightEditor;
+
+  private final JComboBox<WinnerType> mWinnerEditor;
+
   private final ScoreCategoryEditor mPerformanceEditor;
 
   private final List<ScoreCategoryEditor> mSubjectiveEditors = new LinkedList<>();
@@ -190,6 +207,88 @@ public class ChallengeDescriptionEditor extends JFrame {
     final JComponent topPanel = Box.createVerticalBox();
     topPanel.setAlignmentX(LEFT_ALIGNMENT);
 
+    // properties specific to the challenge description
+    final JPanel challengePanel = new JPanel(new GridBagLayout());
+    topPanel.add(challengePanel);
+
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.weightx = 0;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_END;
+    challengePanel.add(new JLabel("Title: "), gbc);
+
+    mTitleEditor = FormatterUtils.createStringField();
+    gbc = new GridBagConstraints();
+    gbc.weightx = 1;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    challengePanel.add(mTitleEditor, gbc);
+
+    mTitleEditor.addPropertyChangeListener("value", e -> {
+      if (null != mDescription) {
+        mDescription.setTitle(mTitleEditor.getText());
+      }
+    });
+
+    gbc = new GridBagConstraints();
+    gbc.weightx = 0;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_END;
+    challengePanel.add(new JLabel("Revision: "), gbc);
+
+    mRevisionEditor = FormatterUtils.createStringField();
+    gbc = new GridBagConstraints();
+    gbc.weightx = 1;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    challengePanel.add(mRevisionEditor, gbc);
+
+    mRevisionEditor.addPropertyChangeListener("value", e -> {
+      if (null != mDescription) {
+        mDescription.setRevision(mRevisionEditor.getText());
+      }
+    });
+
+    gbc = new GridBagConstraints();
+    gbc.weightx = 0;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_END;
+    challengePanel.add(new JLabel("Copyright: "), gbc);
+
+    mCopyrightEditor = FormatterUtils.createStringField();
+    gbc = new GridBagConstraints();
+    gbc.weightx = 1;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    challengePanel.add(mCopyrightEditor, gbc);
+
+    mCopyrightEditor.addPropertyChangeListener("value", e -> {
+      if (null != mDescription) {
+        mDescription.setCopyright(mCopyrightEditor.getText());
+      }
+    });
+
+    gbc = new GridBagConstraints();
+    gbc.weightx = 0;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_END;
+    challengePanel.add(new JLabel("Best score: "), gbc);
+
+    mWinnerEditor = new JComboBox<>(WinnerType.values());
+    gbc = new GridBagConstraints();
+    gbc.weightx = 1;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    challengePanel.add(mWinnerEditor, gbc);
+
+    mWinnerEditor.addActionListener(e -> {
+      if (null != mDescription) {
+        final WinnerType winner = mWinnerEditor.getItemAt(mWinnerEditor.getSelectedIndex());
+        mDescription.setWinner(winner);
+      }
+    });
+
+    // child elements of the challenge description
     mPerformanceEditor = new ScoreCategoryEditor();
     mPerformanceEditor.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
     final MovableExpandablePanel performance = new MovableExpandablePanel("Performance", mPerformanceEditor, false);
@@ -389,7 +488,14 @@ public class ChallengeDescriptionEditor extends JFrame {
 
     if (null != mCurrentFile) {
       setTitle(mCurrentFile.getName());
+    } else {
+      setTitle("<no file>");
     }
+    
+    mTitleEditor.setValue(mDescription.getTitle());
+    mRevisionEditor.setValue(mDescription.getRevision());
+    mCopyrightEditor.setValue(mDescription.getCopyright());
+    mWinnerEditor.setSelectedItem(mDescription.getWinner());
 
     mSubjectiveContainer.removeAll();
     mSubjectiveEditors.clear();
@@ -408,7 +514,7 @@ public class ChallengeDescriptionEditor extends JFrame {
 
       mSubjectiveEditors.add(editor);
     }
-    
+
     validate();
   }
 
@@ -567,6 +673,30 @@ public class ChallengeDescriptionEditor extends JFrame {
    * Force any pending edits to complete.
    */
   public void commitChanges() {
+    try {
+      mTitleEditor.commitEdit();
+    } catch (final ParseException e) {
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Got parse exception committing title changes, assuming bad value and ignoring", e);
+      }
+    }
+
+    try {
+      mRevisionEditor.commitEdit();
+    } catch (final ParseException e) {
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Got parse exception committing revision changes, assuming bad value and ignoring", e);
+      }
+    }
+
+    try {
+      mCopyrightEditor.commitEdit();
+    } catch (final ParseException e) {
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Got parse exception committing copyright changes, assuming bad value and ignoring", e);
+      }
+    }
+
     mPerformanceEditor.commitChanges();
     mSubjectiveEditors.forEach(e -> e.commitChanges());
   }
