@@ -8,13 +8,14 @@ package fll.xml;
 
 import java.io.Serializable;
 
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
+import javax.annotation.Nonnull;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.util.FLLInternalException;
 import fll.web.playoff.TeamScore;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**
  * Common parent class of {@link ConditionStatement} and
@@ -22,7 +23,12 @@ import fll.web.playoff.TeamScore;
  */
 public abstract class AbstractConditionStatement implements Serializable {
 
-  public AbstractConditionStatement(final Element ele) {
+  /**
+   * Construct from an XML element.
+   * 
+   * @param ele the element to parse
+   */
+  public AbstractConditionStatement(@Nonnull final Element ele) {
     if (new NodelistElementCollectionAdapter(ele.getElementsByTagName(InequalityComparison.LESS_THAN_TAG_NAME)).hasNext()) {
       mComparison = InequalityComparison.LESS_THAN;
     } else if (new NodelistElementCollectionAdapter(ele.getElementsByTagName(InequalityComparison.LESS_THAN_OR_EQUAL_TAG_NAME)).hasNext()) {
@@ -40,13 +46,30 @@ public abstract class AbstractConditionStatement implements Serializable {
     }
   }
 
+  /**
+   * Default constructor uses {@link InequalityComparison#EQUAL_TO} as the value
+   * for {@link #getComparison()}.
+   */
+  public AbstractConditionStatement() {
+    mComparison = InequalityComparison.EQUAL_TO;
+  }
+
   private InequalityComparison mComparison;
 
+  /**
+   * @return the comparator to use.
+   */
+  @Nonnull
   public InequalityComparison getComparison() {
     return mComparison;
   }
 
-  public void setComparison(final InequalityComparison v) {
+  /**
+   * See {@link #getComparison()}.
+   * 
+   * @param v the new value for the comparator
+   */
+  public void setComparison(@Nonnull final InequalityComparison v) {
     mComparison = v;
   }
 
@@ -55,7 +78,7 @@ public abstract class AbstractConditionStatement implements Serializable {
    */
   public abstract boolean isTrue(TeamScore teamScore);
 
-  public Element getComparisonElement(final Document doc) {
+  protected final Element getComparisonElement(final Document doc) {
     switch (mComparison) {
     case LESS_THAN:
       return doc.createElement(InequalityComparison.LESS_THAN_TAG_NAME);

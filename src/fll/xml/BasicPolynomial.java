@@ -56,14 +56,6 @@ public class BasicPolynomial implements Evaluatable, Serializable {
     mFloatingPoint = FloatingPointType.TRUNCATE;
   }
 
-  /**
-   * @param floatingPoint see {@link #getFloatingPoint()}
-   */
-  public BasicPolynomial(@Nonnull final FloatingPointType floatingPoint) {
-    mTerms = new LinkedList<Term>();
-    mFloatingPoint = floatingPoint;
-  }
-
   private FloatingPointType mFloatingPoint;
 
   @Nonnull

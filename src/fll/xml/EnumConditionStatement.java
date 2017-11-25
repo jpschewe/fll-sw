@@ -59,10 +59,24 @@ public class EnumConditionStatement extends AbstractConditionStatement {
     }
   }
 
+  /**
+   * Default constructor. This has {@link #getLeftString()},
+   * {@link #getLeftGoalRef()}, {@link #getRightGoalRef()},
+   * {@link #getRightString()} all set to null.
+   * The object cannot be evaluated in this state.
+   */
+  public EnumConditionStatement() {
+    super();
+    mLeftGoalRef = null;
+    mLeftString = null;
+    mRightGoalRef = null;
+    mRightString = null;
+  }
+
   private String mLeftString;
 
   /**
-   * Left string, may be null, but then leftGoal cannot not null at evalution
+   * Left string, may be null, but then leftGoal cannot not null at evaluation
    * time.
    * 
    * @return the left string to compare against, may be null.
