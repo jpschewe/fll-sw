@@ -49,6 +49,8 @@ public class GoalEditor extends AbstractGoalEditor {
 
   private final JFormattedTextField mInitialValueEditor;
 
+  private final EnumeratedValuesEditor enumEditor;
+
   /**
    * @param goal the goal to edit
    */
@@ -135,7 +137,7 @@ public class GoalEditor extends AbstractGoalEditor {
     gbc.anchor = GridBagConstraints.FIRST_LINE_START;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.fill = GridBagConstraints.BOTH;
-    add(cardPanel);
+    add(cardPanel, gbc);
 
     final JPanel countPanel = new JPanel(new GridBagLayout());
     cardPanel.add(countPanel, COUNT_PANEL_KEY);
@@ -206,8 +208,9 @@ public class GoalEditor extends AbstractGoalEditor {
       }
     });
 
-    final JPanel enumPanel = new JPanel(new GridBagLayout());
-    cardPanel.add(enumPanel, ENUMERATED_PANEL_KEY);
+    enumEditor = new EnumeratedValuesEditor(goal);
+
+    cardPanel.add(enumEditor, ENUMERATED_PANEL_KEY);
 
     cardLayout.show(cardPanel, getGoal().isEnumerated() ? ENUMERATED_PANEL_KEY : COUNT_PANEL_KEY);
 
@@ -238,6 +241,33 @@ public class GoalEditor extends AbstractGoalEditor {
     if (!mEnumerated.isSelected()) {
       // clear all values
       getGoal().removeAllValues();
+
+      try {
+        mInitialValueEditor.commitEdit();
+      } catch (final ParseException e) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Got parse exception committing initial value changes, assuming bad value and ignoring", e);
+        }
+      }
+
+      try {
+        mMaxEditor.commitEdit();
+      } catch (final ParseException e) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Got parse exception committing max changes, assuming bad value and ignoring", e);
+        }
+      }
+
+      try {
+        mMinEditor.commitEdit();
+      } catch (final ParseException e) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Got parse exception committing min changes, assuming bad value and ignoring", e);
+        }
+      }
+
+    } else {
+      enumEditor.commitChanges();
     }
   }
 

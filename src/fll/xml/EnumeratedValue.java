@@ -46,22 +46,53 @@ public class EnumeratedValue implements Serializable {
     mValue = value;
   }
 
-  private final double mScore;
+  private double mScore;
 
+  /**
+   * @return the score associated with this value
+   */
   public double getScore() {
     return mScore;
   }
 
-  private final String mTitle;
+  /**
+   * @param v see {@link #getScore()}
+   */
+  public void setScore(final double v) {
+    mScore = v;
+  }
 
+  private String mTitle;
+
+  /**
+   * @return the text to display for this value
+   */
   public String getTitle() {
     return mTitle;
   }
 
+  /**
+   * @param v see {@link #getTitle()}
+   */
+  public void setTitle(final String v) {
+    mTitle = v;
+  }
+
   private String mValue;
 
+  /**
+   * @return the value to store in the database, this needs to be a database name
+   *         per the XML schema
+   */
   public String getValue() {
     return mValue;
+  }
+
+  /**
+   * @param v see {@link #getValue()}
+   */
+  public void setValue(final String v) {
+    mValue = v;
   }
 
   public Element toXml(final Document document) {
