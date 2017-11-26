@@ -109,7 +109,7 @@ public final class FormatterUtils {
    * @return text field for editing database names
    */
   public static JFormattedTextField createDatabaseNameField() {
-    final RegexFormatter format = new RegexFormatter("[a-zA-Z]\\w*");
+    final RegexFormatter format = new RegexFormatter(DatabaseNameCellEditor.DATABASE_NAME_REGEXP);
     format.setOverwriteMode(false);
     format.setValueClass(String.class);
 
@@ -136,7 +136,6 @@ public final class FormatterUtils {
     public RegexFormatter(@Nonnull final String pattern) throws PatternSyntaxException {
       this.pattern = Pattern.compile(pattern);
     }
-
 
     /**
      * Returns the Pattern used to determine if a value is legal.

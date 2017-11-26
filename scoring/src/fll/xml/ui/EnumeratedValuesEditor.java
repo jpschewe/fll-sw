@@ -22,6 +22,7 @@ import javax.swing.JTable;
 import org.apache.log4j.Logger;
 
 import fll.scheduler.ButtonColumn;
+import fll.util.DatabaseNameCellEditor;
 import fll.util.LogUtils;
 import fll.xml.Goal;
 
@@ -44,6 +45,8 @@ class EnumeratedValuesEditor extends JPanel {
 
     this.tableModel = new EnumeratedValuesModel(goal);
     table = new JTable(this.tableModel);
+
+    table.getColumnModel().getColumn(1).setCellEditor(new DatabaseNameCellEditor());
 
     new ButtonColumn(table, deleteAction, 4);
 
