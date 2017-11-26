@@ -89,7 +89,8 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
  *   - RubricRange min/max
  *   - unique variable names inside ComputedGoal
  *   - SwitchStatement must have something in the default case
- * - edit goals
+ *   - enum value check for dbstring
+ *   - unique values for enum values in goals
  * - edit rubrics
  * - edit restrictions
  * - edit tie breaker
