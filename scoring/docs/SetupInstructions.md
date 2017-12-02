@@ -1,5 +1,7 @@
 **Please READ ALL INSTRUCTIONS before choosing computers or installing software**
 
+If you are in Minnesota, read [the Minnesota Notes page](MinnesotaNotes.md) in addition to this one.
+
 Required files
 ==============
 
