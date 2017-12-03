@@ -90,9 +90,6 @@ public class DisplayWebSocket {
           LOGGER.info("Removing closed session: " + session.getId());
           
           toRemove.add(session);
-          if (null != displayInfo) {
-            DisplayInfo.deleteDisplay(httpApplication, displayInfo);
-          }
         }
       } // foreach session
 
