@@ -42,7 +42,9 @@ import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.RuleChain;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -62,6 +64,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlSelect;
 import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
 
 import au.com.bytecode.opencsv.CSVWriter;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
 import fll.TestUtils;
 import fll.Tournament;
@@ -88,6 +91,13 @@ import fll.xml.ScoreCategory;
  */
 public class FullTournamentTest {
 
+  /**
+   * Retry the test up to 3 times
+   */
+  @SuppressFBWarnings(value="URF_UNREAD_PUBLIC_PROTECTED_FIELD", justification="Used by the JUnit framework")
+  @Rule
+  public RuleChain chain = RuleChain.outerRule(new TestUtils.Retry(3));
+  
   private static final Logger LOGGER = LogUtils.getLogger();
 
   private WebDriver selenium;
