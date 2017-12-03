@@ -1,6 +1,7 @@
 Notes about things to remember in Minnesota
 ===========================================
 
+  * When printing, make sure you select the correct printer. There are 2 models of printers used. If the wrong printer is used, then the margins are wrong and text gets chopped off the top and the left edge. Match up the printer model with the name of the printer in the print dialog.
   * As of 2016 each server is paired with a router. This means the computer has a static address on it's wireless card and will not work properly with a different router.
     * If a server is used with a router other than it's own, the best option is to plug the server into the router with an ethernet cable and then use the address that the server gets from the wired connection. You will see 2 addresses on the main page, only 1 will work with the other computers.
   * ForYou will most likely be given a database that already has the teams and schedules in it. So you can skip all of the instructions about how to load teams and schedules.
