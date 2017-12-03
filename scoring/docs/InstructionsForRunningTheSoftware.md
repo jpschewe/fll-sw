@@ -6,6 +6,10 @@ This way you won't loose the this document.
 
 See [FLLTools Integration](flltools-integration.md) for integration with the FLLTools project from FIRST.
 
+See the [Minnesota Notes page](MinnesotaNotes.md) for details specific to running a tournament in Minnesota.
+
+See the [training presentation](training/computer-training.odp) for an overview presentation of running a tournament.
+
 ## Loading from a saved database
 
 If you, or someone else, setup the database previously you can then load that database onto the server. To do that visit http://localhost:9080/fll-sw/setup on the server and then use the middle section of the page to specify a database to load. If you connect from the server you don't need to know the username and password.
