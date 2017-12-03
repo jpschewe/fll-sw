@@ -3,7 +3,8 @@ Notes about things to remember in Minnesota
 
   * As of 2016 each server is paired with a router. This means the computer has a static address on it's wireless card and will not work properly with a different router.
     * If a server is used with a router other than it's own, the best option is to plug the server into the router with an ethernet cable and then use the address that the server gets from the wired connection. You will see 2 addresses on the main page, only 1 will work with the other computers.
-  * For Minnesota tournaments you will most likely be given a database that already has the teams and schedules in it. So you can skip all of the instructions about how to load teams and schedules.
+  * ForYou will most likely be given a database that already has the teams and schedules in it. So you can skip all of the instructions about how to load teams and schedules.
+  * The computers that we have already have Java installed, so you only need to install the software.
   * Make sure to have a computer on the performance floor for use by the MCs so they can see the head to head brackets when the screens are showing the video
   * Make sure we have at least 1 screen at state dedicated to scores during the head to head brackets, otherwise people can't see all of the information before it flips to the video
   * When scheduling state make one award group finish subjective before lunch so that we get all of the scoresheets for that division before lunch. This helps spread out the score entry.
