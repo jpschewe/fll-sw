@@ -55,6 +55,8 @@
 	<ul>
 		<li><a href="documentation/index.html">Documentation</a></li>
 
+		<li><a href="troubleshooting/index.jsp">Troubleshooting</a></li>
+
 		<li><a href="<c:url value='/setup'/>">Database setup</a> - Use
 			this link to upload a saved database</li>
 
@@ -93,8 +95,6 @@
 		<li><a href='challenge.xml'>Challenge Descriptor</a></li>
 
 		<li><a href="developer/index.jsp">Developer page</a></li>
-
-		<li><a href="troubleshooting/index.jsp">Troubleshooting</a></li>
 
 		<li><a href="credits/credits.jsp">Credits</a></li>
 	</ul>
