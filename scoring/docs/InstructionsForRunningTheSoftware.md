@@ -101,6 +101,7 @@ Once the finalist schedule has been stored, the schedule can be printed or displ
 ## End of tournament
 
   * Download the database from the admin page and send it to your head computer person.
+  * Also send all all zip files that are in `tomcat/webapps/fll-sw/WEB-INF`. These are the bug reports that were gathered throughout the tournament.
 
 ## Troubleshooting
 
@@ -111,6 +112,8 @@ If you encounter an error, please file a ticket. Save the error log that is disp
 In most cases when an error occurs you will be prompted to submit a bug report. 
 This packages up the logs and the database into a zip file that can be attached to the ticket. 
 After entering a description of what was happening when the error occurred, click submit and you'll be told where to find the zip file.
+
+Also take a look at the [troubleshooting link](http://localhost:9080/fll-sw/troubleshooting/index.jsp) on the main page of the software. There are some tips in there as well.
 
 ### Missing password
 
