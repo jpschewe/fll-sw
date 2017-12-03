@@ -14,14 +14,14 @@
     page with lots of long stuff about Java programming, it's not that bad.
     There will be one or more exceptions listed, separated by a blank line or
     something like root cause.  The first line of each exception is the
-    message of the exception.  If it's one that I cause intentionaly it'll
+    message of the exception.  If it's one that I cause intentionally it'll
     have a, hopefully, understandable message.  Either way, look through the
     things in the following list to see if the messages match anything listed
     here.  If all else fails, email me (Jon Schewe): jpschewe@mtu.net.
     </p>
 
     <ul>
-      <li>First make sure that you've got the latest version of Java.  Java version -&amp; <%=System.getProperty("java.vm.version")%></li>
+      <li>First make sure that you've got the latest version of Java.  Java version: <%=System.getProperty("java.version")%></li>
 
       <li>When you tell the system to compute summarized scores from the
       reporting page you get an exception that a particular score group
