@@ -305,7 +305,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
                                                                  // outdated
                                                                  // copy
         if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("updateLastSeen: removed display  "
+          LOGGER.trace("updateLastSeen: removed old data for display "
               + getName() + "? " + removed);
         }
 
