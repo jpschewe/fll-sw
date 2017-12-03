@@ -294,22 +294,32 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
     mLastSeen = LocalTime.now();
 
     LOGGER.trace("updateLastSeen: "
-        + getName() + " -> " + mLastSeen + " default: " + isDefaultDisplay());
+        + getName()
+        + " -> "
+        + mLastSeen
+        + " default: "
+        + isDefaultDisplay());
 
     if (!isDefaultDisplay()) {
       synchronized (LOCK) {
         final SortedSet<DisplayInfo> displayInformation = internalGetDisplayInformation(application);
 
+        LOGGER.info("Before remove of display copy: " + displayInformation);
+        
         final boolean removed = displayInformation.remove(this); // remove
                                                                  // possible
                                                                  // outdated
                                                                  // copy
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("updateLastSeen: removed old data for display "
-              + getName() + "? " + removed);
+              + getName()
+              + "? "
+              + removed);
         }
 
         displayInformation.add(this); // insert updated version
+
+        LOGGER.info("After add of updated display information: " + displayInformation);
 
         application.setAttribute(ApplicationAttributes.DISPLAY_INFORMATION, displayInformation);
       }
@@ -383,12 +393,14 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
 
   public String getHead2HeadBracketFormParamName(final int bracketIdx) {
     return getFormParamPrefix()
-        + "playoffDivision_" + bracketIdx;
+        + "playoffDivision_"
+        + bracketIdx;
   }
 
   public String getHead2HeadFirstRoundFormParamName(final int bracketIdx) {
     return getFormParamPrefix()
-        + "playoffRoundNumber_" + bracketIdx;
+        + "playoffRoundNumber_"
+        + bracketIdx;
   }
 
   @Override
@@ -404,6 +416,12 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
   @Override
   public int hashCode() {
     return mName.hashCode();
+  }
+
+  @Override
+  public String toString() {
+    return "DisplayInfo for: "
+        + getName();
   }
 
   @Override
