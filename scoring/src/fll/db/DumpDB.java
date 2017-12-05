@@ -5,6 +5,9 @@
  */
 package fll.db;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.sql.Connection;
@@ -16,6 +19,7 @@ import java.util.Formatter;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -26,6 +30,7 @@ import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
@@ -35,6 +40,7 @@ import fll.Utilities;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.web.GatherBugReport;
 import fll.xml.XMLUtils;
 
 /**
@@ -48,11 +54,10 @@ public final class DumpDB extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
       final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
       response.reset();
@@ -61,14 +66,12 @@ public final class DumpDB extends BaseFLLServlet {
 
       final ZipOutputStream zipOut = new ZipOutputStream(response.getOutputStream());
       try {
-        DumpDB.dumpDatabase(zipOut, connection, challengeDocument);
+        DumpDB.dumpDatabase(zipOut, connection, challengeDocument, application);
       } finally {
         zipOut.close();
       }
     } catch (final SQLException sqle) {
       throw new RuntimeException(sqle);
-    } finally {
-      SQLFunctions.close(connection);
     }
   }
 
@@ -77,17 +80,17 @@ public final class DumpDB extends BaseFLLServlet {
    * 
    * @param output where to dump the database
    * @param connection the database connection to dump
+   * @param challengeDocument the challenge document to write out
+   * @param application if not null, then add the log files and bug reports to the
+   *          database
    */
   public static void dumpDatabase(final ZipOutputStream output,
                                   final Connection connection,
-                                  final Document challengeDocument) throws SQLException, IOException {
-    ResultSet rs = null;
-    Statement stmt = null;
-
-    try {
-      stmt = connection.createStatement();
-
-      final OutputStreamWriter outputWriter = new OutputStreamWriter(output, Utilities.DEFAULT_CHARSET);
+                                  final Document challengeDocument,
+                                  final ServletContext application)
+      throws SQLException, IOException {
+    try (Statement stmt = connection.createStatement();
+        OutputStreamWriter outputWriter = new OutputStreamWriter(output, Utilities.DEFAULT_CHARSET)) {
 
       // output the challenge descriptor
       output.putNextEntry(new ZipEntry("challenge.xml"));
@@ -97,17 +100,65 @@ public final class DumpDB extends BaseFLLServlet {
       // can't use Queries.getTablesInDB because it lowercases names and we need
       // all names to be the same as the database is expecting them
       final DatabaseMetaData metadata = connection.getMetaData();
-      rs = metadata.getTables(null, null, "%", new String[] { "TABLE" });
-      while (rs.next()) {
-        final String tableName = rs.getString("TABLE_NAME");
-        dumpTable(output, connection, metadata, outputWriter, tableName.toLowerCase());
-      }
-      SQLFunctions.close(rs);
+      try (ResultSet rs = metadata.getTables(null, null, "%", new String[] { "TABLE" })) {
+        while (rs.next()) {
+          final String tableName = rs.getString("TABLE_NAME");
+          dumpTable(output, connection, metadata, outputWriter, tableName.toLowerCase());
+        }
+      } // ResultSet try
 
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
+      if (null != application) {
+        GatherBugReport.addLogFiles(output, application);
+
+        // find the bug reports
+        addBugReports(output, application);
+      }
+
+    } // stmt & outputWriter
+  }
+
+  /**
+   * Add the bug reports to the zipfile. These files are put
+   * in a "bugs" subdirectory in the zip file.
+   * 
+   * @param zipOut the stream to write to.
+   * @param application used to find the bug report files.
+   */
+  private static void addBugReports(@Nonnull final ZipOutputStream zipOut,
+                                    @Nonnull final ServletContext application)
+      throws IOException {
+
+    // add directory entry for the logs
+    final String directory = "bugs/";
+    zipOut.putNextEntry(new ZipEntry(directory));
+
+    final File fllWebInfDir = new File(application.getRealPath("/WEB-INF"));
+    final File[] bugReports = fllWebInfDir.listFiles(new FilenameFilter() {
+      @Override
+      public boolean accept(final File dir,
+                            final String name) {
+        return name.startsWith("bug_")
+            && name.endsWith(".zip");
+      }
+    });
+
+    if (null != bugReports) {
+      for (final File f : bugReports) {
+        if (f.isFile()) {
+          FileInputStream fis = null;
+          try {
+            zipOut.putNextEntry(new ZipEntry(directory
+                + f.getName()));
+            fis = new FileInputStream(f);
+            IOUtils.copy(fis, zipOut);
+            fis.close();
+          } finally {
+            IOUtils.closeQuietly(fis);
+          }
+        }
+      }
     }
+
   }
 
   /**
@@ -122,7 +173,8 @@ public final class DumpDB extends BaseFLLServlet {
    */
   private static boolean dumpTableTypes(final String tableName,
                                         final DatabaseMetaData metadata,
-                                        final OutputStreamWriter outputWriter) throws SQLException, IOException {
+                                        final OutputStreamWriter outputWriter)
+      throws SQLException, IOException {
     boolean retval = false;
     ResultSet rs = null;
     try {
@@ -134,9 +186,12 @@ public final class DumpDB extends BaseFLLServlet {
         String typeName = rs.getString("TYPE_NAME");
         final String columnName = rs.getString("COLUMN_NAME");
         if ("varchar".equalsIgnoreCase(typeName)
-            || "char".equalsIgnoreCase(typeName) || "character".equalsIgnoreCase(typeName)) {
+            || "char".equalsIgnoreCase(typeName)
+            || "character".equalsIgnoreCase(typeName)) {
           typeName = typeName
-              + "(" + rs.getInt("COLUMN_SIZE") + ")";
+              + "("
+              + rs.getInt("COLUMN_SIZE")
+              + ")";
         }
         csvwriter.writeNext(new String[] { columnName.toLowerCase(), typeName });
         if (LOGGER.isTraceEnabled()) {
@@ -156,7 +211,8 @@ public final class DumpDB extends BaseFLLServlet {
                                 final Connection connection,
                                 final DatabaseMetaData metadata,
                                 final OutputStreamWriter outputWriter,
-                                final String tableName) throws IOException, SQLException {
+                                final String tableName)
+      throws IOException, SQLException {
     ResultSet rs = null;
     Statement stmt = null;
     try {
