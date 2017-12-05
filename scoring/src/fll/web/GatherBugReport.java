@@ -18,6 +18,7 @@ import java.util.Date;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -26,8 +27,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -35,6 +34,7 @@ import org.w3c.dom.Document;
 import fll.Utilities;
 import fll.db.DumpDB;
 import fll.util.LogUtils;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Gather up the data for a bug report.
@@ -47,7 +47,8 @@ public class GatherBugReport extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     ZipOutputStream zipOut = null;
@@ -61,7 +62,7 @@ public class GatherBugReport extends BaseFLLServlet {
       final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
       final File fllWebInfDir = new File(application.getRealPath("/WEB-INF"));
-      final String nowStr = new SimpleDateFormat("yyyy-MM-dd_HH-mm").format(new Date());
+      final String nowStr = new SimpleDateFormat("bug_yyyy-MM-dd_HH-mm").format(new Date());
       final File bugReportFile = File.createTempFile(nowStr, ".zip", fllWebInfDir);
 
       zipOut = new ZipOutputStream(new FileOutputStream(bugReportFile));
@@ -109,7 +110,8 @@ public class GatherBugReport extends BaseFLLServlet {
    */
   private static void addDatabase(final ZipOutputStream zipOut,
                                   final Connection connection,
-                                  final Document challengeDocument) throws IOException, SQLException {
+                                  final Document challengeDocument)
+      throws IOException, SQLException {
 
     ZipOutputStream dbZipOut = null;
     FileInputStream fis = null;
@@ -117,7 +119,7 @@ public class GatherBugReport extends BaseFLLServlet {
       final File temp = File.createTempFile("database", ".flldb");
 
       dbZipOut = new ZipOutputStream(new FileOutputStream(temp));
-      DumpDB.dumpDatabase(dbZipOut, connection, challengeDocument);
+      DumpDB.dumpDatabase(dbZipOut, connection, challengeDocument, null);
       dbZipOut.close();
 
       zipOut.putNextEntry(new ZipEntry("database.flldb"));
@@ -137,10 +139,19 @@ public class GatherBugReport extends BaseFLLServlet {
   }
 
   /**
-   * Add the web application and tomcat logs to the zipfile.
+   * Add the web application and tomcat logs to the zipfile. These files are put
+   * in a "logs" subdirectory in the zip file.
+   * 
+   * @param zipOut the stream to write to.
+   * @param application used to find the log files.
    */
-  private static void addLogFiles(final ZipOutputStream zipOut,
-                                  final ServletContext application) throws IOException {
+  public static void addLogFiles(@Nonnull final ZipOutputStream zipOut,
+                                 @Nonnull final ServletContext application)
+      throws IOException {
+
+    // add directory entry for the logs
+    final String logsDirectory = "logs/";
+    zipOut.putNextEntry(new ZipEntry(logsDirectory));
 
     // get logs from the webapp
     final File fllAppDir = new File(application.getRealPath("/"));
@@ -156,7 +167,8 @@ public class GatherBugReport extends BaseFLLServlet {
         if (f.isFile()) {
           FileInputStream fis = null;
           try {
-            zipOut.putNextEntry(new ZipEntry(f.getName()));
+            zipOut.putNextEntry(new ZipEntry(logsDirectory
+                + f.getName()));
             fis = new FileInputStream(f);
             IOUtils.copy(fis, zipOut);
             fis.close();
@@ -183,7 +195,8 @@ public class GatherBugReport extends BaseFLLServlet {
         if (f.isFile()) {
           FileInputStream fis = null;
           try {
-            zipOut.putNextEntry(new ZipEntry(f.getName()));
+            zipOut.putNextEntry(new ZipEntry(logsDirectory
+                + f.getName()));
             fis = new FileInputStream(f);
             IOUtils.copy(fis, zipOut);
             fis.close();

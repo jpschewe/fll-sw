@@ -42,7 +42,7 @@ public class ImportDBTest {
    * Test the 2012 plymouth database. Got an error about data truncation.
    */
   @Test
-  public void testTruncation() throws IOException, SQLException  {
+  public void testTruncation() throws IOException, SQLException {
     final InputStream dumpFileIS = ImportDBTest.class.getResourceAsStream("data/plymouth-2012-11-17.flldb");
     final File tempFile = File.createTempFile("flltest", null);
     final String database = tempFile.getAbsolutePath();
@@ -66,7 +66,7 @@ public class ImportDBTest {
     }
     TestUtils.deleteDatabase(database);
   }
-  
+
   /**
    * Make sure that no show scores in the subjective data import properly.
    * 
@@ -134,7 +134,7 @@ public class ImportDBTest {
 
       final Document challengeDocument = GlobalParameters.getChallengeDocument(connection);
       Assert.assertNotNull(challengeDocument);
-      DumpDB.dumpDatabase(zipOut, connection, challengeDocument);
+      DumpDB.dumpDatabase(zipOut, connection, challengeDocument, null);
       fos.close();
 
       // load from temp file
