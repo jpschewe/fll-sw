@@ -7,6 +7,15 @@ Required files
 
   * Download the latest version of the software
 
+
+Physical setup notes
+====================
+
+When powering the computers, make sure that the power cords are secured. In many cases one may need to tape extension cords together and tape the plug to the wall to ensure that the cords do not come disconnected during the tournament.
+
+Find a good place in your performance area to put the computers that can be accessed from the performance tables to get score sheets and still be out of the way of traffic.
+
+
 Roles of Computers
 ==================
 
@@ -31,6 +40,10 @@ The Display Computer is **used to display scores**, either on the Display Comput
 
 **Notes on where to display**:
 When setting up the tournament, make sure there is a good place for teams to see the scores. A large white wall high up in a gym works pretty well, provided the gym is dark enough. At larger tournaments we've tapped into the building's TV monitors or setup extra-large monitors with extra computers around the performance and pit areas.
+
+Make sure that you know how to disable the popup blocker either for individual sites or for all sites. The starting of the big screen display will typically trigger a popup blocker because of how the windows are opened.
+
+Make sure that you know how to disable the screen saver on the display computers so that the screen doesn't go off or the computer goto sleep during the tournament.
 
 
 Performance Score Entry
