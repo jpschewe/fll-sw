@@ -349,9 +349,11 @@ public final class ImportDB {
         final Map<String, String> columnTypes = loadTypeInfo(reader);
         typeInfo.put(tablename, columnTypes);
       } else if (name.startsWith(GatherBugReport.LOGS_DIRECTORY)) {
-        LOGGER.trace("Found log file " + name);
+        LOGGER.trace("Found log file "
+            + name);
       } else if (name.startsWith(DumpDB.BUGS_DIRECTORY)) {
-        LOGGER.warn("Found bug report " + name);
+        LOGGER.warn("Found bug report "
+            + name);
       } else {
         LOGGER.warn("Unexpected file found in imported zip file, skipping: "
             + name);
@@ -1201,8 +1203,6 @@ public final class ImportDB {
 
     importFinalistSchedule(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
-    importTableDivision(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
-
     importCategoryScheduleMapping(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
     // update score totals
@@ -1454,83 +1454,66 @@ public final class ImportDB {
                                        final int sourceTournamentID,
                                        final int destTournamentID)
       throws SQLException {
-    PreparedStatement destPrep = null;
-    PreparedStatement sourcePrep = null;
-    ResultSet sourceRS = null;
-    try {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Importing tablenames");
-      }
-      destPrep = destinationConnection.prepareStatement("DELETE FROM tablenames WHERE Tournament = ?");
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Importing tablenames");
+    }
+
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM table_division WHERE tournament = ?")) {
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
-      SQLFunctions.close(destPrep);
-
-      sourcePrep = sourceConnection.prepareStatement("SELECT PairID, SideA, SideB "
-          + "FROM tablenames WHERE Tournament=?");
-      sourcePrep.setInt(1, sourceTournamentID);
-      destPrep = destinationConnection.prepareStatement("INSERT INTO tablenames (Tournament, PairID, SideA, SideB) "
-          + "VALUES (?, ?, ?, ?)");
-      destPrep.setInt(1, destTournamentID);
-      sourceRS = sourcePrep.executeQuery();
-      while (sourceRS.next()) {
-        for (int i = 1; i <= 3; i++) {
-          Object sourceObj = sourceRS.getObject(i);
-          if ("".equals(sourceObj)) {
-            sourceObj = null;
-          }
-          destPrep.setObject(i
-              + 1, sourceObj);
-        }
-        destPrep.executeUpdate();
-      }
-    } finally {
-      SQLFunctions.close(sourceRS);
-      SQLFunctions.close(sourcePrep);
-      SQLFunctions.close(destPrep);
     }
-  }
 
-  private static void importTableDivision(final Connection sourceConnection,
-                                          final Connection destinationConnection,
-                                          final int sourceTournamentID,
-                                          final int destTournamentID)
-      throws SQLException {
-    PreparedStatement destPrep = null;
-    PreparedStatement sourcePrep = null;
-    ResultSet sourceRS = null;
-    try {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Importing table_division");
-      }
-      destPrep = destinationConnection.prepareStatement("DELETE FROM table_division WHERE tournament = ?");
+    try (
+        PreparedStatement destPrep = destinationConnection.prepareStatement("DELETE FROM tablenames WHERE Tournament = ?")) {
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
-      SQLFunctions.close(destPrep);
-
-      sourcePrep = sourceConnection.prepareStatement("SELECT playoff_division, table_id"
-          + " FROM table_division WHERE tournament=?");
-      sourcePrep.setInt(1, sourceTournamentID);
-      destPrep = destinationConnection.prepareStatement("INSERT INTO table_division (tournament, playoff_division, table_id) "
-          + "VALUES (?, ?, ?)");
-      destPrep.setInt(1, destTournamentID);
-      sourceRS = sourcePrep.executeQuery();
-      while (sourceRS.next()) {
-        for (int i = 1; i <= 2; i++) {
-          Object sourceObj = sourceRS.getObject(i);
-          if ("".equals(sourceObj)) {
-            sourceObj = null;
-          }
-          destPrep.setObject(i
-              + 1, sourceObj);
-        }
-        destPrep.executeUpdate();
-      }
-    } finally {
-      SQLFunctions.close(sourceRS);
-      SQLFunctions.close(sourcePrep);
-      SQLFunctions.close(destPrep);
     }
+
+    try (PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT PairID, SideA, SideB "
+        + "FROM tablenames WHERE Tournament=?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO tablenames (Tournament, PairID, SideA, SideB) "
+            + "VALUES (?, ?, ?, ?)")) {
+
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep.setInt(1, destTournamentID);
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          for (int i = 1; i <= 3; i++) {
+            Object sourceObj = sourceRS.getObject(i);
+            if ("".equals(sourceObj)) {
+              sourceObj = null;
+            }
+            destPrep.setObject(i
+                + 1, sourceObj);
+          }
+          destPrep.executeUpdate();
+        }
+      } // result set
+    } // prepared statements
+
+    try (PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT playoff_division, table_id"
+        + " FROM table_division WHERE tournament=?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO table_division (tournament, playoff_division, table_id) "
+            + "VALUES (?, ?, ?)")) {
+      sourcePrep.setInt(1, sourceTournamentID);
+
+      destPrep.setInt(1, destTournamentID);
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          for (int i = 1; i <= 2; i++) {
+            Object sourceObj = sourceRS.getObject(i);
+            if ("".equals(sourceObj)) {
+              sourceObj = null;
+            }
+            destPrep.setObject(i
+                + 1, sourceObj);
+          }
+          destPrep.executeUpdate();
+        }
+      } // result set
+    } // prepared statements
+
   }
 
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic table based upon categories")
