@@ -139,6 +139,11 @@ public class GatherBugReport extends BaseFLLServlet {
   }
 
   /**
+   * Prefix used in the zip files for logs.
+   */
+  public static final String LOGS_DIRECTORY = "logs/";
+  
+  /**
    * Add the web application and tomcat logs to the zipfile. These files are put
    * in a "logs" subdirectory in the zip file.
    * 
@@ -150,7 +155,7 @@ public class GatherBugReport extends BaseFLLServlet {
       throws IOException {
 
     // add directory entry for the logs
-    final String logsDirectory = "logs/";
+    final String logsDirectory = LOGS_DIRECTORY;
     zipOut.putNextEntry(new ZipEntry(logsDirectory));
 
     // get logs from the webapp

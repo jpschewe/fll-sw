@@ -45,6 +45,7 @@ import fll.db.TeamPropertyDifference.TeamProperty;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
+import fll.web.GatherBugReport;
 import fll.web.developer.importdb.ImportDBDump;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
@@ -131,7 +132,11 @@ public final class ImportDB {
         if (!differences) {
           if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Importing data for "
-                + tournament + " from " + sourceURI + " to " + destinationURI);
+                + tournament
+                + " from "
+                + sourceURI
+                + " to "
+                + destinationURI);
           }
           importDatabase(sourceConnection, destinationConnection, tournament);
           if (LOGGER.isDebugEnabled()) {
@@ -210,7 +215,11 @@ public final class ImportDB {
         if (!Team.isInternalTeamNumber(num)) {
           if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Inserting into teams: "
-                + num + ", " + name + ", " + org);
+                + num
+                + ", "
+                + name
+                + ", "
+                + org);
           }
           destPrep.setInt(1, num);
           destPrep.setString(2, name == null
@@ -339,6 +348,10 @@ public final class ImportDB {
         final Reader reader = new InputStreamReader(zipfile, Utilities.DEFAULT_CHARSET);
         final Map<String, String> columnTypes = loadTypeInfo(reader);
         typeInfo.put(tablename, columnTypes);
+      } else if (name.startsWith(GatherBugReport.LOGS_DIRECTORY)) {
+        LOGGER.trace("Found log file " + name);
+      } else if (name.startsWith(DumpDB.BUGS_DIRECTORY)) {
+        LOGGER.warn("Found bug report " + name);
       } else {
         LOGGER.warn("Unexpected file found in imported zip file, skipping: "
             + name);
@@ -366,7 +379,9 @@ public final class ImportDB {
     int dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion > GenerateDB.DATABASE_VERSION) {
       throw new FLLRuntimeException("Database dump too new. Current known database version : "
-          + GenerateDB.DATABASE_VERSION + " dump version: " + dbVersion);
+          + GenerateDB.DATABASE_VERSION
+          + " dump version: "
+          + dbVersion);
     }
 
     upgradeDatabase(connection, challengeResult, description);
@@ -583,7 +598,8 @@ public final class ImportDB {
         final String tableName = categoryElement.getName();
 
         stmt.executeUpdate("ALTER TABLE "
-            + tableName + " ADD COLUMN note longvarchar DEFAULT NULL");
+            + tableName
+            + " ADD COLUMN note longvarchar DEFAULT NULL");
       }
 
       setDBVersion(connection, 11);
@@ -681,7 +697,11 @@ public final class ImportDB {
 
           if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Adding to playoff_bracket_names tournament: "
-                + tournament + " bracketName: " + bracketName + " team: " + team);
+                + tournament
+                + " bracketName: "
+                + bracketName
+                + " team: "
+                + team);
           }
 
           prep.setInt(1, tournament);
@@ -1531,7 +1551,8 @@ public final class ImportDB {
         }
 
         destPrep = destinationConnection.prepareStatement("DELETE FROM "
-            + tableName + " WHERE Tournament = ?");
+            + tableName
+            + " WHERE Tournament = ?");
         destPrep.setInt(1, destTournamentID);
         destPrep.executeUpdate();
         SQLFunctions.close(destPrep);
@@ -1545,7 +1566,8 @@ public final class ImportDB {
         for (final AbstractGoal element : goals) {
           if (!element.isComputed()) {
             columns.append(" "
-                + element.getName() + ",");
+                + element.getName()
+                + ",");
             ++numColumns;
           }
         }
@@ -1604,7 +1626,10 @@ public final class ImportDB {
       destPrep.setInt(1, destTournamentID);
 
       sourcePrep = sourceConnection.prepareStatement("SELECT "
-          + columns.toString() + " FROM " + tableName + " WHERE Tournament = ?");
+          + columns.toString()
+          + " FROM "
+          + tableName
+          + " WHERE Tournament = ?");
       sourcePrep.setInt(1, sourceTournamentID);
       sourceRS = sourcePrep.executeQuery();
       while (sourceRS.next()) {
@@ -1643,7 +1668,8 @@ public final class ImportDB {
       final PerformanceScoreCategory performanceElement = description.getPerformance();
       final String tableName = "Performance";
       destPrep = destinationConnection.prepareStatement("DELETE FROM "
-          + tableName + " WHERE Tournament = ?");
+          + tableName
+          + " WHERE Tournament = ?");
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
       SQLFunctions.close(destPrep);
@@ -1661,7 +1687,8 @@ public final class ImportDB {
       for (final AbstractGoal element : goals) {
         if (!element.isComputed()) {
           columns.append(" "
-              + element.getName() + ",");
+              + element.getName()
+              + ",");
           ++numColumns;
         }
       }
@@ -1894,14 +1921,16 @@ public final class ImportDB {
     final Tournament destTournament = Tournament.findTournamentByName(destConnection, tournament);
     if (null == destTournament) {
       LOGGER.error("Tournament: "
-          + tournament + " doesn't exist in the destination database!");
+          + tournament
+          + " doesn't exist in the destination database!");
       return true;
     }
 
     final Tournament sourceTournament = Tournament.findTournamentByName(sourceConnection, tournament);
     if (null == sourceTournament) {
       LOGGER.error("Tournament: "
-          + tournament + " doesn't exist in the source database!");
+          + tournament
+          + " doesn't exist in the source database!");
       return true;
     }
 
@@ -1950,7 +1979,8 @@ public final class ImportDB {
     ResultSet destRS = null;
     try {
       destPrep = destConnection.prepareStatement("SELECT Teams.TeamName, Teams.Organization"
-          + " FROM Teams" + " WHERE Teams.TeamNumber = ?");
+          + " FROM Teams"
+          + " WHERE Teams.TeamNumber = ?");
 
       sourcePrep = sourceConnection.prepareStatement("SELECT Teams.TeamNumber, Teams.TeamName, Teams.Organization"
           + " FROM Teams, TournamentTeams, Tournaments" //
@@ -2010,7 +2040,8 @@ public final class ImportDB {
     final Tournament sourceTournament = Tournament.findTournamentByName(sourceConnection, tournament);
     if (null == sourceTournament) {
       throw new FLLInternalException("Could not find tournament with name '"
-          + tournament + "' in the source database. This should have been checked in a previous import step.");
+          + tournament
+          + "' in the source database. This should have been checked in a previous import step.");
     }
 
     final Map<Integer, TournamentTeam> sourceTeams = Queries.getTournamentTeams(sourceConnection,
@@ -2019,7 +2050,8 @@ public final class ImportDB {
     final Tournament destTournament = Tournament.findTournamentByName(destConnection, tournament);
     if (null == destTournament) {
       throw new FLLInternalException("Could not find tournament with name '"
-          + tournament + "' in the destination database. This should have been checked in a previous import step.");
+          + tournament
+          + "' in the destination database. This should have been checked in a previous import step.");
     }
 
     final Collection<Integer> destTeams = Queries.getAllTeamNumbers(destConnection);
