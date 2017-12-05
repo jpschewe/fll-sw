@@ -49,6 +49,11 @@ import fll.xml.XMLUtils;
 @WebServlet("/admin/database.flldb")
 public final class DumpDB extends BaseFLLServlet {
 
+  /**
+   * Prefix used in the zip files for bugs.
+   */
+  public static final String BUGS_DIRECTORY = "bugs/";
+
   private static final Logger LOGGER = LogUtils.getLogger();
 
   protected void processRequest(final HttpServletRequest request,
@@ -129,7 +134,7 @@ public final class DumpDB extends BaseFLLServlet {
       throws IOException {
 
     // add directory entry for the logs
-    final String directory = "bugs/";
+    final String directory = BUGS_DIRECTORY;
     zipOut.putNextEntry(new ZipEntry(directory));
 
     final File fllWebInfDir = new File(application.getRealPath("/WEB-INF"));
