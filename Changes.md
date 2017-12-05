@@ -1,3 +1,7 @@
+Release 12.2.1
+==============
+
+* #616 - add logs and bug reports to the database dump
 * #615 - Fix problem where named displays disappear from the remote control page after submitting
 
 Release 12.2.0
