@@ -1,3 +1,5 @@
+* #615 - Fix problem where named displays disappear from the remote control page after submitting
+
 Release 12.2.0
 ==============
 

@@ -166,32 +166,38 @@ public class H2HUpdateWebSocket {
 
     if (session.isOpen()) {
 
-      final HttpSession httpSession = (HttpSession) session.getUserProperties()
-                                                           .get(GetHttpSessionConfigurator.HTTP_SESSION_KEY);
-      final ServletContext httpApplication = httpSession.getServletContext();
+      try {
+        final HttpSession httpSession = (HttpSession) session.getUserProperties()
+                                                             .get(GetHttpSessionConfigurator.HTTP_SESSION_KEY);
+        final ServletContext httpApplication = httpSession.getServletContext();
 
-      final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(httpApplication, httpSession);
+        final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(httpApplication, httpSession);
 
-      final BracketMessage message = new BracketMessage();
-      message.isDisplayUpdate = true;
+        final BracketMessage message = new BracketMessage();
+        message.isDisplayUpdate = true;
 
-      for (final DisplayInfo.H2HBracketDisplay h2hBracket : displayInfo.getBrackets()) {
-        final BracketInfo bracketInfo = new BracketInfo(h2hBracket.getBracket(), h2hBracket.getFirstRound(),
-                                                        h2hBracket.getFirstRound()
-                                                            + 2);
+        for (final DisplayInfo.H2HBracketDisplay h2hBracket : displayInfo.getBrackets()) {
+          final BracketInfo bracketInfo = new BracketInfo(h2hBracket.getBracket(), h2hBracket.getFirstRound(),
+                                                          h2hBracket.getFirstRound()
+                                                              + 2);
 
-        message.allBracketInfo.add(bracketInfo);
-      } // foreach h2h bracket
+          message.allBracketInfo.add(bracketInfo);
+        } // foreach h2h bracket
 
-      // expose all bracketInfo to the javascript
-      final ObjectMapper jsonMapper = new ObjectMapper();
-      try (final StringWriter writer = new StringWriter()) {
-        jsonMapper.writeValue(writer, message);
-        final String allBracketInfoJson = writer.toString();
+        // expose all bracketInfo to the javascript
+        final ObjectMapper jsonMapper = new ObjectMapper();
+        try (final StringWriter writer = new StringWriter()) {
+          jsonMapper.writeValue(writer, message);
+          final String allBracketInfoJson = writer.toString();
 
-        session.getBasicRemote().sendText(allBracketInfoJson);
-      } catch (final IOException e) {
-        throw new FLLInternalException("Error writing JSON for allBracketInfo", e);
+          session.getBasicRemote().sendText(allBracketInfoJson);
+        } catch (final IOException e) {
+          throw new FLLInternalException("Error writing JSON for allBracketInfo", e);
+        }
+        
+      } catch (final IllegalStateException e) {
+        LOGGER.error("Got an illegal state exception, likely from an invalid HttpSession object, skipping update of session: "
+            + session.getId(), e);
       }
     } // open session
   }
