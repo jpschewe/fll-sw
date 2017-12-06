@@ -1,6 +1,7 @@
 Release 12.2.1
 ==============
 
+* Fix error where visiting the edit tournaments page would delete all of the descriptions
 * #616 - add logs and bug reports to the database dump
 * #615 - Fix problem where named displays disappear from the remote control page after submitting
 

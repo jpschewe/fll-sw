@@ -9,10 +9,8 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -137,7 +135,8 @@ public final class Tournaments {
 
         out.println("</table>");
         out.println("<input type='hidden' name='numRows' value='"
-            + tableRows + "'>");
+            + tableRows
+            + "'>");
         out.println("<input type='submit' name='addRow' value='Add Row'>");
         out.println("<input type='submit' name='commit' value='Finished'>");
       }
@@ -168,21 +167,26 @@ public final class Tournaments {
     out.println("<tr>");
 
     out.print("  <input type='hidden' name='key"
-        + row + "'");
+        + row
+        + "'");
     if (null != key) {
       out.print(" value='"
-          + key + "'");
+          + key
+          + "'");
     } else {
       out.print(" value='"
-          + NEW_TOURNAMENT_KEY + "'");
+          + NEW_TOURNAMENT_KEY
+          + "'");
     }
     out.println(">");
 
     out.print("  <td><input type='text' name='name"
-        + row + "'");
+        + row
+        + "'");
     if (null != name) {
       out.print(" value='"
-          + WebUtils.escapeForHtmlFormValue(name) + "'");
+          + WebUtils.escapeForHtmlFormValue(name)
+          + "'");
     }
     if (GenerateDB.DUMMY_TOURNAMENT_NAME.equals(name)
         || GenerateDB.DROP_TOURNAMENT_NAME.equals(name)) {
@@ -191,10 +195,12 @@ public final class Tournaments {
     out.println(" maxlength='128' size='16'></td>");
 
     out.print("  <td><input type='text' name='description"
-        + row + "'");
+        + row
+        + "'");
     if (null != description) {
       out.print(" value='"
-          + WebUtils.escapeForHtmlFormValue(description) + "'");
+          + WebUtils.escapeForHtmlFormValue(description)
+          + "'");
     }
     if (GenerateDB.DUMMY_TOURNAMENT_NAME.equals(name)
         || GenerateDB.DROP_TOURNAMENT_NAME.equals(name)) {
@@ -207,8 +213,7 @@ public final class Tournaments {
 
   /**
    * Verify that the data in the request is valid. Checks for things like
-   * multiple tournaments with the same name and the next tournament parameter
-   * pointing to a non-existant tournament.
+   * multiple tournaments with the same name.
    * 
    * @return true if everything is ok, false otherwise and write message to out
    */
@@ -216,70 +221,29 @@ public final class Tournaments {
   private static boolean verifyData(final JspWriter out,
                                     final HttpServletRequest request)
       throws IOException {
-    final Map<String, String> tournamentNames = new HashMap<String, String>();
+    final Set<String> tournamentNames = new HashSet<>();
     boolean retval = true;
 
     { // build up info of what tournaments exist
       int row = 0;
       String name = request.getParameter("name"
           + row);
-      String next = request.getParameter("next"
-          + row);
       while (null != name) {
         if (!"".equals(name)) {
-          if (tournamentNames.containsKey(name)) {
+          if (tournamentNames.contains(name)) {
             out.println("<p><font color='red'>Row "
                 + (row
                     + 1)
-                + " contains duplicate name " + name + "</font></p>");
+                + " contains duplicate name "
+                + name
+                + "</font></p>");
             retval = false;
-          } else {
-            if ("".equals(next)) {
-              next = null;
-            }
-            tournamentNames.put(name, next);
           }
         }
         row++;
         name = request.getParameter("name"
             + row);
-        next = request.getParameter("next"
-            + row);
       }
-    }
-
-    // loop over tournamentNames to find circularities and unknown tournaments
-    final Set<String> visited = new HashSet<String>();
-    final Iterator<Map.Entry<String, String>> tournIter = tournamentNames.entrySet().iterator();
-    while (tournIter.hasNext()) {
-      final Map.Entry<String, String> entry = tournIter.next();
-      final String current = entry.getKey();
-      String next = entry.getValue();
-      if (null != next
-          && !tournamentNames.containsKey(next)) {
-        out.println("<p><font color='red'>Unknown tournament referenced as the next tournament for "
-            + current + ", next: " + next + "</font></p>");
-        retval = false;
-      }
-
-      final Set<String> nextList = new HashSet<String>();
-      while (null != next) {
-        if (nextList.contains(next)) {
-          out.println("<p><font color='red'>Circularity found starting with tournament: "
-              + current + " containing tournaments: " + nextList + "</font></p>");
-          retval = false;
-          // error, stop now so we don't get too deep
-          next = null;
-        } else if (visited.contains(next)) {
-          // already followed this path, short circuit
-          next = null;
-        } else {
-          nextList.add(next);
-          next = tournamentNames.get(next);
-        }
-      }
-      visited.addAll(nextList);
-      visited.add(current);
     }
 
     return retval;
@@ -297,7 +261,7 @@ public final class Tournaments {
         + row);
     String name = request.getParameter("name"
         + row);
-    String location = request.getParameter("location"
+    String location = request.getParameter("description"
         + row);
     while (null != keyStr) {
       final int key = Integer.parseInt(keyStr);
@@ -317,12 +281,14 @@ public final class Tournaments {
         if (null != tournament) {
           if (key == currentTournament) {
             message.append("<p class='warning'>Unable to delete tournament '"
-                + tournament.getName() + "' because it is the current tournament</p>");
+                + tournament.getName()
+                + "' because it is the current tournament</p>");
           } else {
             // delete if no name
             if (tournament.containsScores(connection, description)) {
               message.append("<p class='warning'>Unable to delete tournament '"
-                  + tournament.getName() + "' that contains scores</p>");
+                  + tournament.getName()
+                  + "' that contains scores</p>");
             } else {
               Tournament.deleteTournament(connection, key);
               if (LOGGER.isDebugEnabled()) {
@@ -337,7 +303,9 @@ public final class Tournaments {
         Queries.updateTournament(connection, key, name, location);
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug("Updating a tournament "
-              + key + " to " + name);
+              + key
+              + " to "
+              + name);
         }
       }
 
@@ -346,7 +314,7 @@ public final class Tournaments {
           + row);
       name = request.getParameter("name"
           + row);
-      location = request.getParameter("location"
+      location = request.getParameter("description"
           + row);
     }
   }
