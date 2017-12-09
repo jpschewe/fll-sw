@@ -62,8 +62,8 @@ public class GatherBugReport extends BaseFLLServlet {
       final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
       final File fllWebInfDir = new File(application.getRealPath("/WEB-INF"));
-      final String nowStr = new SimpleDateFormat("bug_yyyy-MM-dd_HH-mm").format(new Date());
-      final File bugReportFile = File.createTempFile(nowStr, ".zip", fllWebInfDir);
+      final String nowStr = new SimpleDateFormat("yyyy-MM-dd_HH-mm").format(new Date());
+      final File bugReportFile = File.createTempFile("bug_" + nowStr, ".zip", fllWebInfDir);
 
       zipOut = new ZipOutputStream(new FileOutputStream(bugReportFile));
 

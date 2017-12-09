@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.zip.ZipInputStream;
@@ -109,7 +110,15 @@ public class CreateDB extends BaseFLLServlet {
           redirect = "/setup";
         } else {
 
-          ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileItem.getInputStream()), connection);
+          final ImportDB.ImportResult importResult = ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileItem.getInputStream()),
+                                                                                    connection);
+          if (importResult.hasBugs()) {
+            message.append("<p id='bugs_found' class='warning'>Bug reports found in the import.</p>");
+          }
+          if (Files.exists(importResult.getImportDirectory())) {
+            message.append(String.format("<p id='import_logs_dir'>See %s for bug reports and logs.</p>",
+                                         importResult.getImportDirectory()));
+          }
 
           // remove application variables that depend on the database
           application.removeAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
@@ -132,7 +141,7 @@ public class CreateDB extends BaseFLLServlet {
       LOG.error(fue, fue);
       redirect = "/setup";
     } catch (final IOException ioe) {
-      message.append("<p class='error'>Error reading challenge descriptor: "
+      message.append("<p class='error'>Error reading database: "
           + ioe.getMessage()
           + "</p>");
       LOG.error(ioe, ioe);
