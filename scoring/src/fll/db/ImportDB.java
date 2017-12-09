@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -19,6 +22,9 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,6 +35,7 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import javax.annotation.Nonnull;
 import javax.sql.DataSource;
 
 import org.slf4j.Logger;
@@ -182,13 +189,15 @@ public final class ImportDB {
    * 
    * @param zipfile the dump file to read
    * @param destConnection where to load the data
+   * @return the result of the import
    * @throws IOException if there is an error reading the dump file
    * @throws SQLException if there is an error importing the data
    * @see ImportDB#loadDatabaseDump(ZipInputStream, Connection)
    * @see ImportDB#importDatabase(Connection, Connection, String)
    */
-  public static void loadFromDumpIntoNewDB(final ZipInputStream zipfile,
-                                           final Connection destConnection)
+  @Nonnull
+  public static ImportDB.ImportResult loadFromDumpIntoNewDB(final ZipInputStream zipfile,
+                                                            final Connection destConnection)
       throws IOException, SQLException {
     PreparedStatement destPrep = null;
     Connection memConnection = null;
@@ -200,7 +209,8 @@ public final class ImportDB {
       final DataSource memSource = Utilities.createMemoryDataSource(databaseName);
       memConnection = memSource.getConnection();
 
-      final Document challengeDocument = loadDatabaseDump(zipfile, memConnection);
+      final ImportDB.ImportResult importResult = loadDatabaseDump(zipfile, memConnection);
+      final Document challengeDocument = importResult.getChallengeDocument();
       GenerateDB.generateDB(challengeDocument, destConnection);
 
       memStmt = memConnection.createStatement();
@@ -252,6 +262,8 @@ public final class ImportDB {
 
       // remove in-memory database
       memStmt.executeUpdate("SHUTDOWN");
+
+      return importResult;
     } finally {
       SQLFunctions.close(memRS);
       SQLFunctions.close(memStmt);
@@ -325,10 +337,13 @@ public final class ImportDB {
    *           database
    * @throws FLLRuntimeException if the database version in the dump is too new
    */
-  public static Document loadDatabaseDump(final ZipInputStream zipfile,
-                                          final Connection connection)
+  public static ImportResult loadDatabaseDump(final ZipInputStream zipfile,
+                                              final Connection connection)
       throws IOException, SQLException {
     Document challengeResult = null;
+    final Path importDirectory = Paths.get("import_"
+        + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")));
+    boolean hasBugs = false;
 
     final Map<String, Map<String, String>> typeInfo = new HashMap<String, Map<String, String>>();
     ZipEntry entry;
@@ -349,11 +364,24 @@ public final class ImportDB {
         final Map<String, String> columnTypes = loadTypeInfo(reader);
         typeInfo.put(tablename, columnTypes);
       } else if (name.startsWith(GatherBugReport.LOGS_DIRECTORY)) {
-        LOGGER.trace("Found log file "
-            + name);
+        if (!entry.isDirectory()) {
+          LOGGER.trace("Found log file "
+              + name);
+
+          final Path outputFileName = importDirectory.resolve(name);
+          Files.createDirectories(outputFileName.getParent());
+          Files.copy(zipfile, outputFileName);
+        }
       } else if (name.startsWith(DumpDB.BUGS_DIRECTORY)) {
-        LOGGER.warn("Found bug report "
-            + name);
+        if (!entry.isDirectory()) {
+          LOGGER.warn("Found bug report "
+              + name);
+          hasBugs = true;
+
+          final Path outputFileName = importDirectory.resolve(name);
+          Files.createDirectories(outputFileName.getParent());
+          Files.copy(zipfile, outputFileName);
+        }
       } else {
         LOGGER.warn("Unexpected file found in imported zip file, skipping: "
             + name);
@@ -388,7 +416,7 @@ public final class ImportDB {
 
     upgradeDatabase(connection, challengeResult, description);
 
-    return challengeResult;
+    return new ImportResult(challengeResult, importDirectory, hasBugs);
   }
 
   /**
@@ -2064,5 +2092,50 @@ public final class ImportDB {
       return new SimpleDateFormat("HH:mm:ss");
     }
   };
+
+  /**
+   * The result of
+   * {@link ImportDB#importDatabase(Connection, Connection, String)}.
+   */
+  public static final class ImportResult {
+
+    public ImportResult(@Nonnull final Document challengeDocument,
+                        @Nonnull final Path importDirectory,
+                        final boolean hasBugs) {
+      this.challengeDocument = challengeDocument;
+      this.importDirectory = importDirectory;
+      this.hasBugs = hasBugs;
+
+    }
+
+    private final Document challengeDocument;
+
+    public Document getChallengeDocument() {
+      return challengeDocument;
+    }
+
+    private final Path importDirectory;
+
+    /**
+     * Any logs or bug reports will be in this directory. The directory may not
+     * exist if there is no data for it.
+     * 
+     * @return the directory where extra data is stored
+     */
+    @Nonnull
+    public Path getImportDirectory() {
+      return importDirectory;
+    }
+
+    private final boolean hasBugs;
+
+    /**
+     * @return true if the import had bug reports
+     */
+    public boolean hasBugs() {
+      return hasBugs;
+    }
+
+  }
 
 }
