@@ -1,6 +1,7 @@
 package fll.web.developer.importdb;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.zip.ZipInputStream;
@@ -79,7 +80,15 @@ public class ImportDBDump extends BaseFLLServlet {
         // import the database
         final FileItem dumpFileItem = (FileItem) request.getAttribute("dbdump");
         final ZipInputStream zipfile = new ZipInputStream(dumpFileItem.getInputStream());
-        ImportDB.loadDatabaseDump(zipfile, memConnection);
+        final ImportDB.ImportResult importResult = ImportDB.loadDatabaseDump(zipfile, memConnection);
+
+        if (importResult.hasBugs()) {
+          message.append("<p id='bugs_found' class='warning'>Bug reports found in the import.</p>");
+        }
+        if (Files.exists(importResult.getImportDirectory())) {
+          message.append(String.format("<p id='import_logs_dir'>See %s for bug reports and logs.</p>",
+                                       importResult.getImportDirectory()));
+        }
 
         final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
         destConnection = destDataSource.getConnection();
