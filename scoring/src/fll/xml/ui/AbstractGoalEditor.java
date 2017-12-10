@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 
 import fll.util.FormatterUtils;
 import fll.util.LogUtils;
+import fll.util.TextAreaEditor;
 import fll.xml.AbstractGoal;
 
 /**
@@ -33,7 +34,7 @@ import fll.xml.AbstractGoal;
 
   private final JFormattedTextField mNameEditor;
 
-  private final JFormattedTextField mDescriptionEditor;
+  private final TextAreaEditor mDescriptionEditor;
 
   private final JFormattedTextField mCategoryEditor;
 
@@ -88,19 +89,14 @@ import fll.xml.AbstractGoal;
     gbc.anchor = GridBagConstraints.FIRST_LINE_END;
     add(new JLabel("Description: "), gbc);
 
-    mDescriptionEditor = FormatterUtils.createStringField();
+    mDescriptionEditor = new TextAreaEditor(2, 40);
     gbc = new GridBagConstraints();
     gbc.weightx = 1;
     gbc.anchor = GridBagConstraints.FIRST_LINE_START;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     add(mDescriptionEditor, gbc);
-    mDescriptionEditor.setValue(goal.getDescription());
-
-    mDescriptionEditor.addPropertyChangeListener("value", e -> {
-      final String newValue = mDescriptionEditor.getText();
-      goal.setDescription(newValue);
-    });
+    mDescriptionEditor.setText(goal.getDescription());
 
     gbc = new GridBagConstraints();
     gbc.weightx = 0;
@@ -139,11 +135,7 @@ import fll.xml.AbstractGoal;
       LOGGER.debug("Got parse exception committing changes to name, assuming bad value and ignoring", e);
     }
 
-    try {
-      mDescriptionEditor.commitEdit();
-    } catch (final ParseException e) {
-      LOGGER.debug("Got parse exception committing changes to description, assuming bad value and ignoring", e);
-    }
+    mGoal.setDescription(mDescriptionEditor.getText());
 
     try {
       mCategoryEditor.commitEdit();
