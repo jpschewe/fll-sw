@@ -169,5 +169,5 @@ public final class FormatterUtils {
       }
       return text;
     }
-  }
+  } // RegEx formatter
 }
