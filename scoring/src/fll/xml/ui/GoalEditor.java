@@ -51,6 +51,8 @@ public class GoalEditor extends AbstractGoalEditor {
 
   private final EnumeratedValuesEditor enumEditor;
 
+  private final RubricEditor rubricEditor;
+
   /**
    * @param goal the goal to edit
    */
@@ -219,6 +221,15 @@ public class GoalEditor extends AbstractGoalEditor {
     });
     mEnumerated.setSelected(getGoal().isEnumerated());
 
+    rubricEditor = new RubricEditor(getGoal());
+    gbc = new GridBagConstraints();
+    gbc.weightx = 1;
+    gbc.weighty = 1;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.fill = GridBagConstraints.BOTH;
+    add(rubricEditor, gbc);
+
   }
 
   /**
@@ -269,6 +280,8 @@ public class GoalEditor extends AbstractGoalEditor {
     } else {
       enumEditor.commitChanges();
     }
+    
+    rubricEditor.commitChanges();
   }
 
   @Override
