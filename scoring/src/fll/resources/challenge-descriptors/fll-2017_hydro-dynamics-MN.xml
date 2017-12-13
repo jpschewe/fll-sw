@@ -220,6 +220,8 @@
 		<goal initialValue="0" max="12" min="0" multiplier="1"
 			name="problem_identification" title="Problem Identification"
 			category="Research" required="true">
+			<description>Clear definition of the problem being studied
+			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3" shortDescription="Unclear, few details">
 					<description>Doesn't relate to FLL theme, no understanding of
@@ -235,12 +237,14 @@
 				<range title="Accomplished" min="7" max="9"
 					shortDescription="Mostly clear, detailed">
 					<description>Relates fairly well to the FLL theme, understand
-						of technical terms, but didn't explain them all clearly.
+						of
+						technical terms, but didn't explain them all clearly.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12" shortDescription="Clear, very detailed">
 					<description>Integrates well with the FLL theme, demonstrated
-						and shared a full understanding of technical terms.
+						and
+						shared a full understanding of technical terms.
 					</description>
 				</range>
 			</rubric>
@@ -248,6 +252,8 @@
 
 		<goal initialValue="0" max="12" min="0" multiplier="1"
 			name="sources_information" title="Sources of Information" category="Research">
+			<description>Quality and variety of data/evidence and sources cited
+			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
 					shortDescription="minimal quality; variety limited">
@@ -268,11 +274,16 @@
 
 		<goal initialValue="0" max="12" min="0" multiplier="1"
 			name="problem_analysis" title="Problem Analysis" category="Research">
+			<description>Depth to which the problem was studied and analyzed by
+				the team, including extent
+				of analysis of existing solutions
+			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
 					shortDescription="Minimal study; no analysis">
 					<description>No research on the impact of the problem,
-						alternative theories or interpretations ignored.
+						alternative
+						theories or interpretations ignored.
 					</description>
 				</range>
 				<range title="Developing" min="4" max="6"
@@ -290,7 +301,8 @@
 				<range title="Exemplary" min="10" max="12"
 					shortDescription="Extensive study and analysis">
 					<description>Impact of problem thoroughly examined and applied
-						to solution. Persuasive argument against alternatives.
+						to
+						solution. Persuasive argument against alternatives.
 					</description>
 				</range>
 			</rubric>
@@ -299,6 +311,10 @@
 		<goal initialValue="0" max="12" min="0" multiplier="1"
 			name="team_solution" title="Team Solution" category="Innovative Solution"
 			required="true">
+			<description>Clear explanation of the proposed solution and
+				description of how it solves the
+				problem
+			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3" shortDescription="Difficult to understand">
 					<description>No solution presented. Team lacks enthusiasm for
@@ -311,15 +327,19 @@
 				</range>
 				<range title="Accomplished" min="7" max="9" shortDescription="Understandable">
 					<description>Understandable but may not address the problem.
-						Team members were actively participating and showed
-						excitement. Project is a group effort.
+						Team
+						members were actively participating and showed
+						excitement. Project
+						is a group effort.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
 					shortDescription="Easy to understand by all">
 					<description>Easy to understand by all and clearly addressed
-						the problem. Team members were articulate and enthusiastic
-						about their solution.
+						the
+						problem. Team members were articulate and enthusiastic
+						about their
+						solution.
 					</description>
 				</range>
 			</rubric>
@@ -327,6 +347,11 @@
 
 		<goal initialValue="0" max="12" min="0" multiplier="1" name="innovation"
 			title="Innovation" category="Innovative Solution">
+			<description>Degree to which the team's solution makes life better by
+				improving existing options, developing
+				a new application of existing ideas, or solving the problem in a
+				completely new way.
+			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
 					shortDescription="Existing solution/application">
@@ -341,7 +366,8 @@
 				<range title="Accomplished" min="7" max="9"
 					shortDescription="Original solution/application; potential added value">
 					<description>Solution is innovative and applies some knowledge
-						of science and/or technology.
+						of
+						science and/or technology.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
@@ -355,6 +381,10 @@
 
 		<goal initialValue="0" max="12" min="0" multiplier="1"
 			name="solution_development" title="Solution Development" category="Innovative Solution">
+			<description>Systematic process used to select, develop, evaluate,
+				test, and improve the solution
+				(Implementation could include cost, ease of manufacturing, etc.)
+			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
 					shortDescription="process AND explanation need improvement">
@@ -373,6 +403,10 @@
 
 		<goal initialValue="0" max="12" min="0" multiplier="1" name="sharing"
 			title="Sharing" category="Presentation" required="true">
+			<description>Degree to which the team shared their Project before the
+				tournament with others who
+				might benefit from the team's efforts
+			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
 					shortDescription="shared with family / friends">
@@ -383,19 +417,22 @@
 				<range title="Developing" min="4" max="6"
 					shortDescription="shared outside family / friends (such as classmates)">
 					<description>Considered how this might impact themselves or
-						family, but not others.
+						family,
+						but not others.
 					</description>
 				</range>
 				<range title="Accomplished" min="7" max="9"
 					shortDescription="shared with one audience who may benefit OR one professional">
 					<description>Considered how this might impact themselves and
-						family and took that into account.
+						family
+						and took that into account.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
 					shortDescription="shared with multiple audiences who may benefit OR multiple professionals">
 					<description>Considered how this impacts others and
-						implemented a plan to include those impacts.
+						implemented a
+						plan to include those impacts.
 					</description>
 				</range>
 			</rubric>
@@ -403,6 +440,8 @@
 
 		<goal initialValue="0" max="12" min="0" multiplier="1" name="creativity"
 			title="Creativity" category="Presentation">
+			<description>Imagination used to develop and deliver the presentation
+			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
 					shortDescription="Minimally engaging OR unimaginative">
@@ -429,6 +468,8 @@
 		<goal initialValue="0" max="12" min="0" multiplier="1"
 			name="presentation_effectiveness" title="Presentation Effectiveness"
 			category="Presentation">
+			<description>Message delivery and organization of the presentation
+			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3" shortDescription="Unclear OR disorganized">
 					<description>No supporting material, unable to answer judge
@@ -438,7 +479,8 @@
 				<range title="Developing" min="4" max="6"
 					shortDescription="Partially clear; minimal organization">
 					<description>Ineffective visual aids and support material,
-						hesitant answers to judge questions.
+						hesitant
+						answers to judge questions.
 					</description>
 				</range>
 				<range title="Accomplished" min="7" max="9"
@@ -450,7 +492,8 @@
 				<range title="Exemplary" min="10" max="12"
 					shortDescription="Clear AND well organized">
 					<description>Carefully chosen aids/material add to
-						presentation, comprehensive answers.
+						presentation,
+						comprehensive answers.
 					</description>
 				</range>
 			</rubric>
@@ -462,13 +505,15 @@
 		<goal initialValue="0" max="12" min="0" multiplier="1" name="discovery"
 			title="Discovery" category="Inspiration">
 			<description>Balanced emphasis on all three aspects (Robot,
-				Project, Core Values) of FLL; it's not just about winning awards
+				Project,
+				Core Values) of FLL; it's not just about winning awards
 			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
 					shortDescription="Emphasis on only one aspect; others neglected">
 					<description>Problems identified, but steps not taken to
-						solve. Team doesn't mention new skills acquired.
+						solve. Team
+						doesn't mention new skills acquired.
 					</description>
 				</range>
 				<range title="Developing" min="4" max="6"
@@ -480,13 +525,15 @@
 				<range title="Accomplished" min="7" max="9"
 					shortDescription="Emphasis on all three aspects">
 					<description>Problems identified and solutions found. Team
-						implied new skills acquired.
+						implied
+						new skills acquired.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
 					shortDescription="Balanced emphasis on all three aspects">
 					<description>Problems identified, solutions found working
-						together. Team demonstrated new skills.
+						together.
+						Team demonstrated new skills.
 					</description>
 				</range>
 			</rubric>
@@ -511,13 +558,15 @@
 				<range title="Accomplished" min="7" max="9"
 					shortDescription="Team is enthusiastic and fun; clear identity">
 					<description>Most of team appears excited, members
-						enthusiastic, but talk over each other.
+						enthusiastic, but
+						talk over each other.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
 					shortDescription="Team engages others in their enthusiasm and fun; clear identity">
 					<description>Concrete examples of enthusiasm, all equally
-						invested and speak.
+						invested
+						and speak.
 					</description>
 				</range>
 			</rubric>
@@ -533,8 +582,10 @@
 				<range title="Beginning" min="1" max="3"
 					shortDescription="Team does not apply FLL values and skills outside FLL.">
 					<description>Members compete with each other to talk. Members
-						show no awareness of school/ community issues No mention of
-						future goals.
+						show
+						no awareness of school/ community issues No mention of
+						future
+						goals.
 					</description>
 				</range>
 				<range title="Developing" min="4" max="6"
@@ -546,14 +597,17 @@
 				<range title="Accomplished" min="7" max="9"
 					shortDescription="Team able to describe multiple examples">
 					<description>Increased awareness of outside issue evident.
-						Team is vague about how this translates to other aspects of
-						life. Suggest how it may have helped.
+						Team is
+						vague about how this translates to other aspects of
+						life. Suggest
+						how it may have helped.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
 					shortDescription="Team able to describe multiple examples, including individual stories">
 					<description>Demonstrated increased awareness and clearly
-						discuss how this translates to other areas of life.
+						discuss
+						how this translates to other areas of life.
 					</description>
 				</range>
 			</rubric>
@@ -573,7 +627,8 @@
 				<range title="Developing" min="4" max="6"
 					shortDescription="Team goals OR team processes unclear">
 					<description> Team members helping each other if asked.
-						Various solutions tested in series, not thought out.
+						Various
+						solutions tested in series, not thought out.
 					</description>
 				</range>
 				<range title="Accomplished" min="7" max="9"
@@ -585,7 +640,8 @@
 				<range title="Exemplary" min="10" max="12"
 					shortDescription="Clear processes enable team to accomplish well defined goals">
 					<description>Members can fill in for each other easily.
-						Various solutions tested and best incorporated.
+						Various
+						solutions tested and best incorporated.
 					</description>
 				</range>
 			</rubric>
@@ -641,7 +697,8 @@
 				<range title="Exemplary" min="10" max="12"
 					shortDescription="Team independence with minimal coach guidance">
 					<description>Cooperation within team is dominant theme. Team
-						owns solutions.
+						owns
+						solutions.
 					</description>
 				</range>
 			</rubric>
@@ -728,7 +785,8 @@
 				<range title="Accomplished" min="7" max="9"
 					shortDescription="Almost always evident with all team members">
 					<description>Members implied they helped other and worked
-						together. Some collaboration is evident.
+						together.
+						Some collaboration is evident.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
@@ -745,13 +803,15 @@
 		<goal initialValue="0" max="12" min="0" multiplier="1" name="durability"
 			title="Durability" category="Mechanical Design">
 			<description>Evidence of structural integrity; ability to
-				withstand rigors of competition.
+				withstand
+				rigors of competition.
 			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
 					shortDescription="Quite fragile; breaks a lot">
 					<description>Base weak, falls apart when handled or run.
-						Difficult to assemble.
+						Difficult
+						to assemble.
 					</description>
 				</range>
 				<range title="Developing" min="4" max="6"
@@ -782,22 +842,28 @@
 				<range title="Beginning" min="1" max="3"
 					shortDescription="Excessive parts or time to repair/modify">
 					<description>Robot lacks critical design components: works,
-						stays together, efficient part use. Few components work
-						together, belong together.
+						stays
+						together, efficient part use. Few components work
+						together, belong
+						together.
 					</description>
 				</range>
 				<range title="Developing" min="4" max="6"
 					shortDescription="Inefficient parts or time to repair/modify">
 					<description>Robot lacks some critical design components:
-						works, stays together, efficient parts use. Some components
-						work or belong together.
+						works,
+						stays together, efficient parts use. Some components
+						work or belong
+						together.
 					</description>
 				</range>
 				<range title="Accomplished" min="7" max="9"
 					shortDescription="Appropriate use of parts and time to repair/modify">
 					<description>Robot lacks few critical design components:
-						works, stays together, efficient parts use. Most components
-						work and belong together.
+						works,
+						stays together, efficient parts use. Most components
+						work and
+						belong together.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
@@ -820,20 +886,23 @@
 					shortDescription="Imbalance of speed, strength and accuracy on most tasks">
 					<description>Difficulty going same distance repeatedly, turns
 						inaccurate or inconsistent. Too fast for accuracy, too slow
-						to complete mission.
+						to
+						complete mission.
 					</description>
 				</range>
 				<range title="Developing" min="4" max="6"
 					shortDescription="Imbalance of speed, strength and accuracy on some tasks">
 					<description>Goes defined distances and turns sometimes.
-						Somewhat too fast for accuracy, or too slow to complete
+						Somewhat
+						too fast for accuracy, or too slow to complete
 						mission.
 					</description>
 				</range>
 				<range title="Accomplished" min="7" max="9"
 					shortDescription="Appropriate balance of speed, strength and accuracy on most tasks">
 					<description>Goes defined distance and turns reasonable
-						accurately and consistently. Good speed balance.
+						accurately
+						and consistently. Good speed balance.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
@@ -864,19 +933,22 @@
 				<range title="Developing" min="4" max="6"
 					shortDescription="Sensor use inconsistent.  Not modular or consistent attachments">
 					<description>Not modular or consistent attachments,
-						attachments awkward to add/remove. Not repeatable.
+						attachments
+						awkward to add/remove. Not repeatable.
 					</description>
 				</range>
 				<range title="Accomplished" min="7" max="9"
 					shortDescription="Sensors used appropriately.  Attachments somewhat modular and work as expected">
 					<description>Attachments somewhat modular and work as
-						expected. Easy to add/remove. Somewhat repeatable.
+						expected. Easy
+						to add/remove. Somewhat repeatable.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
 					shortDescription="Sensor use precise and repeatable.  Attachments modular and work as expected">
 					<description>Attachments modular and work as expected,
-						repeatedly. They look like they belong to the robot.
+						repeatedly.
+						They look like they belong to the robot.
 					</description>
 				</range>
 			</rubric>
@@ -903,13 +975,15 @@
 				<range title="Accomplished" min="7" max="9"
 					shortDescription="Good balance between team responsibility and coach guidance">
 					<description>Moderate understanding of robot structure,
-						underlying design, strategy and technology.
+						underlying
+						design, strategy and technology.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
 					shortDescription="Team independence with minimal coach guidance">
 					<description>Thorough understanding of robot structure,
-						underlying design, strategy and technology.
+						underlying
+						design, strategy and technology.
 					</description>
 				</range>
 			</rubric>
@@ -927,21 +1001,26 @@
 				<range title="Beginning" min="1" max="3"
 					shortDescription="Organization AND explanation need improvement">
 					<description>Disorganized AND poorly explained improvement
-						cycles. Uses standard design. No design process (concept
-						build test refine).
+						cycles.
+						Uses standard design. No design process (concept
+						build test
+						refine).
 					</description>
 				</range>
 				<range title="Developing" min="4" max="6"
 					shortDescription="Organization OR explanation need improvement">
 					<description>Disorganized OR poorly explained improvement
-						cycles. Some forethought in initial design. Refinement of
-						robot not well communicated.
+						cycles.
+						Some forethought in initial design. Refinement of
+						robot not well
+						communicated.
 					</description>
 				</range>
 				<range title="Accomplished" min="7" max="9"
 					shortDescription="Systematic and well-explained">
 					<description>Basic understanding of design process, evidence
-						of concept planning, building, testing, refining.
+						of
+						concept planning, building, testing, refining.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
@@ -974,13 +1053,15 @@
 				<range title="Accomplished" min="7" max="9"
 					shortDescription="Clear strategy to accomplish the team's well defined goals">
 					<description>Effective strategic planning, combining of
-						missions, routes, attachments.
+						missions,
+						routes, attachments.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
 					shortDescription="Clear strategy to accomplish most/all game missions and team goals">
 					<description>Excellent/innovative strategy, combining
-						missions, routes, points.
+						missions,
+						routes, points.
 					</description>
 				</range>
 			</rubric>
@@ -992,25 +1073,29 @@
 				(e.g.
 				designs, programs, strategies or applications) that are
 				beneficial
-				in performing the specified tasks.
+				in
+				performing the specified tasks.
 			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
 					shortDescription="Original feature(s) with no added value or potential">
 					<description>Design, drive, structure are standard. Expected
-						sensor use only.
+						sensor
+						use only.
 					</description>
 				</range>
 				<range title="Developing" min="4" max="6"
 					shortDescription="Original feature(s) with some added value or potential">
 					<description>Either design creative, unique use of drive train
-						or structure, or unique mission strategy.
+						or
+						structure, or unique mission strategy.
 					</description>
 				</range>
 				<range title="Accomplished" min="7" max="9"
 					shortDescription="Original feature(s) with the potential to add significant value">
 					<description>More than one unique design, drive train,
-						structure, or mission strategy.
+						structure, or
+						mission strategy.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
@@ -1063,7 +1148,8 @@
 				<range title="Beginning" min="1" max="3"
 					shortDescription="Limited team responsibility AND excessive coach guidance">
 					<description>Little knowledge of how programs work on robot.
-						Little or no understanding of what pieces do what.
+						Little
+						or no understanding of what pieces do what.
 					</description>
 				</range>
 				<range title="Developing" min="4" max="6"
@@ -1076,14 +1162,17 @@
 				<range title="Accomplished" min="7" max="9"
 					shortDescription="Good balance between team responsibility and coach guidance">
 					<description>Moderate understanding of underlying design,
-						strategy and robot programming. Kids describe most missions.
+						strategy
+						and robot programming. Kids describe most missions.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
 					shortDescription="Team independence with minimal coach guidance">
 					<description>Thorough understanding of underlying design,
-						strategy and programming. Kids describe missions and
-						reference appropriate programs.
+						strategy
+						and programming. Kids describe missions and
+						reference appropriate
+						programs.
 					</description>
 				</range>
 			</rubric>
@@ -1108,13 +1197,15 @@
 				<range title="Accomplished" min="7" max="9"
 					shortDescription="Should achieve purpose repeatedly">
 					<description>Efficient and work as expected. Easy to
-						modify/debug. Well commented.
+						modify/debug.
+						Well commented.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
 					shortDescription="Should achieve purpose every time">
 					<description>Programs logically organized, efficient and
-						always work, even for complex tasks.
+						always
+						work, even for complex tasks.
 					</description>
 				</range>
 			</rubric>
@@ -1134,7 +1225,8 @@
 				<range title="Developing" min="4" max="6"
 					shortDescription="Inefficient code and challenging to understand">
 					<description>Programs somewhat organized, efficient at a
-						couple tasks. Some understanding of language constructs.
+						couple
+						tasks. Some understanding of language constructs.
 					</description>
 				</range>
 				<range title="Accomplished" min="7" max="9"
@@ -1146,7 +1238,8 @@
 				<range title="Exemplary" min="10" max="12"
 					shortDescription="Streamlined code and easy for anyone to understand">
 					<description>Logically organized, and the team has an
-						excellent understanding and use of language constructs.
+						excellent
+						understanding and use of language constructs.
 					</description>
 				</range>
 			</rubric>
@@ -1162,19 +1255,22 @@
 				<range title="Beginning" min="1" max="3"
 					shortDescription="Frequent team intervention to aim AND retrieve robot">
 					<description>Sensors inappropriately used, and didn't provide
-						any help.
+						any
+						help.
 					</description>
 				</range>
 				<range title="Developing" min="4" max="6"
 					shortDescription="Frequent team intervention to aim OR retrieve robot">
 					<description>Sensors occasionally used effectively. Provide
-						some aid in navigation and manipulation.
+						some aid
+						in navigation and manipulation.
 					</description>
 				</range>
 				<range title="Accomplished" min="7" max="9"
 					shortDescription="Robot moves/acts as intended repeatedly w/ occasional team intervention">
 					<description>Sensors were effectively used, repeatable,
-						provided definitely improvement.
+						provided
+						definitely improvement.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
@@ -1209,7 +1305,8 @@
 				<range title="Accomplished" min="7" max="9"
 					shortDescription="Systematic and well-explained">
 					<description>Basic understanding of design process, evidence
-						of concept planning, coding, testing, refining.
+						of
+						concept planning, coding, testing, refining.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
@@ -1242,13 +1339,15 @@
 				<range title="Accomplished" min="7" max="9"
 					shortDescription="Clear strategy to accomplish the team's well defined goals">
 					<description>Effective strategic planning, combining of
-						missions, routes, attachments, code.
+						missions,
+						routes, attachments, code.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
 					shortDescription="Clear strategy to accomplish most/all game missions and team goals">
 					<description>Excellent/innovative strategy, combining
-						missions, routes, points.
+						missions,
+						routes, points.
 					</description>
 				</range>
 			</rubric>
@@ -1260,13 +1359,15 @@
 				(e.g.
 				designs, programs, strategies or applications) that are
 				beneficial
-				in performing the specified tasks.
+				in
+				performing the specified tasks.
 			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
 					shortDescription="Original feature(s) with no added value or potential">
 					<description>Programs and strategy are standard. Expected
-						sensor use only.
+						sensor use
+						only.
 					</description>
 				</range>
 				<range title="Developing" min="4" max="6"
@@ -1283,7 +1384,8 @@
 				<range title="Exemplary" min="10" max="12"
 					shortDescription="Original feature(s) that add significant value">
 					<description>Extremely unique/creative/unexpected program,
-						control, construct or mission strategy.
+						control,
+						construct or mission strategy.
 					</description>
 				</range>
 			</rubric>
