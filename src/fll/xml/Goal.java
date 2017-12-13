@@ -107,6 +107,16 @@ public class Goal extends AbstractGoal {
   }
 
   /**
+   * Replace the rubric.
+   * 
+   * @param v the new value
+   */
+  public void setRubric(final List<RubricRange> v) {
+    mRubric.clear();
+    mRubric.addAll(v);
+  }
+
+  /**
    * Remove a rubric range
    * 
    * @param v the rubric range to remove

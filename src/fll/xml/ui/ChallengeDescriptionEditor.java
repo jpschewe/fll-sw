@@ -91,7 +91,7 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
  *   - SwitchStatement must have something in the default case
  *   - enum value check for dbstring
  *   - unique values for enum values in goals
- * - edit rubrics
+ * - add rubric ranges
  * - edit restrictions
  * - edit tie breaker
  * - ability to add subjective categories
