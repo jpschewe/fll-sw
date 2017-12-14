@@ -1,3 +1,5 @@
+* If there is no description for a goal, make sure the scoresheet doesn't find a description in the rubric to use
+
 Release 12.2.1
 ==============
 

@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
+import javax.annotation.Nonnull;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -30,6 +30,7 @@ import org.w3c.dom.Element;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.util.LogUtils;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**
  * XML utilities for FLL.
@@ -265,7 +266,10 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
                 // needed
                 // then mark the file as delete on exit
                 LOGGER.warn("URL doesn't exist for "
-                    + baseDir + challengeName + " entry: " + entryName);
+                    + baseDir
+                    + challengeName
+                    + " entry: "
+                    + entryName);
               }
             }
           }
@@ -289,5 +293,25 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
 
     return urls;
 
+  }
+
+  /**
+   * Find a child element by tag name. This is very similar to
+   * {@link Element#getElementsByTagName(String)}, except that it only works with
+   * the direct children.
+   * 
+   * @param parent the element to check the children of
+   * @return the list of elements, may be empty
+   */
+  @Nonnull
+  public static List<Element> getChildElementsByTagName(@Nonnull final Element parent,
+                                                        @Nonnull final String tagname) {
+    final List<Element> retval = new LinkedList<>();
+    for (final Element child : new NodelistElementCollectionAdapter(parent.getChildNodes())) {
+      if (tagname.equals(child.getTagName())) {
+        retval.add(child);
+      }
+    }
+    return retval;
   }
 }

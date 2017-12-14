@@ -369,7 +369,10 @@ public final class ImportDB {
               + name);
 
           final Path outputFileName = importDirectory.resolve(name);
-          Files.createDirectories(outputFileName.getParent());
+          final Path outputParent = outputFileName.getParent();
+          if (null != outputParent) {
+            Files.createDirectories(outputParent);
+          }
           Files.copy(zipfile, outputFileName);
         }
       } else if (name.startsWith(DumpDB.BUGS_DIRECTORY)) {
@@ -379,7 +382,10 @@ public final class ImportDB {
           hasBugs = true;
 
           final Path outputFileName = importDirectory.resolve(name);
-          Files.createDirectories(outputFileName.getParent());
+          final Path outputParent = outputFileName.getParent();
+          if (null != outputParent) {
+            Files.createDirectories(outputParent);
+          }
           Files.copy(zipfile, outputFileName);
         }
       } else {

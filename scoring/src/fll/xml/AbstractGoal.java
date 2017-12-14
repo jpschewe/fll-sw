@@ -13,8 +13,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import fll.util.FLLInternalException;
 import fll.util.FP;
@@ -31,9 +29,9 @@ public abstract class AbstractGoal implements Serializable {
       mRequired = false;
     }
 
-    final NodeList descEles = ele.getElementsByTagName("description");
-    if (descEles.getLength() > 0) {
-      final Node descEle = descEles.item(0);
+    final List<Element> descEles = XMLUtils.getChildElementsByTagName(ele, "description");
+    if (descEles.size() > 0) {
+      final Element descEle = descEles.get(0);
       mDescription = descEle.getTextContent();
     } else {
       mDescription = null;
