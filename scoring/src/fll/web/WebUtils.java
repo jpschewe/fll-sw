@@ -113,7 +113,6 @@ public final class WebUtils {
               + addrStr
               + ":"
               + request.getLocalPort()
-              + "/"
               + request.getContextPath();
           urls.add(url);
 
