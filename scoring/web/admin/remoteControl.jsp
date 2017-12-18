@@ -209,9 +209,7 @@
       <!--  Scoreboard -->
 
       <tr>
-        <th>Head to Head <i>WARNING: Do not select brackets
-            until all seeding runs have been recorded!</i>
-        </th>
+        <th>Head to Head</th>
 
         <c:forEach
           items="${displayInformation}"
