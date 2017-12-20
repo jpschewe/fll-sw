@@ -91,16 +91,17 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
  *   - SwitchStatement must have something in the default case
  *   - enum value check for dbstring
  *   - unique values for enum values in goals
- * - add rubric ranges
  * - edit restrictions
  * - edit tie breaker
  * - ability to add subjective categories
  * - Ability to add goals
+ * - add rubric ranges
  * - edit computed goals
  * - Note that one can create a BasicPolynomial with variable references.
  *   - Perhaps BasicPolynomial and ComplexPolynomial can be merged?
  *   - What effect does this have on the XML? Is there always a scope available?
  *   - If we can't do this, then the UI needs to enforce the restriction.
+ *   - I think I want the UI to enforce the restriction as I don't want variables in the tie breakers at this point
  * - support grouping of goals, this is where DnD might be useful 
  *   - all goals in a group must be consecutive
  * - how to handle when being run from the launcher so that it doesn't exit?
@@ -189,7 +190,7 @@ public class ChallengeDescriptionEditor extends JFrame {
 
   private final JComboBox<WinnerType> mWinnerEditor;
 
-  private final ScoreCategoryEditor mPerformanceEditor;
+  private final PerformanceEditor mPerformanceEditor;
 
   private final List<ScoreCategoryEditor> mSubjectiveEditors = new LinkedList<>();
 
@@ -294,7 +295,7 @@ public class ChallengeDescriptionEditor extends JFrame {
     });
 
     // child elements of the challenge description
-    mPerformanceEditor = new ScoreCategoryEditor();
+    mPerformanceEditor = new PerformanceEditor();
     mPerformanceEditor.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
     final MovableExpandablePanel performance = new MovableExpandablePanel("Performance", mPerformanceEditor, false);
     topPanel.add(performance);

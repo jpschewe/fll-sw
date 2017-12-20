@@ -145,6 +145,17 @@ public class PerformanceScoreCategory extends ScoreCategory {
   public TiebreakerTest removeTiebreakerTest(final int index) {
     return mTiebreaker.remove(index);
   }
+  
+  /**
+   * Replace the tiebreakers.
+   * 
+   * @param v the new value
+   */
+  public void setTiebreaker(final List<TiebreakerTest> v) {
+    mTiebreaker.clear();
+    mTiebreaker.addAll(v);
+  }
+
 
   private double mMinimumScore;
 
