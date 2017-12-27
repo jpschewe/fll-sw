@@ -40,11 +40,15 @@ public class TiebreakerEditor extends JPanel {
 
     editorContainer = Box.createVerticalBox();
 
-    final MovableExpandablePanel exPanel = new MovableExpandablePanel("Tie breaker", editorContainer, false);
-    add(exPanel, BorderLayout.CENTER);
+    // add some space on the left side of the expanded panel
+    final JPanel expansion = new JPanel(new BorderLayout());
+    expansion.add(Box.createHorizontalStrut(10), BorderLayout.WEST);
+    expansion.add(editorContainer, BorderLayout.CENTER);
 
+    final MovableExpandablePanel exPanel = new MovableExpandablePanel("Tie breaker", expansion, false);
+    add(exPanel, BorderLayout.CENTER);
   }
-  
+
   private void addTest(final TiebreakerTest test) {
     final TiebreakerTestEditor editor = new TiebreakerTestEditor(test);
     editors.add(editor);
@@ -60,20 +64,20 @@ public class TiebreakerEditor extends JPanel {
       editors.remove(editor);
     });
 
-    panel.setBorder(BorderFactory.createMatteBorder(1, 0, 1, 0, Color.BLACK));
+    panel.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.BLACK));
     editorContainer.add(panel);
   }
 
   public void commitChanges() {
     final List<TiebreakerTest> newTiebreaker = new LinkedList<>();
 
-    //FIXME
-//    editors.forEach(editor -> {
-//      editor.commitChanges();
-//      final TiebreakerTest test = editor.getTest();
-//
-//      newTiebreaker.add(test);
-//    });
+    // FIXME
+    // editors.forEach(editor -> {
+    // editor.commitChanges();
+    // final TiebreakerTest test = editor.getTest();
+    //
+    // newTiebreaker.add(test);
+    // });
 
     performance.setTiebreaker(newTiebreaker);
   }
@@ -81,12 +85,12 @@ public class TiebreakerEditor extends JPanel {
   /**
    * @param v specify the new performance element to edit
    */
-  public void setPerformance(@Nonnull final PerformanceScoreCategory v) {    
+  public void setPerformance(@Nonnull final PerformanceScoreCategory v) {
     this.performance = v;
-    
+
     performance.getTiebreaker().forEach(test -> {
       addTest(test);
     });
   }
-  
+
 }
