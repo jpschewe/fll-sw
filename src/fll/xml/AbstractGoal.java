@@ -6,6 +6,8 @@
 
 package fll.xml;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
@@ -33,6 +35,8 @@ public abstract class AbstractGoal implements Serializable {
 
   public static final String DESCRIPTION_TAG_NAME = "description";
 
+  private final PropertyChangeSupport propChangeSupport;
+
   /**
    * Default constructor for creating a new goal.
    */
@@ -41,6 +45,7 @@ public abstract class AbstractGoal implements Serializable {
     mTitle = null;
     mDescription = null;
     mCategory = null;
+    propChangeSupport = new PropertyChangeSupport(this);
   }
 
   /**
@@ -49,6 +54,8 @@ public abstract class AbstractGoal implements Serializable {
    * @param ele the XML element to parse
    */
   public AbstractGoal(@Nonnull final Element ele) {
+    this();
+
     mName = ele.getAttribute(NAME_ATTRIBUTE);
     mTitle = ele.getAttribute(TITLE_ATTRIBUTE);
 
@@ -67,6 +74,8 @@ public abstract class AbstractGoal implements Serializable {
    * @param name see {@link #getName()}
    */
   public AbstractGoal(final String name) {
+    this();
+    
     mName = name;
     mTitle = null;
     mDescription = null;
@@ -84,9 +93,12 @@ public abstract class AbstractGoal implements Serializable {
 
   /**
    * @param v see {@link #getCategory()}
+   * Fires property change event.
    */
   public void setCategory(final String v) {
+    final String old = mCategory;
     mCategory = v;
+    this.propChangeSupport.firePropertyChange("category", old, v);
   }
 
   private String mName;
@@ -101,9 +113,12 @@ public abstract class AbstractGoal implements Serializable {
 
   /**
    * @param v see {@link #getName()}
+   * Fires property change event.
    */
   public void setName(@Nonnull final String v) {
+    final String old = mName;
     mName = v;
+    this.propChangeSupport.firePropertyChange("name", old, v);
   }
 
   private String mTitle;
@@ -117,9 +132,12 @@ public abstract class AbstractGoal implements Serializable {
 
   /**
    * @param v see {@link #getTitle()}
+   * Fires property change event.
    */
   public void setTitle(final String v) {
+    final String old = mTitle;
     mTitle = v;
+    this.propChangeSupport.firePropertyChange("title", old, v);
   }
 
   private String mDescription;
@@ -133,9 +151,12 @@ public abstract class AbstractGoal implements Serializable {
 
   /**
    * @param v see {@link #getDescription()}
+   * Fires property change event.
    */
   public void setDescription(final String v) {
+    final String old = mDescription;
     mDescription = v;
+    this.propChangeSupport.firePropertyChange("description", old, v);
   }
 
   /**
@@ -231,5 +252,23 @@ public abstract class AbstractGoal implements Serializable {
   }
 
   public abstract Element toXml(final Document doc);
+
+  /**
+   * Add a listener for property change events.
+   * 
+   * @param listener the listener to add
+   */
+  public void addPropertyChangeListener(@Nonnull final PropertyChangeListener listener) {
+    this.propChangeSupport.addPropertyChangeListener(listener);
+  }
+
+  /**
+   * Remove a property change listener.
+   * 
+   * @param listener the listener to remove
+   */
+  public void removePropertyChangeListener(@Nonnull final PropertyChangeListener listener) {
+    this.propChangeSupport.removePropertyChangeListener(listener);
+  }
 
 }
