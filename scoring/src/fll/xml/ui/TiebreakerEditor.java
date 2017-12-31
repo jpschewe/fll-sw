@@ -85,9 +85,12 @@ public class TiebreakerEditor extends JPanel {
   /**
    * @param v specify the new performance element to edit
    */
-  public void setPerformance(@Nonnull final PerformanceScoreCategory v) {
-    this.performance = v;
+  public void setPerformance(@Nonnull final PerformanceScoreCategory v) {    
+    editorContainer.removeAll();
+    editors.clear();
 
+    this.performance = v;    
+    
     performance.getTiebreaker().forEach(test -> {
       addTest(test);
     });

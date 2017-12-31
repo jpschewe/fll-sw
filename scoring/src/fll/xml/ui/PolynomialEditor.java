@@ -23,7 +23,7 @@ import fll.xml.Term;
 /**
  * Editor for {@link BasicPolynomial} and {@link ComplexPolynomial}.
  */
-public class PolynomialEditor extends JPanel {
+/* package */ class PolynomialEditor extends JPanel {
 
   private final BasicPolynomial poly;
 
