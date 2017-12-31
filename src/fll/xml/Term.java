@@ -6,24 +6,29 @@
 
 package fll.xml;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.Utilities;
 import fll.web.playoff.TeamScore;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**
  * Term in a polynomial.
  */
-public class Term extends AbstractTerm {
+public class Term extends Object implements Evaluatable, Serializable {
 
   public static final String TAG_NAME = "term";
+
+  public static final String CONSTANT_TAG_NAME = "constant";
+
+  public static final String CONSTANT_VALUE_ATTRIBUTE = "value";
 
   /**
    * Create a new term.
@@ -37,7 +42,16 @@ public class Term extends AbstractTerm {
               final GoalScope goalScope,
               final VariableScope variableScope)
       throws VariableRefNotAllowedException {
-    super(ele);
+    super();
+
+    double coefficient = 1;
+    for (final Element constantEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(CONSTANT_TAG_NAME))) {
+      final double value = Double.valueOf(constantEle.getAttribute(CONSTANT_VALUE_ATTRIBUTE));
+      coefficient = coefficient
+          * value;
+    }
+
+    mCoefficient = coefficient;
 
     for (final Element goalEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(GoalRef.TAG_NAME))) {
       final GoalRef goal = new GoalRef(goalEle, goalScope);
@@ -60,8 +74,10 @@ public class Term extends AbstractTerm {
    */
   public Term() {
     super();
+
+    mCoefficient = 1;
   }
-  
+
   private final Collection<GoalRef> mGoals = new LinkedList<GoalRef>();
 
   /**
@@ -133,6 +149,22 @@ public class Term extends AbstractTerm {
     }
 
     return value;
+  }
+
+  private double mCoefficient;
+
+  public double getCoefficient() {
+    return mCoefficient;
+  }
+
+  public void setCoefficient(final double v) {
+    mCoefficient = v;
+  }
+
+  private Element createConstantElement(final Document doc) {
+    final Element ele = doc.createElement(CONSTANT_TAG_NAME);
+    ele.setAttribute(CONSTANT_VALUE_ATTRIBUTE, Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mCoefficient));
+    return ele;
   }
 
   public Element toXml(final Document doc) {
