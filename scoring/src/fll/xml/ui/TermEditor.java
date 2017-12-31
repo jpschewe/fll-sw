@@ -99,7 +99,11 @@ import fll.xml.Variable;
     row.add(new JLabel("X "));
     
     final JLabel name = new JLabel(goal.getTitle());
-    //FIXME add listener
+    goal.addPropertyChangeListener(e -> {
+      if("title".equals(e.getPropertyName())) {
+        name.setText((String)e.getNewValue());
+      }
+    });
     row.add(name);
     
     final JComboBox<GoalScoreType> scoreType = new JComboBox<>(GoalScoreType.values());
@@ -120,7 +124,11 @@ import fll.xml.Variable;
     row.add(new JLabel("X "));
     
     final JLabel name = new JLabel(variable.getName());
-    //FIXME add listener
+    variable.addPropertyChangeListener(e -> {
+      if("name".equals(e.getPropertyName())) {
+        name.setText((String)e.getNewValue());
+      }
+    });
     row.add(name);
        
     final JButton delete = new JButton("Delete Variable");
