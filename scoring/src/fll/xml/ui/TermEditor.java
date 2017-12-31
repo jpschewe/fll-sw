@@ -6,6 +6,10 @@
 
 package fll.xml.ui;
 
+import java.util.Collection;
+import java.util.LinkedList;
+
+import javax.annotation.Nonnull;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -13,10 +17,14 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import fll.util.ChooseOptionDialog;
 import fll.util.FormatterUtils;
 import fll.xml.AbstractGoal;
+import fll.xml.GoalRef;
+import fll.xml.GoalScope;
 import fll.xml.GoalScoreType;
 import fll.xml.Term;
 import fll.xml.Variable;
@@ -28,20 +36,24 @@ import fll.xml.Variable;
 
   private final Term term;
 
+  private final GoalScope goalScope;
+
   private final JFormattedTextField coefficient;
-  
+
   private final JComponent refContainer;
 
-  public TermEditor(final Term term,
+  public TermEditor(@Nonnull final Term term,
+                    @Nonnull final GoalScope goalScope,
                     final boolean allowVariables) {
     this.term = term;
+    this.goalScope = goalScope;
 
     setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
     final Box buttonBar = Box.createHorizontalBox();
     this.add(buttonBar);
 
-    final JButton addGoal = new JButton("Add Goal");    
+    final JButton addGoal = new JButton("Add Goal");
     buttonBar.add(addGoal);
     // FIXME listener
     addGoal.setToolTipText("Add a reference to a goal");
@@ -50,7 +62,7 @@ import fll.xml.Variable;
       final JButton addVariable = new JButton("Add Variable");
       buttonBar.add(addVariable);
       // FIXME listener
-      
+
       addVariable.setToolTipText("Add a reference to a variable");
     }
 
@@ -72,7 +84,7 @@ import fll.xml.Variable;
 
     coefficient.setValue(term.getCoefficient());
     coefficientBox.add(Box.createHorizontalGlue());
-    
+
     refContainer = Box.createVerticalBox();
     this.add(refContainer);
 
@@ -92,26 +104,40 @@ import fll.xml.Variable;
 
   }
 
+  private void addNewGoal() {
+    final Collection<AbstractGoal> goals = goalScope.getGoals();
+    final ChooseOptionDialog<AbstractGoal> dialog = new ChooseOptionDialog<>(JOptionPane.getRootFrame(),
+                                                                             new LinkedList<>(goals));
+    dialog.setVisible(true);
+    final AbstractGoal selected = dialog.getSelectedValue();
+    if (null != selected) {
+      //FIXME add to term?
+//      this.term.addGoal(new GoalRef(selected));
+      addGoal(selected);
+    }
+
+  }
+
   private void addGoal(final AbstractGoal goal) {
     final Box row = Box.createHorizontalBox();
     refContainer.add(row);
-    
+
     row.add(new JLabel("X "));
-    
+
     final JLabel name = new JLabel(goal.getTitle());
     goal.addPropertyChangeListener(e -> {
-      if("title".equals(e.getPropertyName())) {
-        name.setText((String)e.getNewValue());
+      if ("title".equals(e.getPropertyName())) {
+        name.setText((String) e.getNewValue());
       }
     });
     row.add(name);
-    
+
     final JComboBox<GoalScoreType> scoreType = new JComboBox<>(GoalScoreType.values());
     row.add(scoreType);
-    //FIXME add listener and a place to store the value
-    
+    // FIXME add listener and a place to store the value
+
     final JButton delete = new JButton("Delete Goal");
-    //FIXME add action listener
+    // FIXME add action listener
     row.add(delete);
 
     row.add(Box.createHorizontalGlue());
@@ -120,21 +146,21 @@ import fll.xml.Variable;
   private void addVariable(final Variable variable) {
     final Box row = Box.createHorizontalBox();
     refContainer.add(row);
-    
+
     row.add(new JLabel("X "));
-    
+
     final JLabel name = new JLabel(variable.getName());
     variable.addPropertyChangeListener(e -> {
-      if("name".equals(e.getPropertyName())) {
-        name.setText((String)e.getNewValue());
+      if ("name".equals(e.getPropertyName())) {
+        name.setText((String) e.getNewValue());
       }
     });
     row.add(name);
-       
+
     final JButton delete = new JButton("Delete Variable");
-    //FIXME add action listener
+    // FIXME add action listener
     row.add(delete);
-    
+
     row.add(Box.createHorizontalGlue());
 
   }
