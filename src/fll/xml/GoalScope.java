@@ -6,6 +6,8 @@
 
 package fll.xml;
 
+import java.util.Collection;
+
 import javax.annotation.Nonnull;
 
 /**
@@ -23,4 +25,12 @@ public interface GoalScope {
   @Nonnull
   public AbstractGoal getGoal(final String name) throws ScopeException;
 
+  /**
+   * 
+   * @return all goals currently known to the scope
+   */
+  @Nonnull
+  public Collection<AbstractGoal> getGoals();
+  
+  
 }
