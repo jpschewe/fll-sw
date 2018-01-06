@@ -29,17 +29,16 @@ public class Welcome {
 
     final List<String> logoFiles = Utilities.getGraphicFiles(new File(imagePath));
 
-    final int numColumns = (int) Math.ceil((double) logoFiles.size()
-        / (double) MAX_NUM_LOGOS_PER_COLUMN);
+//    final int numColumns = (int) Math.ceil((double) logoFiles.size()
+//        / (double) MAX_NUM_LOGOS_PER_COLUMN);
 
+    final int numColumns = 3;
+    
     final Formatter formatter = new Formatter(out);
 
     if (!logoFiles.isEmpty()) {
       formatter.format("<td align='center' width='50%%'>%n");
-      formatter.format("<table>%n");
-      formatter.format("<tr>%n");
-      formatter.format("<td align='center' class='title' colspan='%d'>Sponsored by:</td>%n", numColumns);
-      formatter.format("</tr>%n");
+      formatter.format("<table width='100%%'>%n");
 
       for (int index = 0; index < logoFiles.size(); ++index) {
         final String file = logoFiles.get(index);
