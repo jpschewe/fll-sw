@@ -433,7 +433,8 @@
             </c:choose> <input
             type='text'
             name='${displayInfo.specialUrlFormParamName}'
-            value="${display.specialUrl}"></td>
+            value="${displayInfo.specialUrl}">
+            </td>
         </c:forEach>
 
       </tr>
