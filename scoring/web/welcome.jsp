@@ -41,25 +41,19 @@ body {
   <div class='center'>
     <h1>${challengeDescription.title }</h1>
 
-    <!--img height="40%" align='middle' src='<c:url value="/images/logo.gif"/>' /><br /-->
-    <img
-      height="20%"
-      align='middle'
-      src='<c:url value="/images/htk_logo.jpg"/>' /><br />
-
-    <table>
+    <table width="100%">
       <tr>
+        <td width="50%">
+          <img src='<c:url value="/images/htk_logo.jpg"/>' width="100%" align="middle"/>
+        </td>
+        <td width="50%">
+          <img src='images/fll_logo.gif' width="100%"/>          
+        </td>
+    </table>
 
         <%
           Welcome.outputLogos(application, out);
         %>
-
-        <td valign="middle"><img
-          width='100%'
-          src='images/fll_logo.gif' /></td>
-
-      </tr>
-    </table>
 
     <h2>${ScorePageText }</h2>
 
