@@ -27,7 +27,7 @@
     </c:if>
     <c:if test="${not empty param.RunNumber}">
       <c:forEach var="division" items="${divisions}">
-        <h2>Division <c:out value="${division}"/></h2>
+        <h2>Award Group <c:out value="${division}"/></h2>
         <table border='1'>
           <tr>
            <th>Team Number </th>
