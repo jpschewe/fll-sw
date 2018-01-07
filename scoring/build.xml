@@ -676,11 +676,11 @@
 
 		<fix-scripts dir="${dir.dist}" />
 
-		<zip zipfile="${dir.build}/${app.name}-${app.version.short}.zip">
-			<zipfileset dir="${dir.dist}" prefix="${app.name}-${app.version.short}" filemode="755">
+		<zip zipfile="${dir.build}/${app.name}-v${app.version.short}.zip">
+			<zipfileset dir="${dir.dist}" prefix="${app.name}-v${app.version.short}" filemode="755">
 				<include name="**/*.sh" />
 			</zipfileset>
-			<zipfileset dir="${dir.dist}" prefix="${app.name}-${app.version.short}">
+			<zipfileset dir="${dir.dist}" prefix="${app.name}-v${app.version.short}">
 				<exclude name="**/*.sh" />
 			</zipfileset>
 		</zip>
