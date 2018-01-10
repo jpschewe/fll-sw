@@ -1,3 +1,11 @@
+Release 12.2.3
+==============
+
+* change welcome screen layout to support more sponsor logos on low
+    resolution projectors
+* Auto-size images in the slide show
+
+
 Release 12.2.2
 ==============
 
