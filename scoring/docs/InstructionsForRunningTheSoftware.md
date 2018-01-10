@@ -55,7 +55,19 @@ You may need to enter a dummy score for the team that competes against the no sh
 ### Display Computer
 
 On the display computer bring up the Big Screen Display page. This will display the welcome page, the scoreboard and the head to head brackets as needed. This page is controlled by the Remote Control Page found under administration. **Important note**: Do not close the background window that launched the fullscreen window. This background window actually controls the fullscreen window. Note that when the scoreboard comes up the All Teams column will be blank until any scores are entered.
-Once the page comes up , use F11 to make the web page go full screen without the address bar and title bar
+Once the page comes up , use F11 to make the web page go full screen without the address bar and title bar.
+
+#### multiple displays
+
+If you have multiple displays and want to display different information on each one, then you will want to name them. 
+This is done by switching to the background page (Alt-Tab), typing in a name and then pressing submit. 
+Once you have done this the named display will show up on the display remote control page.
+
+On the display remote control page you can then select what to show on each page. 
+There is a column for default and for each named display.
+Any display that doesn't have a name shows what is selected in the default column.
+Initially each named display is set to follow default, meaning that it will show what is selected in the default column.
+
     
 ### Performance score entry
 
