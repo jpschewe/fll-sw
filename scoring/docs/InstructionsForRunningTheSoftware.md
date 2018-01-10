@@ -91,6 +91,19 @@ This has caught many data entry errors in previous tournaments.
   * You can goto the printable bracket page and then keep refreshing the page. As scores are entered the bracket will fill out. Clicking the print scoresheets button at the top will create a PDF of the score sheets for the rounds that can be determined and haven't been printed yet. If you want to reprint some scoresheets you just check the box next to the round to print and then click the print scoresheets button.
   * Scores are entered per the [Performance Score Entry Instructions](performance-entry-instructions.md)
   * The final scores of each head to head bracket are not displayed on the screen. This is because they are revealed at the awards ceremony. *Because of this it is critical that the computer person check the final scores and make sure there are no ties at the end of the bracket.*
+  
+### Optional extra performance round
+
+At some tournaments we don't run head to head, instead we schedule an extra performance round.
+This round is in the schedule just like the normal 3 rounds.
+Like head to head this round is not used for advancement.
+To be able to enter these scores there are a couple of things that need to happen.
+  1. Create a single head to head bracket with all teams and initialize it.
+    * this allows one to enter at least 1 more score for each team
+  1. Edit the max scoreboard round to be 10, this allows the extra round scores to be displayed
+    1. Admin Index 
+    1. Edit All Parameters
+    1. Under the tournament change "Max Scoreboard Round" to be 10
 
 ## End of subjective judging
 
