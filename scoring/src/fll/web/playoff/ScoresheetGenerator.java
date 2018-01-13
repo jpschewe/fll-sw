@@ -132,6 +132,7 @@ public class ScoresheetGenerator {
       throws SQLException {
     final Tournament tournamentObj = Tournament.findTournamentByID(connection, tournament);
     this.tournamentName = tournamentObj.getName();
+    final ScoreType performanceScoreType = description.getPerformance().getScoreType();
 
     final String numMatchesStr = request.getParameter("numMatches");
     if (null == numMatchesStr) {
@@ -225,13 +226,10 @@ public class ScoresheetGenerator {
                                         teamA.getTeamNumber(), playoffRound, division));
             } else {
               // update the brackets with the table name
-              final int dbLine = Queries.getPlayoffTableLineNumber(connection, tournament, teamA.getTeamNumber(),
-                                                                   performanceRunA);
-              final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, tournament, division);
-              H2HUpdateWebSocket.updateBracket(division, dbLine, playoffRound, maxPlayoffRound, teamA.getTeamNumber(),
-                                               teamA.getTeamName(), null, ScoreType.INTEGER, // doesn't
-                                                                                             // matter
-                                               false, true, m_table[j]);
+              final String table = m_table[j];
+
+              updateDisplayForTable(connection, tournament, performanceScoreType, division, playoffRound, teamA,
+                                    performanceRunA, table);
             }
             j++;
 
@@ -262,13 +260,9 @@ public class ScoresheetGenerator {
                                         teamB.getTeamNumber(), playoffRound, division));
             } else {
               // update the brackets with the table name
-              final int dbLine = Queries.getPlayoffTableLineNumber(connection, tournament, teamB.getTeamNumber(),
-                                                                   performanceRunB);
-              final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, tournament, division);
-              H2HUpdateWebSocket.updateBracket(division, dbLine, playoffRound, maxPlayoffRound, teamB.getTeamNumber(),
-                                               teamB.getTeamName(), null, ScoreType.INTEGER, // doesn't
-                                                                                             // matter
-                                               false, true, m_table[j]);
+              final String table = m_table[j];
+              updateDisplayForTable(connection, tournament, performanceScoreType, division, playoffRound, teamB,
+                                    performanceRunB, table);
             }
             j++;
           }
@@ -278,6 +272,29 @@ public class ScoresheetGenerator {
       }
     }
     setChallengeInfo(description);
+  }
+
+ 
+  private void updateDisplayForTable(final Connection connection,
+                                     final int tournamentId,
+                                     final ScoreType performanceScoreType,
+                                     final String headToHeadBracket,
+                                     final int playoffRound,
+                                     final Team team,
+                                     final int performanceRunNumber,
+                                     final String table)
+      throws SQLException {
+    final int teamNumber = team.getTeamNumber();
+    final int dbLine = Queries.getPlayoffTableLineNumber(connection, tournamentId, team.getTeamNumber(),
+                                                         performanceRunNumber);
+    final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, tournamentId, headToHeadBracket);
+
+    final Double score = Queries.getPerformanceScore(connection, tournamentId, teamNumber, performanceRunNumber);
+    final boolean noShow = Queries.isNoShow(connection, tournamentId, teamNumber, performanceRunNumber);
+    final boolean verified = Queries.isVerified(connection, tournamentId, teamNumber, performanceRunNumber);
+
+    H2HUpdateWebSocket.updateBracket(headToHeadBracket, dbLine, playoffRound, maxPlayoffRound, teamNumber,
+                                     team.getTeamName(), score, performanceScoreType, noShow, verified, table);
   }
 
   /**
@@ -408,8 +425,6 @@ public class ScoresheetGenerator {
 
       // This table is a single score sheet
       final PdfPTable scoreSheet = new PdfPTable(2);
-      // scoreSheet.getDefaultCell().setBorder(Rectangle.LEFT | Rectangle.BOTTOM
-      // | Rectangle.RIGHT | Rectangle.TOP); //FIXME DEBUG should be NO_BORDER
       scoreSheet.getDefaultCell().setBorder(Rectangle.NO_BORDER);
       scoreSheet.getDefaultCell().setPaddingRight(1);
       scoreSheet.getDefaultCell().setPaddingLeft(0);
