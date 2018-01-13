@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.log4j.Logger;
@@ -1217,17 +1218,31 @@ public class BracketData extends BracketInfo {
                                                                                                    tournament,
                                                                                                    division);
 
+    final List<TableInformation> tablesToUse = tournamentTables.stream().filter(t -> t.getUse())
+                                                               .collect(Collectors.toList());
+    if (tablesToUse.isEmpty()
+        && !tournamentTables.isEmpty()) {
+      LOG.warn("Tables are defined, but none are set to be used by bracket "
+          + division
+          + ". This is unexpected, using all tables");
+      tablesToUse.addAll(tournamentTables);
+    }
+
     if (LOG.isDebugEnabled()) {
-      LOG.debug("Tables: "
-          + tournamentTables);
+      LOG.debug("Division: "
+          + division
+          + " all Tables: "
+          + tournamentTables
+          + " use tables: "
+          + tablesToUse);
     }
 
     // Prevent divide by 0 errors if no tables were set in the database.
-    if (tournamentTables.isEmpty()) {
-      tournamentTables.add(new TableInformation(0, "Table 1", "Table 2", true));
+    if (tablesToUse.isEmpty()) {
+      tablesToUse.add(new TableInformation(0, "Table 1", "Table 2", true));
     }
 
-    Iterator<TableInformation> tAssignIt = tournamentTables.iterator();
+    Iterator<TableInformation> tAssignIt = tablesToUse.iterator();
 
     // Build the cells...
     int matchNum = 1;
@@ -1258,7 +1273,7 @@ public class BracketData extends BracketInfo {
               && ((TeamBracketCell) roundData.get(curArray[1])).getTeam().getTeamNumber() > 0) {
 
             if (!tAssignIt.hasNext()) {
-              tAssignIt = tournamentTables.iterator();
+              tAssignIt = tablesToUse.iterator();
             }
 
             final String storedTableA = ((TeamBracketCell) roundData.get(curArray[0])).getTable();
@@ -1295,23 +1310,21 @@ public class BracketData extends BracketInfo {
             } else {
               // assign both
               if (!tAssignIt.hasNext()) {
-                tAssignIt = tournamentTables.iterator();
+                tAssignIt = tablesToUse.iterator();
               }
-              TableInformation info = tAssignIt.next();
-              while (!info.getUse()
-                  && tAssignIt.hasNext()) {
-                info = tAssignIt.next();
-              }
-
-              if (!info.getUse()
-                  && !tAssignIt.hasNext()) {
-                LOG.warn("No tables can be used, this is odd");
-                tAssignIt = tournamentTables.iterator();
-                info = tAssignIt.next();
-              }
+              final TableInformation info = tAssignIt.next();
 
               tableA = info.getSideA();
               tableB = info.getSideB();
+
+              if (LOG.isTraceEnabled()) {
+                LOG.trace("Assigning tables "
+                    + tableA
+                    + ", "
+                    + tableB
+                    + " to bracket "
+                    + bracketLabel);
+              }
             }
 
             final TeamBracketCell topCell = (TeamBracketCell) roundData.get(curArray[0]);
@@ -1322,7 +1335,7 @@ public class BracketData extends BracketInfo {
                                                    curArray[1].intValue()
                                                        - curArray[0].intValue()
                                                        - 1));
-            // Put placeholders for the rows that are to be spanned over
+            // Put place holders for the rows that are to be spanned over
             for (int j = curArray[0].intValue()
                 + 2; j < curArray[1].intValue(); j++) {
               roundData.put(j, new SpannedOverBracketCell("spanned row"
@@ -1339,9 +1352,10 @@ public class BracketData extends BracketInfo {
             roundData.put(line, new BracketLabelCell(bracketLabel));
           }
           bracketNumber++;
-        }
-      }
-    }
+        } // foreach row
+      } // roundData not null
+    } // foreach round
+
     return matchNum
         - 1;
   }
