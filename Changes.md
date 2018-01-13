@@ -1,3 +1,6 @@
+* #634 - fix head to head table assignment algorithm to ensure that only the desired tables are used
+
+
 Release 12.2.3
 ==============
 

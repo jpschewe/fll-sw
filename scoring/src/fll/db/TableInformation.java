@@ -63,10 +63,24 @@ public final class TableInformation implements Serializable {
   public int getId() {
     return mId;
   }
-  
+
+  @Override
+  public String toString() {
+    return "TableInformation [A: "
+        + getSideA()
+        + " B: "
+        + getSideB()
+        + " id: "
+        + getId()
+        + " use: "
+        + getUse()
+        + "]";
+  }
+
   private static List<Integer> getTablesForDivision(final Connection connection,
                                                     final int tournament,
-                                                    final String division) throws SQLException {
+                                                    final String division)
+      throws SQLException {
     final List<Integer> tableIds = new LinkedList<Integer>();
     PreparedStatement prep = null;
     ResultSet rs = null;
@@ -99,7 +113,8 @@ public final class TableInformation implements Serializable {
    */
   public static List<TableInformation> getTournamentTableInformation(final Connection connection,
                                                                      final int tournament,
-                                                                     final String division) throws SQLException {
+                                                                     final String division)
+      throws SQLException {
     final List<Integer> tableIdsForDivision = getTablesForDivision(connection, tournament, division);
 
     final List<TableInformation> tableInfo = new LinkedList<TableInformation>();
