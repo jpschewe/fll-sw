@@ -797,9 +797,11 @@ public final class Queries {
 
         final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, currentTournament, bracketName);
 
+        final boolean verified = Queries.isVerified(connection, currentTournament, teamNumber, runNumber);
+
         H2HUpdateWebSocket.updateBracket(bracketName, dbLine, playoffRound, maxPlayoffRound, teamNumber,
                                          team.getTeamName(), score, performanceElement.getScoreType(),
-                                         teamScore.isNoShow(), false, table);
+                                         teamScore.isNoShow(), verified, table);
       }
     } else {
       tournament.recordPerformanceSeedingModified(connection);
@@ -1225,20 +1227,6 @@ public final class Queries {
             // reflect the deletion of this score by removing the team from the
             // next run column in the bracket
             removePlayoffScore(connection, division, currentTournament, irunNumber, ptLine);
-
-            // send H2H update that this team's score is now null
-            final Team team = Team.getTeamFromDatabase(connection, teamNumber);
-            final int playoffRound = Playoff.getPlayoffRound(connection, division, irunNumber);
-
-            final String table = Queries.getAssignedTable(connection, currentTournament, division, playoffRound,
-                                                          ptLine);
-
-            final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, currentTournament, division);
-
-            H2HUpdateWebSocket.updateBracket(division, ptLine, playoffRound, maxPlayoffRound, teamNumber,
-                                             team.getTeamName(), null, ScoreType.INTEGER // doesn't
-                                                                                         // matter
-                                             , false, true, table);
           }
         } else {
           // Do nothing - team didn't get entered into the PlayoffData table.
@@ -1287,6 +1275,7 @@ public final class Queries {
                                          final int runNumber,
                                          final int lineNumber)
       throws SQLException {
+
     PreparedStatement prep = null;
     try {
       prep = connection.prepareStatement("UPDATE PlayoffData" //
@@ -1323,15 +1312,17 @@ public final class Queries {
 
     }
 
+    final Document document = GlobalParameters.getChallengeDocument(connection);
+    final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
+    final PerformanceScoreCategory performance = description.getPerformance();
+    final ScoreType performanceScoreType = performance.getScoreType();
+
     final String table = Queries.getAssignedTable(connection, currentTournament, division, playoffRound, lineNumber);
 
     final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, currentTournament, division);
 
-    // FIXME need to get the current score here
-    H2HUpdateWebSocket.updateBracket(division, lineNumber, playoffRound, maxPlayoffRound, team.getTeamNumber(),
-                                     team.getTeamName(), null, ScoreType.INTEGER, // doesn't
-                                                                                  // matter
-                                     false, true, table);
+    H2HUpdateWebSocket.updateDisplayForTable(connection, currentTournament, performanceScoreType, division,
+                                             maxPlayoffRound, team, runNumber, lineNumber, table);
   }
 
   /**
