@@ -35,6 +35,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.Team;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -194,7 +195,7 @@ public class H2HUpdateWebSocket {
         } catch (final IOException e) {
           throw new FLLInternalException("Error writing JSON for allBracketInfo", e);
         }
-        
+
       } catch (final IllegalStateException e) {
         LOGGER.error("Got an illegal state exception, likely from an invalid HttpSession object, skipping update of session: "
             + session.getId(), e);
@@ -301,6 +302,44 @@ public class H2HUpdateWebSocket {
   public void error(@SuppressWarnings("unused") final Session session,
                     final Throwable t) {
     LOGGER.error("Caught websocket error", t);
+  }
+
+  /**
+   * Update the table for a team in a head to head bracket. This will query the
+   * database for the current score to ensure that scores don't disappear from the
+   * display.
+   * 
+   * @param connection the database connection
+   * @param tournamentId which tournament to work with
+   * @param performanceScoreType the type of scores for performance (used for
+   *          display)
+   * @param headToHeadBracket the bracket name
+   * @param playoffRound the round in the playoffs
+   * @param team the team
+   * @param performanceRunNumber the run number
+   * @param dbLine the line in the playoff table
+   * @param table the table to display
+   * @throws SQLException
+   */
+  public static void updateDisplayForTable(final Connection connection,
+                                           final int tournamentId,
+                                           final ScoreType performanceScoreType,
+                                           final String headToHeadBracket,
+                                           final int playoffRound,
+                                           final Team team,
+                                           final int performanceRunNumber,
+                                           final int dbLine,
+                                           final String table)
+      throws SQLException {
+    final int teamNumber = team.getTeamNumber();
+    final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, tournamentId, headToHeadBracket);
+
+    final Double score = Queries.getPerformanceScore(connection, tournamentId, teamNumber, performanceRunNumber);
+    final boolean noShow = Queries.isNoShow(connection, tournamentId, teamNumber, performanceRunNumber);
+    final boolean verified = Queries.isVerified(connection, tournamentId, teamNumber, performanceRunNumber);
+
+    updateBracket(headToHeadBracket, dbLine, playoffRound, maxPlayoffRound, teamNumber, team.getTeamName(), score,
+                  performanceScoreType, noShow, verified, table);
   }
 
   /**

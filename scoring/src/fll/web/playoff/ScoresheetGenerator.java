@@ -274,27 +274,19 @@ public class ScoresheetGenerator {
     setChallengeInfo(description);
   }
 
- 
-  private void updateDisplayForTable(final Connection connection,
-                                     final int tournamentId,
-                                     final ScoreType performanceScoreType,
-                                     final String headToHeadBracket,
-                                     final int playoffRound,
-                                     final Team team,
-                                     final int performanceRunNumber,
-                                     final String table)
+  private static void updateDisplayForTable(final Connection connection,
+                                            final int tournamentId,
+                                            final ScoreType performanceScoreType,
+                                            final String headToHeadBracket,
+                                            final int playoffRound,
+                                            final Team team,
+                                            final int performanceRunNumber,
+                                            final String table)
       throws SQLException {
-    final int teamNumber = team.getTeamNumber();
     final int dbLine = Queries.getPlayoffTableLineNumber(connection, tournamentId, team.getTeamNumber(),
                                                          performanceRunNumber);
-    final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, tournamentId, headToHeadBracket);
-
-    final Double score = Queries.getPerformanceScore(connection, tournamentId, teamNumber, performanceRunNumber);
-    final boolean noShow = Queries.isNoShow(connection, tournamentId, teamNumber, performanceRunNumber);
-    final boolean verified = Queries.isVerified(connection, tournamentId, teamNumber, performanceRunNumber);
-
-    H2HUpdateWebSocket.updateBracket(headToHeadBracket, dbLine, playoffRound, maxPlayoffRound, teamNumber,
-                                     team.getTeamName(), score, performanceScoreType, noShow, verified, table);
+    H2HUpdateWebSocket.updateDisplayForTable(connection, tournamentId, performanceScoreType, headToHeadBracket,
+                                             playoffRound, team, performanceRunNumber, dbLine, table);
   }
 
   /**
