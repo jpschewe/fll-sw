@@ -37,6 +37,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -65,6 +66,7 @@ import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 
@@ -1192,6 +1194,7 @@ public class TournamentSchedule implements Serializable {
     table.addCell(PdfUtils.createHeaderCell("Round"));
     table.setHeaderRows(1);
 
+    LocalTime prevTime = null;
     for (final Map.Entry<PerformanceTime, TeamScheduleInfo> entry : performanceTimes.entrySet()) {
       final PerformanceTime performance = entry.getKey();
       final TeamScheduleInfo si = entry.getValue();
@@ -1206,16 +1209,42 @@ public class TournamentSchedule implements Serializable {
         backgroundColor = null;
       }
 
-      table.addCell(PdfUtils.createCell(String.valueOf(si.getTeamNumber())));
-      table.addCell(PdfUtils.createCell(si.getAwardGroup()));
-      table.addCell(PdfUtils.createCell(si.getOrganization()));
-      table.addCell(PdfUtils.createCell(si.getTeamName()));
-      table.addCell(PdfUtils.createCell(formatTime(si.getPerfTime(round)), backgroundColor));
-      table.addCell(PdfUtils.createCell(si.getPerfTableColor(round)
+      final LocalTime performanceTime = si.getPerfTime(round);
+      final boolean addTopBorder = !Objects.equals(performanceTime, prevTime);
+      final float topBorderWidth = addTopBorder ? 2f : Rectangle.UNDEFINED;
+
+      PdfPCell cell = PdfUtils.createCell(String.valueOf(si.getTeamNumber()));
+      cell.setBorderWidthTop(topBorderWidth);
+      table.addCell(cell);
+
+      cell = PdfUtils.createCell(si.getAwardGroup());
+      cell.setBorderWidthTop(topBorderWidth);
+      table.addCell(cell);
+
+      cell = PdfUtils.createCell(si.getOrganization());
+      cell.setBorderWidthTop(topBorderWidth);
+      table.addCell(cell);
+
+      cell = PdfUtils.createCell(si.getTeamName());
+      cell.setBorderWidthTop(topBorderWidth);
+      table.addCell(cell);
+
+      cell = PdfUtils.createCell(formatTime(performanceTime), backgroundColor);
+      cell.setBorderWidthTop(topBorderWidth);
+      table.addCell(cell);
+
+      cell = PdfUtils.createCell(si.getPerfTableColor(round)
           + " "
-          + si.getPerfTableSide(round), backgroundColor));
-      table.addCell(PdfUtils.createCell(String.valueOf(round
-          + 1)));
+          + si.getPerfTableSide(round), backgroundColor);
+      cell.setBorderWidthTop(topBorderWidth);
+      table.addCell(cell);
+
+      cell = PdfUtils.createCell(String.valueOf(round
+          + 1));
+      cell.setBorderWidthTop(topBorderWidth);
+      table.addCell(cell);
+
+      prevTime = performanceTime;
     }
 
     detailedSchedules.add(table);
