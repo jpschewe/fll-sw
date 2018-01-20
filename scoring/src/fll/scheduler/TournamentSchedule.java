@@ -107,6 +107,12 @@ public class TournamentSchedule implements Serializable {
   private static final Logger LOGGER = LogUtils.getLogger();
 
   /**
+   * How wide to make the line between time separations in the "by time" schedule
+   * outputs.
+   */
+  private static final float TIME_SEPARATOR_LINE_WIDTH = 2f;
+
+  /**
    * Header on team number column.
    */
   public static final String TEAM_NUMBER_HEADER = "Team #";
@@ -1210,8 +1216,8 @@ public class TournamentSchedule implements Serializable {
       }
 
       final LocalTime performanceTime = si.getPerfTime(round);
-      final boolean addTopBorder = !Objects.equals(performanceTime, prevTime);
-      final float topBorderWidth = addTopBorder ? 2f : Rectangle.UNDEFINED;
+      final float topBorderWidth = !Objects.equals(performanceTime, prevTime) ? TIME_SEPARATOR_LINE_WIDTH
+          : Rectangle.UNDEFINED;
 
       PdfPCell cell = PdfUtils.createCell(String.valueOf(si.getTeamNumber()));
       cell.setBorderWidthTop(topBorderWidth);
@@ -1321,13 +1327,37 @@ public class TournamentSchedule implements Serializable {
     table.setHeaderRows(2);
 
     Collections.sort(_schedule, getComparatorForSubjectiveByTime(subjectiveStation));
+    LocalTime prevTime = null;
     for (final TeamScheduleInfo si : _schedule) {
-      table.addCell(PdfUtils.createCell(String.valueOf(si.getTeamNumber())));
-      table.addCell(PdfUtils.createCell(si.getAwardGroup()));
-      table.addCell(PdfUtils.createCell(si.getOrganization()));
-      table.addCell(PdfUtils.createCell(si.getTeamName()));
-      table.addCell(PdfUtils.createCell(formatTime(si.getSubjectiveTimeByName(subjectiveStation).getTime())));
-      table.addCell(PdfUtils.createCell(si.getJudgingGroup()));
+      final LocalTime time = si.getSubjectiveTimeByName(subjectiveStation).getTime();
+
+      final float topBorderWidth = !Objects.equals(time, prevTime) ? TIME_SEPARATOR_LINE_WIDTH : Rectangle.UNDEFINED;
+
+      PdfPCell cell = PdfUtils.createCell(String.valueOf(si.getTeamNumber()));
+      cell.setBorderWidthTop(topBorderWidth);
+      table.addCell(cell);
+
+      cell = PdfUtils.createCell(si.getAwardGroup());
+      cell.setBorderWidthTop(topBorderWidth);
+      table.addCell(cell);
+
+      cell = PdfUtils.createCell(si.getOrganization());
+      cell.setBorderWidthTop(topBorderWidth);
+      table.addCell(cell);
+
+      cell = PdfUtils.createCell(si.getTeamName());
+      cell.setBorderWidthTop(topBorderWidth);
+      table.addCell(cell);
+
+      cell = PdfUtils.createCell(formatTime(time));
+      cell.setBorderWidthTop(topBorderWidth);
+      table.addCell(cell);
+
+      cell = PdfUtils.createCell(si.getJudgingGroup());
+      cell.setBorderWidthTop(topBorderWidth);
+      table.addCell(cell);
+
+      prevTime = time;
     }
 
     detailedSchedules.add(table);
