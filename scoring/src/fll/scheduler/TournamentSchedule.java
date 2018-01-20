@@ -1183,6 +1183,7 @@ public class TournamentSchedule implements Serializable {
     final List<TeamScheduleInfo> teamsMissingOpponents = new LinkedList<TeamScheduleInfo>();
 
     final PdfPTable table = PdfUtils.createTable(7);
+    int currentRow = 0;
     table.setWidths(new float[] { 2, 1, 3, 3, 2, 2, 2 });
 
     final PdfPCell tournamentCell = PdfUtils.createHeaderCell("Tournament: "
@@ -1190,6 +1191,8 @@ public class TournamentSchedule implements Serializable {
         + " Performance");
     tournamentCell.setColspan(7);
     table.addCell(tournamentCell);
+    table.completeRow();
+    ++currentRow;
 
     table.addCell(PdfUtils.createHeaderCell(TEAM_NUMBER_HEADER));
     table.addCell(PdfUtils.createHeaderCell(AWARD_GROUP_HEADER));
@@ -1198,6 +1201,9 @@ public class TournamentSchedule implements Serializable {
     table.addCell(PdfUtils.createHeaderCell("Time"));
     table.addCell(PdfUtils.createHeaderCell("Table"));
     table.addCell(PdfUtils.createHeaderCell("Round"));
+    table.completeRow();
+    ++currentRow;
+
     table.setHeaderRows(1);
 
     LocalTime prevTime = null;
@@ -1216,8 +1222,16 @@ public class TournamentSchedule implements Serializable {
       }
 
       final LocalTime performanceTime = si.getPerfTime(round);
-      final float topBorderWidth = !Objects.equals(performanceTime, prevTime) ? TIME_SEPARATOR_LINE_WIDTH
-          : Rectangle.UNDEFINED;
+      final float topBorderWidth;
+      if (Objects.equals(performanceTime, prevTime)) {
+        topBorderWidth = Rectangle.UNDEFINED;
+
+        // keep the rows with the same times together
+        table.getRow(currentRow
+            - 1).setMayNotBreak(true);
+      } else {
+        topBorderWidth = TIME_SEPARATOR_LINE_WIDTH;
+      }
 
       PdfPCell cell = PdfUtils.createCell(String.valueOf(si.getTeamNumber()));
       cell.setBorderWidthTop(topBorderWidth);
@@ -1249,7 +1263,9 @@ public class TournamentSchedule implements Serializable {
           + 1));
       cell.setBorderWidthTop(topBorderWidth);
       table.addCell(cell);
+      table.completeRow();
 
+      ++currentRow;
       prevTime = performanceTime;
     }
 
@@ -1266,6 +1282,10 @@ public class TournamentSchedule implements Serializable {
       detailedSchedules.add(stayingTable);
 
     }
+
+    // make sure the last row isn't by itself
+    table.getRow(currentRow
+        - 1).setMayNotBreak(true);
 
     detailedSchedules.add(Chunk.NEXTPAGE);
   }
@@ -1309,6 +1329,7 @@ public class TournamentSchedule implements Serializable {
                                               final String subjectiveStation)
       throws DocumentException {
     final PdfPTable table = PdfUtils.createTable(6);
+    int currentRow = 0;
     table.setWidths(new float[] { 2, 1, 3, 3, 2, 2 });
 
     final PdfPCell tournamentCell = PdfUtils.createHeaderCell("Tournament: "
@@ -1317,6 +1338,8 @@ public class TournamentSchedule implements Serializable {
         + subjectiveStation);
     tournamentCell.setColspan(6);
     table.addCell(tournamentCell);
+    table.completeRow();
+    currentRow++;
 
     table.addCell(PdfUtils.createHeaderCell(TEAM_NUMBER_HEADER));
     table.addCell(PdfUtils.createHeaderCell(AWARD_GROUP_HEADER));
@@ -1324,6 +1347,8 @@ public class TournamentSchedule implements Serializable {
     table.addCell(PdfUtils.createHeaderCell(TEAM_NAME_HEADER));
     table.addCell(PdfUtils.createHeaderCell(subjectiveStation));
     table.addCell(PdfUtils.createHeaderCell(JUDGE_GROUP_HEADER));
+    table.completeRow();
+    currentRow++;
     table.setHeaderRows(2);
 
     Collections.sort(_schedule, getComparatorForSubjectiveByTime(subjectiveStation));
@@ -1331,7 +1356,16 @@ public class TournamentSchedule implements Serializable {
     for (final TeamScheduleInfo si : _schedule) {
       final LocalTime time = si.getSubjectiveTimeByName(subjectiveStation).getTime();
 
-      final float topBorderWidth = !Objects.equals(time, prevTime) ? TIME_SEPARATOR_LINE_WIDTH : Rectangle.UNDEFINED;
+      final float topBorderWidth;
+      if (Objects.equals(time, prevTime)) {
+        topBorderWidth = Rectangle.UNDEFINED;
+
+        // keep the rows with the same times together
+        table.getRow(currentRow
+            - 1).setMayNotBreak(true);
+      } else {
+        topBorderWidth = TIME_SEPARATOR_LINE_WIDTH;
+      }
 
       PdfPCell cell = PdfUtils.createCell(String.valueOf(si.getTeamNumber()));
       cell.setBorderWidthTop(topBorderWidth);
@@ -1356,9 +1390,15 @@ public class TournamentSchedule implements Serializable {
       cell = PdfUtils.createCell(si.getJudgingGroup());
       cell.setBorderWidthTop(topBorderWidth);
       table.addCell(cell);
+      table.completeRow();
 
+      currentRow++;
       prevTime = time;
     }
+
+    // make sure the last row isn't by itself
+    table.getRow(currentRow
+        - 1).setMayNotBreak(true);
 
     detailedSchedules.add(table);
 
