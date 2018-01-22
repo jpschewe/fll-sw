@@ -1,3 +1,6 @@
+Release 12.2.4
+==============
+
 * #633 - Improve the schedules printed by time to make the breaks between times clearer
 * #634 - fix head to head table assignment algorithm to ensure that only the desired tables are used
 
