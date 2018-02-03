@@ -229,18 +229,20 @@ public class H2HUpdateWebSocket {
    * @param score the score for the team, may be null
    * @param performanceScoreType used to format the score
    * @param table the table for the team, may be null
+   * @param connection the database connection
    */
-  public static void updateBracket(final String bracketName,
-                                   final int dbLine,
-                                   final int playoffRound,
-                                   final int maxPlayoffRound,
-                                   final Integer teamNumber,
-                                   final String teamName,
-                                   final Double score,
-                                   final ScoreType performanceScoreType,
-                                   final boolean noShow,
-                                   final boolean verified,
-                                   final String table) {
+  private static void updateBracket(final String bracketName,
+                                    final int dbLine,
+                                    final int playoffRound,
+                                    final int maxPlayoffRound,
+                                    final Integer teamNumber,
+                                    final String teamName,
+                                    final Double score,
+                                    final ScoreType performanceScoreType,
+                                    final boolean noShow,
+                                    final boolean verified,
+                                    final String table) {
+
     final BracketMessage message = new BracketMessage();
     message.isBracketUpdate = true;
     message.bracketUpdate = new BracketUpdate(bracketName, dbLine, playoffRound, maxPlayoffRound, teamNumber, teamName,
@@ -305,31 +307,28 @@ public class H2HUpdateWebSocket {
   }
 
   /**
-   * Update the table for a team in a head to head bracket. This will query the
-   * database for the current score to ensure that scores don't disappear from the
-   * display.
+   * Update the display for the information in this bracket. This function queries
+   * the database for the the information to display.
    * 
    * @param connection the database connection
-   * @param tournamentId which tournament to work with
    * @param performanceScoreType the type of scores for performance (used for
    *          display)
    * @param headToHeadBracket the bracket name
-   * @param playoffRound the round in the playoffs
    * @param team the team
    * @param performanceRunNumber the run number
-   * @param dbLine the line in the playoff table
-   * @param table the table to display
    * @throws SQLException
    */
-  public static void updateDisplayForTable(final Connection connection,
-                                           final int tournamentId,
-                                           final ScoreType performanceScoreType,
-                                           final String headToHeadBracket,
-                                           final Team team,
-                                           final int performanceRunNumber,
-                                           final int dbLine,
-                                           final String table)
+  public static void updateBracket(final Connection connection,
+                                   final ScoreType performanceScoreType,
+                                   final String headToHeadBracket,
+                                   final Team team,
+                                   final int performanceRunNumber)
       throws SQLException {
+    final int tournamentId = Queries.getCurrentTournament(connection);
+
+    final int dbLine = Queries.getPlayoffTableLineNumber(connection, tournamentId, team.getTeamNumber(),
+                                                         performanceRunNumber);
+
     final int teamNumber = team.getTeamNumber();
     final int playoffRound = Playoff.getPlayoffRound(connection, headToHeadBracket, performanceRunNumber);
     final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, tournamentId, headToHeadBracket);
@@ -337,6 +336,8 @@ public class H2HUpdateWebSocket {
     final Double score = Queries.getPerformanceScore(connection, tournamentId, teamNumber, performanceRunNumber);
     final boolean noShow = Queries.isNoShow(connection, tournamentId, teamNumber, performanceRunNumber);
     final boolean verified = Queries.isVerified(connection, tournamentId, teamNumber, performanceRunNumber);
+
+    final String table = Queries.getAssignedTable(connection, tournamentId, headToHeadBracket, playoffRound, dbLine);
 
     updateBracket(headToHeadBracket, dbLine, playoffRound, maxPlayoffRound, teamNumber, team.getTeamName(), score,
                   performanceScoreType, noShow, verified, table);

@@ -787,21 +787,10 @@ public final class Queries {
       } else {
         // send H2H update that this team's score is entered
         final String bracketName = Playoff.getPlayoffDivision(connection, teamNumber, runNumber);
-        final int dbLine = getPlayoffTableLineNumber(connection, currentTournament, teamNumber, runNumber);
         final Team team = Team.getTeamFromDatabase(connection, teamNumber);
-        final int playoffRound = Playoff.getPlayoffRound(connection, bracketName, runNumber);
-        final double score = performanceElement.evaluate(teamScore);
 
-        final String table = Queries.getAssignedTable(connection, tournament.getTournamentID(), bracketName,
-                                                      playoffRound, dbLine);
-
-        final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, currentTournament, bracketName);
-
-        final boolean verified = Queries.isVerified(connection, currentTournament, teamNumber, runNumber);
-
-        H2HUpdateWebSocket.updateBracket(bracketName, dbLine, playoffRound, maxPlayoffRound, teamNumber,
-                                         team.getTeamName(), score, performanceElement.getScoreType(),
-                                         teamScore.isNoShow(), verified, table);
+        H2HUpdateWebSocket.updateBracket(connection, performanceElement.getScoreType(), bracketName, team,
+                                                 runNumber);
       }
     } else {
       tournament.recordPerformanceSeedingModified(connection);
@@ -999,13 +988,8 @@ public final class Queries {
             + score);
       }
 
-      final String table = Queries.getAssignedTable(connection, currentTournament, division, playoffRun, ptLine);
-
-      final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, currentTournament, division);
-
-      H2HUpdateWebSocket.updateBracket(division, ptLine, playoffRun, maxPlayoffRound, teamNumber, team.getTeamName(),
-                                       Double.isNaN(score) ? null : score, performanceElement.getScoreType(),
-                                       teamScore.isNoShow(), verified, table);
+      H2HUpdateWebSocket.updateBracket(connection, performanceElement.getScoreType(), division, team,
+                                               runNumber);
 
       final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division, (ptLine
           % 2 == 0 ? ptLine
@@ -1317,10 +1301,7 @@ public final class Queries {
     final PerformanceScoreCategory performance = description.getPerformance();
     final ScoreType performanceScoreType = performance.getScoreType();
 
-    final String table = Queries.getAssignedTable(connection, currentTournament, division, playoffRound, lineNumber);
-
-    H2HUpdateWebSocket.updateDisplayForTable(connection, currentTournament, performanceScoreType, division, team,
-                                             runNumber, lineNumber, table);
+    H2HUpdateWebSocket.updateBracket(connection, performanceScoreType, division, team, runNumber);
   }
 
   /**
