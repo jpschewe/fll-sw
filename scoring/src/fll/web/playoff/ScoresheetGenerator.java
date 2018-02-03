@@ -41,7 +41,6 @@ import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
 import fll.Version;
-import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.util.FP;
@@ -226,10 +225,7 @@ public class ScoresheetGenerator {
                                         teamA.getTeamNumber(), playoffRound, division));
             } else {
               // update the brackets with the table name
-              final String table = m_table[j];
-
-              updateDisplayForTable(connection, tournament, performanceScoreType, division, teamA, performanceRunA,
-                                    table);
+              H2HUpdateWebSocket.updateBracket(connection, performanceScoreType, division, teamA, performanceRunA);
             }
             j++;
 
@@ -260,9 +256,7 @@ public class ScoresheetGenerator {
                                         teamB.getTeamNumber(), playoffRound, division));
             } else {
               // update the brackets with the table name
-              final String table = m_table[j];
-              updateDisplayForTable(connection, tournament, performanceScoreType, division, teamB, performanceRunB,
-                                    table);
+              H2HUpdateWebSocket.updateBracket(connection, performanceScoreType, division, teamB, performanceRunB);
             }
             j++;
           }
@@ -272,20 +266,6 @@ public class ScoresheetGenerator {
       }
     }
     setChallengeInfo(description);
-  }
-
-  private static void updateDisplayForTable(final Connection connection,
-                                            final int tournamentId,
-                                            final ScoreType performanceScoreType,
-                                            final String headToHeadBracket,
-                                            final Team team,
-                                            final int performanceRunNumber,
-                                            final String table)
-      throws SQLException {
-    final int dbLine = Queries.getPlayoffTableLineNumber(connection, tournamentId, team.getTeamNumber(),
-                                                         performanceRunNumber);
-    H2HUpdateWebSocket.updateDisplayForTable(connection, tournamentId, performanceScoreType, headToHeadBracket, team,
-                                             performanceRunNumber, dbLine, table);
   }
 
   /**
