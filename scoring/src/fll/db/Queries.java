@@ -789,8 +789,7 @@ public final class Queries {
         final String bracketName = Playoff.getPlayoffDivision(connection, teamNumber, runNumber);
         final Team team = Team.getTeamFromDatabase(connection, teamNumber);
 
-        H2HUpdateWebSocket.updateBracket(connection, performanceElement.getScoreType(), bracketName, team,
-                                                 runNumber);
+        H2HUpdateWebSocket.updateBracket(connection, performanceElement.getScoreType(), bracketName, team, runNumber);
       }
     } else {
       tournament.recordPerformanceSeedingModified(connection);
@@ -988,8 +987,7 @@ public final class Queries {
             + score);
       }
 
-      H2HUpdateWebSocket.updateBracket(connection, performanceElement.getScoreType(), division, team,
-                                               runNumber);
+      H2HUpdateWebSocket.updateBracket(connection, performanceElement.getScoreType(), division, team, runNumber);
 
       final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division, (ptLine
           % 2 == 0 ? ptLine
@@ -1239,6 +1237,19 @@ public final class Queries {
       deletePrep.setInt(3, irunNumber);
 
       deletePrep.executeUpdate();
+
+      if (irunNumber > numSeedingRounds) {
+        final String division = Playoff.getPlayoffDivision(connection, teamNumber, irunNumber);
+
+        final Document document = GlobalParameters.getChallengeDocument(connection);
+        final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
+        final PerformanceScoreCategory performance = description.getPerformance();
+        final ScoreType performanceScoreType = performance.getScoreType();
+
+        final Team team = Team.getTeamFromDatabase(connection, teamNumber);
+
+        H2HUpdateWebSocket.updateBracket(connection, performanceScoreType, division, team, irunNumber);
+      }
     } finally {
       SQLFunctions.close(prep);
     }
