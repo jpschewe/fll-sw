@@ -325,13 +325,13 @@ public class H2HUpdateWebSocket {
                                            final int tournamentId,
                                            final ScoreType performanceScoreType,
                                            final String headToHeadBracket,
-                                           final int playoffRound,
                                            final Team team,
                                            final int performanceRunNumber,
                                            final int dbLine,
                                            final String table)
       throws SQLException {
     final int teamNumber = team.getTeamNumber();
+    final int playoffRound = Playoff.getPlayoffRound(connection, headToHeadBracket, performanceRunNumber);
     final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, tournamentId, headToHeadBracket);
 
     final Double score = Queries.getPerformanceScore(connection, tournamentId, teamNumber, performanceRunNumber);

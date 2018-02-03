@@ -228,8 +228,8 @@ public class ScoresheetGenerator {
               // update the brackets with the table name
               final String table = m_table[j];
 
-              updateDisplayForTable(connection, tournament, performanceScoreType, division, playoffRound, teamA,
-                                    performanceRunA, table);
+              updateDisplayForTable(connection, tournament, performanceScoreType, division, teamA, performanceRunA,
+                                    table);
             }
             j++;
 
@@ -261,8 +261,8 @@ public class ScoresheetGenerator {
             } else {
               // update the brackets with the table name
               final String table = m_table[j];
-              updateDisplayForTable(connection, tournament, performanceScoreType, division, playoffRound, teamB,
-                                    performanceRunB, table);
+              updateDisplayForTable(connection, tournament, performanceScoreType, division, teamB, performanceRunB,
+                                    table);
             }
             j++;
           }
@@ -278,15 +278,14 @@ public class ScoresheetGenerator {
                                             final int tournamentId,
                                             final ScoreType performanceScoreType,
                                             final String headToHeadBracket,
-                                            final int playoffRound,
                                             final Team team,
                                             final int performanceRunNumber,
                                             final String table)
       throws SQLException {
     final int dbLine = Queries.getPlayoffTableLineNumber(connection, tournamentId, team.getTeamNumber(),
                                                          performanceRunNumber);
-    H2HUpdateWebSocket.updateDisplayForTable(connection, tournamentId, performanceScoreType, headToHeadBracket,
-                                             playoffRound, team, performanceRunNumber, dbLine, table);
+    H2HUpdateWebSocket.updateDisplayForTable(connection, tournamentId, performanceScoreType, headToHeadBracket, team,
+                                             performanceRunNumber, dbLine, table);
   }
 
   /**

@@ -98,7 +98,9 @@ function populateLeaf(leafId, bracketUpdate) {
           bracketUpdate.teamName, bracketUpdate.score);
 
     }
-  } // valid team number
+  } else {
+    console.log("No team number, clearing leaf: " + leafId);
+  }
 
   $("#" + leafId).html(text);
 }
