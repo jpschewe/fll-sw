@@ -37,14 +37,13 @@ function parseTeamName(teamName) {
   }
 }
 
-function getSpecialString(teamName) {
-  return "<span class=\"TeamName\">" + parseTeamName(teamName) + "</span>";
-}
-
 function getTeamNameString(teamNumber, teamName) {
-  return "<span class=\"TeamNumber\">#" + teamNumber
-      + "</span> <span class=\"TeamName\">" + parseTeamName(teamName)
-      + "</span>";
+  var text = "";
+  if (teamNumber >= 0) {
+    text += "<span class=\"TeamNumber\">#" + teamNumber + "</span> "
+  }
+  text += "<span class=\"TeamName\">" + parseTeamName(teamName) + "</span>";
+  return text;
 }
 
 function getTeamNameAndScoreString(teamNumber, teamName, scoreData) {
@@ -55,29 +54,51 @@ function getTeamNameAndScoreString(teamNumber, teamName, scoreData) {
 
 function populateLeaf(leafId, bracketUpdate) {
   var text = "";
-  if (bracketUpdate.verified && null != bracketUpdate.teamNumber
-      && "" != bracketUpdate.teamNumber) {
+
+  // Some of these if/else statements can be collapsed, however I've broken them
+  // out to make it clear what each case is.
+
+  if (null != bracketUpdate.teamNumber && "" != bracketUpdate.teamNumber) {
+    // have a valid team number, otherwise clear the cell
+
     if (bracketUpdate.teamNumber < 0) {
       // tie or bye
-      text = getSpecialString(bracketUpdate.teamName);
+      text = getTeamNameString(bracketUpdate.teamNumber, bracketUpdate.teamName);
+    } else if (bracketUpdate.playoffRound >= bracketUpdate.maxPlayoffRound) {
+
+      // finals, don't display the finals
+      text = "";
+
+    } else if (!bracketUpdate.verified) {
+
+      // score isn't verified, only show the team name
+      text = getTeamNameString(bracketUpdate.teamNumber, bracketUpdate.teamName);
+
+    } else if (null == bracketUpdate.score || "" == bracketUpdate.score) {
+
+      // no score, only show the team name
+      text = getTeamNameString(bracketUpdate.teamNumber, bracketUpdate.teamName);
+
+    } else if (bracketUpdate.playoffRound == bracketUpdate.maxPlayoffRound - 1) {
+
+      // scores from the last head to head round can't be displayed, because
+      // then the winner would be known, only show team name
+      text = getTeamNameString(bracketUpdate.teamNumber, bracketUpdate.teamName);
+
+    } else if (bracketUpdate.noShow) {
+
+      // no show, explicitly set score text
+      text = getTeamNameAndScoreString(bracketUpdate.teamNumber,
+          bracketUpdate.teamName, "No Show");
+
     } else {
-      if (bracketUpdate.playoffRound >= bracketUpdate.maxPlayoffRound) {
-        // finals
-        text = "";
-      } else if (null == bracketUpdate.score || "" == bracketUpdate.score
-          || bracketUpdate.playoffRound == bracketUpdate.maxPlayoffRound - 1) {
-        // no score or don't display because will show finals
-        text = getTeamNameString(bracketUpdate.teamNumber,
-            bracketUpdate.teamName);
-      } else if (bracketUpdate.noShow) {
-        text = getTeamNameAndScoreString(bracketUpdate.teamNumber,
-            bracketUpdate.teamName, "No Show");
-      } else {
-        text = getTeamNameAndScoreString(bracketUpdate.teamNumber,
-            bracketUpdate.teamName, bracketUpdate.score);
-      }
+
+      // verified score
+      text = getTeamNameAndScoreString(bracketUpdate.teamNumber,
+          bracketUpdate.teamName, bracketUpdate.score);
+
     }
-  }
+  } // valid team number
 
   $("#" + leafId).html(text);
 }
