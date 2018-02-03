@@ -1319,10 +1319,8 @@ public final class Queries {
 
     final String table = Queries.getAssignedTable(connection, currentTournament, division, playoffRound, lineNumber);
 
-    final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, currentTournament, division);
-
-    H2HUpdateWebSocket.updateDisplayForTable(connection, currentTournament, performanceScoreType, division,
-                                             maxPlayoffRound, team, runNumber, lineNumber, table);
+    H2HUpdateWebSocket.updateDisplayForTable(connection, currentTournament, performanceScoreType, division, team,
+                                             runNumber, lineNumber, table);
   }
 
   /**
