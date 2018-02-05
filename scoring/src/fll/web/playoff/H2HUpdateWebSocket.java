@@ -307,6 +307,38 @@ public class H2HUpdateWebSocket {
   }
 
   /**
+   * Update a particular bracket.
+   * This cannot be used with internal teams as the playoff line cannot be
+   * reliably determined for internal teams.
+   * 
+   * @param connection the database connection
+   * @param performanceScoreType used to determine how to convert the score to a
+   *          string
+   * @param headToHeadBracket the bracket name to look at
+   * @param team the team
+   * @param performanceRunNumber the performance run number
+   * @throws SQLException if there is a problem talking to the database
+   * @throws IllegalArgumentException if teamNumber is for an internal team
+   * @see Team#isInternal
+   */
+  public static void updateBracket(final Connection connection,
+                                   final ScoreType performanceScoreType,
+                                   final String headToHeadBracket,
+                                   final Team team,
+                                   final int performanceRunNumber)
+      throws SQLException {
+    if (team.isInternal()) {
+      throw new IllegalArgumentException("Cannot reliably determine playoff dbline for internal teams");
+    }
+
+    final int tournamentId = Queries.getCurrentTournament(connection);
+
+    final int dbLine = Queries.getPlayoffTableLineNumber(connection, tournamentId, team.getTeamNumber(),
+                                                         performanceRunNumber);
+    updateBracket(connection, performanceScoreType, headToHeadBracket, team, performanceRunNumber, dbLine);
+  }
+
+  /**
    * Update the display for the information in this bracket. This function queries
    * the database for the the information to display.
    * 
@@ -316,18 +348,17 @@ public class H2HUpdateWebSocket {
    * @param headToHeadBracket the bracket name
    * @param team the team
    * @param performanceRunNumber the run number
+   * @param dbLine the line in the playoff table to find the bracket entry at
    * @throws SQLException
    */
   public static void updateBracket(final Connection connection,
                                    final ScoreType performanceScoreType,
                                    final String headToHeadBracket,
                                    final Team team,
-                                   final int performanceRunNumber)
+                                   final int performanceRunNumber,
+                                   final int dbLine)
       throws SQLException {
     final int tournamentId = Queries.getCurrentTournament(connection);
-
-    final int dbLine = Queries.getPlayoffTableLineNumber(connection, tournamentId, team.getTeamNumber(),
-                                                         performanceRunNumber);
 
     final int teamNumber = team.getTeamNumber();
     final int playoffRound = Playoff.getPlayoffRound(connection, headToHeadBracket, performanceRunNumber);
