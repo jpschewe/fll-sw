@@ -1,3 +1,4 @@
+* #605 - Don't clear head to head score when printing score sheet, rework display to handle deleted scores better
 * #634 - fix head to head table assignment algorithm to ensure that only the desired tables are used
 
 
