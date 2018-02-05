@@ -41,7 +41,6 @@ import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
 import fll.Version;
-import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.util.FP;
@@ -132,6 +131,7 @@ public class ScoresheetGenerator {
       throws SQLException {
     final Tournament tournamentObj = Tournament.findTournamentByID(connection, tournament);
     this.tournamentName = tournamentObj.getName();
+    final ScoreType performanceScoreType = description.getPerformance().getScoreType();
 
     final String numMatchesStr = request.getParameter("numMatches");
     if (null == numMatchesStr) {
@@ -225,13 +225,7 @@ public class ScoresheetGenerator {
                                         teamA.getTeamNumber(), playoffRound, division));
             } else {
               // update the brackets with the table name
-              final int dbLine = Queries.getPlayoffTableLineNumber(connection, tournament, teamA.getTeamNumber(),
-                                                                   performanceRunA);
-              final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, tournament, division);
-              H2HUpdateWebSocket.updateBracket(division, dbLine, playoffRound, maxPlayoffRound, teamA.getTeamNumber(),
-                                               teamA.getTeamName(), null, ScoreType.INTEGER, // doesn't
-                                                                                             // matter
-                                               false, true, m_table[j]);
+              H2HUpdateWebSocket.updateBracket(connection, performanceScoreType, division, teamA, performanceRunA);
             }
             j++;
 
@@ -262,13 +256,7 @@ public class ScoresheetGenerator {
                                         teamB.getTeamNumber(), playoffRound, division));
             } else {
               // update the brackets with the table name
-              final int dbLine = Queries.getPlayoffTableLineNumber(connection, tournament, teamB.getTeamNumber(),
-                                                                   performanceRunB);
-              final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, tournament, division);
-              H2HUpdateWebSocket.updateBracket(division, dbLine, playoffRound, maxPlayoffRound, teamB.getTeamNumber(),
-                                               teamB.getTeamName(), null, ScoreType.INTEGER, // doesn't
-                                                                                             // matter
-                                               false, true, m_table[j]);
+              H2HUpdateWebSocket.updateBracket(connection, performanceScoreType, division, teamB, performanceRunB);
             }
             j++;
           }
@@ -408,8 +396,6 @@ public class ScoresheetGenerator {
 
       // This table is a single score sheet
       final PdfPTable scoreSheet = new PdfPTable(2);
-      // scoreSheet.getDefaultCell().setBorder(Rectangle.LEFT | Rectangle.BOTTOM
-      // | Rectangle.RIGHT | Rectangle.TOP); //FIXME DEBUG should be NO_BORDER
       scoreSheet.getDefaultCell().setBorder(Rectangle.NO_BORDER);
       scoreSheet.getDefaultCell().setPaddingRight(1);
       scoreSheet.getDefaultCell().setPaddingLeft(0);

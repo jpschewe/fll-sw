@@ -1,3 +1,5 @@
+* #605 - Don't clear head to head score when printing score sheet, rework display to handle deleted scores better
+
 Release 12.2.4
 ==============
 

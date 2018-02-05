@@ -33,7 +33,7 @@ public final class BracketUpdate implements Serializable {
   public String score;
 
   /**
-   * True if the information has been verified.
+   * True if the score has been verified.
    */
   public boolean verified;
 
