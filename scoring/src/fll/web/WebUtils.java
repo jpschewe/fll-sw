@@ -19,18 +19,19 @@ import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
-
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Some utilities for dealing with the web.
@@ -266,4 +267,26 @@ public final class WebUtils {
     }
   }
 
+  /**
+   * Get a parameter value, trim it and if it's empty return null.
+   * 
+   * @param request the request to get the parameter from
+   * @param parameterName the name of the parameter to find
+   * @return the parameter value, null if the parameter isn't present OR the
+   *         parameter value is the empty string
+   */
+  public static String getParameterOrNull(@Nonnull final ServletRequest request,
+                                          @Nonnull final String parameterName) {
+    final String rawValue = request.getParameter(parameterName);
+    if (null == rawValue) {
+      return null;
+    } else {
+      final String trimmed = rawValue.trim();
+      if (trimmed.isEmpty()) {
+        return null;
+      } else {
+        return trimmed;
+      }
+    }
+  }
 }

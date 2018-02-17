@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Arrays;
 
+import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -35,6 +36,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UploadSpreadsheet;
+import fll.web.WebUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -64,18 +66,18 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
             + advanceFile);
       }
 
-      final String teamNumberColumnName = request.getParameter("teamNumber");
+      final String teamNumberColumnName = WebUtils.getParameterOrNull(request, "teamNumber");
       if (null == teamNumberColumnName) {
         throw new FLLRuntimeException("Cannot find 'teamNumber' request parameter");
       }
 
-      final String tournamentColumnName = request.getParameter("tournament");
+      final String tournamentColumnName = WebUtils.getParameterOrNull(request, "tournament");
       if (null == tournamentColumnName) {
         throw new FLLRuntimeException("Cannot find 'tournament' request parameter");
       }
 
-      final String eventDivisionColumnName = request.getParameter("event_division");
-      final String judgingStationColumnName = request.getParameter("judging_station");
+      final String eventDivisionColumnName = WebUtils.getParameterOrNull(request, "event_division");
+      final String judgingStationColumnName = WebUtils.getParameterOrNull(request, "judging_station");
 
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
@@ -94,17 +96,20 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
 
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error saving team assignmentsinto the database: "
-          + sqle.getMessage() + "</p>");
+          + sqle.getMessage()
+          + "</p>");
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error saving team assignments into the database", sqle);
     } catch (final ParseException e) {
       message.append("<p class='error'>Error saving team assignments into the database: "
-          + e.getMessage() + "</p>");
+          + e.getMessage()
+          + "</p>");
       LOGGER.error(e, e);
       throw new RuntimeException("Error saving team assignments into the database", e);
     } catch (final Exception e) {
       message.append("<p class='error'>Error saving team assignments into the database: "
-          + e.getMessage() + "</p>");
+          + e.getMessage()
+          + "</p>");
       LOGGER.error(e, e);
       throw new RuntimeException("Error saving team assignments into the database", e);
     } finally {
@@ -124,14 +129,14 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
    * 
    * @throws InvalidFormatException
    */
-  public static void processFile(final Connection connection,
-                                 final StringBuilder message,
-                                 final File file,
-                                 final String sheetName,
-                                 final String teamNumberColumnName,
-                                 final String tournamentColumnName,
-                                 final String eventDivisionColumnName,
-                                 final String judgingStationColumnName)
+  private static void processFile(@Nonnull final Connection connection,
+                                  @Nonnull final StringBuilder message,
+                                  @Nonnull final File file,
+                                  final String sheetName,
+                                  @Nonnull final String teamNumberColumnName,
+                                  @Nonnull final String tournamentColumnName,
+                                  final String eventDivisionColumnName,
+                                  final String judgingStationColumnName)
       throws SQLException, IOException, ParseException, InvalidFormatException {
 
     if (LOGGER.isTraceEnabled()) {
@@ -147,10 +152,23 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
       columnNames = reader.readNext();
     }
     if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("sheetName: "
+          + sheetName //
+          + " teamNumberColumnName: "
+          + teamNumberColumnName //
+          + " tournamentColumnName: "
+          + tournamentColumnName //
+          + " eventDivisionColumnName: "
+          + eventDivisionColumnName //
+          + " judgingStationColumnName: "
+          + judgingStationColumnName //
+      );
       LOGGER.trace("Column names size: "
           + columnNames.length //
-          + " names: " + Arrays.asList(columnNames).toString() //
-          + " teamNumber column: " + teamNumberColumnName);
+          + " names: "
+          + Arrays.asList(columnNames).toString() //
+          + " teamNumber column: "
+          + teamNumberColumnName);
     }
 
     int teamNumColumnIdx = -1;
@@ -160,7 +178,9 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
     int index = 0;
     while (index < columnNames.length
         && (-1 == teamNumColumnIdx
-            || -1 == tournamentColumnIdx || -1 == eventDivisionColumnIdx || -1 == judgingStationColumnIdx)) {
+            || -1 == tournamentColumnIdx
+            || -1 == eventDivisionColumnIdx
+            || -1 == judgingStationColumnIdx)) {
       if (-1 == teamNumColumnIdx
           && teamNumberColumnName.equals(columnNames[index])) {
         teamNumColumnIdx = index;
@@ -170,11 +190,13 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
           && tournamentColumnName.equals(columnNames[index])) {
         tournamentColumnIdx = index;
       }
-      if (-1 == eventDivisionColumnIdx
+      if (null != eventDivisionColumnName
+          && -1 == eventDivisionColumnIdx
           && eventDivisionColumnName.equals(columnNames[index])) {
         eventDivisionColumnIdx = index;
       }
-      if (-1 == judgingStationColumnIdx
+      if (null != judgingStationColumnName
+          && -1 == judgingStationColumnIdx
           && judgingStationColumnName.equals(columnNames[index])) {
         judgingStationColumnIdx = index;
       }
@@ -182,10 +204,26 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
       ++index;
     }
 
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("teamNumIdx: "
+          + teamNumColumnIdx//
+          + " tournamentColumnIdex: "
+          + tournamentColumnIdx //
+          + " eventDivisionColumnIdex: "
+          + eventDivisionColumnIdx //
+          + " judgingStationColumnIdx: "
+          + judgingStationColumnIdx //
+      );
+
+    }
+
     if (-1 == teamNumColumnIdx
         || -1 == tournamentColumnIdx) {
       throw new FLLInternalException("Cannot find index for team number column '"
-          + teamNumberColumnName + "' or tournament '" + tournamentColumnName + "'");
+          + teamNumberColumnName
+          + "' or tournament '"
+          + tournamentColumnName
+          + "'");
     }
 
     int rowsProcessed = 0;
@@ -206,10 +244,12 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
             tournament = Tournament.findTournamentByName(connection, tournamentName);
             if (null == tournament) {
               throw new FLLInternalException("Created tournament '"
-                  + tournamentName + "', but can't find it.");
+                  + tournamentName
+                  + "', but can't find it.");
             } else {
               message.append("<p>Created tournament '"
-                  + tournamentName + "'</p>");
+                  + tournamentName
+                  + "'</p>");
             }
           }
 
@@ -236,7 +276,8 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
     }
 
     message.append("<p>Successfully processed "
-        + rowsProcessed + " rows of data</p>");
+        + rowsProcessed
+        + " rows of data</p>");
 
   }
 
