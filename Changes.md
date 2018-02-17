@@ -1,6 +1,4 @@
-Release 12.2.5
-==============
-
+* Properly handle unspecified judging group and award group when adding teams to tournament specified by spreadsheet
 * #605 - Don't clear head to head score when printing score sheet, rework display to handle deleted scores better
 
 
