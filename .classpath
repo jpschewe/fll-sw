@@ -86,11 +86,6 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/fll-sw/scoring/lib/source/itextpdf-5.5.9-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/home/jpschewe/projects/fll-sw/working-dir/scoring/lib/itext-xtra-5.5.9.jar" sourcepath="scoring/lib/source/itext-xtra-5.5.9-sources.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/fll-sw/scoring/lib/source/itext-xtra-5.5.9-javadoc.jar!/"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="lib" path="scoring/lib/log4jdbc4-1.2.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/dnsjava-2.1.7.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/webdrivermanager/webdrivermanager-1.6.0.jar"/>
@@ -98,5 +93,6 @@
 	<classpathentry kind="lib" path="scoring/lib/test/selenium/client-combined-3.3.0-nodeps.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/selenium/selenium-server-standalone-3.3.0.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/tika-core-1.16.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/itext-xtra-5.5.9.jar"/>
 	<classpathentry kind="output" path="scoring/bin/"/>
 </classpath>
