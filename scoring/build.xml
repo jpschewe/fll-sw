@@ -874,9 +874,6 @@
 			<arg value="test-unit" />
 			<arg value="web" />
 		</exec>
-
-		<xslt style="${basedir}/cloc2sloccount.xsl" in="${basedir}/cloc.xml" out="${basedir}/sloccount.sc">
-		</xslt>
 	</target>
 
 	<target name="continuous" description="Runs the continuous integration build">
