@@ -26,7 +26,7 @@ pipeline {
     stage('Count lines of code') {
       steps { 
         fllSwAnt('sloccount')
-        sloccountPublish pattern: 'scoring/sloccount.sc'
+        sloccountPublish pattern: 'scoring/cloc.xml'
       }
     }
 
