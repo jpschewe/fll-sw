@@ -51,8 +51,18 @@ public class ComputedGoal extends AbstractGoal implements VariableScope {
 
   private final Collection<Variable> mVariables;
 
+  /**
+   * The variables in the computed goal.
+   * 
+   * @return unmodifiable collection
+   */
   public Collection<Variable> getVariables() {
     return Collections.unmodifiableCollection(mVariables);
+  }
+  
+  @Override
+  public Collection<Variable> getAllVariables() {
+    return getVariables();
   }
 
   /**

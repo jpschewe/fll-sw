@@ -6,6 +6,8 @@
 
 package fll.xml;
 
+import javax.annotation.Nonnull;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -24,9 +26,11 @@ public class TiebreakerTest extends BasicPolynomial {
 
   /**
    * Default constructor uses {@link WinnerType#HIGH} as {@link #getWinner()}.
+   * 
+   * @param goalScope where to lookup goals for references
    */
-  public TiebreakerTest() {
-    super();
+  public TiebreakerTest(@Nonnull final GoalScope goalScope) {
+    super(goalScope, null);
     mWinner = WinnerType.HIGH;
   }
 

@@ -30,7 +30,7 @@ public interface GoalScope {
    * @return all goals currently known to the scope
    */
   @Nonnull
-  public Collection<AbstractGoal> getGoals();
+  public Collection<AbstractGoal> getAllGoals();
   
   
 }
