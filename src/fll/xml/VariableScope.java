@@ -30,6 +30,6 @@ public interface VariableScope {
    * @return all variables currently known to the scope
    */
   @Nonnull
-  public Collection<Variable> getVariables();
+  public Collection<Variable> getAllVariables();
 
 }

@@ -48,13 +48,31 @@ public class GoalRef implements Evaluatable, Serializable {
     mGoalName = goalName;
   }
 
-  private final String mGoalName;
+  private String mGoalName;
 
+  /**
+   * @return the name of the goal referenced
+   */
   public String getGoalName() {
     return mGoalName;
   }
 
+  /**
+   * @param v see {@link #getGoalName()}
+   */
+  public void setGoalName(final String v) {
+    mGoalName = v;
+  }
+
   private final GoalScope mGoalScope;
+
+  /**
+   * @return the scope used to lookup goals
+   */
+  @Nonnull
+  public GoalScope getGoalScope() {
+    return mGoalScope;
+  }
 
   /**
    * Resolve the goal name against the goal scope
@@ -67,10 +85,20 @@ public class GoalRef implements Evaluatable, Serializable {
     return mGoalScope.getGoal(mGoalName);
   }
 
-  private final GoalScoreType mScoreType;
+  private GoalScoreType mScoreType;
 
+  /**
+   * @return how the goal value should be interpreted
+   */
   public GoalScoreType getScoreType() {
     return mScoreType;
+  }
+
+  /**
+   * @param v see {@link #getScoreType()}
+   */
+  public void setScoreType(final GoalScoreType v) {
+    mScoreType = v;
   }
 
   @Override

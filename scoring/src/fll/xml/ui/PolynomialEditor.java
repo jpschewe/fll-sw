@@ -88,7 +88,7 @@ import fll.xml.Term;
     
     termBox.add(Box.createHorizontalStrut(20));
     
-    final TermEditor editor = new TermEditor(term, false);
+    final TermEditor editor = new TermEditor(term, poly.getGoalScope(), poly.getVariableScope());
     termBox.add(editor);
   }
 

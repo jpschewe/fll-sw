@@ -7,6 +7,7 @@
 package fll.xml;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -59,6 +60,11 @@ public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
    */
   public List<AbstractGoal> getGoals() {
     return Collections.unmodifiableList(mGoals);
+  }
+
+  @Override
+  public Collection<AbstractGoal> getAllGoals() {
+    return getGoals();
   }
 
   /**

@@ -27,17 +27,19 @@ public class BasicPolynomial implements Evaluatable, Serializable {
 
   public static final String FLOATING_POINT_ATTRIBUTE = "floatingPoint";
 
-  public BasicPolynomial(final Element ele,
-                         final GoalScope goalScope) {
+  public BasicPolynomial(@Nonnull final Element ele,
+                         @Nonnull final GoalScope goalScope) {
     this(ele, goalScope, null);
   }
 
   /**
    * Only to be called from {@link ComplexPolynomial}.
    */
-  protected BasicPolynomial(final Element ele,
-                            final GoalScope goalScope,
+  protected BasicPolynomial(@Nonnull final Element ele,
+                            @Nonnull final GoalScope goalScope,
                             final VariableScope variableScope) {
+    this.goalScope = goalScope;
+    this.variableScope = variableScope;
 
     mTerms = new LinkedList<Term>();
     for (final Element termEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(Term.TAG_NAME))) {
@@ -47,13 +49,39 @@ public class BasicPolynomial implements Evaluatable, Serializable {
     mFloatingPoint = FloatingPointType.fromString(ele.getAttribute(FLOATING_POINT_ATTRIBUTE));
   }
 
+  private final GoalScope goalScope;
+
+  /**
+   * @return the scope to find goals in
+   */
+  @Nonnull
+  public GoalScope getGoalScope() {
+    return goalScope;
+  }
+
+  private final VariableScope variableScope;
+
+  /**
+   * @return the scope to find variables in, may be null if variables are not
+   *         allowed in this polynomial
+   */
+  public VariableScope getVariableScope() {
+    return variableScope;
+  }
+
   /**
    * Default construction uses {@link FloatingPointType#TRUNCATE} as the floating
    * point type. The terms list is empty.
+   * 
+   * @param goalScope where to lookup goals
+   * @param variableScope where to lookup variables, null if variables are not allowed
    */
-  protected BasicPolynomial() {
+  protected BasicPolynomial(@Nonnull final GoalScope goalScope,
+                            final VariableScope variableScope) {
     mTerms = new LinkedList<>();
     mFloatingPoint = FloatingPointType.TRUNCATE;
+    this.goalScope = goalScope;
+    this.variableScope = variableScope;
   }
 
   private FloatingPointType mFloatingPoint;
