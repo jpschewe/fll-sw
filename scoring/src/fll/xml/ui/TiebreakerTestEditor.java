@@ -7,30 +7,39 @@
 package fll.xml.ui;
 
 import javax.annotation.Nonnull;
+import javax.swing.JComboBox;
 
 import fll.xml.TiebreakerTest;
+import fll.xml.WinnerType;
 
 /**
  * Editor for {@link TiebreakerTest} objects.
+ * All changes are immediately written to the object.
  */
 public class TiebreakerTestEditor extends PolynomialEditor {
 
   private final TiebreakerTest test;
 
+  /**
+   * @return the object being edited
+   */
+  public TiebreakerTest getTest() {
+    return test;
+  }
+
   public TiebreakerTestEditor(@Nonnull final TiebreakerTest test) {
     super(test);
     this.test = test;
-    
-    //FIXME add winner type
-    
-  }
 
-  /**
-   * @return the tiebreaker test based on the current value of the editor
-   */
-  public TiebreakerTest getTest() {
-    // FIXME implement
-    throw new RuntimeException("Not implemented yet");
+    final JComboBox<WinnerType> winnerEditor = new JComboBox<>(WinnerType.values());
+    this.add(winnerEditor);
+
+    winnerEditor.addActionListener(e -> {
+      final WinnerType winner = winnerEditor.getItemAt(winnerEditor.getSelectedIndex());
+      test.setWinner(winner);
+    });
+
+    winnerEditor.setToolTipText("Determine if the high score or low score determines the winner of this tiebreaker");
   }
 
 }

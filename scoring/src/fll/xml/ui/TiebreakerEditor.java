@@ -36,17 +36,30 @@ public class TiebreakerEditor extends JPanel {
   public TiebreakerEditor() {
     super(new BorderLayout());
 
-    // FIXME need add button
-
     editorContainer = Box.createVerticalBox();
 
     // add some space on the left side of the expanded panel
     final JPanel expansion = new JPanel(new BorderLayout());
+
+    final Box buttonBox = Box.createHorizontalBox();
+    expansion.add(buttonBox, BorderLayout.NORTH);
+    
+    final JButton add = new JButton("Add Tiebreaker");
+    buttonBox.add(add);
+    add.addActionListener(l -> addNewTest());
+    
+    buttonBox.add(Box.createHorizontalGlue());
+
     expansion.add(Box.createHorizontalStrut(10), BorderLayout.WEST);
     expansion.add(editorContainer, BorderLayout.CENTER);
 
-    final MovableExpandablePanel exPanel = new MovableExpandablePanel("Tie breaker", expansion, false);
+    final MovableExpandablePanel exPanel = new MovableExpandablePanel("Tie breakers", expansion, false);
     add(exPanel, BorderLayout.CENTER);
+  }
+
+  private void addNewTest() {
+    final TiebreakerTest test = new TiebreakerTest(performance);
+    addTest(test);
   }
 
   private void addTest(final TiebreakerTest test) {
@@ -56,12 +69,13 @@ public class TiebreakerEditor extends JPanel {
     final JPanel panel = new JPanel(new BorderLayout());
     panel.add(editor, BorderLayout.CENTER);
 
-    final JButton delete = new JButton("Delete Test");
+    final JButton delete = new JButton("Delete Tiebreaker");
     panel.add(delete, BorderLayout.EAST);
 
     delete.addActionListener(e -> {
       editorContainer.remove(panel);
       editors.remove(editor);
+      editorContainer.validate();
     });
 
     panel.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.BLACK));
@@ -71,13 +85,10 @@ public class TiebreakerEditor extends JPanel {
   public void commitChanges() {
     final List<TiebreakerTest> newTiebreaker = new LinkedList<>();
 
-    // FIXME
-    // editors.forEach(editor -> {
-    // editor.commitChanges();
-    // final TiebreakerTest test = editor.getTest();
-    //
-    // newTiebreaker.add(test);
-    // });
+    editors.forEach(editor -> {
+      final TiebreakerTest test = editor.getTest();
+      newTiebreaker.add(test);
+    });
 
     performance.setTiebreaker(newTiebreaker);
   }
@@ -85,12 +96,12 @@ public class TiebreakerEditor extends JPanel {
   /**
    * @param v specify the new performance element to edit
    */
-  public void setPerformance(@Nonnull final PerformanceScoreCategory v) {    
+  public void setPerformance(@Nonnull final PerformanceScoreCategory v) {
     editorContainer.removeAll();
     editors.clear();
 
-    this.performance = v;    
-    
+    this.performance = v;
+
     performance.getTiebreaker().forEach(test -> {
       addTest(test);
     });
