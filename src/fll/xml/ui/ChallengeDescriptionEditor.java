@@ -92,16 +92,10 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
  *   - enum value check for dbstring
  *   - unique values for enum values in goals
  * - edit restrictions
- * - edit tie breaker
  * - ability to add subjective categories
  * - Ability to add goals
  * - add rubric ranges
  * - edit computed goals
- * - Note that one can create a BasicPolynomial with variable references.
- *   - Perhaps BasicPolynomial and ComplexPolynomial can be merged?
- *   - What effect does this have on the XML? Is there always a scope available?
- *   - If we can't do this, then the UI needs to enforce the restriction.
- *   - I think I want the UI to enforce the restriction as I don't want variables in the tie breakers at this point
  * - support grouping of goals, this is where DnD might be useful 
  *   - all goals in a group must be consecutive
  * - how to handle when being run from the launcher so that it doesn't exit?

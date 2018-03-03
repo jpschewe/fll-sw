@@ -22,6 +22,7 @@ import fll.xml.Term;
 
 /**
  * Editor for {@link BasicPolynomial} and {@link ComplexPolynomial}.
+ * Add changes are immediately committed to the polynomial.
  */
 /* package */ class PolynomialEditor extends JPanel {
 
@@ -62,6 +63,7 @@ import fll.xml.Term;
     floatingPointType = new JComboBox<>(FloatingPointType.values());
     floatingPointType.setSelectedItem(FloatingPointType.TRUNCATE);
     this.add(floatingPointType);
+    floatingPointType.setToolTipText("How to handle floating point values");
   }
 
   private void addTerm(final Term term) {

@@ -17,10 +17,10 @@ import fll.xml.ScoreCategory;
 public class PerformanceEditor extends ScoreCategoryEditor {
 
   private final TiebreakerEditor tiebreaker;
-  
+
   public PerformanceEditor() {
     super();
-    
+
     GridBagConstraints gbc;
 
     // FIXME restrictions
@@ -33,7 +33,7 @@ public class PerformanceEditor extends ScoreCategoryEditor {
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.fill = GridBagConstraints.BOTH;
     add(tiebreaker, gbc);
-    
+
   }
 
   /**
@@ -48,8 +48,13 @@ public class PerformanceEditor extends ScoreCategoryEditor {
     }
 
     super.setCategory(v);
-    
-    this.tiebreaker.setPerformance((PerformanceScoreCategory)v);
+
+    this.tiebreaker.setPerformance((PerformanceScoreCategory) v);
   }
-  
+
+  @Override
+  public void commitChanges() {
+    super.commitChanges();
+    tiebreaker.commitChanges();
+  }
 }

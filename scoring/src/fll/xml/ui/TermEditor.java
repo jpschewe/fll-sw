@@ -140,6 +140,7 @@ import fll.xml.VariableScope;
     delete.addActionListener(l -> {
       refContainer.remove(row);
       term.removeGoal(ref);
+      refContainer.validate();
     });
     row.add(delete);
 
