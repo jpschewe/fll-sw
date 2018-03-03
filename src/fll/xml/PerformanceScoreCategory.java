@@ -94,6 +94,16 @@ public class PerformanceScoreCategory extends ScoreCategory {
     return mRestrictions.remove(v);
   }
 
+  /**
+   * Replace the restrictions.
+   * 
+   * @param v the new value
+   */
+  public void setRestrictions(final List<Restriction> v) {
+    mRestrictions.clear();
+    mRestrictions.addAll(v);
+  }
+
   private final List<TiebreakerTest> mTiebreaker;
 
   /**
@@ -145,7 +155,7 @@ public class PerformanceScoreCategory extends ScoreCategory {
   public TiebreakerTest removeTiebreakerTest(final int index) {
     return mTiebreaker.remove(index);
   }
-  
+
   /**
    * Replace the tiebreakers.
    * 
@@ -155,7 +165,6 @@ public class PerformanceScoreCategory extends ScoreCategory {
     mTiebreaker.clear();
     mTiebreaker.addAll(v);
   }
-
 
   private double mMinimumScore;
 

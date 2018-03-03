@@ -91,7 +91,6 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
  *   - SwitchStatement must have something in the default case
  *   - enum value check for dbstring
  *   - unique values for enum values in goals
- * - edit restrictions
  * - ability to add subjective categories
  * - Ability to add goals
  * - add rubric ranges
@@ -100,6 +99,7 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
  *   - all goals in a group must be consecutive
  * - how to handle when being run from the launcher so that it doesn't exit?
  *   - maybe have a method that is called from main that creates everything
+ * - set minimum size of double fields
  * 
  */
 

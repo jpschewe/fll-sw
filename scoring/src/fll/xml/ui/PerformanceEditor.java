@@ -18,12 +18,21 @@ public class PerformanceEditor extends ScoreCategoryEditor {
 
   private final TiebreakerEditor tiebreaker;
 
+  private final RestrictionListEditor restrictions;
+
   public PerformanceEditor() {
     super();
 
     GridBagConstraints gbc;
 
-    // FIXME restrictions
+    restrictions = new RestrictionListEditor();
+    gbc = new GridBagConstraints();
+    gbc.weightx = 1;
+    gbc.weighty = 1;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.fill = GridBagConstraints.BOTH;
+    add(restrictions, gbc);
 
     tiebreaker = new TiebreakerEditor();
     gbc = new GridBagConstraints();
@@ -49,12 +58,16 @@ public class PerformanceEditor extends ScoreCategoryEditor {
 
     super.setCategory(v);
 
-    this.tiebreaker.setPerformance((PerformanceScoreCategory) v);
+    final PerformanceScoreCategory performance = (PerformanceScoreCategory) v;
+
+    tiebreaker.setPerformance(performance);
+    restrictions.setPerformance(performance);
   }
 
   @Override
   public void commitChanges() {
     super.commitChanges();
     tiebreaker.commitChanges();
+    restrictions.commitChanges();
   }
 }
