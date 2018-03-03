@@ -42,7 +42,6 @@ class GoalRefEditor extends JPanel {
     goal.addActionListener(l -> {
       final Collection<AbstractGoal> goals = goalRef.getGoalScope().getAllGoals();
 
-      // FIXME need renderer
       final ChooseOptionDialog<AbstractGoal> dialog = new ChooseOptionDialog<>(JOptionPane.getRootFrame(),
                                                                                new LinkedList<>(goals),
                                                                                new AbstractGoalCellRenderer());

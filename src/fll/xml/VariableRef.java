@@ -38,7 +38,7 @@ public class VariableRef implements Evaluatable, Serializable {
     mVariableScope = scope;
   }
 
-  private final String mVariableName;
+  private String mVariableName;
 
   /**
    * @return the variable name to reference
@@ -48,7 +48,22 @@ public class VariableRef implements Evaluatable, Serializable {
     return mVariableName;
   }
 
+  /**
+   * @param v see {@link #getVariableName()}
+   */
+  public void setVariableName(@Nonnull final String v) {
+    mVariableName = v;
+  }
+
   private final VariableScope mVariableScope;
+
+  /**
+   * @return the scope used to lookup the variable
+   */
+  @Nonnull
+  public VariableScope getVariableScope() {
+    return mVariableScope;
+  }
 
   /**
    * @return the variable
