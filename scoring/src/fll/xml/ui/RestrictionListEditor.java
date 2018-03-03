@@ -19,21 +19,21 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 import fll.xml.PerformanceScoreCategory;
-import fll.xml.TiebreakerTest;
+import fll.xml.Restriction;
 
 /**
- * Edit the list of {@link TiebreakerTest} objects on the
+ * Edit the list of {@link Restriction} objects on the
  * {@link PerformanceScoreCategory}.
  */
-public class TiebreakerEditor extends JPanel {
+public class RestrictionListEditor extends JPanel {
 
   private final JComponent editorContainer;
 
   private PerformanceScoreCategory performance;
 
-  private final List<TiebreakerTestEditor> editors = new LinkedList<>();
+  private final List<RestrictionEditor> editors = new LinkedList<>();
 
-  public TiebreakerEditor() {
+  public RestrictionListEditor() {
     super(new BorderLayout());
 
     editorContainer = Box.createVerticalBox();
@@ -43,33 +43,33 @@ public class TiebreakerEditor extends JPanel {
 
     final Box buttonBox = Box.createHorizontalBox();
     expansion.add(buttonBox, BorderLayout.NORTH);
-    
-    final JButton add = new JButton("Add Tiebreaker");
+
+    final JButton add = new JButton("Add Restriction");
     buttonBox.add(add);
-    add.addActionListener(l -> addNewTest());
-    
+    add.addActionListener(l -> addNewRestriction());
+
     buttonBox.add(Box.createHorizontalGlue());
 
     expansion.add(Box.createHorizontalStrut(10), BorderLayout.WEST);
     expansion.add(editorContainer, BorderLayout.CENTER);
 
-    final MovableExpandablePanel exPanel = new MovableExpandablePanel("Tie breakers", expansion, false);
+    final MovableExpandablePanel exPanel = new MovableExpandablePanel("Restrictions", expansion, false);
     add(exPanel, BorderLayout.CENTER);
   }
 
-  private void addNewTest() {
-    final TiebreakerTest test = new TiebreakerTest(performance);
-    addTest(test);
+  private void addNewRestriction() {
+    final Restriction test = new Restriction(performance);
+    addRestriction(test);
   }
 
-  private void addTest(final TiebreakerTest test) {
-    final TiebreakerTestEditor editor = new TiebreakerTestEditor(test);
+  private void addRestriction(final Restriction restriction) {
+    final RestrictionEditor editor = new RestrictionEditor(restriction);
     editors.add(editor);
 
     final JPanel panel = new JPanel(new BorderLayout());
     panel.add(editor, BorderLayout.CENTER);
 
-    final JButton delete = new JButton("Delete Tiebreaker");
+    final JButton delete = new JButton("Delete Restriction");
     panel.add(delete, BorderLayout.EAST);
 
     delete.addActionListener(e -> {
@@ -83,14 +83,14 @@ public class TiebreakerEditor extends JPanel {
   }
 
   public void commitChanges() {
-    final List<TiebreakerTest> newTiebreaker = new LinkedList<>();
+    final List<Restriction> newRestrictions = new LinkedList<>();
 
     editors.forEach(editor -> {
-      final TiebreakerTest test = editor.getTest();
-      newTiebreaker.add(test);
+      final Restriction r = editor.getRestriction();
+      newRestrictions.add(r);
     });
 
-    performance.setTiebreaker(newTiebreaker);
+    performance.setRestrictions(newRestrictions);
   }
 
   /**
@@ -102,8 +102,8 @@ public class TiebreakerEditor extends JPanel {
 
     this.performance = v;
 
-    performance.getTiebreaker().forEach(test -> {
-      addTest(test);
+    performance.getRestrictions().forEach(r -> {
+      addRestriction(r);
     });
   }
 
