@@ -50,23 +50,18 @@ public class RestrictionEditor extends PolynomialEditor {
     final Box lowerBoundBox = Box.createHorizontalBox();
     // using 0 as the index to put it at the front
     this.add(lowerBoundBox, 0);
-
     lowerBound = FormatterUtils.createDoubleField();
     lowerBound.setValue(restriction.getLowerBound());
     lowerBoundBox.add(lowerBound);
-
     lowerBoundBox.add(new JLabel(" <= "));
-
     lowerBoundBox.add(Box.createHorizontalGlue());
 
     final Box upperBoundBox = Box.createHorizontalBox();
     this.add(upperBoundBox);
-    
     upperBoundBox.add(new JLabel(" <= "));
     upperBound = FormatterUtils.createDoubleField();
     upperBound.setValue(restriction.getUpperBound());
     upperBoundBox.add(upperBound);
-
     upperBoundBox.add(Box.createHorizontalGlue());
 
     messageEditor = FormatterUtils.createDatabaseNameField();

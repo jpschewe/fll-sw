@@ -67,20 +67,33 @@ public final class FormatterUtils {
                                                       final double max) {
 
     final NumberFormatter def = new NumberFormatter();
-    def.setValueClass(Integer.class);
+    def.setValueClass(Double.class);
     final DecimalFormat format = new DecimalFormat();
     format.setGroupingUsed(true);
     format.setDecimalSeparatorAlwaysShown(true);
     format.setMinimumFractionDigits(2);
     final NumberFormatter disp = new NumberFormatter(format);
-    disp.setValueClass(Integer.class);
+    disp.setValueClass(Double.class);
     final NumberFormatter ed = new NumberFormatter(format);
-    ed.setValueClass(Integer.class);
+    ed.setValueClass(Double.class);
     final DefaultFormatterFactory factory = new DefaultFormatterFactory(def, disp, ed);
 
     final JFormattedTextField field = new JFormattedTextField(factory);
     field.setValue(Double.valueOf(min));
     field.setInputVerifier(new DoubleVerifier(min, max));
+
+    final int numColumns;
+    if (Double.isFinite(max)) {
+      numColumns = format.format(max).length()
+          + 2;
+    } else {
+      // just pick a reasonable number
+      numColumns = 10;
+    }
+
+    field.setColumns(numColumns);
+    field.setMaximumSize(field.getPreferredSize());
+
     return field;
   }
 

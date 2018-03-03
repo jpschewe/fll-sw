@@ -95,11 +95,11 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
  * - Ability to add goals
  * - add rubric ranges
  * - edit computed goals
+ * - Ability to add computed goals
  * - support grouping of goals, this is where DnD might be useful 
  *   - all goals in a group must be consecutive
  * - how to handle when being run from the launcher so that it doesn't exit?
  *   - maybe have a method that is called from main that creates everything
- * - set minimum size of double fields
  * 
  */
 
