@@ -18,7 +18,7 @@ public class TiebreakerTestEditor extends PolynomialEditor {
   private final TiebreakerTest test;
 
   public TiebreakerTestEditor(@Nonnull final TiebreakerTest test) {
-    super(test, false);
+    super(test);
     this.test = test;
     
     //FIXME add winner type

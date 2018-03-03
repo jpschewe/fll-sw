@@ -74,7 +74,8 @@ public class BasicPolynomial implements Evaluatable, Serializable {
    * point type. The terms list is empty.
    * 
    * @param goalScope where to lookup goals
-   * @param variableScope where to lookup variables, null if variables are not allowed
+   * @param variableScope where to lookup variables, null if variables are not
+   *          allowed
    */
   protected BasicPolynomial(@Nonnull final GoalScope goalScope,
                             final VariableScope variableScope) {
@@ -148,6 +149,7 @@ public class BasicPolynomial implements Evaluatable, Serializable {
    * 
    * @param term the term to remove
    * @return if the term was removed
+   * @see List#remove(Object)
    */
   public boolean removeTerm(final Term term) {
     return mTerms.remove(term);
@@ -159,6 +161,7 @@ public class BasicPolynomial implements Evaluatable, Serializable {
    * @param index the index to remove the term at
    * @return the term that was removed
    * @throws IndexOutOfBoundsException
+   * @see List#remove(int)
    */
   public Term removeTerm(final int index) throws IndexOutOfBoundsException {
     return mTerms.remove(index);
