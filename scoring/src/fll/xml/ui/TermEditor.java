@@ -26,6 +26,7 @@ import fll.xml.GoalRef;
 import fll.xml.GoalScope;
 import fll.xml.GoalScoreType;
 import fll.xml.Term;
+import fll.xml.Variable;
 import fll.xml.VariableRef;
 import fll.xml.VariableScope;
 
@@ -65,14 +66,12 @@ import fll.xml.VariableScope;
     final JButton addGoal = new JButton("Add Goal");
     buttonBar.add(addGoal);
     addGoal.addActionListener(l -> addNewGoalRef());
-    // FIXME listener
     addGoal.setToolTipText("Add a reference to a goal");
 
     if (null != variableScope) {
       final JButton addVariable = new JButton("Add Variable");
       buttonBar.add(addVariable);
-      // FIXME listener
-
+      addGoal.addActionListener(l -> addNewVariableRef());
       addVariable.setToolTipText("Add a reference to a variable");
     }
 
@@ -103,10 +102,9 @@ import fll.xml.VariableScope;
     });
 
     if (null != variableScope) {
-      // FIXME
-      // term.getVariables().forEach(varRef -> {
-      // addVariable(varRef.getVariable());
-      // });
+      term.getVariables().forEach(varRef -> {
+        addVariableRef(varRef);
+      });
     } else {
       if (!term.getVariables().isEmpty()) {
         throw new IllegalArgumentException("Passed a term with variables, but allow variables is false");
@@ -127,7 +125,6 @@ import fll.xml.VariableScope;
       this.term.addGoal(ref);
       addGoalRef(ref);
     }
-
   }
 
   private void addGoalRef(final GoalRef ref) {
@@ -149,27 +146,34 @@ import fll.xml.VariableScope;
     row.add(Box.createHorizontalGlue());
   }
 
+  private void addNewVariableRef() {
+    final Collection<Variable> variables = variableScope.getAllVariables();
+    final ChooseOptionDialog<Variable> dialog = new ChooseOptionDialog<>(JOptionPane.getRootFrame(),
+                                                                         new LinkedList<>(variables),
+                                                                         new VariableCellRenderer());
+    dialog.setVisible(true);
+    final Variable selected = dialog.getSelectedValue();
+    if (null != selected) {
+      final VariableRef ref = new VariableRef(selected.getName(), variableScope);
+      this.term.addVariable(ref);
+      addVariableRef(ref);
+    }
+  }
+
   private void addVariableRef(final VariableRef ref) {
     final Box row = Box.createHorizontalBox();
     refContainer.add(row);
 
     row.add(new JLabel("X "));
 
-    // FIXME
-    // final JLabel name = new JLabel(variable.getName());
-    // variable.addPropertyChangeListener(e -> {
-    // if ("name".equals(e.getPropertyName())) {
-    // name.setText((String) e.getNewValue());
-    // }
-    // });
-    // row.add(name);
+    final VariableRefEditor editor = new VariableRefEditor(ref);
+    row.add(editor);
 
     final JButton delete = new JButton("Delete Variable");
     delete.addActionListener(l -> {
       refContainer.remove(row);
       term.removeVariable(ref);
     });
-    // FIXME add action listener
     row.add(delete);
 
     row.add(Box.createHorizontalGlue());

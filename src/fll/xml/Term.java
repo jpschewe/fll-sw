@@ -99,8 +99,10 @@ public class Term extends Object implements Evaluatable, Serializable {
   /**
    * Remove a goal reference.
    * 
-   * @param v the goal to remove
+   * @param v the goal to remove (only the first goal is removed if there are
+   *          multiple instances of the goal)
    * @return if the goal reference was found and removed
+   * @see List#remove(Object)
    */
   public boolean removeGoal(final GoalRef v) {
     return mGoals.remove(v);
@@ -127,8 +129,10 @@ public class Term extends Object implements Evaluatable, Serializable {
   /**
    * Remove a variable reference
    * 
-   * @param var the variable reference to remove
+   * @param var the variable reference to remove (only the first one is removed if
+   *          there are multiple entries)
    * @return if the variable reference was found and removed
+   * @see List#remove(Object)
    */
   public boolean removeVariable(final VariableRef var) {
     return mVariables.remove(var);

@@ -7,6 +7,7 @@
 package fll.xml;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
@@ -27,12 +28,12 @@ public class GoalRef implements Evaluatable, Serializable {
 
   public static final String GOAL_ATTRIBUTE = "goal";
 
-  public GoalRef(final Element ele,
-                 final GoalScope scope) {
+  public GoalRef(@Nonnull final Element ele,
+                 @Nonnull final GoalScope scope) {
     mScoreType = GoalScoreType.fromString(ele.getAttribute(SCORE_TYPE_ATTRIBUTE));
 
     mGoalScope = scope;
-    mGoalName = ele.getAttribute(GOAL_ATTRIBUTE);
+    mGoalName = Objects.requireNonNull(ele.getAttribute(GOAL_ATTRIBUTE));
   }
 
   /**
@@ -40,9 +41,9 @@ public class GoalRef implements Evaluatable, Serializable {
    * @param scope the scope to use to find the goal at evaluation time
    * @param scoreType see {@link #getScoreType()}
    */
-  public GoalRef(final String goalName,
-                 final GoalScope scope,
-                 final GoalScoreType scoreType) {
+  public GoalRef(@Nonnull final String goalName,
+                 @Nonnull final GoalScope scope,
+                 @Nonnull final GoalScoreType scoreType) {
     mScoreType = scoreType;
     mGoalScope = scope;
     mGoalName = goalName;
@@ -53,6 +54,7 @@ public class GoalRef implements Evaluatable, Serializable {
   /**
    * @return the name of the goal referenced
    */
+  @Nonnull
   public String getGoalName() {
     return mGoalName;
   }
@@ -60,7 +62,7 @@ public class GoalRef implements Evaluatable, Serializable {
   /**
    * @param v see {@link #getGoalName()}
    */
-  public void setGoalName(final String v) {
+  public void setGoalName(@Nonnull final String v) {
     mGoalName = v;
   }
 
@@ -90,6 +92,7 @@ public class GoalRef implements Evaluatable, Serializable {
   /**
    * @return how the goal value should be interpreted
    */
+  @Nonnull
   public GoalScoreType getScoreType() {
     return mScoreType;
   }
@@ -97,7 +100,7 @@ public class GoalRef implements Evaluatable, Serializable {
   /**
    * @param v see {@link #getScoreType()}
    */
-  public void setScoreType(final GoalScoreType v) {
+  public void setScoreType(@Nonnull final GoalScoreType v) {
     mScoreType = v;
   }
 
