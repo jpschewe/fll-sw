@@ -27,8 +27,6 @@ import fll.xml.Term;
 
   private final BasicPolynomial poly;
 
-  private final boolean allowVariables;
-
   private final JComponent termsContainer;
 
   private final JComboBox<FloatingPointType> floatingPointType;
@@ -36,11 +34,9 @@ import fll.xml.Term;
   /**
    * @param poly the polynomial to edit
    */
-  public PolynomialEditor(@Nonnull final BasicPolynomial poly,
-                          final boolean allowVariables) {
+  public PolynomialEditor(@Nonnull final BasicPolynomial poly) {
     super();
     this.poly = poly;
-    this.allowVariables = allowVariables;
 
     setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
@@ -66,7 +62,6 @@ import fll.xml.Term;
     floatingPointType = new JComboBox<>(FloatingPointType.values());
     floatingPointType.setSelectedItem(FloatingPointType.TRUNCATE);
     this.add(floatingPointType);
-
   }
 
   private void addTerm(final Term term) {
@@ -79,15 +74,18 @@ import fll.xml.Term;
 
     final JButton delete = new JButton("Delete Term");
     buttonBar.add(delete);
-    // FIXME need action listener
+    delete.addActionListener(l -> {
+      termsContainer.remove(termContainer);
+      poly.removeTerm(term);
+    });
 
     buttonBar.add(Box.createHorizontalGlue());
 
     final Box termBox = Box.createHorizontalBox();
     termContainer.add(termBox);
-    
+
     termBox.add(Box.createHorizontalStrut(20));
-    
+
     final TermEditor editor = new TermEditor(term, poly.getGoalScope(), poly.getVariableScope());
     termBox.add(editor);
   }
