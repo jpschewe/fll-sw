@@ -181,7 +181,7 @@ public class GoalEditor extends AbstractGoalEditor {
     mMaxEditor.setValue(goal.getMax());
 
     mMaxEditor.addPropertyChangeListener("value", e -> {
-      final Number value = (Number) mMinEditor.getValue();
+      final Number value = (Number) mMaxEditor.getValue();
       if (null != value) {
         final double newValue = value.doubleValue();
         getGoal().setMax(newValue);
@@ -200,10 +200,10 @@ public class GoalEditor extends AbstractGoalEditor {
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     countPanel.add(mInitialValueEditor, gbc);
-    mInitialValueEditor.setValue(goal.getMin());
+    mInitialValueEditor.setValue(goal.getInitialValue());
 
     mInitialValueEditor.addPropertyChangeListener("value", e -> {
-      final Number value = (Number) mMinEditor.getValue();
+      final Number value = (Number) mInitialValueEditor.getValue();
       if (null != value) {
         final double newValue = value.doubleValue();
         getGoal().setInitialValue(newValue);
