@@ -6,6 +6,8 @@
 
 package fll.xml.ui;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import java.util.LinkedList;
 
@@ -26,6 +28,8 @@ class VariableRefEditor extends JPanel {
 
   private final VariableRef variableRef;
 
+  private final JButton editor;
+
   /**
    * @param ref the object to edit
    */
@@ -34,10 +38,11 @@ class VariableRefEditor extends JPanel {
 
     setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
 
-    final JButton goal = new JButton(ref.getVariableName());
-    add(goal);
-    goal.setToolTipText("Click to change the referenced variable");
-    goal.addActionListener(l -> {
+    editor = new JButton(ref.getVariableName());
+    add(editor);
+    editor.setToolTipText("Click to change the referenced variable");
+    ref.getVariable().addPropertyChangeListener(nameListener);
+    editor.addActionListener(l -> {
       final Collection<Variable> variables = variableRef.getVariableScope().getAllVariables();
 
       final ChooseOptionDialog<Variable> dialog = new ChooseOptionDialog<>(JOptionPane.getRootFrame(),
@@ -46,9 +51,28 @@ class VariableRefEditor extends JPanel {
       dialog.setVisible(true);
       final Variable selected = dialog.getSelectedValue();
       if (null != selected) {
+        ref.getVariable().removePropertyChangeListener(nameListener);
+
         ref.setVariableName(selected.getName());
-        goal.setText(selected.getName());
+        editor.setText(selected.getName());
+
+        ref.getVariable().addPropertyChangeListener(nameListener);
       }
     });
   }
+
+  private final NameChangeListener nameListener = new NameChangeListener();
+
+  private class NameChangeListener implements PropertyChangeListener {
+
+    @Override
+    public void propertyChange(final PropertyChangeEvent evt) {
+      if ("name".equals(evt.getPropertyName())) {
+        final String newName = (String) evt.getNewValue();
+        variableRef.setVariableName(newName);
+        editor.setText(newName);
+      }
+    }
+  }
+
 }

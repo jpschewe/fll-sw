@@ -6,6 +6,8 @@
 
 package fll.xml.ui;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import java.util.LinkedList;
 
@@ -28,6 +30,8 @@ class GoalRefEditor extends JPanel {
 
   private final GoalRef goalRef;
 
+  private final JButton editor;
+
   /**
    * @param ref the object to edit
    */
@@ -36,10 +40,11 @@ class GoalRefEditor extends JPanel {
 
     setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
 
-    final JButton goal = new JButton(ref.getGoal().getTitle());
-    add(goal);
-    goal.setToolTipText("Click to change the referenced goal");
-    goal.addActionListener(l -> {
+    editor = new JButton(ref.getGoal().getTitle());
+    add(editor);
+    ref.getGoal().addPropertyChangeListener(nameListener);
+    editor.setToolTipText("Click to change the referenced goal");
+    editor.addActionListener(l -> {
       final Collection<AbstractGoal> goals = goalRef.getGoalScope().getAllGoals();
 
       final ChooseOptionDialog<AbstractGoal> dialog = new ChooseOptionDialog<>(JOptionPane.getRootFrame(),
@@ -48,8 +53,12 @@ class GoalRefEditor extends JPanel {
       dialog.setVisible(true);
       final AbstractGoal selected = dialog.getSelectedValue();
       if (null != selected) {
+        ref.getGoal().removePropertyChangeListener(nameListener);
+
         ref.setGoalName(selected.getName());
-        goal.setText(selected.getTitle());
+        editor.setText(selected.getTitle());
+
+        ref.getGoal().addPropertyChangeListener(nameListener);
       }
     });
 
@@ -59,6 +68,22 @@ class GoalRefEditor extends JPanel {
       final GoalScoreType selected = scoreType.getItemAt(scoreType.getSelectedIndex());
       goalRef.setScoreType(selected);
     });
-
   }
+
+  private final NameChangeListener nameListener = new NameChangeListener();
+
+  private class NameChangeListener implements PropertyChangeListener {
+
+    @Override
+    public void propertyChange(final PropertyChangeEvent evt) {
+      if ("name".equals(evt.getPropertyName())) {
+        final String newName = (String) evt.getNewValue();
+        goalRef.setGoalName(newName);
+      } else if ("title".equals(evt.getPropertyName())) {
+        final String newTitle = (String) evt.getNewValue();
+        editor.setText(newTitle);
+      }
+    }
+  }
+
 }
