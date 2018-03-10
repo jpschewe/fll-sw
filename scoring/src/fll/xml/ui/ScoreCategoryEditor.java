@@ -180,8 +180,7 @@ public abstract class ScoreCategoryEditor extends JPanel {
     if (goal instanceof Goal) {
       editor = new GoalEditor((Goal) goal);
     } else if (goal instanceof ComputedGoal) {
-      LOGGER.warn("Computed goals are not yet supported");
-      return;
+      editor = new ComputedGoalEditor((ComputedGoal) goal);
     } else {
       throw new RuntimeException("Unexpected goal class: "
           + goal.getClass());

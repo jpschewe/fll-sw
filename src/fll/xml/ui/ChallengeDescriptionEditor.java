@@ -93,6 +93,8 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
  *   - enum value check for dbstring
  *   - unique values for enum values in goals
  * - edit computed goals
+ * - delete goals
+ * - delete subjective categories
  * - support grouping of goals, this is where DnD might be useful 
  *   - all goals in a group must be consecutive
  * - how to handle when being run from the launcher so that it doesn't exit?
@@ -130,7 +132,7 @@ public class ChallengeDescriptionEditor extends JFrame {
     }
 
     try (
-        final InputStream stream = ChallengeDescriptionEditor.class.getResourceAsStream("/fll/resources/challenge-descriptors/fll-2016_animal-allies-MN.xml")) {
+        final InputStream stream = ChallengeDescriptionEditor.class.getResourceAsStream("/fll/resources/challenge-descriptors/fll-2015_trash-trek.xml")) {
 
       final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(stream));
 
