@@ -35,8 +35,15 @@ public class RubricEditor extends JPanel {
     super(new BorderLayout());
     this.goal = goal;
 
-    // FIXME need add button
     final JPanel rangePanel = new JPanel(new BorderLayout());
+    final Box buttonBox = Box.createHorizontalBox();
+    rangePanel.add(buttonBox, BorderLayout.NORTH);
+
+    final JButton addRange = new JButton("Add Rubric Range");
+    buttonBox.add(addRange);
+    addRange.addActionListener(l -> addNewRange());
+
+    buttonBox.add(Box.createHorizontalGlue());
 
     rangeList = Box.createVerticalBox();
     rangePanel.add(rangeList, BorderLayout.CENTER);
@@ -48,6 +55,12 @@ public class RubricEditor extends JPanel {
       addRange(range);
     });
 
+  }
+
+  private void addNewRange() {
+    final String title = String.format("Range %d", rangeEditors.size());
+    final RubricRange newRange = new RubricRange(title);
+    addRange(newRange);
   }
 
   private void addRange(final RubricRange range) {
