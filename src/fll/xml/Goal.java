@@ -72,7 +72,7 @@ public class Goal extends AbstractGoal {
   /**
    * Create a goal with default values for min (0), max (1), multiplier (1),
    * required (false), empty rubric, empty enumerated values and
-   * initial value (0).
+   * initial value (0) and score type {@link ScoreType#INTEGER}.
    * 
    * @param name see {@link #getName()}
    */
@@ -85,6 +85,7 @@ public class Goal extends AbstractGoal {
     mRequired = false;
     mRubric = new LinkedList<RubricRange>();
     mValues = new LinkedList<EnumeratedValue>();
+    mScoreType = ScoreType.INTEGER;
   }
 
   private static final Comparator<RubricRange> LEAST_RUBRIC_RANGE = new Comparator<RubricRange>() {
@@ -216,11 +217,12 @@ public class Goal extends AbstractGoal {
 
   private ScoreType mScoreType;
 
+  @Nonnull
   public ScoreType getScoreType() {
     return mScoreType;
   }
 
-  public void setScoreType(final ScoreType v) {
+  public void setScoreType(@Nonnull final ScoreType v) {
     mScoreType = v;
   }
 
