@@ -41,6 +41,9 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
 
     mTitleEditor = FormatterUtils.createStringField();
     titleContainer.add(mTitleEditor);
+    mTitleEditor.setColumns(80);
+    mTitleEditor.setMaximumSize(mTitleEditor.getPreferredSize());
+
 
     mTitleEditor.addPropertyChangeListener("value", e -> {
       if (null != mSubjectiveCategory) {
@@ -59,6 +62,9 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
 
     mNameEditor = FormatterUtils.createDatabaseNameField();
     nameContainer.add(mNameEditor);
+
+    mNameEditor.setColumns(40);
+    mNameEditor.setMaximumSize(mNameEditor.getPreferredSize());
 
     mNameEditor.addPropertyChangeListener("value", e -> {
       if (null != mSubjectiveCategory) {

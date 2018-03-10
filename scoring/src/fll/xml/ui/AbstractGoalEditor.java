@@ -65,6 +65,9 @@ import fll.xml.AbstractGoal;
       fireTitleChange(oldTitle, newTitle);
     });
 
+    mTitleEditor.setColumns(80);
+    mTitleEditor.setMaximumSize(mTitleEditor.getPreferredSize());
+
     gbc = new GridBagConstraints();
     gbc.weightx = 0;
     gbc.anchor = GridBagConstraints.FIRST_LINE_END;
@@ -83,6 +86,9 @@ import fll.xml.AbstractGoal;
       final String newValue = mNameEditor.getText();
       goal.setName(newValue);
     });
+
+    mNameEditor.setColumns(40);
+    mNameEditor.setMaximumSize(mNameEditor.getPreferredSize());
 
     gbc = new GridBagConstraints();
     gbc.weightx = 0;
