@@ -529,18 +529,7 @@ public class ChallengeDescriptionEditor extends JFrame {
 
     mPerformanceEditor.setCategory(mDescription.getPerformance());
 
-    for (final SubjectiveScoreCategory cat : mDescription.getSubjectiveCategories()) {
-      final ScoreCategoryEditor editor = new ScoreCategoryEditor();
-      editor.setCategory(cat);
-      editor.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
-
-      final MovableExpandablePanel container = new MovableExpandablePanel(cat.getTitle(), editor);
-      container.addMoveEventListener(mSubjectiveMoveListener);
-
-      mSubjectiveContainer.add(container);
-
-      mSubjectiveEditors.add(editor);
-    }
+    mDescription.getSubjectiveCategories().forEach(this::addSubjectiveCategory);
 
     validate();
   }
@@ -551,17 +540,26 @@ public class ChallengeDescriptionEditor extends JFrame {
 
     final SubjectiveScoreCategory cat = new SubjectiveScoreCategory(name, title);
     mDescription.addSubjectiveCategory(cat);
-    
-    final ScoreCategoryEditor editor = new ScoreCategoryEditor();
+
+    addSubjectiveCategory(cat);
+  }
+
+  private void addSubjectiveCategory(final SubjectiveScoreCategory cat) {
+    final SubjectiveCategoryEditor editor = new SubjectiveCategoryEditor();
     editor.setCategory(cat);
     editor.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
 
     final MovableExpandablePanel container = new MovableExpandablePanel(cat.getTitle(), editor);
     container.addMoveEventListener(mSubjectiveMoveListener);
 
+    editor.addPropertyChangeListener("title", e -> {
+      final String newTitle = (String) e.getNewValue();
+      container.setTitle(newTitle);
+    });
+
     mSubjectiveContainer.add(container);
     mSubjectiveContainer.validate();
-    
+
     mSubjectiveEditors.add(editor);
   }
 

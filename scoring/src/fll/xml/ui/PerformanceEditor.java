@@ -6,8 +6,6 @@
 
 package fll.xml.ui;
 
-import java.awt.GridBagConstraints;
-
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreCategory;
 
@@ -23,25 +21,11 @@ public class PerformanceEditor extends ScoreCategoryEditor {
   public PerformanceEditor() {
     super();
 
-    GridBagConstraints gbc;
-
     restrictions = new RestrictionListEditor();
-    gbc = new GridBagConstraints();
-    gbc.weightx = 1;
-    gbc.weighty = 1;
-    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
-    gbc.gridwidth = GridBagConstraints.REMAINDER;
-    gbc.fill = GridBagConstraints.BOTH;
-    add(restrictions, gbc);
+    add(restrictions);
 
     tiebreaker = new TiebreakerEditor();
-    gbc = new GridBagConstraints();
-    gbc.weightx = 1;
-    gbc.weighty = 1;
-    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
-    gbc.gridwidth = GridBagConstraints.REMAINDER;
-    gbc.fill = GridBagConstraints.BOTH;
-    add(tiebreaker, gbc);
+    add(tiebreaker);
 
   }
 
