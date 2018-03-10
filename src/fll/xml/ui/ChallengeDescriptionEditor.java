@@ -34,6 +34,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -91,7 +92,7 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
  *   - SwitchStatement must have something in the default case
  *   - enum value check for dbstring
  *   - unique values for enum values in goals
- * - ability to add subjective categories
+ * - edit subjective category names and titles
  * - Ability to add goals
  * - add rubric ranges
  * - edit computed goals
@@ -294,9 +295,22 @@ public class ChallengeDescriptionEditor extends JFrame {
     final MovableExpandablePanel performance = new MovableExpandablePanel("Performance", mPerformanceEditor, false);
     topPanel.add(performance);
 
+    final Box subjectiveTopContainer = Box.createVerticalBox();
+    topPanel.add(subjectiveTopContainer);
+
+    subjectiveTopContainer.setBorder(BorderFactory.createTitledBorder("Subjective"));
+
+    final Box subjectiveButtonBox = Box.createHorizontalBox();
+    subjectiveTopContainer.add(subjectiveButtonBox);
+
+    final JButton addSubjectiveCategory = new JButton("Add Subjective Category");
+    subjectiveButtonBox.add(addSubjectiveCategory);
+    addSubjectiveCategory.addActionListener(l -> addNewSubjectiveCategory());
+
+    subjectiveButtonBox.add(Box.createHorizontalGlue());
+
     mSubjectiveContainer = Box.createVerticalBox();
-    mSubjectiveContainer.setBorder(BorderFactory.createTitledBorder("Subjective"));
-    topPanel.add(mSubjectiveContainer);
+    subjectiveTopContainer.add(mSubjectiveContainer);
 
     mSubjectiveMoveListener = new MoveEventListener() {
 
@@ -529,6 +543,26 @@ public class ChallengeDescriptionEditor extends JFrame {
     }
 
     validate();
+  }
+
+  private void addNewSubjectiveCategory() {
+    final String name = String.format("category_%d", mSubjectiveEditors.size());
+    final String title = String.format("Category %d", mSubjectiveEditors.size());
+
+    final SubjectiveScoreCategory cat = new SubjectiveScoreCategory(name, title);
+    mDescription.addSubjectiveCategory(cat);
+    
+    final ScoreCategoryEditor editor = new ScoreCategoryEditor();
+    editor.setCategory(cat);
+    editor.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
+
+    final MovableExpandablePanel container = new MovableExpandablePanel(cat.getTitle(), editor);
+    container.addMoveEventListener(mSubjectiveMoveListener);
+
+    mSubjectiveContainer.add(container);
+    mSubjectiveContainer.validate();
+    
+    mSubjectiveEditors.add(editor);
   }
 
   private final Action mExitAction = new AbstractAction("Exit") {
