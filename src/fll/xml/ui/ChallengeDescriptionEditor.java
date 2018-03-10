@@ -93,6 +93,7 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
  *   - enum value check for dbstring
  *   - unique values for enum values in goals
  * - edit computed goals
+ * - delete computed goals
  * - delete goals
  * - delete subjective categories
  * - support grouping of goals, this is where DnD might be useful 
