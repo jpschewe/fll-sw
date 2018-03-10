@@ -97,7 +97,6 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
  *   - all goals in a group must be consecutive
  * - how to handle when being run from the launcher so that it doesn't exit?
  *   - maybe have a method that is called from main that creates everything
- * 
  */
 
 /**
