@@ -62,6 +62,9 @@ public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
     return Collections.unmodifiableList(mGoals);
   }
 
+  /**
+   * @see fll.xml.GoalScope#getAllGoals()
+   */
   @Override
   public Collection<AbstractGoal> getAllGoals() {
     return getGoals();

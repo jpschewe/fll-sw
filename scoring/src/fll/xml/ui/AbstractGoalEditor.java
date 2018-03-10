@@ -26,7 +26,7 @@ import fll.xml.AbstractGoal;
  * Fires property change "title" when the title changes. This allows the
  * container to update it's title. The type of this property is {@link String}.
  */
-/* package */ class AbstractGoalEditor extends JPanel {
+/* package */ abstract class AbstractGoalEditor extends JPanel {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 

@@ -14,6 +14,7 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -24,6 +25,7 @@ import org.apache.log4j.Logger;
 import fll.util.FormatterUtils;
 import fll.util.LogUtils;
 import fll.xml.AbstractGoal;
+import fll.xml.ComputedGoal;
 import fll.xml.Goal;
 import fll.xml.ScoreCategory;
 import fll.xml.ui.MovableExpandablePanel.MoveEvent;
@@ -52,7 +54,7 @@ public abstract class ScoreCategoryEditor extends JPanel {
 
     final Box weightContainer = Box.createHorizontalBox();
     add(weightContainer);
-    
+
     weightContainer.add(new JLabel("Weight: "));
 
     mWeight = FormatterUtils.createDoubleField();
@@ -68,6 +70,19 @@ public abstract class ScoreCategoryEditor extends JPanel {
         }
       }
     });
+
+    final Box buttonBox = Box.createHorizontalBox();
+    add(buttonBox);
+
+    final JButton addGoal = new JButton("Add Goal");
+    buttonBox.add(addGoal);
+    addGoal.addActionListener(l -> addNewGoal());
+
+    final JButton addComputedGoal = new JButton("Add Computed Goal");
+    buttonBox.add(addComputedGoal);
+    addComputedGoal.addActionListener(l -> addNewComputedGoal());
+
+    buttonBox.add(Box.createHorizontalGlue());
 
     mGoalEditorContainer = Box.createVerticalBox();
     add(mGoalEditorContainer);
@@ -135,30 +150,54 @@ public abstract class ScoreCategoryEditor extends JPanel {
     mGoalEditors.clear();
 
     if (null != mCategory) {
-
-
       mWeight.setValue(mCategory.getWeight());
 
-      for (final AbstractGoal goal : mCategory.getGoals()) {
-
-        final AbstractGoalEditor editor;
-        if (goal instanceof Goal) {
-          editor = new GoalEditor((Goal) goal);
-        } else {
-          editor = new AbstractGoalEditor(goal);
-        }
-        editor.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
-        final MovableExpandablePanel panel = new MovableExpandablePanel(goal.getTitle(), editor, true);
-        editor.addPropertyChangeListener("title", e -> {
-          final String newTitle = (String) e.getNewValue();
-          panel.setTitle(newTitle);
-        });
-        panel.addMoveEventListener(mGoalMoveListener);
-
-        mGoalEditorContainer.add(panel);
-        mGoalEditors.add(editor);
-      }
+      mCategory.getGoals().forEach(this::addGoal);
     }
+  }
+
+  private void addNewGoal() {
+    final String name = String.format("goal_%d", mCategory.getGoals().size());
+    final String title = String.format("Goal %d", mCategory.getGoals().size());
+    final Goal newGoal = new Goal(name);
+    newGoal.setTitle(title);
+    mCategory.addGoal(newGoal);
+    addGoal(newGoal);
+  }
+
+  private void addNewComputedGoal() {
+    final String name = String.format("goal_%d", mCategory.getGoals().size());
+    final String title = String.format("Goal %d", mCategory.getGoals().size());
+    final ComputedGoal newGoal = new ComputedGoal(name);
+    newGoal.setTitle(title);
+    mCategory.addGoal(newGoal);
+    addGoal(newGoal);
+  }
+
+  private void addGoal(final AbstractGoal goal) {
+
+    final AbstractGoalEditor editor;
+    if (goal instanceof Goal) {
+      editor = new GoalEditor((Goal) goal);
+    } else if (goal instanceof ComputedGoal) {
+      LOGGER.warn("Computed goals are not yet supported");
+      return;
+    } else {
+      throw new RuntimeException("Unexpected goal class: "
+          + goal.getClass());
+    }
+    editor.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
+    final MovableExpandablePanel panel = new MovableExpandablePanel(goal.getTitle(), editor, true);
+    editor.addPropertyChangeListener("title", e -> {
+      final String newTitle = (String) e.getNewValue();
+      panel.setTitle(newTitle);
+    });
+    panel.addMoveEventListener(mGoalMoveListener);
+
+    mGoalEditors.add(editor);
+
+    mGoalEditorContainer.add(panel);
+
   }
 
   /**
