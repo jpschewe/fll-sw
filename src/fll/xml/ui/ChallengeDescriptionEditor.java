@@ -92,7 +92,6 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
  *   - SwitchStatement must have something in the default case
  *   - enum value check for dbstring
  *   - unique values for enum values in goals
- * - add rubric ranges
  * - edit computed goals
  * - support grouping of goals, this is where DnD might be useful 
  *   - all goals in a group must be consecutive
