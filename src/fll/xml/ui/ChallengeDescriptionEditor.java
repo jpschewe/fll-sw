@@ -92,7 +92,6 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
  *   - SwitchStatement must have something in the default case
  *   - enum value check for dbstring
  *   - unique values for enum values in goals
- * - edit subjective category names and titles
  * - Ability to add goals
  * - add rubric ranges
  * - edit computed goals
@@ -231,6 +230,9 @@ public class ChallengeDescriptionEditor extends JFrame {
       }
     });
 
+    mTitleEditor.setColumns(80);
+    mTitleEditor.setMaximumSize(mTitleEditor.getPreferredSize());
+
     gbc = new GridBagConstraints();
     gbc.weightx = 0;
     gbc.anchor = GridBagConstraints.FIRST_LINE_END;
@@ -250,6 +252,9 @@ public class ChallengeDescriptionEditor extends JFrame {
       }
     });
 
+    mRevisionEditor.setColumns(20);
+    mRevisionEditor.setMaximumSize(mRevisionEditor.getPreferredSize());
+
     gbc = new GridBagConstraints();
     gbc.weightx = 0;
     gbc.anchor = GridBagConstraints.FIRST_LINE_END;
@@ -268,6 +273,9 @@ public class ChallengeDescriptionEditor extends JFrame {
         mDescription.setCopyright(mCopyrightEditor.getText());
       }
     });
+
+    mCopyrightEditor.setColumns(80);
+    mCopyrightEditor.setMaximumSize(mCopyrightEditor.getPreferredSize());
 
     gbc = new GridBagConstraints();
     gbc.weightx = 0;
