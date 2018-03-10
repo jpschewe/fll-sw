@@ -46,10 +46,22 @@ public class SubjectiveScoreCategory extends ScoreCategory {
     mTitle = title;
   }
 
-  private final String mName;
+  private String mName;
 
+  /**
+   * The name of the category must be a valid database string.
+   * 
+   * @return The name
+   */
   public String getName() {
     return mName;
+  }
+
+  /**
+   * @param v see {@link #getName()}
+   */
+  public void setName(final String v) {
+    mName = v;
   }
 
   private String mTitle;

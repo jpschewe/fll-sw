@@ -7,14 +7,13 @@
 package fll.xml.ui;
 
 import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.text.ParseException;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -34,7 +33,7 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 /**
  * Editor for {@link ScoreCategory} objects.
  */
-public class ScoreCategoryEditor extends JPanel {
+public abstract class ScoreCategoryEditor extends JPanel {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -49,22 +48,16 @@ public class ScoreCategoryEditor extends JPanel {
   private final MoveEventListener mGoalMoveListener;
 
   public ScoreCategoryEditor() {
-    setLayout(new GridBagLayout());
+    setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 
-    GridBagConstraints gbc;
-
-    gbc = new GridBagConstraints();
-    gbc.weightx = 0;
-    gbc.anchor = GridBagConstraints.FIRST_LINE_END;
-    add(new JLabel("Weight: "), gbc);
+    final Box weightContainer = Box.createHorizontalBox();
+    add(weightContainer);
+    
+    weightContainer.add(new JLabel("Weight: "));
 
     mWeight = FormatterUtils.createDoubleField();
-    gbc = new GridBagConstraints();
-    gbc.weightx = 1;
-    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
-    gbc.gridwidth = GridBagConstraints.REMAINDER;
-    gbc.fill = GridBagConstraints.HORIZONTAL;
-    add(mWeight, gbc);
+    weightContainer.add(mWeight);
+    weightContainer.add(Box.createHorizontalGlue());
 
     mWeight.addPropertyChangeListener("value", e -> {
       if (null != mCategory) {
@@ -77,13 +70,7 @@ public class ScoreCategoryEditor extends JPanel {
     });
 
     mGoalEditorContainer = Box.createVerticalBox();
-    gbc = new GridBagConstraints();
-    gbc.weightx = 1;
-    gbc.weighty = 1;
-    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
-    gbc.gridwidth = GridBagConstraints.REMAINDER;
-    gbc.fill = GridBagConstraints.BOTH;
-    add(mGoalEditorContainer, gbc);
+    add(mGoalEditorContainer);
 
     mGoalMoveListener = new MoveEventListener() {
 
@@ -148,6 +135,8 @@ public class ScoreCategoryEditor extends JPanel {
     mGoalEditors.clear();
 
     if (null != mCategory) {
+
+
       mWeight.setValue(mCategory.getWeight());
 
       for (final AbstractGoal goal : mCategory.getGoals()) {
