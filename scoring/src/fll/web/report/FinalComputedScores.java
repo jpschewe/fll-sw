@@ -52,7 +52,6 @@ import fll.Utilities;
 import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
-import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.util.FP;
 import fll.util.LogUtils;
@@ -216,17 +215,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
     final WinnerType winnerCriteria = challengeDescription.getWinner();
 
-    final TournamentSchedule schedule;
-    if (TournamentSchedule.scheduleExistsInDatabase(connection, tournament.getTournamentID())) {
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("Found a schedule for tournament: "
-            + tournament);
-      }
-      schedule = new TournamentSchedule(connection, tournament.getTournamentID());
-    } else {
-      schedule = null;
-    }
-
     try {
       // This creates our new PDF document and declares it to be in portrait
       // orientation
@@ -290,7 +278,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           }
         }
 
-        writeColumnHeaders(schedule, weights, subjectiveCategories, relativeWidths, challengeDescription, divTable);
+        writeColumnHeaders(weights, subjectiveCategories, relativeWidths, challengeDescription, divTable);
 
         writeScores(connection, subjectiveCategories, challengeDescription.getPerformance().getScoreType(), weights,
                     relativeWidths, awardGroup, winnerCriteria, tournament, divTable, bestTeams);
@@ -724,8 +712,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
   /**
    * @throws ParseException
    */
-  private void writeColumnHeaders(final TournamentSchedule schedule,
-                                  final double[] weights,
+  private void writeColumnHeaders(final double[] weights,
                                   final ScoreCategory[] subjectiveCategories,
                                   final float[] relativeWidths,
                                   final ChallengeDescription challengeDescription,
@@ -742,16 +729,14 @@ public final class FinalComputedScores extends BaseFLLServlet {
     divTable.addCell(organizationCell);
 
     // judging group
-    if (null != schedule) {
-      final Paragraph judgingGroup = new Paragraph("Judging", ARIAL_8PT_BOLD);
-      judgingGroup.add(Chunk.NEWLINE);
-      judgingGroup.add(new Chunk("Group"));
-      final PdfPCell osCell = new PdfPCell(judgingGroup);
-      osCell.setBorder(0);
-      osCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-      osCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
-      divTable.addCell(osCell);
-    }
+    final Paragraph judgingGroup = new Paragraph("Judging", ARIAL_8PT_BOLD);
+    judgingGroup.add(Chunk.NEWLINE);
+    judgingGroup.add(new Chunk("Group"));
+    final PdfPCell judgeGroupCell = new PdfPCell(judgingGroup);
+    judgeGroupCell.setBorder(0);
+    judgeGroupCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+    judgeGroupCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
+    divTable.addCell(judgeGroupCell);
 
     divTable.addCell(""); // weight/raw&scaled
 
@@ -795,9 +780,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
     final Paragraph wPar = new Paragraph("Weight:", ARIAL_8PT_NORMAL);
     final PdfPCell wCell = new PdfPCell(wPar);
-    if (null != schedule) {
-      wCell.setColspan(2);
-    }
+    wCell.setColspan(2);
     wCell.setBorder(0);
     wCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
     divTable.addCell(wCell);
