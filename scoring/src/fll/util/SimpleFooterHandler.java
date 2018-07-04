@@ -71,8 +71,7 @@ public class SimpleFooterHandler extends PdfPageEventHelper {
     _tpl.beginText();
     _tpl.setFontAndSize(_headerFooterFont, 12);
     _tpl.setTextMatrix(0, 0);
-    _tpl.showText(""
-        + (writer.getPageNumber() - 1));
+    _tpl.showText(String.valueOf(writer.getPageNumber() - 1));
     _tpl.endText();
   }
 
