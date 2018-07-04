@@ -1,3 +1,5 @@
+* #641 - Fix computed score report format when there is no schedule
+
 Release 12.2.5
 ==============
 
