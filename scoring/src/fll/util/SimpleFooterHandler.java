@@ -74,7 +74,11 @@ public class SimpleFooterHandler extends PdfPageEventHelper {
     _tpl.beginText();
     _tpl.setFontAndSize(_headerFooterFont, 12);
     _tpl.setTextMatrix(0, 0);
-    _tpl.showText(String.valueOf(writer.getPageNumber()
+    // Through trial and error I found that getCurrentPageNumber is always one more
+    // than the end of the document.
+    // getPageNumber is sometimes the last page and sometimes one past the last page.
+    // - Jon Schewe 7/4/2018
+    _tpl.showText(String.valueOf(writer.getCurrentPageNumber()
         - 1));
     _tpl.endText();
   }
