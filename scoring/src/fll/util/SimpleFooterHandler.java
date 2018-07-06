@@ -48,15 +48,18 @@ public class SimpleFooterHandler extends PdfPageEventHelper {
 
     // compose the footer
     final String text = "Page "
-        + writer.getPageNumber() + " of ";
+        + writer.getPageNumber()
+        + " of ";
     final float textSize = _headerFooterFont.getWidthPoint(text, 12);
-    final float textBase = document.bottom() - 20;
+    final float textBase = document.bottom()
+        - 20;
     cb.beginText();
     cb.setFontAndSize(_headerFooterFont, 12);
 
     final float adjust = _headerFooterFont.getWidthPoint("0", 12);
     cb.setTextMatrix(document.right()
-        - textSize - adjust, textBase);
+        - textSize
+        - adjust, textBase);
     cb.showText(text);
     cb.endText();
     cb.addTemplate(_tpl, document.right()
@@ -71,8 +74,12 @@ public class SimpleFooterHandler extends PdfPageEventHelper {
     _tpl.beginText();
     _tpl.setFontAndSize(_headerFooterFont, 12);
     _tpl.setTextMatrix(0, 0);
-    _tpl.showText(""
-        + (writer.getPageNumber() - 1));
+    // Through trial and error I found that getCurrentPageNumber is always one more
+    // than the end of the document.
+    // getPageNumber is sometimes the last page and sometimes one past the last page.
+    // - Jon Schewe 7/4/2018
+    _tpl.showText(String.valueOf(writer.getCurrentPageNumber()
+        - 1));
     _tpl.endText();
   }
 
