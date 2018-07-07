@@ -99,5 +99,10 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/fll-sw/scoring/lib/bcprov-jdk15on-160.zip!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="scoring/lib/bcpkix-jdk15on-160.jar" sourcepath="scoring/lib/bcpkix-jdk15on-160-src.zip">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/fll-sw/scoring/lib/bcpkix-jdk15on-160-docs.zip!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="scoring/bin/"/>
 </classpath>
