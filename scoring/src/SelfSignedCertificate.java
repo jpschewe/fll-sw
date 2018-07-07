@@ -17,7 +17,11 @@ import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
 
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
@@ -50,9 +54,10 @@ public class SelfSignedCertificate {
    * @param args
    * @throws Exception
    */
-  public static void main(String[] args) throws Exception {
-    SelfSignedCertificate signedCertificate = new SelfSignedCertificate();
+  public static void main(final String[] args) throws Exception {
+    final SelfSignedCertificate signedCertificate = new SelfSignedCertificate();
     signedCertificate.createCertificate();
+    System.out.println("Finished");
   }
 
   private X509Certificate createCertificate() throws Exception {
@@ -60,18 +65,6 @@ public class SelfSignedCertificate {
     keyPairGenerator.initialize(CERTIFICATE_BITS, new SecureRandom());
     final KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
-    // var subjectAlternativeNames = new Asn1Encodable[]
-    // {
-    // new GeneralName(GeneralName.DnsName, "server"),
-    // new GeneralName(GeneralName.DnsName, "server.mydomain.com")
-    // };
-    // var subjectAlternativeNamesExtension = new
-    // DerSequence(subjectAlternativeNames);
-    // certificateGenerator.AddExtension(
-    // Extension.subjectAlternativeName.Id, false,
-    // subjectAlternativeNamesExtension);
-
-    // GENERATE THE X509 CERTIFICATE
     final Calendar notBefore = Calendar.getInstance();
     notBefore.add(Calendar.HOUR_OF_DAY, -1);
     final Calendar notAfter = (Calendar) notBefore.clone();
@@ -80,6 +73,18 @@ public class SelfSignedCertificate {
     final SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded());
     final X509v3CertificateBuilder v3CertGen = new X509v3CertificateBuilder(issuer, BigInteger.ONE, notBefore.getTime(),
                                                                             notAfter.getTime(), issuer, publicKeyInfo);
+
+    final ASN1EncodableVector names = new ASN1EncodableVector();
+    names.add(new GeneralName(GeneralName.dNSName, "localhost"));
+    names.add(new GeneralName(GeneralName.dNSName, "127.0.0.1"));
+
+    names.add(new GeneralName(GeneralName.iPAddress, "127.0.0.1"));
+    names.add(new GeneralName(GeneralName.iPAddress, "192.168.10.2"));
+    names.add(new GeneralName(GeneralName.iPAddress, "192.168.42.12"));
+    names.add(new GeneralName(GeneralName.iPAddress, "192.168.42.11"));
+    
+    final DERSequence subjectAlternativeNames = new DERSequence(names);
+    v3CertGen.addExtension(Extension.subjectAlternativeName, false, subjectAlternativeNames);
 
     final ContentSigner signer = new JcaContentSignerBuilder("SHA1WithRSA").setProvider(new BouncyCastleProvider())
                                                                            .build(keyPair.getPrivate());
@@ -92,8 +97,8 @@ public class SelfSignedCertificate {
     return cert;
   }
 
-  private void saveCert(X509Certificate cert,
-                        PrivateKey key)
+  private void saveCert(final X509Certificate cert,
+                        final PrivateKey key)
       throws Exception {
     KeyStore keyStore = KeyStore.getInstance("PKCS12");
     keyStore.load(null, null);
