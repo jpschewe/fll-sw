@@ -15,14 +15,16 @@ import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.cert.X509Certificate;
-import java.util.Date;
+import java.util.Calendar;
 
-import org.bouncycastle.asn1.x509.Extension;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
 /**
  * 
@@ -53,45 +55,40 @@ public class SelfSignedCertificate {
     signedCertificate.createCertificate();
   }
 
-  @SuppressWarnings("deprecation")
   private X509Certificate createCertificate() throws Exception {
-    X509Certificate cert = null;
-    KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(CERTIFICATE_ALGORITHM);
+    final KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(CERTIFICATE_ALGORITHM);
     keyPairGenerator.initialize(CERTIFICATE_BITS, new SecureRandom());
-    KeyPair keyPair = keyPairGenerator.generateKeyPair();
+    final KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
-//    var subjectAlternativeNames = new Asn1Encodable[]
-//        {
-//            new GeneralName(GeneralName.DnsName, "server"),
-//            new GeneralName(GeneralName.DnsName, "server.mydomain.com")
-//        };
-//    var subjectAlternativeNamesExtension = new DerSequence(subjectAlternativeNames);
-//    certificateGenerator.AddExtension(
-//        Extension.subjectAlternativeName.Id, false, subjectAlternativeNamesExtension);
-    
+    // var subjectAlternativeNames = new Asn1Encodable[]
+    // {
+    // new GeneralName(GeneralName.DnsName, "server"),
+    // new GeneralName(GeneralName.DnsName, "server.mydomain.com")
+    // };
+    // var subjectAlternativeNamesExtension = new
+    // DerSequence(subjectAlternativeNames);
+    // certificateGenerator.AddExtension(
+    // Extension.subjectAlternativeName.Id, false,
+    // subjectAlternativeNamesExtension);
+
     // GENERATE THE X509 CERTIFICATE
-    X509V3CertificateGenerator v3CertGen = new X509V3CertificateGenerator();
-    v3CertGen.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()));
-    v3CertGen.setIssuerDN(new X509Principal(CERTIFICATE_DN));
-    v3CertGen.setNotBefore(new Date(System.currentTimeMillis()
-        - 1000L
-            * 60
-            * 60
-            * 24));
-    v3CertGen.setNotAfter(new Date(System.currentTimeMillis()
-        + (1000L
-            * 60
-            * 60
-            * 24
-            * 365
-            * 10)));
-    v3CertGen.setSubjectDN(new X509Principal(CERTIFICATE_DN));
-    v3CertGen.setPublicKey(keyPair.getPublic());
-    v3CertGen.setSignatureAlgorithm("SHA256WithRSAEncryption");
-    cert = v3CertGen.generateX509Certificate(keyPair.getPrivate());
-    
+    final Calendar notBefore = Calendar.getInstance();
+    notBefore.add(Calendar.HOUR_OF_DAY, -1);
+    final Calendar notAfter = (Calendar) notBefore.clone();
+    notAfter.add(Calendar.YEAR, 1);
+    final X500Name issuer = new X500Name(CERTIFICATE_DN);
+    final SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded());
+    final X509v3CertificateBuilder v3CertGen = new X509v3CertificateBuilder(issuer, BigInteger.ONE, notBefore.getTime(),
+                                                                            notAfter.getTime(), issuer, publicKeyInfo);
+
+    final ContentSigner signer = new JcaContentSignerBuilder("SHA1WithRSA").setProvider(new BouncyCastleProvider())
+                                                                           .build(keyPair.getPrivate());
+    final X509CertificateHolder holder = v3CertGen.build(signer);
+    final X509Certificate cert = new JcaX509CertificateConverter().setProvider(new BouncyCastleProvider())
+                                                                  .getCertificate(holder);
+
     saveCert(cert, keyPair.getPrivate());
-    
+
     return cert;
   }
 
