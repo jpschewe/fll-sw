@@ -94,5 +94,10 @@
 	<classpathentry kind="lib" path="scoring/lib/test/selenium/selenium-server-standalone-3.3.0.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/tika-core-1.16.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/itext-xtra-5.5.9.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/bcprov-jdk15on-160.jar" sourcepath="scoring/lib/bcprov-jdk15on-160-src.zip">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/fll-sw/scoring/lib/bcprov-jdk15on-160.zip!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="scoring/bin/"/>
 </classpath>
