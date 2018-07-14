@@ -7,6 +7,7 @@
 package fll.web;
 
 import java.io.IOException;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
@@ -106,10 +107,13 @@ public final class WebUtils {
     final Collection<String> urls = new LinkedList<String>();
     for (final InetAddress address : getAllIPs()) {
       final String addrStr = address.getHostAddress();
-      if (!addrStr.contains(":")) {
+      if (address instanceof Inet4Address) {
         // TODO skip IPv6 for now, need to figure out how to encode and get
         // Tomcat to listen on IPv6
+
         if (!address.isLoopbackAddress()) {
+          // don't tell the user about connecting to localhost
+
           final String url = "http://"
               + addrStr
               + ":"
