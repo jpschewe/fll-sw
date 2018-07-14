@@ -8,6 +8,7 @@ package fll.web;
 
 import java.io.IOException;
 import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
@@ -106,7 +107,7 @@ public final class WebUtils {
   public static Collection<String> getAllURLs(final HttpServletRequest request) {
     final Collection<String> urls = new LinkedList<String>();
     for (final InetAddress address : getAllIPs()) {
-      final String addrStr = address.getHostAddress();
+      final String addrStr = getHostAddress(address);
       if (address instanceof Inet4Address) {
         // TODO skip IPv6 for now, need to figure out how to encode and get
         // Tomcat to listen on IPv6
@@ -139,6 +140,29 @@ public final class WebUtils {
       }
     }
     return urls;
+  }
+
+  /**
+   * Get the host address for the specified address. For IPv4 addresses this just
+   * calls {@link InetAddress#getHostAddress()}. For IPv6 addresses, the same
+   * method is called, however the scope ID needs to be removed.
+   * 
+   * @param address the address to convert
+   * @return the IP address as a string.
+   */
+  public static String getHostAddress(final InetAddress address) {
+    final String addrStr = address.getHostAddress();
+    if (address instanceof Inet6Address) {
+      final int index = addrStr.indexOf('%');
+      if (index >= 0) {
+        final String trimmed = addrStr.substring(0, index);
+        return trimmed;
+      } else {
+        return addrStr;
+      }
+    } else {
+      return addrStr;
+    }
   }
 
   /**
