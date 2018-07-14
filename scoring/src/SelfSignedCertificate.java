@@ -8,6 +8,8 @@
 import java.io.File;
 import java.io.FileOutputStream;
 import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
@@ -16,6 +18,7 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
+import java.util.stream.IntStream;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.DERSequence;
@@ -29,11 +32,18 @@ import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import fll.util.LogUtils;
+import fll.web.WebUtils;
 
 /**
  * 
  */
 public class SelfSignedCertificate {
+
+  private static Logger LOGGER = LoggerFactory.getLogger(SelfSignedCertificate.class);
 
   private static final String CERTIFICATE_ALIAS = "tomcat";
 
@@ -55,6 +65,8 @@ public class SelfSignedCertificate {
    * @throws Exception
    */
   public static void main(final String[] args) throws Exception {
+    LogUtils.initializeLogging();
+
     final SelfSignedCertificate signedCertificate = new SelfSignedCertificate();
     signedCertificate.createCertificate();
     System.out.println("Finished");
@@ -76,13 +88,14 @@ public class SelfSignedCertificate {
 
     final ASN1EncodableVector names = new ASN1EncodableVector();
     names.add(new GeneralName(GeneralName.dNSName, "localhost"));
-    names.add(new GeneralName(GeneralName.dNSName, "127.0.0.1"));
 
+    names.add(new GeneralName(GeneralName.dNSName, "127.0.0.1"));
     names.add(new GeneralName(GeneralName.iPAddress, "127.0.0.1"));
-    names.add(new GeneralName(GeneralName.iPAddress, "192.168.10.2"));
-    names.add(new GeneralName(GeneralName.iPAddress, "192.168.42.12"));
-    names.add(new GeneralName(GeneralName.iPAddress, "192.168.42.11"));
-    
+
+    addNamesForMinnesotaLaptops(names);
+
+    addAllLocalNames(names);
+
     final DERSequence subjectAlternativeNames = new DERSequence(names);
     v3CertGen.addExtension(Extension.subjectAlternativeName, false, subjectAlternativeNames);
 
@@ -95,6 +108,38 @@ public class SelfSignedCertificate {
     saveCert(cert, keyPair.getPrivate());
 
     return cert;
+  }
+
+  private static void addNamesForMinnesotaLaptops(final ASN1EncodableVector names) {
+    IntStream.rangeClosed(1, 99).forEach(i -> {
+      final String nameLocal = String.format("fll-%02d.local", i);
+      names.add(new GeneralName(GeneralName.dNSName, nameLocal));
+    });
+  }
+
+  /**
+   * Find all of the IP addresses for this system and resolve them to names if
+   * possible. Then add both the IP address and the name for the list of names for
+   * the certificate.
+   */
+  private static void addAllLocalNames(final ASN1EncodableVector names) {
+    for (final InetAddress address : WebUtils.getAllIPs()) {
+      final String addrStr = WebUtils.getHostAddress(address);
+
+      names.add(new GeneralName(GeneralName.iPAddress, addrStr));
+      names.add(new GeneralName(GeneralName.dNSName, addrStr));
+
+      if (!address.isLoopbackAddress()) {
+
+        // check for a name
+        try {
+          final String name = org.xbill.DNS.Address.getHostName(address);
+          names.add(new GeneralName(GeneralName.dNSName, name));
+        } catch (final UnknownHostException e) {
+          LOGGER.trace("Could not resolve IP: {}", addrStr, e);
+        }
+      } // not loopback
+    } // foreach IP
   }
 
   private void saveCert(final X509Certificate cert,
