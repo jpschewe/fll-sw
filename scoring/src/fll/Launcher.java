@@ -123,6 +123,12 @@ public class Launcher extends JFrame {
 
   private static final Color OFFLINE_COLOR = Color.RED;
 
+  private final JButton sslCertButton;
+
+  private final JButton webserverStartButton;
+
+  private final JButton webserverStopButton;
+
   public Launcher() {
     super();
     setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -141,20 +147,24 @@ public class Launcher extends JFrame {
     final JPanel buttonBox = new JPanel(new GridLayout(0, 2));
     cpane.add(buttonBox, BorderLayout.CENTER);
 
-    final JButton sslCertButton = new JButton("Create web server certificate");
+    sslCertButton = new JButton("Create web server certificate");
+    webserverStartButton = new JButton("Start web server");
+
     sslCertButton.setToolTipText("Create the SSL certificate used by the web server. This should be run on a computer before the web server is started for the first time.");
     sslCertButton.addActionListener(ae -> {
       createCertificateStore();
+
+      webserverStartButton.setEnabled(isKeystorePresent() && !mServerOnline);
     });
     buttonBox.add(sslCertButton);
 
-    final JButton webserverStartButton = new JButton("Start web server");
     webserverStartButton.addActionListener(ae -> {
       controlWebserver(true);
     });
     buttonBox.add(webserverStartButton);
+    webserverStartButton.setEnabled(isKeystorePresent());
 
-    final JButton webserverStopButton = new JButton("Stop web server");
+    webserverStopButton = new JButton("Stop web server");
     webserverStopButton.addActionListener(ae -> {
       controlWebserver(false);
     });
@@ -225,6 +235,11 @@ public class Launcher extends JFrame {
         mServerStatus.setBackground(OFFLINE_COLOR);
       }
     }
+
+    webserverStartButton.setEnabled(isKeystorePresent()
+        && !mServerOnline);
+    webserverStopButton.setEnabled(mServerOnline);
+    sslCertButton.setEnabled(!mServerOnline);
   }
 
   private SchedulerUI scheduler = null;
@@ -437,7 +452,6 @@ public class Launcher extends JFrame {
    * Create the certificate store to be used by tomcat.
    */
   private void createCertificateStore() {
-
     final Path tomcatConfDir = getTomcatConfDir();
     if (null == tomcatConfDir) {
       throw new FLLRuntimeException("Cannot find tomcat conf directory, cannot write keystore.");
@@ -480,6 +494,18 @@ public class Launcher extends JFrame {
       }
     }
     return null;
+  }
+
+  private boolean isKeystorePresent() {
+    final Path tomcatConfDir = getTomcatConfDir();
+    if (null == tomcatConfDir) {
+      LOGGER.error("Cannot find tomcat conf directory.");
+      return false;
+    }
+
+    final Path keystoreFilename = tomcatConfDir.resolve(KEYSTORE_FILENAME);
+
+    return Files.exists(keystoreFilename);
   }
 
 }
