@@ -1,23 +1,26 @@
-
 /*
  * Copyright (c) 2018 High Tech Kids.  All rights reserved
  * HighTechKids is on the web at: http://www.hightechkids.org
  * This code is released under GPL; see LICENSE.txt for details.
  */
+package fll.web;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Security;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.stream.IntStream;
@@ -33,13 +36,10 @@ import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import fll.util.FLLRuntimeException;
-import fll.util.LogUtils;
-import fll.web.WebUtils;
 
 /**
  * Generate a self-signed certificate for all IP addresses on this host plus the
@@ -57,11 +57,6 @@ public class SelfSignedCertificate {
 
   private static final String KEYSTORE_PASSWORD = "changeit";
 
-  /**
-   * This filename must match the filename in the server.xml for tomcat.
-   */
-  private static final String KEYSTORE_FILENAME = "tomcat.keystore";
-
   private static final int CERTIFICATE_BITS = 4096;
 
   static {
@@ -69,19 +64,25 @@ public class SelfSignedCertificate {
     Security.addProvider(new BouncyCastleProvider());
   }
 
-  /**
-   * @param args
-   * @throws Exception
-   */
-  public static void main(final String[] args) throws Exception {
-    LogUtils.initializeLogging();
-
-    final SelfSignedCertificate signedCertificate = new SelfSignedCertificate();
-    signedCertificate.createCertificate();
-    LOGGER.info("Finished");
+  private SelfSignedCertificate() {
   }
 
-  private X509Certificate createCertificate() throws Exception {
+  /**
+   * Create a certificate for this host and all common hostnames for Minnesota
+   * servers.
+   * 
+   * @param keystoreFilename where to store the certificate, this creates a new
+   *          keystore
+   * @throws NoSuchAlgorithmException If the certificate algorithm cannot be found
+   * @throws OperatorCreationException If there is an error creating the
+   *           certificate
+   * @throws CertificateException if there is a general error creating the
+   *           certificate
+   * @throws IOException If there is a problem writing the keystore
+   * @throws KeyStoreException If there is a problem writing the keystore
+   */
+  public static void createAndStoreCertificate(final Path keystoreFilename)
+      throws NoSuchAlgorithmException, OperatorCreationException, CertificateException, KeyStoreException, IOException {
     final KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(CERTIFICATE_ALGORITHM);
     keyPairGenerator.initialize(CERTIFICATE_BITS, new SecureRandom());
     final KeyPair keyPair = keyPairGenerator.generateKeyPair();
@@ -92,7 +93,8 @@ public class SelfSignedCertificate {
     notAfter.add(Calendar.YEAR, 1);
     final X500Name issuer = new X500Name(CERTIFICATE_DN);
     final SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded());
-    // use the current time as the serial number to avoid collisions when generating new certificates
+    // use the current time as the serial number to avoid collisions when generating
+    // new certificates
     final X509v3CertificateBuilder v3CertGen = new X509v3CertificateBuilder(issuer,
                                                                             new BigInteger(String.valueOf(System.currentTimeMillis())),
                                                                             notBefore.getTime(), notAfter.getTime(),
@@ -118,9 +120,7 @@ public class SelfSignedCertificate {
     final X509Certificate cert = new JcaX509CertificateConverter().setProvider(new BouncyCastleProvider())
                                                                   .getCertificate(holder);
 
-    saveCert(cert, keyPair.getPrivate());
-
-    return cert;
+    saveCert(keystoreFilename, cert, keyPair.getPrivate());
   }
 
   private static void addNamesForMinnesotaLaptops(final ASN1EncodableVector names) {
@@ -149,50 +149,38 @@ public class SelfSignedCertificate {
           final String name = org.xbill.DNS.Address.getHostName(address);
           names.add(new GeneralName(GeneralName.dNSName, name));
         } catch (final UnknownHostException e) {
-          LOGGER.trace("Could not resolve IP: {}", addrStr, e);
+          LOGGER.trace("Could not resolve IP: "
+              + addrStr, e);
         }
       } // not loopback
     } // foreach IP
   }
 
-  private void saveCert(final X509Certificate cert,
-                        final PrivateKey key)
-      throws Exception {
+  /**
+   * Create a keystore and put the certificate in it.
+   * 
+   * @param keystoreFile where to create the keystore
+   * @param cert the certificate to store
+   * @param key the private key to store
+   * @throws KeyStoreException
+   * @throws IOException if there is a problem writing the keystore
+   * @throws CertificateException if there is a problem with the certificate
+   * @throws NoSuchAlgorithmException if the certificate algorithm cannot be found
+   */
+  private static void saveCert(final Path keystoreFile,
+                               final X509Certificate cert,
+                               final PrivateKey key)
+      throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
     final KeyStore keyStore = KeyStore.getInstance("PKCS12");
     keyStore.load(null, null);
     keyStore.setKeyEntry(CERTIFICATE_ALIAS, key, KEYSTORE_PASSWORD.toCharArray(),
                          new java.security.cert.Certificate[] { cert });
-    final Path tomcatConfDir = getTomcatConfDir();
-    if (null == tomcatConfDir) {
-      throw new FLLRuntimeException("Cannot find tomcat conf directory, cannot write keystore.");
-    }
 
-    final Path keystoreFile = tomcatConfDir.resolve(KEYSTORE_FILENAME);
     try (OutputStream out = Files.newOutputStream(keystoreFile)) {
       keyStore.store(out, KEYSTORE_PASSWORD.toCharArray());
     }
-    LOGGER.info("Wrote keystore at {}", keystoreFile.toString());
-  }
-
-  /**
-   * Find the path to the tomcat conf directory.
-   * 
-   * @return null if the directory cannot be found
-   */
-  private Path getTomcatConfDir() {
-    final Path[] possibleLocations = { //
-                                       Paths.get("tomcat", "conf"), //
-                                       Paths.get("."), //
-                                       Paths.get("build", "tomcat", "conf"), //
-                                       Paths.get("scoring", "build", "tomcat", "conf") //
-    };
-    for (final Path location : possibleLocations) {
-      final Path check = location.resolve("server.xml");
-      if (Files.exists(check)) {
-        return location;
-      }
-    }
-    return null;
+    LOGGER.debug("Wrote keystore to "
+        + keystoreFile.toString());
   }
 
 }
