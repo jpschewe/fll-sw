@@ -19,6 +19,12 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -33,13 +39,16 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 
 import org.apache.log4j.Logger;
+import org.bouncycastle.operator.OperatorCreationException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.scheduler.SchedulerUI;
 import fll.subjective.SubjectiveFrame;
 import fll.util.FLLInternalException;
+import fll.util.FLLRuntimeException;
 import fll.util.GuiExceptionHandler;
 import fll.util.LogUtils;
+import fll.web.SelfSignedCertificate;
 import net.mtu.eggplant.util.gui.GraphicsUtils;
 
 /**
@@ -131,6 +140,13 @@ public class Launcher extends JFrame {
 
     final JPanel buttonBox = new JPanel(new GridLayout(0, 2));
     cpane.add(buttonBox, BorderLayout.CENTER);
+
+    final JButton sslCertButton = new JButton("Create web server certificate");
+    sslCertButton.setToolTipText("Create the SSL certificate used by the web server. This should be run on a computer before the web server is started for the first time.");
+    sslCertButton.addActionListener(ae -> {
+      createCertificateStore();
+    });
+    buttonBox.add(sslCertButton);
 
     final JButton webserverStartButton = new JButton("Start web server");
     webserverStartButton.addActionListener(ae -> {
@@ -406,10 +422,64 @@ public class Launcher extends JFrame {
     }
     return null;
   }
-  
+
   private static boolean isWindows() {
     final boolean windows = System.getProperty("os.name").startsWith("Windows");
     return windows;
+  }
+
+  /**
+   * This filename must match the filename in the server.xml for tomcat.
+   */
+  private static final String KEYSTORE_FILENAME = "tomcat.keystore";
+
+  /**
+   * Create the certificate store to be used by tomcat.
+   */
+  private void createCertificateStore() {
+
+    final Path tomcatConfDir = getTomcatConfDir();
+    if (null == tomcatConfDir) {
+      throw new FLLRuntimeException("Cannot find tomcat conf directory, cannot write keystore.");
+    }
+    final Path keystoreFilename = tomcatConfDir.resolve(KEYSTORE_FILENAME);
+
+    try {
+      SelfSignedCertificate.createAndStoreCertificate(keystoreFilename);
+    } catch (final IOException e) {
+      LOGGER.error("I/O error writing keystore "
+          + e.getMessage(), e);
+
+      JOptionPane.showMessageDialog(this, "I/O error writing keystore "
+          + e.getMessage());
+    } catch (NoSuchAlgorithmException | OperatorCreationException | CertificateException | KeyStoreException e) {
+      LOGGER.error("Internal error creating SSL certificate: "
+          + e.getMessage(), e);
+
+      JOptionPane.showMessageDialog(this, "Internal error creating SSL certificate: "
+          + e.getMessage());
+    }
+  }
+
+  /**
+   * Find the path to the tomcat conf directory.
+   * 
+   * @return null if the directory cannot be found
+   */
+  private static Path getTomcatConfDir() {
+    final Path[] possibleLocations = { //
+                                       Paths.get("tomcat", "conf"), //
+                                       Paths.get("."), //
+                                       Paths.get("build", "tomcat", "conf"), //
+                                       Paths.get("scoring", "build", "tomcat", "conf") //
+    };
+    for (final Path location : possibleLocations) {
+      final Path check = location.resolve("server.xml");
+      if (Files.exists(check)) {
+        return location;
+      }
+    }
+    return null;
   }
 
 }
