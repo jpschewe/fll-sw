@@ -109,7 +109,7 @@ public class SelfSignedCertificate {
     final DERSequence subjectAlternativeNames = new DERSequence(names);
     v3CertGen.addExtension(Extension.subjectAlternativeName, false, subjectAlternativeNames);
 
-    final ContentSigner signer = new JcaContentSignerBuilder("SHA1WithRSA").setProvider(new BouncyCastleProvider())
+    final ContentSigner signer = new JcaContentSignerBuilder("SHA256WithRSA").setProvider(new BouncyCastleProvider())
                                                                            .build(keyPair.getPrivate());
     final X509CertificateHolder holder = v3CertGen.build(signer);
     final X509Certificate cert = new JcaX509CertificateConverter().setProvider(new BouncyCastleProvider())
