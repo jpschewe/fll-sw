@@ -92,11 +92,14 @@ public class SelfSignedCertificate {
     notAfter.add(Calendar.YEAR, 1);
     final X500Name issuer = new X500Name(CERTIFICATE_DN);
     final SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded());
-    final X509v3CertificateBuilder v3CertGen = new X509v3CertificateBuilder(issuer, BigInteger.ONE, notBefore.getTime(),
-                                                                            notAfter.getTime(), issuer, publicKeyInfo);
+    // use the current time as the serial number to avoid collisions when generating new certificates
+    final X509v3CertificateBuilder v3CertGen = new X509v3CertificateBuilder(issuer,
+                                                                            new BigInteger(String.valueOf(System.currentTimeMillis())),
+                                                                            notBefore.getTime(), notAfter.getTime(),
+                                                                            issuer, publicKeyInfo);
 
     final ASN1EncodableVector names = new ASN1EncodableVector();
-    
+
     // always add localhost
     names.add(new GeneralName(GeneralName.dNSName, "localhost"));
     names.add(new GeneralName(GeneralName.dNSName, "127.0.0.1"));
@@ -110,7 +113,7 @@ public class SelfSignedCertificate {
     v3CertGen.addExtension(Extension.subjectAlternativeName, false, subjectAlternativeNames);
 
     final ContentSigner signer = new JcaContentSignerBuilder("SHA256WithRSA").setProvider(new BouncyCastleProvider())
-                                                                           .build(keyPair.getPrivate());
+                                                                             .build(keyPair.getPrivate());
     final X509CertificateHolder holder = v3CertGen.build(signer);
     final X509Certificate cert = new JcaX509CertificateConverter().setProvider(new BouncyCastleProvider())
                                                                   .getCertificate(holder);
