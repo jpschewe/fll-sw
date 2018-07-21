@@ -5,11 +5,13 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
@@ -35,11 +37,13 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.WebUtils;
 
 /**
- * 
+ * Generate a self-signed certificate for all IP addresses on this host plus the
+ * standard IP addresses used by the Minnesota routers.
  */
 public class SelfSignedCertificate {
 
@@ -51,7 +55,12 @@ public class SelfSignedCertificate {
 
   private static final String CERTIFICATE_DN = "O=FLL-SW, ST=MN, C=US";
 
-  private static final String CERTIFICATE_NAME = "keystore.test";
+  private static final String KEYSTORE_PASSWORD = "changeit";
+
+  /**
+   * This filename must match the filename in the server.xml for tomcat.
+   */
+  private static final String KEYSTORE_FILENAME = "tomcat.keystore";
 
   private static final int CERTIFICATE_BITS = 4096;
 
@@ -69,7 +78,7 @@ public class SelfSignedCertificate {
 
     final SelfSignedCertificate signedCertificate = new SelfSignedCertificate();
     signedCertificate.createCertificate();
-    System.out.println("Finished");
+    LOGGER.info("Finished");
   }
 
   private X509Certificate createCertificate() throws Exception {
@@ -87,8 +96,9 @@ public class SelfSignedCertificate {
                                                                             notAfter.getTime(), issuer, publicKeyInfo);
 
     final ASN1EncodableVector names = new ASN1EncodableVector();
+    
+    // always add localhost
     names.add(new GeneralName(GeneralName.dNSName, "localhost"));
-
     names.add(new GeneralName(GeneralName.dNSName, "127.0.0.1"));
     names.add(new GeneralName(GeneralName.iPAddress, "127.0.0.1"));
 
@@ -145,11 +155,41 @@ public class SelfSignedCertificate {
   private void saveCert(final X509Certificate cert,
                         final PrivateKey key)
       throws Exception {
-    KeyStore keyStore = KeyStore.getInstance("PKCS12");
+    final KeyStore keyStore = KeyStore.getInstance("PKCS12");
     keyStore.load(null, null);
-    keyStore.setKeyEntry(CERTIFICATE_ALIAS, key, "changit".toCharArray(),
+    keyStore.setKeyEntry(CERTIFICATE_ALIAS, key, KEYSTORE_PASSWORD.toCharArray(),
                          new java.security.cert.Certificate[] { cert });
-    File file = new File(".", CERTIFICATE_NAME);
-    keyStore.store(new FileOutputStream(file), "changeit".toCharArray());
+    final Path tomcatConfDir = getTomcatConfDir();
+    if (null == tomcatConfDir) {
+      throw new FLLRuntimeException("Cannot find tomcat conf directory, cannot write keystore.");
+    }
+
+    final Path keystoreFile = tomcatConfDir.resolve(KEYSTORE_FILENAME);
+    try (OutputStream out = Files.newOutputStream(keystoreFile)) {
+      keyStore.store(out, KEYSTORE_PASSWORD.toCharArray());
+    }
+    LOGGER.info("Wrote keystore at {}", keystoreFile.toString());
   }
+
+  /**
+   * Find the path to the tomcat conf directory.
+   * 
+   * @return null if the directory cannot be found
+   */
+  private Path getTomcatConfDir() {
+    final Path[] possibleLocations = { //
+                                       Paths.get("tomcat", "conf"), //
+                                       Paths.get("."), //
+                                       Paths.get("build", "tomcat", "conf"), //
+                                       Paths.get("scoring", "build", "tomcat", "conf") //
+    };
+    for (final Path location : possibleLocations) {
+      final Path check = location.resolve("server.xml");
+      if (Files.exists(check)) {
+        return location;
+      }
+    }
+    return null;
+  }
+
 }
