@@ -115,7 +115,8 @@ public final class WebUtils {
         if (!address.isLoopbackAddress()) {
           // don't tell the user about connecting to localhost
 
-          final String url = "http://"
+          final String url = request.getScheme()
+              + "://"
               + addrStr
               + ":"
               + request.getLocalPort()
@@ -126,7 +127,8 @@ public final class WebUtils {
           try {
             final String name = org.xbill.DNS.Address.getHostName(address);
 
-            final String nameurl = "http://"
+            final String nameurl = request.getScheme()
+                + "://"
                 + name
                 + ":"
                 + request.getLocalPort()
