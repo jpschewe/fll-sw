@@ -75,6 +75,7 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
 
 /*
  * TODO
+ * - add goal isn't showing up until performance is made small and then large again
  * - add validity check 
  *   - call from the UI
  *     - display indicator on each element if it's valid or not?
