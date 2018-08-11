@@ -48,7 +48,7 @@ import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.GuiExceptionHandler;
 import fll.util.LogUtils;
-import fll.web.SelfSignedCertificate;
+import fll.web.CertificateUtils;
 import net.mtu.eggplant.util.gui.GraphicsUtils;
 
 /**
@@ -459,7 +459,7 @@ public class Launcher extends JFrame {
     final Path keystoreFilename = tomcatConfDir.resolve(KEYSTORE_FILENAME);
 
     try {
-      SelfSignedCertificate.createAndStoreCertificate(keystoreFilename);
+      CertificateUtils.createAndStoreCertificate(keystoreFilename);
     } catch (final IOException e) {
       LOGGER.error("I/O error writing keystore "
           + e.getMessage(), e);
