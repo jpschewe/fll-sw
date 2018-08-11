@@ -42,12 +42,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Generate a self-signed certificate for all IP addresses on this host plus the
- * standard IP addresses used by the Minnesota routers.
+ * Utilities for working with certificates.
  */
-public class SelfSignedCertificate {
+public class CertificateUtils {
 
-  private static Logger LOGGER = LoggerFactory.getLogger(SelfSignedCertificate.class);
+  private static Logger LOGGER = LoggerFactory.getLogger(CertificateUtils.class);
 
   private static final String CERTIFICATE_ALIAS = "tomcat";
 
@@ -64,7 +63,7 @@ public class SelfSignedCertificate {
     Security.addProvider(new BouncyCastleProvider());
   }
 
-  private SelfSignedCertificate() {
+  private CertificateUtils() {
   }
 
   /**
