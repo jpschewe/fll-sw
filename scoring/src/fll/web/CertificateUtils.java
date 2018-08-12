@@ -80,7 +80,9 @@ public class CertificateUtils {
 
   /**
    * Create a certificate for this host and all common hostnames for Minnesota
-   * servers.
+   * servers. The generated certificate is good for 1 month. This should balance
+   * the ability to run a tournament and keep from exposing users's computers to
+   * the threat of another entity using this certificate for evil means.
    * 
    * @param keystoreFilename where to store the certificate, this creates a new
    *          keystore
@@ -101,7 +103,7 @@ public class CertificateUtils {
     final Calendar notBefore = Calendar.getInstance();
     notBefore.add(Calendar.HOUR_OF_DAY, -1);
     final Calendar notAfter = (Calendar) notBefore.clone();
-    notAfter.add(Calendar.YEAR, 1);
+    notAfter.add(Calendar.MONTH, 1);
     final X500Name issuer = new X500Name(CERTIFICATE_DN);
     final SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded());
     // use the current time as the serial number to avoid collisions when generating
@@ -112,7 +114,7 @@ public class CertificateUtils {
                                                                             issuer, publicKeyInfo);
 
     v3CertGen.addExtension(Extension.basicConstraints, true, new BasicConstraints(true));
-    
+
     final ASN1EncodableVector names = new ASN1EncodableVector();
 
     // always add localhost
