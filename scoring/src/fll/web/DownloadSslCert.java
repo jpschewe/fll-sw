@@ -7,15 +7,11 @@
 package fll.web;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -53,24 +49,18 @@ public class DownloadSslCert extends BaseFLLServlet {
     }
 
     try {
-      final KeyStore keyStore = KeyStore.getInstance("PKCS12");
-      try (InputStream in = Files.newInputStream(keystoreFile)) {
-        keyStore.load(in, CertificateUtils.KEYSTORE_PASSWORD.toCharArray());
-      } catch (NoSuchAlgorithmException | CertificateException | IOException e) {
-        throw new FLLInternalException("Error loaoding keystore: "
-            + e.getMessage(), e);
-      }
+      final Certificate cert = CertificateUtils.getCertificate(keystoreFile);
 
       response.reset();
       response.setContentType("application/x-x509-ca-cert");
       response.setHeader("Content-Disposition", "filename=fll-sw.crt");
 
-      final Certificate cert = keyStore.getCertificate(CertificateUtils.CERTIFICATE_ALIAS);
       try (JcaPEMWriter pw = new JcaPEMWriter(response.getWriter())) {
         pw.writeObject(cert);
       }
     } catch (final KeyStoreException e) {
-      throw new FLLInternalException("Cannot find parser for keystore", e);
+      throw new FLLInternalException("Cannot find load keystore: "
+          + e.getMessage(), e);
     }
 
   }
