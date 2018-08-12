@@ -25,6 +25,7 @@ import java.nio.file.Paths;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateParsingException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -154,7 +155,8 @@ public class Launcher extends JFrame {
     sslCertButton.addActionListener(ae -> {
       createCertificateStore();
 
-      webserverStartButton.setEnabled(isKeystorePresent() && !mServerOnline);
+      webserverStartButton.setEnabled(checkCertificateStore()
+          && !mServerOnline);
     });
     buttonBox.add(sslCertButton);
 
@@ -162,7 +164,7 @@ public class Launcher extends JFrame {
       controlWebserver(true);
     });
     buttonBox.add(webserverStartButton);
-    webserverStartButton.setEnabled(isKeystorePresent());
+    webserverStartButton.setEnabled(checkCertificateStore());
 
     webserverStopButton = new JButton("Stop web server");
     webserverStopButton.addActionListener(ae -> {
@@ -236,7 +238,7 @@ public class Launcher extends JFrame {
       }
     }
 
-    webserverStartButton.setEnabled(isKeystorePresent()
+    webserverStartButton.setEnabled(checkCertificateStore()
         && !mServerOnline);
     webserverStopButton.setEnabled(mServerOnline);
     sslCertButton.setEnabled(!mServerOnline);
@@ -477,6 +479,33 @@ public class Launcher extends JFrame {
   }
 
   /**
+   * @return if the certificate store contains all of the IP addresses of this
+   *         system and is not expired.
+   */
+  private boolean checkCertificateStore() {
+    final Path tomcatConfDir = getTomcatConfDir();
+    if (null == tomcatConfDir) {
+      throw new FLLRuntimeException("Cannot find tomcat conf directory, cannot write keystore.");
+    }
+    final Path keystoreFile = tomcatConfDir.resolve(KEYSTORE_FILENAME);
+
+    if (!Files.exists(keystoreFile)) {
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Keystore doesn't exist: "
+            + keystoreFile);
+      }
+      return false;
+    }
+
+    try {
+      return CertificateUtils.checkCertificateStore(keystoreFile);
+    } catch (CertificateParsingException | KeyStoreException e) {
+      throw new FLLInternalException("Error checking certificate store: "
+          + e.getMessage(), e);
+    }
+  }
+
+  /**
    * Find the path to the tomcat conf directory.
    * 
    * @return null if the directory cannot be found
@@ -495,18 +524,6 @@ public class Launcher extends JFrame {
       }
     }
     return null;
-  }
-
-  private boolean isKeystorePresent() {
-    final Path tomcatConfDir = getTomcatConfDir();
-    if (null == tomcatConfDir) {
-      LOGGER.error("Cannot find tomcat conf directory.");
-      return false;
-    }
-
-    final Path keystoreFilename = tomcatConfDir.resolve(KEYSTORE_FILENAME);
-
-    return Files.exists(keystoreFilename);
   }
 
 }

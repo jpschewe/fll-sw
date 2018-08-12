@@ -8,7 +8,6 @@ package fll.web;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Writer;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -25,8 +24,15 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateNotYetValidException;
+import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
@@ -40,12 +46,13 @@ import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import fll.util.FLLInternalException;
 
 /**
  * Utilities for working with certificates.
@@ -198,21 +205,91 @@ public class CertificateUtils {
         + keystoreFile.toString());
   }
 
-  public static void main(final String[] args)
-      throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
-    final Path keystoreFilename = Paths.get("/home/jpschewe/projects/fll-sw/working-dir/scoring/build/tomcat/conf/tomcat.keystore");
-
+  /**
+   * @param keystoreFile the path to the keystore used by the webserver
+   * @return the SSL certificate used for the web server
+   * @throws KeyStoreException see {@link KeyStore#getInstance(String)} using
+   *           "PKCS12" for the type and see
+   *           {@link KeyStore#getCertificate(String)}
+   */
+  public static Certificate getCertificate(final Path keystoreFile) throws KeyStoreException {
     final KeyStore keyStore = KeyStore.getInstance("PKCS12");
-    try (InputStream in = Files.newInputStream(keystoreFilename)) {
-      keyStore.load(in, KEYSTORE_PASSWORD.toCharArray());
+    try (InputStream in = Files.newInputStream(keystoreFile)) {
+      keyStore.load(in, CertificateUtils.KEYSTORE_PASSWORD.toCharArray());
+    } catch (NoSuchAlgorithmException | CertificateException | IOException e) {
+      throw new FLLInternalException("Error loaoding keystore: "
+          + e.getMessage(), e);
     }
 
-    final Certificate cert = keyStore.getCertificate(CERTIFICATE_ALIAS);
-    try (Writer writer = Files.newBufferedWriter(Paths.get("/home/jpschewe/projects/fll-sw/working-dir/output.cert"))) {
-      try (JcaPEMWriter pw = new JcaPEMWriter(writer)) {
-        pw.writeObject(cert);
+    final Certificate cert = keyStore.getCertificate(CertificateUtils.CERTIFICATE_ALIAS);
+    return cert;
+  }
+
+  /**
+   * @param cert the certificate to check
+   * @return if the current date is within the validity dates of the certificate
+   * @see X509Certificate#getNotAfter()
+   * @see X509Certificate#getNotBefore()
+   */
+  public static boolean isCertificateDateValid(final X509Certificate cert) {
+    try {
+      cert.checkValidity();
+      return true;
+    } catch (CertificateExpiredException | CertificateNotYetValidException e) {
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Invalid cert: "
+            + e.getMessage(), e);
       }
+      return false;
     }
+  }
+
+  /**
+   * Documented at {@link X509Certificate#getSubjectAlternativeNames()}
+   */
+  private static final int IP_GENERAL_NAME_TYPE = 7;
+
+  private static Collection<String> getCertificateIps(final X509Certificate cert) throws CertificateParsingException {
+    final Collection<List<?>> altNames = cert.getSubjectAlternativeNames();
+    if (null == altNames) {
+      return Collections.emptyList();
+    }
+
+    return altNames.stream().filter(e -> e.get(0).equals(IP_GENERAL_NAME_TYPE)).map(e -> e.get(1))
+                   .filter(e -> e instanceof String).map(e -> (String) e).collect(Collectors.toList());
+  }
+
+  /**
+   * @param keystoreFile the path to the keystore to check
+   * @return if the certificate store contains all of the IP addresses of this
+   *         system and is not expired.
+   * @throws CertificateParsingException if there is a problem parsing the found certificate
+   * @throws KeyStoreException if there is a problem reading the keystore 
+   */
+  public static boolean checkCertificateStore(final Path keystoreFile) throws CertificateParsingException, KeyStoreException {
+    // currently valid?
+    final Certificate cert = getCertificate(keystoreFile);
+    if (cert instanceof X509Certificate) {
+      final X509Certificate cert509 = (X509Certificate) cert;
+      if (!isCertificateDateValid(cert509)) {
+        return false;
+      }
+
+      final Collection<String> certificateIps = getCertificateIps(cert509);
+      for (final InetAddress address : WebUtils.getAllIPs()) {
+        final String addrStr = WebUtils.getHostAddress(address);
+        if (!certificateIps.contains(addrStr)) {
+          return false;
+        }
+      }
+
+      return true;
+
+    } else {
+      LOGGER.warn("Checking non-x509 certificate, cannot validate, assuming valid");
+      return true;
+    }
+  }
 
   }
 
