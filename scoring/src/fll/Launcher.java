@@ -445,8 +445,9 @@ public class Launcher extends JFrame {
 
   /**
    * This filename must match the filename in the server.xml for tomcat.
+   * This file lives in the tomcat conf directory.
    */
-  private static final String KEYSTORE_FILENAME = "tomcat.keystore";
+  public static final String KEYSTORE_FILENAME = "tomcat.keystore";
 
   /**
    * Create the certificate store to be used by tomcat.

@@ -46,7 +46,11 @@
 			on the computer that's used to display scores with the projector.</li>
 
 		<li><a href="subjective/Auth">Subjective Web application</a>
-			Follow this link on the subjective judge's electronic devices.</li>
+			Follow this link on the subjective judge's electronic devices.
+			<ul>
+				<li><a href="fll-sw.crt">Security certificate</a> for alternate
+					subjective web application access</li>
+			</ul></li>
 
 
 	</ul>
