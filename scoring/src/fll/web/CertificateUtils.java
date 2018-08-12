@@ -54,13 +54,19 @@ public class CertificateUtils {
 
   private static Logger LOGGER = LoggerFactory.getLogger(CertificateUtils.class);
 
-  private static final String CERTIFICATE_ALIAS = "tomcat";
+  /**
+   * Alias for the SSL certificate inside the keystore.
+   */
+  public static final String CERTIFICATE_ALIAS = "tomcat";
 
   private static final String CERTIFICATE_ALGORITHM = "RSA";
 
   private static final String CERTIFICATE_DN = "O=FLL-SW, ST=MN, C=US";
 
-  private static final String KEYSTORE_PASSWORD = "changeit";
+  /**
+   * Password used for the tomcat keystore.
+   */
+  public static final String KEYSTORE_PASSWORD = "changeit";
 
   private static final int CERTIFICATE_BITS = 4096;
 
@@ -188,6 +194,24 @@ public class CertificateUtils {
     }
     LOGGER.debug("Wrote keystore to "
         + keystoreFile.toString());
+  }
+
+  public static void main(final String[] args)
+      throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+    final Path keystoreFilename = Paths.get("/home/jpschewe/projects/fll-sw/working-dir/scoring/build/tomcat/conf/tomcat.keystore");
+
+    final KeyStore keyStore = KeyStore.getInstance("PKCS12");
+    try (InputStream in = Files.newInputStream(keystoreFilename)) {
+      keyStore.load(in, KEYSTORE_PASSWORD.toCharArray());
+    }
+
+    final Certificate cert = keyStore.getCertificate(CERTIFICATE_ALIAS);
+    try (Writer writer = Files.newBufferedWriter(Paths.get("/home/jpschewe/projects/fll-sw/working-dir/output.cert"))) {
+      try (JcaPEMWriter pw = new JcaPEMWriter(writer)) {
+        pw.writeObject(cert);
+      }
+    }
+
   }
 
 }
