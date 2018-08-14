@@ -128,6 +128,8 @@ public class Launcher extends JFrame {
 
   private final JButton webserverStopButton;
 
+  private final JButton mainPage;
+
   public Launcher() {
     super();
     setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -159,7 +161,7 @@ public class Launcher extends JFrame {
     });
     buttonBox.add(webserverStopButton);
 
-    final JButton mainPage = new JButton("Visit the main web page");
+    mainPage = new JButton("Visit the main web page");
     mainPage.addActionListener(ae -> {
       loadFllHtml();
     });
@@ -227,6 +229,7 @@ public class Launcher extends JFrame {
 
     webserverStartButton.setEnabled(!mServerOnline);
     webserverStopButton.setEnabled(mServerOnline);
+    mainPage.setEnabled(mServerOnline);
   }
 
   private SchedulerUI scheduler = null;
@@ -304,16 +307,16 @@ public class Launcher extends JFrame {
       }
     }
   }
-  
+
   private void startWebserver() {
-    if(!checkCertificateStore()) {
+    if (!checkCertificateStore()) {
       LOGGER.trace("Creating certificate store");
       createCertificateStore();
     }
-    
+
     controlWebserver(true);
   }
-  
+
   private void stopWebserver() {
     controlWebserver(false);
   }
