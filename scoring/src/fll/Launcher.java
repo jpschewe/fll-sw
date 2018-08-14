@@ -124,8 +124,6 @@ public class Launcher extends JFrame {
 
   private static final Color OFFLINE_COLOR = Color.RED;
 
-  private final JButton sslCertButton;
-
   private final JButton webserverStartButton;
 
   private final JButton webserverStopButton;
@@ -148,27 +146,16 @@ public class Launcher extends JFrame {
     final JPanel buttonBox = new JPanel(new GridLayout(0, 2));
     cpane.add(buttonBox, BorderLayout.CENTER);
 
-    sslCertButton = new JButton("Create web server certificate");
     webserverStartButton = new JButton("Start web server");
 
-    sslCertButton.setToolTipText("Create the SSL certificate used by the web server. This should be run on a computer before the web server is started for the first time.");
-    sslCertButton.addActionListener(ae -> {
-      createCertificateStore();
-
-      webserverStartButton.setEnabled(checkCertificateStore()
-          && !mServerOnline);
-    });
-    buttonBox.add(sslCertButton);
-
     webserverStartButton.addActionListener(ae -> {
-      controlWebserver(true);
+      startWebserver();
     });
     buttonBox.add(webserverStartButton);
-    webserverStartButton.setEnabled(checkCertificateStore());
 
     webserverStopButton = new JButton("Stop web server");
     webserverStopButton.addActionListener(ae -> {
-      controlWebserver(false);
+      stopWebserver();
     });
     buttonBox.add(webserverStopButton);
 
@@ -238,10 +225,8 @@ public class Launcher extends JFrame {
       }
     }
 
-    webserverStartButton.setEnabled(checkCertificateStore()
-        && !mServerOnline);
+    webserverStartButton.setEnabled(!mServerOnline);
     webserverStopButton.setEnabled(mServerOnline);
-    sslCertButton.setEnabled(!mServerOnline);
   }
 
   private SchedulerUI scheduler = null;
@@ -318,6 +303,19 @@ public class Launcher extends JFrame {
             + e.getMessage(), "Error Launching Scheduler", JOptionPane.ERROR_MESSAGE);
       }
     }
+  }
+  
+  private void startWebserver() {
+    if(!checkCertificateStore()) {
+      LOGGER.trace("Creating certificate store");
+      createCertificateStore();
+    }
+    
+    controlWebserver(true);
+  }
+  
+  private void stopWebserver() {
+    controlWebserver(false);
   }
 
   private transient Thread webserverThread = null;
