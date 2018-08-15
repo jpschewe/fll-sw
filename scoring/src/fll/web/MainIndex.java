@@ -18,12 +18,6 @@ import fll.xml.ChallengeDescription;
 public class MainIndex {
 
   /**
-   * Port used to listen for SSL connections, must match webserver configuration
-   * file.
-   */
-  public static final int SSL_PORT = 9081;
-
-  /**
    * Populate the page context with information for the jsp.
    * pageContext:
    * <ul>
@@ -46,7 +40,7 @@ public class MainIndex {
 
     pageContext.setAttribute("urls", WebUtils.getAllURLs(request));
 
-    final String baseSslUrl = String.format("https://%s:%d%s", request.getLocalName(), SSL_PORT,
+    final String baseSslUrl = String.format("https://%s:%d%s", request.getLocalName(), WebUtils.SSL_PORT,
                                             request.getContextPath());
     pageContext.setAttribute("baseSslUrl", baseSslUrl);
   }

@@ -50,6 +50,12 @@ public final class WebUtils {
 
   private static final long IP_CACHE_LIFETIME = 300000;
 
+  /**
+   * Port used to listen for SSL connections, must match webserver configuration
+   * file.
+   */
+  public static final int SSL_PORT = 9081;
+
   private WebUtils() {
     // no instances
   }
