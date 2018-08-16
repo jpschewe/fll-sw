@@ -1,3 +1,28 @@
+# Android
+
+## Chrome
+
+1. Click on the link to download the certificate
+1. Enter pin or fingerprint if prompted
+1. name the certificate 'FLL-SW'
+1. leave used for at "VPN and apps"
+1. Click Ok
+
+
+## Firefox
+
+Firefox on Android isn't supported. The instructions below *should* work ,but don't seem to. Continue at your own risk.
+
+1. Click on the link to download the certificate
+1. A dialog will appear asking where to trust this certificate
+1. Click Trust this certificate to identify websites
+1. Click OK
+
+When visiting the site you may get an error about a self-signed certificate. If you do, follow the instructions below:
+1. Click "I Understand the Risks"
+1. Click "Add permanent exception"
+
+
 # Firefox
 
 1. Click on the link to download the certificate
