@@ -168,6 +168,24 @@ public class Launcher extends JFrame {
     });
     buttonBox.add(subjectiveButton);
 
+    final JButton sponsorLogos = new JButton("Sponsor Logos");
+    sponsorLogos.setToolTipText("Opens the directory where the sponsor logos go");
+    sponsorLogos.addActionListener(ae -> {
+      final File dir = getSponsorLogosDirectory();
+      if (null != dir) {
+        try {
+          Desktop.getDesktop().open(dir);
+        } catch (final IOException e) {
+          final String message = "Error opening sponsor_logos directory: "
+              + e.getMessage();
+          LOGGER.error(message, e);
+          JOptionPane.showMessageDialog(this, message, "ERROR", JOptionPane.ERROR_MESSAGE);
+        }
+      } else {
+        JOptionPane.showMessageDialog(this, "Cannot find sponsor_logos directory.", "ERROR", JOptionPane.ERROR_MESSAGE);
+      }
+    });
+    buttonBox.add(sponsorLogos);
     final JButton exit = new JButton("Exit");
     exit.addActionListener(ae -> {
       setVisible(false);
