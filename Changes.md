@@ -1,3 +1,4 @@
+* #631 - launcher buttons
 * #637 - Correct PDF footers showing the total number of pages
 * #641 - Fix computed score report format when there is no schedule
 
