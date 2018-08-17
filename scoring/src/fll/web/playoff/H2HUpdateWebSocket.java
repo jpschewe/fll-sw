@@ -198,7 +198,11 @@ public class H2HUpdateWebSocket {
 
       } catch (final IllegalStateException e) {
         LOGGER.error("Got an illegal state exception, likely from an invalid HttpSession object, skipping update of session: "
-            + session.getId(), e);
+            + session.getId()
+            + " websocket session: "
+            + session.getId()
+            + " open: "
+            + session.isOpen(), e);
       }
     } // open session
   }
