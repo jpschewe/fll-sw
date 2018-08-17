@@ -65,7 +65,7 @@ public class DisplayQueryServlet extends BaseFLLServlet {
           + "/scoreboard/main.jsp";
     } else if (displayInfo.isSlideshow()) {
       return contextPath
-          + "/slideshow/index.jsp";
+          + "/slideshow.jsp";
     } else if (displayInfo.isHeadToHead()) {
       return contextPath
           + "/playoff/remoteMain.jsp";
