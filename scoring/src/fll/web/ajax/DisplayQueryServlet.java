@@ -78,7 +78,7 @@ public class DisplayQueryServlet extends BaseFLLServlet {
           + "/report/finalist/FinalistTeams.jsp?finalistTeamsScroll=true";
     } else if (displayInfo.isSpecial()) {
       return contextPath
-          + "/" + displayInfo.getSpecialUrl();
+          + "/custom/" + displayInfo.getSpecialUrl();
     } else {
       return contextPath
           + "/welcome.jsp";
