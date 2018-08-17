@@ -677,9 +677,9 @@ public final class Queries {
    * @throws ParseException if the team number cannot be parsed
    */
   @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Goals determine columns")
-  private static void insertPerformanceScore(final ChallengeDescription description,
-                                             final Connection connection,
-                                             final HttpServletRequest request)
+  public static void insertPerformanceScore(final ChallengeDescription description,
+                                            final Connection connection,
+                                            final HttpServletRequest request)
       throws SQLException, ParseException, RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
     final Tournament tournament = Tournament.findTournamentByID(connection, currentTournament);
@@ -794,6 +794,9 @@ public final class Queries {
     } else {
       tournament.recordPerformanceSeedingModified(connection);
     }
+
+    // notify that there may be more runs to verify
+    UnverifiedRunsWebSocket.notifyToUpdate();
   }
 
   public static boolean isThirdPlaceEnabled(final Connection connection,
@@ -835,9 +838,9 @@ public final class Queries {
    * @throws RuntimeException if a parameter is missing.
    */
   @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate list of columns off the goals")
-  private static int updatePerformanceScore(final ChallengeDescription description,
-                                            final Connection connection,
-                                            final HttpServletRequest request)
+  public static int updatePerformanceScore(final ChallengeDescription description,
+                                           final Connection connection,
+                                           final HttpServletRequest request)
       throws SQLException, ParseException, RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
     final Tournament tournament = Tournament.findTournamentByID(connection, currentTournament);
@@ -940,6 +943,9 @@ public final class Queries {
         tournament.recordPerformanceSeedingModified(connection);
       }
     }
+
+    // notify that there may be more runs to verify
+    UnverifiedRunsWebSocket.notifyToUpdate();
 
     return numRowsUpdated;
   }
@@ -1128,6 +1134,7 @@ public final class Queries {
    * 
    * @throws RuntimeException if a parameter is missing or if the playoff meta
    *           data would become inconsistent due to the deletion.
+   * @throws ParseException if the numbers in the request can't be parsed as numbers
    */
   @SuppressFBWarnings(value = "OBL_UNSATISFIED_OBLIGATION", justification = "Bug in findbugs - ticket:2924739")
   public static void deletePerformanceScore(final Connection connection,
