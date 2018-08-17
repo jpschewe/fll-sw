@@ -1,3 +1,5 @@
+* #632 - add instructions for using the relative URL feature
+* #631 - add launcher buttons for directories used
 * #637 - Correct PDF footers showing the total number of pages
 * #641 - Fix computed score report format when there is no schedule
 
