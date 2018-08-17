@@ -40,5 +40,10 @@ The process to handle the tie is as follows:
   
 This process does discard the original scores, so if one wants to have a record of these the original score sheets will need to be retained and manually marked as the original scores for the head to head bracket.
 
+## Sorting score sheets
+
+It is nice to sort the score sheets by team number as this helps when needing to find one later when there is an issue. 
+It’s also much nicer for those in the back room stuffing envelopes as they can easily put the right sheets in the right envelopes.
+
 
 
