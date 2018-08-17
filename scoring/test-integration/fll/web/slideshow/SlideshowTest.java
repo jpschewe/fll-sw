@@ -79,7 +79,7 @@ public class SlideshowTest {
       selenium.findElement(By.id("success"));
 
       IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-          + "/slideshow/index.jsp");
+          + "/slideshow.jsp");
 
     } catch (final RuntimeException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
