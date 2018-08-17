@@ -144,7 +144,7 @@ public class FooterFilter implements Filter {
       return true;
     } else if (url.indexOf("report/finalist/PublicFinalistDisplaySchedule.jsp") != -1) {
       return true;
-    } else if(url.indexOf("slideshow/index.jsp") != -1) {
+    } else if(url.indexOf("slideshow.jsp") != -1) {
       return true;
     } else {
       return false;

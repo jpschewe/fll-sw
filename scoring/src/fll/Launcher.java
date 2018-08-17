@@ -168,6 +168,63 @@ public class Launcher extends JFrame {
     });
     buttonBox.add(subjectiveButton);
 
+    final JButton sponsorLogos = new JButton("Sponsor Logos");
+    sponsorLogos.setToolTipText("Opens the directory where the sponsor logos go");
+    sponsorLogos.addActionListener(ae -> {
+      final File dir = getSponsorLogosDirectory();
+      if (null != dir) {
+        try {
+          Desktop.getDesktop().open(dir);
+        } catch (final IOException e) {
+          final String message = "Error opening sponsor_logos directory: "
+              + e.getMessage();
+          LOGGER.error(message, e);
+          JOptionPane.showMessageDialog(this, message, "ERROR", JOptionPane.ERROR_MESSAGE);
+        }
+      } else {
+        JOptionPane.showMessageDialog(this, "Cannot find sponsor_logos directory.", "ERROR", JOptionPane.ERROR_MESSAGE);
+      }
+    });
+    buttonBox.add(sponsorLogos);
+
+    final JButton slideshow = new JButton("Slide show");
+    slideshow.setToolTipText("Opens the directory where the slideshow images go");
+    slideshow.addActionListener(ae -> {
+      final File dir = getSlideshowDirectory();
+      if (null != dir) {
+        try {
+          Desktop.getDesktop().open(dir);
+        } catch (final IOException e) {
+          final String message = "Error opening slideshow directory: "
+              + e.getMessage();
+          LOGGER.error(message, e);
+          JOptionPane.showMessageDialog(this, message, "ERROR", JOptionPane.ERROR_MESSAGE);
+        }
+      } else {
+        JOptionPane.showMessageDialog(this, "Cannot find slideshow directory.", "ERROR", JOptionPane.ERROR_MESSAGE);
+      }
+    });
+    buttonBox.add(slideshow);
+
+    final JButton custom = new JButton("Custom files");
+    custom.setToolTipText("Opens the directory where to put extra files to display on the big screen display");
+    custom.addActionListener(ae -> {
+      final File dir = getCustomDirectory();
+      if (null != dir) {
+        try {
+          Desktop.getDesktop().open(dir);
+        } catch (final IOException e) {
+          final String message = "Error opening custom directory: "
+              + e.getMessage();
+          LOGGER.error(message, e);
+          JOptionPane.showMessageDialog(this, message, "ERROR", JOptionPane.ERROR_MESSAGE);
+        }
+      } else {
+        JOptionPane.showMessageDialog(this, "Cannot find custom directory.", "ERROR", JOptionPane.ERROR_MESSAGE);
+      }
+    });
+    buttonBox.add(custom);
+
     final JButton exit = new JButton("Exit");
     exit.addActionListener(ae -> {
       setVisible(false);
@@ -372,6 +429,51 @@ public class Launcher extends JFrame {
   }
 
   /**
+   * @return the directory or null if not found
+   */
+  private File getSponsorLogosDirectory() {
+    final String[] possibleLocations = { "tomcat/webapps/fll-sw/sponsor_logos" };
+    for (final String location : possibleLocations) {
+      final File f = new File(location);
+      if (f.exists()
+          && f.isDirectory()) {
+        return f;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * @return the directory or null if not found
+   */
+  private File getSlideshowDirectory() {
+    final String[] possibleLocations = { "tomcat/webapps/fll-sw/slideshow" };
+    for (final String location : possibleLocations) {
+      final File f = new File(location);
+      if (f.exists()
+          && f.isDirectory()) {
+        return f;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * @return the directory or null if not found
+   */
+  private File getCustomDirectory() {
+    final String[] possibleLocations = { "tomcat/webapps/fll-sw/custom" };
+    for (final String location : possibleLocations) {
+      final File f = new File(location);
+      if (f.exists()
+          && f.isDirectory()) {
+        return f;
+      }
+    }
+    return null;
+  }
+
+  /**
    * Open up the main page.
    */
   private void loadDocsHtml() {
@@ -406,7 +508,7 @@ public class Launcher extends JFrame {
     }
     return null;
   }
-  
+
   private static boolean isWindows() {
     final boolean windows = System.getProperty("os.name").startsWith("Windows");
     return windows;
