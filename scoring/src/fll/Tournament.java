@@ -241,6 +241,7 @@ public final class Tournament implements Serializable {
           // subjective may have changed and have computed
           return summaryComputed.before(subjectiveModified);
         } else if (null == subjectiveModified) {
+          // performance may have changed
           return summaryComputed.before(performanceSeedingModified);
         } else {
           // nothing is null
