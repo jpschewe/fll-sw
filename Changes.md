@@ -1,3 +1,4 @@
+* #643 - Keep rows together with the same award group in the subjective by judging station report
 * #129 - validate form parameters in the finalist scheduling application
 * #642 - explicitly update or insert performance scores and report proper errors
 * #632 - add instructions for using the relative URL feature
