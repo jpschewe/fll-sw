@@ -38,6 +38,13 @@ public class AdminIndex {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
+  /**
+   * Populate page context with variables for the admin index page.
+   * 
+   * @param application the application context
+   * @param session the session context
+   * @param pageContext populated with variables
+   */
   public static void populateContext(final ServletContext application,
                                      final HttpSession session,
                                      final PageContext pageContext) {
@@ -60,7 +67,7 @@ public class AdminIndex {
       stmt = connection.createStatement();
 
       final int currentTournamentID = Queries.getCurrentTournament(connection);
-      pageContext.setAttribute("currentTournamentID", currentTournamentID);
+      pageContext.setAttribute("currentTournament", Tournament.findTournamentByID(connection, currentTournamentID));
 
       final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournamentID);
       pageContext.setAttribute("numSeedingRounds", numSeedingRounds);
@@ -77,7 +84,7 @@ public class AdminIndex {
       pageContext.setAttribute("teamsUploaded", teamsUploaded);
 
       pageContext.setAttribute("scheduleUploaded",
-                           TournamentSchedule.scheduleExistsInDatabase(connection, currentTournamentID));
+                               TournamentSchedule.scheduleExistsInDatabase(connection, currentTournamentID));
 
       pageContext.setAttribute("judgesAssigned", Queries.isJudgesProperlyAssigned(connection, challengeDescription));
 
@@ -86,7 +93,8 @@ public class AdminIndex {
 
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
-          + sqle.getMessage() + "</p>");
+          + sqle.getMessage()
+          + "</p>");
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);
     } finally {
