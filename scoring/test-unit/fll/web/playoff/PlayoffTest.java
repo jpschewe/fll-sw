@@ -8,7 +8,6 @@ package fll.web.playoff;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 import java.io.File;
@@ -44,7 +43,9 @@ public class PlayoffTest {
     final File tempFile = File.createTempFile("flltest", null);
     final String database = tempFile.getAbsolutePath();
     try (Connection connection = Utilities.createFileDataSource(database).getConnection()) {
-      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), connection);
+      final ImportDB.ImportResult importResult = ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS),
+                                                                                connection);
+      TestUtils.deleteImportData(importResult);
 
       final String bracketName = "Lakes"; // must match data in the database
       final String tournamentName = "Sample8"; // must match data in the database
@@ -74,7 +75,9 @@ public class PlayoffTest {
     final File tempFile = File.createTempFile("flltest", null);
     final String database = tempFile.getAbsolutePath();
     try (Connection connection = Utilities.createFileDataSource(database).getConnection()) {
-      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), connection);
+      final ImportDB.ImportResult importResult = ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS),
+                                                                                connection);
+      TestUtils.deleteImportData(importResult);
 
       final String bracketName = "Lakes"; // must match data in the database
       final String tournamentName = "Sample8"; // must match data in the database
