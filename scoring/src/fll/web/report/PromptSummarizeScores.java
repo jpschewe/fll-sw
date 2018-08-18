@@ -42,25 +42,21 @@ public class PromptSummarizeScores extends BaseFLLServlet {
    */
   public static final String SUMMARY_REDIRECT_KEY = "summary_redirect";
 
-  /**
-   * Session variable key to note that we have checked if the user wants to
-   * recompute summarized scores.
-   */
-  public static final String SUMMARY_CHECKED_KEY = "summary_checked";
-
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
-
-    session.setAttribute(SUMMARY_CHECKED_KEY, true);
-
+                                final HttpSession session)
+      throws IOException, ServletException {
     if (null != request.getParameter("recompute")) {
       WebUtils.sendRedirect(application, response, "summarizePhase1.jsp");
     } else {
       final String url = SessionAttributes.getAttribute(session, SUMMARY_REDIRECT_KEY, String.class);
-      WebUtils.sendRedirect(application, response, url);
+      if (null == url) {
+        WebUtils.sendRedirect(application, response, "index.jsp");
+      } else {
+        WebUtils.sendRedirect(application, response, url);
+      }
     }
   }
 
@@ -80,27 +76,20 @@ public class PromptSummarizeScores extends BaseFLLServlet {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("top check if summary updated");
     }
-  
-    if (null != session.getAttribute(SUMMARY_CHECKED_KEY)) {
-      LOGGER.info("summary checked");
-  
-      // alredy checked, can just continue
-      return false;
-    }
-  
+
     Connection connection = null;
     try {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
-  
+
       final int tournamentId = Queries.getCurrentTournament(connection);
       final Tournament tournament = Tournament.findTournamentByID(connection, tournamentId);
-  
+
       if (tournament.checkTournamentNeedsSummaryUpdate(connection)) {
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("Needs summary update");
         }
-  
+
         session.setAttribute(SUMMARY_REDIRECT_KEY, redirect);
         WebUtils.sendRedirect(application, response, "promptSummarizeScores.jsp");
         return true;
@@ -108,10 +97,10 @@ public class PromptSummarizeScores extends BaseFLLServlet {
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("No updated needed");
         }
-  
+
         return false;
       }
-  
+
     } catch (final SQLException e) {
       LOGGER.error(e, e);
       throw new RuntimeException(e);
@@ -121,7 +110,7 @@ public class PromptSummarizeScores extends BaseFLLServlet {
     } finally {
       SQLFunctions.close(connection);
     }
-  
+
   }
 
 }
