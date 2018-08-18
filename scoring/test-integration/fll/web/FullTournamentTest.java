@@ -650,7 +650,7 @@ public class FullTournamentTest {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "report/summarizePhase1.jsp");
 
-    selenium.findElement(By.id("continue")).click();
+    selenium.findElement(By.id("finish")).click();
 
     Assert.assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
   }

@@ -45,7 +45,7 @@
 		<p>
 			If this does not look correct, go back to the <a href="../index.jsp">main
 				page and correct the scores</a>. Otherwise <input type='submit'
-				value="finish" /> the score summarization.
+				value="finish" id='finish' /> the score summarization.
 		</p>
 	</form>
 
