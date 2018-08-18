@@ -84,7 +84,7 @@ public class PromptSummarizeScores extends BaseFLLServlet {
     if (null != session.getAttribute(SUMMARY_CHECKED_KEY)) {
       LOGGER.info("summary checked");
   
-      // alredy checked, can just continue
+      // already checked, can just continue
       return false;
     }
   
