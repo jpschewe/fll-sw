@@ -814,7 +814,7 @@ public final class Playoff {
   }
 
   /**
-   * Check if some teams are involved in an playoff bracket that isn't finished.
+   * Check if some teams are involved in a playoff bracket that isn't finished.
    * 
    * @param teamNumbers the teams to check, NULL, BYE and TIE team
    *          numbers will be ignored as they can be in multiple playoffs at the
