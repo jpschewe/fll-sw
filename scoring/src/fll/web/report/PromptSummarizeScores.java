@@ -52,7 +52,11 @@ public class PromptSummarizeScores extends BaseFLLServlet {
       WebUtils.sendRedirect(application, response, "summarizePhase1.jsp");
     } else {
       final String url = SessionAttributes.getAttribute(session, SUMMARY_REDIRECT_KEY, String.class);
-      WebUtils.sendRedirect(application, response, url);
+      if (null == url) {
+        WebUtils.sendRedirect(application, response, "index.jsp");
+      } else {
+        WebUtils.sendRedirect(application, response, url);
+      }
     }
   }
 
