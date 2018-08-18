@@ -24,7 +24,6 @@ import fll.db.GenerateDB;
 import fll.util.LogUtils;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreCategory;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * The representation of a tournament. If someone changes the database, this
@@ -52,7 +51,6 @@ public final class Tournament implements Serializable {
   private final String name;
 
   /**
-   * 
    * @return a short name for the tournament
    */
   public String getName() {
@@ -62,7 +60,6 @@ public final class Tournament implements Serializable {
   private final String description;
 
   /**
-   * 
    * @return a longer description of the tournament
    */
   public String getDescription() {
@@ -74,15 +71,13 @@ public final class Tournament implements Serializable {
    */
   public static void createTournament(final Connection connection,
                                       final String tournamentName,
-                                      final String description) throws SQLException {
-    PreparedStatement prep = null;
-    try {
-      prep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location) VALUES (?, ?)");
+                                      final String description)
+      throws SQLException {
+    try (
+        PreparedStatement prep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location) VALUES (?, ?)")) {
       prep.setString(1, tournamentName);
       prep.setString(2, description);
       prep.executeUpdate();
-    } finally {
-      SQLFunctions.close(prep);
     }
   }
 
@@ -94,23 +89,19 @@ public final class Tournament implements Serializable {
    */
   public static List<Tournament> getTournaments(final Connection connection) throws SQLException {
     final List<Tournament> retval = new LinkedList<Tournament>();
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = connection.prepareStatement("SELECT tournament_id, Name, Location FROM Tournaments WHERE tournament_id <> ? ORDER BY Name");
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT tournament_id, Name, Location FROM Tournaments WHERE tournament_id <> ? ORDER BY Name")) {
       prep.setInt(1, GenerateDB.INTERNAL_TOURNAMENT_ID);
-      rs = prep.executeQuery();
-      while (rs.next()) {
-        final int tournamentID = rs.getInt(1);
-        final String name = rs.getString(2);
-        final String location = rs.getString(3);
+      try (ResultSet rs = prep.executeQuery()) {
+        while (rs.next()) {
+          final int tournamentID = rs.getInt(1);
+          final String name = rs.getString(2);
+          final String location = rs.getString(3);
 
-        final Tournament tournament = new Tournament(tournamentID, name, location);
-        retval.add(tournament);
+          final Tournament tournament = new Tournament(tournamentID, name, location);
+          retval.add(tournament);
+        }
       }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
     }
     return retval;
   }
@@ -124,23 +115,20 @@ public final class Tournament implements Serializable {
    * @throws SQLException
    */
   public static Tournament findTournamentByName(final Connection connection,
-                                                final String name) throws SQLException {
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = connection.prepareStatement("SELECT tournament_id, Location FROM Tournaments WHERE Name = ?");
+                                                final String name)
+      throws SQLException {
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT tournament_id, Location FROM Tournaments WHERE Name = ?")) {
       prep.setString(1, name);
-      rs = prep.executeQuery();
-      if (rs.next()) {
-        final int id = rs.getInt(1);
-        final String location = rs.getString(2);
-        return new Tournament(id, name, location);
-      } else {
-        return null;
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          final int id = rs.getInt(1);
+          final String location = rs.getString(2);
+          return new Tournament(id, name, location);
+        } else {
+          return null;
+        }
       }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
     }
   }
 
@@ -153,23 +141,20 @@ public final class Tournament implements Serializable {
    * @throws SQLException
    */
   public static Tournament findTournamentByID(final Connection connection,
-                                              final int tournamentID) throws SQLException {
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = connection.prepareStatement("SELECT Name, Location FROM Tournaments WHERE tournament_id = ?");
+                                              final int tournamentID)
+      throws SQLException {
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT Name, Location FROM Tournaments WHERE tournament_id = ?")) {
       prep.setInt(1, tournamentID);
-      rs = prep.executeQuery();
-      if (rs.next()) {
-        final String name = rs.getString(1);
-        final String location = rs.getString(2);
-        return new Tournament(tournamentID, name, location);
-      } else {
-        return null;
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          final String name = rs.getString(1);
+          final String location = rs.getString(2);
+          return new Tournament(tournamentID, name, location);
+        } else {
+          return null;
+        }
       }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
     }
   }
 
@@ -189,7 +174,10 @@ public final class Tournament implements Serializable {
   @Override
   public String toString() {
     return getName()
-        + " (" + getTournamentID() + ") - " + getDescription();
+        + " ("
+        + getTournamentID()
+        + ") - "
+        + getDescription();
   }
 
   /**
@@ -199,61 +187,57 @@ public final class Tournament implements Serializable {
    * @throws SQLException
    */
   public boolean checkTournamentNeedsSummaryUpdate(final Connection connection) throws SQLException {
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = connection.prepareStatement("SELECT performance_seeding_modified, subjective_modified, summary_computed" //
-          + " FROM Tournaments" //
-          + " WHERE tournament_id = ?");
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT performance_seeding_modified, subjective_modified, summary_computed" //
+            + " FROM Tournaments" //
+            + " WHERE tournament_id = ?")) {
       prep.setInt(1, getTournamentID());
-      rs = prep.executeQuery();
-      if (rs.next()) {
-        Timestamp performanceSeedingModified = rs.getTimestamp(1);
-        if (rs.wasNull()) {
-          performanceSeedingModified = null;
-        }
-        Timestamp subjectiveModified = rs.getTimestamp(2);
-        if (rs.wasNull()) {
-          subjectiveModified = null;
-        }
-        Timestamp summaryComputed = rs.getTimestamp(3);
-        if (rs.wasNull()) {
-          summaryComputed = null;
-        }
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          Timestamp performanceSeedingModified = rs.getTimestamp(1);
+          if (rs.wasNull()) {
+            performanceSeedingModified = null;
+          }
+          Timestamp subjectiveModified = rs.getTimestamp(2);
+          if (rs.wasNull()) {
+            subjectiveModified = null;
+          }
+          Timestamp summaryComputed = rs.getTimestamp(3);
+          if (rs.wasNull()) {
+            summaryComputed = null;
+          }
 
-        if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("performance: "
-              + performanceSeedingModified);
-          LOGGER.trace("subjective: "
-              + subjectiveModified);
-          LOGGER.trace("summary: "
-              + summaryComputed);
-        }
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("performance: "
+                + performanceSeedingModified);
+            LOGGER.trace("subjective: "
+                + subjectiveModified);
+            LOGGER.trace("summary: "
+                + summaryComputed);
+          }
 
-        if (null == summaryComputed) {
-          // never computed
-          return true;
-        } else if (null == performanceSeedingModified
-            && null == subjectiveModified) {
-          // computed and nothing has changed
-          return false;
-        } else if (null == performanceSeedingModified) {
-          // subjective may have changed and have computed
-          return summaryComputed.before(subjectiveModified);
-        } else if (null == subjectiveModified) {
-          return summaryComputed.before(performanceSeedingModified);
+          if (null == summaryComputed) {
+            // never computed
+            return true;
+          } else if (null == performanceSeedingModified
+              && null == subjectiveModified) {
+            // computed and nothing has changed
+            return false;
+          } else if (null == performanceSeedingModified) {
+            // subjective may have changed
+            return summaryComputed.before(subjectiveModified);
+          } else if (null == subjectiveModified) {
+            // performance may have changed
+            return summaryComputed.before(performanceSeedingModified);
+          } else {
+            // nothing is null
+            return summaryComputed.before(subjectiveModified)
+                || summaryComputed.before(performanceSeedingModified);
+          }
         } else {
-          // nothing is null
-          return summaryComputed.before(subjectiveModified)
-              || summaryComputed.before(performanceSeedingModified);
+          return true;
         }
-
-      } else {
-        return true;
       }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
     }
   }
 
@@ -264,15 +248,11 @@ public final class Tournament implements Serializable {
    * @throws SQLException
    */
   public void recordPerformanceSeedingModified(final Connection connection) throws SQLException {
-    PreparedStatement prep = null;
-    try {
-      prep = connection.prepareStatement("UPDATE Tournaments" //
-          + " SET performance_seeding_modified = CURRENT_TIMESTAMP" //
-          + " WHERE tournament_id = ?");
+    try (PreparedStatement prep = connection.prepareStatement("UPDATE Tournaments" //
+        + " SET performance_seeding_modified = CURRENT_TIMESTAMP" //
+        + " WHERE tournament_id = ?")) {
       prep.setInt(1, getTournamentID());
       prep.executeUpdate();
-    } finally {
-      SQLFunctions.close(prep);
     }
   }
 
@@ -283,15 +263,11 @@ public final class Tournament implements Serializable {
    * @throws SQLException
    */
   public void recordSubjectiveModified(final Connection connection) throws SQLException {
-    PreparedStatement prep = null;
-    try {
-      prep = connection.prepareStatement("UPDATE Tournaments" //
-          + " SET subjective_modified = CURRENT_TIMESTAMP" //
-          + " WHERE tournament_id = ?");
+    try (PreparedStatement prep = connection.prepareStatement("UPDATE Tournaments" //
+        + " SET subjective_modified = CURRENT_TIMESTAMP" //
+        + " WHERE tournament_id = ?")) {
       prep.setInt(1, getTournamentID());
       prep.executeUpdate();
-    } finally {
-      SQLFunctions.close(prep);
     }
   }
 
@@ -301,15 +277,11 @@ public final class Tournament implements Serializable {
    * @throws SQLException
    */
   public void recordScoreSummariesUpdated(final Connection connection) throws SQLException {
-    PreparedStatement prep = null;
-    try {
-      prep = connection.prepareStatement("UPDATE Tournaments" //
-          + " SET summary_computed = CURRENT_TIMESTAMP" //
-          + " WHERE tournament_id = ?");
+    try (PreparedStatement prep = connection.prepareStatement("UPDATE Tournaments" //
+        + " SET summary_computed = CURRENT_TIMESTAMP" //
+        + " WHERE tournament_id = ?")) {
       prep.setInt(1, getTournamentID());
       prep.executeUpdate();
-    } finally {
-      SQLFunctions.close(prep);
     }
   }
 
@@ -323,26 +295,22 @@ public final class Tournament implements Serializable {
    */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic based upon tables in the database")
   private boolean scoresInTable(final Connection connection,
-                                final String table) throws SQLException {
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = connection.prepareStatement("SELECT COUNT(*) FROM "
-          + table + " WHERE tournament = ?");
+                                final String table)
+      throws SQLException {
+    try (PreparedStatement prep = connection.prepareStatement("SELECT COUNT(*) FROM "
+        + table
+        + " WHERE tournament = ?")) {
       prep.setInt(1, getTournamentID());
-      rs = prep.executeQuery();
-      if (rs.next()) {
-        final int count = rs.getInt(1);
-        if (count > 0) {
-          return true;
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          final int count = rs.getInt(1);
+          if (count > 0) {
+            return true;
+          }
         }
       }
-
       // no scores found
       return false;
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
     }
   }
 
@@ -357,7 +325,8 @@ public final class Tournament implements Serializable {
    * @throws SQLException
    */
   public boolean containsScores(final Connection connection,
-                                final ChallengeDescription description) throws SQLException {
+                                final ChallengeDescription description)
+      throws SQLException {
     if (scoresInTable(connection, "performance")) {
       return true;
     }
@@ -381,57 +350,51 @@ public final class Tournament implements Serializable {
    * @throws SQLException If there is a database error such as scores existing.
    */
   public static void deleteTournament(final Connection connection,
-                                      final int tournamentID) throws SQLException {
-    PreparedStatement deleteTournament = null;
-    PreparedStatement deleteTables = null;
-    PreparedStatement deleteJudges = null;
-    PreparedStatement deleteSchedule = null;
-    PreparedStatement deleteSchedulePerf = null;
-    PreparedStatement deleteScheduleSubj = null;
-    PreparedStatement deleteTournamentParameters = null;
-    PreparedStatement deleteTournamentTeams = null;
-    try {
-      deleteTables = connection.prepareStatement("DELETE FROM TableNames WHERE tournament = ?");
+                                      final int tournamentID)
+      throws SQLException {
+    try (PreparedStatement deleteTables = connection.prepareStatement("DELETE FROM TableNames WHERE tournament = ?")) {
       deleteTables.setInt(1, tournamentID);
       deleteTables.executeUpdate();
+    }
 
-      deleteJudges = connection.prepareStatement("DELETE FROM judges WHERE tournament = ?");
+    try (PreparedStatement deleteJudges = connection.prepareStatement("DELETE FROM judges WHERE tournament = ?")) {
       deleteJudges.setInt(1, tournamentID);
       deleteJudges.executeUpdate();
+    }
 
-      deleteSchedulePerf = connection.prepareStatement("DELETE FROM sched_perf_rounds WHERE tournament = ?");
+    try (
+        PreparedStatement deleteSchedulePerf = connection.prepareStatement("DELETE FROM sched_perf_rounds WHERE tournament = ?")) {
       deleteSchedulePerf.setInt(1, tournamentID);
       deleteSchedulePerf.executeUpdate();
+    }
 
-      deleteScheduleSubj = connection.prepareStatement("DELETE FROM sched_subjective WHERE tournament = ?");
+    try (
+        PreparedStatement deleteScheduleSubj = connection.prepareStatement("DELETE FROM sched_subjective WHERE tournament = ?")) {
       deleteScheduleSubj.setInt(1, tournamentID);
       deleteScheduleSubj.executeUpdate();
+    }
 
-      deleteSchedule = connection.prepareStatement("DELETE FROM schedule WHERE tournament = ?");
+    try (PreparedStatement deleteSchedule = connection.prepareStatement("DELETE FROM schedule WHERE tournament = ?")) {
       deleteSchedule.setInt(1, tournamentID);
       deleteSchedule.executeUpdate();
+    }
 
-      deleteTournamentParameters = connection.prepareStatement("DELETE FROM tournament_parameters WHERE tournament = ?");
+    try (
+        PreparedStatement deleteTournamentParameters = connection.prepareStatement("DELETE FROM tournament_parameters WHERE tournament = ?")) {
       deleteTournamentParameters.setInt(1, tournamentID);
       deleteTournamentParameters.executeUpdate();
+    }
 
-      deleteTournamentTeams = connection.prepareStatement("DELETE FROM TournamentTeams WHERE tournament = ?");
+    try (
+        PreparedStatement deleteTournamentTeams = connection.prepareStatement("DELETE FROM TournamentTeams WHERE tournament = ?")) {
       deleteTournamentTeams.setInt(1, tournamentID);
       deleteTournamentTeams.executeUpdate();
+    }
 
-      deleteTournament = connection.prepareStatement("DELETE FROM Tournaments WHERE tournament_id = ?");
+    try (
+        PreparedStatement deleteTournament = connection.prepareStatement("DELETE FROM Tournaments WHERE tournament_id = ?")) {
       deleteTournament.setInt(1, tournamentID);
       deleteTournament.executeUpdate();
-    } finally {
-      SQLFunctions.close(deleteTournament);
-      SQLFunctions.close(deleteTables);
-      SQLFunctions.close(deleteJudges);
-      SQLFunctions.close(deleteSchedule);
-      SQLFunctions.close(deleteSchedulePerf);
-      SQLFunctions.close(deleteScheduleSubj);
-      SQLFunctions.close(deleteTournamentParameters);
-      SQLFunctions.close(deleteTournamentTeams);
-
     }
   }
 
