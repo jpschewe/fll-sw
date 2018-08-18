@@ -82,7 +82,7 @@ public final class Tournament implements Serializable {
   }
 
   /**
-   * Get a list of tournaments in the DB ordered by Name. This excludes the
+   * Get a list of tournaments in the DB ordered by Location. This excludes the
    * internal tournament.
    * 
    * @return list of tournament tournaments
@@ -90,7 +90,7 @@ public final class Tournament implements Serializable {
   public static List<Tournament> getTournaments(final Connection connection) throws SQLException {
     final List<Tournament> retval = new LinkedList<Tournament>();
     try (
-        PreparedStatement prep = connection.prepareStatement("SELECT tournament_id, Name, Location FROM Tournaments WHERE tournament_id <> ? ORDER BY Name")) {
+        PreparedStatement prep = connection.prepareStatement("SELECT tournament_id, Name, Location FROM Tournaments WHERE tournament_id <> ? ORDER BY Location")) {
       prep.setInt(1, GenerateDB.INTERNAL_TOURNAMENT_ID);
       try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {

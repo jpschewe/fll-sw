@@ -1,3 +1,4 @@
+* #629 - Make selecting tournaments easier (better sorting, clearer language)
 * #618 - improvements to score summarization workflow
 * #129 - validate form parameters in the finalist scheduling application
 * #642 - explicitly update or insert performance scores and report proper errors
