@@ -7,7 +7,6 @@
 package fll.web.admin;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -17,8 +16,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
-
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
@@ -57,14 +54,7 @@ public class AdminIndex {
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    ResultSet rs = null;
-    ResultSet rs2 = null;
-    Statement stmt = null;
-    PreparedStatement prep = null;
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
-      stmt = connection.createStatement();
+    try (Connection connection = datasource.getConnection(); Statement stmt = connection.createStatement()) {
 
       final int currentTournamentID = Queries.getCurrentTournament(connection);
       pageContext.setAttribute("currentTournament", Tournament.findTournamentByID(connection, currentTournamentID));
@@ -76,10 +66,11 @@ public class AdminIndex {
       pageContext.setAttribute("tournaments", tournaments);
 
       boolean teamsUploaded = false;
-      rs = stmt.executeQuery("SELECT COUNT(*) FROM Teams WHERE TeamNumber >= 0");
-      while (rs.next()) {
-        final int count = rs.getInt(1);
-        teamsUploaded = count > 0;
+      try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM Teams WHERE TeamNumber >= 0")) {
+        while (rs.next()) {
+          final int count = rs.getInt(1);
+          teamsUploaded = count > 0;
+        }
       }
       pageContext.setAttribute("teamsUploaded", teamsUploaded);
 
@@ -97,12 +88,6 @@ public class AdminIndex {
           + "</p>");
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(rs2);
-      SQLFunctions.close(stmt);
-      SQLFunctions.close(prep);
-      SQLFunctions.close(connection);
     }
 
     session.setAttribute(SessionAttributes.MESSAGE, message.toString());
