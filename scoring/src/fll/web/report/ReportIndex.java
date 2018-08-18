@@ -42,7 +42,6 @@ public class ReportIndex {
 
     // clear out some variables
     session.removeAttribute(PromptSummarizeScores.SUMMARY_REDIRECT_KEY);
-    session.removeAttribute(PromptSummarizeScores.SUMMARY_CHECKED_KEY);
 
     Connection connection = null;
     PreparedStatement prep = null;
