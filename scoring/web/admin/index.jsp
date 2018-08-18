@@ -124,12 +124,12 @@
       </div></li>
 
 
-    <li>
+    <li>Current tournament is ${currentTournament.description }.
       <form
         id='currentTournament'
         action='SetCurrentTournament'
         method="post">
-        Current Tournament: <select
+        Change tournament to <select
           id='currentTournamentSelect'
           name='currentTournament'>
           <c:forEach
@@ -137,7 +137,7 @@
             var="tournament">
             <c:choose>
               <c:when
-                test="${tournament.tournamentID == currentTournamentID}">
+                test="${tournament.tournamentID == currentTournament.tournamentID}">
                 <option
                   selected
                   value='${tournament.tournamentID }'>${tournament.description}
@@ -152,7 +152,7 @@
         </select> <input
           type='submit'
           name='change_tournament'
-          value='Change tournament'>
+          value='Submit'>
       </form>
     </li>
 
