@@ -65,7 +65,7 @@ public class DisplayQueryServlet extends BaseFLLServlet {
           + "/scoreboard/main.jsp";
     } else if (displayInfo.isSlideshow()) {
       return contextPath
-          + "/slideshow/index.jsp";
+          + "/slideshow.jsp";
     } else if (displayInfo.isHeadToHead()) {
       return contextPath
           + "/playoff/remoteMain.jsp";
@@ -78,7 +78,7 @@ public class DisplayQueryServlet extends BaseFLLServlet {
           + "/report/finalist/FinalistTeams.jsp?finalistTeamsScroll=true";
     } else if (displayInfo.isSpecial()) {
       return contextPath
-          + "/" + displayInfo.getSpecialUrl();
+          + "/custom/" + displayInfo.getSpecialUrl();
     } else {
       return contextPath
           + "/welcome.jsp";
