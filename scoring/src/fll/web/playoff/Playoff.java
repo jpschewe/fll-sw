@@ -12,9 +12,11 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -28,11 +30,16 @@ import fll.Team;
 import fll.db.GenerateDB;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
+import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.FP;
 import fll.util.LogUtils;
+import fll.xml.AbstractGoal;
 import fll.xml.BracketSortType;
 import fll.xml.ChallengeDescription;
+import fll.xml.ChallengeParser;
+import fll.xml.EnumeratedValue;
+import fll.xml.Goal;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.TiebreakerTest;
 import fll.xml.WinnerType;
@@ -1190,9 +1197,48 @@ public final class Playoff {
   }
 
   /**
+   * Protected for testing.
+   * 
+   * @param challenge the challenge description
+   * @param simpleGoals populated with simple goal initial values
+   * @param enumGoals populated with enum goal initial values
+   */
+  protected static final void populateInitialScoreMaps(final ChallengeDescription challenge,
+                                                       final Map<String, Double> simpleGoals,
+                                                       final Map<String, String> enumGoals) {
+    for (final AbstractGoal agoal : challenge.getPerformance().getGoals()) {
+      if (agoal instanceof Goal) {
+        final Goal goal = (Goal) agoal;
+        if (!goal.isComputed()) {
+          final String name = goal.getName();
+          final double initial = goal.getInitialValue();
+          if (goal.isEnumerated()) {
+            final EnumeratedValue einitial = goal.getValues().stream().filter(value -> Math.abs(initial
+                - value.getScore()) < ChallengeParser.INITIAL_VALUE_TOLERANCE).findAny().orElse(null);
+            if (null == einitial) {
+              throw new FLLInternalException("Enumerated goal "
+                  + name
+                  + " doesn't have a value that matches the initial value "
+                  + initial);
+            } else {
+              enumGoals.put(name, einitial.getValue());
+            }
+          } else {
+            simpleGoals.put(name, initial);
+          }
+        } // not computed
+      } // Goal
+    } // foreach goal
+  }
+
+  /**
    * Finish a bracket by adding dummy scores to complete it.
    * For each pair competing that doesn't have a score, one will get a "No Show"
    * score and the other will get a score with all initial values.
+   * If the bracket is already finished, then this method returns true without
+   * making changes.
+   * If the bracket has a tie, then this method returns false without making
+   * changes.
    * 
    * @param connection the database connection
    * @param tournamentId the tournament that the bracket is in
@@ -1208,14 +1254,12 @@ public final class Playoff {
                                       final int tournamentId,
                                       final String bracketName)
       throws SQLException {
-    // FIXME decide if exception is correct for a tie or what, perhaps return an
-    // error string?, or a boolean? Are there other failure conditions?
-    // Note that one can find a tie when walking the data to finish the
-    // bracket. This should also be an error.
+    // populate maps for DummyTeamScore
+    final Map<String, Double> simpleGoals = new HashMap<>();
+    final Map<String, String> enumGoals = new HashMap<>();
+    populateInitialScoreMaps(challenge, simpleGoals, enumGoals);
 
     // FIXME do everything in a transaction and roll back if something goes wrong
-
-    // FIXME populate maps for DummyTeamScore
 
     // FIXME walk the playoff bracket
 
