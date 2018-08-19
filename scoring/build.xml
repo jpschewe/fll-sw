@@ -170,6 +170,9 @@
 		<!-- parse mime types -->
 		<pathelement location="${dir.lib}/tika-core-1.16.jar" />
 
+		<!-- handle errors in lambdas -->
+		<pathelement location="${dir.lib}/durian-core-1.1.0.jar" />
+		
 	</path>
 
 	<path id="application.classpath">

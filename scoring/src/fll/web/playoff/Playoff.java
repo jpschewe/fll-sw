@@ -16,11 +16,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-
-import net.mtu.eggplant.util.sql.SQLFunctions;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+
+import com.diffplug.common.base.Errors;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
@@ -35,6 +36,7 @@ import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.TiebreakerTest;
 import fll.xml.WinnerType;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Handle playoff information.
@@ -856,6 +858,25 @@ public final class Playoff {
   }
 
   /**
+   * Find all unfinished playoff brackets.
+   * 
+   * @param connection the database connection
+   * @param tournamentId the tournament
+   * @throws SQLException on a database error
+   */
+  public static List<String> getUnfinishedPlayoffBrackets(final Connection connection,
+                                                          final int tournamentId)
+      throws SQLException {
+    return getPlayoffBrackets(connection,
+                              tournamentId).stream()
+                                           .filter(Errors.rethrow()
+                                                         .wrapPredicate(bracket -> isPlayoffBracketUnfinished(connection,
+                                                                                                              tournamentId,
+                                                                                                              bracket)))
+                                           .collect(Collectors.toList());
+  }
+
+  /**
    * Check if some teams are involved in a playoff bracket that isn't finished.
    * 
    * @param teamNumbers the teams to check, NULL, BYE and TIE team
@@ -870,75 +891,35 @@ public final class Playoff {
       throws SQLException {
     final StringBuilder message = new StringBuilder();
 
+    final List<String> unfinishedPlayoffBrackets = getUnfinishedPlayoffBrackets(connection, tournament);
+
     final String teamNumbersStr = StringUtils.join(teamNumbers, ",");
 
-    PreparedStatement divisionsPrep = null;
-    ResultSet divisions = null;
-    PreparedStatement checkPrep = null;
-    ResultSet check = null;
-    PreparedStatement detailPrep = null;
-    ResultSet detail = null;
-    try {
-      divisionsPrep = connection.prepareStatement("SELECT DISTINCT event_division from PlayoffData WHERE" //
-          + " Tournament = ?" //
-          + " AND Team IN ( "
-          + teamNumbersStr
-          + " )");
-      divisionsPrep.setInt(1, tournament);
-      divisions = divisionsPrep.executeQuery();
-
-      checkPrep = connection.prepareStatement("SELECT * FROM PlayoffData WHERE" //
-          + " run_number = " //
-          + "   (SELECT MAX(run_number) FROM PlayoffData WHERE event_division = ? AND Tournament = ?)" //
-          + "     AND (team = ? OR team = ?) AND Tournament = ?");
-      checkPrep.setInt(2, tournament);
-      checkPrep.setInt(3, Team.NULL.getTeamNumber());
-      checkPrep.setInt(4, Team.TIE.getTeamNumber());
-      checkPrep.setInt(5, tournament);
-
-      detailPrep = connection.prepareStatement("SELECT DISTINCT Team from PlayoffData WHERE event_division = ?" //
-          + " AND tournament = ?" //
-          + " AND Team NOT IN (?, ?, ?)" // exclude internal teams
-          + " AND Team IN ( "
-          + teamNumbersStr
-          + " )");
+    try (
+        PreparedStatement detailPrep = connection.prepareStatement("SELECT DISTINCT Team from PlayoffData WHERE event_division = ?" //
+            + " AND tournament = ?" //
+            + " AND Team NOT IN (?, ?, ?)" // exclude internal teams
+            + " AND Team IN ( "
+            + teamNumbersStr
+            + " )")) {
       detailPrep.setInt(2, tournament);
       detailPrep.setInt(3, Team.BYE.getTeamNumber());
       detailPrep.setInt(4, Team.TIE.getTeamNumber());
       detailPrep.setInt(5, Team.NULL.getTeamNumber());
 
-      while (divisions.next()) {
-        final String eventDivision = divisions.getString(1);
-
-        checkPrep.setString(1, eventDivision);
-        check = checkPrep.executeQuery();
-        if (check.next()) {
-
-          detailPrep.setString(1, eventDivision);
-          detail = detailPrep.executeQuery();
+      for (final String bracketName : unfinishedPlayoffBrackets) {
+        detailPrep.setString(1, bracketName);
+        try (ResultSet detail = detailPrep.executeQuery()) {
           while (detail.next()) {
             final int teamNumber = detail.getInt(1);
             message.append("<li>Team "
                 + teamNumber
                 + " is involved in the playoff bracket '"
-                + eventDivision
+                + bracketName
                 + "', which isn't finished</li>");
           }
-          SQLFunctions.close(detail);
-          detail = null;
-
         }
-        SQLFunctions.close(check);
-        check = null;
       }
-
-    } finally {
-      SQLFunctions.close(detail);
-      SQLFunctions.close(detailPrep);
-      SQLFunctions.close(check);
-      SQLFunctions.close(checkPrep);
-      SQLFunctions.close(divisions);
-      SQLFunctions.close(divisionsPrep);
     }
 
     if (message.length() == 0) {
