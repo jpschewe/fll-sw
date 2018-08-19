@@ -1231,6 +1231,39 @@ public final class Playoff {
     } // foreach goal
   }
 
+  private static boolean bracketHasTie(final Connection connection,
+                                       final int tournamentId,
+                                       final String bracketName)
+      throws SQLException {
+    try (PreparedStatement prep = connection.prepareStatement("SELECT COUNT(*) FROM PlayoffData " //
+        + " WHERE event_division = ?" //
+        + " AND Tournament = ?" //
+        + " AND Team = ?")) {
+      prep.setString(1, bracketName);
+      prep.setInt(2, tournamentId);
+      prep.setInt(3, Team.TIE.getTeamNumber());
+
+      try (ResultSet rs = prep.executeQuery()) {
+        if (!rs.next()) {
+          throw new FLLInternalException("Did not get result from COUNT(*) looking for ties");
+        }
+        
+        final int numTies = rs.getInt(1);
+        if (numTies > 0) {
+          LOGGER.debug("Found "
+              + numTies
+              + " in bracket "
+              + bracketName
+              + " of tournament "
+              + tournamentId);
+          return true;
+        } else {
+          return false;
+        }
+      }
+    }
+  }
+
   /**
    * Finish a bracket by adding dummy scores to complete it.
    * For each pair competing that doesn't have a score, one will get a "No Show"
@@ -1254,6 +1287,10 @@ public final class Playoff {
                                       final int tournamentId,
                                       final String bracketName)
       throws SQLException {
+    if (bracketHasTie(connection, tournamentId, bracketName)) {
+      return false;
+    }
+
     // populate maps for DummyTeamScore
     final Map<String, Double> simpleGoals = new HashMap<>();
     final Map<String, String> enumGoals = new HashMap<>();
