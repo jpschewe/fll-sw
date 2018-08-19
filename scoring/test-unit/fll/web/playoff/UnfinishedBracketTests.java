@@ -18,7 +18,9 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipInputStream;
 
 import org.junit.After;
@@ -36,6 +38,7 @@ import fll.Tournament;
 import fll.Utilities;
 import fll.db.GlobalParameters;
 import fll.db.ImportDB;
+import fll.util.DummyTeamScore;
 import fll.xml.ChallengeDescription;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -267,6 +270,31 @@ public class UnfinishedBracketTests {
       for (final String bracketName : unfinishedBracketNames) {
         assertThat(bracketName, actual, hasItem(bracketName));
       }
+    }
+
+    /**
+     * Check that the dummy score created by
+     * {@link Playoff#populateInitialScoreMaps(ChallengeDescription, Map, Map)} can
+     * be evaluated without error.
+     * 
+     * @throws RuntimeException internal test error
+     * @throws SQLException internal test error
+     */
+    @Test
+    public void testDummyScore() throws SQLException, RuntimeException {
+      final Document document = GlobalParameters.getChallengeDocument(connection);
+      assertThat(document, notNullValue());
+
+      final ChallengeDescription challenge = new ChallengeDescription(document.getDocumentElement());
+
+      final Map<String, Double> simpleGoals = new HashMap<>();
+      final Map<String, String> enumGoals = new HashMap<>();
+
+      Playoff.populateInitialScoreMaps(challenge, simpleGoals, enumGoals);
+
+      final TeamScore teamScore = new DummyTeamScore(unfinishedTeamNumber, 1, simpleGoals, enumGoals);
+
+      challenge.getPerformance().evaluate(teamScore);
     }
 
   }
