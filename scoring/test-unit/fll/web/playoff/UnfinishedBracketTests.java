@@ -6,7 +6,6 @@
 
 package fll.web.playoff;
 
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -25,12 +24,19 @@ import java.util.zip.ZipInputStream;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
+import org.junit.runner.RunWith;
+import org.w3c.dom.Document;
 
 import fll.Team;
 import fll.TestUtils;
 import fll.Tournament;
 import fll.Utilities;
+import fll.db.GlobalParameters;
 import fll.db.ImportDB;
+import fll.xml.ChallengeDescription;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -38,121 +44,231 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  */
 public class UnfinishedBracketTests {
 
-  private static final int unfinishedTeamNumber = 101;
+  private static final int unfinishedTeamNumber = 352;
 
-  private static final String finishedBracketName = "Lakes";
+  private static final String[] finishedBracketNames = { "Lakes", "Woods" };
 
+  // 352, 405, 407, 408
   private static final String unfinishedBracketName = "unfinished";
 
+  // 1154, 3135, 3698, 3811
+  private static final String unfinished3rdBracketName = "unfinished-3rd";
+
+  // 4916, 4918, 5280, 7391
   private static final String tieBracketName = "tie";
 
-  private static final String tournamentName = "Sample8";
+  // 7393, 7684, 8330, 9975
+  private static final String tie3rdBracketName = "tie-3rd";
 
-  private File tempFile;
+  // 10484, 10486, 10719, 10721
+  private static final String tieMiddleBracketName = "tie-middle";
 
-  private String database;
+  // 11221, 11228, 11229, 12911
+  private static final String unfinished1st3rdBracketName = "unfinished-1st-3rd";
 
-  private Connection connection;
+  // 14446, 16627, 17521, 18420
+  private static final String tie1st3rdBracketName = "tie-1st-3rd";
 
-  private Tournament tournament;
+  private static final String[] unfinishedBracketNames = { tie1st3rdBracketName, tie3rdBracketName, tieBracketName,
+                                                           tieMiddleBracketName, unfinishedBracketName,
+                                                           unfinished3rdBracketName, unfinished1st3rdBracketName };
 
-  @Before
-  public void setup() throws IOException, SQLException {
-    tempFile = File.createTempFile("flltest", null);
-    database = tempFile.getAbsolutePath();
-    connection = Utilities.createFileDataSource(database).getConnection();
+  private static final String tournamentName = "12/13/15 - Rochester";
 
-    final InputStream dumpFileIS = UnfinishedBracketTests.class.getResourceAsStream("data/unfinished-bracket-tests.flldb");
-    assertThat(dumpFileIS, notNullValue());
+  /**
+   * Common setup and tear down for the unfinished bracket tests.
+   */
+  public static class BaseTest {
 
-    final ImportDB.ImportResult importResult = ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS),
-                                                                              connection);
-    TestUtils.deleteImportData(importResult);
+    private File tempFile;
 
-    tournament = Tournament.findTournamentByName(connection, tournamentName);
-    assertThat(tournament, notNullValue());
-  }
+    private String database;
 
-  @After
-  public void tearDown() {
-    SQLFunctions.close(connection);
+    protected Connection connection;
 
-    if (null != tempFile
-        && !tempFile.delete()) {
-      tempFile.deleteOnExit();
+    protected Tournament tournament;
+
+    @Before
+    public void setup() throws IOException, SQLException {
+      tempFile = File.createTempFile("flltest", null);
+      database = tempFile.getAbsolutePath();
+      connection = Utilities.createFileDataSource(database).getConnection();
+
+      final InputStream dumpFileIS = UnfinishedBracketTests.class.getResourceAsStream("data/unfinished-bracket-tests.flldb");
+      assertThat(dumpFileIS, notNullValue());
+
+      final ImportDB.ImportResult importResult = ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS),
+                                                                                connection);
+      TestUtils.deleteImportData(importResult);
+
+      tournament = Tournament.findTournamentByName(connection, tournamentName);
+      assertThat(tournament, notNullValue());
     }
-    if (null != database) {
-      TestUtils.deleteDatabase(database);
+
+    @After
+    public void tearDown() {
+      SQLFunctions.close(connection);
+
+      if (null != tempFile
+          && !tempFile.delete()) {
+        tempFile.deleteOnExit();
+      }
+      if (null != database) {
+        TestUtils.deleteDatabase(database);
+      }
     }
   }
 
   /**
-   * Check that a playoff bracket that ends in a tie is considered unfinished.
-   * 
-   * @throws SQLException internal test error
+   * Test that {@link Playoff#isPlayoffBracketUnfinished(Connection, int, String)}
+   * properly identifies unfinished brackets.
    */
-  @Test
-  public void testFinalTieUnfinished() throws SQLException {
-    final boolean result = Playoff.isPlayoffBracketUnfinished(connection, tournament.getTournamentID(), tieBracketName);
-    assertThat("Final tie should leave bracket unfinished", result, is(true));
+  @RunWith(Theories.class)
+  public static final class UnfinishedBrackets extends BaseTest {
+    @DataPoints
+    public static String[] names() {
+      return unfinishedBracketNames;
+    }
+
+    /**
+     * Test that the specified bracket is unfinished.
+     * 
+     * @param bracketName the bracket to check
+     * @throws SQLException internal test error
+     */
+    @Theory
+    public void test(final String bracketName) throws SQLException {
+      final boolean result = Playoff.isPlayoffBracketUnfinished(connection, tournament.getTournamentID(), bracketName);
+      assertThat(result, is(true));
+    }
   }
 
   /**
-   * Check that
-   * {@link Playoff#isPlayoffBracketUnfinished(Connection, int, String)} shows
-   * unfinished for the unfinished bracket.
-   * 
-   * @throws SQLException internal test error
+   * Test that {@link Playoff#isPlayoffBracketUnfinished(Connection, int, String)}
+   * properly identifies finished brackets.
    */
-  @Test
-  public void testUnfinished() throws SQLException {
-    final boolean result = Playoff.isPlayoffBracketUnfinished(connection, tournament.getTournamentID(),
-                                                              unfinishedBracketName);
-    assertThat(result, is(true));
+  @RunWith(Theories.class)
+  public static final class FinishedBrackets extends BaseTest {
+    @DataPoints
+    public static String[] names() {
+      return finishedBracketNames;
+    }
+
+    /**
+     * Test that the specified bracket is finished.
+     * 
+     * @param bracketName the bracket to check
+     * @throws SQLException internal test error
+     */
+    @Theory
+    public void test(final String bracketName) throws SQLException {
+      final boolean result = Playoff.isPlayoffBracketUnfinished(connection, tournament.getTournamentID(), bracketName);
+      assertThat(result, is(false));
+    }
   }
 
   /**
-   * Check that
-   * {@link Playoff#isPlayoffBracketUnfinished(Connection, int, String)} shows
-   * finished for the completed bracket.
-   * 
-   * @throws SQLException internal test error
+   * Test that {@link Playoff#isPlayoffBracketUnfinished(Connection, int, String)}
+   * properly identifies ties.
    */
-  @Test
-  public void testFinished() throws SQLException {
-    final boolean result = Playoff.isPlayoffBracketUnfinished(connection, tournament.getTournamentID(),
-                                                              finishedBracketName);
-    assertThat(result, is(false));
+  @RunWith(Theories.class)
+  public static final class TieBrackets extends BaseTest {
+    @DataPoints
+    public static String[] names() {
+      return new String[] { tie1st3rdBracketName, tie3rdBracketName, tieBracketName, tieMiddleBracketName };
+    }
+
+    /**
+     * Test that the specified bracket is noted as a tie.
+     * 
+     * @param bracketName the bracket to check
+     * @throws SQLException internal test error
+     */
+    @Theory
+    public void test(final String bracketName) throws SQLException {
+      final Document document = GlobalParameters.getChallengeDocument(connection);
+      assertThat(document, notNullValue());
+
+      final ChallengeDescription challenge = new ChallengeDescription(document.getDocumentElement());
+
+      // should get false for all ties
+      final boolean result = Playoff.finishBracket(connection, challenge, tournament.getTournamentID(), bracketName);
+      assertThat(result, is(false));
+    }
   }
 
   /**
-   * Check that a team in an unfinished playoff bracket is properly noted.
-   * 
-   * @throws SQLException internal test error
+   * Test that
+   * {@link Playoff#finishBracket(Connection, ChallengeDescription, int, String)}
+   * will finish the unfinished brackets.
    */
-  @Test
-  public void testTeamInUnfinished() throws SQLException {
-    final Team team = Team.getTeamFromDatabase(connection, unfinishedTeamNumber);
-    assertThat(team, notNullValue());
+  @RunWith(Theories.class)
+  public static final class TestFinish extends BaseTest {
+    @DataPoints
+    public static String[] names() {
+      return new String[] { unfinished3rdBracketName, unfinished1st3rdBracketName, unfinishedBracketName };
+    }
 
-    final List<Integer> teamNumbers = Collections.singletonList(team.getTeamNumber());
-    final String errors = Playoff.involvedInUnfinishedPlayoff(connection, tournament.getTournamentID(), teamNumbers);
-    assertThat(errors, notNullValue());
+    /**
+     * Test that the specified bracket can be finished.
+     * 
+     * @param bracketName the bracket to check
+     * @throws SQLException internal test error
+     */
+    @Theory
+    public void test(final String bracketName) throws SQLException {
+      final Document document = GlobalParameters.getChallengeDocument(connection);
+      assertThat(document, notNullValue());
+
+      final ChallengeDescription challenge = new ChallengeDescription(document.getDocumentElement());
+
+      final boolean before = Playoff.isPlayoffBracketUnfinished(connection, tournament.getTournamentID(), bracketName);
+      assertThat(before, is(true));
+
+      Playoff.finishBracket(connection, challenge, tournament.getTournamentID(), bracketName);
+
+      final boolean after = Playoff.isPlayoffBracketUnfinished(connection, tournament.getTournamentID(), bracketName);
+      assertThat(after, is(false));
+    }
   }
 
   /**
-   * Check that {@link Playoff#getUnfinishedPlayoffBrackets(Connection, int)}
-   * lists only the unfinished brackets.
-   * 
-   * @throws SQLException internal test error
+   * Non-parameterized tests.
    */
-  @Test
-  public void testUnfinishedByName() throws SQLException {
-    final List<String> actual = Playoff.getUnfinishedPlayoffBrackets(connection, tournament.getTournamentID());
+  public static final class StandardTests extends BaseTest {
 
-    assertThat(actual, hasSize(2));
-    assertThat(actual, hasItem(unfinishedBracketName));
-    assertThat(actual, hasItem(tieBracketName));
+    /**
+     * Check that a team in an unfinished playoff bracket is properly noted.
+     * 
+     * @throws SQLException internal test error
+     */
+    @Test
+    public void testTeamInUnfinished() throws SQLException {
+      final Team team = Team.getTeamFromDatabase(connection, unfinishedTeamNumber);
+      assertThat(team, notNullValue());
+
+      final List<Integer> teamNumbers = Collections.singletonList(team.getTeamNumber());
+      final String errors = Playoff.involvedInUnfinishedPlayoff(connection, tournament.getTournamentID(), teamNumbers);
+      assertThat(errors, notNullValue());
+    }
+
+    /**
+     * Check that {@link Playoff#getUnfinishedPlayoffBrackets(Connection, int)}
+     * lists only the unfinished brackets.
+     * 
+     * @throws SQLException internal test error
+     */
+    @Test
+    public void testUnfinishedByName() throws SQLException {
+      final List<String> actual = Playoff.getUnfinishedPlayoffBrackets(connection, tournament.getTournamentID());
+
+      assertThat(actual, hasSize(unfinishedBracketNames.length));
+
+      for (final String bracketName : unfinishedBracketNames) {
+        assertThat(bracketName, actual, hasItem(bracketName));
+      }
+    }
+
   }
 
 }

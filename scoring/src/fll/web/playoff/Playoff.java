@@ -1188,4 +1188,38 @@ public final class Playoff {
       SQLFunctions.close(prep);
     }
   }
+
+  /**
+   * Finish a bracket by adding dummy scores to complete it.
+   * For each pair competing that doesn't have a score, one will get a "No Show"
+   * score and the other will get a score with all initial values.
+   * 
+   * @param connection the database connection
+   * @param tournamentId the tournament that the bracket is in
+   * @param bracketName the name of the head to head bracket
+   * @param challenge the challenge description, used to get the goal names and
+   *          their initial values.
+   * @return true if the bracket is finished when the method returns, false if a
+   *         tie is found
+   * @throws SQLException if there is a problem talking to the database
+   */
+  public static boolean finishBracket(final Connection connection,
+                                      final ChallengeDescription challenge,
+                                      final int tournamentId,
+                                      final String bracketName)
+      throws SQLException {
+    // FIXME decide if exception is correct for a tie or what, perhaps return an
+    // error string?, or a boolean? Are there other failure conditions?
+    // Note that one can find a tie when walking the data to finish the
+    // bracket. This should also be an error.
+
+    // FIXME do everything in a transaction and roll back if something goes wrong
+
+    // FIXME populate maps for DummyTeamScore
+
+    // FIXME walk the playoff bracket
+
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
 }
