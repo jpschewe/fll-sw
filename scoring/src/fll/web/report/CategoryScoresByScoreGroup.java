@@ -40,7 +40,6 @@ import fll.web.BaseFLLServlet;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreCategory;
 import fll.xml.WinnerType;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Display the report for scores by score group.
@@ -60,10 +59,8 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
       return;
     }
 
-    Connection connection = null;
-    try {
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
-      connection = datasource.getConnection();
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
       final int tournamentID = Queries.getCurrentTournament(connection);
       final Tournament tournament = Tournament.findTournamentByID(connection, tournamentID);
@@ -81,8 +78,6 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
       throw new RuntimeException(e);
     } catch (final DocumentException e) {
       throw new RuntimeException(e);
-    } finally {
-      SQLFunctions.close(connection);
     }
   }
 
@@ -93,32 +88,33 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
                               final Tournament tournament)
       throws SQLException, DocumentException {
 
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      final String challengeTitle = challengeDescription.getTitle();
-      final WinnerType winnerCriteria = challengeDescription.getWinner();
+    final String challengeTitle = challengeDescription.getTitle();
+    final WinnerType winnerCriteria = challengeDescription.getWinner();
 
-      final List<ScoreCategory> subjectiveCategories = challengeDescription.getSubjectiveCategories();
-      final Collection<String> eventDivisions = Queries.getAwardGroups(connection);
-      final Collection<String> judgingGroups = Queries.getJudgingStations(connection, tournament.getTournamentID());
+    final List<ScoreCategory> subjectiveCategories = challengeDescription.getSubjectiveCategories();
+    final Collection<String> eventDivisions = Queries.getAwardGroups(connection);
+    final Collection<String> judgingGroups = Queries.getJudgingStations(connection, tournament.getTournamentID());
 
-      for (final ScoreCategory catElement : subjectiveCategories) {
-        final String catName = catElement.getName();
-        final String catTitle = catElement.getTitle();
+    for (final ScoreCategory catElement : subjectiveCategories) {
+      final String catName = catElement.getName();
+      final String catTitle = catElement.getTitle();
 
-        prep = connection.prepareStatement("SELECT "//
-            + " Teams.TeamNumber, Teams.TeamName, Teams.Organization, FinalScores." + catName //
-            + " FROM Teams, FinalScores" //
-            + " WHERE FinalScores.Tournament = ?" //
-            + " AND FinalScores.TeamNumber = Teams.TeamNumber" //
-            + " AND FinalScores.TeamNumber IN (" //
-            + "   SELECT TeamNumber FROM TournamentTeams"//
-            + "   WHERE Tournament = ?" //
-            + "   AND event_division = ?" //
-            + "   AND judging_station = ?)" //
-            + " ORDER BY " + catName + " " + winnerCriteria.getSortString() //
-        );
+      try (PreparedStatement prep = connection.prepareStatement("SELECT "//
+          + " Teams.TeamNumber, Teams.TeamName, Teams.Organization, FinalScores."
+          + catName //
+          + " FROM Teams, FinalScores" //
+          + " WHERE FinalScores.Tournament = ?" //
+          + " AND FinalScores.TeamNumber = Teams.TeamNumber" //
+          + " AND FinalScores.TeamNumber IN (" //
+          + "   SELECT TeamNumber FROM TournamentTeams"//
+          + "   WHERE Tournament = ?" //
+          + "   AND event_division = ?" //
+          + "   AND judging_station = ?)" //
+          + " ORDER BY "
+          + catName
+          + " "
+          + winnerCriteria.getSortString() //
+      )) {
         prep.setInt(1, tournament.getTournamentID());
         prep.setInt(2, tournament.getTournamentID());
 
@@ -131,27 +127,28 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
             prep.setString(4, judgingGroup);
 
             boolean haveData = false;
-            rs = prep.executeQuery();
-            while (rs.next()) {
-              haveData = true;
+            try (ResultSet rs = prep.executeQuery()) {
+              while (rs.next()) {
+                haveData = true;
 
-              final int teamNumber = rs.getInt(1);
-              final String teamName = rs.getString(2);
-              final String organization = rs.getString(3);
+                final int teamNumber = rs.getInt(1);
+                final String teamName = rs.getString(2);
+                final String organization = rs.getString(3);
 
-              table.addCell(PdfUtils.createCell(String.valueOf(teamNumber)));
-              table.addCell(PdfUtils.createCell(null == teamName ? "" : teamName));
-              table.addCell(PdfUtils.createCell(null == organization ? "" : organization));
-              double score = rs.getDouble(4);
-              if (rs.wasNull()) {
-                score = Double.NaN;
-              }
-              if (Double.isNaN(score)) {
-                table.addCell(PdfUtils.createCell("No Score"));
-              } else {
-                table.addCell(PdfUtils.createCell(Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(score)));
-              }
-            }
+                table.addCell(PdfUtils.createCell(String.valueOf(teamNumber)));
+                table.addCell(PdfUtils.createCell(null == teamName ? "" : teamName));
+                table.addCell(PdfUtils.createCell(null == organization ? "" : organization));
+                double score = rs.getDouble(4);
+                if (rs.wasNull()) {
+                  score = Double.NaN;
+                }
+                if (Double.isNaN(score)) {
+                  table.addCell(PdfUtils.createCell("No Score"));
+                } else {
+                  table.addCell(PdfUtils.createCell(Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(score)));
+                }
+              } // foreach result
+            } // allocate rs
 
             if (haveData) {
               table.keepRowsTogether(0);
@@ -163,14 +160,8 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
           } // foreach station
         } // foreach division
 
-        SQLFunctions.close(prep);
-        prep = null;
-      } // foreach category
-
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
+      } // allocate prep
+    } // foreach category
 
   }
 

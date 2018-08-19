@@ -10,6 +10,15 @@
 <link rel="stylesheet" type="text/css"
 	href="<c:url value='/style/fll-sw.css'/>" />
 
+<script type="text/javascript" src="../extlib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../extlib/jquery.validate.min.js"></script>
+
+<script type="text/javascript">
+  $(document).ready(function() {
+    $("#choose_headers").validate();
+  });
+</script>
+
 </head>
 
 <body>
@@ -19,7 +28,7 @@
 	<%-- clear out the message, so that we don't see it again --%>
 	<c:remove var="message" />
 
-	<form name="choose_headers" method='POST'
+	<form name="choose_headers" id="choose_headers" method='POST'
 		action='ProcessSubjectiveHeaders'>
 		<p>Match the column names from the schedule data file with the
 			subjective categories that they contain the schedule for. Also
@@ -50,9 +59,9 @@
 
 					</select></td>
 
-					<!--  TODO issue:129 need to validate that this is a number -->
 					<td><input type="text" name="${subcat.name}:duration"
-						value="${default_duration}" /></td>
+						id="${subcat.name}:duration" value="${default_duration}"
+						class="required digist" /></td>
 
 				</tr>
 				<!-- row for category -->
@@ -62,7 +71,7 @@
 
 		</table>
 
-		<input type="submit" id='submit' />
+		<input type="submit" id='submit' onsubmit="return validateForm()" />
 	</form>
 
 </body>

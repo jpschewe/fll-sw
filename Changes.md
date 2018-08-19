@@ -1,3 +1,10 @@
+* #629 - Make selecting tournaments easier (better sorting, clearer language)
+* #643 - Keep rows together with the same award group in the subjective by judging station report
+* #618 - improvements to score summarization workflow
+* #129 - validate form parameters in the finalist scheduling application
+* #642 - explicitly update or insert performance scores and report proper errors
+* #632 - add instructions for using the relative URL feature
+* #631 - add launcher buttons for directories used
 * #637 - Correct PDF footers showing the total number of pages
 * #641 - Fix computed score report format when there is no schedule
 

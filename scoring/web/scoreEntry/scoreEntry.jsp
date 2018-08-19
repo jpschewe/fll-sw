@@ -168,7 +168,7 @@ init();
   </div>
 
   <form
-    action="submit.jsp"
+    action="SubmitScoreEntry"
     method="POST"
     name="scoreEntry">
     <input
