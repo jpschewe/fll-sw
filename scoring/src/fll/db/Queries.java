@@ -684,10 +684,6 @@ public final class Queries {
     final int currentTournament = getCurrentTournament(connection);
     final Tournament tournament = Tournament.findTournamentByID(connection, currentTournament);
 
-    final WinnerType winnerCriteria = description.getWinner();
-    final PerformanceScoreCategory performanceElement = description.getPerformance();
-    final List<TiebreakerTest> tiebreakerElement = performanceElement.getTiebreaker();
-
     final String teamNumberStr = request.getParameter("TeamNumber");
     if (null == teamNumberStr) {
       throw new RuntimeException("Missing parameter: TeamNumber");
@@ -705,7 +701,38 @@ public final class Queries {
       throw new RuntimeException("Missing parameter: NoShow");
     }
 
+    final boolean verified = "1".equals(request.getParameter("Verified"));
+
     final TeamScore teamScore = new HttpTeamScore(teamNumber, runNumber, request);
+
+    insertPerformanceScore(connection, description, tournament, teamNumber, runNumber, verified, teamScore);
+  }
+
+  /**
+   * Insert a performance score into the database and do all appropriate updates
+   * to the playoff tables and notifications to the UI code.
+   * 
+   * @param connection the database connection
+   * @param description the challenge description
+   * @param tournament which tournament
+   * @param teamNumber which team
+   * @param runNumber which run
+   * @param verified if the run is verified
+   * @param teamScore the team score
+   * @throws SQLException on a database error
+   * @throws ParseException on an error parsing the score data
+   */
+  public static void insertPerformanceScore(final Connection connection,
+                                            final ChallengeDescription description,
+                                            final Tournament tournament,
+                                            final int teamNumber,
+                                            final int runNumber,
+                                            final boolean verified,
+                                            final TeamScore teamScore)
+      throws SQLException, ParseException {
+    final WinnerType winnerCriteria = description.getWinner();
+    final PerformanceScoreCategory performanceElement = description.getPerformance();
+    final List<TiebreakerTest> tiebreakerElement = performanceElement.getTiebreaker();
 
     final StringBuffer columns = new StringBuffer();
     final StringBuffer values = new StringBuffer();
@@ -714,7 +741,7 @@ public final class Queries {
     values.append(teamNumber);
     columns.append(", Tournament");
     values.append(", "
-        + currentTournament);
+        + tournament.getTournamentID());
 
     columns.append(", ComputedTotal");
     if (teamScore.isNoShow()) {
@@ -726,36 +753,33 @@ public final class Queries {
 
     columns.append(", RunNumber");
     values.append(", "
-        + runNumberStr);
+        + runNumber);
+
+    // TODO: this should be reworked to use ? in the prepared statement
 
     columns.append(", NoShow");
     values.append(", "
-        + noShow);
+        + (teamScore.isNoShow() ? "1" : "0"));
 
     columns.append(", Verified");
     values.append(", "
-        + request.getParameter("Verified"));
+        + (verified ? "1" : "0"));
 
     // now do each goal
     for (final AbstractGoal element : performanceElement.getGoals()) {
       if (!element.isComputed()) {
         final String name = element.getName();
 
-        final String value = request.getParameter(name);
-        if (null == value) {
-          throw new RuntimeException("Missing parameter: "
-              + name);
-        }
         columns.append(", "
             + name);
         if (element.isEnumerated()) {
           // enumerated
           values.append(", '"
-              + value
+              + teamScore.getEnumRawScore(name)
               + "'");
         } else {
           values.append(", "
-              + value);
+              + teamScore.getRawScore(name));
         }
       } // !computed
     } // foreach goal
@@ -767,22 +791,18 @@ public final class Queries {
         + "VALUES ( "
         + values.toString()
         + ")";
-    Statement stmt = null;
-    try {
-      stmt = connection.createStatement();
+    try (Statement stmt = connection.createStatement()) {
       stmt.executeUpdate(sql);
-    } finally {
-      SQLFunctions.close(stmt);
     }
 
     // Perform updates to the playoff data table if in playoff rounds.
-    final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournament);
+    final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID());
     if (runNumber > numSeedingRounds) {
-      if ("1".equals(request.getParameter("Verified"))) {
+      if (verified) {
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("Updating playoff score from insert");
         }
-        updatePlayoffScore(connection, request, currentTournament, winnerCriteria, performanceElement,
+        updatePlayoffScore(connection, verified, tournament.getTournamentID(), winnerCriteria, performanceElement,
                            tiebreakerElement, teamNumber, runNumber, teamScore);
       } else {
         // send H2H update that this team's score is entered
@@ -937,7 +957,9 @@ public final class Queries {
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("Updating playoff score from updatePerformanceScore");
         }
-        updatePlayoffScore(connection, request, currentTournament, winnerCriteria, performanceElement,
+
+        final boolean verified = "1".equals(request.getParameter("Verified"));
+        updatePlayoffScore(connection, verified, currentTournament, winnerCriteria, performanceElement,
                            tiebreakerElement, teamNumber, runNumber, teamScore);
       } else {
         tournament.recordPerformanceSeedingModified(connection);
@@ -955,7 +977,7 @@ public final class Queries {
    * this new information.
    */
   private static void updatePlayoffScore(final Connection connection,
-                                         final HttpServletRequest request,
+                                         final boolean verified,
                                          final int currentTournament,
                                          final WinnerType winnerCriteria,
                                          final PerformanceScoreCategory performanceElement,
@@ -970,8 +992,6 @@ public final class Queries {
           + " run: "
           + runNumber);
     }
-
-    final boolean verified = "1".equals(request.getParameter("Verified"));
 
     final Team team = Team.getTeamFromDatabase(connection, teamNumber);
 
@@ -1134,7 +1154,8 @@ public final class Queries {
    * 
    * @throws RuntimeException if a parameter is missing or if the playoff meta
    *           data would become inconsistent due to the deletion.
-   * @throws ParseException if the numbers in the request can't be parsed as numbers
+   * @throws ParseException if the numbers in the request can't be parsed as
+   *           numbers
    */
   @SuppressFBWarnings(value = "OBL_UNSATISFIED_OBLIGATION", justification = "Bug in findbugs - ticket:2924739")
   public static void deletePerformanceScore(final Connection connection,
