@@ -7,7 +7,6 @@
 package fll.web.admin;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -17,8 +16,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
-
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
@@ -38,6 +35,13 @@ public class AdminIndex {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
+  /**
+   * Populate page context with variables for the admin index page.
+   * 
+   * @param application the application context
+   * @param session the session context
+   * @param pageContext populated with variables
+   */
   public static void populateContext(final ServletContext application,
                                      final HttpSession session,
                                      final PageContext pageContext) {
@@ -50,17 +54,10 @@ public class AdminIndex {
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    ResultSet rs = null;
-    ResultSet rs2 = null;
-    Statement stmt = null;
-    PreparedStatement prep = null;
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
-      stmt = connection.createStatement();
+    try (Connection connection = datasource.getConnection(); Statement stmt = connection.createStatement()) {
 
       final int currentTournamentID = Queries.getCurrentTournament(connection);
-      pageContext.setAttribute("currentTournamentID", currentTournamentID);
+      pageContext.setAttribute("currentTournament", Tournament.findTournamentByID(connection, currentTournamentID));
 
       final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournamentID);
       pageContext.setAttribute("numSeedingRounds", numSeedingRounds);
@@ -69,15 +66,16 @@ public class AdminIndex {
       pageContext.setAttribute("tournaments", tournaments);
 
       boolean teamsUploaded = false;
-      rs = stmt.executeQuery("SELECT COUNT(*) FROM Teams WHERE TeamNumber >= 0");
-      while (rs.next()) {
-        final int count = rs.getInt(1);
-        teamsUploaded = count > 0;
+      try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM Teams WHERE TeamNumber >= 0")) {
+        while (rs.next()) {
+          final int count = rs.getInt(1);
+          teamsUploaded = count > 0;
+        }
       }
       pageContext.setAttribute("teamsUploaded", teamsUploaded);
 
       pageContext.setAttribute("scheduleUploaded",
-                           TournamentSchedule.scheduleExistsInDatabase(connection, currentTournamentID));
+                               TournamentSchedule.scheduleExistsInDatabase(connection, currentTournamentID));
 
       pageContext.setAttribute("judgesAssigned", Queries.isJudgesProperlyAssigned(connection, challengeDescription));
 
@@ -86,15 +84,10 @@ public class AdminIndex {
 
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
-          + sqle.getMessage() + "</p>");
+          + sqle.getMessage()
+          + "</p>");
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(rs2);
-      SQLFunctions.close(stmt);
-      SQLFunctions.close(prep);
-      SQLFunctions.close(connection);
     }
 
     session.setAttribute(SessionAttributes.MESSAGE, message.toString());
