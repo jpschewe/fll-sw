@@ -29,7 +29,7 @@ public final class PlayoffSessionData implements Serializable {
   public PlayoffSessionData(final Connection connection) throws SQLException {
     final int currentTournamentID = Queries.getCurrentTournament(connection);
     mCurrentTournament = Tournament.findTournamentByID(connection, currentTournamentID);
-    mNumPlayoffRounds = Queries.getNumPlayoffRounds(connection);
+    mNumPlayoffRounds = Queries.getNumPlayoffRounds(connection, currentTournamentID);
     mTournamentTeams = Queries.getTournamentTeams(connection, mCurrentTournament.getTournamentID());
 
     mExistingBrackets = Playoff.getPlayoffBrackets(connection, mCurrentTournament.getTournamentID());
