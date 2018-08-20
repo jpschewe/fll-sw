@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -72,9 +73,14 @@ public class UnfinishedBracketTests {
   // 14446, 16627, 17521, 18420
   private static final String tie1st3rdBracketName = "tie-1st-3rd";
 
+  /** bracket that has multiple missing entries */
+  // 19689, 20806, 21169, 21940
+  private static final String unfinishedLarge = "unfinished-large";
+
   private static final String[] unfinishedBracketNames = { tie1st3rdBracketName, tie3rdBracketName, tieBracketName,
                                                            tieMiddleBracketName, unfinishedBracketName,
-                                                           unfinished3rdBracketName, unfinished1st3rdBracketName };
+                                                           unfinished3rdBracketName, unfinished1st3rdBracketName,
+                                                           unfinishedLarge };
 
   private static final String tournamentName = "12/13/15 - Rochester";
 
@@ -186,16 +192,17 @@ public class UnfinishedBracketTests {
      * 
      * @param bracketName the bracket to check
      * @throws SQLException internal test error
+     * @throws ParseException internal test error
      */
     @Theory
-    public void test(final String bracketName) throws SQLException {
+    public void test(final String bracketName) throws SQLException, ParseException {
       final Document document = GlobalParameters.getChallengeDocument(connection);
       assertThat(document, notNullValue());
 
       final ChallengeDescription challenge = new ChallengeDescription(document.getDocumentElement());
 
       // should get false for all ties
-      final boolean result = Playoff.finishBracket(connection, challenge, tournament.getTournamentID(), bracketName);
+      final boolean result = Playoff.finishBracket(connection, challenge, tournament, bracketName);
       assertThat(result, is(false));
     }
   }
@@ -209,7 +216,8 @@ public class UnfinishedBracketTests {
   public static final class TestFinish extends BaseTest {
     @DataPoints
     public static String[] names() {
-      return new String[] { unfinished3rdBracketName, unfinished1st3rdBracketName, unfinishedBracketName };
+      return new String[] { unfinished3rdBracketName, unfinished1st3rdBracketName, unfinishedBracketName,
+                            unfinishedLarge };
     }
 
     /**
@@ -217,9 +225,10 @@ public class UnfinishedBracketTests {
      * 
      * @param bracketName the bracket to check
      * @throws SQLException internal test error
+     * @throws ParseException internal test error
      */
     @Theory
-    public void test(final String bracketName) throws SQLException {
+    public void test(final String bracketName) throws SQLException, ParseException {
       final Document document = GlobalParameters.getChallengeDocument(connection);
       assertThat(document, notNullValue());
 
@@ -228,7 +237,7 @@ public class UnfinishedBracketTests {
       final boolean before = Playoff.isPlayoffBracketUnfinished(connection, tournament.getTournamentID(), bracketName);
       assertThat(before, is(true));
 
-      Playoff.finishBracket(connection, challenge, tournament.getTournamentID(), bracketName);
+      Playoff.finishBracket(connection, challenge, tournament, bracketName);
 
       final boolean after = Playoff.isPlayoffBracketUnfinished(connection, tournament.getTournamentID(), bracketName);
       assertThat(after, is(false));

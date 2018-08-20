@@ -406,9 +406,9 @@ public class BracketData extends BracketInfo {
     _currentTournament = Queries.getCurrentTournament(_connection);
 
     _rowsPerTeam = pRowsPerTeam;
-    _firstRoundSize = Queries.getFirstPlayoffRoundSize(_connection, getBracketName());
+    _firstRoundSize = Queries.getFirstPlayoffRoundSize(_connection, _currentTournament, getBracketName());
 
-    _finalsRound = Queries.getNumPlayoffRounds(_connection, getBracketName());
+    _finalsRound = Queries.getNumPlayoffRounds(_connection, _currentTournament, getBracketName());
 
     _bracketData = new TreeMap<Integer, SortedMap<Integer, BracketDataType>>();
     for (int i = getFirstRound(); i <= getLastRound(); i++) {
@@ -1395,7 +1395,8 @@ public class BracketData extends BracketInfo {
       sb.append(StringUtils.trimString(team.getTeamName(), Team.MAX_TEAM_NAME_LEN));
       sb.append("</span>");
 
-      final boolean performanceScoreExists = Queries.performanceScoreExists(_connection, team, runNumber);
+      final boolean performanceScoreExists = Queries.performanceScoreExists(_connection, currentTournament, team,
+                                                                            runNumber);
       sb.append("<!-- performance score exists: "
           + performanceScoreExists
           + " -->\n");

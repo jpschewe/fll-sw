@@ -705,7 +705,7 @@ public final class Queries {
 
     final TeamScore teamScore = new HttpTeamScore(teamNumber, runNumber, request);
 
-    insertPerformanceScore(connection, description, tournament, teamNumber, runNumber, verified, teamScore);
+    insertPerformanceScore(connection, description, tournament, verified, teamScore);
   }
 
   /**
@@ -715,8 +715,6 @@ public final class Queries {
    * @param connection the database connection
    * @param description the challenge description
    * @param tournament which tournament
-   * @param teamNumber which team
-   * @param runNumber which run
    * @param verified if the run is verified
    * @param teamScore the team score
    * @throws SQLException on a database error
@@ -725,8 +723,6 @@ public final class Queries {
   public static void insertPerformanceScore(final Connection connection,
                                             final ChallengeDescription description,
                                             final Tournament tournament,
-                                            final int teamNumber,
-                                            final int runNumber,
                                             final boolean verified,
                                             final TeamScore teamScore)
       throws SQLException, ParseException {
@@ -738,7 +734,7 @@ public final class Queries {
     final StringBuffer values = new StringBuffer();
 
     columns.append("TeamNumber");
-    values.append(teamNumber);
+    values.append(teamScore.getTeamNumber());
     columns.append(", Tournament");
     values.append(", "
         + tournament.getTournamentID());
@@ -753,7 +749,7 @@ public final class Queries {
 
     columns.append(", RunNumber");
     values.append(", "
-        + runNumber);
+        + teamScore.getRunNumber());
 
     // TODO: this should be reworked to use ? in the prepared statement
 
@@ -797,19 +793,21 @@ public final class Queries {
 
     // Perform updates to the playoff data table if in playoff rounds.
     final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID());
-    if (runNumber > numSeedingRounds) {
+    if (teamScore.getRunNumber() > numSeedingRounds) {
       if (verified) {
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("Updating playoff score from insert");
         }
         updatePlayoffScore(connection, verified, tournament.getTournamentID(), winnerCriteria, performanceElement,
-                           tiebreakerElement, teamNumber, runNumber, teamScore);
+                           tiebreakerElement, teamScore.getTeamNumber(), teamScore.getRunNumber(), teamScore);
       } else {
         // send H2H update that this team's score is entered
-        final String bracketName = Playoff.getPlayoffDivision(connection, teamNumber, runNumber);
-        final Team team = Team.getTeamFromDatabase(connection, teamNumber);
+        final String bracketName = Playoff.getPlayoffDivision(connection, tournament.getTournamentID(),
+                                                              teamScore.getTeamNumber(), teamScore.getRunNumber());
+        final Team team = Team.getTeamFromDatabase(connection, teamScore.getTeamNumber());
 
-        H2HUpdateWebSocket.updateBracket(connection, performanceElement.getScoreType(), bracketName, team, runNumber);
+        H2HUpdateWebSocket.updateBracket(connection, performanceElement.getScoreType(), bracketName, team,
+                                         teamScore.getRunNumber());
       }
     } else {
       tournament.recordPerformanceSeedingModified(connection);
@@ -820,11 +818,10 @@ public final class Queries {
   }
 
   public static boolean isThirdPlaceEnabled(final Connection connection,
+                                            final int tournament,
                                             final String division)
       throws SQLException {
-    final int finalRound = getNumPlayoffRounds(connection, division);
-
-    final int tournament = getCurrentTournament(connection);
+    final int finalRound = getNumPlayoffRounds(connection, tournament, division);
 
     PreparedStatement prep = null;
     ResultSet rs = null;
@@ -1001,9 +998,9 @@ public final class Queries {
           + ptLine);
     }
 
-    final String division = Playoff.getPlayoffDivision(connection, teamNumber, runNumber);
+    final String division = Playoff.getPlayoffDivision(connection, currentTournament, teamNumber, runNumber);
     if (ptLine > 0) {
-      final int playoffRun = Playoff.getPlayoffRound(connection, division, runNumber);
+      final int playoffRun = Playoff.getPlayoffRound(connection, currentTournament, division, runNumber);
 
       final double score = performanceElement.evaluate(teamScore);
 
@@ -1015,11 +1012,13 @@ public final class Queries {
 
       H2HUpdateWebSocket.updateBracket(connection, performanceElement.getScoreType(), division, team, runNumber);
 
-      final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division, (ptLine
+      final int siblingDbLine = ptLine
           % 2 == 0 ? ptLine
               - 1
               : ptLine
-                  + 1), runNumber);
+                  + 1;
+      final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division, siblingDbLine,
+                                                         runNumber);
 
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Sibling is: "
@@ -1035,17 +1034,19 @@ public final class Queries {
         // anyway
 
         // See if the modification affects the result of the playoff match
-        final Team teamA = Team.getTeamFromDatabase(connection, teamNumber);
+        final int winnerDbLine = (ptLine
+            + 1)
+            / 2;
+        final int winnerRunNumber = runNumber
+            + 1;
+        final int oldWinnerTeamNumber = Queries.getTeamNumberByPlayoffLine(connection, currentTournament, division,
+                                                                           winnerDbLine, winnerRunNumber);
+
         final Team teamB = Team.getTeamFromDatabase(connection, siblingTeam);
-        if (teamA == null
-            || teamB == null) {
-          throw new FLLRuntimeException("Unable to find one of these team numbers in the database: "
-              + teamNumber
-              + " and "
-              + siblingTeam);
+        if (teamB == null) {
+          throw new FLLRuntimeException("Unable to find team number in the database: "
+              + teamNumber);
         }
-        final Team oldWinner = Playoff.pickWinner(connection, currentTournament, performanceElement, tiebreakerElement,
-                                                  winnerCriteria, teamA, teamB, runNumber);
         final Team newWinner = Playoff.pickWinner(connection, currentTournament, performanceElement, tiebreakerElement,
                                                   winnerCriteria, teamB, team, teamScore, runNumber);
         PreparedStatement prep = null;
@@ -1055,9 +1056,8 @@ public final class Queries {
               + " WHERE TeamNumber = ?" //
               + " AND RunNumber > ?" //
               + " AND Tournament = ?");
-          if (oldWinner != null
-              && newWinner != null
-              && !oldWinner.equals(newWinner)) {
+          if (newWinner != null
+              && oldWinnerTeamNumber != newWinner.getTeamNumber()) {
             // This score update changes the result of the match, so make sure
             // no other scores exist in later round for either of these 2 teams.
             if (getPlayoffTableLineNumber(connection, currentTournament, teamNumber, runNumber
@@ -1106,7 +1106,7 @@ public final class Queries {
         // If the second-check flag is NO or the opposing team is not
         // verified, we set the match "winner" (possibly back) to NULL.
         if (!verified
-            || !(Queries.performanceScoreExists(connection, teamB, runNumber)
+            || !(Queries.performanceScoreExists(connection, currentTournament, teamB, runNumber)
                 && Queries.isVerified(connection, currentTournament, teamB, runNumber))) {
           removePlayoffScore(connection, division, currentTournament, runNumber, ptLine);
         } else {
@@ -1119,15 +1119,15 @@ public final class Queries {
               / 2);
           updatePlayoffTable(connection, newWinner, division, currentTournament, nextRun, winnerLineNumber);
 
-          final int semiFinalRound = getNumPlayoffRounds(connection, division)
+          final int semiFinalRound = getNumPlayoffRounds(connection, currentTournament, division)
               - 1;
           if (playoffRun == semiFinalRound
-              && isThirdPlaceEnabled(connection, division)) {
+              && isThirdPlaceEnabled(connection, currentTournament, division)) {
             final Team newLoser;
-            if (newWinner.equals(teamA)) {
+            if (newWinner.equals(team)) {
               newLoser = teamB;
             } else {
-              newLoser = teamA;
+              newLoser = team;
             }
 
             // the line number where the losing team goes to playoff for 3rd
@@ -1137,9 +1137,8 @@ public final class Queries {
                 / 2);
             updatePlayoffTable(connection, newLoser, division, currentTournament, nextRun, thirdPlaceBracketLineNumber);
           }
-        }
-      }
-
+        } // verified score
+      } // no sibling
     } else {
       throw new FLLRuntimeException("Team "
           + teamNumber
@@ -1177,7 +1176,7 @@ public final class Queries {
     final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournament);
 
     final int dbLine = getPlayoffTableLineNumber(connection, currentTournament, teamNumber, irunNumber);
-    final String division = Playoff.getPlayoffDivision(connection, teamNumber, irunNumber);
+    final String division = Playoff.getPlayoffDivision(connection, currentTournament, teamNumber, irunNumber);
 
     // Check if we need to update the PlayoffData table
     try (PreparedStatement prep = connection.prepareStatement("SELECT TeamNumber FROM Performance" //
@@ -1311,7 +1310,7 @@ public final class Queries {
       SQLFunctions.close(prep);
     }
 
-    final int playoffRound = Playoff.getPlayoffRound(connection, division, runNumber);
+    final int playoffRound = Playoff.getPlayoffRound(connection, currentTournament, division, runNumber);
 
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Sending H2H update" //
@@ -1354,11 +1353,11 @@ public final class Queries {
 
     updatePlayoffTable(connection, Team.NULL, division, currentTournament, nextRunNumber, nextDbLine);
 
-    final int semiFinalRound = getNumPlayoffRounds(connection, division)
+    final int semiFinalRound = getNumPlayoffRounds(connection, currentTournament, division)
         - 1;
-    final int playoffRun = Playoff.getPlayoffRound(connection, division, runNumber);
+    final int playoffRun = Playoff.getPlayoffRound(connection, currentTournament, division, runNumber);
     if (playoffRun == semiFinalRound
-        && isThirdPlaceEnabled(connection, division)) {
+        && isThirdPlaceEnabled(connection, currentTournament, division)) {
       updatePlayoffTable(connection, Team.NULL, division, currentTournament, (runNumber
           + 1), ((ptLine
               + 5)
@@ -2788,9 +2787,10 @@ public final class Queries {
    * @throws SQLException on database errors.
    */
   public static int getNumPlayoffRounds(final Connection connection,
+                                        final int tournament,
                                         final String division)
       throws SQLException {
-    final int x = getFirstPlayoffRoundSize(connection, division);
+    final int x = getFirstPlayoffRoundSize(connection, tournament, division);
     if (x > 0) {
       return (int) Math.round(Math.log(x)
           / Math.log(2));
@@ -2808,11 +2808,12 @@ public final class Queries {
    *         brackets have not been initialized.
    * @throws SQLException on database errors.
    */
-  public static int getNumPlayoffRounds(final Connection connection) throws SQLException {
-    final int tournament = getCurrentTournament(connection);
+  public static int getNumPlayoffRounds(final Connection connection,
+                                        final int tournament)
+      throws SQLException {
     int numRounds = 0;
     for (final String division : Playoff.getPlayoffBrackets(connection, tournament)) {
-      final int x = getFirstPlayoffRoundSize(connection, division);
+      final int x = getFirstPlayoffRoundSize(connection, tournament, division);
       if (x > 0) {
         numRounds = Math.max((int) Math.round(Math.log(x)
             / Math.log(2)), numRounds);
@@ -2832,9 +2833,9 @@ public final class Queries {
    * @throws SQLException on database error.
    */
   public static int getFirstPlayoffRoundSize(final Connection connection,
+                                             final int tournament,
                                              final String division)
       throws SQLException {
-    final int tournament = getCurrentTournament(connection);
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
@@ -2939,27 +2940,11 @@ public final class Queries {
    * @throws SQLException on a database error
    */
   public static boolean performanceScoreExists(final Connection connection,
+                                               final int tournament,
                                                final int teamNumber,
                                                final int runNumber)
       throws SQLException {
-    return null != getPerformanceScore(connection, teamNumber, runNumber);
-  }
-
-  /**
-   * Get a team's performance score in the current tournament.
-   * 
-   * @param connection database connection
-   * @param teamNumber which team to get the score for
-   * @param runNumber which run number to get the score for
-   * @return the score if it exists, null if it doesn't exist
-   * @throws SQLException on a database error
-   */
-  public static Double getPerformanceScore(final Connection connection,
-                                           final int teamNumber,
-                                           final int runNumber)
-      throws SQLException {
-    final int tournament = getCurrentTournament(connection);
-    return getPerformanceScore(connection, tournament, teamNumber, runNumber);
+    return null != getPerformanceScore(connection, tournament, teamNumber, runNumber);
   }
 
   /**
@@ -3049,13 +3034,14 @@ public final class Queries {
    * team.getTeamNumber(), runNumber), otherwise returns false.
    */
   public static boolean performanceScoreExists(final Connection connection,
+                                               final int tournament,
                                                final Team team,
                                                final int runNumber)
       throws SQLException {
     if (null == team) {
       return false;
     } else {
-      return performanceScoreExists(connection, team.getTeamNumber(), runNumber);
+      return performanceScoreExists(connection, tournament, team.getTeamNumber(), runNumber);
     }
   }
 
