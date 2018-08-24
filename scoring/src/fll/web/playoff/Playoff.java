@@ -1333,13 +1333,16 @@ public final class Playoff {
                                   final String bracketName,
                                   final RoundInfo info)
       throws SQLException, ParseException {
+
     final int roundToFinish = info.round
         - 1;
+    final int performanceRunNumberToEnter = info.runNumber
+        - 1;
+
+    //FIXME this logic needs to take 3rd place into account to properly back-compute the dbline
     final int teamBdbLine = info.dbLine
         * 2;
     final int teamAdbLine = teamBdbLine
-        - 1;
-    final int performanceRunNumberToEnter = info.runNumber
         - 1;
 
     final int teamAteamNumber = Queries.getTeamNumberByPlayoffLine(connection, tournament.getTournamentID(),
