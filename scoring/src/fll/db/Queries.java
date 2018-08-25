@@ -1000,8 +1000,6 @@ public final class Queries {
 
     final String division = Playoff.getPlayoffDivision(connection, currentTournament, teamNumber, runNumber);
     if (ptLine > 0) {
-      final int playoffRun = Playoff.getPlayoffRound(connection, currentTournament, division, runNumber);
-
       final double score = performanceElement.evaluate(teamScore);
 
       // this makes sure that scores get pushed through to the displays
@@ -1109,34 +1107,15 @@ public final class Queries {
             || !(Queries.performanceScoreExists(connection, currentTournament, teamB, runNumber)
                 && Queries.isVerified(connection, currentTournament, teamB, runNumber))) {
           removePlayoffScore(connection, division, currentTournament, runNumber, ptLine);
-        } else {
-          final int nextRun = runNumber
-              + 1;
-
-          // the line number where the winner will go
-          final int winnerLineNumber = ((ptLine
-              + 1)
-              / 2);
-          updatePlayoffTable(connection, newWinner, division, currentTournament, nextRun, winnerLineNumber);
-
-          final int semiFinalRound = getNumPlayoffRounds(connection, currentTournament, division)
-              - 1;
-          if (playoffRun == semiFinalRound
-              && isThirdPlaceEnabled(connection, currentTournament, division)) {
-            final Team newLoser;
-            if (newWinner.equals(team)) {
-              newLoser = teamB;
-            } else {
-              newLoser = team;
-            }
-
-            // the line number where the losing team goes to playoff for 3rd
-            // place
-            final int thirdPlaceBracketLineNumber = ((ptLine
-                + 5)
-                / 2);
-            updatePlayoffTable(connection, newLoser, division, currentTournament, nextRun, thirdPlaceBracketLineNumber);
+        } else {          
+          final Team newLoser;
+          if (newWinner.equals(team)) {
+            newLoser = teamB;
+          } else {
+            newLoser = team;
           }
+          updatePlayoffData(connection, division, currentTournament, runNumber, ptLine, newWinner, newLoser);
+
         } // verified score
       } // no sibling
     } else {
@@ -1343,23 +1322,33 @@ public final class Queries {
                                          final int runNumber,
                                          final int ptLine)
       throws SQLException {
+    // winner and loser are both null now
+    updatePlayoffData(connection, division, currentTournament, runNumber, ptLine, Team.NULL, Team.NULL);
+  }
+
+  private static void updatePlayoffData(final Connection connection,
+                                        final String bracketName,
+                                        final int tournamentId,
+                                        final int runNumber,
+                                        final int dbLine,
+                                        final Team winner,
+                                        final Team loser)
+      throws SQLException {
     final int nextRunNumber = runNumber
         + 1;
-    // final int nextDbLine = Queries.getPlayoffTableLineNumber(connection,
-    // currentTournament, teamNumber, nextRunNumber);
-    final int nextDbLine = ((ptLine
+    final int nextDbLine = ((dbLine
         + 1)
         / 2);
 
-    updatePlayoffTable(connection, Team.NULL, division, currentTournament, nextRunNumber, nextDbLine);
+    updatePlayoffTable(connection, winner, bracketName, tournamentId, nextRunNumber, nextDbLine);
 
-    final int semiFinalRound = getNumPlayoffRounds(connection, currentTournament, division)
+    final int semiFinalRound = getNumPlayoffRounds(connection, tournamentId, bracketName)
         - 1;
-    final int playoffRun = Playoff.getPlayoffRound(connection, currentTournament, division, runNumber);
+    final int playoffRun = Playoff.getPlayoffRound(connection, tournamentId, bracketName, runNumber);
     if (playoffRun == semiFinalRound
-        && isThirdPlaceEnabled(connection, currentTournament, division)) {
-      updatePlayoffTable(connection, Team.NULL, division, currentTournament, (runNumber
-          + 1), ((ptLine
+        && isThirdPlaceEnabled(connection, tournamentId, bracketName)) {
+      updatePlayoffTable(connection, loser, bracketName, tournamentId, (runNumber
+          + 1), ((dbLine
               + 5)
               / 2));
     }
