@@ -720,6 +720,7 @@ public final class Queries {
    * @throws SQLException on a database error
    * @throws ParseException on an error parsing the score data
    */
+  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate list of columns off the goals")
   public static void insertPerformanceScore(final Connection connection,
                                             final ChallengeDescription description,
                                             final Tournament tournament,
