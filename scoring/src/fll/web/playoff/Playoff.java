@@ -1333,13 +1333,23 @@ public final class Playoff {
                                   final String bracketName,
                                   final RoundInfo info)
       throws SQLException, ParseException {
+    // info is the round that we need the winner for, so we need to walk back
+    // through the bracket to find the 2 teams that are competing for this spot.
 
     final int roundToFinish = info.round
         - 1;
     final int performanceRunNumberToEnter = info.runNumber
         - 1;
 
-    //FIXME this logic needs to take 3rd place into account to properly back-compute the dbline
+    final int finalRound = Queries.getNumPlayoffRounds(connection, tournament.getTournamentID(), bracketName);
+
+    if (finalRound == info.round
+        && info.dbLine > 2) {
+      // must be the 3rd place bracket computation
+      // these teams are already filled in, so skip this
+      return;
+    }
+
     final int teamBdbLine = info.dbLine
         * 2;
     final int teamAdbLine = teamBdbLine
@@ -1409,6 +1419,33 @@ public final class Playoff {
       Queries.insertPerformanceScore(connection, description, tournament, true, teamBscore);
     }
 
+  }
+
+  /**
+   * Compute the 3rd place database line given the database line of a team
+   * competing in the semi-finals.
+   * 
+   * @param dbLine the line of a team in the semi-finals
+   * @return the database line that the team will be in if they lost in the
+   *         semi-finals
+   */
+  public static int computeThirdPlaceDbLine(final int dbLine) {
+    final int loserDbLine = (dbLine
+        + 5)
+        / 2;
+    return loserDbLine;
+  }
+
+  /**
+   * This method is the inverse of {@link #computeThirdPlaceDbLine(int)}.
+   * 
+   * @param thirdPlaceDbLine a database line in the 3rd place bracket
+   * @return a database line in the semi-finals
+   */
+  public static int computeSemiFinalDbLine(final int thirdPlaceDbLine) {
+    return (2
+        * thirdPlaceDbLine)
+        - 5;
   }
 
   /**
