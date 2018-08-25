@@ -1107,7 +1107,7 @@ public final class Queries {
             || !(Queries.performanceScoreExists(connection, currentTournament, teamB, runNumber)
                 && Queries.isVerified(connection, currentTournament, teamB, runNumber))) {
           removePlayoffScore(connection, division, currentTournament, runNumber, ptLine);
-        } else {          
+        } else {
           final Team newLoser;
           if (newWinner.equals(team)) {
             newLoser = teamB;
@@ -1347,10 +1347,8 @@ public final class Queries {
     final int playoffRun = Playoff.getPlayoffRound(connection, tournamentId, bracketName, runNumber);
     if (playoffRun == semiFinalRound
         && isThirdPlaceEnabled(connection, tournamentId, bracketName)) {
-      updatePlayoffTable(connection, loser, bracketName, tournamentId, (runNumber
-          + 1), ((dbLine
-              + 5)
-              / 2));
+      final int thirdPlaceDbLine = Playoff.computeThirdPlaceDbLine(dbLine);
+      updatePlayoffTable(connection, loser, bracketName, tournamentId, nextRunNumber, thirdPlaceDbLine);
     }
   }
 
