@@ -33,6 +33,7 @@ org.apache.tools.ant.taskdefs.optional.jlink
 org.apache.tools.ant.taskdefs.optional.jsp
 org.apache.tools.ant.taskdefs.optional.jsp.compilers
 org.apache.tools.ant.taskdefs.optional.junit
+org.apache.tools.ant.taskdefs.optional.junitlauncher
 org.apache.tools.ant.taskdefs.optional.native2ascii
 org.apache.tools.ant.taskdefs.optional.net
 org.apache.tools.ant.taskdefs.optional.pvcs
@@ -45,12 +46,14 @@ org.apache.tools.ant.taskdefs.optional.testing
 org.apache.tools.ant.taskdefs.optional.unix
 org.apache.tools.ant.taskdefs.optional.vss
 org.apache.tools.ant.taskdefs.optional.windows
+org.apache.tools.ant.taskdefs.optional.xz
 org.apache.tools.ant.taskdefs.rmic
 org.apache.tools.ant.types
 org.apache.tools.ant.types.mappers
 org.apache.tools.ant.types.optional
 org.apache.tools.ant.types.optional.depend
 org.apache.tools.ant.types.optional.image
+org.apache.tools.ant.types.optional.xz
 org.apache.tools.ant.types.resolver
 org.apache.tools.ant.types.resources
 org.apache.tools.ant.types.resources.comparators

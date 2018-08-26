@@ -24,33 +24,31 @@
 
 <body>
 
-<h2><a name="deltree">Deltree</a></h2>
-<h3><i>Deprecated</i></h3>
-<p><i>This task has been deprecated.  Use the Delete task instead.</i></p>
+<h2 id="deltree">Deltree</h2>
+<h3><em><u>Deprecated</u></em></h3>
+<p><em>This task has been <u>deprecated</u>.  Use the <code>Delete</code> task instead.</em></p>
 <h3>Description</h3>
 <p>Deletes a directory with all its files and subdirectories.</p>
 <h3>Parameters</h3>
-<table border="1" cellpadding="2" cellspacing="0">
+<table class="attr">
   <tr>
-    <td valign="top"><b>Attribute</b></td>
-    <td valign="top"><b>Description</b></td>
-    <td align="center" valign="top"><b>Required</b></td>
+    <th scope="col">Attribute</th>
+    <th scope="col">Description</th>
+    <th scope="col">Required</th>
   </tr>
   <tr>
-    <td valign="top">dir</td>
-    <td valign="top">the directory to delete.</td>
-    <td valign="top" align="center">Yes</td>
+    <td>dir</td>
+    <td>the directory to delete.</td>
+    <td>Yes</td>
   </tr>
 </table>
 <h3>Examples</h3>
-<pre>  &lt;deltree dir=&quot;dist&quot;/&gt;</pre>
-<p>deletes the directory <code>dist</code>, including its files and
-subdirectories.</p>
-<pre>  &lt;deltree dir=&quot;${dist}&quot;/&gt;</pre>
-<p>deletes the directory <code>${dist}</code>, including its files and
-subdirectories.</p>
 
+<p>Delete the directory <samp>dist</samp>, including its files and subdirectories.</p>
+<pre>&lt;deltree dir=&quot;dist&quot;/&gt;</pre>
+
+<p>Delete the directory <samp>${dist}</samp>, including its files and subdirectories.</p>
+<pre>&lt;deltree dir=&quot;${dist}&quot;/&gt;</pre>
 
 </body>
 </html>
-
