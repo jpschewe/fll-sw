@@ -817,7 +817,8 @@
 				<formatter type="brief" usefile="false" />
 				<formatter type="xml" />
 				<batchtest todir="${dir.build}/test-results" skipNonTests="true">
-					<fileset dir="@{dir.src}" includes="**/*.java"/>
+					<fileset dir="@{dir.src}" includes="**/*.java">
+					</fileset>
 				</batchtest>
 			</junit>
 
