@@ -166,9 +166,12 @@
 
 		<!-- file upload -->
 		<pathelement location="${dir.lib}/commons-fileupload-1.3.jar" />
-		
+
 		<!-- parse mime types -->
 		<pathelement location="${dir.lib}/tika-core-1.16.jar" />
+
+		<!-- handle errors in lambdas -->
+		<pathelement location="${dir.lib}/durian-core-1.1.0.jar" />
 
 	</path>
 
@@ -558,7 +561,7 @@
 				<include name="LICENSE" />
 			</fileset>
 		</copy>
-		
+
 		<copy todir="${dir.build}/docs" file="${basedir}/../Changes.md" />
 
 		<copy todir="${dir.web}/documentation">
@@ -813,9 +816,8 @@
 
 				<formatter type="brief" usefile="false" />
 				<formatter type="xml" />
-				<batchtest todir="${dir.build}/test-results">
+				<batchtest todir="${dir.build}/test-results" skipNonTests="true">
 					<fileset dir="@{dir.src}" includes="**/*.java">
-						<contains text="@Test" />
 					</fileset>
 				</batchtest>
 			</junit>

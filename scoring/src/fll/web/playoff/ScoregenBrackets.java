@@ -66,8 +66,9 @@ public class ScoregenBrackets {
         }
       }
 
+      final int tournament = Queries.getCurrentTournament(connection);
       final int lastColumn = 1
-          + Queries.getNumPlayoffRounds(connection, division);
+          + Queries.getNumPlayoffRounds(connection, tournament, division);
 
       int lastRound;
       String lastRoundStr = request.getParameter("lastRound");

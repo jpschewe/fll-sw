@@ -10,7 +10,7 @@
   rel="stylesheet"
   type="text/css"
   href="<c:url value='/style/fll-sw.css'/>" />
-<title>${bracketInfo.bracketName}PrintablePlayoff Bracket</title>
+<title>${bracketInfo.bracketName} - PrintablePlayoff Bracket</title>
 </head>
 
 <script type="text/javascript">

@@ -59,8 +59,9 @@ public class AdminBrackets {
         firstRound = 1;
       }
 
+      final int tournament = Queries.getCurrentTournament(connection);
       final int lastColumn = 1
-          + Queries.getNumPlayoffRounds(connection, divisionStr);
+          + Queries.getNumPlayoffRounds(connection, tournament, divisionStr);
 
       int lastRound;
       try {

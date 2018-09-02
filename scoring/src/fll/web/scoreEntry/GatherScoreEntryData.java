@@ -107,10 +107,11 @@ public class GatherScoreEntryData extends BaseFLLServlet {
             return;
           }
         } else {
-          if (!Queries.performanceScoreExists(connection, teamNumber, runNumber)) {
+          if (!Queries.performanceScoreExists(connection, tournament, teamNumber, runNumber)) {
             session.setAttribute(SessionAttributes.MESSAGE,
                                  "<p name='error' class='error'>Team has not yet competed in run "
-                                     + runNumber + ".  Please choose a valid run number.</p>");
+                                     + runNumber
+                                     + ".  Please choose a valid run number.</p>");
             response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
             return;
           }
@@ -140,8 +141,8 @@ public class GatherScoreEntryData extends BaseFLLServlet {
 
       final String roundText;
       if (lRunNumber > numSeedingRounds) {
-        final String division = Playoff.getPlayoffDivision(connection, teamNumber, lRunNumber);
-        final int playoffRun = Playoff.getPlayoffRound(connection, division, lRunNumber);
+        final String division = Playoff.getPlayoffDivision(connection, tournament, teamNumber, lRunNumber);
+        final int playoffRun = Playoff.getPlayoffRound(connection, tournament, division, lRunNumber);
         roundText = "Playoff&nbsp;Round&nbsp;"
             + playoffRun;
       } else {

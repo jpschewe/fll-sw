@@ -12,29 +12,41 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
-
-import net.mtu.eggplant.util.sql.SQLFunctions;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.diffplug.common.base.Errors;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
+import fll.Tournament;
 import fll.db.GenerateDB;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
+import fll.util.DummyTeamScore;
+import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.FP;
 import fll.util.LogUtils;
+import fll.xml.AbstractGoal;
 import fll.xml.BracketSortType;
 import fll.xml.ChallengeDescription;
+import fll.xml.ChallengeParser;
+import fll.xml.EnumeratedValue;
+import fll.xml.Goal;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.TiebreakerTest;
 import fll.xml.WinnerType;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Handle playoff information.
@@ -306,7 +318,9 @@ public final class Playoff {
     try {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Inserting bye for team: "
-            + team.getTeamNumber() + " run: " + runNumber);
+            + team.getTeamNumber()
+            + " run: "
+            + runNumber);
       }
       prep = connection.prepareStatement("INSERT INTO Performance(TeamNumber, Tournament, RunNumber, Bye, Verified)"
           + " VALUES( ?, ?, ?, 1, 1)");
@@ -337,7 +351,8 @@ public final class Playoff {
       ResultSet rs = null;
       try {
         stmt = connection.prepareStatement("SELECT ComputedTotal FROM Performance WHERE TeamNumber = ?"
-            + " AND Tournament = ?" + " AND RunNumber = ?");
+            + " AND Tournament = ?"
+            + " AND RunNumber = ?");
         stmt.setInt(1, team.getTeamNumber());
         stmt.setInt(2, tournament);
         stmt.setInt(3, runNumber);
@@ -346,7 +361,11 @@ public final class Playoff {
           return rs.getDouble(1);
         } else {
           throw new IllegalArgumentException("No score exists for tournament: "
-              + tournament + " teamNumber: " + team.getTeamNumber() + " runNumber: " + runNumber);
+              + tournament
+              + " teamNumber: "
+              + team.getTeamNumber()
+              + " runNumber: "
+              + runNumber);
         }
       } finally {
         SQLFunctions.close(rs);
@@ -410,7 +429,9 @@ public final class Playoff {
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("initializing playoff bracket: "
-          + division + " enableThird: " + enableThird);
+          + division
+          + " enableThird: "
+          + enableThird);
     }
     final int currentTournament = Queries.getCurrentTournament(connection);
 
@@ -550,7 +571,8 @@ public final class Playoff {
         final int team1 = rs.getInt(3);
         if (!rs.next()) {
           throw new RuntimeException("Error initializing brackets: uneven number"
-              + " of slots in playoff round " + round1);
+              + " of slots in playoff round "
+              + round1);
         }
         final int round2 = rs.getInt(1);
         final int line2 = rs.getInt(2);
@@ -638,7 +660,9 @@ public final class Playoff {
     try {
       divisionsPrep = connection.prepareStatement("SELECT DISTINCT event_division from PlayoffData WHERE" //
           + " Tournament = ?" //
-          + " AND Team IN ( " + teamNumbersStr + " )");
+          + " AND Team IN ( "
+          + teamNumbersStr
+          + " )");
       divisionsPrep.setInt(1, currentTournament);
       divisions = divisionsPrep.executeQuery();
 
@@ -680,7 +704,7 @@ public final class Playoff {
     if (maxPerformanceRound < 0) {
       return -1;
     } else {
-      return getPlayoffRound(connection, playoffDivision, maxPerformanceRound);
+      return getPlayoffRound(connection, tournament, playoffDivision, maxPerformanceRound);
     }
   }
 
@@ -728,7 +752,8 @@ public final class Playoff {
   public static int[] computeInitialBrackets(final int numTeams) {
     if (numTeams < 1) {
       throw new IllegalArgumentException("numTeams must be greater than or equal to 1 found: "
-          + numTeams + " perhaps teams have not had scores entered for seeding rounds?");
+          + numTeams
+          + " perhaps teams have not had scores entered for seeding rounds?");
     }
 
     int n = numTeams;
@@ -746,7 +771,8 @@ public final class Playoff {
       for (int index = 0; index < smallerBracket.length; ++index) {
         final int team = smallerBracket[index];
         final int opponent = n
-            - team + 1;
+            - team
+            + 1;
 
         if (index
             + 1 < n
@@ -814,7 +840,56 @@ public final class Playoff {
   }
 
   /**
-   * Check if some teams are involved in an playoff bracket that isn't finished.
+   * Check if a particular playoff bracket is unfinished.
+   * 
+   * @param connection the database connection
+   * @param tournamentId the tournament
+   * @param bracketName the bracket to check
+   */
+  public static boolean isPlayoffBracketUnfinished(final Connection connection,
+                                                   final int tournamentId,
+                                                   final String bracketName)
+      throws SQLException {
+    try (PreparedStatement prep = connection.prepareStatement("SELECT team FROM PlayoffData WHERE"//
+        + " run_number = (SELECT MAX(run_number) FROM PlayoffData WHERE event_division = ? AND Tournament = ?)" //
+        + " AND (team = ? OR team = ?)" //
+        + " AND Tournament = ?" //
+        + " AND event_division = ?")) {
+      prep.setString(1, bracketName);
+      prep.setInt(2, tournamentId);
+      prep.setInt(3, Team.NULL.getTeamNumber()); // if the null team is the "winner", then it's not done
+      prep.setInt(4, Team.TIE.getTeamNumber()); // if the tie team is the "winner", then it's not done
+      prep.setInt(5, tournamentId);
+      prep.setString(6, bracketName);
+
+      try (ResultSet rs = prep.executeQuery()) {
+        // if there are any results then the bracket is unfinished
+        return rs.next();
+      }
+    }
+  }
+
+  /**
+   * Find all unfinished playoff brackets.
+   * 
+   * @param connection the database connection
+   * @param tournamentId the tournament
+   * @throws SQLException on a database error
+   */
+  public static List<String> getUnfinishedPlayoffBrackets(final Connection connection,
+                                                          final int tournamentId)
+      throws SQLException {
+    return getPlayoffBrackets(connection,
+                              tournamentId).stream()
+                                           .filter(Errors.rethrow()
+                                                         .wrapPredicate(bracket -> isPlayoffBracketUnfinished(connection,
+                                                                                                              tournamentId,
+                                                                                                              bracket)))
+                                           .collect(Collectors.toList());
+  }
+
+  /**
+   * Check if some teams are involved in a playoff bracket that isn't finished.
    * 
    * @param teamNumbers the teams to check, NULL, BYE and TIE team
    *          numbers will be ignored as they can be in multiple playoffs at the
@@ -828,75 +903,43 @@ public final class Playoff {
       throws SQLException {
     final StringBuilder message = new StringBuilder();
 
+    final List<String> unfinishedPlayoffBrackets = getUnfinishedPlayoffBrackets(connection, tournament);
+
     final String teamNumbersStr = StringUtils.join(teamNumbers, ",");
 
-    PreparedStatement divisionsPrep = null;
-    ResultSet divisions = null;
-    PreparedStatement checkPrep = null;
-    ResultSet check = null;
-    PreparedStatement detailPrep = null;
-    ResultSet detail = null;
-    try {
-      divisionsPrep = connection.prepareStatement("SELECT DISTINCT event_division from PlayoffData WHERE" //
-          + " Tournament = ?" //
-          + " AND Team IN ( " + teamNumbersStr + " )");
-      divisionsPrep.setInt(1, tournament);
-      divisions = divisionsPrep.executeQuery();
-
-      checkPrep = connection.prepareStatement("SELECT * FROM PlayoffData WHERE" //
-          + " run_number = " //
-          + "   (SELECT MAX(run_number) FROM PlayoffData WHERE event_division = ? AND Tournament = ?)" //
-          + "     AND team = ? AND Tournament = ?");
-      checkPrep.setInt(2, tournament);
-      checkPrep.setInt(3, Team.NULL.getTeamNumber());
-      checkPrep.setInt(4, tournament);
-
-      detailPrep = connection.prepareStatement("SELECT DISTINCT Team from PlayoffData WHERE event_division = ?" //
-          + " AND tournament = ?" //
-          + " AND Team NOT IN (?, ?, ?)" // exclude internal teams
-          + " AND Team IN ( " + teamNumbersStr + " )");
+    try (
+        PreparedStatement detailPrep = connection.prepareStatement("SELECT DISTINCT Team from PlayoffData WHERE event_division = ?" //
+            + " AND tournament = ?" //
+            + " AND Team NOT IN (?, ?, ?)" // exclude internal teams
+            + " AND Team IN ( "
+            + teamNumbersStr
+            + " )")) {
       detailPrep.setInt(2, tournament);
       detailPrep.setInt(3, Team.BYE.getTeamNumber());
       detailPrep.setInt(4, Team.TIE.getTeamNumber());
       detailPrep.setInt(5, Team.NULL.getTeamNumber());
 
-      while (divisions.next()) {
-        final String eventDivision = divisions.getString(1);
-
-        checkPrep.setString(1, eventDivision);
-        check = checkPrep.executeQuery();
-        if (check.next()) {
-
-          detailPrep.setString(1, eventDivision);
-          detail = detailPrep.executeQuery();
+      for (final String bracketName : unfinishedPlayoffBrackets) {
+        detailPrep.setString(1, bracketName);
+        try (ResultSet detail = detailPrep.executeQuery()) {
           while (detail.next()) {
             final int teamNumber = detail.getInt(1);
             message.append("<li>Team "
-                + teamNumber + " is involved in the playoff bracket '" + eventDivision
+                + teamNumber
+                + " is involved in the playoff bracket '"
+                + bracketName
                 + "', which isn't finished</li>");
           }
-          SQLFunctions.close(detail);
-          detail = null;
-
         }
-        SQLFunctions.close(check);
-        check = null;
       }
-
-    } finally {
-      SQLFunctions.close(detail);
-      SQLFunctions.close(detailPrep);
-      SQLFunctions.close(check);
-      SQLFunctions.close(checkPrep);
-      SQLFunctions.close(divisions);
-      SQLFunctions.close(divisionsPrep);
     }
 
     if (message.length() == 0) {
       return null;
     } else {
       return "<ul class='error'>"
-          + message.toString() + "</ul>";
+          + message.toString()
+          + "</ul>";
     }
 
   }
@@ -940,7 +983,8 @@ public final class Playoff {
     try {
       prep = connection.prepareStatement("SELECT LineNumber FROM PlayoffData"//
           + " WHERE Team = ? " //
-          + " AND run_number = ?" + " AND tournament = ?");
+          + " AND run_number = ?"
+          + " AND tournament = ?");
       prep.setInt(1, teamNumber);
       prep.setInt(2, runNumber);
       prep.setInt(3, tournamentId);
@@ -964,21 +1008,23 @@ public final class Playoff {
   /**
    * Find the playoff round run number for the specified division and
    * performance
-   * run number in the current tournament.
+   * run number in the tournament.
    * 
    * @return the playoff round or -1 if not found
    */
   public static int getPlayoffRound(final Connection connection,
+                                    final int tournament,
                                     final String division,
                                     final int runNumber)
       throws SQLException {
 
-    final int tournament = Queries.getCurrentTournament(connection);
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
       prep = connection.prepareStatement("SELECT PlayoffRound FROM PlayoffData"
-          + " WHERE Tournament = ?" + " AND event_division = ?" + " AND run_number = ?");
+          + " WHERE Tournament = ?"
+          + " AND event_division = ?"
+          + " AND run_number = ?");
       prep.setInt(1, tournament);
       prep.setString(2, division);
       prep.setInt(3, runNumber);
@@ -1028,14 +1074,15 @@ public final class Playoff {
   /**
    * Given a team and run number, get the playoff division
    * 
+   * @param tournamentId the tournament
    * @param runNumber the performance run number
    * @return the division or null if not found
    */
   public static String getPlayoffDivision(final Connection connection,
+                                          final int tournamentId,
                                           final int teamNumber,
                                           final int runNumber)
       throws SQLException {
-    final int tournament = Queries.getCurrentTournament(connection);
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
@@ -1045,7 +1092,7 @@ public final class Playoff {
           + " AND Tournament = ?");
       prep.setInt(1, teamNumber);
       prep.setInt(2, runNumber);
-      prep.setInt(3, tournament);
+      prep.setInt(3, tournamentId);
       rs = prep.executeQuery();
       if (rs.next()) {
         final String division = rs.getString(1);
@@ -1077,7 +1124,8 @@ public final class Playoff {
     try {
       prep = connection.prepareStatement("SELECT run_number FROM PlayoffData" //
           + " WHERE Tournament = ?" //
-          + " AND event_division = ?" + " AND PlayoffRound = ?" //
+          + " AND event_division = ?"
+          + " AND PlayoffRound = ?" //
           + " AND Team = ?");
       prep.setInt(1, tournament);
       prep.setString(2, division);
@@ -1153,4 +1201,333 @@ public final class Playoff {
       SQLFunctions.close(prep);
     }
   }
+
+  /**
+   * Protected for testing.
+   * 
+   * @param challenge the challenge description
+   * @param simpleGoals populated with simple goal initial values
+   * @param enumGoals populated with enum goal initial values
+   */
+  protected static final void populateInitialScoreMaps(final ChallengeDescription challenge,
+                                                       final Map<String, Double> simpleGoals,
+                                                       final Map<String, String> enumGoals) {
+    for (final AbstractGoal agoal : challenge.getPerformance().getGoals()) {
+      if (agoal instanceof Goal) {
+        final Goal goal = (Goal) agoal;
+        if (!goal.isComputed()) {
+          final String name = goal.getName();
+          final double initial = goal.getInitialValue();
+          if (goal.isEnumerated()) {
+            final EnumeratedValue einitial = goal.getValues().stream().filter(value -> Math.abs(initial
+                - value.getScore()) < ChallengeParser.INITIAL_VALUE_TOLERANCE).findAny().orElse(null);
+            if (null == einitial) {
+              throw new FLLInternalException("Enumerated goal "
+                  + name
+                  + " doesn't have a value that matches the initial value "
+                  + initial);
+            } else {
+              enumGoals.put(name, einitial.getValue());
+            }
+          } else {
+            simpleGoals.put(name, initial);
+          }
+        } // not computed
+      } // Goal
+    } // foreach goal
+  }
+
+  private static boolean bracketHasTie(final Connection connection,
+                                       final int tournamentId,
+                                       final String bracketName)
+      throws SQLException {
+    try (PreparedStatement prep = connection.prepareStatement("SELECT COUNT(*) FROM PlayoffData " //
+        + " WHERE event_division = ?" //
+        + " AND Tournament = ?" //
+        + " AND Team = ?")) {
+      prep.setString(1, bracketName);
+      prep.setInt(2, tournamentId);
+      prep.setInt(3, Team.TIE.getTeamNumber());
+
+      try (ResultSet rs = prep.executeQuery()) {
+        if (!rs.next()) {
+          throw new FLLInternalException("Did not get result from COUNT(*) looking for ties");
+        }
+
+        final int numTies = rs.getInt(1);
+        if (numTies > 0) {
+          LOGGER.debug("Found "
+              + numTies
+              + " in bracket "
+              + bracketName
+              + " of tournament "
+              + tournamentId);
+          return true;
+        } else {
+          return false;
+        }
+      }
+    }
+  }
+
+  /**
+   * Finish a bracket by adding dummy scores to complete it.
+   * For each pair competing that doesn't have a score, one will get a "No Show"
+   * score and the other will get a score with all initial values.
+   * If the bracket is already finished, then this method returns true without
+   * making changes.
+   * If the bracket has a tie, then this method returns false without making
+   * changes.
+   * If an exception occurs the database is consistent, but the bracket will not
+   * be finished.
+   * 
+   * @param connection the database connection
+   * @param tournament the tournament that the bracket is in
+   * @param bracketName the name of the head to head bracket
+   * @param challenge the challenge description, used to get the goal names and
+   *          their initial values.
+   * @return true if the bracket is finished when the method returns, false if a
+   *         tie is found
+   * @throws SQLException if there is a problem talking to the database
+   * @throws ParseException if there is an error parsing the score data
+   */
+  public static boolean finishBracket(final Connection connection,
+                                      final ChallengeDescription challenge,
+                                      final Tournament tournament,
+                                      final String bracketName)
+      throws SQLException, ParseException {
+    if (bracketHasTie(connection, tournament.getTournamentID(), bracketName)) {
+      return false;
+    }
+    if (!isPlayoffBracketUnfinished(connection, tournament.getTournamentID(), bracketName)) {
+      // nothing to do
+      return true;
+    }
+
+    // populate maps for DummyTeamScore
+    final Map<String, Double> simpleGoals = new HashMap<>();
+    final Map<String, String> enumGoals = new HashMap<>();
+    populateInitialScoreMaps(challenge, simpleGoals, enumGoals);
+
+    // finish rounds from the beginning
+    final List<RoundInfo> unfinishedRounds = gatherUnfinishedRounds(connection, tournament.getTournamentID(),
+                                                                    bracketName);
+    for (final RoundInfo info : unfinishedRounds) {
+      LOGGER.trace("Computing winner for bracket: "
+          + bracketName
+          + " round: "
+          + info.round
+          + " line: "
+          + info.dbLine);
+      finishRound(connection, challenge, tournament, simpleGoals, enumGoals, bracketName, info);
+    }
+
+    return true;
+  }
+
+  private static void finishRound(final Connection connection,
+                                  final ChallengeDescription description,
+                                  final Tournament tournament,
+                                  final Map<String, Double> simpleGoals,
+                                  final Map<String, String> enumGoals,
+                                  final String bracketName,
+                                  final RoundInfo info)
+      throws SQLException, ParseException {
+    // info is the round that we need the winner for, so we need to walk back
+    // through the bracket to find the 2 teams that are competing for this spot.
+
+    final int roundToFinish = info.round
+        - 1;
+    final int performanceRunNumberToEnter = info.runNumber
+        - 1;
+
+    final int finalRound = Queries.getNumPlayoffRounds(connection, tournament.getTournamentID(), bracketName);
+
+    if (finalRound == info.round
+        && info.dbLine > 2) {
+      // must be the 3rd place bracket computation
+      // these teams are already filled in, so skip this
+      return;
+    }
+
+    final int teamBdbLine = info.dbLine
+        * 2;
+    final int teamAdbLine = teamBdbLine
+        - 1;
+
+    final int teamAteamNumber = Queries.getTeamNumberByPlayoffLine(connection, tournament.getTournamentID(),
+                                                                   bracketName, teamAdbLine,
+                                                                   performanceRunNumberToEnter);
+    if (Team.NULL.getTeamNumber() == teamAteamNumber) {
+      throw new FLLInternalException("Cannot find team for bracket: "
+          + bracketName
+          + " round: "
+          + roundToFinish
+          + " line: "
+          + teamAdbLine);
+    }
+    final boolean teamAscoreExists = Queries.performanceScoreExists(connection, tournament.getTournamentID(),
+                                                                    teamAteamNumber, performanceRunNumberToEnter);
+
+    final int teamBteamNumber = Queries.getTeamNumberByPlayoffLine(connection, tournament.getTournamentID(),
+                                                                   bracketName, teamBdbLine,
+                                                                   performanceRunNumberToEnter);
+    if (Team.NULL.getTeamNumber() == teamBteamNumber) {
+      throw new FLLInternalException("Cannot find team for bracket: "
+          + bracketName
+          + " round: "
+          + roundToFinish
+          + " line: "
+          + teamBdbLine);
+    }
+    final boolean teamBscoreExists = Queries.performanceScoreExists(connection, tournament.getTournamentID(),
+                                                                    teamBteamNumber, performanceRunNumberToEnter);
+
+    LOGGER.trace("Finishing performance run: "
+        + performanceRunNumberToEnter
+        + " for teams "
+        + teamAteamNumber
+        + ", "
+        + teamBteamNumber);
+
+    if (teamAscoreExists
+        && teamBscoreExists) {
+      LOGGER.warn("Trying to finish bracket "
+          + bracketName
+          + " round "
+          + roundToFinish
+          + " found that it's already finished, skipping");
+      return;
+    } else if (teamAscoreExists) {
+      final TeamScore teamBscore = new DummyTeamScore(teamBteamNumber, performanceRunNumberToEnter, simpleGoals,
+                                                      enumGoals, true, false);
+      Queries.insertPerformanceScore(connection, description, tournament, true, teamBscore);
+
+    } else if (teamBscoreExists) {
+      final TeamScore teamAscore = new DummyTeamScore(teamAteamNumber, performanceRunNumberToEnter, simpleGoals,
+                                                      enumGoals, true, false);
+      Queries.insertPerformanceScore(connection, description, tournament, true, teamAscore);
+    } else {
+      // initial value score
+      final TeamScore teamAscore = new DummyTeamScore(teamAteamNumber, performanceRunNumberToEnter, simpleGoals,
+                                                      enumGoals, false, false);
+      Queries.insertPerformanceScore(connection, description, tournament, true, teamAscore);
+
+      // no show
+      final TeamScore teamBscore = new DummyTeamScore(teamBteamNumber, performanceRunNumberToEnter, simpleGoals,
+                                                      enumGoals, true, false);
+      Queries.insertPerformanceScore(connection, description, tournament, true, teamBscore);
+    }
+
+  }
+
+  /**
+   * Compute the 3rd place database line given the database line of a team
+   * competing in the semi-finals.
+   * 
+   * @param dbLine the line of a team in the semi-finals
+   * @return the database line that the team will be in if they lost in the
+   *         semi-finals
+   */
+  public static int computeThirdPlaceDbLine(final int dbLine) {
+    final int loserDbLine = (dbLine
+        + 5)
+        / 2;
+    return loserDbLine;
+  }
+
+  /**
+   * This method is the inverse of {@link #computeThirdPlaceDbLine(int)}.
+   * 
+   * @param thirdPlaceDbLine a database line in the 3rd place bracket
+   * @return a database line in the semi-finals
+   */
+  public static int computeSemiFinalDbLine(final int thirdPlaceDbLine) {
+    return (2
+        * thirdPlaceDbLine)
+        - 5;
+  }
+
+  /**
+   * @return list of rounds that are sorted by lowest round, then lowest line
+   *         number.
+   * @throws SQLException on database error
+   */
+  private static List<RoundInfo> gatherUnfinishedRounds(final Connection connection,
+                                                        final int tournamentId,
+                                                        final String bracketName)
+      throws SQLException {
+    final List<RoundInfo> unfinishedRounds = new LinkedList<>();
+    try (PreparedStatement prep = connection.prepareStatement("SELECT playoffround, linenumber, run_number" //
+        + " FROM PlayoffData" //
+        + " WHERE tournament = ?"//
+        + " AND event_division = ?"
+        + " AND team = ?")) {
+      prep.setInt(1, tournamentId);
+      prep.setString(2, bracketName);
+      prep.setInt(3, Team.NULL.getTeamNumber());
+
+      try (ResultSet rs = prep.executeQuery()) {
+        while (rs.next()) {
+          final RoundInfo info = new RoundInfo();
+          info.round = rs.getInt(1);
+          info.dbLine = rs.getInt(2);
+          info.runNumber = rs.getInt(3);
+          unfinishedRounds.add(info);
+        }
+      }
+    }
+
+    Collections.sort(unfinishedRounds);
+    return unfinishedRounds;
+  }
+
+  /**
+   * Track information about the playoff round that needs to be populated.
+   */
+  private static final class RoundInfo implements Comparable<RoundInfo> {
+    public int round;
+
+    public int dbLine;
+
+    public int runNumber;
+
+    @Override
+    public int compareTo(final RoundInfo o) {
+      if (this.round == o.round) {
+        if (this.dbLine == o.dbLine) {
+          return 0;
+        } else if (this.dbLine < o.dbLine) {
+          return -1;
+        } else {
+          return 1;
+        }
+      } else if (this.round < o.round) {
+        return -1;
+      } else {
+        return 1;
+      }
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(round, dbLine);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+      if (this == o) {
+        return true;
+      } else if (null == o) {
+        return false;
+      } else if (this.getClass() == o.getClass()) {
+        final RoundInfo other = (RoundInfo) o;
+        return other.round == this.round
+            && other.dbLine == this.dbLine;
+      } else {
+        return false;
+      }
+    }
+  }
+
 }
