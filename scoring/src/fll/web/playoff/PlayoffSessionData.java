@@ -44,6 +44,8 @@ public final class PlayoffSessionData implements Serializable {
       }
     }
 
+    mUnfinishedBrackets = Playoff.getUnfinishedPlayoffBrackets(connection, mCurrentTournament.getTournamentID());
+
     mSort = null;
   }
 
@@ -108,6 +110,15 @@ public final class PlayoffSessionData implements Serializable {
    */
   public List<String> getUninitializedBrackets() {
     return Collections.unmodifiableList(mUninitializedBrackets);
+  }
+
+  private final List<String> mUnfinishedBrackets;
+
+  /**
+   * @return brackets that have been initialized, but not completed
+   */
+  public List<String> getUnfinishedBrackets() {
+    return Collections.unmodifiableList(mUnfinishedBrackets);
   }
 
   private final int mNumPlayoffRounds;
