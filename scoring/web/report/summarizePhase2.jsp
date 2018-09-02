@@ -7,7 +7,6 @@
 <%@ page import="fll.web.ApplicationAttributes"%>
 <%@ page import="fll.web.SessionAttributes"%>
 <%@ page import="javax.sql.DataSource"%>
-<%@ page import="fll.web.report.PromptSummarizeScores"%>
 <%@ page import="fll.web.WebUtils"%>
 
 <%
@@ -19,13 +18,6 @@
   ScoreStandardization.updateTeamTotalScores(connection, description, currentTournament);
   final String errorMsg = ScoreStandardization.checkDataConsistency(connection);
   pageContext.setAttribute("errorMsg", errorMsg);
-
-  final String url = SessionAttributes.getAttribute(session, PromptSummarizeScores.SUMMARY_REDIRECT_KEY,
-                                                    String.class);
-  if (null != url) {
-    WebUtils.sendRedirect(application, response, url);
-    return;
-  }
 %>
 
 <html>

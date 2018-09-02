@@ -1312,14 +1312,48 @@ public class TournamentSchedule implements Serializable {
     table.setHeaderRows(2);
 
     Collections.sort(_schedule, getComparatorForSubjectiveByDivision(subjectiveStation));
+    String prevAwardGroup = null;
     for (final TeamScheduleInfo si : _schedule) {
-      table.addCell(PdfUtils.createCell(String.valueOf(si.getTeamNumber())));
-      table.addCell(PdfUtils.createCell(si.getAwardGroup()));
-      table.addCell(PdfUtils.createCell(si.getOrganization()));
-      table.addCell(PdfUtils.createCell(si.getTeamName()));
-      table.addCell(PdfUtils.createCell(formatTime(si.getSubjectiveTimeByName(subjectiveStation).getTime())));
-      table.addCell(PdfUtils.createCell(si.getJudgingGroup()));
+      final LocalTime time = si.getSubjectiveTimeByName(subjectiveStation).getTime();
+      final String awardGroup = si.getAwardGroup();
+      final float topBorderWidth;
+      if (Objects.equals(awardGroup, prevAwardGroup)) {
+        topBorderWidth = Rectangle.UNDEFINED;
+        // keep the rows with the same award group together
+        table.getRow(table.getLastCompletedRowIndex()).setMayNotBreak(true);
+      } else {
+        topBorderWidth = TIME_SEPARATOR_LINE_WIDTH;
+      }
+
+      PdfPCell cell = PdfUtils.createCell(String.valueOf(si.getTeamNumber()));
+      cell.setBorderWidthTop(topBorderWidth);
+      table.addCell(cell);
+
+      cell = PdfUtils.createCell(awardGroup);
+      cell.setBorderWidthTop(topBorderWidth);
+      table.addCell(cell);
+
+      cell = PdfUtils.createCell(si.getOrganization());
+      cell.setBorderWidthTop(topBorderWidth);
+      table.addCell(cell);
+
+      cell = PdfUtils.createCell(si.getTeamName());
+      cell.setBorderWidthTop(topBorderWidth);
+      table.addCell(cell);
+
+      cell = PdfUtils.createCell(formatTime(time));
+      cell.setBorderWidthTop(topBorderWidth);
+      table.addCell(cell);
+
+      cell = PdfUtils.createCell(si.getJudgingGroup());
+      cell.setBorderWidthTop(topBorderWidth);
+      table.addCell(cell);
+
+      prevAwardGroup = awardGroup;
     }
+
+    // make sure the last row isn't by itself
+    table.getRow(table.getLastCompletedRowIndex()).setMayNotBreak(true);
 
     detailedSchedules.add(table);
 
