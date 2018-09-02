@@ -100,7 +100,9 @@ public class SubjectiveFrameTest {
 
       connection = Utilities.createFileDataSource(database).getConnection();
 
-      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), connection);
+      final ImportDB.ImportResult importResult = ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS),
+                                                                                connection);
+      TestUtils.deleteImportData(importResult);
 
       document = GlobalParameters.getChallengeDocument(connection);
 
@@ -117,7 +119,8 @@ public class SubjectiveFrameTest {
         }
       }
       Assert.assertTrue("Could find tournament "
-          + tournamentName + " in database dump", tournamentID != -1);
+          + tournamentName
+          + " in database dump", tournamentID != -1);
       Queries.setCurrentTournament(connection, tournamentID);
 
       // create the subjective datafile
@@ -178,8 +181,7 @@ public class SubjectiveFrameTest {
       expectedRowCounts.put("Design", 41);
       expectedRowCounts.put("Programming", 29);
       expectedRowCounts.put("Research Project Assessment", 58);
-      for (final Element categoryDescription : new NodelistElementCollectionAdapter(
-                                                                                    document.getDocumentElement()
+      for (final Element categoryDescription : new NodelistElementCollectionAdapter(document.getDocumentElement()
                                                                                             .getElementsByTagName("subjectiveCategory"))) {
         final String title = categoryDescription.getAttribute("title");
 
@@ -191,7 +193,8 @@ public class SubjectiveFrameTest {
               + title, expected, table.rowCount());
         } else {
           Assert.fail("Unknown category '"
-              + title + "'");
+              + title
+              + "'");
         }
       }
 
@@ -316,12 +319,15 @@ public class SubjectiveFrameTest {
       for (int column = 0; column < numSubCategories; ++column) {
         // no schedule, so base num columns is good
         final TableCell dataCell = TableCell.row(teamCell.row).column(teamCell.column
-            + SubjectiveTableModel.BASE_NUM_COLUMNS_LEFT_OF_SCORES + column);
+            + SubjectiveTableModel.BASE_NUM_COLUMNS_LEFT_OF_SCORES
+            + column);
         table.click(dataCell, MouseButton.LEFT_BUTTON);
         table.pressAndReleaseKey(KeyPressInfo.keyCode(KeyEvent.VK_BACK_SPACE));
         table.pressAndReleaseKey(KeyPressInfo.keyCode(KeyEvent.VK_TAB));
         Assert.assertEquals("Value should have been overwritten row: "
-            + dataCell.row + " column: " + dataCell.column, "", table.valueAt(dataCell));
+            + dataCell.row
+            + " column: "
+            + dataCell.column, "", table.valueAt(dataCell));
       }
 
       window.button(JButtonMatcher.withText("Quit")).click();

@@ -94,10 +94,10 @@ public class FullTournamentTest {
   /**
    * Retry the test up to 3 times
    */
-  @SuppressFBWarnings(value="URF_UNREAD_PUBLIC_PROTECTED_FIELD", justification="Used by the JUnit framework")
+  @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_PROTECTED_FIELD", justification = "Used by the JUnit framework")
   @Rule
   public RuleChain chain = RuleChain.outerRule(new TestUtils.Retry(3));
-  
+
   private static final Logger LOGGER = LogUtils.getLogger();
 
   private WebDriver selenium;
@@ -131,7 +131,8 @@ public class FullTournamentTest {
     try (final InputStream dbResourceStream = FullTournamentTest.class.getResourceAsStream("data/99-final.flldb")) {
       Assert.assertNotNull("Missing test data", dbResourceStream);
       final ZipInputStream zipStream = new ZipInputStream(dbResourceStream);
-      ImportDB.loadFromDumpIntoNewDB(zipStream, testDataConn);
+      final ImportDB.ImportResult result = ImportDB.loadFromDumpIntoNewDB(zipStream, testDataConn);
+      TestUtils.deleteImportData(result);
     }
   }
 
