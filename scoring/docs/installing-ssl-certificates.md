@@ -1,13 +1,32 @@
 # Android
+For this to work it is likely that you will need to have a password or pin code set on your tablet. If you do not have one set, you will be prompted during these steps if one is required.
 
-## Chrome
+## Chrome and Silk
+In Minnesota this includes both the tablets with grey cases and those with colorful cases.
 
 1. Click on the link to download the certificate
+1. If prompted asking if it should be downloaded again say yes
 1. Enter pin or fingerprint if prompted
-1. name the certificate 'FLL-SW'
-1. leave used for at "VPN and apps"
+1. Name the certificate 'FLL-SW'
+1. Leave used for at "VPN and apps"
 1. Click Ok
 
+If you get an error that the certificate file could not be installed because it could not be read, do the following.
+This will most likely happen on a Google Nexus 7 (in Minnesota the grey tablets).
+
+1. Open Settings
+1. Click on Security
+1. Under Credentials click on Install from Storage
+1. Click Downloads
+1. Click on the most recent fll-sw.crt file (closest to the top)
+1. Name the certificate 'FLL-SW'
+1. Leave used for at "VPN and apps"
+1. Click Ok
+ 
+
+# IOS - iPhone, iPad
+
+Not supported at this time. You should use the non-secure version of the app.
 
 ## Firefox
 
@@ -23,14 +42,14 @@ When visiting the site you may get an error about a self-signed certificate. If 
 1. Click "Add permanent exception"
 
 
-# Firefox
+# Firefox on laptops
 
 1. Click on the link to download the certificate
 1. A dialog will appear asking where to trust this certificate
 1. Click Trust this certificate to identify websites
 1. Click OK
 
-# IE
+# IE on laptops
 
 1. Click on the link to download the certificate
 1. Double click on the downloaded file
@@ -39,7 +58,7 @@ When visiting the site you may get an error about a self-signed certificate. If 
 1. Choose Trusted Root Authorities
 1. OK
 
-# Chrome
+# Chrome on laptops
 
 ## Windows
 
