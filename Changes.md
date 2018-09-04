@@ -1,3 +1,4 @@
+* #659 - add report of the top seeding round scores for all award groups
 * #644 - allow one to automatically finish a playoff bracket
 * #629 - Make selecting tournaments easier (better sorting, clearer language)
 * #643 - Keep rows together with the same award group in the subjective by judging station report
