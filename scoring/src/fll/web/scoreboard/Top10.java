@@ -11,8 +11,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Formatter;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
@@ -40,6 +42,9 @@ import fll.xml.ChallengeDescription;
 import fll.xml.ScoreType;
 import fll.xml.WinnerType;
 
+/**
+ * Compute top scores from the seeding rounds.
+ */
 @WebServlet("/scoreboard/Top10")
 public class Top10 extends BaseFLLServlet {
 
@@ -166,6 +171,103 @@ public class Top10 extends BaseFLLServlet {
                         final String organization,
                         @Nonnull final String formattedScore,
                         final int rank);
+  }
+
+  /**
+   * @param application application context
+   * @return awardGroup -> sorted scores
+   */
+  public static Map<String, List<ScoreEntry>> getTableAsMap(@Nonnull final ServletContext application)
+      throws SQLException {
+    final Map<String, List<ScoreEntry>> data = new HashMap<>();
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
+      final List<String> awardGroups = Queries.getAwardGroups(connection);
+      for (final String ag : awardGroups) {
+        final List<ScoreEntry> scores = new LinkedList<>();
+        processScores(application, ag, (teamName,
+                                        teamNumber,
+                                        organization,
+                                        formattedScore,
+                                        rank) -> {
+          final ScoreEntry row = new ScoreEntry(teamName, teamNumber, organization, formattedScore, rank);
+          scores.add(row);
+        });
+        data.put(ag, scores);
+      }
+      return data;
+    }
+  }
+
+  /**
+   * Data class for scores within an award group.
+   */
+  public static class ScoreEntry {
+    /**
+     * @param teamName see {@link #getTeamName()}
+     * @param teamNumber see {@link #getTeamNumber()}
+     * @param organization see {@link #getOrganization()}
+     * @param formattedScore see {@link #getFormattedScore()}
+     * @param rank see {@link #getRank()}
+     */
+    public ScoreEntry(final String teamName,
+                      final int teamNumber,
+                      final String organization,
+                      @Nonnull final String formattedScore,
+                      final int rank) {
+      this.teamName = teamName;
+      this.teamNumber = teamNumber;
+      this.organization = organization;
+      this.formattedScore = formattedScore;
+      this.rank = rank;
+    }
+
+    private final String teamName;
+
+    /**
+     * @return team name
+     */
+    public String getTeamName() {
+      return teamName;
+    }
+
+    private final int teamNumber;
+
+    /**
+     * @return team number
+     */
+    public int getTeamNumber() {
+      return teamNumber;
+    }
+
+    private final String formattedScore;
+
+    /**
+     * @return score formatted for display
+     */
+    @Nonnull
+    public String getFormattedScore() {
+      return formattedScore;
+    }
+
+    private final String organization;
+
+    /**
+     * @return team organization
+     */
+    public String getOrganization() {
+      return organization;
+    }
+
+    private final int rank;
+
+    /**
+     * @return rank within their award group
+     */
+    public int getRank() {
+      return rank;
+    }
+
   }
 
   /**
