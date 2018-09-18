@@ -114,7 +114,7 @@ public final class JsonUtilities {
           }
           return null;
         }
-        final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
+        final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection, currentTournament);
         final int teamNumber = tbc.getTeam().getTeamNumber();
         final int runNumber = Playoff.getRunNumber(connection, division, teamNumber, playoffRound);
         final TeamScore teamScore = new DatabaseTeamScore(GenerateDB.PERFORMANCE_TABLE_NAME, currentTournament,

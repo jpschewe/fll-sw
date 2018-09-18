@@ -104,5 +104,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="scoring/lib/hsqldb-2.4.1.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/durian-core-1.1.0.jar"/>
 	<classpathentry kind="output" path="scoring/bin/"/>
 </classpath>

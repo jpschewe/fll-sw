@@ -52,7 +52,8 @@ public class ImportDBTest {
     try {
       connection = Utilities.createFileDataSource(database).getConnection();
 
-      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), connection);
+      final ImportDB.ImportResult importResult = ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), connection);
+      TestUtils.deleteImportData(importResult);
 
       connection.close();
     } finally {
@@ -86,7 +87,9 @@ public class ImportDBTest {
     try {
       connection = Utilities.createFileDataSource(database).getConnection();
 
-      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), connection);
+      final ImportDB.ImportResult importResult = ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS),
+                                                                                connection);
+      TestUtils.deleteImportData(importResult);
 
       // check that team 8777 has a no show in research
       stmt = connection.createStatement();
@@ -126,7 +129,9 @@ public class ImportDBTest {
     try {
       connection = Utilities.createFileDataSource(database).getConnection();
 
-      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), connection);
+      final ImportDB.ImportResult importResult = ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS),
+                                                                                connection);
+      TestUtils.deleteImportData(importResult);
 
       // dump to temp file
       final FileOutputStream fos = new FileOutputStream(temp);
@@ -139,7 +144,8 @@ public class ImportDBTest {
 
       // load from temp file
       final FileInputStream fis = new FileInputStream(temp);
-      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(fis), connection);
+      final ImportDB.ImportResult importResult2 = ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(fis), connection);
+      TestUtils.deleteImportData(importResult2);
       fis.close();
     } finally {
       SQLFunctions.close(connection);
