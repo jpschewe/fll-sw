@@ -25,6 +25,7 @@ import javax.swing.filechooser.FileFilter;
 
 import org.apache.log4j.Logger;
 
+import fll.TestUtils;
 import fll.Tournament;
 import fll.db.ImportDB;
 import fll.util.GuiExceptionHandler;
@@ -140,7 +141,8 @@ public class ReplayTournament {
       throws IOException, SQLException {
     try (final InputStream dbResourceStream = new FileInputStream(database.toFile())) {
       final ZipInputStream zipStream = new ZipInputStream(dbResourceStream);
-      ImportDB.loadFromDumpIntoNewDB(zipStream, testDataConn);
+      ImportDB.ImportResult result = ImportDB.loadFromDumpIntoNewDB(zipStream, testDataConn);
+      TestUtils.deleteImportData(result);
     }
 
   }

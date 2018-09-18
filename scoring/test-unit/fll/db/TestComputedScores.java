@@ -67,7 +67,9 @@ public class TestComputedScores {
 
       connection = Utilities.createFileDataSource(database).getConnection();
 
-      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), connection);
+      final ImportDB.ImportResult importResult = ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS),
+                                                                                connection);
+      TestUtils.deleteImportData(importResult);
 
       final Document document = GlobalParameters.getChallengeDocument(connection);
       final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());

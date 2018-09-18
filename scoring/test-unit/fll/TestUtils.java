@@ -7,6 +7,9 @@ package fll;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Comparator;
 
 import org.apache.log4j.Logger;
 import org.fest.swing.image.ScreenshotTaker;
@@ -14,6 +17,7 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
+import fll.db.ImportDB;
 import fll.util.LogUtils;
 
 /**
@@ -104,5 +108,17 @@ public final class TestUtils {
       };
     }
   } // class Retry
+
+  /**
+   * Delete data created by an import that we don't care about.
+   * 
+   * @param importResult the result of a database import
+   * @throws IOException if there is an error deleting the files
+   */
+  public static void deleteImportData(final ImportDB.ImportResult importResult) throws IOException {
+    if (Files.exists(importResult.getImportDirectory()))
+      Files.walk(importResult.getImportDirectory()).sorted(Comparator.reverseOrder()).map(Path::toFile)
+           .forEach(File::delete);
+  }
 
 }

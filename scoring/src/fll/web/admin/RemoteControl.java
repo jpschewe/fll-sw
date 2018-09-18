@@ -57,7 +57,7 @@ public class RemoteControl {
         application.setAttribute(ApplicationAttributes.DISPLAY_PAGE, "welcome");
       }
 
-      pageContext.setAttribute("numPlayoffRounds", Queries.getNumPlayoffRounds(connection));
+      pageContext.setAttribute("numPlayoffRounds", Queries.getNumPlayoffRounds(connection, currentTournament));
 
       final Collection<String> finalistDivisions = FinalistSchedule.getAllDivisions(connection, currentTournament);
       pageContext.setAttribute("finalistDivisions", finalistDivisions);

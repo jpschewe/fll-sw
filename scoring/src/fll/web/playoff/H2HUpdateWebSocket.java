@@ -365,7 +365,7 @@ public class H2HUpdateWebSocket {
     final int tournamentId = Queries.getCurrentTournament(connection);
 
     final int teamNumber = team.getTeamNumber();
-    final int playoffRound = Playoff.getPlayoffRound(connection, headToHeadBracket, performanceRunNumber);
+    final int playoffRound = Playoff.getPlayoffRound(connection, tournamentId, headToHeadBracket, performanceRunNumber);
     final int maxPlayoffRound = Playoff.getMaxPlayoffRound(connection, tournamentId, headToHeadBracket);
 
     final Double score = Queries.getPerformanceScore(connection, tournamentId, teamNumber, performanceRunNumber);
