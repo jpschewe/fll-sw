@@ -1,16 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<%@ page import="java.sql.Connection"%>
-<%@ page import="javax.sql.DataSource"%>
-
-<%@ page import="fll.db.Queries"%>
-<%@ page import="fll.web.ApplicationAttributes"%>
-<%@ page import="fll.web.WebUtils"%>
-
 <%
-	final DataSource datasource = ApplicationAttributes.getDataSource(application);
-	final Connection connection = datasource.getConnection();
-	pageContext.setAttribute("urls", WebUtils.getAllURLs(request));
+	fll.web.MainIndex.populateContext(request, application, pageContext);
 %>
 
 
@@ -30,7 +21,7 @@
 
 
 	<p>
-		The current tournament is <b> <%=Queries.getCurrentTournamentName(connection)%></b>
+		The current tournament is <b>${tournamentTitle }</b>
 	</p>
 
 	<h2>Main Pages</h2>
@@ -46,7 +37,17 @@
 			on the computer that's used to display scores with the projector.</li>
 
 		<li><a href="subjective/Auth">Subjective Web application</a>
-			Follow this link on the subjective judge's electronic devices.</li>
+			Follow this link on the subjective judge's electronic devices. If you
+			get an error that SSL is required for the application to work offline
+			then import the SSL certificate by following <a
+			href="documentation/installing-ssl-certificates.html" target='_new'>these
+				instructions</a>. The link to the SSL certificate is below.
+			<ul>
+				<li><a href="fll-sw.crt">Security certificate</a> for SSL
+					subjective web application access</li>
+				<li><a href="${baseSslUrl}/subjective/Auth">SSL Subjective
+						Web Application</a></li>
+			</ul></li>
 
 
 	</ul>
