@@ -19,6 +19,13 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateParsingException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -33,13 +40,16 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 
 import org.apache.log4j.Logger;
+import org.bouncycastle.operator.OperatorCreationException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.scheduler.SchedulerUI;
 import fll.subjective.SubjectiveFrame;
 import fll.util.FLLInternalException;
+import fll.util.FLLRuntimeException;
 import fll.util.GuiExceptionHandler;
 import fll.util.LogUtils;
+import fll.web.CertificateUtils;
 import net.mtu.eggplant.util.gui.GraphicsUtils;
 
 /**
@@ -114,6 +124,12 @@ public class Launcher extends JFrame {
 
   private static final Color OFFLINE_COLOR = Color.RED;
 
+  private final JButton webserverStartButton;
+
+  private final JButton webserverStopButton;
+
+  private final JButton mainPage;
+
   public Launcher() {
     super();
     setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -132,19 +148,20 @@ public class Launcher extends JFrame {
     final JPanel buttonBox = new JPanel(new GridLayout(0, 2));
     cpane.add(buttonBox, BorderLayout.CENTER);
 
-    final JButton webserverStartButton = new JButton("Start web server");
+    webserverStartButton = new JButton("Start web server");
+
     webserverStartButton.addActionListener(ae -> {
-      controlWebserver(true);
+      startWebserver();
     });
     buttonBox.add(webserverStartButton);
 
-    final JButton webserverStopButton = new JButton("Stop web server");
+    webserverStopButton = new JButton("Stop web server");
     webserverStopButton.addActionListener(ae -> {
-      controlWebserver(false);
+      stopWebserver();
     });
     buttonBox.add(webserverStopButton);
 
-    final JButton mainPage = new JButton("Visit the main web page");
+    mainPage = new JButton("Visit the main web page");
     mainPage.addActionListener(ae -> {
       loadFllHtml();
     });
@@ -266,6 +283,10 @@ public class Launcher extends JFrame {
         mServerStatus.setBackground(OFFLINE_COLOR);
       }
     }
+
+    webserverStartButton.setEnabled(!mServerOnline);
+    webserverStopButton.setEnabled(mServerOnline);
+    mainPage.setEnabled(mServerOnline);
   }
 
   private SchedulerUI scheduler = null;
@@ -342,6 +363,19 @@ public class Launcher extends JFrame {
             + e.getMessage(), "Error Launching Scheduler", JOptionPane.ERROR_MESSAGE);
       }
     }
+  }
+
+  private void startWebserver() {
+    if (!checkCertificateStore()) {
+      LOGGER.trace("Creating certificate store");
+      createCertificateStore();
+    }
+
+    controlWebserver(true);
+  }
+
+  private void stopWebserver() {
+    controlWebserver(false);
   }
 
   private transient Thread webserverThread = null;
@@ -512,6 +546,87 @@ public class Launcher extends JFrame {
   private static boolean isWindows() {
     final boolean windows = System.getProperty("os.name").startsWith("Windows");
     return windows;
+  }
+
+  /**
+   * This filename must match the filename in the server.xml for tomcat.
+   * This file lives in the tomcat conf directory.
+   */
+  public static final String KEYSTORE_FILENAME = "tomcat.keystore";
+
+  /**
+   * Create the certificate store to be used by tomcat.
+   */
+  private void createCertificateStore() {
+    final Path tomcatConfDir = getTomcatConfDir();
+    if (null == tomcatConfDir) {
+      throw new FLLRuntimeException("Cannot find tomcat conf directory, cannot write keystore.");
+    }
+    final Path keystoreFilename = tomcatConfDir.resolve(KEYSTORE_FILENAME);
+
+    try {
+      CertificateUtils.createAndStoreCertificate(keystoreFilename);
+    } catch (final IOException e) {
+      LOGGER.error("I/O error writing keystore "
+          + e.getMessage(), e);
+
+      JOptionPane.showMessageDialog(this, "I/O error writing keystore "
+          + e.getMessage());
+    } catch (NoSuchAlgorithmException | OperatorCreationException | CertificateException | KeyStoreException e) {
+      LOGGER.error("Internal error creating SSL certificate: "
+          + e.getMessage(), e);
+
+      JOptionPane.showMessageDialog(this, "Internal error creating SSL certificate: "
+          + e.getMessage());
+    }
+  }
+
+  /**
+   * @return if the certificate store contains all of the IP addresses of this
+   *         system and is not expired.
+   */
+  private boolean checkCertificateStore() {
+    final Path tomcatConfDir = getTomcatConfDir();
+    if (null == tomcatConfDir) {
+      throw new FLLRuntimeException("Cannot find tomcat conf directory, cannot write keystore.");
+    }
+    final Path keystoreFile = tomcatConfDir.resolve(KEYSTORE_FILENAME);
+
+    if (!Files.exists(keystoreFile)) {
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Keystore doesn't exist: "
+            + keystoreFile);
+      }
+      return false;
+    }
+
+    try {
+      return CertificateUtils.checkCertificateStore(keystoreFile);
+    } catch (CertificateParsingException | KeyStoreException e) {
+      throw new FLLInternalException("Error checking certificate store: "
+          + e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Find the path to the tomcat conf directory.
+   * 
+   * @return null if the directory cannot be found
+   */
+  private static Path getTomcatConfDir() {
+    final Path[] possibleLocations = { //
+                                       Paths.get("tomcat", "conf"), //
+                                       Paths.get("."), //
+                                       Paths.get("build", "tomcat", "conf"), //
+                                       Paths.get("scoring", "build", "tomcat", "conf") //
+    };
+    for (final Path location : possibleLocations) {
+      final Path check = location.resolve("server.xml");
+      if (Files.exists(check)) {
+        return location;
+      }
+    }
+    return null;
   }
 
 }

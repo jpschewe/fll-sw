@@ -7,6 +7,8 @@
 package fll.web;
 
 import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
@@ -47,6 +49,12 @@ public final class WebUtils {
   private static long ipsExpiration = 0;
 
   private static final long IP_CACHE_LIFETIME = 300000;
+
+  /**
+   * Port used to listen for SSL connections, must match webserver configuration
+   * file.
+   */
+  public static final int SSL_PORT = 9081;
 
   private WebUtils() {
     // no instances
@@ -105,12 +113,16 @@ public final class WebUtils {
   public static Collection<String> getAllURLs(final HttpServletRequest request) {
     final Collection<String> urls = new LinkedList<String>();
     for (final InetAddress address : getAllIPs()) {
-      final String addrStr = address.getHostAddress();
-      if (!addrStr.contains(":")) {
+      final String addrStr = getHostAddress(address);
+      if (address instanceof Inet4Address) {
         // TODO skip IPv6 for now, need to figure out how to encode and get
         // Tomcat to listen on IPv6
+
         if (!address.isLoopbackAddress()) {
-          final String url = "http://"
+          // don't tell the user about connecting to localhost
+
+          final String url = request.getScheme()
+              + "://"
               + addrStr
               + ":"
               + request.getLocalPort()
@@ -121,7 +133,8 @@ public final class WebUtils {
           try {
             final String name = org.xbill.DNS.Address.getHostName(address);
 
-            final String nameurl = "http://"
+            final String nameurl = request.getScheme()
+                + "://"
                 + name
                 + ":"
                 + request.getLocalPort()
@@ -135,6 +148,29 @@ public final class WebUtils {
       }
     }
     return urls;
+  }
+
+  /**
+   * Get the host address for the specified address. For IPv4 addresses this just
+   * calls {@link InetAddress#getHostAddress()}. For IPv6 addresses, the same
+   * method is called, however the scope ID needs to be removed.
+   * 
+   * @param address the address to convert
+   * @return the IP address as a string.
+   */
+  public static String getHostAddress(final InetAddress address) {
+    final String addrStr = address.getHostAddress();
+    if (address instanceof Inet6Address) {
+      final int index = addrStr.indexOf('%');
+      if (index >= 0) {
+        final String trimmed = addrStr.substring(0, index);
+        return trimmed;
+      } else {
+        return addrStr;
+      }
+    } else {
+      return addrStr;
+    }
   }
 
   /**
