@@ -1,41 +1,41 @@
 <?xml version="1.0"?>
 <fll title="2018 Minnesota FIRST LEGO League - Into Orbit"
 	copyright="2018 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST) and The LEGO Group. Used by special permission. All rights reserved."
-	revision="1" schemaVersion="2">
+	revision="J7" schemaVersion="2">
 
 	<Performance minimumScore="0" weight="1">
 
 		<goal initialValue="0" name="m01_vehicle_payload"
-			title="M01 - Vehicle Payload" min="0" max="1" multiplier="22">
+			title="M01 - Space Travel - Vehicle Payload" min="0" max="1" multiplier="22" category="M01">
 		</goal>
 
 		<goal initialValue="0" name="m01_supply_payload"
-			title="M01 - Supply Payload" min="0" max="1" multiplier="14">
+			title="M01 - Space Travel - Supply Payload" min="0" max="1" multiplier="14" category="M01">
 		</goal>
 
 		<goal initialValue="0" name="m01_crew_payload"
-			title="M01 - Crew Payload" min="0" max="1" multiplier="10">
+			title="M01 - Space Travel - Crew Payload" min="0" max="1" multiplier="10" category="M01">
 		</goal>
 
 		<goal initialValue="0" name="m02_both_solar_panels_same"
-			title="M02 - Both Solar Panels are Angled toward the same Field"
-			min="0" max="1" multiplier="22">
+			title="M02 - Both Solar Panels are Angled toward same Field"
+			min="0" max="1" multiplier="22" category="M02">
 		</goal>
 
 		<goal initialValue="0" name="m02_solar_panel_other"
-			title="M02 - Solar Panel Angeld toward other team" min="0" max="1"
-			multiplier="18">
+			title="M02 - Solar Panel Angled toward other team" min="0" max="1"
+			multiplier="18" category="M02">
 		</goal>
 
 
 		<goal initialValue="0" name="m03_3d_printing"
-			title="M03 - 3D Printing">
+			title="M03 - 3D Printing - Ejected using Regolith Core Sample " category="M03">
 
 			<value value="completely_in_ne"
-				title="Completely in the Northeast Planet Area" score="22" />
+				title="Completely in the NE Planet Area" score="22" />
 
 			<value value="ejected"
-				title="Ejected and not completely in the Northest Planet Area"
+				title="Ejected"
 				score="18" />
 
 			<value value="none" title="None" score="0" />
@@ -43,24 +43,24 @@
 		</goal>
 
 		<goal initialValue="0" name="m04_crater_crossing"
-			title="M04 - Crater Crossing" min="0" max="1" multiplier="20">
+			title="M04 - Crater Crossing" min="0" max="1" multiplier="20" category="M04">
 		</goal>
 
 		<goal initialValue="0" name="m05_extraction"
 			title="M05 - Extraction - all core samples not touching axel" min="0"
-			max="1" multiplier="16">
+			max="1" multiplier="16" category="M05">
 		</goal>
 
 		<goal initialValue="0" name="m05_extraction_gas"
-			title="M05 - Gas Core Sample">
+			title="M05 - Gas Core Sample" category="M05">
 			<value value="lander_target"
-				title="In the Lander's Target Circle" score="12" />
+				title="In Lander's Target Circle" score="12" />
 			<value value="in_base" title="Completely In Base" score="10" />
 			<value value="none" title="None" score="0" />
 		</goal>
 
 		<goal initialValue="0" name="m05_extraction_water"
-			title="M05 - Water Core Sample" min="0" max="1" multiplier="8" />
+			title="M05 - Water Core Sample - On Food Growth Chamber" min="0" max="1" multiplier="8" category="M05" />
 
 		<!-- computed(m05_extraction_gas) <= computed(m05_extraction_gas) * raw(m05_extraction) 
 			<= Infinity -->
@@ -95,69 +95,69 @@
 		</restriction>
 
 		<goal initialValue="0" name="m06_cone_module"
-			title="M06 - Cone Module into base" min="0" max="1" multiplier="16">
+			title="M06 - Cone Module into base" min="0" max="1" multiplier="16" category="M06">
 		</goal>
 
 		<goal initialValue="0" name="m06_tub_module"
 			title="M06 - Tube Module into Habitation Hub port, west side" min="0"
-			max="1" multiplier="16">
+			max="1" multiplier="16" category="M06">
 		</goal>
 
 		<goal initialValue="0" name="m06_dock_module"
 			title="M06 - Dock Module into Habitation Hub port, east side" min="0"
-			max="1" multiplier="14">
+			max="1" multiplier="14" category="M06">
 		</goal>
 
 		<goal initialValue="0" name="m07_space_walk"
-			title="M07 - Space Walk Emergency">
+			title="M07 - Space Walk Emergency" category="M07">
 			<value value="completely" title="Completely In" score="22" />
 			<value value="partly" title="Partly In" score="18" />
 			<value value="none" title="None" score="0" />
 		</goal>
 
 		<goal initialValue="0" name="m08_aerobic_exercies"
-			title="M08 - Aerobic Exercise">
+			title="M08 - Aerobic Exercise" category="M08">
 			<value value="orange"
-				title="Completely in organge, or partly covering orange's end-borders"
+				title="Completely in orange"
 				score="22" />
 			<value value="white" title="Completely in white" score="20" />
 			<value value="gray"
-				title="Completely in gray, or partly covering gray's end-borders"
+				title="Completely in gray"
 				score="18" />
 			<value value="none" title="None" score="0" />
 		</goal>
 
 		<goal name="m09_strength_exercise"
 			title="M09 - Strength Exercise" initialValue="0" min="0" max="1"
-			multiplier="16" />
+			multiplier="16" category="M09"/>
 
 		<goal name="m10_food_production" title="M10 - Food Production"
-			initialValue="0" min="0" max="1" multiplier="16" />
+			initialValue="0" min="0" max="1" multiplier="16" category="M10" />
 
 		<goal name="m11_escape_velocity" title="M11 Escape Velocity"
-			initialValue="0" min="0" max="1" multiplier="24" />
+			initialValue="0" min="0" max="1" multiplier="24" category="M11" />
 
 		<goal name="m12_satellite_orbits" title="M12 - Satellite Orbits"
-			initialValue="0" min="0" max="3" multiplier="8" />
+			initialValue="0" min="0" max="3" multiplier="8"  category="M12"/>
 
-		<goal name="m13_observatory" title="M13 - Observatory"
+		<goal name="m13_observatory" title="M13 - Observatory" category="M13"
 			initialValue="0">
 			<value value="orange"
-				title="Completely in organge, or partly covering orange's end-borders"
+				title="Completely in orange"
 				score="20" />
 			<value value="white" title="Completely in white" score="18" />
 			<value value="gray"
-				title="Completely in gray, or partly covering gray's end-borders"
+				title="Completely in gray"
 				score="16" />
 			<value value="none" title="None" score="0" />
 		</goal>
 
 		<goal name="m14_meteroid_deflection_center"
-			title="M14 - Meteroid Deflection - in the Center Section"
+			title="M14 - Meteroid Deflection - in the Center Section" category="M14"
 			initialValue="0" min="0" max="2" multiplier="12" />
 
 		<goal name="m14_meteroid_deflection_side"
-			title="M14 - Meteroid Deflection - in Either Side Section"
+			title="M14 - Meteroid Deflection - in Either Side Section" category="M14"
 			initialValue="0" min="0" max="2" multiplier="8" />
 
 		<restriction lowerBound="0" upperBound="2"
@@ -173,10 +173,10 @@
 
 
 
-		<goal name="m15_lander" title="M15 - Lander Touch-down"
+		<goal name="m15_lander" title="M15 - Lander Touch-down" category="M15"
 			initialValue="0">
 			<value value="target" title="Target Circle" score="22" />
-			<value value="northeast" title="Northeast Planet Area"
+			<value value="northeast" title="NE Planet Area"
 				score="20" />
 			<value value="base" title="Base" score="16" />
 			<value value="none" title="None" score="0" />
@@ -206,26 +206,26 @@
 			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
-					shortDescription="Unclear, few details">
+					shortDescription="unclear; few details">
 					<description>Doesn't relate to FLL theme, no understanding of
 						technical terms.
 					</description>
 				</range>
 				<range title="Developing" min="4" max="6"
-					shortDescription="Partially clear, details missing">
+					shortDescription="partially clear; details missing">
 					<description>Relates only poorly to the FLL theme, limited
 						understanding of technical terms.
 					</description>
 				</range>
 				<range title="Accomplished" min="7" max="9"
-					shortDescription="Mostly clear, detailed">
+					shortDescription="mostly clear; detailed">
 					<description>Relates fairly well to the FLL theme, understand
 						of
 						technical terms, but didn't explain them all clearly.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
-					shortDescription="Clear, very detailed">
+					shortDescription="clear; very detailed">
 					<description>Integrates well with the FLL theme, demonstrated
 						and
 						shared a full understanding of technical terms.
@@ -265,26 +265,26 @@
 			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
-					shortDescription="Minimal study; no analysis">
+					shortDescription="minimal study; no analysis">
 					<description>No research on the impact of the problem,
 						alternative
 						theories or interpretations ignored.
 					</description>
 				</range>
 				<range title="Developing" min="4" max="6"
-					shortDescription="Minimal study; some analysis">
+					shortDescription="minimal study; some analysis">
 					<description>Limited research on the impact of the problem,
 						alternative theories obscured.
 					</description>
 				</range>
 				<range title="Accomplished" min="7" max="9"
-					shortDescription="Sufficient study and analysis">
+					shortDescription="sufficient study and analysis">
 					<description>Impact of problem clearly researched, considered
 						alternative theories and had clear arguments.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
-					shortDescription="Extensive study and analysis">
+					shortDescription="extensive study and analysis">
 					<description>Impact of problem thoroughly examined and applied
 						to
 						solution. Persuasive argument against alternatives.
@@ -302,18 +302,18 @@
 			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
-					shortDescription="Difficult to understand">
+					shortDescription="difficult to understand">
 					<description>No solution presented. Team lacks enthusiasm for
 						solution.
 					</description>
 				</range>
 				<range title="Developing" min="4" max="6"
-					shortDescription="Some parts confusing">
+					shortDescription="some parts confusing">
 					<description>Team members showed some enthusiasm.
 					</description>
 				</range>
 				<range title="Accomplished" min="7" max="9"
-					shortDescription="Understandable">
+					shortDescription="understandable">
 					<description>Understandable but may not address the problem.
 						Team
 						members were actively participating and showed
@@ -322,7 +322,7 @@
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
-					shortDescription="Easy to understand by all">
+					shortDescription="easy to understand by all">
 					<description>Easy to understand by all and clearly addressed
 						the
 						problem. Team members were articulate and enthusiastic
@@ -343,7 +343,7 @@
 			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
-					shortDescription="Existing solution/application">
+					shortDescription="existing solution/application">
 					<description>Solution is not innovative or new.</description>
 				</range>
 				<range title="Developing" min="4" max="6"
@@ -353,14 +353,14 @@
 					</description>
 				</range>
 				<range title="Accomplished" min="7" max="9"
-					shortDescription="Original solution/application; potential added value">
+					shortDescription="original solution/application; potential added value">
 					<description>Solution is innovative and applies some knowledge
 						of
 						science and/or technology.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
-					shortDescription="Original solution/application; demonstrated added value">
+					shortDescription="original solution/application; demonstrated added value">
 					<description>Solution is innovative and applies knowledge of
 						science and/or technology.
 					</description>
@@ -436,21 +436,21 @@
 			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
-					shortDescription="Minimally engaging OR unimaginative">
+					shortDescription="minimally engaging OR unimaginative">
 					<description>Lacked excitement.</description>
 				</range>
 				<range title="Developing" min="4" max="6"
-					shortDescription="Engaging OR imaginative">
+					shortDescription="engaging OR imaginative">
 					<description>Information presented with limited creativity.
 					</description>
 				</range>
 				<range title="Accomplished" min="7" max="9"
-					shortDescription="Engaging AND imaginative">
+					shortDescription="engaging AND imaginative">
 					<description>Creative elements used in the presentation.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
-					shortDescription="Very engaging AND exceptionally imaginative">
+					shortDescription="very engaging AND exceptionally imaginative">
 					<description>Unique elements of creativity included.
 					</description>
 				</range>
@@ -464,26 +464,26 @@
 			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
-					shortDescription="Unclear OR disorganized">
+					shortDescription="unclear OR disorganized">
 					<description>No supporting material, unable to answer judge
 						questions.
 					</description>
 				</range>
 				<range title="Developing" min="4" max="6"
-					shortDescription="Partially clear; minimal organization">
+					shortDescription="partially clear; minimal organization">
 					<description>Ineffective visual aids and support material,
 						hesitant
 						answers to judge questions.
 					</description>
 				</range>
 				<range title="Accomplished" min="7" max="9"
-					shortDescription="Mostly clear; mostly organized">
+					shortDescription="mostly clear; mostly organized">
 					<description>Supporting aids/material complement presentation,
 						adequate answers.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
-					shortDescription="Clear AND well organized">
+					shortDescription="clear AND well organized">
 					<description>Carefully chosen aids/material add to
 						presentation,
 						comprehensive answers.
@@ -499,31 +499,31 @@
 			name="discovery" title="Discovery" category="Inspiration">
 			<description>Balanced emphasis on all three aspects (Robot,
 				Project,
-				Core Values) of FLL; it's not just about winning awards
+				Core Values) of FIRST LEGO League; it's not just about winning awards
 			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
-					shortDescription="Emphasis on only one aspect; others neglected">
+					shortDescription="emphasis on only one aspect; others neglected">
 					<description>Problems identified, but steps not taken to
 						solve. Team
 						doesn't mention new skills acquired.
 					</description>
 				</range>
 				<range title="Developing" min="4" max="6"
-					shortDescription="Emphasis on two aspects; one neglected">
+					shortDescription="emphasis on two aspects; one neglected">
 					<description>Problems identified, but solution was inadequate.
 						Limited attention to new skills.
 					</description>
 				</range>
 				<range title="Accomplished" min="7" max="9"
-					shortDescription="Emphasis on all three aspects">
+					shortDescription="emphasis on all three aspects">
 					<description>Problems identified and solutions found. Team
 						implied
 						new skills acquired.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
-					shortDescription="Balanced emphasis on all three aspects">
+					shortDescription="balanced emphasis on all three aspects">
 					<description>Problems identified, solutions found working
 						together.
 						Team demonstrated new skills.
@@ -538,25 +538,25 @@
 			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
-					shortDescription="Minimal enthusiasm AND minimal identity">
+					shortDescription="minimal enthusiasm AND minimal identity">
 					<description>Limited eye contact, member disengaged.
 					</description>
 				</range>
 				<range title="Developing" min="4" max="6"
-					shortDescription="Minimal enthusiasm OR minimal identity">
+					shortDescription="minimal enthusiasm OR minimal identity">
 					<description>1/2 the team interested, other members not paying
 						attention.
 					</description>
 				</range>
 				<range title="Accomplished" min="7" max="9"
-					shortDescription="Team is enthusiastic and fun; clear identity">
+					shortDescription="team is enthusiastic and fun; clear identity">
 					<description>Most of team appears excited, members
 						enthusiastic, but
 						talk over each other.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
-					shortDescription="Team engages others in their enthusiasm and fun; clear identity">
+					shortDescription="team engages others in their enthusiasm and fun; clear identity">
 					<description>Concrete examples of enthusiasm, all equally
 						invested
 						and speak.
@@ -567,13 +567,13 @@
 
 		<goal initialValue="0" max="12" min="0" multiplier="1"
 			name="integration" title="Integration" category="Inspiration">
-			<description>Application of FLL values and skills outside FLL
+			<description>Application of FIRST LEGO League values and skills outside FIRST LEGO League
 				(ability to describe current and potential examples from daily
-				life
+				life)
 			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
-					shortDescription="Team does not apply FLL values and skills outside FLL.">
+					shortDescription="team does not apply  values and skills outside FIRST LEGO League">
 					<description>Members compete with each other to talk. Members
 						show
 						no awareness of school/ community issues No mention of
@@ -582,13 +582,13 @@
 					</description>
 				</range>
 				<range title="Developing" min="4" max="6"
-					shortDescription="Team able to describe at least one example">
+					shortDescription="team able to describe at least one example">
 					<description>Team shows limited awareness of school/ community
 						issues. Members imply future aspirations.
 					</description>
 				</range>
 				<range title="Accomplished" min="7" max="9"
-					shortDescription="Team able to describe multiple examples">
+					shortDescription="team able to describe multiple examples">
 					<description>Increased awareness of outside issue evident.
 						Team is
 						vague about how this translates to other aspects of
@@ -597,7 +597,7 @@
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
-					shortDescription="Team able to describe multiple examples, including individual stories">
+					shortDescription="team able to describe multiple examples, including individual stories">
 					<description>Demonstrated increased awareness and clearly
 						discuss
 						how this translates to other areas of life.
@@ -614,24 +614,24 @@
 			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
-					shortDescription="Team goals AND team processes unclear">
+					shortDescription="team goals AND team processes unclear">
 					<description>Team members not collaborating.</description>
 				</range>
 				<range title="Developing" min="4" max="6"
-					shortDescription="Team goals OR team processes unclear">
+					shortDescription="team goals OR team processes unclear">
 					<description> Team members helping each other if asked.
 						Various
 						solutions tested in series, not thought out.
 					</description>
 				</range>
 				<range title="Accomplished" min="7" max="9"
-					shortDescription="Clear team goals and processes">
+					shortDescription="clear team goals and processes">
 					<description>Members help each other without asking to advance
 						progress. Team tested or thought about various solutions.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
-					shortDescription="Clear processes enable team to accomplish well defined goals">
+					shortDescription="clear processes enable team to accomplish well defined goals">
 					<description>Members can fill in for each other easily.
 						Various
 						solutions tested and best incorporated.
@@ -643,23 +643,23 @@
 		<goal initialValue="0" max="12" min="0" multiplier="1"
 			name="efficiency" title="Efficiency" category="Teamwork">
 			<description>Resources used relative to what the team accomplishes
-				(time management, distribution of roles, responsibilities)
+				(time management, distribution of roles and responsibilities)
 			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
-					shortDescription="Limited time management AND unclear roles">
+					shortDescription="limited time management AND unclear roles">
 					<description>Not clear who completed which tasks.
 					</description>
 				</range>
 				<range title="Developing" min="4" max="6"
-					shortDescription="Limited time management OR unclear roles">
+					shortDescription="limited time management OR unclear roles">
 				</range>
 				<range title="Accomplished" min="7" max="9"
-					shortDescription="Excellent time management and role definition allows team to accomplish MOST goals">
+					shortDescription="excellent time management and role definition allows team to accomplish most goals">
 					<description>Clearly defined roles.</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
-					shortDescription="Excellent time management and role definition allows team to accomplish ALL goals">
+					shortDescription="excellent time management and role definition allows team to accomplish all goals">
 					<description>Clearly defined roles, understood by all.
 					</description>
 				</range>
@@ -673,22 +673,22 @@
 			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
-					shortDescription="Limited team responsibility AND excessive coach guidance">
+					shortDescription="limited team responsibility AND excessive coach guidance">
 					<description>Decision making unclear, no team cooperation.
 					</description>
 				</range>
 				<range title="Developing" min="4" max="6"
-					shortDescription="Limited team responsibility OR excessive coach guidance">
+					shortDescription="limited team responsibility OR excessive coach guidance">
 					<description>Team able to describe some decision making.
 					</description>
 				</range>
 				<range title="Accomplished" min="7" max="9"
-					shortDescription="Good balance between team responsibility and coach guidance">
+					shortDescription="good balance between team responsibility and coach guidance">
 					<description>Team cooperation, decisions made by team.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
-					shortDescription="Team independence with minimal coach guidance">
+					shortDescription="team independence with minimal coach guidance">
 					<description>Cooperation within team is dominant theme. Team
 						owns
 						solutions.
@@ -706,21 +706,21 @@
 			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
-					shortDescription="Unbalanced team involvement AND lack of appreciation for contributions">
+					shortDescription="unbalanced team involvement AND lack of appreciation for contributions">
 					<description>Only one team member spoke, worked at judging.
 					</description>
 				</range>
 				<range title="Developing" min="4" max="6"
-					shortDescription="Unbalanced team involvement OR lack of appreciation for contributions">
+					shortDescription="unbalanced team involvement OR lack of appreciation for contributions">
 					<description>Multiple members spoke, but one in full charge.
 					</description>
 				</range>
 				<range title="Accomplished" min="7" max="9"
-					shortDescription="Balanced team involvement AND appreciation for contributions of most team members">
+					shortDescription="balanced team involvement AND appreciation for contributions of most team members">
 					<description>Members helped others.</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
-					shortDescription="Balanced team involvement AND appreciation for contributions of all team members">
+					shortDescription="balanced team involvement AND appreciation for contributions of all team members">
 					<description>All involved fully.</description>
 				</range>
 			</rubric>
@@ -736,22 +736,22 @@
 			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
-					shortDescription="Not evident with majority of team members">
+					shortDescription="not evident with majority of team members">
 				</range>
 				<range title="Developing" min="4" max="6"
-					shortDescription="Evident with majority of team members">
+					shortDescription="evident with majority of team members">
 					<description>
 						Only when
 						absolutely necessary
 					</description>
 				</range>
 				<range title="Accomplished" min="7" max="9"
-					shortDescription="Almost always evident with all team members">
+					shortDescription="almost always evident with all team members">
 					<description>
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
-					shortDescription="Always evident, even in the most difficult situations">
+					shortDescription="always evident, even in the most difficult situations">
 					<description>
 					</description>
 				</range>
@@ -767,26 +767,26 @@
 			</description>
 			<rubric>
 				<range title="Beginning" min="1" max="3"
-					shortDescription="Not evident with majority of team members">
+					shortDescription="not evident with majority of team members">
 					<description>Members don't help each other. Confrontation is
 						evident.
 					</description>
 				</range>
 				<range title="Developing" min="4" max="6"
-					shortDescription="Evident with majority of team members">
+					shortDescription="evident with majority of team members">
 					<description>Members rarely helped each other, coexistence is
 						dominant theme.
 					</description>
 				</range>
 				<range title="Accomplished" min="7" max="9"
-					shortDescription="Almost always evident with all team members">
+					shortDescription="almost always evident with all team members">
 					<description>Members implied they helped other and worked
 						together.
 						Some collaboration is evident.
 					</description>
 				</range>
 				<range title="Exemplary" min="10" max="12"
-					shortDescription="Always evident, even in difficult situations -- and team actively helps other teams">
+					shortDescription="always evident, even in difficult situations -- and team actively helps other teams">
 					<description>Shows respect and mutual help during judging.
 					</description>
 				</range>
