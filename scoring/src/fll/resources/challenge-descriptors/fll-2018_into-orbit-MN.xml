@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <fll title="2018 Minnesota FIRST LEGO League - Into Orbit"
 	copyright="2018 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST) and The LEGO Group. Used by special permission. All rights reserved."
-	revision="J7" schemaVersion="2">
+	revision="8" schemaVersion="2">
 
 	<Performance minimumScore="0" weight="1">
 
@@ -61,38 +61,6 @@
 
 		<goal initialValue="0" name="m05_extraction_water"
 			title="M05 - Water Core Sample - On Food Growth Chamber" min="0" max="1" multiplier="8" category="M05" />
-
-		<!-- computed(m05_extraction_gas) <= computed(m05_extraction_gas) * raw(m05_extraction) 
-			<= Infinity -->
-		<!-- 0 <= -1 * computed(m05_extraction_gas) + computed(m05_extraction_gas) 
-			* raw(m05_extraction) <= Infinity -->
-		<restriction lowerBound="0" upperBound="100"
-			message="Cannot have Gas Core Sample score without getting all 4 core samples off the axel">
-			<term>
-				<constant value="-1" />
-				<goalRef goal="m05_extraction_gas" scoreType="computed" />
-			</term>
-			<term>
-				<goalRef goal="m05_extraction_gas" scoreType="computed" />
-				<goalRef goal="m05_extraction" scoreType="raw" />
-			</term>
-		</restriction>
-
-		<!-- computed(m05_extraction_water) <= computed(m05_extraction_water) * 
-			raw(m05_extraction) <= Infinity -->
-		<!-- 0 <= -1 * computed(m05_extraction_water) + computed(m05_extraction_water) 
-			* raw(m05_extraction) <= Infinity -->
-		<restriction lowerBound="0" upperBound="100"
-			message="Cannot have water Core Sample score without getting all 4 core samples off the axel">
-			<term>
-				<constant value="-1" />
-				<goalRef goal="m05_extraction_water" scoreType="computed" />
-			</term>
-			<term>
-				<goalRef goal="m05_extraction_water" scoreType="computed" />
-				<goalRef goal="m05_extraction" scoreType="raw" />
-			</term>
-		</restriction>
 
 		<goal initialValue="0" name="m06_cone_module"
 			title="M06 - Cone Module into base" min="0" max="1" multiplier="16" category="M06">
