@@ -1,3 +1,4 @@
+* #645 - Add SSL option for the subjective judging web application to handle new security in web browsers
 * #659 - add report of the top seeding round scores for all award groups
 * #644 - allow one to automatically finish a playoff bracket
 * #629 - Make selecting tournaments easier (better sorting, clearer language)
