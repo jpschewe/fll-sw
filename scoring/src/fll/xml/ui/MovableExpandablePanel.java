@@ -24,27 +24,23 @@ import javax.swing.event.EventListenerList;
 public class MovableExpandablePanel extends JPanel {
 
   private boolean mExpanded = false;
-  
-  private final JLabel mTitleLabel;
 
-  /**
-   * Creates a panel that is movable.
-   * 
-   * @see #MovableExpandablePanel(String, JComponent, boolean)
-   */
-  public MovableExpandablePanel(final String title,
-                                final JComponent view) {
-    this(title, view, true);
-  }
+  private final JLabel mTitleLabel;
 
   /**
    * @param title the title to display
    * @param view the component to display
-   * @param movable if the move buttons should be visible
+   * @param movable if the move buttons should be visible. See
+   *          {@link #addMoveEventListener(MoveEventListener)} to get notified of
+   *          the move request
+   * @param deletable if the delete button should be visible. See
+   *          {@link #addDeleteEventListener(DeleteEventListener)} to get notified
+   *          of the delete request
    */
   public MovableExpandablePanel(final String title,
                                 final JComponent view,
-                                final boolean movable) {
+                                final boolean movable,
+                                final boolean deletable) {
     super(new BorderLayout());
 
     final JComponent top = Box.createHorizontalBox();
@@ -81,32 +77,70 @@ public class MovableExpandablePanel extends JPanel {
       });
     }
 
+    if (deletable) {
+      final JButton delete = new JButton("Delete");
+      top.add(delete);
+      delete.addActionListener(e -> {
+        fireDeleteEventListener();
+      });
+    }
+
     add(view, BorderLayout.CENTER);
     view.setVisible(mExpanded);
   }
 
+  /**
+   * Used to notify one that the widget should be moved.
+   */
   public static class MoveEvent extends EventObject {
+
+    /**
+     * The direction to move the widget.
+     */
     public enum MoveDirection {
-      UP, DOWN
+    /**
+     * Move the widget up.
+     */
+    UP,
+    /**
+     * Move the widget down.
+     */
+    DOWN
     }
 
     private final MoveDirection mDirection;
-    
+
+    /**
+     * Create a new event.
+     * 
+     * @param source see {@link #getComponent()}
+     * @param direction see {@link #getDirection()}
+     */
     public MoveEvent(final JComponent source,
                      final MoveDirection direction) {
       super(source);
       mDirection = direction;
     }
 
+    /**
+     * @return the source as a {@link JComponent}
+     * @see #getSource()
+     */
     public JComponent getComponent() {
       return (JComponent) getSource();
     }
 
+    /**
+     * @return the direction to move the widget
+     */
     public MoveDirection getDirection() {
       return mDirection;
     }
   }
 
+  /**
+   * Listen for move events.
+   */
   public static interface MoveEventListener extends EventListener {
     /**
      * The component should be moved.
@@ -117,24 +151,84 @@ public class MovableExpandablePanel extends JPanel {
 
   private final EventListenerList mListeners = new EventListenerList();
 
+  /**
+   * @param l the listener to add
+   */
   public void addMoveEventListener(final MoveEventListener l) {
     mListeners.add(MoveEventListener.class, l);
   }
 
+  /**
+   * @param l the listener to remove
+   */
   public void removeMoveEventListener(final MoveEventListener l) {
     mListeners.remove(MoveEventListener.class, l);
   }
 
+  /**
+   * Notify listeners of a requested move.
+   * 
+   * @param direction which direction the component should move
+   */
   protected void fireMoveEventListener(final MoveEvent.MoveDirection direction) {
     final MoveEvent event = new MoveEvent(this, direction);
-    
+
     for (final MoveEventListener l : mListeners.getListeners(MoveEventListener.class)) {
       l.requestedMove(event);
     }
   }
-  
+
   /**
-   * 
+   * Used to notify one that the widget should be deleted.
+   */
+  public static class DeleteEvent extends EventObject {
+
+    /**
+     * Create a new event.
+     * 
+     * @param source see {@link #getComponent()}
+     */
+    public DeleteEvent(final JComponent source) {
+      super(source);
+    }
+
+    /**
+     * @return the source as a {@link JComponent}
+     * @see #getSource()
+     */
+    public JComponent getComponent() {
+      return (JComponent) getSource();
+    }
+  }
+
+  /**
+   * Listen for delete events.
+   */
+  public static interface DeleteEventListener extends EventListener {
+    /**
+     * The component should be deleted.
+     */
+    public void requestDelete(final DeleteEvent e);
+
+  }
+
+  public void addDeleteEventListener(final DeleteEventListener l) {
+    mListeners.add(DeleteEventListener.class, l);
+  }
+
+  public void removeDeleteEventListener(final DeleteEventListener l) {
+    mListeners.remove(DeleteEventListener.class, l);
+  }
+
+  protected void fireDeleteEventListener() {
+    final DeleteEvent event = new DeleteEvent(this);
+
+    for (final DeleteEventListener l : mListeners.getListeners(DeleteEventListener.class)) {
+      l.requestDelete(event);
+    }
+  }
+
+  /**
    * @param text the new title text
    */
   public void setTitle(final String text) {
