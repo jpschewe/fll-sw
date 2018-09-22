@@ -73,36 +73,6 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 import net.mtu.eggplant.util.BasicFileFilter;
 import net.mtu.eggplant.util.gui.GraphicsUtils;
 
-/*
- * TODO
- * - add goal isn't showing up until performance is made small and then large again
- * - add validity check 
- *   - call from the UI
- *     - display indicator on each element if it's valid or not?
- *   - ensure that all names are unique
- *   - see the validity check that is run after parsing the XML
- *   - non-null name for AbstractGoal title and name
- *   - SwitchStatement must have a default case
- *   - look at the XML validation code
- *   - unique names for goals in each category
- *   - unique names for categories
- *   - Goal min/max and initial value
- *   - Restriction upperBound/lowerBound
- *   - RubricRange min/max
- *   - unique variable names inside ComputedGoal
- *   - SwitchStatement must have something in the default case
- *   - enum value check for dbstring
- *   - unique values for enum values in goals
- * - edit computed goals
- * - delete computed goals
- * - delete goals
- * - delete subjective categories
- * - support grouping of goals, this is where DnD might be useful 
- *   - all goals in a group must be consecutive
- * - how to handle when being run from the launcher so that it doesn't exit?
- *   - maybe have a method that is called from main that creates everything
- */
-
 /**
  * Application to edit {@link ChallengeDescription} objects.
  */
