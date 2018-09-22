@@ -127,6 +127,10 @@ public abstract class ScoreCategoryEditor extends JPanel {
           return;
         }
 
+        // update editor list
+        final AbstractGoalEditor editor = mGoalEditors.remove(oldIndex);
+        mGoalEditors.add(newIndex, editor);
+
         // update the UI
         mGoalEditorContainer.add(e.getComponent(), newIndex);
         mGoalEditorContainer.validate();
@@ -154,6 +158,14 @@ public abstract class ScoreCategoryEditor extends JPanel {
 
       mCategory.getGoals().forEach(this::addGoal);
     }
+  }
+
+  /**
+   * @return the category being edited, may be null if
+   *         {@link #setCategory(ScoreCategory)} hasn't been called
+   */
+  public ScoreCategory getCategory() {
+    return mCategory;
   }
 
   private void addNewGoal() {
