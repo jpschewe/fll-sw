@@ -5,6 +5,8 @@
  */
 package fll;
 
+import java.awt.Component;
+import java.awt.Container;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
@@ -755,6 +757,24 @@ public final class Utilities {
     }
 
     return strings;
+  }
+
+  /**
+   * @param container the container to find component in
+   * @param component the component to find
+   * @return the index of component or -1 if not found
+   */
+  public static int getIndexOfComponent(final Container container,
+                                        final Component component) {
+    int index = -1;
+    for (int i = 0; index < 0
+        && i < container.getComponentCount(); ++i) {
+      final Component c = container.getComponent(i);
+      if (c == component) {
+        index = i;
+      }
+    }
+    return index;
   }
 
 }
