@@ -156,7 +156,7 @@ public class ChallengeDescriptionEditor extends JFrame {
 
   private final PerformanceEditor mPerformanceEditor;
 
-  private final List<ScoreCategoryEditor> mSubjectiveEditors = new LinkedList<>();
+  private final List<SubjectiveCategoryEditor> mSubjectiveEditors = new LinkedList<>();
 
   private final JComponent mSubjectiveContainer;
 
@@ -330,8 +330,12 @@ public class ChallengeDescriptionEditor extends JFrame {
           return;
         }
 
+        // update editor list
+        final SubjectiveCategoryEditor editor = mSubjectiveEditors.remove(oldIndex);
+        mSubjectiveEditors.add(newIndex, editor);
+                
         // update the UI
-        mSubjectiveContainer.add(e.getComponent(), newIndex);
+        mSubjectiveContainer.add(editor, newIndex);
         mSubjectiveContainer.validate();
 
         // update the order in the challenge description
