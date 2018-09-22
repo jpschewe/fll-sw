@@ -7,7 +7,6 @@
 package fll.xml.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -294,15 +293,7 @@ public class ChallengeDescriptionEditor extends JFrame {
 
       @Override
       public void requestedMove(final MoveEvent e) {
-        // find index of e.component in subjective
-        int oldIndex = -1;
-        for (int i = 0; oldIndex < 0
-            && i < mSubjectiveContainer.getComponentCount(); ++i) {
-          final Component c = mSubjectiveContainer.getComponent(i);
-          if (c == e.getComponent()) {
-            oldIndex = i;
-          }
-        }
+        final int oldIndex = Utilities.getIndexOfComponent(mSubjectiveContainer, e.getComponent());
         if (oldIndex < 0) {
           if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Unable to find source of move event in subjective container");

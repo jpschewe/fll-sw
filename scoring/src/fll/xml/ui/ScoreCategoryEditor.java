@@ -6,7 +6,6 @@
 
 package fll.xml.ui;
 
-import java.awt.Component;
 import java.text.ParseException;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,6 +21,7 @@ import javax.swing.border.EtchedBorder;
 
 import org.apache.log4j.Logger;
 
+import fll.Utilities;
 import fll.util.FormatterUtils;
 import fll.util.LogUtils;
 import fll.xml.AbstractGoal;
@@ -91,15 +91,7 @@ public abstract class ScoreCategoryEditor extends JPanel {
 
       @Override
       public void requestedMove(final MoveEvent e) {
-        // find index of e.component in subjective
-        int oldIndex = -1;
-        for (int i = 0; oldIndex < 0
-            && i < mGoalEditorContainer.getComponentCount(); ++i) {
-          final Component c = mGoalEditorContainer.getComponent(i);
-          if (c == e.getComponent()) {
-            oldIndex = i;
-          }
-        }
+        final int oldIndex = Utilities.getIndexOfComponent(mGoalEditorContainer, e.getComponent());
         if (oldIndex < 0) {
           if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Unable to find source of move event in goal container");
