@@ -196,7 +196,7 @@ public abstract class ScoreCategoryEditor extends JPanel {
     mGoalEditors.add(editor);
 
     mGoalEditorContainer.add(panel);
-
+    mGoalEditorContainer.validate();
   }
 
   /**
