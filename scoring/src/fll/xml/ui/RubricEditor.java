@@ -48,7 +48,7 @@ public class RubricEditor extends JPanel {
     rangeList = Box.createVerticalBox();
     rangePanel.add(rangeList, BorderLayout.CENTER);
 
-    final MovableExpandablePanel rubricPanel = new MovableExpandablePanel("Rubric", rangePanel, false);
+    final MovableExpandablePanel rubricPanel = new MovableExpandablePanel("Rubric", rangePanel, false, false);
     add(rubricPanel, BorderLayout.CENTER);
 
     goal.getRubric().forEach(range -> {

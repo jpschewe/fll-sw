@@ -43,17 +43,17 @@ public class TiebreakerEditor extends JPanel {
 
     final Box buttonBox = Box.createHorizontalBox();
     expansion.add(buttonBox, BorderLayout.NORTH);
-    
+
     final JButton add = new JButton("Add Tiebreaker");
     buttonBox.add(add);
     add.addActionListener(l -> addNewTest());
-    
+
     buttonBox.add(Box.createHorizontalGlue());
 
     expansion.add(Box.createHorizontalStrut(10), BorderLayout.WEST);
     expansion.add(editorContainer, BorderLayout.CENTER);
 
-    final MovableExpandablePanel exPanel = new MovableExpandablePanel("Tie breakers", expansion, false);
+    final MovableExpandablePanel exPanel = new MovableExpandablePanel("Tie breakers", expansion, false, false);
     add(exPanel, BorderLayout.CENTER);
   }
 

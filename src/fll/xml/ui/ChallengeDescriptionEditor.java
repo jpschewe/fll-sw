@@ -66,6 +66,8 @@ import fll.xml.ChallengeXMLException;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.WinnerType;
 import fll.xml.XMLUtils;
+import fll.xml.ui.MovableExpandablePanel.DeleteEvent;
+import fll.xml.ui.MovableExpandablePanel.DeleteEventListener;
 import fll.xml.ui.MovableExpandablePanel.MoveEvent;
 import fll.xml.ui.MovableExpandablePanel.MoveEvent.MoveDirection;
 import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
@@ -160,6 +162,8 @@ public class ChallengeDescriptionEditor extends JFrame {
   private final JComponent mSubjectiveContainer;
 
   private final MoveEventListener mSubjectiveMoveListener;
+
+  private final DeleteEventListener mSubjectiveDeleteListener;
 
   public ChallengeDescriptionEditor() {
     super("Challenge Description Editor");
@@ -269,7 +273,8 @@ public class ChallengeDescriptionEditor extends JFrame {
     // child elements of the challenge description
     mPerformanceEditor = new PerformanceEditor();
     mPerformanceEditor.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
-    final MovableExpandablePanel performance = new MovableExpandablePanel("Performance", mPerformanceEditor, false);
+    final MovableExpandablePanel performance = new MovableExpandablePanel("Performance", mPerformanceEditor, false,
+                                                                          false);
     topPanel.add(performance);
 
     final Box subjectiveTopContainer = Box.createVerticalBox();
@@ -297,8 +302,8 @@ public class ChallengeDescriptionEditor extends JFrame {
         if (oldIndex < 0) {
           if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Unable to find source of move event in subjective container");
-            return;
           }
+          return;
         }
 
         final int newIndex;
@@ -324,7 +329,7 @@ public class ChallengeDescriptionEditor extends JFrame {
         // update editor list
         final SubjectiveCategoryEditor editor = mSubjectiveEditors.remove(oldIndex);
         mSubjectiveEditors.add(newIndex, editor);
-                
+
         // update the UI
         mSubjectiveContainer.add(editor, newIndex);
         mSubjectiveContainer.validate();
@@ -332,6 +337,37 @@ public class ChallengeDescriptionEditor extends JFrame {
         // update the order in the challenge description
         final SubjectiveScoreCategory category = mDescription.removeSubjectiveCategory(oldIndex);
         mDescription.addSubjectiveCategory(newIndex, category);
+      }
+    };
+
+    mSubjectiveDeleteListener = new DeleteEventListener() {
+
+      @Override
+      public void requestDelete(final DeleteEvent e) {
+        final int confirm = JOptionPane.showConfirmDialog(ChallengeDescriptionEditor.this,
+                                                          "Are you sure that you want to delete the subjective category?",
+                                                          "Confirm Delete", JOptionPane.YES_NO_OPTION);
+        if (confirm != JOptionPane.YES_OPTION) {
+          return;
+        }
+
+        final int index = Utilities.getIndexOfComponent(mSubjectiveContainer, e.getComponent());
+        if (index < 0) {
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Unable to find source of delete event in subjective category container");
+          }
+          return;
+        }
+
+        // update editor list
+        mSubjectiveEditors.remove(index);
+        
+        // update the challenge description
+        mDescription.removeSubjectiveCategory(index);
+
+        // update the UI
+        mSubjectiveContainer.remove(index);
+        mSubjectiveContainer.validate();
       }
     };
 
@@ -522,8 +558,9 @@ public class ChallengeDescriptionEditor extends JFrame {
     editor.setCategory(cat);
     editor.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
 
-    final MovableExpandablePanel container = new MovableExpandablePanel(cat.getTitle(), editor);
+    final MovableExpandablePanel container = new MovableExpandablePanel(cat.getTitle(), editor, true, true);
     container.addMoveEventListener(mSubjectiveMoveListener);
+    container.addDeleteEventListener(mSubjectiveDeleteListener);
 
     editor.addPropertyChangeListener("title", e -> {
       final String newTitle = (String) e.getNewValue();

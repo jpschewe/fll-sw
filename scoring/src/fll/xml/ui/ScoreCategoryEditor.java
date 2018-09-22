@@ -16,6 +16,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
 
@@ -28,6 +29,8 @@ import fll.xml.AbstractGoal;
 import fll.xml.ComputedGoal;
 import fll.xml.Goal;
 import fll.xml.ScoreCategory;
+import fll.xml.ui.MovableExpandablePanel.DeleteEvent;
+import fll.xml.ui.MovableExpandablePanel.DeleteEventListener;
 import fll.xml.ui.MovableExpandablePanel.MoveEvent;
 import fll.xml.ui.MovableExpandablePanel.MoveEvent.MoveDirection;
 import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
@@ -48,6 +51,8 @@ public abstract class ScoreCategoryEditor extends JPanel {
   private ScoreCategory mCategory = null;
 
   private final MoveEventListener mGoalMoveListener;
+
+  private final DeleteEventListener mGoalDeleteListener;
 
   public ScoreCategoryEditor() {
     setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
@@ -95,8 +100,8 @@ public abstract class ScoreCategoryEditor extends JPanel {
         if (oldIndex < 0) {
           if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Unable to find source of move event in goal container");
-            return;
           }
+          return;
         }
 
         final int newIndex;
@@ -130,6 +135,37 @@ public abstract class ScoreCategoryEditor extends JPanel {
         // update the order in the challenge description
         final AbstractGoal goal = mCategory.removeGoal(oldIndex);
         mCategory.addGoal(newIndex, goal);
+      }
+    };
+
+    mGoalDeleteListener = new DeleteEventListener() {
+
+      @Override
+      public void requestDelete(final DeleteEvent e) {
+        final int confirm = JOptionPane.showConfirmDialog(ScoreCategoryEditor.this,
+                                                          "Are you sure that you want to delete the goal?",
+                                                          "Confirm Delete", JOptionPane.YES_NO_OPTION);
+        if (confirm != JOptionPane.YES_OPTION) {
+          return;
+        }
+
+        final int index = Utilities.getIndexOfComponent(mGoalEditorContainer, e.getComponent());
+        if (index < 0) {
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Unable to find source of delete event in goal container");
+          }
+          return;
+        }
+
+        // update editor list
+        mGoalEditors.remove(index);
+        
+        // update the challenge description
+        mCategory.removeGoal(index);
+
+        // update the UI
+        mGoalEditorContainer.remove(index);
+        mGoalEditorContainer.validate();
       }
     };
 
@@ -190,12 +226,13 @@ public abstract class ScoreCategoryEditor extends JPanel {
           + goal.getClass());
     }
     editor.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
-    final MovableExpandablePanel panel = new MovableExpandablePanel(goal.getTitle(), editor, true);
+    final MovableExpandablePanel panel = new MovableExpandablePanel(goal.getTitle(), editor, true, true);
     editor.addPropertyChangeListener("title", e -> {
       final String newTitle = (String) e.getNewValue();
       panel.setTitle(newTitle);
     });
     panel.addMoveEventListener(mGoalMoveListener);
+    panel.addDeleteEventListener(mGoalDeleteListener);
 
     mGoalEditors.add(editor);
 

@@ -53,7 +53,7 @@ public class RestrictionListEditor extends JPanel {
     expansion.add(Box.createHorizontalStrut(10), BorderLayout.WEST);
     expansion.add(editorContainer, BorderLayout.CENTER);
 
-    final MovableExpandablePanel exPanel = new MovableExpandablePanel("Restrictions", expansion, false);
+    final MovableExpandablePanel exPanel = new MovableExpandablePanel("Restrictions", expansion, false, false);
     add(exPanel, BorderLayout.CENTER);
   }
 
