@@ -184,7 +184,8 @@ public class SubjectivePdfWriter {
     image = Image.getInstance(imageUrl);
 
     // make it a little smaller
-    image.scalePercent(85);
+    image.scaleToFit(115, 60);
+//    image.scalePercent(85);
 
     // put the image in the header cell
     headerCell = new PdfPCell(image, false);
