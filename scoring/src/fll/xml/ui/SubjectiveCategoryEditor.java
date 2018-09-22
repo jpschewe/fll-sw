@@ -44,7 +44,6 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
     mTitleEditor.setColumns(80);
     mTitleEditor.setMaximumSize(mTitleEditor.getPreferredSize());
 
-
     mTitleEditor.addPropertyChangeListener("value", e -> {
       if (null != mSubjectiveCategory) {
         final String oldTitle = mSubjectiveCategory.getTitle();
@@ -87,13 +86,29 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
     if (!(v instanceof SubjectiveScoreCategory)) {
       throw new IllegalArgumentException("Can only edit SubjectiveScoreCategory objects");
     }
+    setSubjectiveScoreCategory((SubjectiveScoreCategory) v);
+  }
 
+  /**
+   * Sets the category to edit.
+   * 
+   * @param v the new subjective score category
+   * @see #setCategory(ScoreCategory)
+   */
+  public void setSubjectiveScoreCategory(final SubjectiveScoreCategory v) {
     super.setCategory(v);
 
-    mSubjectiveCategory = (SubjectiveScoreCategory) v;
+    mSubjectiveCategory = v;
 
     mTitleEditor.setValue(mSubjectiveCategory.getTitle());
     mNameEditor.setValue(mSubjectiveCategory.getName());
+  }
+
+  /**
+   * @return the subjective score category, may be null
+   */
+  public SubjectiveScoreCategory getSubjectiveScoreCategory() {
+    return mSubjectiveCategory;
   }
 
   @Override
