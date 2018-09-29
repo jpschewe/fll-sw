@@ -43,7 +43,7 @@ This process does discard the original scores, so if one wants to have a record 
 ## Sorting score sheets
 
 It is nice to sort the score sheets by team number as this helps when needing to find one later when there is an issue. 
-It’s also much nicer for those in the back room stuffing envelopes as they can easily put the right sheets in the right envelopes.
+It's also much nicer for those in the back room stuffing envelopes as they can easily put the right sheets in the right envelopes.
 
 
 
