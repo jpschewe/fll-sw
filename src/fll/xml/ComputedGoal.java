@@ -27,6 +27,8 @@ public class ComputedGoal extends AbstractGoal implements VariableScope {
                       final GoalScope goalScope) {
     super(ele);
 
+    this.goalScope = goalScope;
+
     mVariables = new LinkedList<>();
     for (final Element varEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(Variable.TAG_NAME))) {
       final Variable var = new Variable(varEle, goalScope);
@@ -42,9 +44,12 @@ public class ComputedGoal extends AbstractGoal implements VariableScope {
    * statement.
    * 
    * @param name see {@link #getName()}
+   * @param goalScope see {@link #getGoalScope()}
    */
-  public ComputedGoal(@Nonnull final String name) {
+  public ComputedGoal(@Nonnull final String name,
+                      final GoalScope goalScope) {
     super(name);
+    this.goalScope = goalScope;
     mVariables = new LinkedList<>();
     mSwitch = new SwitchStatement();
   }
@@ -59,7 +64,7 @@ public class ComputedGoal extends AbstractGoal implements VariableScope {
   public Collection<Variable> getVariables() {
     return Collections.unmodifiableCollection(mVariables);
   }
-  
+
   @Override
   public Collection<Variable> getAllVariables() {
     return getVariables();
@@ -157,6 +162,15 @@ public class ComputedGoal extends AbstractGoal implements VariableScope {
     ele.appendChild(switchEle);
 
     return ele;
+  }
+
+  private final GoalScope goalScope;
+
+  /**
+   * @return where to lookup goals for the computation
+   */
+  public GoalScope getGoalScope() {
+    return goalScope;
   }
 
 }

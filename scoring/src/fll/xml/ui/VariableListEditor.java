@@ -1,0 +1,132 @@
+/*
+ * Copyright (c) 2018 High Tech Kids.  All rights reserved
+ * HighTechKids is on the web at: http://www.hightechkids.org
+ * This code is released under GPL; see LICENSE.txt for details.
+ */
+
+package fll.xml.ui;
+
+import java.awt.BorderLayout;
+import java.util.LinkedList;
+import java.util.List;
+
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+
+import org.apache.log4j.Logger;
+
+import fll.Utilities;
+import fll.util.LogUtils;
+import fll.xml.ComputedGoal;
+import fll.xml.Variable;
+import fll.xml.ui.MovableExpandablePanel.DeleteEvent;
+import fll.xml.ui.MovableExpandablePanel.DeleteEventListener;
+
+/**
+ * Edit a list of variables from a {@link ComputedGoal}.
+ */
+public class VariableListEditor extends JPanel {
+
+  private static final Logger LOGGER = LogUtils.getLogger();
+
+  private final ComputedGoal goal;
+
+  private final JComponent editorContainer;
+
+  private final DeleteEventListener deleteListener;
+
+  private final List<VariableEditor> editors = new LinkedList<>();
+
+  public VariableListEditor(final ComputedGoal goal) {
+    super(new BorderLayout());
+
+    this.goal = goal;
+
+    editorContainer = Box.createVerticalBox();
+
+    deleteListener = new DeleteEventListener() {
+
+      @Override
+      public void requestDelete(final DeleteEvent e) {
+        final int confirm = JOptionPane.showConfirmDialog(VariableListEditor.this,
+                                                          "Are you sure that you want to delete the variable?",
+                                                          "Confirm Delete", JOptionPane.YES_NO_OPTION);
+        if (confirm != JOptionPane.YES_OPTION) {
+          return;
+        }
+
+        final int index = Utilities.getIndexOfComponent(editorContainer, e.getComponent());
+        if (index < 0) {
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Unable to find source of delete event in variable container");
+          }
+          return;
+        }
+
+        // update editor list
+        final VariableEditor editor = editors.get(index);
+        editors.remove(index);
+
+        // update the challenge description
+        goal.removeVariable(editor.getVariable());
+
+        // update the UI
+        editorContainer.remove(index);
+        editorContainer.validate();
+      }
+    };
+
+    // add some space on the left side of the expanded panel
+    final JPanel expansion = new JPanel(new BorderLayout());
+
+    final Box buttonBox = Box.createHorizontalBox();
+    expansion.add(buttonBox, BorderLayout.NORTH);
+
+    final JButton add = new JButton("Add Variable");
+    buttonBox.add(add);
+    add.addActionListener(l -> addNewVariable());
+
+    buttonBox.add(Box.createHorizontalGlue());
+
+    expansion.add(Box.createHorizontalStrut(10), BorderLayout.WEST);
+    expansion.add(editorContainer, BorderLayout.CENTER);
+
+    final MovableExpandablePanel exPanel = new MovableExpandablePanel("Variables", expansion, false, false);
+    add(exPanel, BorderLayout.CENTER);
+
+    goal.getAllVariables().forEach(v -> addVariable(v));
+  }
+
+  private void addNewVariable() {
+    final String name = String.format("Variable %d", editorContainer.getComponentCount());
+    final Variable var = new Variable(name, this.goal.getGoalScope());
+    this.goal.addVariable(var);
+
+    addVariable(var);
+  }
+
+  private void addVariable(final Variable var) {
+    final VariableEditor variableEditor = new VariableEditor(var);
+    final MovableExpandablePanel exPanel = new MovableExpandablePanel(var.getName(), variableEditor, false, true);
+    editorContainer.add(exPanel);
+
+    variableEditor.addPropertyChangeListener("name", e -> {
+      final String newName = (String) e.getNewValue();
+      exPanel.setTitle(newName);
+    });
+
+    exPanel.addDeleteEventListener(deleteListener);
+
+  }
+
+  /**
+   * Force any pending edits to complete.
+   */
+  public void commitChanges() {
+    editors.forEach(e -> e.commitChanges());
+  }
+
+}

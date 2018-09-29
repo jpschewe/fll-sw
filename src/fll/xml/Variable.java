@@ -33,6 +33,14 @@ public class Variable extends BasicPolynomial {
     propChangeSupport = new PropertyChangeSupport(this);
   }
 
+  public Variable(final String name,
+                  final GoalScope goalScope) {
+    super(goalScope, null);
+
+    mName = name;
+    propChangeSupport = new PropertyChangeSupport(this);
+  }
+
   private String mName;
 
   /**
@@ -43,10 +51,9 @@ public class Variable extends BasicPolynomial {
   }
 
   /**
-   * 
    * @param v the new name of the variable.
    * @see #getName()
-   * Fires property change event.
+   *      Fires property change event.
    */
   public void setName(final String v) {
     final String old = mName;
