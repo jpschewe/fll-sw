@@ -208,7 +208,7 @@ public abstract class ScoreCategoryEditor extends JPanel {
   private void addNewComputedGoal() {
     final String name = String.format("goal_%d", mCategory.getGoals().size());
     final String title = String.format("Goal %d", mCategory.getGoals().size());
-    final ComputedGoal newGoal = new ComputedGoal(name);
+    final ComputedGoal newGoal = new ComputedGoal(name, mCategory);
     newGoal.setTitle(title);
     mCategory.addGoal(newGoal);
     addGoal(newGoal);

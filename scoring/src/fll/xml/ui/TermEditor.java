@@ -71,7 +71,7 @@ import fll.xml.VariableScope;
     if (null != variableScope) {
       final JButton addVariable = new JButton("Add Variable");
       buttonBar.add(addVariable);
-      addGoal.addActionListener(l -> addNewVariableRef());
+      addVariable.addActionListener(l -> addNewVariableRef());
       addVariable.setToolTipText("Add a reference to a variable");
     }
 

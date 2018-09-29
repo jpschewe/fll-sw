@@ -105,7 +105,10 @@ public class ChallengeDescriptionEditor extends JFrame {
     }
 
     try (
-        final InputStream stream = ChallengeDescriptionEditor.class.getResourceAsStream("/fll/resources/challenge-descriptors/fll-2015_trash-trek.xml")) {
+        // final InputStream stream =
+        // ChallengeDescriptionEditor.class.getResourceAsStream("/fll/resources/challenge-descriptors/fll-2015_trash-trek.xml"))
+        // {
+        final InputStream stream = ChallengeDescriptionEditor.class.getResourceAsStream("/fll/resources/challenge-descriptors/fll-2014-world_class.xml")) {
 
       final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(stream));
 
@@ -361,7 +364,7 @@ public class ChallengeDescriptionEditor extends JFrame {
 
         // update editor list
         mSubjectiveEditors.remove(index);
-        
+
         // update the challenge description
         mDescription.removeSubjectiveCategory(index);
 
