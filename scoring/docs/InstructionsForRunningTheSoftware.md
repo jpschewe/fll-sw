@@ -144,3 +144,8 @@ Also take a look at the [troubleshooting link](http://localhost:9080/fll-sw/trou
 If you are at a tournament and someone else has set the password for the server and you don't know it you can create a new username and password from the admin index. 
 Use the "Create User" option under "User Management".
 Once you create a new user, both that use and the new user will be able to edit scores.
+
+## Alternative setups
+
+  * [Setup with a separate server in the judges room](2server.md)
+  
