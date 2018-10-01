@@ -12,12 +12,13 @@ import javax.annotation.Nonnull;
 
 import fll.xml.ComputedGoal;
 import fll.xml.GoalScope;
-import fll.xml.SwitchStatement;
 
 /**
  * Editor for {@link ComputedGoal} objects.
  */
 public class ComputedGoalEditor extends AbstractGoalEditor {
+
+  private final SwitchStatementEditor switchStatementEditor;
 
   private final VariableListEditor variableListEditor;
 
@@ -30,7 +31,8 @@ public class ComputedGoalEditor extends AbstractGoalEditor {
 
     GridBagConstraints gbc;
     gbc = new GridBagConstraints();
-    gbc.weightx = 0;
+    gbc.weightx = 1;
+    gbc.weighty = 1;
     gbc.anchor = GridBagConstraints.FIRST_LINE_START;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.fill = GridBagConstraints.BOTH;
@@ -38,20 +40,15 @@ public class ComputedGoalEditor extends AbstractGoalEditor {
     variableListEditor = new VariableListEditor(goal, goalScope);
     add(variableListEditor, gbc);
 
-    final SwitchStatement switchStmt = goal.getSwitch();
-    
-    // FIXME need cases
-
     gbc = new GridBagConstraints();
-    gbc.weightx = 0;
+    gbc.weightx = 1;
+    gbc.weighty = 1;
     gbc.anchor = GridBagConstraints.FIRST_LINE_START;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.fill = GridBagConstraints.BOTH;
 
-    final PolynomialEditor otherwiseEditor = new PolynomialEditor(switchStmt.getDefaultCase(), goalScope, goal);
-    final MovableExpandablePanel otherwisePanel = new MovableExpandablePanel("Otherwise goal value is",
-                                                                             otherwiseEditor, false, false);
-    add(otherwisePanel, gbc);
+    switchStatementEditor = new SwitchStatementEditor(goal.getSwitch(), goalScope, goal);
+    add(switchStatementEditor, gbc);
   }
 
   /**
@@ -59,6 +56,7 @@ public class ComputedGoalEditor extends AbstractGoalEditor {
    */
   public void commitChanges() {
     variableListEditor.commitChanges();
+    switchStatementEditor.commitChanges();
   }
 
 }

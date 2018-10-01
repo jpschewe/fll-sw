@@ -45,8 +45,8 @@ public class ConditionStatement extends AbstractConditionStatement {
   public ConditionStatement(final GoalScope goalScope,
                             final VariableScope variableScope) {
     super();
-    mLeft = new ComplexPolynomial(goalScope, variableScope);
-    mRight = new ComplexPolynomial(goalScope, variableScope);
+    mLeft = new ComplexPolynomial();
+    mRight = new ComplexPolynomial();
   }
 
   private final ComplexPolynomial mLeft;

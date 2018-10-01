@@ -35,7 +35,7 @@ public class Variable extends BasicPolynomial {
 
   public Variable(final String name,
                   final GoalScope goalScope) {
-    super(goalScope, null);
+    super();
 
     mName = name;
     propChangeSupport = new PropertyChangeSupport(this);

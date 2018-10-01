@@ -32,7 +32,7 @@ public class SwitchStatement implements Evaluatable, Serializable {
    */
   public SwitchStatement() {
     mCases = new LinkedList<>();
-    mDefaultCase = null;
+    mDefaultCase = new ComplexPolynomial();
   }
 
   /**
