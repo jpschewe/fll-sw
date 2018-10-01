@@ -35,7 +35,7 @@ public class Restriction extends BasicPolynomial {
    * bound is {@link Double#POSITIVE_INFINITY}, message is null.
    */
   public Restriction(final GoalScope goalScope) {
-    super(goalScope, null);
+    super();
     mLowerBound = Double.NEGATIVE_INFINITY;
     mUpperBound = Double.POSITIVE_INFINITY;
     mMessage = null;

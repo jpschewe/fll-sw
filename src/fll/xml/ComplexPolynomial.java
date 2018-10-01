@@ -20,11 +20,10 @@ public class ComplexPolynomial extends BasicPolynomial {
   }
 
   /**
-   * see {@link BasicPolynomial#BasicPolynomial(GoalScope, VariableScope)}
+   * see {@link BasicPolynomial#BasicPolynomial()}
    */
-  public ComplexPolynomial(final GoalScope goalScope,
-                           final VariableScope variableScope) {
-    super(goalScope, variableScope);
+  public ComplexPolynomial() {
+    super();
   }
 
 }

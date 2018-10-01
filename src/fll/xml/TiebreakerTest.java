@@ -30,7 +30,7 @@ public class TiebreakerTest extends BasicPolynomial {
    * @param goalScope where to lookup goals for references
    */
   public TiebreakerTest(@Nonnull final GoalScope goalScope) {
-    super(goalScope, null);
+    super();
     mWinner = WinnerType.HIGH;
   }
 
