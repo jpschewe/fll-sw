@@ -16,7 +16,6 @@ import org.apache.log4j.Logger;
 
 import fll.util.FormatterUtils;
 import fll.util.LogUtils;
-import fll.xml.ScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
 
 /**
@@ -30,10 +29,11 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
 
   private final JFormattedTextField mNameEditor;
 
-  private SubjectiveScoreCategory mSubjectiveCategory;
+  private final SubjectiveScoreCategory mSubjectiveCategory;
 
-  public SubjectiveCategoryEditor() {
-    super();
+  public SubjectiveCategoryEditor(final SubjectiveScoreCategory category) {
+    super(category);
+    mSubjectiveCategory = category;
 
     final Box titleContainer = Box.createHorizontalBox();
     add(titleContainer, 0);
@@ -73,32 +73,6 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
     });
 
     nameContainer.add(Box.createHorizontalGlue());
-
-  }
-
-  /**
-   * @param v must be a {@link SubjectiveScoreCategory}
-   * @throws IllegalArgumentException if not an instance of
-   *           {@link SubjectiveScoreCategory}.
-   */
-  @Override
-  public void setCategory(final ScoreCategory v) {
-    if (!(v instanceof SubjectiveScoreCategory)) {
-      throw new IllegalArgumentException("Can only edit SubjectiveScoreCategory objects");
-    }
-    setSubjectiveScoreCategory((SubjectiveScoreCategory) v);
-  }
-
-  /**
-   * Sets the category to edit.
-   * 
-   * @param v the new subjective score category
-   * @see #setCategory(ScoreCategory)
-   */
-  public void setSubjectiveScoreCategory(final SubjectiveScoreCategory v) {
-    super.setCategory(v);
-
-    mSubjectiveCategory = v;
 
     mTitleEditor.setValue(mSubjectiveCategory.getTitle());
     mNameEditor.setValue(mSubjectiveCategory.getName());

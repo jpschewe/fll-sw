@@ -18,7 +18,9 @@ import javax.swing.JPanel;
 import fll.xml.BasicPolynomial;
 import fll.xml.ComplexPolynomial;
 import fll.xml.FloatingPointType;
+import fll.xml.GoalScope;
 import fll.xml.Term;
+import fll.xml.VariableScope;
 
 /**
  * Editor for {@link BasicPolynomial} and {@link ComplexPolynomial}.
@@ -32,12 +34,22 @@ import fll.xml.Term;
 
   private final JComboBox<FloatingPointType> floatingPointType;
 
+  private final GoalScope goalScope;
+
+  private final VariableScope variableScope;
+
   /**
    * @param poly the polynomial to edit
+   * @param goalScope where to find goals for the polynomial
+   * @param variableScope where to find variables for the polynomial, may be null
    */
-  public PolynomialEditor(@Nonnull final BasicPolynomial poly) {
+  public PolynomialEditor(@Nonnull final BasicPolynomial poly,
+                          @Nonnull final GoalScope goalScope,
+                          final VariableScope variableScope) {
     super();
     this.poly = poly;
+    this.goalScope = goalScope;
+    this.variableScope = variableScope;
 
     setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
@@ -88,7 +100,7 @@ import fll.xml.Term;
 
     termBox.add(Box.createHorizontalStrut(20));
 
-    final TermEditor editor = new TermEditor(term, poly.getGoalScope(), poly.getVariableScope());
+    final TermEditor editor = new TermEditor(term, goalScope, variableScope);
     termBox.add(editor);
   }
 

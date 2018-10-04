@@ -10,6 +10,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.text.ParseException;
 
+import javax.annotation.Nonnull;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -18,6 +19,7 @@ import org.apache.log4j.Logger;
 
 import fll.util.FormatterUtils;
 import fll.util.LogUtils;
+import fll.xml.GoalScope;
 import fll.xml.Variable;
 
 /**
@@ -38,7 +40,8 @@ public class VariableEditor extends JPanel {
     return variable;
   }
 
-  public VariableEditor(final Variable variable) {
+  public VariableEditor(@Nonnull final Variable variable,
+                        @Nonnull final GoalScope goalScope) {
     super(new GridBagLayout());
 
     this.variable = variable;
@@ -69,7 +72,7 @@ public class VariableEditor extends JPanel {
     mNameEditor.setColumns(80);
     mNameEditor.setMaximumSize(mNameEditor.getPreferredSize());
 
-    final PolynomialEditor polyEditor = new PolynomialEditor(variable);
+    final PolynomialEditor polyEditor = new PolynomialEditor(variable, goalScope, null);
     gbc = new GridBagConstraints();
     gbc.weightx = 1;
     gbc.weighty = 1;

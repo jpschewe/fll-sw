@@ -29,12 +29,13 @@ public class RestrictionListEditor extends JPanel {
 
   private final JComponent editorContainer;
 
-  private PerformanceScoreCategory performance;
+  private final PerformanceScoreCategory performance;
 
   private final List<RestrictionEditor> editors = new LinkedList<>();
 
-  public RestrictionListEditor() {
+  public RestrictionListEditor(@Nonnull final PerformanceScoreCategory performance) {
     super(new BorderLayout());
+    this.performance = performance;
 
     editorContainer = Box.createVerticalBox();
 
@@ -55,6 +56,9 @@ public class RestrictionListEditor extends JPanel {
 
     final MovableExpandablePanel exPanel = new MovableExpandablePanel("Restrictions", expansion, false, false);
     add(exPanel, BorderLayout.CENTER);
+
+    performance.getRestrictions().forEach(this::addRestriction);
+
   }
 
   private void addNewRestriction() {
@@ -63,7 +67,7 @@ public class RestrictionListEditor extends JPanel {
   }
 
   private void addRestriction(final Restriction restriction) {
-    final RestrictionEditor editor = new RestrictionEditor(restriction);
+    final RestrictionEditor editor = new RestrictionEditor(restriction, performance);
     editors.add(editor);
 
     final JPanel panel = new JPanel(new BorderLayout());
@@ -91,20 +95,6 @@ public class RestrictionListEditor extends JPanel {
     });
 
     performance.setRestrictions(newRestrictions);
-  }
-
-  /**
-   * @param v specify the new performance element to edit
-   */
-  public void setPerformance(@Nonnull final PerformanceScoreCategory v) {
-    editorContainer.removeAll();
-    editors.clear();
-
-    this.performance = v;
-
-    performance.getRestrictions().forEach(r -> {
-      addRestriction(r);
-    });
   }
 
 }

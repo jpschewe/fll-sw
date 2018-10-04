@@ -29,12 +29,13 @@ public class TiebreakerEditor extends JPanel {
 
   private final JComponent editorContainer;
 
-  private PerformanceScoreCategory performance;
+  private final PerformanceScoreCategory performance;
 
   private final List<TiebreakerTestEditor> editors = new LinkedList<>();
 
-  public TiebreakerEditor() {
+  public TiebreakerEditor(@Nonnull final PerformanceScoreCategory performance) {
     super(new BorderLayout());
+    this.performance = performance;
 
     editorContainer = Box.createVerticalBox();
 
@@ -55,6 +56,8 @@ public class TiebreakerEditor extends JPanel {
 
     final MovableExpandablePanel exPanel = new MovableExpandablePanel("Tie breakers", expansion, false, false);
     add(exPanel, BorderLayout.CENTER);
+  
+    performance.getTiebreaker().forEach(this::addTest);
   }
 
   private void addNewTest() {
@@ -63,7 +66,7 @@ public class TiebreakerEditor extends JPanel {
   }
 
   private void addTest(final TiebreakerTest test) {
-    final TiebreakerTestEditor editor = new TiebreakerTestEditor(test);
+    final TiebreakerTestEditor editor = new TiebreakerTestEditor(test, performance);
     editors.add(editor);
 
     final JPanel panel = new JPanel(new BorderLayout());
@@ -91,20 +94,6 @@ public class TiebreakerEditor extends JPanel {
     });
 
     performance.setTiebreaker(newTiebreaker);
-  }
-
-  /**
-   * @param v specify the new performance element to edit
-   */
-  public void setPerformance(@Nonnull final PerformanceScoreCategory v) {
-    editorContainer.removeAll();
-    editors.clear();
-
-    this.performance = v;
-
-    performance.getTiebreaker().forEach(test -> {
-      addTest(test);
-    });
   }
 
 }

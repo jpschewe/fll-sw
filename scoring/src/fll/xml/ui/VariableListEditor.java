@@ -10,6 +10,7 @@ import java.awt.BorderLayout;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.annotation.Nonnull;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -21,6 +22,7 @@ import org.apache.log4j.Logger;
 import fll.Utilities;
 import fll.util.LogUtils;
 import fll.xml.ComputedGoal;
+import fll.xml.GoalScope;
 import fll.xml.Variable;
 import fll.xml.ui.MovableExpandablePanel.DeleteEvent;
 import fll.xml.ui.MovableExpandablePanel.DeleteEventListener;
@@ -40,10 +42,14 @@ public class VariableListEditor extends JPanel {
 
   private final List<VariableEditor> editors = new LinkedList<>();
 
-  public VariableListEditor(final ComputedGoal goal) {
+  private final GoalScope goalScope;
+
+  public VariableListEditor(@Nonnull final ComputedGoal goal,
+                            @Nonnull final GoalScope goalScope) {
     super(new BorderLayout());
 
     this.goal = goal;
+    this.goalScope = goalScope;
 
     editorContainer = Box.createVerticalBox();
 
@@ -109,7 +115,7 @@ public class VariableListEditor extends JPanel {
   }
 
   private void addVariable(final Variable var) {
-    final VariableEditor variableEditor = new VariableEditor(var);
+    final VariableEditor variableEditor = new VariableEditor(var, goalScope);
     final MovableExpandablePanel exPanel = new MovableExpandablePanel(var.getName(), variableEditor, false, true);
     editorContainer.add(exPanel);
 

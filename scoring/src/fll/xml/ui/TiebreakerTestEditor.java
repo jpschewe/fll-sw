@@ -9,6 +9,7 @@ package fll.xml.ui;
 import javax.annotation.Nonnull;
 import javax.swing.JComboBox;
 
+import fll.xml.GoalScope;
 import fll.xml.TiebreakerTest;
 import fll.xml.WinnerType;
 
@@ -27,8 +28,9 @@ public class TiebreakerTestEditor extends PolynomialEditor {
     return test;
   }
 
-  public TiebreakerTestEditor(@Nonnull final TiebreakerTest test) {
-    super(test);
+  public TiebreakerTestEditor(@Nonnull final TiebreakerTest test,
+                              @Nonnull final GoalScope goalScope) {
+    super(test, goalScope, null);
     this.test = test;
 
     final JComboBox<WinnerType> winnerEditor = new JComboBox<>(WinnerType.values());
