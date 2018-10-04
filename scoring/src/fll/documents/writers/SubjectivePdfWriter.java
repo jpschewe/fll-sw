@@ -185,13 +185,14 @@ public class SubjectivePdfWriter {
 
     // make it a little smaller
     image.scaleToFit(115, 60);
-//    image.scalePercent(85);
 
     // put the image in the header cell
     headerCell = new PdfPCell(image, false);
     headerCell.setRowspan(2);
     headerCell.setBorder(0);
     headerCell.setVerticalAlignment(Element.ALIGN_TOP);
+    // make sure there is enough height for the team number and the team name
+    headerCell.setMinimumHeight(45);
 
     // put the rest of the header cells on the table
     pageHeaderTable.addCell(headerCell);
@@ -221,7 +222,6 @@ public class SubjectivePdfWriter {
     final String teamNameText = "Team Name: "
         + teamInfo.getTeamName();
     teamNameCell.setCellEvent(new PdfUtils.TruncateContent(teamNameText, f12b));
-    teamNameCell.setVerticalAlignment(Element.ALIGN_LEFT);
     pageHeaderTable.addCell(teamNameCell);
 
     pageHeaderTable.addCell(createCell(tournamentName, f6i, NO_BORDERS, Element.ALIGN_RIGHT));
