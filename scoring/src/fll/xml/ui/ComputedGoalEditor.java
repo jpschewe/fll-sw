@@ -8,7 +8,10 @@ package fll.xml.ui;
 
 import java.awt.GridBagConstraints;
 
+import javax.annotation.Nonnull;
+
 import fll.xml.ComputedGoal;
+import fll.xml.GoalScope;
 import fll.xml.SwitchStatement;
 
 /**
@@ -21,7 +24,8 @@ public class ComputedGoalEditor extends AbstractGoalEditor {
   /**
    * @param goal the goal to edit
    */
-  public ComputedGoalEditor(final ComputedGoal goal) {
+  public ComputedGoalEditor(@Nonnull final ComputedGoal goal,
+                            @Nonnull final GoalScope goalScope) {
     super(goal);
 
     GridBagConstraints gbc;
@@ -31,7 +35,7 @@ public class ComputedGoalEditor extends AbstractGoalEditor {
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.fill = GridBagConstraints.BOTH;
 
-    variableListEditor = new VariableListEditor(goal);
+    variableListEditor = new VariableListEditor(goal, goalScope);
     add(variableListEditor, gbc);
 
     final SwitchStatement switchStmt = goal.getSwitch();
@@ -44,7 +48,7 @@ public class ComputedGoalEditor extends AbstractGoalEditor {
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.fill = GridBagConstraints.BOTH;
 
-    final PolynomialEditor otherwiseEditor = new PolynomialEditor(switchStmt.getDefaultCase());
+    final PolynomialEditor otherwiseEditor = new PolynomialEditor(switchStmt.getDefaultCase(), goalScope, goal);
     final MovableExpandablePanel otherwisePanel = new MovableExpandablePanel("Otherwise goal value is",
                                                                              otherwiseEditor, false, false);
     add(otherwisePanel, gbc);

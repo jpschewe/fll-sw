@@ -48,13 +48,15 @@ public abstract class ScoreCategoryEditor extends JPanel {
 
   private final Box mGoalEditorContainer;
 
-  private ScoreCategory mCategory = null;
+  private final ScoreCategory mCategory;
 
   private final MoveEventListener mGoalMoveListener;
 
   private final DeleteEventListener mGoalDeleteListener;
 
-  public ScoreCategoryEditor() {
+  public ScoreCategoryEditor(final ScoreCategory scoreCategory) {
+    mCategory = scoreCategory;
+
     setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 
     final Box weightContainer = Box.createHorizontalBox();
@@ -159,7 +161,7 @@ public abstract class ScoreCategoryEditor extends JPanel {
 
         // update editor list
         mGoalEditors.remove(index);
-        
+
         // update the challenge description
         mCategory.removeGoal(index);
 
@@ -169,23 +171,10 @@ public abstract class ScoreCategoryEditor extends JPanel {
       }
     };
 
-  }
+    mWeight.setValue(mCategory.getWeight());
 
-  /**
-   * @param category the category to edit, may be null to clear the object
-   */
-  public void setCategory(final ScoreCategory category) {
-    mCategory = category;
+    mCategory.getGoals().forEach(this::addGoal);
 
-    mWeight.setValue(null);
-    mGoalEditorContainer.removeAll();
-    mGoalEditors.clear();
-
-    if (null != mCategory) {
-      mWeight.setValue(mCategory.getWeight());
-
-      mCategory.getGoals().forEach(this::addGoal);
-    }
   }
 
   /**
@@ -220,7 +209,7 @@ public abstract class ScoreCategoryEditor extends JPanel {
     if (goal instanceof Goal) {
       editor = new GoalEditor((Goal) goal);
     } else if (goal instanceof ComputedGoal) {
-      editor = new ComputedGoalEditor((ComputedGoal) goal);
+      editor = new ComputedGoalEditor((ComputedGoal) goal, mCategory);
     } else {
       throw new RuntimeException("Unexpected goal class: "
           + goal.getClass());

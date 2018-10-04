@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 
 import fll.util.FormatterUtils;
 import fll.util.LogUtils;
+import fll.xml.GoalScope;
 import fll.xml.Restriction;
 
 /**
@@ -43,8 +44,9 @@ public class RestrictionEditor extends PolynomialEditor {
     return restriction;
   }
 
-  public RestrictionEditor(@Nonnull final Restriction restriction) {
-    super(restriction);
+  public RestrictionEditor(@Nonnull final Restriction restriction,
+                           @Nonnull final GoalScope goalScope) {
+    super(restriction, goalScope, null);
     this.restriction = restriction;
 
     final Box lowerBoundBox = Box.createHorizontalBox();

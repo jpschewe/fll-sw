@@ -7,7 +7,6 @@
 package fll.xml.ui;
 
 import fll.xml.PerformanceScoreCategory;
-import fll.xml.ScoreCategory;
 
 /**
  * Editor for {@link PerformanceScoreCategory} objects.
@@ -18,34 +17,15 @@ public class PerformanceEditor extends ScoreCategoryEditor {
 
   private final RestrictionListEditor restrictions;
 
-  public PerformanceEditor() {
-    super();
+  public PerformanceEditor(final PerformanceScoreCategory category) {
+    super(category);
 
-    restrictions = new RestrictionListEditor();
+    restrictions = new RestrictionListEditor(category);
     add(restrictions);
 
-    tiebreaker = new TiebreakerEditor();
+    tiebreaker = new TiebreakerEditor(category);
     add(tiebreaker);
 
-  }
-
-  /**
-   * @param v must be a {@link PerformanceScoreCategory}
-   * @throws IllegalArgumentException if not an instance of
-   *           {@link PerformanceScoreCategory}.
-   */
-  @Override
-  public void setCategory(final ScoreCategory v) {
-    if (!(v instanceof PerformanceScoreCategory)) {
-      throw new IllegalArgumentException("Can only edit PerformanceScoreCategory objects");
-    }
-
-    super.setCategory(v);
-
-    final PerformanceScoreCategory performance = (PerformanceScoreCategory) v;
-
-    tiebreaker.setPerformance(performance);
-    restrictions.setPerformance(performance);
   }
 
   @Override
