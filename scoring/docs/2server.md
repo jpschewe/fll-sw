@@ -23,3 +23,7 @@ When using the site's wireless or the judges room is close to the performance ar
   1. Upload to the judges server the subjective data that was downloaded above
 
 Repeat this process as necessary noting that only the subjective score changes to the judges server are persevered with this process.
+
+# End of tournament
+
+Make sure to download the database from both servers and name the downloaded files differently so that they can be merged later.
