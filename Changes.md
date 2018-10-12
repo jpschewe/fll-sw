@@ -1,3 +1,6 @@
+Release 13.0.0
+==============
+
 * #661 - Update FIRST Lego League logo for the subjective scoring sheets
 * #645 - Add SSL option for the subjective judging web application to handle new security in web browsers
 * #659 - add report of the top seeding round scores for all award groups
