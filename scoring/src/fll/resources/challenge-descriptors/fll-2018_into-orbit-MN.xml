@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <fll title="2018 Minnesota FIRST LEGO League - Into Orbit"
 	copyright="2018 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST) and The LEGO Group. Used by special permission. All rights reserved."
-	revision="8" schemaVersion="2">
+	revision="9" schemaVersion="2">
 
 	<Performance minimumScore="0" weight="1">
 
@@ -32,7 +32,7 @@
 			title="M03 - 3D Printing - Ejected using Regolith Core Sample " category="M03">
 
 			<value value="completely_in_ne"
-				title="Completely in the NE Planet Area" score="22" />
+				title="In NE Planet Area" score="22" />
 
 			<value value="ejected"
 				title="Ejected"
@@ -54,8 +54,8 @@
 		<goal initialValue="0" name="m05_extraction_gas"
 			title="M05 - Gas Core Sample" category="M05">
 			<value value="lander_target"
-				title="In Lander's Target Circle" score="12" />
-			<value value="in_base" title="Completely In Base" score="10" />
+				title="In Target Circle" score="12" />
+			<value value="in_base" title="In Base" score="10" />
 			<value value="none" title="None" score="0" />
 		</goal>
 
@@ -86,11 +86,11 @@
 		<goal initialValue="0" name="m08_aerobic_exercies"
 			title="M08 - Aerobic Exercise" category="M08">
 			<value value="orange"
-				title="Completely in orange"
+				title="Orange"
 				score="22" />
-			<value value="white" title="Completely in white" score="20" />
+			<value value="white" title="White" score="20" />
 			<value value="gray"
-				title="Completely in gray"
+				title="Gray"
 				score="18" />
 			<value value="none" title="None" score="0" />
 		</goal>
@@ -111,11 +111,11 @@
 		<goal name="m13_observatory" title="M13 - Observatory" category="M13"
 			initialValue="0">
 			<value value="orange"
-				title="Completely in orange"
+				title="Orange"
 				score="20" />
-			<value value="white" title="Completely in white" score="18" />
+			<value value="white" title="White" score="18" />
 			<value value="gray"
-				title="Completely in gray"
+				title="Gray"
 				score="16" />
 			<value value="none" title="None" score="0" />
 		</goal>
