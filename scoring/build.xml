@@ -686,10 +686,10 @@
 		<zip zipfile="${dir.build}/${app.name}-v${app.version.short}.zip">
 			<zipfileset dir="${dir.dist}" prefix="${app.name}-v${app.version.short}" filemode="755">
 				<include name="**/*.sh" />
-				<exclude name="**/WEB-INF/flldb.*" />
 			</zipfileset>
 			<zipfileset dir="${dir.dist}" prefix="${app.name}-v${app.version.short}">
 				<exclude name="**/*.sh" />
+				<exclude name="**/WEB-INF/flldb.*" />
 			</zipfileset>
 		</zip>
 		<echo message="The distribution file is ${dir.build}/${app.name}-${app.version.short}.zip" />
