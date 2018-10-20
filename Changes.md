@@ -1,3 +1,5 @@
+* #665 - keep database files out of the release
+
 Release 13.0.0
 ==============
 
