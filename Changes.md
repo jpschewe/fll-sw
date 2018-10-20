@@ -1,3 +1,4 @@
+* #663 - add the ability to overwrite all subjective scores on upload
 * #665 - keep database files out of the release
 
 Release 13.0.0
