@@ -72,7 +72,8 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
 
     final StringBuilder message = new StringBuilder();
 
@@ -85,46 +86,57 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
       final FileItem subjectiveFileItem = (FileItem) request.getAttribute("subjectiveFile");
       subjectiveFileItem.write(file);
 
+      final String overwriteStr = (String) request.getAttribute("overwrite_all");
+      final boolean overwrite = null == overwriteStr ? false : Boolean.valueOf(overwriteStr);
+
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
       saveSubjectiveData(file, Queries.getCurrentTournament(connection),
-                         ApplicationAttributes.getChallengeDescription(application), connection, application);
+                         ApplicationAttributes.getChallengeDescription(application), connection, application,
+                         overwrite);
       message.append("<p id='success'><i>Subjective data uploaded successfully</i></p>");
     } catch (final SAXParseException spe) {
       final String errorMessage = String.format("Error parsing file line: %d column: %d%n Message: %s%n This may be caused by using the wrong version of the software attempting to parse a file that is not subjective data.",
                                                 spe.getLineNumber(), spe.getColumnNumber(), spe.getMessage());
       message.append("<p class='error'>"
-          + errorMessage + "</p>");
+          + errorMessage
+          + "</p>");
       LOGGER.error(errorMessage, spe);
     } catch (final SAXException se) {
       final String errorMessage = "The subjective scores file was found to be invalid, check that you are parsing a subjective scores file and not something else";
       message.append("<p class='error'>"
-          + errorMessage + "</p>");
+          + errorMessage
+          + "</p>");
       LOGGER.error(errorMessage, se);
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error saving subjective data into the database: "
-          + sqle.getMessage() + "</p>");
+          + sqle.getMessage()
+          + "</p>");
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error saving subjective data into the database", sqle);
     } catch (final ParseException e) {
       message.append("<p class='error'>Error saving subjective data into the database: "
-          + e.getMessage() + "</p>");
+          + e.getMessage()
+          + "</p>");
       LOGGER.error(e, e);
       throw new RuntimeException("Error saving subjective data into the database", e);
     } catch (final FileUploadException e) {
       message.append("<p class='error'>Error processing subjective data upload: "
-          + e.getMessage() + "</p>");
+          + e.getMessage()
+          + "</p>");
       LOGGER.error(e, e);
       throw new RuntimeException("Error processing subjective data upload", e);
     } catch (final Exception e) {
       message.append("<p class='error'>Error saving subjective data into the database: "
-          + e.getMessage() + "</p>");
+          + e.getMessage()
+          + "</p>");
       LOGGER.error(e, e);
       throw new RuntimeException("Error saving subjective data into the database", e);
     } finally {
       if (!file.delete()) {
         LOGGER.warn("Unable to delete file "
-            + file.getAbsolutePath() + ", setting to delete on exit");
+            + file.getAbsolutePath()
+            + ", setting to delete on exit");
         file.deleteOnExit();
       }
       SQLFunctions.close(connection);
@@ -147,14 +159,17 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
    * 
    * @param file the file to read the data from
    * @param connection the database connection to write to
+   * @param overwrite if true, then overwrite ALL scores in the database, not just
+   *          modified scores
    * @throws SAXException if there is an error parsing the document
    */
-  public static void saveSubjectiveData(final File file,
-                                        final int currentTournament,
-                                        final ChallengeDescription challengeDescription,
-                                        final Connection connection,
-                                        final ServletContext application)
-                                            throws SQLException, IOException, ParseException, SAXException {
+  private static void saveSubjectiveData(final File file,
+                                         final int currentTournament,
+                                         final ChallengeDescription challengeDescription,
+                                         final Connection connection,
+                                         final ServletContext application,
+                                         final boolean overwrite)
+      throws SQLException, IOException, ParseException, SAXException {
     if (LOGGER.isDebugEnabled()) {
       try {
         LOGGER.debug("Saving uploaded file to ");
@@ -211,7 +226,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
         throw new FLLRuntimeException("Cannot parse input as a compressed subjective data file or an uncompressed XML file");
       }
 
-      saveSubjectiveData(scoreDocument, currentTournament, challengeDescription, connection);
+      saveSubjectiveData(scoreDocument, currentTournament, challengeDescription, connection, overwrite);
     } finally {
       if (null != zipfile) {
         zipfile.close();
@@ -225,11 +240,13 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
   public static void saveSubjectiveData(final Document scoreDocument,
                                         final int currentTournament,
                                         final ChallengeDescription challengeDescription,
-                                        final Connection connection) throws SQLException, IOException, ParseException {
+                                        final Connection connection,
+                                        final boolean overwrite)
+      throws SQLException, IOException, ParseException {
 
     // make sure all judges exist in the database first
     addMissingJudges(connection, currentTournament, scoreDocument);
-    
+
     final Element scoresElement = scoreDocument.getDocumentElement();
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("first element: "
@@ -256,7 +273,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
             + categoryName);
       }
 
-      saveCategoryData(currentTournament, connection, scoreCategoryElement, categoryName, categoryElement);
+      saveCategoryData(currentTournament, connection, overwrite, scoreCategoryElement, categoryName, categoryElement);
     }
 
     removeNullSubjectiveRows(connection, currentTournament, challengeDescription);
@@ -275,7 +292,8 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
    */
   public static void removeNullSubjectiveRows(final Connection connection,
                                               final int tournamentId,
-                                              final ChallengeDescription challengeDescription) throws SQLException {
+                                              final ChallengeDescription challengeDescription)
+      throws SQLException {
     for (final ScoreCategory cat : challengeDescription.getSubjectiveCategories()) {
       removeNullRows(tournamentId, connection, cat.getName(), cat);
     }
@@ -295,16 +313,19 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
   private static void removeNullRows(final int currentTournament,
                                      final Connection connection,
                                      final String categoryName,
-                                     final ScoreCategory categoryElement) throws SQLException {
+                                     final ScoreCategory categoryElement)
+      throws SQLException {
     final List<AbstractGoal> goalDescriptions = categoryElement.getGoals();
     PreparedStatement prep = null;
     try {
       final StringBuffer sql = new StringBuffer();
       sql.append("DELETE FROM "
-          + categoryName + " WHERE NoShow <> ? ");
+          + categoryName
+          + " WHERE NoShow <> ? ");
       for (final AbstractGoal goalDescription : goalDescriptions) {
         sql.append(" AND "
-            + goalDescription.getName() + " IS NULL ");
+            + goalDescription.getName()
+            + " IS NULL ");
       }
 
       sql.append(" AND Tournament = ?");
@@ -321,9 +342,11 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns are dynamic")
   private static void saveCategoryData(final int currentTournament,
                                        final Connection connection,
+                                       final boolean overwrite,
                                        final Element scoreCategoryElement,
                                        final String categoryName,
-                                       final ScoreCategory categoryElement) throws SQLException, ParseException {
+                                       final ScoreCategory categoryElement)
+      throws SQLException, ParseException {
     final List<AbstractGoal> goalDescriptions = categoryElement.getGoals();
 
     PreparedStatement insertPrep = null;
@@ -334,24 +357,28 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
       final StringBuffer updateStmt = new StringBuffer();
       final StringBuffer insertSQLColumns = new StringBuffer();
       insertSQLColumns.append("INSERT INTO "
-          + categoryName + " (TeamNumber, Tournament, Judge, NoShow");
+          + categoryName
+          + " (TeamNumber, Tournament, Judge, NoShow");
       final StringBuffer insertSQLValues = new StringBuffer();
       insertSQLValues.append(") VALUES ( ?, ?, ?, ?");
       updateStmt.append("UPDATE "
-          + categoryName + " SET NoShow = ? ");
+          + categoryName
+          + " SET NoShow = ? ");
       final int numGoals = goalDescriptions.size();
       for (final AbstractGoal goalDescription : goalDescriptions) {
         insertSQLColumns.append(", "
             + goalDescription.getName());
         insertSQLValues.append(", ?");
         updateStmt.append(", "
-            + goalDescription.getName() + " = ?");
+            + goalDescription.getName()
+            + " = ?");
       }
 
       updateStmt.append(" WHERE TeamNumber = ? AND Tournament = ? AND Judge = ?");
       updatePrep = connection.prepareStatement(updateStmt.toString());
       insertPrep = connection.prepareStatement(insertSQLColumns.toString()
-          + insertSQLValues.toString() + ")");
+          + insertSQLValues.toString()
+          + ")");
       // initialze the tournament
       insertPrep.setInt(2, currentTournament);
       updatePrep.setInt(numGoals
@@ -359,10 +386,11 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
 
       for (final Element scoreElement : new NodelistElementCollectionAdapter(scoreCategoryElement.getElementsByTagName("score"))) {
 
-        if (scoreElement.hasAttribute("modified")
-            && "true".equalsIgnoreCase(scoreElement.getAttribute("modified"))) {
+        if (overwrite
+            || (scoreElement.hasAttribute("modified")
+                && "true".equalsIgnoreCase(scoreElement.getAttribute("modified")))) {
           final int teamNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(scoreElement.getAttribute("teamNumber"))
-                                                                 .intValue();
+                                                                         .intValue();
 
           if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Saving score data for team: "
@@ -432,7 +460,8 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
    */
   private static void addMissingJudges(final Connection connection,
                                        final int tournamentId,
-                                       final Document scoreDocument) throws SQLException {
+                                       final Document scoreDocument)
+      throws SQLException {
 
     PreparedStatement insertJudge = null;
     try {
