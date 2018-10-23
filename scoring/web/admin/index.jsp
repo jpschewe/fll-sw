@@ -250,7 +250,7 @@
 						<!-- overwrite all scores -->
 						<input type='checkbox' name='overwrite_all' value='true'
 							id='subjective_overwrite_all' /> <label
-							for='subjective_overwrite_all'>Overwrite All Scores</label> <a
+							for='subjective_overwrite_all'>Overwrite All Subjective Scores</label> <a
 							href='javascript:display("subjective_overwrite_help")'>[help]</a>
 						<div id='subjective_overwrite_help' class='help'
 							style='display: none'>
