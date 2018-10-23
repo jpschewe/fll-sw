@@ -238,6 +238,11 @@
 					</form>
 				</li>
 
+				<li>If there is a second server in the judges room, you will
+					want to follow <a href="../documentation/2server.html">these
+						instructions</a>.
+				</li>
+
 			</ul></li>
 
 		<li>Once the seeding rounds have been completed you will need to
