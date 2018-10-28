@@ -29,6 +29,15 @@ import fll.xml.ScoreCategory;
  */
 public final class ScoreStandardization {
 
+  /**
+   * Thrown when there are not enough scores for a judging group.
+   */
+  public static class TooFewScoresException extends FLLRuntimeException {
+    public TooFewScoresException(final String message) {
+      super(message);
+    }
+  }
+
   private ScoreStandardization() {
     // no instances
   }
@@ -40,12 +49,14 @@ public final class ScoreStandardization {
    * @param connection connection to the database with delete and insert
    *          privileges
    * @param tournament which tournament to summarize scores for
+   * @throws TooFewScoresException if there aren't enough scores in a judging
+   *           group
    */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Can't use variable param for column to set")
   public static void summarizeScores(final Connection connection,
                                      final ChallengeDescription description,
                                      final int tournament)
-      throws SQLException, ParseException {
+      throws SQLException, ParseException, TooFewScoresException {
     if (tournament != Queries.getCurrentTournament(connection)) {
       throw new FLLRuntimeException("Cannot compute summarized scores for a tournament other than the current tournament");
     }
@@ -71,7 +82,8 @@ public final class ScoreStandardization {
       insertPrep = connection.prepareStatement("INSERT INTO FinalScores "//
           + " ( TeamNumber, Tournament, performance ) " //
           + " SELECT TeamNumber" //
-          + ", " + tournament //
+          + ", "
+          + tournament //
           + ", ((Score - ?) * ?) + ? "//
           + " FROM performance_seeding_max");
       insertPrep.setDouble(3, mean);
@@ -95,7 +107,7 @@ public final class ScoreStandardization {
               / sgStdev);
           insertPrep.executeUpdate();
         } else {
-          throw new RuntimeException("Not enough scores for in category: Performance");
+          throw new TooFewScoresException("Not enough scores for in category: Performance");
         }
 
         // subjective
@@ -106,13 +118,20 @@ public final class ScoreStandardization {
           // number and score group as well as computing the average (across
           // judges)
           updatePrep = connection.prepareStatement("UPDATE FinalScores" //
-              + " SET " + catName + " = " //
+              + " SET "
+              + catName
+              + " = " //
               + " ( SELECT " //
               + "   Avg(StandardizedScore)" //
-              + "   FROM " + catName //
+              + "   FROM "
+              + catName //
               + "   WHERE StandardizedScore IS NOT NULL" //
-              + "   AND FinalScores.TeamNumber = " + catName + ".TeamNumber" //
-              + "   AND FinalScores.Tournament = " + catName + ".Tournament" //
+              + "   AND FinalScores.TeamNumber = "
+              + catName
+              + ".TeamNumber" //
+              + "   AND FinalScores.Tournament = "
+              + catName
+              + ".Tournament" //
               + "   GROUP BY TeamNumber )" //
               + " WHERE Tournament = ?");
           updatePrep.setInt(1, tournament);
@@ -120,7 +139,7 @@ public final class ScoreStandardization {
         }
 
       } else {
-        throw new RuntimeException("No performance scores for standardization");
+        throw new TooFewScoresException("No performance scores for standardization");
       }
       SQLFunctions.close(rs);
 
@@ -166,7 +185,8 @@ public final class ScoreStandardization {
         // 4 - judge
         // 5 - tournament
         updatePrep = connection.prepareStatement("UPDATE "
-            + category + " SET StandardizedScore = ((ComputedTotal - ?) * ? ) + ?  WHERE Judge = ?"
+            + category
+            + " SET StandardizedScore = ((ComputedTotal - ?) * ? ) + ?  WHERE Judge = ?"
             + " AND Tournament = ?");
         updatePrep.setDouble(3, mean);
         updatePrep.setInt(5, tournament);
@@ -175,7 +195,8 @@ public final class ScoreStandardization {
             + " Avg(ComputedTotal) AS sg_mean," //
             + " Count(ComputedTotal) AS sg_count," //
             + " stddev_pop(ComputedTotal) AS sg_stdev" //
-            + " FROM " + category //
+            + " FROM "
+            + category //
             + " WHERE Tournament = ?" //
             + " and ComputedTotal IS NOT NULL AND NoShow = false GROUP BY Judge");
         selectPrep.setInt(1, tournament);
@@ -192,8 +213,10 @@ public final class ScoreStandardization {
             updatePrep.setString(4, judge);
             updatePrep.executeUpdate();
           } else { // if(sgCount == 1) {
-            throw new RuntimeException("Not enough scores for Judge: "
-                + judge + " in category: " + category);
+            throw new TooFewScoresException("Not enough scores for Judge: "
+                + judge
+                + " in category: "
+                + category);
           } // ignore 0 in a judging group
         }
         SQLFunctions.close(rs);
@@ -234,7 +257,10 @@ public final class ScoreStandardization {
         final String catName = catElement.getName();
         final double catWeight = catElement.getWeight();
         final PreparedStatement prep = connection.prepareStatement("SELECT "
-            + catName + " * " + catWeight + " FROM FinalScores WHERE Tournament = ? AND TeamNumber = ?");
+            + catName
+            + " * "
+            + catWeight
+            + " FROM FinalScores WHERE Tournament = ? AND TeamNumber = ?");
         prep.setInt(1, tournament);
         subjectiveSelects.add(prep);
       }
@@ -242,7 +268,8 @@ public final class ScoreStandardization {
       final PerformanceScoreCategory performanceElement = description.getPerformance();
       final double performanceWeight = performanceElement.getWeight();
       perfSelect = connection.prepareStatement("SELECT performance * "
-          + performanceWeight + " FROM FinalScores WHERE Tournament = ? AND TeamNumber = ?");
+          + performanceWeight
+          + " FROM FinalScores WHERE Tournament = ? AND TeamNumber = ?");
       perfSelect.setInt(1, tournament);
 
       update = connection.prepareStatement("UPDATE FinalScores SET OverallScore = ? WHERE Tournament = ? AND TeamNumber = ?");
