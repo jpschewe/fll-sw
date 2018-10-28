@@ -1,3 +1,4 @@
+* #666 - do DNS lookups in the background so that the loading of pages isn't slowed down by looking for host names
 * #665 - keep database files out of the release
 
 Release 13.0.0

@@ -30,7 +30,6 @@ import fll.db.GlobalParameters;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.xml.ChallengeDescription;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Initialize web attributes.
@@ -234,66 +233,62 @@ public class InitFilter implements Filter {
                                     final ServletContext application)
       throws IOException, RuntimeException {
 
-    try {
+    synchronized (initLock) {
 
-      synchronized (initLock) {
+      // make sure that we compute the host names as soon as possible
+      WebUtils.updateHostNamesInBackground(application);
 
-        final DataSource datasource = ApplicationAttributes.getDataSource(application);
+      final DataSource datasource = ApplicationAttributes.getDataSource(application);
+      try (Connection connection = datasource.getConnection()) {
 
-        // Initialize the connection
-        Connection connection = null;
-        try {
-          connection = datasource.getConnection();
+        // check if the database is initialized
+        final boolean dbinitialized = Utilities.testDatabaseInitialized(connection);
+        if (!dbinitialized) {
+          LOGGER.warn("Database not initialized, redirecting to setup");
+          session.setAttribute(SessionAttributes.MESSAGE,
+                               "<p class='error'>The database is not yet initialized. Please create the database.</p>");
+          response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
+              + "/setup/index.jsp"));
+          return false;
+        }
 
-          // check if the database is initialized
-          final boolean dbinitialized = Utilities.testDatabaseInitialized(connection);
-          if (!dbinitialized) {
-            LOGGER.warn("Database not initialized, redirecting to setup");
-            session.setAttribute(SessionAttributes.MESSAGE,
-                                 "<p class='error'>The database is not yet initialized. Please create the database.</p>");
-            response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
-                + "/setup/index.jsp"));
-            return false;
+        // load the challenge descriptor
+        if (null == ApplicationAttributes.getChallengeDocument(application)) {
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Loading challenge descriptor");
           }
-
-          // load the challenge descriptor
-          if (null == ApplicationAttributes.getChallengeDocument(application)) {
-            if (LOGGER.isDebugEnabled()) {
-              LOGGER.debug("Loading challenge descriptor");
-            }
-            try {
-              final Document document = GlobalParameters.getChallengeDocument(connection);
-              if (null == document) {
-                LOGGER.warn("Could not find challenge descriptor");
-                session.setAttribute(SessionAttributes.MESSAGE,
-                                     "<p class='error'>Could not find xml challenge description in the database! Please create the database.</p>");
-                response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
-                    + "/setup/index.jsp"));
-                return false;
-              }
-              application.setAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT, document);
-
-              final ChallengeDescription challengeDescription = new ChallengeDescription(document.getDocumentElement());
-              application.setAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION, challengeDescription);
-            } catch (final FLLRuntimeException e) {
-              LOGGER.error("Error getting challenge document", e);
-              session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>"
-                  + e.getMessage()
-                  + " Please create the database.</p>");
+          try {
+            final Document document = GlobalParameters.getChallengeDocument(connection);
+            if (null == document) {
+              LOGGER.warn("Could not find challenge descriptor");
+              session.setAttribute(SessionAttributes.MESSAGE,
+                                   "<p class='error'>Could not find xml challenge description in the database! Please create the database.</p>");
               response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
                   + "/setup/index.jsp"));
               return false;
             }
+            application.setAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT, document);
+
+            final ChallengeDescription challengeDescription = new ChallengeDescription(document.getDocumentElement());
+            application.setAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION, challengeDescription);
+          } catch (final FLLRuntimeException e) {
+            LOGGER.error("Error getting challenge document", e);
+            session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>"
+                + e.getMessage()
+                + " Please create the database.</p>");
+            response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
+                + "/setup/index.jsp"));
+            return false;
           }
-        } finally {
-          SQLFunctions.close(connection);
         }
 
+      } catch (final SQLException e) {
+        throw new RuntimeException(e);
       }
 
       return true;
-    } catch (final SQLException e) {
-      throw new RuntimeException(e);
-    }
+
+    } // lock
   }
+
 }
