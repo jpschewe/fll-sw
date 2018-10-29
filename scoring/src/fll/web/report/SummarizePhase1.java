@@ -23,6 +23,7 @@ import javax.sql.DataSource;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.ScoreStandardization;
+import fll.ScoreStandardization.TooFewScoresException;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.xml.ChallengeDescription;
@@ -40,7 +41,8 @@ public class SummarizePhase1 {
 
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate table name from category")
   public static void populateContext(final ServletContext application,
-                                     final PageContext pageContext) throws IOException, ServletException {
+                                     final PageContext pageContext)
+      throws IOException, ServletException {
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     PreparedStatement getJudges = null;
@@ -55,14 +57,20 @@ public class SummarizePhase1 {
 
       Queries.updateScoreTotals(challengeDescription, connection);
 
-      ScoreStandardization.standardizeSubjectiveScores(connection, challengeDescription, tournament);
+      try {
+        ScoreStandardization.standardizeSubjectiveScores(connection, challengeDescription, tournament);
+      } catch (final TooFewScoresException e) {
+        pageContext.setAttribute("ERROR", e.getMessage());
+        return;
+      }
+      
       ScoreStandardization.summarizeScores(connection, challengeDescription, tournament);
 
       final Collection<JudgeSummary> summary = new LinkedList<JudgeSummary>();
 
       getJudges = connection.prepareStatement("SELECT id, category, station from Judges"
-              + " WHERE Tournament = ?"
-              + " ORDER BY category ASC, station ASC");
+          + " WHERE Tournament = ?"
+          + " ORDER BY category ASC, station ASC");
       getJudges.setInt(1, tournament);
       judges = getJudges.executeQuery();
       while (judges.next()) {
@@ -83,7 +91,8 @@ public class SummarizePhase1 {
         }
 
         getActual = connection.prepareStatement("SELECT COUNT(*)" //
-            + " FROM " + category //
+            + " FROM "
+            + category //
             + " WHERE tournament = ?" //
             + " AND Judge = ?" //
             + " AND ( ComputedTotal IS NOT NULL OR NoShow = true )"//
