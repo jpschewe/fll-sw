@@ -38,7 +38,7 @@ public class MainIndex {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     pageContext.setAttribute("tournamentTitle", description.getTitle());
 
-    pageContext.setAttribute("urls", WebUtils.getAllURLs(request));
+    pageContext.setAttribute("urls", WebUtils.getAllUrls(request, application));
 
     final String baseSslUrl = String.format("https://%s:%d%s", request.getLocalName(), WebUtils.SSL_PORT,
                                             request.getContextPath());
