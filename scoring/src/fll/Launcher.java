@@ -366,12 +366,19 @@ public class Launcher extends JFrame {
   }
 
   private void startWebserver() {
-    if (!checkCertificateStore()) {
-      LOGGER.trace("Creating certificate store");
-      createCertificateStore();
-    }
+    final int result = JOptionPane.showConfirmDialog(this, "Have you connected to the network yet?", "Network Question",
+                                                     JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+    if (JOptionPane.YES_OPTION == result) {
+      if (!checkCertificateStore()) {
+        LOGGER.trace("Creating certificate store");
+        createCertificateStore();
+      }
 
-    controlWebserver(true);
+      controlWebserver(true);
+    } else {
+      JOptionPane.showMessageDialog(this,
+                                    "You should connect to the network first to ensure there aren't issues with SSL later");
+    }
   }
 
   private void stopWebserver() {
