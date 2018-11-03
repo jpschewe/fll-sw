@@ -1,3 +1,4 @@
+* #663 - add the ability to overwrite all subjective scores on upload
 * #667 - provide error message, without stack trace, when there are too few scores for a judging group
 * #666 - do DNS lookups in the background so that the loading of pages isn't slowed down by looking for host names
 * #665 - keep database files out of the release

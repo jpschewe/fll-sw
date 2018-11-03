@@ -51,7 +51,7 @@ import fll.xml.XMLUtils;
 public class SubjectiveScoresTest {
 
   private static final Logger LOGGER = LogUtils.getLogger();
-  
+
   @Before
   public void setUp() {
     LogUtils.initializeLogging();
@@ -68,7 +68,7 @@ public class SubjectiveScoresTest {
    * 
    * @throws SQLException
    * @throws IOException
-   * @throws ParseException 
+   * @throws ParseException
    */
   @Test
   public void testDeleteScores() throws SAXException, SQLException, IOException, ParseException {
@@ -77,7 +77,7 @@ public class SubjectiveScoresTest {
     Assert.assertNotNull(stream);
     final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(stream));
     Assert.assertNotNull(challengeDocument);
-    
+
     final ChallengeDescription challenge = new ChallengeDescription(challengeDocument.getDocumentElement());
 
     final File tempFile = File.createTempFile("flltest", null);
@@ -87,24 +87,24 @@ public class SubjectiveScoresTest {
     final String tournamentName = "test";
     final int teamNumber = 1;
     final String category = "teamwork";
-    final String division= "div";
+    final String division = "div";
     Connection connection = null;
     PreparedStatement prep = null;
     try {
       connection = datasource.getConnection();
 
-      // setup the database with a team and some judges 
+      // setup the database with a team and some judges
       GenerateDB.generateDB(challengeDocument, connection);
       Tournament.createTournament(connection, tournamentName, tournamentName);
       Tournament tournament = Tournament.findTournamentByName(connection, tournamentName);
-      Assert.assertNull(Queries.addTeam(connection, teamNumber, "team" + teamNumber, "org"));  
+      Assert.assertNull(Queries.addTeam(connection, teamNumber, "team"
+          + teamNumber, "org"));
       Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), division, division);
-      
+
       prep = connection.prepareStatement("INSERT INTO Judges (id, category, station, Tournament) VALUES(?, ?, ?, ?)");
       prep.setInt(4, tournament.getTournamentID());
-      for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
-                                                                                  challengeDocument.getDocumentElement()
-                                                                                                    .getElementsByTagName("subjectiveCategory"))) {
+      for (final Element subjectiveElement : new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement()
+                                                                                                   .getElementsByTagName("subjectiveCategory"))) {
         final String categoryName = subjectiveElement.getAttribute("name");
         prep.setString(1, "jon");
         prep.setString(2, categoryName);
@@ -113,46 +113,45 @@ public class SubjectiveScoresTest {
       }
       Queries.setCurrentTournament(connection, tournament.getTournamentID());
 
-
       // create subjective scores document
       final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection);
       final Document scoreDocument = DownloadSubjectiveData.createSubjectiveScoresDocument(challenge,
                                                                                            tournamentTeams.values(),
-                                                                                           connection, tournament.getTournamentID());
+                                                                                           connection,
+                                                                                           tournament.getTournamentID());
       StringWriter testWriter = new StringWriter();
       XMLUtils.writeXML(scoreDocument, testWriter, Utilities.DEFAULT_CHARSET.name());
       LOGGER.info(testWriter.toString());
-      
+
       ScoreCategory scoreCategory = null;
-      for(final ScoreCategory sc : challenge.getSubjectiveCategories()) {
-        if(category.equals(sc.getName())) {
+      for (final ScoreCategory sc : challenge.getSubjectiveCategories()) {
+        if (category.equals(sc.getName())) {
           scoreCategory = sc;
         }
       }
       Assert.assertNotNull(scoreCategory);
 
-      
       // create subjective table model for the category we're going to edit
       final SubjectiveTableModel tableModel = new SubjectiveTableModel(scoreDocument, scoreCategory, null, null);
 
-      
       // enter scores for a team and category
       final int row = 0;
-      for(int goalIdx=0; goalIdx < tableModel.getNumGoals(); ++goalIdx) {
-        final int column = goalIdx + tableModel.getNumColumnsLeftOfScores();
+      for (int goalIdx = 0; goalIdx < tableModel.getNumGoals(); ++goalIdx) {
+        final int column = goalIdx
+            + tableModel.getNumColumnsLeftOfScores();
         tableModel.setValueAt(5, row, column);
       }
 
-      
       // delete the scores for a team and category
-      for(int goalIdx=0; goalIdx < tableModel.getNumGoals(); ++goalIdx) {
-        final int column = goalIdx + tableModel.getNumColumnsLeftOfScores();
+      for (int goalIdx = 0; goalIdx < tableModel.getNumGoals(); ++goalIdx) {
+        final int column = goalIdx
+            + tableModel.getNumColumnsLeftOfScores();
         tableModel.setValueAt(null, row, column);
       }
 
-            
       // upload the scores
-      UploadSubjectiveData.saveSubjectiveData(scoreDocument, tournament.getTournamentID(), challenge, connection);
+      UploadSubjectiveData.saveSubjectiveData(scoreDocument, tournament.getTournamentID(), challenge, connection,
+                                              false);
 
     } finally {
       SQLFunctions.close(prep);
