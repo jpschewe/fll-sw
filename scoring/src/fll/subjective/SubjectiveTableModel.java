@@ -112,7 +112,8 @@ public final class SubjectiveTableModel extends AbstractTableModel {
           + getNumColumnsLeftOfScores()) {
         return "No Show";
       } else if (column == getNumGoals()
-          + getNumColumnsLeftOfScores() + 1) {
+          + getNumColumnsLeftOfScores()
+          + 1) {
         return "Total Score";
       } else {
         return getGoalDescription(column
@@ -145,7 +146,8 @@ public final class SubjectiveTableModel extends AbstractTableModel {
         // No Show
         return Boolean.class;
       } else if (column == getNumGoals()
-          + getNumColumnsLeftOfScores() + 1) {
+          + getNumColumnsLeftOfScores()
+          + 1) {
         // Total Score
         return Double.class;
       } else {
@@ -168,14 +170,16 @@ public final class SubjectiveTableModel extends AbstractTableModel {
 
   public int getColumnCount() {
     return getNumColumnsLeftOfScores()
-        + getNumGoals() + 2;
+        + getNumGoals()
+        + 2;
   }
 
   public Object getValueAt(final int row,
                            final int column) {
     try {
       final Element scoreEle = getScoreElement(row);
-      final int teamNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(scoreEle.getAttribute("teamNumber")).intValue();
+      final int teamNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(scoreEle.getAttribute("teamNumber"))
+                                                                     .intValue();
       switch (column) {
       case 0:
         if (scoreEle.hasAttribute("teamNumber")) {
@@ -198,21 +202,28 @@ public final class SubjectiveTableModel extends AbstractTableModel {
       case 5:
         if (null != _schedule) {
           final TeamScheduleInfo schedInfo = _schedule.getSchedInfoForTeam(teamNumber);
-          final String categoryName = _subjectiveCategory.getName();
-          final String schedColumn = getSchedColumnForCategory(categoryName);
-          final SubjectiveTime subjTime = schedInfo.getSubjectiveTimeByName(schedColumn);
-          if (null != subjTime) {
-            return subjTime.getTime();
-          } else {
+          if (null == schedInfo) {
             return null;
+          } else {
+            final String categoryName = _subjectiveCategory.getName();
+            final String schedColumn = getSchedColumnForCategory(categoryName);
+            final SubjectiveTime subjTime = schedInfo.getSubjectiveTimeByName(schedColumn);
+            if (null != subjTime) {
+              return subjTime.getTime();
+            } else {
+              return null;
+            }
           }
+        } else {
+          return null;
         }
       default:
         if (column == getNumGoals()
             + getNumColumnsLeftOfScores()) {
           return Boolean.valueOf(scoreEle.getAttribute("NoShow"));
         } else if (column == getNumGoals()
-            + getNumColumnsLeftOfScores() + 1) {
+            + getNumColumnsLeftOfScores()
+            + 1) {
           if (Boolean.valueOf(scoreEle.getAttribute("NoShow"))) {
             return (double) 0;
           } else {
@@ -301,7 +312,8 @@ public final class SubjectiveTableModel extends AbstractTableModel {
         // No Show
         return true;
       } else if (column == getNumGoals()
-          + getNumColumnsLeftOfScores() + 1) {
+          + getNumColumnsLeftOfScores()
+          + 1) {
         // Total Score
         return false;
       } else {
@@ -361,7 +373,8 @@ public final class SubjectiveTableModel extends AbstractTableModel {
         error = true;
       }
     } else if (value != null
-        && !"".equals(value) && Boolean.parseBoolean(element.getAttribute("NoShow"))) {
+        && !"".equals(value)
+        && Boolean.parseBoolean(element.getAttribute("NoShow"))) {
       // don't allow changes to rows with NoShow set to true, but allow the
       // scores to be set to null
       error = true;
