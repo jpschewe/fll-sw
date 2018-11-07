@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <fll title="2018 Minnesota FIRST LEGO League - Into Orbit"
 	copyright="2018 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST) and The LEGO Group. Used by special permission. All rights reserved."
-	revision="9" schemaVersion="2">
+	revision="10" schemaVersion="2">
 
 	<Performance minimumScore="0" weight="1">
 
@@ -154,14 +154,48 @@
 			initialValue="0" min="0" max="6" multiplier="-3" />
 
 
-		<tiebreaker>
-			<test winner="LOW">
-				<term>
-					<goalRef goal="penalties" scoreType="raw" />
-				</term>
-			</test>
+	<tiebreaker>
+	<test winner="HIGH">
+		<term>
+			<goalRef goal="m14_meteroid_deflection_center"
+				scoreType="raw"></goalRef>
+		</term>
+		<term>
+			<goalRef goal="m14_meteroid_deflection_side" scoreType="raw"></goalRef>
+		</term>
+	</test>
 
-		</tiebreaker>
+	<test winner="HIGH">
+		<term>
+			<goalRef goal="m12_satellite_orbits" scoreType="raw"></goalRef>
+		</term>
+	</test>
+
+	<test winner="HIGH">
+		<term>
+			<goalRef goal="m01_vehicle_payload" scoreType="raw"></goalRef>
+		</term>
+		<term>
+			<goalRef goal="m01_supply_payload" scoreType="raw"></goalRef>
+		</term>
+		<term>
+			<goalRef goal="m01_crew_payload" scoreType="raw"></goalRef>
+		</term>
+	</test>
+
+	<test winner="HIGH">
+		<term>
+			<goalRef goal="m03_3d_printing" scoreType="computed"></goalRef>
+		</term>
+		<term>
+			<goalRef goal="m05_extraction_gas" scoreType="computed"></goalRef>
+		</term>
+		<term>
+			<goalRef goal="m05_extraction_water" scoreType="raw"></goalRef>
+		</term>
+	</test>
+
+</tiebreaker>
 	</Performance>
 
 
