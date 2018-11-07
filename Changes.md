@@ -1,3 +1,6 @@
+Release 13.1.1
+==============
+
 * Add tie breakers to the 2018 challenge description
 * #668 support adding a team that's not in the schedule and still being able to edit their subjective scores
 
