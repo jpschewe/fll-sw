@@ -11,14 +11,19 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Desktop;
 import java.awt.FlowLayout;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.Window;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,10 +31,13 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateParsingException;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -133,6 +141,7 @@ public class Launcher extends JFrame {
   public Launcher() {
     super();
     setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+    setApplicationIcon(this);
 
     final Container cpane = getContentPane();
     cpane.setLayout(new BorderLayout());
@@ -297,6 +306,8 @@ public class Launcher extends JFrame {
     } else {
       try {
         scheduler = new SchedulerUI();
+        setApplicationIcon(scheduler);
+        
         scheduler.addWindowListener(new WindowAdapter() {
           @Override
           public void windowClosing(final WindowEvent e) {
@@ -334,6 +345,7 @@ public class Launcher extends JFrame {
     } else {
       try {
         subjective = new SubjectiveFrame();
+        setApplicationIcon(subjective);
 
         subjective.addWindowListener(new WindowAdapter() {
           @Override
@@ -634,6 +646,31 @@ public class Launcher extends JFrame {
       }
     }
     return null;
+  }
+
+  private static void setApplicationIcon(final Window window) {
+    try {
+      // get images from small to large
+      final URL imageURL = Launcher.class.getResource("/fll/resources/fll-sw.png");
+      final BufferedImage original = ImageIO.read(imageURL);
+
+      final List<BufferedImage> images = new LinkedList<>();
+      for (final int size : new int[] { 8, 16, 32, 64, 128, 256, 512, 1024 }) {
+        final double scaleWidth = (double) size
+            / original.getWidth();
+        final double scaleHeight = (double) size
+            / original.getHeight();
+
+        final BufferedImage scaled = new BufferedImage(size, size, original.getType());
+        final Graphics2D scaledGraphics = scaled.createGraphics();
+        final AffineTransform transform = AffineTransform.getScaleInstance(scaleWidth, scaleHeight);
+        scaledGraphics.drawRenderedImage(original, transform);
+        images.add(scaled);
+      }
+      window.setIconImages(images);
+    } catch (final IOException e) {
+      LOGGER.error("Unable to get application icon, not setting icon", e);
+    }
   }
 
 }
