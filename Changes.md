@@ -1,3 +1,6 @@
+* #669 Keep the launcher from running twice
+
+
 Release 13.1.1
 ==============
 
