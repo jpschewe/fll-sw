@@ -40,7 +40,7 @@ public class MainIndex {
 
     pageContext.setAttribute("urls", WebUtils.getAllUrls(request, application));
 
-    final String baseSslUrl = String.format("https://%s:%d%s", request.getLocalName(), WebUtils.SSL_PORT,
+    final String baseSslUrl = String.format("https://%s:%d%s", request.getServerName(), WebUtils.SSL_PORT,
                                             request.getContextPath());
     pageContext.setAttribute("baseSslUrl", baseSslUrl);
   }
