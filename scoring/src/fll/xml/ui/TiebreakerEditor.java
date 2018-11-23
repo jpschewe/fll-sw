@@ -8,30 +8,50 @@ package fll.xml.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import org.apache.log4j.Logger;
+
+import fll.Utilities;
+import fll.util.LogUtils;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.TiebreakerTest;
+import fll.xml.ui.MovableExpandablePanel.DeleteEvent;
+import fll.xml.ui.MovableExpandablePanel.DeleteEventListener;
+import fll.xml.ui.MovableExpandablePanel.MoveEvent;
+import fll.xml.ui.MovableExpandablePanel.MoveEvent.MoveDirection;
+import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 
 /**
  * Edit the list of {@link TiebreakerTest} objects on the
  * {@link PerformanceScoreCategory}.
  */
-public class TiebreakerEditor extends JPanel {
+/* package */ class TiebreakerEditor extends JPanel {
+
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   private final JComponent editorContainer;
 
   private final PerformanceScoreCategory performance;
 
   private final List<TiebreakerTestEditor> editors = new LinkedList<>();
+
+  private final Map<TiebreakerTestEditor, MovableExpandablePanel> exPanels = new HashMap<>();
+
+  private final MoveEventListener moveListener;
+
+  private final DeleteEventListener deleteListener;
 
   public TiebreakerEditor(@Nonnull final PerformanceScoreCategory performance) {
     super(new BorderLayout());
@@ -57,7 +77,94 @@ public class TiebreakerEditor extends JPanel {
     final MovableExpandablePanel exPanel = new MovableExpandablePanel("Tie breakers", expansion, false, false);
     add(exPanel, BorderLayout.CENTER);
 
+    moveListener = new MoveEventListener() {
+
+      @Override
+      public void requestedMove(final MoveEvent e) {
+        final int oldIndex = Utilities.getIndexOfComponent(editorContainer, e.getComponent());
+        if (oldIndex < 0) {
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Unable to find source of move event in statement container");
+          }
+          return;
+        }
+
+        final int newIndex;
+        if (e.getDirection() == MoveDirection.DOWN) {
+          newIndex = oldIndex
+              + 1;
+        } else {
+          newIndex = oldIndex
+              - 1;
+        }
+
+        if (newIndex < 0
+            || newIndex >= editorContainer.getComponentCount()) {
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Can't move component outside the container oldIndex: "
+                + oldIndex
+                + " newIndex: "
+                + newIndex);
+          }
+          return;
+        }
+
+        // update editor list
+        final TiebreakerTestEditor editor = editors.remove(oldIndex);
+        editors.add(newIndex, editor);
+
+        // update the UI
+        editorContainer.add(e.getComponent(), newIndex);
+        editorContainer.validate();
+        updateTitles();
+      }
+    };
+
+    deleteListener = new DeleteEventListener() {
+
+      @Override
+      public void requestDelete(final DeleteEvent e) {
+        final int confirm = JOptionPane.showConfirmDialog(TiebreakerEditor.this,
+                                                          "Are you sure that you want to delete the tie breaker?",
+                                                          "Confirm Delete", JOptionPane.YES_NO_OPTION);
+        if (confirm != JOptionPane.YES_OPTION) {
+          return;
+        }
+
+        final int index = Utilities.getIndexOfComponent(editorContainer, e.getComponent());
+        if (index < 0) {
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Unable to find source of delete event in tiebreaker container");
+          }
+          return;
+        }
+
+        // update editor list
+        final TiebreakerTestEditor editor = editors.get(index);
+        editors.remove(index);
+        exPanels.remove(editor);
+
+        // update the UI
+        GuiUtils.removeFromContainer(editorContainer, index);
+        updateTitles();
+      }
+    };
+
     performance.getTiebreaker().forEach(this::addTest);
+  }
+
+  private static final String TITLE_FORMAT = "Tiebreaker %d";
+
+  private void updateTitles() {
+    int index = 0;
+    for (final TiebreakerTestEditor editor : editors) {
+      final String title = String.format(TITLE_FORMAT, index
+          + 1);
+      final MovableExpandablePanel panel = exPanels.get(editor);
+      panel.setTitle(title);
+
+      ++index;
+    }
   }
 
   private void addNewTest() {
@@ -69,16 +176,12 @@ public class TiebreakerEditor extends JPanel {
     final TiebreakerTestEditor editor = new TiebreakerTestEditor(test, performance);
     editors.add(editor);
 
-    final JPanel panel = new JPanel(new BorderLayout());
-    panel.add(editor, BorderLayout.CENTER);
+    final MovableExpandablePanel panel = new MovableExpandablePanel(String.format(TITLE_FORMAT, editors.size()), editor,
+                                                                    true, true);
+    exPanels.put(editor, panel);
 
-    final JButton delete = new JButton("Delete Tiebreaker");
-    panel.add(delete, BorderLayout.EAST);
-
-    delete.addActionListener(e -> {
-      editors.remove(editor);
-      GuiUtils.removeFromContainer(editorContainer, panel);
-    });
+    panel.addDeleteEventListener(deleteListener);
+    panel.addMoveEventListener(moveListener);
 
     panel.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.BLACK));
     GuiUtils.addToContainer(editorContainer, panel);
