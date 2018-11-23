@@ -25,6 +25,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import fll.Utilities;
@@ -42,7 +43,7 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 /**
  * Editor for {@link ChallengeDescription} objects.
  */
-public class ChallengeDescriptionEditor extends JPanel {
+public class ChallengeDescriptionEditor extends JPanel implements Validatable {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -73,6 +74,8 @@ public class ChallengeDescriptionEditor extends JPanel {
 
   private final DeleteEventListener mSubjectiveDeleteListener;
 
+  private final ValidityPanel titleValidity;
+
   public ChallengeDescriptionEditor(@Nonnull final ChallengeDescription description) {
     super(new BorderLayout());
     this.mDescription = description;
@@ -85,10 +88,26 @@ public class ChallengeDescriptionEditor extends JPanel {
     final JPanel challengePanel = new JPanel(new GridBagLayout());
     topPanel.add(challengePanel);
 
-    GridBagConstraints gbc = new GridBagConstraints();
+    GridBagConstraints gbc;
+
+    final JPanel titleBox = new JPanel(new GridBagLayout());
+    titleValidity = new ValidityPanel();
+    gbc = new GridBagConstraints();
+    gbc.weightx = 1;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+    titleBox.add(titleValidity, gbc);
+
+    gbc = new GridBagConstraints();
     gbc.weightx = 0;
     gbc.anchor = GridBagConstraints.FIRST_LINE_END;
-    challengePanel.add(new JLabel("Title: "), gbc);
+    titleBox.add(new JLabel("Title: "), gbc);
+    
+    
+    gbc = new GridBagConstraints();
+    gbc.weightx = 0;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_END;
+    challengePanel.add(titleBox, gbc);
 
     mTitleEditor = FormatterUtils.createStringField();
     gbc = new GridBagConstraints();
@@ -97,7 +116,7 @@ public class ChallengeDescriptionEditor extends JPanel {
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     challengePanel.add(mTitleEditor, gbc);
-    
+
     mTitleEditor.addPropertyChangeListener("value", e -> {
       if (null != mDescription) {
         mDescription.setTitle(mTitleEditor.getText());
@@ -106,7 +125,7 @@ public class ChallengeDescriptionEditor extends JPanel {
 
     mTitleEditor.setColumns(80);
     mTitleEditor.setMaximumSize(mTitleEditor.getPreferredSize());
-    mTitleEditor.setValue(mDescription.getTitle());                                                                                   
+    mTitleEditor.setValue(mDescription.getTitle());
 
     gbc = new GridBagConstraints();
     gbc.weightx = 0;
@@ -129,7 +148,7 @@ public class ChallengeDescriptionEditor extends JPanel {
 
     mRevisionEditor.setColumns(20);
     mRevisionEditor.setMaximumSize(mRevisionEditor.getPreferredSize());
-    mRevisionEditor.setValue(mDescription.getRevision());                                                                             
+    mRevisionEditor.setValue(mDescription.getRevision());
 
     gbc = new GridBagConstraints();
     gbc.weightx = 0;
@@ -152,7 +171,7 @@ public class ChallengeDescriptionEditor extends JPanel {
 
     mCopyrightEditor.setColumns(80);
     mCopyrightEditor.setMaximumSize(mCopyrightEditor.getPreferredSize());
-    mCopyrightEditor.setValue(mDescription.getCopyright());                                                                           
+    mCopyrightEditor.setValue(mDescription.getCopyright());
 
     gbc = new GridBagConstraints();
     gbc.weightx = 0;
@@ -173,7 +192,7 @@ public class ChallengeDescriptionEditor extends JPanel {
         mDescription.setWinner(winner);
       }
     });
-    mWinnerEditor.setSelectedItem(mDescription.getWinner());      
+    mWinnerEditor.setSelectedItem(mDescription.getWinner());
 
     // child elements of the challenge description
     mPerformanceEditor = new PerformanceEditor(mDescription.getPerformance());
@@ -340,6 +359,22 @@ public class ChallengeDescriptionEditor extends JPanel {
 
     mPerformanceEditor.commitChanges();
     mSubjectiveEditors.forEach(e -> e.commitChanges());
+  }
+
+  @Override
+  public boolean checkValidity() {
+    commitChanges();
+    
+    boolean valid = true;
+
+    if (StringUtils.isBlank(mTitleEditor.getText())) {
+      titleValidity.setInvalid("The challenge must have a title");
+      valid = false;
+    } else {
+      titleValidity.setValid();
+    }
+
+    return valid;
   }
 
 }

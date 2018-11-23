@@ -175,6 +175,8 @@ public class ChallengeDescriptionFrame extends JFrame {
     menu.add(mSaveAction);
     menu.add(mSaveAsAction);
 
+    menu.add(validateAction);
+
     menu.addSeparator();
 
     menu.add(mExitAction);
@@ -353,6 +355,33 @@ public class ChallengeDescriptionFrame extends JFrame {
     }
   };
 
+  private final Action validateAction = new AbstractAction("Validate") {
+    {
+      // putValue(SMALL_ICON,
+      // GraphicsUtils.getIcon("toolbarButtonGraphics/general/SaveAs16.gif"));
+      // putValue(LARGE_ICON_KEY,
+      // GraphicsUtils.getIcon("toolbarButtonGraphics/general/SaveAs24.gif"));
+      putValue(SHORT_DESCRIPTION, "Check the challenge for validity");
+    }
+
+    @Override
+    public void actionPerformed(final ActionEvent ae) {
+      validateChallengeDescription();
+
+    }
+  };
+
+  private boolean validateChallengeDescription() {
+    final boolean valid = editor.checkValidity();
+    if (!valid) {
+      JOptionPane.showMessageDialog(null,
+                                    "Some part of the challenge is invalid, look for red boxes to identify the issues",
+                                    "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    return valid;
+  }
+
   private static final Preferences PREFS = Preferences.userNodeForPackage(ChallengeDescriptionEditor.class);
 
   private static final String DESCRIPTION_STARTING_DIRECTORY_PREF = "descriptionStartingDirectory";
@@ -368,6 +397,11 @@ public class ChallengeDescriptionFrame extends JFrame {
     }
 
     editor.commitChanges();
+
+    final boolean valid = validateChallengeDescription();
+    if (!valid) {
+      return;
+    }
 
     try (final Writer writer = new FileWriter(mCurrentFile)) {
       final Document saveDoc = editor.getDescription().toXml();
@@ -387,6 +421,11 @@ public class ChallengeDescriptionFrame extends JFrame {
    */
   private void saveAsChallengeDescription() {
     editor.commitChanges();
+
+    final boolean valid = validateChallengeDescription();
+    if (!valid) {
+      return;
+    }
 
     final String startingDirectory = PREFS.get(DESCRIPTION_STARTING_DIRECTORY_PREF, null);
 
