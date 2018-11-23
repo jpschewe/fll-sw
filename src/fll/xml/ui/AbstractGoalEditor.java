@@ -14,6 +14,7 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import fll.util.FormatterUtils;
@@ -26,7 +27,7 @@ import fll.xml.AbstractGoal;
  * Fires property change "title" when the title changes. This allows the
  * container to update it's title. The type of this property is {@link String}.
  */
-/* package */ abstract class AbstractGoalEditor extends JPanel {
+/* package */ abstract class AbstractGoalEditor extends JPanel implements Validatable {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -38,16 +39,33 @@ import fll.xml.AbstractGoal;
 
   private final JFormattedTextField mCategoryEditor;
 
+  private final ValidityPanel nameValid;
+
+  private final ValidityPanel titleValid;
+
   public AbstractGoalEditor(final AbstractGoal goal) {
     super(new GridBagLayout());
     mGoal = goal;
 
     GridBagConstraints gbc;
 
+    final JPanel titleBox = new JPanel(new GridBagLayout());
     gbc = new GridBagConstraints();
     gbc.weightx = 0;
     gbc.anchor = GridBagConstraints.FIRST_LINE_END;
-    add(new JLabel("Title: "), gbc);
+    add(titleBox, gbc);
+
+    titleValid = new ValidityPanel();
+    gbc = new GridBagConstraints();
+    gbc.weightx = 1;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+    titleBox.add(titleValid, gbc);
+
+    gbc = new GridBagConstraints();
+    gbc.weightx = 0;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_END;
+    titleBox.add(new JLabel("Title: "), gbc);
 
     mTitleEditor = FormatterUtils.createStringField();
     gbc = new GridBagConstraints();
@@ -68,10 +86,23 @@ import fll.xml.AbstractGoal;
     mTitleEditor.setColumns(80);
     mTitleEditor.setMaximumSize(mTitleEditor.getPreferredSize());
 
+    final JPanel nameBox = new JPanel(new GridBagLayout());
     gbc = new GridBagConstraints();
     gbc.weightx = 0;
     gbc.anchor = GridBagConstraints.FIRST_LINE_END;
-    add(new JLabel("Name: "), gbc);
+    add(nameBox, gbc);
+
+    nameValid = new ValidityPanel();
+    gbc = new GridBagConstraints();
+    gbc.weightx = 1;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+    nameBox.add(nameValid, gbc);
+
+    gbc = new GridBagConstraints();
+    gbc.weightx = 0;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_END;
+    nameBox.add(new JLabel("Name: "), gbc);
 
     mNameEditor = FormatterUtils.createDatabaseNameField();
     gbc = new GridBagConstraints();
@@ -163,6 +194,27 @@ import fll.xml.AbstractGoal;
    */
   public AbstractGoal getGoal() {
     return mGoal;
+  }
+
+  @Override
+  public boolean checkValidity() {
+    boolean valid = true;
+
+    if (StringUtils.isBlank(mTitleEditor.getText())) {
+      titleValid.setInvalid("The goal must have a title");
+      valid = false;
+    } else {
+      titleValid.setValid();
+    }
+
+    if (StringUtils.isBlank(mNameEditor.getText())) {
+      nameValid.setInvalid("The goal must have a name");
+      valid = false;
+    } else {
+      nameValid.setValid();
+    }
+
+    return valid;
   }
 
 }
