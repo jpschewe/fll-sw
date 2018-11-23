@@ -1,3 +1,6 @@
+Release 13.2.0
+==============
+
 * #494 - add application icon to get rid of the default Java icon
 * #669 Keep the launcher from running twice
 * #671 - Ensure that the link to the SSL web page uses the host name that the user visited 
