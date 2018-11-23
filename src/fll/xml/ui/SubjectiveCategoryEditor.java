@@ -12,6 +12,7 @@ import javax.swing.Box;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import fll.util.FormatterUtils;
@@ -31,12 +32,22 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
 
   private final SubjectiveScoreCategory mSubjectiveCategory;
 
+  private final ValidityPanel nameValid;
+
+  private final ValidityPanel titleValid;
+
   public SubjectiveCategoryEditor(final SubjectiveScoreCategory category) {
     super(category);
     mSubjectiveCategory = category;
 
     final Box titleContainer = Box.createHorizontalBox();
-    add(titleContainer, 0);
+    add(titleContainer, 1); // add at particular index to get above weight
+
+    titleValid = new ValidityPanel();
+    titleContainer.add(titleValid);
+    titleValid.setPreferredSize(titleValid.getMinimumSize());
+    titleValid.setMaximumSize(titleValid.getMinimumSize());
+
     titleContainer.add(new JLabel("Title: "));
 
     mTitleEditor = FormatterUtils.createStringField();
@@ -56,7 +67,13 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
     titleContainer.add(Box.createHorizontalGlue());
 
     final Box nameContainer = Box.createHorizontalBox();
-    add(nameContainer, 1);
+    add(nameContainer, 2); // add at particular index to get above weight
+
+    nameValid = new ValidityPanel();
+    nameContainer.add(nameValid);
+    nameValid.setPreferredSize(nameValid.getMinimumSize());
+    nameValid.setMaximumSize(nameValid.getMinimumSize());
+
     nameContainer.add(new JLabel("Name: "));
 
     mNameEditor = FormatterUtils.createDatabaseNameField();
@@ -105,6 +122,27 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
   protected void fireTitleChange(final String oldTitle,
                                  final String newTitle) {
     firePropertyChange("title", oldTitle, newTitle);
+  }
+
+  @Override
+  public boolean checkValidity() {
+    boolean valid = super.checkValidity();
+
+    if (StringUtils.isBlank(mTitleEditor.getText())) {
+      titleValid.setInvalid("The category must have a title");
+      valid = false;
+    } else {
+      titleValid.setValid();
+    }
+
+    if (StringUtils.isBlank(mNameEditor.getText())) {
+      nameValid.setInvalid("The category must have a name");
+      valid = false;
+    } else {
+      nameValid.setValid();
+    }
+
+    return valid;
   }
 
 }

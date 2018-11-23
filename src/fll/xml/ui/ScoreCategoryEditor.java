@@ -7,8 +7,10 @@
 package fll.xml.ui;
 
 import java.text.ParseException;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -38,7 +40,7 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 /**
  * Editor for {@link ScoreCategory} objects.
  */
-public abstract class ScoreCategoryEditor extends JPanel {
+public abstract class ScoreCategoryEditor extends JPanel implements Validatable {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -54,10 +56,14 @@ public abstract class ScoreCategoryEditor extends JPanel {
 
   private final DeleteEventListener mGoalDeleteListener;
 
+  private final ValidityPanel goalNamesUnique;
+
   public ScoreCategoryEditor(final ScoreCategory scoreCategory) {
     mCategory = scoreCategory;
-
     setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+
+    goalNamesUnique = new ValidityPanel();
+    add(goalNamesUnique);
 
     final Box weightContainer = Box.createHorizontalBox();
     add(weightContainer);
@@ -238,6 +244,30 @@ public abstract class ScoreCategoryEditor extends JPanel {
     }
 
     mGoalEditors.forEach(e -> e.commitChanges());
+  }
+
+  @Override
+  public boolean checkValidity() {
+    boolean valid = true;
+
+    final List<String> duplicateGoalNames = new LinkedList<>();
+    final Set<String> goalNames = new HashSet<>();
+    for (final AbstractGoalEditor editor : mGoalEditors) {
+      final String name = editor.getGoal().getName();
+      final boolean newName = goalNames.add(name);
+      if (!newName) {
+        duplicateGoalNames.add(String.format("Goal names must be unique in a category, the name \"%s\" is used more than once",
+                                             name));
+      }
+    }
+    if (!duplicateGoalNames.isEmpty()) {
+      final String message = String.join("\n", duplicateGoalNames);
+      goalNamesUnique.setInvalid(message);
+    } else {
+      goalNamesUnique.setValid();
+    }
+
+    return valid;
   }
 
 }
