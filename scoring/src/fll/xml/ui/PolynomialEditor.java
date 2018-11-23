@@ -59,7 +59,7 @@ import fll.xml.VariableScope;
     final JButton addTerm = new JButton("Add Term");
     buttonBar.add(addTerm);
     addTerm.addActionListener(e -> {
-      addTerm(new Term());
+      addNewTerm();
     });
 
     buttonBar.add(Box.createHorizontalGlue());
@@ -75,6 +75,12 @@ import fll.xml.VariableScope;
     floatingPointType.setSelectedItem(FloatingPointType.TRUNCATE);
     this.add(floatingPointType);
     floatingPointType.setToolTipText("How to handle floating point values");
+  }
+  
+  private void addNewTerm() {
+    final Term term = new Term();
+    poly.addTerm(term);
+    addTerm(term);
   }
 
   private void addTerm(final Term term) {
@@ -100,7 +106,7 @@ import fll.xml.VariableScope;
 
     final TermEditor editor = new TermEditor(term, goalScope, variableScope);
     termBox.add(editor);
-
+    
     GuiUtils.addToContainer(termsContainer, termContainer);
   }
 
