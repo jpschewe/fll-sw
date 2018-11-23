@@ -61,7 +61,7 @@ public class TiebreakerEditor extends JPanel {
   }
 
   private void addNewTest() {
-    final TiebreakerTest test = new TiebreakerTest(performance);
+    final TiebreakerTest test = new TiebreakerTest();
     addTest(test);
   }
 

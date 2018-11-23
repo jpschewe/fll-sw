@@ -62,7 +62,7 @@ public class RestrictionListEditor extends JPanel {
   }
 
   private void addNewRestriction() {
-    final Restriction test = new Restriction(performance);
+    final Restriction test = new Restriction();
     addRestriction(test);
   }
 
