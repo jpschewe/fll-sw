@@ -74,12 +74,12 @@ public class RubricEditor extends JPanel {
     panel.add(delete, BorderLayout.EAST);
 
     delete.addActionListener(e -> {
-      rangeList.remove(panel);
+      GuiUtils.removeFromContainer(rangeList, panel);
       rangeEditors.remove(editor);
     });
 
     panel.setBorder(BorderFactory.createMatteBorder(1, 0, 1, 0, Color.BLACK));
-    rangeList.add(panel);
+    GuiUtils.addToContainer(rangeList, panel);
   }
 
   public void commitChanges() {

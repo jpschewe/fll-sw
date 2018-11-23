@@ -60,7 +60,6 @@ import fll.xml.VariableScope;
     buttonBar.add(addTerm);
     addTerm.addActionListener(e -> {
       addTerm(new Term());
-      PolynomialEditor.this.validate();
     });
 
     buttonBar.add(Box.createHorizontalGlue());
@@ -80,7 +79,6 @@ import fll.xml.VariableScope;
 
   private void addTerm(final Term term) {
     final Box termContainer = Box.createVerticalBox();
-    termsContainer.add(termContainer);
 
     final Box buttonBar = Box.createHorizontalBox();
     termContainer.add(buttonBar);
@@ -89,8 +87,8 @@ import fll.xml.VariableScope;
     final JButton delete = new JButton("Delete Term");
     buttonBar.add(delete);
     delete.addActionListener(l -> {
-      termsContainer.remove(termContainer);
       poly.removeTerm(term);
+      GuiUtils.removeFromContainer(termsContainer, termContainer);
     });
 
     buttonBar.add(Box.createHorizontalGlue());
@@ -102,6 +100,8 @@ import fll.xml.VariableScope;
 
     final TermEditor editor = new TermEditor(term, goalScope, variableScope);
     termBox.add(editor);
+
+    GuiUtils.addToContainer(termsContainer, termContainer);
   }
 
 }

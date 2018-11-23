@@ -148,8 +148,7 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
         switchStmt.removeCase(index);
 
         // update the UI
-        stmtContainer.remove(index);
-        stmtContainer.validate();
+        GuiUtils.removeFromContainer(stmtContainer, index);
       }
     };
 
@@ -166,7 +165,7 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
   private void addCaseStatement(final CaseStatement stmt) {
     final CaseStatementEditor editor = new CaseStatementEditor(stmt, goalScope, variableScope);
     final MovableExpandablePanel exPanel = new MovableExpandablePanel("If/then", editor, true, true);
-    stmtContainer.add(exPanel);
+    GuiUtils.addToContainer(stmtContainer, exPanel);
 
     exPanel.addMoveEventListener(mCaseMoveListener);
     exPanel.addDeleteEventListener(mCaseDeleteListener);
