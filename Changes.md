@@ -1,3 +1,5 @@
+* #494 - add application icon to get rid of the default Java icon
+
 Release 13.1.1
 ==============
 
