@@ -196,11 +196,18 @@ public class ChallengeDescriptionFrame extends JFrame {
 
     @Override
     public void actionPerformed(final ActionEvent ae) {
-      // FIXME prompt for saving of existing file
-
+      promptForSaveOfCurrentDescription();
       openChallengeDescription();
     }
   };
+
+  private void promptForSaveOfCurrentDescription() {
+    final int result = JOptionPane.showConfirmDialog(this, "Do you want to save the current challenge description?",
+                                                     "Overwrite file?", JOptionPane.YES_NO_OPTION);
+    if (result == JOptionPane.YES_OPTION) {
+      saveChallengeDescription();
+    }
+  }
 
   private final Action mNewAction = new AbstractAction("New") {
     {
@@ -213,8 +220,7 @@ public class ChallengeDescriptionFrame extends JFrame {
 
     @Override
     public void actionPerformed(final ActionEvent ae) {
-      // FIXME prompt for saving of existing file
-
+      promptForSaveOfCurrentDescription();
       setCurrentFile(null, null);
     }
   };
