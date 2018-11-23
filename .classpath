@@ -105,5 +105,7 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="scoring/lib/hsqldb-2.4.1.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/durian-core-1.1.0.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/junique-1.0.4.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/apache-log4j-extras-1.2.17.jar"/>
 	<classpathentry kind="output" path="scoring/bin/"/>
 </classpath>
