@@ -107,7 +107,7 @@ public class VariableListEditor extends JPanel {
 
   private void addNewVariable() {
     final String name = String.format("Variable %d", editorContainer.getComponentCount());
-    final Variable var = new Variable(name, this.goal.getGoalScope());
+    final Variable var = new Variable(name);
     this.goal.addVariable(var);
 
     addVariable(var);
