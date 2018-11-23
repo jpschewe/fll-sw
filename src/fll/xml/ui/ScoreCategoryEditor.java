@@ -56,14 +56,14 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
 
   private final DeleteEventListener mGoalDeleteListener;
 
-  private final ValidityPanel goalNamesUnique;
+  private final ValidityPanel categoryValid;
 
   public ScoreCategoryEditor(final ScoreCategory scoreCategory) {
     mCategory = scoreCategory;
     setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 
-    goalNamesUnique = new ValidityPanel();
-    add(goalNamesUnique);
+    categoryValid = new ValidityPanel();
+    add(categoryValid);
 
     final Box weightContainer = Box.createHorizontalBox();
     add(weightContainer);
@@ -250,21 +250,28 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
   public boolean checkValidity() {
     boolean valid = true;
 
-    final List<String> duplicateGoalNames = new LinkedList<>();
+    final List<String> invalidMessages = new LinkedList<>();
     final Set<String> goalNames = new HashSet<>();
     for (final AbstractGoalEditor editor : mGoalEditors) {
       final String name = editor.getGoal().getName();
+
+      final boolean editorValid = editor.checkValidity();
+      if (!editorValid) {
+        invalidMessages.add(String.format("Goal \"%s\" has invalid elements", name));
+        valid = false;
+      }
+
       final boolean newName = goalNames.add(name);
       if (!newName) {
-        duplicateGoalNames.add(String.format("Goal names must be unique in a category, the name \"%s\" is used more than once",
-                                             name));
+        invalidMessages.add(String.format("Goal names must be unique in a category, the name \"%s\" is used more than once",
+                                          name));
       }
     }
-    if (!duplicateGoalNames.isEmpty()) {
-      final String message = String.join("\n", duplicateGoalNames);
-      goalNamesUnique.setInvalid(message);
+    if (!invalidMessages.isEmpty()) {
+      final String message = String.join("\n", invalidMessages);
+      categoryValid.setInvalid(message);
     } else {
-      goalNamesUnique.setValid();
+      categoryValid.setValid();
     }
 
     return valid;

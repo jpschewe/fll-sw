@@ -78,7 +78,9 @@ public class ChallengeDescriptionEditor extends JPanel implements Validatable {
 
   private final ValidityPanel titleValidity;
 
-  private final ValidityPanel subjectiveNamesUnique;
+  private final ValidityPanel performanceValid;
+
+  private final ValidityPanel subjectiveValid;
 
   public ChallengeDescriptionEditor(@Nonnull final ChallengeDescription description) {
     super(new BorderLayout());
@@ -95,6 +97,11 @@ public class ChallengeDescriptionEditor extends JPanel implements Validatable {
     GridBagConstraints gbc;
 
     final JPanel titleBox = new JPanel(new GridBagLayout());
+    gbc = new GridBagConstraints();
+    gbc.weightx = 0;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_END;
+    challengePanel.add(titleBox, gbc);
+
     titleValidity = new ValidityPanel();
     gbc = new GridBagConstraints();
     gbc.weightx = 1;
@@ -106,11 +113,6 @@ public class ChallengeDescriptionEditor extends JPanel implements Validatable {
     gbc.weightx = 0;
     gbc.anchor = GridBagConstraints.FIRST_LINE_END;
     titleBox.add(new JLabel("Title: "), gbc);
-
-    gbc = new GridBagConstraints();
-    gbc.weightx = 0;
-    gbc.anchor = GridBagConstraints.FIRST_LINE_END;
-    challengePanel.add(titleBox, gbc);
 
     mTitleEditor = FormatterUtils.createStringField();
     gbc = new GridBagConstraints();
@@ -198,18 +200,24 @@ public class ChallengeDescriptionEditor extends JPanel implements Validatable {
     mWinnerEditor.setSelectedItem(mDescription.getWinner());
 
     // child elements of the challenge description
+    final JPanel performanceBox = new JPanel(new BorderLayout());
+    topPanel.add(performanceBox);
+
+    performanceValid = new ValidityPanel();
+    performanceBox.add(performanceValid, BorderLayout.WEST);
+
     mPerformanceEditor = new PerformanceEditor(mDescription.getPerformance());
     mPerformanceEditor.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
     final MovableExpandablePanel performance = new MovableExpandablePanel("Performance", mPerformanceEditor, false,
                                                                           false);
-    topPanel.add(performance);
+    performanceBox.add(performance, BorderLayout.CENTER);
 
     final Box subjectiveTopContainer = Box.createVerticalBox();
     topPanel.add(subjectiveTopContainer);
     subjectiveTopContainer.setBorder(BorderFactory.createTitledBorder("Subjective"));
 
-    subjectiveNamesUnique = new ValidityPanel();
-    subjectiveTopContainer.add(subjectiveNamesUnique);
+    subjectiveValid = new ValidityPanel();
+    subjectiveTopContainer.add(subjectiveValid);
 
     final Box subjectiveButtonBox = Box.createHorizontalBox();
     subjectiveTopContainer.add(subjectiveButtonBox);
@@ -379,27 +387,36 @@ public class ChallengeDescriptionEditor extends JPanel implements Validatable {
       titleValidity.setValid();
     }
 
-    final boolean performanceValid = mPerformanceEditor.checkValidity();
-    valid &= performanceValid;
+    final boolean performanceEditorValid = mPerformanceEditor.checkValidity();
+    if (!performanceEditorValid) {
+      performanceValid.setInvalid("Performance has invalid elements");
+      valid = false;
+    } else {
+      performanceValid.setValid();
+    }
 
-    final List<String> duplicateSubjectiveCategoryNames = new LinkedList<>();
+    final List<String> subjectiveInvalidMessages = new LinkedList<>();
     final Set<String> subjectiveCategoryNames = new HashSet<>();
     for (final SubjectiveCategoryEditor editor : mSubjectiveEditors) {
-      final boolean editorValid = editor.checkValidity();
-      valid &= editorValid;
-
       final String name = editor.getSubjectiveScoreCategory().getName();
+
+      final boolean editorValid = editor.checkValidity();
+      if (!editorValid) {
+        subjectiveInvalidMessages.add(String.format("Category \"%s\" has invalid elements", name));
+        valid = false;
+      }
+
       final boolean newName = subjectiveCategoryNames.add(name);
       if (!newName) {
-        duplicateSubjectiveCategoryNames.add(String.format("Subjective category names must be unique, the name \"%s\" is used more than once",
-                                                           name));
+        subjectiveInvalidMessages.add(String.format("The subjective category name \"%s\" is used more than once",
+                                                    name));
       }
     }
-    if (!duplicateSubjectiveCategoryNames.isEmpty()) {
-      final String message = String.join("\n", duplicateSubjectiveCategoryNames);
-      subjectiveNamesUnique.setInvalid(message);
+    if (!subjectiveInvalidMessages.isEmpty()) {
+      final String message = String.join("\n", subjectiveInvalidMessages);
+      subjectiveValid.setInvalid(message);
     } else {
-      subjectiveNamesUnique.setValid();
+      subjectiveValid.setValid();
     }
 
     return valid;
