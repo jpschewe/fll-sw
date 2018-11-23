@@ -10,8 +10,10 @@ import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.text.ParseException;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.swing.BorderFactory;
@@ -76,6 +78,8 @@ public class ChallengeDescriptionEditor extends JPanel implements Validatable {
 
   private final ValidityPanel titleValidity;
 
+  private final ValidityPanel subjectiveNamesUnique;
+
   public ChallengeDescriptionEditor(@Nonnull final ChallengeDescription description) {
     super(new BorderLayout());
     this.mDescription = description;
@@ -102,8 +106,7 @@ public class ChallengeDescriptionEditor extends JPanel implements Validatable {
     gbc.weightx = 0;
     gbc.anchor = GridBagConstraints.FIRST_LINE_END;
     titleBox.add(new JLabel("Title: "), gbc);
-    
-    
+
     gbc = new GridBagConstraints();
     gbc.weightx = 0;
     gbc.anchor = GridBagConstraints.FIRST_LINE_END;
@@ -203,8 +206,10 @@ public class ChallengeDescriptionEditor extends JPanel implements Validatable {
 
     final Box subjectiveTopContainer = Box.createVerticalBox();
     topPanel.add(subjectiveTopContainer);
-
     subjectiveTopContainer.setBorder(BorderFactory.createTitledBorder("Subjective"));
+
+    subjectiveNamesUnique = new ValidityPanel();
+    subjectiveTopContainer.add(subjectiveNamesUnique);
 
     final Box subjectiveButtonBox = Box.createHorizontalBox();
     subjectiveTopContainer.add(subjectiveButtonBox);
@@ -364,7 +369,7 @@ public class ChallengeDescriptionEditor extends JPanel implements Validatable {
   @Override
   public boolean checkValidity() {
     commitChanges();
-    
+
     boolean valid = true;
 
     if (StringUtils.isBlank(mTitleEditor.getText())) {
@@ -372,6 +377,29 @@ public class ChallengeDescriptionEditor extends JPanel implements Validatable {
       valid = false;
     } else {
       titleValidity.setValid();
+    }
+
+    final boolean performanceValid = mPerformanceEditor.checkValidity();
+    valid &= performanceValid;
+
+    final List<String> duplicateSubjectiveCategoryNames = new LinkedList<>();
+    final Set<String> subjectiveCategoryNames = new HashSet<>();
+    for (final SubjectiveCategoryEditor editor : mSubjectiveEditors) {
+      final boolean editorValid = editor.checkValidity();
+      valid &= editorValid;
+
+      final String name = editor.getSubjectiveScoreCategory().getName();
+      final boolean newName = subjectiveCategoryNames.add(name);
+      if (!newName) {
+        duplicateSubjectiveCategoryNames.add(String.format("Subjective category names must be unique, the name \"%s\" is used more than once",
+                                                           name));
+      }
+    }
+    if (!duplicateSubjectiveCategoryNames.isEmpty()) {
+      final String message = String.join("\n", duplicateSubjectiveCategoryNames);
+      subjectiveNamesUnique.setInvalid(message);
+    } else {
+      subjectiveNamesUnique.setValid();
     }
 
     return valid;
