@@ -122,6 +122,7 @@
 
 		<!-- logging -->
 		<pathelement location="${dir.lib}/log4j-1.2.17.jar" />
+		<pathelement location="${dir.lib}/apache-log4j-extras-1.2.17.jar" />
 		<pathelement location="${dir.lib}/slf4j-api-1.7.5.jar" />
 		<pathelement location="${dir.lib}/slf4j-log4j12-1.7.5.jar" />
 
@@ -177,6 +178,8 @@
 		<!-- handle errors in lambdas -->
 		<pathelement location="${dir.lib}/durian-core-1.1.0.jar" />
 
+		<!-- help with only starting a single instance -->
+		<pathelement location="${dir.lib}/junique-1.0.4.jar" />
 	</path>
 
 	<path id="application.classpath">

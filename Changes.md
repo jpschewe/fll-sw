@@ -1,3 +1,4 @@
+* #669 Keep the launcher from running twice
 * #671 - Ensure that the link to the SSL web page uses the host name that the user visited 
 
 Release 13.1.1

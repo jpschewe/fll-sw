@@ -50,6 +50,8 @@ import fll.util.FLLRuntimeException;
 import fll.util.GuiExceptionHandler;
 import fll.util.LogUtils;
 import fll.web.CertificateUtils;
+import it.sauronsoftware.junique.AlreadyLockedException;
+import it.sauronsoftware.junique.JUnique;
 import net.mtu.eggplant.util.gui.GraphicsUtils;
 
 /**
@@ -58,6 +60,44 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
 public class Launcher extends JFrame {
 
   private static final Logger LOGGER = LogUtils.getLogger();
+
+  private static final String OPEN_MSG = "open";
+
+  /**
+   * Check that no other instance is running. If one is, send a message to bring
+   * it to the front and then exit.
+   * 
+   * @param thisLauncher this launcher, used to bring to the front
+   */
+  private static void ensureSingleInstance(final Launcher thisLauncher) {
+    final String id = Launcher.class.getName();
+    boolean start;
+    try {
+      JUnique.acquireLock(id, message -> {
+        if (null != thisLauncher) {
+          if (OPEN_MSG.equals(message)) {            
+            thisLauncher.toFront();
+            thisLauncher.setVisible(true);
+          } else {
+            LOGGER.error("Unknow message received from other launcher: '"
+                + message
+                + "'");
+          }
+        }
+        return null;
+      });
+      start = true;
+    } catch (final AlreadyLockedException e) {
+      // Application already running.
+      LOGGER.info("Launcher already running, bringing to the front and then exiting");
+      start = false;
+    }
+    if (!start) {
+      // send open message to the already active instance.
+      JUnique.sendMessage(id, OPEN_MSG);
+      System.exit(0);
+    }
+  }
 
   public static void main(final String[] args) {
     LogUtils.initializeLogging();
@@ -80,6 +120,9 @@ public class Launcher extends JFrame {
 
     try {
       final Launcher frame = new Launcher();
+      
+      ensureSingleInstance(frame);
+
       frame.addWindowListener(new WindowAdapter() {
         @Override
         @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "Exiting from main is OK")

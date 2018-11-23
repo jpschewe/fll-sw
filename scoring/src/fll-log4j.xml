@@ -9,10 +9,11 @@
   </layout>
  </appender>
 
- <appender name="LOGFILE" class="org.apache.log4j.DailyRollingFileAppender">
-  <param name="File" value="${logroot}fll-${app.name}.log" />
-  <param name="datePattern" value="'.'yyyy-MM-dd" />
+ <appender name="LOGFILE" class="org.apache.log4j.rolling.RollingFileAppender">
   <param name="Append" value="true" />
+  <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
+    <param name="FileNamePattern" value="${logroot}fll-${app.name}.%d{yyyy-MM-dd_HH-mm-ss}.log" />      
+  </rollingPolicy>
   <layout class="org.apache.log4j.TTCCLayout">
    <param name="dateFormat" value="DATE" />
   </layout>
