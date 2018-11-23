@@ -125,12 +125,6 @@ public final class SubjectiveFrame extends JFrame {
       frame.addWindowListener(new WindowAdapter() {
         @Override
         @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "Exiting from main is OK")
-        public void windowClosing(final WindowEvent e) {
-          System.exit(0);
-        }
-
-        @Override
-        @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "Exiting from main is OK")
         public void windowClosed(final WindowEvent e) {
           System.exit(0);
         }

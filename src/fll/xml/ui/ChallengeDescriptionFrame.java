@@ -94,16 +94,7 @@ public class ChallengeDescriptionFrame extends JFrame {
       final ChallengeDescriptionFrame editor = new ChallengeDescriptionFrame();
       editor.setCurrentFile(null, description);
 
-      // FIXME need close handler, think about running from launcher and how
-      // that will work
-
       editor.addWindowListener(new WindowAdapter() {
-        @Override
-        @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "Exiting from main is OK")
-        public void windowClosing(final WindowEvent e) {
-          System.exit(0);
-        }
-
         @Override
         @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "Exiting from main is OK")
         public void windowClosed(final WindowEvent e) {
@@ -119,7 +110,13 @@ public class ChallengeDescriptionFrame extends JFrame {
         }
       });
 
+      GraphicsUtils.centerWindow(editor);
       editor.setVisible(true);
+    } catch (final Throwable e) {
+      JOptionPane.showMessageDialog(null, "Unexpected error: "
+          + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+      LOGGER.fatal("Unexpected error", e);
+      System.exit(1);
     }
   }
 
@@ -318,7 +315,7 @@ public class ChallengeDescriptionFrame extends JFrame {
   };
 
   private void exit() {
-    // FIXME: check that everything is saved
+    promptForSaveOfCurrentDescription();
 
     // only hide the frame so that when being called from elsewhere the system
     // doesn't exit
