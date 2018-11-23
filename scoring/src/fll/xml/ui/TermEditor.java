@@ -129,7 +129,6 @@ import fll.xml.VariableScope;
 
   private void addGoalRef(final GoalRef ref) {
     final Box row = Box.createHorizontalBox();
-    refContainer.add(row);
 
     row.add(new JLabel("X "));
 
@@ -138,13 +137,14 @@ import fll.xml.VariableScope;
 
     final JButton delete = new JButton("Delete Goal");
     delete.addActionListener(l -> {
-      refContainer.remove(row);
       term.removeGoal(ref);
-      refContainer.validate();
+      GuiUtils.removeFromContainer(refContainer, row);
     });
     row.add(delete);
 
     row.add(Box.createHorizontalGlue());
+
+    GuiUtils.addToContainer(refContainer, row);
   }
 
   private void addNewVariableRef() {
@@ -163,7 +163,6 @@ import fll.xml.VariableScope;
 
   private void addVariableRef(final VariableRef ref) {
     final Box row = Box.createHorizontalBox();
-    refContainer.add(row);
 
     row.add(new JLabel("X "));
 
@@ -172,13 +171,13 @@ import fll.xml.VariableScope;
 
     final JButton delete = new JButton("Delete Variable");
     delete.addActionListener(l -> {
-      refContainer.remove(row);
       term.removeVariable(ref);
+      GuiUtils.removeFromContainer(refContainer, row);
     });
     row.add(delete);
 
     row.add(Box.createHorizontalGlue());
-
+    GuiUtils.addToContainer(refContainer, row);
   }
 
 }

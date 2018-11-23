@@ -21,7 +21,7 @@ import fll.xml.GoalScope;
 import fll.xml.VariableScope;
 
 /**
- * 
+ * Editor for {@link AbstractConditionStatement}.
  */
 public class AbstractConditionStatementEditor extends JPanel {
 

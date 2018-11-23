@@ -166,8 +166,7 @@ public abstract class ScoreCategoryEditor extends JPanel {
         mCategory.removeGoal(index);
 
         // update the UI
-        mGoalEditorContainer.remove(index);
-        mGoalEditorContainer.validate();
+        GuiUtils.removeFromContainer(mGoalEditorContainer, index);
       }
     };
 
@@ -225,8 +224,7 @@ public abstract class ScoreCategoryEditor extends JPanel {
 
     mGoalEditors.add(editor);
 
-    mGoalEditorContainer.add(panel);
-    mGoalEditorContainer.validate();
+    GuiUtils.addToContainer(mGoalEditorContainer, panel);
   }
 
   /**

@@ -271,8 +271,7 @@ public class ChallengeDescriptionEditor extends JPanel {
         mDescription.removeSubjectiveCategory(index);
 
         // update the UI
-        mSubjectiveContainer.remove(index);
-        mSubjectiveContainer.validate();
+        GuiUtils.removeFromContainer(mSubjectiveContainer, index);
       }
     };
 
@@ -306,8 +305,7 @@ public class ChallengeDescriptionEditor extends JPanel {
       container.setTitle(newTitle);
     });
 
-    mSubjectiveContainer.add(container);
-    mSubjectiveContainer.validate();
+    GuiUtils.addToContainer(mSubjectiveContainer, container);
 
     mSubjectiveEditors.add(editor);
   }

@@ -78,12 +78,11 @@ public class RestrictionListEditor extends JPanel {
 
     delete.addActionListener(e -> {
       editorContainer.remove(panel);
-      editors.remove(editor);
-      editorContainer.validate();
+      GuiUtils.removeFromContainer(editorContainer, editor);
     });
 
     panel.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.BLACK));
-    editorContainer.add(panel);
+    GuiUtils.addToContainer(editorContainer, panel);
   }
 
   public void commitChanges() {

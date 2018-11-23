@@ -80,8 +80,7 @@ public class VariableListEditor extends JPanel {
         goal.removeVariable(editor.getVariable());
 
         // update the UI
-        editorContainer.remove(index);
-        editorContainer.validate();
+        GuiUtils.removeFromContainer(editorContainer, index);
       }
     };
 
@@ -117,7 +116,7 @@ public class VariableListEditor extends JPanel {
   private void addVariable(final Variable var) {
     final VariableEditor variableEditor = new VariableEditor(var, goalScope);
     final MovableExpandablePanel exPanel = new MovableExpandablePanel(var.getName(), variableEditor, false, true);
-    editorContainer.add(exPanel);
+    GuiUtils.addToContainer(editorContainer, exPanel);
 
     variableEditor.addPropertyChangeListener("name", e -> {
       final String newName = (String) e.getNewValue();

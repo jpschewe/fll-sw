@@ -56,7 +56,7 @@ public class TiebreakerEditor extends JPanel {
 
     final MovableExpandablePanel exPanel = new MovableExpandablePanel("Tie breakers", expansion, false, false);
     add(exPanel, BorderLayout.CENTER);
-  
+
     performance.getTiebreaker().forEach(this::addTest);
   }
 
@@ -76,13 +76,12 @@ public class TiebreakerEditor extends JPanel {
     panel.add(delete, BorderLayout.EAST);
 
     delete.addActionListener(e -> {
-      editorContainer.remove(panel);
       editors.remove(editor);
-      editorContainer.validate();
+      GuiUtils.removeFromContainer(editorContainer, panel);
     });
 
     panel.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.BLACK));
-    editorContainer.add(panel);
+    GuiUtils.addToContainer(editorContainer, panel);
   }
 
   public void commitChanges() {
