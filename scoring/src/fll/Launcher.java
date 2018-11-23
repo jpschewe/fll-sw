@@ -77,6 +77,7 @@ public class Launcher extends JFrame {
    * 
    * @param thisLauncher this launcher, used to bring to the front
    */
+  @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "Exiting when another instance is running is OK")
   private static void ensureSingleInstance(final Launcher thisLauncher) {
     final String id = Launcher.class.getName();
     boolean start;
