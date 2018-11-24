@@ -413,7 +413,7 @@ public class ChallengeDescriptionEditor extends JPanel implements Validatable {
       }
     }
     if (!subjectiveInvalidMessages.isEmpty()) {
-      final String message = String.join("\n", subjectiveInvalidMessages);
+      final String message = String.join("<br/>", subjectiveInvalidMessages);
       subjectiveValid.setInvalid(message);
     } else {
       subjectiveValid.setValid();

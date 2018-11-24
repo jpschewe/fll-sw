@@ -268,7 +268,7 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
       }
     }
     if (!invalidMessages.isEmpty()) {
-      final String message = String.join("\n", invalidMessages);
+      final String message = String.join("<br/>", invalidMessages);
       categoryValid.setInvalid(message);
     } else {
       categoryValid.setValid();
