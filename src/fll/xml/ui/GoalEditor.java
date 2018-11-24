@@ -10,6 +10,10 @@ import java.awt.CardLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.text.ParseException;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -21,6 +25,7 @@ import org.apache.log4j.Logger;
 
 import fll.util.FormatterUtils;
 import fll.util.LogUtils;
+import fll.xml.EnumeratedValue;
 import fll.xml.Goal;
 import fll.xml.ScoreType;
 
@@ -52,6 +57,8 @@ public class GoalEditor extends AbstractGoalEditor {
   private final EnumeratedValuesEditor enumEditor;
 
   private final RubricEditor rubricEditor;
+
+  private final ValidityPanel enumCountValidity;
 
   /**
    * @param goal the goal to edit
@@ -130,6 +137,15 @@ public class GoalEditor extends AbstractGoalEditor {
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     add(mEnumerated, gbc);
+
+    enumCountValidity = new ValidityPanel();
+    gbc = new GridBagConstraints();
+    gbc.weightx = 1;
+    gbc.weighty = 1;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.fill = GridBagConstraints.BOTH;
+    add(enumCountValidity, gbc);
 
     final CardLayout cardLayout = new CardLayout();
     final JPanel cardPanel = new JPanel(cardLayout);
@@ -211,7 +227,6 @@ public class GoalEditor extends AbstractGoalEditor {
     });
 
     enumEditor = new EnumeratedValuesEditor(goal);
-
     cardPanel.add(enumEditor, ENUMERATED_PANEL_KEY);
 
     cardLayout.show(cardPanel, getGoal().isEnumerated() ? ENUMERATED_PANEL_KEY : COUNT_PANEL_KEY);
@@ -280,13 +295,73 @@ public class GoalEditor extends AbstractGoalEditor {
     } else {
       enumEditor.commitChanges();
     }
-    
+
     rubricEditor.commitChanges();
   }
 
   @Override
   public Goal getGoal() {
     return (Goal) super.getGoal();
+  }
+
+  private List<String> checkCountValid() {
+    final List<String> messages = new LinkedList<>();
+
+    if (getGoal().getMin() >= getGoal().getMax()) {
+      messages.add("Minimum value must be less than maximum value");
+    }
+    if (getGoal().getInitialValue() < getGoal().getMin()
+        || getGoal().getInitialValue() > getGoal().getMax()) {
+      messages.add("Initial value must be between minimum value and maximum value");
+    }
+
+    return messages;
+  }
+
+  private List<String> checkEnumeratedValid() {
+    final List<String> messages = new LinkedList<>();
+
+    if (Double.isNaN(getGoal().getInitialValue())) {
+      messages.add("One initial value must be set");
+    }
+
+    final Set<String> values = new HashSet<>();
+    for (final EnumeratedValue enumValue : getGoal().getValues()) {
+      final String value = enumValue.getValue();
+
+      final boolean newValue = values.add(value);
+      if (!newValue) {
+        messages.add(String.format("Values must be unique, the value \"%s\" is used more than once", value));
+      }
+    }
+
+    return messages;
+  }
+
+  private boolean checkEnumCountValid() {
+    final List<String> messages;
+    if (!mEnumerated.isSelected()) {
+      messages = checkCountValid();
+    } else {
+      messages = checkEnumeratedValid();
+    }
+
+    if (!messages.isEmpty()) {
+      enumCountValidity.setInvalid(String.join("<br/>", messages));
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  @Override
+  public boolean checkValidity() {
+    boolean valid = super.checkValidity();
+
+    final boolean enumCountValid = checkEnumCountValid();
+    valid &= enumCountValid;
+
+    return valid;
   }
 
 }
