@@ -53,11 +53,11 @@ final class ValidityPanel extends JPanel {
   /**
    * State that the object is invalid.
    * 
-   * @param message why is the object invalid
+   * @param message why is the object invalid, this may contain HTML markup
    */
   public void setInvalid(final String message) {
     setBackground(INVALID);
-    setToolTipText(message);
+    setToolTipText(String.format("<html>%s</html>", message));
   }
 
 }
