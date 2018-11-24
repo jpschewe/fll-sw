@@ -375,7 +375,7 @@ public class ChallengeDescriptionFrame extends JFrame {
     final boolean valid = editor.checkValidity();
     if (!valid) {
       JOptionPane.showMessageDialog(null,
-                                    "Some part of the challenge is invalid, look for red boxes to identify the issues",
+                                    "Some part of the challenge is invalid, hover over the red boxes to see the issues",
                                     "Error", JOptionPane.ERROR_MESSAGE);
     }
 
