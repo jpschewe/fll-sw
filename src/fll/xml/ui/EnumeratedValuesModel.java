@@ -190,12 +190,11 @@ class EnumeratedValuesModel extends AbstractTableModel {
 
   /**
    * Make sure that all values are committed to the underlying goal.
+   * If no initial value is set, it will be NaN.
    */
   public void commitChanges() {
     final double value = getInitialValue();
-    if (!Double.isNaN(value)) {
-      goal.setInitialValue(value);
-    }
+    goal.setInitialValue(value);
   }
 
   /**
