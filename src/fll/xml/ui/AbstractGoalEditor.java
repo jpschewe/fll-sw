@@ -9,6 +9,8 @@ package fll.xml.ui;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.text.ParseException;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
@@ -39,9 +41,7 @@ import fll.xml.AbstractGoal;
 
   private final JFormattedTextField mCategoryEditor;
 
-  private final ValidityPanel nameValid;
-
-  private final ValidityPanel titleValid;
+  private final ValidityPanel goalValid;
 
   public AbstractGoalEditor(final AbstractGoal goal) {
     super(new GridBagLayout());
@@ -49,23 +49,17 @@ import fll.xml.AbstractGoal;
 
     GridBagConstraints gbc;
 
-    final JPanel titleBox = new JPanel(new GridBagLayout());
-    gbc = new GridBagConstraints();
-    gbc.weightx = 0;
-    gbc.anchor = GridBagConstraints.FIRST_LINE_END;
-    add(titleBox, gbc);
-
-    titleValid = new ValidityPanel();
     gbc = new GridBagConstraints();
     gbc.weightx = 1;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.anchor = GridBagConstraints.FIRST_LINE_START;
-    titleBox.add(titleValid, gbc);
+    goalValid = new ValidityPanel();
+    add(goalValid, gbc);
 
     gbc = new GridBagConstraints();
     gbc.weightx = 0;
     gbc.anchor = GridBagConstraints.FIRST_LINE_END;
-    titleBox.add(new JLabel("Title: "), gbc);
+    add(new JLabel("Title: "), gbc);
 
     mTitleEditor = FormatterUtils.createStringField();
     gbc = new GridBagConstraints();
@@ -86,23 +80,10 @@ import fll.xml.AbstractGoal;
     mTitleEditor.setColumns(80);
     mTitleEditor.setMaximumSize(mTitleEditor.getPreferredSize());
 
-    final JPanel nameBox = new JPanel(new GridBagLayout());
     gbc = new GridBagConstraints();
     gbc.weightx = 0;
     gbc.anchor = GridBagConstraints.FIRST_LINE_END;
-    add(nameBox, gbc);
-
-    nameValid = new ValidityPanel();
-    gbc = new GridBagConstraints();
-    gbc.weightx = 1;
-    gbc.fill = GridBagConstraints.HORIZONTAL;
-    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
-    nameBox.add(nameValid, gbc);
-
-    gbc = new GridBagConstraints();
-    gbc.weightx = 0;
-    gbc.anchor = GridBagConstraints.FIRST_LINE_END;
-    nameBox.add(new JLabel("Name: "), gbc);
+    add(new JLabel("Name: "), gbc);
 
     mNameEditor = FormatterUtils.createDatabaseNameField();
     gbc = new GridBagConstraints();
@@ -196,25 +177,38 @@ import fll.xml.AbstractGoal;
     return mGoal;
   }
 
-  @Override
-  public boolean checkValidity() {
-    boolean valid = true;
+  /**
+   * Called by {@link #checkValidity()}. If the list is empty after the call, then
+   * the goal is valid, otherwise the goal is invalid and the messages will be
+   * displayed to the user.
+   * Subclasses should override this to add extra checks. Make sure to call the
+   * parent class method.
+   * 
+   * @param messages put invalid messages in the list.
+   */
+  protected void gatherValidityMessages(final List<String> messages) {
 
     if (StringUtils.isBlank(mTitleEditor.getText())) {
-      titleValid.setInvalid("The goal must have a title");
-      valid = false;
-    } else {
-      titleValid.setValid();
+      messages.add("The goal must have a title");
     }
 
     if (StringUtils.isBlank(mNameEditor.getText())) {
-      nameValid.setInvalid("The goal must have a name");
-      valid = false;
-    } else {
-      nameValid.setValid();
+      messages.add("The goal must have a name");
     }
 
-    return valid;
+  }
+
+  @Override
+  public boolean checkValidity() {
+    final List<String> messages = new LinkedList<>();
+    gatherValidityMessages(messages);
+
+    if (!messages.isEmpty()) {
+      goalValid.setInvalid(String.join("<br/>", messages));
+      return false;
+    } else {
+      return true;
+    }
   }
 
 }

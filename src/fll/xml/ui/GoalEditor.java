@@ -11,7 +11,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.text.ParseException;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -304,9 +303,7 @@ public class GoalEditor extends AbstractGoalEditor {
     return (Goal) super.getGoal();
   }
 
-  private List<String> checkCountValid() {
-    final List<String> messages = new LinkedList<>();
-
+  private void checkCountValid(final List<String> messages) {
     if (getGoal().getMin() >= getGoal().getMax()) {
       messages.add("Minimum value must be less than maximum value");
     }
@@ -314,13 +311,9 @@ public class GoalEditor extends AbstractGoalEditor {
         || getGoal().getInitialValue() > getGoal().getMax()) {
       messages.add("Initial value must be between minimum value and maximum value");
     }
-
-    return messages;
   }
 
-  private List<String> checkEnumeratedValid() {
-    final List<String> messages = new LinkedList<>();
-
+  private void checkEnumeratedValid(final List<String> messages) {
     if (Double.isNaN(getGoal().getInitialValue())) {
       messages.add("One initial value must be set");
     }
@@ -334,34 +327,18 @@ public class GoalEditor extends AbstractGoalEditor {
         messages.add(String.format("Values must be unique, the value \"%s\" is used more than once", value));
       }
     }
-
-    return messages;
-  }
-
-  private boolean checkEnumCountValid() {
-    final List<String> messages;
-    if (!mEnumerated.isSelected()) {
-      messages = checkCountValid();
-    } else {
-      messages = checkEnumeratedValid();
-    }
-
-    if (!messages.isEmpty()) {
-      enumCountValidity.setInvalid(String.join("<br/>", messages));
-      return false;
-    } else {
-      return true;
-    }
   }
 
   @Override
-  public boolean checkValidity() {
-    boolean valid = super.checkValidity();
-
-    final boolean enumCountValid = checkEnumCountValid();
-    valid &= enumCountValid;
-
-    return valid;
+  protected void gatherValidityMessages(final List<String> messages) {
+    if (!mEnumerated.isSelected()) {
+      checkCountValid(messages);
+    } else {
+      checkEnumeratedValid(messages);
+    }
+    
+    //FIXME chain to rubirc editor
+    
   }
 
 }
