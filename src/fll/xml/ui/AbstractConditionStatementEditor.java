@@ -54,7 +54,7 @@ public class AbstractConditionStatementEditor extends JPanel {
       condStmt = (ConditionStatement) stmt;
       enumStmt = new EnumConditionStatement();
     } else {
-      condStmt = new ConditionStatement(goalScope, variableScope);
+      condStmt = new ConditionStatement();
       enumStmt = (EnumConditionStatement) stmt;
     }
 

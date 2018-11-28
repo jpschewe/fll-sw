@@ -42,8 +42,7 @@ public class ConditionStatement extends AbstractConditionStatement {
    * Default constructor with empty left and right polynomials.
    * 
    */
-  public ConditionStatement(final GoalScope goalScope,
-                            final VariableScope variableScope) {
+  public ConditionStatement() {
     super();
     mLeft = new ComplexPolynomial();
     mRight = new ComplexPolynomial();
