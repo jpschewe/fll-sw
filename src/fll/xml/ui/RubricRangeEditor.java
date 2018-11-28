@@ -9,12 +9,15 @@ package fll.xml.ui;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.text.ParseException;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import fll.util.FormatterUtils;
@@ -25,7 +28,7 @@ import fll.xml.RubricRange;
 /**
  * Edit for a rubric range.
  */
-public class RubricRangeEditor extends JPanel {
+public class RubricRangeEditor extends JPanel implements Validatable {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -40,6 +43,8 @@ public class RubricRangeEditor extends JPanel {
   private final JFormattedTextField mMax;
 
   private final RubricRange mRange;
+
+  private final ValidityPanel rangeValid;
 
   /**
    * @return the range being edited
@@ -56,6 +61,14 @@ public class RubricRangeEditor extends JPanel {
     mRange = range;
 
     GridBagConstraints gbc;
+
+    rangeValid = new ValidityPanel();
+    gbc = new GridBagConstraints();
+    gbc.weightx = 1;
+    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    add(rangeValid, gbc);
 
     gbc = new GridBagConstraints();
     gbc.weightx = 0;
@@ -182,4 +195,24 @@ public class RubricRangeEditor extends JPanel {
 
   }
 
+  @Override
+  public boolean checkValidity() {
+    final List<String> messages = new LinkedList<>();
+
+    if (StringUtils.isBlank(mTitle.getText())) {
+      messages.add("The rubric range must have a title");
+    }
+
+    if (getRange().getMin() >= getRange().getMax()) {
+      messages.add("Minimum value must be less than maximum value");
+    }
+
+    if (!messages.isEmpty()) {
+      rangeValid.setInvalid(String.join("<br/>", messages));
+      return false;
+    } else {
+      rangeValid.setValid();
+      return true;
+    }
+  }
 }

@@ -23,7 +23,7 @@ import fll.xml.RubricRange;
 /**
  * Edit the rubric of a goal.
  */
-public class RubricEditor extends JPanel {
+public class RubricEditor extends JPanel implements Validatable {
 
   private final JComponent rangeList;
 
@@ -93,5 +93,15 @@ public class RubricEditor extends JPanel {
     });
 
     goal.setRubric(newRubric);
+  }
+
+  @Override
+  public boolean checkValidity() {
+    boolean valid = true;
+    for (final RubricRangeEditor editor : rangeEditors) {
+      final boolean v = editor.checkValidity();
+      valid &= v;
+    }
+    return valid;
   }
 }

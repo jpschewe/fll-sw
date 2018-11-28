@@ -7,6 +7,7 @@
 package fll.xml.ui;
 
 import java.text.ParseException;
+import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.JFormattedTextField;
@@ -32,21 +33,12 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
 
   private final SubjectiveScoreCategory mSubjectiveCategory;
 
-  private final ValidityPanel nameValid;
-
-  private final ValidityPanel titleValid;
-
   public SubjectiveCategoryEditor(final SubjectiveScoreCategory category) {
     super(category);
     mSubjectiveCategory = category;
 
     final Box titleContainer = Box.createHorizontalBox();
     add(titleContainer, 1); // add at particular index to get above weight
-
-    titleValid = new ValidityPanel();
-    titleContainer.add(titleValid);
-    titleValid.setPreferredSize(titleValid.getMinimumSize());
-    titleValid.setMaximumSize(titleValid.getMinimumSize());
 
     titleContainer.add(new JLabel("Title: "));
 
@@ -68,11 +60,6 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
 
     final Box nameContainer = Box.createHorizontalBox();
     add(nameContainer, 2); // add at particular index to get above weight
-
-    nameValid = new ValidityPanel();
-    nameContainer.add(nameValid);
-    nameValid.setPreferredSize(nameValid.getMinimumSize());
-    nameValid.setMaximumSize(nameValid.getMinimumSize());
 
     nameContainer.add(new JLabel("Name: "));
 
@@ -125,24 +112,16 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
   }
 
   @Override
-  public boolean checkValidity() {
-    boolean valid = super.checkValidity();
-
+  protected void gatherValidityMessages(final List<String> messages) {
+    super.gatherValidityMessages(messages);
+    
     if (StringUtils.isBlank(mTitleEditor.getText())) {
-      titleValid.setInvalid("The category must have a title");
-      valid = false;
-    } else {
-      titleValid.setValid();
+      messages.add("The category must have a title");
     }
 
     if (StringUtils.isBlank(mNameEditor.getText())) {
-      nameValid.setInvalid("The category must have a name");
-      valid = false;
-    } else {
-      nameValid.setValid();
+      messages.add("The category must have a name");
     }
-
-    return valid;
   }
 
 }

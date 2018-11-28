@@ -246,35 +246,47 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
     mGoalEditors.forEach(e -> e.commitChanges());
   }
 
-  @Override
-  public boolean checkValidity() {
-    boolean valid = true;
+  /**
+   * Called by {@link #checkValidity()}. If the list is empty after the call, then
+   * the goal is valid, otherwise the goal is invalid and the messages will be
+   * displayed to the user.
+   * Subclasses should override this to add extra checks. Make sure to call the
+   * parent class method.
+   * 
+   * @param messages put invalid messages in the list.
+   */
+  protected void gatherValidityMessages(final List<String> messages) {
 
-    final List<String> invalidMessages = new LinkedList<>();
     final Set<String> goalNames = new HashSet<>();
     for (final AbstractGoalEditor editor : mGoalEditors) {
       final String name = editor.getGoal().getName();
 
       final boolean editorValid = editor.checkValidity();
       if (!editorValid) {
-        invalidMessages.add(String.format("Goal \"%s\" has invalid elements", name));
-        valid = false;
+        messages.add(String.format("Goal \"%s\" has invalid elements", name));
       }
 
       final boolean newName = goalNames.add(name);
       if (!newName) {
-        invalidMessages.add(String.format("Goal names must be unique in a category, the name \"%s\" is used more than once",
-                                          name));
+        messages.add(String.format("Goal names must be unique in a category, the name \"%s\" is used more than once",
+                                   name));
       }
     }
-    if (!invalidMessages.isEmpty()) {
-      final String message = String.join("<br/>", invalidMessages);
-      categoryValid.setInvalid(message);
+
+  }
+
+  @Override
+  public boolean checkValidity() {
+    final List<String> messages = new LinkedList<>();
+    gatherValidityMessages(messages);
+
+    if (!messages.isEmpty()) {
+      categoryValid.setInvalid(String.join("<br/>", messages));
+      return false;
     } else {
       categoryValid.setValid();
+      return true;
     }
-
-    return valid;
   }
 
 }

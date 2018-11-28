@@ -57,8 +57,6 @@ public class GoalEditor extends AbstractGoalEditor {
 
   private final RubricEditor rubricEditor;
 
-  private final ValidityPanel enumCountValidity;
-
   /**
    * @param goal the goal to edit
    */
@@ -136,15 +134,6 @@ public class GoalEditor extends AbstractGoalEditor {
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     add(mEnumerated, gbc);
-
-    enumCountValidity = new ValidityPanel();
-    gbc = new GridBagConstraints();
-    gbc.weightx = 1;
-    gbc.weighty = 1;
-    gbc.anchor = GridBagConstraints.FIRST_LINE_START;
-    gbc.gridwidth = GridBagConstraints.REMAINDER;
-    gbc.fill = GridBagConstraints.BOTH;
-    add(enumCountValidity, gbc);
 
     final CardLayout cardLayout = new CardLayout();
     final JPanel cardPanel = new JPanel(cardLayout);
@@ -336,9 +325,11 @@ public class GoalEditor extends AbstractGoalEditor {
     } else {
       checkEnumeratedValid(messages);
     }
-    
-    //FIXME chain to rubirc editor
-    
+
+    final boolean rubricValid = rubricEditor.checkValidity();
+    if (!rubricValid) {
+      messages.add("The rubic has invalid elements");
+    }
   }
 
 }
