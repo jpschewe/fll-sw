@@ -52,6 +52,7 @@ import fll.xml.AbstractGoal;
     gbc = new GridBagConstraints();
     gbc.weightx = 1;
     gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.anchor = GridBagConstraints.FIRST_LINE_START;
     goalValid = new ValidityPanel();
     add(goalValid, gbc);
@@ -207,6 +208,7 @@ import fll.xml.AbstractGoal;
       goalValid.setInvalid(String.join("<br/>", messages));
       return false;
     } else {
+      goalValid.setValid();
       return true;
     }
   }
