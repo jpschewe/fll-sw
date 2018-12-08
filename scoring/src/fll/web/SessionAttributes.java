@@ -34,7 +34,9 @@ public final class SessionAttributes {
   }
 
   /**
-   * Key in the session used to store the URL to redirect to after the current operation completes.
+   * Key in the session used to store the URL to redirect to after the current
+   * operation completes.
+   * The type is a {@link String}.
    */
   public static final String REDIRECT_URL = "redirect_url";
 
@@ -48,20 +50,21 @@ public final class SessionAttributes {
 
   /**
    * Key in the session used to store the display name.
+   * 
    * @see fll.web.DisplayInfo
    */
   public static final String DISPLAY_NAME = "displayName";
-  
+
   /**
    * Get the name for the current display.
-   *  
+   * 
    * @param session where to get the information from
    * @return may be null
    */
   public static String getDisplayName(final HttpSession session) {
     return getAttribute(session, DISPLAY_NAME, String.class);
   }
-  
+
   /**
    * Get session attribute and send appropriate error if type is wrong. Note
    * that null is always valid.
@@ -70,13 +73,16 @@ public final class SessionAttributes {
    * @param attribute the attribute to get
    * @param clazz the expected type
    */
-  public static <T> T getAttribute(final HttpSession session, final String attribute, final Class<T> clazz) {
+  public static <T> T getAttribute(final HttpSession session,
+                                   final String attribute,
+                                   final Class<T> clazz) {
     final Object o = session.getAttribute(attribute);
     if (o == null
         || clazz.isInstance(o)) {
       return clazz.cast(o);
     } else {
-      throw new ClassCastException(String.format("Expecting session attribute '%s' to be of type '%s', but was of type '%s'", attribute, clazz, o.getClass()));
+      throw new ClassCastException(String.format("Expecting session attribute '%s' to be of type '%s', but was of type '%s'",
+                                                 attribute, clazz, o.getClass()));
     }
   }
 
@@ -86,10 +92,13 @@ public final class SessionAttributes {
    * 
    * @see #getAttribute(HttpSession, String, Class)
    */
-  public static <T> T getNonNullAttribute(final HttpSession session, final String attribute, final Class<T> clazz) {
+  public static <T> T getNonNullAttribute(final HttpSession session,
+                                          final String attribute,
+                                          final Class<T> clazz) {
     final T retval = getAttribute(session, attribute, clazz);
     if (null == retval) {
-      throw new NullPointerException(String.format("Session attribute %s is null when it's not expected to be", attribute));
+      throw new NullPointerException(String.format("Session attribute %s is null when it's not expected to be",
+                                                   attribute));
     }
     return retval;
   }
