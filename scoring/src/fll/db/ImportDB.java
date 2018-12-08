@@ -144,7 +144,7 @@ public final class ImportDB {
                 + " to "
                 + destinationURI);
           }
-          importDatabase(sourceConnection, destinationConnection, tournament);
+          importDatabase(sourceConnection, destinationConnection, tournament, true, true, true);
           if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Data successfully imported");
           }
@@ -192,7 +192,8 @@ public final class ImportDB {
    * @throws IOException if there is an error reading the dump file
    * @throws SQLException if there is an error importing the data
    * @see ImportDB#loadDatabaseDump(ZipInputStream, Connection)
-   * @see ImportDB#importDatabase(Connection, Connection, String)
+   * @see ImportDB#importDatabase(Connection, Connection, String, boolean,
+   *      boolean, boolean)
    */
   @Nonnull
   public static ImportDB.ImportResult loadFromDumpIntoNewDB(final ZipInputStream zipfile,
@@ -256,7 +257,7 @@ public final class ImportDB {
       for (final Tournament sourceTournament : Tournament.getTournaments(memConnection)) {
         final String tournament = sourceTournament.getName();
         // import the data from the tournament
-        importDatabase(memConnection, destConnection, tournament);
+        importDatabase(memConnection, destConnection, tournament, true, true, true);
       }
 
       // remove in-memory database
@@ -1198,10 +1199,17 @@ public final class ImportDB {
    * @param sourceConnection a connection to the source database
    * @param destinationConnection a connection to the destination database
    * @param tournamentName the tournament that the scores are for
+   * @param importPerformance if the performance data, including playoffs, should
+   *          be imported
+   * @param importSubjective if the subjective data should be imported
+   * @param importFinalist if the finalist schedule should be imported
    */
   public static void importDatabase(final Connection sourceConnection,
                                     final Connection destinationConnection,
-                                    final String tournamentName)
+                                    final String tournamentName,
+                                    final boolean importPerformance,
+                                    final boolean importSubjective,
+                                    final boolean importFinalist)
       throws SQLException {
 
     final Document document = GlobalParameters.getChallengeDocument(destinationConnection);
@@ -1212,34 +1220,82 @@ public final class ImportDB {
     final Tournament destTournament = Tournament.findTournamentByName(destinationConnection, tournamentName);
     final int destTournamentID = destTournament.getTournamentID();
 
-    // Tournaments table isn't imported as it's expected to already be populated
-    // with the tournament
+    importTournamentData(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
-    importTournamentParameters(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+    if (importPerformance) {
+      importPerformanceData(sourceConnection, destinationConnection, description, sourceTournamentID, destTournamentID);
+    }
 
-    importJudges(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+    if (importSubjective) {
+      importSubjectiveData(sourceConnection, destinationConnection, description, sourceTournamentID, destTournamentID);
+    }
 
-    importTournamentTeams(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
-
-    importPerformance(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID, description);
-
-    importSubjective(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID, description);
-
-    importTableNames(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
-
-    importPlayoffData(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
-    importPlayoffTeams(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
-
-    importSubjectiveNominees(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
-
-    importSchedule(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
-
-    importFinalistSchedule(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
-
-    importCategoryScheduleMapping(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+    if (importFinalist) {
+      importFinalistSchedule(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+    }
 
     // update score totals
     Queries.updateScoreTotals(description, destinationConnection, destTournamentID);
+  }
+
+  /**
+   * @param sourceConnection
+   * @param destinationConnection
+   * @param description
+   * @param sourceTournamentID
+   * @param destTournamentID
+   * @throws SQLException
+   */
+  public static void importSubjectiveData(final Connection sourceConnection,
+                                          final Connection destinationConnection,
+                                          final ChallengeDescription description,
+                                          final int sourceTournamentID,
+                                          final int destTournamentID)
+      throws SQLException {
+    importJudges(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+    importSubjective(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID, description);
+    importSubjectiveNominees(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+  }
+
+  /**
+   * @param sourceConnection
+   * @param destinationConnection
+   * @param description
+   * @param sourceTournamentID
+   * @param destTournamentID
+   * @throws SQLException
+   */
+  public static void importPerformanceData(final Connection sourceConnection,
+                                           final Connection destinationConnection,
+                                           final ChallengeDescription description,
+                                           final int sourceTournamentID,
+                                           final int destTournamentID)
+      throws SQLException {
+    importPerformance(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID, description);
+
+    importPlayoffData(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+    importPlayoffTeams(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+  }
+
+  /**
+   * @param sourceConnection
+   * @param destinationConnection
+   * @param sourceTournamentID
+   * @param destTournamentID
+   * @throws SQLException
+   */
+  public static void importTournamentData(final Connection sourceConnection,
+                                          final Connection destinationConnection,
+                                          final int sourceTournamentID,
+                                          final int destTournamentID)
+      throws SQLException {
+    // Tournaments table isn't imported as it's expected to already be populated
+    // with the tournament
+    importTournamentParameters(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+    importTournamentTeams(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+    importTableNames(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+    importSchedule(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+    importCategoryScheduleMapping(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
   }
 
   private static void importSchedule(final Connection sourceConnection,
@@ -2100,7 +2156,7 @@ public final class ImportDB {
 
   /**
    * The result of
-   * {@link ImportDB#importDatabase(Connection, Connection, String)}.
+   * {@link ImportDB#importDatabase(Connection, Connection, String, boolean, boolean, boolean)}.
    */
   public static final class ImportResult {
 
