@@ -63,7 +63,7 @@ public class ExecuteImport extends BaseFLLServlet {
         message.append("<p class='error'>Error, there are still differences, cannot import. Try starting the workflow again.</p>");
         session.setAttribute(SessionAttributes.REDIRECT_URL, "selectTournament.jsp");
       } else {
-        ImportDB.importDatabase(sourceConnection, destConnection, tournament);
+        ImportDB.importDatabase(sourceConnection, destConnection, tournament, true, true, true);
         
         // update score totals
         final Tournament destTournament = Tournament.findTournamentByName(destConnection, tournament);
