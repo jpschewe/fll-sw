@@ -1,3 +1,4 @@
+* #676 - keep tomcat logs from testing out of the distribution
 * #673 - Pass full URL, including query string, when redirected to the login form
 
 Release 13.2.0
