@@ -1,3 +1,5 @@
+* #679 - when loading from a database, select the tournament that was in the database
+
 Release 13.2.0
 ==============
 
