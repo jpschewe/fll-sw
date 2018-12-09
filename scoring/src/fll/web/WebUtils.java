@@ -375,4 +375,24 @@ public final class WebUtils {
       }
     }
   }
+
+  /**
+   * Based on
+   * https://stackoverflow.com/questions/2222238/httpservletrequest-to-complete-url.
+   * 
+   * @param request a request
+   * @return the full url, including query string
+   * @see HttpServletRequest#getQueryString()
+   * @see HttpServletRequest#getRequestURL()
+   */
+  public static String getFullURL(HttpServletRequest request) {
+    final StringBuilder requestURL = new StringBuilder(request.getRequestURL().toString());
+    final String queryString = request.getQueryString();
+
+    if (null == queryString) {
+      return requestURL.toString();
+    } else {
+      return requestURL.append('?').append(queryString).toString();
+    }
+  }
 }
