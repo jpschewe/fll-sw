@@ -6,16 +6,28 @@
 
 package fll.web;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.PageContext;
+import javax.sql.DataSource;
 
+import org.apache.log4j.Logger;
+
+import fll.Tournament;
+import fll.db.Queries;
+import fll.util.LogUtils;
 import fll.xml.ChallengeDescription;
 
 /**
  * Code for /index.jsp.
  */
 public class MainIndex {
+
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   /**
    * Populate the page context with information for the jsp.
@@ -34,15 +46,23 @@ public class MainIndex {
   public static void populateContext(final HttpServletRequest request,
                                      final ServletContext application,
                                      final PageContext pageContext) {
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
 
-    final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
-    pageContext.setAttribute("tournamentTitle", description.getTitle());
+      final int tournamentId = Queries.getCurrentTournament(connection);
+      final Tournament tournament = Tournament.findTournamentByID(connection, tournamentId);
+      pageContext.setAttribute("tournamentTitle", tournament.getDescription());
 
-    pageContext.setAttribute("urls", WebUtils.getAllUrls(request, application));
+      pageContext.setAttribute("urls", WebUtils.getAllUrls(request, application));
 
-    final String baseSslUrl = String.format("https://%s:%d%s", request.getServerName(), WebUtils.SSL_PORT,
-                                            request.getContextPath());
-    pageContext.setAttribute("baseSslUrl", baseSslUrl);
+      final String baseSslUrl = String.format("https://%s:%d%s", request.getServerName(), WebUtils.SSL_PORT,
+                                              request.getContextPath());
+      pageContext.setAttribute("baseSslUrl", baseSslUrl);
+    } catch (final SQLException sqle) {
+      LOGGER.error(sqle, sqle);
+      throw new RuntimeException("Error talking to the database", sqle);
+    }
+
   }
 
 }
