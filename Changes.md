@@ -1,3 +1,4 @@
+* #679 - when loading from a database, select the tournament that was in the database
 * #676 - keep tomcat logs from testing out of the distribution
 * #673 - Pass full URL, including query string, when redirected to the login form
 
