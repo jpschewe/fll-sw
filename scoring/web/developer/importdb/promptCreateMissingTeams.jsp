@@ -58,7 +58,7 @@
     action="AddMissingTeams">
 
     <p>The following teams are in the source database and not in the
-      dest database. OK to add teams?</p>
+      destination database. OK to add teams?</p>
 
     <table border='1'>
       <tr>
@@ -78,7 +78,7 @@
     <input
       name='submit'
       type='submit'
-      value="Add/Delete teams" />
+      value="Add teams" />
   </form>
 
   <p>
