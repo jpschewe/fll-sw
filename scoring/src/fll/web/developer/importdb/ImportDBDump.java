@@ -46,20 +46,21 @@ public class ImportDBDump extends BaseFLLServlet {
    * unique.
    */
   private static int _importdbCount = 0;
+
   public static int getNextDBCount() {
-    synchronized(ImportDBDump.class) {
+    synchronized (ImportDBDump.class) {
       return _importdbCount++;
     }
   }
-  
+
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     final StringBuilder message = new StringBuilder();
 
     Utilities.loadDBDriver();
-    Connection destConnection = null;
     try {
       // must be first to ensure the form parameters are set
       UploadProcessor.processUpload(request);
@@ -69,8 +70,7 @@ public class ImportDBDump extends BaseFLLServlet {
         final String databaseName = "dbimport"
             + String.valueOf(getNextDBCount());
         // TODO issue:123 should figure out how to clean up this database
-        final DataSource importDataSource = Utilities.createMemoryDataSource(databaseName)
-            ;
+        final DataSource importDataSource = Utilities.createMemoryDataSource(databaseName);
 
         // let other pages know where the connection is
         session.setAttribute("dbimport", importDataSource);
@@ -91,20 +91,22 @@ public class ImportDBDump extends BaseFLLServlet {
         }
 
         final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
-        destConnection = destDataSource.getConnection();
-        final String docMessage = checkChallengeDescriptors(memConnection, destConnection);
-        if (null == docMessage) {
-          session.setAttribute(SessionAttributes.REDIRECT_URL, "selectTournament.jsp");
-        } else {
-          message.append("<p class='error'>");
-          message.append("Import failed: Challenge descriptors are incompatible. ");
-          message.append(docMessage);
-          message.append("</p>");
-          session.setAttribute(SessionAttributes.REDIRECT_URL, "../index.jsp");
+        try (Connection destConnection = destDataSource.getConnection()) {
+          final String docMessage = checkChallengeDescriptors(memConnection, destConnection);
+          if (null == docMessage) {
+            session.setAttribute(SessionAttributes.REDIRECT_URL, "selectTournament.jsp");
+          } else {
+            message.append("<p class='error'>");
+            message.append("Import failed: Challenge descriptors are incompatible. ");
+            message.append(docMessage);
+            message.append("</p>");
+            session.setAttribute(SessionAttributes.REDIRECT_URL, "../index.jsp");
+          }
         }
       } else {
         message.append("<p class='error'>Unknown form state, expected form fields not seen: "
-            + request + "</p>");
+            + request
+            + "</p>");
       }
     } catch (final FileUploadException fue) {
       LOG.error(fue);
@@ -112,8 +114,6 @@ public class ImportDBDump extends BaseFLLServlet {
     } catch (final SQLException sqle) {
       LOG.error(sqle, sqle);
       throw new RuntimeException("Error loading data into the database", sqle);
-    } finally {
-      SQLFunctions.close(destConnection);
     }
 
     session.setAttribute(SessionAttributes.MESSAGE, message.toString());
@@ -126,7 +126,8 @@ public class ImportDBDump extends BaseFLLServlet {
    * @return message to the user if there are errors, null if everything is OK
    */
   private String checkChallengeDescriptors(final Connection sourceConnection,
-                                           final Connection destConnection) throws SQLException {
+                                           final Connection destConnection)
+      throws SQLException {
     final Document sourceDoc = GlobalParameters.getChallengeDocument(sourceConnection);
     final Document destDoc = GlobalParameters.getChallengeDocument(destConnection);
     final String compareMessage = ChallengeParser.compareStructure(destDoc, sourceDoc);
