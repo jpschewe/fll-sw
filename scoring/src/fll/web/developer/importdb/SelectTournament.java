@@ -16,6 +16,7 @@ import javax.servlet.jsp.PageContext;
 import org.apache.log4j.Logger;
 
 import fll.Tournament;
+import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.SessionAttributes;
 
@@ -37,6 +38,9 @@ public class SelectTournament {
 
       final List<Tournament> tournaments = Tournament.getTournaments(connection);
       page.setAttribute("tournaments", tournaments);
+
+      final String selectedTournamentName = Queries.getCurrentTournamentName(connection);
+      page.setAttribute("selectedTournament", selectedTournamentName);
 
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
