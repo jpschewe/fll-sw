@@ -6,10 +6,12 @@
 
 package fll.db;
 
+import java.io.Serializable;
+
 /**
  * Represents a different in a property for a team.
  */
-public class TeamPropertyDifference {
+public class TeamPropertyDifference implements Serializable {
   /**
    * Team string properties that can differ.
    */

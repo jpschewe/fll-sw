@@ -14,8 +14,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.log4j.Logger;
@@ -40,6 +38,11 @@ import fll.xml.ChallengeParser;
 public class ImportDBDump extends BaseFLLServlet {
 
   private static final Logger LOG = LogUtils.getLogger();
+
+  /**
+   * Key in the session to store an instance of {@link ImportDbSessionInfo}.
+   */
+  public static final String IMPORT_DB_SESSION_KEY = "importDbSessionInfo";
 
   /**
    * Keep track of the number of database imports so that the database names are
@@ -67,42 +70,47 @@ public class ImportDBDump extends BaseFLLServlet {
 
       if (null != request.getAttribute("importdb")) {
 
+        final ImportDbSessionInfo sessionInfo = new ImportDbSessionInfo();
+
         final String databaseName = "dbimport"
             + String.valueOf(getNextDBCount());
         // TODO issue:123 should figure out how to clean up this database
         final DataSource importDataSource = Utilities.createMemoryDataSource(databaseName);
 
-        // let other pages know where the connection is
-        session.setAttribute("dbimport", importDataSource);
+        sessionInfo.setImportDataSource(importDataSource);
 
-        final Connection memConnection = importDataSource.getConnection();
+        try (Connection memConnection = importDataSource.getConnection()) {
 
-        // import the database
-        final FileItem dumpFileItem = (FileItem) request.getAttribute("dbdump");
-        final ZipInputStream zipfile = new ZipInputStream(dumpFileItem.getInputStream());
-        final ImportDB.ImportResult importResult = ImportDB.loadDatabaseDump(zipfile, memConnection);
+          // import the database
+          final FileItem dumpFileItem = (FileItem) request.getAttribute("dbdump");
+          try (ZipInputStream zipfile = new ZipInputStream(dumpFileItem.getInputStream())) {
+            final ImportDB.ImportResult importResult = ImportDB.loadDatabaseDump(zipfile, memConnection);
 
-        if (importResult.hasBugs()) {
-          message.append("<p id='bugs_found' class='warning'>Bug reports found in the import.</p>");
-        }
-        if (Files.exists(importResult.getImportDirectory())) {
-          message.append(String.format("<p id='import_logs_dir'>See %s for bug reports and logs.</p>",
-                                       importResult.getImportDirectory()));
-        }
+            if (importResult.hasBugs()) {
+              message.append("<p id='bugs_found' class='warning'>Bug reports found in the import.</p>");
+            }
+            if (Files.exists(importResult.getImportDirectory())) {
+              message.append(String.format("<p id='import_logs_dir'>See %s for bug reports and logs.</p>",
+                                           importResult.getImportDirectory()));
+            }
 
-        final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
-        try (Connection destConnection = destDataSource.getConnection()) {
-          final String docMessage = checkChallengeDescriptors(memConnection, destConnection);
-          if (null == docMessage) {
-            session.setAttribute(SessionAttributes.REDIRECT_URL, "selectTournament.jsp");
-          } else {
-            message.append("<p class='error'>");
-            message.append("Import failed: Challenge descriptors are incompatible. ");
-            message.append(docMessage);
-            message.append("</p>");
-            session.setAttribute(SessionAttributes.REDIRECT_URL, "../index.jsp");
-          }
-        }
+            final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
+            try (Connection destConnection = destDataSource.getConnection()) {
+              final String docMessage = checkChallengeDescriptors(memConnection, destConnection);
+              if (null == docMessage) {
+                session.setAttribute(SessionAttributes.REDIRECT_URL, "selectTournament.jsp");
+              } else {
+                message.append("<p class='error'>");
+                message.append("Import failed: Challenge descriptors are incompatible. ");
+                message.append(docMessage);
+                message.append("</p>");
+                session.setAttribute(SessionAttributes.REDIRECT_URL, "../index.jsp");
+              }
+            } // allocate destConnection
+          } // allocate zipfile
+        } // allocate memConnection
+
+        session.setAttribute(IMPORT_DB_SESSION_KEY, sessionInfo);
       } else {
         message.append("<p class='error'>Unknown form state, expected form fields not seen: "
             + request
