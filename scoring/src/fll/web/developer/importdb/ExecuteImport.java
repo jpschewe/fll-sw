@@ -79,7 +79,7 @@ public class ExecuteImport extends BaseFLLServlet {
         Queries.updateScoreTotals(description, destConnection, destTournamentID);
 
         message.append(String.format("<p>Import of tournament %s successful.</p>", tournament));
-        session.setAttribute(SessionAttributes.REDIRECT_URL, "../index.jsp");
+        session.setAttribute(SessionAttributes.REDIRECT_URL, sessionInfo.getRedirectURL());
 
         session.removeAttribute(ImportDBDump.IMPORT_DB_SESSION_KEY);
       }

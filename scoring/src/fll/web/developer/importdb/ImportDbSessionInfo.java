@@ -12,6 +12,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.annotation.Nonnull;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
 import fll.Team;
@@ -139,6 +141,23 @@ public final class ImportDbSessionInfo {
    */
   public boolean isImportFinalist() {
     return importFinalist;
+  }
+
+  private String redirectURL = "../index.jsp";
+
+  /**
+   * This is a URL that is passed to
+   * {@link HttpServletResponse#sendRedirect(String)} when {@link ExecuteImport}
+   * finishes successfully. The default is the developer index.
+   * 
+   * @return the URL to redirect to on success
+   */
+  public String getRedirectURL() {
+    return redirectURL;
+  }
+
+  public void setRedirectURL(final String v) {
+    redirectURL = v;
   }
 
 }
