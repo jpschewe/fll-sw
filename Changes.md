@@ -1,3 +1,5 @@
+* #657 - Allow the import database process to do partial imports
+
 Release 13.2.0
 ==============
 
