@@ -581,7 +581,7 @@
 		<mkdir dir="${dir.build}/docs/workflows" />
 
 		<copy todir="${dir.build}/docs/workflows">
-			<fileset dir="${dir.build}/docs/workflows" />
+			<fileset dir="${basedir}/docs/workflows" />
 		</copy>
 
 		<apply executable="dot" dest="${dir.build}/docs/workflows">
