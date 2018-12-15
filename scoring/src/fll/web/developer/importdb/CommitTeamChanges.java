@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Objects;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -17,8 +18,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
-
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
@@ -43,43 +42,47 @@ public class CommitTeamChanges extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     final StringBuilder message = new StringBuilder();
+    final ImportDbSessionInfo sessionInfo = SessionAttributes.getNonNullAttribute(session,
+                                                                                  ImportDBDump.IMPORT_DB_SESSION_KEY,
+                                                                                  ImportDbSessionInfo.class);
 
-    Connection sourceConnection = null;
-    Connection destConnection = null;
-    try {      
-      final DataSource sourceDataSource = SessionAttributes.getNonNullAttribute(session, "dbimport", DataSource.class);
-      sourceConnection = sourceDataSource.getConnection();
+    final DataSource sourceDataSource = sessionInfo.getImportDataSource();
+    Objects.requireNonNull(sourceDataSource, "Missing import data source");
 
-      final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
-      destConnection = destDataSource.getConnection();
+    final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
 
-      @SuppressWarnings(value = "unchecked")
-      final List<TeamPropertyDifference> teamDifferences = SessionAttributes.getNonNullAttribute(session, "teamDifferences", List.class);
-      for(int idx=0; idx<teamDifferences.size(); ++idx) {
+    final List<TeamPropertyDifference> teamDifferences = sessionInfo.getTeamDifferences();
+
+    try (Connection sourceConnection = sourceDataSource.getConnection();
+        Connection destConnection = destDataSource.getConnection()) {
+
+      for (int idx = 0; idx < teamDifferences.size(); ++idx) {
         final TeamPropertyDifference difference = teamDifferences.get(idx);
         final String userChoice = request.getParameter(String.valueOf(idx));
-        if(null == userChoice) {
-          throw new RuntimeException("Missing paramter '" + idx + "' when committing team change");
-        } else if("source".equals(userChoice)) {
-          applyDifference(destConnection, difference.getTeamNumber(), difference.getProperty(), difference.getSourceValue());
-        } else if("dest".equals(userChoice)) {
-          applyDifference(sourceConnection, difference.getTeamNumber(), difference.getProperty(), difference.getDestValue());
+        if (null == userChoice) {
+          throw new RuntimeException("Missing paramter '"
+              + idx
+              + "' when committing team change");
+        } else if ("source".equals(userChoice)) {
+          applyDifference(destConnection, difference.getTeamNumber(), difference.getProperty(),
+                          difference.getSourceValue());
+        } else if ("dest".equals(userChoice)) {
+          applyDifference(sourceConnection, difference.getTeamNumber(), difference.getProperty(),
+                          difference.getDestValue());
         } else {
           throw new RuntimeException(String.format("Unknown value '%s' for choice of parameter '%d'", userChoice, idx));
         }
-                  
+
       }
-      
+
       session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTeamInfo");
-      
+
     } catch (final SQLException sqle) {
       LOG.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);
-    } finally {
-      SQLFunctions.close(sourceConnection);
-      SQLFunctions.close(destConnection);
     }
 
     session.setAttribute("message", message.toString());
@@ -94,8 +97,12 @@ public class CommitTeamChanges extends BaseFLLServlet {
    * @param property the property on the team to change
    * @param value the new value
    */
-  private void applyDifference(final Connection connection, final int teamNumber, final TeamProperty property, final String value) throws SQLException {
-    switch(property) {
+  private void applyDifference(final Connection connection,
+                               final int teamNumber,
+                               final TeamProperty property,
+                               final String value)
+      throws SQLException {
+    switch (property) {
     case NAME:
       Queries.updateTeamName(connection, teamNumber, value);
       break;
@@ -103,8 +110,9 @@ public class CommitTeamChanges extends BaseFLLServlet {
       Queries.updateTeamOrganization(connection, teamNumber, value);
       break;
     default:
-      throw new IllegalArgumentException("Unknown property " + property);
+      throw new IllegalArgumentException("Unknown property "
+          + property);
     }
-    
+
   }
 }
