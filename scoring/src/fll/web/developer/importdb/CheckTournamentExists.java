@@ -17,8 +17,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.log4j.Logger;
 
 import fll.Tournament;
@@ -40,41 +38,62 @@ public class CheckTournamentExists extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     final StringBuilder message = new StringBuilder();
 
-    Connection connection = null;
-    try {
-      // support finding the selected tournament in the session as well
-      final String selectedTournamentParam = request.getParameter("tournament");
-      final String selectedTournament;
-      if(null == selectedTournamentParam) {
-        selectedTournament = SessionAttributes.getAttribute(session, "selectedTournament", String.class);
-      } else {
-        selectedTournament = selectedTournamentParam;
-      }
-      
-      if (null != selectedTournament) {
-        session.setAttribute("selectedTournament", selectedTournament);
+    final ImportDbSessionInfo sessionInfo = SessionAttributes.getNonNullAttribute(session,
+                                                                                  ImportDBDump.IMPORT_DB_SESSION_KEY,
+                                                                                  ImportDbSessionInfo.class);
 
-        // Check if the tournament exists
-        final DataSource datasource = ApplicationAttributes.getDataSource(application);
-        connection = datasource.getConnection();
+    // support finding the selected tournament in the session as well
+    final String selectedTournamentParam = request.getParameter("tournament");
+    final String selectedTournament;
+    if (null == selectedTournamentParam) {
+      selectedTournament = sessionInfo.getTournamentName();
+    } else {
+      selectedTournament = selectedTournamentParam;
+    }
+
+    if (null != request.getParameter("submit_tournament")) {
+      // just came from selectTournament.jsp
+      sessionInfo.setImportSubjective(null != request.getParameter("importSubjective"));
+      sessionInfo.setImportPerformance(null != request.getParameter("importPerformance"));
+      sessionInfo.setImportFinalist(null != request.getParameter("importFinalist"));
+
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("subjective: " + request.getParameter("importSubjective"));
+        LOG.debug("performance: " + request.getParameter("importPerformance"));
+        LOG.debug("finalist: " + request.getParameter("importFinalist"));
+        LOG.debug("import subjective: "
+            + sessionInfo.isImportSubjective()
+            + " performance: "
+            + sessionInfo.isImportPerformance()
+            + " finalist: "
+            + sessionInfo.isImportFinalist());
+      }
+    }
+
+    if (null != selectedTournament) {
+      sessionInfo.setTournamentName(selectedTournament);
+
+      // Check if the tournament exists
+      final DataSource datasource = ApplicationAttributes.getDataSource(application);
+      try (Connection connection = datasource.getConnection()) {
         final Tournament tournament = Tournament.findTournamentByName(connection, selectedTournament);
         if (null == tournament) {
           session.setAttribute(SessionAttributes.REDIRECT_URL, "promptCreateTournament.jsp");
         } else {
           session.setAttribute(SessionAttributes.REDIRECT_URL, "FindMissingTeams");
         }
-
-      } else {
-        message.append("<p class='error'>Can't find the 'tournament' parameter</p>");
+      } catch (final SQLException sqle) {
+        LOG.error(sqle, sqle);
+        throw new RuntimeException("Error talking to the database", sqle);
       }
-    } catch (final SQLException sqle) {
-      LOG.error(sqle, sqle);
-      throw new RuntimeException("Error talking to the database", sqle);
-    } finally {
-      SQLFunctions.close(connection);
+
+      session.setAttribute(ImportDBDump.IMPORT_DB_SESSION_KEY, sessionInfo);
+    } else {
+      message.append("<p class='error'>Can't find the 'tournament' parameter</p>");
     }
 
     session.setAttribute("message", message.toString());

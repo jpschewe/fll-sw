@@ -8,7 +8,8 @@ package fll.web.developer.importdb;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
+import java.util.Collection;
+import java.util.Objects;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -26,7 +27,6 @@ import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Add teams after promptCreateMissingTeams.jsp.
@@ -41,24 +41,28 @@ public class AddMissingTeams extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     final StringBuilder message = new StringBuilder();
 
-    Connection sourceConnection = null;
-    Connection destConnection = null;
-    try {
-      final DataSource sourceDataSource = SessionAttributes.getNonNullAttribute(session, "dbimport", DataSource.class);
-      sourceConnection = sourceDataSource.getConnection();
+    final ImportDbSessionInfo sessionInfo = SessionAttributes.getNonNullAttribute(session,
+                                                                                  ImportDBDump.IMPORT_DB_SESSION_KEY,
+                                                                                  ImportDbSessionInfo.class);
 
-      final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
-      destConnection = destDataSource.getConnection();
+    final DataSource sourceDataSource = sessionInfo.getImportDataSource();
+    Objects.requireNonNull(sourceDataSource, "Missing import data source");
 
-      @SuppressWarnings(value = "unchecked")
-      final List<Team> missingTeams = SessionAttributes.getNonNullAttribute(session, FindMissingTeams.MISSING_TEAMS, List.class);
+    final Collection<Team> missingTeams = sessionInfo.getMissingTeams();
+
+    final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
+
+    try (Connection sourceConnection = sourceDataSource.getConnection();
+        Connection destConnection = destDataSource.getConnection()) {
+
       for (final Team team : missingTeams) {
-        // ignore the duplicate return value, if the team is already in the database, just assign the team to this tournament
-        Queries.addTeam(destConnection, team.getTeamNumber(), team.getTeamName(),
-                                           team.getOrganization());
+        // ignore the duplicate return value, if the team is already in the database it
+        // will all work out in ExecuteImport
+        Queries.addTeam(destConnection, team.getTeamNumber(), team.getTeamName(), team.getOrganization());
       }
 
       session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTeamInfo");
@@ -66,9 +70,6 @@ public class AddMissingTeams extends BaseFLLServlet {
     } catch (final SQLException sqle) {
       LOG.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);
-    } finally {
-      SQLFunctions.close(sourceConnection);
-      SQLFunctions.close(destConnection);
     }
 
     session.setAttribute("message", message.toString());
