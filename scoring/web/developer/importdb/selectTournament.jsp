@@ -34,7 +34,27 @@
 				</c:choose>
 
 			</c:forEach>
-		</select> <input name='submit' type='submit' value='Select Tournament' />
+		</select><br />
+
+
+		<!--  -->
+		<input name="importSubjective" id="importSubjective" type="checkbox"
+			${importSubjectiveChecked} /><label for="importSubjective">Import
+			Subjective Data</label><br />
+
+		<!--  -->
+		<input name="importPerformance" id="importPerformance" type="checkbox"
+			${importPerformanceChecked} /><label for="importPerformance">Import
+			Performance Data</label><br />
+
+		<!--  -->
+		<input name="importFinalist" id="importFinalist" type="checkbox"
+			${importFinalistChecked} /><label for="importFinalist">Import
+			Finalist Data</label><br />
+
+		<!--  -->
+		<input name='submit_tournament' type='submit'
+			value='Select Tournament' />
 	</form>
 
 	<p>

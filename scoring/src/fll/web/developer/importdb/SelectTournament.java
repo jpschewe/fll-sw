@@ -42,6 +42,24 @@ public class SelectTournament {
       final String selectedTournamentName = Queries.getCurrentTournamentName(connection);
       page.setAttribute("selectedTournament", selectedTournamentName);
 
+      if (sessionInfo.isImportSubjective()) {
+        page.setAttribute("importSubjectiveChecked", "checked");
+      } else {
+        page.setAttribute("importSubjectiveChecked", "");
+      }
+
+      if (sessionInfo.isImportPerformance()) {
+        page.setAttribute("importPerformanceChecked", "checked");
+      } else {
+        page.setAttribute("importPerformanceChecked", "");
+      }
+
+      if (sessionInfo.isImportFinalist()) {
+        page.setAttribute("importFinalistChecked", "checked");
+      } else {
+        page.setAttribute("importFinalistChecked", "");
+      }
+
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
       throw new RuntimeException("There was an error talking to the database", e);
