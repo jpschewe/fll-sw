@@ -200,20 +200,20 @@ public final class ImportDB {
                                                             final Connection destConnection)
       throws IOException, SQLException {
     PreparedStatement destPrep = null;
-    Connection memConnection = null;
+    Connection sourceConnection = null;
     Statement memStmt = null;
     ResultSet memRS = null;
     try {
       final String databaseName = "dbimport"
           + String.valueOf(ImportDBDump.getNextDBCount());
       final DataSource memSource = Utilities.createMemoryDataSource(databaseName);
-      memConnection = memSource.getConnection();
+      sourceConnection = memSource.getConnection();
 
-      final ImportDB.ImportResult importResult = loadDatabaseDump(zipfile, memConnection);
+      final ImportDB.ImportResult importResult = loadDatabaseDump(zipfile, sourceConnection);
       final Document challengeDocument = importResult.getChallengeDocument();
       GenerateDB.generateDB(challengeDocument, destConnection);
 
-      memStmt = memConnection.createStatement();
+      memStmt = sourceConnection.createStatement();
 
       // load the teams table into the destination database
       memRS = memStmt.executeQuery("SELECT TeamNumber, TeamName, Organization FROM Teams");
@@ -246,7 +246,7 @@ public final class ImportDB {
       // load all of the tournaments
       // don't worry about bringing the times over, this way they will all be
       // null and this will force score summarization
-      for (final Tournament sourceTournament : Tournament.getTournaments(memConnection)) {
+      for (final Tournament sourceTournament : Tournament.getTournaments(sourceConnection)) {
         if (!GenerateDB.INTERNAL_TOURNAMENT_NAME.equals(sourceTournament.getName())
             && GenerateDB.INTERNAL_TOURNAMENT_ID != sourceTournament.getTournamentID()) {
           createTournament(sourceTournament, destConnection);
@@ -254,11 +254,16 @@ public final class ImportDB {
       }
 
       // for each tournament listed in the dump file, import it
-      for (final Tournament sourceTournament : Tournament.getTournaments(memConnection)) {
+      for (final Tournament sourceTournament : Tournament.getTournaments(sourceConnection)) {
         final String tournament = sourceTournament.getName();
         // import the data from the tournament
-        importDatabase(memConnection, destConnection, tournament, true, true, true);
+        importDatabase(sourceConnection, destConnection, tournament, true, true, true);
       }
+
+      final String sourceSelectedTournamentName = Queries.getCurrentTournamentName(sourceConnection);
+      final Tournament destSelectedTournament = Tournament.findTournamentByName(destConnection,
+                                                                                sourceSelectedTournamentName);
+      Queries.setCurrentTournament(destConnection, destSelectedTournament.getTournamentID());
 
       // remove in-memory database
       memStmt.executeUpdate("SHUTDOWN");
@@ -267,7 +272,7 @@ public final class ImportDB {
     } finally {
       SQLFunctions.close(memRS);
       SQLFunctions.close(memStmt);
-      SQLFunctions.close(memConnection);
+      SQLFunctions.close(sourceConnection);
 
       SQLFunctions.close(destPrep);
     }

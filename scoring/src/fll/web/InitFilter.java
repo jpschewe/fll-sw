@@ -205,7 +205,7 @@ public class InitFilter implements Filter {
     if (WebUtils.checkAuthenticated(request, application)) {
       return true;
     } else {
-      session.setAttribute(SessionAttributes.REDIRECT_URL, request.getRequestURI());
+      session.setAttribute(SessionAttributes.REDIRECT_URL, WebUtils.getFullURL(request));
       response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
           + "/login.jsp"));
       LOGGER.debug("Returning false from checkSecurity");
