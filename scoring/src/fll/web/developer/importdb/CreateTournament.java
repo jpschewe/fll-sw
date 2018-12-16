@@ -8,6 +8,7 @@ package fll.web.developer.importdb;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Objects;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -24,7 +25,6 @@ import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Servlet to create a tournament.
@@ -39,7 +39,8 @@ public class CreateTournament extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     final StringBuilder message = new StringBuilder();
 
     // unset redirect url
@@ -49,7 +50,8 @@ public class CreateTournament extends BaseFLLServlet {
       final String answer = (String) request.getParameter("submit");
       if (LOG.isTraceEnabled()) {
         LOG.trace("Submit to CreateTournament: '"
-            + answer + "'");
+            + answer
+            + "'");
       }
 
       if ("Yes".equals(answer)) {
@@ -83,21 +85,22 @@ public class CreateTournament extends BaseFLLServlet {
    */
   private static void createSelectedTournament(final StringBuilder message,
                                                final ServletContext application,
-                                               final HttpSession session) throws SQLException {
-    Connection sourceConnection = null;
-    Connection destConnection = null;
-    try {
-      final String tournament = SessionAttributes.getNonNullAttribute(session, "selectedTournament", String.class);
-      final DataSource sourceDataSource = SessionAttributes.getNonNullAttribute(session, "dbimport", DataSource.class);
-      sourceConnection = sourceDataSource.getConnection();
+                                               final HttpSession session)
+      throws SQLException {
+    final ImportDbSessionInfo sessionInfo = SessionAttributes.getNonNullAttribute(session,
+                                                                                  ImportDBDump.IMPORT_DB_SESSION_KEY,
+                                                                                  ImportDbSessionInfo.class);
+    final String tournament = sessionInfo.getTournamentName();
+    Objects.requireNonNull(tournament, "Missing tournament name to import");
 
-      final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
-      destConnection = destDataSource.getConnection();
+    final DataSource sourceDataSource = sessionInfo.getImportDataSource();
+    Objects.requireNonNull(sourceDataSource, "Missing the import data source");
 
+    final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
+
+    try (Connection sourceConnection = sourceDataSource.getConnection();
+        Connection destConnection = destDataSource.getConnection()) {
       createTournament(sourceConnection, destConnection, tournament, message, session);
-    } finally {
-      SQLFunctions.close(sourceConnection);
-      SQLFunctions.close(destConnection);
     }
   }
 
@@ -111,11 +114,13 @@ public class CreateTournament extends BaseFLLServlet {
                                        final Connection destConnection,
                                        final String tournamentName,
                                        final StringBuilder message,
-                                       final HttpSession session) throws SQLException {
+                                       final HttpSession session)
+      throws SQLException {
     final Tournament sourceTournament = Tournament.findTournamentByName(sourceConnection, tournamentName);
     Tournament.createTournament(destConnection, sourceTournament.getName(), sourceTournament.getDescription());
     message.append("<p>Created tournament "
-        + sourceTournament.getName() + "</p>");
+        + sourceTournament.getName()
+        + "</p>");
 
     if (null == SessionAttributes.getRedirectURL(session)) {
       session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTournamentExists");

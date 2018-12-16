@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Objects;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -26,7 +27,6 @@ import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Servlet to find teams that are missing via
@@ -39,42 +39,39 @@ public class FindMissingTeams extends BaseFLLServlet {
 
   private static final Logger LOG = LogUtils.getLogger();
 
-  /**
-   * Teams that are in the source database for the tournament and not in the
-   * destination database for the tournament.
-   * List of type TournamentTeam.
-   */
-  public static final String MISSING_TEAMS = "missingTeams";
-
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     final StringBuilder message = new StringBuilder();
 
-    Connection sourceConnection = null;
-    Connection destConnection = null;
-    try {
-      final String tournament = SessionAttributes.getNonNullAttribute(session, "selectedTournament", String.class);
-      final DataSource sourceDataSource = SessionAttributes.getNonNullAttribute(session, "dbimport", DataSource.class);
-      sourceConnection = sourceDataSource.getConnection();
+    final ImportDbSessionInfo sessionInfo = SessionAttributes.getNonNullAttribute(session,
+                                                                                  ImportDBDump.IMPORT_DB_SESSION_KEY,
+                                                                                  ImportDbSessionInfo.class);
 
-      final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
-      destConnection = destDataSource.getConnection();
+    final String tournament = sessionInfo.getTournamentName();
+    Objects.requireNonNull(tournament, "Missing tournament to import");
+
+    final DataSource sourceDataSource = sessionInfo.getImportDataSource();
+    Objects.requireNonNull(sourceDataSource, "Missing import data source");
+
+    final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
+
+    try (Connection sourceConnection = sourceDataSource.getConnection();
+        Connection destConnection = destDataSource.getConnection()) {
 
       final List<Team> missingTeams = ImportDB.findMissingTeams(sourceConnection, destConnection, tournament);
       if (missingTeams.isEmpty()) {
         session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTeamInfo");
       } else {
-        session.setAttribute(MISSING_TEAMS, missingTeams);
+        sessionInfo.setMissingTeams(missingTeams);
+        session.setAttribute(ImportDBDump.IMPORT_DB_SESSION_KEY, sessionInfo);
         session.setAttribute(SessionAttributes.REDIRECT_URL, "promptCreateMissingTeams.jsp");
       }
     } catch (final SQLException sqle) {
       LOG.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);
-    } finally {
-      SQLFunctions.close(sourceConnection);
-      SQLFunctions.close(destConnection);
     }
 
     session.setAttribute("message", message.toString());

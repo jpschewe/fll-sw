@@ -12,14 +12,13 @@ import java.util.List;
 
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
-import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 
 import fll.Tournament;
+import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.SessionAttributes;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Populate page context for selectTournament.jsp.
@@ -31,20 +30,39 @@ public class SelectTournament {
   public static void populateContext(final HttpSession session,
                                      final PageContext page) {
 
-    final DataSource importDataSource = SessionAttributes.getNonNullAttribute(session, "dbimport", DataSource.class);
+    final ImportDbSessionInfo sessionInfo = SessionAttributes.getNonNullAttribute(session,
+                                                                                  ImportDBDump.IMPORT_DB_SESSION_KEY,
+                                                                                  ImportDbSessionInfo.class);
 
-    Connection connection = null;
-    try {
-      connection = importDataSource.getConnection();
+    try (Connection connection = sessionInfo.getImportDataSource().getConnection()) {
 
       final List<Tournament> tournaments = Tournament.getTournaments(connection);
       page.setAttribute("tournaments", tournaments);
 
+      final String selectedTournamentName = Queries.getCurrentTournamentName(connection);
+      page.setAttribute("selectedTournament", selectedTournamentName);
+
+      if (sessionInfo.isImportSubjective()) {
+        page.setAttribute("importSubjectiveChecked", "checked");
+      } else {
+        page.setAttribute("importSubjectiveChecked", "");
+      }
+
+      if (sessionInfo.isImportPerformance()) {
+        page.setAttribute("importPerformanceChecked", "checked");
+      } else {
+        page.setAttribute("importPerformanceChecked", "");
+      }
+
+      if (sessionInfo.isImportFinalist()) {
+        page.setAttribute("importFinalistChecked", "checked");
+      } else {
+        page.setAttribute("importFinalistChecked", "");
+      }
+
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
       throw new RuntimeException("There was an error talking to the database", e);
-    } finally {
-      SQLFunctions.close(connection);
     }
   }
 
