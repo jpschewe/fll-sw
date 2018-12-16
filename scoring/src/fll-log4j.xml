@@ -19,8 +19,6 @@
   </layout>
  </appender>
 
-<logger name="fll.web.playoff.Playoff"><level value="TRACE"/></logger>
-
  <!-- appender name="SYSLOG" class="org.apache.log4j.net.SyslogAppender"> 
   <param name="syslogHost" value="localhost"/> <param name="facility" value="USER"/> 
   <layout class="org.apache.log4j.PatternLayout"> <param name="conversionPattern" 
