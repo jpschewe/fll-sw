@@ -219,7 +219,7 @@ public class SubjectivePdfWriter {
     pageHeaderTable.addCell(roomCell);
 
     final PdfPCell teamNameCell = createCell(null, f12b, NO_BORDERS, Element.ALIGN_LEFT);
-    final String teamNameText = "Team Name: "
+    final String teamNameText = "Name: "
         + teamInfo.getTeamName();
     teamNameCell.setCellEvent(new PdfUtils.TruncateContent(teamNameText, f12b));
     pageHeaderTable.addCell(teamNameCell);
