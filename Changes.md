@@ -1,3 +1,4 @@
+* #690 - remove the ranking report
 * #689 - Support longer team names on the subjective sheets
 * #681 - Remove yes/no from subjective clear data page. The yes/no can be confusing.
 * #657 - Allow the import database process to do partial imports
