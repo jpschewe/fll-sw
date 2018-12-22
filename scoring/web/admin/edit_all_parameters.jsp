@@ -328,31 +328,6 @@
 					<td><input type='text' value="${gHeadToHeadMsPerRow }"
 						id='gHeadToHeadMsPerRow' name='gHeadToHeadMsPerRow' /></td>
 				</tr>
-
-				<tr>
-					<th>Should the ranking report display quartiles?</th>
-					<td><c:choose>
-							<c:when test="${gUseQuartiles }">
-								<input type='radio' name='gUseQuartiles' id='gUseQuartiles_yes'
-									value='true' checked />
-								<label for='gUseQuartiles_yes'>Yes</label>
-
-								<input type='radio' name='gUseQuartiles' id='gUseQuartiles_no'
-									value='false' />
-								<label for='gUseQuartiles_no'>No</label>
-							</c:when>
-							<c:otherwise>
-								<input type='radio' name='gUseQuartiles' id='gUseQuartiles_yes'
-									value='true' />
-								<label for='gUseQuartiles_yes'>Yes</label>
-
-								<input type='radio' name='gUseQuartiles' id='gUseQuartiles_no'
-									value='false' checked />
-								<label for='gUseQuartiles_no'>No</label>
-							</c:otherwise>
-						</c:choose></td>
-				</tr>
-
 				<tr>
 					<th colspan="2">FLL Tools integration</th>
 				</tr>

@@ -88,8 +88,6 @@ public class GatherParameterInformation {
       pageContext.setAttribute("gDivisionFlipRate",
                                GlobalParameters.getIntGlobalParameter(connection, GlobalParameters.DIVISION_FLIP_RATE));
 
-      pageContext.setAttribute("gUseQuartiles", GlobalParameters.getUseQuartilesInRankingReport(connection));
-
       pageContext.setAttribute("gAllTeamsMsPerRow", GlobalParameters.getAllTeamsMsPerRow(connection));
       pageContext.setAttribute("gHeadToHeadMsPerRow", GlobalParameters.getHeadToHeadMsPerRow(connection));
 
