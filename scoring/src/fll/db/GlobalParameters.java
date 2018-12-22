@@ -43,30 +43,6 @@ public final class GlobalParameters {
 
   public static final int DIVISION_FLIP_RATE_DEFAULT = 30;
 
-  public static final String RANKING_REPORT_USE_QUARTILES = "RankingReportUseQuartiles";
-
-  public static final boolean RANKING_REPORT_USE_QUARTILES_DEFAULT = true;
-
-  /**
-   * Should the ranking report show quartiles or actual ranks?
-   * 
-   * @return true to use quartiles
-   * @throws SQLException
-   */
-  public static boolean getUseQuartilesInRankingReport(final Connection connection) throws SQLException {
-    if (!globalParameterExists(connection, RANKING_REPORT_USE_QUARTILES)) {
-      return RANKING_REPORT_USE_QUARTILES_DEFAULT;
-    } else {
-      return getBooleanGlobalParameter(connection, RANKING_REPORT_USE_QUARTILES);
-    }
-  }
-
-  public static void setUseQuartilesInRankingReport(final Connection connection,
-                                                    final boolean value)
-      throws SQLException {
-    setBooleanGlobalParameter(connection, RANKING_REPORT_USE_QUARTILES, value);
-  }
-
   private GlobalParameters() {
     // no instances
   }

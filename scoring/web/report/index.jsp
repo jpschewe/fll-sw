@@ -38,10 +38,6 @@
 			category by judging group. This is useful for checking the winners of
 			each category.</li>
 
-		<li><a href="RankingReport" target="_blank">Ranking Report
-				for teams</a>. This is printed at the end of the day and each team gets
-			their page.</li>
-
 		<li><a href="PerformanceScoreReport" target="_blank">Performance
 				Score Report</a>. This displays the details of the performance runs for
 			each team.</li>
