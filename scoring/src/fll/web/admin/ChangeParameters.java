@@ -76,9 +76,6 @@ public class ChangeParameters extends BaseFLLServlet {
       GlobalParameters.setDoubleGlobalParameter(connection, GlobalParameters.DIVISION_FLIP_RATE,
                                                 Double.valueOf(request.getParameter("gDivisionFlipRate")));
 
-      GlobalParameters.setUseQuartilesInRankingReport(connection,
-                                                      Boolean.valueOf(request.getParameter("gUseQuartiles")));
-
       GlobalParameters.setAllTeamsMsPerRow(connection, Integer.parseInt(request.getParameter("gAllTeamsMsPerRow")));
 
       GlobalParameters.setHeadToHeadMsPerRow(connection, Integer.parseInt(request.getParameter("gHeadToHeadMsPerRow")));
