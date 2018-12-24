@@ -274,6 +274,7 @@
 					want to follow <a href="../documentation/2server.html">these
 						instructions</a>.
 				</li>
+				<li><a href="CheckSubjectiveEmpty">Export performance data for judges server</a></li>
 
 			</ul></li>
 
