@@ -15,7 +15,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -94,7 +97,8 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     try {
@@ -113,9 +117,17 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
       final Collection<CategoryColumnMapping> scheduleColumnMappings = CategoryColumnMapping.load(connection,
                                                                                                   currentTournament);
 
+      final Tournament tournament = Tournament.findTournamentByID(connection, currentTournament);
+
+      final DateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+      final String dateStr = df.format(new Date());
+
+      final String filename = String.format("%s_%s_subjective-data.fll", tournament.getName(), dateStr);
+
       response.reset();
       response.setContentType("application/zip");
-      response.setHeader("Content-Disposition", "filename=subjective-data.fll");
+      response.setHeader("Content-Disposition", "attachment; filename="
+          + filename);
       writeSubjectiveData(connection, challengeDocument, challengeDescription, schedule, scheduleColumnMappings,
                           response.getOutputStream());
     } catch (final SQLException e) {
@@ -140,7 +152,8 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
   public static Document createSubjectiveScoresDocument(final ChallengeDescription challengeDescription,
                                                         final Collection<? extends Team> teams,
                                                         final Connection connection,
-                                                        final int currentTournament) throws SQLException {
+                                                        final int currentTournament)
+      throws SQLException {
     ResultSet rs = null;
     ResultSet rs2 = null;
     PreparedStatement prep = null;
@@ -174,7 +187,7 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
 
           for (final Team team : teams) {
             final String teamJudgingGroup = Queries.getJudgingGroup(connection, team.getTeamNumber(),
-                                                                        currentTournament);
+                                                                    currentTournament);
             if (judgingStation.equals(teamJudgingGroup)) {
               final String teamDiv = Queries.getEventDivision(connection, team.getTeamNumber());
 
@@ -189,7 +202,8 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
               scoreElement.setAttributeNS(null, "judge", judge);
 
               prep2 = connection.prepareStatement("SELECT * FROM "
-                  + categoryName + " WHERE TeamNumber = ? AND Tournament = ? AND Judge = ?");
+                  + categoryName
+                  + " WHERE TeamNumber = ? AND Tournament = ? AND Judge = ?");
               prep2.setInt(1, team.getTeamNumber());
               prep2.setInt(2, currentTournament);
               prep2.setString(3, judge);
@@ -234,7 +248,8 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
                                          final ChallengeDescription challengeDescription,
                                          final TournamentSchedule schedule,
                                          final Collection<CategoryColumnMapping> scheduleColumnMappings,
-                                         final OutputStream stream) throws IOException, SQLException {
+                                         final OutputStream stream)
+      throws IOException, SQLException {
     final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection);
     final int tournament = Queries.getCurrentTournament(connection);
 
