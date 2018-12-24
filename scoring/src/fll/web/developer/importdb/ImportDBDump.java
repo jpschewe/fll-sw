@@ -50,6 +50,9 @@ public class ImportDBDump extends BaseFLLServlet {
    */
   private static int _importdbCount = 0;
 
+  /**
+   * @return an integer to differentiate in-memory databases.
+   */
   public static int getNextDBCount() {
     synchronized (ImportDBDump.class) {
       return _importdbCount++;
@@ -129,12 +132,14 @@ public class ImportDBDump extends BaseFLLServlet {
   }
 
   /**
-   * @param memConnection
-   * @param destConnection
+   * Compare challenge descriptions between 2 databases.
+   * 
+   * @param sourceConnection the first database to compare
+   * @param destConnection the second database to compare
    * @return message to the user if there are errors, null if everything is OK
    */
-  private String checkChallengeDescriptors(final Connection sourceConnection,
-                                           final Connection destConnection)
+  public static String checkChallengeDescriptors(final Connection sourceConnection,
+                                                 final Connection destConnection)
       throws SQLException {
     final Document sourceDoc = GlobalParameters.getChallengeDocument(sourceConnection);
     final Document destDoc = GlobalParameters.getChallengeDocument(destConnection);
