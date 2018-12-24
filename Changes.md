@@ -1,3 +1,4 @@
+* #670 - streamline the export/import process for the 2 server model
 * #690 - remove the ranking report
 * #689 - Support longer team names on the subjective sheets
 * #681 - Remove yes/no from subjective clear data page. The yes/no can be confusing.
