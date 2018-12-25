@@ -26,18 +26,15 @@
 
 	<h2>Main Pages</h2>
 	<ul>
-		<li><a href="public">Public landing page</a> A list of pages that
-			the public may want to visit if they are allowed to connect to the
-			network.</li>
-
-		<li><a href="scoreEntry/select_team.jsp">Score Entry</a> Follow
+		<li><a href="scoreEntry/select_team.jsp">Score Entry</a> - follow
 			this link on the performance score entry computers.</li>
 
-		<li><a href='display.jsp'>Big Screen Display</a> Follow this link
-			on the computer that's used to display scores with the projector.</li>
+		<li><a href='display.jsp'>Big Screen Display</a> - follow this
+			link on the computer that's used to display scores with the
+			projector.</li>
 
-		<li><a href="subjective/Auth">Subjective Web application</a>
-			Follow this link on the subjective judge's electronic devices. If you
+		<li><a href="subjective/Auth">Subjective Web application</a> -
+			follow this link on the subjective judge's electronic devices. If you
 			get an error that SSL is required for the application to work offline
 			then import the SSL certificate by following <a
 			href="documentation/installing-ssl-certificates.html" target='_new'>these
@@ -49,6 +46,12 @@
 						Web Application</a></li>
 			</ul></li>
 
+		<li><a href="<c:url value='/judges-room.jsp' />">Judges room</a>
+			- follow this link on the judges room server</li>
+
+		<li><a href="public">Public landing page</a> A list of pages that
+			the public may want to visit if they are allowed to connect to the
+			network.</li>
 
 	</ul>
 

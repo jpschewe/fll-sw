@@ -8,6 +8,8 @@ package fll.web;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -19,11 +21,12 @@ import org.apache.log4j.Logger;
 import fll.Tournament;
 import fll.db.Queries;
 import fll.util.LogUtils;
+import fll.xml.ChallengeDescription;
 
 /**
- * Code for /index.jsp.
+ * Code for /judges-room.jsp.
  */
-public class MainIndex {
+public class JudgesRoom {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -56,6 +59,13 @@ public class MainIndex {
       final String baseSslUrl = String.format("https://%s:%d%s", request.getServerName(), WebUtils.SSL_PORT,
                                               request.getContextPath());
       pageContext.setAttribute("baseSslUrl", baseSslUrl);
+
+      final int currentTournamentID = Queries.getCurrentTournament(connection);
+      pageContext.setAttribute("currentTournament", Tournament.findTournamentByID(connection, currentTournamentID));
+
+      final List<Tournament> tournaments = Tournament.getTournaments(connection);
+      pageContext.setAttribute("tournaments", tournaments);
+
     } catch (final SQLException sqle) {
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);
