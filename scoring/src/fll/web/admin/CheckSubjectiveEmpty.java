@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
@@ -58,6 +59,7 @@ public class CheckSubjectiveEmpty extends BaseFLLServlet {
     }
   }
 
+  @SuppressFBWarnings(value = "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING", justification = "table name is dependent on category name")
   private boolean categoryHasScores(final Connection connection,
                                     final ScoreCategory category,
                                     final int tournamentId)
