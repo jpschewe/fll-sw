@@ -35,11 +35,11 @@ import fll.web.developer.importdb.ImportDBDump;
 import fll.web.developer.importdb.ImportDbSessionInfo;
 
 /**
- * Start the import of performance data by setting up the expected parameters
+ * Start the import of finalist data by setting up the expected parameters
  * and then calling into the import database workflow.
  */
-@WebServlet("/admin/ProcessImportPerformance")
-public class ProcessImportPerformance extends BaseFLLServlet {
+@WebServlet("/admin/ProcessImportFinalist")
+public class ProcessImportFinalist extends BaseFLLServlet {
 
   private static final Logger LOG = LogUtils.getLogger();
 
@@ -57,7 +57,7 @@ public class ProcessImportPerformance extends BaseFLLServlet {
       // must be first to ensure the form parameters are set
       UploadProcessor.processUpload(request);
 
-      if (null != request.getAttribute("performanceFile")) {
+      if (null != request.getAttribute("finalistFile")) {
 
         final ImportDbSessionInfo sessionInfo = new ImportDbSessionInfo();
 
@@ -69,14 +69,14 @@ public class ProcessImportPerformance extends BaseFLLServlet {
 
         sessionInfo.setImportDataSource(importDataSource);
 
-        // set redirect page to be the judges room index
-        final String finalRedirectUrl = String.format("%s/judges-room.jsp", request.getContextPath());
+        // set redirect page to be the admin index
+        final String finalRedirectUrl = String.format("%s/admin/index.jsp", request.getContextPath());
         sessionInfo.setRedirectURL(finalRedirectUrl);
 
         try (Connection memConnection = importDataSource.getConnection()) {
 
           // import the database
-          final FileItem dumpFileItem = (FileItem) request.getAttribute("performanceFile");
+          final FileItem dumpFileItem = (FileItem) request.getAttribute("finalistFile");
           try (ZipInputStream zipfile = new ZipInputStream(dumpFileItem.getInputStream())) {
             ImportDB.loadDatabaseDump(zipfile, memConnection);
 
@@ -97,15 +97,19 @@ public class ProcessImportPerformance extends BaseFLLServlet {
                 } else {
 
                   sessionInfo.setTournamentName(sourceTournamentName);
-                  sessionInfo.setImportFinalist(false);
-                  sessionInfo.setImportPerformance(true);
-                  sessionInfo.setImportSubjective(false);
+                  sessionInfo.setImportFinalist(true);
+                  sessionInfo.setImportPerformance(false);
+                  sessionInfo.setImportSubjective(true);
 
-                  session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckPerformanceEmpty");
+                  // insert into the import workflow after tournament verification
+                  final String redirect = String.format("%s/developer/importdb/FindMissingTeams",
+                                                        request.getContextPath());
+                  session.setAttribute(SessionAttributes.REDIRECT_URL, redirect);
+                  session.setAttribute(ImportDBDump.IMPORT_DB_SESSION_KEY, sessionInfo);
                 }
               } else {
                 message.append("<p class='error'>");
-                message.append("Import failed: Challenge descriptors are incompatible. This performance dump is not from the same tournament.");
+                message.append("Import failed: Challenge descriptors are incompatible. This finalist dump is not from the same tournament.");
                 message.append(docMessage);
                 message.append("</p>");
                 session.setAttribute(SessionAttributes.REDIRECT_URL, "index.jsp");
@@ -113,12 +117,13 @@ public class ProcessImportPerformance extends BaseFLLServlet {
             } // allocate destConnection
           } // allocate zipfile
         } // allocate memConnection
-
-        session.setAttribute(ImportDBDump.IMPORT_DB_SESSION_KEY, sessionInfo);
       } else {
-        message.append("<p class='error'>Missing performance data file</p>");
+        message.append("<p class='error'>Missing finalist data file</p>");
         session.setAttribute(SessionAttributes.REDIRECT_URL, "index.jsp");
       }
+
+      session.setAttribute(SessionAttributes.MESSAGE, message.toString());
+      response.sendRedirect(response.encodeRedirectURL(SessionAttributes.getRedirectURL(session)));
     } catch (final FileUploadException fue) {
       LOG.error(fue);
       throw new RuntimeException("Error handling the file upload", fue);
@@ -126,9 +131,6 @@ public class ProcessImportPerformance extends BaseFLLServlet {
       LOG.error(sqle, sqle);
       throw new RuntimeException("Error loading data into the database", sqle);
     }
-
-    session.setAttribute(SessionAttributes.MESSAGE, message.toString());
-    response.sendRedirect(response.encodeRedirectURL(SessionAttributes.getRedirectURL(session)));
   }
 
 }

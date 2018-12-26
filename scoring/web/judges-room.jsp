@@ -162,6 +162,79 @@
 	</ul>
 
 
+	<h2>Finalist scheduling</h2>
+	<p>This is used at tournaments where there is more than 1 judging
+		group in an award group. This is typically the case at a state
+		tournament where all teams are competing for first place in each
+		category, but there are too many teams for one judge to see.</p>
+
+	<p>Before using these links the initial head to head brackets need
+		to be assigned in the performance area and the performance dump needs
+		to be imported using the link above.</p>
+
+	<ul>
+
+		<li><a href="<c:url value='/report/non-numeric-nominees.jsp' />"
+			target="_blank">Enter non-numeric nominees</a>. This is used to enter
+			the teams that are up for consideration for the non-scored subjective
+			categories. This information transfers over to the finalist
+			scheduling web application. This is also used in the awards scripts
+			report.</li>
+
+		<li><a href="<c:url value='/report/finalist/load.jsp' />"
+			target="_blank">Schedule Finalists</a>. Before visiting this page,
+			all subjective scores need to be uploaded and any head to head
+			brackets that will occur during the finalist judging should be
+			created to avoid scheduling conflicts.</li>
+
+		<li>
+			<form
+				ACTION="<c:url value='/report/finalist/PrivateFinalistSchedule' />"
+				METHOD='POST' target="_blank">
+				<select name='division'>
+					<c:forEach var="division" items="${finalistDivisions }">
+						<option value='${division }'>${division }</option>
+					</c:forEach>
+				</select> <input type='submit' value='Private Finalist Schedule (PDF)' />
+				This displays the finalist schedule for all categories.
+			</form>
+		</li>
+
+		<li>
+			<form
+				ACTION="<c:url value='/report/finalist/PublicFinalistSchedule' />"
+				METHOD='POST' target="_blank">
+				<select name='division'>
+					<c:forEach var="division" items="${finalistDivisions }">
+						<option value='${division }'>${division }</option>
+					</c:forEach>
+				</select> <input type='submit' value='Public Finalist Schedule (PDF)' />
+				This displays the finalist schedule for public categories.
+			</form>
+		</li>
+
+		<li>
+			<form
+				ACTION="<c:url value='/report/finalist/PublicFinalistDisplaySchedule.jsp' />"
+				METHOD='POST' target="_blank">
+				<select name='division'>
+					<c:forEach var="division" items="${finalistDivisions }">
+						<option value='${division }'>${division }</option>
+					</c:forEach>
+				</select> <input type='submit' value='Public Finalist Schedule (HTML)' />
+				This displays the finalist schedule for public categories.
+			</form>
+		</li>
+
+		<li><a
+			href="<c:url value='/report/finalist/TeamFinalistSchedule' />"
+			target="_blank">Finalist Schedule for each team</a></li>
+
+		<li><a href="<c:url value='/admin/ExportFinalistData' />">Export
+				finalist data</a> to bring to the performance computer</li>
+
+	</ul>
+
 
 </body>
 </html>

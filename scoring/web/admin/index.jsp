@@ -290,6 +290,20 @@
 								<input id='uploadPerformanceData' type="submit" value="Upload" />
 							</form>
 						</li>
+
+
+						<li>
+							<form name="import-finalist" action="ProcessImportFinalist"
+								method="POST" ENCTYPE="multipart/form-data">
+								Specify the file that was exported from the judges server with
+								the finalist data <input type="file" size="32"
+									name="finalistFile" />
+
+								<!-- performance file upload button -->
+								<input id='uploadFinalistData' type="submit" value="Upload" />
+							</form>
+						</li>
+
 					</ul>
 				</li>
 				<!--  end 2 server actions -->
