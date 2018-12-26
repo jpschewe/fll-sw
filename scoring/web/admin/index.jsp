@@ -272,13 +272,10 @@
 
 				<li>2 server actions
 					<ul>
-						<li>If there is a second server in the judges room, you will
-							want to follow <a href="../documentation/2server.html">these
-								instructions</a>.
-						</li>
-
 						<li><a href="CheckSubjectiveEmpty">Export performance
-								data for judges server</a></li>
+								data for judges server</a>. If doing finalist scheduling, the
+							initial head to head brackets need to be created before doing
+							this export.</li>
 
 						<li>
 							<form name="import-performance" action="ProcessImportPerformance"
