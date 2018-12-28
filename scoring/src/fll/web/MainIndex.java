@@ -8,7 +8,6 @@ package fll.web;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -20,7 +19,6 @@ import org.apache.log4j.Logger;
 import fll.Tournament;
 import fll.db.Queries;
 import fll.util.LogUtils;
-import fll.xml.ChallengeDescription;
 
 /**
  * Code for /index.jsp.

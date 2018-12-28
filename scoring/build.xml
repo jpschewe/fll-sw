@@ -348,6 +348,10 @@
 		</copy>
 
 		<fix-scripts dir="${dir.build}" />
+
+		<!-- copy judges server page -->
+		<copy todir="${dir.build}" file="${basedir}/docs/judges-server.html" />
+
 	</target>
 
 	<macrodef name="fix-scripts" description="Fix script permissions and line endings">

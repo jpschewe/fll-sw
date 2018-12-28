@@ -15,6 +15,9 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Formatter;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -36,6 +39,7 @@ import org.w3c.dom.Document;
 
 import au.com.bytecode.opencsv.CSVWriter;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.Tournament;
 import fll.Utilities;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -61,22 +65,54 @@ public final class DumpDB extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+
+    final String label = "";
+
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
     try (Connection connection = datasource.getConnection()) {
-      final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
-      response.reset();
-      response.setContentType("application/zip");
-      response.setHeader("Content-Disposition", "filename=database.flldb");
-
-      final ZipOutputStream zipOut = new ZipOutputStream(response.getOutputStream());
-      try {
-        DumpDB.dumpDatabase(zipOut, connection, challengeDocument, application);
-      } finally {
-        zipOut.close();
-      }
+      exportDatabase(response, application, label, challengeDocument, connection);
     } catch (final SQLException sqle) {
       throw new RuntimeException(sqle);
+    }
+  }
+
+  /**
+   * Export the current database using a standard filename format.
+   * 
+   * @param response where to write the database
+   * @param application used to get some information for the dump
+   * @param label the label to use, may be null. Appended to the end of the
+   *          filename before the suffix.
+   * @param challengeDocument the challenge document
+   * @param connection database connection
+   * @throws SQLException if there is an error reading from the database
+   * @throws IOException if there is an error writing to the response
+   */
+  public static void exportDatabase(final HttpServletResponse response,
+                                    final ServletContext application,
+                                    final String label,
+                                    final Document challengeDocument,
+                                    Connection connection)
+      throws SQLException, IOException {
+    final int tournamentId = Queries.getCurrentTournament(connection);
+    final Tournament tournament = Tournament.findTournamentByID(connection, tournamentId);
+
+    final DateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+    final String dateStr = df.format(new Date());
+
+    final String filename = String.format("%s_%s%s.flldb", tournament.getName(), dateStr, (null == label ? "" : label));
+    response.reset();
+    response.setContentType("application/zip");
+    response.setHeader("Content-Disposition", "attachment; filename="
+        + filename);
+
+    final ZipOutputStream zipOut = new ZipOutputStream(response.getOutputStream());
+    try {
+      DumpDB.dumpDatabase(zipOut, connection, challengeDocument, application);
+    } finally {
+      zipOut.close();
     }
   }
 
