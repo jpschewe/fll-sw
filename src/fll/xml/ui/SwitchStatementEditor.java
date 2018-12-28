@@ -48,12 +48,15 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 
   private final DeleteEventListener mCaseDeleteListener;
 
+  private final SwitchStatement switchStmt;
+
   public SwitchStatementEditor(final SwitchStatement switchStmt,
                                final GoalScope goalScope,
                                final VariableScope variableScope) {
     super(new BorderLayout());
     this.goalScope = goalScope;
     this.variableScope = variableScope;
+    this.switchStmt = switchStmt;
 
     final Box buttonBox = Box.createHorizontalBox();
     add(buttonBox, BorderLayout.NORTH);
@@ -176,6 +179,15 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
    */
   public void commitChanges() {
     stmtEditors.forEach(CaseStatementEditor::commitChanges);
+  }
+
+  /**
+   * @param messages add any errors to the list
+   */
+  /* package */ void gatherValidityMessages(final List<String> messages) {
+    if (switchStmt.getDefaultCase().getTerms().isEmpty()) {
+      messages.add("There must be an otherwise case that has a value");
+    }
   }
 
 }

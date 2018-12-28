@@ -65,6 +65,7 @@ public class ComputedGoalEditor extends AbstractGoalEditor {
     super.gatherValidityMessages(messages);
 
     variableListEditor.gatherValidityMessages(messages);
+    switchStatementEditor.gatherValidityMessages(messages);
   }
 
 }
