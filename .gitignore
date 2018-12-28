@@ -5,3 +5,17 @@ cobertura.ser
 .DS_Store
 *~
 .*.html
+.ant-targets-build.xml
+ant
+sloccount.sc
+build
+tmp
+fll.log
+dist
+web/wiki/*
+override.properties
+web/sponsor_logos/*.jpg
+cloc.xml
+bin/
+import_*
+tmp-web
