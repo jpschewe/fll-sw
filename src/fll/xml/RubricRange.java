@@ -13,6 +13,7 @@ import javax.annotation.Nonnull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.util.FLLRuntimeException;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**
@@ -166,6 +167,10 @@ public class RubricRange implements Serializable {
   }
 
   public Element toXml(final Document doc) {
+    if (mMin >= mMax) {
+      throw new FLLRuntimeException("Minimum value must be less than maximum value");
+    }
+
     final Element ele = doc.createElement(TAG_NAME);
     ele.setAttribute(TITLE_ATTRIBUTE, mTitle);
     ele.setAttribute(MIN_ATTRIBUTE, Integer.toString(mMin));
