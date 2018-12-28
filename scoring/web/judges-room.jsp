@@ -29,6 +29,10 @@
 	<%-- clear out the message, so that we don't see it again --%>
 	<c:remove var="message" />
 
+	<p>This page contains links to the pages used in the judges room.
+		Most links open new tabs so that you can continue to follow the
+		workflow on this page.</p>
+
 	<p>
 		The current tournament is <b>${tournamentTitle }</b>
 	</p>

@@ -24,7 +24,11 @@
 		The current tournament is <b>${tournamentTitle }</b>
 	</p>
 
-	<h2>Main Pages</h2>
+	<h2>Computer types</h2>
+
+	<p>There is a link here for the common uses of computers at a
+		tournament.</p>
+
 	<ul>
 		<li><a href="scoreEntry/select_team.jsp">Score Entry</a> - follow
 			this link on the performance score entry computers.</li>
@@ -48,6 +52,9 @@
 
 		<li><a href="<c:url value='/judges-room.jsp' />">Judges room</a>
 			- follow this link on the judges room server</li>
+
+		<li><a href="<c:url value='/admin/performance-area.jsp' />">Performance
+				area</a> - follow this link on the performance area server</li>
 
 		<li><a href="public">Public landing page</a> A list of pages that
 			the public may want to visit if they are allowed to connect to the
@@ -73,6 +80,7 @@
 
 
 	<h2>Server addresses</h2>
+	<p>These are needed for any computer connecting to the software.</p>
 	<ul>
 		<c:forEach items="${urls}" var="url">
 			<li><a href="${url }">${url }</a></li>
@@ -96,7 +104,8 @@
 					subjective sheet - ${category.title} (PDF)</a>
 		</c:forEach>
 
-		<li><a href='challenge.xml'>Challenge Descriptor</a></li>
+		<li><a href='challenge.xml'>Challenge Descriptor</a>. One can use
+			this to see the scoring and the tie breaker.</li>
 
 		<li><a href="developer/index.jsp">Developer page</a></li>
 
