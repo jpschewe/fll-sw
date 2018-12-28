@@ -1084,6 +1084,8 @@ public class TournamentSchedule implements Serializable {
    * @param description the challenge description
    * @param categoryToSchedule mapping of ScoreCategories to schedule columns
    * @param tournamentName the name of the tournament to display on the sheets
+   * @param filenameSuffixes map score category to output filename suffixes, may
+   *          be empty
    * @throws DocumentException
    * @throws MalformedURLException
    * @throws IOException
@@ -1092,18 +1094,22 @@ public class TournamentSchedule implements Serializable {
                                      final String dir,
                                      final String baseFileName,
                                      final ChallengeDescription description,
-                                     final Map<ScoreCategory, String> categoryToSchedule)
+                                     @Nonnull final Map<ScoreCategory, String> categoryToSchedule,
+                                     @Nonnull final Map<ScoreCategory, String> filenameSuffixes)
       throws DocumentException, MalformedURLException, IOException {
 
     // setup the sheets from the sucked in xml
     for (final ScoreCategory category : description.getSubjectiveCategories()) {
       final SheetElement sheetElement = createSubjectiveSheetElement(category);
+      final String suffix = filenameSuffixes.get(category);
 
       final String filename = dir
           + File.separator
           + baseFileName
           + "-"
           + category.getName()
+          + (null != suffix ? "_"
+              + suffix : "")
           + ".pdf";
 
       // sort the schedule by the category we're working with

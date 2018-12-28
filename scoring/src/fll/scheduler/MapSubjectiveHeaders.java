@@ -12,6 +12,7 @@ import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,21 +23,24 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreCategory;
 
 /**
- * Map subjective headers to subjective categories.
+ * Map subjective headers to subjective categories. Also map file suffixes.
  * This dialog is modal.
  */
-public class MapSubjectiveHeaders extends JDialog {
+/* package */ class MapSubjectiveHeaders extends JDialog {
 
   private final ChallengeDescription description;
 
   private final TournamentSchedule schedule;
 
   private final Map<ScoreCategory, JComboBox<String>> comboBoxes = new HashMap<>();
+
+  private final Map<ScoreCategory, JTextField> filenameSuffixes = new HashMap<>();
 
   private boolean canceled = true;
 
@@ -70,17 +74,18 @@ public class MapSubjectiveHeaders extends JDialog {
   private void initComponents() {
     getContentPane().setLayout(new BorderLayout());
 
-    final JTextArea instructions = new JTextArea("Match the column names from the schedule data file with the subjective categories that they contain the schedule for. Also specify the number of minutes between judging sessions for each category.");
+    final JTextArea instructions = new JTextArea("Match the column names from the schedule data file with the subjective categories that they contain the schedule for. If you want a suffix on the filename, then fill in that column.");
     instructions.setEditable(false);
     instructions.setWrapStyleWord(true);
     instructions.setLineWrap(true);
     getContentPane().add(instructions, BorderLayout.NORTH);
 
-    final JPanel grid = new JPanel(new GridLayout(0, 2));
+    final JPanel grid = new JPanel(new GridLayout(0, 3));
     getContentPane().add(grid, BorderLayout.CENTER);
 
     grid.add(new JLabel("Subjective Category"));
     grid.add(new JLabel("Data file column name"));
+    grid.add(new JLabel("Filename suffix for category"));
 
     final String[] scheduleColumns = schedule.getSubjectiveStations().toArray(new String[0]);
 
@@ -90,6 +95,11 @@ public class MapSubjectiveHeaders extends JDialog {
       final JComboBox<String> comboBox = new JComboBox<>(scheduleColumns);
       grid.add(comboBox);
       comboBoxes.put(category, comboBox);
+
+      final String defaultText = DEFAULT_CATEGORY_SUFFIXES.get(category.getName());
+      final JTextField filenameSuffix = new JTextField(defaultText);
+      grid.add(filenameSuffix);
+      filenameSuffixes.put(category, filenameSuffix);
     }
 
     final Box buttonBox = Box.createHorizontalBox();
@@ -113,7 +123,7 @@ public class MapSubjectiveHeaders extends JDialog {
       }
     });
 
-    setMinimumSize(getPreferredSize());
+    // setMinimumSize(getPreferredSize());
     pack();
   }
 
@@ -130,6 +140,40 @@ public class MapSubjectiveHeaders extends JDialog {
     } else {
       return null;
     }
+  }
+
+  /**
+   * Get filename suffix for category.
+   * 
+   * @param category what to find
+   * @return null if not found or no suffix
+   */
+  public String getFilenameSuffixForCategory(final ScoreCategory category) {
+    final JTextField widget = filenameSuffixes.get(category);
+    if (null != widget) {
+      final String text = widget.getText();
+      if (null == text
+          || "".equals(text.trim())) {
+        return null;
+      } else {
+        return text.trim();
+      }
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Map category names to file suffixes.
+   */
+  private static final Map<String, String> DEFAULT_CATEGORY_SUFFIXES;
+  static {
+    final Map<String, String> defaultCategorySuffixes = new HashMap<>();
+    defaultCategorySuffixes.put("project", "LtBeigePaper");
+    defaultCategorySuffixes.put("core_values", "LtPinkPaper");
+    defaultCategorySuffixes.put("robot_design", "LtBluePaper");
+    defaultCategorySuffixes.put("robot_programming", "LtPurplePaper");
+    DEFAULT_CATEGORY_SUFFIXES = Collections.unmodifiableMap(defaultCategorySuffixes);
   }
 
 }
