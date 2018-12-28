@@ -19,14 +19,14 @@ pipeline {
     stage('Duplicate Code Analysis') {
       steps { 
         fllSwAnt('cpd.xml')
-        dry defaultEncoding: '', healthy: '', pattern: 'scoring/build/cpd.xml', unHealthy: ''
+        dry defaultEncoding: '', healthy: '', pattern: 'build/cpd.xml', unHealthy: ''
       }     
     }
 
     stage('Count lines of code') {
       steps { 
         fllSwAnt('sloccount')
-        sloccountPublish pattern: 'scoring/cloc.xml'
+        sloccountPublish pattern: 'cloc.xml'
       }
     }
 
@@ -39,7 +39,7 @@ pipeline {
     stage('Findbugs analysis') {
       steps { 
         fllSwAnt('findbugs')
-        findbugs defaultEncoding: '', excludePattern: '', failedTotalHigh: '0', healthy: '', includePattern: '', pattern: 'scoring/build/findbugs/report.xml', unHealthy: ''
+        findbugs defaultEncoding: '', excludePattern: '', failedTotalHigh: '0', healthy: '', includePattern: '', pattern: 'build/findbugs/report.xml', unHealthy: ''
       }
     }
     
@@ -48,7 +48,7 @@ pipeline {
         throttle(['fll-sw']) { 
           timestamps {
             fllSwAnt('dist')
-            junit testResults: "scoring/build/test-results/TEST-*.xml", keepLongStdio: true
+            junit testResults: "build/test-results/TEST-*.xml", keepLongStdio: true
             fllSwAnt('tomcat.check-logs')
           } // timestamps
         } // throttle
@@ -58,7 +58,7 @@ pipeline {
     stage('Code coverage analysis') {
       steps { 
         fllSwAnt('coverage.report')
-        step $class: 'CoberturaPublisher', coberturaReportFile: 'scoring/build/docs/reports/coverage/coverage.xml'
+        step $class: 'CoberturaPublisher', coberturaReportFile: 'build/docs/reports/coverage/coverage.xml'
       }
     }
     
@@ -68,7 +68,7 @@ pipeline {
             allowMissing: false,
             alwaysLinkToLastBuild: false,
             keepAll: false,
-            reportDir: 'scoring/build/docs',
+            reportDir: 'build/docs',
             reportFiles: 'index.html',
             reportName: 'Documentation'
           ])
@@ -79,9 +79,9 @@ pipeline {
     
   post {
     always {
-      archiveArtifacts artifacts: 'scoring/build/screenshots/,scoring/build/tomcat/webapps/fll-sw/fllweb*,scoring/build/tomcat/logs/,scoring/build/docs/reports/,scoring/build/fll-sw*.zip'           
+      archiveArtifacts artifacts: 'build/screenshots/,build/tomcat/webapps/fll-sw/fllweb*,build/tomcat/logs/,build/docs/reports/,build/fll-sw*.zip'           
                         
-      openTasks defaultEncoding: '', excludePattern: 'scoring/checkstyle*.xml,**/ChatServlet.java', healthy: '', high: 'FIXME,HACK', low: '', normal: 'TODO', pattern: '**/*.java,**/*.jsp,**/*.jspf,**/*.xml', unHealthy: ''
+      openTasks defaultEncoding: '', excludePattern: 'checkstyle*.xml,**/ChatServlet.java', healthy: '', high: 'FIXME,HACK', low: '', normal: 'TODO', pattern: '**/*.java,**/*.jsp,**/*.jspf,**/*.xml', unHealthy: ''
       warnings categoriesPattern: '', consoleParsers: [[parserName: 'Java Compiler (javac)']], defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', messagesPattern: '', unHealthy: ''
       
       emailext recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']], 
@@ -108,12 +108,10 @@ Find more details at: ${JENKINS_URL}
 
 def fllSwAnt(target) {
   withAnt(installation: 'FLL-SW') {
-    dir("scoring") {
-      if (isUnix()) {
-        sh script: "ant ${target}"
-      } else {
-        bat script: "ant ${target}"
-      }
+    if (isUnix()) {
+      sh script: "ant ${target}"
+    } else {
+      bat script: "ant-win ${target}"
     }
   }
 }
