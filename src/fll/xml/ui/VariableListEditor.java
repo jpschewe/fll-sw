@@ -7,8 +7,10 @@
 package fll.xml.ui;
 
 import java.awt.BorderLayout;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.swing.Box;
@@ -132,6 +134,24 @@ public class VariableListEditor extends JPanel {
    */
   public void commitChanges() {
     editors.forEach(e -> e.commitChanges());
+  }
+
+  /**
+   * Check that there aren't duplicate variable names.
+   * 
+   * @param messages add any errors to the list
+   */
+  /* package */ void gatherValidityMessages(final List<String> messages) {
+    final Set<String> variableNames = new HashSet<>();
+
+    editors.forEach(e -> {
+      final String name = e.getVariable().getName();
+      final boolean newElement = variableNames.add(name);
+      if (!newElement) {
+        final String message = String.format("The variable name '%s' is used twice in the goal", name);
+        messages.add(message);
+      }
+    });
   }
 
 }
