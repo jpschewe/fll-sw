@@ -266,6 +266,10 @@
 		<h2>Other useful pages</h2>
 		<ul>
 
+			<li><a
+				href="<c:url value='/playoff/h2h-checkin-instructions.jsp' />">Instructions
+					for tablet displays</a></li>
+
 			<li><a href="remoteMain.jsp">Scrolling Head to head Bracket</a>
 				(as on big screen display)<br /> Bracket and round must be selected
 				from the big screen display <a
