@@ -1102,7 +1102,7 @@ public class TournamentSchedule implements Serializable {
       final String filename = dir
           + File.separator
           + baseFileName
-          + "_SubjectiveSheets-"
+          + "-"
           + category.getName()
           + ".pdf";
 
