@@ -320,6 +320,8 @@ public class GoalEditor extends AbstractGoalEditor {
 
   @Override
   protected void gatherValidityMessages(final List<String> messages) {
+    super.gatherValidityMessages(messages);
+    
     if (!mEnumerated.isSelected()) {
       checkCountValid(messages);
     } else {
