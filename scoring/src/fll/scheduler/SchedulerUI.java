@@ -287,10 +287,11 @@ public class SchedulerUI extends JFrame {
       if (returnVal == JFileChooser.APPROVE_OPTION) {
         final File currentDirectory = fileChooser.getCurrentDirectory();
         PREFS.put(DESCRIPTION_STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
-        
+
         File selectedFile = fileChooser.getSelectedFile();
-        if(!selectedFile.getName().endsWith(".properties")) {
-          selectedFile = new File(selectedFile.getAbsolutePath() + ".properties");
+        if (!selectedFile.getName().endsWith(".properties")) {
+          selectedFile = new File(selectedFile.getAbsolutePath()
+              + ".properties");
         }
 
         mScheduleDescriptionFile = selectedFile;
@@ -838,6 +839,7 @@ public class SchedulerUI extends JFrame {
               mapDialog.setVisible(true);
               if (!mapDialog.isCanceled()) {
                 final Map<ScoreCategory, String> categoryToSchedule = new HashMap<>();
+                final Map<ScoreCategory, String> filenameSuffixes = new HashMap<>();
                 for (final ScoreCategory scoreCategory : description.getSubjectiveCategories()) {
                   final String scheduleColumn = mapDialog.getSubjectiveHeaderForCategory(scoreCategory);
                   if (null == scheduleColumn) {
@@ -845,10 +847,11 @@ public class SchedulerUI extends JFrame {
                         + scoreCategory.getTitle());
                   }
                   categoryToSchedule.put(scoreCategory, scheduleColumn);
+                  filenameSuffixes.put(scoreCategory, mapDialog.getFilenameSuffixForCategory(scoreCategory));
                 }
 
                 getScheduleData().outputSubjectiveSheets(tournamentName, directory.getAbsolutePath(), baseFilename,
-                                                         description, categoryToSchedule);
+                                                         description, categoryToSchedule, filenameSuffixes);
 
                 JOptionPane.showMessageDialog(SchedulerUI.this, "Scoresheets written '"
                     + scoresheetFile.getAbsolutePath()

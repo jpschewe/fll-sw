@@ -145,7 +145,3 @@ If you are at a tournament and someone else has set the password for the server 
 Use the "Create User" option under "User Management".
 Once you create a new user, both that use and the new user will be able to edit scores.
 
-## Alternative setups
-
-  * [Setup with a separate server in the judges room](2server.md)
-  

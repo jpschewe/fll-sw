@@ -250,8 +250,8 @@
 						<!-- overwrite all scores -->
 						<input type='checkbox' name='overwrite_all' value='true'
 							id='subjective_overwrite_all' /> <label
-							for='subjective_overwrite_all'>Overwrite All Subjective Scores</label> <a
-							href='javascript:display("subjective_overwrite_help")'>[help]</a>
+							for='subjective_overwrite_all'>Overwrite All Subjective
+							Scores</label> <a href='javascript:display("subjective_overwrite_help")'>[help]</a>
 						<div id='subjective_overwrite_help' class='help'
 							style='display: none'>
 							The normal upload only saves scores that have been modified by
@@ -270,10 +270,41 @@
 					</form>
 				</li>
 
-				<li>If there is a second server in the judges room, you will
-					want to follow <a href="../documentation/2server.html">these
-						instructions</a>.
+				<li>2 server actions
+					<ul>
+						<li><a href="CheckSubjectiveEmpty">Export performance
+								data for judges server</a>. If doing finalist scheduling, the
+							initial head to head brackets need to be created before doing
+							this export.</li>
+
+						<li>
+							<form name="import-performance" action="ProcessImportPerformance"
+								method="POST" ENCTYPE="multipart/form-data">
+								Specify the file that was exported from the performance server <input
+									type="file" size="32" name="performanceFile" />
+
+								<!-- performance file upload button -->
+								<input id='uploadPerformanceData' type="submit" value="Upload" />
+							</form>
+						</li>
+
+
+						<li>
+							<form name="import-finalist" action="ProcessImportFinalist"
+								method="POST" ENCTYPE="multipart/form-data">
+								Specify the file that was exported from the judges server with
+								the finalist data <input type="file" size="32"
+									name="finalistFile" />
+
+								<!-- performance file upload button -->
+								<input id='uploadFinalistData' type="submit" value="Upload" />
+							</form>
+						</li>
+
+					</ul>
 				</li>
+				<!--  end 2 server actions -->
+
 
 			</ul></li>
 
