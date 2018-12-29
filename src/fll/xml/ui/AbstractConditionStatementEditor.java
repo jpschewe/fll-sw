@@ -109,8 +109,8 @@ public class AbstractConditionStatementEditor extends JPanel implements Validata
 
     final boolean conditionValid;
     if (enumCondition.isSelected()) {
-//      conditionValid = enumStmtEditor.checkValidity(messagesToDisplay);
-//      valid &= conditionValid;
+      conditionValid = enumStmtEditor.checkValidity(messagesToDisplay);
+      valid &= conditionValid;
     } else {
       conditionValid = standardStmtEditor.checkValidity(messagesToDisplay);
       valid &= conditionValid;

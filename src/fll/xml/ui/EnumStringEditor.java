@@ -28,11 +28,12 @@ import fll.xml.AbstractGoal;
 import fll.xml.GoalRef;
 import fll.xml.GoalScope;
 import fll.xml.GoalScoreType;
+import fll.xml.ScopeException;
 
 /**
  * Editor to allow one to pick a string or an enumerated goal.
  */
-class EnumStringEditor extends JPanel {
+class EnumStringEditor extends JPanel implements Validatable {
 
   private GoalRef goalRef;
 
@@ -48,14 +49,19 @@ class EnumStringEditor extends JPanel {
 
   private static final String STRING_PANEL = "string";
 
+  private final JCheckBox decision;
+
+  private final GoalScope goalScope;
+
   public EnumStringEditor(final GoalRef goalRef,
                           final String str,
                           @Nonnull final GoalScope goalScope) {
     super(new BorderLayout());
     this.goalRef = goalRef;
     this.string = str;
+    this.goalScope = goalScope;
 
-    final JCheckBox decision = new JCheckBox("String");
+    decision = new JCheckBox("String");
     add(decision, BorderLayout.NORTH);
 
     final CardLayout layout = new CardLayout();
@@ -144,5 +150,21 @@ class EnumStringEditor extends JPanel {
       }
     }
   };
+
+  @Override
+  public boolean checkValidity(Collection<String> messagesToDisplay) {
+    boolean valid = true;
+
+    if (!decision.isSelected()) {
+      try {
+        goalScope.getGoal(goalRef.getGoalName());
+      } catch (final ScopeException e) {
+        messagesToDisplay.add(String.format("Goal %s is not known. It may have been deleted.", goalRef.getGoalName()));
+        valid = false;
+      }
+    }
+
+    return valid;
+  }
 
 }

@@ -7,6 +7,7 @@
 package fll.xml.ui;
 
 import java.awt.BorderLayout;
+import java.util.Collection;
 
 import javax.annotation.Nonnull;
 import javax.swing.Box;
@@ -20,7 +21,7 @@ import fll.xml.InequalityComparison;
 /**
  * Edit {@link EnumConditionStatement}.
  */
-/* package */ class EnumConditionStatementEditor extends JPanel {
+/* package */ class EnumConditionStatementEditor extends JPanel implements Validatable {
 
   private final EnumStringEditor leftEditor;
 
@@ -62,6 +63,19 @@ import fll.xml.InequalityComparison;
     stmt.setLeftString(leftEditor.getString());
     stmt.setRightGoalRef(rightEditor.getGoalRef());
     stmt.setRightString(rightEditor.getString());
+  }
+
+  @Override
+  public boolean checkValidity(Collection<String> messagesToDisplay) {
+    boolean valid = true;
+
+    final boolean leftValid = leftEditor.checkValidity(messagesToDisplay);
+    valid &= leftValid;
+
+    final boolean rightValid = rightEditor.checkValidity(messagesToDisplay);
+    valid &= rightValid;
+
+    return valid;
   }
 
 }
