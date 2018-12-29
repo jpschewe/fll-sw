@@ -7,7 +7,7 @@
 package fll.xml.ui;
 
 import java.text.ParseException;
-import java.util.List;
+import java.util.Collection;
 
 import javax.swing.Box;
 import javax.swing.JFormattedTextField;
@@ -112,9 +112,9 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
   }
 
   @Override
-  protected void gatherValidityMessages(final List<String> messages) {
+  protected void gatherValidityMessages(final Collection<String> messages) {
     super.gatherValidityMessages(messages);
-    
+
     if (StringUtils.isBlank(mTitleEditor.getText())) {
       messages.add("The category must have a title");
     }

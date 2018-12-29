@@ -6,7 +6,7 @@
 
 package fll.xml.ui;
 
-import java.util.List;
+import java.util.Collection;
 
 import fll.xml.PerformanceScoreCategory;
 
@@ -38,7 +38,7 @@ public class PerformanceEditor extends ScoreCategoryEditor {
   }
 
   @Override
-  protected void gatherValidityMessages(final List<String> messages) {
+  protected void gatherValidityMessages(final Collection<String> messages) {
     super.gatherValidityMessages(messages);
     restrictions.checkValidity(messages);
     tiebreaker.checkValidity(messages);
