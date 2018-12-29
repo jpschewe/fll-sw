@@ -8,10 +8,14 @@ package fll.xml.ui;
 
 import java.text.ParseException;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -28,10 +32,20 @@ import org.apache.log4j.Logger;
 import fll.Utilities;
 import fll.util.FormatterUtils;
 import fll.util.LogUtils;
+import fll.xml.AbstractConditionStatement;
 import fll.xml.AbstractGoal;
+import fll.xml.BasicPolynomial;
+import fll.xml.CaseStatement;
 import fll.xml.ComputedGoal;
+import fll.xml.ConditionStatement;
+import fll.xml.EnumConditionStatement;
 import fll.xml.Goal;
+import fll.xml.GoalRef;
+import fll.xml.ScopeException;
 import fll.xml.ScoreCategory;
+import fll.xml.SwitchStatement;
+import fll.xml.Term;
+import fll.xml.Variable;
 import fll.xml.ui.MovableExpandablePanel.DeleteEvent;
 import fll.xml.ui.MovableExpandablePanel.DeleteEventListener;
 import fll.xml.ui.MovableExpandablePanel.MoveEvent;
@@ -256,7 +270,7 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
    * 
    * @param messages put invalid messages in the list.
    */
-  protected void gatherValidityMessages(final List<String> messages) {
+  protected void gatherValidityMessages(final Collection<String> messages) {
 
     final Set<String> goalNames = new HashSet<>();
     for (final AbstractGoalEditor editor : mGoalEditors) {
@@ -274,6 +288,7 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
       }
     }
 
+    checkCircularReferences(messages);
   }
 
   @Override
@@ -288,6 +303,151 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
       categoryValid.setValid();
       return true;
     }
+  }
+
+  private static void getReferencedComputedGoals(final BasicPolynomial poly,
+                                                 final Set<ComputedGoal> referenced) {
+    if (null == poly) {
+      return;
+    }
+
+    for (final Term t : poly.getTerms()) {
+      for (final GoalRef gr : t.getGoals()) {
+        getReferencedComputedGoals(gr, referenced);
+      } // foreach goal
+    } // foreach term
+  }
+
+  private static void getReferencedComputedGoals(final CaseStatement caseStatement,
+                                                 final Set<ComputedGoal> referenced) {
+    if (null == caseStatement) {
+      return;
+    }
+
+    getReferencedComputedGoals(caseStatement.getCondition(), referenced);
+
+    if (null != caseStatement.getResultPoly()) {
+      getReferencedComputedGoals(caseStatement.getResultPoly(), referenced);
+    }
+    if (null != caseStatement.getResultSwitch()) {
+      getReferencedComputedGoals(caseStatement.getResultSwitch(), referenced);
+    }
+
+  }
+
+  private static void getReferencedComputedGoals(final GoalRef gr,
+                                                 final Set<ComputedGoal> referenced) {
+    try {
+      final AbstractGoal goal = gr.getGoal();
+      if (goal.isComputed()) {
+        referenced.add((ComputedGoal) goal);
+      }
+    } catch (final ScopeException e) {
+      // handled elsewhere
+      LOGGER.debug("Referenced goal doesn't exist: "
+          + gr.getGoalName());
+    }
+  }
+
+  private static void getReferencedComputedGoals(final AbstractConditionStatement cond,
+                                                 final Set<ComputedGoal> referenced) {
+    if (null == cond) {
+      return;
+    }
+
+    if (cond instanceof ConditionStatement) {
+      final ConditionStatement c = (ConditionStatement) cond;
+      getReferencedComputedGoals(c.getLeft(), referenced);
+      getReferencedComputedGoals(c.getRight(), referenced);
+    } else if (cond instanceof EnumConditionStatement) {
+      final EnumConditionStatement c = (EnumConditionStatement) cond;
+      getReferencedComputedGoals(c.getLeftGoalRef(), referenced);
+      getReferencedComputedGoals(c.getRightGoalRef(), referenced);
+    } else {
+      throw new IllegalArgumentException("Unknown condition type: "
+          + cond.getClass());
+    }
+  }
+
+  private static void getReferencedComputedGoals(final SwitchStatement sw,
+                                                 final Set<ComputedGoal> referenced) {
+    if (null == sw) {
+      return;
+    }
+
+    for (final CaseStatement cstmt : sw.getCases()) {
+      getReferencedComputedGoals(cstmt, referenced);
+    }
+
+    getReferencedComputedGoals(sw.getDefaultCase(), referenced);
+  }
+
+  /**
+   * Find all computed goals that are directly referenced by the source goal.
+   * 
+   * @param source the source goal
+   * @return the referenced goals
+   */
+  private static Set<ComputedGoal> getReferencedComputedGoals(final ComputedGoal source) {
+    final Set<ComputedGoal> referenced = new HashSet<>();
+
+    getReferencedComputedGoals(source.getSwitch(), referenced);
+
+    for (final Variable var : source.getVariables()) {
+      getReferencedComputedGoals(var, referenced);
+    }
+
+    return referenced;
+  }
+
+  private static boolean findCircularReferences(final ComputedGoal next,
+                                                final List<ComputedGoal> visited,
+                                                final Map<ComputedGoal, Set<ComputedGoal>> referenceMap,
+                                                final Collection<String> messages) {
+    final List<ComputedGoal> newVisited = new LinkedList<>(visited);
+    newVisited.add(next);
+
+    final Set<ComputedGoal> refs = referenceMap.getOrDefault(next, Collections.emptySet());
+    for (final ComputedGoal check : refs) {
+      if (newVisited.contains(check)) {
+        newVisited.add(check); // so that the name gets in the list for the message
+        final List<String> newVisitedNames = newVisited.stream().map(ComputedGoal::getName)
+                                                       .collect(Collectors.toList());
+        final String chainMessage = String.join(" -> ", newVisitedNames);
+        final String message = "Found circular references: "
+            + chainMessage;
+        messages.add(message);
+        return true;
+      } else {
+        final boolean result = findCircularReferences(check, newVisited, referenceMap, messages);
+        if (result) {
+          return true;
+        }
+      }
+    }
+
+    // no issues
+    return false;
+  }
+
+  private void checkCircularReferences(final Collection<String> messages) {
+
+    // compute direct references
+    final Map<ComputedGoal, Set<ComputedGoal>> referenceMap = new HashMap<>();
+    for (final AbstractGoal ag : mCategory.getGoals()) {
+      if (ag.isComputed()) {
+        final ComputedGoal goal = (ComputedGoal) ag;
+        final Set<ComputedGoal> refs = getReferencedComputedGoals(goal);
+        referenceMap.put(goal, refs);
+      }
+    }
+
+    // walk the references to find circular dependencies
+    referenceMap.forEach((goal,
+                          ignored) -> {
+      findCircularReferences(goal, Collections.emptyList(), referenceMap, messages);
+    });
+
   }
 
 }
