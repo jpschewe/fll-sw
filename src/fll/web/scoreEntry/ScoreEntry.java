@@ -355,9 +355,8 @@ public final class ScoreEntry {
       formatter.format("    $('#score-errors').append('<div>%s</div>');%n", message);
       formatter.format("    error_found = true;%n");
       formatter.format("  }%n");
+      ++restrictIdx;
     }
-    
-    ++restrictIdx;
   }
 
   /**

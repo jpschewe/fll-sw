@@ -58,9 +58,12 @@ public class AbstractConditionStatementEditor extends JPanel implements Validata
     if (stmt instanceof ConditionStatement) {
       condStmt = (ConditionStatement) stmt;
       enumStmt = new EnumConditionStatement();
-    } else {
+    } else if (stmt instanceof EnumConditionStatement) {
       condStmt = new ConditionStatement();
       enumStmt = (EnumConditionStatement) stmt;
+    } else {
+      throw new IllegalArgumentException("Unknown condition statement class: "
+          + stmt.getClass());
     }
 
     enumCondition = new JCheckBox("Enumeration Comparison");

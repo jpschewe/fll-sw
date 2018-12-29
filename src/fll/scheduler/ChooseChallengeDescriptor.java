@@ -192,11 +192,9 @@ public class ChooseChallengeDescriptor extends JDialog {
         final String revision = descriptionInfo.getRevision();
         final StringBuilder value = new StringBuilder();
         value.append(title);
-        if (null != revision) {
-          value.append('(');
-          value.append(revision);
-          value.append(')');
-        }
+        value.append('(');
+        value.append(revision);
+        value.append(')');
 
         return mDelegate.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
       }
