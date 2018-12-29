@@ -10,6 +10,7 @@ import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.text.ParseException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -375,7 +376,7 @@ public class ChallengeDescriptionEditor extends JPanel implements Validatable {
   }
 
   @Override
-  public boolean checkValidity() {
+  public boolean checkValidity(final Collection<String> messagesToDisplay) {
     commitChanges();
 
     boolean valid = true;
@@ -387,20 +388,23 @@ public class ChallengeDescriptionEditor extends JPanel implements Validatable {
       titleValidity.setValid();
     }
 
-    final boolean performanceEditorValid = mPerformanceEditor.checkValidity();
+    final Collection<String> performanceMessages = new LinkedList<>();
+    final boolean performanceEditorValid = mPerformanceEditor.checkValidity(performanceMessages);
     if (!performanceEditorValid) {
-      performanceValid.setInvalid("Performance has invalid elements");
+      performanceMessages.add("Performance has invalid elements");
+      final String message = String.join("<br/>", performanceMessages);
+      performanceValid.setInvalid(message);
       valid = false;
     } else {
       performanceValid.setValid();
     }
 
-    final List<String> subjectiveInvalidMessages = new LinkedList<>();
+    final Collection<String> subjectiveInvalidMessages = new LinkedList<>();
     final Set<String> subjectiveCategoryNames = new HashSet<>();
     for (final SubjectiveCategoryEditor editor : mSubjectiveEditors) {
       final String name = editor.getSubjectiveScoreCategory().getName();
 
-      final boolean editorValid = editor.checkValidity();
+      final boolean editorValid = editor.checkValidity(subjectiveInvalidMessages);
       if (!editorValid) {
         subjectiveInvalidMessages.add(String.format("Category \"%s\" has invalid elements", name));
         valid = false;

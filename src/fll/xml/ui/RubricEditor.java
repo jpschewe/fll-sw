@@ -8,6 +8,7 @@ package fll.xml.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -96,11 +97,14 @@ public class RubricEditor extends JPanel implements Validatable {
   }
 
   @Override
-  public boolean checkValidity() {
+  public boolean checkValidity(final Collection<String> messagesToDisplay) {
     boolean valid = true;
     for (final RubricRangeEditor editor : rangeEditors) {
-      final boolean v = editor.checkValidity();
-      valid &= v;
+      final boolean v = editor.checkValidity(messagesToDisplay);
+      if (!v) {
+        messagesToDisplay.add("Some elements of the Rubric are invalid");
+        valid = false;
+      }
     }
     return valid;
   }
