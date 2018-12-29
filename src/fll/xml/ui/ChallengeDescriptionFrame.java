@@ -15,13 +15,15 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.prefs.Preferences;
@@ -89,7 +91,7 @@ public class ChallengeDescriptionFrame extends JFrame {
         // {
         final InputStream stream = ChallengeDescriptionEditor.class.getResourceAsStream("/fll/resources/challenge-descriptors/fll-2014-world_class.xml")) {
 
-      final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(stream));
+      final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(stream, Charset.defaultCharset()));
 
       final ChallengeDescription description = new ChallengeDescription(challengeDocument.getDocumentElement());
 
@@ -252,7 +254,7 @@ public class ChallengeDescriptionFrame extends JFrame {
         return;
       }
 
-      try (Reader stream = new FileReader(file)) {
+      try (Reader stream = new InputStreamReader(new FileInputStream(file), Charset.defaultCharset())) {
 
         final Document challengeDocument = ChallengeParser.parse(stream);
 
@@ -406,7 +408,7 @@ public class ChallengeDescriptionFrame extends JFrame {
       return;
     }
 
-    try (final Writer writer = new FileWriter(mCurrentFile)) {
+    try (final Writer writer = new OutputStreamWriter(new FileOutputStream(mCurrentFile), Charset.defaultCharset())) {
       final Document saveDoc = editor.getDescription().toXml();
       XMLUtils.writeXML(saveDoc, writer, Utilities.DEFAULT_CHARSET.name());
     } catch (final IOException e) {
@@ -460,7 +462,7 @@ public class ChallengeDescriptionFrame extends JFrame {
         }
       }
 
-      try (final Writer writer = new FileWriter(file)) {
+      try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charset.defaultCharset())) {
         final Document saveDoc = editor.getDescription().toXml();
         XMLUtils.writeXML(saveDoc, writer, Utilities.DEFAULT_CHARSET.name());
 

@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
@@ -114,10 +115,12 @@ public class SetupIndex {
       return mDescription;
     }
 
+    @Nonnull
     public String getTitle() {
       return mDescription.getTitle();
     }
 
+    @Nonnull
     public String getRevision() {
       return mDescription.getRevision();
     }
