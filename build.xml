@@ -567,13 +567,9 @@
   -->
 	<target name="docs" depends="javadoc,doc.workflow.generate,doc.markdown.render,doc.database-diagram" description="Generate all documentation">
 
-		<copy todir="${dir.build}/docs">
-			<fileset dir="${basedir}/..">
-				<include name="LICENSE" />
-			</fileset>
-		</copy>
-
-		<copy todir="${dir.build}/docs" file="${basedir}/../Changes.md" />
+		<copy todir="${dir.build}/docs" file="${basedir}/LICENSE" />
+		
+		<copy todir="${dir.build}/docs" file="${basedir}/Changes.md" />
 
 		<copy todir="${dir.web}/documentation">
 			<fileset dir="${dir.build}/docs" />

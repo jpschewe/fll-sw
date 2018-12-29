@@ -18,7 +18,8 @@ unset CATALINA_HOME
 unset CATALINA_BASE
 
 #Make sure that the right ant is being used
-unset ANT_HOME
+ANT_HOME="${MYDIR}"/tools/ant
+export ANT_HOME
 
 # Set ANT options
 #ANT_OPTS="-XX:MaxPermSize=128m"
