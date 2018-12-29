@@ -9,12 +9,14 @@ package fll.xml.ui;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.text.ParseException;
+import java.util.Collection;
 
 import javax.annotation.Nonnull;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import fll.util.FormatterUtils;
@@ -23,15 +25,17 @@ import fll.xml.GoalScope;
 import fll.xml.Variable;
 
 /**
- * 
+ * Editor for {@link Variable}.
  */
-public class VariableEditor extends JPanel {
+public class VariableEditor extends JPanel implements Validatable {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
   private final JFormattedTextField mNameEditor;
 
   private final Variable variable;
+
+  private final PolynomialEditor polyEditor;
 
   /**
    * @return the variable being edited
@@ -72,7 +76,7 @@ public class VariableEditor extends JPanel {
     mNameEditor.setColumns(80);
     mNameEditor.setMaximumSize(mNameEditor.getPreferredSize());
 
-    final PolynomialEditor polyEditor = new PolynomialEditor(variable, goalScope, null);
+    polyEditor = new PolynomialEditor(variable, goalScope, null);
     gbc = new GridBagConstraints();
     gbc.weightx = 1;
     gbc.weighty = 1;
@@ -97,6 +101,21 @@ public class VariableEditor extends JPanel {
     } catch (final ParseException e) {
       LOGGER.debug("Got parse exception committing changes to name, assuming bad value and ignoring", e);
     }
+  }
+
+  @Override
+  public boolean checkValidity(final Collection<String> messagesToDisplay) {
+    boolean valid = true;
+
+    if (StringUtils.isBlank(mNameEditor.getText())) {
+      messagesToDisplay.add("The variable must have a name");
+      valid = false;
+    }
+
+    final boolean polyValid = polyEditor.checkValidity(messagesToDisplay);
+    valid &= polyValid;
+
+    return valid;
   }
 
 }

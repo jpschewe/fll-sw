@@ -8,6 +8,7 @@ package fll.xml.ui;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.util.Collection;
 
 import javax.annotation.Nonnull;
 import javax.swing.Box;
@@ -23,7 +24,7 @@ import fll.xml.VariableScope;
 /**
  * Editor for {@link AbstractConditionStatement}.
  */
-public class AbstractConditionStatementEditor extends JPanel {
+public class AbstractConditionStatementEditor extends JPanel implements Validatable {
 
   private static final String ENUM_PANEL = "enum";
 
@@ -32,6 +33,10 @@ public class AbstractConditionStatementEditor extends JPanel {
   private AbstractConditionStatement stmt;
 
   private final EnumConditionStatementEditor enumStmtEditor;
+
+  private final JCheckBox enumCondition;
+
+  private final ConditionStatementEditor standardStmtEditor;
 
   /**
    * This is a {@link ConditionStatement} or an {@link EnumConditionStatement}
@@ -58,7 +63,7 @@ public class AbstractConditionStatementEditor extends JPanel {
       enumStmt = (EnumConditionStatement) stmt;
     }
 
-    final JCheckBox enumCondition = new JCheckBox("Enumeration Comparison");
+    enumCondition = new JCheckBox("Enumeration Comparison");
     enumCondition.setToolTipText("Select this when you want to compare specific values of an enumerated goal");
     add(enumCondition, BorderLayout.NORTH);
 
@@ -66,8 +71,8 @@ public class AbstractConditionStatementEditor extends JPanel {
     final JPanel conditionPanel = new JPanel(conditionLayout);
     add(conditionPanel, BorderLayout.CENTER);
 
-    final ConditionStatementEditor standard = new ConditionStatementEditor(condStmt, goalScope, variableScope);
-    conditionPanel.add(standard, STANDARD_PANEL);
+    standardStmtEditor = new ConditionStatementEditor(condStmt, goalScope, variableScope);
+    conditionPanel.add(standardStmtEditor, STANDARD_PANEL);
 
     final Box enumPanel = Box.createVerticalBox();
     conditionPanel.add(enumPanel, ENUM_PANEL);
@@ -96,6 +101,22 @@ public class AbstractConditionStatementEditor extends JPanel {
    */
   public void commitChanges() {
     enumStmtEditor.commitChanges();
+  }
+
+  @Override
+  public boolean checkValidity(final Collection<String> messagesToDisplay) {
+    boolean valid = true;
+
+    final boolean conditionValid;
+    if (enumCondition.isSelected()) {
+//      conditionValid = enumStmtEditor.checkValidity(messagesToDisplay);
+//      valid &= conditionValid;
+    } else {
+      conditionValid = standardStmtEditor.checkValidity(messagesToDisplay);
+      valid &= conditionValid;
+    }
+
+    return valid;
   }
 
 }

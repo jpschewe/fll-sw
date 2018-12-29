@@ -46,7 +46,7 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 /**
  * Editor for {@link ChallengeDescription} objects.
  */
-public class ChallengeDescriptionEditor extends JPanel implements Validatable {
+public final class ChallengeDescriptionEditor extends JPanel implements Validatable {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 

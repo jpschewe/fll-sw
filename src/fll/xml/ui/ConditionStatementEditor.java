@@ -7,6 +7,7 @@
 package fll.xml.ui;
 
 import java.awt.BorderLayout;
+import java.util.Collection;
 
 import javax.annotation.Nonnull;
 import javax.swing.Box;
@@ -21,7 +22,11 @@ import fll.xml.VariableScope;
 /**
  * Edit {@link ConditionStatement}.
  */
-/* package */ class ConditionStatementEditor extends JPanel {
+/* package */ class ConditionStatementEditor extends JPanel implements Validatable {
+
+  private final PolynomialEditor leftEditor;
+
+  private final PolynomialEditor rightEditor;
 
   public ConditionStatementEditor(@Nonnull final ConditionStatement stmt,
                                   @Nonnull final GoalScope goalScope,
@@ -31,7 +36,7 @@ import fll.xml.VariableScope;
     final Box container = Box.createVerticalBox();
     add(container, BorderLayout.CENTER);
 
-    final PolynomialEditor leftEditor = new PolynomialEditor(stmt.getLeft(), goalScope, variableScope);
+    leftEditor = new PolynomialEditor(stmt.getLeft(), goalScope, variableScope);
     container.add(leftEditor);
 
     final JComboBox<InequalityComparison> comparisonEditor = new JComboBox<>(new InequalityComparison[] { InequalityComparison.GREATER_THAN,
@@ -45,8 +50,21 @@ import fll.xml.VariableScope;
       stmt.setComparison(comparisonEditor.getItemAt(comparisonEditor.getSelectedIndex()));
     });
 
-    final PolynomialEditor rightEditor = new PolynomialEditor(stmt.getRight(), goalScope, variableScope);
+    rightEditor = new PolynomialEditor(stmt.getRight(), goalScope, variableScope);
     container.add(rightEditor);
+  }
+
+  @Override
+  public boolean checkValidity(Collection<String> messagesToDisplay) {
+    boolean valid = true;
+
+    final boolean leftValid = leftEditor.checkValidity(messagesToDisplay);
+    valid &= leftValid;
+
+    final boolean rightValid = rightEditor.checkValidity(messagesToDisplay);
+    valid &= rightValid;
+
+    return valid;
   }
 
 }
