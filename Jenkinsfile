@@ -13,15 +13,7 @@ pipeline {
       steps {
         echo "NODE_NAME = ${env.NODE_NAME}"
         echo "My branch is: ${env.BRANCH_NAME}"
-
-        echo "Environment Variables"
-        if (isUnix()) {
-          sh script: 'printenv'
-        } else {
-          bat script: 'set'
-        }
-        echo "end Environment Variables"
-	
+        printEnv()	
       }
     }
 
@@ -123,4 +115,14 @@ def fllSwAnt(target) {
       bat script: "ant-win ${target}"
     }
   }
+}
+
+def printEnv() {
+  echo "Environment Variables"
+  if (isUnix()) {
+    sh script: 'printenv'
+  } else {
+    bat script: 'set'
+  }
+  echo "end Environment Variables"
 }
