@@ -6,6 +6,8 @@
 
 package fll.xml.ui;
 
+import java.util.List;
+
 import fll.xml.PerformanceScoreCategory;
 
 /**
@@ -34,4 +36,12 @@ public class PerformanceEditor extends ScoreCategoryEditor {
     tiebreaker.commitChanges();
     restrictions.commitChanges();
   }
+
+  @Override
+  protected void gatherValidityMessages(final List<String> messages) {
+    super.gatherValidityMessages(messages);
+    restrictions.checkValidity(messages);
+    tiebreaker.checkValidity(messages);
+  }
+
 }

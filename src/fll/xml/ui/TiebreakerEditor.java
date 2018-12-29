@@ -8,6 +8,7 @@ package fll.xml.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,7 +38,7 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
  * Edit the list of {@link TiebreakerTest} objects on the
  * {@link PerformanceScoreCategory}.
  */
-/* package */ class TiebreakerEditor extends JPanel {
+/* package */ class TiebreakerEditor extends JPanel implements Validatable {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -196,6 +197,18 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
     });
 
     performance.setTiebreaker(newTiebreaker);
+  }
+
+  @Override
+  public boolean checkValidity(final Collection<String> messagesToDisplay) {
+    boolean valid = true;
+
+    for (final TiebreakerTestEditor editor : editors) {
+      final boolean editorValid = editor.checkValidity(messagesToDisplay);
+      valid &= editorValid;
+    }
+
+    return valid;
   }
 
 }

@@ -8,6 +8,7 @@ package fll.xml.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -25,7 +26,7 @@ import fll.xml.Restriction;
  * Edit the list of {@link Restriction} objects on the
  * {@link PerformanceScoreCategory}.
  */
-public class RestrictionListEditor extends JPanel {
+public class RestrictionListEditor extends JPanel implements Validatable {
 
   private final JComponent editorContainer;
 
@@ -94,6 +95,18 @@ public class RestrictionListEditor extends JPanel {
     });
 
     performance.setRestrictions(newRestrictions);
+  }
+
+  @Override
+  public boolean checkValidity(final Collection<String> messagesToDisplay) {
+    boolean valid = true;
+
+    for (final RestrictionEditor editor : editors) {
+      final boolean editorValid = editor.checkValidity(messagesToDisplay);
+      valid &= editorValid;
+    }
+
+    return valid;
   }
 
 }
