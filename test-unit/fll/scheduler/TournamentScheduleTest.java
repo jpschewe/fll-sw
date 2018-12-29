@@ -284,7 +284,7 @@ public class TournamentScheduleTest {
   @Test
   public void testLoadAllSchedules()
       throws InvalidFormatException, IOException, ParseException, ScheduleParseException {
-    File baseScheduleDir = new File("../../scheduling/blank-schedules");
+    File baseScheduleDir = new File("../scheduling/blank-schedules");
     if (!baseScheduleDir.exists()) {
       baseScheduleDir = new File("scheduling/blank-schedules");
     }

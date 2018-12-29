@@ -1,8 +1,8 @@
 # Latest Development Releases
 
-If you want to test out the latest code you can do so by [downloading the most recent automated packaged development release](https://mtu.net/jenkins/job/FLL-SW/job/master/lastSuccessfulBuild/artifact/scoring/build/). These are built automatically by our continuous integration system. They are a good place to see what features are coming up in the next release and a relatively easy way for people to test if a bug has been fixed as they'd like it.
+If you want to test out the latest code you can do so by [downloading the most recent automated packaged development release](https://mtu.net/jenkins/job/FLL-SW/job/master/lastSuccessfulBuild/artifact). These are built automatically by our continuous integration system. They are a good place to see what features are coming up in the next release and a relatively easy way for people to test if a bug has been fixed as they'd like it.
 
-Documentation on the database schema, API, workflows, etc. for the [current release are available on the continuous integration server](https://mtu.net/jenkins/job/FLL-SW/job/current-release/Documentation/). You can also view the documentation in your working directory by running the ant task `docs` and then looking in `scoring/docs/index.html`. 
+Documentation on the database schema, API, workflows, etc. for the [current release are available on the continuous integration server](https://mtu.net/jenkins/job/FLL-SW/job/current-release/Documentation/). You can also view the documentation in your working directory by running the ant task `docs` and then looking in `docs/index.html`. 
 
 
 # Getting started as a developer
@@ -11,7 +11,7 @@ Documentation on the database schema, API, workflows, etc. for the [current rele
   1. Get the source code from git
     * git clone git@github.com:jpschewe/fll-sw (read-only)
     * Or you can create a fork and then submit a pull request when you have changes to merge in
-  1. Build by changing to `fll-sw/scoring` and running `./ant.sh`
+  1. Build by changing to `fll-sw` and running `./ant.sh`
   1. You can start tomcat with `./ant.sh tomcat.start`
   1. You can stop tomcat with `./ant.sh tomcat.stop`, the target `tomcat.reload` can be useful when working on servlet code.
   1. We have a continuous integration server running using [Jenkins](http://jenkins-ci.org/). You can access it at [http://mtu.net/jenkins/job/fll-sw/](http://mtu.net/jenkins/job/fll-sw/). The master branch is built by the job 'fll-sw', all other branches are built by 'fll-sw-feature-branches'.
@@ -35,7 +35,7 @@ Please make sure anything you add has the following sort of header:
 
 # GIT rules/guidelines
 
-If you're new to git read at least the first 3 chapters of [http://progit.org/book/](http://progit.org/book/)
+If you're new to git read at least the first 3 chapters of [the git book](https://git-scm.com/book/)
 
 Do all development on a branch other than master. Branches named "feature.XXX" or "ticket.XXX" are preferred. Where "XXX" can be anything, but typically has the number of the ticket that you're working on in it and some short description of what you're doing. Example usage:
 
@@ -83,7 +83,7 @@ Please stick to [standard markdown syntax](http://daringfireball.net/projects/ma
 
 ## Using Ant in Eclipse
 
-Most ant targets will work out of the box once you tell Eclipse about our ant build file. However if you want to run the test.report target you'll get an error about the style sheet. Using the instructions at http://help.eclipse.org/juno/index.jsp?topic=%2Forg.eclipse.platform.doc.user%2Ftasks%2Ftasks-ant-version.htm you can point Eclipse at scoring/tools/ant as the Ant Home variable and then the test.report target works. This setting is for the workspace, so you'll want to make sure you're workspace is only used for fll-sw. 
+Most ant targets will work out of the box once you tell Eclipse about our ant build file. However if you want to run the test.report target you'll get an error about the style sheet. Using the instructions at http://help.eclipse.org/juno/index.jsp?topic=%2Forg.eclipse.platform.doc.user%2Ftasks%2Ftasks-ant-version.htm you can point Eclipse at tools/ant as the Ant Home variable and then the test.report target works. This setting is for the workspace, so you'll want to make sure you're workspace is only used for fll-sw. 
 
 # Viewing the database diagram
 

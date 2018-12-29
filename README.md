@@ -4,11 +4,11 @@ This is the home of the Minnesota FIRST Lego League (FLL) software. This softwar
 
 Non-developers should visit the [home page](http://jpschewe.github.io/fll-sw/).
 
-Developers should take a look at the [developer information page](scoring/docs/developer/DeveloperInformation.md)
+Developers should take a look at the [developer information page](docs/developer/DeveloperInformation.md)
 
 Minnesota
 =========
 
 Some notes for things happening in the Minnesota tournaments.
 
-[Notes for Minnesota](scoring/docs/MinnesotaNotes.md)
+[Notes for Minnesota](docs/MinnesotaNotes.md)
