@@ -24,7 +24,7 @@ import fll.xml.RubricRange;
 /**
  * Edit the rubric of a goal.
  */
-public class RubricEditor extends JPanel implements Validatable {
+public final class RubricEditor extends JPanel implements Validatable {
 
   private final JComponent rangeList;
 

@@ -29,7 +29,7 @@ import fll.xml.RubricRange;
 /**
  * Edit for a rubric range.
  */
-public class RubricRangeEditor extends JPanel implements Validatable {
+public final class RubricRangeEditor extends JPanel implements Validatable {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 

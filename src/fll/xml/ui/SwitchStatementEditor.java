@@ -7,6 +7,7 @@
 package fll.xml.ui;
 
 import java.awt.BorderLayout;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -32,7 +33,7 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 /**
  * Editor for {@link SwitchStatement}.
  */
-/* package */ class SwitchStatementEditor extends JPanel {
+/* package */ final class SwitchStatementEditor extends JPanel implements Validatable {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -49,6 +50,8 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
   private final DeleteEventListener mCaseDeleteListener;
 
   private final SwitchStatement switchStmt;
+
+  private final PolynomialEditor otherwiseEditor;
 
   public SwitchStatementEditor(final SwitchStatement switchStmt,
                                final GoalScope goalScope,
@@ -73,8 +76,7 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
     stmtContainer = Box.createVerticalBox();
     container.add(stmtContainer);
 
-    final PolynomialEditor otherwiseEditor = new PolynomialEditor(switchStmt.getDefaultCase(), goalScope,
-                                                                  variableScope);
+    otherwiseEditor = new PolynomialEditor(switchStmt.getDefaultCase(), goalScope, variableScope);
     final MovableExpandablePanel otherwisePanel = new MovableExpandablePanel("Otherwise goal value is", otherwiseEditor,
                                                                              false, false);
     container.add(otherwisePanel);
@@ -184,10 +186,24 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
   /**
    * @param messages add any errors to the list
    */
-  /* package */ void gatherValidityMessages(final List<String> messages) {
+  @Override
+  public boolean checkValidity(final Collection<String> messages) {
+    boolean valid = true;
+
     if (switchStmt.getDefaultCase().getTerms().isEmpty()) {
       messages.add("There must be an otherwise case that has a value");
+      valid = false;
     }
+
+    final boolean otherwiseValid = otherwiseEditor.checkValidity(messages);
+    valid &= otherwiseValid;
+
+    for (final CaseStatementEditor editor : stmtEditors) {
+      final boolean editorValid = editor.checkValidity(messages);
+      valid &= editorValid;
+    }
+
+    return valid;
   }
 
 }

@@ -9,6 +9,7 @@ package fll.xml.ui;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Font;
+import java.util.Collection;
 
 import javax.annotation.Nonnull;
 import javax.swing.Box;
@@ -25,7 +26,7 @@ import fll.xml.VariableScope;
 /**
  * Editor for {@link CaseStatement}.
  */
-public class CaseStatementEditor extends JPanel {
+public final class CaseStatementEditor extends JPanel implements Validatable {
 
   private final AbstractConditionStatementEditor conditionEditor;
 
@@ -116,6 +117,24 @@ public class CaseStatementEditor extends JPanel {
    */
   public void commitChanges() {
     stmt.setCondition(conditionEditor.getStatement());
+  }
+
+  @Override
+  public boolean checkValidity(final Collection<String> messages) {
+    boolean valid = true;
+
+    final boolean conditionValid = conditionEditor.checkValidity(messages);
+    valid &= conditionValid;
+
+    if (resultType.isSelected()) {
+      final boolean resultSwitchValid = resultSwitchEditor.checkValidity(messages);
+      valid &= resultSwitchValid;
+    } else {
+      final boolean resultValid = resultPolyEditor.checkValidity(messages);
+      valid &= resultValid;
+    }
+
+    return valid;
   }
 
 }
