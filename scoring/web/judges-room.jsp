@@ -3,6 +3,7 @@
 <%
 	fll.web.MainIndex.populateContext(request, application, pageContext);
 	fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
+	fll.web.report.ReportIndex.populateContext(application, session, pageContext);
 %>
 
 <html>
@@ -146,6 +147,10 @@
 				<input id='uploadPerformanceData' type="submit" value="Upload" />
 			</form>
 		</li>
+
+		<li>Once the subjective scores are in, you will want to <a
+			target="_report" href="<c:url value='/report/index.jsp' />">generate
+				reports</a></li>
 
 		<li>At the end of the day <a
 			href="<c:url value='/admin/DownloadJudgesDatabase' />">download
