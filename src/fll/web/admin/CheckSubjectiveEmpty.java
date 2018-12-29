@@ -26,7 +26,7 @@ import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.xml.ChallengeDescription;
-import fll.xml.ScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
 
 /**
  * Check that there isn't any subjective data in the database. If there is, make
@@ -46,7 +46,7 @@ public class CheckSubjectiveEmpty extends BaseFLLServlet {
     try (Connection connection = datasource.getConnection()) {
       final int tournamentId = Queries.getCurrentTournament(connection);
 
-      for (final ScoreCategory category : challenge.getSubjectiveCategories()) {
+      for (final SubjectiveScoreCategory category : challenge.getSubjectiveCategories()) {
         if (categoryHasScores(connection, category, tournamentId)) {
           response.sendRedirect(response.encodeRedirectURL("confirm-export-with-subjective-scores.jsp"));
           return;
@@ -61,7 +61,7 @@ public class CheckSubjectiveEmpty extends BaseFLLServlet {
 
   @SuppressFBWarnings(value = "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING", justification = "table name is dependent on category name")
   private boolean categoryHasScores(final Connection connection,
-                                    final ScoreCategory category,
+                                    final SubjectiveScoreCategory category,
                                     final int tournamentId)
       throws SQLException {
     try (PreparedStatement prep = connection.prepareStatement("SELECT COUNT(*) FROM "
