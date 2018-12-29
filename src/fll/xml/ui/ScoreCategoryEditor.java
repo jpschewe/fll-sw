@@ -7,6 +7,7 @@
 package fll.xml.ui;
 
 import java.text.ParseException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -261,7 +262,7 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
     for (final AbstractGoalEditor editor : mGoalEditors) {
       final String name = editor.getGoal().getName();
 
-      final boolean editorValid = editor.checkValidity();
+      final boolean editorValid = editor.checkValidity(messages);
       if (!editorValid) {
         messages.add(String.format("Goal \"%s\" has invalid elements", name));
       }
@@ -276,7 +277,7 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
   }
 
   @Override
-  public boolean checkValidity() {
+  public boolean checkValidity(final Collection<String> messagesToDisplay) {
     final List<String> messages = new LinkedList<>();
     gatherValidityMessages(messages);
 

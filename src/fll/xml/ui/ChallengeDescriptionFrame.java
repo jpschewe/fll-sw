@@ -22,6 +22,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
@@ -372,7 +374,8 @@ public class ChallengeDescriptionFrame extends JFrame {
   };
 
   private boolean validateChallengeDescription() {
-    final boolean valid = editor.checkValidity();
+    final Collection<String> messages = new LinkedList<>();
+    final boolean valid = editor.checkValidity(messages);
     if (!valid) {
       JOptionPane.showMessageDialog(null,
                                     "Some part of the challenge is invalid, hover over the red boxes to see the issues",

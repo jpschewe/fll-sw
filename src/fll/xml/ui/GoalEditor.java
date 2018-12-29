@@ -321,14 +321,14 @@ public class GoalEditor extends AbstractGoalEditor {
   @Override
   protected void gatherValidityMessages(final List<String> messages) {
     super.gatherValidityMessages(messages);
-    
+
     if (!mEnumerated.isSelected()) {
       checkCountValid(messages);
     } else {
       checkEnumeratedValid(messages);
     }
 
-    final boolean rubricValid = rubricEditor.checkValidity();
+    final boolean rubricValid = rubricEditor.checkValidity(messages);
     if (!rubricValid) {
       messages.add("The rubic has invalid elements");
     }

@@ -9,6 +9,7 @@ package fll.xml.ui;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.text.ParseException;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -200,7 +201,7 @@ import fll.xml.AbstractGoal;
   }
 
   @Override
-  public boolean checkValidity() {
+  public boolean checkValidity(final Collection<String> messagesToDisplay) {
     final List<String> messages = new LinkedList<>();
     gatherValidityMessages(messages);
 
