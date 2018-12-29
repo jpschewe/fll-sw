@@ -7,6 +7,7 @@
 package fll.xml.ui;
 
 import java.text.ParseException;
+import java.util.Collection;
 
 import javax.annotation.Nonnull;
 import javax.swing.Box;
@@ -92,6 +93,15 @@ public class RestrictionEditor extends PolynomialEditor {
       messageEditor.commitEdit();
     } catch (final ParseException e) {
       LOGGER.debug("Got parse exception committing changes to message, assuming bad value and ignoring", e);
+    }
+  }
+
+  @Override
+  protected void gatherValidityMessages(final Collection<String> messages) {
+    super.gatherValidityMessages(messages);
+
+    if (restriction.getLowerBound() > restriction.getUpperBound()) {
+      messages.add("Lower bound must be less than or equal to upper bound");
     }
 
   }
