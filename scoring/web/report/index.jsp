@@ -25,9 +25,8 @@
 			will be returned to this page if there are no errors summarizing
 			scores.</li>
 
-		<li><a href="topScoreReport.jsp">Top seeding round scores</a>.
-			This creates a text report of the top seeding round scores by award
-			group.</li>
+		<li><a href="topScoreReport.jsp">Top performance scores</a>. This
+			creates a text report of the top seeding round scores by award group.</li>
 
 		<li><a href='FinalComputedScores' target="_blank">Final
 				Computed Scores</a>. This is the report that the head judge will want to
