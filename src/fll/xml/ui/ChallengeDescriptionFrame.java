@@ -57,7 +57,7 @@ import net.mtu.eggplant.util.BasicFileFilter;
 import net.mtu.eggplant.util.gui.GraphicsUtils;
 
 /**
- * 
+ * Frame that the challenge description editor lives in.
  */
 public class ChallengeDescriptionFrame extends JFrame {
   private static final Logger LOGGER = LogUtils.getLogger();

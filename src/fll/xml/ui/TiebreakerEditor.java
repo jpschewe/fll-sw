@@ -24,6 +24,7 @@ import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.util.LogUtils;
 import fll.xml.PerformanceScoreCategory;
@@ -38,6 +39,8 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
  * Edit the list of {@link TiebreakerTest} objects on the
  * {@link PerformanceScoreCategory}.
  */
+@SuppressFBWarnings(value = { "SE_BAD_FIELD",
+                              "SE_BAD_FIELD_STORE" }, justification = "This class isn't going to be serialized")
 /* package */ class TiebreakerEditor extends JPanel implements Validatable {
 
   private static final Logger LOGGER = LogUtils.getLogger();

@@ -1114,7 +1114,7 @@ public class SchedulerUI extends JFrame {
 
   private static final String DESCRIPTION_STARTING_DIRECTORY_PREF = "descriptionStartingDirectory";
 
-  @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This calss isn't going to be serialized")
+  @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This class isn't going to be serialized")
   private TournamentSchedule mScheduleData;
 
   /* package */TournamentSchedule getScheduleData() {

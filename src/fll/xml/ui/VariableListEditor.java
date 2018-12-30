@@ -21,6 +21,7 @@ import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.util.LogUtils;
 import fll.xml.ComputedGoal;
@@ -32,6 +33,8 @@ import fll.xml.ui.MovableExpandablePanel.DeleteEventListener;
 /**
  * Edit a list of variables from a {@link ComputedGoal}.
  */
+@SuppressFBWarnings(value = { "SE_BAD_FIELD",
+                              "SE_BAD_FIELD_STORE" }, justification = "This class isn't going to be serialized")
 public class VariableListEditor extends JPanel {
 
   private static final Logger LOGGER = LogUtils.getLogger();
