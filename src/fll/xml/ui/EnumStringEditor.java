@@ -22,6 +22,7 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.util.ChooseOptionDialog;
 import fll.util.FormatterUtils;
 import fll.xml.AbstractGoal;
@@ -33,6 +34,8 @@ import fll.xml.ScopeException;
 /**
  * Editor to allow one to pick a string or an enumerated goal.
  */
+@SuppressFBWarnings(value = { "SE_BAD_FIELD",
+                              "SE_BAD_FIELD_STORE" }, justification = "This class isn't going to be serialized")
 class EnumStringEditor extends JPanel implements Validatable {
 
   private GoalRef goalRef;

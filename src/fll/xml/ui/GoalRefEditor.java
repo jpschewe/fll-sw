@@ -18,6 +18,7 @@ import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.util.ChooseOptionDialog;
 import fll.xml.AbstractGoal;
 import fll.xml.GoalRef;
@@ -26,6 +27,8 @@ import fll.xml.GoalScoreType;
 /**
  * Editor for {@link GoalRef} objects.
  */
+@SuppressFBWarnings(value = { "SE_BAD_FIELD",
+                              "SE_BAD_FIELD_STORE" }, justification = "This class isn't going to be serialized")
 class GoalRefEditor extends JPanel {
 
   private final GoalRef goalRef;

@@ -17,6 +17,7 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.util.ChooseOptionDialog;
 import fll.xml.Variable;
 import fll.xml.VariableRef;
@@ -24,6 +25,8 @@ import fll.xml.VariableRef;
 /**
  * Editor for {@link VariableRef} objects.
  */
+@SuppressFBWarnings(value = { "SE_BAD_FIELD",
+                              "SE_BAD_FIELD_STORE" }, justification = "This class isn't going to be serialized")
 class VariableRefEditor extends JPanel {
 
   private final VariableRef variableRef;
