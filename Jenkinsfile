@@ -108,12 +108,10 @@ Find more details at: ${JENKINS_URL}
 } // pipeline
 
 def fllSwAnt(target) {
-  withAnt(installation: 'FLL-SW') {
-    if (isUnix()) {
-      sh script: "ant ${target}"
-    } else {
-      bat script: "ant-win ${target}"
-    }
+  if (isUnix()) {
+    sh script: "ant ${target}"
+  } else {
+    bat script: "ant-win ${target}"
   }
 }
 
