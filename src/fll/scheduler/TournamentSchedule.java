@@ -128,7 +128,7 @@ public class TournamentSchedule implements Serializable {
   @Deprecated
   private static final String DIVISION_HEADER = "Div";
 
-  public static final String AWARD_GROUP_HEADER = "Awawrd Group";
+  public static final String AWARD_GROUP_HEADER = "Award Group";
 
   public static final String JUDGE_GROUP_HEADER = "Judging Group";
 
