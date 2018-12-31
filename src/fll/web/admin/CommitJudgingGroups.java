@@ -29,7 +29,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.xml.ChallengeDescription;
-import fll.xml.ScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -120,7 +120,7 @@ public class CommitJudgingGroups extends BaseFLLServlet {
               final String currentJudgingGroup = Queries.getJudgingGroup(connection, teamNumber, currentTournamentID);
               if (!newJudgingGroup.equals(currentJudgingGroup)) {
                 // clear out scores for this team first
-                for (final ScoreCategory category : challengeDescription.getSubjectiveCategories()) {
+                for (final SubjectiveScoreCategory category : challengeDescription.getSubjectiveCategories()) {
                   Queries.deleteSubjectiveScores(connection, category.getName(), teamNumber, currentTournamentID);
                 }
                 

@@ -8,6 +8,7 @@ package fll.xml;
 
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.util.FLLInternalException;
@@ -19,17 +20,32 @@ import fll.web.playoff.TeamScore;
  */
 public class ConditionStatement extends AbstractConditionStatement {
 
+  public static final String TAG_NAME = "condition";
+
+  public static final String LEFT_TAG_NAME = "left";
+
+  public static final String RIGHT_TAG_NAME = "right";
+
   public ConditionStatement(final Element ele,
                             final GoalScope goalScope,
                             final VariableScope variableScope) {
     super(ele);
 
-    final Element leftEle = new NodelistElementCollectionAdapter(ele.getElementsByTagName("left")).next();
+    final Element leftEle = new NodelistElementCollectionAdapter(ele.getElementsByTagName(LEFT_TAG_NAME)).next();
     mLeft = new ComplexPolynomial(leftEle, goalScope, variableScope);
 
-    final Element rightEle = new NodelistElementCollectionAdapter(ele.getElementsByTagName("right")).next();
+    final Element rightEle = new NodelistElementCollectionAdapter(ele.getElementsByTagName(RIGHT_TAG_NAME)).next();
     mRight = new ComplexPolynomial(rightEle, goalScope, variableScope);
+  }
 
+  /**
+   * Default constructor with empty left and right polynomials.
+   * 
+   */
+  public ConditionStatement() {
+    super();
+    mLeft = new ComplexPolynomial();
+    mRight = new ComplexPolynomial();
   }
 
   private final ComplexPolynomial mLeft;
@@ -65,6 +81,24 @@ public class ConditionStatement extends AbstractConditionStatement {
       throw new FLLInternalException("Unknown comparison: "
           + getComparison());
     }
+
+  }
+
+  @Override
+  public Element toXml(final Document doc) {
+    final Element ele = doc.createElement(TAG_NAME);
+
+    final Element leftEle = doc.createElement(LEFT_TAG_NAME);
+    mLeft.populateXml(doc, leftEle);
+    ele.appendChild(leftEle);
+
+    ele.appendChild(getComparisonElement(doc));
+
+    final Element rightEle = doc.createElement(RIGHT_TAG_NAME);
+    mRight.populateXml(doc, rightEle);
+    ele.appendChild(rightEle);
+
+    return ele;
   }
 
 }

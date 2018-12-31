@@ -28,8 +28,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
@@ -45,7 +43,8 @@ import fll.web.ApplicationAttributes;
 import fll.web.admin.UploadSubjectiveData;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
-import fll.xml.ScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * GET: {category, {judge, {teamNumber, SubjectiveScore}}}
@@ -59,7 +58,8 @@ public class SubjectiveScoresServlet extends HttpServlet {
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns and category are dynamic")
   @Override
   protected final void doGet(final HttpServletRequest request,
-                             final HttpServletResponse response) throws IOException, ServletException {
+                             final HttpServletResponse response)
+      throws IOException, ServletException {
     final ServletContext application = getServletContext();
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -75,7 +75,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
       final Map<String, Map<String, Map<Integer, SubjectiveScore>>> allScores = new HashMap<String, Map<String, Map<Integer, SubjectiveScore>>>();
 
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
-      for (final ScoreCategory sc : challengeDescription.getSubjectiveCategories()) {
+      for (final SubjectiveScoreCategory sc : challengeDescription.getSubjectiveCategories()) {
         // judge->teamNumber->score
         final Map<String, Map<Integer, SubjectiveScore>> categoryScores = new HashMap<String, Map<Integer, SubjectiveScore>>();
 
@@ -147,7 +147,8 @@ public class SubjectiveScoresServlet extends HttpServlet {
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns and category are dynamic")
   @Override
   protected final void doPost(final HttpServletRequest request,
-                              final HttpServletResponse response) throws IOException, ServletException {
+                              final HttpServletResponse response)
+      throws IOException, ServletException {
     int numModified = 0;
     final ObjectMapper jsonMapper = new ObjectMapper();
 
@@ -179,7 +180,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
                                                                                                      ScoresTypeInfo.INSTANCE);
       for (final Map.Entry<String, Map<String, Map<Integer, SubjectiveScore>>> catEntry : allScores.entrySet()) {
         final String category = catEntry.getKey();
-        final ScoreCategory categoryDescription = challengeDescription.getSubjectiveCategoryByName(category);
+        final SubjectiveScoreCategory categoryDescription = challengeDescription.getSubjectiveCategoryByName(category);
 
         deletePrep = connection.prepareStatement("DELETE FROM "
             + category //
@@ -287,7 +288,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
       } // foreach category
 
       UploadSubjectiveData.removeNullSubjectiveRows(connection, currentTournament, challengeDescription);
-      
+
       final Tournament tournament = Tournament.findTournamentByID(connection, currentTournament);
       tournament.recordSubjectiveModified(connection);
 
@@ -320,7 +321,8 @@ public class SubjectiveScoresServlet extends HttpServlet {
    */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns and category are dynamic")
   private PreparedStatement createInsertStatement(final Connection connection,
-                                                  final ScoreCategory categoryDescription) throws SQLException {
+                                                  final SubjectiveScoreCategory categoryDescription)
+      throws SQLException {
     final List<AbstractGoal> goalDescriptions = categoryDescription.getGoals();
 
     final StringBuffer insertSQLColumns = new StringBuffer();
@@ -372,8 +374,8 @@ public class SubjectiveScoresServlet extends HttpServlet {
 
   }
 
-  private static final class ScoresTypeInfo extends
-      TypeReference<Map<String, Map<String, Map<Integer, SubjectiveScore>>>> {
+  private static final class ScoresTypeInfo
+      extends TypeReference<Map<String, Map<String, Map<Integer, SubjectiveScore>>>> {
     public static final ScoresTypeInfo INSTANCE = new ScoresTypeInfo();
   }
 }

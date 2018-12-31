@@ -19,4 +19,11 @@ public class ComplexPolynomial extends BasicPolynomial {
     super(ele, goalScope, variableScope);
   }
 
+  /**
+   * see {@link BasicPolynomial#BasicPolynomial()}
+   */
+  public ComplexPolynomial() {
+    super();
+  }
+
 }

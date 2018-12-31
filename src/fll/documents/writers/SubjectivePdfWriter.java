@@ -37,8 +37,9 @@ import fll.util.LogUtils;
 import fll.util.PdfUtils;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
+import fll.xml.Goal;
 import fll.xml.RubricRange;
-import fll.xml.ScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
 import net.mtu.eggplant.util.Pair;
 
 public class SubjectivePdfWriter {
@@ -88,7 +89,7 @@ public class SubjectivePdfWriter {
 
   private final BaseColor sheetColor;
 
-  private final ScoreCategory scoreCategory;
+  private final SubjectiveScoreCategory scoreCategory;
 
   private final SheetElement sheetElement;
 
@@ -286,9 +287,12 @@ public class SubjectivePdfWriter {
     closingTable.addCell(strengthsCell);
 
     boolean somethingRequired = false;
-    for (final AbstractGoal goal : sheetElement.getSheetData().getGoals()) {
-      if (goal.isRequired()) {
-        somethingRequired = true;
+    for (final AbstractGoal agoal : sheetElement.getSheetData().getGoals()) {
+      if (agoal instanceof Goal) {
+        final Goal goal = (Goal) agoal;
+        if (goal.isRequired()) {
+          somethingRequired = true;
+        }
       }
     }
     if (somethingRequired) {

@@ -58,6 +58,7 @@ import fll.util.FLLRuntimeException;
 import fll.util.GuiExceptionHandler;
 import fll.util.LogUtils;
 import fll.web.CertificateUtils;
+import fll.xml.ui.ChallengeDescriptionFrame;
 import it.sauronsoftware.junique.AlreadyLockedException;
 import it.sauronsoftware.junique.JUnique;
 import net.mtu.eggplant.util.gui.GraphicsUtils;
@@ -226,18 +227,6 @@ public class Launcher extends JFrame {
     });
     buttonBox.add(docsPage);
 
-    final JButton schedulerButton = new JButton("Scheduler");
-    schedulerButton.addActionListener(ae -> {
-      launchScheduler();
-    });
-    buttonBox.add(schedulerButton);
-
-    final JButton subjectiveButton = new JButton("Subjective Application");
-    subjectiveButton.addActionListener(ae -> {
-      launchSubjective();
-    });
-    buttonBox.add(subjectiveButton);
-
     final JButton sponsorLogos = new JButton("Sponsor Logos");
     sponsorLogos.setToolTipText("Opens the directory where the sponsor logos go");
     sponsorLogos.addActionListener(ae -> {
@@ -294,6 +283,24 @@ public class Launcher extends JFrame {
       }
     });
     buttonBox.add(custom);
+
+    final JButton subjectiveButton = new JButton("Subjective Application");
+    subjectiveButton.addActionListener(ae -> {
+      launchSubjective();
+    });
+    buttonBox.add(subjectiveButton);
+
+    final JButton schedulerButton = new JButton("Scheduler");
+    schedulerButton.addActionListener(ae -> {
+      launchScheduler();
+    });
+    buttonBox.add(schedulerButton);
+
+    final JButton challengeEditorButton = new JButton("Challenge Editor");
+    challengeEditorButton.addActionListener(ae -> {
+      launchChallengeEditor();
+    });
+    buttonBox.add(challengeEditorButton);
 
     final JButton exit = new JButton("Exit");
     exit.addActionListener(ae -> {
@@ -393,11 +400,6 @@ public class Launcher extends JFrame {
 
         subjective.addWindowListener(new WindowAdapter() {
           @Override
-          public void windowClosing(final WindowEvent e) {
-            subjective = null;
-          }
-
-          @Override
           public void windowClosed(final WindowEvent e) {
             subjective = null;
           }
@@ -413,6 +415,39 @@ public class Launcher extends JFrame {
         GraphicsUtils.centerWindow(subjective);
         subjective.setVisible(true);
         subjective.promptForFile();
+      } catch (final Exception e) {
+        LOGGER.fatal("Unexpected error", e);
+        JOptionPane.showMessageDialog(null, "Unexpected error: "
+            + e.getMessage(), "Error Launching Scheduler", JOptionPane.ERROR_MESSAGE);
+      }
+    }
+  }
+
+  private ChallengeDescriptionFrame challengeEditor = null;
+
+  private void launchChallengeEditor() {
+    if (null != challengeEditor) {
+      challengeEditor.setVisible(true);
+    } else {
+      try {
+        challengeEditor = new ChallengeDescriptionFrame();
+
+        challengeEditor.addWindowListener(new WindowAdapter() {
+          @Override
+          public void windowClosed(final WindowEvent e) {
+            challengeEditor = null;
+          }
+        });
+        // should be able to watch for window closing, but hidden works
+        challengeEditor.addComponentListener(new ComponentAdapter() {
+          @Override
+          public void componentHidden(final ComponentEvent e) {
+            challengeEditor = null;
+          }
+        });
+
+        GraphicsUtils.centerWindow(challengeEditor);
+        challengeEditor.setVisible(true);
       } catch (final Exception e) {
         LOGGER.fatal("Unexpected error", e);
         JOptionPane.showMessageDialog(null, "Unexpected error: "

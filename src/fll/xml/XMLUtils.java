@@ -7,6 +7,7 @@ package fll.xml;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -21,6 +22,12 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
 import javax.annotation.Nonnull;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -88,17 +95,19 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
     return "computedGoal".equals(element.getNodeName());
   }
 
+  public static final String WINNER_ATTRIBUTE = "winner";
+  
   /**
    * Get the winner criteria for a particular element.
    */
   public static WinnerType getWinnerCriteria(final Element element) {
-    if (element.hasAttribute("winner")) {
-      final String str = element.getAttribute("winner");
+    if (element.hasAttribute(WINNER_ATTRIBUTE)) {
+      final String str = element.getAttribute(WINNER_ATTRIBUTE);
       final String sortStr;
       if (!str.isEmpty()) {
         sortStr = str.toUpperCase();
       } else {
-        sortStr = "HIGH";
+        sortStr = WinnerType.HIGH.toString();
       }
       return Enum.valueOf(WinnerType.class, sortStr);
     } else {
@@ -106,17 +115,19 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
     }
   }
 
+  public static final String SCORE_TYPE_ATTRIBUTE = "scoreType";
+  
   /**
    * Get the score type for a particular element.
    */
   public static ScoreType getScoreType(final Element element) {
-    if (element.hasAttribute("scoreType")) {
-      final String str = element.getAttribute("scoreType");
+    if (element.hasAttribute(SCORE_TYPE_ATTRIBUTE)) {
+      final String str = element.getAttribute(SCORE_TYPE_ATTRIBUTE);
       final String sortStr;
       if (!str.isEmpty()) {
         sortStr = str.toUpperCase();
       } else {
-        sortStr = "INTEGER";
+        sortStr = ScoreType.INTEGER.toString();
       }
       return Enum.valueOf(ScoreType.class, sortStr);
     } else {
@@ -313,5 +324,36 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
       }
     }
     return retval;
+  }
+  
+  
+  /**
+   * Write the document to a writer.
+   * 
+   * TODO: move this back to JonsInfra. This sets the indent level.
+   * Put in as JonsInfra#2.
+   * 
+   * @param doc the document to write
+   * @param writer where to write the document
+   * @param encoding if non-null use this as the encoding for the text
+   * @throws RuntimeException if a {@link TransformerException} occurs.
+   */
+  public static void writeXML(final Document doc,
+                              final Writer writer,
+                              final String encoding) {
+    try {
+      final TransformerFactory transformerFactory = TransformerFactory.newInstance();
+      final Transformer transformer = transformerFactory.newTransformer();
+      transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+      transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+      if (null != encoding) {
+        transformer.setOutputProperty(OutputKeys.ENCODING, encoding);
+      }
+      final DOMSource source = new DOMSource(doc);
+      final StreamResult result = new StreamResult(writer);
+      transformer.transform(source, result);
+    } catch (final TransformerException e) {
+      throw new RuntimeException("Internal error writing xml", e);
+    }
   }
 }

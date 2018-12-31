@@ -19,9 +19,6 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
-
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Assert;
@@ -42,8 +39,10 @@ import fll.web.admin.DownloadSubjectiveData;
 import fll.web.admin.UploadSubjectiveData;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
-import fll.xml.ScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
 import fll.xml.XMLUtils;
+import net.mtu.eggplant.util.sql.SQLFunctions;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**
  * Test editing subjective scores.
@@ -123,8 +122,8 @@ public class SubjectiveScoresTest {
       XMLUtils.writeXML(scoreDocument, testWriter, Utilities.DEFAULT_CHARSET.name());
       LOGGER.info(testWriter.toString());
 
-      ScoreCategory scoreCategory = null;
-      for (final ScoreCategory sc : challenge.getSubjectiveCategories()) {
+      SubjectiveScoreCategory scoreCategory = null;
+      for (final SubjectiveScoreCategory sc : challenge.getSubjectiveCategories()) {
         if (category.equals(sc.getName())) {
           scoreCategory = sc;
         }

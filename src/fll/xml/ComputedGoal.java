@@ -8,37 +8,85 @@ package fll.xml;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
+import javax.annotation.Nonnull;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.web.playoff.TeamScore;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 public class ComputedGoal extends AbstractGoal implements VariableScope {
+
+  public static final String TAG_NAME = "computedGoal";
 
   public ComputedGoal(final Element ele,
                       final GoalScope goalScope) {
     super(ele);
 
-    final Map<String, Variable> variables = new HashMap<String, Variable>();
-    for (final Element varEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName("variable"))) {
-      final Variable var = new Variable(varEle, goalScope);
-      variables.put(var.getName(), var);
-    }
-    mVariables = Collections.unmodifiableMap(variables);
+    this.goalScope = goalScope;
 
-    final Element switchEle = new NodelistElementCollectionAdapter(ele.getElementsByTagName("switch")).next();
+    mVariables = new LinkedList<>();
+    for (final Element varEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(Variable.TAG_NAME))) {
+      final Variable var = new Variable(varEle, goalScope);
+      mVariables.add(var);
+    }
+
+    final Element switchEle = new NodelistElementCollectionAdapter(ele.getElementsByTagName(SwitchStatement.TAG_NAME)).next();
     mSwitch = new SwitchStatement(switchEle, goalScope, this);
   }
 
-  private final Map<String, Variable> mVariables;
+  /**
+   * Default constructor, creates an object with no variables and a default switch
+   * statement.
+   * 
+   * @param name see {@link #getName()}
+   * @param goalScope see {@link #getGoalScope()}
+   */
+  public ComputedGoal(@Nonnull final String name,
+                      final GoalScope goalScope) {
+    super(name);
+    this.goalScope = goalScope;
+    mVariables = new LinkedList<>();
+    mSwitch = new SwitchStatement();
+  }
 
+  private final Collection<Variable> mVariables;
+
+  /**
+   * The variables in the computed goal.
+   * 
+   * @return unmodifiable collection
+   */
   public Collection<Variable> getVariables() {
-    return mVariables.values();
+    return Collections.unmodifiableCollection(mVariables);
+  }
+
+  @Override
+  public Collection<Variable> getAllVariables() {
+    return getVariables();
+  }
+
+  /**
+   * Add a variable.
+   * 
+   * @param v the variable to add
+   */
+  public void addVariable(final Variable v) {
+    mVariables.add(v);
+  }
+
+  /**
+   * Remove a variable.
+   * 
+   * @param v the variable to remove
+   * @return true if the variable was removed
+   */
+  public boolean removeVariable(final Variable v) {
+    return mVariables.remove(v);
   }
 
   private final SwitchStatement mSwitch;
@@ -48,12 +96,14 @@ public class ComputedGoal extends AbstractGoal implements VariableScope {
   }
 
   public Variable getVariable(final String name) throws ScopeException {
-    if (mVariables.containsKey(name)) {
-      return mVariables.get(name);
-    } else {
-      throw new ScopeException("Cannot find variable '"
-          + name + "'");
+    for (final Variable var : mVariables) {
+      if (var.getName().equals(name)) {
+        return var;
+      }
     }
+    throw new ScopeException("Cannot find variable '"
+        + name
+        + "'");
   }
 
   public double getRawScore(final TeamScore teamScore) {
@@ -92,8 +142,35 @@ public class ComputedGoal extends AbstractGoal implements VariableScope {
         * Double.MAX_VALUE;
   }
 
+  @Override
   public double getMax() {
     return Double.MAX_VALUE;
+  }
+
+  @Override
+  public Element toXml(final Document doc) {
+    final Element ele = doc.createElement(TAG_NAME);
+
+    populateXml(doc, ele);
+
+    for (final Variable var : mVariables) {
+      final Element varEle = var.toXml(doc);
+      ele.appendChild(varEle);
+    }
+
+    final Element switchEle = mSwitch.toXml(doc);
+    ele.appendChild(switchEle);
+
+    return ele;
+  }
+
+  private final GoalScope goalScope;
+
+  /**
+   * @return where to lookup goals for the computation
+   */
+  public GoalScope getGoalScope() {
+    return goalScope;
   }
 
 }

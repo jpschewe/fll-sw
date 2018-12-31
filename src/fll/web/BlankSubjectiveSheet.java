@@ -28,7 +28,7 @@ import fll.documents.writers.SubjectivePdfWriter;
 import fll.scheduler.TeamScheduleInfo;
 import fll.util.FLLRuntimeException;
 import fll.xml.ChallengeDescription;
-import fll.xml.ScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
 
 /**
  * Generate blank subjective sheets for the specified subjective category.
@@ -56,7 +56,7 @@ public class BlankSubjectiveSheet extends HttpServlet {
         response.setContentType("application/pdf");
         response.setHeader("Content-Disposition", String.format("filename=subjective-%s.pdf", subjectiveCategoryName));
 
-        final ScoreCategory category = challengeDescription.getSubjectiveCategoryByName(subjectiveCategoryName);
+        final SubjectiveScoreCategory category = challengeDescription.getSubjectiveCategoryByName(subjectiveCategoryName);
 
         final SheetElement sheetElement = new SheetElement(category);
 

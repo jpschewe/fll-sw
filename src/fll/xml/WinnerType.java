@@ -11,6 +11,7 @@ package fll.xml;
  * @author jpschewe
  */
 public enum WinnerType {
+  
   HIGH("MAX", "DESC"), LOW("MIN", "ASC");
 
   private final String mMinMaxString;

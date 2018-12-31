@@ -6,12 +6,19 @@
 
 package fll.xml;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
+import org.apache.commons.lang3.StringUtils;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.util.FLLInternalException;
@@ -20,16 +27,39 @@ import fll.web.playoff.TeamScore;
 
 public abstract class AbstractGoal implements Serializable {
 
-  public AbstractGoal(final Element ele) {
-    mName = ele.getAttribute("name");
-    mTitle = ele.getAttribute("title");
-    if (ele.hasAttribute("required")) {
-      mRequired = Boolean.valueOf(ele.getAttribute("required"));
-    } else {
-      mRequired = false;
-    }
+  public static final String CATEGORY_ATTRIBUTE = "category";
 
-    final List<Element> descEles = XMLUtils.getChildElementsByTagName(ele, "description");
+  public static final String TITLE_ATTRIBUTE = "title";
+
+  public static final String NAME_ATTRIBUTE = "name";
+
+  public static final String DESCRIPTION_TAG_NAME = "description";
+
+  private final PropertyChangeSupport propChangeSupport;
+
+  /**
+   * Default constructor for creating a new goal.
+   */
+  public AbstractGoal() {
+    mName = null;
+    mTitle = null;
+    mDescription = null;
+    mCategory = null;
+    propChangeSupport = new PropertyChangeSupport(this);
+  }
+
+  /**
+   * Constructor for reading from an XML document.
+   * 
+   * @param ele the XML element to parse
+   */
+  public AbstractGoal(@Nonnull final Element ele) {
+    this();
+
+    mName = ele.getAttribute(NAME_ATTRIBUTE);
+    mTitle = ele.getAttribute(TITLE_ATTRIBUTE);
+
+    final List<Element> descEles = XMLUtils.getChildElementsByTagName(ele, DESCRIPTION_TAG_NAME);
     if (descEles.size() > 0) {
       final Element descEle = descEles.get(0);
       mDescription = descEle.getTextContent();
@@ -37,43 +67,96 @@ public abstract class AbstractGoal implements Serializable {
       mDescription = null;
     }
 
-    mCategory = ele.getAttribute("category");
+    mCategory = ele.getAttribute(CATEGORY_ATTRIBUTE);
   }
 
-  private final String mCategory;
+  /**
+   * @param name see {@link #getName()}
+   */
+  public AbstractGoal(final String name) {
+    this();
+    
+    mName = name;
+    mTitle = null;
+    mDescription = null;
+    mCategory = null;
+  }
 
+  private String mCategory;
+
+  /**
+   * @return the category of the goal, may be null
+   */
   public String getCategory() {
     return mCategory;
   }
 
-  private final boolean mRequired;
-
   /**
-   * True if the goal is required for award consideration.
+   * @param v see {@link #getCategory()}
+   * Fires property change event.
    */
-  public boolean isRequired() {
-    return mRequired;
+  public void setCategory(final String v) {
+    final String old = mCategory;
+    mCategory = v;
+    this.propChangeSupport.firePropertyChange("category", old, v);
   }
 
-  private final String mName;
+  private String mName;
 
+  /**
+   * @return the name of the goal
+   */
+  @Nonnull
   public String getName() {
     return mName;
   }
 
-  private final String mTitle;
+  /**
+   * @param v see {@link #getName()}
+   * Fires property change event.
+   */
+  public void setName(@Nonnull final String v) {
+    final String old = mName;
+    mName = v;
+    this.propChangeSupport.firePropertyChange("name", old, v);
+  }
 
+  private String mTitle;
+
+  /**
+   * @return the title of the goal, may be null.
+   */
   public String getTitle() {
     return mTitle;
   }
 
-  private final String mDescription;
+  /**
+   * @param v see {@link #getTitle()}
+   * Fires property change event.
+   */
+  public void setTitle(final String v) {
+    final String old = mTitle;
+    mTitle = v;
+    this.propChangeSupport.firePropertyChange("title", old, v);
+  }
+
+  private String mDescription;
 
   /**
    * @return the description, may be null
    */
   public String getDescription() {
-    return mDescription;
+    return null == mDescription ? null : mDescription.trim().replaceAll("\\s+", " ");
+  }
+
+  /**
+   * @param v see {@link #getDescription()}
+   * Fires property change event.
+   */
+  public void setDescription(final String v) {
+    final String old = mDescription;
+    mDescription = v;
+    this.propChangeSupport.firePropertyChange("description", old, v);
   }
 
   /**
@@ -95,9 +178,9 @@ public abstract class AbstractGoal implements Serializable {
   public abstract boolean isEnumerated();
 
   /**
-   * Read-only list of the values.
+   * Read-only collection of the values.
    */
-  public abstract List<EnumeratedValue> getValues();
+  public abstract Collection<EnumeratedValue> getValues();
 
   /**
    * Get the enumerated values from the goal and sort them for display.
@@ -140,16 +223,19 @@ public abstract class AbstractGoal implements Serializable {
     }
   }
 
-  private static final class EnumeratedValueHighestFirst implements Comparator<EnumeratedValue>, Serializable {
-    public static final EnumeratedValueHighestFirst INSTANCE = new EnumeratedValueHighestFirst();
+  protected void populateXml(final Document document,
+                             final Element ele) {
+    ele.setAttribute(NAME_ATTRIBUTE, getName());
+    ele.setAttribute(TITLE_ATTRIBUTE, getTitle());
 
-    private EnumeratedValueHighestFirst() {
+    if (!StringUtils.isEmpty(getDescription())) {
+      final Element descriptionEle = document.createElement(DESCRIPTION_TAG_NAME);
+      descriptionEle.appendChild(document.createTextNode(getDescription()));
+      ele.appendChild(descriptionEle);
     }
 
-    public int compare(final EnumeratedValue one,
-                       final EnumeratedValue two) {
-      return -1
-          * Double.compare(one.getScore(), two.getScore());
+    if (!StringUtils.isEmpty(getCategory())) {
+      ele.setAttribute(CATEGORY_ATTRIBUTE, getCategory());
     }
   }
 
@@ -163,6 +249,26 @@ public abstract class AbstractGoal implements Serializable {
                        final EnumeratedValue two) {
       return Double.compare(one.getScore(), two.getScore());
     }
+  }
+
+  public abstract Element toXml(final Document doc);
+
+  /**
+   * Add a listener for property change events.
+   * 
+   * @param listener the listener to add
+   */
+  public void addPropertyChangeListener(@Nonnull final PropertyChangeListener listener) {
+    this.propChangeSupport.addPropertyChangeListener(listener);
+  }
+
+  /**
+   * Remove a property change listener.
+   * 
+   * @param listener the listener to remove
+   */
+  public void removePropertyChangeListener(@Nonnull final PropertyChangeListener listener) {
+    this.propChangeSupport.removePropertyChangeListener(listener);
   }
 
 }
