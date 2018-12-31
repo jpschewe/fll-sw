@@ -158,6 +158,9 @@
 							schedule sorted by time</a></li>
 					<li><a href="PerformanceSchedule" target="_new">Performance
 							Schedule</a></li>
+					<li><a
+						href="<c:url value='/admin/ScheduleAsCsv' />" target="_new">Full
+							Schedule as CSV</a> - for use with scheduling tools</li>
 				</ul>
 			</c:if></li>
 

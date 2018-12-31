@@ -2278,4 +2278,58 @@ public class TournamentSchedule implements Serializable {
     }
   }
 
+  /**
+   * Write the schedule as a CSV file to the specified stream.
+   * 
+   * @param stream where to write the schedule
+   * @throws IOException if there is a problem writing to the stream
+   */
+  public void outputScheduleAsCSV(final OutputStream stream) throws IOException {
+
+    try (final CSVWriter csv = new CSVWriter(new OutputStreamWriter(stream, Utilities.DEFAULT_CHARSET))) {
+
+      final List<String> headerLine = new LinkedList<>();
+      headerLine.add(TournamentSchedule.TEAM_NUMBER_HEADER);
+      headerLine.add(TournamentSchedule.TEAM_NAME_HEADER);
+      headerLine.add(TournamentSchedule.ORGANIZATION_HEADER);
+      headerLine.add(TournamentSchedule.JUDGE_GROUP_HEADER);
+      headerLine.add(TournamentSchedule.AWARD_GROUP_HEADER);
+      for (final String station : getSubjectiveStations()) {
+        headerLine.add(station);
+      }
+      for (int round = 0; round < getNumberOfRounds(); ++round) {
+        headerLine.add(String.format(TournamentSchedule.PERF_HEADER_FORMAT, round
+            + 1));
+        headerLine.add(String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round
+            + 1));
+      }
+      csv.writeNext(headerLine.toArray(new String[0]));
+
+      Collections.sort(_schedule, ComparatorByTeam.INSTANCE);
+      for (final TeamScheduleInfo si : _schedule) {
+        final List<String> line = new LinkedList<>();
+
+        line.add(String.valueOf(si.getTeamNumber()));
+        line.add(si.getTeamName());
+        line.add(si.getOrganization());
+        line.add(si.getJudgingGroup());
+        line.add(si.getAwardGroup());
+
+        for (final String subjectiveStation : subjectiveStations) {
+          line.add(formatTime(si.getSubjectiveTimeByName(subjectiveStation).getTime()));
+        }
+
+        for (int round = 0; round < getNumberOfRounds(); ++round) {
+          final PerformanceTime perf = si.getPerf(round);
+
+          line.add(formatTime(perf.getTime()));
+
+          line.add(String.format("%s %s", perf.getTable(), perf.getSide()));
+        }
+
+        csv.writeNext(line.toArray(new String[0]));
+      } // foreach team
+    } // allocate csv writer
+  }
+
 }
