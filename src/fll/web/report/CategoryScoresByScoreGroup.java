@@ -38,7 +38,7 @@ import fll.util.SimpleFooterHandler;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.xml.ChallengeDescription;
-import fll.xml.ScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
 import fll.xml.WinnerType;
 
 /**
@@ -91,11 +91,11 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
     final String challengeTitle = challengeDescription.getTitle();
     final WinnerType winnerCriteria = challengeDescription.getWinner();
 
-    final List<ScoreCategory> subjectiveCategories = challengeDescription.getSubjectiveCategories();
+    final List<SubjectiveScoreCategory> subjectiveCategories = challengeDescription.getSubjectiveCategories();
     final Collection<String> eventDivisions = Queries.getAwardGroups(connection);
     final Collection<String> judgingGroups = Queries.getJudgingStations(connection, tournament.getTournamentID());
 
-    for (final ScoreCategory catElement : subjectiveCategories) {
+    for (final SubjectiveScoreCategory catElement : subjectiveCategories) {
       final String catName = catElement.getName();
       final String catTitle = catElement.getTitle();
 

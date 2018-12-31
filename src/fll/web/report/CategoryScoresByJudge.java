@@ -28,8 +28,8 @@ import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.xml.ChallengeDescription;
-import fll.xml.ScoreCategory;
 import fll.xml.ScoreType;
+import fll.xml.SubjectiveScoreCategory;
 import fll.xml.WinnerType;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -60,7 +60,7 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
     // cache the subjective categories title->dbname
     final Map<String, String> subjectiveCategories = new HashMap<>();
     final Map<String, ScoreType> categoryScoreType = new HashMap<>();
-    for (final ScoreCategory subjectiveElement : challengeDescription.getSubjectiveCategories()) {
+    for (final SubjectiveScoreCategory subjectiveElement : challengeDescription.getSubjectiveCategories()) {
       final String title = subjectiveElement.getTitle();
       final String name = subjectiveElement.getName();
       subjectiveCategories.put(title, name);

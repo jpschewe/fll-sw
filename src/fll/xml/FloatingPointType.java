@@ -14,13 +14,18 @@ public enum FloatingPointType {
    * Defaults to TRUNCATE if string doesn't match any known constant.
    */
   public static FloatingPointType fromString(final String str) {
-    if ("decimal".equalsIgnoreCase(str)) {
+    if (DECIMAL.toString().equalsIgnoreCase(str)) {
       return DECIMAL;
-    } else if ("round".equalsIgnoreCase(str)) {
+    } else if (ROUND.toString().equalsIgnoreCase(str)) {
       return ROUND;
     } else {
       return TRUNCATE;
     }
+  }
+  
+  public String toXmlString() {
+    // the XML always uses the lower case version
+    return toString().toLowerCase();
   }
 
 }

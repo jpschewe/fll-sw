@@ -7,85 +7,132 @@
 package fll.xml;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
-
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.Utilities;
 import fll.web.playoff.TeamScore;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**
- * 
+ * Base for {@link SubjectiveScoreCategory} and
+ * {@link PerformanceScoreCategory}.
  */
 public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
 
-  public ScoreCategory(final Element ele) {
-    this(ele, ele.getAttribute("name"), ele.getAttribute("title"));
-  }
+  public static final String WEIGHT_ATTRIBUTE = "weight";
 
-  protected ScoreCategory(final Element ele,
-                          final String name,
-                          final String title) {
-    mName = name;
-    mTitle = title;
-    mWeight = Double.valueOf(ele.getAttribute("weight"));
+  protected ScoreCategory(final Element ele) {
+    mWeight = Double.valueOf(ele.getAttribute(WEIGHT_ATTRIBUTE));
 
-    final Map<String, AbstractGoal> goals = new HashMap<String, AbstractGoal>();
-    final List<AbstractGoal> goalsList = new LinkedList<AbstractGoal>();
+    mGoals = new LinkedList<AbstractGoal>();
     for (final Element goalEle : new NodelistElementCollectionAdapter(ele.getChildNodes())) {
-      if ("goal".equals(goalEle.getNodeName())) {
+      if (Goal.TAG_NAME.equals(goalEle.getNodeName())) {
         final Goal goal = new Goal(goalEle);
-        goals.put(goal.getName(), goal);
-        goalsList.add(goal);
-      } else if ("computedGoal".equals(goalEle.getNodeName())) {
+        mGoals.add(goal);
+      } else if (ComputedGoal.TAG_NAME.equals(goalEle.getNodeName())) {
         final ComputedGoal compGoal = new ComputedGoal(goalEle, this);
-        goals.put(compGoal.getName(), compGoal);
-        goalsList.add(compGoal);
+        mGoals.add(compGoal);
       }
     }
-    mGoals = Collections.unmodifiableMap(goals);
-    mGoalsList = Collections.unmodifiableList(goalsList);
   }
 
-  private final Map<String, AbstractGoal> mGoals;
+  /**
+   * Default constructor creates an object with no {@link #getGoals()} and a
+   * {@link #getWeight()} of 1.
+   */
+  protected ScoreCategory() {
+    mGoals = new LinkedList<>();
+    mWeight = 1;
+  }
 
-  private final List<AbstractGoal> mGoalsList;
+  private final List<AbstractGoal> mGoals;
 
+  /**
+   * The goals for the category in the order they should be displayed.
+   * 
+   * @return unmodifiable list
+   */
   public List<AbstractGoal> getGoals() {
-    return mGoalsList;
+    return Collections.unmodifiableList(mGoals);
   }
 
-  private final String mName;
-
-  public String getName() {
-    return mName;
+  /**
+   * @see fll.xml.GoalScope#getAllGoals()
+   */
+  @Override
+  public Collection<AbstractGoal> getAllGoals() {
+    return getGoals();
   }
 
-  private final String mTitle;
-
-  public String getTitle() {
-    return mTitle;
+  /**
+   * Add the specified goal to the end of the list.
+   * 
+   * @param v
+   */
+  public void addGoal(final AbstractGoal v) {
+    mGoals.add(v);
   }
 
-  private final double mWeight;
+  /**
+   * Add a goal at the specified index.
+   * 
+   * @param index the index to add the goal at
+   * @param v the goal to add
+   * @throws IndexOutOfBoundsException if the index is out of range
+   */
+  public void addGoal(final int index,
+                      final AbstractGoal v)
+      throws IndexOutOfBoundsException {
+    mGoals.add(index, v);
+  }
+
+  /**
+   * Remove the specified goal from the list.
+   * 
+   * @param v the goal to remove
+   * @return if the goal was removed
+   */
+  public boolean removeGoal(final AbstractGoal v) {
+    return mGoals.remove(v);
+  }
+
+  /**
+   * Remove the goal at the specified index.
+   * 
+   * @param index the index of the goal to remove
+   * @return the removed goal
+   * @throws IndexOutOfBoundsException if the index is out of range
+   */
+  public AbstractGoal removeGoal(final int index) throws IndexOutOfBoundsException {
+    return mGoals.remove(index);
+  }
+
+  private double mWeight;
 
   public double getWeight() {
     return mWeight;
   }
 
-  public AbstractGoal getGoal(final String name) {
-    if (mGoals.containsKey(name)) {
-      return mGoals.get(name);
-    } else {
-      throw new ScopeException("Cannot find goal named '"
-          + name + "'");
-    }
+  public void setWeight(final double v) {
+    mWeight = v;
+  }
 
+  @Override
+  public AbstractGoal getGoal(final String name) {
+    for (final AbstractGoal goal : mGoals) {
+      if (goal.getName().equals(name)) {
+        return goal;
+      }
+    }
+    throw new ScopeException("Cannot find goal named '"
+        + name
+        + "'");
   }
 
   @Override
@@ -114,6 +161,16 @@ public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
   public ScoreType getScoreType() {
     final boolean hasFloatingPointGoals = getGoals().stream().anyMatch(g -> g.getScoreType() == ScoreType.FLOAT);
     return hasFloatingPointGoals ? ScoreType.FLOAT : ScoreType.INTEGER;
+  }
+
+  public void populateXml(final Document doc,
+                          final Element ele) {
+    ele.setAttribute(WEIGHT_ATTRIBUTE, Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mWeight));
+
+    for (final AbstractGoal goal : mGoals) {
+      final Element goalEle = goal.toXml(doc);
+      ele.appendChild(goalEle);
+    }
   }
 
 }

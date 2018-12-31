@@ -12,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.Collection;
 import java.util.Formatter;
 import java.util.List;
 
@@ -336,11 +337,11 @@ public final class ScoreEntry {
 
     final PerformanceScoreCategory performanceElement = description.getPerformance();
 
-    final List<Restriction> restrictions = performanceElement.getRestrictions();
+    final Collection<Restriction> restrictions = performanceElement.getRestrictions();
 
     // output actual check of restriction
-    for (int restrictIdx = 0; restrictIdx < restrictions.size(); ++restrictIdx) {
-      final Restriction restrictEle = restrictions.get(restrictIdx);
+    int restrictIdx = 0;
+    for (final Restriction restrictEle : restrictions) {
       final double lowerBound = restrictEle.getLowerBound();
       final double upperBound = restrictEle.getUpperBound();
       final String message = restrictEle.getMessage();
@@ -354,6 +355,7 @@ public final class ScoreEntry {
       formatter.format("    $('#score-errors').append('<div>%s</div>');%n", message);
       formatter.format("    error_found = true;%n");
       formatter.format("  }%n");
+      ++restrictIdx;
     }
   }
 

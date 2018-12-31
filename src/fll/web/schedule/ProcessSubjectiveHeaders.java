@@ -25,7 +25,7 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.WebUtils;
 import fll.xml.ChallengeDescription;
-import fll.xml.ScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
 
 /**
  * Processes results of chooseSubjectiveHeaders.jsp and redirects to
@@ -53,7 +53,7 @@ public class ProcessSubjectiveHeaders extends BaseFLLServlet {
       // get params for subjectiveHeader
       final List<SubjectiveStation> subjectiveStations = new LinkedList<SubjectiveStation>();
 
-      for (final ScoreCategory cat : challenge.getSubjectiveCategories()) {
+      for (final SubjectiveScoreCategory cat : challenge.getSubjectiveCategories()) {
         final String value = request.getParameter(cat.getName()
             + ":header");
         if (null != value) {

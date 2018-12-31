@@ -11,4 +11,10 @@ package fll.xml;
 public enum ScoreType {
   INTEGER, FLOAT;
 
+
+  public String toXmlString() {
+    // case for XML and enum value are the same
+    return toString();
+  }
+
 }

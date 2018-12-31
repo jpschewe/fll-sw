@@ -89,7 +89,7 @@ import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.EnumeratedValue;
-import fll.xml.ScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
 import fll.xml.XMLUtils;
 import net.mtu.eggplant.util.BasicFileFilter;
 import net.mtu.eggplant.util.gui.GraphicsUtils;
@@ -123,12 +123,6 @@ public final class SubjectiveFrame extends JFrame {
     try {
       final SubjectiveFrame frame = new SubjectiveFrame();
       frame.addWindowListener(new WindowAdapter() {
-        @Override
-        @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "Exiting from main is OK")
-        public void windowClosing(final WindowEvent e) {
-          System.exit(0);
-        }
-
         @Override
         @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "Exiting from main is OK")
         public void windowClosed(final WindowEvent e) {
@@ -360,7 +354,7 @@ public final class SubjectiveFrame extends JFrame {
       }
     }
 
-    for (final ScoreCategory subjectiveCategory : getChallengeDescription().getSubjectiveCategories()) {
+    for (final SubjectiveScoreCategory subjectiveCategory : getChallengeDescription().getSubjectiveCategories()) {
       createSubjectiveTable(tabbedPane, subjectiveCategory);
     }
 
@@ -378,7 +372,7 @@ public final class SubjectiveFrame extends JFrame {
   }
 
   private void createSubjectiveTable(final JTabbedPane tabbedPane,
-                                     final ScoreCategory subjectiveCategory) {
+                                     final SubjectiveScoreCategory subjectiveCategory) {
     final SubjectiveTableModel tableModel = new SubjectiveTableModel(_scoreDocument, subjectiveCategory, _schedule,
                                                                      _scheduleColumnMappings);
     final JTable table = new JTable(tableModel);
@@ -598,7 +592,7 @@ public final class SubjectiveFrame extends JFrame {
     stopCellEditors();
 
     final List<String> warnings = new LinkedList<String>();
-    for (final ScoreCategory subjectiveCategory : getChallengeDescription().getSubjectiveCategories()) {
+    for (final SubjectiveScoreCategory subjectiveCategory : getChallengeDescription().getSubjectiveCategories()) {
       final String category = subjectiveCategory.getName();
       final String categoryTitle = subjectiveCategory.getTitle();
 

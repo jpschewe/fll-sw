@@ -427,21 +427,21 @@ public final class ChallengeParser {
       return goalCompareMessage;
     }
 
-    final List<ScoreCategory> curSubCats = curDoc.getSubjectiveCategories();
-    final List<ScoreCategory> newSubCats = newDoc.getSubjectiveCategories();
+    final List<SubjectiveScoreCategory> curSubCats = curDoc.getSubjectiveCategories();
+    final List<SubjectiveScoreCategory> newSubCats = newDoc.getSubjectiveCategories();
     if (curSubCats.size() != newSubCats.size()) {
       return "New document has "
           + newSubCats.size() + " subjective categories, current document has " + curSubCats.size()
           + " subjective categories";
     }
     final Map<String, Map<String, String>> curCats = new HashMap<String, Map<String, String>>();
-    for (final ScoreCategory ele : curSubCats) {
+    for (final SubjectiveScoreCategory ele : curSubCats) {
       final String name = ele.getName();
       final Map<String, String> goalDefs = gatherColumnDefinitions(ele);
       curCats.put(name, goalDefs);
     }
 
-    for (final ScoreCategory ele : newSubCats) {
+    for (final SubjectiveScoreCategory ele : newSubCats) {
       final String name = ele.getName();
       if (!curCats.containsKey(name)) {
         return "New document has subjective category '"

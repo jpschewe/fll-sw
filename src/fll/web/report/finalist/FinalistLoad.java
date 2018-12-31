@@ -17,7 +17,6 @@ import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
 import fll.TournamentTeam;
 import fll.db.NonNumericNominees;
 import fll.db.Queries;
@@ -25,7 +24,8 @@ import fll.web.ApplicationAttributes;
 import fll.web.WebUtils;
 import fll.web.playoff.Playoff;
 import fll.xml.ChallengeDescription;
-import fll.xml.ScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Support for /report/finalist/load.jsp.
@@ -137,7 +137,7 @@ public class FinalistLoad {
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final Formatter output = new Formatter(writer);
 
-    for (final ScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
+    for (final SubjectiveScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
       final String categoryName = subjectiveElement.getName();
       final String categoryTitle = subjectiveElement.getTitle();
       final String quotedCatTitle = WebUtils.quoteJavascriptString(categoryTitle);
@@ -210,7 +210,7 @@ public class FinalistLoad {
         final double overallScore = rs.getDouble("OverallScore");
         output.format("$.finalist.setCategoryScore(%s, championship, %.02f);%n", teamVar, overallScore);
 
-        for (final ScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
+        for (final SubjectiveScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
           final String categoryName = subjectiveElement.getName();
           final String categoryVar = getCategoryVarName(categoryName);
           final double catScore = rs.getDouble(categoryName);

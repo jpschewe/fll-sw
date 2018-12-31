@@ -568,7 +568,7 @@
 	<target name="docs" depends="javadoc,doc.workflow.generate,doc.markdown.render,doc.database-diagram" description="Generate all documentation">
 
 		<copy todir="${dir.build}/docs" file="${basedir}/LICENSE" />
-		
+
 		<copy todir="${dir.build}/docs" file="${basedir}/Changes.md" />
 
 		<copy todir="${dir.web}/documentation">
@@ -898,7 +898,7 @@
 		<antcall target="coverage.report" />
 	</target>
 
-	<target name="findbugs" depends="compile" description="Executes findbugs to look for problems in the source.">
+	<target name="findbugs" depends="compile" description="Executes findbugs to look for problems in the source. Outputs to XML.">
 		<mkdir dir="${dir.build}/findbugs" />
 		<findbugs home="${findbugs.home}" output="xml" outputFile="${dir.build}/findbugs/report.xml" effort="max" jvmargs="-Xmx1024m" reportLevel="low" excludeFilter="${basedir}/findbugs-filters.xml">
 			<auxClasspath refid="application.classpath" />
@@ -907,7 +907,7 @@
 		</findbugs>
 	</target>
 
-	<target name="findbugs.html" depends="compile" description="Executes findbugs to look for problems in the source.">
+	<target name="findbugs.html" depends="compile" description="Executes findbugs to look for problems in the source. Outputs to HTML.">
 		<mkdir dir="${dir.reports}/findbugs" />
 		<findbugs home="${findbugs.home}" output="html" outputFile="${dir.reports}/findbugs/index.html" effort="max" jvmargs="-Xmx1024m" reportLevel="low" excludeFilter="${basedir}/findbugs-filters.xml">
 			<auxClasspath refid="application.classpath" />

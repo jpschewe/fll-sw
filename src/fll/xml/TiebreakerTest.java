@@ -6,6 +6,7 @@
 
 package fll.xml;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
@@ -13,15 +14,36 @@ import org.w3c.dom.Element;
  */
 public class TiebreakerTest extends BasicPolynomial {
 
-  public TiebreakerTest(final Element ele, final GoalScope goalScope) {
+  public static final String TAG_NAME = "test";
+
+  public TiebreakerTest(final Element ele,
+                        final GoalScope goalScope) {
     super(ele, goalScope);
     mWinner = XMLUtils.getWinnerCriteria(ele);
   }
 
-  private final WinnerType mWinner;
+  /**
+   * Default constructor uses {@link WinnerType#HIGH} as {@link #getWinner()}.
+   */
+  public TiebreakerTest() {
+    super();
+    mWinner = WinnerType.HIGH;
+  }
+
+  private WinnerType mWinner;
 
   public WinnerType getWinner() {
     return mWinner;
   }
 
+  public void setWinner(final WinnerType v) {
+    mWinner = v;
+  }
+
+  public Element toXml(final Document doc) {
+    final Element ele = doc.createElement(TAG_NAME);
+    populateXml(doc, ele);
+    ele.setAttribute(XMLUtils.WINNER_ATTRIBUTE, mWinner.toString());
+    return ele;
+  }
 }

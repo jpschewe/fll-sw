@@ -56,7 +56,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
-import fll.xml.ScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
 import fll.xml.XMLUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -173,7 +173,7 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
         top.setAttribute("tournamentDescription", tournament.getDescription());
       }
 
-      for (final ScoreCategory categoryDescription : challengeDescription.getSubjectiveCategories()) {
+      for (final SubjectiveScoreCategory categoryDescription : challengeDescription.getSubjectiveCategories()) {
         final String categoryName = categoryDescription.getName();
         final Element categoryElement = document.createElementNS(null, SUBJECTIVE_CATEGORY_NODE_NAME);
         top.appendChild(categoryElement);

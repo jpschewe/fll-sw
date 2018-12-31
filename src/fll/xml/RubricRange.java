@@ -8,21 +8,39 @@ package fll.xml;
 
 import java.io.Serializable;
 
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
+import javax.annotation.Nonnull;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import fll.util.FLLRuntimeException;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**
  * Represents a rubric range.
  */
 public class RubricRange implements Serializable {
 
-  public RubricRange(final Element ele) {
-    mTitle = ele.getAttribute("title");
-    mMin = Integer.parseInt(ele.getAttribute("min"));
-    mMax = Integer.parseInt(ele.getAttribute("max"));
+  public static final String RUBRIC_TAG_NAME = "rubric";
 
-    final NodelistElementCollectionAdapter descriptions = new NodelistElementCollectionAdapter(ele.getElementsByTagName("description"));
+  public static final String TAG_NAME = "range";
+
+  public static final String TITLE_ATTRIBUTE = "title";
+
+  public static final String MIN_ATTRIBUTE = "min";
+
+  public static final String MAX_ATTRIBUTE = "max";
+
+  public static final String DESCRIPTION_TAG_NAME = "description";
+
+  public static final String SHORT_DESCRIPTION_ATTRIBUTE = "shortDescription";
+
+  public RubricRange(final Element ele) {
+    mTitle = ele.getAttribute(TITLE_ATTRIBUTE);
+    mMin = Integer.parseInt(ele.getAttribute(MIN_ATTRIBUTE));
+    mMax = Integer.parseInt(ele.getAttribute(MAX_ATTRIBUTE));
+
+    final NodelistElementCollectionAdapter descriptions = new NodelistElementCollectionAdapter(ele.getElementsByTagName(DESCRIPTION_TAG_NAME));
     if (descriptions.hasNext()) {
       final Element descriptionEle = descriptions.next();
       mDescription = removeExtraWhitespace(descriptionEle.getTextContent());
@@ -30,7 +48,22 @@ public class RubricRange implements Serializable {
       mDescription = null;
     }
 
-    mShortDescription = ele.getAttribute("shortDescription");
+    mShortDescription = ele.getAttribute(SHORT_DESCRIPTION_ATTRIBUTE);
+  }
+
+  /**
+   * Default constructor. {@link #getDescription()} is null,
+   * {@link #getShortDescription()} is null, {@link #getMin()} is 0,
+   * {@Link #getMax()} is 1.
+   * 
+   * @param title the title of the range
+   */
+  public RubricRange(@Nonnull final String title) {
+    mTitle = title;
+    mMin = 0;
+    mMax = 1;
+    mDescription = null;
+    mShortDescription = null;
   }
 
   private static String removeExtraWhitespace(final String str) {
@@ -45,13 +78,17 @@ public class RubricRange implements Serializable {
     return result;
   }
 
-  private final String mTitle;
+  private String mTitle;
 
   public String getTitle() {
     return mTitle;
   }
 
-  private final String mDescription;
+  public void setTitle(final String v) {
+    mTitle = v;
+  }
+
+  private String mDescription;
 
   /**
    * The long description, may be null.
@@ -62,13 +99,21 @@ public class RubricRange implements Serializable {
     return mDescription;
   }
 
-  private final String mShortDescription;
+  public void setDescription(final String v) {
+    mDescription = removeExtraWhitespace(v);
+  }
+
+  private String mShortDescription;
 
   /**
    * Short description, typically 1 line. May be null.
    */
   public String getShortDescription() {
     return mShortDescription;
+  }
+
+  public void setShortDescription(final String v) {
+    mShortDescription = v;
   }
 
   /**
@@ -80,10 +125,12 @@ public class RubricRange implements Serializable {
     final StringBuilder sb = new StringBuilder();
     final String shortDescription = getShortDescription();
 
-    if (null != shortDescription && !shortDescription.trim().isEmpty()) {
+    if (null != shortDescription
+        && !shortDescription.trim().isEmpty()) {
       sb.append(shortDescription.trim());
       if (!shortDescription.endsWith(".")
-          && !shortDescription.endsWith("!") && !shortDescription.endsWith("?")) {
+          && !shortDescription.endsWith("!")
+          && !shortDescription.endsWith("?")) {
         sb.append(".");
       }
     }
@@ -99,16 +146,45 @@ public class RubricRange implements Serializable {
     return sb.toString();
   }
 
-  private final int mMin;
+  private int mMin;
 
   public int getMin() {
     return mMin;
   }
 
-  private final int mMax;
+  public void setMin(final int v) {
+    mMin = v;
+  }
+
+  private int mMax;
 
   public int getMax() {
     return mMax;
+  }
+
+  public void setMax(final int v) {
+    mMax = v;
+  }
+
+  public Element toXml(final Document doc) {
+    if (mMin >= mMax) {
+      throw new FLLRuntimeException("Minimum value must be less than maximum value");
+    }
+
+    final Element ele = doc.createElement(TAG_NAME);
+    ele.setAttribute(TITLE_ATTRIBUTE, mTitle);
+    ele.setAttribute(MIN_ATTRIBUTE, Integer.toString(mMin));
+    ele.setAttribute(MAX_ATTRIBUTE, Integer.toString(mMax));
+
+    if (null != mDescription) {
+      final Element descriptionEle = doc.createElement(DESCRIPTION_TAG_NAME);
+      descriptionEle.appendChild(doc.createTextNode(mDescription));
+      ele.appendChild(descriptionEle);
+    }
+
+    ele.setAttribute(SHORT_DESCRIPTION_ATTRIBUTE, mShortDescription);
+
+    return ele;
   }
 
 }

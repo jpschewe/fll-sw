@@ -23,8 +23,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.log4j.Logger;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -36,7 +34,8 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.xml.ChallengeDescription;
-import fll.xml.ScoreCategory;
+import fll.xml.SubjectiveScoreCategory;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Get the information needed to edit judges and store it in the session.
@@ -83,7 +82,7 @@ public class GatherJudgeInformation extends BaseFLLServlet {
       final int tournament = Queries.getCurrentTournament(connection);
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
-      final List<ScoreCategory> subjectiveCategories = challengeDescription.getSubjectiveCategories();
+      final List<SubjectiveScoreCategory> subjectiveCategories = challengeDescription.getSubjectiveCategories();
 
       if (!TournamentSchedule.scheduleExistsInDatabase(connection, tournament)) {
         message.append("<p class='warning'>You have not loaded a schedule. If you intend to do so you should go back to the <a href='index.jsp'>admin page</a> and do this before assigning judges.</p>");
@@ -113,12 +112,12 @@ public class GatherJudgeInformation extends BaseFLLServlet {
 
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
   private static boolean checkForEnteredSubjectiveScores(final Connection connection,
-                                                         final List<ScoreCategory> subjectiveCategories,
+                                                         final List<SubjectiveScoreCategory> subjectiveCategories,
                                                          final int tournament) throws SQLException {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      for (final ScoreCategory category : subjectiveCategories) {
+      for (final SubjectiveScoreCategory category : subjectiveCategories) {
         final String categoryName = category.getName();
         prep = connection.prepareStatement(String.format("SELECT * FROM %s WHERE Tournament = ?", categoryName));
         prep.setInt(1, tournament);
@@ -142,9 +141,9 @@ public class GatherJudgeInformation extends BaseFLLServlet {
     return stations;
   }
 
-  private Map<String, String> gatherCategories(final List<ScoreCategory> subjectiveCategories) {
+  private Map<String, String> gatherCategories(final List<SubjectiveScoreCategory> subjectiveCategories) {
     final Map<String, String> categories = new HashMap<String, String>();
-    for (final ScoreCategory element : subjectiveCategories) {
+    for (final SubjectiveScoreCategory element : subjectiveCategories) {
       final String categoryName = element.getName();
       final String categoryTitle = element.getTitle();
       categories.put(categoryName, categoryTitle);
