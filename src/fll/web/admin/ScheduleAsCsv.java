@@ -20,11 +20,8 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 
-import com.itextpdf.text.DocumentException;
-
 import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
-import fll.util.FLLInternalException;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
@@ -32,10 +29,10 @@ import fll.web.SessionAttributes;
 import fll.web.WebUtils;
 
 /**
- * @see TournamentSchedule#outputScheduleByTeam(java.io.OutputStream)
+ * @see TournamentSchedule#outputScheduleAsCSV(java.io.OutputStream)
  */
-@WebServlet("/admin/ScheduleByTeam")
-public class ScheduleByTeam extends BaseFLLServlet {
+@WebServlet("/admin/ScheduleAsCsv")
+public class ScheduleAsCsv extends BaseFLLServlet {
 
   private static Logger LOGGER = LogUtils.getLogger();
 
@@ -47,6 +44,7 @@ public class ScheduleByTeam extends BaseFLLServlet {
       throws IOException, ServletException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
+
       final int currentTournamentID = Queries.getCurrentTournament(connection);
 
       if (!TournamentSchedule.scheduleExistsInDatabase(connection, currentTournamentID)) {
@@ -59,13 +57,10 @@ public class ScheduleByTeam extends BaseFLLServlet {
       final TournamentSchedule schedule = new TournamentSchedule(connection, currentTournamentID);
 
       response.reset();
-      response.setContentType("application/pdf");
-      response.setHeader("Content-Disposition", "filename=schedule.pdf");
-      schedule.outputScheduleByTeam(response.getOutputStream());
+      response.setContentType("text/csv");
+      response.setHeader("Content-Disposition", "filename=schedule.csv");
+      schedule.outputScheduleAsCSV(response.getOutputStream());
 
-    } catch (final DocumentException e) {
-      LOGGER.error(e.getMessage(), e);
-      throw new FLLInternalException("Got error writing schedule", e);
     } catch (final SQLException sqle) {
       LOGGER.error(sqle.getMessage(), sqle);
       throw new RuntimeException(sqle);
