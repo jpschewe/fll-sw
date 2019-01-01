@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 
 import com.itextpdf.text.DocumentException;
 
+import fll.Tournament;
 import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
@@ -30,12 +31,14 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.WebUtils;
+import fll.xml.ChallengeDescription;
 
 /**
- * @see TournamentSchedule#outputScheduleByTeam(java.io.OutputStream)
+ * @see TournamentSchedule#outputPerformanceSheets(String, java.io.OutputStream,
+ *      fll.xml.ChallengeDescription)
  */
-@WebServlet("/admin/ScheduleByTeam")
-public class ScheduleByTeam extends BaseFLLServlet {
+@WebServlet("/admin/PerformanceSheets")
+public class PerformanceSheets extends BaseFLLServlet {
 
   private static Logger LOGGER = LogUtils.getLogger();
 
@@ -46,6 +49,8 @@ public class ScheduleByTeam extends BaseFLLServlet {
                                 final HttpSession session)
       throws IOException, ServletException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
+    
     try (Connection connection = datasource.getConnection()) {
       final int currentTournamentID = Queries.getCurrentTournament(connection);
 
@@ -58,10 +63,12 @@ public class ScheduleByTeam extends BaseFLLServlet {
 
       final TournamentSchedule schedule = new TournamentSchedule(connection, currentTournamentID);
 
+      final Tournament tournament = Tournament.findTournamentByID(connection, currentTournamentID);
+
       response.reset();
       response.setContentType("application/pdf");
-      response.setHeader("Content-Disposition", "filename=schedule.pdf");
-      schedule.outputScheduleByTeam(response.getOutputStream());
+      response.setHeader("Content-Disposition", "filename=performance-sheets.pdf");
+      schedule.outputPerformanceSheets(tournament.getName(), response.getOutputStream(), description);
 
     } catch (final DocumentException e) {
       LOGGER.error(e.getMessage(), e);
