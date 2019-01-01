@@ -8,12 +8,19 @@
 
 <html>
 <head>
+<title>Edit Tournaments</title>
+
 <link rel="stylesheet" type="text/css"
 	href="<c:url value='/style/fll-sw.css'/>" />
-<title>Edit Tournaments</title>
 
 <script type="text/javascript"
 	src="<c:url value='/extlib/jquery-1.11.1.min.js' />"></script>
+
+<link rel="stylesheet"
+	href="<c:url value='/extlib/jquery-ui-1.12.1/jquery-ui.min.css' />" />
+
+<script type="text/javascript"
+	src="<c:url value='/extlib/jquery-ui-1.12.1/jquery-ui.min.js' />"></script>
 
 <script type="text/javascript" src="tournaments.js"></script>
 
@@ -38,6 +45,7 @@
 
 		<table border="1" id="tournamentsTable">
 			<tr>
+				<th>Date</th>
 				<th>Name</th>
 				<th>Description</th>
 			</tr>
@@ -47,8 +55,12 @@
 				<tr>
 					<td><input type="hidden" name="key${loopStatus.index}"
 						value="${tournament.tournamentID}" /> <input type="text"
-						name="name${loopStatus.index}" id="name${loopStatus.index}"
-						value="${tournament.name}" maxlength="128" size="16" /></td>
+						name="date${loopStatus.index}" id="date${loopStatus.index}"
+						value="${tournament.dateString}" size="8" /></td>
+
+					<td><input type="text" name="name${loopStatus.index}"
+						id="name${loopStatus.index}" value="${tournament.name}"
+						maxlength="128" size="32" /></td>
 
 					<td><input type="text" name="description${loopStatus.index}"
 						value="${tournament.description}" size="64" /></td>

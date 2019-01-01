@@ -10,26 +10,38 @@ function addTournament() {
   var numRows = parseInt($('#numRows').val());
   var newTournamentId = $('#newTournamentId').val();
 
-  var element = $([
-      "<tr>",
-      "  <td>",
-      "    <input type=\"hidden\" name=\"key" + numRows + "\" value=\""
-          + newTournamentId + "\" />",
-      "    <input type=\"text\" id=\"name" + numRows + "\" name=\"name"
-          + numRows + "\" maxlength=\"128\" size=\"16\" />",
-      "  </td>",
-      "<td><input type=\"text\" name=\"description" + numRows
-          + "\" size=\"64\" /></td>",
+  var trElement = $("<tr></tr>");
 
-      "</tr>" ].join("\n"));
+  var td1Element = $("<td></td>");
+  var keyElement = $("<input type=\"hidden\" name=\"key" + numRows
+      + "\" value=\"" + newTournamentId + "\" />");
+  td1Element.append(keyElement);
 
-  $('#tournamentsTable tbody').append(element);
+  var dateElement = $("<input type=\"text\" name=\"date" + numRows
+      + "\" size=\"8\" />");
+  dateElement.datepicker();
+  td1Element.append(dateElement);
+  trElement.append(td1Element);
+
+  var td2Element = $("<td></td>");
+  var nameElement = $("<input type=\"text\" id=\"name" + numRows
+      + "\" name=\"name" + numRows + "\" maxlength=\"128\" size=\"32\" />");
+  td2Element.append(nameElement);
+  trElement.append(td2Element);
+
+  var td3Element = $("<td></td>");
+  var descriptionElement = $("<input type=\"text\" name=\"description"
+      + numRows + "\" size=\"64\" />");
+  td3Element.append(descriptionElement);
+  trElement.append(td3Element);
+
+  $('#tournamentsTable tbody').append(trElement);
 
   $('#numRows').val(numRows + 1);
 }
 
 function checkTournamentNames() {
-  var numRows = $('#numRows').val();
+  var numRows = parseInt($('#numRows').val());
 
   var tournamentsSeen = [];
   for (var idx = 0; idx < numRows; ++idx) {
@@ -48,11 +60,20 @@ function checkTournamentNames() {
   return true;
 }
 
+function setupDatepickers() {
+  var numRows = parseInt($('#numRows').val());
+  for (var idx = 0; idx < numRows; ++idx) {
+    $('#date' + idx).datepicker();
+  }
+}
+
 $(document).ready(function() {
 
   $('#addRow').click(function(e) {
     addTournament();
     e.preventDefault();
   });
+
+  setupDatepickers();
 
 }); // end ready function

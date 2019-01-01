@@ -9,6 +9,10 @@ package fll.web.admin;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -36,6 +40,16 @@ import fll.xml.ChallengeDescription;
 public class StoreTournamentData extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
+
+  /** This matches the format used by the jquery UI datepicker. */
+  public static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendValue(ChronoField.MONTH_OF_YEAR,
+                                                                                                    2)
+                                                                                       .appendLiteral('/')
+                                                                                       .appendValue(ChronoField.DAY_OF_MONTH,
+                                                                                                    2)
+                                                                                       .appendLiteral('/')
+                                                                                       .appendValue(ChronoField.YEAR, 4)
+                                                                                       .toFormatter();
 
   @Override
   protected void processRequest(final HttpServletRequest request,
@@ -81,6 +95,8 @@ public class StoreTournamentData extends BaseFLLServlet {
         + row);
     String description = request.getParameter("description"
         + row);
+    String dateStr = request.getParameter("date"
+        + row);
     while (null != keyStr) {
       final int key = Integer.parseInt(keyStr);
       if (Tournaments.NEW_TOURNAMENT_KEY == key) {
@@ -118,7 +134,15 @@ public class StoreTournamentData extends BaseFLLServlet {
         } // tournament exists
       } else {
         // update with new values
-        Queries.updateTournament(connection, key, name, description);
+
+        final LocalDate date;
+        if (null == dateStr
+            || dateStr.trim().isEmpty()) {
+          date = null;
+        } else {
+          date = LocalDate.parse(dateStr, DATE_FORMATTER);
+        }
+        Queries.updateTournament(connection, key, name, description, date);
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug("Updating a tournament "
               + key
@@ -133,6 +157,8 @@ public class StoreTournamentData extends BaseFLLServlet {
       name = request.getParameter("name"
           + row);
       description = request.getParameter("description"
+          + row);
+      dateStr = request.getParameter("date"
           + row);
     }
   }
