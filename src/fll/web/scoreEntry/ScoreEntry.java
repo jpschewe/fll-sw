@@ -448,9 +448,15 @@ public final class ScoreEntry {
         if (!StringUtils.equals(prevCategory, category)) {
           writer.println("<tr><td colspan='4'>&nbsp;</td></tr>");
           if (!StringUtils.isEmpty(category)) {
-            writer.println("<tr><td colspan='4' class='center'><b>"
+            writer.println("<tr>");
+            writer.println("<td colspan='2' class='center truncate'><b>"
                 + category
-                + "</b></td></tr>");
+                + "</b></td>");
+            // repeat category over the count and score columns
+            writer.println("<td colspan='2' class='center truncate'><b>"
+                + category
+                + "</b></td>");
+            writer.println("</tr>");
           }
         }
 
