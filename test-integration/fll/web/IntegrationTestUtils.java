@@ -598,7 +598,7 @@ public final class IntegrationTestUtils {
 
   private static WebDriver createFirefoxWebDriver() {
     if (!mInitializedWebDrivers.contains(WebDriverType.FIREFOX)) {
-      FirefoxDriverManager.getInstance().version("0.14.0").setup();
+      FirefoxDriverManager.getInstance().setup();
       mInitializedWebDrivers.add(WebDriverType.FIREFOX);
     }
 
