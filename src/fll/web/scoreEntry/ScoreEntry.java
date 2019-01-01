@@ -91,12 +91,11 @@ public final class ScoreEntry {
         final double min = goal.getMin();
         final double max = goal.getMax();
 
-        writer.println("  <!-- "
-            + name
-            + " -->");
+        writer.println("  //"
+            + name);
         if (goal.isEnumerated()) {
           // enumerated
-          writer.println("  <!-- nothing to check -->");
+          writer.println("  // nothing to check");
         } else {
           final String rawVarName = getVarNameForRawScore(name);
           writer.println("  if("
@@ -137,7 +136,7 @@ public final class ScoreEntry {
       if (goal.isComputed()) {
         // generate the method to update the computed goal variables
         final String goalName = goal.getName();
-        formatter.format("<!-- %s -->%n", goalName);
+        formatter.format("// %s%n", goalName);
         formatter.format("var %s;%n", getVarNameForComputedScore(goalName));
         generateComputedGoalFunction(formatter, (ComputedGoal) goal);
       } else {
@@ -146,7 +145,7 @@ public final class ScoreEntry {
         final double max = goal.getMax();
         final String rawVarName = getVarNameForRawScore(name);
 
-        formatter.format("<!-- %s -->%n", name);
+        formatter.format("// %s%n", name);
         formatter.format("var %s;%n", rawVarName);
         formatter.format("var %s;%n", getVarNameForComputedScore(name));
 
@@ -197,7 +196,7 @@ public final class ScoreEntry {
     } // end for each goal
 
     // method for double-check field
-    formatter.format("<!-- Verified -->%n");
+    formatter.format("// Verified %n");
     formatter.format("var Verified;%n");
     formatter.format("function %s(newValue) {%n", getSetMethodName("Verified"));
     formatter.format("  Verified = newValue;%n");
@@ -259,7 +258,7 @@ public final class ScoreEntry {
               + max);
         }
 
-        formatter.format("<!-- %s -->%n", name);
+        formatter.format("// %s%n", name);
 
         if (goal.isEnumerated()) {
           // enumerated

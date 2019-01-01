@@ -42,7 +42,6 @@ body {
     <c:if test="${not isBye}">
 
 
-<!-- No Show -->
 function submit_NoShow() {
  retval = confirm("Are you sure this is a 'No Show'?") 
  if(retval) {
