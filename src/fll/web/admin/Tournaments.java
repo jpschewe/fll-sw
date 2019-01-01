@@ -8,16 +8,20 @@ package fll.web.admin;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.ParseException;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspWriter;
+import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
@@ -35,16 +39,45 @@ import fll.xml.ChallengeDescription;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
- * Java code used in tournaments.jsp
+ * Java code used in /admin/tournaments.jsp.
  */
 public final class Tournaments {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  private static final int NEW_TOURNAMENT_KEY = -1;
+  /**
+   * The key used for new tournaments so that {@link StoreTournamentData} knows
+   * when to add a tournament rather than modify one.
+   */
+  public static final int NEW_TOURNAMENT_KEY = -1;
 
   private Tournaments() {
     // no instances
+  }
+
+  /**
+   * Populate page context with variables for /admin/tournaments.jsp.
+   * 
+   * @param application the application context
+   * @param session the session context
+   * @param pageContext populated with variables
+   */
+  public static void populateContext(final ServletContext application,
+                                     final PageContext pageContext) {
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection(); Statement stmt = connection.createStatement()) {
+
+      final List<Tournament> tournaments = Tournament.getTournaments(connection).stream()
+                                                     .filter(t -> !GenerateDB.DUMMY_TOURNAMENT_NAME.equals(t.getName())
+                                                         && !GenerateDB.DROP_TOURNAMENT_NAME.equals(t.getName()))
+                                                     .collect(Collectors.toList());
+      pageContext.setAttribute("tournaments", tournaments);
+
+      pageContext.setAttribute("newTournamentId", NEW_TOURNAMENT_KEY);
+    } catch (final SQLException sqle) {
+      LOGGER.error(sqle);
+      throw new RuntimeException("Error talking to the database", sqle);
+    }
   }
 
   /**
