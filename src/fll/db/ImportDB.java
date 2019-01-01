@@ -594,9 +594,15 @@ public final class ImportDB {
     if (dbVersion < 14) {
       upgrade13To14(connection);
     }
+
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 15) {
       upgrade14To15(connection);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 16) {
+      upgrade15To16(connection);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
@@ -757,6 +763,17 @@ public final class ImportDB {
       SQLFunctions.close(rs);
       SQLFunctions.close(stmt);
       SQLFunctions.close(prep);
+    }
+  }
+
+  private static void upgrade15To16(final Connection connection) throws SQLException {
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Upgrading database from 14 to 15");
+    }
+
+    try (Statement stmt = connection.createStatement()) {
+      stmt.executeUpdate("ALTER TABLE tournaments ADD COLUMN tournament_date DATE DEFAULT NULL");
+      setDBVersion(connection, 16);
     }
   }
 

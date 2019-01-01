@@ -13,6 +13,7 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Types;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -3056,24 +3057,31 @@ public final class Queries {
   }
 
   /**
-   * Set the name and location of a tournament.
+   * Update the information for a tournament.
    * 
    * @param tournamentID which tournament to modify
    * @param name new name
    * @param location new location
+   * @param date the new tournament date
    * @throws SQLException
    */
   public static void updateTournament(final Connection connection,
                                       final int tournamentID,
                                       final String name,
-                                      final String location)
+                                      final String location,
+                                      final LocalDate date)
       throws SQLException {
     PreparedStatement updatePrep = null;
     try {
-      updatePrep = connection.prepareStatement("UPDATE Tournaments SET Name = ?, Location = ? WHERE tournament_id = ?");
+      updatePrep = connection.prepareStatement("UPDATE Tournaments SET Name = ?, Location = ?, tournament_date = ? WHERE tournament_id = ?");
       updatePrep.setString(1, name);
       updatePrep.setString(2, location);
-      updatePrep.setInt(3, tournamentID);
+      if (null == date) {
+        updatePrep.setNull(3, Types.DATE);
+      } else {
+        updatePrep.setDate(3, java.sql.Date.valueOf(date));
+      }
+      updatePrep.setInt(4, tournamentID);
       updatePrep.executeUpdate();
     } finally {
       SQLFunctions.close(updatePrep);
