@@ -12,10 +12,6 @@
     throw new Error("jStorage needs to be loaded!");
   }
 
-  if (!window.applicationCache) {
-    alert("Your browser doesn't support application caching. This app cannot be run offline");
-  }
-
   var STORAGE_PREFIX = "fll.subjective.";
 
   // //////////////////////// PRIVATE INTERFACE ////////////////////////
