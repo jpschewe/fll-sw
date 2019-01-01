@@ -1,6 +1,7 @@
 Release 13.3.0
 ==============
 
+* #675 - repeat category names over the count & score columns on the score entry page 
 * #173 - add tool to edit challenge descriptions
 * #688 - allow the user to specify the filename suffix on subjective score sheets
 * #670 - streamline the export/import process for the 2 server model
