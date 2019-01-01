@@ -90,7 +90,6 @@
 	<classpathentry kind="lib" path="lib/test/webdrivermanager/webdrivermanager-1.6.0.jar"/>
 	<classpathentry kind="lib" path="tools/tomcat/lib/websocket-api.jar"/>
 	<classpathentry kind="lib" path="lib/test/selenium/client-combined-3.3.0-nodeps.jar"/>
-	<classpathentry kind="lib" path="lib/test/selenium/selenium-server-standalone-3.3.0.jar"/>
 	<classpathentry kind="lib" path="lib/tika-core-1.16.jar"/>
 	<classpathentry kind="lib" path="lib/itext-xtra-5.5.9.jar"/>
 	<classpathentry kind="lib" path="lib/bcprov-jdk15on-160.jar" sourcepath="lib/bcprov-jdk15on-160-src.zip">
@@ -107,5 +106,6 @@
 	<classpathentry kind="lib" path="lib/durian-core-1.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/junique-1.0.4.jar"/>
 	<classpathentry kind="lib" path="lib/apache-log4j-extras-1.2.17.jar"/>
+	<classpathentry kind="lib" path="lib/test/selenium/selenium-server-standalone-3.141.59.jar"/>
 	<classpathentry kind="output" path="bin/"/>
 </classpath>
