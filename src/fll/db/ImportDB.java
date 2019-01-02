@@ -772,7 +772,11 @@ public final class ImportDB {
     }
 
     try (Statement stmt = connection.createStatement()) {
-      stmt.executeUpdate("ALTER TABLE tournaments ADD COLUMN tournament_date DATE DEFAULT NULL");
+      // if the database was upgraded from version 0, then the column already exists,
+      // so check for it
+      if (!checkForColumnInTable(connection, "tournaments", "tournament_date")) {
+        stmt.executeUpdate("ALTER TABLE tournaments ADD COLUMN tournament_date DATE DEFAULT NULL");
+      }
       setDBVersion(connection, 16);
     }
   }
