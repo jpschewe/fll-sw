@@ -768,7 +768,7 @@ public final class ImportDB {
 
   private static void upgrade15To16(final Connection connection) throws SQLException {
     if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("Upgrading database from 14 to 15");
+      LOGGER.trace("Upgrading database from 15 to 16");
     }
 
     try (Statement stmt = connection.createStatement()) {
