@@ -1035,27 +1035,22 @@ public final class ImportDB {
    * Add run_number to the playoff table.
    */
   private static void upgrade7To8(final Connection connection) throws SQLException {
-    Statement stmt = null;
-    PreparedStatement prep = null;
-    try {
-      stmt = connection.createStatement();
+    try (Statement stmt = connection.createStatement();
+        PreparedStatement prep = connection.prepareStatement("UPDATE PlayoffData SET run_number = ? + PlayoffRound WHERE tournament = ?")) {
       stmt.executeUpdate("ALTER TABLE PlayoffData ADD COLUMN run_number integer");
 
-      final List<Tournament> tournaments = Tournament.getTournaments(connection);
-      for (final Tournament tournament : tournaments) {
-        final int seedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID());
+      try (ResultSet rs = stmt.executeQuery("SELECT tournament_id from tournaments")) {
+        while (rs.next()) {
+          final int tournamentId = rs.getInt(1);
+          final int seedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournamentId);
 
-        prep = connection.prepareStatement("UPDATE PlayoffData SET run_number = ? + PlayoffRound");
-        prep.setInt(1, seedingRounds);
-        prep.executeUpdate();
+          prep.setInt(1, seedingRounds);
+          prep.setInt(2, tournamentId);
+          prep.executeUpdate();
+        }
       }
 
       setDBVersion(connection, 8);
-    } finally {
-      SQLFunctions.close(stmt);
-      stmt = null;
-      SQLFunctions.close(prep);
-      prep = null;
     }
   }
 
