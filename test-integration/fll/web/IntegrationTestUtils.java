@@ -612,7 +612,7 @@ public final class IntegrationTestUtils {
     // final WebDriver selenium = new FirefoxDriver(capabilities);
 
     FirefoxOptions options = new FirefoxOptions();
-    options.setLogLevel(FirefoxDriverLogLevel.TRACE);
+    //options.setLogLevel(FirefoxDriverLogLevel.TRACE);
     final WebDriver selenium = new FirefoxDriver(options);
 
 //    final WebDriver selenium = new FirefoxDriver();
