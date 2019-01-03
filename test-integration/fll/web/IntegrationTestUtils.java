@@ -33,8 +33,8 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.http.Header;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -53,6 +53,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxDriverLogLevel;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.support.ui.Select;
 import org.w3c.dom.Document;
 
@@ -356,7 +358,9 @@ public final class IntegrationTestUtils {
     // get the database
     final Path dbroot = Paths.get("tomcat", "webapps", "fll-sw", "WEB-INF");
     LOGGER.info("Copying database files from "
-        + dbroot.toAbsolutePath() + " to " + tempDir.toAbsolutePath());
+        + dbroot.toAbsolutePath()
+        + " to "
+        + tempDir.toAbsolutePath());
     try (final DirectoryStream<Path> stream = Files.newDirectoryStream(dbroot, "flldb*")) {
       for (final Path entry : stream) {
         if (Files.isRegularFile(entry)) {
@@ -533,7 +537,8 @@ public final class IntegrationTestUtils {
             + text);
       }
       if (text.endsWith("[ "
-          + tournamentName + " ]")) {
+          + tournamentName
+          + " ]")) {
         tournamentID = option.getAttribute("value");
       }
     }
@@ -598,7 +603,7 @@ public final class IntegrationTestUtils {
 
   private static WebDriver createFirefoxWebDriver() {
     if (!mInitializedWebDrivers.contains(WebDriverType.FIREFOX)) {
-      FirefoxDriverManager.getInstance().version("0.14.0").setup();
+      FirefoxDriverManager.getInstance().setup();
       mInitializedWebDrivers.add(WebDriverType.FIREFOX);
     }
 
@@ -606,7 +611,11 @@ public final class IntegrationTestUtils {
     // capabilities.setCapability("marionette", true);
     // final WebDriver selenium = new FirefoxDriver(capabilities);
 
-    final WebDriver selenium = new FirefoxDriver();
+    FirefoxOptions options = new FirefoxOptions();
+    //options.setLogLevel(FirefoxDriverLogLevel.TRACE);
+    final WebDriver selenium = new FirefoxDriver(options);
+
+//    final WebDriver selenium = new FirefoxDriver();
     return selenium;
   }
 
@@ -638,7 +647,8 @@ public final class IntegrationTestUtils {
     Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
 
     selenium.findElement(By.xpath("//input[@value='Create Head to Head Bracket for Award Group "
-        + awardGroup + "']")).click();
+        + awardGroup
+        + "']")).click();
     Assert.assertTrue("Error creating bracket for award group: "
         + awardGroup, isElementPresent(selenium, By.id("success")));
 
@@ -754,21 +764,21 @@ public final class IntegrationTestUtils {
       // this.followRedirects);
       // requestMethod.setParams(httpRequestParameters);
 
-      final HttpResponse response = client.execute(requestMethod, localContext);
+      try (CloseableHttpResponse response = client.execute(requestMethod, localContext)) {
 
-      final Header contentTypeHeader = response.getFirstHeader("Content-type");
-      Assert.assertNotNull("Null content type header: "
-          + urlToLoad.toString(), contentTypeHeader);
-      final String contentType = contentTypeHeader.getValue().split(";")[0].trim();
-      Assert.assertEquals("Unexpected content type from: "
-          + urlToLoad.toString(), expectedContentType, contentType);
+        final Header contentTypeHeader = response.getFirstHeader("Content-type");
+        Assert.assertNotNull("Null content type header: "
+            + urlToLoad.toString(), contentTypeHeader);
+        final String contentType = contentTypeHeader.getValue().split(";")[0].trim();
+        Assert.assertEquals("Unexpected content type from: "
+            + urlToLoad.toString(), expectedContentType, contentType);
 
-      if (null != destination) {
-        try (final InputStream stream = response.getEntity().getContent()) {
-          Files.copy(stream, destination, StandardCopyOption.REPLACE_EXISTING);
-        } // try create stream
-      } // non-null destination
-
+        if (null != destination) {
+          try (final InputStream stream = response.getEntity().getContent()) {
+            Files.copy(stream, destination, StandardCopyOption.REPLACE_EXISTING);
+          } // try create stream
+        } // non-null destination
+      }
     } catch (final URISyntaxException e) {
       throw new FLLInternalException("Got exception turning URL into URI, this shouldn't happen", e);
     }

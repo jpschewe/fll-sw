@@ -158,6 +158,20 @@
 							schedule sorted by time</a></li>
 					<li><a href="PerformanceSchedule" target="_new">Performance
 							Schedule</a></li>
+					<li><a href="<c:url value='/admin/ScheduleAsCsv' />"
+						target="_new">Full Schedule as CSV</a> - for use with scheduling
+						tools</li>
+
+					<li><a
+						href="<c:url value='/admin/PerformanceSheets' />"
+						target="_new">Performance sheets for the seeding rounds</a></li>
+
+					<c:forEach items="${challengeDescription.subjectiveCategories}"
+						var="category">
+						<li><a href="<c:url value='SubjectiveSheets/${category.name}' />">Subjective
+								sheets for ${category.title}</a>
+					</c:forEach>
+
 				</ul>
 			</c:if></li>
 
