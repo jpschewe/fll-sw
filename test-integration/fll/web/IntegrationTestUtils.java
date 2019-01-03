@@ -33,7 +33,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.http.Header;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -53,6 +52,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxDriverLogLevel;
+import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.remote.http.HttpResponse;
 import org.openqa.selenium.support.ui.Select;
 import org.w3c.dom.Document;
 
@@ -598,6 +600,11 @@ public final class IntegrationTestUtils {
 
   private static WebDriver createFirefoxWebDriver() {
     if (!mInitializedWebDrivers.contains(WebDriverType.FIREFOX)) {
+      
+      FirefoxOptions options = new FirefoxOptions();
+      options.setLogLevel(FirefoxDriverLogLevel.TRACE);
+      WebDriver driver = new FirefoxDriver(options);
+      
       FirefoxDriverManager.getInstance().setup();
       mInitializedWebDrivers.add(WebDriverType.FIREFOX);
     }
