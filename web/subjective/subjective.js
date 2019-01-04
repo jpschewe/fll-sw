@@ -12,10 +12,6 @@
     throw new Error("jStorage needs to be loaded!");
   }
 
-  if (!window.applicationCache) {
-    alert("Your browser doesn't support application caching. This app cannot be run offline");
-  }
-
   var STORAGE_PREFIX = "fll.subjective.";
 
   // //////////////////////// PRIVATE INTERFACE ////////////////////////
@@ -285,11 +281,6 @@
                     + " server: " + serverVersion);
 
                 if (null != serverVersion && serverVersion != webappVersion) {
-                  var appCache = window.applicationCache;
-                  appCache.update();
-                  if (appCache.status == appCache.UPDATEREADY) {
-                    appCache.swapCache();
-                  }
                   if (confirm("Version mismatch webapp: " + webappVersion
                       + " server: " + serverVersion
                       + ". Would you like to reload?")) {
