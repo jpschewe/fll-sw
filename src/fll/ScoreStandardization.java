@@ -9,16 +9,18 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
+import fll.util.LogUtils;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
@@ -28,6 +30,8 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  * Does score standardization routines from the web.
  */
 public final class ScoreStandardization {
+
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   /**
    * Thrown when there are not enough scores for a judging group.
@@ -40,6 +44,106 @@ public final class ScoreStandardization {
 
   private ScoreStandardization() {
     // no instances
+  }
+
+  private static void summarizePerformanceScores(final Connection connection,
+                                                 final int tournament)
+      throws SQLException, TooFewScoresException {
+    final double mean = GlobalParameters.getStandardizedMean(connection);
+    final double sigma = GlobalParameters.getStandardizedSigma(connection);
+
+    try (PreparedStatement getParams = connection.prepareStatement("SELECT " //
+        + " Avg(Score) AS sg_mean," //
+        + " Count(Score) AS sg_count," //
+        + " stddev_pop(Score) AS sg_stdev" //
+        + " FROM performance_seeding_max")) {
+      try (ResultSet params = getParams.executeQuery()) {
+        if (params.next()) {
+          final int sgCount = params.getInt(2);
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("sgCount: "
+                + sgCount);
+          }
+
+          if (0 == sgCount) {
+            // nothing to do
+            LOGGER.error("sgCount is 0, cannot summarize scores");
+            return;
+          } else if (sgCount > 1) {
+            final double sgMean = params.getDouble(1);
+            final double sgStdev = params.getDouble(3);
+            if (LOGGER.isTraceEnabled()) {
+              LOGGER.trace("sgMean: "
+                  + sgMean
+                  + " sgStdev: "
+                  + sgStdev);
+            }
+
+            try (
+                PreparedStatement select = connection.prepareStatement("SELECT TeamNumber, ((Score - ?) * ?) + ? FROM performance_seeding_max");
+                PreparedStatement update = connection.prepareStatement("UPDATE FinalScores SET performance = ? WHERE TeamNumber = ? AND Tournament = ?")) {
+              update.setInt(3, tournament);
+
+              select.setDouble(1, sgMean);
+              select.setDouble(2, sigma
+                  / sgStdev);
+              select.setDouble(3, mean);
+
+              try (ResultSet perfStdScores = select.executeQuery()) {
+                while (perfStdScores.next()) {
+                  final int teamNumber = perfStdScores.getInt(1);
+                  final double stdScore = perfStdScores.getDouble(2);
+                  if (LOGGER.isTraceEnabled()) {
+                    LOGGER.trace("Team: "
+                        + teamNumber
+                        + " stdScore: "
+                        + stdScore);
+                  }
+
+                  update.setDouble(1, stdScore);
+                  update.setInt(2, teamNumber);
+                  update.executeUpdate();
+                } // foreach team's score
+              } // select team scores
+            } // allocate statements
+          } else {
+            throw new TooFewScoresException("Not enough scores for in category: Performance");
+          } // sgCount
+        } else {
+          throw new TooFewScoresException("No performance scores for standardization");
+        } // params check
+      } // select params
+    } // allocate params stmt
+  }
+
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Can't use variable param for column to set")
+  private static void summarizeSubjectiveScores(final Connection connection,
+                                                final int tournament,
+                                                final String catName)
+      throws SQLException {
+    // insert rows from the current tournament and category, keeping team
+    // number and score group as well as computing the average (across
+    // judges)
+    try (PreparedStatement updatePrep = connection.prepareStatement("UPDATE FinalScores" //
+        + " SET "
+        + catName
+        + " = " //
+        + " ( SELECT " //
+        + "   Avg(StandardizedScore)" //
+        + "   FROM "
+        + catName //
+        + "   WHERE StandardizedScore IS NOT NULL" //
+        + "   AND FinalScores.TeamNumber = "
+        + catName
+        + ".TeamNumber" //
+        + "   AND FinalScores.Tournament = "
+        + catName
+        + ".Tournament" //
+        + "   GROUP BY TeamNumber )" //
+        + " WHERE Tournament = ?")) {
+      updatePrep.setInt(1, tournament);
+      updatePrep.executeUpdate();
+    }
   }
 
   /**
@@ -61,95 +165,26 @@ public final class ScoreStandardization {
       throw new FLLRuntimeException("Cannot compute summarized scores for a tournament other than the current tournament");
     }
 
-    Statement stmt = null;
-    PreparedStatement deletePrep = null;
-    PreparedStatement insertPrep = null;
-    PreparedStatement selectPrep = null;
-    ResultSet rs = null;
-    PreparedStatement updatePrep = null;
-    try {
-      stmt = connection.createStatement();
-
-      // delete all rows matching this tournament
-      deletePrep = connection.prepareStatement("DELETE FROM FinalScores WHERE Tournament = ?");
+    // delete all rows matching this tournament
+    try (PreparedStatement deletePrep = connection.prepareStatement("DELETE FROM FinalScores WHERE Tournament = ?")) {
       deletePrep.setInt(1, tournament);
       deletePrep.executeUpdate();
-
-      // performance
-      final double mean = GlobalParameters.getStandardizedMean(connection);
-      final double sigma = GlobalParameters.getStandardizedSigma(connection);
-
-      insertPrep = connection.prepareStatement("INSERT INTO FinalScores "//
-          + " ( TeamNumber, Tournament, performance ) " //
-          + " SELECT TeamNumber" //
-          + ", "
-          + tournament //
-          + ", ((Score - ?) * ?) + ? "//
-          + " FROM performance_seeding_max");
-      insertPrep.setDouble(3, mean);
-
-      selectPrep = connection.prepareStatement("SELECT " //
-          + " Avg(Score) AS sg_mean," //
-          + " Count(Score) AS sg_count," //
-          + " stddev_pop(Score) AS sg_stdev" //
-          + " FROM performance_seeding_max");
-      rs = selectPrep.executeQuery();
-      if (rs.next()) {
-        final int sgCount = rs.getInt(2);
-        if (0 == sgCount) {
-          // nothing to do
-          return;
-        } else if (sgCount > 1) {
-          final double sgMean = rs.getDouble(1);
-          final double sgStdev = rs.getDouble(3);
-          insertPrep.setDouble(1, sgMean);
-          insertPrep.setDouble(2, sigma
-              / sgStdev);
-          insertPrep.executeUpdate();
-        } else {
-          throw new TooFewScoresException("Not enough scores for in category: Performance");
-        }
-
-        // subjective
-        for (final SubjectiveScoreCategory catElement : description.getSubjectiveCategories()) {
-          final String catName = catElement.getName();
-
-          // insert rows from the current tournament and category, keeping team
-          // number and score group as well as computing the average (across
-          // judges)
-          updatePrep = connection.prepareStatement("UPDATE FinalScores" //
-              + " SET "
-              + catName
-              + " = " //
-              + " ( SELECT " //
-              + "   Avg(StandardizedScore)" //
-              + "   FROM "
-              + catName //
-              + "   WHERE StandardizedScore IS NOT NULL" //
-              + "   AND FinalScores.TeamNumber = "
-              + catName
-              + ".TeamNumber" //
-              + "   AND FinalScores.Tournament = "
-              + catName
-              + ".Tournament" //
-              + "   GROUP BY TeamNumber )" //
-              + " WHERE Tournament = ?");
-          updatePrep.setInt(1, tournament);
-          updatePrep.executeUpdate();
-        }
-
-      } else {
-        throw new TooFewScoresException("No performance scores for standardization");
-      }
-      SQLFunctions.close(rs);
-
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
-      SQLFunctions.close(insertPrep);
-      SQLFunctions.close(deletePrep);
-      SQLFunctions.close(selectPrep);
     }
+
+    // insert an empty row for each team
+    try (
+        PreparedStatement insertTeams = connection.prepareStatement("INSERT INTO FinalScores (TeamNumber, Tournament) SELECT teamnumber, tournament FROM tournamentteams WHERE tournament = ?")) {
+      insertTeams.setInt(1, tournament);
+      insertTeams.executeUpdate();
+    }
+
+    summarizePerformanceScores(connection, tournament);
+
+    for (final SubjectiveScoreCategory catElement : description.getSubjectiveCategories()) {
+      final String catName = catElement.getName();
+      summarizeSubjectiveScores(connection, tournament, catName);
+    }
+
   }
 
   /**

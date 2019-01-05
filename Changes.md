@@ -1,6 +1,7 @@
 Release 13.3.0
 ==============
 
+* #695 - compute performance and subjective standardized scores independently
 * #509 - add date to tournament to help with sorting
 * #675 - repeat category names over the count & score columns on the score entry page 
 * #682 - add some more schedule outputs to the admin page (CSV schedule, subjective sheets, performance sheets)
