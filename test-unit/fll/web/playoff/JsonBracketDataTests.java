@@ -65,12 +65,13 @@ public class JsonBracketDataTests {
     // shouldn't be able to access out of context rounds
     Map<Integer, Integer> query = new HashMap<Integer, Integer>();
     query.put(3, 1);
-    List<BracketLeafResultSet> leaves = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, 0, playoff.getConnection(),
-                                                            playoff.getDescription().getPerformance(),
-                                                            playoff.getBracketData(), SHOW_ONLY_VERIFIED,
-                                                            SHOW_FINAL_ROUNDS);    
+    List<BracketLeafResultSet> leaves = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, 0,
+                                                                              playoff.getConnection(),
+                                                                              playoff.getDescription().getPerformance(),
+                                                                              playoff.getBracketData(),
+                                                                              SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
     Assert.assertEquals(-1.0D, leaves.get(0).score, 0.0);
-    
+
     // done
     SQLFunctions.close(playoff.getConnection());
   }
@@ -280,7 +281,7 @@ public class JsonBracketDataTests {
     GenerateDB.generateDB(document, connection);
 
     final int tournament = 2;
-    Tournament.createTournament(connection, "Playoff Test Tournament", "Test");
+    Tournament.createTournament(connection, "Playoff Test Tournament", "Test", null);
     Queries.setCurrentTournament(connection, tournament); // 2 is tournament ID
     TournamentParameters.setNumSeedingRounds(connection, tournament, 0);
     // make teams

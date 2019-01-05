@@ -279,7 +279,7 @@ public final class ImportDB {
   }
 
   /**
-   * Recursively create a tournament and it's next tournament.
+   * Create a tournament in the destination matching the source tournament.
    */
   private static void createTournament(final Tournament sourceTournament,
                                        final Connection destConnection)
@@ -288,7 +288,7 @@ public final class ImportDB {
     // exist
     final Tournament destTournament = Tournament.findTournamentByName(destConnection, sourceTournament.getName());
     if (null == destTournament) {
-      Tournament.createTournament(destConnection, sourceTournament.getName(), sourceTournament.getDescription());
+      Tournament.createTournament(destConnection, sourceTournament.getName(), sourceTournament.getDescription(), sourceTournament.getDate());
     }
   }
 
@@ -1143,7 +1143,7 @@ public final class ImportDB {
         if (!GenerateDB.INTERNAL_TOURNAMENT_NAME.equals(entry.getKey())) {
           final Tournament tournament = Tournament.findTournamentByName(connection, entry.getKey());
           if (null == tournament) {
-            Tournament.createTournament(connection, entry.getKey(), entry.getValue());
+            Tournament.createTournament(connection, entry.getKey(), entry.getValue(), null);
           }
         }
       }
