@@ -2180,6 +2180,15 @@ public final class ImportDB {
   };
 
   /**
+   * Date format found in the CSV dump files.
+   */
+  public static final ThreadLocal<DateFormat> CSV_DATE_FORMATTER = new ThreadLocal<DateFormat>() {
+    protected DateFormat initialValue() {
+      return new SimpleDateFormat("dd-MMM-yyyy");
+    }
+  };
+
+  /**
    * The result of
    * {@link ImportDB#importDatabase(Connection, Connection, String, boolean, boolean, boolean)}.
    */
