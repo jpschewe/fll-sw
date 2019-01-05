@@ -38,7 +38,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 15;
+  public static final int DATABASE_VERSION = 16;
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -57,7 +57,7 @@ public final class GenerateDB {
   public static final int INTERNAL_TOURNAMENT_ID = -1;
 
   public static final String INTERNAL_TOURNAMENT_NAME = "INTERNAL";
-  
+
   public static final String PERFORMANCE_TABLE_NAME = "Performance";
 
   /**
@@ -100,9 +100,12 @@ public final class GenerateDB {
       stmt.executeUpdate("DROP TABLE IF EXISTS Teams CASCADE");
       stmt.executeUpdate("CREATE TABLE Teams ("
           + "  TeamNumber integer NOT NULL," //
-          + "  TeamName varchar(255) default '" + DEFAULT_TEAM_NAME + "' NOT NULL," //
+          + "  TeamName varchar(255) default '"
+          + DEFAULT_TEAM_NAME
+          + "' NOT NULL," //
           + "  Organization varchar(255)," //
-          + "  CONSTRAINT teams_pk PRIMARY KEY (TeamNumber)" + ")");
+          + "  CONSTRAINT teams_pk PRIMARY KEY (TeamNumber)"
+          + ")");
 
       // add the bye team so that references work
       prep = connection.prepareStatement("INSERT INTO Teams(TeamNumber, TeamName) VALUES(?, ?)");
@@ -130,7 +133,8 @@ public final class GenerateDB {
           + "  SideA varchar(64) NOT NULL," //
           + "  SideB varchar(64) NOT NULL," //
           + "  CONSTRAINT tablenames_pk PRIMARY KEY (Tournament,PairID)" //
-          + " ,CONSTRAINT tablenames_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" + ")");
+          + " ,CONSTRAINT tablenames_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)"
+          + ")");
 
       createTableDivision(connection, true);
 
@@ -143,7 +147,9 @@ public final class GenerateDB {
                                               // brackets
           + " LineNumber integer NOT NULL," // the line in the brackets that are
                                             // displayed
-          + " Team integer default " + Team.NULL_TEAM_NUMBER + "," //
+          + " Team integer default "
+          + Team.NULL_TEAM_NUMBER
+          + "," //
           + " AssignedTable varchar(64) default NULL," //
           + " Printed boolean default FALSE," //
           + " run_number integer NOT NULL," // the performance run number for
@@ -161,11 +167,14 @@ public final class GenerateDB {
       stmt.executeUpdate("CREATE TABLE TournamentTeams ("
           + "  TeamNumber integer NOT NULL" //
           + " ,Tournament INTEGER NOT NULL" //
-          + " ,event_division varchar(32) default '" + DEFAULT_TEAM_DIVISION + "' NOT NULL" //
+          + " ,event_division varchar(32) default '"
+          + DEFAULT_TEAM_DIVISION
+          + "' NOT NULL" //
           + " ,judging_station varchar(64) NOT NULL"
           + " ,CONSTRAINT tournament_teams_pk PRIMARY KEY (TeamNumber, Tournament)" //
           + " ,CONSTRAINT tournament_teams_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber)" //
-          + " ,CONSTRAINT tournament_teams_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" + ")");
+          + " ,CONSTRAINT tournament_teams_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)"
+          + ")");
 
       tournamentParameters(connection);
 
@@ -199,9 +208,11 @@ public final class GenerateDB {
         final String tableName = PERFORMANCE_TABLE_NAME;
         stmt.executeUpdate("DROP VIEW IF EXISTS performance_seeding_max CASCADE");
         stmt.executeUpdate("DROP TABLE IF EXISTS "
-            + tableName + " CASCADE");
+            + tableName
+            + " CASCADE");
         createStatement.append("CREATE TABLE "
-            + tableName + " (");
+            + tableName
+            + " (");
         performanceColumns.append("TeamNumber,");
         createStatement.append(" TeamNumber INTEGER NOT NULL,");
         performanceColumns.append("Tournament,");
@@ -219,7 +230,8 @@ public final class GenerateDB {
           if (!element.isComputed()) {
             final String columnDefinition = generateGoalColumnDefinition(element);
             createStatement.append(" "
-                + columnDefinition + ",");
+                + columnDefinition
+                + ",");
             performanceColumns.append(element.getName()
                 + ",");
           }
@@ -229,11 +241,14 @@ public final class GenerateDB {
         performanceColumns.append("StandardizedScore");
         createStatement.append(" StandardizedScore float default NULL,");
         createStatement.append(" CONSTRAINT "
-            + tableName + "_pk PRIMARY KEY (TeamNumber, Tournament, RunNumber)");
+            + tableName
+            + "_pk PRIMARY KEY (TeamNumber, Tournament, RunNumber)");
         createStatement.append(",CONSTRAINT "
-            + tableName + "_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber)");
+            + tableName
+            + "_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber)");
         createStatement.append(",CONSTRAINT "
-            + tableName + "_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)");
+            + tableName
+            + "_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)");
         createStatement.append(");");
         stmt.executeUpdate(createStatement.toString());
 
@@ -250,9 +265,11 @@ public final class GenerateDB {
         final String tableName = categoryElement.getName();
 
         stmt.executeUpdate("DROP TABLE IF EXISTS "
-            + tableName + " CASCADE");
+            + tableName
+            + " CASCADE");
         createStatement.append("CREATE TABLE "
-            + tableName + " (");
+            + tableName
+            + " (");
         createStatement.append(" TeamNumber INTEGER NOT NULL,");
         createStatement.append(" Tournament INTEGER NOT NULL,");
         createStatement.append(" Judge VARCHAR(64) NOT NULL,");
@@ -260,17 +277,21 @@ public final class GenerateDB {
         for (final AbstractGoal element : categoryElement.getGoals()) {
           final String columnDefinition = generateGoalColumnDefinition(element);
           createStatement.append(" "
-              + columnDefinition + ",");
+              + columnDefinition
+              + ",");
         }
         createStatement.append(" note longvarchar DEFAULT NULL,");
         createStatement.append(" ComputedTotal float DEFAULT NULL,");
         createStatement.append(" StandardizedScore float default NULL,");
         createStatement.append(" CONSTRAINT "
-            + tableName + "_pk PRIMARY KEY (TeamNumber, Tournament, Judge)");
+            + tableName
+            + "_pk PRIMARY KEY (TeamNumber, Tournament, Judge)");
         createStatement.append(",CONSTRAINT "
-            + tableName + "_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber)");
+            + tableName
+            + "_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber)");
         createStatement.append(",CONSTRAINT "
-            + tableName + "_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)");
+            + tableName
+            + "_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)");
         createStatement.append(");");
         stmt.executeUpdate(createStatement.toString());
 
@@ -299,10 +320,14 @@ public final class GenerateDB {
           + " SELECT TeamNumber, Max(ComputedTotal) As Score, AVG(ComputedTotal) As average" //
           + " FROM Performance" //
           + " WHERE " //
-          + " tournament IN " + " (SELECT CONVERT(param_value, INTEGER) " // " +
+          + " tournament IN "
+          + " (SELECT CONVERT(param_value, INTEGER) " // " +
           + "      FROM global_parameters " //
-          + "      WHERE param = '" + GlobalParameters.CURRENT_TOURNAMENT + "'"//
-          + "  )" + " AND RunNumber <= ("//
+          + "      WHERE param = '"
+          + GlobalParameters.CURRENT_TOURNAMENT
+          + "'"//
+          + "  )"
+          + " AND RunNumber <= ("//
           // compute the run number for the current tournament
           + "   SELECT CONVERT(param_value, INTEGER) FROM tournament_parameters" //
           + "     WHERE param = 'SeedingRounds' AND tournament = ("
@@ -313,8 +338,11 @@ public final class GenerateDB {
           + "           AND ( tournament = -1 OR tournament IN ("//
           // current tournament
           + "             SELECT CONVERT(param_value, INTEGER) FROM global_parameters"//
-          + "               WHERE  param = '" + GlobalParameters.CURRENT_TOURNAMENT + "'  )"//
-          + "        ) )" + " ) GROUP BY TeamNumber, Tournament");
+          + "               WHERE  param = '"
+          + GlobalParameters.CURRENT_TOURNAMENT
+          + "'  )"//
+          + "        ) )"
+          + " ) GROUP BY TeamNumber, Tournament");
 
       // current tournament teams
       stmt.executeUpdate("DROP VIEW IF EXISTS current_tournament_teams");
@@ -323,14 +351,17 @@ public final class GenerateDB {
           + " WHERE Tournament IN " //
           + " (SELECT CONVERT(param_value, INTEGER) " // " +
           + "      FROM global_parameters " //
-          + "      WHERE param = '" + GlobalParameters.CURRENT_TOURNAMENT + "'"//
+          + "      WHERE param = '"
+          + GlobalParameters.CURRENT_TOURNAMENT
+          + "'"//
           + "  )");
       prep.executeUpdate();
 
       // verified performance scores
       stmt.executeUpdate("DROP VIEW IF EXISTS verified_performance");
       stmt.executeUpdate("CREATE VIEW verified_performance AS SELECT "
-          + performanceColumns.toString() + " FROM Performance WHERE Verified = TRUE");
+          + performanceColumns.toString()
+          + " FROM Performance WHERE Verified = TRUE");
 
       setDefaultParameters(connection);
 
@@ -495,11 +526,12 @@ public final class GenerateDB {
           + " ,performance_seeding_modified TIMESTAMP DEFAULT NULL" //
           + " ,subjective_modified TIMESTAMP DEFAULT NULL" //
           + " ,summary_computed TIMESTAMP DEFAULT NULL" //
+          + " ,tournament_date DATE DEFAULT NULL" //
           + " ,CONSTRAINT tournaments_pk PRIMARY KEY (tournament_id)" //
           + " ,CONSTRAINT name_unique UNIQUE(Name)" //
           + ")");
-      Tournament.createTournament(connection, DUMMY_TOURNAMENT_NAME, "Default dummy tournament");
-      Tournament.createTournament(connection, DROP_TOURNAMENT_NAME, "Dummy tournament for teams that drop out");
+      Tournament.createTournament(connection, DUMMY_TOURNAMENT_NAME, "Default dummy tournament", null);
+      Tournament.createTournament(connection, DROP_TOURNAMENT_NAME, "Dummy tournament for teams that drop out", null);
 
       // add internal tournament for default values and such
       createInternalTournament(connection);

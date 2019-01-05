@@ -1,6 +1,7 @@
 Release 13.3.0
 ==============
 
+* #509 - add date to tournament to help with sorting
 * #675 - repeat category names over the count & score columns on the score entry page 
 * #682 - add some more schedule outputs to the admin page (CSV schedule, subjective sheets, performance sheets)
 * #173 - add tool to edit challenge descriptions

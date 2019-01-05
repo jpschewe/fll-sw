@@ -3056,31 +3056,6 @@ public final class Queries {
   }
 
   /**
-   * Set the name and location of a tournament.
-   * 
-   * @param tournamentID which tournament to modify
-   * @param name new name
-   * @param location new location
-   * @throws SQLException
-   */
-  public static void updateTournament(final Connection connection,
-                                      final int tournamentID,
-                                      final String name,
-                                      final String location)
-      throws SQLException {
-    PreparedStatement updatePrep = null;
-    try {
-      updatePrep = connection.prepareStatement("UPDATE Tournaments SET Name = ?, Location = ? WHERE tournament_id = ?");
-      updatePrep.setString(1, name);
-      updatePrep.setString(2, location);
-      updatePrep.setInt(3, tournamentID);
-      updatePrep.executeUpdate();
-    } finally {
-      SQLFunctions.close(updatePrep);
-    }
-  }
-
-  /**
    * Check if the authentication table is empty or doesn't exist. This will
    * create the authentication table if it doesn't exist.
    * 

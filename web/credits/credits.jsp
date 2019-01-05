@@ -78,6 +78,9 @@
 		<li><a href="http://jquery.com/">jQuery</a> - <a
 			href="jQuery-license.txt">License</a></li>
 
+		<li><a href="http://jqueryui.com/">jQuery UI</a> - <a
+			href="<c:url value='/extlib/jquery-ui-1.12.1/LICENSE.txt' />">License</a></li>
+
 		<li><a href="https://github.com/Krinkle/jquery-json">jQuery-json</a>
 			- <a href="jquery.json.license.txt">License</a></li>
 
@@ -100,7 +103,7 @@
 
 		<li><a href="http://tika.apache.org/">Apache Tika</a> - <a
 			href="tiki-license.txt">Apache License</a></li>
-			
+
 	</ul>
 
 
