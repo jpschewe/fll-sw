@@ -53,7 +53,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxDriverLogLevel;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.support.ui.Select;
 import org.w3c.dom.Document;
@@ -612,7 +611,7 @@ public final class IntegrationTestUtils {
     // final WebDriver selenium = new FirefoxDriver(capabilities);
 
     FirefoxOptions options = new FirefoxOptions();
-    //options.setLogLevel(FirefoxDriverLogLevel.TRACE);
+    //options.setLogLevel(org.openqa.selenium.firefox.FirefoxDriverLogLevel.TRACE);
     final WebDriver selenium = new FirefoxDriver(options);
 
 //    final WebDriver selenium = new FirefoxDriver();

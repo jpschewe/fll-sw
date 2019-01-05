@@ -279,7 +279,7 @@ public final class ImportDB {
   }
 
   /**
-   * Recursively create a tournament and it's next tournament.
+   * Create a tournament in the destination matching the source tournament.
    */
   private static void createTournament(final Tournament sourceTournament,
                                        final Connection destConnection)
@@ -288,7 +288,7 @@ public final class ImportDB {
     // exist
     final Tournament destTournament = Tournament.findTournamentByName(destConnection, sourceTournament.getName());
     if (null == destTournament) {
-      Tournament.createTournament(destConnection, sourceTournament.getName(), sourceTournament.getDescription());
+      Tournament.createTournament(destConnection, sourceTournament.getName(), sourceTournament.getDescription(), sourceTournament.getDate());
     }
   }
 
@@ -594,9 +594,15 @@ public final class ImportDB {
     if (dbVersion < 14) {
       upgrade13To14(connection);
     }
+
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 15) {
       upgrade14To15(connection);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 16) {
+      upgrade15To16(connection);
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
@@ -757,6 +763,21 @@ public final class ImportDB {
       SQLFunctions.close(rs);
       SQLFunctions.close(stmt);
       SQLFunctions.close(prep);
+    }
+  }
+
+  private static void upgrade15To16(final Connection connection) throws SQLException {
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Upgrading database from 15 to 16");
+    }
+
+    try (Statement stmt = connection.createStatement()) {
+      // if the database was upgraded from version 0, then the column already exists,
+      // so check for it
+      if (!checkForColumnInTable(connection, "tournaments", "tournament_date")) {
+        stmt.executeUpdate("ALTER TABLE tournaments ADD COLUMN tournament_date DATE DEFAULT NULL");
+      }
+      setDBVersion(connection, 16);
     }
   }
 
@@ -1014,28 +1035,27 @@ public final class ImportDB {
    * Add run_number to the playoff table.
    */
   private static void upgrade7To8(final Connection connection) throws SQLException {
-    Statement stmt = null;
-    PreparedStatement prep = null;
-    try {
-      stmt = connection.createStatement();
+    try (Statement stmt = connection.createStatement()) {
       stmt.executeUpdate("ALTER TABLE PlayoffData ADD COLUMN run_number integer");
 
-      final List<Tournament> tournaments = Tournament.getTournaments(connection);
-      for (final Tournament tournament : tournaments) {
-        final int seedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID());
+      // need to create prepared statement after adding column
+      try (
+          PreparedStatement prep = connection.prepareStatement("UPDATE PlayoffData SET run_number = ? + PlayoffRound WHERE tournament = ?")) {
 
-        prep = connection.prepareStatement("UPDATE PlayoffData SET run_number = ? + PlayoffRound");
-        prep.setInt(1, seedingRounds);
-        prep.executeUpdate();
-      }
+        try (ResultSet rs = stmt.executeQuery("SELECT tournament_id from tournaments")) {
+          while (rs.next()) {
+            final int tournamentId = rs.getInt(1);
+            final int seedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournamentId);
+
+            prep.setInt(1, seedingRounds);
+            prep.setInt(2, tournamentId);
+            prep.executeUpdate();
+          }
+        } // result set
+      } // prepared statement
 
       setDBVersion(connection, 8);
-    } finally {
-      SQLFunctions.close(stmt);
-      stmt = null;
-      SQLFunctions.close(prep);
-      prep = null;
-    }
+    } // statement
   }
 
   /**
@@ -1123,7 +1143,7 @@ public final class ImportDB {
         if (!GenerateDB.INTERNAL_TOURNAMENT_NAME.equals(entry.getKey())) {
           final Tournament tournament = Tournament.findTournamentByName(connection, entry.getKey());
           if (null == tournament) {
-            Tournament.createTournament(connection, entry.getKey(), entry.getValue());
+            Tournament.createTournament(connection, entry.getKey(), entry.getValue(), null);
           }
         }
       }
@@ -2156,6 +2176,15 @@ public final class ImportDB {
   public static final ThreadLocal<DateFormat> CSV_TIME_FORMATTER = new ThreadLocal<DateFormat>() {
     protected DateFormat initialValue() {
       return new SimpleDateFormat("HH:mm:ss");
+    }
+  };
+
+  /**
+   * Date format found in the CSV dump files.
+   */
+  public static final ThreadLocal<DateFormat> CSV_DATE_FORMATTER = new ThreadLocal<DateFormat>() {
+    protected DateFormat initialValue() {
+      return new SimpleDateFormat("dd-MMM-yyyy");
     }
   };
 

@@ -82,12 +82,14 @@ public final class UploadTeams extends BaseFLLServlet {
       parseFile(file, sheetName, connection, session);
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error saving team data into the database: "
-          + sqle.getMessage() + "</p>");
+          + sqle.getMessage()
+          + "</p>");
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error saving team data into the database", sqle);
     } catch (final Exception e) {
       message.append("<p class='error'>Error saving team data into the database: "
-          + e.getMessage() + "</p>");
+          + e.getMessage()
+          + "</p>");
       LOGGER.error(e, e);
       throw new RuntimeException("Error saving team data into the database", e);
     } finally {
@@ -146,7 +148,9 @@ public final class UploadTeams extends BaseFLLServlet {
       final String columnName = sanitizeColumnName(header);
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("header: "
-            + header + " columnName: " + columnName);
+            + header
+            + " columnName: "
+            + columnName);
       }
       if (columnNamesSeen.contains(columnName)) {
         throw new RuntimeException("Duplicate column name found: "
@@ -165,7 +169,10 @@ public final class UploadTeams extends BaseFLLServlet {
           + " longvarchar");
       insertPrepSQL.append("?");
       selectOptions.append("<option value='"
-          + columnName + "'>" + columnName + "</option>");
+          + columnName
+          + "'>"
+          + columnName
+          + "</option>");
     }
     createTable.append(")");
     insertPrepSQL.append(")");
@@ -311,8 +318,11 @@ public final class UploadTeams extends BaseFLLServlet {
       while (paramIter.hasMoreElements()) {
         final String parameter = (String) paramIter.nextElement();
         if (null != parameter
-            && !"".equals(parameter) && !"TeamNumber".equals(parameter) && !"tournament".equals(parameter)
-            && !"event_division".equals(parameter) && !"judging_station".equals(parameter)) {
+            && !"".equals(parameter)
+            && !"TeamNumber".equals(parameter)
+            && !"tournament".equals(parameter)
+            && !"event_division".equals(parameter)
+            && !"judging_station".equals(parameter)) {
           final String value = request.getParameter(parameter);
           if (null != value
               && !"".equals(value)) {
@@ -334,9 +344,13 @@ public final class UploadTeams extends BaseFLLServlet {
 
       // now copy the data over converting the team number to an integer
       final String selectSQL = "SELECT "
-          + dataColumns.toString() + " FROM AllTeams";
+          + dataColumns.toString()
+          + " FROM AllTeams";
       final String insertSQL = "INSERT INTO Teams ("
-          + dbColumns.toString() + ") VALUES(" + values.toString() + ")";
+          + dbColumns.toString()
+          + ") VALUES("
+          + values.toString()
+          + ")";
       prep = connection.prepareStatement(insertSQL);
 
       stmt = connection.createStatement();
@@ -346,7 +360,8 @@ public final class UploadTeams extends BaseFLLServlet {
         final String teamNumStr = rs.getString(1);
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug("Inserting "
-              + teamNumStr + " into Teams");
+              + teamNumStr
+              + " into Teams");
         }
         try {
           final Number num = Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(teamNumStr);
@@ -355,7 +370,8 @@ public final class UploadTeams extends BaseFLLServlet {
               || num.intValue() < 0) {
             session.setAttribute(SessionAttributes.MESSAGE,
                                  "<p class='error'>All team numbers must be positive integers: "
-                                     + num + "</p>");
+                                     + num
+                                     + "</p>");
             response.sendRedirect(response.encodeRedirectURL("index.jsp"));
             return false;
           }
@@ -364,7 +380,8 @@ public final class UploadTeams extends BaseFLLServlet {
           prep.setInt(1, teamNum);
         } catch (final ParseException e) {
           out.println("<font color='red'>Error, "
-              + teamNumStr + " is not numeric.<br/>");
+              + teamNumStr
+              + " is not numeric.<br/>");
           out.println("Go back and check your input file for errors.<br/></font>");
           if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(e, e);
@@ -372,7 +389,8 @@ public final class UploadTeams extends BaseFLLServlet {
           return false;
         } catch (final NumberFormatException nfe) {
           out.println("<font color='red'>Error, "
-              + teamNumStr + " is not numeric.<br/>");
+              + teamNumStr
+              + " is not numeric.<br/>");
           out.println("Go back and check your input file for errors.<br/></font>");
           if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(nfe, nfe);
@@ -395,7 +413,8 @@ public final class UploadTeams extends BaseFLLServlet {
           prep.executeUpdate();
         } catch (final SQLException sqle) {
           throw new FLLRuntimeException("Got error inserting teamNumber "
-              + teamNumStr + " into Teams table, probably have two teams with the same team number", sqle);
+              + teamNumStr
+              + " into Teams table, probably have two teams with the same team number", sqle);
         }
       } // for each row imported
 
@@ -429,7 +448,9 @@ public final class UploadTeams extends BaseFLLServlet {
       stmt = connection.createStatement();
       rs = stmt.executeQuery("SELECT Teams.TeamNumber" //
           + " FROM Teams, AllTeams" //
-          + " WHERE AllTeams." + teamNumberColumn + " = Teams.TeamNumber");
+          + " WHERE AllTeams."
+          + teamNumberColumn
+          + " = Teams.TeamNumber");
 
       final StringBuilder teams = new StringBuilder();
       boolean first = true;
@@ -447,7 +468,8 @@ public final class UploadTeams extends BaseFLLServlet {
       if (!first) {
         // found duplicates
         message.append("<p class='error'>The following teams are already in the database, please remove them from your spreadsheet and try again: "
-            + teams.toString() + "</p>");
+            + teams.toString()
+            + "</p>");
         return false;
       } else {
         return true;
@@ -491,7 +513,8 @@ public final class UploadTeams extends BaseFLLServlet {
         eventDivisionSql = eventDivisionColumn;
       } else {
         eventDivisionSql = "'"
-            + GenerateDB.DEFAULT_TEAM_DIVISION + "'";
+            + GenerateDB.DEFAULT_TEAM_DIVISION
+            + "'";
       }
 
       final String judgingStationSql;
@@ -500,7 +523,8 @@ public final class UploadTeams extends BaseFLLServlet {
         judgingStationSql = judgingStationColumn;
       } else {
         judgingStationSql = "'"
-            + GenerateDB.DEFAULT_TEAM_DIVISION + "'";
+            + GenerateDB.DEFAULT_TEAM_DIVISION
+            + "'";
       }
 
       // if a tournament is specified for the new data, set it
@@ -527,7 +551,7 @@ public final class UploadTeams extends BaseFLLServlet {
           final String tournamentName = rs.getString(2);
           Tournament tournament = Tournament.findTournamentByName(connection, tournamentName);
           if (null == tournament) {
-            Tournament.createTournament(connection, tournamentName, tournamentName);
+            Tournament.createTournament(connection, tournamentName, tournamentName, null);
             tournament = Tournament.findTournamentByName(connection, tournamentName);
           }
 
@@ -545,9 +569,15 @@ public final class UploadTeams extends BaseFLLServlet {
         final int dummyTournamentID = dummyTournament.getTournamentID();
         stmt.executeUpdate("INSERT INTO TournamentTeams " //
             + " (Tournament, TeamNumber, event_division, judging_station)" // "
-            + " SELECT " + dummyTournamentID + ", Teams.TeamNumber, " + eventDivisionSql + ", " + judgingStationSql //
+            + " SELECT "
+            + dummyTournamentID
+            + ", Teams.TeamNumber, "
+            + eventDivisionSql
+            + ", "
+            + judgingStationSql //
             + " FROM Teams, AllTeams" //
-            + "   WHERE Teams.TeamNumber = AllTeams." + teamNumberColumn);
+            + "   WHERE Teams.TeamNumber = AllTeams."
+            + teamNumberColumn);
       }
 
     } finally {
