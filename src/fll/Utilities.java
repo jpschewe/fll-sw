@@ -262,6 +262,18 @@ public final class Utilities {
           throw new FLLRuntimeException("Problem parsing timestamp in database dump", e);
         }
       }
+    } else if ("date".equals(typeLower)) {
+      if (null == data
+          || "".equals(data.trim())) {
+        prep.setNull(index, Types.DATE);
+      } else {
+        try {
+          final java.util.Date value = ImportDB.CSV_DATE_FORMATTER.get().parse(data);
+          prep.setDate(index, new java.sql.Date(value.getTime()));
+        } catch (final ParseException e) {
+          throw new FLLRuntimeException("Problem parsing date in database dump", e);
+        }
+      }
     } else {
       throw new FLLRuntimeException("Unhandled SQL data type '"
           + type
