@@ -94,7 +94,7 @@ public class SubjectiveScoresTest {
 
       // setup the database with a team and some judges
       GenerateDB.generateDB(challengeDocument, connection);
-      Tournament.createTournament(connection, tournamentName, tournamentName);
+      Tournament.createTournament(connection, tournamentName, tournamentName, null);
       Tournament tournament = Tournament.findTournamentByName(connection, tournamentName);
       Assert.assertNull(Queries.addTeam(connection, teamNumber, "team"
           + teamNumber, "org"));

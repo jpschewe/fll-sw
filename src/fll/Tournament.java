@@ -12,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,6 +28,7 @@ import fll.util.LogUtils;
 import fll.web.admin.StoreTournamentData;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * The representation of a tournament. If someone changes the database, this
@@ -94,12 +96,18 @@ public final class Tournament implements Serializable {
    */
   public static void createTournament(final Connection connection,
                                       final String tournamentName,
-                                      final String description)
+                                      final String description,
+                                      final LocalDate date)
       throws SQLException {
     try (
-        PreparedStatement prep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location) VALUES (?, ?)")) {
+        PreparedStatement prep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location, tournament_date) VALUES (?, ?, ?)")) {
       prep.setString(1, tournamentName);
       prep.setString(2, description);
+      if (null == date) {
+        prep.setNull(3, Types.DATE);
+      } else {
+        prep.setDate(3, java.sql.Date.valueOf(date));
+      }
       prep.executeUpdate();
     }
   }
@@ -369,6 +377,38 @@ public final class Tournament implements Serializable {
 
     // no scores found
     return false;
+  }
+
+  /**
+   * Update the information for a tournament.
+   * 
+   * @param tournamentID which tournament to modify
+   * @param name new name
+   * @param location new location
+   * @param date the new tournament date
+   * @throws SQLException
+   */
+  public static void updateTournament(final Connection connection,
+                                      final int tournamentID,
+                                      final String name,
+                                      final String location,
+                                      final LocalDate date)
+      throws SQLException {
+    PreparedStatement updatePrep = null;
+    try {
+      updatePrep = connection.prepareStatement("UPDATE Tournaments SET Name = ?, Location = ?, tournament_date = ? WHERE tournament_id = ?");
+      updatePrep.setString(1, name);
+      updatePrep.setString(2, location);
+      if (null == date) {
+        updatePrep.setNull(3, Types.DATE);
+      } else {
+        updatePrep.setDate(3, java.sql.Date.valueOf(date));
+      }
+      updatePrep.setInt(4, tournamentID);
+      updatePrep.executeUpdate();
+    } finally {
+      SQLFunctions.close(updatePrep);
+    }
   }
 
   /**

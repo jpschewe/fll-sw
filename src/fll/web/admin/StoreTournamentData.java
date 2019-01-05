@@ -99,14 +99,28 @@ public class StoreTournamentData extends BaseFLLServlet {
         + row);
     while (null != keyStr) {
       final int key = Integer.parseInt(keyStr);
+
+      final LocalDate date;
+      if (null == dateStr
+          || dateStr.trim().isEmpty()) {
+        date = null;
+      } else {
+        date = LocalDate.parse(dateStr, DATE_FORMATTER);
+      }
+
       if (Tournaments.NEW_TOURNAMENT_KEY == key) {
         if (null != name
             && !"".equals(name)) {
           // new tournament
-          Tournament.createTournament(connection, name, description);
+          Tournament.createTournament(connection, name, description, date);
           if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Adding a new tournament "
-                + name);
+                + " name: "
+                + name
+                + " description: "
+                + description
+                + " date: "
+                + date);
           }
         }
       } else if (null == name
@@ -135,19 +149,16 @@ public class StoreTournamentData extends BaseFLLServlet {
       } else {
         // update with new values
 
-        final LocalDate date;
-        if (null == dateStr
-            || dateStr.trim().isEmpty()) {
-          date = null;
-        } else {
-          date = LocalDate.parse(dateStr, DATE_FORMATTER);
-        }
-        Queries.updateTournament(connection, key, name, description, date);
+        Tournament.updateTournament(connection, key, name, description, date);
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug("Updating a tournament "
               + key
-              + " to "
-              + name);
+              + " name: "
+              + name
+              + " description: "
+              + description
+              + " date: "
+              + date);
         }
       }
 

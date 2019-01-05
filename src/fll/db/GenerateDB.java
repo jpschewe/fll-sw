@@ -530,8 +530,8 @@ public final class GenerateDB {
           + " ,CONSTRAINT tournaments_pk PRIMARY KEY (tournament_id)" //
           + " ,CONSTRAINT name_unique UNIQUE(Name)" //
           + ")");
-      Tournament.createTournament(connection, DUMMY_TOURNAMENT_NAME, "Default dummy tournament");
-      Tournament.createTournament(connection, DROP_TOURNAMENT_NAME, "Dummy tournament for teams that drop out");
+      Tournament.createTournament(connection, DUMMY_TOURNAMENT_NAME, "Default dummy tournament", null);
+      Tournament.createTournament(connection, DROP_TOURNAMENT_NAME, "Dummy tournament for teams that drop out", null);
 
       // add internal tournament for default values and such
       createInternalTournament(connection);
