@@ -95,7 +95,7 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
       }
 
     } catch (final SQLException sqle) {
-      message.append("<p class='error'>Error saving team assignmentsinto the database: "
+      message.append("<p class='error'>Error saving team assignments into the database: "
           + sqle.getMessage()
           + "</p>");
       LOGGER.error(sqle, sqle);
@@ -266,8 +266,17 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
             judgingStation = data[judgingStationColumnIdx];
           }
 
-          Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), eventDivision,
-                                      judgingStation);
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Adding team "
+                + teamNumber
+                + " to tournament "
+                + tournament.getTournamentID());
+          }
+
+          if (!Queries.isTeamInTournament(connection, teamNumber, tournament.getTournamentID())) {
+            Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), eventDivision,
+                                        judgingStation);
+          }
           ++rowsProcessed;
         }
       }
