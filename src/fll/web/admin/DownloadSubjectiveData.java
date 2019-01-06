@@ -126,8 +126,9 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
 
       response.reset();
       response.setContentType("application/zip");
-      response.setHeader("Content-Disposition", "attachment; filename="
-          + filename);
+      response.setHeader("Content-Disposition", "attachment; filename=\""
+          + filename
+          + "\"");
       writeSubjectiveData(connection, challengeDocument, challengeDescription, schedule, scheduleColumnMappings,
                           response.getOutputStream());
     } catch (final SQLException e) {
