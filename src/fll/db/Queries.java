@@ -2227,6 +2227,31 @@ public final class Queries {
   }
 
   /**
+   * Check if a team is assigned to a tournament. If you are checking for a number
+   * of teams against the same tournament, then
+   * {@link #getTournamentTeams(Connection, int)} will be more efficient.
+   * 
+   * @param connection the database connection
+   * @param teamNumber the team number to check
+   * @param tournament the tournament ID to check
+   * @return true if the team is in the tournament
+   * @throws SQLException on a database error
+   */
+  public static boolean isTeamInTournament(final Connection connection,
+                                           final int teamNumber,
+                                           final int tournament)
+      throws SQLException {
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT TeamNumber FROM TournamentTeams WHERE TeamNumber = ? and Tournament = ?")) {
+      prep.setInt(1, teamNumber);
+      prep.setInt(2, tournament);
+      try (ResultSet rs = prep.executeQuery()) {
+        return rs.next();
+      }
+    }
+  }
+
+  /**
    * Add a team to a tournament.
    * 
    * @param connection database connection
