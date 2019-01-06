@@ -105,8 +105,9 @@ public final class DumpDB extends BaseFLLServlet {
     final String filename = String.format("%s_%s%s.flldb", tournament.getName(), dateStr, (null == label ? "" : label));
     response.reset();
     response.setContentType("application/zip");
-    response.setHeader("Content-Disposition", "attachment; filename="
-        + filename);
+    response.setHeader("Content-Disposition", "attachment; filename=\""
+        + filename
+        + "\"");
 
     final ZipOutputStream zipOut = new ZipOutputStream(response.getOutputStream());
     try {
