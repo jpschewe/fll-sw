@@ -26,8 +26,8 @@
 	<property name="dir.test.unit.src" value="${basedir}/src/test/java" />
 	<property name="dir.test.unit.resources" value="${basedir}/src/test/resources" />
 	
-	<property name="dir.test.integration.src" value="${basedir}/src/test-integration/java" />
-	<property name="dir.test.integration.resources" value="${basedir}/src/test-integration/resources" />
+	<property name="dir.test.integration.src" value="${basedir}/src/integration-test/java" />
+	<property name="dir.test.integration.resources" value="${basedir}/src/integration-test/resources" />
 
 	<property name="dir.tmp" value="${basedir}/tmp" />
 	<property name="dir.src.jsp" value="${dir.build}/jsp_source" />
