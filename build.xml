@@ -23,7 +23,9 @@
 	<property name="dir.src" value="${basedir}/src/main/java" />
 	<property name="dir.resources" value="${basedir}/src/main/resources" />
 
-	<property name="dir.test.unit" value="test-unit" />
+	<property name="dir.test.unit.src" value="${basedir}/src/test/java" />
+	<property name="dir.test.unit.resources" value="${basedir}/src/test/resources" />
+	
 	<property name="dir.test.integration" value="test-integration" />
 
 	<property name="dir.tmp" value="${basedir}/tmp" />
@@ -422,7 +424,7 @@
 	<target name="compile.test.all" depends="compile.test.unit, compile.test.integration" description="Compile all tests" />
 
 	<target name="compile.test.unit" depends="copy.web.files,compile" description="Compile the unit tests">
-		<compile dir.dest="${coverage.dir.classes}" dir.src="${dir.test.unit}" dir.resources="${dir.test.unit}">
+		<compile dir.dest="${coverage.dir.classes}" dir.src="${dir.test.unit.src}" dir.resources="${dir.test.unit.resources}">
 			<classpath-elements>
 				<path refid="test.classpath" />
 			</classpath-elements>
@@ -854,7 +856,7 @@
 
 	<!-- unit tests -->
 	<target name="test.unit" depends="compile,compile.test.unit,coverage.instr" description="Run the unit tests">
-		<run-tests working-dir="${dir.build}" dir.src="${dir.test.unit}" />
+		<run-tests working-dir="${dir.build}" dir.src="${dir.test.unit.src}" />
 	</target>
 
 	<!-- integration tests -->
