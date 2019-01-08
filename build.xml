@@ -268,7 +268,7 @@
 		<tstamp />
 
 		<uptodate property="jsp.notRequired" targetfile="${dir.src.jsp}/.timestamp">
-			<srcfiles dir="web" includes="**" />
+			<srcfiles dir="src/main/webapp" includes="**" />
 		</uptodate>
 
 		<!-- set arch -->
@@ -712,7 +712,7 @@
 			<!-- Create build directory and copy static content -->
 			<mkdir dir="@{webdir}" />
 			<copy todir="@{webdir}">
-				<fileset dir="web">
+				<fileset dir="src/main/webapp">
 					<exclude name="**/*.java" />
 				</fileset>
 			</copy>
@@ -726,7 +726,7 @@
 
 			<!-- special files that need overwrite -->
 			<copy todir="@{webdir}" overwrite="true">
-				<fileset dir="web">
+				<fileset dir="src/main/webapp">
 					<include name="**/*.appcache" />
 					<include name="**/subjective.js" />
 				</fileset>
@@ -882,9 +882,6 @@
 			<arg value="--xml" />
 			<arg value="--out=${basedir}/cloc.xml" />
 			<arg value="src" />
-			<arg value="test-integration" />
-			<arg value="test-unit" />
-			<arg value="web" />
 		</exec>
 	</target>
 
