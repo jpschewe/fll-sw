@@ -26,7 +26,8 @@
 	<property name="dir.test.unit.src" value="${basedir}/src/test/java" />
 	<property name="dir.test.unit.resources" value="${basedir}/src/test/resources" />
 	
-	<property name="dir.test.integration" value="test-integration" />
+	<property name="dir.test.integration.src" value="${basedir}/src/test-integration/java" />
+	<property name="dir.test.integration.resources" value="${basedir}/src/test-integration/resources" />
 
 	<property name="dir.tmp" value="${basedir}/tmp" />
 	<property name="dir.src.jsp" value="${dir.build}/jsp_source" />
@@ -432,7 +433,7 @@
 	</target>
 
 	<target name="compile.test.integration" depends="copy.web.files,compile,compile.test.unit" description="Compile the integration tests">
-		<compile dir.dest="${coverage.dir.classes}" dir.src="${dir.test.integration}" dir.resources="${dir.test.integration}">
+		<compile dir.dest="${coverage.dir.classes}" dir.src="${dir.test.integration.src}" dir.resources="${dir.test.integration.resources}">
 			<classpath-elements>
 				<path refid="test.classpath" />
 			</classpath-elements>
@@ -867,7 +868,7 @@
 
 		<antcall target="tomcat.start" />
 
-		<run-tests working-dir="${dir.build}" dir.src="${dir.test.integration}" />
+		<run-tests working-dir="${dir.build}" dir.src="${dir.test.integration.src}" />
 
 		<!-- force cobertura information to be written -->
 		<get src="http://localhost:9080/coberturaFlush/flushCobertura" dest="${dir.build}" />
