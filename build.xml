@@ -625,7 +625,7 @@
 	<target name="javadoc" description="Create Javadoc API documentation">
 
 		<mkdir dir="${dir.build}/docs/api" />
-		<javadoc sourcepath="src" windowtitle="${app.name}" destdir="${dir.build}/docs/api" packagenames="fll.*" use="true" splitindex="true" breakiterator="yes">
+		<javadoc sourcepath="src/main/java" windowtitle="${app.name}" destdir="${dir.build}/docs/api" packagenames="fll.*" use="true" splitindex="true" breakiterator="yes">
 			<classpath>
 				<path refid="application.classpath" />
 				<pathelement location="${dir.src}" />
