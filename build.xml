@@ -20,7 +20,8 @@
 	<property name="dir.classes" value="${dir.web}/WEB-INF/classes" />
 
 	<property name="dir.lib" value="${basedir}/lib" />
-	<property name="dir.src" value="${basedir}/src" />
+	<property name="dir.src" value="${basedir}/src/main/java" />
+	<property name="dir.resources" value="${basedir}/src/main/resources" />
 
 	<property name="dir.test.unit" value="test-unit" />
 	<property name="dir.test.integration" value="test-integration" />
@@ -388,6 +389,7 @@
 	<macrodef name="compile">
 		<attribute name="dir.dest" />
 		<attribute name="dir.src" />
+		<attribute name="dir.resources" />
 		<element name="classpath-elements" />
 
 		<sequential>
@@ -395,9 +397,9 @@
 
 			<!-- Copy static files from external dependencies as needed -->
 			<copy todir="@{dir.dest}">
-				<fileset dir="@{dir.src}">
-					<exclude name="**/*.java" />
-				</fileset>
+			  <fileset dir="@{dir.resources}">
+			    <exclude name="**/*.java"/>
+			  </fileset>
 			</copy>
 
 			<javac includeantruntime="false" srcdir="@{dir.src}" destdir="@{dir.dest}" debug="${compile.debug}" deprecation="${compile.deprecation}">
@@ -410,7 +412,7 @@
 	</macrodef>
 
 	<target name="compile.classes" depends="copy.web.files" description="Compile Java sources">
-		<compile dir.dest="${dir.classes}" dir.src="${dir.src}">
+		<compile dir.dest="${dir.classes}" dir.src="${dir.src}" dir.resources="${dir.resources}">
 			<classpath-elements>
 				<path refid="application.classpath" />
 			</classpath-elements>
@@ -420,7 +422,7 @@
 	<target name="compile.test.all" depends="compile.test.unit, compile.test.integration" description="Compile all tests" />
 
 	<target name="compile.test.unit" depends="copy.web.files,compile" description="Compile the unit tests">
-		<compile dir.dest="${coverage.dir.classes}" dir.src="${dir.test.unit}">
+		<compile dir.dest="${coverage.dir.classes}" dir.src="${dir.test.unit}" dir.resources="${dir.test.unit}">
 			<classpath-elements>
 				<path refid="test.classpath" />
 			</classpath-elements>
@@ -428,7 +430,7 @@
 	</target>
 
 	<target name="compile.test.integration" depends="copy.web.files,compile,compile.test.unit" description="Compile the integration tests">
-		<compile dir.dest="${coverage.dir.classes}" dir.src="${dir.test.integration}">
+		<compile dir.dest="${coverage.dir.classes}" dir.src="${dir.test.integration}" dir.resources="${dir.test.integration}">
 			<classpath-elements>
 				<path refid="test.classpath" />
 			</classpath-elements>
@@ -456,7 +458,7 @@
 	</target>
 
 	<target name="compile.jsp" depends="compile.classes,generate.jsp" description="Compile JSP sources">
-		<compile dir.src="${dir.src.jsp}" dir.dest="${dir.src.jsp}">
+		<compile dir.src="${dir.src.jsp}" dir.resources="${dir.src.jsp}" dir.dest="${dir.src.jsp}">
 			<classpath-elements>
 				<path refid="application.classpath" />
 				<fileset dir="${dir.web}/WEB-INF/lib">
