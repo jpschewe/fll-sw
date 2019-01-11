@@ -68,7 +68,7 @@ div.img {
 
   </style>
   <script type='text/javascript'>
-    window.setInterval("location.href='index.jsp'",<%=slideShowInterval %>);
+    window.setInterval("location.href='slideshow.jsp'",<%=slideShowInterval %>);
   </script>
 </head>
 
