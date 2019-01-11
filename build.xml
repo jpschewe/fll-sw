@@ -9,7 +9,7 @@
 
 	<property name="app.name" value="${ant.project.name}" />
 
-	<property name="dir.build" value="${basedir}/build" />
+	<property name="dir.build" value="${basedir}/build.ant" />
 	<property name="dir.tomcat" value="${dir.build}/tomcat" />
 	<property name="dir.tomcat.src" value="${basedir}/tools/tomcat" />
 
