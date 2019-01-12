@@ -20,7 +20,7 @@ pipeline {
     stage('Duplicate Code Analysis') {
       steps { 
         fllSwAnt('cpd.xml')
-        dry defaultEncoding: '', healthy: '', pattern: 'build/cpd.xml', unHealthy: ''
+        dry defaultEncoding: '', healthy: '', pattern: 'build.ant/cpd.xml', unHealthy: ''
       }     
     }
 
@@ -40,7 +40,7 @@ pipeline {
     stage('Findbugs analysis') {
       steps { 
         fllSwAnt('findbugs')
-        findbugs defaultEncoding: '', excludePattern: '', failedTotalHigh: '0', healthy: '', includePattern: '', pattern: 'build/findbugs/report.xml', unHealthy: ''
+        findbugs defaultEncoding: '', excludePattern: '', failedTotalHigh: '0', healthy: '', includePattern: '', pattern: 'build.ant/findbugs/report.xml', unHealthy: ''
       }
     }
     
@@ -49,7 +49,7 @@ pipeline {
         throttle(['fll-sw']) { 
           timestamps {
             fllSwAnt('dist')
-            junit testResults: "build/test-results/TEST-*.xml", keepLongStdio: true
+            junit testResults: "build.ant/test-results/TEST-*.xml", keepLongStdio: true
             fllSwAnt('tomcat.check-logs')
           } // timestamps
         } // throttle
@@ -59,7 +59,7 @@ pipeline {
     stage('Code coverage analysis') {
       steps { 
         fllSwAnt('coverage.report')
-        step $class: 'CoberturaPublisher', coberturaReportFile: 'build/docs/reports/coverage/coverage.xml'
+        step $class: 'CoberturaPublisher', coberturaReportFile: 'build.ant/docs/reports/coverage/coverage.xml'
       }
     }
     
@@ -69,7 +69,7 @@ pipeline {
             allowMissing: false,
             alwaysLinkToLastBuild: false,
             keepAll: false,
-            reportDir: 'build/docs',
+            reportDir: 'build.ant/docs',
             reportFiles: 'index.html',
             reportName: 'Documentation'
           ])
@@ -80,7 +80,7 @@ pipeline {
     
   post {
     always {
-      archiveArtifacts artifacts: 'build/screenshots/,build/tomcat/webapps/fll-sw/fllweb*,build/tomcat/logs/,build/docs/reports/,build/fll-sw*.zip'           
+      archiveArtifacts artifacts: 'build.ant/screenshots/,build.ant/tomcat/webapps/fll-sw/fllweb*,build.ant/tomcat/logs/,build.ant/docs/reports/,build.ant/fll-sw*.zip'           
                         
       openTasks defaultEncoding: '', excludePattern: 'checkstyle*.xml,**/ChatServlet.java', healthy: '', high: 'FIXME,HACK', low: '', normal: 'TODO', pattern: '**/*.java,**/*.jsp,**/*.jspf,**/*.xml', unHealthy: ''
       warnings categoriesPattern: '', consoleParsers: [[parserName: 'Java Compiler (javac)']], defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', messagesPattern: '', unHealthy: ''
