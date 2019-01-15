@@ -12,21 +12,21 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.ScoreStandardization;
 import fll.ScoreStandardization.TooFewScoresException;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.xml.ChallengeDescription;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Do first part of summarizing scores and gather information to show the user
@@ -66,11 +66,11 @@ public class SummarizePhase1 {
       
       ScoreStandardization.summarizeScores(connection, challengeDescription, tournament);
 
-      final Collection<JudgeSummary> summary = new LinkedList<JudgeSummary>();
+      final List<JudgeSummary> summary = new LinkedList<JudgeSummary>();
 
       getJudges = connection.prepareStatement("SELECT id, category, station from Judges"
           + " WHERE Tournament = ?"
-          + " ORDER BY category ASC, station ASC");
+          + " ORDER BY station ASC, category ASC");
       getJudges.setInt(1, tournament);
       judges = getJudges.executeQuery();
       while (judges.next()) {
