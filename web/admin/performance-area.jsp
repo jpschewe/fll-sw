@@ -38,7 +38,7 @@
 </head>
 
 <body>
-	<h1>${challengeDescription.title }(Performance Area)</h1>
+	<h1>${challengeDescription.title }(PerformanceArea)</h1>
 
 	<div class='status-message'>${message}</div>
 	<%-- clear out the message, so that we don't see it again --%>
@@ -112,6 +112,10 @@
 			</form>
 		</li>
 
+		<li><a href='<c:url value="/report/PlayoffReport" />'
+			target="_blank">Winners of each head to head bracket</a>. This is
+			needed for the awards ceremony.</li>
+
 		<li><a href='database.flldb'>Download the final database</a> -
 			send this to the lead computer person</li>
 
@@ -121,7 +125,8 @@
 	<h2>Other useful pages</h2>
 	<ul>
 		<li>
-			<form action="<c:url value='ChangeScorePageText' />" method='post'>
+			<form
+				action="<c:url value='ChangeScorePageText' />" method='post'>
 				Scoring display text: <input type='text' name='ScorePageText'
 					value='<c:out value="${ScorePageText}"/>'> <input
 					type='submit' value='Change text'> <a
