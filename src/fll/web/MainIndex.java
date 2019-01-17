@@ -33,7 +33,6 @@ public class MainIndex {
    * <ul>
    * <li>tournamentTitle - display name of the tournament</li>
    * <li>urls - URLs to access the server - collection of string</li>
-   * <li>baseSslUrl - base URL for SSL connections, string, does not end with with
    * slash</li>
    * </ul>
    * 
@@ -52,10 +51,6 @@ public class MainIndex {
       pageContext.setAttribute("tournamentTitle", tournament.getDescription());
 
       pageContext.setAttribute("urls", WebUtils.getAllUrls(request, application));
-
-      final String baseSslUrl = String.format("https://%s:%d%s", request.getServerName(), WebUtils.SSL_PORT,
-                                              request.getContextPath());
-      pageContext.setAttribute("baseSslUrl", baseSslUrl);
     } catch (final SQLException sqle) {
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);

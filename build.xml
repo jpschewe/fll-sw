@@ -171,10 +171,6 @@
 		<!-- parse mime types -->
 		<pathelement location="${dir.lib}/tika-core-1.16.jar" />
 
-		<!-- BouncyCastle SSL provider for creating SSL certificates -->
-		<pathelement location="${dir.lib}/bcprov-jdk15on-160.jar" />
-		<pathelement location="${dir.lib}/bcpkix-jdk15on-160.jar" />
-
 		<!-- handle errors in lambdas -->
 		<pathelement location="${dir.lib}/durian-core-1.1.0.jar" />
 

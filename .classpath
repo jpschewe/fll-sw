@@ -91,16 +91,6 @@
 	<classpathentry kind="lib" path="tools/tomcat/lib/websocket-api.jar"/>
 	<classpathentry kind="lib" path="lib/tika-core-1.16.jar"/>
 	<classpathentry kind="lib" path="lib/itext-xtra-5.5.9.jar"/>
-	<classpathentry kind="lib" path="lib/bcprov-jdk15on-160.jar" sourcepath="lib/bcprov-jdk15on-160-src.zip">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/fll-sw/lib/bcprov-jdk15on-160.zip!/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="lib/bcpkix-jdk15on-160.jar" sourcepath="lib/bcpkix-jdk15on-160-src.zip">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/fll-sw/lib/bcpkix-jdk15on-160-docs.zip!/"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="lib" path="lib/hsqldb-2.4.1.jar"/>
 	<classpathentry kind="lib" path="lib/durian-core-1.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/junique-1.0.4.jar"/>

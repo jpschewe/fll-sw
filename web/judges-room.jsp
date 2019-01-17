@@ -77,33 +77,9 @@
 			electronic devices the scores will be entered through the Subjective
 			Java application from the launcher.
 			<ul>
-				<li>Electronic devices use these links
-					<ul>
-						<li><a target="_subjective"
-							href="<c:url value='/subjective/Auth' />">Standard web
-								application</a>. If you get an error that the application cache is
-							not supported or that the SSL version must be used. Then use the
-							SSL version below.</li>
-
-						<li>SSL web application
-							<ol>
-								<li>Follow <a
-									href="<c:url value='/documentation/installing-ssl-certificates.html' />"
-									target='_installing_ssl'>these instructions</a> to get the
-									certificate trusted
-								</li>
-
-								<li><a href="<c:url value='/fll-sw.crt' />">Security
-										certificate</a> for SSL subjective web application access. This is
-									referenced in the instructions.</li>
-
-								<li><a target="_subjective"
-									href="${baseSslUrl}/subjective/Auth">SSL Subjective Web
-										Application</a></li>
-
-							</ol>
-						</li>
-					</ul>
+				<li>Electronic devices visit <a target="_subjective"
+					href="<c:url value='/subjective/Auth' />">subjective web
+						application</a>.
 				</li>
 				<li>Java application use these links
 					<ul>
