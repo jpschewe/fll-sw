@@ -24,13 +24,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateParsingException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -48,16 +41,13 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 
 import org.apache.log4j.Logger;
-import org.bouncycastle.operator.OperatorCreationException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.scheduler.SchedulerUI;
 import fll.subjective.SubjectiveFrame;
 import fll.util.FLLInternalException;
-import fll.util.FLLRuntimeException;
 import fll.util.GuiExceptionHandler;
 import fll.util.LogUtils;
-import fll.web.CertificateUtils;
 import fll.xml.ui.ChallengeDescriptionFrame;
 import it.sauronsoftware.junique.AlreadyLockedException;
 import it.sauronsoftware.junique.JUnique;
@@ -85,7 +75,7 @@ public class Launcher extends JFrame {
     try {
       JUnique.acquireLock(id, message -> {
         if (null != thisLauncher) {
-          if (OPEN_MSG.equals(message)) {            
+          if (OPEN_MSG.equals(message)) {
             thisLauncher.toFront();
             thisLauncher.setVisible(true);
           } else {
@@ -130,7 +120,7 @@ public class Launcher extends JFrame {
 
     try {
       final Launcher frame = new Launcher();
-      
+
       ensureSingleInstance(frame);
 
       frame.addWindowListener(new WindowAdapter() {
@@ -358,7 +348,7 @@ public class Launcher extends JFrame {
       try {
         scheduler = new SchedulerUI();
         setApplicationIcon(scheduler);
-        
+
         scheduler.addWindowListener(new WindowAdapter() {
           @Override
           public void windowClosing(final WindowEvent e) {
@@ -457,19 +447,7 @@ public class Launcher extends JFrame {
   }
 
   private void startWebserver() {
-    final int result = JOptionPane.showConfirmDialog(this, "Have you connected to the network yet?", "Network Question",
-                                                     JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-    if (JOptionPane.YES_OPTION == result) {
-      if (!checkCertificateStore()) {
-        LOGGER.trace("Creating certificate store");
-        createCertificateStore();
-      }
-
-      controlWebserver(true);
-    } else {
-      JOptionPane.showMessageDialog(this,
-                                    "You should connect to the network first to ensure there aren't issues with SSL later");
-    }
+    controlWebserver(true);
   }
 
   private void stopWebserver() {
@@ -644,87 +622,6 @@ public class Launcher extends JFrame {
   private static boolean isWindows() {
     final boolean windows = System.getProperty("os.name").startsWith("Windows");
     return windows;
-  }
-
-  /**
-   * This filename must match the filename in the server.xml for tomcat.
-   * This file lives in the tomcat conf directory.
-   */
-  public static final String KEYSTORE_FILENAME = "tomcat.keystore";
-
-  /**
-   * Create the certificate store to be used by tomcat.
-   */
-  private void createCertificateStore() {
-    final Path tomcatConfDir = getTomcatConfDir();
-    if (null == tomcatConfDir) {
-      throw new FLLRuntimeException("Cannot find tomcat conf directory, cannot write keystore.");
-    }
-    final Path keystoreFilename = tomcatConfDir.resolve(KEYSTORE_FILENAME);
-
-    try {
-      CertificateUtils.createAndStoreCertificate(keystoreFilename);
-    } catch (final IOException e) {
-      LOGGER.error("I/O error writing keystore "
-          + e.getMessage(), e);
-
-      JOptionPane.showMessageDialog(this, "I/O error writing keystore "
-          + e.getMessage());
-    } catch (NoSuchAlgorithmException | OperatorCreationException | CertificateException | KeyStoreException e) {
-      LOGGER.error("Internal error creating SSL certificate: "
-          + e.getMessage(), e);
-
-      JOptionPane.showMessageDialog(this, "Internal error creating SSL certificate: "
-          + e.getMessage());
-    }
-  }
-
-  /**
-   * @return if the certificate store contains all of the IP addresses of this
-   *         system and is not expired.
-   */
-  private boolean checkCertificateStore() {
-    final Path tomcatConfDir = getTomcatConfDir();
-    if (null == tomcatConfDir) {
-      throw new FLLRuntimeException("Cannot find tomcat conf directory, cannot write keystore.");
-    }
-    final Path keystoreFile = tomcatConfDir.resolve(KEYSTORE_FILENAME);
-
-    if (!Files.exists(keystoreFile)) {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Keystore doesn't exist: "
-            + keystoreFile);
-      }
-      return false;
-    }
-
-    try {
-      return CertificateUtils.checkCertificateStore(keystoreFile);
-    } catch (CertificateParsingException | KeyStoreException e) {
-      throw new FLLInternalException("Error checking certificate store: "
-          + e.getMessage(), e);
-    }
-  }
-
-  /**
-   * Find the path to the tomcat conf directory.
-   * 
-   * @return null if the directory cannot be found
-   */
-  private static Path getTomcatConfDir() {
-    final Path[] possibleLocations = { //
-                                       Paths.get("tomcat", "conf"), //
-                                       Paths.get("."), //
-                                       Paths.get("build", "tomcat", "conf"), //
-                                       Paths.get("scoring", "build", "tomcat", "conf") //
-    };
-    for (final Path location : possibleLocations) {
-      final Path check = location.resolve("server.xml");
-      if (Files.exists(check)) {
-        return location;
-      }
-    }
-    return null;
   }
 
   private static void setApplicationIcon(final Window window) {

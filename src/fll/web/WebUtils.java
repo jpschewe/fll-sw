@@ -48,12 +48,6 @@ public final class WebUtils {
 
   private static final Pattern needsEscape = Pattern.compile("[\'\"\\\\]");
 
-  /**
-   * Port used to listen for SSL connections, must match webserver configuration
-   * file.
-   */
-  public static final int SSL_PORT = 9081;
-
   private WebUtils() {
     // no instances
   }
