@@ -63,7 +63,7 @@ public class ChangeParameters extends BaseFLLServlet {
 
       storeSeedingRounds(connection, request, tournaments, message);
 
-      storeMaxScoreboardRound(connection, request, tournaments);
+      //FIXME add storing of running head to head
 
       storePerformanceAdvancementPercentage(connection, request, tournaments);
 
@@ -146,25 +146,6 @@ public class ChangeParameters extends BaseFLLServlet {
             TournamentParameters.setNumSeedingRounds(connection, tournament.getTournamentID(), value);
           }
         }
-      }
-    }
-  }
-
-  private void storeMaxScoreboardRound(final Connection connection,
-                                       final HttpServletRequest request,
-                                       final List<Tournament> tournaments)
-      throws SQLException {
-    final int defaultNumRounds = Integer.parseInt(request.getParameter("max_scoreboard_round_default"));
-    TournamentParameters.setDefaultMaxScoreboardPerformanceRound(connection, defaultNumRounds);
-
-    for (final Tournament tournament : tournaments) {
-      final String str = request.getParameter("max_scoreboard_round_"
-          + tournament.getTournamentID());
-      if ("default".equals(str)) {
-        TournamentParameters.unsetMaxScoreboardPerformanceRound(connection, tournament.getTournamentID());
-      } else {
-        final int value = Integer.parseInt(str);
-        TournamentParameters.setMaxScoreboardPerformanceRound(connection, tournament.getTournamentID(), value);
       }
     }
   }

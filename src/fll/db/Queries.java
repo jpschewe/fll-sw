@@ -794,22 +794,26 @@ public final class Queries {
 
     // Perform updates to the playoff data table if in playoff rounds.
     final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID());
+    final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection,
+                                                                                tournament.getTournamentID());
     if (teamScore.getRunNumber() > numSeedingRounds) {
-      if (verified) {
-        if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("Updating playoff score from insert");
-        }
-        updatePlayoffScore(connection, verified, tournament.getTournamentID(), winnerCriteria, performanceElement,
-                           tiebreakerElement, teamScore.getTeamNumber(), teamScore.getRunNumber(), teamScore);
-      } else {
-        // send H2H update that this team's score is entered
-        final String bracketName = Playoff.getPlayoffDivision(connection, tournament.getTournamentID(),
-                                                              teamScore.getTeamNumber(), teamScore.getRunNumber());
-        final Team team = Team.getTeamFromDatabase(connection, teamScore.getTeamNumber());
+      if (runningHeadToHead) {
+        if (verified) {
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Updating playoff score from insert");
+          }
+          updatePlayoffScore(connection, verified, tournament.getTournamentID(), winnerCriteria, performanceElement,
+                             tiebreakerElement, teamScore.getTeamNumber(), teamScore.getRunNumber(), teamScore);
+        } else {
+          // send H2H update that this team's score is entered
+          final String bracketName = Playoff.getPlayoffDivision(connection, tournament.getTournamentID(),
+                                                                teamScore.getTeamNumber(), teamScore.getRunNumber());
+          final Team team = Team.getTeamFromDatabase(connection, teamScore.getTeamNumber());
 
-        H2HUpdateWebSocket.updateBracket(connection, performanceElement.getScoreType(), bracketName, team,
-                                         teamScore.getRunNumber());
-      }
+          H2HUpdateWebSocket.updateBracket(connection, performanceElement.getScoreType(), bracketName, team,
+                                           teamScore.getRunNumber());
+        }
+      } // running head to head
     } else {
       tournament.recordPerformanceSeedingModified(connection);
     }
@@ -952,13 +956,16 @@ public final class Queries {
       // Check if we need to update the PlayoffData table
       final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournament);
       if (runNumber > numSeedingRounds) {
-        if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("Updating playoff score from updatePerformanceScore");
-        }
+        final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection, currentTournament);
+        if (runningHeadToHead) {
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Updating playoff score from updatePerformanceScore");
+          }
 
-        final boolean verified = "1".equals(request.getParameter("Verified"));
-        updatePlayoffScore(connection, verified, currentTournament, winnerCriteria, performanceElement,
-                           tiebreakerElement, teamNumber, runNumber, teamScore);
+          final boolean verified = "1".equals(request.getParameter("Verified"));
+          updatePlayoffScore(connection, verified, currentTournament, winnerCriteria, performanceElement,
+                             tiebreakerElement, teamNumber, runNumber, teamScore);
+        }
       } else {
         tournament.recordPerformanceSeedingModified(connection);
       }

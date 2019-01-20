@@ -288,7 +288,8 @@ public final class ImportDB {
     // exist
     final Tournament destTournament = Tournament.findTournamentByName(destConnection, sourceTournament.getName());
     if (null == destTournament) {
-      Tournament.createTournament(destConnection, sourceTournament.getName(), sourceTournament.getDescription(), sourceTournament.getDate());
+      Tournament.createTournament(destConnection, sourceTournament.getName(), sourceTournament.getDescription(),
+                                  sourceTournament.getDate());
     }
   }
 
@@ -606,6 +607,11 @@ public final class ImportDB {
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 17) {
+      upgrade16To17(connection);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < GenerateDB.DATABASE_VERSION) {
       throw new RuntimeException("Internal error, database version not updated to current instead was: "
           + dbVersion);
@@ -779,6 +785,15 @@ public final class ImportDB {
       }
       setDBVersion(connection, 16);
     }
+  }
+
+  private static void upgrade16To17(final Connection connection) throws SQLException {
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Upgrading database from 16 to 17");
+    }
+
+    TournamentParameters.setDefaultRunningHeadToHead(connection, TournamentParameters.RUNNING_HEAD_2_HEAD_DEFAULT);
+    setDBVersion(connection, 17);
   }
 
   /**
@@ -1858,11 +1873,9 @@ public final class ImportDB {
     // use the "get" methods rather than generic SQL query to ensure that the
     // default value is picked up in case the default value has been changed
     final int seedingRounds = TournamentParameters.getNumSeedingRounds(sourceConnection, sourceTournamentID);
-    final int maxPerScoreboardPerformanceRound = TournamentParameters.getMaxScoreboardPerformanceRound(sourceConnection,
-                                                                                                       sourceTournamentID);
+    final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(sourceConnection, sourceTournamentID);
     TournamentParameters.setNumSeedingRounds(destinationConnection, destTournamentID, seedingRounds);
-    TournamentParameters.setMaxScoreboardPerformanceRound(destinationConnection, destTournamentID,
-                                                          maxPerScoreboardPerformanceRound);
+    TournamentParameters.setRunningHeadToHead(destinationConnection, destTournamentID, runningHeadToHead);
   }
 
   private static void importJudges(final Connection sourceConnection,
