@@ -158,67 +158,6 @@
 
 
 				<tr>
-					<th>Max Scoreboard Round <a
-						href='javascript:display("MaxScoreboardRoundHelp")'>[help]</a>
-						<div id='MaxScoreboardRoundHelp' class='help'
-							style='display: none'>
-							Performance rounds greater than this number will not be displayed
-							on the scoreboard. This exists to prevent the winners of the head
-							to head from being displayed before the awards ceremony.
-							Generally this should be the same as the number of seeding
-							rounds. Ideally this would be the number of rounds include <a
-								href='javascript:hide("MaxScoreboardRoundHelp")'>[hide]</a>
-						</div>
-
-					</th>
-
-					<td><select name='max_scoreboard_round_default'>
-							<c:forEach begin="0" end="10" var="numRounds">
-								<c:choose>
-									<c:when test="${numRounds == maxScoreboardRound_default}">
-										<option selected value='${numRounds}'>${numRounds}</option>
-									</c:when>
-									<c:otherwise>
-										<option value='${numRounds}'>${numRounds }</option>
-									</c:otherwise>
-								</c:choose>
-							</c:forEach>
-					</select></td>
-
-					<c:forEach items="${tournaments }" var="tournament">
-
-						<td><select
-							name='max_scoreboard_round_${tournament.tournamentID }'>
-								<c:choose>
-									<c:when
-										test="${empty maxScoreboardRound[tournament.tournamentID]}">
-										<option selected value="default">Default</option>
-									</c:when>
-									<c:otherwise>
-										<option value="default">Default</option>
-									</c:otherwise>
-								</c:choose>
-
-								<c:forEach begin="0" end="10" var="numRounds">
-									<c:choose>
-										<c:when
-											test="${numRounds == maxScoreboardRound[tournament.tournamentID]}">
-											<option selected value='${numRounds}'>${numRounds}</option>
-										</c:when>
-										<c:otherwise>
-											<option value='${numRounds}'>${numRounds }</option>
-										</c:otherwise>
-									</c:choose>
-								</c:forEach>
-						</select></td>
-
-					</c:forEach>
-
-				</tr>
-				<!--  max scoreboard round -->
-
-
-				<tr>
 					<th>Performance Advancement Percentage <a
 						href='javascript:display("PerformanceAdvancementPercentageHelp")'>[help]</a>
 						<div id='PerformanceAdvancementPercentageHelp' class='help'

@@ -38,7 +38,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 16;
+  public static final int DATABASE_VERSION = 17;
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -648,15 +648,14 @@ public final class GenerateDB {
         TournamentParameters.setDefaultNumSeedingRounds(connection, TournamentParameters.SEEDING_ROUNDS_DEFAULT);
       }
 
-      if (!TournamentParameters.defaultParameterExists(connection, TournamentParameters.MAX_SCOREBOARD_ROUND)) {
-        TournamentParameters.setDefaultMaxScoreboardPerformanceRound(connection,
-                                                                     TournamentParameters.MAX_SCOREBOARD_ROUND_DEFAULT);
-      }
-
       if (!TournamentParameters.defaultParameterExists(connection,
                                                        TournamentParameters.PERFORMANCE_ADVANCEMENT_PERCENTAGE)) {
         TournamentParameters.setDefaultPerformanceAdvancementPercentage(connection,
                                                                         TournamentParameters.PERFORMANCE_ADVANCEMENT_PERCENTAGE_DEFAULT);
+      }
+
+      if (!TournamentParameters.defaultParameterExists(connection, TournamentParameters.RUNNING_HEAD_2_HEAD)) {
+        TournamentParameters.setDefaultRunningHeadToHead(connection, TournamentParameters.RUNNING_HEAD_2_HEAD_DEFAULT);
       }
 
     } finally {

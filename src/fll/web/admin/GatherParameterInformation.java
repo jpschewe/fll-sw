@@ -51,18 +51,7 @@ public class GatherParameterInformation {
       }
       pageContext.setAttribute("numSeedingRounds", numSeedingRounds);
 
-      pageContext.setAttribute("maxScoreboardRound_default",
-                               TournamentParameters.getDefaultMaxScoreboardPerformanceRound(connection));
-      final Map<Integer, Integer> maxScoreboardRound = new HashMap<Integer, Integer>();
-      for (final Tournament tournament : tournaments) {
-        if (TournamentParameters.tournamentParameterValueExists(connection, tournament.getTournamentID(),
-                                                                TournamentParameters.MAX_SCOREBOARD_ROUND)) {
-          maxScoreboardRound.put(tournament.getTournamentID(),
-                                 TournamentParameters.getMaxScoreboardPerformanceRound(connection,
-                                                                                       tournament.getTournamentID()));
-        }
-      }
-      pageContext.setAttribute("maxScoreboardRound", maxScoreboardRound);
+      // FIXME add boolean for running head to head
 
       pageContext.setAttribute("performanceAdvancementPercentage_default",
                                TournamentParameters.getDefaultPerformanceAdvancementPercentage(connection));

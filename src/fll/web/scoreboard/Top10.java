@@ -325,8 +325,8 @@ public class Top10 extends BaseFLLServlet {
       final WinnerType winnerCriteria = challengeDescription.getWinner();
 
       final int currentTournament = Queries.getCurrentTournament(connection);
-      final int maxScoreboardRound = TournamentParameters.getMaxScoreboardPerformanceRound(connection,
-                                                                                           currentTournament);
+      final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournament);
+      final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection, currentTournament);
 
       try (
           PreparedStatement prep = connection.prepareStatement("SELECT Teams.TeamName, Teams.Organization, Teams.TeamNumber, T2.MaxOfComputedScore" //
@@ -336,7 +336,7 @@ public class Top10 extends BaseFLLServlet {
               + "  FROM verified_performance WHERE Tournament = ? "
               + "   AND NoShow = False" //
               + "   AND Bye = False" //
-              + "   AND RunNumber <= ?" //
+              + "   AND (? OR RunNumber <= ?)" //
               + "  GROUP BY TeamNumber) AS T2"
               + " JOIN Teams ON Teams.TeamNumber = T2.TeamNumber, current_tournament_teams"
               + " WHERE Teams.TeamNumber = current_tournament_teams.TeamNumber" //
@@ -344,8 +344,9 @@ public class Top10 extends BaseFLLServlet {
               + " ORDER BY T2.MaxOfComputedScore "
               + winnerCriteria.getSortString())) {
         prep.setInt(1, currentTournament);
-        prep.setInt(2, maxScoreboardRound);
-        prep.setString(3, awardGroupName);
+        prep.setBoolean(2, !runningHeadToHead);
+        prep.setInt(3, numSeedingRounds);
+        prep.setString(4, awardGroupName);
         try (ResultSet rs = prep.executeQuery()) {
 
           double prevScore = -1;
