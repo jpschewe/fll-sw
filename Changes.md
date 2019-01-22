@@ -1,3 +1,5 @@
+* #703 - be clear that head to head runs should be on single table pairs when running in parallel
+* #704 - note that the rank is in parenthesis in the final computed scores report
 * #700 - remove SSL code, this isn't needed now that the application cache isn't used
 
 Release 13.3.0
