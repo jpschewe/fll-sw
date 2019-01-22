@@ -48,7 +48,7 @@
 				<li>The current tournament is ${currentTournament.description }.</li>
 				<li>
 					<form id='currentTournament'
-						action="c:url value='/admin/SetCurrentTournament' />"
+						action="<c:url value='/admin/SetCurrentTournament' />"
 						method="post">
 						Change tournament to <select id='currentTournamentSelect'
 							name='currentTournament'>
