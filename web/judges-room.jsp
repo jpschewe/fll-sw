@@ -124,15 +124,13 @@
 			</form>
 		</li>
 
-		<li>Once the subjective scores are in, you will want to <a
-			target="_report" href="<c:url value='/report/index.jsp' />">generate
-				reports</a></li>
+		<li><a target="_report"
+			href="<c:url value='/report/index.jsp' />">Generate reports</a> -
+			this is done ones all of the subjective scores are in</li>
 
-		<li>At the end of the day <a
-			href="<c:url value='/admin/DownloadJudgesDatabase' />">download
+		<li><a href="<c:url value='/admin/DownloadJudgesDatabase' />">Download
 				the final judges room database</a> and send it to the head computer
-			person
-		</li>
+			person</li>
 
 	</ol>
 
