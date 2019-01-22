@@ -921,7 +921,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
         hurdleText = "";
       }
 
-      _legendText = String.format("%sbold - top team in a category & judging group, %.2f == average ; %.2f = 1 standard deviation",
+      _legendText = String.format("%sbold - top team in a category & judging group (rank), %.2f == average ; %.2f = 1 standard deviation",
                                   hurdleText, standardMean, standardSigma);
     }
 
