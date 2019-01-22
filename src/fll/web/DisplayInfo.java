@@ -304,7 +304,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
       synchronized (LOCK) {
         final SortedSet<DisplayInfo> displayInformation = internalGetDisplayInformation(application);
 
-        LOGGER.info("Before remove of display copy: " + displayInformation);
+        LOGGER.trace("Before remove of display copy: " + displayInformation);
         
         final boolean removed = displayInformation.remove(this); // remove
                                                                  // possible
@@ -319,7 +319,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
 
         displayInformation.add(this); // insert updated version
 
-        LOGGER.info("After add of updated display information: " + displayInformation);
+        LOGGER.trace("After add of updated display information: " + displayInformation);
 
         application.setAttribute(ApplicationAttributes.DISPLAY_INFORMATION, displayInformation);
       }
