@@ -173,7 +173,7 @@
 					</th>
 
 					<td><select name='max_scoreboard_round_default'>
-							<c:forEach begin="0" end="10" var="numRounds">
+							<c:forEach begin="0" end="3" var="numRounds">
 								<c:choose>
 									<c:when test="${numRounds == maxScoreboardRound_default}">
 										<option selected value='${numRounds}'>${numRounds}</option>
@@ -183,6 +183,14 @@
 									</c:otherwise>
 								</c:choose>
 							</c:forEach>
+							<c:choose>
+								<c:when test="${999 == maxScoreboardRound_default}">
+									<option selected value='999'>999</option>
+								</c:when>
+								<c:otherwise>
+									<option value='999'>999</option>
+								</c:otherwise>
+							</c:choose>
 					</select></td>
 
 					<c:forEach items="${tournaments }" var="tournament">
@@ -199,7 +207,7 @@
 									</c:otherwise>
 								</c:choose>
 
-								<c:forEach begin="0" end="10" var="numRounds">
+								<c:forEach begin="0" end="3" var="numRounds">
 									<c:choose>
 										<c:when
 											test="${numRounds == maxScoreboardRound[tournament.tournamentID]}">
@@ -210,6 +218,15 @@
 										</c:otherwise>
 									</c:choose>
 								</c:forEach>
+								<c:choose>
+									<c:when
+										test="${999 == maxScoreboardRound[tournament.tournamentID]}">
+										<option value='999'>999</option>
+									</c:when>
+									<c:otherwise>
+										<option value='999'>999</option>
+									</c:otherwise>
+								</c:choose>
 						</select></td>
 
 					</c:forEach>
@@ -224,7 +241,7 @@
 						<div id='PerformanceAdvancementPercentageHelp' class='help'
 							style='display: none'>
 							Teams should have a performance score in the top X% of all
-							performnace scores to be allowed to advance to the next
+							performance scores to be allowed to advance to the next
 							tournament. <a
 								href='javascript:hide("PerformanceAdvancementPercentageHelp")'>[hide]</a>
 						</div>
