@@ -82,8 +82,7 @@ public class TestAJAXBrackets {
       selenium.findElement(By.name("SideB0")).sendKeys("Table 2");
       selenium.findElement(By.id("finished")).click();
 
-      final int tournamentId = IntegrationTestUtils.getCurrentTournamentId(selenium);
-      IntegrationTestUtils.changeNumSeedingRounds(selenium, tournamentId, 0);
+      IntegrationTestUtils.changeNumSeedingRounds(selenium, 0);
 
       // init brackets
       IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
