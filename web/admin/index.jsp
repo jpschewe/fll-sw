@@ -347,7 +347,8 @@
 	<h2>Advanced</h2>
 	<p>These links are for advanced users.</p>
 	<ul>
-		<li><a href="edit_all_parameters.jsp">Edit all parameters</a></li>
+		<li><a href="edit_global_parameters.jsp">Edit global
+				parameters</a></li>
 
 		<li>
 			<form id='uploadTeamTournamentAssignments'
