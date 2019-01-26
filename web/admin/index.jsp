@@ -132,6 +132,8 @@
 			</form>
 		</li>
 
+		<li><a href="edit_tournament_parameters.jsp">Edit tournament
+				parameters</a> - should not be needed for most tournaments.</li>
 
 		<li><c:if test="${scheduleUploaded }">
 				<span class='completed'>DONE </span>
@@ -162,13 +164,13 @@
 						target="_new">Full Schedule as CSV</a> - for use with scheduling
 						tools</li>
 
-					<li><a
-						href="<c:url value='/admin/PerformanceSheets' />"
+					<li><a href="<c:url value='/admin/PerformanceSheets' />"
 						target="_new">Performance sheets for the seeding rounds</a></li>
 
 					<c:forEach items="${challengeDescription.subjectiveCategories}"
 						var="category">
-						<li><a href="<c:url value='SubjectiveSheets/${category.name}' />">Subjective
+						<li><a
+							href="<c:url value='SubjectiveSheets/${category.name}' />">Subjective
 								sheets for ${category.title}</a>
 					</c:forEach>
 

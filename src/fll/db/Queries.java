@@ -3017,23 +3017,44 @@ public final class Queries {
       throws SQLException {
     final int tournament = getCurrentTournament(connection);
 
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = connection.prepareStatement("SELECT MAX(RunNumber) FROM Performance"
-          + " WHERE TeamNumber = ? AND Tournament = ?");
+    try (PreparedStatement prep = connection.prepareStatement("SELECT MAX(RunNumber) FROM Performance"
+        + " WHERE TeamNumber = ? AND Tournament = ?")) {
       prep.setInt(1, teamNumber);
       prep.setInt(2, tournament);
-      rs = prep.executeQuery();
-      if (rs.next()) {
-        final int runNumber = rs.getInt(1);
-        return runNumber;
-      } else {
-        return 0;
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          final int runNumber = rs.getInt(1);
+          return runNumber;
+        } else {
+          return 0;
+        }
       }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
+    }
+
+  }
+
+  /**
+   * Get the max performance run number completed for all teams in the
+   * current tournament. This does not check the verified flag.
+   * 
+   * @param connection database connection
+   * @return the max run number or 0 if no performance runs have been completed
+   * @throws SQLException
+   */
+  public static int maxPerformanceRunNumberCompleted(final Connection connection) throws SQLException {
+    final int tournament = getCurrentTournament(connection);
+
+    try (PreparedStatement prep = connection.prepareStatement("SELECT MAX(RunNumber) FROM Performance"
+        + " WHERE Tournament = ?")) {
+      prep.setInt(1, tournament);
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          final int runNumber = rs.getInt(1);
+          return runNumber;
+        } else {
+          return 0;
+        }
+      }
     }
 
   }
