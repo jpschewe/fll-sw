@@ -1,3 +1,4 @@
+* #701 - add parameter to enable/disable head to head. This makes it much easier to run a tournament with extra rounds instead of head to head. 
 * #702 - allow easy editing of parameters for the current tournament
 * #700 - remove SSL code, this isn't needed now that the application cache isn't used
 
