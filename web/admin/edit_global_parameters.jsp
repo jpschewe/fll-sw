@@ -27,7 +27,10 @@
 }
 </style>
 
-<script type='text/javascript' src='../extlib/jquery-1.11.1.min.js'></script>
+<script type="text/javascript"
+	src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
+<script type="text/javascript"
+	src="<c:url value='/extlib/jquery.validate.min.js'/>"></script>
 
 <!-- functions to displaying and hiding help -->
 <script type="text/javascript">
@@ -38,25 +41,11 @@
     document.getElementById(id).style.display = "none";
   }
 
-  function checkParams() {
-    var value = $("#gStandardizedMean").val();
-    if (!$.isNumeric(value)) {
-      alert("Standardized Mean must be a decimal number");
-      return false;
-    }
-
-    value = $("#gStandardizedSigma").val();
-    if (!$.isNumeric(value)) {
-      alert("Standardized Sigma must be a decimal number");
-      return false;
-    }
-
-    return true;
-  }
-
   $(document).ready(function() {
+    $("#edit_global_parameters").validate();
+
     $("#submit").click(function() {
-      return checkParams();
+      return validateForm();
     });
   });
 </script>
@@ -67,7 +56,10 @@
 
 	<div class='content'>
 
-		<h1>Edit All Parameters</h1>
+		<h1>Edit Global Parameters</h1>
+
+		<p>These parameters are specified globally and apply to all
+			tournaments in the database.</p>
 
 		<div class='status-message'>${message}</div>
 		<%-- clear out the message, so that we don't see it again --%>
@@ -77,124 +69,8 @@
 		<p>This page is for advanced users only. Be careful changing
 			parameters here.</p>
 
-		<form name='edit_parameters' action='ChangeParameters' method='POST'>
-			<h2>Tournament Parameters</h2>
-			<p>These parameters are specified per tournament. Each of them
-				has a default value that is used if no value is specified for the
-				tournament</p>
-
-			<table>
-
-				<tr>
-					<th>Parameter</th>
-					<th>Default Value <a
-						href='javascript:display("DefaultValueHelp")'>[help]</a>
-						<div id='DefaultValueHelp' class='help' style='display: none'>
-							If a value is not specified for a tournament, this value is used.
-							<a href='javascript:hide("DefaultValueHelp")'>[hide]</a>
-						</div>
-					</th>
-
-					<c:forEach items="${tournaments }" var="tournament">
-						<th>${tournament.name }</th>
-					</c:forEach>
-
-				</tr>
-
-				<tr>
-					<th>Seeding Rounds <a
-						href='javascript:display("SeedingRoundsHelp")'>[help]</a>
-						<div id='SeedingRoundsHelp' class='help' style='display: none'>
-							This parameter specifies the number of seeding rounds. The
-							seeding rounds are used for the performance score in the final
-							report and are used to rank teams for the initial head to head
-							round. <a href='javascript:hide("SeedingRoundsHelp")'>[hide]</a>
-						</div>
-					</th>
-
-					<td><select name='seeding_rounds_default'>
-							<c:forEach begin="0" end="10" var="numRounds">
-								<c:choose>
-									<c:when test="${numRounds == numSeedingRounds_default}">
-										<option selected value='${numRounds}'>${numRounds}</option>
-									</c:when>
-									<c:otherwise>
-										<option value='${numRounds}'>${numRounds }</option>
-									</c:otherwise>
-								</c:choose>
-							</c:forEach>
-					</select></td>
-
-					<c:forEach items="${tournaments }" var="tournament">
-
-						<td><select name='seeding_rounds_${tournament.tournamentID }'>
-								<c:choose>
-									<c:when
-										test="${empty numSeedingRounds[tournament.tournamentID]}">
-										<option selected value="default">Default</option>
-									</c:when>
-									<c:otherwise>
-										<option value="default">Default</option>
-									</c:otherwise>
-								</c:choose>
-
-								<c:forEach begin="0" end="10" var="numRounds">
-									<c:choose>
-										<c:when
-											test="${numRounds == numSeedingRounds[tournament.tournamentID]}">
-											<option selected value='${numRounds}'>${numRounds}</option>
-										</c:when>
-										<c:otherwise>
-											<option value='${numRounds}'>${numRounds }</option>
-										</c:otherwise>
-									</c:choose>
-								</c:forEach>
-						</select></td>
-
-					</c:forEach>
-
-				</tr>
-				<!--  seeding rounds -->
-
-
-				<tr>
-					<th>Performance Advancement Percentage <a
-						href='javascript:display("PerformanceAdvancementPercentageHelp")'>[help]</a>
-						<div id='PerformanceAdvancementPercentageHelp' class='help'
-							style='display: none'>
-							Teams should have a performance score in the top X% of all
-							performnace scores to be allowed to advance to the next
-							tournament. <a
-								href='javascript:hide("PerformanceAdvancementPercentageHelp")'>[hide]</a>
-						</div>
-
-					</th>
-
-					<td><input type='text'
-						id='performance_advancement_percentage_default'
-						name='performance_advancement_percentage_default'
-						value='${performanceAdvancementPercentage_default}' /></td>
-
-					<c:forEach items="${tournaments }" var="tournament">
-
-						<td><input type='text'
-							id='performance_advancement_percentage_${tournament.tournamentID }'
-							name='performance_advancement_percentage_${tournament.tournamentID }'
-							value='${performanceAdvancementPercentage[tournament.tournamentID]}' />
-
-						</td>
-
-					</c:forEach>
-
-				</tr>
-				<!-- performance advancement percentage -->
-
-			</table>
-
-
-			<h2>Global Parameters</h2>
-			<p>These parameters are specified globally and apply to all
-				tournaments in the database.</p>
+		<form name='edit_global_parameters' action='StoreGlobalParameters'
+			method='POST'>
 
 			<table>
 
@@ -213,7 +89,8 @@
 
 					</th>
 					<td><input type='text' value="${gStandardizedMean }"
-						id='gStandardizedMean' name='gStandardizedMean' /></td>
+						id='gStandardizedMean' name='gStandardizedMean'
+						class='required number' /></td>
 				</tr>
 
 				<tr>
@@ -226,7 +103,8 @@
 
 					</th>
 					<td><input type='text' value="${gStandardizedSigma }"
-						id='gStandardizedSigma' name='gStandardizedSigma' /></td>
+						id='gStandardizedSigma' name='gStandardizedSigma'
+						class='required number' /></td>
 				</tr>
 
 				<tr>
@@ -239,7 +117,8 @@
 						</div>
 					</th>
 					<td><input type='text' value="${gDivisionFlipRate}"
-						id='gDivisionFlipRate' name='gDivisionFlipRate' /></td>
+						id='gDivisionFlipRate' name='gDivisionFlipRate'
+						class='required digits' /></td>
 				</tr>
 
 				<tr>
@@ -251,7 +130,8 @@
 					</th>
 
 					<td><input type='text' value="${gAllTeamsMsPerRow }"
-						id='gAllTeamsMsPerRow' name='gAllTeamsMsPerRow' /></td>
+						id='gAllTeamsMsPerRow' name='gAllTeamsMsPerRow'
+						class='required digits' /></td>
 				</tr>
 
 				<tr>
@@ -265,7 +145,8 @@
 					</th>
 
 					<td><input type='text' value="${gHeadToHeadMsPerRow }"
-						id='gHeadToHeadMsPerRow' name='gHeadToHeadMsPerRow' /></td>
+						id='gHeadToHeadMsPerRow' name='gHeadToHeadMsPerRow'
+						class='required digits' /></td>
 				</tr>
 				<tr>
 					<th colspan="2">FLL Tools integration</th>
@@ -293,7 +174,7 @@
 
 					</th>
 					<td><input type='text' value="${gMhubPort }" id='gMhubPort'
-						name='gMhubPort' /></td>
+						name='gMhubPort' class='required digits' /></td>
 				</tr>
 
 				<tr>
