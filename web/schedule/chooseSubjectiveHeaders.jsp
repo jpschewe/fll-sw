@@ -63,7 +63,7 @@
 
 					<td><input type="text" name="${subcat.name}:duration"
 						id="${subcat.name}:duration" value="${default_duration}"
-						class="required digist" /></td>
+						class="required digits" /></td>
 
 				</tr>
 				<!-- row for category -->
