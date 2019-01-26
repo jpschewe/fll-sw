@@ -1,3 +1,4 @@
+* #702 - allow easy editing of parameters for the current tournament
 * #700 - remove SSL code, this isn't needed now that the application cache isn't used
 
 Release 13.3.0
