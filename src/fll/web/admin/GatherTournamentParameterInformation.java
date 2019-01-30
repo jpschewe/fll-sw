@@ -8,6 +8,7 @@ package fll.web.admin;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.jsp.PageContext;
@@ -17,6 +18,7 @@ import fll.Tournament;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.web.ApplicationAttributes;
+import fll.web.playoff.Playoff;
 
 /**
  * Gather parameter information for edit_tournament_parameters.jsp.
@@ -42,7 +44,10 @@ public class GatherTournamentParameterInformation {
         pageContext.setAttribute("runningHeadToHeadChecked", "");
       }
       final int maxPerformanceRoundEntered = Queries.maxPerformanceRunNumberCompleted(connection);
-      pageContext.setAttribute("runningHeadToHeadDisabled", maxPerformanceRoundEntered > numSeedingRounds);
+      final List<String> playoffBrackets = Playoff.getPlayoffBrackets(connection, tournament.getTournamentID());
+      final boolean runningHeadToHeadDisabled = maxPerformanceRoundEntered > numSeedingRounds
+          || !playoffBrackets.isEmpty();
+      pageContext.setAttribute("runningHeadToHeadDisabled", runningHeadToHeadDisabled);
 
       pageContext.setAttribute("numSeedingSoundsDisabled", maxPerformanceRoundEntered > 0);
 
