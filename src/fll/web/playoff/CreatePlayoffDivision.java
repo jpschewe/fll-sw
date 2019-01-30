@@ -28,6 +28,7 @@ import org.apache.log4j.Logger;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.db.Queries;
+import fll.db.TournamentParameters;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
@@ -61,6 +62,9 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
 
       final List<String> awardGroups = Queries.getAwardGroups(connection, currentTournamentID);
       pageContext.setAttribute("awardGroups", awardGroups);
+
+      pageContext.setAttribute("runningHeadToHead",
+                               TournamentParameters.getRunningHeadToHead(connection, currentTournamentID));
 
     } catch (final SQLException sqle) {
       LOGGER.error(sqle, sqle);
@@ -104,7 +108,8 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
           redirect = "create_playoff_division.jsp";
         } else if (playoffDivisions.contains(bracketName)) {
           message.append("<p class='error'>The playoff bracket '"
-              + bracketName + "' already exists, please pick a different name");
+              + bracketName
+              + "' already exists, please pick a different name");
           redirect = "create_playoff_division.jsp";
         } else {
           final String[] selectedTeams = request.getParameterValues("selected_team");
@@ -122,7 +127,8 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
           Playoff.createPlayoffBracket(connection, currentTournamentID, bracketName, teamNumbers);
 
           message.append("<p id='success'>Created playoff bracket"
-              + bracketName + "</p>");
+              + bracketName
+              + "</p>");
 
           redirect = "index.jsp";
         }
@@ -151,7 +157,8 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
             Playoff.createPlayoffBracket(connection, currentTournamentID, awardGroup, teamNumbers);
 
             message.append("<p id='success'>Created playoff bracket '"
-                + awardGroup + "'</p>");
+                + awardGroup
+                + "'</p>");
             redirect = "index.jsp";
             done = true;
           } else if (paramName.startsWith("create_judging_group_")) {
@@ -171,7 +178,8 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
             Playoff.createPlayoffBracket(connection, currentTournamentID, judgingGroup, teamNumbers);
 
             message.append("<p id='success'>Created playoff bracket '"
-                + judgingGroup + "'</p>");
+                + judgingGroup
+                + "'</p>");
             redirect = "index.jsp";
             done = true;
           }
@@ -185,7 +193,8 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
 
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
-          + sqle.getMessage() + "</p>");
+          + sqle.getMessage()
+          + "</p>");
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);
     } finally {

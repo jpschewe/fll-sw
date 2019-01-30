@@ -84,7 +84,8 @@
 				<c:choose>
 					<c:when test="${runningHeadToHeadDisabled }">
 						<i>This parameter cannot be changed once any performance
-							scores beyond the seeding rounds have been entered. </i>
+							scores beyond the seeding rounds have been entered or there is an
+							initialized playoff bracket.</i>
 						<input type="checkbox" name="running_head_to_head"
 							id="running_head_to_head" readonly ${runningHeadToHeadChecked }/>
 					</c:when>
@@ -120,7 +121,7 @@
 
 			</div>
 
-			<input type="submit" id='submit' />
+			<input type="submit" id='submit' value='Submit' />
 
 		</form>
 	</div>
