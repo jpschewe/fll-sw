@@ -178,9 +178,9 @@ public class TestAJAXBrackets {
     } catch (final IOException | RuntimeException | AssertionError e) {
       LOGGER.fatal(e, e);
       IntegrationTestUtils.storeScreenshot("main", selenium);
-      IntegrationTestUtils.storeScreenshot("brackets", selenium);
-      IntegrationTestUtils.storeScreenshot("scoreEntry", selenium);
-      IntegrationTestUtils.storeScreenshot("scoreSheet", selenium);
+      IntegrationTestUtils.storeScreenshot("brackets", bracketsWindow);
+      IntegrationTestUtils.storeScreenshot("scoreEntry", scoreEntryWindow);
+      IntegrationTestUtils.storeScreenshot("scoreSheet", scoresheetWindow);
       throw e;
     }
   }
