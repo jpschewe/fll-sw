@@ -19,6 +19,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.apache.log4j.Logger;
 
 import fll.db.Queries;
+import fll.db.TournamentParameters;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
@@ -53,6 +54,9 @@ public class PlayoffIndex {
 
       final int currentTournamentID = Queries.getCurrentTournament(connection);
 
+      pageContext.setAttribute("runningHeadToHead",
+                               TournamentParameters.getRunningHeadToHead(connection, currentTournamentID));
+
       final PlayoffSessionData data = new PlayoffSessionData(connection);
       session.setAttribute(SESSION_DATA, data);
 
@@ -61,7 +65,8 @@ public class PlayoffIndex {
 
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
-          + sqle.getMessage() + "</p>");
+          + sqle.getMessage()
+          + "</p>");
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error saving team data into the database", sqle);
     } finally {
