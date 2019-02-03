@@ -36,6 +36,9 @@ By looking at this you can quickly tell which scores haven't been entered or if 
 
 The web application can be used on a desktop, laptop, phone, or tablet. Although a phone screen might be a little small to be useful. Judges names do not need to be entered before using the subjective web application. This application is accessible from the main index and from the admin index. The app is intended to be self explanatory as the user is guided through the judging.
 
+We have found that the Silk browser on Amazon tablets sometimes has problems working offline properly. 
+It is best if one can load Chrome on these tablets and use that browser instead. 
+
 # Checking entered scores
 
 Once scores have been uploaded from the tablets or via the Java application it is a good idea to check that all scores are entered. 
