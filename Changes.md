@@ -1,6 +1,13 @@
 * #712 - save the database as a dump file on an integration test failure
 * #701 - add parameter to enable/disable head to head. This makes it much easier to run a tournament with extra rounds instead of head to head. 
 * #702 - allow easy editing of parameters for the current tournament
+
+Release 13.4.0
+==============
+
+* Work around for displaying all performance scores when not r
+* #703 - be clear that head to head runs should be on single table pairs when running in parallel
+* #704 - note that the rank is in parenthesis in the final computed scores report
 * #700 - remove SSL code, this isn't needed now that the application cache isn't used
 
 Release 13.3.0
