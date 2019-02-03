@@ -21,8 +21,6 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.nio.file.DirectoryIteratorException;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -355,23 +353,11 @@ public final class IntegrationTestUtils {
         + htmlFile.toAbsolutePath().toString());
 
     // get the database
-    final Path dbroot = Paths.get("tomcat", "webapps", "fll-sw", "WEB-INF");
-    LOGGER.info("Copying database files from "
-        + dbroot.toAbsolutePath()
-        + " to "
-        + tempDir.toAbsolutePath());
-    try (final DirectoryStream<Path> stream = Files.newDirectoryStream(dbroot, "flldb*")) {
-      for (final Path entry : stream) {
-        if (Files.isRegularFile(entry)) {
-          Files.copy(entry, tempDir.resolve(dbroot.relativize(entry)));
-          LOGGER.info("Copied database file "
-              + entry.toString());
-        }
-      }
-    } catch (final DirectoryIteratorException ex) {
-      LOGGER.error("Unable to get database files", ex);
-    }
-    LOGGER.info("Finished copying database files");
+    final Path dbOutput = tempDir.resolve("database.flldb");
+    LOGGER.info("Downloading database to "
+        + dbOutput.toAbsolutePath());
+    downloadFile(new URL(TestUtils.URL_ROOT
+        + "admin/database.flldb"), null, dbOutput);
 
   }
 
@@ -739,8 +725,10 @@ public final class IntegrationTestUtils {
    * If the content type doesn't match an assertion violation will be thrown.
    * 
    * @param urlToLoad the page to load
-   * @param destination where to save the file, may be null to not save the file
-   *          and just check the content type. Any existing file will be
+   * @param the expected content type.
+   *          If the expected type is null, skip this check.
+   * @param destination where to save the file. If null don't save the file.
+   *          Any existing file will be
    *          overwritten.
    */
   public static void downloadFile(final URL urlToLoad,
@@ -764,12 +752,14 @@ public final class IntegrationTestUtils {
 
       try (CloseableHttpResponse response = client.execute(requestMethod, localContext)) {
 
-        final Header contentTypeHeader = response.getFirstHeader("Content-type");
-        Assert.assertNotNull("Null content type header: "
-            + urlToLoad.toString(), contentTypeHeader);
-        final String contentType = contentTypeHeader.getValue().split(";")[0].trim();
-        Assert.assertEquals("Unexpected content type from: "
-            + urlToLoad.toString(), expectedContentType, contentType);
+        if (null != expectedContentType) {
+          final Header contentTypeHeader = response.getFirstHeader("Content-type");
+          Assert.assertNotNull("Null content type header: "
+              + urlToLoad.toString(), contentTypeHeader);
+          final String contentType = contentTypeHeader.getValue().split(";")[0].trim();
+          Assert.assertEquals("Unexpected content type from: "
+              + urlToLoad.toString(), expectedContentType, contentType);
+        }
 
         if (null != destination) {
           try (final InputStream stream = response.getEntity().getContent()) {
