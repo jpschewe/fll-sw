@@ -794,22 +794,26 @@ public final class Queries {
 
     // Perform updates to the playoff data table if in playoff rounds.
     final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament.getTournamentID());
+    final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection,
+                                                                                tournament.getTournamentID());
     if (teamScore.getRunNumber() > numSeedingRounds) {
-      if (verified) {
-        if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("Updating playoff score from insert");
-        }
-        updatePlayoffScore(connection, verified, tournament.getTournamentID(), winnerCriteria, performanceElement,
-                           tiebreakerElement, teamScore.getTeamNumber(), teamScore.getRunNumber(), teamScore);
-      } else {
-        // send H2H update that this team's score is entered
-        final String bracketName = Playoff.getPlayoffDivision(connection, tournament.getTournamentID(),
-                                                              teamScore.getTeamNumber(), teamScore.getRunNumber());
-        final Team team = Team.getTeamFromDatabase(connection, teamScore.getTeamNumber());
+      if (runningHeadToHead) {
+        if (verified) {
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Updating playoff score from insert");
+          }
+          updatePlayoffScore(connection, verified, tournament.getTournamentID(), winnerCriteria, performanceElement,
+                             tiebreakerElement, teamScore.getTeamNumber(), teamScore.getRunNumber(), teamScore);
+        } else {
+          // send H2H update that this team's score is entered
+          final String bracketName = Playoff.getPlayoffDivision(connection, tournament.getTournamentID(),
+                                                                teamScore.getTeamNumber(), teamScore.getRunNumber());
+          final Team team = Team.getTeamFromDatabase(connection, teamScore.getTeamNumber());
 
-        H2HUpdateWebSocket.updateBracket(connection, performanceElement.getScoreType(), bracketName, team,
-                                         teamScore.getRunNumber());
-      }
+          H2HUpdateWebSocket.updateBracket(connection, performanceElement.getScoreType(), bracketName, team,
+                                           teamScore.getRunNumber());
+        }
+      } // running head to head
     } else {
       tournament.recordPerformanceSeedingModified(connection);
     }
@@ -952,13 +956,16 @@ public final class Queries {
       // Check if we need to update the PlayoffData table
       final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournament);
       if (runNumber > numSeedingRounds) {
-        if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("Updating playoff score from updatePerformanceScore");
-        }
+        final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection, currentTournament);
+        if (runningHeadToHead) {
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Updating playoff score from updatePerformanceScore");
+          }
 
-        final boolean verified = "1".equals(request.getParameter("Verified"));
-        updatePlayoffScore(connection, verified, currentTournament, winnerCriteria, performanceElement,
-                           tiebreakerElement, teamNumber, runNumber, teamScore);
+          final boolean verified = "1".equals(request.getParameter("Verified"));
+          updatePlayoffScore(connection, verified, currentTournament, winnerCriteria, performanceElement,
+                             tiebreakerElement, teamNumber, runNumber, teamScore);
+        }
       } else {
         tournament.recordPerformanceSeedingModified(connection);
       }
@@ -3010,23 +3017,44 @@ public final class Queries {
       throws SQLException {
     final int tournament = getCurrentTournament(connection);
 
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = connection.prepareStatement("SELECT MAX(RunNumber) FROM Performance"
-          + " WHERE TeamNumber = ? AND Tournament = ?");
+    try (PreparedStatement prep = connection.prepareStatement("SELECT MAX(RunNumber) FROM Performance"
+        + " WHERE TeamNumber = ? AND Tournament = ?")) {
       prep.setInt(1, teamNumber);
       prep.setInt(2, tournament);
-      rs = prep.executeQuery();
-      if (rs.next()) {
-        final int runNumber = rs.getInt(1);
-        return runNumber;
-      } else {
-        return 0;
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          final int runNumber = rs.getInt(1);
+          return runNumber;
+        } else {
+          return 0;
+        }
       }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
+    }
+
+  }
+
+  /**
+   * Get the max performance run number completed for all teams in the
+   * current tournament. This does not check the verified flag.
+   * 
+   * @param connection database connection
+   * @return the max run number or 0 if no performance runs have been completed
+   * @throws SQLException
+   */
+  public static int maxPerformanceRunNumberCompleted(final Connection connection) throws SQLException {
+    final int tournament = getCurrentTournament(connection);
+
+    try (PreparedStatement prep = connection.prepareStatement("SELECT MAX(RunNumber) FROM Performance"
+        + " WHERE Tournament = ?")) {
+      prep.setInt(1, tournament);
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          final int runNumber = rs.getInt(1);
+          return runNumber;
+        } else {
+          return 0;
+        }
+      }
     }
 
   }

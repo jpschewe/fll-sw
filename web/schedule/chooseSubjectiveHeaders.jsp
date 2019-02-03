@@ -10,8 +10,10 @@
 <link rel="stylesheet" type="text/css"
 	href="<c:url value='/style/fll-sw.css'/>" />
 
-<script type="text/javascript" src="../extlib/jquery-1.11.1.min.js"></script>
-<script type="text/javascript" src="../extlib/jquery.validate.min.js"></script>
+<script type="text/javascript"
+	src="<c:url value='/extlib/jquery-1.11.1.min.js'/>"></script>
+<script type="text/javascript"
+	src="<c:url value='/extlib/jquery.validate.min.js'/>"></script>
 
 <script type="text/javascript">
   $(document).ready(function() {
@@ -61,7 +63,7 @@
 
 					<td><input type="text" name="${subcat.name}:duration"
 						id="${subcat.name}:duration" value="${default_duration}"
-						class="required digist" /></td>
+						class="required digits" /></td>
 
 				</tr>
 				<!-- row for category -->

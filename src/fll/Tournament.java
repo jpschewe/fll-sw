@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.GenerateDB;
+import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.admin.StoreTournamentData;
 import fll.xml.ChallengeDescription;
@@ -138,6 +139,17 @@ public final class Tournament implements Serializable {
       }
     }
     return retval;
+  }
+
+  /**
+   * @param connection the database connection
+   * @return the current tournament
+   * @throws SQLException on a database error
+   */
+  public static Tournament getCurrentTournament(final Connection connection) throws SQLException {
+    final int currentTournamentID = Queries.getCurrentTournament(connection);
+    final Tournament currentTournament = Tournament.findTournamentByID(connection, currentTournamentID);
+    return currentTournament;
   }
 
   /**

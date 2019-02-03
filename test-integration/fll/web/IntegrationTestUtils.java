@@ -611,10 +611,10 @@ public final class IntegrationTestUtils {
     // final WebDriver selenium = new FirefoxDriver(capabilities);
 
     FirefoxOptions options = new FirefoxOptions();
-    //options.setLogLevel(org.openqa.selenium.firefox.FirefoxDriverLogLevel.TRACE);
+    // options.setLogLevel(org.openqa.selenium.firefox.FirefoxDriverLogLevel.TRACE);
     final WebDriver selenium = new FirefoxDriver(options);
 
-//    final WebDriver selenium = new FirefoxDriver();
+    // final WebDriver selenium = new FirefoxDriver();
     return selenium;
   }
 
@@ -691,23 +691,22 @@ public final class IntegrationTestUtils {
   }
 
   /**
-   * Change the number of seeding rounds for the specified tournament.
+   * Change the number of seeding rounds for the current tournament.
    * 
-   * @param selenium
-   * @param newValue
+   * @param selenium the driver
+   * @param newValue the new value
    * @throws NoSuchElementException if there was a problem changing the value
    * @throws IOException if there is an error talking to selenium
    * @throws InterruptedException
    */
   public static void changeNumSeedingRounds(final WebDriver selenium,
-                                            final int tournamentId,
                                             final int newValue)
       throws NoSuchElementException, IOException, InterruptedException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-        + "admin/edit_all_parameters.jsp");
-    final Select seedingRoundsSelection = new Select(selenium.findElement(By.name("seeding_rounds_"
-        + tournamentId)));
-    seedingRoundsSelection.selectByValue(Integer.toString(newValue));
+        + "admin/edit_tournament_parameters.jsp");
+
+    selenium.findElement(By.name("seeding_rounds")).sendKeys(String.valueOf(newValue));
+
     selenium.findElement(By.id("submit")).click();
 
     selenium.findElement(By.id("success"));

@@ -64,15 +64,17 @@ public class AllTeams {
             + " WHERE verified_performance.Tournament = ?" //
             + "   AND verified_performance.TeamNumber = ?" //
             + "   AND verified_performance.Bye = False" //
-            + "   AND verified_performance.RunNumber <= ?" //
+            + "   AND (? OR verified_performance.RunNumber <= ?)" //
             + " ORDER BY verified_performance.RunNumber")) {
 
       final int tournamentId = Queries.getCurrentTournament(connection);
-      final int maxScoreboardRound = TournamentParameters.getMaxScoreboardPerformanceRound(connection, tournamentId);
+      final int numSeedingRuns = TournamentParameters.getNumSeedingRounds(connection, tournamentId);
+      final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection, tournamentId);
       final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection, tournamentId);
 
       prep.setInt(1, tournamentId);
-      prep.setInt(3, maxScoreboardRound);
+      prep.setBoolean(3, !runningHeadToHead);
+      prep.setInt(4, numSeedingRuns);
 
       final List<String> awardGroups = Queries.getAwardGroups(connection, tournamentId);
       final List<TournamentTeam> teamsWithScores = new LinkedList<>();

@@ -69,8 +69,7 @@ public class TestPlayoffs {
       }
 
       // set seeding rounds to 1
-      final int tournamentId = IntegrationTestUtils.getCurrentTournamentId(selenium);
-      IntegrationTestUtils.changeNumSeedingRounds(selenium, tournamentId, 1);
+      IntegrationTestUtils.changeNumSeedingRounds(selenium, 1);
 
       // enter 1 score for all teams equal to their team number
       for (int teamNumber = 0; teamNumber < 4; ++teamNumber) {

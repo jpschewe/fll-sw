@@ -11,12 +11,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.log4j.Logger;
 
 import fll.util.FLLInternalException;
 import fll.util.LogUtils;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Constants for the tournament parameters in the database.
@@ -30,13 +29,13 @@ public final class TournamentParameters {
 
   public static final int SEEDING_ROUNDS_DEFAULT = 3;
 
-  public static final String MAX_SCOREBOARD_ROUND = "MaxScoreboardRound";
-
-  public static final int MAX_SCOREBOARD_ROUND_DEFAULT = SEEDING_ROUNDS_DEFAULT;
-
   public static final String PERFORMANCE_ADVANCEMENT_PERCENTAGE = "PerformanceAdvancementPercentage";
 
   public static final int PERFORMANCE_ADVANCEMENT_PERCENTAGE_DEFAULT = 0;
+
+  public static final String RUNNING_HEAD_2_HEAD = "RunningHeadToHead";
+
+  public static final boolean RUNNING_HEAD_2_HEAD_DEFAULT = true;
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -60,7 +59,48 @@ public final class TournamentParameters {
         final int value = rs.getInt(1);
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("getIntTournamentParameter tournament: "
-              + tournament + " param: " + paramName + " value: " + value);
+              + tournament
+              + " param: "
+              + paramName
+              + " value: "
+              + value);
+        }
+        return value;
+      } else {
+        throw new FLLInternalException("There is no default value for tournament parameter: "
+            + paramName);
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+  }
+
+  /**
+   * Get the value of a tournament parameter
+   * 
+   * @param connection
+   * @param paramName
+   * @throws SQLException
+   */
+  private static boolean getBooleanTournamentParameter(final Connection connection,
+                                                       final int tournament,
+                                                       final String paramName)
+      throws SQLException {
+    ResultSet rs = null;
+    PreparedStatement prep = null;
+    try {
+      prep = TournamentParameters.getTournamentParameterStmt(connection, tournament, paramName);
+      rs = prep.executeQuery();
+      if (rs.next()) {
+        final boolean value = rs.getBoolean(1);
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("getBooleanTournamentParameter tournament: "
+              + tournament
+              + " param: "
+              + paramName
+              + " value: "
+              + value);
         }
         return value;
       } else {
@@ -92,7 +132,45 @@ public final class TournamentParameters {
         final int value = rs.getInt(1);
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("getIntTournamentParameterDefault"
-              + " param: " + paramName + " value: " + value);
+              + " param: "
+              + paramName
+              + " value: "
+              + value);
+        }
+        return value;
+      } else {
+        throw new FLLInternalException("There is no default value for tournament parameter: "
+            + paramName);
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+  }
+
+  /**
+   * Get the default value of a tournament parameter
+   * 
+   * @param connection
+   * @param paramName
+   * @throws SQLException
+   */
+  private static boolean getBooleanTournamentParameterDefault(final Connection connection,
+                                                              final String paramName)
+      throws SQLException {
+    ResultSet rs = null;
+    PreparedStatement prep = null;
+    try {
+      prep = TournamentParameters.getTournamentParameterStmt(connection, GenerateDB.INTERNAL_TOURNAMENT_ID, paramName);
+      rs = prep.executeQuery();
+      if (rs.next()) {
+        final boolean value = rs.getBoolean(1);
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("getBooleanTournamentParameterDefault"
+              + " param: "
+              + paramName
+              + " value: "
+              + value);
         }
         return value;
       } else {
@@ -168,6 +246,13 @@ public final class TournamentParameters {
     setIntParameter(connection, GenerateDB.INTERNAL_TOURNAMENT_ID, paramName, paramValue);
   }
 
+  private static void setBooleanParameterDefault(final Connection connection,
+                                                 final String paramName,
+                                                 final boolean paramValue)
+      throws SQLException {
+    setBooleanParameter(connection, GenerateDB.INTERNAL_TOURNAMENT_ID, paramName, paramValue);
+  }
+
   private static void setIntParameter(final Connection connection,
                                       final int tournament,
                                       final String paramName,
@@ -182,6 +267,29 @@ public final class TournamentParameters {
         prep = connection.prepareStatement("UPDATE tournament_parameters SET param_value = ? WHERE param = ? AND tournament = ?");
       }
       prep.setInt(1, paramValue);
+      prep.setString(2, paramName);
+      prep.setInt(3, tournament);
+
+      prep.executeUpdate();
+    } finally {
+      SQLFunctions.close(prep);
+    }
+  }
+
+  private static void setBooleanParameter(final Connection connection,
+                                          final int tournament,
+                                          final String paramName,
+                                          final boolean paramValue)
+      throws SQLException {
+    final boolean paramExists = tournamentParameterValueExists(connection, tournament, paramName);
+    PreparedStatement prep = null;
+    try {
+      if (!paramExists) {
+        prep = connection.prepareStatement("INSERT INTO tournament_parameters (param_value, param, tournament) VALUES (?, ?, ?)");
+      } else {
+        prep = connection.prepareStatement("UPDATE tournament_parameters SET param_value = ? WHERE param = ? AND tournament = ?");
+      }
+      prep.setBoolean(1, paramValue);
       prep.setString(2, paramName);
       prep.setInt(3, tournament);
 
@@ -269,42 +377,6 @@ public final class TournamentParameters {
   }
 
   /**
-   * Get the maximum performance round number to display on the scoreboard
-   * pages.
-   */
-  public static int getMaxScoreboardPerformanceRound(final Connection connection,
-                                                     final int tournament)
-      throws SQLException {
-    return getIntTournamentParameter(connection, tournament, MAX_SCOREBOARD_ROUND);
-  }
-
-  /**
-   * @see #getMaxScoreboardPerformanceRound(Connection, int)
-   */
-  public static void setMaxScoreboardPerformanceRound(final Connection connection,
-                                                      final int tournament,
-                                                      final int value)
-      throws SQLException {
-    setIntParameter(connection, tournament, MAX_SCOREBOARD_ROUND, value);
-  }
-
-  public static void unsetMaxScoreboardPerformanceRound(final Connection connection,
-                                                        final int tournament)
-      throws SQLException {
-    unsetParameter(connection, tournament, MAX_SCOREBOARD_ROUND);
-  }
-
-  public static int getDefaultMaxScoreboardPerformanceRound(final Connection connection) throws SQLException {
-    return getIntTournamentParameterDefault(connection, MAX_SCOREBOARD_ROUND);
-  }
-
-  public static void setDefaultMaxScoreboardPerformanceRound(final Connection connection,
-                                                             final int value)
-      throws SQLException {
-    setIntParameterDefault(connection, MAX_SCOREBOARD_ROUND, value);
-  }
-
-  /**
    * Check if a default value for the specified parameter exists.
    * This is to be used when upgrading databases.
    */
@@ -372,6 +444,41 @@ public final class TournamentParameters {
                                                                 final int newValue)
       throws SQLException {
     setIntParameterDefault(connection, PERFORMANCE_ADVANCEMENT_PERCENTAGE, newValue);
+  }
+
+  /**
+   * @param connection the database connection
+   * @param tournament the tournament
+   * @return if head to head is being used
+   * @throws SQLException on a database error
+   */
+  public static boolean getRunningHeadToHead(final Connection connection,
+                                             final int tournament)
+      throws SQLException {
+    return getBooleanTournamentParameter(connection, tournament, RUNNING_HEAD_2_HEAD);
+  }
+
+  public static void setRunningHeadToHead(final Connection connection,
+                                          final int tournament,
+                                          final boolean value)
+      throws SQLException {
+    setBooleanParameter(connection, tournament, RUNNING_HEAD_2_HEAD, value);
+  }
+
+  public static void unsetRunningHeadToHead(final Connection connection,
+                                            final int tournament)
+      throws SQLException {
+    unsetParameter(connection, tournament, RUNNING_HEAD_2_HEAD);
+  }
+
+  public static boolean getDefaultRuningHeadToHead(final Connection connection) throws SQLException {
+    return getBooleanTournamentParameterDefault(connection, RUNNING_HEAD_2_HEAD);
+  }
+
+  public static void setDefaultRunningHeadToHead(final Connection connection,
+                                                 final boolean value)
+      throws SQLException {
+    setBooleanParameterDefault(connection, RUNNING_HEAD_2_HEAD, value);
   }
 
 }
