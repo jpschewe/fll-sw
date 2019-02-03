@@ -1,3 +1,6 @@
+* #701 - add parameter to enable/disable head to head. This makes it much easier to run a tournament with extra rounds instead of head to head. 
+* #702 - allow easy editing of parameters for the current tournament
+
 Release 13.4.0
 ==============
 

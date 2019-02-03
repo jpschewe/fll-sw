@@ -18,6 +18,7 @@ import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 import org.xml.sax.SAXException;
 
@@ -82,8 +83,7 @@ public class TestAJAXBrackets {
       selenium.findElement(By.name("SideB0")).sendKeys("Table 2");
       selenium.findElement(By.id("finished")).click();
 
-      final int tournamentId = IntegrationTestUtils.getCurrentTournamentId(selenium);
-      IntegrationTestUtils.changeNumSeedingRounds(selenium, tournamentId, 0);
+      IntegrationTestUtils.changeNumSeedingRounds(selenium, 0);
 
       // init brackets
       IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
@@ -94,7 +94,8 @@ public class TestAJAXBrackets {
       IntegrationTestUtils.initializePlayoffsForAwardGroup(selenium, division, BracketSortType.ALPHA_TEAM);
 
       // set display to show the head to head brackets
-      IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT + "admin/remoteControl.jsp");
+      IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+          + "admin/remoteControl.jsp");
       selenium.findElement(By.cssSelector("[type='radio'][name='remotePage'][value='playoffs']")).click();
       selenium.findElement(By.name("submit")).click();
       Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
@@ -114,7 +115,9 @@ public class TestAJAXBrackets {
 
       // assign tables for the scoresheets
       IntegrationTestUtils.loadPage(scoresheetWindow, TestUtils.URL_ROOT
-          + "playoff/scoregenbrackets.jsp?division=" + division + "&firstRound=1&lastRound=7");
+          + "playoff/scoregenbrackets.jsp?division="
+          + division
+          + "&firstRound=1&lastRound=7");
 
       scoresheetWindow.findElement(By.name("print1")).click();
       scoresheetWindow.findElement(By.name("tableA1")).sendKeys("Blue 1");
@@ -148,11 +151,23 @@ public class TestAJAXBrackets {
             + scoreTextBefore);
       }
       Assert.assertFalse("Should not find score yet '"
-          + scoreTextBefore + "'", scoreTextBefore.contains("Score:"));
+          + scoreTextBefore
+          + "'", scoreTextBefore.contains("Score:"));
 
       // verify
       final Select verifySelect = new Select(scoreEntryWindow.findElement(By.id("select-verify-teamnumber")));
-      verifySelect.selectByValue("4-1");
+      boolean found = false;
+      for (final WebElement option : verifySelect.getOptions()) {
+        final String value = option.getAttribute("value");
+        if (value.startsWith("4-")) {
+          verifySelect.selectByValue(value);
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        Assert.fail("Unable to find verification for team 4");
+      }
       scoreEntryWindow.findElement(By.id("verify_submit")).click();
 
       scoreEntryWindow.findElement(By.id("Verified_yes")).click();
@@ -174,14 +189,15 @@ public class TestAJAXBrackets {
             + scoreTextAfter);
       }
       Assert.assertTrue("Should find score in '"
-          + scoreTextAfter + "'", scoreTextAfter.contains("Score:"));
+          + scoreTextAfter
+          + "'", scoreTextAfter.contains("Score:"));
 
     } catch (final IOException | RuntimeException | AssertionError e) {
       LOGGER.fatal(e, e);
       IntegrationTestUtils.storeScreenshot("main", selenium);
-      IntegrationTestUtils.storeScreenshot("brackets", selenium);
-      IntegrationTestUtils.storeScreenshot("scoreEntry", selenium);
-      IntegrationTestUtils.storeScreenshot("scoreSheet", selenium);
+      IntegrationTestUtils.storeScreenshot("brackets", bracketsWindow);
+      IntegrationTestUtils.storeScreenshot("scoreEntry", scoreEntryWindow);
+      IntegrationTestUtils.storeScreenshot("scoreSheet", scoresheetWindow);
       throw e;
     }
   }

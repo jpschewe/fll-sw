@@ -72,6 +72,11 @@
 			</ul>
 		</li>
 
+		<li><a target="_edit_parameters"
+			href="<c:url value='/admin/edit_tournament_parameters.jsp'/>">Edit
+				tournament parameters</a> - should not be needed for most tournaments.</li>
+
+
 		<li>Enter subjective scores. This can be done through the web
 			application for judges using electronic devices. For those not using
 			electronic devices the scores will be entered through the Subjective

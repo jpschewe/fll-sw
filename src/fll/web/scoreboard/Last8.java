@@ -180,8 +180,8 @@ public class Last8 extends BaseFLLServlet {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
       final int currentTournament = Queries.getCurrentTournament(connection);
-      final int maxScoreboardRound = TournamentParameters.getMaxScoreboardPerformanceRound(connection,
-                                                                                           currentTournament);
+      final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournament);
+      final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection, currentTournament);
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
       final ScoreType performanceScoreType = challengeDescription.getPerformance().getScoreType();
 
@@ -197,10 +197,11 @@ public class Last8 extends BaseFLLServlet {
           + "  AND Teams.TeamNumber = verified_performance.TeamNumber" //
           + "  AND Teams.TeamNumber = current_tournament_teams.TeamNumber" //
           + "  AND verified_performance.Bye = False" //
-          + "  AND verified_performance.RunNumber <= ?"
+          + "  AND (? OR verified_performance.RunNumber <= ?)"
           + " ORDER BY verified_performance.TimeStamp DESC, Teams.TeamNumber ASC LIMIT 20")) {
         prep.setInt(1, currentTournament);
-        prep.setInt(2, maxScoreboardRound);
+        prep.setBoolean(2, !runningHeadToHead);
+        prep.setInt(3, numSeedingRounds);
         try (ResultSet rs = prep.executeQuery()) {
           while (rs.next()) {
             final int teamNumber = rs.getInt("TeamNumber");
