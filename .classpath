@@ -7,15 +7,8 @@
 	<classpathentry kind="src" path="src/test/java"/>
 	<classpathentry kind="src" path="src/main/resources"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="tools/tomcat/lib/jsp-api.jar"/>
-	<classpathentry kind="lib" path="tools/tomcat/lib/servlet-api.jar"/>
 	<classpathentry kind="lib" path="lib/jlfgr-1_0.jar"/>
 	<classpathentry kind="lib" path="lib/xmlbeans-2.3.0.jar"/>
-	<classpathentry kind="lib" path="lib/test/fest/fest-assert-1.2.jar" sourcepath="lib/test/fest/fest-assert-1.2-sources.jar"/>
-	<classpathentry kind="lib" path="lib/test/fest/fest-reflect-1.2.jar" sourcepath="lib/test/fest/fest-reflect-1.2-sources.jar"/>
-	<classpathentry kind="lib" path="lib/test/fest/fest-swing-1.2.jar" sourcepath="lib/test/fest/fest-swing-1.2-sources.jar"/>
-	<classpathentry kind="lib" path="lib/test/fest/fest-util-1.1.2.jar" sourcepath="lib/test/fest/fest-util-1.1.2-sources.jar"/>
-	<classpathentry kind="lib" path="lib/test/fest/jcip-annotations-1.0.jar" sourcepath="lib/test/fest/jcip-annotations-1.0-sources.jar"/>
 	<classpathentry kind="lib" path="lib/commons-cli-1.2.jar" sourcepath="lib/source/commons-cli-1.2-sources.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:platform:/resource/fll-sw/lib/source/commons-cli-1.2-javadoc.jar!/"/>
@@ -25,7 +18,6 @@
 	<classpathentry kind="lib" path="lib/jstl-1.2.jar"/>
 	<classpathentry kind="lib" path="lib/opencsv-jps-2.4.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-2.5.jar"/>
-	<classpathentry kind="lib" path="lib/cobertura/lib/oro-2.0.8.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.17.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-api-1.7.5.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-log4j12-1.7.5.jar"/>
@@ -54,33 +46,8 @@
 	<classpathentry kind="lib" path="lib/commons-logging-1.2.jar"/>
 	<classpathentry kind="lib" path="lib/schemaSpy_5.0.0.jar" sourcepath="lib/schemaSpy_5.0.0.source.jar"/>
 	<classpathentry kind="lib" path="lib/cobertura/lib/asm-5.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/cobertura/lib/asm-analysis-5.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/cobertura/lib/asm-commons-5.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/cobertura/lib/asm-tree-5.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/cobertura/lib/asm-util-5.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/cobertura/lib/hamcrest-core-1.3.jar"/>
-	<classpathentry kind="lib" path="lib/cobertura/lib/jaxen-1.1.4.jar"/>
-	<classpathentry kind="lib" path="lib/cobertura/lib/jetty-6.1.14.jar"/>
-	<classpathentry kind="lib" path="lib/cobertura/lib/jetty-util-6.1.14.jar"/>
-	<classpathentry kind="lib" path="lib/cobertura/lib/logback-core-1.0.13.jar"/>
-	<classpathentry kind="lib" path="lib/cobertura/cobertura-2.1.1.jar"/>
-	<classpathentry kind="lib" path="lib/test/htmlunit/htmlunit-2.22.jar"/>
 	<classpathentry kind="lib" path="lib/commons-lang3-3.4.jar"/>
 	<classpathentry kind="lib" path="lib/test/junit-4.12.jar"/>
-	<classpathentry kind="lib" path="lib/test/htmlunit/cssparser-0.9.19.jar"/>
-	<classpathentry kind="lib" path="lib/test/htmlunit/htmlunit-core-js-2.22.jar"/>
-	<classpathentry kind="lib" path="lib/test/htmlunit/jetty-io-9.2.17.v20160517.jar"/>
-	<classpathentry kind="lib" path="lib/test/htmlunit/jetty-util-9.2.17.v20160517.jar"/>
-	<classpathentry kind="lib" path="lib/test/htmlunit/neko-htmlunit-2.21.jar"/>
-	<classpathentry kind="lib" path="lib/test/htmlunit/sac-1.3.jar"/>
-	<classpathentry kind="lib" path="lib/test/htmlunit/serializer-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib/test/htmlunit/xalan-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib/test/htmlunit/xercesImpl-2.11.0.jar"/>
-	<classpathentry kind="lib" path="lib/test/htmlunit/xml-apis-1.4.01.jar"/>
-	<classpathentry kind="lib" path="lib/test/webdrivermanager/commons-compress-1.12.jar"/>
-	<classpathentry kind="lib" path="lib/test/webdrivermanager/config-1.3.0.jar"/>
-	<classpathentry kind="lib" path="lib/test/webdrivermanager/jarchivelib-0.7.0.jar"/>
-	<classpathentry kind="lib" path="lib/test/webdrivermanager/xz-1.5.jar"/>
 	<classpathentry kind="lib" path="lib/itextpdf-5.5.9.jar" sourcepath="lib/source/itextpdf-5.5.9-sources.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:platform:/resource/fll-sw/lib/source/itextpdf-5.5.9-javadoc.jar!/"/>
@@ -96,12 +63,6 @@
 	<classpathentry kind="lib" path="lib/durian-core-1.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/junique-1.0.4.jar"/>
 	<classpathentry kind="lib" path="lib/apache-log4j-extras-1.2.17.jar"/>
-	<classpathentry kind="lib" path="lib/test/selenium/selenium-server-standalone-3.141.59.jar"/>
-	<classpathentry kind="lib" path="lib/test/selenium/client-combined-3.141.59.jar"/>
-	<classpathentry kind="lib" path="lib/test/httpclient-4.5.2.jar"/>
-	<classpathentry kind="lib" path="lib/test/httpcore-4.4.4.jar"/>
-	<classpathentry kind="lib" path="lib/test/selenium/hamcrest-core-1.3.jar"/>
-	<classpathentry kind="lib" path="lib/test/selenium/hamcrest-library-1.3.jar"/>
 	<classpathentry kind="lib" path="lib/annotations.jar"/>
 	<classpathentry kind="lib" path="lib/ecj-3.15.0.jar"/>
 	<classpathentry kind="lib" path="lib/jsr305.jar"/>
@@ -119,5 +80,42 @@
 	<classpathentry kind="lib" path="lib/tomcat-servlet-api-9.0.14.jar"/>
 	<classpathentry kind="lib" path="lib/tomcat-util-9.0.14.jar"/>
 	<classpathentry kind="lib" path="lib/tomcat-util-scan-9.0.14.jar"/>
+	<classpathentry kind="lib" path="lib/test/fest/fest-assert-1.2.jar" sourcepath="lib/test/fest/fest-assert-1.2-sources.jar"/>
+	<classpathentry kind="lib" path="lib/test/fest/fest-reflect-1.2.jar" sourcepath="lib/test/fest/fest-reflect-1.2-sources.jar"/>
+	<classpathentry kind="lib" path="lib/test/fest/fest-swing-1.2.jar" sourcepath="lib/test/fest/fest-swing-1.2-sources.jar"/>
+	<classpathentry kind="lib" path="lib/test/fest/fest-util-1.1.2.jar" sourcepath="lib/test/fest/fest-util-1.1.2-sources.jar"/>
+	<classpathentry kind="lib" path="lib/test/fest/jcip-annotations-1.0.jar" sourcepath="lib/test/fest/jcip-annotations-1.0-sources.jar"/>
+	<classpathentry kind="lib" path="lib/cobertura/lib/oro-2.0.8.jar"/>
+	<classpathentry kind="lib" path="lib/cobertura/lib/asm-analysis-5.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/cobertura/lib/asm-commons-5.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/cobertura/lib/asm-tree-5.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/cobertura/lib/asm-util-5.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/cobertura/lib/hamcrest-core-1.3.jar"/>
+	<classpathentry kind="lib" path="lib/cobertura/lib/jaxen-1.1.4.jar"/>
+	<classpathentry kind="lib" path="lib/cobertura/lib/jetty-6.1.14.jar"/>
+	<classpathentry kind="lib" path="lib/cobertura/lib/jetty-util-6.1.14.jar"/>
+	<classpathentry kind="lib" path="lib/cobertura/lib/logback-core-1.0.13.jar"/>
+	<classpathentry kind="lib" path="lib/cobertura/cobertura-2.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/test/htmlunit/htmlunit-2.22.jar"/>
+	<classpathentry kind="lib" path="lib/test/htmlunit/cssparser-0.9.19.jar"/>
+	<classpathentry kind="lib" path="lib/test/htmlunit/htmlunit-core-js-2.22.jar"/>
+	<classpathentry kind="lib" path="lib/test/htmlunit/jetty-io-9.2.17.v20160517.jar"/>
+	<classpathentry kind="lib" path="lib/test/htmlunit/jetty-util-9.2.17.v20160517.jar"/>
+	<classpathentry kind="lib" path="lib/test/htmlunit/neko-htmlunit-2.21.jar"/>
+	<classpathentry kind="lib" path="lib/test/htmlunit/sac-1.3.jar"/>
+	<classpathentry kind="lib" path="lib/test/htmlunit/serializer-2.7.2.jar"/>
+	<classpathentry kind="lib" path="lib/test/htmlunit/xalan-2.7.2.jar"/>
+	<classpathentry kind="lib" path="lib/test/htmlunit/xercesImpl-2.11.0.jar"/>
+	<classpathentry kind="lib" path="lib/test/htmlunit/xml-apis-1.4.01.jar"/>
+	<classpathentry kind="lib" path="lib/test/webdrivermanager/commons-compress-1.12.jar"/>
+	<classpathentry kind="lib" path="lib/test/webdrivermanager/config-1.3.0.jar"/>
+	<classpathentry kind="lib" path="lib/test/webdrivermanager/jarchivelib-0.7.0.jar"/>
+	<classpathentry kind="lib" path="lib/test/webdrivermanager/xz-1.5.jar"/>
+	<classpathentry kind="lib" path="lib/test/selenium/client-combined-3.141.59.jar"/>
+	<classpathentry kind="lib" path="lib/test/selenium/selenium-server-standalone-3.141.59.jar"/>
+	<classpathentry kind="lib" path="lib/test/httpclient-4.5.2.jar"/>
+	<classpathentry kind="lib" path="lib/test/httpcore-4.4.4.jar"/>
+	<classpathentry kind="lib" path="lib/test/selenium/hamcrest-core-1.3.jar"/>
+	<classpathentry kind="lib" path="lib/test/selenium/hamcrest-library-1.3.jar"/>
 	<classpathentry kind="output" path="bin/"/>
 </classpath>

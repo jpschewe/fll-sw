@@ -13,10 +13,13 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.RuleChain;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.TestUtils;
 import fll.db.GenerateDB;
 import fll.util.LogUtils;
@@ -32,6 +35,13 @@ public class SlideshowTest {
   private static final Logger LOGGER = LogUtils.getLogger();
 
   private WebDriver selenium;
+
+  /**
+   * Requirements for running tests.
+   */
+  @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by the JUnit framework")
+  @Rule
+  public RuleChain chain = RuleChain.outerRule(new IntegrationTestUtils.TomcatRequired());
 
   @Before
   public void setUp() throws Exception {
@@ -51,7 +61,7 @@ public class SlideshowTest {
    * Test setting slideshow interval and make sure it doesn't error.
    * 
    * @throws IOException
-   * @throws InterruptedException 
+   * @throws InterruptedException
    */
   @Test
   public void testSlideshowInterval() throws IOException, InterruptedException {
@@ -66,12 +76,14 @@ public class SlideshowTest {
       IntegrationTestUtils.addTeam(selenium, 1, "team", "org", "1", GenerateDB.DUMMY_TOURNAMENT_NAME);
 
       IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-                                   + "/admin/");
+          + "/admin/");
 
       selenium.findElement(By.id("remote-control")).click();
       Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
 
-      selenium.findElement(By.xpath("//input[@name='remotePage' and @value='" + DisplayInfo.SLIDESHOW_REMOTE_PAGE + "']")).click();
+      selenium.findElement(By.xpath("//input[@name='remotePage' and @value='"
+          + DisplayInfo.SLIDESHOW_REMOTE_PAGE
+          + "']")).click();
       selenium.findElement(By.name("slideInterval")).sendKeys("5");
       selenium.findElement(By.name("submit")).click();
       Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);

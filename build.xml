@@ -273,10 +273,6 @@
 
 	<!-- ==================== Setup/Prepare/Clean ==================== -->
 	<target name="init" depends="git.revision">
-		<tstamp>
-			<format property="TODAY" pattern="yyyy-MM-dd_HH:mm:ss" />
-		</tstamp>
-
 		<tstamp />
 
 		<uptodate property="jsp.notRequired" targetfile="${dir.src.jsp}/.timestamp">
@@ -744,7 +740,6 @@
 				</fileset>
 				<filterset>
 					<filter token="APP-VERSION" value="${app.version.long}" />
-					<filter token="TODAY" value="${TODAY}" />
 				</filterset>
 			</copy>
 			<copy todir="@{webdir}/WEB-INF/classes" overwrite="true">
@@ -753,7 +748,6 @@
 				</fileset>
 				<filterset>
 					<filter token="APP-VERSION" value="${app.version.long}" />
-					<filter token="TODAY" value="${TODAY}" />
 				</filterset>
 			</copy>
 
@@ -771,7 +765,7 @@
 	</macrodef>
 
 
-	<target name="copy.web.files" depends="init,tomcat.expand" description="prepare the web directory">
+	<target name="copy.web.files" depends="init" description="prepare the web directory">
 		<copy-web-files webdir="${dir.web}" />
 	</target>
 
@@ -825,6 +819,7 @@
 
 			<junit fork="yes" haltonfailure="false" dir="@{working-dir}" failureproperty="test.failed">
 				<sysproperty key="net.sourceforge.cobertura.datafile" value="${dir.coverage}/cobertura.ser" />
+				<sysproperty key="inside.test" value="true" />
 
 				<classpath>
 					<path refid="coverage.test.classpath" />
@@ -844,7 +839,6 @@
 
 	<!-- one shot tests -->
 	<target name="test.single" depends="compile,compile.test.all,coverage.instr" description="Run a single unit test specified by junit.test.class property.">
-		<antcall target="tomcat.start" />
 		<delete-database />
 
 		<mkdir dir="${dir.build}/screenshots" />
@@ -857,8 +851,6 @@
 			<formatter type="plain" usefile="false" />
 			<test name="${junit.test.class}" if="junit.test.class" todir="${dir.build}/test-results" />
 		</junit>
-
-		<antcall target="tomcat.stop" />
 	</target>
 
 	<!-- unit tests -->
@@ -868,18 +860,7 @@
 
 	<!-- integration tests -->
 	<target name="test.integration" depends="compile,compile.test.integration,coverage.instr" description="Run the integration tests">
-
-		<!-- setup cobertura flush application -->
-		<copy file="${dir.lib}/cobertura/coberturaFlush.war" todir="${dir.tomcat}/webapps" />
-
-		<antcall target="tomcat.start" />
-
 		<run-tests working-dir="${dir.build}" dir.src="${dir.test.integration.src}" />
-
-		<!-- force cobertura information to be written -->
-		<get src="http://localhost:9080/coberturaFlush/flushCobertura" dest="${dir.build}" />
-
-		<antcall target="tomcat.stop" />
 	</target>
 
 	<target name="sloccount" description="Run sloccount on the code">

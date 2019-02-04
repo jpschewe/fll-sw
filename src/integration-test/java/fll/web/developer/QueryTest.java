@@ -11,10 +11,13 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.RuleChain;
 import org.openqa.selenium.WebDriver;
 import org.xml.sax.SAXException;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.TestUtils;
 import fll.util.LogUtils;
 import fll.web.IntegrationTestUtils;
@@ -28,6 +31,13 @@ public class QueryTest {
   private static final Logger LOGGER = LogUtils.getLogger();
 
   private WebDriver selenium;
+
+  /**
+   * Requirements for running tests.
+   */
+  @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by the JUnit framework")
+  @Rule
+  public RuleChain chain = RuleChain.outerRule(new IntegrationTestUtils.TomcatRequired());
 
   @Before
   public void setUp() {

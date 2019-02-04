@@ -8,6 +8,7 @@ package fll;
 
 import java.io.File;
 
+import org.apache.catalina.LifecycleException;
 import org.apache.catalina.WebResourceRoot;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.startup.Tomcat;
@@ -19,32 +20,52 @@ import org.apache.catalina.webresources.StandardRoot;
  */
 public class TomcatLauncher {
 
-  public static void main(final String[] args) throws Exception {
+  private final Tomcat tomcat;
 
+  /**
+   * Create Tomcat launcher.
+   */
+  public TomcatLauncher() {
     final String webappDirLocation = "tomcat/webapps/fll-sw/";
-    final Tomcat tomcat = new Tomcat();
+
+    tomcat = new Tomcat();
 
     tomcat.setPort(Launcher.WEB_PORT);
     tomcat.getConnector(); // trigger the creation of the default connector
 
+    // TODO: call tomcat.setBasedir() to specify the temporary directory to use
+
     final StandardContext ctx = (StandardContext) tomcat.addWebapp("/fll-sw",
                                                                    new File(webappDirLocation).getAbsolutePath());
-    System.out.println("configuring app with basedir: "
-        + new File("./"
-            + webappDirLocation).getAbsolutePath());
 
-    // Declare an alternative location for your "WEB-INF/classes" dir
-    // Servlet 3.0 annotation will work
-    // TODO: probably don't need this since we have them all internally
-    final File additionWebInfClasses = new File("tomcat/webapps/fll-sw/WEB-INF/classes");
     final WebResourceRoot resources = new StandardRoot(ctx);
-    resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/classes", additionWebInfClasses.getAbsolutePath(),
-                                                 "/"));
+    if (Boolean.getBoolean("inside.test")) {
+      // when running inside testing we want to use the instrumented files
+
+      final File additionWebInfClasses = new File("tomcat/webapps/TEST-fll-sw/WEB-INF/classes");
+      resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/classes",
+                                                   additionWebInfClasses.getAbsolutePath(), "/"));
+    }
     ctx.setResources(resources);
 
-    tomcat.addWebapp("/", new File("tomcat/webapps/ROOT").getAbsolutePath());
+    // tomcat.addWebapp("/", new File("tomcat/webapps/ROOT").getAbsolutePath());
+  }
 
+  /**
+   * Start the server.
+   * 
+   * @throws LifecycleException if an error occurs
+   */
+  public void start() throws LifecycleException {
     tomcat.start();
-    tomcat.getServer().await();
+  }
+
+  /**
+   * Stop the server.
+   * 
+   * @throws LifecycleException if an error occurs
+   */
+  public void stop() throws LifecycleException {
+    tomcat.stop();
   }
 }
