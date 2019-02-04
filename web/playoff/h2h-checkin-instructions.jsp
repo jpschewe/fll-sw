@@ -33,10 +33,9 @@
 		<li>Setup the "Default" display to show all brackets by using the
 			"Add Bracket" button.</li>
 
-		<li>Visit the "Big Screen Display" link on the tablets</li>
+		<li>Visit the non-scrolling head to head bracket link at the
+			bottom of the playoff page.</li>
 
-		<li>If presented with a page asking for the name of the tablet,
-			just click submit and continue.</li>
 
 	</ol>
 
