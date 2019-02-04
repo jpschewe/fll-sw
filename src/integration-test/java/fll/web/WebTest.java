@@ -11,10 +11,13 @@ import java.net.MalformedURLException;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.RuleChain;
 import org.openqa.selenium.WebDriver;
 import org.xml.sax.SAXException;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.TestUtils;
 import fll.db.GenerateDB;
 import fll.util.LogUtils;
@@ -25,6 +28,13 @@ import fll.util.LogUtils;
 public class WebTest {
 
   private static final Logger LOGGER = LogUtils.getLogger();
+
+  /**
+   * Requirements for running tests.
+   */
+  @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by the JUnit framework")
+  @Rule
+  public RuleChain chain = RuleChain.outerRule(new IntegrationTestUtils.TomcatRequired());
 
   private WebDriver selenium;
 
@@ -67,7 +77,8 @@ public class WebTest {
                                             "troubleshooting/index.jsp", };
       for (final String page : pages) {
         LOGGER.info("Testing page #"
-            + page + "#");
+            + page
+            + "#");
         IntegrationTestUtils.initializeDatabaseFromDump(selenium,
                                                         TestUtils.class.getResourceAsStream("/fll/data/testdb.flldb"));
 

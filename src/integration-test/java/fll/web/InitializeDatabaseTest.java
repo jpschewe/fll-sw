@@ -6,15 +6,25 @@ import java.io.InputStream;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.RuleChain;
 import org.openqa.selenium.WebDriver;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.util.LogUtils;
 
 /**
  * Test initializing the database via the web.
  */
 public class InitializeDatabaseTest {
+
+  /**
+   * Requirements for running tests.
+   */
+  @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by the JUnit framework")
+  @Rule
+  public RuleChain chain = RuleChain.outerRule(new IntegrationTestUtils.TomcatRequired());
 
   private static final Logger LOGGER = LogUtils.getLogger();
 

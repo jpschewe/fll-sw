@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.catalina.LifecycleException;
 import org.apache.http.Header;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -40,6 +41,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
+import org.junit.rules.ExternalResource;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -58,6 +60,7 @@ import org.w3c.dom.Document;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.TestUtils;
+import fll.TomcatLauncher;
 import fll.Tournament;
 import fll.util.FLLInternalException;
 import fll.util.LogUtils;
@@ -771,5 +774,31 @@ public final class IntegrationTestUtils {
       throw new FLLInternalException("Got exception turning URL into URI, this shouldn't happen", e);
     }
   }
+
+  /**
+   * Used to allocate tomcat around a test.
+   */
+  public static class TomcatRequired extends ExternalResource {
+    private TomcatLauncher launcher;
+
+    @Override
+    protected void before() {
+      launcher = new TomcatLauncher();
+      try {
+        launcher.start();
+      } catch (final LifecycleException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    @Override
+    protected void after() {
+      try {
+        launcher.stop();
+      } catch (final LifecycleException e) {
+        throw new RuntimeException(e);
+      }
+    }
+  };
 
 }

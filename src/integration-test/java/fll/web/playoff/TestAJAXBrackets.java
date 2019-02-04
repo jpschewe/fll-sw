@@ -13,7 +13,9 @@ import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.RuleChain;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoAlertPresentException;
@@ -22,6 +24,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 import org.xml.sax.SAXException;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.TestUtils;
 import fll.db.GenerateDB;
 import fll.util.LogUtils;
@@ -44,6 +47,13 @@ public class TestAJAXBrackets {
   private WebDriver scoreEntryWindow;
 
   private WebDriver scoresheetWindow;
+
+  /**
+   * Requirements for running tests.
+   */
+  @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by the JUnit framework")
+  @Rule
+  public RuleChain chain = RuleChain.outerRule(new IntegrationTestUtils.TomcatRequired());
 
   @Before
   public void setUp() throws Exception {

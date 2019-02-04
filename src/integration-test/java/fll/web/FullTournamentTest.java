@@ -92,11 +92,12 @@ import fll.xml.SubjectiveScoreCategory;
 public class FullTournamentTest {
 
   /**
-   * Retry the test up to 3 times
+   * Requirements for running tests.
    */
-  @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_PROTECTED_FIELD", justification = "Used by the JUnit framework")
+  @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by the JUnit framework")
   @Rule
-  public RuleChain chain = RuleChain.outerRule(new TestUtils.Retry(3));
+  public RuleChain chain = RuleChain.outerRule(new IntegrationTestUtils.TomcatRequired())
+                                    .around(new TestUtils.Retry(3));
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
