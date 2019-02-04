@@ -61,6 +61,11 @@ public class Launcher extends JFrame {
   private static final Logger LOGGER = LogUtils.getLogger();
 
   private static final String OPEN_MSG = "open";
+  
+  /**
+   * Port that the web serer runs on.
+   */
+  public static final int WEB_PORT = 9080;
 
   /**
    * Check that no other instance is running. If one is, send a message to bring
@@ -315,7 +320,7 @@ public class Launcher extends JFrame {
    */
   private void checkWebserver() {
     boolean newServerOnline = false;
-    try (final Socket s = new Socket("localhost", 9080)) {
+    try (final Socket s = new Socket("localhost", WEB_PORT)) {
       newServerOnline = true;
     } catch (final IOException ex) {
       if (LOGGER.isTraceEnabled()) {

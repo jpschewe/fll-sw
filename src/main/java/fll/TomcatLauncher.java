@@ -14,38 +14,37 @@ import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.webresources.DirResourceSet;
 import org.apache.catalina.webresources.StandardRoot;
 
-//TODO: get logging into log4j
-//TODO: launch this from the regular launcher
-//TODO: get classpath right
 /**
- * 
+ * Launcher for embedded tomcat.
  */
 public class TomcatLauncher {
 
-  public static void main(String[] args) throws Exception {
+  public static void main(final String[] args) throws Exception {
 
-      final String webappDirLocation = "tomcat/webapps/fll-sw/";
-      final Tomcat tomcat = new Tomcat();
+    final String webappDirLocation = "tomcat/webapps/fll-sw/";
+    final Tomcat tomcat = new Tomcat();
 
-      tomcat.setPort(8080);
-      tomcat.getConnector(); // trigger the creation of the default connector
+    tomcat.setPort(Launcher.WEB_PORT);
+    tomcat.getConnector(); // trigger the creation of the default connector
 
-      final StandardContext ctx = (StandardContext) tomcat.addWebapp("/fll-sw", new File(webappDirLocation).getAbsolutePath());
-      System.out.println("configuring app with basedir: " + new File("./" + webappDirLocation).getAbsolutePath());
+    final StandardContext ctx = (StandardContext) tomcat.addWebapp("/fll-sw",
+                                                                   new File(webappDirLocation).getAbsolutePath());
+    System.out.println("configuring app with basedir: "
+        + new File("./"
+            + webappDirLocation).getAbsolutePath());
 
-      // Declare an alternative location for your "WEB-INF/classes" dir
-      // Servlet 3.0 annotation will work
-      //TODO: probably don't need this since we have them all internally
-      final File additionWebInfClasses = new File("tomcat/webapps/fll-sw/WEB-INF/classes");
-      final WebResourceRoot resources = new StandardRoot(ctx);
-      resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/classes",
-              additionWebInfClasses.getAbsolutePath(), "/"));
-      ctx.setResources(resources);
-      
-      tomcat.addWebapp("/", new File("tomcat/webapps/ROOT").getAbsolutePath());     
-      
+    // Declare an alternative location for your "WEB-INF/classes" dir
+    // Servlet 3.0 annotation will work
+    // TODO: probably don't need this since we have them all internally
+    final File additionWebInfClasses = new File("tomcat/webapps/fll-sw/WEB-INF/classes");
+    final WebResourceRoot resources = new StandardRoot(ctx);
+    resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/classes", additionWebInfClasses.getAbsolutePath(),
+                                                 "/"));
+    ctx.setResources(resources);
 
-      tomcat.start();
-      tomcat.getServer().await();
+    tomcat.addWebapp("/", new File("tomcat/webapps/ROOT").getAbsolutePath());
+
+    tomcat.start();
+    tomcat.getServer().await();
   }
 }
