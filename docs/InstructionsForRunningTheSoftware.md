@@ -97,12 +97,9 @@ This has caught many data entry errors in previous tournaments.
 At some tournaments we don't run head to head, instead we schedule an extra performance round.
 This round is in the schedule just like the normal 3 rounds.
 Like head to head this round is not used for advancement.
-To be able to enter these scores there are a couple of things that need to happen.
-1. Create a single head to head bracket with all teams and initialize it. This allows one to enter at least 1 more score for each team.
-1. Edit the max scoreboard round to be 10, this allows the extra round scores to be displayed
-    1. Admin Index 
-    1. Edit All Parameters
-    1. Under the tournament change "Max Scoreboard Round" to be 10
+To use this you need to edit the tournament parameters on the Admin Index page.
+There you can select to not run head to head for the tournament.
+This change needs to be made before scores are entered.
 
 ## End of subjective judging
 
