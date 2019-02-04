@@ -1,3 +1,4 @@
+* #714 - fix bug displaying finalist schedule on the big screen display
 * #712 - save the database as a dump file on an integration test failure
 * #701 - add parameter to enable/disable head to head. This makes it much easier to run a tournament with extra rounds instead of head to head. 
 * #702 - allow easy editing of parameters for the current tournament

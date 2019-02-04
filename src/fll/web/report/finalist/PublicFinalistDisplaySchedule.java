@@ -7,9 +7,7 @@
 package fll.web.report.finalist;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -18,6 +16,7 @@ import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
@@ -28,7 +27,7 @@ import fll.db.Queries;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
-import net.mtu.eggplant.util.sql.SQLFunctions;
+import fll.web.DisplayInfo;
 
 /**
  * Support for PublicFinalistDisplaySchedule.jsp.
@@ -39,19 +38,22 @@ public class PublicFinalistDisplaySchedule {
 
   public static void populateContext(final HttpServletRequest request,
                                      final ServletContext application,
+                                     final HttpSession session,
                                      final PageContext pageContext) {
-    final String division = request.getParameter("division");
+    String division = request.getParameter("division");
     if (null == division
         || "".equals(division)) {
-      throw new FLLRuntimeException("Parameter 'division' cannot be null");
+      // if no parameters, then must have been called from the big screen display
+      final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
+      division = displayInfo.getFinalistScheduleAwardGroup();
     }
 
-    Connection connection = null;
-    Statement stmt = null;
-    ResultSet rs = null;
-    try {
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
-      connection = datasource.getConnection();
+    if (null == division) {
+      throw new FLLRuntimeException("Cannot determine which division to display");
+    }
+
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
 
       final int tournament = Queries.getCurrentTournament(connection);
 
@@ -76,10 +78,6 @@ public class PublicFinalistDisplaySchedule {
     } catch (final SQLException e) {
       LOGGER.error(e, e);
       throw new RuntimeException(e);
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
-      SQLFunctions.close(connection);
     }
   }
 }
