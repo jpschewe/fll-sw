@@ -9,12 +9,7 @@ Notes about things to remember in Minnesota
   
   * After setting up for the Head to Head some MCs (and registration) like to have a tablet so they can more easily see the brackets. Bring up the printable brackets page for each head to head bracket on the tablet and then they can just refresh the pages to see who won each round.
   
-State
-------
-
-  * Make sure to have a computer on the performance floor for use by the MCs so they can see the head to head brackets when the screens are showing the cameras.
-  * Make sure we have at least 1 screen dedicated to scores during the head to head brackets, otherwise people can't see all of the information before it flips to the cameras.
-  * When scheduling state make one award group finish subjective before lunch so that we get all of the score sheets for that award group before lunch. This helps spread out the score entry.
+[State Notes](state.md)
 
 Public Wireless
 ==============
