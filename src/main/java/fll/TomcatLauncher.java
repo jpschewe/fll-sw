@@ -14,11 +14,16 @@ import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.webresources.DirResourceSet;
 import org.apache.catalina.webresources.StandardRoot;
+import org.apache.log4j.Logger;
+
+import fll.util.LogUtils;
 
 /**
  * Launcher for embedded tomcat.
  */
 public class TomcatLauncher {
+
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   private final Tomcat tomcat;
 
@@ -61,11 +66,16 @@ public class TomcatLauncher {
   }
 
   /**
-   * Stop the server.
+   * Stop the server. This object cannot be used after this method has been
+   * called.
    * 
    * @throws LifecycleException if an error occurs
    */
   public void stop() throws LifecycleException {
+    LOGGER.info("Stopping tomcat");
     tomcat.stop();
+    LOGGER.info("Stopped tomcat");
+    tomcat.destroy();
+    LOGGER.info("Destroyed tomcat");
   }
 }
