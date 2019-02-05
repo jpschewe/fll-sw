@@ -368,8 +368,6 @@
 		<sequential>
 			<fixcrlf srcdir="@{dir}/bin" includes="*.sh" eol="unix" />
 			<fixcrlf srcdir="@{dir}/bin" includes="*.bat" eol="dos" />
-			<fixcrlf srcdir="@{dir}/tomcat/bin" includes="*.sh" eol="unix" />
-			<fixcrlf srcdir="@{dir}/tomcat/bin" includes="*.bat" eol="dos" />
 			<fixcrlf file="@{dir}/fll-sw.sh" eol="unix" />
 
 			<chmod perm="+x">
