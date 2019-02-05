@@ -475,12 +475,6 @@
 				<fileset dir="${dir.web}/WEB-INF/lib">
 					<include name="*.jar" />
 				</fileset>
-				<fileset dir="${dir.tomcat}/lib">
-					<include name="*.jar" />
-				</fileset>
-				<fileset dir="${dir.tomcat}/bin">
-					<include name="*.jar" />
-				</fileset>
 			</classpath-elements>
 		</compile>
 	</target>
@@ -879,7 +873,6 @@
 		<antcall target="docs" />
 		<antcall target="findbugs" />
 		<antcall target="test.all" />
-		<antcall target="tomcat.check-logs" />
 		<antcall target="coverage.report" />
 	</target>
 
