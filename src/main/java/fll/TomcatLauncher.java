@@ -9,11 +9,7 @@ package fll;
 import java.io.File;
 
 import org.apache.catalina.LifecycleException;
-import org.apache.catalina.WebResourceRoot;
-import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.startup.Tomcat;
-import org.apache.catalina.webresources.DirResourceSet;
-import org.apache.catalina.webresources.StandardRoot;
 import org.apache.log4j.Logger;
 
 import fll.util.LogUtils;
@@ -31,8 +27,6 @@ public class TomcatLauncher {
    * Create Tomcat launcher.
    */
   public TomcatLauncher() {
-    final String webappDirLocation = "tomcat/webapps/fll-sw/";
-
     tomcat = new Tomcat();
 
     tomcat.setPort(Launcher.WEB_PORT);
@@ -40,18 +34,12 @@ public class TomcatLauncher {
 
     // TODO: call tomcat.setBasedir() to specify the temporary directory to use
 
-    final StandardContext ctx = (StandardContext) tomcat.addWebapp("/fll-sw",
-                                                                   new File(webappDirLocation).getAbsolutePath());
+    tomcat.addWebapp("/fll-sw", new File("tomcat/webapps/fll-sw/").getAbsolutePath());
 
-    final WebResourceRoot resources = new StandardRoot(ctx);
     if (Boolean.getBoolean("inside.test")) {
-      // when running inside testing we want to use the instrumented files
-
-      final File additionWebInfClasses = new File("tomcat/webapps/TEST-fll-sw/WEB-INF/classes");
-      resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/classes",
-                                                   additionWebInfClasses.getAbsolutePath(), "/"));
+      // setup test webapp
+      tomcat.addWebapp("/TEST-fll-sw", new File("tomcat/webapps/TEST-fll-sw/").getAbsolutePath());
     }
-    ctx.setResources(resources);
 
     // tomcat.addWebapp("/", new File("tomcat/webapps/ROOT").getAbsolutePath());
   }
