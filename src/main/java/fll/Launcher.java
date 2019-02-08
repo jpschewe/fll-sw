@@ -56,6 +56,7 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
 /**
  * Launcher for fll-sw applications.
  */
+@SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This class is not meant to be serialized")
 public class Launcher extends JFrame {
 
   private static final Logger LOGGER = LogUtils.getLogger();
