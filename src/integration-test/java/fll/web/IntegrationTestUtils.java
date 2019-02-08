@@ -694,7 +694,7 @@ public final class IntegrationTestUtils {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "admin/edit_tournament_parameters.jsp");
 
-    selenium.findElement(By.name("seeding_rounds")).sendKeys(String.valueOf(newValue));
+    selenium.findElement(By.id("seeding_rounds")).sendKeys(String.valueOf(newValue));
 
     selenium.findElement(By.id("submit")).click();
 
