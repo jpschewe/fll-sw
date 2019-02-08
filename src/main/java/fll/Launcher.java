@@ -40,12 +40,12 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 
+import org.apache.catalina.LifecycleException;
 import org.apache.log4j.Logger;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.scheduler.SchedulerUI;
 import fll.subjective.SubjectiveFrame;
-import fll.util.FLLInternalException;
 import fll.util.GuiExceptionHandler;
 import fll.util.LogUtils;
 import fll.xml.ui.ChallengeDescriptionFrame;
@@ -61,7 +61,7 @@ public class Launcher extends JFrame {
   private static final Logger LOGGER = LogUtils.getLogger();
 
   private static final String OPEN_MSG = "open";
-  
+
   /**
    * Port that the web serer runs on.
    */
@@ -451,59 +451,33 @@ public class Launcher extends JFrame {
     }
   }
 
+  private TomcatLauncher webserverLauncher = null;
+
   private void startWebserver() {
-    controlWebserver(true);
+    if (null == webserverLauncher) {
+      webserverLauncher = new TomcatLauncher();
+    }
+    try {
+      webserverLauncher.start();
+
+      loadFllHtml();
+    } catch (LifecycleException e) {
+      LOGGER.fatal("Unexpected error starting webserver", e);
+      JOptionPane.showMessageDialog(null, "Unexpected error starting webserver: "
+          + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    }
   }
 
   private void stopWebserver() {
-    controlWebserver(false);
-  }
-
-  private transient Thread webserverThread = null;
-
-  private void controlWebserver(final boolean start) {
-    if (start
-        && null != webserverThread) {
-      JOptionPane.showMessageDialog(this, "Webserver has already been told to start");
-      return;
-    }
-
-    final String[] env = { "JRE_HOME="
-        + System.getProperty("java.home") };
-    if (start) {
-      webserverThread = new Thread(() -> {
-        try {
-          if (isWindows()) {
-            Runtime.getRuntime().exec("cmd /c start /b bin\\start-tomcat.bat", env);
-          } else {
-            Runtime.getRuntime().exec("./bin/start-tomcat.sh", env);
-          }
-        } catch (final IOException e) {
-          throw new FLLInternalException("Could not start tomcat", e);
-        }
-
-        // TODO: invoke via java rather than system call
-
-        webserverThread = null;
-      });
-
-      webserverThread.setDaemon(true);
-
-      webserverThread.start();
-
-      loadFllHtml();
-
-    } else {
+    if (null != webserverLauncher) {
       try {
-        if (isWindows()) {
-          Runtime.getRuntime().exec("cmd /c start /b bin\\stop-tomcat.bat", env);
-        } else {
-          Runtime.getRuntime().exec("./bin/stop-tomcat.sh", env);
-        }
-      } catch (final IOException e) {
-        throw new FLLInternalException("Could not stop tomcat", e);
+        webserverLauncher.stop();
+        webserverLauncher = null;
+      } catch (final LifecycleException e) {
+        LOGGER.fatal("Unexpected error stopping webserver", e);
+        JOptionPane.showMessageDialog(null, "Unexpected error stopping webserver: "
+            + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
       }
-
     }
   }
 
@@ -622,11 +596,6 @@ public class Launcher extends JFrame {
       }
     }
     return null;
-  }
-
-  private static boolean isWindows() {
-    final boolean windows = System.getProperty("os.name").startsWith("Windows");
-    return windows;
   }
 
   private static void setApplicationIcon(final Window window) {
