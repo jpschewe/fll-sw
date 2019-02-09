@@ -50,7 +50,6 @@ pipeline {
           timestamps {
             fllSwAnt('dist')
             junit testResults: "build.ant/test-results/TEST-*.xml", keepLongStdio: true
-            fllSwAnt('tomcat.check-logs')
           } // timestamps
         } // throttle
       } // steps           
