@@ -1,6 +1,0 @@
-[Desktop Entry]
-Type=Application
-Exec="/home/flluser/fll-sw/bin/start-tomcat.sh"
-Name=Start Tomcat
-Categories=Network;X-fllsw;
-Icon=tomcat

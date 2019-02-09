@@ -386,12 +386,6 @@
 				</fileset>
 			</chmod>
 
-			<chmod perm="+x">
-				<fileset dir="@{dir}">
-					<include name="menu-entries/*.sh" />
-				</fileset>
-			</chmod>
-
 		</sequential>
 	</macrodef>
 
@@ -605,13 +599,6 @@
 			<fileset dir="${dir.build}">
 				<include name="tomcat/**" />
 				<exclude name="tomcat/webapps/TEST-${app.name}/**" />
-			</fileset>
-		</copy>
-
-		<!-- copy menu entry stuff -->
-		<copy todir="${dir.dist}">
-			<fileset dir="${basedir}">
-				<include name="menu-entries/**" />
 			</fileset>
 		</copy>
 
