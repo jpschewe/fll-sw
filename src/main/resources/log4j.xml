@@ -69,6 +69,11 @@
 
  <!-- end stuff for debugging -->
 
+<!-- ignore strict errors from htmlunit for now -->
+<logger name="com.gargoylesoftware.htmlunit.javascript.StrictErrorReporter">
+<level value="FATAL" />
+</logger>
+
  <root>
   <level value="INFO" />
   <appender-ref ref="CONSOLE" />
