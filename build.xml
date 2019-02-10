@@ -465,15 +465,15 @@
 		</compile>
 	</target>
 
-	<target name="tomcat.check-logs" description="Check for errors in the tomcat logs">
-		<fileset id="matches" dir="${dir.tomcat}/logs">
+	<target name="check-logs" description="Check for errors in the logs">
+		<fileset id="matches" dir="${dir.build}">
 			<patternset id="files">
-				<include name="localhost*.log" />
+				<include name="fll-sw_*.log" />
 			</patternset>
-			<containsregexp expression="(SEVERE)|(ERROR)" />
+			<containsregexp expression="(FATAL)|(ERROR)" />
 		</fileset>
 
-		<fail message="Errors found in the tomcat logs">
+		<fail message="Errors found in the logs">
 			<condition>
 				<resourcecount when="greater" count="0" refid="matches" />
 			</condition>
