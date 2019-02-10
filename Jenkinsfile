@@ -80,7 +80,7 @@ pipeline {
     
   post {
     always {
-      archiveArtifacts artifacts: 'build.ant/screenshots/,build.ant/tomcat/webapps/fll-sw/fllweb*,build.ant/tomcat/logs/,build.ant/docs/reports/,build.ant/fll-sw*.zip'           
+      archiveArtifacts artifacts: 'build.ant/*.log,build.ant/screenshots/,build.ant/tomcat/webapps/fll-sw/fllweb*,build.ant/tomcat/logs/,build.ant/docs/reports/,build.ant/fll-sw*.zip'           
                         
       openTasks defaultEncoding: '', excludePattern: 'checkstyle*.xml,**/ChatServlet.java', healthy: '', high: 'FIXME,HACK', low: '', normal: 'TODO', pattern: '**/*.java,**/*.jsp,**/*.jspf,**/*.xml', unHealthy: ''
       warnings categoriesPattern: '', consoleParsers: [[parserName: 'Java Compiler (javac)']], defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', messagesPattern: '', unHealthy: ''
