@@ -15,20 +15,15 @@ import fll.util.LogUtils;
 /**
  * @author jpschewe
  */
-@WebServlet(urlPatterns="/log4j-init", loadOnStartup=1)
+@WebServlet(urlPatterns = "/log4j-init", loadOnStartup = 1)
 public class Log4jInit extends HttpServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
   @Override
   public void init() {
-    final String prefix = getServletContext().getRealPath("/");
-
     // set some properties that are used in the log4j config file
     System.setProperty("app.name", "web");
-    System.setProperty("logroot", prefix
-        + "/"); // need the trailing slash because of how the log4j.xml file
-    // is built
 
     LogUtils.initializeLogging();
 

@@ -343,7 +343,7 @@
 			<path refid="base.classpath" />
 			<pathelement location="classes" />
 		</path>
-		<buildscript scripts.dir="${dir.build}" scripts.basedir="${basedir}" scripts.root="tomcat/webapps/fll-sw/WEB-INF" scripts.path="launcher.classpath" script.name="fll-sw" class.main="fll.Launcher" java.args="-Dapp.name=fll-sw -Dlogroot=./" template.name="run" />
+		<buildscript scripts.dir="${dir.build}" scripts.basedir="${basedir}" scripts.root="tomcat/webapps/fll-sw/WEB-INF" scripts.path="launcher.classpath" script.name="fll-sw" class.main="fll.Launcher" java.args="-Dapp.name=launcher" template.name="run" />
 		<!-- don't want the windows bat file, want them to use the executable -->
 		<delete file="${dir.build}/fll-sw.bat" />
 
@@ -369,12 +369,6 @@
 			<fixcrlf srcdir="@{dir}/bin" includes="*.sh" eol="unix" />
 			<fixcrlf srcdir="@{dir}/bin" includes="*.bat" eol="dos" />
 			<fixcrlf file="@{dir}/fll-sw.sh" eol="unix" />
-
-			<chmod perm="+x">
-				<fileset dir="@{dir}/tomcat/bin">
-					<include name="*.sh" />
-				</fileset>
-			</chmod>
 
 			<chmod perm="+x">
 				<fileset dir="@{dir}/bin">
