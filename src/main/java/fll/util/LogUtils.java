@@ -130,7 +130,7 @@ public final class LogUtils {
       if (!log4jConfigured) {
         LogManager.resetConfiguration();
 
-        final URL config = LogUtils.class.getResource("/fll-log4j.xml");
+        final URL config = LogUtils.class.getResource("/log4j.xml");
         DOMConfigurator.configure(config);
         log4jConfigured = true;
 
