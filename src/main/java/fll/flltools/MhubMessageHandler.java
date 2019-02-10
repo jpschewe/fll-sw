@@ -111,7 +111,10 @@ public class MhubMessageHandler extends Thread {
       if (null != datasource) {
         try (Connection connection = datasource.getConnection()) {
           if (Utilities.testDatabaseInitialized(connection)) {
-            createWebSocket(MhubParameters.getHostname(connection), MhubParameters.getPort(connection));
+            final String hostname = MhubParameters.getHostname(connection);
+            if (null != hostname) {
+              createWebSocket(hostname, MhubParameters.getPort(connection));
+            }
           } // have valid database
         } catch (final SQLException e) {
           LOGGER.error("Error talking to the database, will try again later", e);
@@ -237,6 +240,7 @@ public class MhubMessageHandler extends Thread {
             + hostname
             + ":"
             + port);
+        
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("Checking if need to create websocket current: "
               + currentUri
@@ -340,15 +344,19 @@ public class MhubMessageHandler extends Thread {
       final List<Integer> toRemove = new LinkedList<>();
 
       final LocalTime now = LocalTime.now();
-      
-      pendingMessages.forEach((seq, entry) -> {
+
+      pendingMessages.forEach((seq,
+                               entry) -> {
         final Duration timeSinceSent = Duration.between(entry.getTimeSent(), now);
-        if(timeSinceSent.compareTo(messageTimeout) > 0) {
-          LOGGER.warn("Have not received ACK for message in " + messageTimeout.toString() + ". Message: " + entry.getMessage());
+        if (timeSinceSent.compareTo(messageTimeout) > 0) {
+          LOGGER.warn("Have not received ACK for message in "
+              + messageTimeout.toString()
+              + ". Message: "
+              + entry.getMessage());
           toRemove.add(seq);
         }
       });
-      
+
       toRemove.forEach(seq -> pendingMessages.remove(seq));
     }
   }
