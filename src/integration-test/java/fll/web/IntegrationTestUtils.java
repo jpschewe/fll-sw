@@ -263,12 +263,14 @@ public final class IntegrationTestUtils {
     try {
       selenium.get(TestUtils.URL_ROOT
           + "setup/");
+      Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
 
       if (isElementPresent(selenium, By.name("submit_login"))) {
         login(selenium);
 
         selenium.get(TestUtils.URL_ROOT
             + "setup/");
+        Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
       }
 
       final WebElement dbEle = selenium.findElement(By.name("dbdump"));
@@ -276,6 +278,8 @@ public final class IntegrationTestUtils {
 
       final WebElement createEle = selenium.findElement(By.name("createdb"));
       createEle.click();
+      
+      Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
 
       try {
         final Alert confirmCreateDB = selenium.switchTo().alert();
@@ -287,6 +291,9 @@ public final class IntegrationTestUtils {
           LOGGER.trace("No alert found, assuming the database was empty and didn't need an alert.");
         }
       }
+
+      Thread.sleep(2
+                   * WAIT_FOR_PAGE_LOAD_MS);
 
       selenium.findElement(By.id("success"));
 
@@ -302,6 +309,8 @@ public final class IntegrationTestUtils {
 
       final WebElement submitElement = selenium.findElement(By.name("submit_create_user"));
       submitElement.click();
+      Thread.sleep(2
+                   * WAIT_FOR_PAGE_LOAD_MS);
 
       selenium.findElement(By.id("success-create-user"));
 
