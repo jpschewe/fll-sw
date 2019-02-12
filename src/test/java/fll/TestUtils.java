@@ -30,7 +30,7 @@ public final class TestUtils {
   /**
    * Root URL for the software with trailing slash.
    */
-  public static final String URL_ROOT = "http://localhost:9080/TEST-fll-sw/";
+  public static final String URL_ROOT = "http://localhost:9080/fll-sw/";
 
   private TestUtils() {
     // no instances

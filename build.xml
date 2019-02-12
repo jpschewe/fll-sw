@@ -40,8 +40,7 @@
 	<property name="findbugs.home" value="${dir.lib}/findbugs-3.0.1" />
 	<property name="dir.lib.findbugs" value="${findbugs.home}/lib" />
 
-	<property name="coverage.dir.web" value="${dir.tomcat}/webapps/TEST-${app.name}" />
-	<property name="coverage.dir.classes" value="${coverage.dir.web}/WEB-INF/classes" />
+	<property name="coverage.dir.classes" value="${dir.coverage}/classes" />
 
 	<import file="${basedir}/buildscript-imports.xml" />
 
@@ -224,13 +223,7 @@
 	</path>
 
 	<!-- ==================== Code coverage ==================== -->
-	<target name="create.test.webapp" depends="compile">
-		<copy todir="${coverage.dir.web}">
-			<fileset dir="${dir.web}" />
-		</copy>
-	</target>
-
-	<target name="coverage.instr" depends="create.test.webapp" description="Instrument files for code coverage">
+	<target name="coverage.instr" description="Instrument files for code coverage">
 		<mkdir dir="${dir.coverage}" />
 
 
@@ -245,24 +238,16 @@
 				<include name="**/*.class" />
 			</fileset>
 		</cobertura-instrument>
-		<copy file="${dir.coverage}/cobertura.ser" tofile="${dir.coverage}/tomcat-cobertura.ser" />
 	</target>
 
 	<target name="coverage.report" description="Generate coverage report">
-		<cobertura-merge datafile="${dir.coverage}/merge-cobertura.ser">
-			<fileset dir="${dir.coverage}">
-				<include name="cobertura.ser" />
-				<include name="tomcat-cobertura.ser" />
-			</fileset>
-		</cobertura-merge>
-
 		<mkdir dir="${dir.reports}/coverage" />
-		<cobertura-report format="html" destdir="${dir.reports}/coverage" datafile="${dir.coverage}/merge-cobertura.ser">
+		<cobertura-report format="html" destdir="${dir.reports}/coverage" datafile="${dir.coverage}/cobertura.ser">
 			<fileset dir="${dir.src}">
 				<include name="**/*.java" />
 			</fileset>
 		</cobertura-report>
-		<cobertura-report format="xml" destdir="${dir.reports}/coverage" datafile="${dir.coverage}/merge-cobertura.ser">
+		<cobertura-report format="xml" destdir="${dir.reports}/coverage" datafile="${dir.coverage}/cobertura.ser">
 			<fileset dir="${dir.src}">
 				<include name="**/*.java" />
 			</fileset>
