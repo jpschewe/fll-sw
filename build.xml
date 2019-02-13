@@ -14,7 +14,7 @@
 
 	<property name="dir.dist" value="dist" />
 	<property name="dir.web" value="${dir.tomcat}/webapps/${app.name}" />
-	<property name="tmp.dir.web" value="${basedir}/tmp-web" />
+	<property name="tmp.dir.web" value="${dir.build}/tmp-web" />
 
 	<property name="dir.classes" value="${dir.web}/WEB-INF/classes" />
 
@@ -164,20 +164,20 @@
 
 		<!-- tomcat libraries -->
 		<pathelement location="${dir.lib}/ecj-3.15.0.jar" />
-		<pathelement location="${dir.lib}/tomcat-annotations-api-9.0.14.jar" />
-		<pathelement location="${dir.lib}/tomcat-api-9.0.14.jar" />
-		<pathelement location="${dir.lib}/tomcat-el-api-9.0.14.jar" />
-		<pathelement location="${dir.lib}/tomcat-embed-core-9.0.14.jar" />
-		<pathelement location="${dir.lib}/tomcat-embed-el-9.0.14.jar" />
-		<pathelement location="${dir.lib}/tomcat-embed-jasper-9.0.14.jar" />
-		<pathelement location="${dir.lib}/tomcat-embed-websocket-9.0.14.jar" />
-		<pathelement location="${dir.lib}/tomcat-jasper-9.0.14.jar" />
-		<pathelement location="${dir.lib}/tomcat-jasper-el-9.0.14.jar" />
-		<pathelement location="${dir.lib}/tomcat-jsp-api-9.0.14.jar" />
-		<pathelement location="${dir.lib}/tomcat-juli-9.0.14.jar" />
-		<pathelement location="${dir.lib}/tomcat-servlet-api-9.0.14.jar" />
-		<pathelement location="${dir.lib}/tomcat-util-9.0.14.jar" />
-		<pathelement location="${dir.lib}/tomcat-util-scan-9.0.14.jar" />
+		<pathelement location="${dir.lib}/tomcat-annotations-api-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-api-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-el-api-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-embed-core-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-embed-el-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-embed-jasper-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-embed-websocket-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-jasper-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-jasper-el-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-jsp-api-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-juli-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-servlet-api-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-util-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-util-scan-9.0.16.jar" />
 
 		<!-- file upload -->
 		<pathelement location="${dir.lib}/commons-fileupload-1.3.jar" />
@@ -428,18 +428,18 @@
 	<path id="tomcat.task.classpath">
 		<pathelement location="${dir.lib}/tomcat-catalina-ant-9.0.14.jar" />
 
-		<pathelement location="${dir.lib}/tomcat-util-scan-9.0.14.jar" />
-		<pathelement location="${dir.lib}/tomcat-util-9.0.14.jar" />
-		<pathelement location="${dir.lib}/tomcat-api-9.0.14.jar" />
-		<pathelement location="${dir.lib}/tomcat-servlet-api-9.0.14.jar" />
-		<pathelement location="${dir.lib}/tomcat-juli-9.0.14.jar" />
-		<pathelement location="${dir.lib}/tomcat-jasper-9.0.14.jar" />		
-		<pathelement location="${dir.lib}/tomcat-jsp-api-9.0.14.jar" />
-		<pathelement location="${dir.lib}/tomcat-el-api-9.0.14.jar" />
-		<pathelement location="${dir.lib}/tomcat-embed-el-9.0.14.jar" />		
-		<pathelement location="${dir.lib}/tomcat-embed-core-9.0.14.jar" />
-		<pathelement location="${dir.lib}/tomcat-annotations-api-9.0.14.jar" />		
-		<pathelement location="${dir.lib}/tomcat-embed-el-9.0.14.jar" />		
+		<pathelement location="${dir.lib}/tomcat-util-scan-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-util-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-api-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-servlet-api-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-juli-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-jasper-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-jsp-api-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-el-api-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-embed-el-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-embed-core-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-annotations-api-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-embed-el-9.0.16.jar" />
 		<pathelement location="${dir.lib}/ecj-3.15.0.jar" />
 	</path>
 	<taskdef classpathref="tomcat.task.classpath" resource="org/apache/catalina/ant/catalina.tasks" />
@@ -458,7 +458,7 @@
 
 		<mkdir dir="${dir.src.jsp}" />
 
-		<jasper validateXml="false" uriroot="${tmp.dir.web}" webXmlFragment="${dir.src.jsp}/generated_web.xml" outputDir="${dir.src.jsp}" poolingEnabled="false" />
+		<jasper validateXml="false" uriroot="${tmp.dir.web}" webXmlInclude="${dir.src.jsp}/generated_web_include.xml" webFragmentXml="${dir.src.jsp}/generated_web_fragment.xml" outputDir="${dir.src.jsp}" poolingEnabled="false" />
 
 		<delete dir="${tmp.dir.web}" deleteonexit="true" failonerror="false" />
 
