@@ -11,7 +11,6 @@
 
 	<property name="dir.build" value="${basedir}/build.ant" />
 	<property name="dir.tomcat" value="${dir.build}/tomcat" />
-	<property name="dir.tomcat.src" value="${basedir}/tools/tomcat" />
 
 	<property name="dir.dist" value="dist" />
 	<property name="dir.web" value="${dir.tomcat}/webapps/${app.name}" />
@@ -25,7 +24,7 @@
 
 	<property name="dir.test.unit.src" value="${basedir}/src/test/java" />
 	<property name="dir.test.unit.resources" value="${basedir}/src/test/resources" />
-	
+
 	<property name="dir.test.integration.src" value="${basedir}/src/integration-test/java" />
 	<property name="dir.test.integration.resources" value="${basedir}/src/integration-test/resources" />
 
@@ -178,7 +177,7 @@
 		<pathelement location="${dir.lib}/tomcat-juli-9.0.14.jar" />
 		<pathelement location="${dir.lib}/tomcat-servlet-api-9.0.14.jar" />
 		<pathelement location="${dir.lib}/tomcat-util-9.0.14.jar" />
-		<pathelement location="${dir.lib}/tomcat-util-scan-9.0.14.jar" />		
+		<pathelement location="${dir.lib}/tomcat-util-scan-9.0.14.jar" />
 
 		<!-- file upload -->
 		<pathelement location="${dir.lib}/commons-fileupload-1.3.jar" />
@@ -230,11 +229,11 @@
 		<!-- Can't use todir because only classes are copied to the destination, not interfaces.
 			So instead copy all of the files over and then instrument them in place. -->
 		<copy todir="${coverage.dir.classes}">
-		  <fileset dir="${dir.classes}">
-		  </fileset>
+			<fileset dir="${dir.classes}">
+			</fileset>
 		</copy>
 
-		
+
 		<cobertura-instrument datafile="${dir.coverage}/cobertura.ser">
 			<auxClasspath>
 				<path refid="test.classpath" />
@@ -385,9 +384,9 @@
 
 			<!-- Copy static files from external dependencies as needed -->
 			<copy todir="@{dir.dest}">
-			  <fileset dir="@{dir.resources}">
-			    <exclude name="**/*.java"/>
-			  </fileset>
+				<fileset dir="@{dir.resources}">
+					<exclude name="**/*.java" />
+				</fileset>
 			</copy>
 
 			<javac includeantruntime="false" srcdir="@{dir.src}" destdir="@{dir.dest}" debug="${compile.debug}" deprecation="${compile.deprecation}">
@@ -425,7 +424,28 @@
 		</compile>
 	</target>
 
-	<import file="${dir.tomcat.src}/bin/catalina-tasks.xml" />
+	<!-- ====== tomcat task setup ====== -->
+	<path id="tomcat.task.classpath">
+		<pathelement location="${dir.lib}/tomcat-catalina-ant-9.0.14.jar" />
+
+		<pathelement location="${dir.lib}/tomcat-util-scan-9.0.14.jar" />
+		<pathelement location="${dir.lib}/tomcat-util-9.0.14.jar" />
+		<pathelement location="${dir.lib}/tomcat-api-9.0.14.jar" />
+		<pathelement location="${dir.lib}/tomcat-servlet-api-9.0.14.jar" />
+		<pathelement location="${dir.lib}/tomcat-juli-9.0.14.jar" />
+		<pathelement location="${dir.lib}/tomcat-jasper-9.0.14.jar" />		
+		<pathelement location="${dir.lib}/tomcat-jsp-api-9.0.14.jar" />
+		<pathelement location="${dir.lib}/tomcat-el-api-9.0.14.jar" />
+		<pathelement location="${dir.lib}/tomcat-embed-el-9.0.14.jar" />		
+		<pathelement location="${dir.lib}/tomcat-embed-core-9.0.14.jar" />
+		<pathelement location="${dir.lib}/tomcat-annotations-api-9.0.14.jar" />		
+		<pathelement location="${dir.lib}/tomcat-embed-el-9.0.14.jar" />		
+		<pathelement location="${dir.lib}/ecj-3.15.0.jar" />
+	</path>
+	<taskdef classpathref="tomcat.task.classpath" resource="org/apache/catalina/ant/catalina.tasks" />
+
+	<!-- ====== end tomcat task setup ===== -->
+
 	<target name="generate.jsp" depends="copy.web.files" description="Generate Java sources for JSP files" unless="jsp.notRequired">
 		<mkdir dir="${dir.src.jsp}" />
 
