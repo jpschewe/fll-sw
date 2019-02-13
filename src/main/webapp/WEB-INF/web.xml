@@ -24,4 +24,5 @@
 		<mime-type>text/cache-manifest</mime-type>
 	</mime-mapping>
 
+	<absolute-ordering /> 
 </web-app>
