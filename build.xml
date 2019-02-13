@@ -224,11 +224,17 @@
 
 	<!-- ==================== Code coverage ==================== -->
 	<target name="coverage.instr" description="Instrument files for code coverage">
-		<mkdir dir="${dir.coverage}" />
+		<mkdir dir="${dir.coverage.classes}" />
 
 
-		<!-- don't use todir because only classes are copied to the destination, not interfaces.
-			So instead copy all of the files over and then instrument them. -->
+		<!-- Can't use todir because only classes are copied to the destination, not interfaces.
+			So instead copy all of the files over and then instrument them in place. -->
+		<copy todir="${coverage.dir.classes}">
+		  <fileset dir="${dir.classes}">
+		  </fileset>
+		</copy>
+
+		
 		<cobertura-instrument datafile="${dir.coverage}/cobertura.ser">
 			<auxClasspath>
 				<path refid="test.classpath" />
