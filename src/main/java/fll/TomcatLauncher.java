@@ -39,7 +39,7 @@ public class TomcatLauncher {
     // TODO: call tomcat.setBasedir() to specify the temporary directory to use
 
     final StandardContext ctx = (StandardContext) tomcat.addWebapp("/",
-                                                                   new File("tomcat/webapps/fll-sw/").getAbsolutePath());
+                                                                   new File("webapps/fll-sw/").getAbsolutePath());
 
     if (Boolean.getBoolean("inside.test")) {
       // Use instrumented classes when under test

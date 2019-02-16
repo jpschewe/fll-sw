@@ -522,7 +522,7 @@ public class Launcher extends JFrame {
    * @return the directory or null if not found
    */
   private File getSponsorLogosDirectory() {
-    final String[] possibleLocations = { "tomcat/webapps/fll-sw/sponsor_logos" };
+    final String[] possibleLocations = { "webapps/fll-sw/sponsor_logos" };
     for (final String location : possibleLocations) {
       final File f = new File(location);
       if (f.exists()
@@ -537,7 +537,7 @@ public class Launcher extends JFrame {
    * @return the directory or null if not found
    */
   private File getSlideshowDirectory() {
-    final String[] possibleLocations = { "tomcat/webapps/fll-sw/slideshow" };
+    final String[] possibleLocations = { "webapps/fll-sw/slideshow" };
     for (final String location : possibleLocations) {
       final File f = new File(location);
       if (f.exists()
@@ -552,7 +552,7 @@ public class Launcher extends JFrame {
    * @return the directory or null if not found
    */
   private File getCustomDirectory() {
-    final String[] possibleLocations = { "tomcat/webapps/fll-sw/custom" };
+    final String[] possibleLocations = { "webapps/fll-sw/custom" };
     for (final String location : possibleLocations) {
       final File f = new File(location);
       if (f.exists()

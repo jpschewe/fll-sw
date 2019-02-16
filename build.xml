@@ -10,10 +10,9 @@
 	<property name="app.name" value="${ant.project.name}" />
 
 	<property name="dir.build" value="${basedir}/build.ant" />
-	<property name="dir.tomcat" value="${dir.build}/tomcat" />
 
 	<property name="dir.dist" value="dist" />
-	<property name="dir.web" value="${dir.tomcat}/webapps/${app.name}" />
+	<property name="dir.web" value="${dir.build}/webapps/${app.name}" />
 	<property name="tmp.dir.web" value="${dir.build}/tmp-web" />
 
 	<property name="dir.classes" value="${dir.web}/WEB-INF/classes" />
@@ -102,6 +101,24 @@
 
 	<taskdef classpathref="cobertura.task.classpath" resource="tasks.properties" />
 
+	<path id="tomcat.base.classpath">
+		<pathelement location="${dir.lib}/ecj-3.15.0.jar" />
+		<pathelement location="${dir.lib}/tomcat-annotations-api-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-api-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-el-api-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-embed-core-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-embed-el-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-embed-jasper-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-embed-websocket-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-jasper-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-jasper-el-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-jsp-api-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-juli-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-servlet-api-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-util-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-util-scan-9.0.16.jar" />
+	</path>
+
 	<path id="base.classpath">
 		<!-- the classpath without the classes dir -->
 		<pathelement location="${dir.lib}/xmlunit-1.4.jar" />
@@ -162,22 +179,7 @@
 		<!-- use commons-lang3 -->
 		<pathelement location="${dir.lib}/commons-lang3-3.4.jar" />
 
-		<!-- tomcat libraries -->
-		<pathelement location="${dir.lib}/ecj-3.15.0.jar" />
-		<pathelement location="${dir.lib}/tomcat-annotations-api-9.0.16.jar" />
-		<pathelement location="${dir.lib}/tomcat-api-9.0.16.jar" />
-		<pathelement location="${dir.lib}/tomcat-el-api-9.0.16.jar" />
-		<pathelement location="${dir.lib}/tomcat-embed-core-9.0.16.jar" />
-		<pathelement location="${dir.lib}/tomcat-embed-el-9.0.16.jar" />
-		<pathelement location="${dir.lib}/tomcat-embed-jasper-9.0.16.jar" />
-		<pathelement location="${dir.lib}/tomcat-embed-websocket-9.0.16.jar" />
-		<pathelement location="${dir.lib}/tomcat-jasper-9.0.16.jar" />
-		<pathelement location="${dir.lib}/tomcat-jasper-el-9.0.16.jar" />
-		<pathelement location="${dir.lib}/tomcat-jsp-api-9.0.16.jar" />
-		<pathelement location="${dir.lib}/tomcat-juli-9.0.16.jar" />
-		<pathelement location="${dir.lib}/tomcat-servlet-api-9.0.16.jar" />
-		<pathelement location="${dir.lib}/tomcat-util-9.0.16.jar" />
-		<pathelement location="${dir.lib}/tomcat-util-scan-9.0.16.jar" />
+		<path refid="tomcat.base.classpath" />
 
 		<!-- file upload -->
 		<pathelement location="${dir.lib}/commons-fileupload-1.3.jar" />
@@ -333,7 +335,7 @@
 			<path refid="base.classpath" />
 			<pathelement location="classes" />
 		</path>
-		<buildscript scripts.dir="${dir.build}" scripts.basedir="${basedir}" scripts.root="tomcat/webapps/fll-sw/WEB-INF" scripts.path="launcher.classpath" script.name="fll-sw" class.main="fll.Launcher" java.args="-Dapp.name=launcher" template.name="run" />
+		<buildscript scripts.dir="${dir.build}" scripts.basedir="${basedir}" scripts.root="webapps/fll-sw/WEB-INF" scripts.path="launcher.classpath" script.name="fll-sw" class.main="fll.Launcher" java.args="-Dapp.name=launcher" template.name="run" />
 		<!-- don't want the windows bat file, want them to use the executable -->
 		<delete file="${dir.build}/fll-sw.bat" />
 
@@ -428,19 +430,7 @@
 	<path id="tomcat.task.classpath">
 		<pathelement location="${dir.lib}/tomcat-catalina-ant-9.0.14.jar" />
 
-		<pathelement location="${dir.lib}/tomcat-util-scan-9.0.16.jar" />
-		<pathelement location="${dir.lib}/tomcat-util-9.0.16.jar" />
-		<pathelement location="${dir.lib}/tomcat-api-9.0.16.jar" />
-		<pathelement location="${dir.lib}/tomcat-servlet-api-9.0.16.jar" />
-		<pathelement location="${dir.lib}/tomcat-juli-9.0.16.jar" />
-		<pathelement location="${dir.lib}/tomcat-jasper-9.0.16.jar" />
-		<pathelement location="${dir.lib}/tomcat-jsp-api-9.0.16.jar" />
-		<pathelement location="${dir.lib}/tomcat-el-api-9.0.16.jar" />
-		<pathelement location="${dir.lib}/tomcat-embed-el-9.0.16.jar" />
-		<pathelement location="${dir.lib}/tomcat-embed-core-9.0.16.jar" />
-		<pathelement location="${dir.lib}/tomcat-annotations-api-9.0.16.jar" />
-		<pathelement location="${dir.lib}/tomcat-embed-el-9.0.16.jar" />
-		<pathelement location="${dir.lib}/ecj-3.15.0.jar" />
+		<path refid="tomcat.base.classpath" />
 	</path>
 	<taskdef classpathref="tomcat.task.classpath" resource="org/apache/catalina/ant/catalina.tasks" />
 
@@ -602,8 +592,7 @@
 		<!-- copy web stuff -->
 		<copy todir="${dir.dist}">
 			<fileset dir="${dir.build}">
-				<include name="tomcat/**" />
-				<exclude name="tomcat/webapps/TEST-${app.name}/**" />
+				<include name="webapps/**" />
 			</fileset>
 		</copy>
 
@@ -616,7 +605,7 @@
 			<zipfileset dir="${dir.dist}" prefix="${app.name}-v${app.version.short}">
 				<exclude name="**/*.sh" />
 				<exclude name="**/WEB-INF/flldb.*" />
-				<exclude name="tomcat/logs/*" />
+				<exclude name="*.log" />
 			</zipfileset>
 		</zip>
 		<echo message="The distribution file is ${dir.build}/${app.name}-${app.version.short}.zip" />

@@ -16,30 +16,7 @@ Test the software
     * If windows smart screen comes up, click on More Details, then Run Anyway
   1. Click on Start web server
     * If windows asks about allowing access for Java, you need to click allow access
-  1. Your web browser should now open and you should see the setup page. If you get an error that tomcat is not running, see troubleshooting.
-
-Troubleshooting
----------------
-If the tomcat window didn't stay open, then tomcat couldn't start for some reason. Here are some things to try.
-
-  1. Start tomcat directly
-    1. Open up the install directory and go into the tomcat directory
-    1. Go into the bin directory
-    1. Double click on startup.bat
-    1. If the window opens and stays open, then you're all set.
-  1. Start tomcat from a command window so that you can see the errors
-    1. Open a command prompt (terminal or xterm in Linux and Mac)
-      * Start->Run (or search) cmd
-    1. Change to the directory that the server software is installed in
-      * This is done as a set of cd commands eg.
-        * ```cd Downloads```
-        * ```cd fll-sw-5.11```
-    1. Change to the tomcat\bin directory with `cd tomcat\bin`
-    1. `startup`
-    1. Check the error messages and see if you can figure out what the problem is. 
-      * It may be that you don't have `JAVA_HOME` setup properly, see [setting up JAVA_HOME](SettingUpJavaHome).
-      * Try searching on Google for the error messages
-      * File a ticket using the "Issues" link at the top (requires registration to keep spam out)
+  1. Your web browser should now open and you should see the setup page.
 
 
 Setting up the database

@@ -130,7 +130,7 @@ Once the finalist schedule has been stored, the schedule can be printed or displ
 
 If something blows up, take a look at the message that was spit out. It should be the first thing at the top of the page. Usually this will be something descriptive like "Not enough teams to compute standardized score" followed by a bunch of filenames and line numbers.
 
-If you encounter an error, please file a ticket. Save the error log that is displayed (if there is one) as well as `tomcat/webapps/fll-sw/fllweb*` and `tomcat/logs` and attach them to the bug report.
+If you encounter an error, please file a ticket. Save the error log that is displayed (if there is one) as well as all log files in the directory containing `fll-sw.exe`. These files should be attached to the bug report.
 
 In most cases when an error occurs you will be prompted to submit a bug report. 
 This packages up the logs and the database into a zip file that can be attached to the ticket. 
