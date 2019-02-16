@@ -56,7 +56,6 @@
 	<classpathentry kind="lib" path="lib/log4jdbc4-1.2.jar"/>
 	<classpathentry kind="lib" path="lib/dnsjava-2.1.7.jar"/>
 	<classpathentry kind="lib" path="lib/test/webdrivermanager/webdrivermanager-1.6.0.jar"/>
-	<classpathentry kind="lib" path="tools/tomcat/lib/websocket-api.jar"/>
 	<classpathentry kind="lib" path="lib/tika-core-1.16.jar"/>
 	<classpathentry kind="lib" path="lib/itext-xtra-5.5.9.jar"/>
 	<classpathentry kind="lib" path="lib/hsqldb-2.4.1.jar"/>
@@ -66,20 +65,20 @@
 	<classpathentry kind="lib" path="lib/annotations.jar"/>
 	<classpathentry kind="lib" path="lib/ecj-3.15.0.jar"/>
 	<classpathentry kind="lib" path="lib/jsr305.jar"/>
-	<classpathentry kind="lib" path="lib/tomcat-annotations-api-9.0.14.jar"/>
-	<classpathentry kind="lib" path="lib/tomcat-api-9.0.14.jar"/>
-	<classpathentry kind="lib" path="lib/tomcat-el-api-9.0.14.jar"/>
-	<classpathentry kind="lib" path="lib/tomcat-embed-core-9.0.14.jar"/>
-	<classpathentry kind="lib" path="lib/tomcat-embed-el-9.0.14.jar"/>
-	<classpathentry kind="lib" path="lib/tomcat-embed-jasper-9.0.14.jar"/>
-	<classpathentry kind="lib" path="lib/tomcat-embed-websocket-9.0.14.jar"/>
-	<classpathentry kind="lib" path="lib/tomcat-jasper-9.0.14.jar"/>
-	<classpathentry kind="lib" path="lib/tomcat-jasper-el-9.0.14.jar"/>
-	<classpathentry kind="lib" path="lib/tomcat-jsp-api-9.0.14.jar"/>
-	<classpathentry kind="lib" path="lib/tomcat-juli-9.0.14.jar"/>
-	<classpathentry kind="lib" path="lib/tomcat-servlet-api-9.0.14.jar"/>
-	<classpathentry kind="lib" path="lib/tomcat-util-9.0.14.jar"/>
-	<classpathentry kind="lib" path="lib/tomcat-util-scan-9.0.14.jar"/>
+	<classpathentry kind="lib" path="lib/tomcat-annotations-api-9.0.16.jar"/>
+	<classpathentry kind="lib" path="lib/tomcat-api-9.0.16.jar"/>
+	<classpathentry kind="lib" path="lib/tomcat-el-api-9.0.16.jar"/>
+	<classpathentry kind="lib" path="lib/tomcat-embed-core-9.0.16.jar"/>
+	<classpathentry kind="lib" path="lib/tomcat-embed-el-9.0.16.jar"/>
+	<classpathentry kind="lib" path="lib/tomcat-embed-jasper-9.0.16.jar"/>
+	<classpathentry kind="lib" path="lib/tomcat-embed-websocket-9.0.16.jar"/>
+	<classpathentry kind="lib" path="lib/tomcat-jasper-9.0.16.jar"/>
+	<classpathentry kind="lib" path="lib/tomcat-jasper-el-9.0.16.jar"/>
+	<classpathentry kind="lib" path="lib/tomcat-jsp-api-9.0.16.jar"/>
+	<classpathentry kind="lib" path="lib/tomcat-juli-9.0.16.jar"/>
+	<classpathentry kind="lib" path="lib/tomcat-servlet-api-9.0.16.jar"/>
+	<classpathentry kind="lib" path="lib/tomcat-util-9.0.16.jar"/>
+	<classpathentry kind="lib" path="lib/tomcat-util-scan-9.0.16.jar"/>
 	<classpathentry kind="lib" path="lib/test/fest/fest-assert-1.2.jar" sourcepath="lib/test/fest/fest-assert-1.2-sources.jar"/>
 	<classpathentry kind="lib" path="lib/test/fest/fest-reflect-1.2.jar" sourcepath="lib/test/fest/fest-reflect-1.2-sources.jar"/>
 	<classpathentry kind="lib" path="lib/test/fest/fest-swing-1.2.jar" sourcepath="lib/test/fest/fest-swing-1.2-sources.jar"/>
