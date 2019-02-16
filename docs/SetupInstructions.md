@@ -137,7 +137,6 @@ If you do not have a zip tool to open up the archives you can use the jar tool t
       1. Note that you will need a username and password to access all pages that can make changes or display information that the teams should not see. Other pages can be viewable by the general public, so the network can be shared.
       1. From the score entry computers and scoreboard computers make sure you can also get to this page, replacing localhost with the IP address of the server
       * You can find links to copy to the score entry computers at the bottom of the main page
-      1. When done for the day shutdown tomcat by going to bin and running stop-tomcat.bat.
   1. Subjective
       1. Follow the instructions above for installing Java
       1. Unzip subjective.zip to a location on the computer
@@ -151,8 +150,8 @@ If you do not have a zip tool to open up the archives you can use the jar tool t
       1. Select the file you just copied
       1. Click upload and if all is well you'll be returned to the Adminstration page again
   1. When you're done for the day you should make a copy of the database for the head of your state.
-      1. Shut down tomcat
-      1. Send a copy of tomcat/webapps/fll-sw/WEB-INF/flldb.* to the head of your tournaments
+      1. The database can be downloaded from the performance area page and from the admin index page
+      1. Shut down the web server
   1. For those interested in looking at the source and possibly making changes the source can be found [here](Home.md). Developers please look at README.developer. Any changes that you do make need to be sent back to me under the terms of the GPL. I look forward to any fixes you make. Please follow the coding standards listed [here](http://mtu.net/%7Ejpschewe/java/CodingStandards.html).
   1. Once you're done with the tournament you might want to uninstall everything. This can be accomplished by deleting the JAVA_HOME environment variable. Then uninstalling the JDK from the control panel.
 
@@ -160,10 +159,10 @@ Sponsor Logos
 =============
 
 In version 4 of the software we added the ability to have sponsor logos displayed. These logos are displayed on the main welcome page, in between team scores on the scoreboard and on the bottom of the head to head brackets page. 
-Any files with image extensions (currently the list is: `.jpg`, `.jpeg`, `.gif`, `.png`) put into the directory `tomcat/webapps/fll-sw/sponsor_logos` will be displayed on these pages. 
+Any files with image extensions (currently the list is: `.jpg`, `.jpeg`, `.gif`, `.png`) put into the directory `webapps/fll-sw/sponsor_logos` will be displayed on these pages. There is a button on the launcher that will open this directory.
 
 The welcome page lists the logos sorted by filename, so you can to show the sponsors in a particular order, say by amount donated.
-Because of this is advised to name the files prefixd by `01`, `02`, etc. so that the order is clear. 
+Because of this is advised to name the files prefixed by `01`, `02`, etc. so that the order is clear. 
 The logos are displayed the other pages in a random order.
 
 To display well, a logo graphic should be approximately 150-200 pixels wide and
@@ -183,7 +182,9 @@ Slideshow
 =========
 
 There is an option to display a slide show on the big screen display.
-This option shows all image files (`.jpg`, `.jpeg`, `.gif`, `.png`) from the directory `tomcat/webapps/fll-sw/slideshow`.
+This option shows all image files (`.jpg`, `.jpeg`, `.gif`, `.png`) from the directory `webapps/fll-sw/slideshow`.
+There is a button on the launcher that will open this directory.
+
 The images are displayed in order, so naming them starting with 2-digit or 3-digit numbers helps to know the order in which they will be displayed in.
 
 
