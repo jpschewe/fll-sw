@@ -38,7 +38,7 @@ public class TomcatLauncher {
 
     // TODO: call tomcat.setBasedir() to specify the temporary directory to use
 
-    final StandardContext ctx = (StandardContext) tomcat.addWebapp("/fll-sw",
+    final StandardContext ctx = (StandardContext) tomcat.addWebapp("/",
                                                                    new File("tomcat/webapps/fll-sw/").getAbsolutePath());
 
     if (Boolean.getBoolean("inside.test")) {
@@ -51,7 +51,6 @@ public class TomcatLauncher {
       ctx.setResources(resources);
     }
 
-    // tomcat.addWebapp("/", new File("tomcat/webapps/ROOT").getAbsolutePath());
   }
 
   /**

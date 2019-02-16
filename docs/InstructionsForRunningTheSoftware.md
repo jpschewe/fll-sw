@@ -12,19 +12,19 @@ See the [training presentation](training/computer-training.odp) for an overview 
 
 ## Loading from a saved database
 
-If you, or someone else, setup the database previously you can then load that database onto the server. To do that visit http://localhost:9080/fll-sw/setup on the server and then use the middle section of the page to specify a database to load. If you connect from the server you don't need to know the username and password.
+If you, or someone else, setup the database previously you can then load that database onto the server. To do that visit http://localhost:9080/setup on the server and then use the middle section of the page to specify a database to load. If you connect from the server you don't need to know the username and password.
 
 ## Setup of tournament without a saved database
 
-Links in this section are also found on the [admin index](http://localhost:9080/fll-sw/admin/index.jsp). Not all of these things need to be done the day before, you can do them the morning of, but it helps to prepare as much as you can the first few tournaments you do. You can skip this section if you were provided a database dump to load.
+Links in this section are also found on the [admin index](http://localhost:9080/admin/index.jsp). Not all of these things need to be done the day before, you can do them the morning of, but it helps to prepare as much as you can the first few tournaments you do. You can skip this section if you were provided a database dump to load.
 
   1. You will need to provide a challenge description, either one from the software itself or a custom one or from a saved database ([instructions below](#loading-from-a-saved-database))
-  1. Once the database is initialized, go to the [admin index](http://localhost:9080/fll-sw/admin/index.jsp) and upload the team datafile. This takes in a tab delimited file and uses that information to determine what teams will exist in the database. Note the sizes and datatypes of columns. If the columns in your datafile are too large the text will be truncated.
+  1. Once the database is initialized, go to the [admin index](http://localhost:9080/admin/index.jsp) and upload the team datafile. This takes in a tab delimited file and uses that information to determine what teams will exist in the database. Note the sizes and datatypes of columns. If the columns in your datafile are too large the text will be truncated.
     * Files may be tab delimited, comma delimited or Excel spreadsheets
     * Any tournament that is listed as the initial tournament for a team during upload is automatically created 
-  1. If the team data doesn't look quite right you can edit it by following the link to [Edit Team](http://localhost:9080/fll-sw/admin/select_team.jsp) on the admin index.
-  1. If you'd like to change some of the information about the tournaments you can [edit the tournament list](http://localhost:9080/fll-sw/admin/tournaments.jsp).
-  1. Set the current tournament on the [admin index](http://localhost:9080/fll-sw/admin/index.jsp)
+  1. If the team data doesn't look quite right you can edit it by following the link to [Edit Team](http://localhost:9080/admin/select_team.jsp) on the admin index.
+  1. If you'd like to change some of the information about the tournaments you can [edit the tournament list](http://localhost:9080/admin/tournaments.jsp).
+  1. Set the current tournament on the [admin index](http://localhost:9080/admin/index.jsp)
   1. At this point you can just use this computer, or you can download the database file from the admin page and import that into another computer at the tournament from the setup page. In Minnesota we typically have one person create the database that contains the data for all regional tournaments and then that database is distributed to all of the regional tournaments.  
 
 
@@ -42,11 +42,11 @@ Links in this section are also found on the [admin index](http://localhost:9080/
 
 ## Tournament day
 
-For the most part you can just walk down the links on the [admin index](http://localhost:9080/fll-sw/admin/index.jsp).
+For the most part you can just walk down the links on the [admin index](http://localhost:9080/admin/index.jsp).
 
 The other computers on the network will need to know the address of the server. You can find this information at the bottom of the main page.
   
-The scoreboard, welcome page and head to head brackets have a place at the top for text to be displayed, this can be changed from the [admin index](http://localhost:9080/fll-sw/admin/). It's labeled Score Display Text.
+The scoreboard, welcome page and head to head brackets have a place at the top for text to be displayed, this can be changed from the [admin index](http://localhost:9080/admin/). It's labeled Score Display Text.
   
 If a team does not show up you should mark that team as a No Show in both the subjective application and in all performance runs. 
 When you get to the brackets page this team will show up as last place and will still be placed on the brackets. 
@@ -71,7 +71,7 @@ Initially each named display is set to follow default, meaning that it will show
     
 ### Performance score entry
 
-Enter scores for the performance rounds on the [score entry](http://localhost:9080/fll-sw/scoreEntry/select_team.jsp) page. This page is linked from the main index.
+Enter scores for the performance rounds on the [score entry](http://localhost:9080/scoreEntry/select_team.jsp) page. This page is linked from the main index.
 
 I suggest at least two people entering scores. 
 One person enters the scores and the second person goes back and verifies the scores using the score edit feature. 
@@ -85,7 +85,7 @@ This has caught many data entry errors in previous tournaments.
     
 
 ### Head to Head
-  * When it comes time to do head to head, make sure you initialize the brackets on the [head to head page](http://localhost:9080/fll-sw/playoff/index.jsp) before entering scores. If you attempt to enter head to head scores before initializing the brackets, you will get an error message. Don't worry, nothing is broken, you just need to initialize the brackets first.
+  * When it comes time to do head to head, make sure you initialize the brackets on the [head to head page](http://localhost:9080/playoff/index.jsp) before entering scores. If you attempt to enter head to head scores before initializing the brackets, you will get an error message. Don't worry, nothing is broken, you just need to initialize the brackets first.
     * When you initialize head to head brackets you will be asked how to seed the teams into the brackets. In most cases you want to choose "Use the best score from the seeding rounds".
   * You can print out the brackets by going to the admin/printable bracket page, under the Head to Head link on the main index, for each division and printing that out.
   * You can goto the printable bracket page and then keep refreshing the page. As scores are entered the bracket will fill out. Clicking the print scoresheets button at the top will create a PDF of the score sheets for the rounds that can be determined and haven't been printed yet. If you want to reprint some scoresheets you just check the box next to the round to print and then click the print scoresheets button.
@@ -106,17 +106,17 @@ To be able to enter these scores there are a couple of things that need to happe
 
 ## End of subjective judging
 
-  * If using the stand-alone subjective scoring application, make sure you upload all data from the subjective scoring computers via the [admin index](http://localhost:9080/fll-sw/admin/index.jsp).
+  * If using the stand-alone subjective scoring application, make sure you upload all data from the subjective scoring computers via the [admin index](http://localhost:9080/admin/index.jsp).
   * If using the web based subjective scoring application (usually on tablets), make sure that all devices have uploaded their scores.
-  * Follow the compute summarized scores link on the [reporting page](http://localhost:9080/fll-sw/report/index.jsp) to summarize the scores. Make sure the judges shown are the ones you'd expect and that the number of teams seen by each judge are correct.
-  * [View the reports](http://localhost:9080/fll-sw/report/index.jsp) and print them out through your web browser. You can visit these pages as many times as you like. Each time you visit them the report page will be recomputed. So if you find any missing scores, just enter them and goto the reporting pages again and make sure you compute summarized scores before going to the reports.
+  * Follow the compute summarized scores link on the [reporting page](http://localhost:9080/report/index.jsp) to summarize the scores. Make sure the judges shown are the ones you'd expect and that the number of teams seen by each judge are correct.
+  * [View the reports](http://localhost:9080/report/index.jsp) and print them out through your web browser. You can visit these pages as many times as you like. Each time you visit them the report page will be recomputed. So if you find any missing scores, just enter them and goto the reporting pages again and make sure you compute summarized scores before going to the reports.
   
 ### Finalist Scheduling
 
 If the tournament has multiple judging groups in the same award group, then finalist judging must be done to determine the winner in each subjective category.
 This usually involves selecting the top 1 or 2 teams from each judging group and judging them again.
 
-To aide in the scheduling of this final judging there is a finalist scheduling feature on the [reporting page](http://localhost:9080/fll-sw/report/index.jsp).
+To aide in the scheduling of this final judging there is a finalist scheduling feature on the [reporting page](http://localhost:9080/report/index.jsp).
 Once all of the subjective scores are entered and the initial head to head brackets have been created you should follow the link to schedule finalists.
 Once the page has loaded you can disconnect from the network and finish the scheduling somewhere else and then reconnect when you are ready to store the finalist schedule.
 Once the finalist schedule has been stored, the schedule can be printed or displayed on the big screen display.
@@ -137,7 +137,7 @@ This packages up the logs and the database into a zip file that can be attached 
 After entering a description of what was happening when the error occurred, click submit and you'll be told where to find the zip file.
 The bug report will be included in the database dump, so that the lead computer person can find it later when entering the database.
 
-Also take a look at the [troubleshooting link](http://localhost:9080/fll-sw/troubleshooting/index.jsp) on the main page of the software. There are some tips in there as well.
+Also take a look at the [troubleshooting link](http://localhost:9080/troubleshooting/index.jsp) on the main page of the software. There are some tips in there as well.
 
 ### Missing password
 

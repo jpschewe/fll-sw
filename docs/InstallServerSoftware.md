@@ -44,7 +44,7 @@ If the tomcat window didn't stay open, then tomcat couldn't start for some reaso
 
 Setting up the database
 =======================
-If the instructions above worked, you should have a web browser that is open to http://localhost:9080/fll-sw/setup. If not, go there now.
+If the instructions above worked, you should have a web browser that is open to http://localhost:9080/setup. If not, go there now.
 
 There are two ways to get the database setup.  One is from scratch and one is from a pre-built database dump. Most users will need to start from scratch. I typically create database dumps for those in Minnesota.
 
