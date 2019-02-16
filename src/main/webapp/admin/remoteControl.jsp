@@ -411,7 +411,7 @@
       <!--  Slideshow -->
 
       <tr>
-        <th>Specify page relative to /fll-sw/custom</th>
+        <th>Specify page relative to /custom</th>
 
         <c:forEach
           items="${displayInformation}"
