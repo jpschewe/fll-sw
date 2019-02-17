@@ -6,6 +6,7 @@
 
 package fll.web;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -49,7 +50,9 @@ public class DisplayWebSocket {
 
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Adding session "
-            + session + " display: " + displayName);
+            + session
+            + " display: "
+            + displayName);
       }
     }
   }
@@ -73,7 +76,8 @@ public class DisplayWebSocket {
             session.getBasicRemote().sendText(messageText);
           } catch (final IOException ioe) {
             LOGGER.error("Got error sending message to session ("
-                + session.getId() + "), dropping session", ioe);
+                + session.getId()
+                + "), dropping session", ioe);
             toRemove.add(session);
           }
 
@@ -81,14 +85,17 @@ public class DisplayWebSocket {
           if (null != displayInfo) {
             if (LOGGER.isTraceEnabled()) {
               LOGGER.trace("Updating last seen time for display: "
-                  + displayName + " display: " + displayInfo.getName());
+                  + displayName
+                  + " display: "
+                  + displayInfo.getName());
             }
 
             displayInfo.updateLastSeen(httpApplication);
           } // non-null DisplayInfo
         } else {
-          LOGGER.info("Removing closed session: " + session.getId());
-          
+          LOGGER.info("Removing closed session: "
+              + session.getId());
+
           toRemove.add(session);
         }
       } // foreach session
@@ -104,7 +111,11 @@ public class DisplayWebSocket {
   public void error(final Session session,
                     final Throwable t) {
     synchronized (SESSIONS_LOCK) {
-      LOGGER.error("Caught websocket error, closing session", t);
+      if (t instanceof EOFException) {
+        LOGGER.warn("Got end of file from websocket, assuming that the webserver shutdown", t);
+      } else {
+        LOGGER.error("Caught websocket error, closing session", t);
+      }
 
       internalRemoveSession(session);
     }
