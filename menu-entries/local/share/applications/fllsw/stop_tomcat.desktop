@@ -1,6 +1,0 @@
-[Desktop Entry]
-Type=Application
-Exec=/home/flluser/fll-sw/bin/stop-tomcat.sh
-Name=Stop Tomcat
-Categories=Network;X-fllsw;
-Icon=tomcat-shutdown

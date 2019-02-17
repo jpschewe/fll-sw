@@ -4,7 +4,7 @@ This document describes the JSON objects available through the REST api.
 
 ## Version
 
-URL: http://localhost:9080/fll-sw/api/Version
+URL: http://localhost:9080/api/Version
 
 Java class: fll.web.api.VersionServlet
 
@@ -16,12 +16,12 @@ GET returns the version of the software running on the server as a string.
 ## Check authentication
 
 Check if the current session is authenticated.
-If the session is not authenticated a login is required using the form at http://localhost:9080/fll-sw//login.jsp.
+If the session is not authenticated a login is required using the form at http://localhost:9080//login.jsp.
 
 
 Java class: fll.web.api.CheckAuthServlet
 
-URL: http://localhost:9080/fll-sw/api/CheckAuth
+URL: http://localhost:9080/api/CheckAuth
 
 GET returns if the session is authenticated (Java class fll.web.api.CheckAuthServlet.AuthResult).
 
@@ -33,7 +33,7 @@ Access the list of judges.
 
 Java class: fll.web.api.JudgesServlet
 
-URL: http://localhost:9080/fll-sw/api/Judges
+URL: http://localhost:9080/api/Judges
 
 GET returns a list of all of the judges (Java class fll.JudgeInformation). 
 
@@ -57,7 +57,7 @@ New is determined by checking if the judge's id is already in the database.
 
 ## Tournaments
 
-URL: http://localhost:9080/fll-sw/api/Tournaments
+URL: http://localhost:9080/api/Tournaments
 
 Java class: fll.web.api.TournamentsServlet
 
@@ -71,7 +71,7 @@ GET returns the list of all tournaments (Java class fll.Tournament) known to the
       }
     ]
 
-URL: http://localhost:9080/fll-sw/api/Tournaments/<id>
+URL: http://localhost:9080/api/Tournaments/<id>
 
 GET returns the tournament object with the specified id.
 
@@ -83,7 +83,7 @@ Access the list of teams at the current tournament.
 
 Java class: fll.web.api.TournamentTeamsServlet
 
-URL: http://localhost:9080/fll-sw/api/TournamentTeams
+URL: http://localhost:9080/api/TournamentTeams
 
 GET returns the list of teams (Java class fll.TournamentTeam) at the current tournament.
    
@@ -105,7 +105,7 @@ Access the subjective scores.
 
 Java class: fll.web.api.SubjectiveScoresServlet
 
-URL: http://localhost:9080/fll-sw/api/SubjectiveScores
+URL: http://localhost:9080/api/SubjectiveScores
 
 GET returns : {category, {judge, {teamNumber, SubjectiveScore (Java class fll.SubjectiveScore)}}}
 
@@ -156,7 +156,7 @@ Access to the tournament schedule.
 
 Java class: fll.web.api.ScheduleServlet
 
-URL: http://localhost:9080/fll-sw/api/Schedule
+URL: http://localhost:9080/api/Schedule
 
 GET returns the schedule (Java class fll.scheduler.TournamentSchedule)
 
@@ -196,7 +196,7 @@ Used to map subjective categories to columns in the schedule.
 
 Java class: fll.web.api.CategoryScheduleMappingServlet
 
-URL: http://localhost:9080/fll-sw/api/CategoryScheduleMapping
+URL: http://localhost:9080/api/CategoryScheduleMapping
 
 GET returns the a list of mappings of category names to columns (subjective stations) in the schedule (Java class fll.db.CategoryColumnMapping).
 
@@ -227,7 +227,7 @@ This describes everything about the tournament.
 
 Java class: fll.web.api.ChallengeDescriptionServlet
 
-URL: http://localhost:9080/fll-sw/api/ChallengeDescription
+URL: http://localhost:9080/api/ChallengeDescription
 
 GET returns the challenge description (Java class fll.xml.ChallengeDescription).
 Example output not show as it's quite large.
@@ -241,7 +241,7 @@ This information is also available through the challenge description API call.
 
 Java class: fll.web.api.challengeDescription.SubjectiveCategories
 
-URL: http://localhost::9080/fll-sw/api/ChallengeDescription/SubjectiveCategories
+URL: http://localhost::9080/api/ChallengeDescription/SubjectiveCategories
 
 Result is the list of subjective categories (Java class fll.xml.ScoreCategory) and the rubric for each category.
 Each score category has a title for display, name for internal reference, weight and a list of goals ("goals").

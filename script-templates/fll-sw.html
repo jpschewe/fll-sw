@@ -25,7 +25,7 @@
   }
 
   function serverIsUp() {
-    location.href = "http://localhost:9080/fll-sw";
+    location.href = "http://localhost:9080";
   }
 
   function serverIsDown() {
@@ -34,13 +34,13 @@
       alert("Tomcat is not running on localhost. Please execute bin/start-tomcat and then load this page again.");
     } else {
       setTimeout(function() {
-        ifUp("http://localhost:9080/fll-sw/images/blank.gif", serverIsUp,
+        ifUp("http://localhost:9080/images/blank.gif", serverIsUp,
             serverIsDown);
       }, 5000);
     }
   }
 
-  ifUp("http://localhost:9080/fll-sw/images/blank.gif", serverIsUp,
+  ifUp("http://localhost:9080/images/blank.gif", serverIsUp,
       serverIsDown);
 </script>
 
