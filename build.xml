@@ -9,21 +9,23 @@
 
 	<property name="app.name" value="${ant.project.name}" />
 
-	<property name="dir.build" value="${basedir}/build" />
-	<property name="dir.tomcat" value="${dir.build}/tomcat" />
-	<property name="dir.tomcat.src" value="${basedir}/tools/tomcat" />
+	<property name="dir.build" value="${basedir}/build.ant" />
 
 	<property name="dir.dist" value="dist" />
-	<property name="dir.web" value="${dir.tomcat}/webapps/${app.name}" />
-	<property name="tmp.dir.web" value="${basedir}/tmp-web" />
+	<property name="dir.web" value="${dir.build}/webapps/${app.name}" />
+	<property name="tmp.dir.web" value="${dir.build}/tmp-web" />
 
 	<property name="dir.classes" value="${dir.web}/WEB-INF/classes" />
 
 	<property name="dir.lib" value="${basedir}/lib" />
-	<property name="dir.src" value="${basedir}/src" />
+	<property name="dir.src" value="${basedir}/src/main/java" />
+	<property name="dir.resources" value="${basedir}/src/main/resources" />
 
-	<property name="dir.test.unit" value="test-unit" />
-	<property name="dir.test.integration" value="test-integration" />
+	<property name="dir.test.unit.src" value="${basedir}/src/test/java" />
+	<property name="dir.test.unit.resources" value="${basedir}/src/test/resources" />
+
+	<property name="dir.test.integration.src" value="${basedir}/src/integration-test/java" />
+	<property name="dir.test.integration.resources" value="${basedir}/src/integration-test/resources" />
 
 	<property name="dir.tmp" value="${basedir}/tmp" />
 	<property name="dir.src.jsp" value="${dir.build}/jsp_source" />
@@ -36,8 +38,7 @@
 	<property name="findbugs.home" value="${dir.lib}/findbugs-3.0.1" />
 	<property name="dir.lib.findbugs" value="${findbugs.home}/lib" />
 
-	<property name="coverage.dir.web" value="${dir.tomcat}/webapps/TEST-${app.name}" />
-	<property name="coverage.dir.classes" value="${coverage.dir.web}/WEB-INF/classes" />
+	<property name="coverage.dir.classes" value="${dir.coverage}/classes" />
 
 	<import file="${basedir}/buildscript-imports.xml" />
 
@@ -100,6 +101,24 @@
 
 	<taskdef classpathref="cobertura.task.classpath" resource="tasks.properties" />
 
+	<path id="tomcat.base.classpath">
+		<pathelement location="${dir.lib}/ecj-3.15.0.jar" />
+		<pathelement location="${dir.lib}/tomcat-annotations-api-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-api-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-el-api-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-embed-core-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-embed-el-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-embed-jasper-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-embed-websocket-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-jasper-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-jasper-el-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-jsp-api-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-juli-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-servlet-api-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-util-9.0.16.jar" />
+		<pathelement location="${dir.lib}/tomcat-util-scan-9.0.16.jar" />
+	</path>
+
 	<path id="base.classpath">
 		<!-- the classpath without the classes dir -->
 		<pathelement location="${dir.lib}/xmlunit-1.4.jar" />
@@ -138,8 +157,8 @@
 		<pathelement location="${dir.lib}/dom4j-1.6.1.jar" />
 
 		<!-- findbugs annotations -->
-		<pathelement location="${dir.lib.findbugs}/annotations.jar" />
-		<pathelement location="${dir.lib.findbugs}/jsr305.jar" />
+		<pathelement location="${dir.lib}/annotations.jar" />
+		<pathelement location="${dir.lib}/jsr305.jar" />
 
 		<!-- used for password hashes -->
 		<pathelement location="${dir.lib}/commons-codec-1.10.jar" />
@@ -160,10 +179,7 @@
 		<!-- use commons-lang3 -->
 		<pathelement location="${dir.lib}/commons-lang3-3.4.jar" />
 
-		<!-- tomcat libraries -->
-		<pathelement location="${dir.tomcat.src}/lib/servlet-api.jar" />
-		<pathelement location="${dir.tomcat.src}/lib/websocket-api.jar" />
-		<pathelement location="${dir.tomcat.src}/lib/jsp-api.jar" />
+		<path refid="tomcat.base.classpath" />
 
 		<!-- file upload -->
 		<pathelement location="${dir.lib}/commons-fileupload-1.3.jar" />
@@ -208,18 +224,18 @@
 	</path>
 
 	<!-- ==================== Code coverage ==================== -->
-	<target name="create.test.webapp" depends="compile">
-		<copy todir="${coverage.dir.web}">
-			<fileset dir="${dir.web}" />
+	<target name="coverage.instr" description="Instrument files for code coverage">
+		<mkdir dir="${dir.coverage.classes}" />
+
+
+		<!-- Can't use todir because only classes are copied to the destination, not interfaces.
+			So instead copy all of the files over and then instrument them in place. -->
+		<copy todir="${coverage.dir.classes}">
+			<fileset dir="${dir.classes}">
+			</fileset>
 		</copy>
-	</target>
-
-	<target name="coverage.instr" depends="create.test.webapp" description="Instrument files for code coverage">
-		<mkdir dir="${dir.coverage}" />
 
 
-		<!-- don't use todir because only classes are copied to the destination, not interfaces.
-			So instead copy all of the files over and then instrument them. -->
 		<cobertura-instrument datafile="${dir.coverage}/cobertura.ser">
 			<auxClasspath>
 				<path refid="test.classpath" />
@@ -229,24 +245,16 @@
 				<include name="**/*.class" />
 			</fileset>
 		</cobertura-instrument>
-		<copy file="${dir.coverage}/cobertura.ser" tofile="${dir.coverage}/tomcat-cobertura.ser" />
 	</target>
 
 	<target name="coverage.report" description="Generate coverage report">
-		<cobertura-merge datafile="${dir.coverage}/merge-cobertura.ser">
-			<fileset dir="${dir.coverage}">
-				<include name="cobertura.ser" />
-				<include name="tomcat-cobertura.ser" />
-			</fileset>
-		</cobertura-merge>
-
 		<mkdir dir="${dir.reports}/coverage" />
-		<cobertura-report format="html" destdir="${dir.reports}/coverage" datafile="${dir.coverage}/merge-cobertura.ser">
+		<cobertura-report format="html" destdir="${dir.reports}/coverage" datafile="${dir.coverage}/cobertura.ser">
 			<fileset dir="${dir.src}">
 				<include name="**/*.java" />
 			</fileset>
 		</cobertura-report>
-		<cobertura-report format="xml" destdir="${dir.reports}/coverage" datafile="${dir.coverage}/merge-cobertura.ser">
+		<cobertura-report format="xml" destdir="${dir.reports}/coverage" datafile="${dir.coverage}/cobertura.ser">
 			<fileset dir="${dir.src}">
 				<include name="**/*.java" />
 			</fileset>
@@ -257,14 +265,10 @@
 
 	<!-- ==================== Setup/Prepare/Clean ==================== -->
 	<target name="init" depends="git.revision">
-		<tstamp>
-			<format property="TODAY" pattern="yyyy-MM-dd_HH:mm:ss" />
-		</tstamp>
-
 		<tstamp />
 
 		<uptodate property="jsp.notRequired" targetfile="${dir.src.jsp}/.timestamp">
-			<srcfiles dir="web" includes="**" />
+			<srcfiles dir="src/main/webapp" includes="**" />
 		</uptodate>
 
 		<!-- set arch -->
@@ -331,7 +335,7 @@
 			<path refid="base.classpath" />
 			<pathelement location="classes" />
 		</path>
-		<buildscript scripts.dir="${dir.build}" scripts.basedir="${basedir}" scripts.root="tomcat/webapps/fll-sw/WEB-INF" scripts.path="launcher.classpath" script.name="fll-sw" class.main="fll.Launcher" java.args="-Dapp.name=fll-sw -Dlogroot=./" template.name="run" />
+		<buildscript scripts.dir="${dir.build}" scripts.basedir="${basedir}" scripts.root="webapps/fll-sw/WEB-INF" scripts.path="launcher.classpath" script.name="fll-sw" class.main="fll.Launcher" java.args="-Dapp.name=launcher" template.name="run" />
 		<!-- don't want the windows bat file, want them to use the executable -->
 		<delete file="${dir.build}/fll-sw.bat" />
 
@@ -356,15 +360,7 @@
 		<sequential>
 			<fixcrlf srcdir="@{dir}/bin" includes="*.sh" eol="unix" />
 			<fixcrlf srcdir="@{dir}/bin" includes="*.bat" eol="dos" />
-			<fixcrlf srcdir="@{dir}/tomcat/bin" includes="*.sh" eol="unix" />
-			<fixcrlf srcdir="@{dir}/tomcat/bin" includes="*.bat" eol="dos" />
 			<fixcrlf file="@{dir}/fll-sw.sh" eol="unix" />
-
-			<chmod perm="+x">
-				<fileset dir="@{dir}/tomcat/bin">
-					<include name="*.sh" />
-				</fileset>
-			</chmod>
 
 			<chmod perm="+x">
 				<fileset dir="@{dir}/bin">
@@ -376,18 +372,13 @@
 				</fileset>
 			</chmod>
 
-			<chmod perm="+x">
-				<fileset dir="@{dir}">
-					<include name="menu-entries/*.sh" />
-				</fileset>
-			</chmod>
-
 		</sequential>
 	</macrodef>
 
 	<macrodef name="compile">
 		<attribute name="dir.dest" />
 		<attribute name="dir.src" />
+		<attribute name="dir.resources" />
 		<element name="classpath-elements" />
 
 		<sequential>
@@ -395,7 +386,7 @@
 
 			<!-- Copy static files from external dependencies as needed -->
 			<copy todir="@{dir.dest}">
-				<fileset dir="@{dir.src}">
+				<fileset dir="@{dir.resources}">
 					<exclude name="**/*.java" />
 				</fileset>
 			</copy>
@@ -410,7 +401,7 @@
 	</macrodef>
 
 	<target name="compile.classes" depends="copy.web.files" description="Compile Java sources">
-		<compile dir.dest="${dir.classes}" dir.src="${dir.src}">
+		<compile dir.dest="${dir.classes}" dir.src="${dir.src}" dir.resources="${dir.resources}">
 			<classpath-elements>
 				<path refid="application.classpath" />
 			</classpath-elements>
@@ -420,7 +411,7 @@
 	<target name="compile.test.all" depends="compile.test.unit, compile.test.integration" description="Compile all tests" />
 
 	<target name="compile.test.unit" depends="copy.web.files,compile" description="Compile the unit tests">
-		<compile dir.dest="${coverage.dir.classes}" dir.src="${dir.test.unit}">
+		<compile dir.dest="${coverage.dir.classes}" dir.src="${dir.test.unit.src}" dir.resources="${dir.test.unit.resources}">
 			<classpath-elements>
 				<path refid="test.classpath" />
 			</classpath-elements>
@@ -428,14 +419,23 @@
 	</target>
 
 	<target name="compile.test.integration" depends="copy.web.files,compile,compile.test.unit" description="Compile the integration tests">
-		<compile dir.dest="${coverage.dir.classes}" dir.src="${dir.test.integration}">
+		<compile dir.dest="${coverage.dir.classes}" dir.src="${dir.test.integration.src}" dir.resources="${dir.test.integration.resources}">
 			<classpath-elements>
 				<path refid="test.classpath" />
 			</classpath-elements>
 		</compile>
 	</target>
 
-	<import file="${dir.tomcat.src}/bin/catalina-tasks.xml" />
+	<!-- ====== tomcat task setup ====== -->
+	<path id="tomcat.task.classpath">
+		<pathelement location="${dir.lib}/tomcat-catalina-ant-9.0.14.jar" />
+
+		<path refid="tomcat.base.classpath" />
+	</path>
+	<taskdef classpathref="tomcat.task.classpath" resource="org/apache/catalina/ant/catalina.tasks" />
+
+	<!-- ====== end tomcat task setup ===== -->
+
 	<target name="generate.jsp" depends="copy.web.files" description="Generate Java sources for JSP files" unless="jsp.notRequired">
 		<mkdir dir="${dir.src.jsp}" />
 
@@ -448,7 +448,7 @@
 
 		<mkdir dir="${dir.src.jsp}" />
 
-		<jasper validateXml="false" uriroot="${tmp.dir.web}" webXmlFragment="${dir.src.jsp}/generated_web.xml" outputDir="${dir.src.jsp}" poolingEnabled="false" />
+		<jasper validateXml="false" uriroot="${tmp.dir.web}" webXmlInclude="${dir.src.jsp}/generated_web_include.xml" webFragmentXml="${dir.src.jsp}/generated_web_fragment.xml" outputDir="${dir.src.jsp}" poolingEnabled="false" />
 
 		<delete dir="${tmp.dir.web}" deleteonexit="true" failonerror="false" />
 
@@ -456,101 +456,25 @@
 	</target>
 
 	<target name="compile.jsp" depends="compile.classes,generate.jsp" description="Compile JSP sources">
-		<compile dir.src="${dir.src.jsp}" dir.dest="${dir.src.jsp}">
+		<compile dir.src="${dir.src.jsp}" dir.resources="${dir.src.jsp}" dir.dest="${dir.src.jsp}">
 			<classpath-elements>
 				<path refid="application.classpath" />
 				<fileset dir="${dir.web}/WEB-INF/lib">
-					<include name="*.jar" />
-				</fileset>
-				<fileset dir="${dir.tomcat}/lib">
-					<include name="*.jar" />
-				</fileset>
-				<fileset dir="${dir.tomcat}/bin">
 					<include name="*.jar" />
 				</fileset>
 			</classpath-elements>
 		</compile>
 	</target>
 
-
-	<!-- ================ Tomcat Targets =========== -->
-	<target name="tomcat.expand" description="copy tomcat to the right place in the build directory">
-		<mkdir dir="${dir.tomcat}" />
-		<copy todir="${dir.tomcat}">
-			<fileset dir="${dir.tomcat.src}" />
-		</copy>
-	</target>
-
-	<target name="reload" description="alias for tomcat.reload" depends="tomcat.reload" />
-	<target name="tomcat.reload" description="Load new code into tomcat">
-		<antcall target="tomcat.stop" />
-		<antcall target="tomcat.start" />
-	</target>
-
-	<target name="start" description="alias for tomcat.start" depends="tomcat.start" />
-	<target name="tomcat.start" depends="tomcat.expand,compile" description="Compile and start up tomcat">
-		<echo message="Starting tomcat" />
-		<run-tomcat operation="start" spawn="true" />
-
-		<echo message="Waiting for tomcat to startup" />
-		<waitfor maxwait="1" maxwaitunit="minute" checkevery="1000" checkeveryunit="millisecond" timeoutproperty="fll-sw.timeout">
-			<http url="http://localhost:9080/" />
-		</waitfor>
-		<fail message="Access to timed out to http://localhost:9080/ " if="fll-sw.timeout" />
-	</target>
-
-	<target name="stop" description="alias for tomcat.stop" depends="tomcat.stop" />
-	<target name="tomcat.stop" depends="tomcat.expand" description="shut down tomcat">
-		<echo message="Shutting down tomcat" />
-		<run-tomcat operation="stop" spawn="false" />
-
-		<echo message="Waiting for tomcat to shutdown" />
-		<waitfor maxwait="5" maxwaitunit="minute" checkevery="1000" checkeveryunit="millisecond">
-			<not>
-				<http url="http://localhost:9080/" />
-			</not>
-		</waitfor>
-	</target>
-
-	<macrodef name="run-tomcat">
-		<attribute name="spawn" />
-		<attribute name="operation" />
-
-		<sequential>
-			<java classname="org.apache.catalina.startup.Bootstrap" fork="true" spawn="@{spawn}" taskname="tomcat">
-				<sysproperty key="net.sourceforge.cobertura.datafile" value="${dir.coverage}/tomcat-cobertura.ser" />
-
-				<classpath>
-					<!-- tomcat jars -->
-					<pathelement location="${dir.tomcat}/bin/bootstrap.jar" />
-					<pathelement location="${dir.tomcat}/bin/tomcat-juli.jar" />
-
-					<!-- for running instrumented unit tests -->
-					<path id="cobertura.classpath" />
-
-				</classpath>
-				<sysproperty key="java.util.logging.manager" value="org.apache.juli.ClassLoaderLogManager" />
-				<sysproperty key="java.util.logging.config.file" file="${dir.tomcat}/conf/logging.properties" />
-				<sysproperty key="java.endorsed.dirs" file="${dir.tomcat}/common/endorsed" />
-				<sysproperty key="catalina.base" file="${dir.tomcat}" />
-				<sysproperty key="catalina.home" file="${dir.tomcat}" />
-				<sysproperty key="java.io.tmpdir" file="${dir.tomcat}/temp" />
-
-				<arg line="@{operation}" />
-			</java>
-		</sequential>
-	</macrodef>
-
-
-	<target name="tomcat.check-logs" description="Check for errors in the tomcat logs">
-		<fileset id="matches" dir="${dir.tomcat}/logs">
+	<target name="check-logs" description="Check for errors in the logs">
+		<fileset id="matches" dir="${dir.build}">
 			<patternset id="files">
-				<include name="localhost*.log" />
+				<include name="fll-sw_*.log" />
 			</patternset>
-			<containsregexp expression="(SEVERE)|(ERROR)" />
+			<containsregexp expression="(FATAL)|(ERROR)" />
 		</fileset>
 
-		<fail message="Errors found in the tomcat logs">
+		<fail message="Errors found in the logs">
 			<condition>
 				<resourcecount when="greater" count="0" refid="matches" />
 			</condition>
@@ -620,7 +544,7 @@
 	<target name="javadoc" description="Create Javadoc API documentation">
 
 		<mkdir dir="${dir.build}/docs/api" />
-		<javadoc sourcepath="src" windowtitle="${app.name}" destdir="${dir.build}/docs/api" packagenames="fll.*" use="true" splitindex="true" breakiterator="yes">
+		<javadoc sourcepath="src/main/java" windowtitle="${app.name}" destdir="${dir.build}/docs/api" packagenames="fll.*" use="true" splitindex="true" breakiterator="yes">
 			<classpath>
 				<path refid="application.classpath" />
 				<pathelement location="${dir.src}" />
@@ -668,15 +592,7 @@
 		<!-- copy web stuff -->
 		<copy todir="${dir.dist}">
 			<fileset dir="${dir.build}">
-				<include name="tomcat/**" />
-				<exclude name="tomcat/webapps/TEST-${app.name}/**" />
-			</fileset>
-		</copy>
-
-		<!-- copy menu entry stuff -->
-		<copy todir="${dir.dist}">
-			<fileset dir="${basedir}">
-				<include name="menu-entries/**" />
+				<include name="webapps/**" />
 			</fileset>
 		</copy>
 
@@ -689,7 +605,7 @@
 			<zipfileset dir="${dir.dist}" prefix="${app.name}-v${app.version.short}">
 				<exclude name="**/*.sh" />
 				<exclude name="**/WEB-INF/flldb.*" />
-				<exclude name="tomcat/logs/*" />
+				<exclude name="*.log" />
 			</zipfileset>
 		</zip>
 		<echo message="The distribution file is ${dir.build}/${app.name}-${app.version.short}.zip" />
@@ -707,7 +623,7 @@
 			<!-- Create build directory and copy static content -->
 			<mkdir dir="@{webdir}" />
 			<copy todir="@{webdir}">
-				<fileset dir="web">
+				<fileset dir="src/main/webapp">
 					<exclude name="**/*.java" />
 				</fileset>
 			</copy>
@@ -721,13 +637,12 @@
 
 			<!-- special files that need overwrite -->
 			<copy todir="@{webdir}" overwrite="true">
-				<fileset dir="web">
+				<fileset dir="src/main/webapp">
 					<include name="**/*.appcache" />
 					<include name="**/subjective.js" />
 				</fileset>
 				<filterset>
 					<filter token="APP-VERSION" value="${app.version.long}" />
-					<filter token="TODAY" value="${TODAY}" />
 				</filterset>
 			</copy>
 			<copy todir="@{webdir}/WEB-INF/classes" overwrite="true">
@@ -736,7 +651,6 @@
 				</fileset>
 				<filterset>
 					<filter token="APP-VERSION" value="${app.version.long}" />
-					<filter token="TODAY" value="${TODAY}" />
 				</filterset>
 			</copy>
 
@@ -750,17 +664,11 @@
 					<include name="*.jar" />
 				</fileset>
 			</copy>
-			<copy todir="@{webdir}/WEB-INF/lib">
-				<fileset dir="${dir.lib.findbugs}">
-					<include name="annotations.jar" />
-					<include name="jsr305.jar" />
-				</fileset>
-			</copy>
 		</sequential>
 	</macrodef>
 
 
-	<target name="copy.web.files" depends="init,tomcat.expand" description="prepare the web directory">
+	<target name="copy.web.files" depends="init" description="prepare the web directory">
 		<copy-web-files webdir="${dir.web}" />
 	</target>
 
@@ -814,6 +722,7 @@
 
 			<junit fork="yes" haltonfailure="false" dir="@{working-dir}" failureproperty="test.failed">
 				<sysproperty key="net.sourceforge.cobertura.datafile" value="${dir.coverage}/cobertura.ser" />
+				<sysproperty key="inside.test" value="true" />
 
 				<classpath>
 					<path refid="coverage.test.classpath" />
@@ -833,7 +742,6 @@
 
 	<!-- one shot tests -->
 	<target name="test.single" depends="compile,compile.test.all,coverage.instr" description="Run a single unit test specified by junit.test.class property.">
-		<antcall target="tomcat.start" />
 		<delete-database />
 
 		<mkdir dir="${dir.build}/screenshots" />
@@ -846,29 +754,16 @@
 			<formatter type="plain" usefile="false" />
 			<test name="${junit.test.class}" if="junit.test.class" todir="${dir.build}/test-results" />
 		</junit>
-
-		<antcall target="tomcat.stop" />
 	</target>
 
 	<!-- unit tests -->
 	<target name="test.unit" depends="compile,compile.test.unit,coverage.instr" description="Run the unit tests">
-		<run-tests working-dir="${dir.build}" dir.src="${dir.test.unit}" />
+		<run-tests working-dir="${dir.build}" dir.src="${dir.test.unit.src}" />
 	</target>
 
 	<!-- integration tests -->
 	<target name="test.integration" depends="compile,compile.test.integration,coverage.instr" description="Run the integration tests">
-
-		<!-- setup cobertura flush application -->
-		<copy file="${dir.lib}/cobertura/coberturaFlush.war" todir="${dir.tomcat}/webapps" />
-
-		<antcall target="tomcat.start" />
-
-		<run-tests working-dir="${dir.build}" dir.src="${dir.test.integration}" />
-
-		<!-- force cobertura information to be written -->
-		<get src="http://localhost:9080/coberturaFlush/flushCobertura" dest="${dir.build}" />
-
-		<antcall target="tomcat.stop" />
+		<run-tests working-dir="${dir.build}" dir.src="${dir.test.integration.src}" />
 	</target>
 
 	<target name="sloccount" description="Run sloccount on the code">
@@ -877,9 +772,6 @@
 			<arg value="--xml" />
 			<arg value="--out=${basedir}/cloc.xml" />
 			<arg value="src" />
-			<arg value="test-integration" />
-			<arg value="test-unit" />
-			<arg value="web" />
 		</exec>
 	</target>
 
@@ -890,7 +782,6 @@
 		<antcall target="docs" />
 		<antcall target="findbugs" />
 		<antcall target="test.all" />
-		<antcall target="tomcat.check-logs" />
 		<antcall target="coverage.report" />
 	</target>
 

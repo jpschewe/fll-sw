@@ -1,9 +1,3 @@
-Tomcat
-=======
-
-Tomcat is included as part of the fll-sw application. We have made some config changes to tomcat for our custom configuration.
-
-
 ant
 =====
 

@@ -12,9 +12,8 @@ Documentation on the database schema, API, workflows, etc. for the [current rele
     * git clone git@github.com:jpschewe/fll-sw (read-only)
     * Or you can create a fork and then submit a pull request when you have changes to merge in
   1. Build by changing to `fll-sw` and running `./ant.sh`
-  1. You can start tomcat with `./ant.sh tomcat.start`
-  1. You can stop tomcat with `./ant.sh tomcat.stop`, the target `tomcat.reload` can be useful when working on servlet code.
-  1. We have a continuous integration server running using [Jenkins](http://jenkins-ci.org/). You can access it at [http://mtu.net/jenkins/job/fll-sw/](http://mtu.net/jenkins/job/fll-sw/). The master branch is built by the job 'fll-sw', all other branches are built by 'fll-sw-feature-branches'.
+  1. Start the application with `./build/fll-sw.sh` or `./build/fll-sw.exe`
+  1. We have a continuous integration server running using [Jenkins](http://jenkins-ci.org/). You can access it at [http://mtu.net/jenkins/job/FLL-SW/](http://mtu.net/jenkins/job/FLL-SW/). There is a job for each active branch.
 
 You can edit using your favorite Java IDE. We provide project files for Eclipse. See the eclipse folder for the launchers and the code formatter profile.
 
@@ -101,7 +100,7 @@ ensure your code is correct.
 # References to Documentation
 
   * [Java](http://download.oracle.com/javase/8/docs/api/index.html)
-  * [Tomcat API - 8](http://tomcat.apache.org/tomcat-8.0-doc/api/index.html)
+  * [Tomcat API - 9](http://tomcat.apache.org/tomcat-9.0-doc/api/index.html)
   * [EL - 3.0](http://docs.oracle.com/javaee/7/api/javax/el/package-summary.html)
   * [Servlet - 3.1](http://docs.oracle.com/javaee/7/api/javax/servlet/package-summary.html)
   * [JSP - 2.3](http://docs.oracle.com/javaee/7/api/javax/servlet/jsp/package-summary.html)
