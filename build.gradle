@@ -17,7 +17,6 @@ ext {
     jackson_version = "2.9.0"
     slf4j_version = "1.7.5"
     tomcat_version = "9.0.16"
-    junit_version = "4.12"
     itext_version = "5.5.13"
     poi_version = "3.10.1"
 }
@@ -74,8 +73,13 @@ dependencies {
 	compile name: "opencsv-jps-2.4"
 	
 	
-    testCompile group: 'junit', name: 'junit', version: project.junit_version
-    // FIXME need to add other jar files
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile group: 'org.hamcrest', name: 'hamcrest', version: '2.1'
+    testCompile group: 'org.easytesting', name: 'fest-swing', version: '1.2'
+    testCompile group: 'net.sourceforge.htmlunit', name: 'htmlunit', version: '2.22'
+    testCompile group: 'org.seleniumhq.selenium', name: 'selenium-server', version: '3.141.59'
+    testCompile group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '1.6.0'
+    
 }
 
 // Define the main class for the application
