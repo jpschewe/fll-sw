@@ -1,0 +1,83 @@
+// -*- java -*-
+
+plugins {
+	id 'java'
+	id 'application'
+	id "com.dorongold.task-tree" version "1.3.1"
+}
+
+repositories {
+    jcenter()
+    flatDir {
+      dirs 'gradle-repo'
+    }
+}
+
+ext {
+    jackson_version = "2.9.0"
+    slf4j_version = "1.7.5"
+    tomcat_version = "9.0.16"
+    junit_version = "4.12"
+    itext_version = "5.5.13"
+    poi_version = "3.10.1"
+}
+
+dependencies {
+    compile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: project.tomcat_version
+    compile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-jasper', version: project.tomcat_version
+    compile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-websocket', version: project.tomcat_version
+    compile group: 'org.apache.tomcat', name: 'tomcat-jasper', version: project.tomcat_version
+    compile group: 'org.apache.tomcat', name: 'tomcat-jasper-el', version: project.tomcat_version
+    compile group: 'org.apache.tomcat', name: 'tomcat-jsp-api', version: project.tomcat_version
+
+	compile group: "xmlunit", name: "xmlunit", version: "1.4"
+	compile group: "org.apache.commons", name: "commons-lang3", version: "3.4"
+	compile group: "commons-cli", name: "commons-cli", version: "1.2"
+	compile group: "org.hsqldb", name: "hsqldb", version: "2.4.1"
+	
+	compile group: "com.itextpdf", name: "itextpdf", version: project.itext_version
+	
+	compile group: "log4j", name: "log4j", version: "1.2.17"
+	compile group: "log4j", name: "apache-log4j-extras", version: "1.2.17"
+	
+	compile group: "org.slf4j", name: "slf4j-api", version: project.slf4j_version
+	compile group: "org.slf4j", name: "slf4j-log4j12", version: project.slf4j_version
+	
+	compile group: "org.apache.poi", name: "poi-ooxml", version: project.poi_version
+	
+	compile group: "com.google.code.findbugs", name: "annotations", version: "3.0.1"
+	compile group: "com.google.code.findbugs", name: "jsr305", version: "3.0.1"
+	
+	compile group: "com.fasterxml.jackson.core", name: "jackson-databind", version: project.jackson_version
+	compile group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: project.jackson_version
+
+	compile group: "commons-io", name: "commons-io", version: "2.5"
+		
+	compile group: "net.sourceforge.schemaspy", name: "schemaspy", version: "5.0.0"
+		
+	compile group: "dnsjava", name: "dnsjava", version: "2.1.7"
+	
+	compile group: "commons-fileupload", name: "commons-fileupload", version: "1.3"
+	
+	compile group: "org.apache.tika", name: "tika-core", version: "1.16"
+	
+	compile group: "com.diffplug.durian", name: "durian-core", version: "1.1.0"
+	
+	compile group: "it.sauronsoftware", name: "junique", version: "1.0.4"
+		
+	compile group: "com.googlecode.log4jdbc", name: "log4jdbc", version: "1.2"
+	
+	compile group: "net.java.linoleum", name: "jlfgr", version: "1_0"
+	
+	// TODO: get these from repositories somewhere
+	compile name: "JonsInfra-1.6"
+	compile name: "opencsv-jps-2.4"
+	
+	
+    testCompile group: 'junit', name: 'junit', version: project.junit_version
+    // FIXME need to add other jar files
+}
+
+// Define the main class for the application
+mainClassName = 'fll.Launcher'
+
