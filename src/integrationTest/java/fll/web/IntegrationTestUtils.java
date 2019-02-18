@@ -40,6 +40,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.log4j.Logger;
+import org.fest.swing.image.ScreenshotTaker;
 import org.junit.Assert;
 import org.junit.rules.ExternalResource;
 import org.openqa.selenium.Alert;
@@ -278,7 +279,7 @@ public final class IntegrationTestUtils {
 
       final WebElement createEle = selenium.findElement(By.name("createdb"));
       createEle.click();
-      
+
       Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
 
       try {
@@ -293,7 +294,7 @@ public final class IntegrationTestUtils {
       }
 
       Thread.sleep(2
-                   * WAIT_FOR_PAGE_LOAD_MS);
+          * WAIT_FOR_PAGE_LOAD_MS);
 
       selenium.findElement(By.id("success"));
 
@@ -310,7 +311,7 @@ public final class IntegrationTestUtils {
       final WebElement submitElement = selenium.findElement(By.name("submit_create_user"));
       submitElement.click();
       Thread.sleep(2
-                   * WAIT_FOR_PAGE_LOAD_MS);
+          * WAIT_FOR_PAGE_LOAD_MS);
 
       selenium.findElement(By.id("success-create-user"));
 
@@ -808,6 +809,27 @@ public final class IntegrationTestUtils {
         throw new RuntimeException(e);
       }
     }
+  }
+
+  public static final ScreenshotTaker SCREENSHOT_TAKER = new ScreenshotTaker();
+
+  /**
+   * Save a screen shot. Used for UI tests.
+   * 
+   * @throws IOException if there is an error saving the file
+   */
+  public static void saveScreenshot() throws IOException {
+    final File screenshotDir = new File("screenshots");
+    if (!screenshotDir.exists()) {
+      screenshotDir.mkdirs();
+    }
+
+    final File screenshot = File.createTempFile("fll", ".png", screenshotDir);
+    LOGGER.error("Screenshot saved to "
+        + screenshot.getAbsolutePath());
+    // file can't exist when calling save desktop as png
+    screenshot.delete();
+    SCREENSHOT_TAKER.saveDesktopAsPng(screenshot.getAbsolutePath());
   };
 
 }

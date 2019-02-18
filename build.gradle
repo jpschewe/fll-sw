@@ -1,9 +1,23 @@
 // -*- java -*-
 
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'org.unbroken-dome.gradle-plugins:gradle-testsets-plugin:1.4.5'
+    }
+}    
+
 plugins {
 	id 'java'
 	id 'application'
 	id "com.dorongold.task-tree" version "1.3.1"
+	id 'org.unbroken-dome.test-sets' version "2.1.1"
+}
+
+testSets {
+    integrationTest
 }
 
 repositories {
@@ -75,13 +89,22 @@ dependencies {
 	
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile group: 'org.hamcrest', name: 'hamcrest', version: '2.1'
-    testCompile group: 'org.easytesting', name: 'fest-swing', version: '1.2'
-    testCompile group: 'net.sourceforge.htmlunit', name: 'htmlunit', version: '2.22'
-    testCompile group: 'org.seleniumhq.selenium', name: 'selenium-server', version: '3.141.59'
-    testCompile group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '1.6.0'
+    
+    // allow integration tests to reference code in the test directory
+    integrationTestCompile sourceSets.test.output
+        
+    integrationTestCompile group: 'org.easytesting', name: 'fest-swing', version: '1.2'
+    integrationTestCompile group: 'net.sourceforge.htmlunit', name: 'htmlunit', version: '2.22'
+    integrationTestCompile group: 'org.seleniumhq.selenium', name: 'selenium-server', version: '3.141.59'
+    integrationTestCompile group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '1.6.0'
     
 }
 
 // Define the main class for the application
 mainClassName = 'fll.Launcher'
+
+check.dependsOn integrationTest
+integrationTest.mustRunAfter test
+
+
 
