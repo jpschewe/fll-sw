@@ -52,6 +52,7 @@ import fll.db.ImportDB;
 import fll.db.ImportDBTest;
 import fll.db.Queries;
 import fll.util.LogUtils;
+import fll.web.IntegrationTestUtils;
 import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.ChallengeDescription;
 
@@ -141,16 +142,16 @@ public class SubjectiveFrameTest {
       });
       window = new FrameFixture(frame);
     } catch (final AssertionError e) {
-      TestUtils.saveScreenshot();
+      IntegrationTestUtils.saveScreenshot();
       throw e;
     } catch (final RuntimeException e) {
-      TestUtils.saveScreenshot();
+      IntegrationTestUtils.saveScreenshot();
       throw e;
     } catch (final IOException e) {
-      TestUtils.saveScreenshot();
+      IntegrationTestUtils.saveScreenshot();
       throw e;
     } catch (final SQLException e) {
-      TestUtils.saveScreenshot();
+      IntegrationTestUtils.saveScreenshot();
       throw e;
     } finally {
       SQLFunctions.close(connection);
@@ -202,10 +203,10 @@ public class SubjectiveFrameTest {
       final JOptionPaneFixture optionPane = JOptionPaneFinder.findOptionPane().using(window.robot);
       optionPane.button(JButtonMatcher.withText("Yes")).click();
     } catch (final AssertionError e) {
-      TestUtils.saveScreenshot();
+      IntegrationTestUtils.saveScreenshot();
       throw e;
     } catch (final RuntimeException e) {
-      TestUtils.saveScreenshot();
+      IntegrationTestUtils.saveScreenshot();
       throw e;
     }
   }
@@ -230,10 +231,10 @@ public class SubjectiveFrameTest {
       final JOptionPaneFixture optionPane = JOptionPaneFinder.findOptionPane().using(window.robot);
       optionPane.button(JButtonMatcher.withText("Yes")).click();
     } catch (final AssertionError e) {
-      TestUtils.saveScreenshot();
+      IntegrationTestUtils.saveScreenshot();
       throw e;
     } catch (final RuntimeException e) {
-      TestUtils.saveScreenshot();
+      IntegrationTestUtils.saveScreenshot();
       throw e;
     }
   }
@@ -259,10 +260,10 @@ public class SubjectiveFrameTest {
       final JOptionPaneFixture optionPane = JOptionPaneFinder.findOptionPane().using(window.robot);
       optionPane.button(JButtonMatcher.withText("Yes")).click();
     } catch (final AssertionError e) {
-      TestUtils.saveScreenshot();
+      IntegrationTestUtils.saveScreenshot();
       throw e;
     } catch (final RuntimeException e) {
-      TestUtils.saveScreenshot();
+      IntegrationTestUtils.saveScreenshot();
       throw e;
     }
   }
@@ -293,10 +294,10 @@ public class SubjectiveFrameTest {
       final JOptionPaneFixture optionPane = JOptionPaneFinder.findOptionPane().using(window.robot);
       optionPane.button(JButtonMatcher.withText("Yes")).click();
     } catch (final AssertionError e) {
-      TestUtils.saveScreenshot();
+      IntegrationTestUtils.saveScreenshot();
       throw e;
     } catch (final RuntimeException e) {
-      TestUtils.saveScreenshot();
+      IntegrationTestUtils.saveScreenshot();
       throw e;
     }
   }
@@ -334,10 +335,10 @@ public class SubjectiveFrameTest {
       final JOptionPaneFixture optionPane = JOptionPaneFinder.findOptionPane().using(window.robot);
       optionPane.button(JButtonMatcher.withText("Yes")).click();
     } catch (final AssertionError e) {
-      TestUtils.saveScreenshot();
+      IntegrationTestUtils.saveScreenshot();
       throw e;
     } catch (final RuntimeException e) {
-      TestUtils.saveScreenshot();
+      IntegrationTestUtils.saveScreenshot();
       throw e;
     }
   }

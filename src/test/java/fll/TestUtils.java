@@ -12,7 +12,6 @@ import java.nio.file.Path;
 import java.util.Comparator;
 
 import org.apache.log4j.Logger;
-import org.fest.swing.image.ScreenshotTaker;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -50,22 +49,6 @@ public final class TestUtils {
         }
       }
     }
-  }
-
-  private static final ScreenshotTaker SCREENSHOT_TAKER = new ScreenshotTaker();
-
-  public static void saveScreenshot() throws IOException {
-    final File screenshotDir = new File("screenshots");
-    if (!screenshotDir.exists()) {
-      screenshotDir.mkdirs();
-    }
-
-    final File screenshot = File.createTempFile("fll", ".png", screenshotDir);
-    LOG.error("Screenshot saved to "
-        + screenshot.getAbsolutePath());
-    // file can't exist when calling save desktop as png
-    screenshot.delete();
-    SCREENSHOT_TAKER.saveDesktopAsPng(screenshot.getAbsolutePath());
   }
 
   /**
