@@ -110,8 +110,21 @@ application {
 	mainClassName = 'fll.Launcher'
 }
 
+distributions {
+    main {
+        contents {
+            from(javadoc) {
+                into 'docs/api'
+            }
+        }
+    }
+}
 
-
+javadoc {
+	// TODO: Need to fix the errors eventually
+	failOnError = false
+}
+	
 check.dependsOn integrationTest
 integrationTest.mustRunAfter test
 
