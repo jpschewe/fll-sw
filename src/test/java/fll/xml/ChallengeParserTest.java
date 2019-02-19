@@ -46,7 +46,7 @@ public class ChallengeParserTest {
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
     } catch (final RuntimeException e) {
-      if (e.getMessage().contains("cvc-identity-constraint")) {
+      if (e.getMessage().contains("not found for identity constraint")) {
         exception = true;
       } else {
         throw e;
@@ -68,7 +68,7 @@ public class ChallengeParserTest {
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
     } catch (final ChallengeXMLException e) {
-      if (e.getMessage().contains("cvc-identity-constraint")) {
+      if (e.getMessage().contains("not found for identity constraint")) {
         exception = true;
       } else {
         throw e;
@@ -100,7 +100,7 @@ public class ChallengeParserTest {
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
     } catch (final ChallengeXMLException e) {
-      if (e.getMessage().contains("cvc-identity-constraint")) {
+      if (e.getMessage().contains("not found for identity constraint")) {
         exception = true;
       } else {
         throw e;
@@ -122,7 +122,7 @@ public class ChallengeParserTest {
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
     } catch (final ChallengeXMLException e) {
-      if (e.getMessage().contains("cvc-identity-constraint")) {
+      if (e.getMessage().contains("not found for identity constraint")) {
         exception = true;
       } else {
         throw e;
@@ -144,8 +144,8 @@ public class ChallengeParserTest {
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
     } catch (final ChallengeXMLException e) {
-      if (e.getMessage().contains("cvc-identity-constraint")
-          && e.getMessage().contains("performanceGoalRef")) {
+      if (e.getMessage().contains("not found for identity constraint")
+          && e.getMessage().contains("Performance")) {
         exception = true;
       } else {
         throw e;
@@ -166,8 +166,7 @@ public class ChallengeParserTest {
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
     } catch (final ChallengeXMLException e) {
-      if (e.getMessage().contains("cvc-identity-constraint")
-          && e.getMessage().contains("Duplicate key value") && e.getMessage().contains("subjectiveGoalKey")) {
+      if (e.getMessage().contains("Duplicate key value") && e.getMessage().contains("subjectiveCategory")) {
         exception = true;
       } else {
         throw e;
@@ -360,8 +359,7 @@ public class ChallengeParserTest {
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
     } catch (final ChallengeXMLException e) {
-      if (e.getMessage().contains("cvc-identity-constraint")
-          && e.getMessage().contains("Duplicate key value")) {
+      if (e.getMessage().contains("Duplicate key value")) {
         exception = true;
       } else {
         throw e;
