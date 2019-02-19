@@ -100,8 +100,17 @@ dependencies {
     
 }
 
-// Define the main class for the application
-mainClassName = 'fll.Launcher'
+
+
+application {
+	// put the scripts at the top so that users don't need to look for them.
+    executableDir = ''
+    
+    // Define the main class for the application
+	mainClassName = 'fll.Launcher'
+}
+
+
 
 check.dependsOn integrationTest
 integrationTest.mustRunAfter test
