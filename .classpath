@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="src" output="bin/web" path="src/main/web"/>
 	<classpathentry kind="src" path="src/integrationTest/resources"/>
 	<classpathentry kind="src" path="src/test/resources"/>
 	<classpathentry kind="src" path="src/integrationTest/java"/>
@@ -116,5 +117,5 @@
 	<classpathentry kind="lib" path="lib/test/httpcore-4.4.4.jar"/>
 	<classpathentry kind="lib" path="lib/test/selenium/hamcrest-core-1.3.jar"/>
 	<classpathentry kind="lib" path="lib/test/selenium/hamcrest-library-1.3.jar"/>
-	<classpathentry kind="output" path="bin/"/>
+	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
