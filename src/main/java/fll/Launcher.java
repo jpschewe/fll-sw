@@ -64,7 +64,7 @@ public class Launcher extends JFrame {
   private static final String OPEN_MSG = "open";
 
   /**
-   * Port that the web serer runs on.
+   * Port that the web server runs on.
    */
   public static final int WEB_PORT = 9080;
 
