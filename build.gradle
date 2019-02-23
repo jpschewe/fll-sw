@@ -19,6 +19,8 @@ plugins {
 testSets {
     integrationTest
 }
+check.dependsOn integrationTest
+integrationTest.mustRunAfter test
 
 repositories {
     jcenter()
@@ -33,6 +35,8 @@ ext {
     tomcat_version = "9.0.16"
     itext_version = "5.5.13"
     poi_version = "3.10.1"
+    
+    web_build_dir = new File(project.buildDir, 'web')
 }
 
 dependencies {
@@ -110,23 +114,30 @@ application {
 	mainClassName = 'fll.Launcher'
 }
 
+javadoc {
+	// TODO: Need to fix the errors eventually
+	failOnError = false
+}
+	
+
+// copy webapp files
+task copyWeb(type: Copy) {
+    from 'src/main/web'
+    into project.web_build_dir
+}
+distTar.dependsOn copyWeb
+distZip.dependsOn copyWeb
+
 distributions {
     main {
         contents {
             from(javadoc) {
                 into 'docs/api'
             }
+            // get output of copyWebapp task
+            from(project.web_build_dir) {
+                into 'web'
+            }
         }
     }
 }
-
-javadoc {
-	// TODO: Need to fix the errors eventually
-	failOnError = false
-}
-	
-check.dependsOn integrationTest
-integrationTest.mustRunAfter test
-
-
-
