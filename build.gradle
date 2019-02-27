@@ -86,6 +86,8 @@ dependencies {
 	
 	compile group: "net.java.linoleum", name: "jlfgr", version: "1_0"
 	
+	runtime group: "javax.servlet", name: "jstl", version: "1.2"
+	
 	// TODO: get these from repositories somewhere
 	compile name: "JonsInfra-1.6"
 	compile name: "opencsv-jps-2.4"
