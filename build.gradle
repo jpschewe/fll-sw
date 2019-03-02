@@ -11,7 +11,7 @@ buildscript {
 
 plugins {
 	id 'java'
-	id 'application'
+	id 'distribution'
 	id "com.dorongold.task-tree" version "1.3.1"
 	id 'org.unbroken-dome.test-sets' version "2.1.1"
 }
@@ -37,6 +37,8 @@ ext {
     poi_version = "3.10.1"
     
     web_build_dir = new File(project.buildDir, 'web')
+    
+    mainClassName = 'fll.Launcher'
 }
 
 dependencies {
@@ -107,15 +109,6 @@ dependencies {
 }
 
 
-
-application {
-	// put the scripts at the top so that users don't need to look for them.
-    executableDir = ''
-    
-    // Define the main class for the application
-	mainClassName = 'fll.Launcher'
-}
-
 javadoc {
 	// TODO: Need to fix the errors eventually
 	failOnError = false
@@ -130,6 +123,11 @@ task copyWeb(type: Copy) {
 distTar.dependsOn copyWeb
 distZip.dependsOn copyWeb
 
+
+// Configure the distribution plugin instead of using the application plugin so that
+// the web application classes stay outside of a jar file and Tomcat will properly
+// process the annotations. For some reason Tomcat won't process the annotations
+// inside of a jar file.
 distributions {
     main {
         contents {
@@ -140,6 +138,19 @@ distributions {
             from(project.web_build_dir) {
                 into 'web'
             }
+            from(sourceSets.main.output) {
+                into 'classes'
+            }
+            from(configurations.runtime) {
+            	into 'lib'
+           	}
         }
     }
 }
+
+task run(type: JavaExec) {
+	classpath = sourceSets.main.runtimeClasspath
+	
+	main = project.mainClassName
+}
+
