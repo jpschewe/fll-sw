@@ -24,6 +24,18 @@ This is because the launch4j task needs to execute a 32-bit binary.
 
 The labels that are green are good places for a new developer to start. One is the documentation tasks. It's always nice to have new people help with documentation because they have an outside perspective on how the software works. Another is 'good first issue'. These are tasks that should be fairly easy to implement and will give a developer a start on learning the codebase.
 
+## gradle tips
+Gradle will download all dependencies from the web. The first time you build and when you change the dependeicies you need to be online. After that you can build with `--offline` to tell gradle to not look online, even if it's time to refresh the cache.
+
+"gradlew" is a script that downloads the configured version of gradle and then executes it.
+
+To see library dependencies, execute `./gradlew dependencies`.
+
+To see a list of tasks, execute `./gradlew tasks`.
+
+To see how what other tasks depend on a task, for example `assemble`, execute `./gradlew :taskTree assemble`.
+
+
 # Copyright
 
 All of the code is currently Copyrighted by INSciTE.
