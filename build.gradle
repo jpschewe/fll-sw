@@ -132,7 +132,7 @@ distributions {
     main {
         contents {
             from(javadoc) {
-                into 'docs/api'
+                into 'web/documentation/api'
             }
             // get output of copyWebapp task
             from(project.web_build_dir) {

@@ -605,9 +605,9 @@ public class Launcher extends JFrame {
   private Path getDocsHtmlFile() {
     final Path classesPath = TomcatLauncher.getClassesPath();
     final String[] possibleLocations = { //
-                                         "../docs", // distribution
-                                         "../../docs", // eclipse
-                                         "../../../../docs" // gradle
+                                         "../web/documentation", // distribution
+                                         "../../src/main/web/documentation", // eclipse
+                                         "../../../../src/main/web/documentation" // gradle
     };
 
     for (final String location : possibleLocations) {
