@@ -95,7 +95,11 @@ public class TomcatLauncher {
     ctx.setResources(resources);
   }
 
-  private Path findWebappRoot(final Path classesPath) {
+  /**
+   * @param classesPath where the root of the classes are
+   * @return where the root of the web files are, null if it cannot be found
+   */
+  public static Path findWebappRoot(final Path classesPath) {
     // where to look relative to classesPath
     final String[] possibleWebLocations = {
 
