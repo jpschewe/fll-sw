@@ -20,3 +20,4 @@ bin/
 import_*
 tmp-web
 .gradle
+.classpath
