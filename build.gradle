@@ -14,6 +14,7 @@ plugins {
 	id 'distribution'
 	id "com.dorongold.task-tree" version "1.3.1"
 	id 'org.unbroken-dome.test-sets' version "2.1.1"
+	id 'eclipse'
 }
 
 testSets {
@@ -113,7 +114,6 @@ javadoc {
 	// TODO: Need to fix the errors eventually
 	failOnError = false
 }
-	
 
 // copy webapp files
 task copyWeb(type: Copy) {

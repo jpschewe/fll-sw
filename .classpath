@@ -1,122 +1,595 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src/main/java"/>
-	<classpathentry kind="src" output="bin/dist" path="src/main/dist"/>
-	<classpathentry kind="src" output="bin/web" path="src/main/web"/>
-	<classpathentry kind="src" path="src/integrationTest/resources"/>
-	<classpathentry kind="src" path="src/test/resources"/>
-	<classpathentry kind="src" path="src/integrationTest/java"/>
-	<classpathentry kind="src" path="src/test/java"/>
-	<classpathentry kind="src" path="src/main/resources"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="lib/jlfgr-1_0.jar"/>
-	<classpathentry kind="lib" path="lib/xmlbeans-2.3.0.jar"/>
-	<classpathentry kind="lib" path="lib/commons-cli-1.2.jar" sourcepath="lib/source/commons-cli-1.2-sources.jar">
+	<classpathentry kind="output" path="bin/default"/>
+	<classpathentry output="bin/main" kind="src" path="src/main/java">
 		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/fll-sw/lib/source/commons-cli-1.2-javadoc.jar!/"/>
+			<attribute name="gradle_scope" value="main"/>
+			<attribute name="gradle_used_by_scope" value="main,test,integrationTest"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/JonsInfra-1.6.jar" sourcepath="lib/source/JonsInfra-1.6-src.zip"/>
-	<classpathentry kind="lib" path="lib/jstl-1.2.jar"/>
-	<classpathentry kind="lib" path="lib/opencsv-jps-2.4.jar"/>
-	<classpathentry kind="lib" path="lib/commons-io-2.5.jar"/>
-	<classpathentry kind="lib" path="lib/log4j-1.2.17.jar"/>
-	<classpathentry kind="lib" path="lib/slf4j-api-1.7.5.jar"/>
-	<classpathentry kind="lib" path="lib/slf4j-log4j12-1.7.5.jar"/>
-	<classpathentry kind="lib" path="lib/commons-fileupload-1.3.jar"/>
-	<classpathentry kind="lib" path="lib/xmlunit-1.4.jar"/>
-	<classpathentry kind="lib" path="lib/jackson-annotations-2.9.0.jar">
+	<classpathentry output="bin/main" kind="src" path="src/main/resources">
 		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/fll-sw/lib/jackson-annotations-2.9.0-javadoc.jar!/"/>
+			<attribute name="gradle_scope" value="main"/>
+			<attribute name="gradle_used_by_scope" value="main,test,integrationTest"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/jackson-core-2.9.0.jar">
+	<classpathentry output="bin/test" kind="src" path="src/test/java">
 		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/fll-sw/lib/jackson-core-2.9.0-javadoc.jar!/"/>
+			<attribute name="gradle_scope" value="test"/>
+			<attribute name="gradle_used_by_scope" value="test,integrationTest"/>
+			<attribute name="test" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/jackson-databind-2.9.0.jar">
+	<classpathentry output="bin/test" kind="src" path="src/test/resources">
 		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/fll-sw/lib/jackson-databind-2.9.0-javadoc.jar!/"/>
+			<attribute name="gradle_scope" value="test"/>
+			<attribute name="gradle_used_by_scope" value="test,integrationTest"/>
+			<attribute name="test" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/poi-3.10-FINAL-20140208.jar"/>
-	<classpathentry kind="lib" path="lib/poi-ooxml-3.10-FINAL-20140208.jar"/>
-	<classpathentry kind="lib" path="lib/poi-ooxml-schemas-3.10-FINAL-20140208.jar"/>
-	<classpathentry kind="lib" path="lib/dom4j-1.6.1.jar"/>
-	<classpathentry kind="lib" path="lib/commons-codec-1.10.jar"/>
-	<classpathentry kind="lib" path="lib/commons-logging-1.2.jar"/>
-	<classpathentry kind="lib" path="lib/schemaSpy_5.0.0.jar" sourcepath="lib/schemaSpy_5.0.0.source.jar"/>
-	<classpathentry kind="lib" path="lib/cobertura/lib/asm-5.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/commons-lang3-3.4.jar"/>
-	<classpathentry kind="lib" path="lib/test/junit-4.12.jar"/>
-	<classpathentry kind="lib" path="lib/itextpdf-5.5.9.jar" sourcepath="lib/source/itextpdf-5.5.9-sources.jar">
+	<classpathentry output="bin/integrationTest" kind="src" path="src/integrationTest/java">
 		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/fll-sw/lib/source/itextpdf-5.5.9-javadoc.jar!/"/>
+			<attribute name="gradle_scope" value="integrationTest"/>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+			<attribute name="test" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/log4jdbc4-1.2.jar"/>
-	<classpathentry kind="lib" path="lib/dnsjava-2.1.7.jar"/>
-	<classpathentry kind="lib" path="lib/test/webdrivermanager/webdrivermanager-1.6.0.jar"/>
-	<classpathentry kind="lib" path="lib/tika-core-1.16.jar"/>
-	<classpathentry kind="lib" path="lib/itext-xtra-5.5.9.jar"/>
-	<classpathentry kind="lib" path="lib/hsqldb-2.4.1.jar"/>
-	<classpathentry kind="lib" path="lib/durian-core-1.1.0.jar"/>
-	<classpathentry kind="lib" path="lib/junique-1.0.4.jar"/>
-	<classpathentry kind="lib" path="lib/apache-log4j-extras-1.2.17.jar"/>
-	<classpathentry kind="lib" path="lib/annotations.jar"/>
-	<classpathentry kind="lib" path="lib/ecj-3.15.0.jar"/>
-	<classpathentry kind="lib" path="lib/jsr305.jar"/>
-	<classpathentry kind="lib" path="lib/tomcat-annotations-api-9.0.16.jar"/>
-	<classpathentry kind="lib" path="lib/tomcat-api-9.0.16.jar"/>
-	<classpathentry kind="lib" path="lib/tomcat-el-api-9.0.16.jar"/>
-	<classpathentry kind="lib" path="lib/tomcat-embed-core-9.0.16.jar"/>
-	<classpathentry kind="lib" path="lib/tomcat-embed-el-9.0.16.jar"/>
-	<classpathentry kind="lib" path="lib/tomcat-embed-jasper-9.0.16.jar"/>
-	<classpathentry kind="lib" path="lib/tomcat-embed-websocket-9.0.16.jar"/>
-	<classpathentry kind="lib" path="lib/tomcat-jasper-9.0.16.jar"/>
-	<classpathentry kind="lib" path="lib/tomcat-jasper-el-9.0.16.jar"/>
-	<classpathentry kind="lib" path="lib/tomcat-jsp-api-9.0.16.jar"/>
-	<classpathentry kind="lib" path="lib/tomcat-juli-9.0.16.jar"/>
-	<classpathentry kind="lib" path="lib/tomcat-servlet-api-9.0.16.jar"/>
-	<classpathentry kind="lib" path="lib/tomcat-util-9.0.16.jar"/>
-	<classpathentry kind="lib" path="lib/tomcat-util-scan-9.0.16.jar"/>
-	<classpathentry kind="lib" path="lib/test/fest/fest-assert-1.2.jar" sourcepath="lib/test/fest/fest-assert-1.2-sources.jar"/>
-	<classpathentry kind="lib" path="lib/test/fest/fest-reflect-1.2.jar" sourcepath="lib/test/fest/fest-reflect-1.2-sources.jar"/>
-	<classpathentry kind="lib" path="lib/test/fest/fest-swing-1.2.jar" sourcepath="lib/test/fest/fest-swing-1.2-sources.jar"/>
-	<classpathentry kind="lib" path="lib/test/fest/fest-util-1.1.2.jar" sourcepath="lib/test/fest/fest-util-1.1.2-sources.jar"/>
-	<classpathentry kind="lib" path="lib/test/fest/jcip-annotations-1.0.jar" sourcepath="lib/test/fest/jcip-annotations-1.0-sources.jar"/>
-	<classpathentry kind="lib" path="lib/cobertura/lib/oro-2.0.8.jar"/>
-	<classpathentry kind="lib" path="lib/cobertura/lib/asm-analysis-5.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/cobertura/lib/asm-commons-5.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/cobertura/lib/asm-tree-5.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/cobertura/lib/asm-util-5.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/cobertura/lib/hamcrest-core-1.3.jar"/>
-	<classpathentry kind="lib" path="lib/cobertura/lib/jaxen-1.1.4.jar"/>
-	<classpathentry kind="lib" path="lib/cobertura/lib/jetty-6.1.14.jar"/>
-	<classpathentry kind="lib" path="lib/cobertura/lib/jetty-util-6.1.14.jar"/>
-	<classpathentry kind="lib" path="lib/cobertura/lib/logback-core-1.0.13.jar"/>
-	<classpathentry kind="lib" path="lib/cobertura/cobertura-2.1.1.jar"/>
-	<classpathentry kind="lib" path="lib/test/htmlunit/htmlunit-2.22.jar"/>
-	<classpathentry kind="lib" path="lib/test/htmlunit/cssparser-0.9.19.jar"/>
-	<classpathentry kind="lib" path="lib/test/htmlunit/htmlunit-core-js-2.22.jar"/>
-	<classpathentry kind="lib" path="lib/test/htmlunit/jetty-io-9.2.17.v20160517.jar"/>
-	<classpathentry kind="lib" path="lib/test/htmlunit/jetty-util-9.2.17.v20160517.jar"/>
-	<classpathentry kind="lib" path="lib/test/htmlunit/neko-htmlunit-2.21.jar"/>
-	<classpathentry kind="lib" path="lib/test/htmlunit/sac-1.3.jar"/>
-	<classpathentry kind="lib" path="lib/test/htmlunit/serializer-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib/test/htmlunit/xalan-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib/test/htmlunit/xercesImpl-2.11.0.jar"/>
-	<classpathentry kind="lib" path="lib/test/htmlunit/xml-apis-1.4.01.jar"/>
-	<classpathentry kind="lib" path="lib/test/webdrivermanager/commons-compress-1.12.jar"/>
-	<classpathentry kind="lib" path="lib/test/webdrivermanager/config-1.3.0.jar"/>
-	<classpathentry kind="lib" path="lib/test/webdrivermanager/jarchivelib-0.7.0.jar"/>
-	<classpathentry kind="lib" path="lib/test/webdrivermanager/xz-1.5.jar"/>
-	<classpathentry kind="lib" path="lib/test/selenium/client-combined-3.141.59.jar"/>
-	<classpathentry kind="lib" path="lib/test/selenium/selenium-server-standalone-3.141.59.jar"/>
-	<classpathentry kind="lib" path="lib/test/httpclient-4.5.2.jar"/>
-	<classpathentry kind="lib" path="lib/test/httpcore-4.4.4.jar"/>
-	<classpathentry kind="lib" path="lib/test/selenium/hamcrest-core-1.3.jar"/>
-	<classpathentry kind="lib" path="lib/test/selenium/hamcrest-library-1.3.jar"/>
-	<classpathentry kind="output" path="bin/classes"/>
+	<classpathentry output="bin/integrationTest" kind="src" path="src/integrationTest/resources">
+		<attributes>
+			<attribute name="gradle_scope" value="integrationTest"/>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8/"/>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tomcat.embed/tomcat-embed-jasper/9.0.16/c299c386f99f3a9a1eebffa1158d6b273649e4c1/tomcat-embed-jasper-9.0.16-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tomcat.embed/tomcat-embed-jasper/9.0.16/d4c1f88260d9c32005fe88c61d2e37093fac67ed/tomcat-embed-jasper-9.0.16.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tomcat.embed/tomcat-embed-websocket/9.0.16/1515ca9714c29afc06e16f1515ae5aa34be11466/tomcat-embed-websocket-9.0.16-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tomcat.embed/tomcat-embed-websocket/9.0.16/f5eac487823c68f5d20742a99df1d94350c24d21/tomcat-embed-websocket-9.0.16.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tomcat.embed/tomcat-embed-core/9.0.16/8ac536534b3bca3fad92f85b44a585a365a90e5c/tomcat-embed-core-9.0.16-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tomcat.embed/tomcat-embed-core/9.0.16/d7069e3d0f760035b26b68b7b6af5eaa0c1862f/tomcat-embed-core-9.0.16.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tomcat/tomcat-jasper/9.0.16/aebca806700d3775934ac5d48feb54b64bf1dc8d/tomcat-jasper-9.0.16-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tomcat/tomcat-jasper/9.0.16/56196321ceb67e53b8c2102a7b58ee8cbc5a5b44/tomcat-jasper-9.0.16.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tomcat/tomcat-jasper-el/9.0.16/69334a94e8f90757beb8714c3a92636a8dbe2a09/tomcat-jasper-el-9.0.16-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tomcat/tomcat-jasper-el/9.0.16/24de42ae6ca71f4fa40240649d4064ef27cb4a56/tomcat-jasper-el-9.0.16.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tomcat/tomcat-jsp-api/9.0.16/d40a28d9d5fe16e2865307fa2a1bb18ffd3eeb32/tomcat-jsp-api-9.0.16-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tomcat/tomcat-jsp-api/9.0.16/5fd30e34009dddee96e8c950415708ba6b7fd25a/tomcat-jsp-api-9.0.16.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/xmlunit/xmlunit/1.4/5a0161b723f92cc4b6884b241532e4f62c6c1148/xmlunit-1.4-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/xmlunit/xmlunit/1.4/d1b703573ac51bf425e9451f611a6d5fb55587bf/xmlunit-1.4.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-lang3/3.4/b49dafc9cfef24c356827f322e773e7c26725dd2/commons-lang3-3.4-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-lang3/3.4/5fe28b9518e58819180a43a850fbc0dd24b7c050/commons-lang3-3.4.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/commons-cli/commons-cli/1.2/6c5459816530a1962ac18cd315cc775b1b384329/commons-cli-1.2-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/commons-cli/commons-cli/1.2/2bf96b7aa8b611c177d329452af1dc933e14501c/commons-cli-1.2.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.hsqldb/hsqldb/2.4.1/39b5e7e988c00331083aaf9231ca4e4fb00ac70d/hsqldb-2.4.1-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.hsqldb/hsqldb/2.4.1/9daff99b4fbd6809fd46ab4327650ad00a1be6d4/hsqldb-2.4.1.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.itextpdf/itextpdf/5.5.13/5f46f0470635b52c2078a3cdd0b5ba67f83aa340/itextpdf-5.5.13-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.itextpdf/itextpdf/5.5.13/c58c5abc3dcedd5c836b4be8cb210ce63459ee4f/itextpdf-5.5.13.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/log4j/apache-log4j-extras/1.2.17/85863614d82185d7e51fe21c00aa9117a523a8b6/apache-log4j-extras-1.2.17.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-log4j12/1.7.5/65ffa6d644792e8b09cf6479d5c01ed95bb153a0/slf4j-log4j12-1.7.5-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-log4j12/1.7.5/6edffc576ce104ec769d954618764f39f0f0f10d/slf4j-log4j12-1.7.5.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/log4j/log4j/1.2.17/677abe279b68c5e7490d6d50c6951376238d7d3e/log4j-1.2.17-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/log4j/log4j/1.2.17/5af35056b4d257e4b64b9e8069c0746e8b08629f/log4j-1.2.17.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.googlecode.log4jdbc/log4jdbc/1.2/3d15013ac6898c8efc312ac4523e3d22758cc3a7/log4jdbc-1.2-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.googlecode.log4jdbc/log4jdbc/1.2/ba3acb0b14ab0c132de306336c60cb2f086d57a0/log4jdbc-1.2.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-api/1.7.5/654135274d4c27132ea208a4ec07f344bdb83bcb/slf4j-api-1.7.5-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-api/1.7.5/6b262da268f8ad9eff941b25503a9198f0a0ac93/slf4j-api-1.7.5.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.poi/poi-ooxml/3.10.1/6fd6245c9ab6cf26366e498cdea6e783e186b005/poi-ooxml-3.10.1-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.poi/poi-ooxml/3.10.1/c62b1db67f2a7cafd4dd55c41256a2fa0793191/poi-ooxml-3.10.1.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.google.code.findbugs/annotations/3.0.1/e6a834472bdb9f5c9b8ec64d05c3ae2cb6a03cec/annotations-3.0.1-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.google.code.findbugs/annotations/3.0.1/fc019a2216218990d64dfe756e7aa20f0069dea2/annotations-3.0.1.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.google.code.findbugs/jsr305/3.0.1/a2926c057ca3b662b9db194c869bdbe7d3bb8aef/jsr305-3.0.1-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.google.code.findbugs/jsr305/3.0.1/f7be08ec23c21485b9b5a1cf1654c2ec8c58168d/jsr305-3.0.1.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-databind/2.9.0/dd1de78aa439a5bdee53236bf3012cf70f62234f/jackson-databind-2.9.0-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-databind/2.9.0/14fb5f088cc0b0dc90a73ba745bcade4961a3ee3/jackson-databind-2.9.0.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-annotations/2.9.0/a0ad4e203304ccab7e01266fa814115850edb8a9/jackson-annotations-2.9.0-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-annotations/2.9.0/7c10d545325e3a6e72e06381afe469fd40eb701/jackson-annotations-2.9.0.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/commons-fileupload/commons-fileupload/1.3/fc5dcb277589b169c7a10966782ca49d57a4be86/commons-fileupload-1.3-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/commons-fileupload/commons-fileupload/1.3/c89e540e4a12cb034fb973e12135839b5de9a87e/commons-fileupload-1.3.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/commons-io/commons-io/2.5/caf033a4a7c37b4a8ff3ea084cba591539b0b69/commons-io-2.5-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/commons-io/commons-io/2.5/2852e6e05fbb95076fc091f6d1780f1f8fe35e0f/commons-io-2.5.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/net.sourceforge.schemaspy/schemaspy/5.0.0/277e812296046eda0242df5c59048764c8fb148f/schemaspy-5.0.0-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/net.sourceforge.schemaspy/schemaspy/5.0.0/6666f6861e63a6f3061cd68e402cea9b094d1e98/schemaspy-5.0.0.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/dnsjava/dnsjava/2.1.7/11749af9e3182b16f799e4d2e4b6506830163f5c/dnsjava-2.1.7-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/dnsjava/dnsjava/2.1.7/a1ed0a251d22bf528cebfafb94c55e6f3f339cf/dnsjava-2.1.7.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tika/tika-core/1.16/9365d9b6a78379c1b6649ab1027519654ca3bc51/tika-core-1.16-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tika/tika-core/1.16/7b75cb2b65f6d014b6a3e4793835f5759168c34e/tika-core-1.16.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.diffplug.durian/durian-core/1.1.0/8c8382fcf89c3624a8dce8ae3f1304b7d70c0956/durian-core-1.1.0-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.diffplug.durian/durian-core/1.1.0/f50b0ab3b012d1e3faa09824bb29c1ca4370fe71/durian-core-1.1.0.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/it.sauronsoftware/junique/1.0.4/9da1e70560384b123ecc7f1cc24fca56ccaaebab/junique-1.0.4-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/it.sauronsoftware/junique/1.0.4/859f5fde3b6156f2b08b4892fc4c7edee032ca1d/junique-1.0.4.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/net.java.linoleum/jlfgr/1_0/b4680aaa71cd947cbd7ce82b0a569fd99b952985/jlfgr-1_0.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/jpschewe/projects/fll-sw/working-dir/gradle-repo/JonsInfra-1.6.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/jpschewe/projects/fll-sw/working-dir/gradle-repo/opencsv-jps-2.4.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tomcat/tomcat-annotations-api/9.0.16/46bf05374485a7900aaabc2612cbd6927cfe2405/tomcat-annotations-api-9.0.16-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tomcat/tomcat-annotations-api/9.0.16/96d9fc709325f7f3ed175f52068487421747f3cf/tomcat-annotations-api-9.0.16.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tomcat.embed/tomcat-embed-el/9.0.16/7d569a216c12285b96342736758f31417e9112cf/tomcat-embed-el-9.0.16-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tomcat.embed/tomcat-embed-el/9.0.16/baadc5c97260023078f521cfc0085797f7dde91b/tomcat-embed-el-9.0.16.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.eclipse.jdt/ecj/3.15.0/7e3b5f01675c2e41ff8ee6774384250fb08fea5c/ecj-3.15.0-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.eclipse.jdt/ecj/3.15.0/4c91dbad2e3f15f9f7e7b5b863738d7484684cc5/ecj-3.15.0.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tomcat/tomcat-util-scan/9.0.16/e4477a80df745c370260a449bb31395121987cca/tomcat-util-scan-9.0.16-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tomcat/tomcat-util-scan/9.0.16/c48d23475500697542537db04f69d3aef99da50f/tomcat-util-scan-9.0.16.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tomcat/tomcat-api/9.0.16/4f1f7be3e429206bcbd4b9a9fc203f471572620a/tomcat-api-9.0.16-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tomcat/tomcat-api/9.0.16/f9ce30350419f38f9775b291c7e324c686b2c05c/tomcat-api-9.0.16.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tomcat/tomcat-servlet-api/9.0.16/d6d97f7c84ceeac9ea0083fb4333c983984285d9/tomcat-servlet-api-9.0.16-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tomcat/tomcat-servlet-api/9.0.16/d9f8212c6ad0694af590f1ea20627c479fc7e132/tomcat-servlet-api-9.0.16.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tomcat/tomcat-util/9.0.16/76d2c2457778c8e6719b6d06ecfc0b21e55814e2/tomcat-util-9.0.16-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tomcat/tomcat-util/9.0.16/11d07360e3c707cfd1ec68fbf1a5e4fa8ee24e26/tomcat-util-9.0.16.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tomcat/tomcat-juli/9.0.16/7ee78137c6af09ff97a2c36ab25b4dae7b3dbaf8/tomcat-juli-9.0.16-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tomcat/tomcat-juli/9.0.16/b6ef3c1ac1104b6e3fbdc106e194bf2fb5e2e2a8/tomcat-juli-9.0.16.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tomcat/tomcat-el-api/9.0.16/8579af4efe1dd7667311476361bfa62f47f33e6a/tomcat-el-api-9.0.16-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.tomcat/tomcat-el-api/9.0.16/8f1238dc6b302b795f0c6eae64dc7408721677fa/tomcat-el-api-9.0.16.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.poi/poi/3.10.1/dcbcab74270ee3f68da61ef13c6f0858fb532e52/poi-3.10.1-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.poi/poi/3.10.1/95174823e13aa828cb715b542e647e56096ffcb2/poi-3.10.1.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.poi/poi-ooxml-schemas/3.10.1/7a61214b7dc2f1d25d9c265ca7f7fd12cee72fd7/poi-ooxml-schemas-3.10.1.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/dom4j/dom4j/1.6.1/a8e7149359255f43e0e5e3b1837948f9ed5861fb/dom4j-1.6.1-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/dom4j/dom4j/1.6.1/5d3ccc056b6f056dbf0dddfdf43894b9065a8f94/dom4j-1.6.1.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/net.jcip/jcip-annotations/1.0/d853625d8001c00d40abed553e670279504699f9/jcip-annotations-1.0-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/net.jcip/jcip-annotations/1.0/afba4942caaeaf46aab0b976afd57cc7c181467e/jcip-annotations-1.0.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-core/2.9.0/60c3905e59f09cace421e18ad865bf71d8a79c29/jackson-core-2.9.0-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-core/2.9.0/88e7c6220be3b3497b3074d3fc7754213289b987/jackson-core-2.9.0.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/commons-codec/commons-codec/1.5/1100638866461d41fbed0e89d722b161c579fe23/commons-codec-1.5-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/commons-codec/commons-codec/1.5/cf993e250ff71804754ec2734a16f23c0be99f70/commons-codec-1.5.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.xmlbeans/xmlbeans/2.6.0/29e80d2dd51f9dcdef8f9ffaee0d4dc1c9bbfc87/xmlbeans-2.6.0.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/xml-apis/xml-apis/1.0.b2/d8525661c5a0a05702fa41873d250d135031ec25/xml-apis-1.0.b2-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/xml-apis/xml-apis/1.0.b2/3136ca936f64c9d68529f048c2618bd356bf85c9/xml-apis-1.0.b2.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/stax/stax-api/1.0.1/49c100caf72d658aca8e58bd74a4ba90fa2b0d70/stax-api-1.0.1.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/javax.servlet/jstl/1.2/2f5877ef15adb721421e80f5aa2b6fe069eec8ed/jstl-1.2-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/javax.servlet/jstl/1.2/74aca283cd4f4b4f3e425f5820cda58f44409547/jstl-1.2.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.codehaus.mojo/animal-sniffer-annotations/1.14/886474da3f761d39fcbb723d97ecc5089e731f42/animal-sniffer-annotations-1.14-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.codehaus.mojo/animal-sniffer-annotations/1.14/775b7e22fb10026eed3f86e8dc556dfafe35f2d5/animal-sniffer-annotations-1.14.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.google.j2objc/j2objc-annotations/0.1/f6e26f93ebf80c9a62a59282d737f5bed3108b2e/j2objc-annotations-0.1-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.google.j2objc/j2objc-annotations/0.1/f90cbc62dc0c367f7fe164e4857a6de74194e6bc/j2objc-annotations-0.1.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/junit/junit/4.12/a6c32b40bf3d76eca54e3c601e5d1470c86fcdfa/junit-4.12-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/junit/junit/4.12/2973d150c0dc1fefe998f834810d68f278ea58ec/junit-4.12.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.hamcrest/hamcrest/2.1/aa6763235632b77fd9245c850b6a7dc09382314c/hamcrest-2.1-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.hamcrest/hamcrest/2.1/9420ba32c29217b54eebd26ff7f9234d31c3fbb2/hamcrest-2.1.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.hamcrest/hamcrest-core/1.3/1dc37250fbc78e23a65a67fbbaf71d2e9cbc3c0b/hamcrest-core-1.3-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.hamcrest/hamcrest-core/1.3/42a25dc3219429f0e5d060061f71acb49bf010a0/hamcrest-core-1.3.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/net.sourceforge.htmlunit/htmlunit/2.22/dda5e9cc1b72608efce82eeedbdda591625670d5/htmlunit-2.22-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/net.sourceforge.htmlunit/htmlunit/2.22/e01e09287bc1365ca338433e38e307a9e87c0c22/htmlunit-2.22.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/io.github.bonigarcia/webdrivermanager/1.6.0/51151cd8676f1484c0ec60b5e3bba4af8bc35f9/webdrivermanager-1.6.0-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/io.github.bonigarcia/webdrivermanager/1.6.0/e6c28ff8ef77558873cbbf1c8aed0e820241312f/webdrivermanager-1.6.0.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-api/1.7.12/58697792617f38bf86d8e26bc004aac505e516a9/slf4j-api-1.7.12-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-api/1.7.12/8e20852d05222dc286bf1c71d78d0531e177c317/slf4j-api-1.7.12.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.seleniumhq.selenium/selenium-server/3.141.59/6ad5d2a121916b09b3e059714f511032e059d4de/selenium-server-3.141.59-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.seleniumhq.selenium/selenium-server/3.141.59/970059131887e04ede14b433a7a505a793585bce/selenium-server-3.141.59.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.seleniumhq.selenium/selenium-java/3.141.59/b04f3ee8f5e43fa3b162981b50bb72fe1acabb33/selenium-java-3.141.59-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.seleniumhq.selenium/selenium-java/3.141.59/e8e20b741299cb8ffedbd2925a3ab69d08b41063/selenium-java-3.141.59.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.seleniumhq.selenium/selenium-chrome-driver/3.141.59/b7189fcb53e45dcce1f02cf71bfd7d1a38883fed/selenium-chrome-driver-3.141.59-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.seleniumhq.selenium/selenium-chrome-driver/3.141.59/67137314736c6a2f39a8aa59a562e9616ae5f77e/selenium-chrome-driver-3.141.59.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.seleniumhq.selenium/selenium-edge-driver/3.141.59/22496e495104b01c0c38813b1a33285c83eecee9/selenium-edge-driver-3.141.59-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.seleniumhq.selenium/selenium-edge-driver/3.141.59/fc09c66f2d0b33b0816d770761ad1d599ef0df29/selenium-edge-driver-3.141.59.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.seleniumhq.selenium/selenium-firefox-driver/3.141.59/d45a67c085bf718f01c35b3a87a58518ccfcfc92/selenium-firefox-driver-3.141.59-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.seleniumhq.selenium/selenium-firefox-driver/3.141.59/a99f2fe2a42747ed9809d4f62f51a9e1b336dde8/selenium-firefox-driver-3.141.59.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.seleniumhq.selenium/selenium-ie-driver/3.141.59/ecc72d92244d4f4dbe6d63814c383f0b29dc1b9f/selenium-ie-driver-3.141.59-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.seleniumhq.selenium/selenium-ie-driver/3.141.59/677b9b414a3a9bb2aeea89042a7b326edeb13a82/selenium-ie-driver-3.141.59.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.seleniumhq.selenium/selenium-opera-driver/3.141.59/69a0134c983c1cfcccc4b8630614bf05edffc9bd/selenium-opera-driver-3.141.59-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.seleniumhq.selenium/selenium-opera-driver/3.141.59/6b11ed01182bfd8bb62ddeae34cf9eadd3cfc7ff/selenium-opera-driver-3.141.59.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.seleniumhq.selenium/selenium-safari-driver/3.141.59/42a01f2f3ba62d46d9a2e527668189b7cf64a06b/selenium-safari-driver-3.141.59-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.seleniumhq.selenium/selenium-safari-driver/3.141.59/a32b5b88f46ea4b0356079f0d2e2217543923046/selenium-safari-driver-3.141.59.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.seleniumhq.selenium/selenium-support/3.141.59/7e42f1c3e43d22f2c299b74356137dc6f2f455ec/selenium-support-3.141.59-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.seleniumhq.selenium/selenium-support/3.141.59/8735de5049acf0e761defc65ee5837d6541abaf5/selenium-support-3.141.59.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.seleniumhq.selenium/selenium-remote-driver/3.141.59/8950c1557ead2cdba4fdb9ba6f107dce3b5f1520/selenium-remote-driver-3.141.59-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.seleniumhq.selenium/selenium-remote-driver/3.141.59/1c79ca890c312ff9916bd95df4f0c5182ec722d8/selenium-remote-driver-3.141.59.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.google.guava/guava/25.0-jre/30ade485699e7782cc2369b0e5d3d8e0bfc317c/guava-25.0-jre-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.google.guava/guava/25.0-jre/7319c34fa5866a85b6bad445adad69d402323129/guava-25.0-jre.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.easytesting/fest-swing/1.2/d80262a4d85771c137a42b6a186aea7a8495e235/fest-swing-1.2-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.easytesting/fest-swing/1.2/66fa0568377c7e14b88d6cbe8b87b0f5612408e2/fest-swing-1.2.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.easytesting/fest-assert/1.2/6046c687be46e362e6e95300cf3b1ff66bac7e3f/fest-assert-1.2-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.easytesting/fest-assert/1.2/bb0d051e157f921537aa30d6d2c2a6b201edbb1b/fest-assert-1.2.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.easytesting/fest-reflect/1.2/7ace6c0da7ace3a61f3237e113a43ded8762db07/fest-reflect-1.2-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.easytesting/fest-reflect/1.2/4dd614d5490950b4e2c7fe141544a867a0353d66/fest-reflect-1.2.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.easytesting/fest-util/1.1.2/28326cd973c4f6caff877f72963b195ac4a65903/fest-util-1.1.2-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.easytesting/fest-util/1.1.2/e93eddda8fcc46db83886351375275c4f2128263/fest-util-1.1.2.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/xalan/xalan/2.7.2/fe9c3d37a49238fac9d4d6c4f5bbd8c334da787a/xalan-2.7.2-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/xalan/xalan/2.7.2/d55d3f02a56ec4c25695fe67e1334ff8c2ecea23/xalan-2.7.2.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpmime/4.5.2/ca23fd61a082eab682fc0ffd29e37d09eab07180/httpmime-4.5.2-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpmime/4.5.2/22b4c53dd9b6761024258de8f9240c3dce6ea368/httpmime-4.5.2.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpclient/4.5.2/b9f9e3e5255b6ddc3bf21be05428c7a60d00e042/httpclient-4.5.2-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpclient/4.5.2/733db77aa8d9b2d68015189df76ab06304406e50/httpclient-4.5.2.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/commons-codec/commons-codec/1.10/11fb3d88ae7e3b757d70237064210ceb954a5a04/commons-codec-1.10-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/commons-codec/commons-codec/1.10/4b95f4897fa13f2cd904aee711aeafc0c5295cd8/commons-codec-1.10.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/net.sourceforge.htmlunit/htmlunit-core-js/2.22/69bced4c7a6853b4b3e540c68553c0a526ad31c1/htmlunit-core-js-2.22-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/net.sourceforge.htmlunit/htmlunit-core-js/2.22/5266131196351ba341e6265c378dcdf28ab216ec/htmlunit-core-js-2.22.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/net.sourceforge.htmlunit/neko-htmlunit/2.21/6d7194f96adb0e990668a462642f5d997e52fbd3/neko-htmlunit-2.21-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/net.sourceforge.htmlunit/neko-htmlunit/2.21/a714aa20a2a6e04ada63805e1a16ad0540aa65e/neko-htmlunit-2.21.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/net.sourceforge.cssparser/cssparser/0.9.19/4c5e8da95921c556f0cfbf177c38cd0761f10938/cssparser-0.9.19-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/net.sourceforge.cssparser/cssparser/0.9.19/b5742e002af9a34e02c60b0932fc641ddbe36126/cssparser-0.9.19.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/commons-logging/commons-logging/1.2/ecf26c7507d67782a3bbd148d170b31dfad001aa/commons-logging-1.2-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/commons-logging/commons-logging/1.2/4bfc12adfe4842bf07b657f0369c4cb522955686/commons-logging-1.2.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.eclipse.jetty.websocket/websocket-client/9.2.17.v20160517/dda767d68720b02ec2ad4c7c169401e4f0b234d/websocket-client-9.2.17.v20160517-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.eclipse.jetty.websocket/websocket-client/9.2.17.v20160517/e585a320861bf0c65a970c2f24917552d0003b0b/websocket-client-9.2.17.v20160517.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.seleniumhq.selenium/selenium-api/3.141.59/8e9423038552821844ba5f7713cc4c1e6d9835b7/selenium-api-3.141.59-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.seleniumhq.selenium/selenium-api/3.141.59/e006ffd3aa7841e6e9125d9e6691b3a6b7592b05/selenium-api-3.141.59.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.beust/jcommander/1.72/7ef123d5dfb6f839b41265648ff1be34982d50f8/jcommander-1.72-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.beust/jcommander/1.72/6375e521c1e11d6563d4f25a07ce124ccf8cd171/jcommander-1.72.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/net.bytebuddy/byte-buddy/1.8.15/a8f95953d78effdd8eca80e92c5b62f648b4a1f5/byte-buddy-1.8.15-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/net.bytebuddy/byte-buddy/1.8.15/cb36fe3c70ead5fcd016856a7efff908402d86b8/byte-buddy-1.8.15.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-exec/1.3/efd2543e352e55ce5a685eed6db8af028b737905/commons-exec-1.3-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-exec/1.3/8dfb9facd0830a27b1b5f29f84593f0aeee7773b/commons-exec-1.3.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.seleniumhq.selenium/jetty-repacked/9.4.12.v20180830/b04f3ee8f5e43fa3b162981b50bb72fe1acabb33/jetty-repacked-9.4.12.v20180830-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.seleniumhq.selenium/jetty-repacked/9.4.12.v20180830/e42f240e395e4ea083f797c284e654c28e25166f/jetty-repacked-9.4.12.v20180830.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.squareup.okhttp3/okhttp/3.11.0/cf16b99519850b1adc3b259c90fd8566a0f592f3/okhttp-3.11.0-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.squareup.okhttp3/okhttp/3.11.0/75966e05a49046ca2ae734e5626f28837a8d1e82/okhttp-3.11.0.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.squareup.okio/okio/1.14.0/e7c96b4fe5651490d8f3c022042940d743a3bdd9/okio-1.14.0-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.squareup.okio/okio/1.14.0/102d7be47241d781ef95f1581d414b0943053130/okio-1.14.0.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/javax.servlet/javax.servlet-api/3.1.0/ab3976d4574c48d22dc1abf6a9e8bd0fdf928223/javax.servlet-api-3.1.0-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/javax.servlet/javax.servlet-api/3.1.0/3cd63d075497751784b2fa84be59432f4905bf7c/javax.servlet-api-3.1.0.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.yaml/snakeyaml/1.19/3110a637bd11c3094b8017dd1c29fd29baccf292/snakeyaml-1.19-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.yaml/snakeyaml/1.19/2d998d3d674b172a588e54ab619854d073f555b5/snakeyaml-1.19.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.3.1/563dcb685903c96ce8abbd03adf7fa49e19aa8b4/gson-2.3.1-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.3.1/ecb6e1f8e4b0e84c4b886c2f14a1500caf309757/gson-2.3.1.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.typesafe/config/1.2.1/bdacf4f82ce9b29cd474bfde2e91eeb0ca623d28/config-1.2.1-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.typesafe/config/1.2.1/f771f71fdae3df231bcd54d5ca2d57f0bf93f467/config-1.2.1.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.rauschig/jarchivelib/0.7.1/a71217e17bf2a373ac2cf3e7e18e7ede1698e694/jarchivelib-0.7.1-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.rauschig/jarchivelib/0.7.1/47a77274cc38cfe6c04bc2afa3ece808742dc42b/jarchivelib-0.7.1.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.jsoup/jsoup/1.9.2/97441f4a0f6bb4c2d9f1e19321f4a45c9ffd0e2c/jsoup-1.9.2-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.jsoup/jsoup/1.9.2/5e3bda828a80c7a21dfbe2308d1755759c2fd7b4/jsoup-1.9.2.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/xerces/xercesImpl/2.11.0/af86e59459a503adec5e9b47426dd9fa2ac5f1f6/xercesImpl-2.11.0-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/xerces/xercesImpl/2.11.0/9bb329db1cfc4e22462c9d6b43a8432f5850e92c/xercesImpl-2.11.0.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/xml-apis/xml-apis/1.4.01/5502da0c4c0a7916a604356ef19394ccfa30cd4b/xml-apis-1.4.01-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/xml-apis/xml-apis/1.4.01/3789d9fada2d3d458c4ba2de349d48780f381ee3/xml-apis-1.4.01.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/xalan/serializer/2.7.2/fe9c3d37a49238fac9d4d6c4f5bbd8c334da787a/serializer-2.7.2-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/xalan/serializer/2.7.2/24247f3bb052ee068971393bdb83e04512bb1c3c/serializer-2.7.2.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpcore/4.4.4/c5c19e3e6af6b452def290cde12a3ee4c35c893c/httpcore-4.4.4-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpcore/4.4.4/b31526a230871fbe285fbcbe2813f9c0839ae9b0/httpcore-4.4.4.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.w3c.css/sac/1.3/d0eab9163d161293dcd1e291bc2b6b09b4b5c717/sac-1.3-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.w3c.css/sac/1.3/cdb2dcb4e22b83d6b32b93095f644c3462739e82/sac-1.3.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.eclipse.jetty.websocket/websocket-common/9.2.17.v20160517/3a233ace8e690ad8e6529f2aea8d5d157f47e29d/websocket-common-9.2.17.v20160517-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.eclipse.jetty.websocket/websocket-common/9.2.17.v20160517/b69549ef0b1e30d7adeea61a48c4531d32979ffb/websocket-common-9.2.17.v20160517.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.eclipse.jetty/jetty-io/9.2.17.v20160517/aadcf8b9a87930cef13f0789e06ef2a3f797286a/jetty-io-9.2.17.v20160517-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.eclipse.jetty/jetty-io/9.2.17.v20160517/38a89faeff5d0418e9f9f89adcd23e77b796b31/jetty-io-9.2.17.v20160517.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.eclipse.jetty/jetty-util/9.2.17.v20160517/65fdcb4bb82c1ccc104d894108330a51ca453400/jetty-util-9.2.17.v20160517-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.eclipse.jetty/jetty-util/9.2.17.v20160517/ffd0d9e535456e38a735b79690a17127dbbf72d7/jetty-util-9.2.17.v20160517.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.checkerframework/checker-compat-qual/2.0.0/eb7f7d588d0aef07a2c89178053c2a9e4613947f/checker-compat-qual-2.0.0-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.checkerframework/checker-compat-qual/2.0.0/fc89b03860d11d6213d0154a62bcd1c2f69b9efa/checker-compat-qual-2.0.0.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.google.errorprone/error_prone_annotations/2.1.3/990fe1fd48078a2befecdfcebcad8e6e1bd195a0/error_prone_annotations-2.1.3-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.google.errorprone/error_prone_annotations/2.1.3/39b109f2cd352b2d71b52a3b5a1a9850e1dc304b/error_prone_annotations-2.1.3.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.google.j2objc/j2objc-annotations/1.1/dcd31de68a90e41e336f6b7afce0d39285c433d7/j2objc-annotations-1.1-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/com.google.j2objc/j2objc-annotations/1.1/976d8d30bebc251db406f2bdb3eb01962b5685b3/j2objc-annotations-1.1.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-compress/1.9/24371fe090cb7c9f90ecf297342ce02b8ed15575/commons-compress-1.9-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-compress/1.9/cc18955ff1e36d5abd39a14bfe82b19154330a34/commons-compress-1.9.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.eclipse.jetty.websocket/websocket-api/9.2.17.v20160517/f30df50603d1d9a79aaf5173e810a36b424f8a9e/websocket-api-9.2.17.v20160517-sources.jar" kind="lib" path="/home/jpschewe/.gradle/caches/modules-2/files-2.1/org.eclipse.jetty.websocket/websocket-api/9.2.17.v20160517/130a02949cf118411714798da1204da8de922744/websocket-api-9.2.17.v20160517.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/jpschewe/projects/fll-sw/working-dir/build/classes/java/test">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/jpschewe/projects/fll-sw/working-dir/build/resources/test">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="integrationTest,test"/>
+		</attributes>
+	</classpathentry>
 </classpath>

@@ -508,8 +508,11 @@ public class Launcher extends JFrame {
   private Path getFLLHtmlFile() {
     final Path classesPath = TomcatLauncher.getClassesPath();
 
-    final String[] possibleLocations = { "..", "../dist", "../../../../src/main/dist", "bin", ".", "build/bin",
-                                         "scoring/build/bin" };
+    final String[] possibleLocations = { //
+                                         "../../src/main/dist", // eclipse
+                                         "..", // distribution
+                                         "../../../../src/main/dist" // gradle
+    };
     for (final String location : possibleLocations) {
       final Path check = classesPath.resolve(location).resolve("fll-sw.html");
       if (Files.exists(check)
@@ -601,8 +604,12 @@ public class Launcher extends JFrame {
    */
   private Path getDocsHtmlFile() {
     final Path classesPath = TomcatLauncher.getClassesPath();
-    final String[] possibleLocations = { "../../docs", "../../../../docs", "docs", "web/documentation", "build/docs",
-                                         "scoring/build/docs", "." };
+    final String[] possibleLocations = { //
+                                         "../docs", // distribution
+                                         "../../docs", // eclipse
+                                         "../../../../docs" // gradle
+    };
+
     for (final String location : possibleLocations) {
       final Path check = classesPath.resolve(location).resolve("index.html");
       if (Files.exists(check)
