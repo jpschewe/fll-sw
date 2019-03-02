@@ -20,7 +20,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
@@ -228,10 +227,10 @@ public class Launcher extends JFrame {
     final JButton sponsorLogos = new JButton("Sponsor Logos");
     sponsorLogos.setToolTipText("Opens the directory where the sponsor logos go");
     sponsorLogos.addActionListener(ae -> {
-      final File dir = getSponsorLogosDirectory();
+      final Path dir = getSponsorLogosDirectory();
       if (null != dir) {
         try {
-          Desktop.getDesktop().open(dir);
+          Desktop.getDesktop().open(dir.toFile());
         } catch (final IOException e) {
           final String message = "Error opening sponsor_logos directory: "
               + e.getMessage();
@@ -247,10 +246,10 @@ public class Launcher extends JFrame {
     final JButton slideshow = new JButton("Slide show");
     slideshow.setToolTipText("Opens the directory where the slideshow images go");
     slideshow.addActionListener(ae -> {
-      final File dir = getSlideshowDirectory();
+      final Path dir = getSlideshowDirectory();
       if (null != dir) {
         try {
-          Desktop.getDesktop().open(dir);
+          Desktop.getDesktop().open(dir.toFile());
         } catch (final IOException e) {
           final String message = "Error opening slideshow directory: "
               + e.getMessage();
@@ -266,10 +265,10 @@ public class Launcher extends JFrame {
     final JButton custom = new JButton("Custom files");
     custom.setToolTipText("Opens the directory where to put extra files to display on the big screen display");
     custom.addActionListener(ae -> {
-      final File dir = getCustomDirectory();
+      final Path dir = getCustomDirectory();
       if (null != dir) {
         try {
-          Desktop.getDesktop().open(dir);
+          Desktop.getDesktop().open(dir.toFile());
         } catch (final IOException e) {
           final String message = "Error opening custom directory: "
               + e.getMessage();
@@ -524,60 +523,71 @@ public class Launcher extends JFrame {
   /**
    * @return the directory or null if not found
    */
-  private File getSponsorLogosDirectory() {
-    final String[] possibleLocations = { "webapps/fll-sw/sponsor_logos" };
-    for (final String location : possibleLocations) {
-      final File f = new File(location);
-      if (f.exists()
-          && f.isDirectory()) {
-        return f;
+  private Path getSponsorLogosDirectory() {
+    final Path classesPath = TomcatLauncher.getClassesPath();
+    final Path webroot = TomcatLauncher.findWebappRoot(classesPath);
+    if (null == webroot) {
+      return null;
+    } else {
+      final Path check = webroot.resolve("sponsor_logos");
+      if (Files.exists(check)
+          && Files.isDirectory(check)) {
+        return check;
+      } else {
+        return null;
       }
     }
-    return null;
   }
 
   /**
    * @return the directory or null if not found
    */
-  private File getSlideshowDirectory() {
-    final String[] possibleLocations = { "webapps/fll-sw/slideshow" };
-    for (final String location : possibleLocations) {
-      final File f = new File(location);
-      if (f.exists()
-          && f.isDirectory()) {
-        return f;
+  private Path getSlideshowDirectory() {
+    final Path classesPath = TomcatLauncher.getClassesPath();
+    final Path webroot = TomcatLauncher.findWebappRoot(classesPath);
+    if (null == webroot) {
+      return null;
+    } else {
+      final Path check = webroot.resolve("slideshow");
+      if (Files.exists(check)
+          && Files.isDirectory(check)) {
+        return check;
+      } else {
+        return null;
       }
     }
-    return null;
   }
 
   /**
    * @return the directory or null if not found
    */
-  private File getCustomDirectory() {
-    final String[] possibleLocations = { "webapps/fll-sw/custom" };
-    for (final String location : possibleLocations) {
-      final File f = new File(location);
-      if (f.exists()
-          && f.isDirectory()) {
-        return f;
+  private Path getCustomDirectory() {
+    final Path classesPath = TomcatLauncher.getClassesPath();
+    final Path webroot = TomcatLauncher.findWebappRoot(classesPath);
+    if (null == webroot) {
+      return null;
+    } else {
+      final Path check = webroot.resolve("custom");
+      if (Files.exists(check)
+          && Files.isDirectory(check)) {
+        return check;
+      } else {
+        return null;
       }
     }
-    return null;
   }
 
   /**
    * Open up the main page.
    */
   private void loadDocsHtml() {
-    final String docsHtml = getDocsHtmlFile();
+    final Path docsHtml = getDocsHtmlFile();
     if (null == docsHtml) {
       JOptionPane.showMessageDialog(this, "Cannot find docs index.html, you will need to open this is your browser.");
       return;
     }
-    final File htmlFile = new File(docsHtml);
     try {
-      Desktop.getDesktop().browse(htmlFile.toURI());
+      Desktop.getDesktop().browse(docsHtml.toUri());
     } catch (final IOException e) {
       LOGGER.error("Unable to open web browser", e);
       JOptionPane.showMessageDialog(this, "Cannot open docs index.html, you will need to open this is your browser.");
@@ -589,14 +599,15 @@ public class Launcher extends JFrame {
    * 
    * @return null if the file cannot be found
    */
-  private String getDocsHtmlFile() {
-    final String[] possibleLocations = { "docs", "web/documentation", "build/docs", "scoring/build/docs", "." };
+  private Path getDocsHtmlFile() {
+    final Path classesPath = TomcatLauncher.getClassesPath();
+    final String[] possibleLocations = { "../../docs", "../../../../docs", "docs", "web/documentation", "build/docs",
+                                         "scoring/build/docs", "." };
     for (final String location : possibleLocations) {
-      final File f = new File(location
-          + "/index.html");
-      if (f.exists()
-          && f.isFile()) {
-        return f.getAbsolutePath();
+      final Path check = classesPath.resolve(location).resolve("index.html");
+      if (Files.exists(check)
+          && Files.isRegularFile(check)) {
+        return check;
       }
     }
     return null;
