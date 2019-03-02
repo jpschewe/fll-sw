@@ -47,7 +47,10 @@ public class TomcatLauncher {
     configureTomcat(tomcat);
   }
 
-  private void configureTomcat(final Tomcat tomcat) {
+  /**
+   * @return the directory that is the root of the classes directory
+   */
+  public static Path getClassesPath() {
     final ProtectionDomain classDomain = TomcatLauncher.class.getProtectionDomain();
     final CodeSource codeSource = classDomain.getCodeSource();
     final URL codeLocation = codeSource.getLocation();
@@ -62,6 +65,12 @@ public class TomcatLauncher {
     } else {
       classesPath = path;
     }
+
+    return classesPath;
+  }
+
+  private void configureTomcat(final Tomcat tomcat) {
+    final Path classesPath = getClassesPath();
 
     LOGGER.debug("Found classes path: "
         + classesPath.toAbsolutePath().toString());
