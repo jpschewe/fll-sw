@@ -13,8 +13,10 @@ Documentation on the database schema, API, workflows, etc. for the [current rele
     * Or you can create a fork and then submit a pull request when you have changes to merge in
   1. setup eclipse classpath with `./gradlew eclipseClasspath`
     * When library versions change, it's good to remove the .classpath file and then have gradle recreate it
-  1. Build by execute `./gradlew assemble`
+  1. Build by executing `./gradlew classes`
   1. Start the application with `./gradlew run`
+  1. Run tests with `./gradlew test`
+    * integration tests are `./gradlew integrationTest`
   1. We have a continuous integration server running using [Jenkins](http://jenkins-ci.org/). You can access it at [http://mtu.net/jenkins/job/FLL-SW/](http://mtu.net/jenkins/job/FLL-SW/). There is a job for each active branch.
 
 You can edit using your favorite Java IDE. We provide project files for Eclipse. See the eclipse folder for the launchers and the code formatter profile.
