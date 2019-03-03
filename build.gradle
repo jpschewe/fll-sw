@@ -19,6 +19,15 @@ plugins {
 	id 'org.kordamp.markdown.convert' version "1.2.0"	
 }
 
+configurations {
+    jspc
+}
+
+
+dependencies {
+    jspc 'org.apache.ant:ant:1.10.1'
+}
+
 testSets {
     integrationTest
 }
@@ -42,6 +51,11 @@ ext {
     web_build_dir = new File(project.buildDir, 'web')
     documentation_build_dir = new File(project.buildDir, 'gen-documentation')
     
+    
+    jspSrc = 'src/main/web'
+	jspJavaSrc = new File(project.buildDir, "jsp-java-source")
+	jspPackage = "fll.jsp"
+
     mainClassName = 'fll.Launcher'
 }
 
@@ -157,12 +171,15 @@ distributions {
     }
 }
 
+// create run task since we aren't using the application plugin
 task run(type: JavaExec) {
 	classpath = sourceSets.main.runtimeClasspath
 	
 	main = project.mainClassName
 }
 
+
+// convert markdown documentation and copy non-markdown documentation
 markdownToHtml {
 	sourceDir = file('src/main/documentation')
 	outputDir = project.documentation_build_dir
@@ -173,3 +190,54 @@ markdownToHtml {
 }
 distTar.dependsOn markdownToHtml
 distZip.dependsOn markdownToHtml
+
+
+// write log4j config for JspC
+task writeJspcProperties(type: WriteProperties) {
+    outputFile = new File(project.buildDir, "log4j.jspc.properties")
+    property('log4j.rootLogger', 'WARN, stdout')
+    property('log4j.logger.org.apache', 'INFO, stdout')
+    property('log4j.appender.stdout', 'org.apache.log4j.ConsoleAppender')
+    property('log4j.appender.stdout.Target', 'System.out')
+    property('log4j.appender.stdout.layout', 'org.apache.log4j.PatternLayout')
+    property('log4j.appender.stdout.layout.ConversionPattern', '%d [%C] %m%n')
+}
+
+// call JspC to test compile the JSP files
+// the output isn't used other than to check if there are errors in the build
+task jspToJava(type: JavaExec, dependsOn: [compileJava, writeJspcProperties]) {
+
+    inputs.dir jspSrc
+    outputs.dir jspJavaSrc
+
+    File xmlPartial = file("$jspJavaSrc/WEB-INF/web.xml.partial")
+
+    doFirst {
+        // Create the target WEB-INF folder so the JspC can create the web.xml.partial
+        File webInfFolder = xmlPartial.getParentFile()
+        if (!webInfFolder.exists()) {
+            webInfFolder.mkdirs()
+        }
+    }
+
+    classpath = configurations.jspc + sourceSets.main.runtimeClasspath
+    main = 'org.apache.jasper.JspC'
+    jvmArgs "-Dlog4j.configuration=file:$buildDir/log4j.jspc.properties"
+
+    args '-webapp', jspSrc,
+            '-d', jspJavaSrc,
+            '-p', jspPackage,
+            '-webxmlencoding', 'UTF-8',
+            '-webinc', xmlPartial.absolutePath
+
+    doLast {
+        // Merge the partial XML with the original
+        String originalXML = file("$jspSrc/WEB-INF/web.xml").text
+        String xmlToMerge = xmlPartial.text
+        String mergedXML = originalXML.replaceFirst('(?s)(<web-app.*?>)', '$1' + xmlToMerge)
+        file("$jspJavaSrc/WEB-INF/web.xml").text = mergedXML
+    }
+}
+check.dependsOn jspToJava
+
+
