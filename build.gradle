@@ -6,6 +6,7 @@ buildscript {
     }
     dependencies {
         classpath 'org.unbroken-dome.gradle-plugins:gradle-testsets-plugin:1.4.5'
+        classpath 'org.kordamp:markdown-gradle-plugin:1.2.0'
     }
 }    
 
@@ -15,6 +16,7 @@ plugins {
 	id "com.dorongold.task-tree" version "1.3.1"
 	id 'org.unbroken-dome.test-sets' version "2.1.1"
 	id 'eclipse'
+	id 'org.kordamp.markdown.convert' version "1.2.0"	
 }
 
 testSets {
@@ -38,6 +40,7 @@ ext {
     poi_version = "3.10.1"
     
     web_build_dir = new File(project.buildDir, 'web')
+    documentation_build_dir = new File(project.buildDir, 'gen-documentation')
     
     mainClassName = 'fll.Launcher'
 }
@@ -131,19 +134,25 @@ distZip.dependsOn copyWeb
 distributions {
     main {
         contents {
-            from(javadoc) {
-                into 'web/documentation/api'
-            }
-            // get output of copyWebapp task
-            from(project.web_build_dir) {
-                into 'web'
-            }
             from(sourceSets.main.output) {
                 into 'classes'
             }
             from(configurations.runtime) {
             	into 'lib'
            	}
+           	
+           	// web elements
+            from(project.web_build_dir) {
+                into 'web'
+            }
+            
+            // documentation
+           	from(project.documentation_build_dir) {
+           	    into 'web/documentation'
+           	}
+            from(javadoc) {
+                into 'web/documentation/api'
+            }
         }
     }
 }
@@ -154,3 +163,13 @@ task run(type: JavaExec) {
 	main = project.mainClassName
 }
 
+markdownToHtml {
+	sourceDir = file('src/main/documentation')
+	outputDir = project.documentation_build_dir
+	autoLinks = true
+	fencedCodeBlocks = true
+	definitionLists = true
+	tables = true	
+}
+distTar.dependsOn markdownToHtml
+distZip.dependsOn markdownToHtml
