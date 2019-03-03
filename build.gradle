@@ -252,3 +252,25 @@ cpdCheck {
 	// allow the build to continue, catch this in CI as warnings
 	ignoreFailures = true
 }
+
+task sloccount(type: Exec) {
+	commandLine 'cloc', '--by-file', '--xml', '--out', "$buildDir/reports/sloccount/cloc.xml", 'src'
+}
+
+task renderWorkflows(type: Exec, dependsOn: [markdownToHtml]) {
+	executable "dot"
+	/*
+	<apply executable="dot" dest="${dir.build}/docs/workflows">
+			<arg value="-Tpdf" />
+			<arg value="-O" />
+
+			<fileset dir="${dir.build}/docs/workflows">
+				<include name="*.dot" />
+			</fileset>
+
+			<mapper type="glob" from="*.dot" to="*.dot.pdf" />
+		</apply>
+		*/
+}
+distZip.dependsOn renderWorkflows
+distTar.dependsOn renderWorkflows
