@@ -52,22 +52,22 @@ Please make sure anything you add has the following sort of header:
 
 If you're new to git read at least the first 3 chapters of [the git book](https://git-scm.com/book/)
 
-Do all development on a branch other than master. Branches named "feature.XXX" or "ticket.XXX" are preferred. Where "XXX" can be anything, but typically has the number of the ticket that you're working on in it and some short description of what you're doing. Example usage:
+Do all development on a branch other than master. Branches named "issue/XXX/DESCRIPTION" are preferred. Where "XXX" is the issue number and "DESCRIPTION" is a short description. Example usage:
 
 
-    git branch ticket.11.foo master # creates a new branch "feature.11.foo" based off of the local master branch, you can also use origin/master
-    git checkout ticket.11.foo # switch to branch ticket.11.foo
+    git branch issue/11/foo master # creates a new branch "feature/11/foo" based off of the local master branch, you can also use origin/master
+    git checkout issue/11/foo # switch to branch issue/11/foo
     # make changes
     git commit # commit early and commit often
     # when you have something to share
-    ./ant.sh before-checkin # to make sure you didn't break something
-    git push origin ticket.11.foo # push all changes in local branch "ticket.11.foo" to a remote branch with the same name on the remote "origin"
+    ./gradlew check # to make sure you didn't break something
+    git push origin issue/11/foo # push all changes in local branch "issue/11/foo" to a remote branch with the same name on the remote "origin"
 
 Alternatively fork the repository and submit a pull request.
 
 Commit early and often.
 
-Don't rebase commits that have already been pushed.
+Don't rebase commits that have already been pushed to the main repository.
 
 Before merging into master make sure to merge master into your branch, push, and wait for all tests to pass in continuous integration.
 When your feature branch is pushed back up to the main repository, it will be built in continuous integration to be sure that nothing is broken.
@@ -87,18 +87,11 @@ When you start work on a ticket, assign it to yourself. Don't work on someone el
 GitHub allows attachments of certain file types. [You can find the list here](https://help.github.com/articles/file-attachments-on-issues-and-pull-requests/). If you rename the file you want to attach to one of these extensions, they will attach nicely. For databases and subjective data files I add ".zip" a second extension, for log files I add ".txt" as a second extension. This way GitHub accepts the attachment and we still know what type of file it was.
 
 
-# Wiki Editing
-Please stick to [standard markdown syntax](http://daringfireball.net/projects/markdown/syntax) as much as possible. This is because we package a copy of the wiki in the release and the processor only handles standard markdown plus basic linking.
-
-
 # Using Eclipse
 
   1. [Download Eclipse](http://www.eclipse.org/downloads/). Get the Jave EE developer edition.
+  1. `./gradlew eclipseClasspath`
   1. Tell Eclipse to import an existing project and point it to the root of the git checkout
-
-## Using Ant in Eclipse
-
-Most ant targets will work out of the box once you tell Eclipse about our ant build file. However if you want to run the test.report target you'll get an error about the style sheet. Using the instructions at http://help.eclipse.org/juno/index.jsp?topic=%2Forg.eclipse.platform.doc.user%2Ftasks%2Ftasks-ant-version.htm you can point Eclipse at tools/ant as the Ant Home variable and then the test.report target works. This setting is for the workspace, so you'll want to make sure you're workspace is only used for fll-sw. 
 
 # Viewing the database diagram
 
@@ -160,13 +153,11 @@ release and go.
 
   1. Get the latest code from git
   1. Update Changes.md for the new release and commit that
-  1. Create a tag with `git tag -s <tag name>`
+  1. Create a tag with `git tag -a <tag name>`
     * `tag name` should be `x.y` where `x` is the major version (counting up per season), `y` is the minor version
-    * You can optionally use `-a` instead of `-s` to create an unsigned tag
+    * You can optionally use `-s` to create a signed tag
     * You may needed execute `git config user.signingkey 0x<your key id>` before the signing works 
   1. Push the tag with `git push origin master <tag name>`
-  1. Use Jenkins to run the `fll-release` job and get the resulting archive from there
-    * Contact Jon Schewe if you don't have access to create releases
   1. Create a new release on GitHub
     1. Paste the changes since the last release into the release notes
     1. Upload the file created in Jenkins to GitHub
