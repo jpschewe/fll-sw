@@ -17,6 +17,7 @@ plugins {
 	id 'org.unbroken-dome.test-sets' version "2.1.1"
 	id 'eclipse'
 	id 'org.kordamp.markdown.convert' version "1.2.0"	
+	id 'findbugs'
 }
 
 configurations {
@@ -241,3 +242,7 @@ task jspToJava(type: JavaExec, dependsOn: [compileJava, writeJspcProperties]) {
 check.dependsOn jspToJava
 
 
+findbugs {
+	// allow there to be findbugs errors so that the build is a warning, but we can still move forward
+	ignoreFailures = true
+}
