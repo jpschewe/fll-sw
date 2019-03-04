@@ -179,6 +179,9 @@ distributions {
             from("$buildDir/reports/tests/") {
             	into 'web/documentation/reports'
         	}
+            from("$buildDir/reports/findbugs/") {
+            	into 'web/documentation/findbugs'
+        	}
             
             from("$buildDir/launch4j/fll-sw.exe")
         }
@@ -255,11 +258,6 @@ task jspToJava(type: JavaExec, dependsOn: [compileJava, writeJspcProperties]) {
 check.dependsOn jspToJava
 
 
-findbugs {
-	// allow the build to continue, catch this in CI as warnings
-	ignoreFailures = true
-}
-
 cpdCheck {
 	// allow the build to continue, catch this in CI as warnings
 	ignoreFailures = true
@@ -310,3 +308,46 @@ launch4j {
 }
 distZip.dependsOn createExe
 distTar.dependsOn createExe
+
+
+findbugs {
+	// allow the build to continue, catch this in CI as warnings
+	ignoreFailures = true
+}
+
+// some extra tasks so that we can generate html AND xml
+task findbugsMainHtml(type: FindBugs, dependsOn: classes) {
+	classes = project.sourceSets.main.output.classesDirs
+	source = project.sourceSets.main.java.srcDirs
+	classpath = sourceSets.main.runtimeClasspath
+	reports {
+	    html.enabled = true
+	    xml.enabled = false
+	}
+}
+distZip.dependsOn findbugsMainHtml
+distTar.dependsOn findbugsMainHtml
+
+task findbugsTestHtml(type: FindBugs, dependsOn: testClasses) {
+	classes = project.sourceSets.test.output.classesDirs
+	source = project.sourceSets.test.java.srcDirs
+	classpath = sourceSets.test.runtimeClasspath
+	reports {
+	    html.enabled = true
+	    xml.enabled = false
+	}
+}
+distZip.dependsOn findbugsTestHtml
+distTar.dependsOn findbugsTestHtml
+
+task findbugsIntegrationTestHtml(type: FindBugs, dependsOn: integrationTestClasses) {
+	classes = project.sourceSets.integrationTest.output.classesDirs
+	source = project.sourceSets.integrationTest.java.srcDirs
+	classpath = sourceSets.integrationTest.runtimeClasspath
+	reports {
+	    html.enabled = true
+	    xml.enabled = false
+	}
+}
+distZip.dependsOn findbugsIntegrationTestHtml
+distTar.dependsOn findbugsIntegrationTestHtml
