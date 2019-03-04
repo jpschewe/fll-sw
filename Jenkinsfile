@@ -19,28 +19,31 @@ pipeline {
 
     stage('Duplicate Code Analysis') {
       steps { 
-        fllSwAnt('cpd.xml')
-        dry defaultEncoding: '', healthy: '', pattern: 'build.ant/cpd.xml', unHealthy: ''
+        fllSwGradle('cpdCheck')
+        dry defaultEncoding: '', healthy: '', pattern: 'build/reports/cpd/cpdCheck.xml', unHealthy: ''
       }     
     }
 
     stage('Count lines of code') {
       steps { 
-        fllSwAnt('sloccount')
-        sloccountPublish pattern: 'cloc.xml'
+        fllSwGradle('sloccount')
+        sloccountPublish pattern: 'build/reports/sloccount/cloc.xml'
       }
     }
 
-    stage('Generate documentation') {
+    stage('Tests') {
       steps { 
-        fllSwAnt('docs')
+        fllSwGradle('check')
+        fllSwGradle('integrationTest')
+        junit testResults: "build/test-results/test/TEST-*.xml", keepLongStdio: true        
       }
     }
-    
+
     stage('Findbugs analysis') {
       steps { 
-        fllSwAnt('findbugs')
-        findbugs defaultEncoding: '', excludePattern: '', failedTotalHigh: '0', healthy: '', includePattern: '', pattern: 'build.ant/findbugs/report.xml', unHealthy: ''
+        fllSwGradle('findbugsMain')
+        fllSwGradle('findbugsTest')
+        findbugs defaultEncoding: '', excludePattern: '', failedTotalHigh: '0', healthy: '', includePattern: '', pattern: 'build/reports/findbugs/*.xml', unHealthy: ''
       }
     }
     
@@ -48,39 +51,39 @@ pipeline {
       steps {
         throttle(['fll-sw']) { 
           timestamps {
-            fllSwAnt('dist')
-            junit testResults: "build.ant/test-results/TEST-*.xml", keepLongStdio: true
-            fllSwAnt('check-logs')
+            fllSwGradle('distZip')
           } // timestamps
         } // throttle
       } // steps           
     } // build and test stage
     
-    stage('Code coverage analysis') {
+    /*stage('Code coverage analysis') {
       steps { 
         fllSwAnt('coverage.report')
         step $class: 'CoberturaPublisher', coberturaReportFile: 'build.ant/docs/reports/coverage/coverage.xml'
       }
-    }
+    }*/
     
+    /*
     stage('Publish documentation') {
       steps {    
           publishHTML (target: [
             allowMissing: false,
             alwaysLinkToLastBuild: false,
             keepAll: false,
-            reportDir: 'build.ant/docs',
+            reportDir: 'build/gen-documentation',
             reportFiles: 'index.html',
             reportName: 'Documentation'
           ])
       }
     }
+    */
     
   } // stages
     
   post {
     always {
-      archiveArtifacts artifacts: 'build.ant/*.log,build.ant/screenshots/,build.ant/tomcat/webapps/fll-sw/fllweb*,build.ant/tomcat/logs/,build.ant/docs/reports/,build.ant/fll-sw*.zip'           
+      archiveArtifacts artifacts: '*.log,screenshots/,build/reports/,build/distributions'           
                         
       openTasks defaultEncoding: '', excludePattern: 'checkstyle*.xml,**/ChatServlet.java', healthy: '', high: 'FIXME,HACK', low: '', normal: 'TODO', pattern: '**/*.java,**/*.jsp,**/*.jspf,**/*.xml', unHealthy: ''
       warnings categoriesPattern: '', consoleParsers: [[parserName: 'Java Compiler (javac)']], defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', messagesPattern: '', unHealthy: ''
@@ -107,11 +110,21 @@ Find more details at: ${JENKINS_URL}
 
 } // pipeline
 
-def fllSwAnt(target) {
+def fllSwGradle(task) {
+  // make sure the local repository directories exist
+  dir('.gradle-repo') {
+      writeFile file:'dummy', text:''
+  }
+  dir('.maven-repo') {
+      writeFile file:'dummy', text:''
+  }
+  
+  def args='-gradle-user-home .gradle-repo -Dmaven.repo.local=.maven-repo'
+
   if (isUnix()) {
-    sh script: "ant ${target}"
+    sh script: "gradlew ${args} ${task}"
   } else {
-    bat script: "ant-win ${target}"
+    bat script: "gradlew.bat ${args} ${task}"
   }
 }
 
