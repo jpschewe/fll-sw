@@ -119,7 +119,7 @@ def fllSwGradle(task) {
       writeFile file:'dummy', text:''
   }
   
-  def args='-gradle-user-home .gradle-repo -Dmaven.repo.local=.maven-repo'
+  def args='-gradle-user-home .gradle-repo -Dmaven.repo.local=.maven-repo -Dtest.ignoreFailures=true'
 
   if (isUnix()) {
     sh script: "gradlew ${args} ${task}"

@@ -38,6 +38,12 @@ testSets {
 // don't depend on check so that users can skip these on a basic check check.dependsOn integrationTest
 integrationTest.mustRunAfter test
 
+test {
+	 ignoreFailures Boolean.getBoolean("test.ignoreFailures") 
+}
+integrationTest {
+	 ignoreFailures Boolean.getBoolean("test.ignoreFailures") 
+}
 repositories {
     jcenter()
     flatDir {
