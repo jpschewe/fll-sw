@@ -35,7 +35,7 @@ pipeline {
       steps { 
         fllSwGradle('check')
         fllSwGradle('integrationTest')
-        junit testResults: "build/test-results/test/TEST-*.xml", keepLongStdio: true        
+        junit testResults: "build/test-results/*est/TEST-*.xml", keepLongStdio: true        
       }
     }
 
