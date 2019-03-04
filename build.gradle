@@ -51,8 +51,7 @@ ext {
     poi_version = "3.10.1"
     
     web_build_dir = new File(project.buildDir, 'web')
-    documentation_build_dir = new File(project.buildDir, 'gen-documentation')
-    
+    documentation_build_dir = new File(project.buildDir, 'gen-documentation')    
     
     jspSrc = 'src/main/web'
 	jspJavaSrc = new File(project.buildDir, "jsp-java-source")
@@ -282,3 +281,20 @@ task renderWorkflows(dependsOn: [markdownToHtml]) {
 }
 distZip.dependsOn renderWorkflows
 distTar.dependsOn renderWorkflows
+
+task createDatabaseDiagram(type: JavaExec, dependsOn: [markdownToHtml]) {
+	classpath = sourceSets.main.runtimeClasspath
+	
+	main = "fll.db.GenerateDatabaseDiagram"
+ 	args new File(project.documentation_build_dir, "database-diagram").absolutePath
+/*
+	<target name="doc.database-diagram" description="Generate database diagram" depends="compile">
+		<!-- need fork set to true otherwise the classloader inside SchemaSpy doesn't see the database driver -->
+		<java classname="fll.db.GenerateDatabaseDiagram" taskname="SchemaSpy" classpathref="application.classpath" fork="true" failonerror="true">
+			<arg line="${dir.build}/docs/database-diagram" />
+		</java>
+	</target>
+	*/
+}
+distZip.dependsOn createDatabaseDiagram
+distTar.dependsOn createDatabaseDiagram
