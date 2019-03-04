@@ -39,10 +39,10 @@ testSets {
 integrationTest.mustRunAfter test
 
 test {
-	 ignoreFailures Boolean.getBoolean("test.ignoreFailures") 
+	ignoreFailures Boolean.getBoolean("test.ignoreFailures") 
 }
 integrationTest {
-	 ignoreFailures Boolean.getBoolean("test.ignoreFailures") 
+	ignoreFailures Boolean.getBoolean("test.ignoreFailures") 
 }
 repositories {
     jcenter()
@@ -176,6 +176,9 @@ distributions {
             from(javadoc) {
                 into 'web/documentation/api'
             }
+            from("$buildDir/reports/tests/") {
+            	into 'web/documentation/reports'
+        	}
             
             from("$buildDir/launch4j/fll-sw.exe")
         }
