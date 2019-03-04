@@ -6,6 +6,8 @@
 
 package fll;
 
+import java.io.File;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -54,19 +56,24 @@ public class TomcatLauncher {
     final ProtectionDomain classDomain = TomcatLauncher.class.getProtectionDomain();
     final CodeSource codeSource = classDomain.getCodeSource();
     final URL codeLocation = codeSource.getLocation();
-    final Path path = Paths.get(codeLocation.getPath());
+    try {
+      final File codeLocationFile = new File(codeLocation.toURI());
+      final Path path = codeLocationFile.toPath();
 
-    final Path classesPath;
-    if (!Files.isDirectory(path)) {
-      classesPath = path.getParent();
-      LOGGER.debug("Path to class files is a file "
-          + path
-          + " using parent directory as the classes location");
-    } else {
-      classesPath = path;
+      final Path classesPath;
+      if (!Files.isDirectory(path)) {
+        classesPath = path.getParent();
+        LOGGER.debug("Path to class files is a file "
+            + path
+            + " using parent directory as the classes location");
+      } else {
+        classesPath = path;
+      }
+
+      return classesPath;
+    } catch (final URISyntaxException e) {
+      throw new RuntimeException("Error converting code location to a path", e);
     }
-
-    return classesPath;
   }
 
   private void configureTomcat(final Tomcat tomcat) {
