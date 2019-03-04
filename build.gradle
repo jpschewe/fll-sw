@@ -257,20 +257,28 @@ task sloccount(type: Exec) {
 	commandLine 'cloc', '--by-file', '--xml', '--out', "$buildDir/reports/sloccount/cloc.xml", 'src'
 }
 
-task renderWorkflows(type: Exec, dependsOn: [markdownToHtml]) {
-	executable "dot"
-	/*
-	<apply executable="dot" dest="${dir.build}/docs/workflows">
-			<arg value="-Tpdf" />
-			<arg value="-O" />
-
-			<fileset dir="${dir.build}/docs/workflows">
-				<include name="*.dot" />
-			</fileset>
-
-			<mapper type="glob" from="*.dot" to="*.dot.pdf" />
-		</apply>
-		*/
+task renderWorkflows(dependsOn: [markdownToHtml]) {
+	def inputFiles = []
+	def outputFiles = []
+	
+	fileTree(documentation_build_dir).matching{include "**/*.dot"}.visit{FileVisitDetails details ->
+		if(!details.isDirectory) {		
+			inputFiles << details.file.path
+			outputFiles << details.file.path + ".pdf"
+		}
+	}
+	
+	inputs.files inputFiles
+	outputs.files outputFiles
+	
+	doLast {
+		inputFiles.each{ aFile ->
+				exec{
+				    commandLine 'dot'
+				    args "-Tpdf", "-O", aFile
+				}
+		}
+	}
 }
 distZip.dependsOn renderWorkflows
 distTar.dependsOn renderWorkflows
