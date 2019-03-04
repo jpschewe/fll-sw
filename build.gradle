@@ -7,6 +7,7 @@ buildscript {
     dependencies {
         classpath 'org.unbroken-dome.gradle-plugins:gradle-testsets-plugin:1.4.5'
         classpath 'org.kordamp:markdown-gradle-plugin:1.2.0'
+    	classpath 'edu.sc.seis.gradle:launch4j:2.4.4'
     }
 }    
 
@@ -19,6 +20,7 @@ plugins {
 	id 'org.kordamp.markdown.convert' version "1.2.0"	
 	id 'findbugs'
   	id "de.aaschmid.cpd" version "1.2"
+  	id 'edu.sc.seis.launch4j' version '2.4.4'
 }
 
 configurations {
@@ -168,6 +170,8 @@ distributions {
             from(javadoc) {
                 into 'web/documentation/api'
             }
+            
+            from("$buildDir/launch4j/fll-sw.exe")
         }
     }
 }
@@ -287,14 +291,13 @@ task createDatabaseDiagram(type: JavaExec, dependsOn: [markdownToHtml]) {
 	
 	main = "fll.db.GenerateDatabaseDiagram"
  	args new File(project.documentation_build_dir, "database-diagram").absolutePath
-/*
-	<target name="doc.database-diagram" description="Generate database diagram" depends="compile">
-		<!-- need fork set to true otherwise the classloader inside SchemaSpy doesn't see the database driver -->
-		<java classname="fll.db.GenerateDatabaseDiagram" taskname="SchemaSpy" classpathref="application.classpath" fork="true" failonerror="true">
-			<arg line="${dir.build}/docs/database-diagram" />
-		</java>
-	</target>
-	*/
 }
 distZip.dependsOn createDatabaseDiagram
 distTar.dependsOn createDatabaseDiagram
+
+launch4j {
+  mainClassName = project.mainClassName
+  icon = "${projectDir}/src/main/resources/fll/resources/fll-sw.ico"
+}
+distZip.dependsOn createExe
+distTar.dependsOn createExe
