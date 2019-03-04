@@ -43,7 +43,8 @@ pipeline {
       steps { 
         fllSwGradle('findbugsMain')
         fllSwGradle('findbugsTest')
-        findbugs defaultEncoding: '', excludePattern: '', failedTotalHigh: '0', healthy: '', includePattern: '', pattern: 'build/reports/findbugs/*.xml', unHealthy: ''
+        //FIXME add findbugs on the test classes as well
+        findbugs defaultEncoding: '', excludePattern: '', failedTotalHigh: '0', healthy: '', includePattern: '', pattern: 'build/reports/findbugs/main.xml', unHealthy: ''
       }
     }
     
