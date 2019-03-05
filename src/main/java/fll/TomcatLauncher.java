@@ -140,6 +140,10 @@ public class TomcatLauncher {
       final Path check = web.resolve("fll.css");
       if (Files.exists(check)) {
         return web;
+      } else {
+        LOGGER.debug("No web root at '"
+            + check.toAbsolutePath()
+            + "'");
       }
     }
     return null;
