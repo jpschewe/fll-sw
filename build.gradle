@@ -148,7 +148,7 @@ task copyWeb(type: Copy) {
 }
 distTar.dependsOn copyWeb
 distZip.dependsOn copyWeb
-
+integrationTest.dependsOn copyWeb
 
 // Configure the distribution plugin instead of using the application plugin so that
 // the web application classes stay outside of a jar file and Tomcat will properly
