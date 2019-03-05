@@ -343,7 +343,12 @@ public final class IntegrationTestUtils {
   public static void storeScreenshot(final String filePrefix,
                                      final WebDriver driver)
       throws IOException {
-    final Path tempDir = Files.createTempDirectory(Paths.get("screenshots"), filePrefix);
+    final Path screenshotsDir = Paths.get("screenshots");
+    if(!Files.exists(screenshotsDir)) {
+      Files.createDirectories(screenshotsDir);
+    }
+    
+    final Path tempDir = Files.createTempDirectory(screenshotsDir, filePrefix);
 
     if (driver instanceof TakesScreenshot) {
       final Path screenshot = tempDir.resolve("screenshot.png");
