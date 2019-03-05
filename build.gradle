@@ -35,7 +35,7 @@ dependencies {
 testSets {
     integrationTest
 }
-// don't depend on check so that users can skip these on a basic check check.dependsOn integrationTest
+// don't depend on check so that users can skip these on a basic check. check.dependsOn integrationTest
 integrationTest.mustRunAfter test
 
 test {
