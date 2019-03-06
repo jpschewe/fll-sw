@@ -21,6 +21,7 @@ plugins {
 	id 'findbugs'
   	id "de.aaschmid.cpd" version "1.2"
   	id 'edu.sc.seis.launch4j' version '2.4.4'
+    id 'com.palantir.git-version' version '0.11.0'
 }
 
 configurations {
@@ -66,7 +67,12 @@ ext {
 	jspPackage = "fll.jsp"
 
     mainClassName = 'fll.Launcher'
+    
+    versionDetails = versionDetails()
 }
+
+group = 'fll'
+version = project.versionDetails.lastTag + "." + project.versionDetails.commitDistance
 
 dependencies {
     compile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: project.tomcat_version
