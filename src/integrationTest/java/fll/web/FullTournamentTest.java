@@ -15,6 +15,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -35,6 +36,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipInputStream;
 
+import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
 import org.apache.commons.lang3.StringUtils;
@@ -58,6 +60,7 @@ import org.openqa.selenium.support.ui.Select;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+import com.diffplug.common.base.Errors;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
@@ -833,91 +836,99 @@ public class FullTournamentTest {
     IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
         + "admin/subjective-data.fll"), "application/zip", subjectiveZip);
 
-    final SubjectiveFrame subjective = new SubjectiveFrame();
-    subjective.load(subjectiveZip.toFile());
+    try {
+      SwingUtilities.invokeAndWait(Errors.rethrow().wrap(() -> {
+        final SubjectiveFrame subjective = new SubjectiveFrame();
+        subjective.load(subjectiveZip.toFile());
 
-    // insert scores into zip
-    for (final SubjectiveScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
-      final String category = subjectiveElement.getName();
-      final String title = subjectiveElement.getTitle();
+        // insert scores into zip
+        for (final SubjectiveScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
+          final String category = subjectiveElement.getName();
+          final String title = subjectiveElement.getTitle();
 
-      // find appropriate table model
-      final TableModel tableModel = subjective.getTableModelForTitle(title);
-      Assert.assertNotNull(tableModel);
+          // find appropriate table model
+          final TableModel tableModel = subjective.getTableModelForTitle(title);
+          Assert.assertNotNull(tableModel);
 
-      final int teamNumberColumn = findColumnByName(tableModel, "TeamNumber");
-      Assert.assertTrue("Can't find TeamNumber column in subjective table model", teamNumberColumn >= 0);
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("Found team number column at "
-            + teamNumberColumn);
-      }
+          final int teamNumberColumn = findColumnByName(tableModel, "TeamNumber");
+          Assert.assertTrue("Can't find TeamNumber column in subjective table model", teamNumberColumn >= 0);
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Found team number column at "
+                + teamNumberColumn);
+          }
 
-      try (final PreparedStatement prep = testDataConn.prepareStatement("SELECT * FROM "
-          + category
-          + " WHERE Tournament = ?")) {
-        prep.setInt(1, sourceTournament.getTournamentID());
+          try (final PreparedStatement prep = testDataConn.prepareStatement("SELECT * FROM "
+              + category
+              + " WHERE Tournament = ?")) {
+            prep.setInt(1, sourceTournament.getTournamentID());
 
-        try (final ResultSet rs = prep.executeQuery()) {
-          while (rs.next()) {
-            final int teamNumber = rs.getInt("TeamNumber");
+            try (final ResultSet rs = prep.executeQuery()) {
+              while (rs.next()) {
+                final int teamNumber = rs.getInt("TeamNumber");
 
-            // find row number in table
-            int rowIndex = -1;
-            for (int rowIdx = 0; rowIdx < tableModel.getRowCount(); ++rowIdx) {
-              final Object teamNumberRaw = tableModel.getValueAt(rowIdx, teamNumberColumn);
-              Assert.assertNotNull(teamNumberRaw);
-              final int value = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(teamNumberRaw.toString()).intValue();
+                // find row number in table
+                int rowIndex = -1;
+                for (int rowIdx = 0; rowIdx < tableModel.getRowCount(); ++rowIdx) {
+                  final Object teamNumberRaw = tableModel.getValueAt(rowIdx, teamNumberColumn);
+                  Assert.assertNotNull(teamNumberRaw);
+                  final int value = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(teamNumberRaw.toString()).intValue();
 
-              if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace("Checking if "
-                    + teamNumber
-                    + " equals "
-                    + value
-                    + " raw: "
-                    + teamNumberRaw
-                    + "? "
-                    + (value == teamNumber)
-                    + " rowIdx: "
-                    + rowIdx
-                    + " numRows: "
-                    + tableModel.getRowCount());
-              }
+                  if (LOGGER.isTraceEnabled()) {
+                    LOGGER.trace("Checking if "
+                        + teamNumber
+                        + " equals "
+                        + value
+                        + " raw: "
+                        + teamNumberRaw
+                        + "? "
+                        + (value == teamNumber)
+                        + " rowIdx: "
+                        + rowIdx
+                        + " numRows: "
+                        + tableModel.getRowCount());
+                  }
 
-              if (value == teamNumber) {
-                rowIndex = rowIdx;
-                break;
-              }
-            }
-            Assert.assertTrue("Can't find team "
-                + teamNumber
-                + " in subjective table model", rowIndex >= 0);
-
-            if (rs.getBoolean("NoShow")) {
-              // find column for no show
-              final int columnIndex = findColumnByName(tableModel, "No Show");
-              Assert.assertTrue("Can't find No Show column in subjective table model", columnIndex >= 0);
-              tableModel.setValueAt(Boolean.TRUE, rowIndex, columnIndex);
-            } else {
-              for (final AbstractGoal goalElement : subjectiveElement.getGoals()) {
-                if (!goalElement.isComputed()) {
-                  final String goalName = goalElement.getName();
-                  final String goalTitle = goalElement.getTitle();
-
-                  // find column index for goal and call set
-                  final int columnIndex = findColumnByName(tableModel, goalTitle);
-                  Assert.assertTrue("Can't find "
-                      + goalTitle
-                      + " column in subjective table model", columnIndex >= 0);
-                  final int value = rs.getInt(goalName);
-                  tableModel.setValueAt(Integer.valueOf(value), rowIndex, columnIndex);
+                  if (value == teamNumber) {
+                    rowIndex = rowIdx;
+                    break;
+                  }
                 }
-              }
-            } // not NoShow
-          } // foreach score
-        } // try ResultSet
-      } // try PreparedStatement
-    } // foreach category
-    subjective.save();
+                Assert.assertTrue("Can't find team "
+                    + teamNumber
+                    + " in subjective table model", rowIndex >= 0);
+
+                if (rs.getBoolean("NoShow")) {
+                  // find column for no show
+                  final int columnIndex = findColumnByName(tableModel, "No Show");
+                  Assert.assertTrue("Can't find No Show column in subjective table model", columnIndex >= 0);
+                  tableModel.setValueAt(Boolean.TRUE, rowIndex, columnIndex);
+                } else {
+                  for (final AbstractGoal goalElement : subjectiveElement.getGoals()) {
+                    if (!goalElement.isComputed()) {
+                      final String goalName = goalElement.getName();
+                      final String goalTitle = goalElement.getTitle();
+
+                      // find column index for goal and call set
+                      final int columnIndex = findColumnByName(tableModel, goalTitle);
+                      Assert.assertTrue("Can't find "
+                          + goalTitle
+                          + " column in subjective table model", columnIndex >= 0);
+                      final int value = rs.getInt(goalName);
+                      tableModel.setValueAt(Integer.valueOf(value), rowIndex, columnIndex);
+                    }
+                  }
+                } // not NoShow
+              } // foreach score
+            } // try ResultSet
+          } // try PreparedStatement
+        } // foreach category
+        subjective.save();
+
+      }));
+    } catch (final InvocationTargetException e) {
+      LOGGER.error("Error entering subjective scores", e);
+      Assert.fail("Got error entering subjective scores");
+    }
 
     // upload scores
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
