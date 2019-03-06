@@ -11,6 +11,7 @@ import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import java.awt.EventQueue;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,7 +37,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipInputStream;
 
-import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
 import org.apache.commons.lang3.StringUtils;
@@ -837,7 +837,7 @@ public class FullTournamentTest {
         + "admin/subjective-data.fll"), "application/zip", subjectiveZip);
 
     try {
-      SwingUtilities.invokeAndWait(Errors.rethrow().wrap(() -> {
+      EventQueue.invokeAndWait(Errors.rethrow().wrap(() -> {
         final SubjectiveFrame subjective = new SubjectiveFrame();
         subjective.load(subjectiveZip.toFile());
 
