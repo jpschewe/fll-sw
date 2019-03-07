@@ -41,12 +41,13 @@ public class TomcatLauncher {
   public TomcatLauncher() {
     tomcat = new Tomcat();
 
+    configureTomcat(tomcat);
+
     tomcat.setPort(Launcher.WEB_PORT);
 
     // trigger the creation of the default connector
     tomcat.getConnector();
 
-    configureTomcat(tomcat);
   }
 
   /**
@@ -82,11 +83,16 @@ public class TomcatLauncher {
     LOGGER.debug("Found classes path: "
         + classesPath.toAbsolutePath().toString());
 
-    // TODO: call tomcat.setBasedir() to specify the temporary directory to use
     final Path webRoot = findWebappRoot(classesPath);
     Objects.requireNonNull(webRoot, "Could not find web root");
     LOGGER.info("Using web root: "
         + webRoot.toAbsolutePath().toString());
+
+    // specify the temporary directory to use
+    final Path tmpDir = webRoot.resolve("../webserver-temp");
+    LOGGER.info("Using tomcat tmp dir: "
+        + tmpDir.toAbsolutePath().toString());
+    tomcat.setBaseDir(tmpDir.toAbsolutePath().toString());
 
     final StandardContext ctx = (StandardContext) tomcat.addWebapp("/", webRoot.toAbsolutePath().toString());
 
@@ -111,29 +117,22 @@ public class TomcatLauncher {
     final String[] possibleWebLocations = {
 
                                             // shell script ->
-                                            // /home/jpschewe/projects/fll-sw/working-dir/build/distributions/foo/fll-sw/lib/fll-sw.jar
+                                            // fll-sw/lib/fll-sw.jar
                                             // root: (dir)/../web
                                             // classes: <empty>
                                             "../web", //
 
                                             // gradle ->
-                                            // /home/jpschewe/projects/fll-sw/working-dir/build/classes/java/main/
+                                            // working-dir/build/classes/java/main/
                                             // root: ../../../web
                                             // classes: ../../
                                             // classpath
                                             "../../../web",
 
-                                            // eclipse -> /home/jpschewe/projects/fll-sw/working-dir/bin/classes
+                                            // eclipse -> working-dir/bin/classes
                                             // root: ../web
                                             // classes: .
-                                            "../web",
-
-                                            // ant, fll-sw.sh ->
-                                            // /home/jpschewe/projects/fll-sw/working-dir/build.ant/webapps/fll-sw/WEB-INF/classes/
-                                            // root: ../..
-                                            // classes: .
-                                            "../.." //
-    };
+                                            "../web", };
 
     for (final String location : possibleWebLocations) {
       final Path web = classesPath.resolve(location);
