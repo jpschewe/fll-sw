@@ -250,10 +250,6 @@
 					subjective score upload to lessen chance of data loss due to
 					overwrite.</li>
 
-				<li><a href='<c:url value="/subjective-app.jar"/>'>Subjective
-						Scoring Application</a> (Executable Jar file) - run with "java -jar
-					subjective-app.jar"</li>
-
 				<li>
 					<form name='uploadSubjective'
 						ACTION='<c:url value="UploadSubjectiveData"/>' METHOD="POST"
