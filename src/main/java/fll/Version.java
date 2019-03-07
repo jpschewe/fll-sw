@@ -7,6 +7,9 @@ package fll;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -22,12 +25,15 @@ public final class Version {
 
   private static final Logger LOG = LogUtils.getLogger();
 
+  private static final Map<String, String> VERSION_INFORMATION;
+
   private static final String VERSION;
   static {
     final InputStream stream = Version.class.getResourceAsStream("/fll/resources/version.properties");
     if (null == stream) {
       LOG.error("Unable to find version.properties!");
       VERSION = "NO-PROPERTIES-FILE";
+      VERSION_INFORMATION = Collections.emptyMap();
     } else {
       final Properties versionProps = new Properties();
       String version;
@@ -40,13 +46,20 @@ public final class Version {
       } finally {
         try {
           stream.close();
-        } catch(final IOException e) {
-          if(LOG.isDebugEnabled()) {
+        } catch (final IOException e) {
+          if (LOG.isDebugEnabled()) {
             LOG.debug("Error closing stream", e);
           }
         }
       }
 
+      // convert to String, String
+      final Map<String, String> map = new HashMap<>();
+      for (final String name : versionProps.stringPropertyNames()) {
+        map.put(name, versionProps.getProperty(name));
+      }
+
+      VERSION_INFORMATION = Collections.unmodifiableMap(map);
       VERSION = version;
     }
   }
@@ -54,7 +67,7 @@ public final class Version {
   private Version() {
     // no instances
   }
-  
+
   /**
    * @param args
    */
@@ -77,4 +90,13 @@ public final class Version {
       return VERSION;
     }
   }
+
+  /**
+   * @return all version information stored in version.properties, unmodifiable
+   *         map
+   */
+  public static Map<String, String> getAllVersionInformation() {
+    return VERSION_INFORMATION;
+  }
+
 }
