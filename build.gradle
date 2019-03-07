@@ -357,3 +357,21 @@ task findbugsIntegrationTestHtml(type: FindBugs, dependsOn: integrationTestClass
 }
 distZip.dependsOn findbugsIntegrationTestHtml
 distTar.dependsOn findbugsIntegrationTestHtml
+
+task writeProperties() {
+	doLast {
+		def propertyFile = file "build/resources/main/fll/resources/version.properties"
+		def props = new Properties()
+		
+		props.setProperty("version", project.version)
+		props.setProperty("lastTag", String.valueOf(project.versionDetails.lastTag))
+		props.setProperty("commitDistance", String.valueOf(project.versionDetails.commitDistance))
+		props.setProperty("gitHash", String.valueOf(project.versionDetails.gitHash))
+		props.setProperty("gitHashFull", String.valueOf(project.versionDetails.gitHashFull))
+		props.setProperty("branchName", String.valueOf(project.versionDetails.branchName))
+		props.setProperty("isCleanTag", String.valueOf(project.versionDetails.isCleanTag))
+				
+		propertyFile.withWriter { props.store(it, "") }
+	}
+}
+classes.dependsOn writeProperties

@@ -17,7 +17,6 @@ import fll.util.LogUtils;
  * Get version information about the FLL software.
  * 
  * @author jpschewe
- * @version $Revision$
  */
 public final class Version {
 
