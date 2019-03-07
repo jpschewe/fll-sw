@@ -309,8 +309,8 @@ distZip.dependsOn createDatabaseDiagram
 distTar.dependsOn createDatabaseDiagram
 
 launch4j {
-  mainClassName = project.mainClassName
-  icon = "${projectDir}/src/main/resources/fll/resources/fll-sw.ico"
+	mainClassName = project.mainClassName
+	icon = "${projectDir}/src/main/resources/fll/resources/fll-sw.ico"
 }
 distZip.dependsOn createExe
 distTar.dependsOn createExe
