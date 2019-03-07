@@ -84,7 +84,7 @@ pipeline {
     
   post {
     always {
-      archiveArtifacts artifacts: '*.log,screenshots/,build/reports/,build/distributions'           
+      archiveArtifacts artifacts: '*.log,screenshots/,build/reports/,build/distributions/'
                         
       openTasks defaultEncoding: '', excludePattern: 'checkstyle*.xml,**/ChatServlet.java', healthy: '', high: 'FIXME,HACK', low: '', normal: 'TODO', pattern: '**/*.java,**/*.jsp,**/*.jspf,**/*.xml', unHealthy: ''
       warnings categoriesPattern: '', consoleParsers: [[parserName: 'Java Compiler (javac)']], defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', messagesPattern: '', unHealthy: ''
