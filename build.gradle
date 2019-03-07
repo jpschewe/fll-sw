@@ -195,7 +195,7 @@ distributions {
 }
 
 // create run task since we aren't using the application plugin
-task run(type: JavaExec) {
+task run(type: JavaExec, dependsOn: [copyWeb, classes]) {
 	classpath = sourceSets.main.runtimeClasspath
 	
 	main = project.mainClassName
@@ -322,7 +322,7 @@ findbugs {
 }
 
 // some extra tasks so that we can generate html AND xml
-task findbugsMainHtml(type: FindBugs, dependsOn: classes) {
+task findbugsMainHtml(type: FindBugs, dependsOn: [classes]) {
 	classes = project.sourceSets.main.output.classesDirs
 	source = project.sourceSets.main.java.srcDirs
 	classpath = sourceSets.main.runtimeClasspath
@@ -334,7 +334,7 @@ task findbugsMainHtml(type: FindBugs, dependsOn: classes) {
 distZip.dependsOn findbugsMainHtml
 distTar.dependsOn findbugsMainHtml
 
-task findbugsTestHtml(type: FindBugs, dependsOn: testClasses) {
+task findbugsTestHtml(type: FindBugs, dependsOn: [testClasses]) {
 	classes = project.sourceSets.test.output.classesDirs
 	source = project.sourceSets.test.java.srcDirs
 	classpath = sourceSets.test.runtimeClasspath
@@ -346,7 +346,7 @@ task findbugsTestHtml(type: FindBugs, dependsOn: testClasses) {
 distZip.dependsOn findbugsTestHtml
 distTar.dependsOn findbugsTestHtml
 
-task findbugsIntegrationTestHtml(type: FindBugs, dependsOn: integrationTestClasses) {
+task findbugsIntegrationTestHtml(type: FindBugs, dependsOn: [integrationTestClasses]) {
 	classes = project.sourceSets.integrationTest.output.classesDirs
 	source = project.sourceSets.integrationTest.java.srcDirs
 	classpath = sourceSets.integrationTest.runtimeClasspath
