@@ -369,3 +369,17 @@ task writeVersionProperties(type: WriteProperties) {
 	property("isCleanTag", String.valueOf(project.versionDetails.isCleanTag))
 }
 classes.dependsOn writeVersionProperties
+
+task writeLaunchJar(type: Jar) {
+	destinationDir = project.buildDir
+	archiveFileName = "fll-sw.jar"
+	manifest {
+		attributes(
+			"Implementation-Title": project.name,
+            "Implementation-Version": version,
+            "Main-Class": project.mainClassName,
+			"Class-Path": "classes/\n " + configurations.runtimeClasspath.collect { "lib/" + it.getName() }.join(' \n '))
+    }
+}
+distZip.dependsOn writeLaunchJar
+distTar.dependsOn writeLaunchJar
