@@ -187,7 +187,10 @@ distributions {
             	into 'web/documentation/reports'
         	}
             from("$buildDir/reports/findbugs/") {
-            	into 'web/documentation/findbugs'
+            	into 'web/documentation/reports/findbugs'
+        	}
+            from("$buildDir/reports/cobertura/") {
+            	into 'web/documentation/reports/coverage'
         	}
             
             from("$buildDir/launch4j/fll-sw.exe")
