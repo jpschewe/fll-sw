@@ -22,6 +22,7 @@ plugins {
   	id "de.aaschmid.cpd" version "1.2"
   	id 'edu.sc.seis.launch4j' version '2.4.4'
     id 'com.palantir.git-version' version '0.11.0'
+	id 'net.saliman.cobertura' version '2.6.0'
 }
 
 configurations {
@@ -383,3 +384,7 @@ task writeLaunchJar(type: Jar) {
 }
 distZip.dependsOn writeLaunchJar
 distTar.dependsOn writeLaunchJar
+
+cobertura {
+	coverageFormats = [ 'html', 'xml' ]
+}

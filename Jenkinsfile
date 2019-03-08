@@ -24,6 +24,12 @@ pipeline {
       }     
     }
 
+    stage('Test compilation of JSPs') {
+      steps { 
+        fllSwGradle('jspToJava')
+      }     
+    }
+
     stage('Count lines of code') {
       steps { 
         fllSwGradle('sloccount')
@@ -32,10 +38,11 @@ pipeline {
     }
 
     stage('Tests') {
-      steps { 
-        fllSwGradle('check')
-        fllSwGradle('integrationTest')
-        junit testResults: "build/test-results/*est/TEST-*.xml", keepLongStdio: true        
+      steps {
+        // runs all of the test tasks
+      	fllSwGradle('cobertura')
+        junit testResults: "build/test-results/*est/TEST-*.xml", keepLongStdio: true
+        step $class: 'CoberturaPublisher', coberturaReportFile: 'build/reports/cobertura/coverage.xml'                
       }
     }
 
@@ -43,12 +50,13 @@ pipeline {
       steps { 
         fllSwGradle('findbugsMain')
         fllSwGradle('findbugsTest')
+        fllSwGradle('findbugsIntegrationTest')
         //FIXME add findbugs on the test classes as well
         findbugs defaultEncoding: '', excludePattern: '', failedTotalHigh: '0', healthy: '', includePattern: '', pattern: 'build/reports/findbugs/main.xml', unHealthy: ''
       }
     }
     
-    stage('Build, Test, Distribution') {
+    stage('Distribution') {
       steps {
         throttle(['fll-sw']) { 
           timestamps {
@@ -57,13 +65,6 @@ pipeline {
         } // throttle
       } // steps           
     } // build and test stage
-    
-    /*stage('Code coverage analysis') {
-      steps { 
-        fllSwAnt('coverage.report')
-        step $class: 'CoberturaPublisher', coberturaReportFile: 'build.ant/docs/reports/coverage/coverage.xml'
-      }
-    }*/
     
     /*
     stage('Publish documentation') {
