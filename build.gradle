@@ -323,6 +323,9 @@ distTar.dependsOn createExe
 findbugs {
 	// allow the build to continue, catch this in CI as warnings
 	ignoreFailures = true
+	effort = "max"
+	reportLevel = "low"
+	excludeFilter = file("findbugs-filters.xml")
 }
 
 // some extra tasks so that we can generate html AND xml
