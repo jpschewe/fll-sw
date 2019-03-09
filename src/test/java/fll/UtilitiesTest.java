@@ -22,7 +22,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import au.com.bytecode.opencsv.CSVWriter;
+import com.opencsv.CSVWriter;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.util.LogUtils;
 
