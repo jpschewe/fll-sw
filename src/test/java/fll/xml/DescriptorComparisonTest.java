@@ -6,6 +6,7 @@
 
 package fll.xml;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
@@ -14,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
+import fll.Utilities;
 import fll.util.LogUtils;
 
 /**
@@ -28,90 +30,113 @@ public class DescriptorComparisonTest {
 
   /**
    * Test that a different number of performance goals is caught as an error.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testDifferentNumPerfGoals() {
+  public void testDifferentNumPerfGoals() throws IOException {
     doComparison("data/import-document.xml", "data/import-document-diff-num-perf-goals.xml", true);
   }
 
   /**
    * Test that a different performance goal name is an error.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testDifferentPerfGoalName() {
+  public void testDifferentPerfGoalName() throws IOException {
     doComparison("data/import-document.xml", "data/id-diff-goal.xml", true);
   }
 
   /**
    * Test that enumerated vs. non-enumerated performance goal name is an error.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testDifferentPerfGoalTypes() {
+  public void testDifferentPerfGoalTypes() throws IOException {
     doComparison("data/import-document.xml", "data/id-non-enum.xml", true);
   }
 
   /**
    * Test that number of computed performance goals is NOT an error.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testDifferentNumComputedGoals() {
+  public void testDifferentNumComputedGoals() throws IOException {
     doComparison("data/import-document.xml", "data/id-diff-computed-goals.xml", false);
   }
 
   /**
    * Test different number of subjective categories is an error.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testDifferentNumSubjCats() {
+  public void testDifferentNumSubjCats() throws IOException {
     doComparison("data/import-document.xml", "data/id-diff-num-subj-cats.xml", true);
   }
 
   /**
    * Test different name of subjective categories is an error.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testDifferentNameSubjCats() {
+  public void testDifferentNameSubjCats() throws IOException {
     doComparison("data/import-document.xml", "data/id-diff-name-subj-cats.xml", true);
   }
 
   /**
    * Test that a different subjective goal name is an error.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testDifferentNumSubjGoals() {
+  public void testDifferentNumSubjGoals() throws IOException {
     doComparison("data/import-document.xml", "data/id-diff-num-subj-goal.xml", true);
   }
 
   /**
    * Test that a different subjective goal type is an error.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testDifferentTypeSubjGoals() {
+  public void testDifferentTypeSubjGoals() throws IOException {
     doComparison("data/import-document.xml", "data/id-diff-type-subj-goal.xml", true);
   }
 
   private void doComparison(final String curDocRes,
                             final String newDocRes,
-                            final boolean differencesExpected) {
-    final InputStream curDocStream = DescriptorComparisonTest.class.getResourceAsStream(curDocRes);
-    Assert.assertNotNull("Could not find '"
-        + curDocRes + "'", curDocStream);
-    final Document curDoc = ChallengeParser.parse(new InputStreamReader(curDocStream));
-    Assert.assertNotNull("Error parsing '"
-        + curDocRes + "'", curDoc);
-    final InputStream newDocStream = DescriptorComparisonTest.class.getResourceAsStream(newDocRes);
-    Assert.assertNotNull("Could not find '"
-        + newDocRes + "'", newDocStream);
-    final Document newDoc = ChallengeParser.parse(new InputStreamReader(newDocStream));
-    Assert.assertNotNull("Error parsing '"
-        + newDocRes + "'", newDoc);
+                            final boolean differencesExpected)
+      throws IOException {
+    try (InputStream curDocStream = DescriptorComparisonTest.class.getResourceAsStream(curDocRes)) {
+      Assert.assertNotNull("Could not find '"
+          + curDocRes
+          + "'", curDocStream);
+      final Document curDoc = ChallengeParser.parse(new InputStreamReader(curDocStream, Utilities.DEFAULT_CHARSET));
+      Assert.assertNotNull("Error parsing '"
+          + curDocRes
+          + "'", curDoc);
+      try (InputStream newDocStream = DescriptorComparisonTest.class.getResourceAsStream(newDocRes)) {
+        Assert.assertNotNull("Could not find '"
+            + newDocRes
+            + "'", newDocStream);
+        final Document newDoc = ChallengeParser.parse(new InputStreamReader(newDocStream, Utilities.DEFAULT_CHARSET));
+        Assert.assertNotNull("Error parsing '"
+            + newDocRes
+            + "'", newDoc);
 
-    final String message = ChallengeParser.compareStructure(new ChallengeDescription(curDoc.getDocumentElement()),
-                                                            new ChallengeDescription(newDoc.getDocumentElement()));
-    if (differencesExpected) {
-      Assert.assertNotNull("There should be differences", message);
-    } else {
-      Assert.assertNull("There should NOT be differences", message);
-    }
+        final String message = ChallengeParser.compareStructure(new ChallengeDescription(curDoc.getDocumentElement()),
+                                                                new ChallengeDescription(newDoc.getDocumentElement()));
+        if (differencesExpected) {
+          Assert.assertNotNull("There should be differences", message);
+        } else {
+          Assert.assertNull("There should NOT be differences", message);
+        }
+      } // newDocStream
+    } // curDocStream
   }
 }

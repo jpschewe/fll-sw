@@ -45,7 +45,7 @@ public class ChallengeParserTest {
     boolean exception = false;
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/illegal-restriction.xml")) {
       Assert.assertNotNull(stream);
-      ChallengeParser.parse(new InputStreamReader(stream));
+      ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final RuntimeException e) {
       if (e.getMessage().contains("not found for identity constraint")) {
         exception = true;
@@ -68,7 +68,7 @@ public class ChallengeParserTest {
     boolean exception = false;
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/illegal-tiebreaker-ref.xml")) {
       Assert.assertNotNull(stream);
-      ChallengeParser.parse(new InputStreamReader(stream));
+      ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final ChallengeXMLException e) {
       if (e.getMessage().contains("not found for identity constraint")) {
         exception = true;
@@ -88,7 +88,7 @@ public class ChallengeParserTest {
   public void testAllElements() throws IOException {
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/all-elements.xml")) {
       Assert.assertNotNull(stream);
-      try (InputStreamReader reader = new InputStreamReader(stream)) {
+      try (InputStreamReader reader = new InputStreamReader(stream, Utilities.DEFAULT_CHARSET)) {
         ChallengeParser.parse(reader);
       }
     }
@@ -106,7 +106,7 @@ public class ChallengeParserTest {
     boolean exception = false;
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/illegal-computed-enumgoal-ref.xml")) {
       Assert.assertNotNull(stream);
-      ChallengeParser.parse(new InputStreamReader(stream));
+      ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final ChallengeXMLException e) {
       if (e.getMessage().contains("not found for identity constraint")) {
         exception = true;
@@ -129,7 +129,7 @@ public class ChallengeParserTest {
     boolean exception = false;
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/illegal-computed-goal-ref.xml")) {
       Assert.assertNotNull(stream);
-      ChallengeParser.parse(new InputStreamReader(stream));
+      ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final ChallengeXMLException e) {
       if (e.getMessage().contains("not found for identity constraint")) {
         exception = true;
@@ -153,7 +153,7 @@ public class ChallengeParserTest {
     try (
         InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/subjective-computed-goal-ref-other-category.xml")) {
       Assert.assertNotNull(stream);
-      ChallengeParser.parse(new InputStreamReader(stream));
+      ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final ChallengeXMLException e) {
       if (e.getMessage().contains("not found for identity constraint")
           && e.getMessage().contains("Performance")) {
@@ -176,7 +176,7 @@ public class ChallengeParserTest {
     boolean exception = false;
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/subjective-duplicate-goals.xml")) {
       Assert.assertNotNull(stream);
-      ChallengeParser.parse(new InputStreamReader(stream));
+      ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final ChallengeXMLException e) {
       if (e.getMessage().contains("Duplicate key value")
           && e.getMessage().contains("subjectiveCategory")) {
@@ -199,7 +199,7 @@ public class ChallengeParserTest {
     try (
         InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/subjective-two-categories-same-goal.xml")) {
       Assert.assertNotNull(stream);
-      try (InputStreamReader reader = new InputStreamReader(stream)) {
+      try (InputStreamReader reader = new InputStreamReader(stream, Utilities.DEFAULT_CHARSET)) {
         ChallengeParser.parse(reader);
       }
     }
@@ -216,7 +216,7 @@ public class ChallengeParserTest {
     boolean exception = false;
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/enum-using-raw-score-computed.xml")) {
       Assert.assertNotNull(stream);
-      ChallengeParser.parse(new InputStreamReader(stream));
+      ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final IllegalScoreTypeUseException e) {
       exception = true;
     }
@@ -236,7 +236,7 @@ public class ChallengeParserTest {
     try (
         InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/enum-using-raw-score-tiebreaker.xml")) {
       Assert.assertNotNull(stream);
-      ChallengeParser.parse(new InputStreamReader(stream));
+      ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final IllegalScoreTypeUseException e) {
       exception = true;
     }
@@ -256,7 +256,7 @@ public class ChallengeParserTest {
     try (
         InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/enum-using-raw-score-restriction.xml")) {
       Assert.assertNotNull(stream);
-      ChallengeParser.parse(new InputStreamReader(stream));
+      ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final IllegalScoreTypeUseException e) {
       exception = true;
     }
@@ -274,7 +274,7 @@ public class ChallengeParserTest {
     boolean exception = false;
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/non-enum-in-enumcond.xml")) {
       Assert.assertNotNull(stream);
-      ChallengeParser.parse(new InputStreamReader(stream));
+      ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final InvalidEnumCondition e) {
       exception = true;
     }
@@ -291,7 +291,7 @@ public class ChallengeParserTest {
     boolean exception = false;
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/initial-value-below-min.xml")) {
       Assert.assertNotNull(stream);
-      ChallengeParser.parse(new InputStreamReader(stream));
+      ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final InvalidInitialValue e) {
       exception = true;
     }
@@ -308,7 +308,7 @@ public class ChallengeParserTest {
     boolean exception = false;
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/initial-value-above-max.xml")) {
       Assert.assertNotNull(stream);
-      ChallengeParser.parse(new InputStreamReader(stream));
+      ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final InvalidInitialValue e) {
       exception = true;
     }
@@ -326,7 +326,7 @@ public class ChallengeParserTest {
     boolean exception = false;
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/initial-value-enum-no-match.xml")) {
       Assert.assertNotNull(stream);
-      ChallengeParser.parse(new InputStreamReader(stream));
+      ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final InvalidInitialValue e) {
       exception = true;
     }
@@ -344,7 +344,7 @@ public class ChallengeParserTest {
     boolean exception = false;
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/variableRef-in-tiebreaker.xml")) {
       Assert.assertNotNull(stream);
-      ChallengeParser.parse(new InputStreamReader(stream));
+      ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final ChallengeXMLException e) {
       if (e.getMessage().contains("cvc-complex-type")
           && e.getMessage().contains("variableRef")) {
@@ -366,7 +366,7 @@ public class ChallengeParserTest {
     boolean exception = false;
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/variableRef-in-restriction.xml")) {
       Assert.assertNotNull(stream);
-      ChallengeParser.parse(new InputStreamReader(stream));
+      ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final ChallengeXMLException e) {
       if (e.getMessage().contains("cvc-complex-type")
           && e.getMessage().contains("variableRef")) {
@@ -389,7 +389,7 @@ public class ChallengeParserTest {
     boolean exception = false;
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/duplicate-variable.xml")) {
       Assert.assertNotNull(stream);
-      ChallengeParser.parse(new InputStreamReader(stream));
+      ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final ChallengeXMLException e) {
       if (e.getMessage().contains("Duplicate key value")) {
         exception = true;
@@ -432,7 +432,7 @@ public class ChallengeParserTest {
   public void testComputedGoalReference() throws IOException {
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/computed-goal-reference.xml")) {
       Assert.assertNotNull(stream);
-      ChallengeParser.parse(new InputStreamReader(stream));
+      ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     }
   }
 
@@ -447,7 +447,7 @@ public class ChallengeParserTest {
     try (
         InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/computed-goal-circular-reference.xml")) {
       Assert.assertNotNull(stream);
-      ChallengeParser.parse(new InputStreamReader(stream));
+      ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final CircularComputedGoalException e) {
       exception = true;
     }

@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
+import fll.Utilities;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
@@ -46,7 +47,7 @@ public class ScoreTest {
 
   private PerformanceScoreCategory loadDocumentAndGetPerformanceElemnt(final InputStream stream) {
     Assert.assertNotNull(stream);
-    final Document document = ChallengeParser.parse(new InputStreamReader(stream));
+    final Document document = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     Assert.assertNotNull(document);
     final ChallengeDescription desc = new ChallengeDescription(document.getDocumentElement());
     final PerformanceScoreCategory performanceElement = desc.getPerformance();
