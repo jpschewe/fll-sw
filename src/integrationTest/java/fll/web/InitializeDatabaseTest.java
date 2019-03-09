@@ -44,8 +44,7 @@ public class InitializeDatabaseTest {
 
   @Test
   public void testInitializeDatabase() throws IOException, InterruptedException {
-    try {
-      final InputStream challengeStream = getClass().getResourceAsStream("data/challenge-ft.xml");
+    try (InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml")) {
       IntegrationTestUtils.initializeDatabase(selenium, challengeStream);
     } catch (final IOException | RuntimeException | AssertionError e) {
       LOGGER.fatal(e, e);

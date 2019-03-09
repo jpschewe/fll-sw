@@ -42,7 +42,8 @@ public final class WebTestUtils {
   }
 
   public static Page loadPage(final WebClient conversation,
-                              final com.gargoylesoftware.htmlunit.WebRequest request) throws IOException, SAXException {
+                              final com.gargoylesoftware.htmlunit.WebRequest request)
+      throws IOException, SAXException {
     final boolean exceptionOnError = conversation.getOptions().isThrowExceptionOnFailingStatusCode();
     conversation.getOptions().setThrowExceptionOnFailingStatusCode(false);
     try {
@@ -71,11 +72,16 @@ public final class WebTestUtils {
       final String responseMessage = response.getStatusMessage();
       final String text = getPageSource(page);
       final File output = File.createTempFile("server-error", ".html", new File("screenshots"));
-      final FileWriter writer = new FileWriter(output);
-      writer.write(text);
-      writer.close();
+      try (FileWriter writer = new FileWriter(output)) {
+        writer.write(text);
+      }
       Assert.fail("Error loading page: "
-          + page.getUrl() + " code: " + code + " message: " + responseMessage + " Contents of error page written to: "
+          + page.getUrl()
+          + " code: "
+          + code
+          + " message: "
+          + responseMessage
+          + " Contents of error page written to: "
           + output.getAbsolutePath());
     }
 
@@ -105,7 +111,7 @@ public final class WebTestUtils {
         + "login.jsp");
     Assert.assertTrue("Received non-HTML response from web server", loginPage.isHtmlPage());
 
-    final HtmlPage loginHtml = (HtmlPage)loginPage;
+    final HtmlPage loginHtml = (HtmlPage) loginPage;
     HtmlForm form = loginHtml.getFormByName("login");
     Assert.assertNotNull("Cannot find login form", form);
 
@@ -148,11 +154,13 @@ public final class WebTestUtils {
     if (!"application/json".equals(contentType)) {
       final String text = getPageSource(response);
       final File output = File.createTempFile("json-error", ".html", new File("screenshots"));
-      final FileWriter writer = new FileWriter(output);
-      writer.write(text);
-      writer.close();
+      try (FileWriter writer = new FileWriter(output)) {
+        writer.write(text);
+      }
       Assert.fail("Error JSON from QueryHandler: "
-          + response.getUrl() + " Contents of error page written to: " + output.getAbsolutePath());
+          + response.getUrl()
+          + " Contents of error page written to: "
+          + output.getAbsolutePath());
     }
 
     final String responseData = getPageSource(response);

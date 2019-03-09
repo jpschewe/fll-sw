@@ -37,12 +37,13 @@ public class ChallengeParserTest {
    * Load illegal-restriction.xml and ensure an exception is thrown on the
    * illegal reference. This checks for a bad reference in a term element of a
    * restriction.
+   * 
+   * @throws IOException Test error
    */
   @Test
-  public void testIllegalRestriction() {
+  public void testIllegalRestriction() throws IOException {
     boolean exception = false;
-    try {
-      final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/illegal-restriction.xml");
+    try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/illegal-restriction.xml")) {
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
     } catch (final RuntimeException e) {
@@ -59,12 +60,13 @@ public class ChallengeParserTest {
    * Load illegal-tiebreaker-ref.xml and ensure an exception is thrown on the
    * illegal reference. This checks for a bad reference in a term element of a
    * tiebreaker.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testIllegalTiebreakerRef() {
+  public void testIllegalTiebreakerRef() throws IOException {
     boolean exception = false;
-    try {
-      final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/illegal-tiebreaker-ref.xml");
+    try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/illegal-tiebreaker-ref.xml")) {
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
     } catch (final ChallengeXMLException e) {
@@ -79,24 +81,30 @@ public class ChallengeParserTest {
 
   /**
    * Load all-elements.xml and make sure there are no errors.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testAllElements() {
-    final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/all-elements.xml");
-    Assert.assertNotNull(stream);
-    ChallengeParser.parse(new InputStreamReader(stream));
+  public void testAllElements() throws IOException {
+    try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/all-elements.xml")) {
+      Assert.assertNotNull(stream);
+      try (InputStreamReader reader = new InputStreamReader(stream)) {
+        ChallengeParser.parse(reader);
+      }
+    }
   }
 
   /**
    * Load illegal-computed-enumgoal-ref.xml and ensure an exception is thrown on
    * the illegal reference. This checks for a bad reference in a goalRef element
    * of a computed goal.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testIllegalComputedEnumGoal() {
+  public void testIllegalComputedEnumGoal() throws IOException {
     boolean exception = false;
-    try {
-      final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/illegal-computed-enumgoal-ref.xml");
+    try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/illegal-computed-enumgoal-ref.xml")) {
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
     } catch (final ChallengeXMLException e) {
@@ -113,12 +121,13 @@ public class ChallengeParserTest {
    * Load illegal-computed-goal-ref.xml and ensure an exception is thrown on the
    * illegal reference. This checks for a bad reference in a term element of a
    * computed goal.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testIllegalComputedGoal() {
+  public void testIllegalComputedGoal() throws IOException {
     boolean exception = false;
-    try {
-      final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/illegal-computed-goal-ref.xml");
+    try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/illegal-computed-goal-ref.xml")) {
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
     } catch (final ChallengeXMLException e) {
@@ -135,12 +144,14 @@ public class ChallengeParserTest {
    * Load subjective-computed-goal-ref-other-category. This ensure that a
    * computed goal in one subjective category cannot reference a goal in another
    * subjective category.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testSubjectiveComputedRefOtherCategory() {
+  public void testSubjectiveComputedRefOtherCategory() throws IOException {
     boolean exception = false;
-    try {
-      final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/subjective-computed-goal-ref-other-category.xml");
+    try (
+        InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/subjective-computed-goal-ref-other-category.xml")) {
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
     } catch (final ChallengeXMLException e) {
@@ -157,16 +168,18 @@ public class ChallengeParserTest {
   /**
    * Load subjective-duplicate-goals.xml. This checks if two goals having the
    * same name in the same category is caught as an error.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testDuplicateSubjectiveGoals() {
+  public void testDuplicateSubjectiveGoals() throws IOException {
     boolean exception = false;
-    try {
-      final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/subjective-duplicate-goals.xml");
+    try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/subjective-duplicate-goals.xml")) {
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
     } catch (final ChallengeXMLException e) {
-      if (e.getMessage().contains("Duplicate key value") && e.getMessage().contains("subjectiveCategory")) {
+      if (e.getMessage().contains("Duplicate key value")
+          && e.getMessage().contains("subjectiveCategory")) {
         exception = true;
       } else {
         throw e;
@@ -178,23 +191,30 @@ public class ChallengeParserTest {
   /**
    * Load subjective-two-categories-same-goal.xml. This ensure that two
    * subjective categories can have goals with the same name.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testSubjectiveSameGoal() {
-    final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/subjective-two-categories-same-goal.xml");
-    Assert.assertNotNull(stream);
-    ChallengeParser.parse(new InputStreamReader(stream));
+  public void testSubjectiveSameGoal() throws IOException {
+    try (
+        InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/subjective-two-categories-same-goal.xml")) {
+      Assert.assertNotNull(stream);
+      try (InputStreamReader reader = new InputStreamReader(stream)) {
+        ChallengeParser.parse(reader);
+      }
+    }
   }
 
   /**
    * Check that enum goals referenced in a polynomial of a computed goal use the
    * computed score and not the raw score.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testEnumRawScoreComputed() {
+  public void testEnumRawScoreComputed() throws IOException {
     boolean exception = false;
-    try {
-      final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/enum-using-raw-score-computed.xml");
+    try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/enum-using-raw-score-computed.xml")) {
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
     } catch (final IllegalScoreTypeUseException e) {
@@ -207,12 +227,14 @@ public class ChallengeParserTest {
   /**
    * Check that enum goals referenced in a polynomial of a tiebreaker use the
    * computed score and not the raw score.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testEnumRawScoreTiebreaker() {
+  public void testEnumRawScoreTiebreaker() throws IOException {
     boolean exception = false;
-    try {
-      final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/enum-using-raw-score-tiebreaker.xml");
+    try (
+        InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/enum-using-raw-score-tiebreaker.xml")) {
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
     } catch (final IllegalScoreTypeUseException e) {
@@ -225,12 +247,14 @@ public class ChallengeParserTest {
   /**
    * Check that enum goals referenced in a polynomial of a restriction use the
    * computed score and not the raw score.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testEnumRawScoreRestriction() {
+  public void testEnumRawScoreRestriction() throws IOException {
     boolean exception = false;
-    try {
-      final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/enum-using-raw-score-restriction.xml");
+    try (
+        InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/enum-using-raw-score-restriction.xml")) {
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
     } catch (final IllegalScoreTypeUseException e) {
@@ -242,12 +266,13 @@ public class ChallengeParserTest {
 
   /**
    * Check that a regular goal cannot show up in an enum condition.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testNonEnumInEnumCond() {
+  public void testNonEnumInEnumCond() throws IOException {
     boolean exception = false;
-    try {
-      final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/non-enum-in-enumcond.xml");
+    try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/non-enum-in-enumcond.xml")) {
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
     } catch (final InvalidEnumCondition e) {
@@ -258,12 +283,13 @@ public class ChallengeParserTest {
 
   /**
    * Check that setting an initial value below the minimum for a goal fails.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testInitialValueBelowMin() {
+  public void testInitialValueBelowMin() throws IOException {
     boolean exception = false;
-    try {
-      final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/initial-value-below-min.xml");
+    try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/initial-value-below-min.xml")) {
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
     } catch (final InvalidInitialValue e) {
@@ -274,12 +300,13 @@ public class ChallengeParserTest {
 
   /**
    * Check that setting an initial value above the maximum for a goal fails.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testInitialValueAboveMax() {
+  public void testInitialValueAboveMax() throws IOException {
     boolean exception = false;
-    try {
-      final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/initial-value-above-max.xml");
+    try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/initial-value-above-max.xml")) {
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
     } catch (final InvalidInitialValue e) {
@@ -291,12 +318,13 @@ public class ChallengeParserTest {
   /**
    * Check that setting an initial value for an enum goal that doesn't match an
    * enum value fails.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testInitialValueEnumNoMatch() {
+  public void testInitialValueEnumNoMatch() throws IOException {
     boolean exception = false;
-    try {
-      final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/initial-value-enum-no-match.xml");
+    try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/initial-value-enum-no-match.xml")) {
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
     } catch (final InvalidInitialValue e) {
@@ -308,12 +336,13 @@ public class ChallengeParserTest {
 
   /**
    * Check that a variableRef is not allowed in a tiebreaker.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testVariableRefInTiebreaker() {
+  public void testVariableRefInTiebreaker() throws IOException {
     boolean exception = false;
-    try {
-      final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/variableRef-in-tiebreaker.xml");
+    try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/variableRef-in-tiebreaker.xml")) {
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
     } catch (final ChallengeXMLException e) {
@@ -329,12 +358,13 @@ public class ChallengeParserTest {
 
   /**
    * Check that a variableRef is not allowed in a restriction.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testVariableRefInRestriction() {
+  public void testVariableRefInRestriction() throws IOException {
     boolean exception = false;
-    try {
-      final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/variableRef-in-restriction.xml");
+    try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/variableRef-in-restriction.xml")) {
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
     } catch (final ChallengeXMLException e) {
@@ -344,18 +374,20 @@ public class ChallengeParserTest {
       } else {
         throw e;
       }
+    } finally {
     }
     Assert.assertTrue("Expected a runtime exception due to a variableRef in a restriction", exception);
   }
 
   /**
    * Check that a two variables in a computed goal may not have the same name.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testDuplicateVariable() {
+  public void testDuplicateVariable() throws IOException {
     boolean exception = false;
-    try {
-      final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/duplicate-variable.xml");
+    try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/duplicate-variable.xml")) {
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
     } catch (final ChallengeXMLException e) {
@@ -382,32 +414,38 @@ public class ChallengeParserTest {
       LOGGER.info("Challenge: "
           + u.toString());
 
-      final InputStream stream = u.openStream();
-      final Reader reader = new InputStreamReader(stream, Utilities.DEFAULT_CHARSET);
-      final Document document = ChallengeParser.parse(reader);
-      reader.close();
-      new ChallengeDescription(document.getDocumentElement());
+      try (InputStream stream = u.openStream();
+          Reader reader = new InputStreamReader(stream, Utilities.DEFAULT_CHARSET)) {
+        final Document document = ChallengeParser.parse(reader);
+        reader.close();
+        new ChallengeDescription(document.getDocumentElement());
+      }
     }
   }
 
   /**
    * Check that computed goals referencing computed goals is OK.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testComputedGoalReference() {
-    final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/computed-goal-reference.xml");
-    Assert.assertNotNull(stream);
-    ChallengeParser.parse(new InputStreamReader(stream));
+  public void testComputedGoalReference() throws IOException {
+    try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/computed-goal-reference.xml")) {
+      Assert.assertNotNull(stream);
+      ChallengeParser.parse(new InputStreamReader(stream));
+    }
   }
 
   /**
    * Check that computed goals with circular reference are not allowed.
+   * 
+   * @throws IOException test error
    */
   @Test
-  public void testCircularComputedGoalReference() {
+  public void testCircularComputedGoalReference() throws IOException {
     boolean exception = false;
-    try {
-      final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/computed-goal-circular-reference.xml");
+    try (
+        InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/computed-goal-circular-reference.xml")) {
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
     } catch (final CircularComputedGoalException e) {

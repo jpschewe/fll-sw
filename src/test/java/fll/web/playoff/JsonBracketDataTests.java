@@ -210,7 +210,7 @@ public class JsonBracketDataTests {
     }
   }
 
-  private class PlayoffContainer {
+  private static class PlayoffContainer {
     private final Connection c;
 
     private final BracketData bd;

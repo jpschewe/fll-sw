@@ -31,7 +31,6 @@ import fll.util.LogUtils;
  * Tests for {@link Utilities}.
  * 
  * @author jpschewe
- * @version $Revision$
  */
 public class UtilitiesTest {
 

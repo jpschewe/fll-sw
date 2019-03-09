@@ -19,9 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipInputStream;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
-
 import org.fest.swing.core.KeyPressInfo;
 import org.fest.swing.core.MouseButton;
 import org.fest.swing.core.matcher.JButtonMatcher;
@@ -55,6 +52,7 @@ import fll.util.LogUtils;
 import fll.web.IntegrationTestUtils;
 import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.ChallengeDescription;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**
  * Some basic tests for the subjective app.
@@ -88,18 +86,14 @@ public class SubjectiveFrameTest {
 
   @Before
   public void setUp() throws IOException, SQLException {
-    Connection connection = null;
-    try {
-      LogUtils.initializeLogging();
+    LogUtils.initializeLogging();
 
-      // create a database
-      final InputStream dumpFileIS = ImportDBTest.class.getResourceAsStream("data/plymouth-2009-11-21.zip");
+    final File tempFile = File.createTempFile("flltest", null);
+    database = tempFile.getAbsolutePath();
+
+    try (Connection connection = Utilities.createFileDataSource(database).getConnection();
+        InputStream dumpFileIS = ImportDBTest.class.getResourceAsStream("data/plymouth-2009-11-21.zip")) {
       Assert.assertNotNull("Cannot find test data", dumpFileIS);
-
-      final File tempFile = File.createTempFile("flltest", null);
-      database = tempFile.getAbsolutePath();
-
-      connection = Utilities.createFileDataSource(database).getConnection();
 
       final ImportDB.ImportResult importResult = ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS),
                                                                                 connection);
@@ -110,13 +104,15 @@ public class SubjectiveFrameTest {
       // set the right tournament
       final String tournamentName = "11-21 Plymouth Middle";
       int tournamentID = -1;
-      final Statement stmt = connection.createStatement();
-      final ResultSet rs = stmt.executeQuery("Select tournament_id,Name from Tournaments ORDER BY Name");
-      while (rs.next()) {
-        final int id = rs.getInt(1);
-        final String name = rs.getString(2);
-        if (tournamentName.equals(name)) {
-          tournamentID = id;
+      try (Statement stmt = connection.createStatement()) {
+        try (ResultSet rs = stmt.executeQuery("Select tournament_id,Name from Tournaments ORDER BY Name")) {
+          while (rs.next()) {
+            final int id = rs.getInt(1);
+            final String name = rs.getString(2);
+            if (tournamentName.equals(name)) {
+              tournamentID = id;
+            }
+          }
         }
       }
       Assert.assertTrue("Could find tournament "
@@ -126,12 +122,12 @@ public class SubjectiveFrameTest {
 
       // create the subjective datafile
       subjectiveScores = File.createTempFile("testStartupState", ".fll");
-      final FileOutputStream fileStream = new FileOutputStream(subjectiveScores);
-      final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
-      // If the schedule gets added, then make sure that the column offset in
-      // testBackspaceClears gets modified
-      DownloadSubjectiveData.writeSubjectiveData(connection, document, description, null, null, fileStream);
-      fileStream.close();
+      try (FileOutputStream fileStream = new FileOutputStream(subjectiveScores)) {
+        final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
+        // If the schedule gets added, then make sure that the column offset in
+        // testBackspaceClears gets modified
+        DownloadSubjectiveData.writeSubjectiveData(connection, document, description, null, null, fileStream);
+      }
 
       final SubjectiveFrame frame = GuiActionRunner.execute(new GuiQuery<SubjectiveFrame>() {
         protected SubjectiveFrame executeInEDT() throws IOException {
@@ -153,8 +149,6 @@ public class SubjectiveFrameTest {
     } catch (final SQLException e) {
       IntegrationTestUtils.saveScreenshot();
       throw e;
-    } finally {
-      SQLFunctions.close(connection);
     }
   }
 
