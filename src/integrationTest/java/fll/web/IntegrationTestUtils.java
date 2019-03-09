@@ -10,7 +10,6 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -63,6 +62,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fll.TestUtils;
 import fll.TomcatLauncher;
 import fll.Tournament;
+import fll.Utilities;
 import fll.util.FLLInternalException;
 import fll.util.LogUtils;
 import fll.web.api.TournamentsServlet;
@@ -145,7 +145,7 @@ public final class IntegrationTestUtils {
     Assert.assertNotNull(challengeDocument);
 
     final Path challengeFile = Files.createTempFile("fll", ".xml");
-    try (final Writer writer = new FileWriter(challengeFile.toFile())) {
+    try (Writer writer = Files.newBufferedWriter(challengeFile, Utilities.DEFAULT_CHARSET)) {
       XMLUtils.writeXML(challengeDocument, writer);
     }
     try {
@@ -732,7 +732,7 @@ public final class IntegrationTestUtils {
     for (final WebElement option : currentTournamentSel.getOptions()) {
       if (option.isSelected()) {
         final String idStr = option.getAttribute("value");
-        return Integer.valueOf(idStr);
+        return Integer.parseInt(idStr);
       }
     }
     throw new FLLInternalException("Cannot find default tournament");
@@ -809,7 +809,9 @@ public final class IntegrationTestUtils {
     @Override
     protected void after() {
       try {
-        launcher.stop();
+        if (null != launcher) {
+          launcher.stop();
+        }
       } catch (final LifecycleException e) {
         throw new RuntimeException(e);
       }

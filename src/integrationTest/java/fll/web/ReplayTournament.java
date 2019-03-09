@@ -102,7 +102,7 @@ public class ReplayTournament {
       }
 
       System.exit(0);
-    } catch (final Exception e) {
+    } catch (final Throwable e) {
       LOGGER.fatal("Unexpected error", e);
       JOptionPane.showMessageDialog(null, "Unexpected error: "
           + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -170,7 +170,8 @@ public class ReplayTournament {
 
       final File selectedFile = fileChooser.getSelectedFile();
       if (null != selectedFile
-          && selectedFile.isFile() && selectedFile.canRead()) {
+          && selectedFile.isFile()
+          && selectedFile.canRead()) {
         return selectedFile.toPath();
       } else if (null != selectedFile) {
         JOptionPane.showMessageDialog(null,
@@ -207,7 +208,8 @@ public class ReplayTournament {
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       final File selectedFile = fileChooser.getSelectedFile();
       if (null != selectedFile
-          && selectedFile.isDirectory() && selectedFile.canWrite()) {
+          && selectedFile.isDirectory()
+          && selectedFile.canWrite()) {
 
         PREFS.put(OUTPUT_DIRECTORY_PREF, selectedFile.getAbsolutePath());
 
