@@ -344,10 +344,10 @@ public final class IntegrationTestUtils {
                                      final WebDriver driver)
       throws IOException {
     final Path screenshotsDir = Paths.get("screenshots");
-    if(!Files.exists(screenshotsDir)) {
+    if (!Files.exists(screenshotsDir)) {
       Files.createDirectories(screenshotsDir);
     }
-    
+
     final Path tempDir = Files.createTempDirectory(screenshotsDir, filePrefix);
 
     if (driver instanceof TakesScreenshot) {
@@ -388,13 +388,13 @@ public final class IntegrationTestUtils {
    */
   public static File storeInputStreamToFile(final InputStream inputStream) throws IOException {
     final File tempFile = File.createTempFile("fll", null);
-    final FileOutputStream outputStream = new FileOutputStream(tempFile);
-    final byte[] buffer = new byte[1042];
-    int bytesRead;
-    while (-1 != (bytesRead = inputStream.read(buffer))) {
-      outputStream.write(buffer, 0, bytesRead);
+    try (FileOutputStream outputStream = new FileOutputStream(tempFile)) {
+      final byte[] buffer = new byte[1042];
+      int bytesRead;
+      while (-1 != (bytesRead = inputStream.read(buffer))) {
+        outputStream.write(buffer, 0, bytesRead);
+      }
     }
-    outputStream.close();
 
     return tempFile;
   }
@@ -826,15 +826,22 @@ public final class IntegrationTestUtils {
   public static void saveScreenshot() throws IOException {
     final File screenshotDir = new File("screenshots");
     if (!screenshotDir.exists()) {
-      screenshotDir.mkdirs();
+      if (!screenshotDir.mkdirs()) {
+        throw new RuntimeException("Cannot make directories "
+            + screenshotDir);
+      }
     }
 
     final File screenshot = File.createTempFile("fll", ".png", screenshotDir);
     LOGGER.error("Screenshot saved to "
         + screenshot.getAbsolutePath());
     // file can't exist when calling save desktop as png
-    screenshot.delete();
+    if (screenshot.exists()
+        && !screenshot.delete()) {
+      throw new RuntimeException("Cannot delete screenshot file "
+          + screenshot);
+    }
     SCREENSHOT_TAKER.saveDesktopAsPng(screenshot.getAbsolutePath());
-  };
+  }
 
 }
