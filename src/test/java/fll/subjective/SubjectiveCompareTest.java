@@ -18,6 +18,7 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+import fll.Utilities;
 import fll.util.LogUtils;
 import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.ChallengeParser;
@@ -36,7 +37,7 @@ public class SubjectiveCompareTest {
 
     final InputStream stream = SubjectiveCompareTest.class.getResourceAsStream("challenge.xml");
     Assert.assertNotNull(stream);
-    challengeDocument = ChallengeParser.parse(new InputStreamReader(stream));
+    challengeDocument = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
   }
 
   @After

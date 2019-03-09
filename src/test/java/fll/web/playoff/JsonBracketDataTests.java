@@ -19,8 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,6 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
+import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
@@ -41,6 +40,7 @@ import fll.util.LogUtils;
 import fll.xml.BracketSortType;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Basic tests on the JsonBracketData object.
@@ -270,7 +270,7 @@ public class JsonBracketDataTests {
     // load up basic descriptor
     final InputStream challengeDocIS = JsonBracketDataTests.class.getResourceAsStream("data/basic-brackets-json.xml");
     Assert.assertNotNull(challengeDocIS);
-    final Document document = ChallengeParser.parse(new InputStreamReader(challengeDocIS));
+    final Document document = ChallengeParser.parse(new InputStreamReader(challengeDocIS, Utilities.DEFAULT_CHARSET));
     Assert.assertNotNull(document);
 
     final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());

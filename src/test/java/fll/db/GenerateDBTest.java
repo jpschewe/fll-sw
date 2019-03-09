@@ -40,34 +40,37 @@ public class GenerateDBTest {
   /**
    * Test creating a new database from scratch and creating over an existing
    * database.
-   * @throws IOException 
+   * 
+   * @throws IOException test error
+   * @throws SQLException test error
    */
   @Test
   public void testCreateDB() throws SQLException, IOException {
-    final InputStream stream = GenerateDBTest.class.getResourceAsStream("data/challenge-test.xml");
-    Assert.assertNotNull(stream);
-    final Document document = ChallengeParser.parse(new InputStreamReader(stream));
-    Assert.assertNotNull(document);
+    try (InputStream stream = GenerateDBTest.class.getResourceAsStream("data/challenge-test.xml")) {
+      Assert.assertNotNull(stream);
+      final Document document = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
+      Assert.assertNotNull(document);
 
-    final File tempFile = File.createTempFile("flltest", null);
-    final String database = tempFile.getAbsolutePath();
+      final File tempFile = File.createTempFile("flltest", null);
+      final String database = tempFile.getAbsolutePath();
 
-    final DataSource datasource = Utilities.createFileDataSource(database);
+      final DataSource datasource = Utilities.createFileDataSource(database);
 
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
-      GenerateDB.generateDB(document, connection);
+      Connection connection = null;
+      try {
+        connection = datasource.getConnection();
+        GenerateDB.generateDB(document, connection);
 
-      GenerateDB.generateDB(document, connection);
-    } finally {
-      SQLFunctions.close(connection);
-      
-      if (!tempFile.delete()) {
-        tempFile.deleteOnExit();
+        GenerateDB.generateDB(document, connection);
+      } finally {
+        SQLFunctions.close(connection);
+
+        if (!tempFile.delete()) {
+          tempFile.deleteOnExit();
+        }
       }
-    }
 
-    TestUtils.deleteDatabase(database);
+      TestUtils.deleteDatabase(database);
+    }
   }
 }
