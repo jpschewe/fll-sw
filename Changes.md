@@ -1,3 +1,4 @@
+* #696 - build with gradle instead of ant
 * #713 - use embedded Tomcat for the webserver
 
 Release 13.5.0
