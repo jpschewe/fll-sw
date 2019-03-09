@@ -42,6 +42,7 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.TestUtils;
 import fll.Utilities;
 import fll.db.GlobalParameters;
@@ -158,12 +159,16 @@ public class SubjectiveFrameTest {
       window.cleanUp();
     }
 
-    if (!subjectiveScores.delete()) {
+    if (null != subjectiveScores
+        && !subjectiveScores.delete()) {
       subjectiveScores.deleteOnExit();
     }
-    TestUtils.deleteDatabase(database);
+    if (null != database) {
+      TestUtils.deleteDatabase(database);
+    }
   }
 
+  @SuppressFBWarnings(value = "UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR", justification = "fields are initialized in test setup")
   @Test
   public void testStartupState() throws IOException {
     try {

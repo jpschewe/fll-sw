@@ -38,7 +38,7 @@ public class TestAJAXBrackets {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  public static String JS_EVAL_TIMEOUT = "10000";
+  public static final String JS_EVAL_TIMEOUT = "10000";
 
   private WebDriver selenium;
 

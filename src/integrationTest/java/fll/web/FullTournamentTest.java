@@ -12,7 +12,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.awt.EventQueue;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
@@ -631,8 +630,8 @@ public class FullTournamentTest {
     final Path teamsFile = outputDirectory.resolve(sanitizeFilename(sourceTournament.getName())
         + "_teams.csv");
     // write the teams out to a file
-    try (final Writer writer = new FileWriter(teamsFile.toFile())) {
-      try (final CSVWriter csvWriter = new CSVWriter(writer)) {
+    try (Writer writer = Files.newBufferedWriter(teamsFile, Utilities.DEFAULT_CHARSET)) {
+      try (CSVWriter csvWriter = new CSVWriter(writer)) {
         csvWriter.writeNext(new String[] { "team_name", "team_number", "affiliation", "award_group", "judging_group",
                                            "tournament" });
         final Map<Integer, TournamentTeam> sourceTeams = Queries.getTournamentTeams(testDataConnection,
@@ -670,6 +669,7 @@ public class FullTournamentTest {
     selenium.findElement(By.id("next")).click();
     IntegrationTestUtils.assertNoException(selenium);
     Assert.assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
+
   }
 
   private void computeFinalScores() throws IOException, InterruptedException {

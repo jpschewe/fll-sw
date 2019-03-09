@@ -6,10 +6,12 @@
 
 package fll.web;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 
 import org.junit.Assert;
@@ -30,6 +32,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
 
 import fll.TestUtils;
+import fll.Utilities;
 import fll.web.developer.QueryHandler;
 
 /**
@@ -71,8 +74,8 @@ public final class WebTestUtils {
     if (error) {
       final String responseMessage = response.getStatusMessage();
       final String text = getPageSource(page);
-      final File output = File.createTempFile("server-error", ".html", new File("screenshots"));
-      try (FileWriter writer = new FileWriter(output)) {
+      final Path output = Files.createTempFile(Paths.get("screenshots"), "server-error", ".html");
+      try (Writer writer = Files.newBufferedWriter(output, Utilities.DEFAULT_CHARSET)) {
         writer.write(text);
       }
       Assert.fail("Error loading page: "
@@ -82,7 +85,7 @@ public final class WebTestUtils {
           + " message: "
           + responseMessage
           + " Contents of error page written to: "
-          + output.getAbsolutePath());
+          + output.toAbsolutePath().toString());
     }
 
   }
@@ -97,9 +100,12 @@ public final class WebTestUtils {
       return ((JavaScriptPage) page).getContent();
     } else if (page instanceof TextPage) {
       return ((TextPage) page).getContent();
-    } else {
+    } else if (page instanceof UnexpectedPage) {
       // page instanceof UnexpectedPage
       return ((UnexpectedPage) page).getWebResponse().getContentAsString();
+    } else {
+      throw new RuntimeException("Unexpected page type: "
+          + page.getClass());
     }
   }
 
@@ -153,14 +159,14 @@ public final class WebTestUtils {
     final String contentType = response.getWebResponse().getContentType();
     if (!"application/json".equals(contentType)) {
       final String text = getPageSource(response);
-      final File output = File.createTempFile("json-error", ".html", new File("screenshots"));
-      try (FileWriter writer = new FileWriter(output)) {
+      final Path output = Files.createTempFile(Paths.get("screenshots"), "json-error", ".html");
+      try (Writer writer = Files.newBufferedWriter(output, Utilities.DEFAULT_CHARSET)) {
         writer.write(text);
       }
       Assert.fail("Error JSON from QueryHandler: "
           + response.getUrl()
           + " Contents of error page written to: "
-          + output.getAbsolutePath());
+          + output.toAbsolutePath());
     }
 
     final String responseData = getPageSource(response);
