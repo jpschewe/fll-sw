@@ -48,9 +48,18 @@
 	</logger>
 
 	<!-- stuff for debugging -->
-	<!-- <logger name="fll.web.IntegrationTestUtils"><level value="TRACE"/></logger> -->
-
-	<!-- database connection information -->
+	<logger name="fll.TomcatLauncher"><level value="TRACE"/></logger>
+	
+	<!-- 
+	<logger name="org.apache.catalina.startup.ContextConfig"></logger>
+	<logger name="org.apache.tomcat.util.scan.StandardJarScanner"><level value="TRACE"/></logger>
+ -->
+ 
+	<!-- 
+<logger name="org.apache.jasper.servlet.TldScanner"><level value="TRACE"/></logger>
+ -->
+ 
+ 	<!-- database connection information -->
 	<!-- logger name="database"><level value="TRACE"/></logger -->
 
 	<!-- log SQL queries -->

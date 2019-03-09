@@ -1,31 +1,31 @@
 <launch4jConfig>
-  <headerType>gui</headerType>
-  <outfile>fll-sw.exe</outfile>
-  <dontWrapJar>true</dontWrapJar>
-  <errTitle>FLL SW</errTitle>
+	<headerType>gui</headerType>
+	<outfile>fll-sw.exe</outfile>
+	<dontWrapJar>true</dontWrapJar>
+	<errTitle>FLL SW</errTitle>
 
-  <classPath>
-    <mainClass>fll.Launcher</mainClass>
-    <cp>%EXEDIR%/tomcat/webapps/fll-sw/WEB-INF/classes</cp>
-    <cp>%EXEDIR%/tomcat/webapps/fll-sw/WEB-INF/lib/*.jar</cp>
-  </classPath>
+	<classPath>
+		<mainClass>fll.Launcher</mainClass>
+		<cp>%EXEDIR%/classes</cp>
+		<cp>%EXEDIR%/lib/*.jar</cp>
+	</classPath>
 
-  <jre>
-    <minVersion>1.8.0</minVersion>
-    <maxHeapPercent>75</maxHeapPercent>
-  </jre>
+	<jre>
+		<minVersion>1.8.0</minVersion>
+		<maxHeapPercent>75</maxHeapPercent>
+	</jre>
 
-  <versionInfo>
-    <fileVersion>0.1</fileVersion>
-    <txtFileVersion>Development</txtFileVersion>
-    <fileDescription>FIRST Lego League Scoring Software
-    </fileDescription>
-    <copyright>GPL</copyright>
-    <productVersion>0.1</productVersion>
-    <txtProductVersion>devel</txtProductVersion>
-    <productName>FLL-SW</productName>
-    <internalName>fll-sw</internalName>
-    <originalFilename>fll-sw.exe</originalFilename>
-  </versionInfo>
+	<versionInfo>
+		<fileVersion>0.1</fileVersion>
+		<txtFileVersion>Development</txtFileVersion>
+		<fileDescription>FIRST Lego League Scoring Software
+		</fileDescription>
+		<copyright>GPL</copyright>
+		<productVersion>0.1</productVersion>
+		<txtProductVersion>devel</txtProductVersion>
+		<productName>FLL-SW</productName>
+		<internalName>fll-sw</internalName>
+		<originalFilename>fll-sw.exe</originalFilename>
+	</versionInfo>
 
 </launch4jConfig>

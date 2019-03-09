@@ -75,7 +75,7 @@ public abstract class UnfinishedBaseTest {
                                                                  unfinished1st3rdBracketName, unfinishedLarge };
 
   @Before
-  public void setup() throws IOException, SQLException {
+  public void setUp() throws IOException, SQLException {
     tempFile = File.createTempFile("flltest", null);
     database = tempFile.getAbsolutePath();
     connection = Utilities.createFileDataSource(database).getConnection();

@@ -15,8 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,6 +22,7 @@ import org.w3c.dom.Document;
 
 import fll.Team;
 import fll.TournamentTeam;
+import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.db.Queries;
 import fll.util.LogUtils;
@@ -31,6 +30,7 @@ import fll.xml.BracketSortType;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.WinnerType;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Test the various playoff bracket sort methods.
@@ -63,7 +63,7 @@ public class BracketSortTest {
       // load in data/alpha-team-sort.xml
       final InputStream challengeDocIS = BracketSortTest.class.getResourceAsStream("data/alpha-team-sort.xml");
       Assert.assertNotNull(challengeDocIS);
-      final Document document = ChallengeParser.parse(new InputStreamReader(challengeDocIS));
+      final Document document = ChallengeParser.parse(new InputStreamReader(challengeDocIS, Utilities.DEFAULT_CHARSET));
       Assert.assertNotNull(document);
 
       final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
