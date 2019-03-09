@@ -255,10 +255,8 @@ public final class SubjectiveFrame extends JFrame {
 
   /**
    * Prompt the user for a file to load. Calls exit on error.
-   * 
-   * @throws IOException
    */
-  public void promptForFile() throws IOException {
+  public void promptForFile() {
     final File file = chooseSubjectiveFile("Please choose the subjective data file");
     try {
       if (null != file) {
@@ -268,7 +266,9 @@ public final class SubjectiveFrame extends JFrame {
       }
     } catch (final IOException ioe) {
       JOptionPane.showMessageDialog(null, "Error reading data file: "
-          + file.getAbsolutePath() + " - " + ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+          + file.getAbsolutePath()
+          + " - "
+          + ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
       LOGGER.fatal("Error reading datafile: "
           + file.getAbsolutePath(), ioe);
       setVisible(false);
@@ -279,7 +279,7 @@ public final class SubjectiveFrame extends JFrame {
    * Load data. Meant for testing. Most users should use #promptForFile().
    * 
    * @param file where to read the data in from and where to save data to
-   * @throws IOException
+   * @throws IOException if there is an error loading the file
    */
   public void load(final File file) throws IOException {
     _file = file;
@@ -552,12 +552,12 @@ public final class SubjectiveFrame extends JFrame {
     }
   }
 
-      /**
-       * Prompt the user with yes/no/cancel. Yes exits and saves, no exits
-       * without
-       * saving and cancel doesn't quit.
-       */
-      /* package */void quit() {
+  /**
+   * Prompt the user with yes/no/cancel. Yes exits and saves, no exits
+   * without
+   * saving and cancel doesn't quit.
+   */
+  /* package */void quit() {
     if (validateData()) {
 
       final int state = JOptionPane.showConfirmDialog(SubjectiveFrame.this,
@@ -614,7 +614,9 @@ public final class SubjectiveFrame extends JFrame {
         if (numValues != goals.size()
             && numValues != 0) {
           warnings.add(categoryTitle
-              + ": " + scoreElement.getAttribute("teamNumber") + " has too few scores (needs all or none): "
+              + ": "
+              + scoreElement.getAttribute("teamNumber")
+              + " has too few scores (needs all or none): "
               + numValues);
         }
 
@@ -750,7 +752,8 @@ public final class SubjectiveFrame extends JFrame {
 
   /**
    * Get the table model for a given subjective title. Mostly for testing.
-   * 
+   *
+   * @param title the title of the subjective category
    * @return the table model or null if the specified title is not present
    */
   public TableModel getTableModelForTitle(final String title) {
@@ -770,7 +773,7 @@ public final class SubjectiveFrame extends JFrame {
 
   private ChallengeDescription _challengeDescription;
 
-      /* package */ChallengeDescription getChallengeDescription() {
+  /* package */ChallengeDescription getChallengeDescription() {
     return _challengeDescription;
   }
 
@@ -778,7 +781,7 @@ public final class SubjectiveFrame extends JFrame {
 
   private Document _scoreDocument;
 
-      /* package */Document getScoreDocument() {
+  /* package */Document getScoreDocument() {
     return _scoreDocument;
   }
 
