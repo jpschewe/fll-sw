@@ -1,0 +1,396 @@
+// -*- java -*-
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'org.unbroken-dome.gradle-plugins:gradle-testsets-plugin:1.4.5'
+        classpath 'org.kordamp:markdown-gradle-plugin:1.2.0'
+    	classpath 'edu.sc.seis.gradle:launch4j:2.4.4'
+    }
+}    
+
+plugins {
+	id 'java'
+	id 'distribution'
+	id "com.dorongold.task-tree" version "1.3.1"
+	id 'org.unbroken-dome.test-sets' version "2.1.1"
+	id 'eclipse'
+	id 'org.kordamp.markdown.convert' version "1.2.0"	
+	id 'findbugs'
+  	id "de.aaschmid.cpd" version "1.2"
+  	id 'edu.sc.seis.launch4j' version '2.4.4'
+    id 'com.palantir.git-version' version '0.11.0'
+	id 'net.saliman.cobertura' version '2.6.0'
+}
+
+configurations {
+    jspc
+}
+
+
+dependencies {
+    jspc 'org.apache.ant:ant:1.10.1'
+}
+
+testSets {
+    integrationTest
+}
+// don't depend on check so that users can skip these on a basic check. check.dependsOn integrationTest
+integrationTest.mustRunAfter test
+
+test {
+	ignoreFailures Boolean.getBoolean("test.ignoreFailures") 
+}
+integrationTest {
+	ignoreFailures Boolean.getBoolean("test.ignoreFailures") 
+}
+repositories {
+    jcenter()
+    flatDir {
+      dirs 'gradle-repo'
+    }
+}
+
+ext {
+    jackson_version = "2.9.0"
+    slf4j_version = "1.7.5"
+    tomcat_version = "9.0.16"
+    itext_version = "5.5.13"
+    poi_version = "3.10.1"
+    
+    web_build_dir = new File(project.buildDir, 'web')
+    documentation_build_dir = new File(project.buildDir, 'gen-documentation')    
+    
+    jspSrc = 'src/main/web'
+	jspJavaSrc = new File(project.buildDir, "jsp-java-source")
+	jspPackage = "fll.jsp"
+
+    mainClassName = 'fll.Launcher'
+    
+    versionDetails = versionDetails()
+}
+
+group = 'fll'
+version = project.versionDetails.lastTag + "." + project.versionDetails.commitDistance
+
+dependencies {
+    compile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: project.tomcat_version
+    compile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-jasper', version: project.tomcat_version
+    compile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-websocket', version: project.tomcat_version
+    compile group: 'org.apache.tomcat', name: 'tomcat-jasper', version: project.tomcat_version
+    compile group: 'org.apache.tomcat', name: 'tomcat-jasper-el', version: project.tomcat_version
+    compile group: 'org.apache.tomcat', name: 'tomcat-jsp-api', version: project.tomcat_version
+
+	compile group: "xmlunit", name: "xmlunit", version: "1.4"
+	compile group: "org.apache.commons", name: "commons-lang3", version: "3.4"
+	compile group: "commons-cli", name: "commons-cli", version: "1.2"
+	compile group: "org.hsqldb", name: "hsqldb", version: "2.4.1"
+	
+	compile group: "com.itextpdf", name: "itextpdf", version: project.itext_version
+	
+	compile group: "log4j", name: "log4j", version: "1.2.17"
+	compile group: "log4j", name: "apache-log4j-extras", version: "1.2.17"
+	
+	compile group: "org.slf4j", name: "slf4j-api", version: project.slf4j_version
+	compile group: "org.slf4j", name: "slf4j-log4j12", version: project.slf4j_version
+	
+	compile group: "org.apache.poi", name: "poi-ooxml", version: project.poi_version
+	
+	compile group: "com.google.code.findbugs", name: "annotations", version: "3.0.1"
+	compile group: "com.google.code.findbugs", name: "jsr305", version: "3.0.1"
+	
+	compile group: "com.fasterxml.jackson.core", name: "jackson-databind", version: project.jackson_version
+	compile group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: project.jackson_version
+
+	compile group: "commons-io", name: "commons-io", version: "2.5"
+		
+	compile group: "net.sourceforge.schemaspy", name: "schemaspy", version: "5.0.0"
+		
+	compile group: "dnsjava", name: "dnsjava", version: "2.1.7"
+	
+	compile group: "commons-fileupload", name: "commons-fileupload", version: "1.3"
+	
+	compile group: "org.apache.tika", name: "tika-core", version: "1.16"
+	
+	compile group: "com.diffplug.durian", name: "durian-core", version: "1.1.0"
+	
+	compile group: "it.sauronsoftware", name: "junique", version: "1.0.4"
+		
+	compile group: "com.googlecode.log4jdbc", name: "log4jdbc", version: "1.2"
+	
+	compile group: "net.java.linoleum", name: "jlfgr", version: "1_0"
+	
+	runtime group: "javax.servlet", name: "jstl", version: "1.2"
+	
+	// TODO: get these from repositories somewhere
+	compile name: "JonsInfra-1.6"
+	compile name: "opencsv-jps-2.4"
+	
+	
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile group: 'org.hamcrest', name: 'hamcrest', version: '2.1'
+    
+    // allow integration tests to reference code in the test directory
+    integrationTestCompile sourceSets.test.output
+        
+    integrationTestCompile group: 'org.easytesting', name: 'fest-swing', version: '1.2'
+    integrationTestCompile group: 'net.sourceforge.htmlunit', name: 'htmlunit', version: '2.22'
+    integrationTestCompile group: 'org.seleniumhq.selenium', name: 'selenium-server', version: '3.141.59'
+    integrationTestCompile group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '1.6.0'
+    
+}
+
+
+javadoc {
+	// TODO: Need to fix the errors eventually
+	failOnError = false
+}
+
+// copy webapp files
+task copyWeb(type: Copy) {
+    from 'src/main/web'
+    into project.web_build_dir
+}
+distTar.dependsOn copyWeb
+distZip.dependsOn copyWeb
+integrationTest.dependsOn copyWeb
+
+// Configure the distribution plugin instead of using the application plugin so that
+// the web application classes stay outside of a jar file and Tomcat will properly
+// process the annotations. For some reason Tomcat won't process the annotations
+// inside of a jar file.
+distributions {
+    main {
+        contents {
+            from(sourceSets.main.output) {
+                into 'classes'
+            }
+            from(configurations.runtime) {
+            	into 'lib'
+           	}
+           	
+           	// web elements
+            from(project.web_build_dir) {
+                into 'web'
+            }
+            
+            // documentation
+           	from(project.documentation_build_dir) {
+           	    into 'web/documentation'
+           	}
+            from(javadoc) {
+                into 'web/documentation/api'
+            }
+            from("$buildDir/reports/tests/") {
+            	into 'web/documentation/reports'
+        	}
+            from("$buildDir/reports/findbugs/") {
+            	into 'web/documentation/reports/findbugs'
+        	}
+            from("$buildDir/reports/cobertura/") {
+            	into 'web/documentation/reports/coverage'
+        	}
+            
+            from("$buildDir/launch4j/fll-sw.exe")
+        }
+    }
+}
+
+// create run task since we aren't using the application plugin
+task run(type: JavaExec, dependsOn: [copyWeb, classes]) {
+	classpath = sourceSets.main.runtimeClasspath
+	
+	main = project.mainClassName
+}
+
+
+// convert markdown documentation and copy non-markdown documentation
+markdownToHtml {
+	sourceDir = file('src/main/documentation')
+	outputDir = project.documentation_build_dir
+	autoLinks = true
+	fencedCodeBlocks = true
+	definitionLists = true
+	tables = true	
+}
+distTar.dependsOn markdownToHtml
+distZip.dependsOn markdownToHtml
+
+
+// write log4j config for JspC
+task writeJspcProperties(type: WriteProperties) {
+    outputFile = new File(project.buildDir, "log4j.jspc.properties")
+    property('log4j.rootLogger', 'WARN, stdout')
+    property('log4j.logger.org.apache', 'INFO, stdout')
+    property('log4j.appender.stdout', 'org.apache.log4j.ConsoleAppender')
+    property('log4j.appender.stdout.Target', 'System.out')
+    property('log4j.appender.stdout.layout', 'org.apache.log4j.PatternLayout')
+    property('log4j.appender.stdout.layout.ConversionPattern', '%d [%C] %m%n')
+}
+
+// call JspC to test compile the JSP files
+// the output isn't used other than to check if there are errors in the build
+task jspToJava(type: JavaExec, dependsOn: [compileJava, writeJspcProperties]) {
+
+    inputs.dir jspSrc
+    outputs.dir jspJavaSrc
+
+    File xmlPartial = file("$jspJavaSrc/WEB-INF/web.xml.partial")
+
+    doFirst {
+        // Create the target WEB-INF folder so the JspC can create the web.xml.partial
+        File webInfFolder = xmlPartial.getParentFile()
+        if (!webInfFolder.exists()) {
+            webInfFolder.mkdirs()
+        }
+    }
+
+    classpath = configurations.jspc + sourceSets.main.runtimeClasspath
+    main = 'org.apache.jasper.JspC'
+    jvmArgs "-Dlog4j.configuration=file:$buildDir/log4j.jspc.properties"
+
+    args '-webapp', jspSrc,
+            '-d', jspJavaSrc,
+            '-p', jspPackage,
+            '-webxmlencoding', 'UTF-8',
+            '-webinc', xmlPartial.absolutePath
+
+    doLast {
+        // Merge the partial XML with the original
+        String originalXML = file("$jspSrc/WEB-INF/web.xml").text
+        String xmlToMerge = xmlPartial.text
+        String mergedXML = originalXML.replaceFirst('(?s)(<web-app.*?>)', '$1' + xmlToMerge)
+        file("$jspJavaSrc/WEB-INF/web.xml").text = mergedXML
+    }
+}
+check.dependsOn jspToJava
+
+
+cpdCheck {
+	// allow the build to continue, catch this in CI as warnings
+	ignoreFailures = true
+}
+
+task sloccount(type: Exec) {
+	commandLine 'cloc', '--by-file', '--xml', '--out', "$buildDir/reports/sloccount/cloc.xml", 'src'
+}
+
+task renderWorkflows(dependsOn: [markdownToHtml]) {
+	def inputFiles = []
+	def outputFiles = []
+	
+	fileTree(documentation_build_dir).matching{include "**/*.dot"}.visit{FileVisitDetails details ->
+		if(!details.isDirectory) {		
+			inputFiles << details.file.path
+			outputFiles << details.file.path + ".pdf"
+		}
+	}
+	
+	inputs.files inputFiles
+	outputs.files outputFiles
+	
+	doLast {
+		inputFiles.each{ aFile ->
+				exec{
+				    commandLine 'dot'
+				    args "-Tpdf", "-O", aFile
+				}
+		}
+	}
+}
+distZip.dependsOn renderWorkflows
+distTar.dependsOn renderWorkflows
+
+task createDatabaseDiagram(type: JavaExec, dependsOn: [markdownToHtml]) {
+	classpath = sourceSets.main.runtimeClasspath
+	
+	main = "fll.db.GenerateDatabaseDiagram"
+ 	args new File(project.documentation_build_dir, "database-diagram").absolutePath
+}
+distZip.dependsOn createDatabaseDiagram
+distTar.dependsOn createDatabaseDiagram
+
+launch4j {
+	mainClassName = project.mainClassName
+	icon = "${projectDir}/src/main/resources/fll/resources/fll-sw.ico"
+}
+distZip.dependsOn createExe
+distTar.dependsOn createExe
+
+
+findbugs {
+	// allow the build to continue, catch this in CI as warnings
+	ignoreFailures = true
+	effort = "max"
+	reportLevel = "low"
+	excludeFilter = file("findbugs-filters.xml")
+}
+
+// some extra tasks so that we can generate html AND xml
+task findbugsMainHtml(type: FindBugs, dependsOn: [classes]) {
+	classes = project.sourceSets.main.output.classesDirs
+	source = project.sourceSets.main.java.srcDirs
+	classpath = sourceSets.main.runtimeClasspath
+	reports {
+	    html.enabled = true
+	    xml.enabled = false
+	}
+}
+distZip.dependsOn findbugsMainHtml
+distTar.dependsOn findbugsMainHtml
+
+task findbugsTestHtml(type: FindBugs, dependsOn: [testClasses]) {
+	classes = project.sourceSets.test.output.classesDirs
+	source = project.sourceSets.test.java.srcDirs
+	classpath = sourceSets.test.runtimeClasspath
+	reports {
+	    html.enabled = true
+	    xml.enabled = false
+	}
+}
+distZip.dependsOn findbugsTestHtml
+distTar.dependsOn findbugsTestHtml
+
+task findbugsIntegrationTestHtml(type: FindBugs, dependsOn: [integrationTestClasses]) {
+	classes = project.sourceSets.integrationTest.output.classesDirs
+	source = project.sourceSets.integrationTest.java.srcDirs
+	classpath = sourceSets.integrationTest.runtimeClasspath
+	reports {
+	    html.enabled = true
+	    xml.enabled = false
+	}
+}
+distZip.dependsOn findbugsIntegrationTestHtml
+distTar.dependsOn findbugsIntegrationTestHtml
+
+task writeVersionProperties(type: WriteProperties) {
+	outputFile = new File(project.buildDir, "resources/main/fll/resources/version.properties")
+	property("version", project.version)
+	property("lastTag", String.valueOf(project.versionDetails.lastTag))
+	property("commitDistance", String.valueOf(project.versionDetails.commitDistance))
+	property("gitHash", String.valueOf(project.versionDetails.gitHash))
+	property("gitHashFull", String.valueOf(project.versionDetails.gitHashFull))
+	property("branchName", String.valueOf(project.versionDetails.branchName))
+	property("isCleanTag", String.valueOf(project.versionDetails.isCleanTag))
+}
+classes.dependsOn writeVersionProperties
+
+task writeLaunchJar(type: Jar) {
+	destinationDir = project.buildDir
+	archiveFileName = "fll-sw.jar"
+	manifest {
+		attributes(
+			"Implementation-Title": project.name,
+            "Implementation-Version": version,
+            "Main-Class": project.mainClassName,
+			"Class-Path": "classes/\n " + configurations.runtimeClasspath.collect { "lib/" + it.getName() }.join(' \n '))
+    }
+}
+distZip.dependsOn writeLaunchJar
+distTar.dependsOn writeLaunchJar
+
+cobertura {
+	coverageFormats = [ 'html', 'xml' ]
+}

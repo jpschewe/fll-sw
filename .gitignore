@@ -12,7 +12,6 @@ build
 build.ant
 tmp
 fll.log
-dist
 web/wiki/*
 override.properties
 web/sponsor_logos/*.jpg
@@ -20,3 +19,5 @@ cloc.xml
 bin/
 import_*
 tmp-web
+.gradle
+.classpath

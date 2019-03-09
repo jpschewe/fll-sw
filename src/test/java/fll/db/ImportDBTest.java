@@ -17,8 +17,6 @@ import java.sql.Statement;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,29 +41,23 @@ public class ImportDBTest {
    */
   @Test
   public void testTruncation() throws IOException, SQLException {
-    final InputStream dumpFileIS = ImportDBTest.class.getResourceAsStream("data/plymouth-2012-11-17.flldb");
-    final File tempFile = File.createTempFile("flltest", null);
-    final String database = tempFile.getAbsolutePath();
-    Statement stmt = null;
-    ResultSet rs = null;
-    Connection connection = null;
-    try {
-      connection = Utilities.createFileDataSource(database).getConnection();
+    try (InputStream dumpFileIS = ImportDBTest.class.getResourceAsStream("data/plymouth-2012-11-17.flldb")) {
+      final File tempFile = File.createTempFile("flltest", null);
+      final String database = tempFile.getAbsolutePath();
+      try (Connection connection = Utilities.createFileDataSource(database).getConnection()) {
 
-      final ImportDB.ImportResult importResult = ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), connection);
-      TestUtils.deleteImportData(importResult);
+        final ImportDB.ImportResult importResult = ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS),
+                                                                                  connection);
+        TestUtils.deleteImportData(importResult);
 
-      connection.close();
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
-      SQLFunctions.close(connection);
+      } finally {
 
-      if (!tempFile.delete()) {
-        tempFile.deleteOnExit();
+        if (!tempFile.delete()) {
+          tempFile.deleteOnExit();
+        }
       }
+      TestUtils.deleteDatabase(database);
     }
-    TestUtils.deleteDatabase(database);
   }
 
   /**
@@ -76,38 +68,31 @@ public class ImportDBTest {
    */
   @Test
   public void testImportSubjectiveNoShow() throws IOException, SQLException {
-    final InputStream dumpFileIS = ImportDBTest.class.getResourceAsStream("data/mays-20110108-database.flldb");
-    Assert.assertNotNull("Cannot find test data", dumpFileIS);
+    try (InputStream dumpFileIS = ImportDBTest.class.getResourceAsStream("data/mays-20110108-database.flldb")) {
+      Assert.assertNotNull("Cannot find test data", dumpFileIS);
 
-    final File tempFile = File.createTempFile("flltest", null);
-    final String database = tempFile.getAbsolutePath();
-    Statement stmt = null;
-    ResultSet rs = null;
-    Connection connection = null;
-    try {
-      connection = Utilities.createFileDataSource(database).getConnection();
+      final File tempFile = File.createTempFile("flltest", null);
+      final String database = tempFile.getAbsolutePath();
+      try (Connection connection = Utilities.createFileDataSource(database).getConnection();
+          Statement stmt = connection.createStatement()) {
 
-      final ImportDB.ImportResult importResult = ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS),
-                                                                                connection);
-      TestUtils.deleteImportData(importResult);
+        final ImportDB.ImportResult importResult = ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS),
+                                                                                  connection);
+        TestUtils.deleteImportData(importResult);
 
-      // check that team 8777 has a no show in research
-      stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT NoShow FROM research WHERE TeamNumber = 8777");
-      Assert.assertTrue("Should have a row", rs.next());
-      Assert.assertTrue("Should have a no show", rs.getBoolean(1));
+        // check that team 8777 has a no show in research
+        try (ResultSet rs = stmt.executeQuery("SELECT NoShow FROM research WHERE TeamNumber = 8777")) {
+          Assert.assertTrue("Should have a row", rs.next());
+          Assert.assertTrue("Should have a no show", rs.getBoolean(1));
 
-      connection.close();
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
-      SQLFunctions.close(connection);
-
-      if (!tempFile.delete()) {
-        tempFile.deleteOnExit();
+        }
+      } finally {
+        if (!tempFile.delete()) {
+          tempFile.deleteOnExit();
+        }
       }
-    }
-    TestUtils.deleteDatabase(database);
+      TestUtils.deleteDatabase(database);
+    } // allocate stream
   }
 
   /**
@@ -119,43 +104,41 @@ public class ImportDBTest {
    */
   @Test
   public void testLoadFromDumpIntoNewDB() throws IOException, SQLException {
-    final InputStream dumpFileIS = TestUtils.class.getResourceAsStream("data/testdb.flldb");
-    Assert.assertNotNull("Cannot find test data", dumpFileIS);
+    try (InputStream dumpFileIS = TestUtils.class.getResourceAsStream("data/testdb.flldb")) {
+      Assert.assertNotNull("Cannot find test data", dumpFileIS);
 
-    final File tempFile = File.createTempFile("flltest", null);
-    final String database = tempFile.getAbsolutePath();
-    final File temp = File.createTempFile("fll", ".zip");
-    Connection connection = null;
-    try {
-      connection = Utilities.createFileDataSource(database).getConnection();
+      final File tempFile = File.createTempFile("flltest", null);
+      final String database = tempFile.getAbsolutePath();
+      final File temp = File.createTempFile("fll", ".zip");
+      try (Connection connection = Utilities.createFileDataSource(database).getConnection()) {
 
-      final ImportDB.ImportResult importResult = ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS),
-                                                                                connection);
-      TestUtils.deleteImportData(importResult);
+        final ImportDB.ImportResult importResult = ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS),
+                                                                                  connection);
+        TestUtils.deleteImportData(importResult);
 
-      // dump to temp file
-      final FileOutputStream fos = new FileOutputStream(temp);
-      final ZipOutputStream zipOut = new ZipOutputStream(fos);
+        // dump to temp file
+        final FileOutputStream fos = new FileOutputStream(temp);
+        final ZipOutputStream zipOut = new ZipOutputStream(fos);
 
-      final Document challengeDocument = GlobalParameters.getChallengeDocument(connection);
-      Assert.assertNotNull(challengeDocument);
-      DumpDB.dumpDatabase(zipOut, connection, challengeDocument, null);
-      fos.close();
+        final Document challengeDocument = GlobalParameters.getChallengeDocument(connection);
+        Assert.assertNotNull(challengeDocument);
+        DumpDB.dumpDatabase(zipOut, connection, challengeDocument, null);
+        fos.close();
 
-      // load from temp file
-      final FileInputStream fis = new FileInputStream(temp);
-      final ImportDB.ImportResult importResult2 = ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(fis), connection);
-      TestUtils.deleteImportData(importResult2);
-      fis.close();
-    } finally {
-      SQLFunctions.close(connection);
-      if (!tempFile.delete()) {
-        tempFile.deleteOnExit();
+        // load from temp file
+        final FileInputStream fis = new FileInputStream(temp);
+        final ImportDB.ImportResult importResult2 = ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(fis), connection);
+        TestUtils.deleteImportData(importResult2);
+        fis.close();
+      } finally {
+        if (!tempFile.delete()) {
+          tempFile.deleteOnExit();
+        }
+        if (!temp.delete()) {
+          temp.deleteOnExit();
+        }
       }
-      if (!temp.delete()) {
-        temp.deleteOnExit();
-      }
+      TestUtils.deleteDatabase(database);
     }
-    TestUtils.deleteDatabase(database);
   }
 }

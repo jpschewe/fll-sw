@@ -74,7 +74,7 @@ public class SubjectiveScoresTest {
     // create database
     final InputStream stream = SubjectiveScoresTest.class.getResourceAsStream("challenge.xml");
     Assert.assertNotNull(stream);
-    final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(stream));
+    final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     Assert.assertNotNull(challengeDocument);
 
     final ChallengeDescription challenge = new ChallengeDescription(challengeDocument.getDocumentElement());

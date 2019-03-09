@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
+import fll.Utilities;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.DummyServletContext;
@@ -39,13 +40,13 @@ public class ScoreEntryTest {
       if (ApplicationAttributes.CHALLENGE_DOCUMENT.equals(attr)) {
         final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/all-elements.xml");
         Assert.assertNotNull(stream);
-        final Document document = ChallengeParser.parse(new InputStreamReader(stream));
+        final Document document = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
         Assert.assertNotNull(document);
         return document;
       } else if (ApplicationAttributes.CHALLENGE_DESCRIPTION.equals(attr)) {
         final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/all-elements.xml");
         Assert.assertNotNull(stream);
-        final Document document = ChallengeParser.parse(new InputStreamReader(stream));
+        final Document document = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
         Assert.assertNotNull(document);
         return new ChallengeDescription(document.getDocumentElement());
       } else {
