@@ -40,7 +40,8 @@ import javax.sql.DataSource;
 import org.apache.log4j.Logger;
 import org.hsqldb.jdbc.JDBCDataSource;
 
-import au.com.bytecode.opencsv.CSVReader;
+import com.opencsv.CSVReader;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.ImportDB;
 import fll.util.FLLRuntimeException;
