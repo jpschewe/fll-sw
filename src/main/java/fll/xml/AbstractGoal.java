@@ -59,7 +59,7 @@ public abstract class AbstractGoal implements Serializable {
     mName = ele.getAttribute(NAME_ATTRIBUTE);
     mTitle = ele.getAttribute(TITLE_ATTRIBUTE);
 
-    final List<Element> descEles = XMLUtils.getChildElementsByTagName(ele, DESCRIPTION_TAG_NAME);
+    final List<Element> descEles = ChallengeParser.getChildElementsByTagName(ele, DESCRIPTION_TAG_NAME);
     if (descEles.size() > 0) {
       final Element descEle = descEles.get(0);
       mDescription = descEle.getTextContent();

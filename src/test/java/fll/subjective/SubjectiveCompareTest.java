@@ -22,7 +22,7 @@ import fll.Utilities;
 import fll.util.LogUtils;
 import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.ChallengeParser;
-import fll.xml.XMLUtils;
+import net.mtu.eggplant.xml.XMLUtils;
 
 /**
  * Test comparing subjective score documents.

@@ -126,8 +126,7 @@ dependencies {
 	
 	compile group: "com.opencsv", name: "opencsv", version: "4.5"
 	
-	// TODO: get these from repositories somewhere
-	compile name: "JonsInfra-1.6"	
+	compile group: "net.mtu.eggplant", name: "JonsInfra", version: "1.7.0"	
 	
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile group: 'org.hamcrest', name: 'hamcrest', version: '2.1'

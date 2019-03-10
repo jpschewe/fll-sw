@@ -408,7 +408,7 @@ public class ChallengeParserTest {
    */
   @Test
   public void testAllDescriptors() throws IOException {
-    final Collection<URL> urls = XMLUtils.getAllKnownChallengeDescriptorURLs();
+    final Collection<URL> urls = ChallengeParser.getAllKnownChallengeDescriptorURLs();
 
     for (final URL u : urls) {
       LOGGER.info("Challenge: "
