@@ -7,14 +7,15 @@
 package fll.util;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import au.com.bytecode.opencsv.CSVReader;
+import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+
 import fll.Utilities;
 
 /**
@@ -25,35 +26,37 @@ public class CSVCellReader extends CellFileReader {
   private final CSVReader delegate;
 
   /**
-   * @see CSVReader#CSVReader(java.io.Reader)
+   * @param file the file to read in
+   * @throws IOException if the there is an error converting the file to a path,
+   *           see {@link File#toPath()}
    */
-  public CSVCellReader(final File file) throws FileNotFoundException {
-    delegate = new CSVReader(new InputStreamReader(new FileInputStream(file), Utilities.DEFAULT_CHARSET));
+  public CSVCellReader(final File file) throws IOException {
+    this(file.toPath());
   }
 
   /**
    * @throws IOException
-   * @see CSVReader#CSVReader(java.io.Reader, char)
    */
   public CSVCellReader(final Path file,
                        final char separator)
       throws IOException {
-    delegate = new CSVReader(Files.newBufferedReader(file, Utilities.DEFAULT_CHARSET), separator);
+    final CSVParser parser = new CSVParserBuilder().withSeparator(separator).build();
+    delegate = new CSVReaderBuilder(Files.newBufferedReader(file, Utilities.DEFAULT_CHARSET)).withCSVParser(parser)
+                                                                                             .build();
   }
 
   /**
    * @throws IOException
-   * @see CSVReader#CSVReader(java.io.Reader)
    */
   public CSVCellReader(final Path file) throws IOException {
-    delegate = new CSVReader(Files.newBufferedReader(file, Utilities.DEFAULT_CHARSET));
+    delegate = new CSVReaderBuilder(Files.newBufferedReader(file, Utilities.DEFAULT_CHARSET)).build();
   }
 
   /**
    * @see fll.util.CellFileReader#getLineNumber()
    */
-  public int getLineNumber() {
-    return delegate.getLineNumber();
+  public long getLineNumber() {
+    return delegate.getLinesRead();
   }
 
   /**
