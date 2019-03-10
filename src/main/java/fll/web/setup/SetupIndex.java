@@ -31,7 +31,6 @@ import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
-import fll.xml.XMLUtils;
 import net.mtu.eggplant.util.ComparisonUtils;
 
 /**
@@ -76,7 +75,7 @@ public class SetupIndex {
     public static List<DescriptionInfo> getAllKnownChallengeDescriptionInfo() {
       final List<DescriptionInfo> descriptions = new LinkedList<DescriptionInfo>();
 
-      final Collection<URL> urls = XMLUtils.getAllKnownChallengeDescriptorURLs();
+      final Collection<URL> urls = ChallengeParser.getAllKnownChallengeDescriptorURLs();
       for (final URL url : urls) {
         try (final InputStream stream = url.openStream()) {
           try (final Reader reader = new InputStreamReader(stream, Utilities.DEFAULT_CHARSET)) {

@@ -59,7 +59,6 @@ import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
-import fll.xml.XMLUtils;
 import net.mtu.eggplant.io.IOUtils;
 import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
@@ -1186,7 +1185,7 @@ public final class ImportDB {
       tablesToModify.add("FinalScores");
       tablesToModify.add("Performance");
       tablesToModify.add("PlayoffData");
-      tablesToModify.addAll(XMLUtils.getSubjectiveCategoryNames(challengeDocument));
+      tablesToModify.addAll(ChallengeParser.getSubjectiveCategoryNames(challengeDocument));
       for (final String table : tablesToModify) {
         stringsToInts = connection.prepareStatement(String.format("UPDATE %s SET Tournament = ? WHERE Tournament = ?",
                                                                   table));

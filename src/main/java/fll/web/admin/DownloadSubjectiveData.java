@@ -57,8 +57,8 @@ import fll.web.BaseFLLServlet;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
-import fll.xml.XMLUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
+import net.mtu.eggplant.xml.XMLUtils;
 
 /**
  * Download the data file for the subjective score app.
@@ -319,12 +319,12 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
         // work.
         // JPS 2013-07-03
         final java.io.File temp = java.io.File.createTempFile("fll", "xml");
-        fll.xml.XMLUtils.writeXML(document,
+        XMLUtils.writeXML(document,
                                   new java.io.OutputStreamWriter(new java.io.FileOutputStream(temp),
                                                                  Utilities.DEFAULT_CHARSET),
                                   Utilities.DEFAULT_CHARSET.name());
         final InputStream scoreStream = new java.io.FileInputStream(temp);
-        final Document tempDocument = fll.xml.XMLUtils.parseXMLDocument(scoreStream);
+        final Document tempDocument = XMLUtils.parseXMLDocument(scoreStream);
         if (!temp.delete()) {
           temp.deleteOnExit();
         }

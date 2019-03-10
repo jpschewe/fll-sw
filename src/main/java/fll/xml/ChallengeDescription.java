@@ -17,6 +17,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
+import net.mtu.eggplant.xml.XMLUtils;
 
 /**
  * The description of a tournament.
@@ -40,7 +41,7 @@ public class ChallengeDescription implements Serializable {
   public ChallengeDescription(final Element ele) {
     mTitle = ele.getAttribute(TITLE_ATTRIBUTE);
     mRevision = ele.getAttribute(REVISION_ATTRIBUTE);
-    mWinner = XMLUtils.getWinnerCriteria(ele);
+    mWinner = ChallengeParser.getWinnerCriteria(ele);
 
     if (ele.hasAttribute(COPYRIGHT_ATTRIBUTE)) {
       mCopyright = ele.getAttribute(COPYRIGHT_ATTRIBUTE);
@@ -241,7 +242,7 @@ public class ChallengeDescription implements Serializable {
 
     fll.setAttribute(TITLE_ATTRIBUTE, mTitle);
     fll.setAttribute(REVISION_ATTRIBUTE, mRevision);
-    fll.setAttribute(XMLUtils.WINNER_ATTRIBUTE, mWinner.toString());
+    fll.setAttribute(ChallengeParser.WINNER_ATTRIBUTE, mWinner.toString());
     fll.setAttribute(SCHEMA_VERSION_ATTRIBUTE, String.valueOf(ChallengeParser.CURRENT_SCHEMA_VERSION));
 
     if (null != mCopyright) {

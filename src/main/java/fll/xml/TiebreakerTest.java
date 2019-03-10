@@ -19,7 +19,7 @@ public class TiebreakerTest extends BasicPolynomial {
   public TiebreakerTest(final Element ele,
                         final GoalScope goalScope) {
     super(ele, goalScope);
-    mWinner = XMLUtils.getWinnerCriteria(ele);
+    mWinner = ChallengeParser.getWinnerCriteria(ele);
   }
 
   /**
@@ -43,7 +43,7 @@ public class TiebreakerTest extends BasicPolynomial {
   public Element toXml(final Document doc) {
     final Element ele = doc.createElement(TAG_NAME);
     populateXml(doc, ele);
-    ele.setAttribute(XMLUtils.WINNER_ATTRIBUTE, mWinner.toString());
+    ele.setAttribute(ChallengeParser.WINNER_ATTRIBUTE, mWinner.toString());
     return ele;
   }
 }
