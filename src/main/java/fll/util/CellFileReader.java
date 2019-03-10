@@ -29,7 +29,7 @@ public abstract class CellFileReader implements Closeable {
   /**
    * @return The most recent line read (0-based)
    */
-  public abstract int getLineNumber();
+  public abstract long getLineNumber();
 
   /**
    * Read the next line

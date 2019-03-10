@@ -74,7 +74,9 @@ public class ExcelCellReader extends CellFileReader {
     final String contentType = new Tika().detect(path);
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Detected content type: "
-          + contentType + " for " + path);
+          + contentType
+          + " for "
+          + path);
     }
 
     final boolean isCsvFile;
@@ -164,7 +166,7 @@ public class ExcelCellReader extends CellFileReader {
   /**
    * @see fll.util.CellFileReader#getLineNumber()
    */
-  public int getLineNumber() {
+  public long getLineNumber() {
     return lineNumber;
   }
 

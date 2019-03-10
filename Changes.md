@@ -1,3 +1,4 @@
+* #352 - switch to mainstream opencsv
 * #696 - build with gradle instead of ant
 * #713 - use embedded Tomcat for the webserver
 
