@@ -48,9 +48,6 @@ integrationTest {
 }
 repositories {
     jcenter()
-    flatDir {
-      dirs 'gradle-repo'
-    }
 }
 
 ext {
