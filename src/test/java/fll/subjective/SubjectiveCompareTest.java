@@ -6,15 +6,18 @@
 
 package fll.subjective;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collection;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -31,25 +34,25 @@ public class SubjectiveCompareTest {
 
   private Document challengeDocument;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     LogUtils.initializeLogging();
 
     final InputStream stream = SubjectiveCompareTest.class.getResourceAsStream("challenge.xml");
-    Assert.assertNotNull(stream);
+    assertNotNull(stream);
     challengeDocument = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     challengeDocument = null;
   }
 
   private Document loadDocument(final String resourceName) throws SAXException, IOException {
     final InputStream scoreStream = SubjectiveCompareTest.class.getResourceAsStream(resourceName);
-    Assert.assertNotNull(scoreStream);
+    assertNotNull(scoreStream);
     final Document scoreDocument = XMLUtils.parseXMLDocument(scoreStream);
-    Assert.assertNotNull(scoreDocument);
+    assertNotNull(scoreDocument);
 
     DownloadSubjectiveData.validateXML(scoreDocument);
 
@@ -68,8 +71,8 @@ public class SubjectiveCompareTest {
     final Collection<SubjectiveScoreDifference> diffs = SubjectiveUtils.compareScoreDocuments(challengeDocument,
                                                                                               scoreDocument,
                                                                                               scoreDocument);
-    Assert.assertNotNull(diffs);
-    Assert.assertTrue("Should not be any differences", diffs.isEmpty());
+    assertNotNull(diffs);
+    assertTrue( diffs.isEmpty(), "Should not be any differences");
   }
 
   /**
@@ -85,18 +88,18 @@ public class SubjectiveCompareTest {
     final Collection<SubjectiveScoreDifference> diffs = SubjectiveUtils.compareScoreDocuments(challengeDocument,
                                                                                               masterDocument,
                                                                                               compareDocument);
-    Assert.assertNotNull(diffs);
-    Assert.assertEquals("There be exactly 1 difference: "
-        + diffs, 1, diffs.size());
+    assertNotNull(diffs);
+    assertEquals( 1, diffs.size(), "There be exactly 1 difference: "
+        + diffs);
     final SubjectiveScoreDifference diff = diffs.iterator().next();
-    Assert.assertEquals("Teamwork", diff.getCategory());
-    Assert.assertEquals("Confidence & Enthusiasm", diff.getSubcategory());
-    Assert.assertEquals("DEB_JOHNSON", diff.getJudge());
-    Assert.assertEquals(793, diff.getTeamNumber());
+    assertEquals("Teamwork", diff.getCategory());
+    assertEquals("Confidence & Enthusiasm", diff.getSubcategory());
+    assertEquals("DEB_JOHNSON", diff.getJudge());
+    assertEquals(793, diff.getTeamNumber());
 
-    Assert.assertEquals("Should be a double difference", DoubleSubjectiveScoreDifference.class, diff.getClass());
+    assertEquals( DoubleSubjectiveScoreDifference.class, diff.getClass(), "Should be a double difference");
     final DoubleSubjectiveScoreDifference doubleDiff = (DoubleSubjectiveScoreDifference) diff;
-    Assert.assertEquals(15D, doubleDiff.getMasterValue(), 0D);
-    Assert.assertEquals(13D, doubleDiff.getCompareValue(), 0D);
+    assertEquals(15D, doubleDiff.getMasterValue(), 0D);
+    assertEquals(13D, doubleDiff.getCompareValue(), 0D);
   }
 }

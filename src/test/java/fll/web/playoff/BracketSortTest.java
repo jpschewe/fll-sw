@@ -5,6 +5,10 @@
  */
 package fll.web.playoff;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -15,9 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 
 import fll.Team;
@@ -39,7 +42,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  */
 public class BracketSortTest {
 
-  @Before
+  @BeforeEach
   public void setUp() {
     LogUtils.initializeLogging();
   }
@@ -62,9 +65,9 @@ public class BracketSortTest {
     try {
       // load in data/alpha-team-sort.xml
       final InputStream challengeDocIS = BracketSortTest.class.getResourceAsStream("data/alpha-team-sort.xml");
-      Assert.assertNotNull(challengeDocIS);
+      assertNotNull(challengeDocIS);
       final Document document = ChallengeParser.parse(new InputStreamReader(challengeDocIS, Utilities.DEFAULT_CHARSET));
-      Assert.assertNotNull(document);
+      assertNotNull(document);
 
       final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
 
@@ -81,7 +84,7 @@ public class BracketSortTest {
       for (int i = 0; i < teamNames.length; ++i) {
         final String otherTeam = Queries.addTeam(connection, teamNames.length
             - i, teamNames[i], null);
-        Assert.assertNull(otherTeam);
+        assertNull(otherTeam);
         Queries.addTeamToTournament(connection, teamNames.length
             - i, tournament, divisionStr, divisionStr);
         // final Team team = new Team();
@@ -101,14 +104,14 @@ public class BracketSortTest {
       TournamentTeam.filterTeamsToEventDivision(teams, divisionStr);
 
       final List<Team> order = Playoff.buildInitialBracketOrder(connection, bracketSort, winnerCriteria, teams);
-      Assert.assertEquals("A", order.get(0).getTeamName());
-      Assert.assertEquals(Team.BYE, order.get(1));
-      Assert.assertEquals("D", order.get(2).getTeamName());
-      Assert.assertEquals("E", order.get(3).getTeamName());
-      Assert.assertEquals("C", order.get(4).getTeamName());
-      Assert.assertEquals("F", order.get(5).getTeamName());
-      Assert.assertEquals(Team.BYE, order.get(6));
-      Assert.assertEquals("B", order.get(7).getTeamName());
+      assertEquals("A", order.get(0).getTeamName());
+      assertEquals(Team.BYE, order.get(1));
+      assertEquals("D", order.get(2).getTeamName());
+      assertEquals("E", order.get(3).getTeamName());
+      assertEquals("C", order.get(4).getTeamName());
+      assertEquals("F", order.get(5).getTeamName());
+      assertEquals(Team.BYE, order.get(6));
+      assertEquals("B", order.get(7).getTeamName());
 
     } finally {
       SQLFunctions.close(connection);

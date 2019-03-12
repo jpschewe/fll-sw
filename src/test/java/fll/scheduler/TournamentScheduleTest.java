@@ -6,6 +6,12 @@
 
 package fll.scheduler;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,9 +31,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 
 import fll.Tournament;
@@ -50,7 +55,7 @@ public class TournamentScheduleTest {
 
   public static final String TECHNICAL_HEADER = "Technical";
 
-  @Before
+  @BeforeEach
   public void setUp() {
     LogUtils.initializeLogging();
   }
@@ -63,14 +68,14 @@ public class TournamentScheduleTest {
     Connection memConnection = null;
     try {
       final InputStream stream = TournamentScheduleTest.class.getResourceAsStream("/fll/db/data/challenge-test.xml");
-      Assert.assertNotNull(stream);
+      assertNotNull(stream);
       final Document document = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
 
       memConnection = DriverManager.getConnection(url);
 
       GenerateDB.generateDB(document, memConnection);
       final boolean exists = TournamentSchedule.scheduleExistsInDatabase(memConnection, 1);
-      Assert.assertFalse(exists);
+      assertFalse(exists);
 
     } finally {
       SQLFunctions.close(memConnection);
@@ -88,7 +93,7 @@ public class TournamentScheduleTest {
     Connection memConnection = null;
     try {
       final InputStream stream = TournamentScheduleTest.class.getResourceAsStream("/fll/db/data/challenge-test.xml");
-      Assert.assertNotNull(stream);
+      assertNotNull(stream);
       final Document document = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
 
       memConnection = DriverManager.getConnection(url);
@@ -97,30 +102,30 @@ public class TournamentScheduleTest {
 
       Tournament.createTournament(memConnection, tournamentName, null, null);
       final Tournament tournament = Tournament.findTournamentByName(memConnection, tournamentName);
-      Assert.assertNotNull(tournament);
+      assertNotNull(tournament);
 
       Queries.setCurrentTournament(memConnection, tournament.getTournamentID());
 
       final boolean existsBefore = TournamentSchedule.scheduleExistsInDatabase(memConnection, 1);
-      Assert.assertFalse(existsBefore);
+      assertFalse(existsBefore);
 
       // load teams into the database
       for (int teamNumber = 1; teamNumber <= 32; ++teamNumber) {
         final String dup = Queries.addTeam(memConnection, teamNumber, teamNumber
             + " Name", teamNumber
                 + " School");
-        Assert.assertNull(dup);
+        assertNull(dup);
         Queries.addTeamToTournament(memConnection, teamNumber, tournament.getTournamentID(),
                                     GenerateDB.DEFAULT_TEAM_DIVISION, GenerateDB.DEFAULT_TEAM_DIVISION);
       }
 
       // load schedule with matching team numbers
       final URL scheduleResource = TournamentScheduleTest.class.getResource("data/16-16-test.xls");
-      Assert.assertNotNull(scheduleResource);
+      assertNotNull(scheduleResource);
       InputStream scheduleStream = scheduleResource.openStream();
       final List<String> sheetNames = ExcelCellReader.getAllSheetNames(scheduleStream);
       scheduleStream.close();
-      Assert.assertEquals("Expecting exactly 1 sheet in schedule spreadsheet", 1, sheetNames.size());
+      assertEquals(1, sheetNames.size(), "Expecting exactly 1 sheet in schedule spreadsheet");
 
       final String sheetName = sheetNames.get(0);
 
@@ -151,10 +156,10 @@ public class TournamentScheduleTest {
 
       final boolean existsAfter = TournamentSchedule.scheduleExistsInDatabase(memConnection,
                                                                               tournament.getTournamentID());
-      Assert.assertTrue("Schedule should exist now that it's been stored", existsAfter);
+      assertTrue(existsAfter, "Schedule should exist now that it's been stored");
 
       final Document doc = schedule.createXML();
-      Assert.assertNotNull("Should have non-null schedule document", doc);
+      assertNotNull(doc, "Should have non-null schedule document");
 
     } finally {
       SQLFunctions.close(memConnection);
@@ -170,7 +175,7 @@ public class TournamentScheduleTest {
     Connection memConnection = null;
     try {
       final InputStream stream = TournamentScheduleTest.class.getResourceAsStream("/fll/db/data/challenge-test.xml");
-      Assert.assertNotNull(stream);
+      assertNotNull(stream);
       final Document document = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
 
       memConnection = DriverManager.getConnection(url);
@@ -180,7 +185,7 @@ public class TournamentScheduleTest {
       final TournamentSchedule schedule = new TournamentSchedule(memConnection, 1);
 
       final Document doc = schedule.createXML();
-      Assert.assertNotNull("Should have non-null schedule document", doc);
+      assertNotNull(doc, "Should have non-null schedule document");
 
     } finally {
       SQLFunctions.close(memConnection);
@@ -207,11 +212,11 @@ public class TournamentScheduleTest {
     possibleSubjectiveHeaders.add("Project");
 
     final URL schedule12Resource = TournamentScheduleTest.class.getResource("data/12-hour-format.xls");
-    Assert.assertNotNull(schedule12Resource);
+    assertNotNull(schedule12Resource);
     final TournamentSchedule schedule12 = loadSchedule(schedule12Resource, possibleSubjectiveHeaders);
 
     final URL schedule24Resource = TournamentScheduleTest.class.getResource("data/24-hour-format.xls");
-    Assert.assertNotNull(schedule24Resource);
+    assertNotNull(schedule24Resource);
     final TournamentSchedule schedule24 = loadSchedule(schedule12Resource, possibleSubjectiveHeaders);
 
     // write out the schedules to CSV and then compare
@@ -223,7 +228,7 @@ public class TournamentScheduleTest {
     schedule24.writeToCSV(output24);
     final String str24 = output24.toString();
 
-    Assert.assertEquals(str24, str12);
+    assertEquals(str24, str12);
   }
 
   /**
@@ -238,12 +243,12 @@ public class TournamentScheduleTest {
    * @throws ScheduleParseException
    */
   private TournamentSchedule loadSchedule(final URL path,
-                                          final Collection<String> possibleSubjectiveHeaders) throws IOException,
-                                              InvalidFormatException, ParseException, ScheduleParseException {
+                                          final Collection<String> possibleSubjectiveHeaders)
+      throws IOException, InvalidFormatException, ParseException, ScheduleParseException {
     InputStream scheduleStream = path.openStream();
     final List<String> sheetNames = ExcelCellReader.getAllSheetNames(scheduleStream);
     scheduleStream.close();
-    Assert.assertEquals("Expecting exactly 1 sheet in schedule spreadsheet", 1, sheetNames.size());
+    assertEquals(1, sheetNames.size(), "Expecting exactly 1 sheet in schedule spreadsheet");
 
     final String sheetName = sheetNames.get(0);
 
@@ -288,15 +293,15 @@ public class TournamentScheduleTest {
     if (!baseScheduleDir.exists()) {
       baseScheduleDir = new File("scheduling/blank-schedules");
     }
-    Assert.assertTrue("Can't find schedules in "
-        + baseScheduleDir.getAbsolutePath(), baseScheduleDir.exists());
+    assertTrue(baseScheduleDir.exists(), "Can't find schedules in "
+        + baseScheduleDir.getAbsolutePath());
 
-    Assert.assertTrue("Schedules path isn't a directory: "
-        + baseScheduleDir.getAbsolutePath(), baseScheduleDir.isDirectory());
+    assertTrue(baseScheduleDir.isDirectory(), "Schedules path isn't a directory: "
+        + baseScheduleDir.getAbsolutePath());
 
     final Collection<File> schedules = FileUtils.listFiles(baseScheduleDir, new SuffixFileFilter(".xls"),
                                                            TrueFileFilter.INSTANCE);
-    Assert.assertTrue("Didn't find any schedules", !schedules.isEmpty());
+    assertTrue(!schedules.isEmpty(), "Didn't find any schedules");
 
     final Collection<String> possibleSubjectiveHeaders = new LinkedList<String>();
     possibleSubjectiveHeaders.add("Core Values");
@@ -308,12 +313,12 @@ public class TournamentScheduleTest {
       final TournamentSchedule schedule = loadSchedule(resource, possibleSubjectiveHeaders);
 
       // make sure there are some schedule entries
-      Assert.assertTrue("No entries for schedule: "
-          + file.getName(), !schedule.getSchedule().isEmpty());
-      Assert.assertTrue("No division for schedule: "
-          + file.getName(), !schedule.getAwardGroups().isEmpty());
-      Assert.assertTrue("No judging groups for schedule: "
-          + file.getName(), !schedule.getJudgingGroups().isEmpty());
+      assertTrue(!schedule.getSchedule().isEmpty(), "No entries for schedule: "
+          + file.getName());
+      assertTrue(!schedule.getAwardGroups().isEmpty(), "No division for schedule: "
+          + file.getName());
+      assertTrue(!schedule.getJudgingGroups().isEmpty(), "No judging groups for schedule: "
+          + file.getName());
     }
 
   }

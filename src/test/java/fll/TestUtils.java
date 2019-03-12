@@ -12,9 +12,6 @@ import java.nio.file.Path;
 import java.util.Comparator;
 
 import org.apache.log4j.Logger;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
 
 import fll.db.ImportDB;
 import fll.util.LogUtils;
@@ -50,47 +47,6 @@ public final class TestUtils {
       }
     }
   }
-
-  /**
-   * JUnit test rule that reruns filaed tests some number of times.
-   */
-  public static class Retry implements TestRule {
-    private final int retryCount;
-
-    public Retry(final int retryCount) {
-      this.retryCount = retryCount;
-    }
-
-    @Override
-    public Statement apply(final Statement base,
-                           final Description description) {
-      return new Statement() {
-        @Override
-        public void evaluate() throws Throwable {
-          Throwable caughtThrowable = null;
-
-          for (int i = 0; i < retryCount; ++i) {
-            try {
-              base.evaluate();
-              return;
-            } catch (final Throwable t) {
-              caughtThrowable = t;
-              LOG.error(description.getDisplayName()
-                  + ": run "
-                  + (i
-                      + 1)
-                  + " failed");
-            }
-          }
-          LOG.error(description.getDisplayName()
-              + ": giving up after "
-              + retryCount
-              + "failures");
-          throw caughtThrowable;
-        }
-      };
-    }
-  } // class Retry
 
   /**
    * Delete data created by an import that we don't care about.

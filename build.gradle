@@ -55,11 +55,12 @@ repositories {
 
 ext {
     jackson_version = "2.9.0"
-    slf4j_version = "1.7.5"
+    slf4j_version = "1.7.26"
     tomcat_version = "9.0.16"
     itext_version = "5.5.13"
     poi_version = "3.10.1"
-    
+    junit_version = "5.4.0"
+
     web_build_dir = new File(project.buildDir, 'web')
     documentation_build_dir = new File(project.buildDir, 'gen-documentation')    
     
@@ -83,7 +84,6 @@ dependencies {
     compile group: 'org.apache.tomcat', name: 'tomcat-jasper-el', version: project.tomcat_version
     compile group: 'org.apache.tomcat', name: 'tomcat-jsp-api', version: project.tomcat_version
 
-	compile group: "xmlunit", name: "xmlunit", version: "1.4"
 	compile group: "org.apache.commons", name: "commons-lang3", version: "3.4"
 	compile group: "commons-cli", name: "commons-cli", version: "1.2"
 	compile group: "org.hsqldb", name: "hsqldb", version: "2.4.1"
@@ -104,8 +104,6 @@ dependencies {
 	compile group: "com.fasterxml.jackson.core", name: "jackson-databind", version: project.jackson_version
 	compile group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: project.jackson_version
 
-	compile group: "commons-io", name: "commons-io", version: "2.5"
-		
 	compile group: "net.sourceforge.schemaspy", name: "schemaspy", version: "5.0.0"
 		
 	compile group: "dnsjava", name: "dnsjava", version: "2.1.7"
@@ -126,9 +124,12 @@ dependencies {
 	
 	compile group: "com.opencsv", name: "opencsv", version: "4.5"
 	
-	compile group: "net.mtu.eggplant", name: "JonsInfra", version: "1.7.0"	
+	compile group: "net.mtu.eggplant", name: "JonsInfra", version: "2.0.0"	
 	
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+	testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: project.junit_version
+	testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: project.junit_version
+	testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: project.junit_version
+    
     testCompile group: 'org.hamcrest', name: 'hamcrest', version: '2.1'
     
     // allow integration tests to reference code in the test directory
@@ -138,6 +139,7 @@ dependencies {
     integrationTestCompile group: 'net.sourceforge.htmlunit', name: 'htmlunit', version: '2.22'
     integrationTestCompile group: 'org.seleniumhq.selenium', name: 'selenium-server', version: '3.141.59'
     integrationTestCompile group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '1.6.0'
+    integrationTestCompile group: 'io.github.artsok', name: 'rerunner-jupiter', version: '1.1.0'
     
 }
 

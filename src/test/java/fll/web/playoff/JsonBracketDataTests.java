@@ -6,6 +6,10 @@
 
 package fll.web.playoff;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -19,9 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -52,7 +55,7 @@ public class JsonBracketDataTests {
 
   private static final boolean SHOW_FINAL_ROUNDS = false;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     LogUtils.initializeLogging();
   }
@@ -70,7 +73,7 @@ public class JsonBracketDataTests {
                                                                               playoff.getDescription().getPerformance(),
                                                                               playoff.getBracketData(),
                                                                               SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
-    Assert.assertEquals(-1.0D, leaves.get(0).score, 0.0);
+    assertEquals(-1.0D, leaves.get(0).score, 0.0);
 
     // done
     SQLFunctions.close(playoff.getConnection());
@@ -99,12 +102,12 @@ public class JsonBracketDataTests {
                                                                               playoff.getDescription().getPerformance(),
                                                                               playoff.getBracketData(),
                                                                               SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
-    Assert.assertNotNull(leaves);
+    assertNotNull(leaves);
     String jsonOut = jsonMapper.writeValueAsString(leaves);
     List<BracketLeafResultSet> result = jsonMapper.readValue(jsonOut, BracketLeafResultSetTypeInformation.INSTANCE);
 
     // assert score is -1, indicating no score
-    Assert.assertEquals(-1.0D, result.get(0).score, 0.0);
+    assertEquals(-1.0D, result.get(0).score, 0.0);
 
     // test to make sure 2 unverified scores for opposing teams produces no
     // result
@@ -118,10 +121,10 @@ public class JsonBracketDataTests {
     leaves = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, 0, playoff.getConnection(),
                                                    playoff.getDescription().getPerformance(), playoff.getBracketData(),
                                                    SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
-    Assert.assertNotNull(leaves);
+    assertNotNull(leaves);
     jsonOut = jsonMapper.writeValueAsString(leaves);
     result = jsonMapper.readValue(jsonOut, BracketLeafResultSetTypeInformation.INSTANCE);
-    Assert.assertEquals(Team.NULL_TEAM_NUMBER, result.get(0).leaf.getTeam().getTeamNumber());
+    assertEquals(Team.NULL_TEAM_NUMBER, result.get(0).leaf.getTeam().getTeamNumber());
 
     // verify a score that has been entered as unverified and make sure we
     // get data from it
@@ -135,10 +138,10 @@ public class JsonBracketDataTests {
     leaves = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, 0, playoff.getConnection(),
                                                    playoff.getDescription().getPerformance(), playoff.getBracketData(),
                                                    SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
-    Assert.assertNotNull(leaves);
+    assertNotNull(leaves);
     jsonOut = jsonMapper.writeValueAsString(leaves);
     result = jsonMapper.readValue(jsonOut, BracketLeafResultSetTypeInformation.INSTANCE);
-    Assert.assertEquals(5D, result.get(0).score, 0.0);
+    assertEquals(5D, result.get(0).score, 0.0);
 
     // advance 1 and 6 all the way to finals
     insertScore(playoff.getConnection(), 3, 1, true, 5D);
@@ -163,10 +166,10 @@ public class JsonBracketDataTests {
     leaves = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, 0, playoff.getConnection(),
                                                    playoff.getDescription().getPerformance(), playoff.getBracketData(),
                                                    SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
-    Assert.assertNotNull(leaves);
+    assertNotNull(leaves);
     jsonOut = jsonMapper.writeValueAsString(leaves);
     result = jsonMapper.readValue(jsonOut, BracketLeafResultSetTypeInformation.INSTANCE);
-    Assert.assertEquals(-1.0D, result.get(0).score, 0.0);
+    assertEquals(-1.0D, result.get(0).score, 0.0);
 
     SQLFunctions.close(playoff.getConnection());
   }
@@ -187,7 +190,7 @@ public class JsonBracketDataTests {
       ps.setBoolean(3, verified);
       ps.setDouble(4, score);
       ps.setDouble(5, score);
-      Assert.assertEquals(1, ps.executeUpdate());
+      assertEquals(1, ps.executeUpdate());
     } finally {
       SQLFunctions.close(ps);
     }
@@ -204,7 +207,7 @@ public class JsonBracketDataTests {
       ps.setBoolean(1, true);
       ps.setInt(2, team);
       ps.setInt(3, run);
-      Assert.assertEquals(1, ps.executeUpdate());
+      assertEquals(1, ps.executeUpdate());
     } finally {
       SQLFunctions.close(ps);
     }
@@ -269,9 +272,9 @@ public class JsonBracketDataTests {
     Connection connection = null;
     // load up basic descriptor
     final InputStream challengeDocIS = JsonBracketDataTests.class.getResourceAsStream("data/basic-brackets-json.xml");
-    Assert.assertNotNull(challengeDocIS);
+    assertNotNull(challengeDocIS);
     final Document document = ChallengeParser.parse(new InputStreamReader(challengeDocIS, Utilities.DEFAULT_CHARSET));
-    Assert.assertNotNull(document);
+    assertNotNull(document);
 
     final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
 
@@ -290,7 +293,7 @@ public class JsonBracketDataTests {
           + 1;
       final String teamName = teamNames[i];
       final String org = "htk";
-      Assert.assertNull(Queries.addTeam(connection, teamNumber, teamName, org));
+      assertNull(Queries.addTeam(connection, teamNumber, teamName, org));
       Queries.addTeamToTournament(connection, teamNumber, tournament, div, div);
     }
 

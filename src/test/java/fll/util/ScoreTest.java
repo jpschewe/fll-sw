@@ -5,6 +5,11 @@
  */
 package fll.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -18,9 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 
 import fll.Utilities;
@@ -40,18 +44,18 @@ public class ScoreTest {
 
   private static final Logger LOG = LogUtils.getLogger();
 
-  @Before
+  @BeforeEach
   public void setUp() {
     LogUtils.initializeLogging();
   }
 
   private PerformanceScoreCategory loadDocumentAndGetPerformanceElemnt(final InputStream stream) {
-    Assert.assertNotNull(stream);
+    assertNotNull(stream);
     final Document document = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
-    Assert.assertNotNull(document);
+    assertNotNull(document);
     final ChallengeDescription desc = new ChallengeDescription(document.getDocumentElement());
     final PerformanceScoreCategory performanceElement = desc.getPerformance();
-    Assert.assertNotNull(performanceElement);
+    assertNotNull(performanceElement);
     return performanceElement;
   }
 
@@ -73,7 +77,7 @@ public class ScoreTest {
       enumGoals.put("robot_type", "rcx");
       DummyTeamScore dummyTeamScore = new DummyTeamScore(0, 1, simpleGoals, enumGoals);
       double score = performanceElement.evaluate(dummyTeamScore);
-      Assert.assertEquals(260, score, 0);
+      assertEquals(260, score, 0);
 
       simpleGoals.put("pump_station", 1.0);
       simpleGoals.put("flags", 1.0);
@@ -81,7 +85,7 @@ public class ScoreTest {
       enumGoals.put("robot_type", "nxt");
       dummyTeamScore = new DummyTeamScore(1, 1, simpleGoals, enumGoals);
       score = performanceElement.evaluate(dummyTeamScore);
-      Assert.assertEquals(100, score, 0);
+      assertEquals(100, score, 0);
 
       simpleGoals.put("pump_station", 1.0);
       simpleGoals.put("flags", 1.0);
@@ -89,7 +93,7 @@ public class ScoreTest {
       enumGoals.put("robot_type", "rcx");
       dummyTeamScore = new DummyTeamScore(2, 1, simpleGoals, enumGoals);
       score = performanceElement.evaluate(dummyTeamScore);
-      Assert.assertEquals(230, score, 0);
+      assertEquals(230, score, 0);
 
       simpleGoals.put("pump_station", 1.0);
       simpleGoals.put("flags", 1.0);
@@ -97,7 +101,7 @@ public class ScoreTest {
       enumGoals.put("robot_type", "nxt");
       dummyTeamScore = new DummyTeamScore(3, 1, simpleGoals, enumGoals);
       score = performanceElement.evaluate(dummyTeamScore);
-      Assert.assertEquals(85, score, 0);
+      assertEquals(85, score, 0);
     }
   }
 
@@ -120,43 +124,43 @@ public class ScoreTest {
           computed = (ComputedGoal) g;
         }
       }
-      Assert.assertNotNull(computed);
+      assertNotNull(computed);
 
       simpleGoals.put("pump_station", 1.0);
       simpleGoals.put("flags", 1.0);
       simpleGoals.put("flags_rows", 3.0);
       enumGoals.put("robot_type", "rcx");
       DummyTeamScore dummyTeamScore = new DummyTeamScore(0, 1, simpleGoals, enumGoals);
-      Assert.assertEquals(269, computed.getComputedScore(dummyTeamScore), 0);
+      assertEquals(269, computed.getComputedScore(dummyTeamScore), 0);
       double score = performanceElement.evaluate(dummyTeamScore);
-      Assert.assertEquals(384, score, 0);
+      assertEquals(384, score, 0);
 
       simpleGoals.put("pump_station", 1.0);
       simpleGoals.put("flags", 1.0);
       simpleGoals.put("flags_rows", 3.0);
       enumGoals.put("robot_type", "nxt");
       dummyTeamScore = new DummyTeamScore(1, 1, simpleGoals, enumGoals);
-      Assert.assertEquals(0, computed.getComputedScore(dummyTeamScore), 0);
+      assertEquals(0, computed.getComputedScore(dummyTeamScore), 0);
       score = performanceElement.evaluate(dummyTeamScore);
-      Assert.assertEquals(115, score, 0);
+      assertEquals(115, score, 0);
 
       simpleGoals.put("pump_station", 1.0);
       simpleGoals.put("flags", 1.0);
       simpleGoals.put("flags_rows", 1.0);
       enumGoals.put("robot_type", "rcx");
       dummyTeamScore = new DummyTeamScore(2, 1, simpleGoals, enumGoals);
-      Assert.assertEquals(131, computed.getComputedScore(dummyTeamScore), 0);
+      assertEquals(131, computed.getComputedScore(dummyTeamScore), 0);
       score = performanceElement.evaluate(dummyTeamScore);
-      Assert.assertEquals(216, score, 0);
+      assertEquals(216, score, 0);
 
       simpleGoals.put("pump_station", 1.0);
       simpleGoals.put("flags", 1.0);
       simpleGoals.put("flags_rows", 1.0);
       enumGoals.put("robot_type", "nxt");
       dummyTeamScore = new DummyTeamScore(3, 1, simpleGoals, enumGoals);
-      Assert.assertEquals(0, computed.getComputedScore(dummyTeamScore), 0);
+      assertEquals(0, computed.getComputedScore(dummyTeamScore), 0);
       score = performanceElement.evaluate(dummyTeamScore);
-      Assert.assertEquals(85, score, 0);
+      assertEquals(85, score, 0);
     }
   }
 
@@ -195,9 +199,9 @@ public class ScoreTest {
             found = true;
           }
         }
-        Assert.assertTrue(team
+        assertTrue(found, team
             + " is not scheduled for "
-            + category, found);
+            + category);
       }
     }
 
@@ -205,9 +209,9 @@ public class ScoreTest {
     for (final Map<String, Integer> timeSlot : schedule) {
       final Collection<Integer> teamsSeen = new LinkedList<Integer>();
       for (final Integer team : timeSlot.values()) {
-        Assert.assertFalse(team
+        assertFalse(teamsSeen.contains(team), team
             + " appears twice in a time slot in the schedule: "
-            + timeSlot, teamsSeen.contains(team));
+            + timeSlot);
         teamsSeen.add(team);
       }
     }

@@ -11,15 +11,13 @@ import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.RuleChain;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.TestUtils;
 import fll.db.GenerateDB;
 import fll.util.LogUtils;
@@ -28,22 +26,16 @@ import fll.web.InitializeDatabaseTest;
 import fll.web.IntegrationTestUtils;
 
 /**
- * 
+ * Test for the slideshow code.
  */
+@ExtendWith(IntegrationTestUtils.TomcatRequired.class)
 public class SlideshowTest {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
   private WebDriver selenium;
 
-  /**
-   * Requirements for running tests.
-   */
-  @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by the JUnit framework")
-  @Rule
-  public RuleChain chain = RuleChain.outerRule(new IntegrationTestUtils.TomcatRequired());
-
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     LOGGER.info("Top of setup");
     LogUtils.initializeLogging();
@@ -52,7 +44,7 @@ public class SlideshowTest {
     LOGGER.info("Bottom of setup");
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     selenium.quit();
   }

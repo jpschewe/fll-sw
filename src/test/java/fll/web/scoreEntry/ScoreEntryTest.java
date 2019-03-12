@@ -5,15 +5,17 @@
  */
 package fll.web.scoreEntry;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.text.ParseException;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 
 import fll.Utilities;
@@ -39,15 +41,15 @@ public class ScoreEntryTest {
     public Object getAttribute(final String attr) {
       if (ApplicationAttributes.CHALLENGE_DOCUMENT.equals(attr)) {
         final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/all-elements.xml");
-        Assert.assertNotNull(stream);
+        assertNotNull(stream);
         final Document document = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
-        Assert.assertNotNull(document);
+        assertNotNull(document);
         return document;
       } else if (ApplicationAttributes.CHALLENGE_DESCRIPTION.equals(attr)) {
         final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/all-elements.xml");
-        Assert.assertNotNull(stream);
+        assertNotNull(stream);
         final Document document = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
-        Assert.assertNotNull(document);
+        assertNotNull(document);
         return new ChallengeDescription(document.getDocumentElement());
       } else {
         return null;
@@ -55,7 +57,7 @@ public class ScoreEntryTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
     LogUtils.initializeLogging();
   }
@@ -74,7 +76,7 @@ public class ScoreEntryTest {
     final StringWriter writer = new StringWriter();
 
     ScoreEntry.generateCheckRestrictionsBody(writer, new TestServletContext());
-    Assert.assertTrue(writer.toString().length() > 0);
+    assertTrue(writer.toString().length() > 0);
   }
 
 }
