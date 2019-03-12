@@ -41,9 +41,11 @@ testSets {
 integrationTest.mustRunAfter test
 
 test {
+    useJUnitPlatform()
 	ignoreFailures Boolean.getBoolean("test.ignoreFailures") 
 }
 integrationTest {
+    useJUnitPlatform()
 	ignoreFailures Boolean.getBoolean("test.ignoreFailures") 
 }
 repositories {
@@ -124,8 +126,8 @@ dependencies {
 	compile group: "net.mtu.eggplant", name: "JonsInfra", version: "2.0.0"	
 	
 	testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: project.junit_version
-	testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: project.junit_version
 	testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: project.junit_version
+	testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: project.junit_version
     
     testCompile group: 'org.hamcrest', name: 'hamcrest', version: '2.1'
     
