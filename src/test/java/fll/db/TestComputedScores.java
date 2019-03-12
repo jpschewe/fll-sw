@@ -6,6 +6,10 @@
 
 package fll.db;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,9 +20,8 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.zip.ZipInputStream;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 
 import fll.TestUtils;
@@ -35,7 +38,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  */
 public class TestComputedScores {
 
-  @Before
+  @BeforeEach
   public void setUp() {
     LogUtils.initializeLogging();
   }
@@ -63,7 +66,7 @@ public class TestComputedScores {
     final String database = tempFile.getAbsolutePath();
     try {
       final InputStream dumpFileIS = TestComputedScores.class.getResourceAsStream("data/plymouth-2009-11-21.zip");
-      Assert.assertNotNull("Cannot find test data", dumpFileIS);
+      assertNotNull(dumpFileIS, "Cannot find test data");
 
       connection = Utilities.createFileDataSource(database).getConnection();
 
@@ -82,11 +85,11 @@ public class TestComputedScores {
       selectPrep.setInt(2, teamNumber);
       selectPrep.setInt(3, runNumber);
       rs = selectPrep.executeQuery();
-      Assert.assertNotNull("Error getting performance scores", rs);
-      Assert.assertTrue("No scores found", rs.next());
+      assertNotNull(rs,"Error getting performance scores");
+      assertTrue(rs.next(), "No scores found");
 
       final double computedTotal = performanceElement.evaluate(new DatabaseTeamScore(teamNumber, runNumber, rs));
-      Assert.assertEquals(expectedTotal, computedTotal, 0D);
+      assertEquals(expectedTotal, computedTotal, 0D);
 
     } finally {
       if (!tempFile.delete()) {

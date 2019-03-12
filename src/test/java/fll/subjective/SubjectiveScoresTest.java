@@ -6,6 +6,9 @@
 
 package fll.subjective;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,10 +23,9 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -51,13 +53,13 @@ public class SubjectiveScoresTest {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  @Before
+  @BeforeEach
   public void setUp() {
     LogUtils.initializeLogging();
 
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
   }
 
@@ -73,9 +75,9 @@ public class SubjectiveScoresTest {
   public void testDeleteScores() throws SAXException, SQLException, IOException, ParseException {
     // create database
     final InputStream stream = SubjectiveScoresTest.class.getResourceAsStream("challenge.xml");
-    Assert.assertNotNull(stream);
+    assertNotNull(stream);
     final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
-    Assert.assertNotNull(challengeDocument);
+    assertNotNull(challengeDocument);
 
     final ChallengeDescription challenge = new ChallengeDescription(challengeDocument.getDocumentElement());
 
@@ -96,7 +98,7 @@ public class SubjectiveScoresTest {
       GenerateDB.generateDB(challengeDocument, connection);
       Tournament.createTournament(connection, tournamentName, tournamentName, null);
       Tournament tournament = Tournament.findTournamentByName(connection, tournamentName);
-      Assert.assertNull(Queries.addTeam(connection, teamNumber, "team"
+      assertNull(Queries.addTeam(connection, teamNumber, "team"
           + teamNumber, "org"));
       Queries.addTeamToTournament(connection, teamNumber, tournament.getTournamentID(), division, division);
 
@@ -128,7 +130,7 @@ public class SubjectiveScoresTest {
           scoreCategory = sc;
         }
       }
-      Assert.assertNotNull(scoreCategory);
+      assertNotNull(scoreCategory);
 
       // create subjective table model for the category we're going to edit
       final SubjectiveTableModel tableModel = new SubjectiveTableModel(scoreDocument, scoreCategory, null, null);

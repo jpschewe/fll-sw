@@ -6,16 +6,18 @@
 
 package fll.web.playoff;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.log4j.Logger;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.RuleChain;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoAlertPresentException;
@@ -24,7 +26,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 import org.xml.sax.SAXException;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.TestUtils;
 import fll.db.GenerateDB;
 import fll.util.LogUtils;
@@ -34,6 +35,7 @@ import fll.xml.BracketSortType;
 /**
  * Test the AJAX Brackets
  */
+@ExtendWith(IntegrationTestUtils.TomcatRequired.class)
 public class TestAJAXBrackets {
 
   private static final Logger LOGGER = LogUtils.getLogger();
@@ -48,14 +50,7 @@ public class TestAJAXBrackets {
 
   private WebDriver scoresheetWindow;
 
-  /**
-   * Requirements for running tests.
-   */
-  @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by the JUnit framework")
-  @Rule
-  public RuleChain chain = RuleChain.outerRule(new IntegrationTestUtils.TomcatRequired());
-
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
     selenium = IntegrationTestUtils.createWebDriver();
@@ -67,7 +62,7 @@ public class TestAJAXBrackets {
     scoresheetWindow = IntegrationTestUtils.createWebDriver();
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     selenium.quit();
     bracketsWindow.quit();
@@ -160,9 +155,9 @@ public class TestAJAXBrackets {
         LOGGER.debug("Score text before: "
             + scoreTextBefore);
       }
-      Assert.assertFalse("Should not find score yet '"
+      assertFalse(scoreTextBefore.contains("Score:"), "Should not find score yet '"
           + scoreTextBefore
-          + "'", scoreTextBefore.contains("Score:"));
+          + "'");
 
       // verify
       final Select verifySelect = new Select(scoreEntryWindow.findElement(By.id("select-verify-teamnumber")));
@@ -176,7 +171,7 @@ public class TestAJAXBrackets {
         }
       }
       if (!found) {
-        Assert.fail("Unable to find verification for team 4");
+        fail("Unable to find verification for team 4");
       }
       scoreEntryWindow.findElement(By.id("verify_submit")).click();
 
@@ -198,9 +193,9 @@ public class TestAJAXBrackets {
         LOGGER.debug("Score text after: "
             + scoreTextAfter);
       }
-      Assert.assertTrue("Should find score in '"
+      assertTrue(scoreTextAfter.contains("Score:"), "Should find score in '"
           + scoreTextAfter
-          + "'", scoreTextAfter.contains("Score:"));
+          + "'");
 
     } catch (final IOException | RuntimeException | AssertionError e) {
       LOGGER.fatal(e, e);

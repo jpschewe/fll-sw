@@ -599,10 +599,7 @@ public final class ChallengeParser {
       if (null != src) {
         final URL jar = src.getLocation();
 
-        JarInputStream zip = null;
-        try {
-          zip = new JarInputStream(jar.openStream());
-
+        try (JarInputStream zip = new JarInputStream(jar.openStream())) {
           JarEntry ze = null;
           while ((ze = zip.getNextJarEntry()) != null) {
             final String entryName = ze.getName();
@@ -629,12 +626,9 @@ public final class ChallengeParser {
             }
           }
 
-          zip.close();
         } catch (final IOException e) {
           LOGGER.error("Error reading jar file at: "
               + jar.toString(), e);
-        } finally {
-          IOUtils.closeQuietly(zip);
         }
 
       } else {

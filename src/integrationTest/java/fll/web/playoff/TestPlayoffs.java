@@ -6,22 +6,22 @@
 
 package fll.web.playoff;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.log4j.Logger;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.RuleChain;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.Select;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.TestUtils;
 import fll.db.GenerateDB;
 import fll.util.LogUtils;
@@ -30,26 +30,20 @@ import fll.web.IntegrationTestUtils;
 /**
  * Test things about the playoffs.
  */
+@ExtendWith(IntegrationTestUtils.TomcatRequired.class)
 public class TestPlayoffs {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
   private WebDriver selenium;
 
-  /**
-   * Requirements for running tests.
-   */
-  @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by the JUnit framework")
-  @Rule
-  public RuleChain chain = RuleChain.outerRule(new IntegrationTestUtils.TomcatRequired());
-
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
     selenium = IntegrationTestUtils.createWebDriver();
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     selenium.quit();
   }
@@ -85,7 +79,7 @@ public class TestPlayoffs {
       for (int teamNumber = 0; teamNumber < 4; ++teamNumber) {
         enterTeamScore(teamNumber);
 
-        Assert.assertFalse("Errors: ", IntegrationTestUtils.isElementPresent(selenium, By.name("error")));
+        assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.name("error")), "Errors: ");
       }
 
       // initialize playoffs
@@ -95,15 +89,15 @@ public class TestPlayoffs {
 
       // enter score for teams 3 and 0 with 3 winning
       enterTeamScore(3);
-      Assert.assertFalse("Errors: ", IntegrationTestUtils.isElementPresent(selenium, By.name("error")));
+      assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.name("error")), "Errors: ");
       enterTeamScore(0);
-      Assert.assertFalse("Errors: ", IntegrationTestUtils.isElementPresent(selenium, By.name("error")));
+      assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.name("error")), "Errors: ");
 
       // enter score for teams 2 and 1 with 1 winning
       enterTeamScore(2);
-      Assert.assertFalse("Errors: ", IntegrationTestUtils.isElementPresent(selenium, By.name("error")));
+      assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.name("error")), "Errors: ");
       enterTeamScore(1);
-      Assert.assertFalse("Errors: ", IntegrationTestUtils.isElementPresent(selenium, By.name("error")));
+      assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.name("error")), "Errors: ");
 
       // attempt to enter score for 0
       IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
@@ -113,8 +107,7 @@ public class TestPlayoffs {
       selenium.findElement(By.id("enter_submit")).click();
 
       // check for error message
-      Assert.assertTrue("Should have errors",
-                        IntegrationTestUtils.isElementPresent(selenium, By.id("error-not-advanced")));
+      assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("error-not-advanced")), "Should have errors");
 
       // final String text = selenium.getPageSource();
       // Assert.assertTrue("Should have errors",

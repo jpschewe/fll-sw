@@ -5,6 +5,8 @@
  */
 package fll.db;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,9 +16,8 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 
 import fll.TestUtils;
@@ -32,7 +33,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  */
 public class GenerateDBTest {
 
-  @Before
+  @BeforeEach
   public void setUp() {
     LogUtils.initializeLogging();
   }
@@ -47,9 +48,9 @@ public class GenerateDBTest {
   @Test
   public void testCreateDB() throws SQLException, IOException {
     try (InputStream stream = GenerateDBTest.class.getResourceAsStream("data/challenge-test.xml")) {
-      Assert.assertNotNull(stream);
+      assertNotNull(stream);
       final Document document = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
-      Assert.assertNotNull(document);
+      assertNotNull(document);
 
       final File tempFile = File.createTempFile("flltest", null);
       final String database = tempFile.getAbsolutePath();
