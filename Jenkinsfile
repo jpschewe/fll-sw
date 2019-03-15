@@ -51,7 +51,7 @@ pipeline {
         fllSwGradle('findbugsMain')
         fllSwGradle('findbugsTest')
         fllSwGradle('findbugsIntegrationTest')
-        findbugs defaultEncoding: '', excludePattern: '', failedTotalHigh: '0', healthy: '', includePattern: '', pattern: 'build/reports/findbugs/*.xml', unHealthy: ''
+        findbugs pattern: 'build/reports/findbugs/*.xml', healthy: '0', unHealthy: '', failedTotalHigh: '0'
       }
     }
     
