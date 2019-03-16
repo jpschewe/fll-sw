@@ -14,12 +14,12 @@ import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.text.ParseException;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Document;
 
+import fll.TestUtils;
 import fll.Utilities;
-import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.DummyServletContext;
 import fll.xml.ChallengeDescription;
@@ -28,8 +28,8 @@ import fll.xml.ChallengeParserTest;
 
 /**
  * @author jpschewe
- * @version $Revision$
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 public class ScoreEntryTest {
 
   /**
@@ -55,11 +55,6 @@ public class ScoreEntryTest {
         return null;
       }
     }
-  }
-
-  @BeforeEach
-  public void setUp() {
-    LogUtils.initializeLogging();
   }
 
   /**

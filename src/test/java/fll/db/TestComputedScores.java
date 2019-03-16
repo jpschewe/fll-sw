@@ -20,14 +20,13 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.zip.ZipInputStream;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Document;
 
 import fll.TestUtils;
 import fll.Tournament;
 import fll.Utilities;
-import fll.util.LogUtils;
 import fll.web.playoff.DatabaseTeamScore;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
@@ -36,12 +35,8 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 /**
  * 
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 public class TestComputedScores {
-
-  @BeforeEach
-  public void setUp() {
-    LogUtils.initializeLogging();
-  }
 
   /**
    * Check the score computation that was a problem in 2009 where 0 != 0.

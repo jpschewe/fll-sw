@@ -18,22 +18,20 @@ import java.util.Collection;
 import org.apache.log4j.Logger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Document;
 
+import fll.TestUtils;
 import fll.Utilities;
 import fll.util.LogUtils;
 
 /**
  * Test various aspects of the XML document parsing.
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 public class ChallengeParserTest {
 
   private static final Logger LOGGER = LogUtils.getLogger();
-
-  @BeforeEach
-  public void setUp() {
-    LogUtils.initializeLogging();
-  }
 
   /**
    * Load illegal-restriction.xml and ensure an exception is thrown on the

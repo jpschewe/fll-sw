@@ -19,16 +19,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Document;
 
 import fll.Team;
+import fll.TestUtils;
 import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.db.Queries;
-import fll.util.LogUtils;
 import fll.xml.BracketSortType;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
@@ -40,12 +40,8 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  * 
  * @author jpschewe
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 public class BracketSortTest {
-
-  @BeforeEach
-  public void setUp() {
-    LogUtils.initializeLogging();
-  }
 
   /**
    * Test sorting alphabetically by team name.

@@ -13,22 +13,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Document;
 
+import fll.TestUtils;
 import fll.Utilities;
-import fll.util.LogUtils;
 
 /**
  * Tests for comparing documents.
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 public class DescriptorComparisonTest {
-
-  @BeforeEach
-  public void setUp() {
-    LogUtils.initializeLogging();
-  }
 
   /**
    * Test that a different number of performance goals is caught as an error.

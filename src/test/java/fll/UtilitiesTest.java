@@ -21,25 +21,20 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.opencsv.CSVWriter;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import fll.util.LogUtils;
 
 /**
  * Tests for {@link Utilities}.
  * 
  * @author jpschewe
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 public class UtilitiesTest {
-
-  @BeforeEach
-  public void setUp() {
-    LogUtils.initializeLogging();
-  }
 
   /**
    * Test loading a csv file.

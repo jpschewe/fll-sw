@@ -18,11 +18,12 @@ import java.util.Collection;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+import fll.TestUtils;
 import fll.Utilities;
-import fll.util.LogUtils;
 import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.ChallengeParser;
 import net.mtu.eggplant.xml.XMLUtils;
@@ -30,14 +31,13 @@ import net.mtu.eggplant.xml.XMLUtils;
 /**
  * Test comparing subjective score documents.
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 public class SubjectiveCompareTest {
 
   private Document challengeDocument;
 
   @BeforeEach
   public void setUp() {
-    LogUtils.initializeLogging();
-
     final InputStream stream = SubjectiveCompareTest.class.getResourceAsStream("challenge.xml");
     assertNotNull(stream);
     challengeDocument = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
@@ -72,7 +72,7 @@ public class SubjectiveCompareTest {
                                                                                               scoreDocument,
                                                                                               scoreDocument);
     assertNotNull(diffs);
-    assertTrue( diffs.isEmpty(), "Should not be any differences");
+    assertTrue(diffs.isEmpty(), "Should not be any differences");
   }
 
   /**
@@ -89,7 +89,7 @@ public class SubjectiveCompareTest {
                                                                                               masterDocument,
                                                                                               compareDocument);
     assertNotNull(diffs);
-    assertEquals( 1, diffs.size(), "There be exactly 1 difference: "
+    assertEquals(1, diffs.size(), "There be exactly 1 difference: "
         + diffs);
     final SubjectiveScoreDifference diff = diffs.iterator().next();
     assertEquals("Teamwork", diff.getCategory());
@@ -97,7 +97,7 @@ public class SubjectiveCompareTest {
     assertEquals("DEB_JOHNSON", diff.getJudge());
     assertEquals(793, diff.getTeamNumber());
 
-    assertEquals( DoubleSubjectiveScoreDifference.class, diff.getClass(), "Should be a double difference");
+    assertEquals(DoubleSubjectiveScoreDifference.class, diff.getClass(), "Should be a double difference");
     final DoubleSubjectiveScoreDifference doubleDiff = (DoubleSubjectiveScoreDifference) diff;
     assertEquals(15D, doubleDiff.getMasterValue(), 0D);
     assertEquals(13D, doubleDiff.getCompareValue(), 0D);

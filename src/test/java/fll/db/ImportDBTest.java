@@ -20,23 +20,18 @@ import java.sql.Statement;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Document;
 
 import fll.TestUtils;
 import fll.Utilities;
-import fll.util.LogUtils;
 
 /**
  * @author jpschewe
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 public class ImportDBTest {
-
-  @BeforeEach
-  public void setUp() {
-    LogUtils.initializeLogging();
-  }
 
   /**
    * Test the 2012 plymouth database. Got an error about data truncation.
@@ -71,7 +66,7 @@ public class ImportDBTest {
   @Test
   public void testImportSubjectiveNoShow() throws IOException, SQLException {
     try (InputStream dumpFileIS = ImportDBTest.class.getResourceAsStream("data/mays-20110108-database.flldb")) {
-      assertNotNull( dumpFileIS, "Cannot find test data");
+      assertNotNull(dumpFileIS, "Cannot find test data");
 
       final File tempFile = File.createTempFile("flltest", null);
       final String database = tempFile.getAbsolutePath();
@@ -84,8 +79,8 @@ public class ImportDBTest {
 
         // check that team 8777 has a no show in research
         try (ResultSet rs = stmt.executeQuery("SELECT NoShow FROM research WHERE TeamNumber = 8777")) {
-          assertTrue( rs.next(), "Should have a row");
-          assertTrue( rs.getBoolean(1), "Should have a no show");
+          assertTrue(rs.next(), "Should have a row");
+          assertTrue(rs.getBoolean(1), "Should have a no show");
 
         }
       } finally {
@@ -107,7 +102,7 @@ public class ImportDBTest {
   @Test
   public void testLoadFromDumpIntoNewDB() throws IOException, SQLException {
     try (InputStream dumpFileIS = TestUtils.class.getResourceAsStream("data/testdb.flldb")) {
-      assertNotNull( dumpFileIS, "Cannot find test data");
+      assertNotNull(dumpFileIS, "Cannot find test data");
 
       final File tempFile = File.createTempFile("flltest", null);
       final String database = tempFile.getAbsolutePath();
