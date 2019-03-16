@@ -84,17 +84,16 @@ pipeline {
     always {
       archiveArtifacts artifacts: '*.log,screenshots/,build/reports/,build/distributions/'
             
-      dry pattern: 'build/reports/cpd/cpdCheck.xml'
-      openTasks pattern: '**/*.java,**/*.jsp,**/*.jspf,**/*.xml', excludePattern: 'checkstyle*.xml', high: 'FIXME,HACK', normal: 'TODO'
-      warnings consoleParsers: [[parserName: 'Java Compiler (javac)']]
-      
-      recordIssues qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]], tool: findBugs(pattern: '\'build/reports/findbugs/*.xml\'', useRankAsPriority: true)     
-      //findbugs pattern: 'build/reports/findbugs/*.xml', healthy: '1', unHealthy: '100', failedTotalHigh: '0'
+      recordIssues healthy: 1, tool: cpd(pattern: 'build/reports/cpd/cpdCheck.xml')
+            
+	  recordIssues tool: taskScanner(includePattern: '**/*.java,**/*.jsp,**/*.jspf,**/*.xml', excludePattern: 'checkstyle*.xml', highTags: 'FIXME,HACK', normalTags: 'TODO')
+	        
+      recordIssues tool: java()     
 
-	  // planned call to recordIssues to replace the above plugins     
-	  // it looks like I can do each tool on their own line and perhaps have their own thresholds  
-      // recordIssues healthy: 1, qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]], tools: [findBugs(pattern: '\'build/reports/findbugs/*.xml\'', useRankAsPriority: true), cpd(pattern: 'build/reports/cpd/cpdCheck.xml'), taskScanner(excludePattern: 'checkstyle*.xml', highTags: 'FIXME,HACK', includePattern: '**/*.java,**/*.jsp,**/*.jspf,**/*.xml', normalTags: 'TODO'), java(), javaDoc()], unhealthy: 100
+      recordIssues tool: javadoc()     
       
+      recordIssues tool: findBugs(pattern: 'build/reports/findbugs/*.xml', useRankAsPriority: true), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]     
+
       emailext recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']], 
           to: 'jpschewe@mtu.net',
           subject: '${PROJECT_NAME} - Build # ${BUILD_NUMBER} - ${BUILD_STATUS}!', 
