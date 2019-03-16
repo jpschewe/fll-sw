@@ -23,6 +23,7 @@ import fll.util.LogUtils;
 /**
  * Basic tests of loading pages.
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 @ExtendWith(IntegrationTestUtils.TomcatRequired.class)
 public class WebTest {
 
@@ -32,7 +33,6 @@ public class WebTest {
 
   @BeforeEach
   public void setUp() throws Exception {
-    LogUtils.initializeLogging();
     selenium = IntegrationTestUtils.createWebDriver();
   }
 

@@ -24,6 +24,7 @@ import fll.web.WebTestUtils;
 /**
  * Test that we can get database query results from {@link QueryHandler}.
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 @ExtendWith(IntegrationTestUtils.TomcatRequired.class)
 public class QueryTest {
 
@@ -33,7 +34,6 @@ public class QueryTest {
 
   @BeforeEach
   public void setUp() {
-    LogUtils.initializeLogging();
     selenium = IntegrationTestUtils.createWebDriver();
   }
 

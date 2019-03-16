@@ -28,6 +28,7 @@ import fll.web.IntegrationTestUtils;
 /**
  * Test for the slideshow code.
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 @ExtendWith(IntegrationTestUtils.TomcatRequired.class)
 public class SlideshowTest {
 
@@ -37,11 +38,8 @@ public class SlideshowTest {
 
   @BeforeEach
   public void setUp() throws Exception {
-    LOGGER.info("Top of setup");
-    LogUtils.initializeLogging();
     selenium = IntegrationTestUtils.createWebDriver();
     selenium.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
-    LOGGER.info("Bottom of setup");
   }
 
   @AfterEach

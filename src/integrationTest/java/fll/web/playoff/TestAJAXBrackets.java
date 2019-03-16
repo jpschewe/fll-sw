@@ -35,6 +35,7 @@ import fll.xml.BracketSortType;
 /**
  * Test the AJAX Brackets
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 @ExtendWith(IntegrationTestUtils.TomcatRequired.class)
 public class TestAJAXBrackets {
 
@@ -52,7 +53,6 @@ public class TestAJAXBrackets {
 
   @BeforeEach
   public void setUp() throws Exception {
-    LogUtils.initializeLogging();
     selenium = IntegrationTestUtils.createWebDriver();
 
     bracketsWindow = IntegrationTestUtils.createWebDriver();

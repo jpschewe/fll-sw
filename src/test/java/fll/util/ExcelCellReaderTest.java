@@ -14,20 +14,17 @@ import java.io.InputStream;
 import java.text.ParseException;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+import fll.TestUtils;
 import fll.Utilities;
 
 /**
  * Test for {@link ExcelCellReader}.
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 public class ExcelCellReaderTest {
-
-  @BeforeEach
-  public void setUp() {
-    LogUtils.initializeLogging();
-  }
 
   @Test
   public void testEmptyCells() throws InvalidFormatException, IOException, ParseException {

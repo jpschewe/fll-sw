@@ -11,7 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 
-import org.apache.log4j.Logger;
+import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
 import fll.db.ImportDB;
 import fll.util.LogUtils;
@@ -20,8 +21,6 @@ import fll.util.LogUtils;
  * Some utilities for writing tests.
  */
 public final class TestUtils {
-
-  private static final Logger LOG = LogUtils.getLogger();
 
   /**
    * Root URL for the software with trailing slash.
@@ -58,6 +57,18 @@ public final class TestUtils {
     if (Files.exists(importResult.getImportDirectory()))
       Files.walk(importResult.getImportDirectory()).sorted(Comparator.reverseOrder()).map(Path::toFile)
            .forEach(File::delete);
+  }
+
+  /**
+   * Setup logging before a test.
+   */
+  public static class InitializeLogging implements BeforeTestExecutionCallback {
+
+    @Override
+    public void beforeTestExecution(final ExtensionContext context) throws Exception {
+      LogUtils.initializeLogging();
+    }
+
   }
 
 }

@@ -16,27 +16,21 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Document;
 
 import fll.TestUtils;
 import fll.Utilities;
-import fll.util.LogUtils;
 import fll.xml.ChallengeParser;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Test generating various databases.
  * 
- * @version $Revision$
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 public class GenerateDBTest {
-
-  @BeforeEach
-  public void setUp() {
-    LogUtils.initializeLogging();
-  }
 
   /**
    * Test creating a new database from scratch and creating over an existing

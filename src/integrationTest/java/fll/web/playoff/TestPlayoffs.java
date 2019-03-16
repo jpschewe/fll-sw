@@ -30,6 +30,7 @@ import fll.web.IntegrationTestUtils;
 /**
  * Test things about the playoffs.
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 @ExtendWith(IntegrationTestUtils.TomcatRequired.class)
 public class TestPlayoffs {
 
@@ -39,7 +40,6 @@ public class TestPlayoffs {
 
   @BeforeEach
   public void setUp() throws Exception {
-    LogUtils.initializeLogging();
     selenium = IntegrationTestUtils.createWebDriver();
   }
 

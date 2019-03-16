@@ -31,10 +31,11 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Document;
 
+import fll.TestUtils;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.GenerateDB;
@@ -42,23 +43,18 @@ import fll.db.Queries;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
 import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
-import fll.util.LogUtils;
 import fll.xml.ChallengeParser;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Tests for {@link TournamentSchedule}.
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 public class TournamentScheduleTest {
 
   public static final String RESEARCH_HEADER = "Research";
 
   public static final String TECHNICAL_HEADER = "Technical";
-
-  @BeforeEach
-  public void setUp() {
-    LogUtils.initializeLogging();
-  }
 
   @Test
   public void testForNoSchedule() throws SQLException, UnsupportedEncodingException {

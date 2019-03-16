@@ -23,9 +23,8 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -49,19 +48,10 @@ import net.mtu.eggplant.xml.XMLUtils;
 /**
  * Test editing subjective scores.
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 public class SubjectiveScoresTest {
 
   private static final Logger LOGGER = LogUtils.getLogger();
-
-  @BeforeEach
-  public void setUp() {
-    LogUtils.initializeLogging();
-
-  }
-
-  @AfterEach
-  public void tearDown() {
-  }
 
   /**
    * Try deleting scores and making sure the file can still be uploaded into a

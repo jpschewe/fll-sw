@@ -19,13 +19,14 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-import fll.util.LogUtils;
+import fll.TestUtils;
 import fll.web.InitializeDatabaseTest;
 import fll.web.IntegrationTestUtils;
 
 /**
  * Test editing the tournaments list
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 @ExtendWith(IntegrationTestUtils.TomcatRequired.class)
 public class EditTournamentsTest {
 
@@ -33,7 +34,6 @@ public class EditTournamentsTest {
 
   @BeforeEach
   public void setUp() throws Exception {
-    LogUtils.initializeLogging();
     selenium = IntegrationTestUtils.createWebDriver();
   }
 

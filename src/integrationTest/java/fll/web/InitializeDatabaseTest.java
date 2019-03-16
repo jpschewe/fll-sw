@@ -10,11 +10,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.WebDriver;
 
+import fll.TestUtils;
 import fll.util.LogUtils;
 
 /**
  * Test initializing the database via the web.
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 @ExtendWith(IntegrationTestUtils.TomcatRequired.class)
 public class InitializeDatabaseTest {
 
@@ -24,8 +26,6 @@ public class InitializeDatabaseTest {
 
   @BeforeEach
   public void setUp() {
-    LogUtils.initializeLogging();
-
     selenium = IntegrationTestUtils.createWebDriver();
   }
 

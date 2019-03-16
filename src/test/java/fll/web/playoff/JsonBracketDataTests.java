@@ -23,14 +23,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Document;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Team;
+import fll.TestUtils;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
@@ -39,7 +40,6 @@ import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.util.JsonUtilities;
 import fll.util.JsonUtilities.BracketLeafResultSet;
-import fll.util.LogUtils;
 import fll.xml.BracketSortType;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
@@ -50,15 +50,11 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  * 
  * @author jjkoletar
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 public class JsonBracketDataTests {
   private static final boolean SHOW_ONLY_VERIFIED = true;
 
   private static final boolean SHOW_FINAL_ROUNDS = false;
-
-  @BeforeEach
-  public void setUp() {
-    LogUtils.initializeLogging();
-  }
 
   @Test
   public void testRoundLimits() throws SQLException, ParseException, IOException, InstantiationException,

@@ -23,10 +23,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Document;
 
+import fll.TestUtils;
 import fll.Utilities;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
@@ -38,16 +39,11 @@ import fll.xml.PerformanceScoreCategory;
  * Test score computations.
  * 
  * @author jpschewe
- * @version $Revision$
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 public class ScoreTest {
 
   private static final Logger LOG = LogUtils.getLogger();
-
-  @BeforeEach
-  public void setUp() {
-    LogUtils.initializeLogging();
-  }
 
   private PerformanceScoreCategory loadDocumentAndGetPerformanceElemnt(final InputStream stream) {
     assertNotNull(stream);

@@ -9,18 +9,16 @@ package fll.util;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import fll.TestUtils;
 
 /**
  * Tests for {@link FP}.
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 public class FPTest {
-
-  @BeforeEach
-  public void setUp() {
-    LogUtils.initializeLogging();
-  }
 
   @Test
   public void testIsFinite0() {

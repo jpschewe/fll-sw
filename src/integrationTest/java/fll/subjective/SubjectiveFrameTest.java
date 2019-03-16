@@ -43,6 +43,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -53,7 +54,6 @@ import fll.db.GlobalParameters;
 import fll.db.ImportDB;
 import fll.db.ImportDBTest;
 import fll.db.Queries;
-import fll.util.LogUtils;
 import fll.web.IntegrationTestUtils;
 import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.ChallengeDescription;
@@ -62,6 +62,7 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 /**
  * Some basic tests for the subjective app.
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 public class SubjectiveFrameTest {
 
   private static NoExitSecurityManagerInstaller noExitSecurityManagerInstaller;
@@ -75,7 +76,7 @@ public class SubjectiveFrameTest {
   public static void setUpOnce() {
     FailOnThreadViolationRepaintManager.install();
     noExitSecurityManagerInstaller = NoExitSecurityManagerInstaller.installNoExitSecurityManager(new ExitCallHook() {
-      public void exitCalled(final int status) {        
+      public void exitCalled(final int status) {
         assertEquals(0, status, "Bad exit status");
       }
     });
@@ -91,8 +92,6 @@ public class SubjectiveFrameTest {
 
   @BeforeEach
   public void setUp() throws IOException, SQLException {
-    LogUtils.initializeLogging();
-
     final File tempFile = File.createTempFile("flltest", null);
     database = tempFile.getAbsolutePath();
 
@@ -193,7 +192,7 @@ public class SubjectiveFrameTest {
         final JTableFixture table = window.table();
         if (expectedRowCounts.containsKey(title)) {
           final int expected = expectedRowCounts.get(title);
-          assertEquals( expected, table.rowCount(), "Category "
+          assertEquals(expected, table.rowCount(), "Category "
               + title);
         } else {
           fail("Unknown category '"

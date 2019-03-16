@@ -98,6 +98,7 @@ import io.github.artsok.RepeatedIfExceptionsTest;
 /**
  * Test a full tournament.
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 @ExtendWith(IntegrationTestUtils.TomcatRequired.class)
 public class FullTournamentTest {
 
@@ -116,7 +117,6 @@ public class FullTournamentTest {
    */
   @BeforeEach
   public void setUp() throws Exception {
-    LogUtils.initializeLogging();
     setUp(IntegrationTestUtils.WebDriverType.FIREFOX);
   }
 
