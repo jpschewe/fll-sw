@@ -20,7 +20,6 @@ pipeline {
     stage('Duplicate Code Analysis') {
       steps { 
         fllSwGradle('cpdCheck')
-        dry defaultEncoding: '', healthy: '', pattern: 'build/reports/cpd/cpdCheck.xml', unHealthy: ''
       }     
     }
 
@@ -51,7 +50,6 @@ pipeline {
         fllSwGradle('findbugsMain')
         fllSwGradle('findbugsTest')
         fllSwGradle('findbugsIntegrationTest')
-        findbugs pattern: 'build/reports/findbugs/*.xml', healthy: '1', unHealthy: '100', failedTotalHigh: '0'
       }
     }
     
@@ -85,9 +83,17 @@ pipeline {
   post {
     always {
       archiveArtifacts artifacts: '*.log,screenshots/,build/reports/,build/distributions/'
-                        
-      openTasks defaultEncoding: '', excludePattern: 'checkstyle*.xml,**/ChatServlet.java', healthy: '', high: 'FIXME,HACK', low: '', normal: 'TODO', pattern: '**/*.java,**/*.jsp,**/*.jspf,**/*.xml', unHealthy: ''
-      warnings categoriesPattern: '', consoleParsers: [[parserName: 'Java Compiler (javac)']], defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', messagesPattern: '', unHealthy: ''
+            
+      dry pattern: 'build/reports/cpd/cpdCheck.xml'
+      openTasks pattern: '**/*.java,**/*.jsp,**/*.jspf,**/*.xml', excludePattern: 'checkstyle*.xml', high: 'FIXME,HACK', normal: 'TODO'
+      warnings consoleParsers: [[parserName: 'Java Compiler (javac)']]
+      
+      recordIssues qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]], tool: findBugs(pattern: '\'build/reports/findbugs/*.xml\'', useRankAsPriority: true)     
+      //findbugs pattern: 'build/reports/findbugs/*.xml', healthy: '1', unHealthy: '100', failedTotalHigh: '0'
+
+	  // planned call to recordIssues to replace the above plugins     
+	  // it looks like I can do each tool on their own line and perhaps have their own thresholds  
+      // recordIssues healthy: 1, qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]], tools: [findBugs(pattern: '\'build/reports/findbugs/*.xml\'', useRankAsPriority: true), cpd(pattern: 'build/reports/cpd/cpdCheck.xml'), taskScanner(excludePattern: 'checkstyle*.xml', highTags: 'FIXME,HACK', includePattern: '**/*.java,**/*.jsp,**/*.jspf,**/*.xml', normalTags: 'TODO'), java(), javaDoc()], unhealthy: 100
       
       emailext recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']], 
           to: 'jpschewe@mtu.net',
