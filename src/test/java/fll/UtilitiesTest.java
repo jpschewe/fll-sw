@@ -5,6 +5,9 @@
  */
 package fll;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -18,26 +21,20 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.opencsv.CSVWriter;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import fll.util.LogUtils;
 
 /**
  * Tests for {@link Utilities}.
  * 
  * @author jpschewe
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 public class UtilitiesTest {
-
-  @Before
-  public void setUp() {
-    LogUtils.initializeLogging();
-  }
 
   /**
    * Test loading a csv file.
@@ -72,19 +69,19 @@ public class UtilitiesTest {
       try (Statement stmt = connection.createStatement()) {
         try (ResultSet rs = stmt.executeQuery("SELECT * FROM testtable")) {
           final ResultSetMetaData meta = rs.getMetaData();
-          Assert.assertEquals("Incorrect number of columns", data[0].length, meta.getColumnCount());
+          assertEquals(data[0].length, meta.getColumnCount(), "Incorrect number of columns");
           final int[] columnIndicies = new int[data[0].length];
           for (int i = 0; i < columnIndicies.length; ++i) {
             try {
               columnIndicies[i] = rs.findColumn(data[0][i]);
             } catch (final SQLException sqle) {
-              Assert.fail("Column not found: "
+              fail("Column not found: "
                   + data[0][i]);
             }
           }
           for (int row = 1; rs.next(); ++row) {
             for (int column = 0; column < data[row].length; ++column) {
-              Assert.assertEquals(data[row][column], rs.getString(column
+              assertEquals(data[row][column], rs.getString(column
                   + 1));
             }
           }

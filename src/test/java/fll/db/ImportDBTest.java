@@ -5,6 +5,9 @@
  */
 package fll.db;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -17,24 +20,18 @@ import java.sql.Statement;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Document;
 
 import fll.TestUtils;
 import fll.Utilities;
-import fll.util.LogUtils;
 
 /**
  * @author jpschewe
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 public class ImportDBTest {
-
-  @Before
-  public void setUp() {
-    LogUtils.initializeLogging();
-  }
 
   /**
    * Test the 2012 plymouth database. Got an error about data truncation.
@@ -69,7 +66,7 @@ public class ImportDBTest {
   @Test
   public void testImportSubjectiveNoShow() throws IOException, SQLException {
     try (InputStream dumpFileIS = ImportDBTest.class.getResourceAsStream("data/mays-20110108-database.flldb")) {
-      Assert.assertNotNull("Cannot find test data", dumpFileIS);
+      assertNotNull(dumpFileIS, "Cannot find test data");
 
       final File tempFile = File.createTempFile("flltest", null);
       final String database = tempFile.getAbsolutePath();
@@ -82,8 +79,8 @@ public class ImportDBTest {
 
         // check that team 8777 has a no show in research
         try (ResultSet rs = stmt.executeQuery("SELECT NoShow FROM research WHERE TeamNumber = 8777")) {
-          Assert.assertTrue("Should have a row", rs.next());
-          Assert.assertTrue("Should have a no show", rs.getBoolean(1));
+          assertTrue(rs.next(), "Should have a row");
+          assertTrue(rs.getBoolean(1), "Should have a no show");
 
         }
       } finally {
@@ -105,7 +102,7 @@ public class ImportDBTest {
   @Test
   public void testLoadFromDumpIntoNewDB() throws IOException, SQLException {
     try (InputStream dumpFileIS = TestUtils.class.getResourceAsStream("data/testdb.flldb")) {
-      Assert.assertNotNull("Cannot find test data", dumpFileIS);
+      assertNotNull(dumpFileIS, "Cannot find test data");
 
       final File tempFile = File.createTempFile("flltest", null);
       final String database = tempFile.getAbsolutePath();
@@ -121,7 +118,7 @@ public class ImportDBTest {
         final ZipOutputStream zipOut = new ZipOutputStream(fos);
 
         final Document challengeDocument = GlobalParameters.getChallengeDocument(connection);
-        Assert.assertNotNull(challengeDocument);
+        assertNotNull(challengeDocument);
         DumpDB.dumpDatabase(zipOut, connection, challengeDocument, null);
         fos.close();
 

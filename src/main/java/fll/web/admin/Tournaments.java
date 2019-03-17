@@ -41,9 +41,8 @@ public final class Tournaments {
 
   /**
    * Populate page context with variables for /admin/tournaments.jsp.
-   * 
+   *
    * @param application the application context
-   * @param session the session context
    * @param pageContext populated with variables
    */
   public static void populateContext(final ServletContext application,

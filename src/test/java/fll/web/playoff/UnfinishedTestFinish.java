@@ -6,18 +6,16 @@
 
 package fll.web.playoff;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
 
-import org.junit.experimental.theories.DataPoints;
-import org.junit.experimental.theories.Theories;
-import org.junit.experimental.theories.Theory;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.w3c.dom.Document;
 
 import fll.db.GlobalParameters;
@@ -28,12 +26,14 @@ import fll.xml.ChallengeDescription;
  * {@link Playoff#finishBracket(Connection, ChallengeDescription, int, String)}
  * will finish the unfinished brackets.
  */
-@RunWith(Theories.class)
 public final class UnfinishedTestFinish extends UnfinishedBaseTest {
-  @DataPoints
+
+  /**
+   * @return bracket names for {@link #test(String)}
+   */
   public static String[] names() {
-    return new String[] { UnfinishedBaseTest.unfinished3rdBracketName, UnfinishedBaseTest.unfinished1st3rdBracketName, UnfinishedBaseTest.unfinishedBracketName,
-                          UnfinishedBaseTest.unfinishedLarge };
+    return new String[] { UnfinishedBaseTest.unfinished3rdBracketName, UnfinishedBaseTest.unfinished1st3rdBracketName,
+                          UnfinishedBaseTest.unfinishedBracketName, UnfinishedBaseTest.unfinishedLarge };
   }
 
   /**
@@ -43,7 +43,8 @@ public final class UnfinishedTestFinish extends UnfinishedBaseTest {
    * @throws SQLException internal test error
    * @throws ParseException internal test error
    */
-  @Theory
+  @ParameterizedTest
+  @MethodSource("names")
   public void test(final String bracketName) throws SQLException, ParseException {
     final Document document = GlobalParameters.getChallengeDocument(connection);
     assertThat(document, notNullValue());

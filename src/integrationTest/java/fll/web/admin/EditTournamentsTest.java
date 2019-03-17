@@ -6,51 +6,30 @@
 
 package fll.web.admin;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.RuleChain;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import fll.util.LogUtils;
+import fll.TestUtils;
 import fll.web.InitializeDatabaseTest;
 import fll.web.IntegrationTestUtils;
 
 /**
  * Test editing the tournaments list
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
+@ExtendWith(IntegrationTestUtils.TomcatRequired.class)
 public class EditTournamentsTest {
 
-  private WebDriver selenium;
-
-  /**
-   * Requirements for running tests.
-   */
-  @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by the JUnit framework")
-  @Rule
-  public RuleChain chain = RuleChain.outerRule(new IntegrationTestUtils.TomcatRequired());
-
-  @Before
-  public void setUp() throws Exception {
-    LogUtils.initializeLogging();
-    selenium = IntegrationTestUtils.createWebDriver();
-  }
-
-  @After
-  public void tearDown() {
-    selenium.quit();
-  }
-
   @Test
-  public void testAddTournament() throws IOException, InterruptedException {
+  public void testAddTournament(final WebDriver selenium) throws IOException, InterruptedException {
     try {
       final InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml");
       IntegrationTestUtils.initializeDatabase(selenium, challengeStream);
@@ -68,7 +47,7 @@ public class EditTournamentsTest {
       // get num rows
       final WebElement numRowsEle = selenium.findElement(By.name("numRows"));
       final String numRowsStr = numRowsEle.getAttribute("value");
-      Assert.assertNotNull(numRowsStr);
+      assertNotNull(numRowsStr);
       final int numRows = Integer.parseInt(numRowsStr);
 
       // type in tournament name

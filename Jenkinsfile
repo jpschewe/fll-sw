@@ -20,7 +20,7 @@ pipeline {
     stage('Duplicate Code Analysis') {
       steps { 
         fllSwGradle('cpdCheck')
-        dry defaultEncoding: '', healthy: '', pattern: 'build/reports/cpd/cpdCheck.xml', unHealthy: ''
+        recordIssues tool: cpd(pattern: 'build/reports/cpd/cpdCheck.xml')        
       }     
     }
 
@@ -51,7 +51,7 @@ pipeline {
         fllSwGradle('findbugsMain')
         fllSwGradle('findbugsTest')
         fllSwGradle('findbugsIntegrationTest')
-        findbugs defaultEncoding: '', excludePattern: '', failedTotalHigh: '0', healthy: '', includePattern: '', pattern: 'build/reports/findbugs/*.xml', unHealthy: ''
+        recordIssues tool: findBugs(pattern: 'build/reports/findbugs/*.xml', useRankAsPriority: true), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]            
       }
     }
     
@@ -86,9 +86,12 @@ pipeline {
     always {
       archiveArtifacts artifacts: '*.log,screenshots/,build/reports/,build/distributions/'
                         
-      openTasks defaultEncoding: '', excludePattern: 'checkstyle*.xml,**/ChatServlet.java', healthy: '', high: 'FIXME,HACK', low: '', normal: 'TODO', pattern: '**/*.java,**/*.jsp,**/*.jspf,**/*.xml', unHealthy: ''
-      warnings categoriesPattern: '', consoleParsers: [[parserName: 'Java Compiler (javac)']], defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', messagesPattern: '', unHealthy: ''
-      
+	  recordIssues tool: taskScanner(includePattern: '**/*.java,**/*.jsp,**/*.jspf,**/*.xml', excludePattern: 'checkstyle*.xml', highTags: 'FIXME,HACK', normalTags: 'TODO')
+	        
+      recordIssues tool: java()  
+
+      recordIssues tool: javaDoc()      
+
       emailext recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']], 
           to: 'jpschewe@mtu.net',
           subject: '${PROJECT_NAME} - Build # ${BUILD_NUMBER} - ${BUILD_STATUS}!', 

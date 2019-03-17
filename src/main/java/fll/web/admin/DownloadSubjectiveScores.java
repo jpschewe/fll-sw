@@ -29,8 +29,8 @@ import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.xml.ChallengeDescription;
-import fll.xml.XMLUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
+import net.mtu.eggplant.xml.XMLUtils;
 
 /**
  * Download the subjective scores to be used by mobile apps.

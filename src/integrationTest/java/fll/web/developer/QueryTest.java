@@ -9,15 +9,11 @@ package fll.web.developer;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.RuleChain;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.WebDriver;
 import org.xml.sax.SAXException;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.TestUtils;
 import fll.util.LogUtils;
 import fll.web.IntegrationTestUtils;
@@ -26,32 +22,14 @@ import fll.web.WebTestUtils;
 /**
  * Test that we can get database query results from {@link QueryHandler}.
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
+@ExtendWith(IntegrationTestUtils.TomcatRequired.class)
 public class QueryTest {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  private WebDriver selenium;
-
-  /**
-   * Requirements for running tests.
-   */
-  @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by the JUnit framework")
-  @Rule
-  public RuleChain chain = RuleChain.outerRule(new IntegrationTestUtils.TomcatRequired());
-
-  @Before
-  public void setUp() {
-    LogUtils.initializeLogging();
-    selenium = IntegrationTestUtils.createWebDriver();
-  }
-
-  @After
-  public void tearDown() {
-    selenium.quit();
-  }
-
   @Test
-  public void test0() throws IOException, SAXException, InterruptedException {
+  public void test0(final WebDriver selenium) throws IOException, SAXException, InterruptedException {
     try {
       IntegrationTestUtils.initializeDatabaseFromDump(selenium,
                                                       TestUtils.class.getResourceAsStream("/fll/data/testdb.flldb"));

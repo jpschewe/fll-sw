@@ -5,19 +5,21 @@
  */
 package fll.web.scoreEntry;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.text.ParseException;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Document;
 
+import fll.TestUtils;
 import fll.Utilities;
-import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.DummyServletContext;
 import fll.xml.ChallengeDescription;
@@ -26,8 +28,8 @@ import fll.xml.ChallengeParserTest;
 
 /**
  * @author jpschewe
- * @version $Revision$
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 public class ScoreEntryTest {
 
   /**
@@ -39,25 +41,20 @@ public class ScoreEntryTest {
     public Object getAttribute(final String attr) {
       if (ApplicationAttributes.CHALLENGE_DOCUMENT.equals(attr)) {
         final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/all-elements.xml");
-        Assert.assertNotNull(stream);
+        assertNotNull(stream);
         final Document document = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
-        Assert.assertNotNull(document);
+        assertNotNull(document);
         return document;
       } else if (ApplicationAttributes.CHALLENGE_DESCRIPTION.equals(attr)) {
         final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/all-elements.xml");
-        Assert.assertNotNull(stream);
+        assertNotNull(stream);
         final Document document = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
-        Assert.assertNotNull(document);
+        assertNotNull(document);
         return new ChallengeDescription(document.getDocumentElement());
       } else {
         return null;
       }
     }
-  }
-
-  @Before
-  public void setUp() {
-    LogUtils.initializeLogging();
   }
 
   /**
@@ -74,7 +71,7 @@ public class ScoreEntryTest {
     final StringWriter writer = new StringWriter();
 
     ScoreEntry.generateCheckRestrictionsBody(writer, new TestServletContext());
-    Assert.assertTrue(writer.toString().length() > 0);
+    assertTrue(writer.toString().length() > 0);
   }
 
 }

@@ -8,18 +8,13 @@ package fll.web.slideshow;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.RuleChain;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.TestUtils;
 import fll.db.GenerateDB;
 import fll.util.LogUtils;
@@ -28,43 +23,22 @@ import fll.web.InitializeDatabaseTest;
 import fll.web.IntegrationTestUtils;
 
 /**
- * 
+ * Test for the slideshow code.
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
+@ExtendWith(IntegrationTestUtils.TomcatRequired.class)
 public class SlideshowTest {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  private WebDriver selenium;
-
-  /**
-   * Requirements for running tests.
-   */
-  @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by the JUnit framework")
-  @Rule
-  public RuleChain chain = RuleChain.outerRule(new IntegrationTestUtils.TomcatRequired());
-
-  @Before
-  public void setUp() throws Exception {
-    LOGGER.info("Top of setup");
-    LogUtils.initializeLogging();
-    selenium = IntegrationTestUtils.createWebDriver();
-    selenium.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
-    LOGGER.info("Bottom of setup");
-  }
-
-  @After
-  public void tearDown() {
-    selenium.quit();
-  }
-
   /**
    * Test setting slideshow interval and make sure it doesn't error.
-   * 
+   *
    * @throws IOException
    * @throws InterruptedException
    */
   @Test
-  public void testSlideshowInterval() throws IOException, InterruptedException {
+  public void testSlideshowInterval(final WebDriver selenium) throws IOException, InterruptedException {
     LOGGER.info("Top testSlideshowInterval");
     try {
       final InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml");

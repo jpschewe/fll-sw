@@ -5,6 +5,9 @@
  */
 package fll.xml;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -13,25 +16,21 @@ import java.net.URL;
 import java.util.Collection;
 
 import org.apache.log4j.Logger;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Document;
 
+import fll.TestUtils;
 import fll.Utilities;
 import fll.util.LogUtils;
 
 /**
  * Test various aspects of the XML document parsing.
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 public class ChallengeParserTest {
 
   private static final Logger LOGGER = LogUtils.getLogger();
-
-  @Before
-  public void setUp() {
-    LogUtils.initializeLogging();
-  }
 
   /**
    * Load illegal-restriction.xml and ensure an exception is thrown on the
@@ -44,7 +43,7 @@ public class ChallengeParserTest {
   public void testIllegalRestriction() throws IOException {
     boolean exception = false;
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/illegal-restriction.xml")) {
-      Assert.assertNotNull(stream);
+      assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final RuntimeException e) {
       if (e.getMessage().contains("not found for identity constraint")) {
@@ -53,7 +52,7 @@ public class ChallengeParserTest {
         throw e;
       }
     }
-    Assert.assertTrue("Expected a runtime exception due to a missing reference", exception);
+    assertTrue(exception, "Expected a runtime exception due to a missing reference");
   }
 
   /**
@@ -67,7 +66,7 @@ public class ChallengeParserTest {
   public void testIllegalTiebreakerRef() throws IOException {
     boolean exception = false;
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/illegal-tiebreaker-ref.xml")) {
-      Assert.assertNotNull(stream);
+      assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final ChallengeXMLException e) {
       if (e.getMessage().contains("not found for identity constraint")) {
@@ -76,7 +75,7 @@ public class ChallengeParserTest {
         throw e;
       }
     }
-    Assert.assertTrue("Expected a runtime exception due to a missing reference in a tiebreaker", exception);
+    assertTrue(exception, "Expected a runtime exception due to a missing reference in a tiebreaker");
   }
 
   /**
@@ -87,7 +86,7 @@ public class ChallengeParserTest {
   @Test
   public void testAllElements() throws IOException {
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/all-elements.xml")) {
-      Assert.assertNotNull(stream);
+      assertNotNull(stream);
       try (InputStreamReader reader = new InputStreamReader(stream, Utilities.DEFAULT_CHARSET)) {
         ChallengeParser.parse(reader);
       }
@@ -105,7 +104,7 @@ public class ChallengeParserTest {
   public void testIllegalComputedEnumGoal() throws IOException {
     boolean exception = false;
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/illegal-computed-enumgoal-ref.xml")) {
-      Assert.assertNotNull(stream);
+      assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final ChallengeXMLException e) {
       if (e.getMessage().contains("not found for identity constraint")) {
@@ -114,7 +113,7 @@ public class ChallengeParserTest {
         throw e;
       }
     }
-    Assert.assertTrue("Expected a runtime exception due to a missing reference", exception);
+    assertTrue(exception, "Expected a runtime exception due to a missing reference");
   }
 
   /**
@@ -128,7 +127,7 @@ public class ChallengeParserTest {
   public void testIllegalComputedGoal() throws IOException {
     boolean exception = false;
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/illegal-computed-goal-ref.xml")) {
-      Assert.assertNotNull(stream);
+      assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final ChallengeXMLException e) {
       if (e.getMessage().contains("not found for identity constraint")) {
@@ -137,7 +136,7 @@ public class ChallengeParserTest {
         throw e;
       }
     }
-    Assert.assertTrue("Expected a runtime exception due to a missing reference", exception);
+    assertTrue(exception, "Expected a runtime exception due to a missing reference");
   }
 
   /**
@@ -152,7 +151,7 @@ public class ChallengeParserTest {
     boolean exception = false;
     try (
         InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/subjective-computed-goal-ref-other-category.xml")) {
-      Assert.assertNotNull(stream);
+      assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final ChallengeXMLException e) {
       if (e.getMessage().contains("not found for identity constraint")
@@ -162,7 +161,7 @@ public class ChallengeParserTest {
         throw e;
       }
     }
-    Assert.assertTrue("Expected a runtime exception due to a missing reference", exception);
+    assertTrue(exception, "Expected a runtime exception due to a missing reference");
   }
 
   /**
@@ -175,7 +174,7 @@ public class ChallengeParserTest {
   public void testDuplicateSubjectiveGoals() throws IOException {
     boolean exception = false;
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/subjective-duplicate-goals.xml")) {
-      Assert.assertNotNull(stream);
+      assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final ChallengeXMLException e) {
       if (e.getMessage().contains("Duplicate key value")
@@ -185,7 +184,7 @@ public class ChallengeParserTest {
         throw e;
       }
     }
-    Assert.assertTrue("Expected a runtime exception due to duplicate goals", exception);
+    assertTrue(exception, "Expected a runtime exception due to duplicate goals");
   }
 
   /**
@@ -198,7 +197,7 @@ public class ChallengeParserTest {
   public void testSubjectiveSameGoal() throws IOException {
     try (
         InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/subjective-two-categories-same-goal.xml")) {
-      Assert.assertNotNull(stream);
+      assertNotNull(stream);
       try (InputStreamReader reader = new InputStreamReader(stream, Utilities.DEFAULT_CHARSET)) {
         ChallengeParser.parse(reader);
       }
@@ -215,13 +214,13 @@ public class ChallengeParserTest {
   public void testEnumRawScoreComputed() throws IOException {
     boolean exception = false;
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/enum-using-raw-score-computed.xml")) {
-      Assert.assertNotNull(stream);
+      assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final IllegalScoreTypeUseException e) {
       exception = true;
     }
-    Assert.assertTrue("Expected a runtime exception due a reference to the raw score of an enum in a computed goal polynomial",
-                      exception);
+    assertTrue(exception,
+               "Expected a runtime exception due a reference to the raw score of an enum in a computed goal polynomial");
   }
 
   /**
@@ -235,13 +234,13 @@ public class ChallengeParserTest {
     boolean exception = false;
     try (
         InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/enum-using-raw-score-tiebreaker.xml")) {
-      Assert.assertNotNull(stream);
+      assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final IllegalScoreTypeUseException e) {
       exception = true;
     }
-    Assert.assertTrue("Expected a runtime exception due a reference to the raw score of an enum in a tiebreaker polynomial",
-                      exception);
+    assertTrue(exception,
+               "Expected a runtime exception due a reference to the raw score of an enum in a tiebreaker polynomial");
   }
 
   /**
@@ -255,13 +254,13 @@ public class ChallengeParserTest {
     boolean exception = false;
     try (
         InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/enum-using-raw-score-restriction.xml")) {
-      Assert.assertNotNull(stream);
+      assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final IllegalScoreTypeUseException e) {
       exception = true;
     }
-    Assert.assertTrue("Expected a runtime exception due a reference to the raw score of an enum in a restriction polynomial",
-                      exception);
+    assertTrue(exception,
+               "Expected a runtime exception due a reference to the raw score of an enum in a restriction polynomial");
   }
 
   /**
@@ -273,12 +272,12 @@ public class ChallengeParserTest {
   public void testNonEnumInEnumCond() throws IOException {
     boolean exception = false;
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/non-enum-in-enumcond.xml")) {
-      Assert.assertNotNull(stream);
+      assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final InvalidEnumCondition e) {
       exception = true;
     }
-    Assert.assertTrue("Expected a runtime exception due a reference to non-enum goal inside enumCond", exception);
+    assertTrue(exception, "Expected a runtime exception due a reference to non-enum goal inside enumCond");
   }
 
   /**
@@ -290,12 +289,12 @@ public class ChallengeParserTest {
   public void testInitialValueBelowMin() throws IOException {
     boolean exception = false;
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/initial-value-below-min.xml")) {
-      Assert.assertNotNull(stream);
+      assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final InvalidInitialValue e) {
       exception = true;
     }
-    Assert.assertTrue("Expected a runtime exception due the initial value being below the min", exception);
+    assertTrue(exception, "Expected a runtime exception due the initial value being below the min");
   }
 
   /**
@@ -307,12 +306,12 @@ public class ChallengeParserTest {
   public void testInitialValueAboveMax() throws IOException {
     boolean exception = false;
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/initial-value-above-max.xml")) {
-      Assert.assertNotNull(stream);
+      assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final InvalidInitialValue e) {
       exception = true;
     }
-    Assert.assertTrue("Expected a runtime exception due the initial value being above the max", exception);
+    assertTrue(exception, "Expected a runtime exception due the initial value being above the max");
   }
 
   /**
@@ -325,13 +324,13 @@ public class ChallengeParserTest {
   public void testInitialValueEnumNoMatch() throws IOException {
     boolean exception = false;
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/initial-value-enum-no-match.xml")) {
-      Assert.assertNotNull(stream);
+      assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final InvalidInitialValue e) {
       exception = true;
     }
-    Assert.assertTrue("Expected a runtime exception due the initial value being set to something that doesn't match an enum value",
-                      exception);
+    assertTrue(exception,
+               "Expected a runtime exception due the initial value being set to something that doesn't match an enum value");
   }
 
   /**
@@ -343,7 +342,7 @@ public class ChallengeParserTest {
   public void testVariableRefInTiebreaker() throws IOException {
     boolean exception = false;
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/variableRef-in-tiebreaker.xml")) {
-      Assert.assertNotNull(stream);
+      assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final ChallengeXMLException e) {
       if (e.getMessage().contains("cvc-complex-type")
@@ -353,7 +352,7 @@ public class ChallengeParserTest {
         throw e;
       }
     }
-    Assert.assertTrue("Expected a runtime exception due to a variableRef in a tiebreaker", exception);
+    assertTrue(exception, "Expected a runtime exception due to a variableRef in a tiebreaker");
   }
 
   /**
@@ -365,7 +364,7 @@ public class ChallengeParserTest {
   public void testVariableRefInRestriction() throws IOException {
     boolean exception = false;
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/variableRef-in-restriction.xml")) {
-      Assert.assertNotNull(stream);
+      assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final ChallengeXMLException e) {
       if (e.getMessage().contains("cvc-complex-type")
@@ -374,9 +373,8 @@ public class ChallengeParserTest {
       } else {
         throw e;
       }
-    } finally {
     }
-    Assert.assertTrue("Expected a runtime exception due to a variableRef in a restriction", exception);
+    assertTrue(exception, "Expected a runtime exception due to a variableRef in a restriction");
   }
 
   /**
@@ -388,7 +386,7 @@ public class ChallengeParserTest {
   public void testDuplicateVariable() throws IOException {
     boolean exception = false;
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/duplicate-variable.xml")) {
-      Assert.assertNotNull(stream);
+      assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final ChallengeXMLException e) {
       if (e.getMessage().contains("Duplicate key value")) {
@@ -397,8 +395,7 @@ public class ChallengeParserTest {
         throw e;
       }
     }
-    Assert.assertTrue("Expected a runtime exception due to two variables having the same name in a computed goal.",
-                      exception);
+    assertTrue(exception, "Expected a runtime exception due to two variables having the same name in a computed goal.");
   }
 
   /**
@@ -408,7 +405,7 @@ public class ChallengeParserTest {
    */
   @Test
   public void testAllDescriptors() throws IOException {
-    final Collection<URL> urls = XMLUtils.getAllKnownChallengeDescriptorURLs();
+    final Collection<URL> urls = ChallengeParser.getAllKnownChallengeDescriptorURLs();
 
     for (final URL u : urls) {
       LOGGER.info("Challenge: "
@@ -431,7 +428,7 @@ public class ChallengeParserTest {
   @Test
   public void testComputedGoalReference() throws IOException {
     try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/computed-goal-reference.xml")) {
-      Assert.assertNotNull(stream);
+      assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     }
   }
@@ -446,12 +443,12 @@ public class ChallengeParserTest {
     boolean exception = false;
     try (
         InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/computed-goal-circular-reference.xml")) {
-      Assert.assertNotNull(stream);
+      assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
     } catch (final CircularComputedGoalException e) {
       exception = true;
     }
-    Assert.assertTrue("Expected an exception due to circular references.", exception);
+    assertTrue(exception, "Expected an exception due to circular references.");
   }
 
 }

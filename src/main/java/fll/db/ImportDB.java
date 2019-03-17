@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -37,6 +38,7 @@ import java.util.zip.ZipInputStream;
 import javax.annotation.Nonnull;
 import javax.sql.DataSource;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -59,8 +61,6 @@ import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
-import fll.xml.XMLUtils;
-import net.mtu.eggplant.io.IOUtils;
 import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -363,7 +363,10 @@ public final class ImportDB {
       } else if (name.endsWith(".csv")) {
         final String tablename = name.substring(0, name.indexOf(".csv")).toLowerCase();
         final Reader reader = new InputStreamReader(zipfile, Utilities.DEFAULT_CHARSET);
-        final String content = IOUtils.readIntoString(reader);
+
+        final StringWriter writer = new StringWriter();
+        IOUtils.copy(reader, writer);
+        final String content = writer.toString();
         tableData.put(tablename, content);
       } else if (name.endsWith(".types")) {
         final String tablename = name.substring(0, name.indexOf(".types")).toLowerCase();
@@ -1186,7 +1189,7 @@ public final class ImportDB {
       tablesToModify.add("FinalScores");
       tablesToModify.add("Performance");
       tablesToModify.add("PlayoffData");
-      tablesToModify.addAll(XMLUtils.getSubjectiveCategoryNames(challengeDocument));
+      tablesToModify.addAll(ChallengeParser.getSubjectiveCategoryNames(challengeDocument));
       for (final String table : tablesToModify) {
         stringsToInts = connection.prepareStatement(String.format("UPDATE %s SET Tournament = ? WHERE Tournament = ?",
                                                                   table));

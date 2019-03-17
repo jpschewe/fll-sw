@@ -43,7 +43,7 @@ public class Goal extends AbstractGoal {
     mMultiplier = Double.valueOf(ele.getAttribute(MULTIPLIER_ATTRIBUTE));
     mInitialValue = Double.valueOf(ele.getAttribute(INITIAL_VALUE_ATTRIBUTE));
 
-    mScoreType = XMLUtils.getScoreType(ele);
+    mScoreType = ChallengeParser.getScoreType(ele);
 
     if (ele.hasAttribute(REQUIRED_ATTRIBUTE)) {
       mRequired = Boolean.valueOf(ele.getAttribute(REQUIRED_ATTRIBUTE));
@@ -287,7 +287,7 @@ public class Goal extends AbstractGoal {
     }
     ele.setAttribute(INITIAL_VALUE_ATTRIBUTE, Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mInitialValue));
 
-    ele.setAttribute(XMLUtils.SCORE_TYPE_ATTRIBUTE, mScoreType.toXmlString());
+    ele.setAttribute(ChallengeParser.SCORE_TYPE_ATTRIBUTE, mScoreType.toXmlString());
     ele.setAttribute(REQUIRED_ATTRIBUTE, Boolean.toString(mRequired));
 
     final List<RubricRange> rubric = getRubric();

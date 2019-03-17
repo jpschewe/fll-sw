@@ -51,9 +51,9 @@ import fll.util.LogUtils;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.ChallengeXMLException;
-import fll.xml.XMLUtils;
 import net.mtu.eggplant.util.BasicFileFilter;
 import net.mtu.eggplant.util.gui.GraphicsUtils;
+import net.mtu.eggplant.xml.XMLUtils;
 
 /**
  * Frame that the challenge description editor lives in.

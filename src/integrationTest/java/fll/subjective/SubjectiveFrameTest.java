@@ -6,6 +6,11 @@
 
 package fll.subjective;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -33,12 +38,12 @@ import org.fest.swing.fixture.JTabbedPaneFixture;
 import org.fest.swing.fixture.JTableFixture;
 import org.fest.swing.security.ExitCallHook;
 import org.fest.swing.security.NoExitSecurityManagerInstaller;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -49,7 +54,6 @@ import fll.db.GlobalParameters;
 import fll.db.ImportDB;
 import fll.db.ImportDBTest;
 import fll.db.Queries;
-import fll.util.LogUtils;
 import fll.web.IntegrationTestUtils;
 import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.ChallengeDescription;
@@ -58,21 +62,22 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 /**
  * Some basic tests for the subjective app.
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 public class SubjectiveFrameTest {
 
   private static NoExitSecurityManagerInstaller noExitSecurityManagerInstaller;
 
-  @AfterClass
+  @AfterAll
   public static void tearDownOnce() {
     noExitSecurityManagerInstaller.uninstall();
   }
 
-  @BeforeClass
+  @BeforeAll
   public static void setUpOnce() {
     FailOnThreadViolationRepaintManager.install();
     noExitSecurityManagerInstaller = NoExitSecurityManagerInstaller.installNoExitSecurityManager(new ExitCallHook() {
       public void exitCalled(final int status) {
-        Assert.assertEquals("Bad exit status", 0, status);
+        assertEquals(0, status, "Bad exit status");
       }
     });
   }
@@ -85,16 +90,14 @@ public class SubjectiveFrameTest {
 
   private Document document;
 
-  @Before
+  @BeforeEach
   public void setUp() throws IOException, SQLException {
-    LogUtils.initializeLogging();
-
     final File tempFile = File.createTempFile("flltest", null);
     database = tempFile.getAbsolutePath();
 
     try (Connection connection = Utilities.createFileDataSource(database).getConnection();
         InputStream dumpFileIS = ImportDBTest.class.getResourceAsStream("data/plymouth-2009-11-21.zip")) {
-      Assert.assertNotNull("Cannot find test data", dumpFileIS);
+      assertNotNull(dumpFileIS, "Cannot find test data");
 
       final ImportDB.ImportResult importResult = ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS),
                                                                                 connection);
@@ -116,9 +119,9 @@ public class SubjectiveFrameTest {
           }
         }
       }
-      Assert.assertTrue("Could find tournament "
+      assertTrue(tournamentID != -1, "Could find tournament "
           + tournamentName
-          + " in database dump", tournamentID != -1);
+          + " in database dump");
       Queries.setCurrentTournament(connection, tournamentID);
 
       // create the subjective datafile
@@ -153,7 +156,7 @@ public class SubjectiveFrameTest {
     }
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     if (null != window) {
       window.cleanUp();
@@ -189,10 +192,10 @@ public class SubjectiveFrameTest {
         final JTableFixture table = window.table();
         if (expectedRowCounts.containsKey(title)) {
           final int expected = expectedRowCounts.get(title);
-          Assert.assertEquals("Category "
-              + title, expected, table.rowCount());
+          assertEquals(expected, table.rowCount(), "Category "
+              + title);
         } else {
-          Assert.fail("Unknown category '"
+          fail("Unknown category '"
               + title
               + "'");
         }
@@ -224,7 +227,7 @@ public class SubjectiveFrameTest {
       final int colIdx = table.columnIndexFor("Structural");
       final TableCell dataCell = TableCell.row(teamCell.row).column(colIdx);
       table.enterValue(dataCell, "10");
-      Assert.assertEquals("10", table.valueAt(dataCell));
+      assertEquals("10", table.valueAt(dataCell));
 
       window.button(JButtonMatcher.withText("Quit")).click();
       final JOptionPaneFixture optionPane = JOptionPaneFinder.findOptionPane().using(window.robot);
@@ -253,7 +256,7 @@ public class SubjectiveFrameTest {
       final TableCell dataCell = TableCell.row(teamCell.row).column(colIdx);
       final String prevValue = table.valueAt(dataCell);
       table.enterValue(dataCell, "50");
-      Assert.assertEquals("Value should have reverted", prevValue, table.valueAt(dataCell));
+      assertEquals(prevValue, table.valueAt(dataCell), "Value should have reverted");
 
       window.button(JButtonMatcher.withText("Quit")).click();
       final JOptionPaneFixture optionPane = JOptionPaneFinder.findOptionPane().using(window.robot);
@@ -287,7 +290,7 @@ public class SubjectiveFrameTest {
       table.click(dataCell, MouseButton.LEFT_BUTTON);
       window.robot.enterText("1");
       table.pressAndReleaseKey(KeyPressInfo.keyCode(KeyEvent.VK_TAB));
-      Assert.assertEquals("Value should have been overwritten", "1", table.valueAt(dataCell));
+      assertEquals("1", table.valueAt(dataCell), "Value should have been overwritten");
 
       window.button(JButtonMatcher.withText("Quit")).click();
       final JOptionPaneFixture optionPane = JOptionPaneFinder.findOptionPane().using(window.robot);
@@ -324,10 +327,10 @@ public class SubjectiveFrameTest {
         table.click(dataCell, MouseButton.LEFT_BUTTON);
         table.pressAndReleaseKey(KeyPressInfo.keyCode(KeyEvent.VK_BACK_SPACE));
         table.pressAndReleaseKey(KeyPressInfo.keyCode(KeyEvent.VK_TAB));
-        Assert.assertEquals("Value should have been overwritten row: "
+        assertEquals("", table.valueAt(dataCell), "Value should have been overwritten row: "
             + dataCell.row
             + " column: "
-            + dataCell.column, "", table.valueAt(dataCell));
+            + dataCell.column);
       }
 
       window.button(JButtonMatcher.withText("Quit")).click();

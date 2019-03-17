@@ -18,10 +18,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
-import net.mtu.eggplant.util.ComparisonUtils;
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
-import net.mtu.eggplant.xml.XMLUtils;
-
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -31,6 +27,9 @@ import fll.Utilities;
 import fll.util.LogUtils;
 import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.ChallengeParser;
+import net.mtu.eggplant.util.ComparisonUtils;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
+import net.mtu.eggplant.xml.XMLUtils;
 
 /**
  * Utils for the subjective scoring application.
@@ -96,7 +95,7 @@ public final class SubjectiveUtils {
 
       compareZipfile.close();
 
-      if (!fll.xml.XMLUtils.compareDocuments(masterChallengeDoc, compareChallengeDoc)) {
+      if (!XMLUtils.compareDocuments(masterChallengeDoc, compareChallengeDoc)) {
         return null;
       } else {
         return compareScoreDocuments(masterChallengeDoc, masterScoreDocument, compareScoreDocument);
@@ -174,7 +173,7 @@ public final class SubjectiveUtils {
           + categoryName);
     }
 
-    final Element categoryDescription = fll.xml.XMLUtils.getSubjectiveCategoryByName(challengeDocument, categoryName);
+    final Element categoryDescription = fll.xml.ChallengeParser.getSubjectiveCategoryByName(challengeDocument, categoryName);
     if (null == categoryDescription) {
       throw new RuntimeException(
                                  "Cannot find subjective category description for category in score document category: "
@@ -242,7 +241,7 @@ public final class SubjectiveUtils {
         final Element masterSubscoreElement = getSubscoreElement(masterScore, goalName);
         final Element compareSubscoreElement = getSubscoreElement(compareScore, goalName);
 
-        if (fll.xml.XMLUtils.isEnumeratedGoal(goalDescription)) {
+        if (fll.xml.ChallengeParser.isEnumeratedGoal(goalDescription)) {
           final String masterValueStr = XMLUtils.getStringAttributeValue(masterSubscoreElement, "value");
           final String compareValueStr = XMLUtils.getStringAttributeValue(compareSubscoreElement, "value");
           if (!ComparisonUtils.safeEquals(masterValueStr, compareValueStr)) {
