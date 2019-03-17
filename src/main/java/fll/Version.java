@@ -18,7 +18,7 @@ import fll.util.LogUtils;
 
 /**
  * Get version information about the FLL software.
- * 
+ *
  * @author jpschewe
  */
 public final class Version {
@@ -29,7 +29,7 @@ public final class Version {
 
   private static final String VERSION;
   static {
-    final InputStream stream = Version.class.getResourceAsStream("/fll/resources/version.properties");
+    final InputStream stream = Version.class.getResourceAsStream("/fll/resources/git.properties");
     if (null == stream) {
       LOG.error("Unable to find version.properties!");
       VERSION = "NO-PROPERTIES-FILE";
@@ -39,7 +39,7 @@ public final class Version {
       String version;
       try {
         versionProps.load(stream);
-        version = versionProps.getProperty("version", "NO-PROPERTY");
+        version = versionProps.getProperty("git.build.version", "NO-PROPERTY");
       } catch (final IOException ioe) {
         LOG.error("Error loading version properties", ioe);
         version = "EXCEPTION";
@@ -80,7 +80,7 @@ public final class Version {
 
   /**
    * Get the version of the software being used.
-   * 
+   *
    * @return the version
    */
   public static String getVersion() {

@@ -5,6 +5,9 @@ buildscript {
         jcenter()
     }
     dependencies {
+	    classpath group: 'com.cinnober.gradle', name: 'semver-git', version: '2.4.0'
+    }    
+    dependencies {
         classpath 'org.unbroken-dome.gradle-plugins:gradle-testsets-plugin:1.4.5'
         classpath 'org.kordamp:markdown-gradle-plugin:1.2.0'
     	classpath 'edu.sc.seis.gradle:launch4j:2.4.4'
@@ -21,8 +24,21 @@ plugins {
 	id 'findbugs'
   	id "de.aaschmid.cpd" version "1.2"
   	id 'edu.sc.seis.launch4j' version '2.4.4'
-    id 'com.palantir.git-version' version '0.11.0'
+    id 'com.palantir.git-version' version '0.11.0' // adds printVersion task
 	id 'net.saliman.cobertura' version '2.6.0'
+	id "com.gorylenko.gradle-git-properties" version "2.0.0"
+}
+
+// needs to use old plugin mechanism otherwise I can't set the extra properties
+ext.nextVersion = "patch"
+ext.snapshotSuffix = "beta.<count>+g<sha><dirty>"
+// optionally: ext.dirtyMarker = "-dirty" (default) replaces <dirty> in snapshotSuffix
+// optionally: ext.gitDescribeArgs = '--match *[0-9].[0-9]*.[0-9]*' (default) or other arguments for git describe.
+apply plugin: 'com.cinnober.gradle.semver-git'
+
+repositories {
+    mavenLocal()
+    jcenter()
 }
 
 configurations {
@@ -69,12 +85,10 @@ ext {
 	jspPackage = "fll.jsp"
 
     mainClassName = 'fll.Launcher'
-    
-    versionDetails = versionDetails()
 }
 
+
 group = 'fll'
-version = project.versionDetails.lastTag + "." + project.versionDetails.commitDistance
 
 dependencies {
     implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: project.tomcat_version
@@ -366,6 +380,11 @@ task findbugsIntegrationTestHtml(type: FindBugs, dependsOn: [integrationTestClas
 distZip.dependsOn findbugsIntegrationTestHtml
 distTar.dependsOn findbugsIntegrationTestHtml
 
+gitProperties {
+    gitPropertiesDir = "${buildDir}/resources/main/fll/resources"
+}
+
+/*
 task writeVersionProperties(type: WriteProperties) {
 	outputFile = new File(project.buildDir, "resources/main/fll/resources/version.properties")
 	property("version", project.version)
@@ -377,6 +396,7 @@ task writeVersionProperties(type: WriteProperties) {
 	property("isCleanTag", String.valueOf(project.versionDetails.isCleanTag))
 }
 classes.dependsOn writeVersionProperties
+*/
 
 task writeLaunchJar(type: Jar) {
 	destinationDir = project.buildDir
