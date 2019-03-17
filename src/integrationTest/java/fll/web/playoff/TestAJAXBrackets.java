@@ -43,8 +43,6 @@ public class TestAJAXBrackets {
 
   public static final String JS_EVAL_TIMEOUT = "10000";
 
-  private WebDriver selenium;
-
   private WebDriver bracketsWindow;
 
   private WebDriver scoreEntryWindow;
@@ -53,8 +51,6 @@ public class TestAJAXBrackets {
 
   @BeforeEach
   public void setUp() throws Exception {
-    selenium = IntegrationTestUtils.createWebDriver();
-
     bracketsWindow = IntegrationTestUtils.createWebDriver();
 
     scoreEntryWindow = IntegrationTestUtils.createWebDriver();
@@ -64,14 +60,19 @@ public class TestAJAXBrackets {
 
   @AfterEach
   public void tearDown() {
-    selenium.quit();
-    bracketsWindow.quit();
-    scoreEntryWindow.quit();
-    scoresheetWindow.quit();
+    if (null != bracketsWindow) {
+      bracketsWindow.quit();
+    }
+    if (null != scoreEntryWindow) {
+      scoreEntryWindow.quit();
+    }
+    if (null != scoresheetWindow) {
+      scoresheetWindow.quit();
+    }
   }
 
   @Test
-  public void testAJAXBracketsInFull() throws IOException, SAXException, InterruptedException {
+  public void testAJAXBracketsInFull(final WebDriver selenium) throws IOException, SAXException, InterruptedException {
     try {
       // Setup our playoffs
       final InputStream challenge = TestAJAXBrackets.class.getResourceAsStream("data/very-simple.xml");

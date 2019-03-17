@@ -9,8 +9,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 
 import org.apache.log4j.Logger;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.WebDriver;
@@ -29,25 +27,14 @@ public class WebTest {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  private WebDriver selenium;
-
-  @BeforeEach
-  public void setUp() throws Exception {
-    selenium = IntegrationTestUtils.createWebDriver();
-  }
-
-  @AfterEach
-  public void tearDown() {
-    selenium.quit();
-  }
-
   /**
    * Basic load of the pages.
-   * 
+   *
    * @throws InterruptedException
    */
   @Test
-  public void testPages() throws SAXException, MalformedURLException, IOException, InterruptedException {
+  public void testPages(final WebDriver selenium)
+      throws SAXException, MalformedURLException, IOException, InterruptedException {
     try {
       final String[] pages = new String[] { //
                                             "", //
@@ -86,12 +73,12 @@ public class WebTest {
 
   /**
    * Test changing tournaments to DUMMY and then back to State.
-   * 
+   *
    * @throws IOException
    * @throws InterruptedException
    */
   @Test
-  public void testChangeTournament() throws IOException, InterruptedException {
+  public void testChangeTournament(final WebDriver selenium) throws IOException, InterruptedException {
     try {
       IntegrationTestUtils.initializeDatabaseFromDump(selenium,
                                                       TestUtils.class.getResourceAsStream("/fll/data/testdb.flldb"));

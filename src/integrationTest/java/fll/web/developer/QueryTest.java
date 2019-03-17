@@ -9,8 +9,6 @@ package fll.web.developer;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.WebDriver;
@@ -30,20 +28,8 @@ public class QueryTest {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  private WebDriver selenium;
-
-  @BeforeEach
-  public void setUp() {
-    selenium = IntegrationTestUtils.createWebDriver();
-  }
-
-  @AfterEach
-  public void tearDown() {
-    selenium.quit();
-  }
-
   @Test
-  public void test0() throws IOException, SAXException, InterruptedException {
+  public void test0(final WebDriver selenium) throws IOException, SAXException, InterruptedException {
     try {
       IntegrationTestUtils.initializeDatabaseFromDump(selenium,
                                                       TestUtils.class.getResourceAsStream("/fll/data/testdb.flldb"));
