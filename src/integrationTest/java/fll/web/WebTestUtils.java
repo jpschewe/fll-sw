@@ -6,6 +6,11 @@
 
 package fll.web;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URL;
@@ -14,7 +19,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 
-import org.junit.Assert;
 import org.xml.sax.SAXException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -78,7 +82,7 @@ public final class WebTestUtils {
       try (Writer writer = Files.newBufferedWriter(output, Utilities.DEFAULT_CHARSET)) {
         writer.write(text);
       }
-      Assert.fail("Error loading page: "
+      fail("Error loading page: "
           + page.getUrl()
           + " code: "
           + code
@@ -115,11 +119,11 @@ public final class WebTestUtils {
     // always login first
     final Page loginPage = conversation.getPage(TestUtils.URL_ROOT
         + "login.jsp");
-    Assert.assertTrue("Received non-HTML response from web server", loginPage.isHtmlPage());
+    assertTrue(loginPage.isHtmlPage(), "Received non-HTML response from web server");
 
     final HtmlPage loginHtml = (HtmlPage) loginPage;
     HtmlForm form = loginHtml.getFormByName("login");
-    Assert.assertNotNull("Cannot find login form", form);
+    assertNotNull(form, "Cannot find login form");
 
     final HtmlTextInput userTextField = form.getInputByName("user");
     userTextField.setValueAttribute(IntegrationTestUtils.TEST_USERNAME);
@@ -138,8 +142,8 @@ public final class WebTestUtils {
     } else {
       correctAddress = true;
     }
-    Assert.assertTrue("Unexpected URL after login: "
-        + address, correctAddress);
+    assertTrue(correctAddress, "Unexpected URL after login: "
+        + address);
 
     return conversation;
   }
@@ -163,7 +167,7 @@ public final class WebTestUtils {
       try (Writer writer = Files.newBufferedWriter(output, Utilities.DEFAULT_CHARSET)) {
         writer.write(text);
       }
-      Assert.fail("Error JSON from QueryHandler: "
+      fail("Error JSON from QueryHandler: "
           + response.getUrl()
           + " Contents of error page written to: "
           + output.toAbsolutePath());
@@ -173,8 +177,8 @@ public final class WebTestUtils {
 
     final ObjectMapper jsonMapper = new ObjectMapper();
     QueryHandler.ResultData result = jsonMapper.readValue(responseData, QueryHandler.ResultData.class);
-    Assert.assertNull("SQL Error: "
-        + result.getError(), result.getError());
+    assertNull(result.getError(), "SQL Error: "
+        + result.getError());
 
     return result;
   }

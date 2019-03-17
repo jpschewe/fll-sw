@@ -6,26 +6,25 @@
 
 package fll.util;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+import fll.TestUtils;
 import fll.Utilities;
 
 /**
  * Test for {@link ExcelCellReader}.
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 public class ExcelCellReaderTest {
-
-  @Before
-  public void setUp() {
-    LogUtils.initializeLogging();
-  }
 
   @Test
   public void testEmptyCells() throws InvalidFormatException, IOException, ParseException {
@@ -43,13 +42,13 @@ public class ExcelCellReaderTest {
         final Number lineNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(values[0]);
         if (19 == lineNumber.intValue()) {
           found = true;
-          Assert.assertNull("line 19 should have null for column 2", values[2]);
+          assertNull(values[2], "line 19 should have null for column 2");
         }
       }
     }
-    Assert.assertTrue("Can't find line 19", found);
+    assertTrue(found, "Can't find line 19");
   }
-  
+
   @Test
   public void testEmptyFirstCell() throws InvalidFormatException, IOException, ParseException {
     final InputStream stream = ExcelCellReaderTest.class.getResourceAsStream("data/excel-test.xls");
@@ -66,11 +65,11 @@ public class ExcelCellReaderTest {
         final Number lineNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(values[1]);
         if (3 == lineNumber.intValue()) {
           found = true;
-          Assert.assertNull("line 3 should have null for column 1", values[0]);
+          assertNull(values[0], "line 3 should have null for column 1");
         }
       }
     }
-    Assert.assertTrue("Can't find line 3, null first cell messed things up", found);    
+    assertTrue(found, "Can't find line 3, null first cell messed things up");
   }
 
   /**
@@ -92,8 +91,8 @@ public class ExcelCellReaderTest {
           continue;
         }
         final String divStr = values[4];
-        Assert.assertTrue("Found decimal point line: "
-            + values[0], -1 == divStr.indexOf('.'));
+        assertTrue(-1 == divStr.indexOf('.'), "Found decimal point line: "
+            + values[0]);
       }
     }
 

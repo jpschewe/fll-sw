@@ -90,8 +90,8 @@ import fll.web.playoff.ScoresheetGenerator;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
-import fll.xml.XMLUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
+import net.mtu.eggplant.xml.XMLUtils;
 
 /**
  * Tournament schedule. Can parse the schedule from a spreadsheet or CSV file.

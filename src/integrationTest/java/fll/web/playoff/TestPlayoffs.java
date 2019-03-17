@@ -6,22 +6,20 @@
 
 package fll.web.playoff;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.log4j.Logger;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.RuleChain;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.Select;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.TestUtils;
 import fll.db.GenerateDB;
 import fll.util.LogUtils;
@@ -30,40 +28,22 @@ import fll.web.IntegrationTestUtils;
 /**
  * Test things about the playoffs.
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
+@ExtendWith(IntegrationTestUtils.TomcatRequired.class)
 public class TestPlayoffs {
 
   private static final Logger LOGGER = LogUtils.getLogger();
-
-  private WebDriver selenium;
-
-  /**
-   * Requirements for running tests.
-   */
-  @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "Used by the JUnit framework")
-  @Rule
-  public RuleChain chain = RuleChain.outerRule(new IntegrationTestUtils.TomcatRequired());
-
-  @Before
-  public void setUp() throws Exception {
-    LogUtils.initializeLogging();
-    selenium = IntegrationTestUtils.createWebDriver();
-  }
-
-  @After
-  public void tearDown() {
-    selenium.quit();
-  }
 
   /**
    * Test that when trying to enter a score for a team that hasn't advanced to a
    * particular playoff round results in an error message and the user being
    * sent back to the select team page.
-   * 
+   *
    * @throws IOException
    * @throws InterruptedException
    */
   @Test
-  public void testNotAdvanced() throws IOException, InterruptedException {
+  public void testNotAdvanced(final WebDriver selenium) throws IOException, InterruptedException {
     try {
       // initialize database using simple challenge descriptor that just has 1
       // goal from 1 - 100
@@ -83,9 +63,9 @@ public class TestPlayoffs {
 
       // enter 1 score for all teams equal to their team number
       for (int teamNumber = 0; teamNumber < 4; ++teamNumber) {
-        enterTeamScore(teamNumber);
+        enterTeamScore(selenium, teamNumber);
 
-        Assert.assertFalse("Errors: ", IntegrationTestUtils.isElementPresent(selenium, By.name("error")));
+        assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.name("error")), "Errors: ");
       }
 
       // initialize playoffs
@@ -94,16 +74,16 @@ public class TestPlayoffs {
       IntegrationTestUtils.assertNoException(selenium);
 
       // enter score for teams 3 and 0 with 3 winning
-      enterTeamScore(3);
-      Assert.assertFalse("Errors: ", IntegrationTestUtils.isElementPresent(selenium, By.name("error")));
-      enterTeamScore(0);
-      Assert.assertFalse("Errors: ", IntegrationTestUtils.isElementPresent(selenium, By.name("error")));
+      enterTeamScore(selenium, 3);
+      assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.name("error")), "Errors: ");
+      enterTeamScore(selenium, 0);
+      assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.name("error")), "Errors: ");
 
       // enter score for teams 2 and 1 with 1 winning
-      enterTeamScore(2);
-      Assert.assertFalse("Errors: ", IntegrationTestUtils.isElementPresent(selenium, By.name("error")));
-      enterTeamScore(1);
-      Assert.assertFalse("Errors: ", IntegrationTestUtils.isElementPresent(selenium, By.name("error")));
+      enterTeamScore(selenium, 2);
+      assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.name("error")), "Errors: ");
+      enterTeamScore(selenium, 1);
+      assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.name("error")), "Errors: ");
 
       // attempt to enter score for 0
       IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
@@ -113,8 +93,7 @@ public class TestPlayoffs {
       selenium.findElement(By.id("enter_submit")).click();
 
       // check for error message
-      Assert.assertTrue("Should have errors",
-                        IntegrationTestUtils.isElementPresent(selenium, By.id("error-not-advanced")));
+      assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("error-not-advanced")), "Should have errors");
 
       // final String text = selenium.getPageSource();
       // Assert.assertTrue("Should have errors",
@@ -132,7 +111,9 @@ public class TestPlayoffs {
     }
   }
 
-  private void enterTeamScore(final int teamNumber) throws IOException, InterruptedException {
+  private void enterTeamScore(final WebDriver selenium,
+                              final int teamNumber)
+      throws IOException, InterruptedException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "scoreEntry/select_team.jsp");
 

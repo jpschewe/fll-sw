@@ -6,8 +6,8 @@
 
 package fll.web.playoff;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,8 +16,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.zip.ZipInputStream;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import fll.TestUtils;
 import fll.Tournament;
@@ -74,7 +74,7 @@ public abstract class UnfinishedBaseTest {
                                                                  unfinishedBracketName, unfinished3rdBracketName,
                                                                  unfinished1st3rdBracketName, unfinishedLarge };
 
-  @Before
+  @BeforeEach
   public void setUp() throws IOException, SQLException {
     tempFile = File.createTempFile("flltest", null);
     database = tempFile.getAbsolutePath();
@@ -91,7 +91,7 @@ public abstract class UnfinishedBaseTest {
     assertThat(tournament, notNullValue());
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     SQLFunctions.close(connection);
 

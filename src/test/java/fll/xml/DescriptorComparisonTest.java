@@ -6,27 +6,25 @@
 
 package fll.xml;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Document;
 
+import fll.TestUtils;
 import fll.Utilities;
-import fll.util.LogUtils;
 
 /**
  * Tests for comparing documents.
  */
+@ExtendWith(TestUtils.InitializeLogging.class)
 public class DescriptorComparisonTest {
-
-  @Before
-  public void setUp() {
-    LogUtils.initializeLogging();
-  }
 
   /**
    * Test that a different number of performance goals is caught as an error.
@@ -113,28 +111,28 @@ public class DescriptorComparisonTest {
                             final boolean differencesExpected)
       throws IOException {
     try (InputStream curDocStream = DescriptorComparisonTest.class.getResourceAsStream(curDocRes)) {
-      Assert.assertNotNull("Could not find '"
+      assertNotNull(curDocStream, "Could not find '"
           + curDocRes
-          + "'", curDocStream);
+          + "'");
       final Document curDoc = ChallengeParser.parse(new InputStreamReader(curDocStream, Utilities.DEFAULT_CHARSET));
-      Assert.assertNotNull("Error parsing '"
+      assertNotNull(curDoc, "Error parsing '"
           + curDocRes
-          + "'", curDoc);
+          + "'");
       try (InputStream newDocStream = DescriptorComparisonTest.class.getResourceAsStream(newDocRes)) {
-        Assert.assertNotNull("Could not find '"
+        assertNotNull(newDocStream, "Could not find '"
             + newDocRes
-            + "'", newDocStream);
+            + "'");
         final Document newDoc = ChallengeParser.parse(new InputStreamReader(newDocStream, Utilities.DEFAULT_CHARSET));
-        Assert.assertNotNull("Error parsing '"
+        assertNotNull(newDoc, "Error parsing '"
             + newDocRes
-            + "'", newDoc);
+            + "'");
 
         final String message = ChallengeParser.compareStructure(new ChallengeDescription(curDoc.getDocumentElement()),
                                                                 new ChallengeDescription(newDoc.getDocumentElement()));
         if (differencesExpected) {
-          Assert.assertNotNull("There should be differences", message);
+          assertNotNull(message, "There should be differences");
         } else {
-          Assert.assertNull("There should NOT be differences", message);
+          assertNull(message, "There should NOT be differences");
         }
       } // newDocStream
     } // curDocStream

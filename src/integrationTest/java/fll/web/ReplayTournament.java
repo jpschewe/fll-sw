@@ -24,6 +24,7 @@ import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
 import org.apache.log4j.Logger;
+import org.openqa.selenium.WebDriver;
 
 import fll.TestUtils;
 import fll.Tournament;
@@ -91,13 +92,11 @@ public class ReplayTournament {
 
         // run
         final FullTournamentTest replay = new FullTournamentTest();
+        final WebDriver selenium = IntegrationTestUtils.createWebDriver(driver);
         try {
-          replay.setUp(driver);
-
-          replay.replayTournament(testDataConn, testTournament.getName(), outputDirectory);
-
+          replay.replayTournament(selenium, testDataConn, testTournament.getName(), outputDirectory);
         } finally {
-          replay.tearDown();
+          selenium.quit();
         }
       }
 

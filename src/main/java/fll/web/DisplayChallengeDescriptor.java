@@ -18,14 +18,13 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.ProcessingInstruction;
 
 import fll.Utilities;
 import fll.db.GlobalParameters;
-import fll.xml.XMLUtils;
+import net.mtu.eggplant.util.sql.SQLFunctions;
+import net.mtu.eggplant.xml.XMLUtils;
 
 @WebServlet("/challenge.xml")
 public class DisplayChallengeDescriptor extends BaseFLLServlet {

@@ -27,10 +27,10 @@ import fll.scheduler.TournamentSchedule;
 import fll.util.LogUtils;
 import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.AbstractGoal;
+import fll.xml.ChallengeParser;
 import fll.xml.EnumeratedValue;
 import fll.xml.ScoreType;
 import fll.xml.SubjectiveScoreCategory;
-import fll.xml.XMLUtils;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**
@@ -246,7 +246,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
             return getTeamScore(row).getEnumRawScore(goalName);
           } else {
             final double score = getTeamScore(row).getRawScore(goalName);
-            final ScoreType scoreType = XMLUtils.getScoreType(scoreEle);
+            final ScoreType scoreType = ChallengeParser.getScoreType(scoreEle);
             if (Double.isNaN(score)) {
               return null;
             } else if (ScoreType.FLOAT == scoreType) {

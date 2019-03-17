@@ -90,9 +90,9 @@ import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.EnumeratedValue;
 import fll.xml.SubjectiveScoreCategory;
-import fll.xml.XMLUtils;
 import net.mtu.eggplant.util.BasicFileFilter;
 import net.mtu.eggplant.util.gui.GraphicsUtils;
+import net.mtu.eggplant.xml.XMLUtils;
 
 /**
  * Application to enter subjective scores with

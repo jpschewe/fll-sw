@@ -6,24 +6,24 @@
 
 package fll.web.playoff;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.junit.experimental.theories.DataPoints;
-import org.junit.experimental.theories.Theories;
-import org.junit.experimental.theories.Theory;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * Test that {@link Playoff#isPlayoffBracketUnfinished(Connection, int, String)}
  * properly identifies unfinished brackets.
  */
-@RunWith(Theories.class)
 public final class UnfinishedBrackets extends UnfinishedBaseTest {
-  @DataPoints
+
+  /**
+   * @return brack names for {@link #test(String)}
+   */
   public static String[] names() {
     return UnfinishedBaseTest.unfinishedBracketNames;
   }
@@ -34,7 +34,8 @@ public final class UnfinishedBrackets extends UnfinishedBaseTest {
    * @param bracketName the bracket to check
    * @throws SQLException internal test error
    */
-  @Theory
+  @ParameterizedTest
+  @MethodSource("names")
   public void test(final String bracketName) throws SQLException {
     final boolean result = Playoff.isPlayoffBracketUnfinished(connection, tournament.getTournamentID(), bracketName);
     assertThat(result, is(true));

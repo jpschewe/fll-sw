@@ -6,6 +6,11 @@
 
 package fll.web;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -40,8 +45,14 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.log4j.Logger;
 import org.fest.swing.image.ScreenshotTaker;
-import org.junit.Assert;
-import org.junit.rules.ExternalResource;
+import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
+import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
+import org.junit.jupiter.api.extension.ExtensionContext.Store;
+import org.junit.jupiter.api.extension.ParameterContext;
+import org.junit.jupiter.api.extension.ParameterResolutionException;
+import org.junit.jupiter.api.extension.ParameterResolver;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -128,7 +139,7 @@ public final class IntegrationTestUtils {
    * Assert that the current page is not the error handler page.
    */
   public static void assertNoException(final WebDriver selenium) {
-    Assert.assertFalse("Error loading page", isElementPresent(selenium, By.id("exception-handler")));
+    assertFalse(isElementPresent(selenium, By.id("exception-handler")), "Error loading page");
   }
 
   /**
@@ -142,7 +153,7 @@ public final class IntegrationTestUtils {
   public static void initializeDatabase(final WebDriver driver,
                                         final Document challengeDocument)
       throws IOException, InterruptedException {
-    Assert.assertNotNull(challengeDocument);
+    assertNotNull(challengeDocument);
 
     final Path challengeFile = Files.createTempFile("fll", ".xml");
     try (Writer writer = Files.newBufferedWriter(challengeFile, Utilities.DEFAULT_CHARSET)) {
@@ -166,7 +177,7 @@ public final class IntegrationTestUtils {
   public static void initializeDatabase(final WebDriver driver,
                                         final InputStream challengeStream)
       throws IOException, InterruptedException {
-    Assert.assertNotNull(challengeStream);
+    assertNotNull(challengeStream);
 
     final Path challengeFile = Files.createTempFile("fll", ".xml");
     Files.copy(challengeStream, challengeFile, StandardCopyOption.REPLACE_EXISTING);
@@ -259,7 +270,7 @@ public final class IntegrationTestUtils {
   public static void initializeDatabaseFromDump(final WebDriver selenium,
                                                 final InputStream inputStream)
       throws IOException, InterruptedException {
-    Assert.assertNotNull(inputStream);
+    assertNotNull(inputStream);
     final File dumpFile = IntegrationTestUtils.storeInputStreamToFile(inputStream);
     try {
       selenium.get(TestUtils.URL_ROOT
@@ -545,15 +556,15 @@ public final class IntegrationTestUtils {
         tournamentID = option.getAttribute("value");
       }
     }
-    Assert.assertNotNull("Could not find tournament with name: "
-        + tournamentName, tournamentID);
+    assertNotNull(tournamentID, "Could not find tournament with name: "
+        + tournamentName);
 
     currentTournamentSel.selectByValue(tournamentID);
 
     final WebElement changeTournament = selenium.findElement(By.name("change_tournament"));
     changeTournament.click();
 
-    Assert.assertNotNull(selenium.findElement(By.id("success")));
+    assertNotNull(selenium.findElement(By.id("success")));
   }
 
   /**
@@ -652,20 +663,20 @@ public final class IntegrationTestUtils {
     selenium.findElement(By.xpath("//input[@value='Create Head to Head Bracket for Award Group "
         + awardGroup
         + "']")).click();
-    Assert.assertTrue("Error creating bracket for award group: "
-        + awardGroup, isElementPresent(selenium, By.id("success")));
+    assertTrue(isElementPresent(selenium, By.id("success")), "Error creating bracket for award group: "
+        + awardGroup);
 
     final Select initDiv = new Select(selenium.findElement(By.id("initialize-division")));
     initDiv.selectByValue(awardGroup);
     selenium.findElement(By.id("initialize_brackets")).click();
     Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
-    Assert.assertFalse("Error loading page", isElementPresent(selenium, By.id("exception-handler")));
+    assertFalse(isElementPresent(selenium, By.id("exception-handler")), "Error loading page");
 
     final Select sort = new Select(selenium.findElement(By.id("sort")));
     sort.selectByValue(bracketSort.name());
     selenium.findElement(By.id("submit")).click();
     Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
-    Assert.assertFalse("Error loading page", isElementPresent(selenium, By.id("exception-handler")));
+    assertFalse(isElementPresent(selenium, By.id("exception-handler")), "Error loading page");
   }
 
   /**
@@ -772,11 +783,11 @@ public final class IntegrationTestUtils {
 
         if (null != expectedContentType) {
           final Header contentTypeHeader = response.getFirstHeader("Content-type");
-          Assert.assertNotNull("Null content type header: "
-              + urlToLoad.toString(), contentTypeHeader);
+          assertNotNull(contentTypeHeader, "Null content type header: "
+              + urlToLoad.toString());
           final String contentType = contentTypeHeader.getValue().split(";")[0].trim();
-          Assert.assertEquals("Unexpected content type from: "
-              + urlToLoad.toString(), expectedContentType, contentType);
+          assertEquals(expectedContentType, contentType, "Unexpected content type from: "
+              + urlToLoad.toString());
         }
 
         if (null != destination) {
@@ -793,21 +804,30 @@ public final class IntegrationTestUtils {
   /**
    * Used to allocate tomcat around a test.
    */
-  public static class TomcatRequired extends ExternalResource {
-    private TomcatLauncher launcher;
+  public static class TomcatRequired
+      implements BeforeTestExecutionCallback, AfterTestExecutionCallback, ParameterResolver {
+    private static final String TOMCAT_LAUNCHER_KEY = "TomcatLauncher";
+
+    private static final String WEBDRIVER_KEY = "WebDriver";
+
+    private Store getStore(final ExtensionContext context) {
+      return context.getStore(Namespace.create(getClass(), context.getRequiredTestMethod()));
+    }
 
     @Override
-    protected void before() {
-      launcher = new TomcatLauncher();
+    public void beforeTestExecution(final ExtensionContext context) throws Exception {
+      final TomcatLauncher launcher = new TomcatLauncher();
       try {
         launcher.start();
       } catch (final LifecycleException e) {
         throw new RuntimeException(e);
       }
+      getStore(context).put(TOMCAT_LAUNCHER_KEY, launcher);
     }
 
     @Override
-    protected void after() {
+    public void afterTestExecution(final ExtensionContext context) throws Exception {
+      final TomcatLauncher launcher = getStore(context).remove(TOMCAT_LAUNCHER_KEY, TomcatLauncher.class);
       try {
         if (null != launcher) {
           launcher.stop();
@@ -815,6 +835,30 @@ public final class IntegrationTestUtils {
       } catch (final LifecycleException e) {
         throw new RuntimeException(e);
       }
+
+      final WebDriver selenium = getStore(context).remove(WEBDRIVER_KEY, WebDriver.class);
+      if (null != selenium) {
+        selenium.quit();
+      }
+    }
+
+    @Override
+    public boolean supportsParameter(final ParameterContext parameterContext,
+                                     final ExtensionContext extensionContext)
+        throws ParameterResolutionException {
+      final Class<?> type = parameterContext.getParameter().getType();
+      return WebDriver.class.isAssignableFrom(type);
+    }
+
+    @Override
+    public Object resolveParameter(final ParameterContext parameterContext,
+                                   final ExtensionContext extensionContext)
+        throws ParameterResolutionException {
+      final WebDriver selenium = createWebDriver();
+
+      getStore(extensionContext).put(WEBDRIVER_KEY, selenium);
+
+      return selenium;
     }
   }
 
