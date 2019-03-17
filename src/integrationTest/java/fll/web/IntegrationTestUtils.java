@@ -50,6 +50,9 @@ import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ExtensionContext.Store;
+import org.junit.jupiter.api.extension.ParameterContext;
+import org.junit.jupiter.api.extension.ParameterResolutionException;
+import org.junit.jupiter.api.extension.ParameterResolver;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -801,8 +804,11 @@ public final class IntegrationTestUtils {
   /**
    * Used to allocate tomcat around a test.
    */
-  public static class TomcatRequired implements BeforeTestExecutionCallback, AfterTestExecutionCallback {
+  public static class TomcatRequired
+      implements BeforeTestExecutionCallback, AfterTestExecutionCallback, ParameterResolver {
     private static final String TOMCAT_LAUNCHER_KEY = "TomcatLauncher";
+
+    private static final String WEBDRIVER_KEY = "WebDriver";
 
     private Store getStore(final ExtensionContext context) {
       return context.getStore(Namespace.create(getClass(), context.getRequiredTestMethod()));
@@ -829,6 +835,30 @@ public final class IntegrationTestUtils {
       } catch (final LifecycleException e) {
         throw new RuntimeException(e);
       }
+
+      final WebDriver selenium = getStore(context).remove(WEBDRIVER_KEY, WebDriver.class);
+      if (null != selenium) {
+        selenium.quit();
+      }
+    }
+
+    @Override
+    public boolean supportsParameter(final ParameterContext parameterContext,
+                                     final ExtensionContext extensionContext)
+        throws ParameterResolutionException {
+      final Class<?> type = parameterContext.getParameter().getType();
+      return WebDriver.class.isAssignableFrom(type);
+    }
+
+    @Override
+    public Object resolveParameter(final ParameterContext parameterContext,
+                                   final ExtensionContext extensionContext)
+        throws ParameterResolutionException {
+      final WebDriver selenium = createWebDriver();
+
+      getStore(extensionContext).put(WEBDRIVER_KEY, selenium);
+
+      return selenium;
     }
   }
 

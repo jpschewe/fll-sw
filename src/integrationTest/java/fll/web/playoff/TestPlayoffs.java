@@ -13,8 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.log4j.Logger;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.Alert;
@@ -36,28 +34,16 @@ public class TestPlayoffs {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  private WebDriver selenium;
-
-  @BeforeEach
-  public void setUp() throws Exception {
-    selenium = IntegrationTestUtils.createWebDriver();
-  }
-
-  @AfterEach
-  public void tearDown() {
-    selenium.quit();
-  }
-
   /**
    * Test that when trying to enter a score for a team that hasn't advanced to a
    * particular playoff round results in an error message and the user being
    * sent back to the select team page.
-   * 
+   *
    * @throws IOException
    * @throws InterruptedException
    */
   @Test
-  public void testNotAdvanced() throws IOException, InterruptedException {
+  public void testNotAdvanced(final WebDriver selenium) throws IOException, InterruptedException {
     try {
       // initialize database using simple challenge descriptor that just has 1
       // goal from 1 - 100
@@ -77,7 +63,7 @@ public class TestPlayoffs {
 
       // enter 1 score for all teams equal to their team number
       for (int teamNumber = 0; teamNumber < 4; ++teamNumber) {
-        enterTeamScore(teamNumber);
+        enterTeamScore(selenium, teamNumber);
 
         assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.name("error")), "Errors: ");
       }
@@ -88,15 +74,15 @@ public class TestPlayoffs {
       IntegrationTestUtils.assertNoException(selenium);
 
       // enter score for teams 3 and 0 with 3 winning
-      enterTeamScore(3);
+      enterTeamScore(selenium, 3);
       assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.name("error")), "Errors: ");
-      enterTeamScore(0);
+      enterTeamScore(selenium, 0);
       assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.name("error")), "Errors: ");
 
       // enter score for teams 2 and 1 with 1 winning
-      enterTeamScore(2);
+      enterTeamScore(selenium, 2);
       assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.name("error")), "Errors: ");
-      enterTeamScore(1);
+      enterTeamScore(selenium, 1);
       assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.name("error")), "Errors: ");
 
       // attempt to enter score for 0
@@ -125,7 +111,9 @@ public class TestPlayoffs {
     }
   }
 
-  private void enterTeamScore(final int teamNumber) throws IOException, InterruptedException {
+  private void enterTeamScore(final WebDriver selenium,
+                              final int teamNumber)
+      throws IOException, InterruptedException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "scoreEntry/select_team.jsp");
 

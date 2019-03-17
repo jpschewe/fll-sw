@@ -11,8 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
@@ -30,20 +28,8 @@ import fll.web.IntegrationTestUtils;
 @ExtendWith(IntegrationTestUtils.TomcatRequired.class)
 public class EditTournamentsTest {
 
-  private WebDriver selenium;
-
-  @BeforeEach
-  public void setUp() throws Exception {
-    selenium = IntegrationTestUtils.createWebDriver();
-  }
-
-  @AfterEach
-  public void tearDown() {
-    selenium.quit();
-  }
-
   @Test
-  public void testAddTournament() throws IOException, InterruptedException {
+  public void testAddTournament(final WebDriver selenium) throws IOException, InterruptedException {
     try {
       final InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml");
       IntegrationTestUtils.initializeDatabase(selenium, challengeStream);

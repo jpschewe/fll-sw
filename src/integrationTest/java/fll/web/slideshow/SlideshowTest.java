@@ -8,11 +8,8 @@ package fll.web.slideshow;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
@@ -34,27 +31,14 @@ public class SlideshowTest {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  private WebDriver selenium;
-
-  @BeforeEach
-  public void setUp() throws Exception {
-    selenium = IntegrationTestUtils.createWebDriver();
-    selenium.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
-  }
-
-  @AfterEach
-  public void tearDown() {
-    selenium.quit();
-  }
-
   /**
    * Test setting slideshow interval and make sure it doesn't error.
-   * 
+   *
    * @throws IOException
    * @throws InterruptedException
    */
   @Test
-  public void testSlideshowInterval() throws IOException, InterruptedException {
+  public void testSlideshowInterval(final WebDriver selenium) throws IOException, InterruptedException {
     LOGGER.info("Top testSlideshowInterval");
     try {
       final InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml");
