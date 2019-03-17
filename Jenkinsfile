@@ -88,9 +88,9 @@ pipeline {
             
 	  recordIssues tool: taskScanner(includePattern: '**/*.java,**/*.jsp,**/*.jspf,**/*.xml', excludePattern: 'checkstyle*.xml', highTags: 'FIXME,HACK', normalTags: 'TODO')
 	        
-      recordIssues tool: java()     
+      recordIssues tool: java()  
 
-      recordIssues tool: javadoc()     
+      recordIssues tool: javaDoc()
       
       recordIssues tool: findBugs(pattern: 'build/reports/findbugs/*.xml', useRankAsPriority: true), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]     
 
