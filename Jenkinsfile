@@ -20,6 +20,7 @@ pipeline {
     stage('Duplicate Code Analysis') {
       steps { 
         fllSwGradle('cpdCheck')
+        recordIssues tool: cpd(pattern: 'build/reports/cpd/cpdCheck.xml')        
       }     
     }
 
@@ -50,6 +51,7 @@ pipeline {
         fllSwGradle('findbugsMain')
         fllSwGradle('findbugsTest')
         fllSwGradle('findbugsIntegrationTest')
+        recordIssues tool: findBugs(pattern: 'build/reports/findbugs/*.xml', useRankAsPriority: true), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]            
       }
     }
     
@@ -83,16 +85,12 @@ pipeline {
   post {
     always {
       archiveArtifacts artifacts: '*.log,screenshots/,build/reports/,build/distributions/'
-            
-      recordIssues healthy: 1, tool: cpd(pattern: 'build/reports/cpd/cpdCheck.xml')
-            
+                        
 	  recordIssues tool: taskScanner(includePattern: '**/*.java,**/*.jsp,**/*.jspf,**/*.xml', excludePattern: 'checkstyle*.xml', highTags: 'FIXME,HACK', normalTags: 'TODO')
 	        
       recordIssues tool: java()  
 
-      recordIssues tool: javaDoc()
-      
-      recordIssues tool: findBugs(pattern: 'build/reports/findbugs/*.xml', useRankAsPriority: true), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]     
+      recordIssues tool: javaDoc()      
 
       emailext recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']], 
           to: 'jpschewe@mtu.net',
