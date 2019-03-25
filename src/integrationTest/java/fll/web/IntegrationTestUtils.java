@@ -78,8 +78,8 @@ import fll.util.FLLInternalException;
 import fll.util.LogUtils;
 import fll.web.api.TournamentsServlet;
 import fll.xml.BracketSortType;
-import io.github.bonigarcia.wdm.ChromeDriverManager;
-import io.github.bonigarcia.wdm.FirefoxDriverManager;
+import io.github.bonigarcia.wdm.DriverManagerType;
+import io.github.bonigarcia.wdm.WebDriverManager;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
@@ -111,7 +111,7 @@ public final class IntegrationTestUtils {
     try {
       selenium.findElement(search);
       elementFound = true;
-    } catch (NoSuchElementException e) {
+    } catch (final NoSuchElementException e) {
       elementFound = false;
     }
     return elementFound;
@@ -119,7 +119,7 @@ public final class IntegrationTestUtils {
 
   /**
    * Load a page and check to make sure the page didn't crash.
-   * 
+   *
    * @param selenium the test controller
    * @param url the page to load
    * @throws IOException
@@ -144,7 +144,7 @@ public final class IntegrationTestUtils {
 
   /**
    * Initialize the database using the given challenge document.
-   * 
+   *
    * @param driver the test controller
    * @param challengeDocument the challenge descriptor
    * @throws IOException
@@ -168,7 +168,7 @@ public final class IntegrationTestUtils {
 
   /**
    * Initialize the database using the given challenge descriptor.
-   * 
+   *
    * @param driver the test controller
    * @param challengeStream the challenge descriptor
    * @throws IOException
@@ -190,7 +190,7 @@ public final class IntegrationTestUtils {
 
   /**
    * Initialize the database using the given challenge descriptor.
-   * 
+   *
    * @param driver the test controller
    * @param challengeFile a file to read the challenge description from. This
    *          file will not be deleted.
@@ -260,7 +260,7 @@ public final class IntegrationTestUtils {
 
   /**
    * Initialize a database from a zip file.
-   * 
+   *
    * @param selenium the test controller
    * @param inputStream input stream that has database to load in it, this input
    *          stream is closed by this method upon successful completion
@@ -337,7 +337,7 @@ public final class IntegrationTestUtils {
 
   /**
    * Defaults filePrefix to "fll".
-   * 
+   *
    * @see #storeScreenshot(String, WebDriver)
    */
   public static void storeScreenshot(final WebDriver driver) throws IOException {
@@ -346,7 +346,7 @@ public final class IntegrationTestUtils {
 
   /**
    * Store screenshot and other information for debugging the error.
-   * 
+   *
    * @param filePrefix prefix for the files that are created
    * @param driver
    * @throws IOException
@@ -392,7 +392,7 @@ public final class IntegrationTestUtils {
 
   /**
    * Copy the contents of a stream to a temporary file.
-   * 
+   *
    * @param inputStream the data to store in the temporary file
    * @return the temporary file, you need to delete it
    * @throws IOException
@@ -412,7 +412,7 @@ public final class IntegrationTestUtils {
 
   /**
    * Login to fll
-   * 
+   *
    * @throws InterruptedException
    */
   public static void login(final WebDriver driver) throws InterruptedException {
@@ -432,7 +432,7 @@ public final class IntegrationTestUtils {
   }
 
   private static String readAll(final Reader rd) throws IOException {
-    StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder();
     int cp;
     while ((cp = rd.read()) != -1) {
       sb.append((char) cp);
@@ -441,7 +441,7 @@ public final class IntegrationTestUtils {
   }
 
   private static String readJSON(final String url) throws MalformedURLException, IOException {
-    InputStream is = new URL(url).openStream();
+    final InputStream is = new URL(url).openStream();
     try {
       final BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
       final String jsonText = readAll(rd);
@@ -453,7 +453,7 @@ public final class IntegrationTestUtils {
 
   /**
    * Find a tournament by name using the JSON API.
-   * 
+   *
    * @param tournamentName name of tournament
    * @return the tournament or null if not found
    */
@@ -484,7 +484,7 @@ public final class IntegrationTestUtils {
 
   /**
    * Add a team to a tournament.
-   * 
+   *
    * @throws InterruptedException
    */
   public static void addTeam(final WebDriver selenium,
@@ -528,7 +528,7 @@ public final class IntegrationTestUtils {
 
   /**
    * Set the current tournament by name.
-   * 
+   *
    * @param tournamentName the name of the tournament to make the current
    *          tournament
    * @throws IOException
@@ -569,7 +569,7 @@ public final class IntegrationTestUtils {
 
   /**
    * Create firefox web driver used for most integration tests.
-   * 
+   *
    * @see #createWebDriver(WebDriverType)
    */
   public static WebDriver createWebDriver() {
@@ -617,7 +617,7 @@ public final class IntegrationTestUtils {
 
   private static WebDriver createFirefoxWebDriver() {
     if (!mInitializedWebDrivers.contains(WebDriverType.FIREFOX)) {
-      FirefoxDriverManager.getInstance().setup();
+      WebDriverManager.getInstance(DriverManagerType.FIREFOX).setup();
       mInitializedWebDrivers.add(WebDriverType.FIREFOX);
     }
 
@@ -625,7 +625,7 @@ public final class IntegrationTestUtils {
     // capabilities.setCapability("marionette", true);
     // final WebDriver selenium = new FirefoxDriver(capabilities);
 
-    FirefoxOptions options = new FirefoxOptions();
+    final FirefoxOptions options = new FirefoxOptions();
     // options.setLogLevel(org.openqa.selenium.firefox.FirefoxDriverLogLevel.TRACE);
     final WebDriver selenium = new FirefoxDriver(options);
 
@@ -635,7 +635,7 @@ public final class IntegrationTestUtils {
 
   private static WebDriver createChromeWebDriver() {
     if (!mInitializedWebDrivers.contains(WebDriverType.CHROME)) {
-      ChromeDriverManager.getInstance().setup();
+      WebDriverManager.getInstance(DriverManagerType.CHROME).setup();
       mInitializedWebDrivers.add(WebDriverType.CHROME);
     }
 
@@ -707,7 +707,7 @@ public final class IntegrationTestUtils {
 
   /**
    * Change the number of seeding rounds for the current tournament.
-   * 
+   *
    * @param selenium the driver
    * @param newValue the new value
    * @throws NoSuchElementException if there was a problem changing the value
@@ -729,7 +729,7 @@ public final class IntegrationTestUtils {
 
   /**
    * Get the id of the current tournament
-   * 
+   *
    * @throws IOException
    * @throws InterruptedException
    */
@@ -752,7 +752,7 @@ public final class IntegrationTestUtils {
   /**
    * Download the specified file and check the content type.
    * If the content type doesn't match an assertion violation will be thrown.
-   * 
+   *
    * @param urlToLoad the page to load
    * @param the expected content type.
    *          If the expected type is null, skip this check.
@@ -866,7 +866,7 @@ public final class IntegrationTestUtils {
 
   /**
    * Save a screen shot. Used for UI tests.
-   * 
+   *
    * @throws IOException if there is an error saving the file
    */
   public static void saveScreenshot() throws IOException {
