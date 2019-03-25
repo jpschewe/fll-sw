@@ -8,7 +8,7 @@ buildscript {
 	    classpath group: 'com.cinnober.gradle', name: 'semver-git', version: '2.4.0'
     }    
     dependencies {
-        classpath 'org.unbroken-dome.gradle-plugins:gradle-testsets-plugin:1.4.5'
+        classpath 'org.unbroken-dome.gradle-plugins:gradle-testsets-plugin:2.1.1'
         classpath 'org.kordamp:markdown-gradle-plugin:1.2.0'
     	classpath 'edu.sc.seis.gradle:launch4j:2.4.4'
     }
@@ -24,9 +24,10 @@ plugins {
 	id 'findbugs'
   	id "de.aaschmid.cpd" version "1.2"
   	id 'edu.sc.seis.launch4j' version '2.4.4'
-    id 'com.palantir.git-version' version '0.11.0' // adds printVersion task
+        id 'com.palantir.git-version' version '0.11.0' // adds printVersion task
 	id 'net.saliman.cobertura' version '2.6.0'
 	id "com.gorylenko.gradle-git-properties" version "2.0.0"
+        id "com.github.ben-manes.versions" version "0.21.0" // adds dependency update check
 }
 
 // needs to use old plugin mechanism otherwise I can't set the extra properties
@@ -70,11 +71,11 @@ repositories {
 }
 
 ext {
-    jackson_version = "2.9.0"
+    jackson_version = "2.9.8"
     slf4j_version = "1.7.26"
-    tomcat_version = "9.0.16"
+    tomcat_version = "9.0.17"
     itext_version = "5.5.13"
-    poi_version = "3.10.1"
+    poi_version = "4.0.1"
     junit_version = "5.4.0"
 
     web_build_dir = new File(project.buildDir, 'web')
@@ -98,8 +99,8 @@ dependencies {
     implementation group: 'org.apache.tomcat', name: 'tomcat-jasper-el', version: project.tomcat_version
     implementation group: 'org.apache.tomcat', name: 'tomcat-jsp-api', version: project.tomcat_version
 
-	implementation group: "org.apache.commons", name: "commons-lang3", version: "3.4"
-	implementation group: "commons-cli", name: "commons-cli", version: "1.2"
+	implementation group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
+	implementation group: "commons-cli", name: "commons-cli", version: "1.4"
 	implementation group: "org.hsqldb", name: "hsqldb", version: "2.4.1"
 	
 	implementation group: "com.itextpdf", name: "itextpdf", version: project.itext_version
@@ -120,13 +121,13 @@ dependencies {
 
 	implementation group: "net.sourceforge.schemaspy", name: "schemaspy", version: "5.0.0"
 		
-	implementation group: "dnsjava", name: "dnsjava", version: "2.1.7"
+	implementation group: "dnsjava", name: "dnsjava", version: "2.1.8"
 	
-	implementation group: "commons-fileupload", name: "commons-fileupload", version: "1.3"
+	implementation group: "commons-fileupload", name: "commons-fileupload", version: "1.4"
 	
 	implementation group: "org.apache.tika", name: "tika-core", version: "1.16"
 	
-	implementation group: "com.diffplug.durian", name: "durian-core", version: "1.1.0"
+	implementation group: "com.diffplug.durian", name: "durian-core", version: "1.2.0"
 	
 	implementation group: "it.sauronsoftware", name: "junique", version: "1.0.4"
 		
@@ -149,11 +150,11 @@ dependencies {
     // allow integration tests to reference code in the test directory
     integrationTestImplementation sourceSets.test.output
         
-    integrationTestImplementation group: 'org.easytesting', name: 'fest-swing', version: '1.2'
-    integrationTestImplementation group: 'net.sourceforge.htmlunit', name: 'htmlunit', version: '2.22'
+    integrationTestImplementation group: 'org.easytesting', name: 'fest-swing', version: '1.2.1'
+    integrationTestImplementation group: 'net.sourceforge.htmlunit', name: 'htmlunit', version: '2.34.1'
     integrationTestImplementation group: 'org.seleniumhq.selenium', name: 'selenium-server', version: '3.141.59'
-    integrationTestImplementation group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '1.6.0'
-    integrationTestImplementation group: 'io.github.artsok', name: 'rerunner-jupiter', version: '1.1.0'
+    integrationTestImplementation group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '3.3.0'
+    integrationTestImplementation group: 'io.github.artsok', name: 'rerunner-jupiter', version: '1.1.1'
     
 }
 
