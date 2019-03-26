@@ -22,9 +22,11 @@ import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
@@ -54,7 +56,7 @@ public class ExcelCellReader extends CellFileReader {
 
   /**
    * Check if we believe this file to be an Excel file.
-   * 
+   *
    * @throws IOException
    */
   public static boolean isExcelFile(final File file) throws IOException {
@@ -63,7 +65,7 @@ public class ExcelCellReader extends CellFileReader {
 
   /**
    * Check if we believe this file to be an Excel file.
-   * 
+   *
    * @throws IOException
    */
   public static boolean isExcelFile(final Path path) throws IOException {
@@ -113,12 +115,12 @@ public class ExcelCellReader extends CellFileReader {
 
   /**
    * Get the names of all sheets in the specified stream.
-   * 
+   *
    * @throws IOException
    * @throws InvalidFormatException
    */
   public static List<String> getAllSheetNames(final InputStream stream) throws InvalidFormatException, IOException {
-    final List<String> sheetNames = new LinkedList<String>();
+    final List<String> sheetNames = new LinkedList<>();
 
     final Workbook workbook = createWorkbook(stream);
     final int numSheets = workbook.getNumberOfSheets();
@@ -138,7 +140,7 @@ public class ExcelCellReader extends CellFileReader {
 
   /**
    * Read an excel file from the specified stream.
-   * 
+   *
    * @param file where to read the excel file from, this is read into memory and
    *          then can be closed after the constructor is finished
    * @param sheetName the sheet to read
@@ -166,6 +168,7 @@ public class ExcelCellReader extends CellFileReader {
   /**
    * @see fll.util.CellFileReader#getLineNumber()
    */
+  @Override
   public long getLineNumber() {
     return lineNumber;
   }
@@ -173,6 +176,7 @@ public class ExcelCellReader extends CellFileReader {
   /**
    * @see fll.util.CellFileReader#readNext()
    */
+  @Override
   @SuppressFBWarnings(value = "PZLA_PREFER_ZERO_LENGTH_ARRAYS", justification = "Return null rather than zero length array so that we know when we hit EFO")
   public String[] readNext() throws IOException {
     if (lineNumber >= sheet.getLastRowNum()) {
@@ -185,14 +189,14 @@ public class ExcelCellReader extends CellFileReader {
       return new String[0];
     }
 
-    final List<String> data = new LinkedList<String>();
+    final List<String> data = new LinkedList<>();
     for (int cellIdx = 0; cellIdx < row.getLastCellNum(); ++cellIdx) {
-      final Cell cell = row.getCell(cellIdx, Row.RETURN_NULL_AND_BLANK);
+      final Cell cell = row.getCell(cellIdx, MissingCellPolicy.RETURN_NULL_AND_BLANK);
       if (null == cell) {
         data.add(null);
       } else {
         final String str;
-        if (Cell.CELL_TYPE_NUMERIC == cell.getCellType()) {
+        if (CellType.NUMERIC.equals(cell.getCellType())) {
           final double d = cell.getNumericCellValue();
           // test if a date!
           if (HSSFDateUtil.isCellDateFormatted(cell)) {
@@ -219,6 +223,7 @@ public class ExcelCellReader extends CellFileReader {
   /**
    * @see java.io.Closeable#close()
    */
+  @Override
   public void close() throws IOException {
     // nop
   }

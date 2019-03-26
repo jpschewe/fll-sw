@@ -5,28 +5,29 @@ buildscript {
         jcenter()
     }
     dependencies {
-	    classpath group: 'com.cinnober.gradle', name: 'semver-git', version: '2.4.0'
+            classpath group: 'com.cinnober.gradle', name: 'semver-git', version: '2.4.0'
     }    
     dependencies {
-        classpath 'org.unbroken-dome.gradle-plugins:gradle-testsets-plugin:1.4.5'
+        classpath 'org.unbroken-dome.gradle-plugins:gradle-testsets-plugin:2.1.1'
         classpath 'org.kordamp:markdown-gradle-plugin:1.2.0'
-    	classpath 'edu.sc.seis.gradle:launch4j:2.4.4'
+        classpath 'edu.sc.seis.gradle:launch4j:2.4.4'
     }
 }    
 
 plugins {
-	id 'java'
-	id 'distribution'
-	id "com.dorongold.task-tree" version "1.3.1"
-	id 'org.unbroken-dome.test-sets' version "2.1.1"
-	id 'eclipse'
-	id 'org.kordamp.markdown.convert' version "1.2.0"	
-	id 'findbugs'
-  	id "de.aaschmid.cpd" version "1.2"
-  	id 'edu.sc.seis.launch4j' version '2.4.4'
+    id 'java'
+    id 'distribution'
+    id "com.dorongold.task-tree" version "1.3.1"
+    id 'org.unbroken-dome.test-sets' version "2.1.1"
+    id 'eclipse'
+    id 'org.kordamp.markdown.convert' version "1.2.0"       
+    id 'findbugs'
+    id "de.aaschmid.cpd" version "1.2"
+    id 'edu.sc.seis.launch4j' version '2.4.4'
     id 'com.palantir.git-version' version '0.11.0' // adds printVersion task
-	id 'net.saliman.cobertura' version '2.6.0'
-	id "com.gorylenko.gradle-git-properties" version "2.0.0"
+    id 'net.saliman.cobertura' version '2.6.0'
+    id "com.gorylenko.gradle-git-properties" version "2.0.0"
+    id "com.github.ben-manes.versions" version "0.21.0" // adds dependency update check
 }
 
 // needs to use old plugin mechanism otherwise I can't set the extra properties
@@ -58,11 +59,11 @@ integrationTest.mustRunAfter test
 
 test {
     useJUnitPlatform()
-	ignoreFailures Boolean.getBoolean("test.ignoreFailures") 
+        ignoreFailures Boolean.getBoolean("test.ignoreFailures") 
 }
 integrationTest {
     useJUnitPlatform()
-	ignoreFailures Boolean.getBoolean("test.ignoreFailures") 
+        ignoreFailures Boolean.getBoolean("test.ignoreFailures") 
 }
 repositories {
     //mavenLocal()
@@ -70,19 +71,19 @@ repositories {
 }
 
 ext {
-    jackson_version = "2.9.0"
+    jackson_version = "2.9.8"
     slf4j_version = "1.7.26"
-    tomcat_version = "9.0.16"
+    tomcat_version = "9.0.17"
     itext_version = "5.5.13"
-    poi_version = "3.10.1"
+    poi_version = "4.0.1"
     junit_version = "5.4.0"
 
     web_build_dir = new File(project.buildDir, 'web')
     documentation_build_dir = new File(project.buildDir, 'gen-documentation')    
     
     jspSrc = 'src/main/web'
-	jspJavaSrc = new File(project.buildDir, "jsp-java-source")
-	jspPackage = "fll.jsp"
+        jspJavaSrc = new File(project.buildDir, "jsp-java-source")
+        jspPackage = "fll.jsp"
 
     mainClassName = 'fll.Launcher'
 }
@@ -98,69 +99,69 @@ dependencies {
     implementation group: 'org.apache.tomcat', name: 'tomcat-jasper-el', version: project.tomcat_version
     implementation group: 'org.apache.tomcat', name: 'tomcat-jsp-api', version: project.tomcat_version
 
-	implementation group: "org.apache.commons", name: "commons-lang3", version: "3.4"
-	implementation group: "commons-cli", name: "commons-cli", version: "1.2"
-	implementation group: "org.hsqldb", name: "hsqldb", version: "2.4.1"
-	
-	implementation group: "com.itextpdf", name: "itextpdf", version: project.itext_version
-	
-	implementation group: "log4j", name: "log4j", version: "1.2.17"
-	implementation group: "log4j", name: "apache-log4j-extras", version: "1.2.17"
-	
-	implementation group: "org.slf4j", name: "slf4j-api", version: project.slf4j_version
-	implementation group: "org.slf4j", name: "slf4j-log4j12", version: project.slf4j_version
-	
-	implementation group: "org.apache.poi", name: "poi-ooxml", version: project.poi_version
-	
-	implementation group: "com.google.code.findbugs", name: "annotations", version: "3.0.1"
-	implementation group: "com.google.code.findbugs", name: "jsr305", version: "3.0.1"
-	
-	implementation group: "com.fasterxml.jackson.core", name: "jackson-databind", version: project.jackson_version
-	implementation group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: project.jackson_version
+    implementation group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
+    implementation group: "commons-cli", name: "commons-cli", version: "1.4"
+    implementation group: "org.hsqldb", name: "hsqldb", version: "2.4.1"
+    
+    implementation group: "com.itextpdf", name: "itextpdf", version: project.itext_version
+    
+    implementation group: "log4j", name: "log4j", version: "1.2.17"
+    implementation group: "log4j", name: "apache-log4j-extras", version: "1.2.17"
+    
+    implementation group: "org.slf4j", name: "slf4j-api", version: project.slf4j_version
+    implementation group: "org.slf4j", name: "slf4j-log4j12", version: project.slf4j_version
+    
+    implementation group: "org.apache.poi", name: "poi-ooxml", version: project.poi_version
+    
+    implementation group: "com.google.code.findbugs", name: "annotations", version: "3.0.1"
+    implementation group: "com.google.code.findbugs", name: "jsr305", version: "3.0.1"
+    
+    implementation group: "com.fasterxml.jackson.core", name: "jackson-databind", version: project.jackson_version
+    implementation group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: project.jackson_version
 
-	implementation group: "net.sourceforge.schemaspy", name: "schemaspy", version: "5.0.0"
-		
-	implementation group: "dnsjava", name: "dnsjava", version: "2.1.7"
-	
-	implementation group: "commons-fileupload", name: "commons-fileupload", version: "1.3"
-	
-	implementation group: "org.apache.tika", name: "tika-core", version: "1.16"
-	
-	implementation group: "com.diffplug.durian", name: "durian-core", version: "1.1.0"
-	
-	implementation group: "it.sauronsoftware", name: "junique", version: "1.0.4"
-		
-	implementation group: "com.googlecode.log4jdbc", name: "log4jdbc", version: "1.2"
-	
-	implementation group: "net.java.linoleum", name: "jlfgr", version: "1_0"
-	
-	runtimeOnly group: "javax.servlet", name: "jstl", version: "1.2"
-	
-	implementation group: "com.opencsv", name: "opencsv", version: "4.5"
-	
-	implementation group: "net.mtu.eggplant", name: "JonsInfra", version: "2.0.1"	
-	
-	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: project.junit_version
-	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: project.junit_version
-	testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: project.junit_version
+    implementation group: "net.sourceforge.schemaspy", name: "schemaspy", version: "5.0.0"
+            
+    implementation group: "dnsjava", name: "dnsjava", version: "2.1.8"
+    
+    implementation group: "commons-fileupload", name: "commons-fileupload", version: "1.4"
+    
+    implementation group: "org.apache.tika", name: "tika-core", version: "1.20"
+    
+    implementation group: "com.diffplug.durian", name: "durian-core", version: "1.2.0"
+        
+    implementation group: "it.sauronsoftware", name: "junique", version: "1.0.4"
+            
+    implementation group: "com.googlecode.log4jdbc", name: "log4jdbc", version: "1.2"
+    
+    implementation group: "net.java.linoleum", name: "jlfgr", version: "1_0"
+    
+    runtimeOnly group: "javax.servlet", name: "jstl", version: "1.2"
+    
+    implementation group: "com.opencsv", name: "opencsv", version: "4.5"
+    
+    implementation group: "net.mtu.eggplant", name: "JonsInfra", version: "2.0.1"   
+    
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: project.junit_version
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: project.junit_version
+    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: project.junit_version
     
     testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.1'
     
     // allow integration tests to reference code in the test directory
     integrationTestImplementation sourceSets.test.output
         
-    integrationTestImplementation group: 'org.easytesting', name: 'fest-swing', version: '1.2'
-    integrationTestImplementation group: 'net.sourceforge.htmlunit', name: 'htmlunit', version: '2.22'
+    integrationTestImplementation group: 'org.easytesting', name: 'fest-swing', version: '1.2.1'
+    integrationTestImplementation group: 'net.sourceforge.htmlunit', name: 'htmlunit', version: '2.34.1'
     integrationTestImplementation group: 'org.seleniumhq.selenium', name: 'selenium-server', version: '3.141.59'
-    integrationTestImplementation group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '1.6.0'
+    integrationTestImplementation group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '3.3.0'
     integrationTestImplementation group: 'io.github.artsok', name: 'rerunner-jupiter', version: '1.1.0'
     
 }
 
 
 javadoc {
-	// TODO: Need to fix the errors eventually
-	failOnError = false
+    // TODO: Need to fix the errors eventually
+    failOnError = false
 }
 
 // copy webapp files
@@ -183,30 +184,30 @@ distributions {
                 into 'classes'
             }
             from(configurations.runtime) {
-            	into 'lib'
-           	}
-           	
-           	// web elements
+                into 'lib'
+                }
+                
+                // web elements
             from(project.web_build_dir) {
                 into 'web'
             }
             
             // documentation
-           	from(project.documentation_build_dir) {
-           	    into 'web/documentation'
-           	}
+            from(project.documentation_build_dir) {
+                into 'web/documentation'
+            }
             from(javadoc) {
                 into 'web/documentation/api'
             }
             from("$buildDir/reports/tests/") {
-            	into 'web/documentation/reports'
-        	}
+                into 'web/documentation/reports'
+                }
             from("$buildDir/reports/findbugs/") {
-            	into 'web/documentation/reports/findbugs'
-        	}
+                into 'web/documentation/reports/findbugs'
+                }
             from("$buildDir/reports/cobertura/") {
-            	into 'web/documentation/reports/coverage'
-        	}
+                into 'web/documentation/reports/coverage'
+            }
             
             from("$buildDir/launch4j/fll-sw.exe")
         }
@@ -215,20 +216,20 @@ distributions {
 
 // create run task since we aren't using the application plugin
 task run(type: JavaExec, dependsOn: [copyWeb, classes]) {
-	classpath = sourceSets.main.runtimeClasspath
-	
-	main = project.mainClassName
+        classpath = sourceSets.main.runtimeClasspath
+        
+        main = project.mainClassName
 }
 
 
 // convert markdown documentation and copy non-markdown documentation
 markdownToHtml {
-	sourceDir = file('src/main/documentation')
-	outputDir = project.documentation_build_dir
-	autoLinks = true
-	fencedCodeBlocks = true
-	definitionLists = true
-	tables = true	
+        sourceDir = file('src/main/documentation')
+        outputDir = project.documentation_build_dir
+        autoLinks = true
+        fencedCodeBlocks = true
+        definitionLists = true
+        tables = true   
 }
 distTar.dependsOn markdownToHtml
 distZip.dependsOn markdownToHtml
@@ -284,98 +285,98 @@ check.dependsOn jspToJava
 
 
 cpdCheck {
-	// allow the build to continue, catch this in CI as warnings
-	ignoreFailures = true
+    // allow the build to continue, catch this in CI as warnings
+    ignoreFailures = true
 }
 
 task sloccount(type: Exec) {
-	commandLine 'cloc', '--by-file', '--xml', '--out', "$buildDir/reports/sloccount/cloc.xml", 'src'
+        commandLine 'cloc', '--by-file', '--xml', '--out', "$buildDir/reports/sloccount/cloc.xml", 'src'
 }
 
 task renderWorkflows(dependsOn: [markdownToHtml]) {
-	def inputFiles = []
-	def outputFiles = []
-	
-	fileTree(documentation_build_dir).matching{include "**/*.dot"}.visit{FileVisitDetails details ->
-		if(!details.isDirectory) {		
-			inputFiles << details.file.path
-			outputFiles << details.file.path + ".pdf"
-		}
-	}
-	
-	inputs.files inputFiles
-	outputs.files outputFiles
-	
-	doLast {
-		inputFiles.each{ aFile ->
-				exec{
-				    commandLine 'dot'
-				    args "-Tpdf", "-O", aFile
-				}
-		}
-	}
+    def inputFiles = []
+    def outputFiles = []
+    
+    fileTree(documentation_build_dir).matching{include "**/*.dot"}.visit{FileVisitDetails details ->
+        if(!details.isDirectory) {              
+            inputFiles << details.file.path
+            outputFiles << details.file.path + ".pdf"
+        }
+    }
+    
+    inputs.files inputFiles
+    outputs.files outputFiles
+    
+    doLast {
+        inputFiles.each{ aFile ->
+                        exec{
+                            commandLine 'dot'
+                            args "-Tpdf", "-O", aFile
+                        }
+        }
+    }
 }
 distZip.dependsOn renderWorkflows
 distTar.dependsOn renderWorkflows
 
 task createDatabaseDiagram(type: JavaExec, dependsOn: [markdownToHtml]) {
-	classpath = sourceSets.main.runtimeClasspath
-	
-	main = "fll.db.GenerateDatabaseDiagram"
- 	args new File(project.documentation_build_dir, "database-diagram").absolutePath
+    classpath = sourceSets.main.runtimeClasspath
+    
+    main = "fll.db.GenerateDatabaseDiagram"
+    args new File(project.documentation_build_dir, "database-diagram").absolutePath
 }
 distZip.dependsOn createDatabaseDiagram
 distTar.dependsOn createDatabaseDiagram
 
 launch4j {
-	mainClassName = project.mainClassName
-	icon = "${projectDir}/src/main/resources/fll/resources/fll-sw.ico"
+        mainClassName = project.mainClassName
+        icon = "${projectDir}/src/main/resources/fll/resources/fll-sw.ico"
 }
 distZip.dependsOn createExe
 distTar.dependsOn createExe
 
 
 findbugs {
-	// allow the build to continue, catch this in CI as warnings
-	ignoreFailures = true
-	effort = "max"
-	reportLevel = "low"
-	excludeFilter = file("findbugs-filters.xml")
+    // allow the build to continue, catch this in CI as warnings
+    ignoreFailures = true
+    effort = "max"
+    reportLevel = "low"
+    excludeFilter = file("findbugs-filters.xml")
 }
 
 // some extra tasks so that we can generate html AND xml
 task findbugsMainHtml(type: FindBugs, dependsOn: [classes]) {
-	classes = project.sourceSets.main.output.classesDirs
-	source = project.sourceSets.main.java.srcDirs
-	classpath = sourceSets.main.runtimeClasspath
-	reports {
-	    html.enabled = true
-	    xml.enabled = false
-	}
+    classes = project.sourceSets.main.output.classesDirs
+    source = project.sourceSets.main.java.srcDirs
+    classpath = sourceSets.main.runtimeClasspath
+    reports {
+        html.enabled = true
+        xml.enabled = false
+    }
 }
 distZip.dependsOn findbugsMainHtml
 distTar.dependsOn findbugsMainHtml
 
 task findbugsTestHtml(type: FindBugs, dependsOn: [testClasses]) {
-	classes = project.sourceSets.test.output.classesDirs
-	source = project.sourceSets.test.java.srcDirs
-	classpath = sourceSets.test.runtimeClasspath
-	reports {
-	    html.enabled = true
-	    xml.enabled = false
-	}
+    classes = project.sourceSets.test.output.classesDirs
+    source = project.sourceSets.test.java.srcDirs
+    classpath = sourceSets.test.runtimeClasspath
+    reports {
+        html.enabled = true
+        xml.enabled = false
+    }
 }
 distZip.dependsOn findbugsTestHtml
 distTar.dependsOn findbugsTestHtml
 
 task findbugsIntegrationTestHtml(type: FindBugs, dependsOn: [integrationTestClasses]) {
-	classes = project.sourceSets.integrationTest.output.classesDirs
-	source = project.sourceSets.integrationTest.java.srcDirs
-	classpath = sourceSets.integrationTest.runtimeClasspath
-	reports {
-	    html.enabled = true
-	    xml.enabled = false
-	}
+    classes = project.sourceSets.integrationTest.output.classesDirs
+    source = project.sourceSets.integrationTest.java.srcDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    reports {
+        html.enabled = true
+        xml.enabled = false
+    }
 }
 distZip.dependsOn findbugsIntegrationTestHtml
 distTar.dependsOn findbugsIntegrationTestHtml
@@ -384,34 +385,34 @@ gitProperties {
     gitPropertiesDir = "${buildDir}/resources/main/fll/resources"
 }
 
-/*
-task writeVersionProperties(type: WriteProperties) {
-	outputFile = new File(project.buildDir, "resources/main/fll/resources/version.properties")
-	property("version", project.version)
-	property("lastTag", String.valueOf(project.versionDetails.lastTag))
-	property("commitDistance", String.valueOf(project.versionDetails.commitDistance))
-	property("gitHash", String.valueOf(project.versionDetails.gitHash))
-	property("gitHashFull", String.valueOf(project.versionDetails.gitHashFull))
-	property("branchName", String.valueOf(project.versionDetails.branchName))
-	property("isCleanTag", String.valueOf(project.versionDetails.isCleanTag))
-}
-classes.dependsOn writeVersionProperties
-*/
-
 task writeLaunchJar(type: Jar) {
-	destinationDir = project.buildDir
-	archiveFileName = "fll-sw.jar"
-	manifest {
-		attributes(
-			"Implementation-Title": project.name,
-            "Implementation-Version": version,
-            "Main-Class": project.mainClassName,
-			"Class-Path": "classes/\n " + configurations.runtimeClasspath.collect { "lib/" + it.getName() }.join(' \n '))
+    destinationDir = project.buildDir
+    archiveFileName = "fll-sw.jar"
+    manifest {
+        attributes(
+        "Implementation-Title": project.name,
+        "Implementation-Version": version,
+        "Main-Class": project.mainClassName,
+        "Class-Path": "classes/\n " + configurations.runtimeClasspath.collect { "lib/" + it.getName() }.join(' \n '))
     }
 }
 distZip.dependsOn writeLaunchJar
 distTar.dependsOn writeLaunchJar
 
 cobertura {
-	coverageFormats = [ 'html', 'xml' ]
+    coverageFormats = [ 'html', 'xml' ]
+}
+
+
+dependencyUpdates.resolutionStrategy {
+    componentSelection { rules ->
+        rules.all { ComponentSelection selection ->
+            boolean rejected = ['alpha', 'beta', 'rc', 'cr', 'm', 'preview', 'b', 'ea'].any { qualifier ->
+            selection.candidate.version ==~ /(?i).*[.-]${qualifier}[.\d-+]*/
+            }
+            if (rejected) {
+                selection.reject('Release candidate')
+            }
+        }
+    }
 }
