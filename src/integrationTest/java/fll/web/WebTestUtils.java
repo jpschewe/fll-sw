@@ -22,8 +22,8 @@ import java.util.Collections;
 import org.xml.sax.SAXException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gargoylesoftware.htmlunit.JavaScriptPage;
 import com.gargoylesoftware.htmlunit.Page;
+import com.gargoylesoftware.htmlunit.SgmlPage;
 import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.UnexpectedPage;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -100,12 +100,11 @@ public final class WebTestUtils {
   public static String getPageSource(final Page page) {
     if (page instanceof HtmlPage) {
       return ((HtmlPage) page).asXml();
-    } else if (page instanceof JavaScriptPage) {
-      return ((JavaScriptPage) page).getContent();
+    } else if (page instanceof SgmlPage) {
+        return ((SgmlPage) page).asXml();
     } else if (page instanceof TextPage) {
       return ((TextPage) page).getContent();
     } else if (page instanceof UnexpectedPage) {
-      // page instanceof UnexpectedPage
       return ((UnexpectedPage) page).getWebResponse().getContentAsString();
     } else {
       throw new RuntimeException("Unexpected page type: "
@@ -122,7 +121,7 @@ public final class WebTestUtils {
     assertTrue(loginPage.isHtmlPage(), "Received non-HTML response from web server");
 
     final HtmlPage loginHtml = (HtmlPage) loginPage;
-    HtmlForm form = loginHtml.getFormByName("login");
+    final HtmlForm form = loginHtml.getFormByName("login");
     assertNotNull(form, "Cannot find login form");
 
     final HtmlTextInput userTextField = form.getInputByName("user");
@@ -176,7 +175,7 @@ public final class WebTestUtils {
     final String responseData = getPageSource(response);
 
     final ObjectMapper jsonMapper = new ObjectMapper();
-    QueryHandler.ResultData result = jsonMapper.readValue(responseData, QueryHandler.ResultData.class);
+    final QueryHandler.ResultData result = jsonMapper.readValue(responseData, QueryHandler.ResultData.class);
     assertNull(result.getError(), "SQL Error: "
         + result.getError());
 
