@@ -8,7 +8,7 @@
 
 <%
   // make sure the exception gets logged
-  fll.util.LogUtils.getLogger().error("An unhandled exception occurred", exception);
+  org.apache.logging.log4j.LogManager.getLogger().error("An unhandled exception occurred", exception);
 %>
 </head>
 

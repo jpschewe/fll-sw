@@ -34,7 +34,7 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
-import org.apache.log4j.Logger;
+
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,7 +42,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fll.Utilities;
 import fll.flltools.displaySystem.DisplaySystemHandler;
 import fll.util.FLLInternalException;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 
 /**
@@ -57,7 +57,7 @@ public class MhubMessageHandler extends Thread {
 
   private final Object lock = new Object();
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private boolean running = false;
 

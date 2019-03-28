@@ -8,14 +8,14 @@ package fll.web.developer;
 
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.WebDriver;
 import org.xml.sax.SAXException;
 
 import fll.TestUtils;
-import fll.util.LogUtils;
+
 import fll.web.IntegrationTestUtils;
 import fll.web.WebTestUtils;
 
@@ -26,7 +26,7 @@ import fll.web.WebTestUtils;
 @ExtendWith(IntegrationTestUtils.TomcatRequired.class)
 public class QueryTest {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   @Test
   public void test0(final WebDriver selenium) throws IOException, SAXException, InterruptedException {

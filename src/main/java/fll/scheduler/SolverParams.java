@@ -17,18 +17,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+
 
 import fll.Utilities;
 import fll.util.FLLRuntimeException;
-import fll.util.LogUtils;
+
 
 /**
  * Parameters for {@link GreedySolver}.
  */
 public class SolverParams extends SchedParams {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   public static final String START_TIME_KEY = "start_time";
 

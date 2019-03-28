@@ -21,16 +21,16 @@ import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.webresources.DirResourceSet;
 import org.apache.catalina.webresources.StandardRoot;
-import org.apache.log4j.Logger;
 
-import fll.util.LogUtils;
+
+
 
 /**
  * Launcher for embedded tomcat.
  */
 public class TomcatLauncher {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private final Tomcat tomcat;
 

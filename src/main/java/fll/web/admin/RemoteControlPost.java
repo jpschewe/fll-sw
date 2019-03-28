@@ -18,7 +18,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fll.web.BaseFLLServlet;
 import fll.web.DisplayInfo;
@@ -29,7 +30,7 @@ import fll.web.playoff.H2HUpdateWebSocket;
 @WebServlet("/admin/RemoteControlPost")
 public class RemoteControlPost extends BaseFLLServlet {
 
-  private static final Logger LOGGER = Logger.getLogger(RemoteControlPost.class.getName());
+  private static final Logger LOGGER = LogManager.getLogger();
 
   @Override
   protected void processRequest(final HttpServletRequest request,

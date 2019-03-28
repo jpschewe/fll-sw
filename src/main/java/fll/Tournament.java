@@ -17,7 +17,7 @@ import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.GenerateDB;
 import fll.db.Queries;
-import fll.util.LogUtils;
+
 import fll.web.admin.StoreTournamentData;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
@@ -38,7 +38,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  */
 public final class Tournament implements Serializable {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private Tournament(@JsonProperty("tournamentID") final int tournamentID,
                      @JsonProperty("name") final String name,

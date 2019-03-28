@@ -13,11 +13,11 @@ import java.util.List;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 
-import org.apache.log4j.Logger;
+
 
 import fll.Tournament;
 import fll.db.Queries;
-import fll.util.LogUtils;
+
 import fll.web.SessionAttributes;
 
 /**
@@ -25,7 +25,7 @@ import fll.web.SessionAttributes;
  */
 public class SelectTournament {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   public static void populateContext(final HttpSession session,
                                      final PageContext page) {

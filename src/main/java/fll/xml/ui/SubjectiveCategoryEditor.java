@@ -14,10 +14,10 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+
 
 import fll.util.FormatterUtils;
-import fll.util.LogUtils;
+
 import fll.xml.SubjectiveScoreCategory;
 
 /**
@@ -25,7 +25,7 @@ import fll.xml.SubjectiveScoreCategory;
  */
 public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private final JFormattedTextField mTitleEditor;
 

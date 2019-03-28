@@ -22,10 +22,10 @@ import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.Logger;
+
 
 import fll.util.FLLRuntimeException;
-import fll.util.LogUtils;
+
 
 /**
  * Information about a display.
@@ -59,7 +59,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
 
   private static final Object LOCK = new Object();
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * Create a string that's a valid HTML name.

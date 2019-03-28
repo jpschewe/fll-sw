@@ -8,7 +8,7 @@ package fll.util;
 
 import java.io.OutputStream;
 
-import org.apache.log4j.Logger;
+
 
 import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.BaseColor;
@@ -36,7 +36,7 @@ import com.itextpdf.text.pdf.PdfWriter;
  */
 public final class PdfUtils {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private PdfUtils() {
     // no instances

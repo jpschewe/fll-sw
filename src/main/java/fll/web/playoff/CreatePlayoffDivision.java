@@ -23,13 +23,13 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+
 
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -41,7 +41,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 @WebServlet("/playoff/CreatePlayoffDivision")
 public class CreatePlayoffDivision extends BaseFLLServlet {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * Populate the context for create_playoff_division.jsp.

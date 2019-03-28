@@ -23,19 +23,19 @@ import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
-import org.apache.log4j.Logger;
+
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.TournamentTeam;
 import fll.db.Queries;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 
 @WebServlet("/api/TournamentTeams/*")
 public class TournamentTeamsServlet extends HttpServlet {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   @Override
   protected final void doGet(final HttpServletRequest request,

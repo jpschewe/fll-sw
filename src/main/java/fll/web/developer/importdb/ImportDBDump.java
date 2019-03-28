@@ -16,13 +16,13 @@ import javax.sql.DataSource;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
-import org.apache.log4j.Logger;
+
 import org.w3c.dom.Document;
 
 import fll.Utilities;
 import fll.db.GlobalParameters;
 import fll.db.ImportDB;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -37,7 +37,7 @@ import fll.xml.ChallengeParser;
 @WebServlet("/developer/importdb/ImportDBDump")
 public class ImportDBDump extends BaseFLLServlet {
 
-  private static final Logger LOG = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOG = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * Key in the session to store an instance of {@link ImportDbSessionInfo}.

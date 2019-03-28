@@ -20,12 +20,12 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+
 
 import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 import fll.web.DisplayInfo;
 
@@ -34,7 +34,7 @@ import fll.web.DisplayInfo;
  */
 public class PublicFinalistDisplaySchedule {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   public static void populateContext(final HttpServletRequest request,
                                      final ServletContext application,

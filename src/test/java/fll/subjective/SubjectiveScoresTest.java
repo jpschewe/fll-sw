@@ -22,7 +22,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Document;
@@ -35,7 +35,7 @@ import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.db.Queries;
-import fll.util.LogUtils;
+
 import fll.web.admin.DownloadSubjectiveData;
 import fll.web.admin.UploadSubjectiveData;
 import fll.xml.ChallengeDescription;
@@ -51,7 +51,7 @@ import net.mtu.eggplant.xml.XMLUtils;
 @ExtendWith(TestUtils.InitializeLogging.class)
 public class SubjectiveScoresTest {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * Try deleting scores and making sure the file can still be uploaded into a

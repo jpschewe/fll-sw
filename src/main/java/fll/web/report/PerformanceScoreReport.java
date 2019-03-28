@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+
 
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -46,7 +46,7 @@ import fll.db.GenerateDB;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.util.FP;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.playoff.DatabaseTeamScore;
@@ -64,7 +64,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 @WebServlet("/report/PerformanceScoreReport")
 public class PerformanceScoreReport extends BaseFLLServlet {
 
-  private static final Logger LOG = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOG = org.apache.logging.log4j.LogManager.getLogger();
 
   private static final Font TITLE_FONT = FontFactory.getFont(FontFactory.TIMES, 12, Font.BOLD);
 

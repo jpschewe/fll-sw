@@ -36,7 +36,6 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
-import org.apache.log4j.Logger;
 
 import com.opencsv.CSVWriter;
 
@@ -45,7 +44,6 @@ import fll.scheduler.SchedParams.InvalidParametersException;
 import fll.util.CheckCanceled;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
-import fll.util.LogUtils;
 
 /**
  * Custom solver for scheduling tournaments.
@@ -57,7 +55,7 @@ public class GreedySolver {
    */
   public static final String SUBJECTIVE_COLUMN_PREFIX = "Subj";
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private final SolverParams solverParameters;
 
@@ -131,6 +129,8 @@ public class GreedySolver {
 
   private final boolean optimize;
 
+  private final FewestAssignments fewestAssignments;
+
   private static final String OPTIMIZE_OPTION = "o";
 
   private static final String DATA_FILE_OPTION = "d";
@@ -153,14 +153,13 @@ public class GreedySolver {
   }
 
   public static void main(final String[] args) throws InterruptedException {
-    LogUtils.initializeLogging();
-
     final Options options = buildOptions();
 
     // parse options
     boolean optimize = false;
     File datafile = null;
     try {
+      // TODO update command line parser
       final CommandLineParser parser = new PosixParser();
       final CommandLine cmd = parser.parse(options, args);
 
@@ -254,7 +253,7 @@ public class GreedySolver {
     subjectiveStations = new int[solverParameters.getNumGroups()][getNumSubjectiveStations()];
     performanceScheduled = new int[solverParameters.getNumGroups()][];
 
-    final List<Integer> performanceOffsets = new ArrayList<Integer>();
+    final List<Integer> performanceOffsets = new ArrayList<>();
     performanceOffsets.addAll(solverParameters.getPerformanceAttemptOffsetMinutes());
 
     for (int table = 0; table < solverParameters.getNumTables(); ++table) {
@@ -279,7 +278,7 @@ public class GreedySolver {
       }
 
       // compute all possible performance time slots for the table
-      List<Integer> possibleTimeSlots = new LinkedList<>();
+      final List<Integer> possibleTimeSlots = new LinkedList<>();
       int perfOffsetIndex = 0;
       while (timeslot < getNumTimeslots()) {
         possibleTimeSlots.add(timeslot);
@@ -333,6 +332,8 @@ public class GreedySolver {
     } // foreach judging group
 
     populatePerfEarliestTimes();
+
+    fewestAssignments = new FewestAssignments(this);
 
     // sort list of teams to make sure that the scheduler is deterministic
     Collections.sort(teams, lowestTeamIndex);
@@ -442,7 +443,7 @@ public class GreedySolver {
 
   /**
    * Generated name for a subjective station.
-   * 
+   *
    * @param station index used to generate the name
    */
   public static String getSubjectiveColumnName(final int station) {
@@ -538,7 +539,7 @@ public class GreedySolver {
 
   /**
    * Assign a team to a performance slot if possible.
-   * 
+   *
    * @param group
    * @param team
    * @param timeslot
@@ -724,7 +725,7 @@ public class GreedySolver {
     final List<SchedTeam> teams = getPossiblePerformanceTeams(timeslot);
     SchedTeam team1 = null;
 
-    final List<SchedTeam> possibleValues = new LinkedList<SchedTeam>();
+    final List<SchedTeam> possibleValues = new LinkedList<>();
     for (final SchedTeam team : teams) {
       if (null == team1) {
         if (assignPerformance(team.getGroup(), team.getIndex(), timeslot, table, 0)) {
@@ -892,12 +893,12 @@ public class GreedySolver {
   }
 
   /**
-   *  
+   *
    */
 
   /**
    * Find the team that is on the table and side prior to timeslot.
-   * 
+   *
    * @param timeslot
    * @param table
    * @param side
@@ -923,7 +924,7 @@ public class GreedySolver {
    */
   private List<SchedTeam> getPossibleSubjectiveTeams(final int group,
                                                      final int station) {
-    List<SchedTeam> possibles = new LinkedList<SchedTeam>();
+    final List<SchedTeam> possibles = new LinkedList<>();
     for (final SchedTeam team : getAllTeams()) {
       if (team.getGroup() == group
           && !subjectiveScheduled[team.getGroup()][team.getIndex()][station]) {
@@ -981,7 +982,7 @@ public class GreedySolver {
    * specified timeslot.
    */
   private List<SchedTeam> getPossiblePerformanceTeams(final int timeslot) {
-    List<SchedTeam> possibles = new LinkedList<SchedTeam>();
+    final List<SchedTeam> possibles = new LinkedList<>();
     for (final SchedTeam team : getAllTeams()) {
       final int teamNextRound = performanceScheduled[team.getGroup()][team.getIndex()];
       if (teamNextRound < perfEarliestTimes.length) {
@@ -1050,7 +1051,7 @@ public class GreedySolver {
     return true;
   }
 
-  private final List<SchedTeam> teams = new LinkedList<SchedTeam>();
+  private final List<SchedTeam> teams = new LinkedList<>();
 
   /**
    * @return unmodifiable list of all teams
@@ -1063,7 +1064,7 @@ public class GreedySolver {
 
   /**
    * Solve the problem.
-   * 
+   *
    * @param checkCanceled if non-null, used to check if the schedule should be
    *          interrupted
    * @return the number of solutions found
@@ -1095,7 +1096,7 @@ public class GreedySolver {
 
   /**
    * Get the number of warnings.
-   * 
+   *
    * @param scheduleFile
    * @return the number of warnings or -1 if there are hard violations
    */
@@ -1118,9 +1119,9 @@ public class GreedySolver {
       return violations.size();
     } catch (final IOException e) {
       throw new FLLRuntimeException("Should not have an IOException trying to get warnings from CSV file", e);
-    } catch (ParseException e) {
+    } catch (final ParseException e) {
       throw new FLLRuntimeException("Should not have an ParseException trying to get warnings from CSV file", e);
-    } catch (ScheduleParseException e) {
+    } catch (final ScheduleParseException e) {
       throw new FLLRuntimeException("Should not have an ScheduleParseException trying to get warnings from CSV file",
                                     e);
     }
@@ -1210,11 +1211,11 @@ public class GreedySolver {
     }
 
     // find possible values
-    final List<Integer> possibleSubjectiveStations = new ArrayList<Integer>();
-    final List<Integer> subjectiveGroups = new ArrayList<Integer>();
+    final List<Integer> possibleSubjectiveStations = new ArrayList<>();
+    final List<Integer> subjectiveGroups = new ArrayList<>();
     final int nextAvailableSubjSlot = findNextAvailableSubjectiveSlot(possibleSubjectiveStations, subjectiveGroups);
 
-    final List<Integer> possiblePerformanceTables = new LinkedList<Integer>();
+    final List<Integer> possiblePerformanceTables = new LinkedList<>();
     final int nextAvailablePerfSlot = findNextAvailablePerformanceSlot(possiblePerformanceTables);
 
     if (Math.min(nextAvailablePerfSlot, nextAvailableSubjSlot) >= getNumTimeslots()) {
@@ -1321,7 +1322,7 @@ public class GreedySolver {
 
   /**
    * Find the earliest performance slot available on a table.
-   * 
+   *
    * @param possiblePerformanceTables return value that will contain the tables
    *          that are available at the returned timeslot
    * @return the next available timeslot or Integer.MAX_VALUE if no slot was
@@ -1348,7 +1349,7 @@ public class GreedySolver {
 
   /**
    * Find the earliest subjective slot available.
-   * 
+   *
    * @param possibleSubjectiveStations return value that will contain the
    *          subjective stations
    *          that are available at the returned timeslot
@@ -1460,7 +1461,7 @@ public class GreedySolver {
 
     try (final CSVWriter csv = new CSVWriter(new OutputStreamWriter(new FileOutputStream(schedule),
                                                                     Utilities.DEFAULT_CHARSET))) {
-      final List<String> line = new ArrayList<String>();
+      final List<String> line = new ArrayList<>();
       line.add(TournamentSchedule.TEAM_NUMBER_HEADER);
       line.add(TournamentSchedule.TEAM_NAME_HEADER);
       line.add(TournamentSchedule.ORGANIZATION_HEADER);
@@ -1506,7 +1507,7 @@ public class GreedySolver {
         }
 
         // find all performances for a team and then sort by time
-        final SortedSet<PerformanceTime> perfTimes = new TreeSet<PerformanceTime>();
+        final SortedSet<PerformanceTime> perfTimes = new TreeSet<>();
         for (int round = 0; round < solverParameters.getNumPerformanceRounds(); ++round) {
           for (int table = 0; table < solverParameters.getNumTables(); ++table) {
             for (int side = 0; side < 2; ++side) {
@@ -1551,7 +1552,7 @@ public class GreedySolver {
 
   /**
    * Get the nth time from slot that is true.
-   * 
+   *
    * @param slots the slots to look in
    * @param count which time to find, 1 based count
    * @return
@@ -1563,7 +1564,7 @@ public class GreedySolver {
       if (slots[i]) {
         ++n;
         if (n == count) {
-          LocalTime slotTime = solverParameters.getStartTime().plusMinutes(i);
+          final LocalTime slotTime = solverParameters.getStartTime().plusMinutes(i);
           return slotTime;
         }
       }
@@ -1585,7 +1586,7 @@ public class GreedySolver {
 
   /**
    * Check if the interval [begin, end] overlaps a break.
-   * 
+   *
    * @param begin the start of the interval (in minutes from start)
    * @param end the end of the interval (in minutes from start)
    * @param breaks the breaks to check against
@@ -1620,27 +1621,31 @@ public class GreedySolver {
     return checkBreak(begin, end, solverParameters.getPerformanceBreaks());
   }
 
-  private static final Comparator<SchedTeam> lowestTeamIndex = new Comparator<SchedTeam>() {
-    @Override
-    public int compare(final SchedTeam one,
-                       final SchedTeam two) {
-      if (one.equals(two)) {
-        return 0;
-      } else if (one.getGroup() < two.getGroup()) {
-        return -1;
-      } else if (one.getGroup() > two.getGroup()) {
-        return 1;
-      } else if (one.getIndex() < two.getIndex()) {
-        return -1;
-      } else if (one.getIndex() > two.getIndex()) {
-        return 1;
-      } else {
-        return 0;
-      }
+  private static final Comparator<SchedTeam> lowestTeamIndex = (one,
+                                                                two) -> {
+    if (one.equals(two)) {
+      return 0;
+    } else if (one.getGroup() < two.getGroup()) {
+      return -1;
+    } else if (one.getGroup() > two.getGroup()) {
+      return 1;
+    } else if (one.getIndex() < two.getIndex()) {
+      return -1;
+    } else if (one.getIndex() > two.getIndex()) {
+      return 1;
+    } else {
+      return 0;
     }
   };
 
-  private final Comparator<SchedTeam> fewestAssignments = new Comparator<SchedTeam>() {
+  private static final class FewestAssignments implements Comparator<SchedTeam> {
+
+    private final GreedySolver solver;
+
+    public FewestAssignments(final GreedySolver solver) {
+      this.solver = solver;
+    }
+
     @Override
     public int compare(final SchedTeam one,
                        final SchedTeam two) {
@@ -1650,18 +1655,18 @@ public class GreedySolver {
         int oneAssignments = 0;
         int twoAssignments = 0;
 
-        for (int station = 0; station < getNumSubjectiveStations(); ++station) {
-          if (subjectiveScheduled[one.getGroup()][one.getIndex()][station]) {
+        for (int station = 0; station < solver.getNumSubjectiveStations(); ++station) {
+          if (solver.subjectiveScheduled[one.getGroup()][one.getIndex()][station]) {
             ++oneAssignments;
           }
-          if (subjectiveScheduled[two.getGroup()][two.getIndex()][station]) {
+          if (solver.subjectiveScheduled[two.getGroup()][two.getIndex()][station]) {
             ++twoAssignments;
           }
         }
 
-        for (int table = 0; table < solverParameters.getNumTables(); ++table) {
-          oneAssignments += performanceScheduled[one.getGroup()][one.getIndex()];
-          twoAssignments += performanceScheduled[two.getGroup()][two.getIndex()];
+        for (int table = 0; table < solver.solverParameters.getNumTables(); ++table) {
+          oneAssignments += solver.performanceScheduled[one.getGroup()][one.getIndex()];
+          twoAssignments += solver.performanceScheduled[two.getGroup()][two.getIndex()];
         }
 
         if (oneAssignments < twoAssignments) {
@@ -1673,6 +1678,6 @@ public class GreedySolver {
         }
       }
     }
-  };
+  }
 
 }

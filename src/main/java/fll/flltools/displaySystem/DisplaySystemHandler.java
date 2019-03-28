@@ -16,7 +16,7 @@ import javax.annotation.concurrent.ThreadSafe;
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+
 
 import fll.Utilities;
 import fll.db.GlobalParameters;
@@ -24,7 +24,7 @@ import fll.db.Queries;
 import fll.flltools.MhubMessageHandler;
 import fll.flltools.MhubParameters;
 import fll.flltools.displaySystem.list.SetArray;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 import fll.web.DisplayInfo;
 import fll.web.scoreboard.Last8;
@@ -37,7 +37,7 @@ import fll.web.scoreboard.Top10;
 @ThreadSafe
 public class DisplaySystemHandler extends Thread {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private boolean listDisplayed = false;
 

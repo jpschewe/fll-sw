@@ -26,7 +26,6 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
-import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import fll.Team;
@@ -38,7 +37,6 @@ import fll.util.CheckCanceled;
 import fll.util.ExcelCellReader;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
-import fll.util.LogUtils;
 
 /**
  * Optimize a schedule by rearranging the sides of tables used and the tables
@@ -46,7 +44,7 @@ import fll.util.LogUtils;
  */
 public class TableOptimizer {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private static final String SCHED_FILE_OPTION = "s";
 
@@ -72,7 +70,7 @@ public class TableOptimizer {
   /**
    * The best schedule found so far. Starts out at null and
    * is modified by {@link #optimize(CheckCanceled)}.
-   * 
+   *
    * @return the file containing the best schedule or null if no such schedule
    *         has been found
    */
@@ -104,7 +102,7 @@ public class TableOptimizer {
    * Compute the table use score. This is the difference between the minimum
    * number of times any table is used and the maximum number of times any table
    * is used. This should even out the table use.
-   * 
+   *
    * @return score, lower is better
    */
   private int computeTableUseScore() {
@@ -125,7 +123,7 @@ public class TableOptimizer {
 
     int minUse = Integer.MAX_VALUE;
     int maxUse = 0;
-    for (Map.Entry<String, Integer> entry : tableUse.entrySet()) {
+    for (final Map.Entry<String, Integer> entry : tableUse.entrySet()) {
       minUse = Math.min(minUse, entry.getValue());
       maxUse = Math.max(maxUse, entry.getValue());
     } // foreach table
@@ -141,7 +139,7 @@ public class TableOptimizer {
   /**
    * Get the current table assignments for the specified time so that
    * they can be re-applied if needed.
-   * 
+   *
    * @return key=table info, value=team number
    */
   private Map<PerformanceTime, Integer> getCurrentTableAssignments(final LocalTime time) {
@@ -162,7 +160,7 @@ public class TableOptimizer {
   /**
    * Compute the best table ordering for a set of teams at the
    * specified time.
-   * 
+   *
    * @param checkCanceled if non-null, check if the optimization should finish
    *          early
    * @return best score found
@@ -227,7 +225,7 @@ public class TableOptimizer {
   /**
    * Compute all possible orderings of teams on the current set
    * of tables.
-   * 
+   *
    * @param teams
    * @return list of possible orderings, key=table information, value=team
    *         number
@@ -300,7 +298,7 @@ public class TableOptimizer {
 
   /**
    * Get team number from teams using teamIndex.
-   * 
+   *
    * @param teams list of teams
    * @param teamIndex index into teams
    * @return the team number or {@see Team#NULL_TEAM_NUMBER} if the index is
@@ -318,7 +316,7 @@ public class TableOptimizer {
   }
 
   private void applyPerformanceOrdering(final Map<PerformanceTime, Integer> possibleValue) {
-    for (Map.Entry<PerformanceTime, Integer> entry : possibleValue.entrySet()) {
+    for (final Map.Entry<PerformanceTime, Integer> entry : possibleValue.entrySet()) {
       final int teamNumber = entry.getValue();
       final PerformanceTime perfTime = entry.getKey();
 
@@ -331,7 +329,7 @@ public class TableOptimizer {
 
   /**
    * Compute permutations of the integers [0, numElements]
-   * 
+   *
    * @param numElements how many elements to be permuted
    * @return all possible orderings
    */
@@ -354,7 +352,7 @@ public class TableOptimizer {
   /**
    * Recursive function that computes permutations. To
    * be called from {@see #permutate(int)}.
-   * 
+   *
    * @param arrayCount
    * @param elements the elements to compute permutations of
    * @param order
@@ -377,10 +375,10 @@ public class TableOptimizer {
     } else {
       for (int i = 0; i < elements.size(); ++i) {
         final int element = elements.get(i);
-        final List<Integer> newOrder = new ArrayList<Integer>(order);
+        final List<Integer> newOrder = new ArrayList<>(order);
         newOrder.set(position, element);
 
-        final List<Integer> newElements = new ArrayList<Integer>(elements);
+        final List<Integer> newElements = new ArrayList<>(elements);
         newElements.remove(i);
         permutate(arrayCount, newElements, newOrder, permutations);
       }
@@ -407,14 +405,14 @@ public class TableOptimizer {
   private List<ConstraintViolation> pickTeamWithMostViolations(final Set<Integer> optimizedTeams) {
     final List<ConstraintViolation> violations = checker.verifySchedule();
     // team->violations
-    final Map<Integer, List<ConstraintViolation>> teamViolations = new HashMap<Integer, List<ConstraintViolation>>();
+    final Map<Integer, List<ConstraintViolation>> teamViolations = new HashMap<>();
     for (final ConstraintViolation violation : violations) {
       if (isPerformanceViolation(violation)) {
         final List<ConstraintViolation> vs;
         if (teamViolations.containsKey(violation.getTeam())) {
           vs = teamViolations.get(violation.getTeam());
         } else {
-          vs = new LinkedList<ConstraintViolation>();
+          vs = new LinkedList<>();
           teamViolations.put(violation.getTeam(), vs);
         }
         vs.add(violation);
@@ -422,7 +420,7 @@ public class TableOptimizer {
     }
 
     // find max
-    List<ConstraintViolation> retval = new LinkedList<ConstraintViolation>();
+    List<ConstraintViolation> retval = new LinkedList<>();
     for (final Map.Entry<Integer, List<ConstraintViolation>> entry : teamViolations.entrySet()) {
       if (!optimizedTeams.contains(entry.getKey())) {
         if (entry.getValue().size() > retval.size()) {
@@ -436,7 +434,7 @@ public class TableOptimizer {
 
   private static Options buildOptions() {
     final Options options = new Options();
-    Option option = new Option(SCHED_FILE_OPTION, "schedfile", true, "<file> the schedule file ");
+    final Option option = new Option(SCHED_FILE_OPTION, "schedfile", true, "<file> the schedule file ");
     option.setRequired(true);
     options.addOption(option);
 
@@ -452,8 +450,6 @@ public class TableOptimizer {
    * @param args
    */
   public static void main(final String[] args) {
-    LogUtils.initializeLogging();
-
     File schedfile = null;
     final Options options = buildOptions();
     try {
@@ -505,7 +501,7 @@ public class TableOptimizer {
       final SchedParams params = new SchedParams(subjectiveStations, SchedParams.DEFAULT_PERFORMANCE_MINUTES,
                                                  SchedParams.MINIMUM_CHANGETIME_MINUTES,
                                                  SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES);
-      final List<String> subjectiveHeaders = new LinkedList<String>();
+      final List<String> subjectiveHeaders = new LinkedList<>();
       for (final SubjectiveStation station : subjectiveStations) {
         subjectiveHeaders.add(station.getName());
       }
@@ -543,7 +539,7 @@ public class TableOptimizer {
     } catch (final RuntimeException e) {
       LOGGER.fatal(e, e);
       throw e;
-    } catch (InvalidFormatException e) {
+    } catch (final InvalidFormatException e) {
       LOGGER.fatal(e, e);
       System.exit(7);
     } finally {
@@ -562,7 +558,7 @@ public class TableOptimizer {
 
   /**
    * Compute map of tables at each time.
-   * 
+   *
    * @param schedule the schedule to work with
    * @return key=time, value=tables used at this time
    */
@@ -655,7 +651,7 @@ public class TableOptimizer {
 
     } else {
       for (final Set<String> group : tableGroups) {
-        finalGroups.add(new ArrayList<String>(group));
+        finalGroups.add(new ArrayList<>(group));
       }
     }
     return finalGroups;
@@ -697,12 +693,12 @@ public class TableOptimizer {
 
   /**
    * Run the table optimizer.
-   * 
+   *
    * @param checkCanceled if non-null, checked to see if the optimizer should
    *          exit early
    */
   public void optimize(final CheckCanceled checkCanceled) {
-    final Set<Integer> optimizedTeams = new HashSet<Integer>();
+    final Set<Integer> optimizedTeams = new HashSet<>();
     final Set<LocalTime> optimizedTimes = new HashSet<>();
 
     List<ConstraintViolation> teamViolations = pickTeamWithMostViolations(optimizedTeams);
@@ -795,14 +791,14 @@ public class TableOptimizer {
 
   /**
    * Optimize the table use at the specified times.
-   * 
+   *
    * @param perfTimes the times to optimize at
    * @param checkCancled used to check if the optimization should exit early
    */
   private void optimize(final Set<LocalTime> perfTimes,
                         final CheckCanceled checkCanceled) {
     for (final LocalTime time : perfTimes) {
-      final List<Integer> teams = new ArrayList<Integer>();
+      final List<Integer> teams = new ArrayList<>();
 
       List<String> tables = null;
       for (final TeamScheduleInfo si : schedule.getSchedule()) {

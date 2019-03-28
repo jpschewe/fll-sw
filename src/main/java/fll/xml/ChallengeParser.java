@@ -45,7 +45,6 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -54,7 +53,6 @@ import org.xml.sax.SAXParseException;
 import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.util.FP;
-import fll.util.LogUtils;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 import net.mtu.eggplant.xml.XMLUtils;
 
@@ -68,7 +66,7 @@ public final class ChallengeParser {
    */
   public static final String FLL_NAMESPACE = "http://www.hightechkids.org";
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * Parse the specified XML document and report errors.
@@ -77,8 +75,6 @@ public final class ChallengeParser {
    * </ul>
    */
   public static void main(final String[] args) {
-    LogUtils.initializeLogging();
-
     if (args.length < 1) {
       LOGGER.fatal("Usage: ChallengeParser <xml file>");
       System.exit(1);
@@ -132,7 +128,7 @@ public final class ChallengeParser {
    * Parse the challenge document from the given stream. The document will be
    * validated and must be in the fll namespace. Does not close the stream after
    * reading.
-   * 
+   *
    * @param stream a stream containing document
    * @return not null
    * @throws ChallengeXMLException on error
@@ -221,7 +217,7 @@ public final class ChallengeParser {
 
   /**
    * Convert from version 0 to version 1 of the schema.
-   * 
+   *
    * @param content
    * @return
    */
@@ -239,7 +235,7 @@ public final class ChallengeParser {
 
   /**
    * Determine the version of the schema used in the XML document.
-   * 
+   *
    * @param content
    * @return
    * @throws IOException
@@ -261,7 +257,7 @@ public final class ChallengeParser {
 
   /**
    * Do validation of the document that cannot be done by the XML parser.
-   * 
+   *
    * @param document the document to validate
    * @throws ParseException
    * @throws RuntimeException if an error occurs
@@ -278,7 +274,7 @@ public final class ChallengeParser {
         final Element childElement = childNode;
 
         // get all nodes named goal at any level under category element
-        final Map<String, Element> simpleGoals = new HashMap<String, Element>();
+        final Map<String, Element> simpleGoals = new HashMap<>();
         for (final Element element : new NodelistElementCollectionAdapter(childElement.getElementsByTagName("goal"))) {
           final String name = element.getAttribute("name");
           simpleGoals.put(name, element);
@@ -317,7 +313,7 @@ public final class ChallengeParser {
         } // foreach goal
 
         // for all computedGoals
-        final Map<String, Element> computedGoals = new HashMap<String, Element>();
+        final Map<String, Element> computedGoals = new HashMap<>();
         for (final Element computedGoalElement : new NodelistElementCollectionAdapter(childElement.getElementsByTagName("computedGoal"))) {
           final String name = computedGoalElement.getAttribute("name");
           computedGoals.put(name, computedGoalElement);
@@ -341,7 +337,7 @@ public final class ChallengeParser {
         } // end foreach computed goal
 
         // computed and non-computed goals
-        final Map<String, Element> allGoals = new HashMap<String, Element>();
+        final Map<String, Element> allGoals = new HashMap<>();
         allGoals.putAll(simpleGoals);
         allGoals.putAll(computedGoals);
 
@@ -370,11 +366,11 @@ public final class ChallengeParser {
    * @param computedGoals
    */
   private static void checkForCircularDependencies(final Map<String, Element> computedGoals) {
-    for (Map.Entry<String, Element> entry : computedGoals.entrySet()) {
+    for (final Map.Entry<String, Element> entry : computedGoals.entrySet()) {
       final String thisGoal = entry.getKey();
 
-      final Set<String> visited = new HashSet<String>();
-      final List<String> toVisit = new LinkedList<String>();
+      final Set<String> visited = new HashSet<>();
+      final List<String> toVisit = new LinkedList<>();
 
       toVisit.addAll(getImmediateComputedGoalDependencies(entry.getValue()));
       while (!toVisit.isEmpty()) {
@@ -402,7 +398,7 @@ public final class ChallengeParser {
 
   /**
    * Find all immediate dependencies of the specified computed goal element.
-   * 
+   *
    * @param computedGoalElement the element for the computed goal, if null and
    *          empty set is returned
    * @return the set of dependencies, will return the names of all goals
@@ -412,7 +408,7 @@ public final class ChallengeParser {
     if (null == computedGoalElement) {
       return Collections.emptySet();
     } else {
-      final Set<String> dependencies = new HashSet<String>();
+      final Set<String> dependencies = new HashSet<>();
       for (final Element termElement : new NodelistElementCollectionAdapter(computedGoalElement.getElementsByTagName("goalRef"))) {
 
         // check that the computed goal only references goals
@@ -432,7 +428,7 @@ public final class ChallengeParser {
   /**
    * If the new document differs from the current document in a way that the
    * database structure will be modified.
-   * 
+   *
    * @param curDoc the current document
    * @param newDoc the document to check against
    * @return null if everything checks out OK, otherwise the error message
@@ -458,7 +454,7 @@ public final class ChallengeParser {
           + curSubCats.size()
           + " subjective categories";
     }
-    final Map<String, Map<String, String>> curCats = new HashMap<String, Map<String, String>>();
+    final Map<String, Map<String, String>> curCats = new HashMap<>();
     for (final SubjectiveScoreCategory ele : curSubCats) {
       final String name = ele.getName();
       final Map<String, String> goalDefs = gatherColumnDefinitions(ele);
@@ -525,7 +521,7 @@ public final class ChallengeParser {
    * Get the column definitions for all goals in the specified element
    */
   private static Map<String, String> gatherColumnDefinitions(final ScoreCategory element) {
-    final Map<String, String> goalDefs = new HashMap<String, String>();
+    final Map<String, String> goalDefs = new HashMap<>();
 
     for (final AbstractGoal goal : element.getGoals()) {
       if (!goal.isComputed()) {
@@ -542,7 +538,7 @@ public final class ChallengeParser {
    * Find a child element by tag name. This is very similar to
    * {@link Element#getElementsByTagName(String)}, except that it only works with
    * the direct children.
-   * 
+   *
    * @param parent the element to check the children of
    * @return the list of elements, may be empty
    */
@@ -571,7 +567,7 @@ public final class ChallengeParser {
       return Collections.emptyList();
     }
 
-    final Collection<URL> urls = new LinkedList<URL>();
+    final Collection<URL> urls = new LinkedList<>();
     if ("file".equals(directory.getProtocol())) {
       try {
         final URI uri = directory.toURI();
@@ -650,7 +646,7 @@ public final class ChallengeParser {
   }
 
   public static List<String> getSubjectiveCategoryNames(final Document challengeDocument) {
-    final List<String> subjectiveCategories = new LinkedList<String>();
+    final List<String> subjectiveCategories = new LinkedList<>();
     for (final Element categoryElement : new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement()
                                                                                                .getElementsByTagName("subjectiveCategory"))) {
       final String categoryName = categoryElement.getAttribute("name");
@@ -697,7 +693,7 @@ public final class ChallengeParser {
 
   /**
    * Check if an element describes a computed goal or not.
-   * 
+   *
    * @param element the goal element
    * @return if the element represents a computed goal
    */
@@ -707,7 +703,7 @@ public final class ChallengeParser {
 
   /**
    * Check if an element describes an enumerated goal or not.
-   * 
+   *
    * @param element the goal element
    * @return if the element represents an enumerated goal
    */
@@ -723,7 +719,7 @@ public final class ChallengeParser {
 
   /**
    * Find a subjective category by name.
-   * 
+   *
    * @param challengeDocument the document to look in
    * @param name the name to look for
    * @return the element or null if one is not found

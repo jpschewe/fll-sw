@@ -19,17 +19,17 @@ import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
-import org.apache.log4j.Logger;
+
 
 import fll.db.Queries;
-import fll.util.LogUtils;
+
 
 /**
  * Some cookie utilities for FLL.
  */
 public final class CookieUtils {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   public static final String LOGIN_KEY = "fll-login";
 

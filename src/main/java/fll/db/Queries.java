@@ -29,7 +29,7 @@ import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+
 import org.w3c.dom.Document;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -41,7 +41,7 @@ import fll.TournamentTeam;
 import fll.Utilities;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
-import fll.util.LogUtils;
+
 import fll.web.playoff.BracketUpdate;
 import fll.web.playoff.DatabaseTeamScore;
 import fll.web.playoff.H2HUpdateWebSocket;
@@ -64,7 +64,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  */
 public final class Queries {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private Queries() {
     // no instances

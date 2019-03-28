@@ -14,7 +14,6 @@ import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
-import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -24,7 +23,6 @@ import fll.db.CategoryColumnMapping;
 import fll.scheduler.SubjectiveTime;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
-import fll.util.LogUtils;
 import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeParser;
@@ -38,7 +36,7 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
  */
 public final class SubjectiveTableModel extends AbstractTableModel {
 
-  private static final Logger LOG = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOG = org.apache.logging.log4j.LogManager.getLogger();
 
   public static final int BASE_NUM_COLUMNS_LEFT_OF_SCORES = 5;
 
@@ -64,7 +62,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
     if (null != scheduleColumnMappings) {
       _scheduleColumnMappings.addAll(scheduleColumnMappings);
     }
-    _goals = new LinkedList<AbstractGoal>(_subjectiveCategory.getGoals());
+    _goals = new LinkedList<>(_subjectiveCategory.getGoals());
     final List<Element> scoreElements = getScoreElements(_scoreDocument, _subjectiveCategory.getName());
     _scoreElements = new Element[scoreElements.size()];
     for (int i = 0; i < scoreElements.size(); i++) {
@@ -164,16 +162,19 @@ public final class SubjectiveTableModel extends AbstractTableModel {
     }
   }
 
+  @Override
   public int getRowCount() {
     return _scoreElements.length;
   }
 
+  @Override
   public int getColumnCount() {
     return getNumColumnsLeftOfScores()
         + getNumGoals()
         + 2;
   }
 
+  @Override
   public Object getValueAt(final int row,
                            final int column) {
     try {
@@ -264,7 +265,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
 
   /**
    * Find the schedule column name for the category name.
-   * 
+   *
    * @param categoryName subjective category name
    * @return the column name or null if not found
    */
@@ -421,8 +422,8 @@ public final class SubjectiveTableModel extends AbstractTableModel {
         } else {
           // numeric
 
-          double min = goalDescription.getMin();
-          double max = goalDescription.getMax();
+          final double min = goalDescription.getMin();
+          final double max = goalDescription.getMax();
 
           final ScoreType scoreType = goalDescription.getScoreType();
           try {
@@ -489,7 +490,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
 
   /**
    * Get the row index for a team number and judge
-   * 
+   *
    * @param teamNumber
    * @param judge
    * @return the row index, -1 if one cannot be found
@@ -548,7 +549,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
 
   /**
    * Find column for subcategory title.
-   * 
+   *
    * @param subcategory
    * @return the column, -1 if it cannot be found
    */
@@ -563,6 +564,6 @@ public final class SubjectiveTableModel extends AbstractTableModel {
 
   private final TournamentSchedule _schedule;
 
-  private final Collection<CategoryColumnMapping> _scheduleColumnMappings = new LinkedList<CategoryColumnMapping>();
+  private final Collection<CategoryColumnMapping> _scheduleColumnMappings = new LinkedList<>();
 
 }

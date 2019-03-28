@@ -29,12 +29,12 @@ import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.util.FormatterUtils;
-import fll.util.LogUtils;
+
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.WinnerType;
@@ -51,7 +51,7 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
                               "SE_BAD_FIELD_STORE" }, justification = "This class isn't going to be serialized")
 public final class ChallengeDescriptionEditor extends JPanel implements Validatable {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private final ChallengeDescription mDescription;
 

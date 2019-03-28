@@ -23,12 +23,12 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
-import org.apache.log4j.Logger;
+
 import org.w3c.dom.Document;
 
 import fll.Utilities;
 import fll.db.GenerateDB;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.UploadProcessor;
@@ -37,7 +37,7 @@ import fll.xml.ChallengeParser;
 @WebServlet("/developer/ReplaceChallengeDescriptor")
 public class ReplaceChallengeDescriptor extends BaseFLLServlet {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,

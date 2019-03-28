@@ -16,10 +16,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+
 
 import fll.db.Queries;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -27,7 +27,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  * Helpers for scoregenbrackets.jsp.
  */
 public class ScoregenBrackets {
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * @param application application context

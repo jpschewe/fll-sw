@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import fll.Team;
@@ -31,7 +31,7 @@ import fll.db.Queries;
 import fll.util.CellFileReader;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -43,7 +43,7 @@ import fll.web.UploadSpreadsheet;
 @WebServlet("/admin/ProcessTeamInformationUpload")
 public final class ProcessTeamInformationUpload extends BaseFLLServlet {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
