@@ -28,12 +28,12 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+
 import org.w3c.dom.Document;
 
 import fll.Utilities;
 import fll.db.DumpDB;
-import fll.util.LogUtils;
+
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -42,7 +42,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 @WebServlet("/GatherBugReport")
 public class GatherBugReport extends BaseFLLServlet {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,

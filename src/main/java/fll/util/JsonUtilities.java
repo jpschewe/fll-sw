@@ -12,7 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.GenerateDB;
@@ -31,7 +31,7 @@ import fll.xml.PerformanceScoreCategory;
  */
 public final class JsonUtilities {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private JsonUtilities() {
   }

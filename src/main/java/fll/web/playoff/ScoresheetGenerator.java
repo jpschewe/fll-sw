@@ -19,7 +19,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+
 
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
@@ -44,7 +44,7 @@ import fll.Version;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.util.FP;
-import fll.util.LogUtils;
+
 import fll.util.PdfUtils;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
@@ -58,7 +58,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  */
 public class ScoresheetGenerator {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private static final String LONG_BLANK = "_________________________";
 

@@ -17,10 +17,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+
 
 import fll.util.FormatterUtils;
-import fll.util.LogUtils;
+
 import fll.xml.GoalScope;
 import fll.xml.Variable;
 
@@ -29,7 +29,7 @@ import fll.xml.Variable;
  */
 public class VariableEditor extends JPanel implements Validatable {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private final JFormattedTextField mNameEditor;
 

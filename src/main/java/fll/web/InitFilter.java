@@ -22,13 +22,13 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+
 import org.w3c.dom.Document;
 
 import fll.Utilities;
 import fll.db.GlobalParameters;
 import fll.util.FLLRuntimeException;
-import fll.util.LogUtils;
+
 import fll.xml.ChallengeDescription;
 
 /**
@@ -37,7 +37,7 @@ import fll.xml.ChallengeDescription;
 @WebFilter("/*")
 public class InitFilter implements Filter {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * @see javax.servlet.Filter#destroy()

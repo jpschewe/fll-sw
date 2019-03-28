@@ -14,10 +14,10 @@ import javax.swing.Box;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 
-import org.apache.log4j.Logger;
+
 
 import fll.util.FormatterUtils;
-import fll.util.LogUtils;
+
 import fll.xml.GoalScope;
 import fll.xml.Restriction;
 
@@ -28,7 +28,7 @@ import fll.xml.Restriction;
  */
 public class RestrictionEditor extends PolynomialEditor {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private final Restriction restriction;
 

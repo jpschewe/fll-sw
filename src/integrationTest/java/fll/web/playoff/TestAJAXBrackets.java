@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.log4j.Logger;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ import org.xml.sax.SAXException;
 
 import fll.TestUtils;
 import fll.db.GenerateDB;
-import fll.util.LogUtils;
+
 import fll.web.IntegrationTestUtils;
 import fll.xml.BracketSortType;
 
@@ -39,7 +39,7 @@ import fll.xml.BracketSortType;
 @ExtendWith(IntegrationTestUtils.TomcatRequired.class)
 public class TestAJAXBrackets {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   public static final String JS_EVAL_TIMEOUT = "10000";
 

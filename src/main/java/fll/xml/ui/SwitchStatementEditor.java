@@ -16,11 +16,11 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import org.apache.log4j.Logger;
+
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
-import fll.util.LogUtils;
+
 import fll.xml.CaseStatement;
 import fll.xml.GoalScope;
 import fll.xml.SwitchStatement;
@@ -38,7 +38,7 @@ import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
                               "SE_BAD_FIELD_STORE" }, justification = "This class isn't going to be serialized")
 /* package */ final class SwitchStatementEditor extends JPanel implements Validatable {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private final GoalScope goalScope;
 

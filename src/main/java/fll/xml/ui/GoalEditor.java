@@ -20,10 +20,10 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import org.apache.log4j.Logger;
+
 
 import fll.util.FormatterUtils;
-import fll.util.LogUtils;
+
 import fll.xml.EnumeratedValue;
 import fll.xml.Goal;
 import fll.xml.ScoreType;
@@ -33,7 +33,7 @@ import fll.xml.ScoreType;
  */
 public class GoalEditor extends AbstractGoalEditor {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private final JFormattedTextField mMultiplierEditor;
 

@@ -14,13 +14,13 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
-import fll.util.LogUtils;
+
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
@@ -31,7 +31,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  */
 public final class ScoreStandardization {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * Thrown when there are not enough scores for a judging group.

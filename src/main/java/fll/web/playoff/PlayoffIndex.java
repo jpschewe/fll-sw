@@ -16,11 +16,11 @@ import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
-import org.apache.log4j.Logger;
+
 
 import fll.db.Queries;
 import fll.db.TournamentParameters;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
 import fll.web.admin.Tables;
@@ -30,7 +30,7 @@ import fll.web.admin.Tables;
  */
 public class PlayoffIndex {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * Instance of {@link PlayoffSessionData} is stored here.

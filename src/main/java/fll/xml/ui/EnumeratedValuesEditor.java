@@ -19,11 +19,11 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 
-import org.apache.log4j.Logger;
+
 
 import fll.scheduler.ButtonColumn;
 import fll.util.DatabaseNameCellEditor;
-import fll.util.LogUtils;
+
 import fll.xml.Goal;
 
 /**
@@ -31,7 +31,7 @@ import fll.xml.Goal;
  */
 class EnumeratedValuesEditor extends JPanel {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private final JTable table;
 

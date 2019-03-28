@@ -41,13 +41,11 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileFilter;
 
-import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.util.GuiExceptionHandler;
-import fll.util.LogUtils;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.ChallengeXMLException;
@@ -59,15 +57,13 @@ import net.mtu.eggplant.xml.XMLUtils;
  * Frame that the challenge description editor lives in.
  */
 public class ChallengeDescriptionFrame extends JFrame {
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * @param args
    * @throws IOException
    */
   public static void main(final String[] args) throws IOException {
-    LogUtils.initializeLogging();
-
     Thread.setDefaultUncaughtExceptionHandler(new GuiExceptionHandler());
 
     // Use cross platform look and feel so that things look right all of the
@@ -283,7 +279,7 @@ public class ChallengeDescriptionFrame extends JFrame {
    * Set the current file. Separate from
    * {@link #setChallengeDescription(File, ChallengeDescription)} for working with
    * {@link #mSaveAsAction}
-   * 
+   *
    * @param file the file where the challenge is saved
    */
   private void setCurrentFile(final File file,

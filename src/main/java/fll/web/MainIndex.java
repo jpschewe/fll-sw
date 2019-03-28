@@ -14,18 +14,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+
 
 import fll.Tournament;
 import fll.db.Queries;
-import fll.util.LogUtils;
+
 
 /**
  * Code for /index.jsp.
  */
 public class MainIndex {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * Populate the page context with information for the jsp.

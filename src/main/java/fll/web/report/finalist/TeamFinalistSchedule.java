@@ -26,7 +26,7 @@ import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
-import org.apache.log4j.Logger;
+
 
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -41,7 +41,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.TournamentTeam;
 import fll.db.Queries;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.report.ReportPageEventHandler;
@@ -55,7 +55,7 @@ import fll.xml.ChallengeDescription;
 @WebServlet("/report/finalist/TeamFinalistSchedule")
 public class TeamFinalistSchedule extends BaseFLLServlet {
 
-  private static final Logger LOG = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOG = org.apache.logging.log4j.LogManager.getLogger();
 
   private static final Font VALUE_FONT = FontFactory.getFont(FontFactory.HELVETICA, 10, Font.NORMAL);
 

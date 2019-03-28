@@ -15,14 +15,14 @@ import java.io.Reader;
 import java.net.URL;
 import java.util.Collection;
 
-import org.apache.log4j.Logger;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Document;
 
 import fll.TestUtils;
 import fll.Utilities;
-import fll.util.LogUtils;
+
 
 /**
  * Test various aspects of the XML document parsing.
@@ -30,7 +30,7 @@ import fll.util.LogUtils;
 @ExtendWith(TestUtils.InitializeLogging.class)
 public class ChallengeParserTest {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * Load illegal-restriction.xml and ensure an exception is thrown on the

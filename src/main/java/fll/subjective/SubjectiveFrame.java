@@ -11,7 +11,6 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
@@ -70,7 +69,6 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyledDocument;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -83,7 +81,6 @@ import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.GuiExceptionHandler;
-import fll.util.LogUtils;
 import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
@@ -99,11 +96,9 @@ import net.mtu.eggplant.xml.XMLUtils;
  */
 public final class SubjectiveFrame extends JFrame {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   public static void main(final String[] args) {
-    LogUtils.initializeLogging();
-
     GuiExceptionHandler.registerExceptionHandler();
 
     // Use cross platform look and feel so that things look right all of the
@@ -163,16 +158,34 @@ public final class SubjectiveFrame extends JFrame {
 
     final JButton quitButton = new JButton("Quit");
     topPanel.add(quitButton);
-    quitButton.addActionListener(new ActionListener() {
-      public void actionPerformed(final ActionEvent ae) {
-        quit();
-      }
-    });
+    quitButton.addActionListener(ae -> quit());
 
     final JButton saveButton = new JButton("Save");
     topPanel.add(saveButton);
-    saveButton.addActionListener(new ActionListener() {
-      public void actionPerformed(final ActionEvent ae) {
+    saveButton.addActionListener(ae -> {
+      try {
+        save();
+      } catch (final IOException ioe) {
+        JOptionPane.showMessageDialog(null, "Error writing to data file: "
+            + ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+      }
+
+    });
+
+    final JButton summaryButton = new JButton("Summary");
+    topPanel.add(summaryButton);
+    summaryButton.addActionListener(ae -> {
+      final SummaryDialog dialog = new SummaryDialog(SubjectiveFrame.this);
+
+      dialog.pack();
+      dialog.setVisible(true);
+    });
+
+    final JButton compareButton = new JButton("Compare Scores");
+    topPanel.add(compareButton);
+    compareButton.addActionListener(ae -> {
+      final File compareFile = chooseSubjectiveFile("Choose the file to compare with");
+      if (null != compareFile) {
         try {
           save();
         } catch (final IOException ioe) {
@@ -180,62 +193,34 @@ public final class SubjectiveFrame extends JFrame {
               + ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
 
-      }
-    });
+        try {
+          final Collection<SubjectiveScoreDifference> diffs = SubjectiveUtils.compareSubjectiveFiles(getFile(),
+                                                                                                     compareFile);
+          if (null == diffs) {
+            JOptionPane.showMessageDialog(null, "Challenge descriptors are different, comparison failed", "Error",
+                                          JOptionPane.ERROR_MESSAGE);
 
-    final JButton summaryButton = new JButton("Summary");
-    topPanel.add(summaryButton);
-    summaryButton.addActionListener(new ActionListener() {
-      public void actionPerformed(final ActionEvent ae) {
-        final SummaryDialog dialog = new SummaryDialog(SubjectiveFrame.this);
-
-        dialog.pack();
-        dialog.setVisible(true);
-      }
-    });
-
-    final JButton compareButton = new JButton("Compare Scores");
-    topPanel.add(compareButton);
-    compareButton.addActionListener(new ActionListener() {
-      public void actionPerformed(final ActionEvent ae) {
-        final File compareFile = chooseSubjectiveFile("Choose the file to compare with");
-        if (null != compareFile) {
-          try {
-            save();
-          } catch (final IOException ioe) {
-            JOptionPane.showMessageDialog(null, "Error writing to data file: "
-                + ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-          }
-
-          try {
-            final Collection<SubjectiveScoreDifference> diffs = SubjectiveUtils.compareSubjectiveFiles(getFile(),
-                                                                                                       compareFile);
-            if (null == diffs) {
-              JOptionPane.showMessageDialog(null, "Challenge descriptors are different, comparison failed", "Error",
-                                            JOptionPane.ERROR_MESSAGE);
-
-            } else if (!diffs.isEmpty()) {
-              showDifferencesDialog(diffs);
-            } else {
-              JOptionPane.showMessageDialog(null, "No differences found", "No Differences",
-                                            JOptionPane.INFORMATION_MESSAGE);
-
-            }
-          } catch (final SAXParseException spe) {
-            final String errorMessage = String.format("Error parsing file line: %d column: %d%n Message: %s%n This may be caused by using the wrong version of the software attempting to parse a file that is not subjective data.",
-                                                      spe.getLineNumber(), spe.getColumnNumber(), spe.getMessage());
-            LOGGER.error(errorMessage, spe);
-            JOptionPane.showMessageDialog(null, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
-          } catch (final SAXException se) {
-            final String errorMessage = "The subjective scores file was found to be invalid, check that you are parsing a subjective scores file and not something else";
-            LOGGER.error(errorMessage, se);
-            JOptionPane.showMessageDialog(null, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
-          } catch (final IOException e) {
-            LOGGER.error("Error reading compare file", e);
-            JOptionPane.showMessageDialog(null, "Error reading compare file: "
-                + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+          } else if (!diffs.isEmpty()) {
+            showDifferencesDialog(diffs);
+          } else {
+            JOptionPane.showMessageDialog(null, "No differences found", "No Differences",
+                                          JOptionPane.INFORMATION_MESSAGE);
 
           }
+        } catch (final SAXParseException spe) {
+          final String errorMessage1 = String.format("Error parsing file line: %d column: %d%n Message: %s%n This may be caused by using the wrong version of the software attempting to parse a file that is not subjective data.",
+                                                    spe.getLineNumber(), spe.getColumnNumber(), spe.getMessage());
+          LOGGER.error(errorMessage1, spe);
+          JOptionPane.showMessageDialog(null, errorMessage1, "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (final SAXException se) {
+          final String errorMessage2 = "The subjective scores file was found to be invalid, check that you are parsing a subjective scores file and not something else";
+          LOGGER.error(errorMessage2, se);
+          JOptionPane.showMessageDialog(null, errorMessage2, "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (final IOException e) {
+          LOGGER.error("Error reading compare file", e);
+          JOptionPane.showMessageDialog(null, "Error reading compare file: "
+              + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+
         }
       }
     });
@@ -277,7 +262,7 @@ public final class SubjectiveFrame extends JFrame {
 
   /**
    * Load data. Meant for testing. Most users should use #promptForFile().
-   * 
+   *
    * @param file where to read the data in from and where to save data to
    * @throws IOException if there is an error loading the file
    */
@@ -399,13 +384,13 @@ public final class SubjectiveFrame extends JFrame {
       final TableColumn column = table.getColumnModel().getColumn(goalIndex
           + tableModel.getNumColumnsLeftOfScores());
       if (goal.isEnumerated()) {
-        final Vector<String> posValues = new Vector<String>();
+        final Vector<String> posValues = new Vector<>();
         posValues.add("");
         for (final EnumeratedValue posValue : goal.getSortedValues()) {
           posValues.add(posValue.getTitle());
         }
 
-        column.setCellEditor(new DefaultCellEditor(new JComboBox<String>(posValues)));
+        column.setCellEditor(new DefaultCellEditor(new JComboBox<>(posValues)));
       } else {
         final JTextField editor = new SelectTextField();
         column.setCellEditor(new DefaultCellEditor(editor));
@@ -429,6 +414,7 @@ public final class SubjectiveFrame extends JFrame {
     // Tab to the next editable cell. When no editable cells goto next cell.
     final Action oldTabAction = table.getActionMap().get(im.get(tab));
     final Action tabAction = new AbstractAction() {
+      @Override
       public void actionPerformed(final ActionEvent e) {
         if (null != oldTabAction) {
           oldTabAction.actionPerformed(e);
@@ -469,7 +455,7 @@ public final class SubjectiveFrame extends JFrame {
 
   /**
    * Find tab index for category title.
-   * 
+   *
    * @param category
    * @return the tab index, -1 on error
    */
@@ -492,6 +478,7 @@ public final class SubjectiveFrame extends JFrame {
     table.setGridColor(Color.BLACK);
 
     table.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseClicked(final MouseEvent e) {
         if (e.getClickCount() == 2) {
           final JTable target = (JTable) e.getSource();
@@ -533,7 +520,7 @@ public final class SubjectiveFrame extends JFrame {
 
   /**
    * Prompt the user for a file.
-   * 
+   *
    * @param title the title on the chooser dialog
    * @return the file if accepted, null if canceled
    */
@@ -584,14 +571,14 @@ public final class SubjectiveFrame extends JFrame {
    * of these columns are set in a row. This avoids the case of partial data.
    * This method is fail fast in that it will display a dialog box on the first
    * error it finds.
-   * 
+   *
    * @return true if everything is ok
    */
   @SuppressFBWarnings(value = "SIC_INNER_SHOULD_BE_STATIC_ANON", justification = "Static inner class to replace anonomous listener isn't worth the confusion of finding the class definition")
   private boolean validateData() {
     stopCellEditors();
 
-    final List<String> warnings = new LinkedList<String>();
+    final List<String> warnings = new LinkedList<>();
     for (final SubjectiveScoreCategory subjectiveCategory : getChallengeDescription().getSubjectiveCategories()) {
       final String category = subjectiveCategory.getName();
       final String categoryTitle = subjectiveCategory.getTitle();
@@ -639,11 +626,9 @@ public final class SubjectiveFrame extends JFrame {
       cpane.setLayout(new BorderLayout());
       final JButton okButton = new JButton("Ok");
       cpane.add(okButton, BorderLayout.SOUTH);
-      okButton.addActionListener(new ActionListener() {
-        public void actionPerformed(final ActionEvent ae) {
-          dialog.setVisible(false);
-          dialog.dispose();
-        }
+      okButton.addActionListener(ae -> {
+        dialog.setVisible(false);
+        dialog.dispose();
       });
       cpane.add(new JTextPane(doc), BorderLayout.CENTER);
       dialog.pack();
@@ -674,7 +659,7 @@ public final class SubjectiveFrame extends JFrame {
 
   /**
    * Save out to the same file that things were read in.
-   * 
+   *
    * @throws IOException if an error occurs writing to the file
    */
   public void save() throws IOException {
@@ -697,7 +682,7 @@ public final class SubjectiveFrame extends JFrame {
   /**
    * Set the initial directory preference. This supports opening new file
    * dialogs to a (hopefully) better default in the user's next session.
-   * 
+   *
    * @param dir the File for the directory in which file dialogs should open
    */
   private static void setInitialDirectory(final File dir) {
@@ -720,7 +705,7 @@ public final class SubjectiveFrame extends JFrame {
   /**
    * Get the initial directory to which file dialogs should open. This supports
    * opening to a better directory across sessions.
-   * 
+   *
    * @return the File for the initial directory
    */
   private static File getInitialDirectory() {
@@ -739,7 +724,7 @@ public final class SubjectiveFrame extends JFrame {
    */
   private static final String INITIAL_DIRECTORY_PREFERENCE_KEY = "InitialDirectory";
 
-  private final Map<String, JTable> _tables = new HashMap<String, JTable>();
+  private final Map<String, JTable> _tables = new HashMap<>();
 
   public JTable getTableForTitle(final String title) {
     final JTable table = _tables.get(title);

@@ -23,13 +23,13 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
 import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -59,7 +59,7 @@ public class GatherJudgeInformation extends BaseFLLServlet {
    */
   public static final String STATIONS_KEY = "JUDGING_STATIONS";
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * String used for all divisions when assigning judges.

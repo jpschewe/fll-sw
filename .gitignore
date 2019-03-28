@@ -21,3 +21,4 @@ import_*
 tmp-web
 .gradle
 .classpath
+logs/

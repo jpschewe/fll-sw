@@ -21,10 +21,10 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.MaskFormatter;
 
-import org.apache.log4j.Logger;
+
 
 import fll.util.FLLInternalException;
-import fll.util.LogUtils;
+
 
 /**
  * Field for displaying schedule times.
@@ -127,7 +127,7 @@ import fll.util.LogUtils;
    */
   public static class TimeVerifier extends InputVerifier {
 
-    private static final Logger LOGGER = LogUtils.getLogger();
+    private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
     public static final Color INVALID_COLOR = Color.red;
 

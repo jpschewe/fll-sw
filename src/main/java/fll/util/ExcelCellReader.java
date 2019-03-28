@@ -16,7 +16,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -42,7 +42,7 @@ import fll.scheduler.TournamentSchedule;
  */
 public class ExcelCellReader extends CellFileReader {
 
-  private static Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private final DataFormatter formatter;
 

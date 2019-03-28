@@ -22,7 +22,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+
 
 import com.diffplug.common.base.Errors;
 
@@ -36,7 +36,7 @@ import fll.util.DummyTeamScore;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.FP;
-import fll.util.LogUtils;
+
 import fll.xml.AbstractGoal;
 import fll.xml.BracketSortType;
 import fll.xml.ChallengeDescription;
@@ -53,7 +53,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  */
 public final class Playoff {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * Tolerance for comparing floating point numbers in the tiebreaker.

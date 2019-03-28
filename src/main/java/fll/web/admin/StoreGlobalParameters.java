@@ -19,11 +19,11 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+
 
 import fll.db.GlobalParameters;
 import fll.flltools.MhubParameters;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -34,7 +34,7 @@ import fll.web.SessionAttributes;
 @WebServlet("/admin/StoreGlobalParameters")
 public class StoreGlobalParameters extends BaseFLLServlet {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   @Override
   protected void processRequest(final HttpServletRequest request,

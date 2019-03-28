@@ -21,12 +21,12 @@ import javax.sql.DataSource;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
-import org.apache.log4j.Logger;
+
 
 import fll.Utilities;
 import fll.db.ImportDB;
 import fll.db.Queries;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -41,7 +41,7 @@ import fll.web.developer.importdb.ImportDbSessionInfo;
 @WebServlet("/admin/ProcessImportPerformance")
 public class ProcessImportPerformance extends BaseFLLServlet {
 
-  private static final Logger LOG = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOG = org.apache.logging.log4j.LogManager.getLogger();
 
   @Override
   protected void processRequest(final HttpServletRequest request,

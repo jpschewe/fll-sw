@@ -15,11 +15,11 @@ import javax.servlet.ServletContext;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+
 
 import fll.Tournament;
 import fll.db.GenerateDB;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 
 /**
@@ -27,7 +27,7 @@ import fll.web.ApplicationAttributes;
  */
 public final class Tournaments {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * The key used for new tournaments so that {@link StoreTournamentData} knows

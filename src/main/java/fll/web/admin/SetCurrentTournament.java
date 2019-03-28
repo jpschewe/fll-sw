@@ -19,11 +19,11 @@ import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
-import org.apache.log4j.Logger;
+
 
 import fll.Tournament;
 import fll.db.Queries;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 
@@ -33,7 +33,7 @@ import fll.web.BaseFLLServlet;
 @WebServlet("/admin/SetCurrentTournament")
 public class SetCurrentTournament extends BaseFLLServlet {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,

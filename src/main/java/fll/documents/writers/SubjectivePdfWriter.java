@@ -11,7 +11,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-import org.apache.log4j.Logger;
+
 
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
@@ -33,7 +33,7 @@ import fll.documents.elements.SheetElement;
 import fll.documents.elements.TableElement;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
-import fll.util.LogUtils;
+
 import fll.util.PdfUtils;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
@@ -43,7 +43,7 @@ import fll.xml.SubjectiveScoreCategory;
 import net.mtu.eggplant.util.Pair;
 
 public class SubjectivePdfWriter {
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private final ChallengeDescription description;
 

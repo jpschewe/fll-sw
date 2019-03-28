@@ -18,14 +18,14 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Team;
 import fll.db.GlobalParameters;
 import fll.util.FLLInternalException;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 import fll.web.DisplayInfo;
 
@@ -34,7 +34,7 @@ import fll.web.DisplayInfo;
  */
 public class RemoteControlBrackets {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   public static void populateContext(final ServletContext application,
                                      final HttpSession session,
