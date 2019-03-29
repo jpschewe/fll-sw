@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
-import java.io.Serializable;
 import java.text.ParseException;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
@@ -40,6 +39,7 @@ import org.apache.commons.cli.PosixParser;
 
 import com.opencsv.CSVWriter;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.scheduler.SchedParams.InvalidParametersException;
 import fll.util.CheckCanceled;
@@ -1639,7 +1639,8 @@ public class GreedySolver {
     }
   };
 
-  private static final class FewestAssignments implements Comparator<SchedTeam>, Serializable {
+  @SuppressFBWarnings(value = "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE", justification = "This comparator is not used in a TreeMap or other serializable class")
+  private static final class FewestAssignments implements Comparator<SchedTeam> {
 
     private final GreedySolver solver;
 
