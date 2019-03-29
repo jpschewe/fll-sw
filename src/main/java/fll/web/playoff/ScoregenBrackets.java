@@ -71,13 +71,13 @@ public class ScoregenBrackets {
           + Queries.getNumPlayoffRounds(connection, tournament, division);
 
       int lastRound;
-      String lastRoundStr = request.getParameter("lastRound");
+      final String lastRoundStr = request.getParameter("lastRound");
       if (null == lastRoundStr) {
         lastRound = 1;
       } else {
         try {
           lastRound = Integer.parseInt(lastRoundStr);
-        } catch (NumberFormatException nfe) {
+        } catch (final NumberFormatException nfe) {
           lastRound = lastColumn;
         }
       }
