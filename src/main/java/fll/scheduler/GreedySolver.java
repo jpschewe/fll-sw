@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.Serializable;
 import java.text.ParseException;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
@@ -1638,7 +1639,7 @@ public class GreedySolver {
     }
   };
 
-  private static final class FewestAssignments implements Comparator<SchedTeam> {
+  private static final class FewestAssignments implements Comparator<SchedTeam>, Serializable {
 
     private final GreedySolver solver;
 
