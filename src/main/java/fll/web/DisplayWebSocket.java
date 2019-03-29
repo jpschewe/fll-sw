@@ -20,9 +20,9 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
-import org.apache.log4j.Logger;
 
-import fll.util.LogUtils;
+
+
 
 /**
  * Handle updating the big screen display pages.
@@ -30,7 +30,7 @@ import fll.util.LogUtils;
 @ServerEndpoint(value = "/DisplayWebSocket", configurator = GetHttpSessionConfigurator.class)
 public class DisplayWebSocket {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * session -> display name

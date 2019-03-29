@@ -8,7 +8,7 @@ package fll.web;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
-import org.apache.log4j.Logger;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.WebDriver;
@@ -16,7 +16,7 @@ import org.xml.sax.SAXException;
 
 import fll.TestUtils;
 import fll.db.GenerateDB;
-import fll.util.LogUtils;
+
 
 /**
  * Basic tests of loading pages.
@@ -25,7 +25,7 @@ import fll.util.LogUtils;
 @ExtendWith(IntegrationTestUtils.TomcatRequired.class)
 public class WebTest {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * Basic load of the pages.

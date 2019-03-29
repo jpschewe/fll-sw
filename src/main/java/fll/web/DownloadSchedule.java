@@ -18,14 +18,14 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.ProcessingInstruction;
 
 import fll.Utilities;
 import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
-import fll.util.LogUtils;
+
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.XMLUtils;
 
@@ -35,7 +35,7 @@ import net.mtu.eggplant.xml.XMLUtils;
 @WebServlet("/schedule.xml")
 public class DownloadSchedule extends BaseFLLServlet {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   @Override
   protected void processRequest(final HttpServletRequest request,

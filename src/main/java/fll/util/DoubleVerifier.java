@@ -12,7 +12,7 @@ import javax.swing.InputVerifier;
 import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
 
-import org.apache.log4j.Logger;
+
 
 /**
  * Ensure that the value is a valid double between the minimum value and the
@@ -20,7 +20,7 @@ import org.apache.log4j.Logger;
  */
 public class DoubleVerifier extends InputVerifier {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   public static final Color INVALID_COLOR = Color.red;
 

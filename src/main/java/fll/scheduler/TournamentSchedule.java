@@ -54,7 +54,7 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -83,7 +83,7 @@ import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
-import fll.util.LogUtils;
+
 import fll.util.PdfUtils;
 import fll.util.SimpleFooterHandler;
 import fll.web.playoff.ScoresheetGenerator;
@@ -105,7 +105,7 @@ import net.mtu.eggplant.xml.XMLUtils;
  * </p>
  */
 public class TournamentSchedule implements Serializable {
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * How wide to make the line between time separations in the "by time" schedule

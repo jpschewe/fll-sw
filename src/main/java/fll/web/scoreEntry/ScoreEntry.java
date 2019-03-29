@@ -22,13 +22,13 @@ import javax.servlet.jsp.JspWriter;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+
 
 import fll.Team;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.util.FP;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
 import fll.xml.AbstractConditionStatement;
@@ -61,7 +61,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  */
 public final class ScoreEntry {
 
-  private static final Logger LOG = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOG = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * Number of spaces to indent code at each level.

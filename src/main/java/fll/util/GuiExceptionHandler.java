@@ -10,7 +10,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
 
 import javax.swing.JOptionPane;
 
-import org.apache.log4j.Logger;
+
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -20,7 +20,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  */
 public class GuiExceptionHandler implements UncaughtExceptionHandler {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   public GuiExceptionHandler() {
   }

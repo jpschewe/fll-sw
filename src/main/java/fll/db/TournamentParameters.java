@@ -11,10 +11,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.apache.log4j.Logger;
+
 
 import fll.util.FLLInternalException;
-import fll.util.LogUtils;
+
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -37,7 +37,7 @@ public final class TournamentParameters {
 
   public static final boolean RUNNING_HEAD_2_HEAD_DEFAULT = true;
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * Get the value of a tournament parameter

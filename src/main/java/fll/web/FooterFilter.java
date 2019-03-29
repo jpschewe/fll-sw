@@ -22,10 +22,10 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
+
 
 import fll.Version;
-import fll.util.LogUtils;
+
 
 /**
  * Ensure that all HTML pages get the same footer.
@@ -33,7 +33,7 @@ import fll.util.LogUtils;
 @WebFilter("/*")
 public class FooterFilter implements Filter {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * @see javax.servlet.Filter#destroy()

@@ -17,10 +17,10 @@ import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
-import org.apache.log4j.Logger;
+
 
 import fll.db.Queries;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 import fll.web.playoff.Playoff;
 import fll.web.report.finalist.FinalistSchedule;
@@ -30,7 +30,7 @@ import fll.web.report.finalist.FinalistSchedule;
  */
 public class RemoteControl {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   public static void populateContext(final ServletContext application,
                                      final PageContext pageContext) {

@@ -77,6 +77,7 @@ ext {
     itext_version = "5.5.13"
     poi_version = "4.0.1"
     junit_version = "5.4.0"
+    log4j_version = "2.11.2"
 
     web_build_dir = new File(project.buildDir, 'web')
     documentation_build_dir = new File(project.buildDir, 'gen-documentation')    
@@ -105,11 +106,11 @@ dependencies {
     
     implementation group: "com.itextpdf", name: "itextpdf", version: project.itext_version
     
-    implementation group: "log4j", name: "log4j", version: "1.2.17"
-    implementation group: "log4j", name: "apache-log4j-extras", version: "1.2.17"
+    runtimeOnly group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: project.log4j_version
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: project.log4j_version    
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: project.log4j_version    
     
     implementation group: "org.slf4j", name: "slf4j-api", version: project.slf4j_version
-    implementation group: "org.slf4j", name: "slf4j-log4j12", version: project.slf4j_version
     
     implementation group: "org.apache.poi", name: "poi-ooxml", version: project.poi_version
     

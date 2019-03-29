@@ -22,10 +22,10 @@ import javax.sql.DataSource;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.log4j.Logger;
+
 
 import fll.db.Queries;
-import fll.util.LogUtils;
+
 
 /**
  * Handle login credentials and if incorrect redirect back to login page.
@@ -33,7 +33,7 @@ import fll.util.LogUtils;
 @WebServlet("/DoLogin")
 public class DoLogin extends BaseFLLServlet {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   @Override
   protected void processRequest(final HttpServletRequest request,

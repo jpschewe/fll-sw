@@ -18,13 +18,13 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
-import org.apache.log4j.Logger;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import fll.Utilities;
-import fll.util.LogUtils;
+
 import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.ChallengeParser;
 import net.mtu.eggplant.util.ComparisonUtils;
@@ -36,7 +36,7 @@ import net.mtu.eggplant.xml.XMLUtils;
  */
 public final class SubjectiveUtils {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private SubjectiveUtils() {
     // no instances

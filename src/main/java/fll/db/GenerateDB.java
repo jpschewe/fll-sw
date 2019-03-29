@@ -15,14 +15,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.apache.log4j.Logger;
+
 import org.w3c.dom.Document;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
-import fll.util.LogUtils;
+
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
@@ -40,7 +40,7 @@ public final class GenerateDB {
    */
   public static final int DATABASE_VERSION = 17;
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private GenerateDB() {
     // no instances

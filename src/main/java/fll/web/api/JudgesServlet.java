@@ -28,7 +28,7 @@ import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,7 +36,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
 import fll.db.Queries;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 
 /**
@@ -46,7 +46,7 @@ import fll.web.ApplicationAttributes;
 @WebServlet("/api/Judges/*")
 public class JudgesServlet extends HttpServlet {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   @Override
   protected final void doGet(final HttpServletRequest request,

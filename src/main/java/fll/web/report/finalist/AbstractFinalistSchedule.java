@@ -22,7 +22,7 @@ import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
-import org.apache.log4j.Logger;
+
 
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -42,7 +42,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.Team;
 import fll.db.Queries;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.xml.ChallengeDescription;
@@ -60,7 +60,7 @@ abstract public class AbstractFinalistSchedule extends BaseFLLServlet {
 
   private static final Font SCHEDULE_FONT = FontFactory.getFont(FontFactory.HELVETICA, 10, Font.NORMAL);
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   protected void processRequest(final String division,
                                 final boolean showPrivate,

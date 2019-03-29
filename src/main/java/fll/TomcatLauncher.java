@@ -21,16 +21,13 @@ import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.webresources.DirResourceSet;
 import org.apache.catalina.webresources.StandardRoot;
-import org.apache.log4j.Logger;
-
-import fll.util.LogUtils;
 
 /**
  * Launcher for embedded tomcat.
  */
 public class TomcatLauncher {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private final Tomcat tomcat;
 
@@ -93,7 +90,7 @@ public class TomcatLauncher {
         + tmpDir.toAbsolutePath().toString());
     tomcat.setBaseDir(tmpDir.toAbsolutePath().toString());
 
-    final StandardContext ctx = (StandardContext) tomcat.addWebapp("/", webRoot.toAbsolutePath().toString());
+    final StandardContext ctx = (StandardContext) tomcat.addWebapp("", webRoot.toAbsolutePath().toString());
 
     // delegate to parent classloader first. This allows the web application
     // to use the application classpath.
@@ -145,7 +142,7 @@ public class TomcatLauncher {
 
   /**
    * Start the server.
-   * 
+   *
    * @throws LifecycleException if an error occurs
    */
   public void start() throws LifecycleException {
@@ -155,7 +152,7 @@ public class TomcatLauncher {
   /**
    * Stop the server. This object cannot be used after this method has been
    * called.
-   * 
+   *
    * @throws LifecycleException if an error occurs
    */
   public void stop() throws LifecycleException {

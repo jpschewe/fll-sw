@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,7 +38,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.SubjectiveScore;
 import fll.Tournament;
 import fll.db.Queries;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 import fll.web.admin.UploadSubjectiveData;
 import fll.xml.AbstractGoal;
@@ -53,7 +53,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 @WebServlet("/api/SubjectiveScores/*")
 public class SubjectiveScoresServlet extends HttpServlet {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns and category are dynamic")
   @Override

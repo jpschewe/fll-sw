@@ -16,11 +16,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.Logger;
+
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import fll.util.CellFileReader;
-import fll.util.LogUtils;
+
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UploadSpreadsheet;
@@ -32,7 +32,7 @@ import fll.web.UploadSpreadsheet;
 @WebServlet("/admin/UploadTeamInformation")
 public final class UploadTeamInformation extends BaseFLLServlet {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * Key in the session to get the {@link String} filename that is the

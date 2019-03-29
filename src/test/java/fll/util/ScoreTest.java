@@ -22,7 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Document;
@@ -43,7 +43,7 @@ import fll.xml.PerformanceScoreCategory;
 @ExtendWith(TestUtils.InitializeLogging.class)
 public class ScoreTest {
 
-  private static final Logger LOG = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOG = org.apache.logging.log4j.LogManager.getLogger();
 
   private PerformanceScoreCategory loadDocumentAndGetPerformanceElemnt(final InputStream stream) {
     assertNotNull(stream);

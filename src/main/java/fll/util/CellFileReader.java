@@ -14,7 +14,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.apache.log4j.Logger;
+
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import fll.Utilities;
@@ -24,7 +24,7 @@ import fll.Utilities;
  */
 public abstract class CellFileReader implements Closeable {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * @return The most recent line read (0-based)

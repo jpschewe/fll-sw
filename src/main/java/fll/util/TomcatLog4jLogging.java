@@ -7,8 +7,9 @@
 package fll.util;
 
 import org.apache.juli.logging.Log;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 /**
  * Send Tomcat log data to log4j.
@@ -19,43 +20,43 @@ public class TomcatLog4jLogging implements Log {
 
   // this constructor is important, otherwise the ServiceLoader cannot start
   public TomcatLog4jLogging() {
-    logger = Logger.getLogger(TomcatLog4jLogging.class);
+    logger = LogManager.getLogger(TomcatLog4jLogging.class);
   }
 
   // this constructor is needed by the LogFactory implementation
   public TomcatLog4jLogging(final String name) {
-    logger = Logger.getLogger(name);
+    logger = LogManager.getLogger(name);
   }
 
   // now we have to implement the `Log` interface
   @Override
   public boolean isFatalEnabled() {
-    return logger.isEnabledFor(Level.FATAL);
+    return logger.isFatalEnabled();
   }
 
   @Override
   public boolean isDebugEnabled() {
-    return logger.isEnabledFor(Level.DEBUG);
+    return logger.isDebugEnabled();
   }
 
   @Override
   public boolean isErrorEnabled() {
-    return logger.isEnabledFor(Level.ERROR);
+    return logger.isErrorEnabled();
   }
 
   @Override
   public boolean isInfoEnabled() {
-    return logger.isEnabledFor(Level.INFO);
+    return logger.isInfoEnabled();
   }
 
   @Override
   public boolean isWarnEnabled() {
-    return logger.isEnabledFor(Level.WARN);
+    return logger.isWarnEnabled();
   }
 
   @Override
   public boolean isTraceEnabled() {
-    return logger.isEnabledFor(Level.TRACE);
+    return logger.isTraceEnabled();
   }
 
   @Override

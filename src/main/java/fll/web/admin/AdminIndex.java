@@ -17,13 +17,13 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+
 
 import fll.Tournament;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.scheduler.TournamentSchedule;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
 import fll.xml.ChallengeDescription;
@@ -33,7 +33,7 @@ import fll.xml.ChallengeDescription;
  */
 public class AdminIndex {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * Populate page context with variables for the admin index page.

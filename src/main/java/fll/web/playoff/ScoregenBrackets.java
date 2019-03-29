@@ -7,27 +7,21 @@
 package fll.web.playoff;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
-
 import fll.db.Queries;
-import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Helpers for scoregenbrackets.jsp.
  */
 public class ScoregenBrackets {
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * @param application application context
@@ -37,12 +31,8 @@ public class ScoregenBrackets {
                                      final HttpServletRequest request,
                                      final PageContext pageContext) {
 
-    Connection connection = null;
-    Statement stmt = null;
-    ResultSet rs = null;
-    try {
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
-      connection = datasource.getConnection();
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (final Connection connection = datasource.getConnection()) {
 
       String division = request.getParameter("division");
       if (null == division) {
@@ -55,13 +45,13 @@ public class ScoregenBrackets {
       pageContext.setAttribute("division", division);
 
       int firstRound;
-      String firstRoundStr = request.getParameter("firstRound");
+      final String firstRoundStr = request.getParameter("firstRound");
       if (null == firstRoundStr) {
         firstRound = 1;
       } else {
         try {
           firstRound = Integer.parseInt(firstRoundStr);
-        } catch (NumberFormatException nfe) {
+        } catch (final NumberFormatException nfe) {
           firstRound = 1;
         }
       }
@@ -71,13 +61,13 @@ public class ScoregenBrackets {
           + Queries.getNumPlayoffRounds(connection, tournament, division);
 
       int lastRound;
-      String lastRoundStr = request.getParameter("lastRound");
+      final String lastRoundStr = request.getParameter("lastRound");
       if (null == lastRoundStr) {
         lastRound = 1;
       } else {
         try {
           lastRound = Integer.parseInt(lastRoundStr);
-        } catch (NumberFormatException nfe) {
+        } catch (final NumberFormatException nfe) {
           lastRound = lastColumn;
         }
       }
@@ -107,10 +97,6 @@ public class ScoregenBrackets {
     } catch (final SQLException e) {
       LOGGER.error(e, e);
       throw new RuntimeException(e);
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
-      SQLFunctions.close(connection);
     }
 
   }

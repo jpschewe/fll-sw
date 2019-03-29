@@ -17,31 +17,26 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
+import org.w3c.dom.Document;
+
+import fll.Utilities;
+import fll.xml.ChallengeParser;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.sourceforge.schemaspy.Config;
 import net.sourceforge.schemaspy.SchemaAnalyzer;
 import net.sourceforge.schemaspy.model.InvalidConfigurationException;
-
-import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
-
-import fll.Utilities;
-import fll.util.LogUtils;
-import fll.xml.ChallengeParser;
 
 /**
  * Generate a schema diagram of our example database.
  */
 public class GenerateDatabaseDiagram {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * @param args
    */
   public static void main(final String[] args) {
-    LogUtils.initializeLogging();
-
     if (args.length != 1) {
       LOGGER.fatal("You must specify the output directory");
       return;
@@ -66,7 +61,7 @@ public class GenerateDatabaseDiagram {
 
       GenerateDB.generateDB(document, connection);
 
-      SchemaAnalyzer analyzer = new SchemaAnalyzer();
+      final SchemaAnalyzer analyzer = new SchemaAnalyzer();
       final Config config = new HsqlMemConfig();
       config.setAdsEnabled(false);
       config.setDb(dbname);

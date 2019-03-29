@@ -42,13 +42,11 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 
 import org.apache.catalina.LifecycleException;
-import org.apache.log4j.Logger;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.scheduler.SchedulerUI;
 import fll.subjective.SubjectiveFrame;
 import fll.util.GuiExceptionHandler;
-import fll.util.LogUtils;
 import fll.xml.ui.ChallengeDescriptionFrame;
 import it.sauronsoftware.junique.AlreadyLockedException;
 import it.sauronsoftware.junique.JUnique;
@@ -60,7 +58,7 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
 @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This class is not meant to be serialized")
 public class Launcher extends JFrame {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private static final String OPEN_MSG = "open";
 
@@ -72,7 +70,7 @@ public class Launcher extends JFrame {
   /**
    * Check that no other instance is running. If one is, send a message to bring
    * it to the front and then exit.
-   * 
+   *
    * @param thisLauncher this launcher, used to bring to the front
    */
   @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "Exiting when another instance is running is OK")
@@ -107,8 +105,6 @@ public class Launcher extends JFrame {
   }
 
   public static void main(final String[] args) {
-    LogUtils.initializeLogging();
-
     GuiExceptionHandler.registerExceptionHandler();
 
     // Use cross platform look and feel so that things look right all of the
@@ -463,7 +459,7 @@ public class Launcher extends JFrame {
       webserverLauncher.start();
 
       loadFllHtml();
-    } catch (LifecycleException e) {
+    } catch (final LifecycleException e) {
       LOGGER.fatal("Unexpected error starting webserver", e);
       JOptionPane.showMessageDialog(null, "Unexpected error starting webserver: "
           + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -502,7 +498,7 @@ public class Launcher extends JFrame {
 
   /**
    * Find the path to fll-sw.html.
-   * 
+   *
    * @return null if the file cannot be found
    */
   private Path getFLLHtmlFile() {
@@ -599,7 +595,7 @@ public class Launcher extends JFrame {
 
   /**
    * Find the path to index.html in the docs directory.
-   * 
+   *
    * @return null if the file cannot be found
    */
   private Path getDocsHtmlFile() {

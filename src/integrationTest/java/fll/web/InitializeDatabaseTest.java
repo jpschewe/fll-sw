@@ -3,13 +3,13 @@ package fll.web;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.log4j.Logger;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.WebDriver;
 
 import fll.TestUtils;
-import fll.util.LogUtils;
+
 
 /**
  * Test initializing the database via the web.
@@ -18,7 +18,7 @@ import fll.util.LogUtils;
 @ExtendWith(IntegrationTestUtils.TomcatRequired.class)
 public class InitializeDatabaseTest {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   @Test
   public void testInitializeDatabase(final WebDriver selenium) throws IOException, InterruptedException {

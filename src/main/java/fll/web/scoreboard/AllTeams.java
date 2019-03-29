@@ -21,14 +21,14 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+
 
 import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
 import fll.xml.ChallengeDescription;
@@ -39,7 +39,7 @@ import fll.xml.ScoreType;
  */
 public class AllTeams {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private static final int TEAMS_BETWEEN_LOGOS = 2;
 

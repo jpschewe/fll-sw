@@ -10,13 +10,13 @@ import javax.swing.DefaultCellEditor;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
-import org.apache.log4j.Logger;
 
-import fll.util.LogUtils;
+
+
 
 /*package*/ final class IntegerCellEditor extends DefaultCellEditor {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private final int minValue;
 

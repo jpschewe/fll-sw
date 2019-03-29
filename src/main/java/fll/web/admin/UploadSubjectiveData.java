@@ -35,7 +35,7 @@ import javax.sql.DataSource;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -48,7 +48,7 @@ import fll.Utilities;
 import fll.db.Queries;
 import fll.subjective.SubjectiveUtils;
 import fll.util.FLLRuntimeException;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.UploadProcessor;
@@ -67,7 +67,7 @@ import net.mtu.eggplant.xml.XMLUtils;
 @WebServlet("/admin/UploadSubjectiveData")
 public final class UploadSubjectiveData extends BaseFLLServlet {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,

@@ -11,11 +11,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 
+import org.apache.logging.log4j.ThreadContext;
+import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import fll.db.ImportDB;
-import fll.util.LogUtils;
 
 /**
  * Some utilities for writing tests.
@@ -49,26 +50,34 @@ public final class TestUtils {
 
   /**
    * Delete data created by an import that we don't care about.
-   * 
+   *
    * @param importResult the result of a database import
    * @throws IOException if there is an error deleting the files
    */
   public static void deleteImportData(final ImportDB.ImportResult importResult) throws IOException {
-    if (Files.exists(importResult.getImportDirectory()))
+    if (Files.exists(importResult.getImportDirectory())) {
       Files.walk(importResult.getImportDirectory()).sorted(Comparator.reverseOrder()).map(Path::toFile)
            .forEach(File::delete);
+    }
   }
 
   /**
-   * Setup logging before a test.
+   * Add method name to logging {@link ThreadContext}.
    */
-  public static class InitializeLogging implements BeforeTestExecutionCallback {
+  public static class InitializeLogging implements BeforeTestExecutionCallback, AfterTestExecutionCallback {
+
+    // TODO consider creating a log file per test
+    // https://stackoverflow.com/questions/52075223/log-file-per-junit-5-test-in-order-to-attach-it-to-the-allure-report
 
     @Override
     public void beforeTestExecution(final ExtensionContext context) throws Exception {
-      LogUtils.initializeLogging();
+      ThreadContext.push(context.getDisplayName());
     }
 
+    @Override
+    public void afterTestExecution(final ExtensionContext context) throws Exception {
+      ThreadContext.pop();
+    }
   }
 
 }

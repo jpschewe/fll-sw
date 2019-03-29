@@ -16,11 +16,11 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+
 
 import fll.Utilities;
 import fll.flltools.MhubMessageHandler;
-import fll.util.LogUtils;
+
 
 /**
  * Take care of initializing some variables in the servlet context.
@@ -28,7 +28,7 @@ import fll.util.LogUtils;
 @WebListener
 public class FLLContextListener implements ServletContextListener {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private MhubMessageHandler mhubMessageHandler = null;
 

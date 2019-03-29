@@ -12,10 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
-
-import fll.util.LogUtils;
-
 /**
  * Get version information about the FLL software.
  *
@@ -23,7 +19,7 @@ import fll.util.LogUtils;
  */
 public final class Version {
 
-  private static final Logger LOG = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOG = org.apache.logging.log4j.LogManager.getLogger();
 
   private static final Map<String, String> VERSION_INFORMATION;
 
@@ -72,8 +68,6 @@ public final class Version {
    * @param args
    */
   public static void main(final String[] args) {
-    LogUtils.initializeLogging();
-
     LOG.info("Version is: "
         + getVersion());
   }

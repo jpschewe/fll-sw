@@ -21,11 +21,11 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+
 
 import fll.db.TableInformation;
 import fll.util.FLLRuntimeException;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -38,7 +38,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 @WebServlet("/playoff/BracketParameters")
 public class BracketParameters extends BaseFLLServlet {
 
-  private static Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * Setup variables needed for the page.
