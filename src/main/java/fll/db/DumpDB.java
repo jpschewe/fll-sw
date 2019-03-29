@@ -149,7 +149,7 @@ public final class DumpDB extends BaseFLLServlet {
       } // ResultSet try
 
       if (null != application) {
-        GatherBugReport.addLogFiles(output, application);
+        GatherBugReport.addLogFiles(output);
 
         // find the bug reports
         addBugReports(output, application);

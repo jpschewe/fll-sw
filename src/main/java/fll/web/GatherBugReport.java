@@ -9,8 +9,12 @@ package fll.web;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -28,12 +32,10 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import org.apache.commons.io.IOUtils;
-
 import org.w3c.dom.Document;
 
 import fll.Utilities;
 import fll.db.DumpDB;
-
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -42,8 +44,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 @WebServlet("/GatherBugReport")
 public class GatherBugReport extends BaseFLLServlet {
 
-  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
-
+  @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -63,7 +64,8 @@ public class GatherBugReport extends BaseFLLServlet {
 
       final File fllWebInfDir = new File(application.getRealPath("/WEB-INF"));
       final String nowStr = new SimpleDateFormat("yyyy-MM-dd_HH-mm").format(new Date());
-      final File bugReportFile = File.createTempFile("bug_" + nowStr, ".zip", fllWebInfDir);
+      final File bugReportFile = File.createTempFile("bug_"
+          + nowStr, ".zip", fllWebInfDir);
 
       zipOut = new ZipOutputStream(new FileOutputStream(bugReportFile));
 
@@ -85,7 +87,7 @@ public class GatherBugReport extends BaseFLLServlet {
                          .getBytes(Utilities.DEFAULT_CHARSET));
 
       addDatabase(zipOut, connection, challengeDocument);
-      addLogFiles(zipOut, application);
+      addLogFiles(zipOut);
 
       message.append(String.format("<i>Bug report saved to '%s', please notify the computer person in charge to look for bug report files.</i>",
                                    bugReportFile.getAbsolutePath()));
@@ -105,7 +107,7 @@ public class GatherBugReport extends BaseFLLServlet {
 
   /**
    * Add the database to the zipfile.
-   * 
+   *
    * @throws SQLException
    */
   private static void addDatabase(final ZipOutputStream zipOut,
@@ -142,71 +144,29 @@ public class GatherBugReport extends BaseFLLServlet {
    * Prefix used in the zip files for logs.
    */
   public static final String LOGS_DIRECTORY = "logs/";
-  
+
   /**
    * Add the web application and tomcat logs to the zipfile. These files are put
    * in a "logs" subdirectory in the zip file.
-   * 
+   *
    * @param zipOut the stream to write to.
-   * @param application used to find the log files.
    */
-  public static void addLogFiles(@Nonnull final ZipOutputStream zipOut,
-                                 @Nonnull final ServletContext application)
-      throws IOException {
+  public static void addLogFiles(@Nonnull final ZipOutputStream zipOut) throws IOException {
 
     // add directory entry for the logs
-    final String logsDirectory = LOGS_DIRECTORY;
-    zipOut.putNextEntry(new ZipEntry(logsDirectory));
+    zipOut.putNextEntry(new ZipEntry(LOGS_DIRECTORY));
 
-    // get logs from the webapp
-    final File fllAppDir = new File(application.getRealPath("/"));
-    final File[] webLogs = fllAppDir.listFiles(new FilenameFilter() {
-      @Override
-      public boolean accept(final File dir,
-                            final String name) {
-        return name.startsWith("fllweb.log");
-      }
-    });
-    if (null != webLogs) {
-      for (final File f : webLogs) {
-        if (f.isFile()) {
-          FileInputStream fis = null;
-          try {
-            zipOut.putNextEntry(new ZipEntry(logsDirectory
-                + f.getName()));
-            fis = new FileInputStream(f);
-            IOUtils.copy(fis, zipOut);
-            fis.close();
-          } finally {
-            IOUtils.closeQuietly(fis);
-          }
-        }
-      }
-    }
-
-    // get tomcat logs
-    final File webappsDir = fllAppDir.getParentFile();
-    LOGGER.trace("Webapps dir: "
-        + webappsDir.getAbsolutePath());
-    final File tomcatDir = webappsDir.getParentFile();
-    LOGGER.trace("Tomcat dir: "
-        + tomcatDir.getAbsolutePath());
-    final File tomcatLogDir = new File(tomcatDir, "logs");
-    LOGGER.trace("tomcat log dir: "
-        + tomcatLogDir.getAbsolutePath());
-    final File[] tomcatLogs = tomcatLogDir.listFiles();
-    if (null != tomcatLogs) {
-      for (final File f : tomcatLogs) {
-        if (f.isFile()) {
-          FileInputStream fis = null;
-          try {
-            zipOut.putNextEntry(new ZipEntry(logsDirectory
-                + f.getName()));
-            fis = new FileInputStream(f);
-            IOUtils.copy(fis, zipOut);
-            fis.close();
-          } finally {
-            IOUtils.closeQuietly(fis);
+    // get logs from the application
+    final Path logsDirectory = Paths.get("logs");
+    if (Files.exists(logsDirectory)
+        && Files.isDirectory(logsDirectory)) {
+      try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(logsDirectory)) {
+        for (final Path path : directoryStream) {
+          if (Files.isRegularFile(path)) {
+            zipOut.putNextEntry(new ZipEntry(logsDirectory.resolve(path.getFileName()).toString()));
+            try (InputStream is = Files.newInputStream(path)) {
+              IOUtils.copy(is, zipOut);
+            }
           }
         }
       }
