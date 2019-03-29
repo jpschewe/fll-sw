@@ -16,13 +16,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.db.Queries;
 import fll.util.FLLInternalException;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 
 /**
@@ -30,7 +30,7 @@ import fll.web.ApplicationAttributes;
  */
 public class AdminBrackets {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   public static void populateContext(final HttpServletRequest request,
                                      final ServletContext application,

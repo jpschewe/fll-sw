@@ -16,11 +16,11 @@ import javax.servlet.ServletContext;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+
 
 import fll.Team;
 import fll.db.Queries;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -29,7 +29,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  */
 public class SelectTeam {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   public static void populateContext(final ServletContext application,
                                      final PageContext pageContext) {

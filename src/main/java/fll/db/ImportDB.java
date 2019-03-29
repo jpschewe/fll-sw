@@ -53,7 +53,6 @@ import fll.Utilities;
 import fll.db.TeamPropertyDifference.TeamProperty;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
-import fll.util.LogUtils;
 import fll.web.GatherBugReport;
 import fll.web.developer.importdb.ImportDBDump;
 import fll.xml.AbstractGoal;
@@ -77,12 +76,10 @@ public final class ImportDB {
 
   /**
    * Import tournament data from one database to another database
-   * 
+   *
    * @param args source tournament destination
    */
   public static void main(final String[] args) {
-    LogUtils.initializeLogging();
-
     try {
       if (args.length != 3) {
         LOGGER.error("You must specify <source uri> <tournament> <destination uri>");
@@ -186,7 +183,7 @@ public final class ImportDB {
    * <code>database</code>. Unlike
    * {@link #loadFromDumpIntoNewDB(ZipInputStream, Connection)}, this
    * will result in a database with all views and generated columns.
-   * 
+   *
    * @param zipfile the dump file to read
    * @param destConnection where to load the data
    * @return the result of the import
@@ -296,13 +293,13 @@ public final class ImportDB {
 
   /**
    * Load type info from reader and return in a Map.
-   * 
+   *
    * @param reader where to read the data from
    * @return key is column name, value is type
    */
   public static Map<String, String> loadTypeInfo(final Reader reader) throws IOException {
     final CSVReader csvreader = new CSVReader(reader);
-    final Map<String, String> columnTypes = new HashMap<String, String>();
+    final Map<String, String> columnTypes = new HashMap<>();
 
     String[] line;
     while (null != (line = csvreader.readNext())) {
@@ -335,7 +332,7 @@ public final class ImportDB {
    * views. The intention is that this database will be migrated
    * into a newly created database.
    * </p>
-   * 
+   *
    * @param zipfile the database dump
    * @param connection where to store the data
    * @return the challenge document
@@ -352,9 +349,9 @@ public final class ImportDB {
         + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")));
     boolean hasBugs = false;
 
-    final Map<String, Map<String, String>> typeInfo = new HashMap<String, Map<String, String>>();
+    final Map<String, Map<String, String>> typeInfo = new HashMap<>();
     ZipEntry entry;
-    final Map<String, String> tableData = new HashMap<String, String>();
+    final Map<String, String> tableData = new HashMap<>();
     while (null != (entry = zipfile.getNextEntry())) {
       final String name = entry.getName();
       if ("challenge.xml".equals(name)) {
@@ -414,7 +411,7 @@ public final class ImportDB {
       // before types were added, assume version 0 types
       createVersion0TypeInfo(typeInfo, description);
     }
-    for (Map.Entry<String, String> tableEntry : tableData.entrySet()) {
+    for (final Map.Entry<String, String> tableEntry : tableData.entrySet()) {
       final String tablename = tableEntry.getKey();
       final String content = tableEntry.getValue();
       final Map<String, String> tableTypes = typeInfo.get(tablename);
@@ -422,7 +419,7 @@ public final class ImportDB {
       Utilities.loadCSVFile(connection, tablename, tableTypes, new StringReader(content));
     }
 
-    int dbVersion = Queries.getDatabaseVersion(connection);
+    final int dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion > GenerateDB.DATABASE_VERSION) {
       throw new FLLRuntimeException("Database dump too new. Current known database version : "
           + GenerateDB.DATABASE_VERSION
@@ -441,12 +438,12 @@ public final class ImportDB {
    */
   private static void createVersion0TypeInfo(final Map<String, Map<String, String>> typeInfo,
                                              final ChallengeDescription description) {
-    final Map<String, String> tournaments = new HashMap<String, String>();
+    final Map<String, String> tournaments = new HashMap<>();
     tournaments.put("Name".toLowerCase(), "varchar(128)");
     tournaments.put("Location".toLowerCase(), "longvarchar");
     typeInfo.put("Tournaments".toLowerCase(), tournaments);
 
-    final Map<String, String> teams = new HashMap<String, String>();
+    final Map<String, String> teams = new HashMap<>();
     teams.put("TeamNumber".toLowerCase(), "integer");
     teams.put("TeamName".toLowerCase(), "varchar(255)");
     teams.put("Organization".toLowerCase(), "varchar(255)");
@@ -454,14 +451,14 @@ public final class ImportDB {
     teams.put("Region".toLowerCase(), "varchar(255)");
     typeInfo.put("Teams".toLowerCase(), teams);
 
-    final Map<String, String> tablenames = new HashMap<String, String>();
+    final Map<String, String> tablenames = new HashMap<>();
     tablenames.put("Tournament".toLowerCase(), "varchar(128)");
     tablenames.put("PairID".toLowerCase(), "integer");
     tablenames.put("SideA".toLowerCase(), "varchar(64)");
     tablenames.put("SideB".toLowerCase(), "varchar(64)");
     typeInfo.put("tablenames".toLowerCase(), tablenames);
 
-    final Map<String, String> playoffData = new HashMap<String, String>();
+    final Map<String, String> playoffData = new HashMap<>();
     playoffData.put("event_division".toLowerCase(), "varchar(32)");
     playoffData.put("Tournament".toLowerCase(), "varchar(128)");
     playoffData.put("PlayoffRound".toLowerCase(), "integer");
@@ -471,20 +468,20 @@ public final class ImportDB {
     playoffData.put("Printed".toLowerCase(), "boolean");
     typeInfo.put("PlayoffData".toLowerCase(), playoffData);
 
-    final Map<String, String> tournamentTeams = new HashMap<String, String>();
+    final Map<String, String> tournamentTeams = new HashMap<>();
     tournamentTeams.put("TeamNumber".toLowerCase(), "integer");
     tournamentTeams.put("Tournament".toLowerCase(), "varchar(128)");
     tournamentTeams.put("event_division".toLowerCase(), "varchar(32)");
     typeInfo.put("TournamentTeams".toLowerCase(), tournamentTeams);
 
-    final Map<String, String> judges = new HashMap<String, String>();
+    final Map<String, String> judges = new HashMap<>();
     judges.put("id".toLowerCase(), "varchar(64)");
     judges.put("category".toLowerCase(), "varchar(64)");
     judges.put("Tournament".toLowerCase(), "varchar(128)");
     judges.put("event_division".toLowerCase(), "varchar(32)");
     typeInfo.put("Judges".toLowerCase(), judges);
 
-    final Map<String, String> performance = new HashMap<String, String>();
+    final Map<String, String> performance = new HashMap<>();
     performance.put("TeamNumber".toLowerCase(), "integer");
     performance.put("Tournament".toLowerCase(), "varchar(128)");
     performance.put("RunNumber".toLowerCase(), "integer");
@@ -505,13 +502,13 @@ public final class ImportDB {
     performance.put("StandardizedScore".toLowerCase(), "float");
     typeInfo.put("Performance".toLowerCase(), performance);
 
-    final Map<String, String> finalScores = new HashMap<String, String>();
+    final Map<String, String> finalScores = new HashMap<>();
     finalScores.put("TeamNumber".toLowerCase(), "integer");
     finalScores.put("Tournament".toLowerCase(), "varchar(128)");
     for (final SubjectiveScoreCategory categoryElement : description.getSubjectiveCategories()) {
       final String tableName = categoryElement.getName();
 
-      final Map<String, String> subjective = new HashMap<String, String>();
+      final Map<String, String> subjective = new HashMap<>();
       subjective.put("TeamNumber".toLowerCase(), "integer");
       subjective.put("Tournament".toLowerCase(), "varchar(128)");
       subjective.put("Judge".toLowerCase(), "varchar(64)");
@@ -539,7 +536,7 @@ public final class ImportDB {
    * under the assumption that the current database is loaded from a set of CSV
    * files and therefore don't have any referential integrity constraints, so
    * we're only fixing up column names and the data in the column.
-   * 
+   *
    * @param connection the database to upgrade
    * @param challengeDocument the XML document specifying the challenge
    * @param description a developer friendly version of challengeDocument
@@ -804,7 +801,7 @@ public final class ImportDB {
    * Check for a column in a table. This checks table names both upper and lower
    * case.
    * This also checks column names ignoring case.
-   * 
+   *
    * @param connection database connection
    * @param table the table to find
    * @param column the column to find
@@ -845,7 +842,7 @@ public final class ImportDB {
    * Add non_numeric_nominees table and make sure that it's consistent with
    * finalist_categories.
    * Add room to finalist_categories table.
-   * 
+   *
    * @param connection
    * @throws SQLException
    */
@@ -924,7 +921,7 @@ public final class ImportDB {
 
   /**
    * Add mapping between schedule columns and subjective categories.
-   * 
+   *
    * @param connection
    * @throws SQLException
    */
@@ -958,7 +955,7 @@ public final class ImportDB {
         // get schedule columns
         getSubjectiveStations = connection.prepareStatement("SELECT DISTINCT name from sched_subjective WHERE tournament = ?");
         getSubjectiveStations.setInt(1, tournament);
-        final Collection<String> scheduleColumns = new LinkedList<String>();
+        final Collection<String> scheduleColumns = new LinkedList<>();
         stations = getSubjectiveStations.executeQuery();
         while (stations.next()) {
           final String name = stations.getString(1);
@@ -1015,7 +1012,7 @@ public final class ImportDB {
       stmt.executeUpdate(sql.toString());
 
       // migrate subjective times over if they are there
-      boolean foundPresentationColumn = checkForColumnInTable(connection, "schedule", "presentation");
+      final boolean foundPresentationColumn = checkForColumnInTable(connection, "schedule", "presentation");
 
       if (foundPresentationColumn) {
         prep = connection.prepareStatement("INSERT INTO sched_subjective" //
@@ -1080,7 +1077,7 @@ public final class ImportDB {
   /**
    * Add judging_station to TournamentTeams. Rename event_division to station in
    * Judges
-   * 
+   *
    * @param connection
    * @throws SQLException
    */
@@ -1142,7 +1139,7 @@ public final class ImportDB {
       // ---- switch from string tournament names to integers ----
 
       // get all data from Tournaments table
-      final Map<String, String> nameLocation = new HashMap<String, String>();
+      final Map<String, String> nameLocation = new HashMap<>();
       rs = stmt.executeQuery("SELECT Name, Location FROM Tournaments");
       while (rs.next()) {
         final String name = rs.getString(1);
@@ -1167,7 +1164,7 @@ public final class ImportDB {
         }
       }
       // get map of names to ids
-      final Map<String, Integer> nameID = new HashMap<String, Integer>();
+      final Map<String, Integer> nameID = new HashMap<>();
       rs = stmt.executeQuery("SELECT Name, tournament_id FROM Tournaments");
       while (rs.next()) {
         final String name = rs.getString(1);
@@ -1182,7 +1179,7 @@ public final class ImportDB {
       }
 
       // update all table columns
-      final List<String> tablesToModify = new LinkedList<String>();
+      final List<String> tablesToModify = new LinkedList<>();
       tablesToModify.add("Judges");
       tablesToModify.add("tablenames");
       tablesToModify.add("TournamentTeams");
@@ -1239,7 +1236,7 @@ public final class ImportDB {
    * will delete all information related to the specified tournament from the
    * destination database and then copy the information from the source
    * database.
-   * 
+   *
    * @param sourceConnection a connection to the source database
    * @param destinationConnection a connection to the destination database
    * @param tournamentName the tournament that the scores are for
@@ -1700,7 +1697,7 @@ public final class ImportDB {
 
   /**
    * Common import code for importSubjective and importPerformance.
-   * 
+   *
    * @param columns the columns in the table, this should include Tournament,
    *          TeamNumber, NoShow, Judge or Verified, then all elements for
    *          category
@@ -2023,7 +2020,7 @@ public final class ImportDB {
 
   /**
    * Check for differences between two tournaments in team information.
-   * 
+   *
    * @return true if there are differences
    */
   public static boolean checkForDifferences(final Connection sourceConnection,
@@ -2085,7 +2082,7 @@ public final class ImportDB {
                                                            final Connection destConnection,
                                                            final String tournament)
       throws SQLException {
-    final List<TeamPropertyDifference> differences = new LinkedList<TeamPropertyDifference>();
+    final List<TeamPropertyDifference> differences = new LinkedList<>();
 
     PreparedStatement sourcePrep = null;
     PreparedStatement destPrep = null;
@@ -2137,7 +2134,7 @@ public final class ImportDB {
   /**
    * Find teams in the source database and not in the dest database. Only checks
    * for teams associated with the specified tournament.
-   * 
+   *
    * @param sourceConnection source connection
    * @param destConnection destination connection
    * @param tournament the tournament to check
@@ -2182,6 +2179,7 @@ public final class ImportDB {
    * Datetime format found in the CSV dump files.
    */
   public static final ThreadLocal<DateFormat> CSV_TIMESTAMP_FORMATTER = new ThreadLocal<DateFormat>() {
+    @Override
     protected DateFormat initialValue() {
       return new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
     }
@@ -2191,6 +2189,7 @@ public final class ImportDB {
    * Time format found in the CSV dump files.
    */
   public static final ThreadLocal<DateFormat> CSV_TIME_FORMATTER = new ThreadLocal<DateFormat>() {
+    @Override
     protected DateFormat initialValue() {
       return new SimpleDateFormat("HH:mm:ss");
     }
@@ -2200,6 +2199,7 @@ public final class ImportDB {
    * Date format found in the CSV dump files.
    */
   public static final ThreadLocal<DateFormat> CSV_DATE_FORMATTER = new ThreadLocal<DateFormat>() {
+    @Override
     protected DateFormat initialValue() {
       return new SimpleDateFormat("dd-MMM-yyyy");
     }
@@ -2231,7 +2231,7 @@ public final class ImportDB {
     /**
      * Any logs or bug reports will be in this directory. The directory may not
      * exist if there is no data for it.
-     * 
+     *
      * @return the directory where extra data is stored
      */
     @Nonnull

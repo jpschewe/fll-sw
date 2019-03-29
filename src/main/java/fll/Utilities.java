@@ -37,7 +37,7 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+
 import org.hsqldb.jdbc.JDBCDataSource;
 
 import com.opencsv.CSVReader;
@@ -45,7 +45,7 @@ import com.opencsv.CSVReader;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.ImportDB;
 import fll.util.FLLRuntimeException;
-import fll.util.LogUtils;
+
 import fll.xml.ScoreType;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -54,7 +54,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  */
 public final class Utilities {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * Single instance of the floating point NumberFormat instance to save on

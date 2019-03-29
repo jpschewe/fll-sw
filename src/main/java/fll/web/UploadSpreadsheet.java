@@ -18,11 +18,11 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
-import org.apache.log4j.Logger;
+
 
 import fll.Utilities;
 import fll.util.ExcelCellReader;
-import fll.util.LogUtils;
+
 
 /**
  * Handle uploading a spreadsheet (csv or Excel). The filename is stored in the
@@ -37,7 +37,7 @@ import fll.util.LogUtils;
 @WebServlet("/UploadSpreadsheet")
 public final class UploadSpreadsheet extends BaseFLLServlet {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * Session key for the name of the file that was saved.

@@ -23,11 +23,11 @@ import javax.servlet.ServletContext;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+
 import org.w3c.dom.Document;
 
 import fll.Utilities;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
@@ -38,7 +38,7 @@ import net.mtu.eggplant.util.ComparisonUtils;
  */
 public class SetupIndex {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * Populate the page context with information for the jsp.

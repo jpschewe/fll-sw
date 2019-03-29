@@ -18,10 +18,10 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
-import org.apache.log4j.Logger;
+
 
 import fll.util.FLLRuntimeException;
-import fll.util.LogUtils;
+
 import fll.web.BaseFLLServlet;
 import fll.web.ProcessSelectedSheet;
 import fll.web.SessionAttributes;
@@ -36,7 +36,7 @@ import fll.web.WebUtils;
 @WebServlet("/schedule/UploadSchedule")
 public class UploadSchedule extends BaseFLLServlet {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * Clear out session variables used by the schedule upload workflow.

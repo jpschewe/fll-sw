@@ -15,9 +15,9 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
-import org.apache.log4j.Logger;
 
-import fll.util.LogUtils;
+
+
 
 /**
  * Notify the select team page when it should reload because there are more
@@ -26,7 +26,7 @@ import fll.util.LogUtils;
 @ServerEndpoint(value = "/scoreEntry/UnverifiedRunsWebSocket")
 public class UnverifiedRunsWebSocket {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private static final Set<Session> ALL_SESSIONS = new HashSet<>();
 

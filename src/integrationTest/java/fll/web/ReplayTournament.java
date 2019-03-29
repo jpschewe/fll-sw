@@ -23,18 +23,16 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
-import org.apache.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 
 import fll.TestUtils;
 import fll.Tournament;
 import fll.db.ImportDB;
 import fll.util.GuiExceptionHandler;
-import fll.util.LogUtils;
 import net.mtu.eggplant.util.BasicFileFilter;
 
 /**
- * 
+ *
  */
 public class ReplayTournament {
 
@@ -44,16 +42,14 @@ public class ReplayTournament {
 
   private static final String OUTPUT_DIRECTORY_PREF = "outputDirectory";
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * Replay a tournament and save it's output.
-   * 
+   *
    * @param args ignored
    */
-  public static void main(String[] args) {
-    LogUtils.initializeLogging();
-
+  public static void main(final String[] args) {
     GuiExceptionHandler.registerExceptionHandler();
 
     try {
@@ -140,7 +136,7 @@ public class ReplayTournament {
       throws IOException, SQLException {
     try (final InputStream dbResourceStream = new FileInputStream(database.toFile())) {
       final ZipInputStream zipStream = new ZipInputStream(dbResourceStream);
-      ImportDB.ImportResult result = ImportDB.loadFromDumpIntoNewDB(zipStream, testDataConn);
+      final ImportDB.ImportResult result = ImportDB.loadFromDumpIntoNewDB(zipStream, testDataConn);
       TestUtils.deleteImportData(result);
     }
 
@@ -148,7 +144,7 @@ public class ReplayTournament {
 
   /**
    * Ask the user for the database to load.
-   * 
+   *
    * @return the database path or null if nothing is there to load
    */
   private static Path chooseDatabase() {
@@ -188,7 +184,7 @@ public class ReplayTournament {
 
   /**
    * Ask the user for the output directory to use
-   * 
+   *
    * @return the database path or null if no directory was chosen
    */
   private static Path chooseOutputDirectory() {

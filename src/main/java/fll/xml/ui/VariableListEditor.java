@@ -19,11 +19,11 @@ import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import org.apache.log4j.Logger;
+
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
-import fll.util.LogUtils;
+
 import fll.xml.ComputedGoal;
 import fll.xml.GoalScope;
 import fll.xml.Variable;
@@ -37,7 +37,7 @@ import fll.xml.ui.MovableExpandablePanel.DeleteEventListener;
                               "SE_BAD_FIELD_STORE" }, justification = "This class isn't going to be serialized")
 public class VariableListEditor extends JPanel {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private final ComputedGoal goal;
 

@@ -17,16 +17,16 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JTable;
 
-import org.apache.log4j.Logger;
 
-import fll.util.LogUtils;
+
+
 
 /**
  * Edit a list of integer durations.
  */
 /* package */ class DurationListEditor extends JComponent {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private final DurationModel tableModel;
 

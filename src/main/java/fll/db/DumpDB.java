@@ -32,7 +32,6 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
 import com.opencsv.CSVWriter;
@@ -40,7 +39,6 @@ import com.opencsv.CSVWriter;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.Utilities;
-import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.GatherBugReport;
@@ -58,8 +56,9 @@ public final class DumpDB extends BaseFLLServlet {
    */
   public static final String BUGS_DIRECTORY = "bugs/";
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -80,7 +79,7 @@ public final class DumpDB extends BaseFLLServlet {
 
   /**
    * Export the current database using a standard filename format.
-   * 
+   *
    * @param response where to write the database
    * @param application used to get some information for the dump
    * @param label the label to use, may be null. Appended to the end of the
@@ -94,7 +93,7 @@ public final class DumpDB extends BaseFLLServlet {
                                     final ServletContext application,
                                     final String label,
                                     final Document challengeDocument,
-                                    Connection connection)
+                                    final Connection connection)
       throws SQLException, IOException {
     final int tournamentId = Queries.getCurrentTournament(connection);
     final Tournament tournament = Tournament.findTournamentByID(connection, tournamentId);
@@ -119,7 +118,7 @@ public final class DumpDB extends BaseFLLServlet {
 
   /**
    * Dump the database to a zip file.
-   * 
+   *
    * @param output where to dump the database
    * @param connection the database connection to dump
    * @param challengeDocument the challenge document to write out
@@ -150,7 +149,7 @@ public final class DumpDB extends BaseFLLServlet {
       } // ResultSet try
 
       if (null != application) {
-        GatherBugReport.addLogFiles(output, application);
+        GatherBugReport.addLogFiles(output);
 
         // find the bug reports
         addBugReports(output, application);
@@ -162,7 +161,7 @@ public final class DumpDB extends BaseFLLServlet {
   /**
    * Add the bug reports to the zipfile. These files are put
    * in a "bugs" subdirectory in the zip file.
-   * 
+   *
    * @param zipOut the stream to write to.
    * @param application used to find the bug report files.
    */
@@ -175,14 +174,9 @@ public final class DumpDB extends BaseFLLServlet {
     zipOut.putNextEntry(new ZipEntry(directory));
 
     final File fllWebInfDir = new File(application.getRealPath("/WEB-INF"));
-    final File[] bugReports = fllWebInfDir.listFiles(new FilenameFilter() {
-      @Override
-      public boolean accept(final File dir,
-                            final String name) {
-        return name.startsWith("bug_")
-            && name.endsWith(".zip");
-      }
-    });
+    final File[] bugReports = fllWebInfDir.listFiles((FilenameFilter) (dir,
+                      name) -> name.startsWith("bug_")
+                          && name.endsWith(".zip"));
 
     if (null != bugReports) {
       for (final File f : bugReports) {
@@ -205,7 +199,7 @@ public final class DumpDB extends BaseFLLServlet {
 
   /**
    * Dump the type information for a table to outputWriter.
-   * 
+   *
    * @param tableName
    * @param metadata
    * @param outputWriter

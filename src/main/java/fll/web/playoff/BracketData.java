@@ -14,7 +14,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
-import org.apache.log4j.Logger;
+
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -24,7 +24,7 @@ import fll.Team;
 import fll.db.Queries;
 import fll.db.TableInformation;
 import fll.db.TournamentParameters;
-import fll.util.LogUtils;
+
 import net.mtu.eggplant.util.StringUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -44,7 +44,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  */
 public class BracketData extends BracketInfo {
 
-  private static final Logger LOG = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOG = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * Data type for brackets.

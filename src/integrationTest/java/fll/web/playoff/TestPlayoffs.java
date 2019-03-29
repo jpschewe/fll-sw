@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.log4j.Logger;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.Alert;
@@ -22,7 +22,7 @@ import org.openqa.selenium.support.ui.Select;
 
 import fll.TestUtils;
 import fll.db.GenerateDB;
-import fll.util.LogUtils;
+
 import fll.web.IntegrationTestUtils;
 
 /**
@@ -32,7 +32,7 @@ import fll.web.IntegrationTestUtils;
 @ExtendWith(IntegrationTestUtils.TomcatRequired.class)
 public class TestPlayoffs {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * Test that when trying to enter a score for a team that hasn't advanced to a

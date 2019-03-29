@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
@@ -34,7 +34,7 @@ import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.flltools.displaySystem.list.SetArray;
 import fll.util.FP;
-import fll.util.LogUtils;
+
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -48,7 +48,7 @@ import fll.xml.WinnerType;
 @WebServlet("/scoreboard/Top10")
 public class Top10 extends BaseFLLServlet {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * Max number of characters in a team name to display.

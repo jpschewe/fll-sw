@@ -43,7 +43,7 @@ import java.util.zip.ZipInputStream;
 import javax.swing.table.TableModel;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+
 import org.fest.swing.edt.FailOnThreadViolationRepaintManager;
 import org.fest.swing.security.NoExitSecurityManagerInstaller;
 import org.junit.jupiter.api.AfterAll;
@@ -82,7 +82,7 @@ import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.scheduler.TournamentSchedule;
 import fll.subjective.SubjectiveFrame;
-import fll.util.LogUtils;
+
 import fll.web.developer.QueryHandler;
 import fll.web.scoreEntry.ScoreEntry;
 import fll.xml.AbstractGoal;
@@ -99,7 +99,7 @@ import io.github.artsok.RepeatedIfExceptionsTest;
 @ExtendWith(IntegrationTestUtils.TomcatRequired.class)
 public class FullTournamentTest {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private static NoExitSecurityManagerInstaller noExitSecurityManagerInstaller;
 

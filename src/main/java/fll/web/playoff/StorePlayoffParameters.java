@@ -9,9 +9,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.Logger;
 
-import fll.util.LogUtils;
+
+
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
@@ -21,7 +21,7 @@ import fll.web.SessionAttributes;
 @WebServlet("/playoff/StorePlayoffParameters")
 public class StorePlayoffParameters extends BaseFLLServlet {
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   @Override
   protected void processRequest(final HttpServletRequest request,

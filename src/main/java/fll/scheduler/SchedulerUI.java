@@ -70,14 +70,12 @@ import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
-import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.w3c.dom.Document;
 
@@ -95,7 +93,6 @@ import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.FormatterUtils;
 import fll.util.GuiExceptionHandler;
-import fll.util.LogUtils;
 import fll.util.ProgressDialog;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
@@ -110,8 +107,6 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
 public class SchedulerUI extends JFrame {
 
   public static void main(final String[] args) {
-    LogUtils.initializeLogging();
-
     GuiExceptionHandler.registerExceptionHandler();
 
     // Use cross platform look and feel so that things look right all of the
@@ -254,19 +249,17 @@ public class SchedulerUI extends JFrame {
   }
 
   @SuppressFBWarnings(value = "SE_TRANSIENT_FIELD_NOT_RESTORED", justification = "There is no state needed to be kept here")
-  private final transient ListSelectionListener violationSelectionListener = new ListSelectionListener() {
-    public void valueChanged(final ListSelectionEvent e) {
-      final int selectedRow = getViolationTable().getSelectedRow();
-      if (selectedRow == -1) {
-        return;
-      }
+  private final transient ListSelectionListener violationSelectionListener = e -> {
+    final int selectedRow = getViolationTable().getSelectedRow();
+    if (selectedRow == -1) {
+      return;
+    }
 
-      final ConstraintViolation selected = getViolationsModel().getViolation(selectedRow);
-      if (Team.NULL_TEAM_NUMBER != selected.getTeam()) {
-        final int teamIndex = getScheduleModel().getIndexOfTeam(selected.getTeam());
-        final int displayIndex = getScheduleTable().convertRowIndexToView(teamIndex);
-        getScheduleTable().changeSelection(displayIndex, 1, false, false);
-      }
+    final ConstraintViolation selected = getViolationsModel().getViolation(selectedRow);
+    if (Team.NULL_TEAM_NUMBER != selected.getTeam()) {
+      final int teamIndex = getScheduleModel().getIndexOfTeam(selected.getTeam());
+      final int displayIndex = getScheduleTable().convertRowIndexToView(teamIndex);
+      getScheduleTable().changeSelection(displayIndex, 1, false, false);
     }
   };
 
@@ -712,7 +705,7 @@ public class SchedulerUI extends JFrame {
         LOGGER.error(errorFormatter, e);
         JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reloading file",
                                       JOptionPane.ERROR_MESSAGE);
-      } catch (ParseException e) {
+      } catch (final ParseException e) {
         final Formatter errorFormatter = new Formatter();
         errorFormatter.format("Error reloading file: %s", e.getMessage());
         LOGGER.error(errorFormatter, e);
@@ -768,6 +761,7 @@ public class SchedulerUI extends JFrame {
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Q, ActionEvent.CTRL_MASK));
     }
 
+    @Override
     public void actionPerformed(final ActionEvent ae) {
       SchedulerUI.this.setVisible(false);
     }
@@ -921,7 +915,7 @@ public class SchedulerUI extends JFrame {
 
   /**
    * Load the specified schedule file and select the schedule tab.
-   * 
+   *
    * @param selectedFile
    * @param subjectiveStations if not null, use as the subjective stations,
    *          otherwise prompt the user for the subjective stations
@@ -960,7 +954,7 @@ public class SchedulerUI extends JFrame {
 
       mSchedParams.setSubjectiveStations(newSubjectiveStations);
 
-      final List<String> subjectiveHeaders = new LinkedList<String>();
+      final List<String> subjectiveHeaders = new LinkedList<>();
       for (final SubjectiveStation station : newSubjectiveStations) {
         subjectiveHeaders.add(station.getName());
       }
@@ -1087,7 +1081,7 @@ public class SchedulerUI extends JFrame {
 
   /**
    * If there is more than 1 sheet, prompt, otherwise just use the sheet.
-   * 
+   *
    * @return the sheet name or null if the user canceled
    * @throws IOException
    * @throws InvalidFormatException
@@ -1194,13 +1188,13 @@ public class SchedulerUI extends JFrame {
     return violationTable;
   }
 
-  private static final Logger LOGGER = LogUtils.getLogger();
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   private static final Color HARD_CONSTRAINT_COLOR = Color.RED;
 
   private static final Color SOFT_CONSTRAINT_COLOR = Color.YELLOW;
 
-  private TableCellRenderer schedTableRenderer = new DefaultTableCellRenderer() {
+  private final TableCellRenderer schedTableRenderer = new DefaultTableCellRenderer() {
 
     @Override
     public Component getTableCellRendererComponent(final JTable table,
@@ -1227,7 +1221,7 @@ public class SchedulerUI extends JFrame {
       final SortedSet<ConstraintViolation.Type> violationTypes = new TreeSet<>();
       for (final ConstraintViolation violation : getViolationsModel().getViolations()) {
         if (violation.getTeam() == schedInfo.getTeamNumber()) {
-          Collection<SubjectiveTime> subjectiveTimes = violation.getSubjectiveTimes();
+          final Collection<SubjectiveTime> subjectiveTimes = violation.getSubjectiveTimes();
           if (tmCol <= SchedulerTableModel.JUDGE_COLUMN
               && subjectiveTimes.isEmpty()
               && null == violation.getPerformance()) {
@@ -1322,7 +1316,7 @@ public class SchedulerUI extends JFrame {
     }
   }
 
-  private TableCellRenderer violationTableRenderer = new DefaultTableCellRenderer() {
+  private final TableCellRenderer violationTableRenderer = new DefaultTableCellRenderer() {
     @Override
     public Component getTableCellRendererComponent(final JTable table,
                                                    final Object value,
@@ -1367,7 +1361,7 @@ public class SchedulerUI extends JFrame {
 
   /**
    * Prompt the user for which columns represent subjective categories.
-   * 
+   *
    * @param parentComponent the parent for the dialog
    * @param columnInfo the column information
    * @return the list of subjective information the user choose
@@ -1375,8 +1369,8 @@ public class SchedulerUI extends JFrame {
   public static List<SubjectiveStation> gatherSubjectiveStationInformation(final Component parentComponent,
                                                                            final ColumnInformation columnInfo) {
     final List<String> unusedColumns = columnInfo.getUnusedColumns();
-    final List<JCheckBox> checkboxes = new LinkedList<JCheckBox>();
-    final List<JFormattedTextField> subjectiveDurations = new LinkedList<JFormattedTextField>();
+    final List<JCheckBox> checkboxes = new LinkedList<>();
+    final List<JFormattedTextField> subjectiveDurations = new LinkedList<>();
     final Box optionPanel = Box.createVerticalBox();
 
     optionPanel.add(new JLabel("Specify which columns in the data file are for subjective judging"));
@@ -1402,7 +1396,7 @@ public class SchedulerUI extends JFrame {
     if (!checkboxes.isEmpty()) {
       JOptionPane.showMessageDialog(parentComponent, optionPanel, "Choose Subjective Columns",
                                     JOptionPane.QUESTION_MESSAGE);
-      subjectiveHeaders = new LinkedList<SubjectiveStation>();
+      subjectiveHeaders = new LinkedList<>();
       for (int i = 0; i < checkboxes.size(); ++i) {
         final JCheckBox box = checkboxes.get(i);
         final JFormattedTextField duration = subjectiveDurations.get(i);
@@ -1431,7 +1425,7 @@ public class SchedulerUI extends JFrame {
    * Add a row of components to the specified container and then add a spacer to
    * the end of the row.
    * The container must have it's layout set to {@link GridBagLayout}.
-   * 
+   *
    * @param components the components to add
    * @param container where to add the components to
    */
