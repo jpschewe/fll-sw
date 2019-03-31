@@ -49,6 +49,17 @@ configurations {
     jspc
 }
 
+eclipse {
+    classpath {
+        file {
+            withXml {
+                def node = it.asNode()
+                // add web as resource entry
+                node.appendNode( 'classpathentry', [ kind: 'src', path: 'src/main/web', output: 'bin/web']) 
+            }
+        }
+    }
+}
 
 dependencies {
     jspc 'org.apache.ant:ant:1.10.1'
