@@ -12,6 +12,9 @@ buildscript {
         classpath 'org.kordamp:markdown-gradle-plugin:1.2.0'
         classpath 'edu.sc.seis.gradle:launch4j:2.4.4'
     }
+    configurations.classpath {
+        exclude group: 'com.google.guava', module: 'guava'
+    }
 }    
 
 plugins {
@@ -21,7 +24,7 @@ plugins {
     id 'org.unbroken-dome.test-sets' version "2.1.1"
     id 'eclipse'
     id 'org.kordamp.markdown.convert' version "1.2.0"       
-    id 'findbugs'
+    id 'com.github.spotbugs' version '1.6.10'
     id "de.aaschmid.cpd" version "1.2"
     id 'edu.sc.seis.launch4j' version '2.4.4'
     id 'com.palantir.git-version' version '0.11.0' // adds printVersion task
@@ -78,6 +81,7 @@ ext {
     poi_version = "4.0.1"
     junit_version = "5.4.0"
     log4j_version = "2.11.2"
+    spotbugs_version = '3.1.12'
 
     web_build_dir = new File(project.buildDir, 'web')
     documentation_build_dir = new File(project.buildDir, 'gen-documentation')    
@@ -114,8 +118,9 @@ dependencies {
     
     implementation group: "org.apache.poi", name: "poi-ooxml", version: project.poi_version
     
-    implementation group: "com.google.code.findbugs", name: "annotations", version: "3.0.1"
-    implementation group: "com.google.code.findbugs", name: "jsr305", version: "3.0.1"
+    compileOnly group: "com.github.spotbugs", name: "spotbugs-annotations", version: project.spotbugs_version
+    compileOnly group: 'net.jcip', name: 'jcip-annotations', version: '1.0'
+    compileOnly group: "com.google.code.findbugs", name: "jsr305", version: "3.0.1"
     
     implementation group: "com.fasterxml.jackson.core", name: "jackson-databind", version: project.jackson_version
     implementation group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: project.jackson_version
@@ -203,8 +208,8 @@ distributions {
             from("$buildDir/reports/tests/") {
                 into 'web/documentation/reports'
                 }
-            from("$buildDir/reports/findbugs/") {
-                into 'web/documentation/reports/findbugs'
+            from("$buildDir/reports/spotbugs/") {
+                into 'web/documentation/reports/spotbugs'
                 }
             from("$buildDir/reports/cobertura/") {
                 into 'web/documentation/reports/coverage'
@@ -337,16 +342,18 @@ distZip.dependsOn createExe
 distTar.dependsOn createExe
 
 
-findbugs {
+spotbugs {
+    toolVersion = project.spotbugs_version
+    
     // allow the build to continue, catch this in CI as warnings
     ignoreFailures = true
     effort = "max"
     reportLevel = "low"
-    excludeFilter = file("findbugs-filters.xml")
+    excludeFilter = file("spotbugs-filters.xml")
 }
 
 // some extra tasks so that we can generate html AND xml
-task findbugsMainHtml(type: FindBugs, dependsOn: [classes]) {
+task spotbugsMainHtml(type: com.github.spotbugs.SpotBugsTask, dependsOn: [classes]) {
     classes = project.sourceSets.main.output.classesDirs
     source = project.sourceSets.main.java.srcDirs
     classpath = sourceSets.main.runtimeClasspath
@@ -355,10 +362,10 @@ task findbugsMainHtml(type: FindBugs, dependsOn: [classes]) {
         xml.enabled = false
     }
 }
-distZip.dependsOn findbugsMainHtml
-distTar.dependsOn findbugsMainHtml
+distZip.dependsOn spotbugsMainHtml
+distTar.dependsOn spotbugsMainHtml
 
-task findbugsTestHtml(type: FindBugs, dependsOn: [testClasses]) {
+task spotbugsTestHtml(type: com.github.spotbugs.SpotBugsTask, dependsOn: [testClasses]) {
     classes = project.sourceSets.test.output.classesDirs
     source = project.sourceSets.test.java.srcDirs
     classpath = sourceSets.test.runtimeClasspath
@@ -367,10 +374,10 @@ task findbugsTestHtml(type: FindBugs, dependsOn: [testClasses]) {
         xml.enabled = false
     }
 }
-distZip.dependsOn findbugsTestHtml
-distTar.dependsOn findbugsTestHtml
+distZip.dependsOn spotbugsTestHtml
+distTar.dependsOn spotbugsTestHtml
 
-task findbugsIntegrationTestHtml(type: FindBugs, dependsOn: [integrationTestClasses]) {
+task spotbugsIntegrationTestHtml(type: com.github.spotbugs.SpotBugsTask, dependsOn: [integrationTestClasses]) {
     classes = project.sourceSets.integrationTest.output.classesDirs
     source = project.sourceSets.integrationTest.java.srcDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
@@ -379,8 +386,8 @@ task findbugsIntegrationTestHtml(type: FindBugs, dependsOn: [integrationTestClas
         xml.enabled = false
     }
 }
-distZip.dependsOn findbugsIntegrationTestHtml
-distTar.dependsOn findbugsIntegrationTestHtml
+distZip.dependsOn spotbugsIntegrationTestHtml
+distTar.dependsOn spotbugsIntegrationTestHtml
 
 gitProperties {
     gitPropertiesDir = "${buildDir}/resources/main/fll/resources"
