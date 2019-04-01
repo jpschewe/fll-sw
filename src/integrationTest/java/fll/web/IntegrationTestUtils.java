@@ -43,7 +43,6 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.protocol.BasicHttpContext;
-
 import org.fest.swing.image.ScreenshotTaker;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
@@ -75,7 +74,6 @@ import fll.TomcatLauncher;
 import fll.Tournament;
 import fll.Utilities;
 import fll.util.FLLInternalException;
-
 import fll.web.api.TournamentsServlet;
 import fll.xml.BracketSortType;
 import io.github.bonigarcia.wdm.DriverManagerType;
@@ -375,9 +373,9 @@ public final class IntegrationTestUtils {
     final Path htmlFile = tempDir.resolve("page.html");
 
     final String html = driver.getPageSource();
-    final BufferedWriter writer = Files.newBufferedWriter(htmlFile);
-    writer.write(html);
-    writer.close();
+    try (BufferedWriter writer = Files.newBufferedWriter(htmlFile)) {
+      writer.write(html);
+    }
     LOGGER.info("HTML saved to "
         + htmlFile.toAbsolutePath().toString());
 

@@ -1,3 +1,4 @@
+* #600 - migrate from FindBugs to SpotBugs
 * #724 - update GatherBugReport to find logs in the new location after switching to embedded Tomcat
 * #569 - upgrade to log4j2
 * #352 - switch to mainstream opencsv

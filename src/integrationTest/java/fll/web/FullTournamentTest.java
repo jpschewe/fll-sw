@@ -43,7 +43,6 @@ import java.util.zip.ZipInputStream;
 import javax.swing.table.TableModel;
 
 import org.apache.commons.lang3.StringUtils;
-
 import org.fest.swing.edt.FailOnThreadViolationRepaintManager;
 import org.fest.swing.security.NoExitSecurityManagerInstaller;
 import org.junit.jupiter.api.AfterAll;
@@ -70,6 +69,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlSelect;
 import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
 import com.opencsv.CSVWriter;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
 import fll.TestUtils;
 import fll.Tournament;
@@ -82,7 +82,6 @@ import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.scheduler.TournamentSchedule;
 import fll.subjective.SubjectiveFrame;
-
 import fll.web.developer.QueryHandler;
 import fll.web.scoreEntry.ScoreEntry;
 import fll.xml.AbstractGoal;
@@ -111,7 +110,9 @@ public class FullTournamentTest {
   @BeforeAll
   public static void setUpOnce() {
     FailOnThreadViolationRepaintManager.install();
-    noExitSecurityManagerInstaller = NoExitSecurityManagerInstaller.installNoExitSecurityManager(status -> assertEquals(0, status, "Bad exit status"));
+    noExitSecurityManagerInstaller = NoExitSecurityManagerInstaller.installNoExitSecurityManager(status -> assertEquals(0,
+                                                                                                                        status,
+                                                                                                                        "Bad exit status"));
   }
 
   /**
@@ -790,18 +791,19 @@ public class FullTournamentTest {
 
   /**
    * Simulate entering subjective scores by pulling them out of testDataConn.
-   * @param selenium TODO
+   *
    * @param testDataConn Where to get the test data from
    * @param challengeDocument the challenge descriptor
-   *
    * @throws SQLException
    * @throws SAXException
    * @throws InterruptedException
    */
+  @SuppressFBWarnings(value = "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING", justification = "Need to specify category for table name")
   private void enterSubjectiveScores(final WebDriver selenium,
                                      final Connection testDataConn,
                                      final ChallengeDescription description,
-                                     final Tournament sourceTournament, final Path outputDirectory)
+                                     final Tournament sourceTournament,
+                                     final Path outputDirectory)
       throws SQLException, IOException, MalformedURLException, ParseException, SAXException, InterruptedException {
 
     final Path subjectiveZip = outputDirectory.resolve(sanitizeFilename(sourceTournament.getName())
@@ -920,15 +922,16 @@ public class FullTournamentTest {
   /**
    * Enter a teams performance score. Data is pulled from testDataConn and
    * pushed to the website.
-   * @param selenium TODO
    *
+   * @param selenium TODO
    * @throws InterruptedException
    */
   private void enterPerformanceScore(final WebDriver selenium,
                                      final Connection testDataConn,
                                      final PerformanceScoreCategory performanceElement,
                                      final Tournament sourceTournament,
-                                     final int runNumber, final int teamNumber)
+                                     final int runNumber,
+                                     final int teamNumber)
       throws SQLException, IOException, MalformedURLException, ParseException, InterruptedException {
 
     if (LOGGER.isInfoEnabled()) {
@@ -1057,15 +1060,16 @@ public class FullTournamentTest {
   /**
    * Enter a teams performance score. Data is pulled from testDataConn and
    * pushed to the website.
-   * @param selenium TODO
    *
+   * @param selenium TODO
    * @throws InterruptedException
    */
   private void verifyPerformanceScore(final WebDriver selenium,
                                       final Connection testDataConn,
                                       final PerformanceScoreCategory performanceElement,
                                       final Tournament sourceTournament,
-                                      final int runNumber, final int teamNumber)
+                                      final int runNumber,
+                                      final int teamNumber)
       throws SQLException, IOException, MalformedURLException, ParseException, InterruptedException {
     final String selectTeamPage = TestUtils.URL_ROOT
         + "scoreEntry/select_team.jsp";
@@ -1189,8 +1193,8 @@ public class FullTournamentTest {
 
   /**
    * Check display pages that aren't shown otherwise.
-   * @param selenium TODO
    *
+   * @param selenium TODO
    * @throws IOException
    * @throws InterruptedException
    */
