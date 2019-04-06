@@ -13,7 +13,7 @@ pipeline {
       steps {
         echo "NODE_NAME = ${env.NODE_NAME}"
         echo "My branch is: ${env.BRANCH_NAME}"
-        printEnv()	
+        printEnv()      
       }
     }
 
@@ -40,18 +40,18 @@ pipeline {
     stage('Tests') {
       steps {
         // runs all of the test tasks
-      	fllSwGradle('cobertura')
+        fllSwGradle('cobertura')
         junit testResults: "build/test-results/*est/TEST-*.xml", keepLongStdio: true
         step $class: 'CoberturaPublisher', coberturaReportFile: 'build/reports/cobertura/coverage.xml'                
       }
     }
 
-    stage(Static analysis') {
+    stage('SpotBugs analysis') {
       steps { 
         fllSwGradle('spotbugsMain')
         fllSwGradle('spotbugsTest')
         fllSwGradle('spotbugsIntegrationTest')
-        recordIssues tool: findBugs(pattern: 'build/reports/spotbugs/*.xml', useRankAsPriority: true), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]            
+        recordIssues tool: spotBugs(pattern: 'build/reports/spotbugs/*.xml', useRankAsPriority: true), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
       }
     }
     
@@ -86,8 +86,8 @@ pipeline {
     always {
       archiveArtifacts artifacts: '*.log,screenshots/,build/reports/,build/distributions/'
                         
-	  recordIssues tool: taskScanner(includePattern: '**/*.java,**/*.jsp,**/*.jspf,**/*.xml', excludePattern: 'checkstyle*.xml', highTags: 'FIXME,HACK', normalTags: 'TODO')
-	        
+      recordIssues tool: taskScanner(includePattern: '**/*.java,**/*.jsp,**/*.jspf,**/*.xml', excludePattern: 'checkstyle*.xml', highTags: 'FIXME,HACK', normalTags: 'TODO')
+                
       recordIssues tool: java()  
 
       recordIssues tool: javaDoc()      
