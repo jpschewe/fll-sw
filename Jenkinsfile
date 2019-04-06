@@ -46,12 +46,12 @@ pipeline {
       }
     }
 
-    stage('Findbugs analysis') {
+    stage(Static analysis') {
       steps { 
-        fllSwGradle('findbugsMain')
-        fllSwGradle('findbugsTest')
-        fllSwGradle('findbugsIntegrationTest')
-        recordIssues tool: findBugs(pattern: 'build/reports/findbugs/*.xml', useRankAsPriority: true), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]            
+        fllSwGradle('spotbugsMain')
+        fllSwGradle('spotbugsTest')
+        fllSwGradle('spotbugsIntegrationTest')
+        recordIssues tool: findBugs(pattern: 'build/reports/spotbugs/*.xml', useRankAsPriority: true), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]            
       }
     }
     
