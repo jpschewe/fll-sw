@@ -27,7 +27,6 @@ plugins {
     id 'com.github.spotbugs' version '1.7.1'
     id "de.aaschmid.cpd" version "1.2"
     id 'edu.sc.seis.launch4j' version '2.4.4'
-    id 'com.palantir.git-version' version '0.11.0' // adds printVersion task
     id 'net.saliman.cobertura' version '2.6.0'
     id "com.gorylenko.gradle-git-properties" version "2.0.0"
     id "com.github.ben-manes.versions" version "0.21.0" // adds dependency update check
