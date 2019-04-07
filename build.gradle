@@ -98,8 +98,8 @@ ext {
     documentation_build_dir = new File(project.buildDir, 'gen-documentation')    
     
     jspSrc = 'src/main/web'
-        jspJavaSrc = new File(project.buildDir, "jsp-java-source")
-        jspPackage = "fll.jsp"
+    jspJavaSrc = new File(project.buildDir, "jsp-java-source")
+    jspPackage = "fll.jsp"
 
     mainClassName = 'fll.Launcher'
 }
