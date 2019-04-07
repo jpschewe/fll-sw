@@ -29,7 +29,7 @@ plugins {
     id 'edu.sc.seis.launch4j' version '2.4.4'
     id 'net.saliman.cobertura' version '2.6.0'
     id "com.gorylenko.gradle-git-properties" version "2.0.0"
-    id "com.github.ben-manes.versions" version "0.21.0" // adds dependency update check
+    id "com.github.ben-manes.versions" version "0.21.0" // adds dependencyUpdates task
 }
 
 // needs to use old plugin mechanism otherwise I can't set the extra properties
