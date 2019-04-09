@@ -1,13 +1,19 @@
 // -*- java -*-
 
+import com.github.spotbugs.SpotBugsTask
+
+import javax.xml.transform.TransformerFactory
+import javax.xml.transform.stream.StreamResult
+import javax.xml.transform.stream.StreamSource
+
+import static org.gradle.api.tasks.PathSensitivity.NONE
+
 buildscript {
     repositories {
         jcenter()
     }
     dependencies {
-            classpath group: 'com.cinnober.gradle', name: 'semver-git', version: '2.4.0'
-    }    
-    dependencies {
+        classpath group: 'com.cinnober.gradle', name: 'semver-git', version: '2.4.0'
         classpath 'org.unbroken-dome.gradle-plugins:gradle-testsets-plugin:2.1.1'
         classpath 'org.kordamp:markdown-gradle-plugin:1.2.0'
         classpath 'edu.sc.seis.gradle:launch4j:2.4.4'
@@ -352,6 +358,14 @@ distZip.dependsOn createExe
 distTar.dependsOn createExe
 
 
+configurations {
+    spotbugsStylesheets { transitive false }
+}
+
+dependencies {
+    spotbugsStylesheets "com.github.spotbugs:spotbugs:$spotbugs.toolVersion"
+}
+
 spotbugs {
     toolVersion = project.spotbugs_version
     
@@ -363,41 +377,33 @@ spotbugs {
 }
 
 // some extra tasks so that we can generate html AND xml
-task spotbugsMainHtml(type: com.github.spotbugs.SpotBugsTask, dependsOn: [classes]) {
-    classes = project.sourceSets.main.output.classesDirs
-    source = project.sourceSets.main.java.srcDirs
-    classpath = sourceSets.main.runtimeClasspath
+tasks.withType(SpotBugsTask) {
     reports {
-        html.enabled = true
-        xml.enabled = false
+        xml.withMessages true
+        html.stylesheet resources.text.fromArchiveEntry(configurations.spotbugsStylesheets, 'default.xsl')
     }
-}
-distZip.dependsOn spotbugsMainHtml
-distTar.dependsOn spotbugsMainHtml
 
-task spotbugsTestHtml(type: com.github.spotbugs.SpotBugsTask, dependsOn: [testClasses]) {
-    classes = project.sourceSets.test.output.classesDirs
-    source = project.sourceSets.test.java.srcDirs
-    classpath = sourceSets.test.runtimeClasspath
-    reports {
-        html.enabled = true
-        xml.enabled = false
+    task "${it.name}HtmlReport" {
+        def input = reports.xml.destination
+        inputs.file reports.html.stylesheet.asFile() withPropertyName 'spotbugsStylesheet' withPathSensitivity NONE
+        inputs.files fileTree(input) withPropertyName 'input' withPathSensitivity NONE skipWhenEmpty()
+        def output = file(input.absolutePath.replaceFirst(/\.xml$/, '.html'))
+        outputs.file output withPropertyName 'output'
+        doLast {
+            def factory = TransformerFactory.newInstance()
+            def transformer = factory.newTransformer(new StreamSource(reports.html.stylesheet.asFile()));
+            transformer.transform(new StreamSource(input), new StreamResult(output))
+        }
     }
+    it.finalizedBy "${it.name}HtmlReport"
 }
-distZip.dependsOn spotbugsTestHtml
-distTar.dependsOn spotbugsTestHtml
-
-task spotbugsIntegrationTestHtml(type: com.github.spotbugs.SpotBugsTask, dependsOn: [integrationTestClasses]) {
-    classes = project.sourceSets.integrationTest.output.classesDirs
-    source = project.sourceSets.integrationTest.java.srcDirs
-    classpath = sourceSets.integrationTest.runtimeClasspath
-    reports {
-        html.enabled = true
-        xml.enabled = false
-    }
-}
-distZip.dependsOn spotbugsIntegrationTestHtml
-distTar.dependsOn spotbugsIntegrationTestHtml
+// these tasks are crated in the loop above
+distZip.dependsOn spotbugsMainHtmlReport
+distTar.dependsOn spotbugsMainHtmlReport
+distZip.dependsOn spotbugsTestHtmlReport
+distTar.dependsOn spotbugsTestHtmlReport
+distZip.dependsOn spotbugsIntegrationTestHtmlReport
+distTar.dependsOn spotbugsIntegrationTestHtmlReport
 
 gitProperties {
     gitPropertiesDir = "${buildDir}/resources/main/fll/resources"
