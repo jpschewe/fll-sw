@@ -40,18 +40,39 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
    */
   public static final String DEFAULT_REMOTE_PAGE = "default";
 
+  /**
+   * Constant for the welcome page.
+   */
   public static final String WELCOME_REMOTE_PAGE = "welcome";
 
+  /**
+   * Constant for displaying the scoreboard.
+   */
   public static final String SCOREBOARD_REMOTE_PAGE = "scoreboard";
 
+  /**
+   * Constant for displaying the slideshow.
+   */
   public static final String SLIDESHOW_REMOTE_PAGE = "slideshow";
 
+  /**
+   * Constant for displaying the playoffs.
+   */
   public static final String HEAD_TO_HEAD_REMOTE_PAGE = "playoffs";
 
+  /**
+   * Constant for displaying the finalist schedule.
+   */
   public static final String FINALIST_SCHEDULE_REMOTE_PAGE = "finalistSchedule";
 
+  /**
+   * Constant for displaying the finalist teams.
+   */
   public static final String FINALIST_TEAMS_REMOTE_PAGE = "finalistTeams";
 
+  /**
+   * Constant for displaying a page outside of the normal pages.
+   */
   public static final String SPECIAL_REMOTE_PAGE = "special";
 
   private static final Object LOCK = new Object();
@@ -347,10 +368,9 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
   }
 
   /**
-   * Get the prefix for form parameters for this display.
    * Needs to match remoteControl.js
    *
-   * @return
+   * @return Get the prefix for form parameters for this display
    */
   public String getFormParamPrefix() {
     if (isDefaultDisplay()) {
@@ -361,42 +381,69 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
     }
   }
 
+  /**
+   * @return the parameter name for the remote page
+   */
   public String getRemotePageFormParamName() {
     return getFormParamPrefix()
         + "remotePage";
   }
 
+  /**
+   * @return the parameter name for the remote URL
+   */
   public String getRemoteUrlFormParamName() {
     return getFormParamPrefix()
         + "remoteURL";
   }
 
+  /**
+   * @return the parameter for deleting a display
+   */
   public String getDeleteFormParamName() {
     return getFormParamPrefix()
         + "delete";
   }
 
+  /**
+   * @return the form parameter for the special URL to display
+   */
   public String getSpecialUrlFormParamName() {
     return getFormParamPrefix()
         + "remoteURL";
   }
 
+  /**
+   * @return the parameter name for the award group to display the finalist
+   *         schedule for
+   */
   public String getFinalistScheduleAwardGroupFormParamName() {
     return getFormParamPrefix()
         + "finalistDivision";
   }
 
+  /**
+   * @return the parameter name for the number of head to head brackets to display
+   */
   public String getHead2HeadNumBracketsFormParamName() {
     return getFormParamPrefix()
         + "numBrackets";
   }
 
+  /**
+   * @param bracketIdx the index for the bracket
+   * @return the parameter for the bracket to display in multiple brackets
+   */
   public String getHead2HeadBracketFormParamName(final int bracketIdx) {
     return getFormParamPrefix()
         + "playoffDivision_"
         + bracketIdx;
   }
 
+  /**
+   * @param bracketIdx the index for the bracket
+   * @return the parameter for the first round to display in multiple brackets
+   */
   public String getHead2HeadFirstRoundFormParamName(final int bracketIdx) {
     return getFormParamPrefix()
         + "playoffRoundNumber_"
@@ -437,6 +484,9 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
     }
   }
 
+  /**
+   * @return is this display following the default display
+   */
   public boolean isFollowDefault() {
     return DEFAULT_REMOTE_PAGE.equals(mRemotePage);
   }
@@ -453,50 +503,83 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
     }
   }
 
+  /**
+   * @return is the welcome page being displayed
+   */
   public boolean isWelcome() {
     return WELCOME_REMOTE_PAGE.equals(mRemotePage);
   }
 
+  /**
+   * @return is the scoreboard being displayed
+   */
   public boolean isScoreboard() {
     return SCOREBOARD_REMOTE_PAGE.equals(mRemotePage);
   }
 
+  /**
+   * @return is the head to head page being displayed
+   */
   public boolean isHeadToHead() {
     return HEAD_TO_HEAD_REMOTE_PAGE.equals(mRemotePage);
   }
 
+  /**
+   * @return is the finalist schedule being displayed
+   */
   public boolean isFinalistSchedule() {
     return FINALIST_SCHEDULE_REMOTE_PAGE.equals(mRemotePage);
   }
 
+  /**
+   * @return is the finalist teams page being displayed
+   */
   public boolean isFinalistTeams() {
     return FINALIST_TEAMS_REMOTE_PAGE.equals(mRemotePage);
   }
 
+  /**
+   * @return is the slideshow being displayed
+   */
   public boolean isSlideshow() {
     return SLIDESHOW_REMOTE_PAGE.equals(mRemotePage);
   }
 
+  /**
+   * @return is the special page being displayed
+   */
   public boolean isSpecial() {
     return SPECIAL_REMOTE_PAGE.equals(mRemotePage);
   }
 
   private String mSpecialUrl;
 
+  /**
+   * @return the special URL to display
+   */
   public String getSpecialUrl() {
     return mSpecialUrl;
   }
 
+  /**
+   * @param v see {@link #getSpecialUrl()}
+   */
   public void setSpecialUrl(final String v) {
     mSpecialUrl = v;
   }
 
   private String mFinalistScheduleAwardGroup;
 
+  /**
+   * @return which award group to show the finalist schedule for
+   */
   public String getFinalistScheduleAwardGroup() {
     return mFinalistScheduleAwardGroup;
   }
 
+  /**
+   * @param v see {@link #getFinalistScheduleAwardGroup()}
+   */
   public void setFinalistScheduleAwardGroup(final String v) {
     mFinalistScheduleAwardGroup = v;
   }
@@ -504,12 +587,15 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
   private final List<H2HBracketDisplay> mBrackets = new LinkedList<>();
 
   /**
-   * Head to head brackets to display on this display.
+   * @return Head to head brackets to display on this display.
    */
   public List<H2HBracketDisplay> getBrackets() {
     return Collections.unmodifiableList(mBrackets);
   }
 
+  /**
+   * @param v see {@link #getBrackets()}
+   */
   public void setBrackets(final List<H2HBracketDisplay> v) {
     mBrackets.clear();
     mBrackets.addAll(v);
@@ -545,7 +631,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
     private final String mBracket;
 
     /**
-     * The bracket to display.
+     * @return The bracket to display.
      */
     public String getBracket() {
       return mBracket;
@@ -554,16 +640,22 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
     private final int mFirstRound;
 
     /**
-     * The first round to display.
+     * @return The first round to display.
      */
     public int getFirstRound() {
       return mFirstRound;
     }
 
+    /**
+     * @return the form parameter name for the bracket name for this bracket
+     */
     public String getHead2HeadBracketFormParamName() {
       return mParent.getHead2HeadBracketFormParamName(mIndex);
     }
 
+    /**
+     * @return the form parameter for the first round for this bracket
+     */
     public String getHead2HeadFirstRoundFormParamName() {
       return mParent.getHead2HeadFirstRoundFormParamName(mIndex);
     }
