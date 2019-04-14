@@ -209,7 +209,7 @@ public final class SubjectiveFrame extends JFrame {
           }
         } catch (final SAXParseException spe) {
           final String errorMessage1 = String.format("Error parsing file line: %d column: %d%n Message: %s%n This may be caused by using the wrong version of the software attempting to parse a file that is not subjective data.",
-                                                    spe.getLineNumber(), spe.getColumnNumber(), spe.getMessage());
+                                                     spe.getLineNumber(), spe.getColumnNumber(), spe.getMessage());
           LOGGER.error(errorMessage1, spe);
           JOptionPane.showMessageDialog(null, errorMessage1, "Error", JOptionPane.ERROR_MESSAGE);
         } catch (final SAXException se) {
@@ -399,57 +399,67 @@ public final class SubjectiveFrame extends JFrame {
     }
   }
 
+  private static final class TabAction extends AbstractAction {
+
+    private final Action oldTabAction;
+
+    public TabAction(final JTable table) {
+      final InputMap im = table.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+      // Have the enter key work the same as the tab key
+      final KeyStroke tab = KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0);
+      final KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
+      im.put(enter, im.get(tab));
+      oldTabAction = table.getActionMap().get(im.get(tab));
+    }
+
+    @Override
+    public void actionPerformed(final ActionEvent e) {
+      // Override the default tab behavior
+      // Tab to the next editable cell. When no editable cells goto next cell.
+      if (null != oldTabAction) {
+        oldTabAction.actionPerformed(e);
+      }
+
+      final JTable table = (JTable) e.getSource();
+      final int rowCount = table.getRowCount();
+      final int columnCount = table.getColumnCount();
+      int row = table.getSelectedRow();
+      int column = table.getSelectedColumn();
+
+      // skip the no show when tabbing
+      while (!table.isCellEditable(row, column)
+          || table.getColumnClass(column) == Boolean.class) {
+        column += 1;
+
+        if (column == columnCount) {
+          column = 0;
+          row += 1;
+        }
+
+        if (row == rowCount) {
+          row = 0;
+        }
+
+        // Back to where we started, get out.
+        if (row == table.getSelectedRow()
+            && column == table.getSelectedColumn()) {
+          break;
+        }
+      }
+
+      table.changeSelection(row, column, false, false);
+    }
+  }
+
   /**
    * Set the tab and return behavior for a table.
    */
   private void setupTabReturnBehavior(final JTable table) {
     final InputMap im = table.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-
-    // Have the enter key work the same as the tab key
     final KeyStroke tab = KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0);
-    final KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
-    im.put(enter, im.get(tab));
 
-    // Override the default tab behavior
-    // Tab to the next editable cell. When no editable cells goto next cell.
-    final Action oldTabAction = table.getActionMap().get(im.get(tab));
-    final Action tabAction = new AbstractAction() {
-      @Override
-      public void actionPerformed(final ActionEvent e) {
-        if (null != oldTabAction) {
-          oldTabAction.actionPerformed(e);
-        }
-
-        final JTable table = (JTable) e.getSource();
-        final int rowCount = table.getRowCount();
-        final int columnCount = table.getColumnCount();
-        int row = table.getSelectedRow();
-        int column = table.getSelectedColumn();
-
-        // skip the no show when tabbing
-        while (!table.isCellEditable(row, column)
-            || table.getColumnClass(column) == Boolean.class) {
-          column += 1;
-
-          if (column == columnCount) {
-            column = 0;
-            row += 1;
-          }
-
-          if (row == rowCount) {
-            row = 0;
-          }
-
-          // Back to where we started, get out.
-          if (row == table.getSelectedRow()
-              && column == table.getSelectedColumn()) {
-            break;
-          }
-        }
-
-        table.changeSelection(row, column, false, false);
-      }
-    };
+    final TabAction tabAction = new TabAction(table);
     table.getActionMap().put(im.get(tab), tabAction);
   }
 

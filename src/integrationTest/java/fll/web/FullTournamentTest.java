@@ -43,7 +43,6 @@ import java.util.zip.ZipInputStream;
 import javax.swing.table.TableModel;
 
 import org.apache.commons.lang3.StringUtils;
-
 import org.fest.swing.edt.FailOnThreadViolationRepaintManager;
 import org.fest.swing.security.NoExitSecurityManagerInstaller;
 import org.junit.jupiter.api.AfterAll;
@@ -70,6 +69,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlSelect;
 import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
 import com.opencsv.CSVWriter;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
 import fll.TestUtils;
 import fll.Tournament;
@@ -82,7 +82,6 @@ import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.scheduler.TournamentSchedule;
 import fll.subjective.SubjectiveFrame;
-
 import fll.web.developer.QueryHandler;
 import fll.web.scoreEntry.ScoreEntry;
 import fll.xml.AbstractGoal;
@@ -111,7 +110,9 @@ public class FullTournamentTest {
   @BeforeAll
   public static void setUpOnce() {
     FailOnThreadViolationRepaintManager.install();
-    noExitSecurityManagerInstaller = NoExitSecurityManagerInstaller.installNoExitSecurityManager(status -> assertEquals(0, status, "Bad exit status"));
+    noExitSecurityManagerInstaller = NoExitSecurityManagerInstaller.installNoExitSecurityManager(status -> assertEquals(0,
+                                                                                                                        status,
+                                                                                                                        "Bad exit status"));
   }
 
   /**
@@ -790,10 +791,9 @@ public class FullTournamentTest {
 
   /**
    * Simulate entering subjective scores by pulling them out of testDataConn.
-   * @param selenium TODO
+   *
    * @param testDataConn Where to get the test data from
    * @param challengeDocument the challenge descriptor
-   *
    * @throws SQLException
    * @throws SAXException
    * @throws InterruptedException
@@ -801,7 +801,8 @@ public class FullTournamentTest {
   private void enterSubjectiveScores(final WebDriver selenium,
                                      final Connection testDataConn,
                                      final ChallengeDescription description,
-                                     final Tournament sourceTournament, final Path outputDirectory)
+                                     final Tournament sourceTournament,
+                                     final Path outputDirectory)
       throws SQLException, IOException, MalformedURLException, ParseException, SAXException, InterruptedException {
 
     final Path subjectiveZip = outputDirectory.resolve(sanitizeFilename(sourceTournament.getName())
@@ -812,91 +813,7 @@ public class FullTournamentTest {
 
     try {
       EventQueue.invokeAndWait(Errors.rethrow().wrap(() -> {
-        final SubjectiveFrame subjective = new SubjectiveFrame();
-        subjective.load(subjectiveZip.toFile());
-
-        // insert scores into zip
-        for (final SubjectiveScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
-          final String category = subjectiveElement.getName();
-          final String title = subjectiveElement.getTitle();
-
-          // find appropriate table model
-          final TableModel tableModel = subjective.getTableModelForTitle(title);
-          assertNotNull(tableModel);
-
-          final int teamNumberColumn = findColumnByName(tableModel, "TeamNumber");
-          assertTrue(teamNumberColumn >= 0, "Can't find TeamNumber column in subjective table model");
-          if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Found team number column at "
-                + teamNumberColumn);
-          }
-
-          try (final PreparedStatement prep = testDataConn.prepareStatement("SELECT * FROM "
-              + category
-              + " WHERE Tournament = ?")) {
-            prep.setInt(1, sourceTournament.getTournamentID());
-
-            try (final ResultSet rs = prep.executeQuery()) {
-              while (rs.next()) {
-                final int teamNumber = rs.getInt("TeamNumber");
-
-                // find row number in table
-                int rowIndex = -1;
-                for (int rowIdx = 0; rowIdx < tableModel.getRowCount(); ++rowIdx) {
-                  final Object teamNumberRaw = tableModel.getValueAt(rowIdx, teamNumberColumn);
-                  assertNotNull(teamNumberRaw);
-                  final int value = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(teamNumberRaw.toString()).intValue();
-
-                  if (LOGGER.isTraceEnabled()) {
-                    LOGGER.trace("Checking if "
-                        + teamNumber
-                        + " equals "
-                        + value
-                        + " raw: "
-                        + teamNumberRaw
-                        + "? "
-                        + (value == teamNumber)
-                        + " rowIdx: "
-                        + rowIdx
-                        + " numRows: "
-                        + tableModel.getRowCount());
-                  }
-
-                  if (value == teamNumber) {
-                    rowIndex = rowIdx;
-                    break;
-                  }
-                }
-                assertTrue(rowIndex >= 0, "Can't find team "
-                    + teamNumber
-                    + " in subjective table model");
-
-                if (rs.getBoolean("NoShow")) {
-                  // find column for no show
-                  final int columnIndex = findColumnByName(tableModel, "No Show");
-                  assertTrue(columnIndex >= 0, "Can't find No Show column in subjective table model");
-                  tableModel.setValueAt(Boolean.TRUE, rowIndex, columnIndex);
-                } else {
-                  for (final AbstractGoal goalElement : subjectiveElement.getGoals()) {
-                    if (!goalElement.isComputed()) {
-                      final String goalName = goalElement.getName();
-                      final String goalTitle = goalElement.getTitle();
-
-                      // find column index for goal and call set
-                      final int columnIndex = findColumnByName(tableModel, goalTitle);
-                      assertTrue(columnIndex >= 0, "Can't find "
-                          + goalTitle
-                          + " column in subjective table model");
-                      final int value = rs.getInt(goalName);
-                      tableModel.setValueAt(Integer.valueOf(value), rowIndex, columnIndex);
-                    }
-                  }
-                } // not NoShow
-              } // foreach score
-            } // try ResultSet
-          } // try PreparedStatement
-        } // foreach category
-        subjective.save();
+        enterSubjectiveScores(testDataConn, description, sourceTournament, subjectiveZip);
 
       }));
     } catch (final InvocationTargetException e) {
@@ -917,18 +834,112 @@ public class FullTournamentTest {
 
   }
 
+  @SuppressFBWarnings(value = "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING", justification = "Need to specify category for table name")
+  public void enterSubjectiveScores(final Connection testDataConn,
+                                    final ChallengeDescription description,
+                                    final Tournament sourceTournament,
+                                    final Path subjectiveZip)
+      throws IOException, SQLException, ParseException {
+    final SubjectiveFrame subjective = new SubjectiveFrame();
+    subjective.load(subjectiveZip.toFile());
+
+    // insert scores into zip
+    for (final SubjectiveScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
+      final String category = subjectiveElement.getName();
+      final String title = subjectiveElement.getTitle();
+
+      // find appropriate table model
+      final TableModel tableModel = subjective.getTableModelForTitle(title);
+      assertNotNull(tableModel);
+
+      final int teamNumberColumn = findColumnByName(tableModel, "TeamNumber");
+      assertTrue(teamNumberColumn >= 0, "Can't find TeamNumber column in subjective table model");
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("Found team number column at "
+            + teamNumberColumn);
+      }
+
+      try (final PreparedStatement prep = testDataConn.prepareStatement("SELECT * FROM "
+          + category
+          + " WHERE Tournament = ?")) {
+        prep.setInt(1, sourceTournament.getTournamentID());
+
+        try (final ResultSet rs = prep.executeQuery()) {
+          while (rs.next()) {
+            final int teamNumber = rs.getInt("TeamNumber");
+
+            // find row number in table
+            int rowIndex = -1;
+            for (int rowIdx = 0; rowIdx < tableModel.getRowCount(); ++rowIdx) {
+              final Object teamNumberRaw = tableModel.getValueAt(rowIdx, teamNumberColumn);
+              assertNotNull(teamNumberRaw);
+              final int value = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(teamNumberRaw.toString()).intValue();
+
+              if (LOGGER.isTraceEnabled()) {
+                LOGGER.trace("Checking if "
+                    + teamNumber
+                    + " equals "
+                    + value
+                    + " raw: "
+                    + teamNumberRaw
+                    + "? "
+                    + (value == teamNumber)
+                    + " rowIdx: "
+                    + rowIdx
+                    + " numRows: "
+                    + tableModel.getRowCount());
+              }
+
+              if (value == teamNumber) {
+                rowIndex = rowIdx;
+                break;
+              }
+            }
+            assertTrue(rowIndex >= 0, "Can't find team "
+                + teamNumber
+                + " in subjective table model");
+
+            if (rs.getBoolean("NoShow")) {
+              // find column for no show
+              final int columnIndex = findColumnByName(tableModel, "No Show");
+              assertTrue(columnIndex >= 0, "Can't find No Show column in subjective table model");
+              tableModel.setValueAt(Boolean.TRUE, rowIndex, columnIndex);
+            } else {
+              for (final AbstractGoal goalElement : subjectiveElement.getGoals()) {
+                if (!goalElement.isComputed()) {
+                  final String goalName = goalElement.getName();
+                  final String goalTitle = goalElement.getTitle();
+
+                  // find column index for goal and call set
+                  final int columnIndex = findColumnByName(tableModel, goalTitle);
+                  assertTrue(columnIndex >= 0, "Can't find "
+                      + goalTitle
+                      + " column in subjective table model");
+                  final int value = rs.getInt(goalName);
+                  tableModel.setValueAt(Integer.valueOf(value), rowIndex, columnIndex);
+                }
+              }
+            } // not NoShow
+          } // foreach score
+        } // try ResultSet
+      } // try PreparedStatement
+    } // foreach category
+    subjective.save();
+  }
+
   /**
    * Enter a teams performance score. Data is pulled from testDataConn and
    * pushed to the website.
-   * @param selenium TODO
    *
+   * @param selenium TODO
    * @throws InterruptedException
    */
   private void enterPerformanceScore(final WebDriver selenium,
                                      final Connection testDataConn,
                                      final PerformanceScoreCategory performanceElement,
                                      final Tournament sourceTournament,
-                                     final int runNumber, final int teamNumber)
+                                     final int runNumber,
+                                     final int teamNumber)
       throws SQLException, IOException, MalformedURLException, ParseException, InterruptedException {
 
     if (LOGGER.isInfoEnabled()) {
@@ -1057,15 +1068,16 @@ public class FullTournamentTest {
   /**
    * Enter a teams performance score. Data is pulled from testDataConn and
    * pushed to the website.
-   * @param selenium TODO
    *
+   * @param selenium TODO
    * @throws InterruptedException
    */
   private void verifyPerformanceScore(final WebDriver selenium,
                                       final Connection testDataConn,
                                       final PerformanceScoreCategory performanceElement,
                                       final Tournament sourceTournament,
-                                      final int runNumber, final int teamNumber)
+                                      final int runNumber,
+                                      final int teamNumber)
       throws SQLException, IOException, MalformedURLException, ParseException, InterruptedException {
     final String selectTeamPage = TestUtils.URL_ROOT
         + "scoreEntry/select_team.jsp";
@@ -1189,8 +1201,8 @@ public class FullTournamentTest {
 
   /**
    * Check display pages that aren't shown otherwise.
-   * @param selenium TODO
    *
+   * @param selenium TODO
    * @throws IOException
    * @throws InterruptedException
    */
