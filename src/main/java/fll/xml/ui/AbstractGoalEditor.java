@@ -19,9 +19,7 @@ import javax.swing.JPanel;
 
 import org.apache.commons.lang3.StringUtils;
 
-
 import fll.util.FormatterUtils;
-
 import fll.util.TextAreaEditor;
 import fll.xml.AbstractGoal;
 
@@ -180,12 +178,12 @@ import fll.xml.AbstractGoal;
   }
 
   /**
-   * Called by {@link #checkValidity()}. If the list is empty after the call, then
+   * Called by {@link #checkValidity(Collection)}. If the list is empty after the call, then
    * the goal is valid, otherwise the goal is invalid and the messages will be
    * displayed to the user.
    * Subclasses should override this to add extra checks. Make sure to call the
    * parent class method.
-   * 
+   *
    * @param messages put invalid messages in the list.
    */
   protected void gatherValidityMessages(final List<String> messages) {

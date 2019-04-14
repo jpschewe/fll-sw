@@ -34,11 +34,15 @@ public class BasicPolynomial implements Evaluatable, Serializable {
 
   /**
    * Only to be called from {@link ComplexPolynomial}.
+   *
+   * @param ele the element to parse
+   * @param goalScope used to lookup goals
+   * @param variableScope used to lookup variables
    */
   protected BasicPolynomial(@Nonnull final Element ele,
                             @Nonnull final GoalScope goalScope,
                             final VariableScope variableScope) {
-    mTerms = new LinkedList<Term>();
+    mTerms = new LinkedList<>();
     for (final Element termEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(Term.TAG_NAME))) {
       final Term term = new Term(termEle, goalScope, variableScope);
       mTerms.add(term);
@@ -76,7 +80,7 @@ public class BasicPolynomial implements Evaluatable, Serializable {
     case ROUND:
       return Math.round(value);
     case TRUNCATE:
-      return (double) ((long) value);
+      return ((long) value);
     default:
       throw new FLLInternalException("Unknown floating point type: "
           + getFloatingPoint());
@@ -94,7 +98,7 @@ public class BasicPolynomial implements Evaluatable, Serializable {
 
   /**
    * Add a term to the end of the polynomial.
-   * 
+   *
    * @param term the term to add
    */
   public void addTerm(final Term term) {
@@ -103,10 +107,11 @@ public class BasicPolynomial implements Evaluatable, Serializable {
 
   /**
    * Add a term at the specified index in the polynomial
-   * 
+   *
    * @param index the index to add the term at
    * @param v the term to add
-   * @throws IndexOutOfBoundsException
+   * @throws IndexOutOfBoundsException if the index isn't valid
+   * @see List#add(int, Object)
    */
   public void addTerm(final int index,
                       final Term v)
@@ -116,7 +121,7 @@ public class BasicPolynomial implements Evaluatable, Serializable {
 
   /**
    * Remove a term.
-   * 
+   *
    * @param term the term to remove
    * @return if the term was removed
    * @see List#remove(Object)
@@ -127,10 +132,10 @@ public class BasicPolynomial implements Evaluatable, Serializable {
 
   /**
    * Remove the term at the specified index.
-   * 
+   *
    * @param index the index to remove the term at
    * @return the term that was removed
-   * @throws IndexOutOfBoundsException
+   * @throws IndexOutOfBoundsException if the index isn't valid
    * @see List#remove(int)
    */
   public Term removeTerm(final int index) throws IndexOutOfBoundsException {

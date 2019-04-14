@@ -16,7 +16,7 @@ import fll.xml.ChallengeDescription;
  * Keys for all attributes in the application. These are initialized from
  * 'jspf/init.jspf', unless otherwise noted. Each key has an associated accessor
  * function as well that helps with type safety.
- * 
+ *
  * @author jpschewe
  * @version $Revision$
  */
@@ -81,10 +81,12 @@ public final class ApplicationAttributes {
   /**
    * Get session attribute and send appropriate error if type is wrong. Note
    * that null is always valid.
-   * 
+   *
    * @param application where to get the attribute
    * @param attribute the attribute to get
    * @param clazz the expected type
+   * @param <T> the expected type
+   * @return the value
    */
   public static <T> T getAttribute(final ServletContext application,
                                    final String attribute,
