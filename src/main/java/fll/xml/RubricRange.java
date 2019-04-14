@@ -21,20 +21,44 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
  */
 public class RubricRange implements Serializable {
 
+  /**
+   * The XML tag name to write the rubric into.
+   */
   public static final String RUBRIC_TAG_NAME = "rubric";
 
+  /**
+   * The XML tag to write the range into.
+   */
   public static final String TAG_NAME = "range";
 
+  /**
+   * The XML attribute name to put the title in.
+   */
   public static final String TITLE_ATTRIBUTE = "title";
 
+  /**
+   * The XML attribute to write the min value to.
+   */
   public static final String MIN_ATTRIBUTE = "min";
 
+  /**
+   * The XML attribute to write the max value to.
+   */
   public static final String MAX_ATTRIBUTE = "max";
 
+  /**
+   * The XML attribute to write the description to.
+   */
   public static final String DESCRIPTION_TAG_NAME = "description";
 
+  /**
+   * The XML element to write the short description to.
+   */
   public static final String SHORT_DESCRIPTION_ATTRIBUTE = "shortDescription";
 
+  /**
+   * @param ele the XML element to parse the range from
+   */
   public RubricRange(final Element ele) {
     mTitle = ele.getAttribute(TITLE_ATTRIBUTE);
     mMin = Integer.parseInt(ele.getAttribute(MIN_ATTRIBUTE));
@@ -55,7 +79,7 @@ public class RubricRange implements Serializable {
    * Default constructor. {@link #getDescription()} is null,
    * {@link #getShortDescription()} is null, {@link #getMin()} is 0,
    * {@Link #getMax()} is 1.
-   * 
+   *
    * @param title the title of the range
    */
   public RubricRange(@Nonnull final String title) {
@@ -80,10 +104,16 @@ public class RubricRange implements Serializable {
 
   private String mTitle;
 
+  /**
+   * @return the title of the range.
+   */
   public String getTitle() {
     return mTitle;
   }
 
+  /**
+   * @param v see {@Link #getTitle()}
+   */
   public void setTitle(final String v) {
     mTitle = v;
   }
@@ -94,11 +124,16 @@ public class RubricRange implements Serializable {
    * The long description, may be null.
    * Extra whitespace is removed. All line endings
    * are removed.
+   *
+   * @return the long description
    */
   public String getDescription() {
     return mDescription;
   }
 
+  /**
+   * @param v see {@link #getDescription()}
+   */
   public void setDescription(final String v) {
     mDescription = removeExtraWhitespace(v);
   }
@@ -106,12 +141,15 @@ public class RubricRange implements Serializable {
   private String mShortDescription;
 
   /**
-   * Short description, typically 1 line. May be null.
+   * @return Short description, typically 1 line. May be null.
    */
   public String getShortDescription() {
     return mShortDescription;
   }
 
+  /**
+   * @param v see {@link #getShortDescription()}
+   */
   public void setShortDescription(final String v) {
     mShortDescription = v;
   }
@@ -120,6 +158,8 @@ public class RubricRange implements Serializable {
    * Combine short description and description.
    * If short description doesn't end with a punctuation,
    * add a period. Handles null description.
+   *
+   * @return the full description to display
    */
   public String getFullDescription() {
     final StringBuilder sb = new StringBuilder();
@@ -148,24 +188,40 @@ public class RubricRange implements Serializable {
 
   private int mMin;
 
+  /**
+   * @return the minimum value for the range.
+   */
   public int getMin() {
     return mMin;
   }
 
+  /**
+   * @param v see {@link #getMin()}
+   */
   public void setMin(final int v) {
     mMin = v;
   }
 
   private int mMax;
 
+  /**
+   * @return the maximum value for the range
+   */
   public int getMax() {
     return mMax;
   }
 
+  /**
+   * @param v see {@link #getMax()}
+   */
   public void setMax(final int v) {
     mMax = v;
   }
 
+  /**
+   * @param doc the document to put the range in
+   * @return an XML element with the information from this range
+   */
   public Element toXml(final Document doc) {
     if (mMin >= mMax) {
       throw new FLLRuntimeException("Minimum value must be less than maximum value");

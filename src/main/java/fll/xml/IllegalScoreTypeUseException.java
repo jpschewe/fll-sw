@@ -15,7 +15,7 @@ import fll.util.FLLRuntimeException;
 public class IllegalScoreTypeUseException extends FLLRuntimeException {
 
   /**
-   * @param message
+   * @param message passed to the parent class
    */
   public IllegalScoreTypeUseException(final String message) {
     super(message);
