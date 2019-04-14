@@ -22,10 +22,7 @@ import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 
-
-
 import fll.util.FLLRuntimeException;
-
 
 /**
  * Information about a display.
@@ -87,7 +84,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
    * Add a display name to the list of known displays.
    * This sets the current time as the last seen time. So this method can also
    * be used to update the last seen time.
-   * 
+   *
    * @param application used to track the list of all display names
    * @param session used to store the display name for the page to see. Variable
    *          is "displayName".
@@ -122,7 +119,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
    * Also cleans up the related application attributes.
    * If <code>displayInfo</code> is the default display this method does nothing
    * as the default display cannot be deleted.
-   * 
+   *
    * @param application where the displays are stored
    * @param displayInfo the display to be deleted
    */
@@ -155,7 +152,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
    * Get the appropriate {@link DisplayInfo} object for the name.
    * If the named display is following the default display or doesn't have a
    * name, then the default display is returned.
-   * 
+   *
    * @param application used to get all of the displays
    * @param displayName the name of the display, may be null
    * @return a non-null {@link DisplayInfo} object
@@ -185,9 +182,10 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
   /**
    * Get the display information from the application context. If the default
    * display isn't there, then it's added.
-   * 
+   *
    * @return an unmodifiable collection sorted by display name with the default
    *         display first
+   * @param application the application context to find information in
    */
   @Nonnull
   public static Collection<DisplayInfo> getDisplayInformation(@Nonnull final ServletContext application) {
@@ -201,7 +199,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
                                                                                    ApplicationAttributes.DISPLAY_INFORMATION,
                                                                                    SortedSet.class);
     if (null == displayInformation) {
-      displayInformation = new TreeSet<DisplayInfo>();
+      displayInformation = new TreeSet<>();
       // don't need set as it will happen in the next if statement body
     }
     if (displayInformation.isEmpty()
@@ -216,7 +214,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
   /**
    * Find the default display information. If it doesn't exist, create it and
    * add it to the application.
-   * 
+   *
    * @param application where to find display information
    * @return a non-null {@link DisplayInfo} object
    */
@@ -238,7 +236,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
 
   /**
    * Find the {@link DisplayInfo} with the specified name.
-   * 
+   *
    * @param application where to find the information
    * @param name the name of the display to find
    * @return the display or null if not known
@@ -257,7 +255,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
 
   /**
    * Create an object to store the information about a display.
-   * 
+   *
    * @param name the name of the display.
    */
   private DisplayInfo(final String name) {
@@ -287,7 +285,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
 
   /**
    * Update the last seen time to be now.
-   * 
+   *
    * @param application used to store the updated {@link DisplayInfo} object.
    */
   public void updateLastSeen(@Nonnull final ServletContext application) {
@@ -304,8 +302,9 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
       synchronized (LOCK) {
         final SortedSet<DisplayInfo> displayInformation = internalGetDisplayInformation(application);
 
-        LOGGER.trace("Before remove of display copy: " + displayInformation);
-        
+        LOGGER.trace("Before remove of display copy: "
+            + displayInformation);
+
         final boolean removed = displayInformation.remove(this); // remove
                                                                  // possible
                                                                  // outdated
@@ -319,7 +318,8 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
 
         displayInformation.add(this); // insert updated version
 
-        LOGGER.trace("After add of updated display information: " + displayInformation);
+        LOGGER.trace("After add of updated display information: "
+            + displayInformation);
 
         application.setAttribute(ApplicationAttributes.DISPLAY_INFORMATION, displayInformation);
       }
@@ -349,7 +349,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
   /**
    * Get the prefix for form parameters for this display.
    * Needs to match remoteControl.js
-   * 
+   *
    * @return
    */
   public String getFormParamPrefix() {
@@ -501,7 +501,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
     mFinalistScheduleAwardGroup = v;
   }
 
-  private List<H2HBracketDisplay> mBrackets = new LinkedList<>();
+  private final List<H2HBracketDisplay> mBrackets = new LinkedList<>();
 
   /**
    * Head to head brackets to display on this display.
@@ -535,7 +535,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
 
     /**
      * The index of this object inside it's list
-     * 
+     *
      * @see DisplayInfo#getBrackets()
      */
     public int getIndex() {

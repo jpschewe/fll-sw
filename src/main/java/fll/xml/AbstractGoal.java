@@ -50,7 +50,7 @@ public abstract class AbstractGoal implements Serializable {
 
   /**
    * Constructor for reading from an XML document.
-   * 
+   *
    * @param ele the XML element to parse
    */
   public AbstractGoal(@Nonnull final Element ele) {
@@ -75,7 +75,7 @@ public abstract class AbstractGoal implements Serializable {
    */
   public AbstractGoal(final String name) {
     this();
-    
+
     mName = name;
     mTitle = null;
     mDescription = null;
@@ -93,7 +93,7 @@ public abstract class AbstractGoal implements Serializable {
 
   /**
    * @param v see {@link #getCategory()}
-   * Fires property change event.
+   *          Fires property change event.
    */
   public void setCategory(final String v) {
     final String old = mCategory;
@@ -113,7 +113,7 @@ public abstract class AbstractGoal implements Serializable {
 
   /**
    * @param v see {@link #getName()}
-   * Fires property change event.
+   *          Fires property change event.
    */
   public void setName(@Nonnull final String v) {
     final String old = mName;
@@ -132,7 +132,7 @@ public abstract class AbstractGoal implements Serializable {
 
   /**
    * @param v see {@link #getTitle()}
-   * Fires property change event.
+   *          Fires property change event.
    */
   public void setTitle(final String v) {
     final String old = mTitle;
@@ -151,7 +151,7 @@ public abstract class AbstractGoal implements Serializable {
 
   /**
    * @param v see {@link #getDescription()}
-   * Fires property change event.
+   *          Fires property change event.
    */
   public void setDescription(final String v) {
     final String old = mDescription;
@@ -161,30 +161,40 @@ public abstract class AbstractGoal implements Serializable {
 
   /**
    * Get the raw score.
-   * 
+   *
+   * @param teamScore the score to evaluate
    * @return the score or NaN if there is currently no score for this goal
    */
   public abstract double getRawScore(final TeamScore teamScore);
 
   /**
    * Get the computed score.
-   * 
+   *
+   * @param teamScore the score to evaluate
    * @return the score or NaN if there is currently no score for this goal
    */
   public abstract double getComputedScore(final TeamScore teamScore);
 
+  /**
+   * @return true if this is a computed goal
+   */
   public abstract boolean isComputed();
 
+  /***
+   * @return true if this is an enumerated goal
+   */
   public abstract boolean isEnumerated();
 
   /**
-   * Read-only collection of the values.
+   * @return Read-only collection of the values.
    */
   public abstract Collection<EnumeratedValue> getValues();
 
   /**
    * Get the enumerated values from the goal and sort them for display.
    * This ensures that all usages have the elements in the same order.
+   *
+   * @return the enumerated values for this goal
    */
   public List<EnumeratedValue> getSortedValues() {
     final List<EnumeratedValue> values = new LinkedList<>(getValues());
@@ -192,14 +202,23 @@ public abstract class AbstractGoal implements Serializable {
     return values;
   }
 
+  /**
+   * @return the score type
+   */
   public abstract ScoreType getScoreType();
 
+  /**
+   * @return minimum raw value for the goal
+   */
   public abstract double getMin();
 
+  /**
+   * @return maximum raw value for the goal
+   */
   public abstract double getMax();
 
   /**
-   * Check if this goal is a yes/no.
+   * @return if this goal is a yes/no.
    */
   public boolean isYesNo() {
     if (isComputed()
@@ -216,7 +235,7 @@ public abstract class AbstractGoal implements Serializable {
     case FLOAT:
       return score;
     case INTEGER:
-      return (double) ((long) score);
+      return ((long) score);
     default:
       throw new FLLInternalException("Unknown score type: "
           + getScoreType());
@@ -245,6 +264,7 @@ public abstract class AbstractGoal implements Serializable {
     private EnumeratedValueLowestFirst() {
     }
 
+    @Override
     public int compare(final EnumeratedValue one,
                        final EnumeratedValue two) {
       return Double.compare(one.getScore(), two.getScore());
@@ -255,7 +275,7 @@ public abstract class AbstractGoal implements Serializable {
 
   /**
    * Add a listener for property change events.
-   * 
+   *
    * @param listener the listener to add
    */
   public void addPropertyChangeListener(@Nonnull final PropertyChangeListener listener) {
@@ -264,7 +284,7 @@ public abstract class AbstractGoal implements Serializable {
 
   /**
    * Remove a property change listener.
-   * 
+   *
    * @param listener the listener to remove
    */
   public void removePropertyChangeListener(@Nonnull final PropertyChangeListener listener) {

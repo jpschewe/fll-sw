@@ -25,7 +25,7 @@ public abstract class AbstractConditionStatement implements Serializable {
 
   /**
    * Construct from an XML element.
-   * 
+   *
    * @param ele the element to parse
    */
   public AbstractConditionStatement(@Nonnull final Element ele) {
@@ -66,7 +66,7 @@ public abstract class AbstractConditionStatement implements Serializable {
 
   /**
    * See {@link #getComparison()}.
-   * 
+   *
    * @param v the new value for the comparator
    */
   public void setComparison(@Nonnull final InequalityComparison v) {
@@ -75,6 +75,9 @@ public abstract class AbstractConditionStatement implements Serializable {
 
   /**
    * Does this conditional statement evaluate to true?
+   *
+   * @param teamScore the score to evaluate
+   * @return if this condition is true for the specified score
    */
   public abstract boolean isTrue(TeamScore teamScore);
 

@@ -70,9 +70,11 @@ public final class ChallengeParser {
 
   /**
    * Parse the specified XML document and report errors.
-   * <ul>
-   * <li>arg[0] - the location of the document to parse
-   * </ul>
+   *
+   * @param args the location of the document to parse
+   *          <ul>
+   *          <li>arg[0] - the location of the document to parse
+   *          </ul>
    */
   public static void main(final String[] args) {
     if (args.length < 1) {
@@ -539,6 +541,7 @@ public final class ChallengeParser {
    * {@link Element#getElementsByTagName(String)}, except that it only works with
    * the direct children.
    *
+   * @param tagname the tag name to select
    * @param parent the element to check the children of
    * @return the list of elements, may be empty
    */
@@ -556,6 +559,9 @@ public final class ChallengeParser {
 
   /**
    * Get all challenge descriptors build into the software.
+   *
+   * @return a collection of all URLs to the challenge descriptions in the
+   *         software
    */
   public static Collection<URL> getAllKnownChallengeDescriptorURLs() {
     final String baseDir = "fll/resources/challenge-descriptors/";
@@ -657,6 +663,9 @@ public final class ChallengeParser {
 
   /**
    * Get the score type for a particular element.
+   *
+   * @param element where to get the attribute from
+   * @return the score type, defaults to {@link ScoreType#INTEGER}
    */
   public static ScoreType getScoreType(final Element element) {
     if (element.hasAttribute(ChallengeParser.SCORE_TYPE_ATTRIBUTE)) {
@@ -675,6 +684,9 @@ public final class ChallengeParser {
 
   /**
    * Get the winner criteria for a particular element.
+   *
+   * @param element where to get the attribute from
+   * @return the winner type, defaults to {@link WinnerType#HIGH}
    */
   public static WinnerType getWinnerCriteria(final Element element) {
     if (element.hasAttribute(ChallengeParser.WINNER_ATTRIBUTE)) {

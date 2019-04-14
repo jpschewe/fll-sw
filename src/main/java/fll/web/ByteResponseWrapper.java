@@ -22,7 +22,7 @@ import fll.util.FLLRuntimeException;
 /**
  * Wrapper class for a response that stores everything in a local buffer to be
  * processed later.
- * 
+ *
  * @see HttpServletResponse
  */
 public class ByteResponseWrapper extends HttpServletResponseWrapper {
@@ -37,7 +37,9 @@ public class ByteResponseWrapper extends HttpServletResponseWrapper {
   private boolean binaryUsed = false;
 
   /**
-   * Was {@link #getOutputStream()} used for output. 
+   * Was {@link #getOutputStream()} used for output.
+   *
+   * @return if {@link #getOutputStream()} has been called
    */
   public boolean isBinaryUsed() {
     return binaryUsed;
@@ -46,20 +48,29 @@ public class ByteResponseWrapper extends HttpServletResponseWrapper {
   private boolean stringUsed = false;
 
   /**
-   * Was {@link #getWriter()} used for output.
+   * @return if {@link #getWriter()} used for output.
    */
   public boolean isStringUsed() {
     return stringUsed;
   }
 
+  /**
+   * @return th ebinary data that was written
+   */
   public byte[] getBinary() {
     return binary.toByteArray();
   }
 
+  /**
+   * @return the string that was written
+   */
   public String getString() {
     return string.getBuffer().toString();
   }
 
+  /**
+   * @param response passed to the parent class
+   */
   public ByteResponseWrapper(final HttpServletResponse response) {
     super(response);
     string = new StringWriter();
@@ -113,7 +124,10 @@ public class ByteResponseWrapper extends HttpServletResponseWrapper {
     }
 
     @Override
-    public void write(final byte[] b, final int off, final int len) throws IOException {
+    public void write(final byte[] b,
+                      final int off,
+                      final int len)
+        throws IOException {
       os.write(b, off, len);
     }
 
@@ -132,7 +146,7 @@ public class ByteResponseWrapper extends HttpServletResponseWrapper {
      */
     @Override
     public void setWriteListener(final WriteListener arg0) {
-      throw new FLLRuntimeException("Async I/O not supported by the wrapper");      
+      throw new FLLRuntimeException("Async I/O not supported by the wrapper");
     }
 
   }

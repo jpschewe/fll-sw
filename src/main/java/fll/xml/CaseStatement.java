@@ -24,7 +24,7 @@ public class CaseStatement implements Evaluatable, Serializable {
 
   /**
    * Construct from an XML document.
-   * 
+   *
    * @param ele the element to parse
    * @param goalScope where to lookup referenced goals
    * @param variableScope where to lookup referenced variables
@@ -81,7 +81,7 @@ public class CaseStatement implements Evaluatable, Serializable {
 
   /**
    * The condition to evaluate.
-   * 
+   *
    * @return may not be null at evaluation time
    */
   public AbstractConditionStatement getCondition() {
@@ -90,7 +90,7 @@ public class CaseStatement implements Evaluatable, Serializable {
 
   /**
    * Specify a new condition statement.
-   * 
+   *
    * @param v see {@link #getCondition()}
    */
   public void setCondition(final AbstractConditionStatement v) {
@@ -101,6 +101,8 @@ public class CaseStatement implements Evaluatable, Serializable {
 
   /**
    * May be null, but then resultSwitch cannot be null at evaluation time.
+   *
+   * @return the polynomial that defines the result
    */
   public ComplexPolynomial getResultPoly() {
     return mResultPoly;
@@ -118,6 +120,8 @@ public class CaseStatement implements Evaluatable, Serializable {
   /**
    * May be null, but then {@link #getResultPoly()} cannot be null at evaluation
    * time.
+   *
+   * @param the switch statement that defines the result
    */
   public SwitchStatement getResultSwitch() {
     return mResultSwitch;
@@ -154,6 +158,12 @@ public class CaseStatement implements Evaluatable, Serializable {
     }
   }
 
+  /**
+   * Convert the object to XML.
+   *
+   * @param doc the document to add to
+   * @return the XML element
+   */
   public Element toXml(final Document doc) {
     final Element ele = doc.createElement(TAG_NAME);
 
