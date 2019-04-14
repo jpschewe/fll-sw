@@ -1,16 +1,25 @@
 // -*- java -*-
 
+import com.github.spotbugs.SpotBugsTask
+
+import javax.xml.transform.TransformerFactory
+import javax.xml.transform.stream.StreamResult
+import javax.xml.transform.stream.StreamSource
+
+import static org.gradle.api.tasks.PathSensitivity.NONE
+
 buildscript {
     repositories {
         jcenter()
     }
     dependencies {
-            classpath group: 'com.cinnober.gradle', name: 'semver-git', version: '2.4.0'
-    }    
-    dependencies {
+        classpath group: 'com.cinnober.gradle', name: 'semver-git', version: '2.4.0'
         classpath 'org.unbroken-dome.gradle-plugins:gradle-testsets-plugin:2.1.1'
         classpath 'org.kordamp:markdown-gradle-plugin:1.2.0'
         classpath 'edu.sc.seis.gradle:launch4j:2.4.4'
+    }
+    configurations.classpath {
+        exclude group: 'com.google.guava', module: 'guava'
     }
 }    
 
@@ -21,13 +30,12 @@ plugins {
     id 'org.unbroken-dome.test-sets' version "2.1.1"
     id 'eclipse'
     id 'org.kordamp.markdown.convert' version "1.2.0"       
-    id 'findbugs'
+    id 'com.github.spotbugs' version '1.7.1'
     id "de.aaschmid.cpd" version "1.2"
     id 'edu.sc.seis.launch4j' version '2.4.4'
-    id 'com.palantir.git-version' version '0.11.0' // adds printVersion task
     id 'net.saliman.cobertura' version '2.6.0'
     id "com.gorylenko.gradle-git-properties" version "2.0.0"
-    id "com.github.ben-manes.versions" version "0.21.0" // adds dependency update check
+    id "com.github.ben-manes.versions" version "0.21.0" // adds dependencyUpdates task
 }
 
 // needs to use old plugin mechanism otherwise I can't set the extra properties
@@ -46,6 +54,17 @@ configurations {
     jspc
 }
 
+eclipse {
+    classpath {
+        file {
+            withXml {
+                def node = it.asNode()
+                // add web as resource entry
+                node.appendNode( 'classpathentry', [ kind: 'src', path: 'src/main/web', output: 'bin/web']) 
+            }
+        }
+    }
+}
 
 dependencies {
     jspc 'org.apache.ant:ant:1.10.1'
@@ -78,13 +97,14 @@ ext {
     poi_version = "4.0.1"
     junit_version = "5.4.0"
     log4j_version = "2.11.2"
+    spotbugs_version = '3.1.12'
 
     web_build_dir = new File(project.buildDir, 'web')
     documentation_build_dir = new File(project.buildDir, 'gen-documentation')    
     
     jspSrc = 'src/main/web'
-        jspJavaSrc = new File(project.buildDir, "jsp-java-source")
-        jspPackage = "fll.jsp"
+    jspJavaSrc = new File(project.buildDir, "jsp-java-source")
+    jspPackage = "fll.jsp"
 
     mainClassName = 'fll.Launcher'
 }
@@ -114,8 +134,9 @@ dependencies {
     
     implementation group: "org.apache.poi", name: "poi-ooxml", version: project.poi_version
     
-    implementation group: "com.google.code.findbugs", name: "annotations", version: "3.0.1"
-    implementation group: "com.google.code.findbugs", name: "jsr305", version: "3.0.1"
+    compileOnly group: "com.github.spotbugs", name: "spotbugs-annotations", version: project.spotbugs_version
+    compileOnly group: 'net.jcip', name: 'jcip-annotations', version: '1.0'
+    compileOnly group: "com.google.code.findbugs", name: "jsr305", version: "3.0.1"
     
     implementation group: "com.fasterxml.jackson.core", name: "jackson-databind", version: project.jackson_version
     implementation group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: project.jackson_version
@@ -203,8 +224,8 @@ distributions {
             from("$buildDir/reports/tests/") {
                 into 'web/documentation/reports'
                 }
-            from("$buildDir/reports/findbugs/") {
-                into 'web/documentation/reports/findbugs'
+            from("$buildDir/reports/spotbugs/") {
+                into 'web/documentation/reports/spotbugs'
                 }
             from("$buildDir/reports/cobertura/") {
                 into 'web/documentation/reports/coverage'
@@ -337,50 +358,52 @@ distZip.dependsOn createExe
 distTar.dependsOn createExe
 
 
-findbugs {
+configurations {
+    spotbugsStylesheets { transitive false }
+}
+
+dependencies {
+    spotbugsStylesheets "com.github.spotbugs:spotbugs:$spotbugs.toolVersion"
+}
+
+spotbugs {
+    toolVersion = project.spotbugs_version
+    
     // allow the build to continue, catch this in CI as warnings
     ignoreFailures = true
     effort = "max"
     reportLevel = "low"
-    excludeFilter = file("findbugs-filters.xml")
+    excludeFilter = file("spotbugs-filters.xml")
 }
 
 // some extra tasks so that we can generate html AND xml
-task findbugsMainHtml(type: FindBugs, dependsOn: [classes]) {
-    classes = project.sourceSets.main.output.classesDirs
-    source = project.sourceSets.main.java.srcDirs
-    classpath = sourceSets.main.runtimeClasspath
+tasks.withType(SpotBugsTask) {
     reports {
-        html.enabled = true
-        xml.enabled = false
+        xml.withMessages true
+        html.stylesheet resources.text.fromArchiveEntry(configurations.spotbugsStylesheets, 'default.xsl')
     }
-}
-distZip.dependsOn findbugsMainHtml
-distTar.dependsOn findbugsMainHtml
 
-task findbugsTestHtml(type: FindBugs, dependsOn: [testClasses]) {
-    classes = project.sourceSets.test.output.classesDirs
-    source = project.sourceSets.test.java.srcDirs
-    classpath = sourceSets.test.runtimeClasspath
-    reports {
-        html.enabled = true
-        xml.enabled = false
+    task "${it.name}HtmlReport" {
+        def input = reports.xml.destination
+        inputs.file reports.html.stylesheet.asFile() withPropertyName 'spotbugsStylesheet' withPathSensitivity NONE
+        inputs.files fileTree(input) withPropertyName 'input' withPathSensitivity NONE skipWhenEmpty()
+        def output = file(input.absolutePath.replaceFirst(/\.xml$/, '.html'))
+        outputs.file output withPropertyName 'output'
+        doLast {
+            def factory = TransformerFactory.newInstance()
+            def transformer = factory.newTransformer(new StreamSource(reports.html.stylesheet.asFile()));
+            transformer.transform(new StreamSource(input), new StreamResult(output))
+        }
     }
+    it.finalizedBy "${it.name}HtmlReport"
 }
-distZip.dependsOn findbugsTestHtml
-distTar.dependsOn findbugsTestHtml
-
-task findbugsIntegrationTestHtml(type: FindBugs, dependsOn: [integrationTestClasses]) {
-    classes = project.sourceSets.integrationTest.output.classesDirs
-    source = project.sourceSets.integrationTest.java.srcDirs
-    classpath = sourceSets.integrationTest.runtimeClasspath
-    reports {
-        html.enabled = true
-        xml.enabled = false
-    }
-}
-distZip.dependsOn findbugsIntegrationTestHtml
-distTar.dependsOn findbugsIntegrationTestHtml
+// these tasks are crated in the loop above
+distZip.dependsOn spotbugsMainHtmlReport
+distTar.dependsOn spotbugsMainHtmlReport
+distZip.dependsOn spotbugsTestHtmlReport
+distTar.dependsOn spotbugsTestHtmlReport
+distZip.dependsOn spotbugsIntegrationTestHtmlReport
+distTar.dependsOn spotbugsIntegrationTestHtmlReport
 
 gitProperties {
     gitPropertiesDir = "${buildDir}/resources/main/fll/resources"

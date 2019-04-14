@@ -114,16 +114,13 @@ public class TomcatLauncher {
 
                                             // shell script ->
                                             // fll-sw/classes/
-                                            // root: (dir)/../web
                                             "../web", //
 
                                             // gradle ->
                                             // working-dir/build/classes/java/main/
-                                            // root: ../../../web
                                             "../../../web",
 
-                                            // eclipse -> working-dir/bin/classes
-                                            // root: ../web
+                                            // eclipse -> working-dir/bin/main
                                             "../web", };
 
     for (final String location : possibleWebLocations) {
