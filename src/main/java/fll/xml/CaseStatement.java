@@ -121,7 +121,7 @@ public class CaseStatement implements Evaluatable, Serializable {
    * May be null, but then {@link #getResultPoly()} cannot be null at evaluation
    * time.
    *
-   * @param the switch statement that defines the result
+   * @return the switch statement that defines the result
    */
   public SwitchStatement getResultSwitch() {
     return mResultSwitch;

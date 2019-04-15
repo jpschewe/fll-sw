@@ -174,6 +174,7 @@ public class EnumConditionStatement extends AbstractConditionStatement {
    * If {@link #getRightGoalRef()} is not null, resolves the goal reference to a
    * goal.
    *
+   * @return the goal for the right side of the conditional
    * @see GoalRef#getGoal()
    */
   public AbstractGoal getRightGoal() {

@@ -97,6 +97,8 @@ public class DurationModel extends AbstractTableModel {
 
   /**
    * Specify the judging groups for the model.
+   *
+   * @param data the new model see {@link #getData()}
    */
   public void setData(final List<Integer> data) {
     this.durations.clear();
@@ -106,7 +108,7 @@ public class DurationModel extends AbstractTableModel {
 
   /**
    * Get the current data.
-   * 
+   *
    * @return read-only list of the durations
    */
   public List<Integer> getData() {
@@ -125,8 +127,8 @@ public class DurationModel extends AbstractTableModel {
 
   /**
    * Delete the specified row.
-   * 
-   * @param row
+   *
+   * @param row the index of the row to delete
    */
   public void deleteRow(final int row) {
     durations.remove(row);

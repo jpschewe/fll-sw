@@ -132,6 +132,7 @@ public class FinalistLoad {
   /**
    * @param application the application context to get information from
    * @return the current tournament name as a quoted javascript string
+   * @throws SQLException on a database error
    */
   public static String currentTournament(final ServletContext application) throws SQLException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -172,6 +173,7 @@ public class FinalistLoad {
    *
    * @param writer where to write
    * @param application the application context
+   * @throws SQLException on a database error
    */
   public static void outputNonNumericNominees(final Writer writer,
                                               final ServletContext application)

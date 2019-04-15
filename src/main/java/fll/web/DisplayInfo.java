@@ -348,7 +348,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
   }
 
   /**
-   * Is this the default display?
+   * @return Is this the default display?
    */
   public boolean isDefaultDisplay() {
     return DEFAULT_DISPLAY_NAME.equals(mName);
@@ -620,8 +620,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
     private final int mIndex;
 
     /**
-     * The index of this object inside it's list
-     *
+     * @return The index of this object inside it's list
      * @see DisplayInfo#getBrackets()
      */
     public int getIndex() {
