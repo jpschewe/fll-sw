@@ -32,7 +32,7 @@ function reloadRuns() {
   var s = document.createElement('script');
   s.type='text/javascript';
   s.id = 'reloadruns';
-  s.src='unverifiedRunsObject.jsp?' + Math.random();
+  s.src='UpdateUnverifiedRuns?' + Math.random();
   document.body.appendChild(s);
 }
 
@@ -193,7 +193,7 @@ $(document).ready(function() {
 
 </table> <!-- outer table -->
 
-        <script type="text/javascript" id="reloadruns" src="unverifiedRunsObject.jsp"></script>
+        <script type="text/javascript" id="reloadruns" src="UpdateUnverifiedRuns"></script>
     
   </body>
 </html>
