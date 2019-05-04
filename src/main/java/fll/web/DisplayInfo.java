@@ -22,10 +22,7 @@ import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 
-
-
 import fll.util.FLLRuntimeException;
-
 
 /**
  * Information about a display.
@@ -43,18 +40,39 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
    */
   public static final String DEFAULT_REMOTE_PAGE = "default";
 
+  /**
+   * Constant for the welcome page.
+   */
   public static final String WELCOME_REMOTE_PAGE = "welcome";
 
+  /**
+   * Constant for displaying the scoreboard.
+   */
   public static final String SCOREBOARD_REMOTE_PAGE = "scoreboard";
 
+  /**
+   * Constant for displaying the slideshow.
+   */
   public static final String SLIDESHOW_REMOTE_PAGE = "slideshow";
 
+  /**
+   * Constant for displaying the playoffs.
+   */
   public static final String HEAD_TO_HEAD_REMOTE_PAGE = "playoffs";
 
+  /**
+   * Constant for displaying the finalist schedule.
+   */
   public static final String FINALIST_SCHEDULE_REMOTE_PAGE = "finalistSchedule";
 
+  /**
+   * Constant for displaying the finalist teams.
+   */
   public static final String FINALIST_TEAMS_REMOTE_PAGE = "finalistTeams";
 
+  /**
+   * Constant for displaying a page outside of the normal pages.
+   */
   public static final String SPECIAL_REMOTE_PAGE = "special";
 
   private static final Object LOCK = new Object();
@@ -87,7 +105,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
    * Add a display name to the list of known displays.
    * This sets the current time as the last seen time. So this method can also
    * be used to update the last seen time.
-   * 
+   *
    * @param application used to track the list of all display names
    * @param session used to store the display name for the page to see. Variable
    *          is "displayName".
@@ -122,7 +140,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
    * Also cleans up the related application attributes.
    * If <code>displayInfo</code> is the default display this method does nothing
    * as the default display cannot be deleted.
-   * 
+   *
    * @param application where the displays are stored
    * @param displayInfo the display to be deleted
    */
@@ -155,7 +173,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
    * Get the appropriate {@link DisplayInfo} object for the name.
    * If the named display is following the default display or doesn't have a
    * name, then the default display is returned.
-   * 
+   *
    * @param application used to get all of the displays
    * @param displayName the name of the display, may be null
    * @return a non-null {@link DisplayInfo} object
@@ -185,9 +203,10 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
   /**
    * Get the display information from the application context. If the default
    * display isn't there, then it's added.
-   * 
+   *
    * @return an unmodifiable collection sorted by display name with the default
    *         display first
+   * @param application the application context to find information in
    */
   @Nonnull
   public static Collection<DisplayInfo> getDisplayInformation(@Nonnull final ServletContext application) {
@@ -201,7 +220,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
                                                                                    ApplicationAttributes.DISPLAY_INFORMATION,
                                                                                    SortedSet.class);
     if (null == displayInformation) {
-      displayInformation = new TreeSet<DisplayInfo>();
+      displayInformation = new TreeSet<>();
       // don't need set as it will happen in the next if statement body
     }
     if (displayInformation.isEmpty()
@@ -216,7 +235,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
   /**
    * Find the default display information. If it doesn't exist, create it and
    * add it to the application.
-   * 
+   *
    * @param application where to find display information
    * @return a non-null {@link DisplayInfo} object
    */
@@ -238,7 +257,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
 
   /**
    * Find the {@link DisplayInfo} with the specified name.
-   * 
+   *
    * @param application where to find the information
    * @param name the name of the display to find
    * @return the display or null if not known
@@ -257,7 +276,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
 
   /**
    * Create an object to store the information about a display.
-   * 
+   *
    * @param name the name of the display.
    */
   private DisplayInfo(final String name) {
@@ -287,7 +306,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
 
   /**
    * Update the last seen time to be now.
-   * 
+   *
    * @param application used to store the updated {@link DisplayInfo} object.
    */
   public void updateLastSeen(@Nonnull final ServletContext application) {
@@ -304,8 +323,9 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
       synchronized (LOCK) {
         final SortedSet<DisplayInfo> displayInformation = internalGetDisplayInformation(application);
 
-        LOGGER.trace("Before remove of display copy: " + displayInformation);
-        
+        LOGGER.trace("Before remove of display copy: "
+            + displayInformation);
+
         final boolean removed = displayInformation.remove(this); // remove
                                                                  // possible
                                                                  // outdated
@@ -319,7 +339,8 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
 
         displayInformation.add(this); // insert updated version
 
-        LOGGER.trace("After add of updated display information: " + displayInformation);
+        LOGGER.trace("After add of updated display information: "
+            + displayInformation);
 
         application.setAttribute(ApplicationAttributes.DISPLAY_INFORMATION, displayInformation);
       }
@@ -327,7 +348,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
   }
 
   /**
-   * Is this the default display?
+   * @return Is this the default display?
    */
   public boolean isDefaultDisplay() {
     return DEFAULT_DISPLAY_NAME.equals(mName);
@@ -347,10 +368,9 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
   }
 
   /**
-   * Get the prefix for form parameters for this display.
    * Needs to match remoteControl.js
-   * 
-   * @return
+   *
+   * @return Get the prefix for form parameters for this display
    */
   public String getFormParamPrefix() {
     if (isDefaultDisplay()) {
@@ -361,42 +381,69 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
     }
   }
 
+  /**
+   * @return the parameter name for the remote page
+   */
   public String getRemotePageFormParamName() {
     return getFormParamPrefix()
         + "remotePage";
   }
 
+  /**
+   * @return the parameter name for the remote URL
+   */
   public String getRemoteUrlFormParamName() {
     return getFormParamPrefix()
         + "remoteURL";
   }
 
+  /**
+   * @return the parameter for deleting a display
+   */
   public String getDeleteFormParamName() {
     return getFormParamPrefix()
         + "delete";
   }
 
+  /**
+   * @return the form parameter for the special URL to display
+   */
   public String getSpecialUrlFormParamName() {
     return getFormParamPrefix()
         + "remoteURL";
   }
 
+  /**
+   * @return the parameter name for the award group to display the finalist
+   *         schedule for
+   */
   public String getFinalistScheduleAwardGroupFormParamName() {
     return getFormParamPrefix()
         + "finalistDivision";
   }
 
+  /**
+   * @return the parameter name for the number of head to head brackets to display
+   */
   public String getHead2HeadNumBracketsFormParamName() {
     return getFormParamPrefix()
         + "numBrackets";
   }
 
+  /**
+   * @param bracketIdx the index for the bracket
+   * @return the parameter for the bracket to display in multiple brackets
+   */
   public String getHead2HeadBracketFormParamName(final int bracketIdx) {
     return getFormParamPrefix()
         + "playoffDivision_"
         + bracketIdx;
   }
 
+  /**
+   * @param bracketIdx the index for the bracket
+   * @return the parameter for the first round to display in multiple brackets
+   */
   public String getHead2HeadFirstRoundFormParamName(final int bracketIdx) {
     return getFormParamPrefix()
         + "playoffRoundNumber_"
@@ -437,6 +484,9 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
     }
   }
 
+  /**
+   * @return is this display following the default display
+   */
   public boolean isFollowDefault() {
     return DEFAULT_REMOTE_PAGE.equals(mRemotePage);
   }
@@ -453,63 +503,99 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
     }
   }
 
+  /**
+   * @return is the welcome page being displayed
+   */
   public boolean isWelcome() {
     return WELCOME_REMOTE_PAGE.equals(mRemotePage);
   }
 
+  /**
+   * @return is the scoreboard being displayed
+   */
   public boolean isScoreboard() {
     return SCOREBOARD_REMOTE_PAGE.equals(mRemotePage);
   }
 
+  /**
+   * @return is the head to head page being displayed
+   */
   public boolean isHeadToHead() {
     return HEAD_TO_HEAD_REMOTE_PAGE.equals(mRemotePage);
   }
 
+  /**
+   * @return is the finalist schedule being displayed
+   */
   public boolean isFinalistSchedule() {
     return FINALIST_SCHEDULE_REMOTE_PAGE.equals(mRemotePage);
   }
 
+  /**
+   * @return is the finalist teams page being displayed
+   */
   public boolean isFinalistTeams() {
     return FINALIST_TEAMS_REMOTE_PAGE.equals(mRemotePage);
   }
 
+  /**
+   * @return is the slideshow being displayed
+   */
   public boolean isSlideshow() {
     return SLIDESHOW_REMOTE_PAGE.equals(mRemotePage);
   }
 
+  /**
+   * @return is the special page being displayed
+   */
   public boolean isSpecial() {
     return SPECIAL_REMOTE_PAGE.equals(mRemotePage);
   }
 
   private String mSpecialUrl;
 
+  /**
+   * @return the special URL to display
+   */
   public String getSpecialUrl() {
     return mSpecialUrl;
   }
 
+  /**
+   * @param v see {@link #getSpecialUrl()}
+   */
   public void setSpecialUrl(final String v) {
     mSpecialUrl = v;
   }
 
   private String mFinalistScheduleAwardGroup;
 
+  /**
+   * @return which award group to show the finalist schedule for
+   */
   public String getFinalistScheduleAwardGroup() {
     return mFinalistScheduleAwardGroup;
   }
 
+  /**
+   * @param v see {@link #getFinalistScheduleAwardGroup()}
+   */
   public void setFinalistScheduleAwardGroup(final String v) {
     mFinalistScheduleAwardGroup = v;
   }
 
-  private List<H2HBracketDisplay> mBrackets = new LinkedList<>();
+  private final List<H2HBracketDisplay> mBrackets = new LinkedList<>();
 
   /**
-   * Head to head brackets to display on this display.
+   * @return Head to head brackets to display on this display.
    */
   public List<H2HBracketDisplay> getBrackets() {
     return Collections.unmodifiableList(mBrackets);
   }
 
+  /**
+   * @param v see {@link #getBrackets()}
+   */
   public void setBrackets(final List<H2HBracketDisplay> v) {
     mBrackets.clear();
     mBrackets.addAll(v);
@@ -534,8 +620,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
     private final int mIndex;
 
     /**
-     * The index of this object inside it's list
-     * 
+     * @return The index of this object inside it's list
      * @see DisplayInfo#getBrackets()
      */
     public int getIndex() {
@@ -545,7 +630,7 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
     private final String mBracket;
 
     /**
-     * The bracket to display.
+     * @return The bracket to display.
      */
     public String getBracket() {
       return mBracket;
@@ -554,16 +639,22 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
     private final int mFirstRound;
 
     /**
-     * The first round to display.
+     * @return The first round to display.
      */
     public int getFirstRound() {
       return mFirstRound;
     }
 
+    /**
+     * @return the form parameter name for the bracket name for this bracket
+     */
     public String getHead2HeadBracketFormParamName() {
       return mParent.getHead2HeadBracketFormParamName(mIndex);
     }
 
+    /**
+     * @return the form parameter for the first round for this bracket
+     */
     public String getHead2HeadFirstRoundFormParamName() {
       return mParent.getHead2HeadFirstRoundFormParamName(mIndex);
     }

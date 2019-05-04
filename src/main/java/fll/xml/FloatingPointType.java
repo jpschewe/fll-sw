@@ -11,7 +11,8 @@ public enum FloatingPointType {
   DECIMAL, ROUND, TRUNCATE;
 
   /**
-   * Defaults to TRUNCATE if string doesn't match any known constant.
+   * @param str the string to convert
+   * @return Defaults to TRUNCATE if string doesn't match any known constant
    */
   public static FloatingPointType fromString(final String str) {
     if (DECIMAL.toString().equalsIgnoreCase(str)) {
@@ -22,7 +23,10 @@ public enum FloatingPointType {
       return TRUNCATE;
     }
   }
-  
+
+  /**
+   * @return the string to use for XML
+   */
   public String toXmlString() {
     // the XML always uses the lower case version
     return toString().toLowerCase();

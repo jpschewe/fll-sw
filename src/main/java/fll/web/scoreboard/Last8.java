@@ -23,14 +23,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-
-
 import fll.Utilities;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.flltools.displaySystem.list.SetArray;
 import fll.util.FLLInternalException;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.xml.ChallengeDescription;
@@ -45,6 +42,7 @@ public class Last8 extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -122,9 +120,10 @@ public class Last8 extends BaseFLLServlet {
 
   /**
    * Get the displayed data as a list for flltools.
-   * 
+   *
    * @param application get all of the appropriate parameters
    * @return payload for the set array message
+   * @throws SQLException if a database error occurs
    */
   public static SetArray.Payload getTableAsList(@Nonnull final ServletContext application) throws SQLException {
 
@@ -160,8 +159,8 @@ public class Last8 extends BaseFLLServlet {
     return payload;
   }
 
-  private static interface ProcessScoreEntry {
-    public void execute(final int teamNumber,
+  private interface ProcessScoreEntry {
+    void execute(final int teamNumber,
                         final String teamName,
                         final String organization,
                         @Nonnull final String awardGroup,

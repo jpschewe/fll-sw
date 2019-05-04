@@ -14,7 +14,7 @@ import fll.util.FLLRuntimeException;
 public class CircularComputedGoalException extends FLLRuntimeException {
 
   /**
-   * @param message
+   * @param message passed to parent class
    */
   public CircularComputedGoalException(final String message) {
     super(message);

@@ -17,12 +17,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
-
-
 import fll.db.Queries;
-
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Some cookie utilities for FLL.
@@ -38,6 +34,10 @@ public final class CookieUtils {
 
   /**
    * Clear out all login cookies.
+   *
+   * @param application the application context
+   * @param request the servlet request
+   * @param response the servlet response
    */
   public static void clearLoginCookies(final ServletContext application,
                                        final HttpServletRequest request,
@@ -63,7 +63,7 @@ public final class CookieUtils {
       connection = datasource.getConnection();
 
       for (final Cookie loginCookie : loginCookies) {
-        Cookie delCookie = new Cookie(loginCookie.getName(), "");
+        final Cookie delCookie = new Cookie(loginCookie.getName(), "");
         delCookie.setMaxAge(0);
         delCookie.setDomain(domain);
         response.addCookie(delCookie);
@@ -75,7 +75,7 @@ public final class CookieUtils {
               + loginCookie.getValue());
         }
       }
-  
+
     } catch (final SQLException e) {
       throw new RuntimeException(e);
     } finally {
@@ -86,26 +86,29 @@ public final class CookieUtils {
 
   /**
    * Set the login cookie.
-   * 
+   *
    * @param response the response
    * @param magicKey the key to store
    */
   public static void setLoginCookie(final HttpServletResponse response,
                                     final String magicKey) {
     final Cookie cookie = new Cookie(LOGIN_KEY, magicKey);
-    cookie.setMaxAge(7 * 24 * 60 * 60); // week year
+    cookie.setMaxAge(7
+        * 24
+        * 60
+        * 60); // week year
     cookie.setPath("/");
     response.addCookie(cookie);
   }
 
   /**
    * Find all login cookies.
-   * 
+   *
    * @param request where to find the cookies
    * @return the cookie or null if not found
    */
   public static Collection<Cookie> findLoginCookie(final HttpServletRequest request) {
-    final Collection<Cookie> found = new LinkedList<Cookie>();
+    final Collection<Cookie> found = new LinkedList<>();
 
     final Cookie[] cookies = request.getCookies();
     if (null == cookies) {
@@ -126,12 +129,12 @@ public final class CookieUtils {
 
   /**
    * Find the login key(s)
-   * 
+   *
    * @param request where to find the cookies
    * @return the string stored in the cookie or null if not found
    */
   public static Collection<String> findLoginKey(final HttpServletRequest request) {
-    final Collection<String> retval = new LinkedList<String>();
+    final Collection<String> retval = new LinkedList<>();
     for (final Cookie cookie : findLoginCookie(request)) {
       if (null != cookie) {
         retval.add(cookie.getValue());

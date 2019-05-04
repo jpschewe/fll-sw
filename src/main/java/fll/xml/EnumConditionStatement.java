@@ -6,13 +6,12 @@
 
 package fll.xml;
 
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.util.FLLInternalException;
 import fll.web.playoff.TeamScore;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 /**
  * Condition statement in a switch case that uses enums.
@@ -29,6 +28,10 @@ public class EnumConditionStatement extends AbstractConditionStatement {
 
   public static final String VALUE_ATTRIBUTE = "value";
 
+  /**
+   * @param ele the element to parse
+   * @param goalScope where to find goals
+   */
   public EnumConditionStatement(final Element ele,
                                 final GoalScope goalScope) {
     super(ele);
@@ -78,7 +81,7 @@ public class EnumConditionStatement extends AbstractConditionStatement {
   /**
    * Left string, may be null, but then leftGoal cannot not null at evaluation
    * time.
-   * 
+   *
    * @return the left string to compare against, may be null.
    */
   public String getLeftString() {
@@ -97,7 +100,7 @@ public class EnumConditionStatement extends AbstractConditionStatement {
   /**
    * Left goal reference, may be null, but then leftString cannot be null at
    * evaluation time.
-   * 
+   *
    * @return the reference to the left goal, may be null
    */
   public GoalRef getLeftGoalRef() {
@@ -116,8 +119,9 @@ public class EnumConditionStatement extends AbstractConditionStatement {
    * evalution time.
    * If {@link #getLeftGoalRef()} is not null, resolves the goal reference to a
    * goal.
-   * 
+   *
    * @see GoalRef#getGoal()
+   * @return the left goal
    */
   public AbstractGoal getLeftGoal() {
     if (null == mLeftGoalRef) {
@@ -131,6 +135,8 @@ public class EnumConditionStatement extends AbstractConditionStatement {
 
   /**
    * Right string, may be null, but then rightGoal is not null.
+   *
+   * @return the right string
    */
   public String getRightString() {
     return mRightString;
@@ -148,7 +154,7 @@ public class EnumConditionStatement extends AbstractConditionStatement {
   /**
    * Right goal reference, may be null, but then right string cannot be null at
    * evaluation time.
-   * 
+   *
    * @return the reference to the right goal, may be null
    */
   public GoalRef getRightGoalRef() {
@@ -167,7 +173,8 @@ public class EnumConditionStatement extends AbstractConditionStatement {
    * evalution time.
    * If {@link #getRightGoalRef()} is not null, resolves the goal reference to a
    * goal.
-   * 
+   *
+   * @return the goal for the right side of the conditional
    * @see GoalRef#getGoal()
    */
   public AbstractGoal getRightGoal() {
