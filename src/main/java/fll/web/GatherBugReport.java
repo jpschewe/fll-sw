@@ -150,6 +150,8 @@ public class GatherBugReport extends BaseFLLServlet {
    * in a "logs" subdirectory in the zip file.
    *
    * @param zipOut the stream to write to.
+   * @throws IOException if there is an error writing the log files to the zip
+   *           stream
    */
   public static void addLogFiles(@Nonnull final ZipOutputStream zipOut) throws IOException {
 

@@ -21,6 +21,9 @@ import fll.Utilities;
 import fll.web.playoff.TeamScore;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
+/**
+ * Represents a goal in the challenge description.
+ */
 public class Goal extends AbstractGoal {
 
   public static final String TAG_NAME = "goal";
@@ -35,6 +38,11 @@ public class Goal extends AbstractGoal {
 
   public static final String REQUIRED_ATTRIBUTE = "required";
 
+  /**
+   * Create the goal from an XML element.
+   *
+   * @param ele the element to parse
+   */
   public Goal(final Element ele) {
     super(ele);
 
@@ -51,7 +59,7 @@ public class Goal extends AbstractGoal {
       mRequired = false;
     }
 
-    mRubric = new LinkedList<RubricRange>();
+    mRubric = new LinkedList<>();
     final NodelistElementCollectionAdapter rubricEles = new NodelistElementCollectionAdapter(ele.getElementsByTagName(RubricRange.RUBRIC_TAG_NAME));
     if (rubricEles.hasNext()) {
       final Element rubricEle = rubricEles.next();
@@ -61,7 +69,7 @@ public class Goal extends AbstractGoal {
       }
     }
 
-    mValues = new LinkedList<EnumeratedValue>();
+    mValues = new LinkedList<>();
     for (final Element valueEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(EnumeratedValue.TAG_NAME))) {
       final EnumeratedValue value = new EnumeratedValue(valueEle);
       mValues.add(value);
@@ -73,7 +81,7 @@ public class Goal extends AbstractGoal {
    * Create a goal with default values for min (0), max (1), multiplier (1),
    * required (false), empty rubric, empty enumerated values and
    * initial value (0) and score type {@link ScoreType#INTEGER}.
-   * 
+   *
    * @param name see {@link #getName()}
    */
   public Goal(@Nonnull final String name) {
@@ -83,17 +91,14 @@ public class Goal extends AbstractGoal {
     mMultiplier = 1;
     mInitialValue = 0;
     mRequired = false;
-    mRubric = new LinkedList<RubricRange>();
-    mValues = new LinkedList<EnumeratedValue>();
+    mRubric = new LinkedList<>();
+    mValues = new LinkedList<>();
     mScoreType = ScoreType.INTEGER;
   }
 
-  private static final Comparator<RubricRange> LEAST_RUBRIC_RANGE = new Comparator<RubricRange>() {
-    public int compare(final RubricRange one,
-                       final RubricRange two) {
-      return Integer.compare(one.getMin(), two.getMin());
-    }
-  };
+  private static final Comparator<RubricRange> LEAST_RUBRIC_RANGE = (one,
+                                                                     two) -> Integer.compare(one.getMin(),
+                                                                                             two.getMin());
 
   private final List<RubricRange> mRubric;
 
@@ -109,8 +114,8 @@ public class Goal extends AbstractGoal {
 
   /**
    * Replace the rubric.
-   * 
-   * @param v the new value
+   *
+   * @param v see {@link #getRubric()}
    */
   public void setRubric(final List<RubricRange> v) {
     mRubric.clear();
@@ -119,7 +124,7 @@ public class Goal extends AbstractGoal {
 
   /**
    * Remove a rubric range
-   * 
+   *
    * @param v the rubric range to remove
    * @return if the rubric range was removed
    */
@@ -129,7 +134,7 @@ public class Goal extends AbstractGoal {
 
   /**
    * Add a rubric range.
-   * 
+   *
    * @param v the rubric range to add
    */
   public void addRubricRange(final RubricRange v) {
@@ -144,13 +149,14 @@ public class Goal extends AbstractGoal {
   /**
    * @return unmodifiable collection
    */
+  @Override
   public Collection<EnumeratedValue> getValues() {
     return Collections.unmodifiableCollection(mValues);
   }
 
   /**
    * Add an enumerated value.
-   * 
+   *
    * @param v the value to add
    */
   public void addValue(final EnumeratedValue v) {
@@ -160,7 +166,7 @@ public class Goal extends AbstractGoal {
   /**
    * Remove an enumerated value, if all enumerated values are removed the goal
    * is no longer an enumerated goal.
-   * 
+   *
    * @param v the value to remove
    * @return if the value was removed
    */
@@ -177,59 +183,85 @@ public class Goal extends AbstractGoal {
 
   private double mMin;
 
+  @Override
   public double getMin() {
     return mMin;
   }
 
+  /**
+   * @param v see {@link #getMin()}
+   */
   public void setMin(final double v) {
     mMin = v;
   }
 
   private double mMax;
 
+  @Override
   public double getMax() {
     return mMax;
   }
 
+  /**
+   * @param v see {@link #getMax()}
+   */
   public void setMax(final double v) {
     mMax = v;
   }
 
   private double mMultiplier;
 
+  /**
+   * @return the multiplier of the raw score for the goal
+   */
   public double getMultiplier() {
     return mMultiplier;
   }
 
+  /**
+   * @param v see {@link #getMultiplier()}
+   */
   public void setMultiplier(final double v) {
     mMultiplier = v;
   }
 
   private double mInitialValue;
 
+  /**
+   * @return the initial raw value for the goal
+   */
   public double getInitialValue() {
     return mInitialValue;
   }
 
+  /**
+   * @param v see {@link #getInitialValue()}
+   */
   public void setInitialValue(final double v) {
     mInitialValue = v;
   }
 
   private ScoreType mScoreType;
 
+  @Override
   @Nonnull
   public ScoreType getScoreType() {
     return mScoreType;
   }
 
+  /**
+   * @param v see {@link #getScoreType()}
+   */
   public void setScoreType(@Nonnull final ScoreType v) {
     mScoreType = v;
   }
 
+  @Override
   public boolean isEnumerated() {
     return !getValues().isEmpty();
   }
 
+  @Override
   public double getRawScore(final TeamScore teamScore) {
     final double score = internalGetRawScore(teamScore);
     return applyScoreType(score);
@@ -250,6 +282,7 @@ public class Goal extends AbstractGoal {
     }
   }
 
+  @Override
   public double getComputedScore(final TeamScore teamScore) {
     final double rawScore = getRawScore(teamScore);
     return rawScore
@@ -264,12 +297,15 @@ public class Goal extends AbstractGoal {
   private boolean mRequired;
 
   /**
-   * True if the goal is required for award consideration.
+   * @return True if the goal is required for award consideration.
    */
   public boolean isRequired() {
     return mRequired;
   }
 
+  /**
+   * @param v see {@link #isRequired()}
+   */
   public void setRequired(final boolean v) {
     mRequired = v;
   }

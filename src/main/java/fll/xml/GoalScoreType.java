@@ -11,7 +11,8 @@ public enum GoalScoreType {
   RAW, COMPUTED;
 
   /**
-   * Defaults to "RAW" if nothing matches.
+   * @param str the string to convert
+   * @return Defaults to {@link #RAW} if nothing matches.
    */
   public static GoalScoreType fromString(final String str) {
     if (COMPUTED.toString().equalsIgnoreCase(str)) {
@@ -20,7 +21,10 @@ public enum GoalScoreType {
       return RAW;
     }
   }
-  
+
+  /**
+   * @return the string to write to XML
+   */
   public String toXmlString() {
     // XML is all lowercase
     return toString().toLowerCase();

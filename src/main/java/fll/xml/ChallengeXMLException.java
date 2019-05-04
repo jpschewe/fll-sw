@@ -16,20 +16,26 @@ public class ChallengeXMLException extends FLLRuntimeException {
   public ChallengeXMLException() {
   }
 
+  /**
+   * @param message passed to the parent class
+   */
   public ChallengeXMLException(final String message) {
     super(message);
   }
 
+  /**
+   * @param cause passed to the parent class
+   */
   public ChallengeXMLException(final Throwable cause) {
     super(cause);
   }
 
   /**
-   * @param message
-   * @param cause
+   * @param message passed to the parent class
+   * @param cause passed to the parent class
    */
   public ChallengeXMLException(final String message,
-                                 final Throwable cause) {
+                               final Throwable cause) {
     super(message, cause);
   }
 

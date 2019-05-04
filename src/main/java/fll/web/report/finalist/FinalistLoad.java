@@ -25,7 +25,6 @@ import fll.web.WebUtils;
 import fll.web.playoff.Playoff;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Support for /report/finalist/load.jsp.
@@ -34,6 +33,9 @@ public class FinalistLoad {
 
   /**
    * The name of the javascript variable that represents the team.
+   *
+   * @return the variable name to use for the specified team number
+   * @param teamNumber the team to get the variable for
    */
   public static String getTeamVarName(final int teamNumber) {
     return "team"
@@ -42,6 +44,9 @@ public class FinalistLoad {
 
   /**
    * The name of the javascript variable that represents the category.
+   *
+   * @param categoryName the category to get the variable for
+   * @return the variable name to use for the category
    */
   public static String getCategoryVarName(final String categoryName) {
     return categoryName
@@ -50,14 +55,16 @@ public class FinalistLoad {
 
   /**
    * Output the variable definition for the specified team.
-   * 
+   *
    * @param output where to write
    * @param team the team
-   * @throws SQLException
+   * @param connection the database connection
+   * @throws SQLException if there is a problem talking to the database
    */
   public static void outputTeamVarDefinition(final Formatter output,
                                              final Connection connection,
-                                             final TournamentTeam team) throws SQLException {
+                                             final TournamentTeam team)
+      throws SQLException {
     final String teamVarName = getTeamVarName(team.getTeamNumber());
     output.format("var %s = $.finalist.lookupTeam(%d);%n", teamVarName, team.getTeamNumber());
     output.format("if(null == %s) {%n", teamVarName);
@@ -76,27 +83,37 @@ public class FinalistLoad {
     }
   }
 
+  /**
+   * Output the variables for the teams.
+   *
+   * @param writer where to write
+   * @param application the application context
+   * @throws SQLException if a database error occurs
+   */
   public static void outputTeamVariables(final Writer writer,
-                                         final ServletContext application) throws SQLException {
+                                         final ServletContext application)
+      throws SQLException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
       final Formatter output = new Formatter(writer);
       for (final TournamentTeam team : Queries.getTournamentTeams(connection).values()) {
         outputTeamVarDefinition(output, connection, team);
       }
-    } finally {
-      SQLFunctions.close(connection);
     }
   }
 
+  /**
+   * Output the award group information.
+   *
+   * @param writer where to write
+   * @param application the application context
+   * @throws SQLException if a database errors occurs
+   */
   public static void outputDivisions(final Writer writer,
-                                     final ServletContext application) throws SQLException {
+                                     final ServletContext application)
+      throws SQLException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
 
       final int tournament = Queries.getCurrentTournament(connection);
 
@@ -109,28 +126,27 @@ public class FinalistLoad {
         output.format("$.finalist.addPlayoffDivision(%s);%n", WebUtils.quoteJavascriptString(playoffDivision));
       }
 
-    } finally {
-      SQLFunctions.close(connection);
     }
   }
 
   /**
+   * @param application the application context to get information from
    * @return the current tournament name as a quoted javascript string
+   * @throws SQLException on a database error
    */
   public static String currentTournament(final ServletContext application) throws SQLException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
       final String name = Queries.getCurrentTournamentName(connection);
       return WebUtils.quoteJavascriptString(name);
-    } finally {
-      SQLFunctions.close(connection);
     }
   }
 
   /**
    * Output the declarations for the category variables.
+   *
+   * @param writer where to write
+   * @param application the application context to get information from
    */
   public static void outputCategories(final Writer writer,
                                       final ServletContext application) {
@@ -154,19 +170,21 @@ public class FinalistLoad {
    * Output javascript to load the subjective nominees into the finalist
    * schedule
    * web application.
+   *
+   * @param writer where to write
+   * @param application the application context
+   * @throws SQLException on a database error
    */
   public static void outputNonNumericNominees(final Writer writer,
-                                              final ServletContext application) throws SQLException {
+                                              final ServletContext application)
+      throws SQLException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
 
       final int tournament = Queries.getCurrentTournament(connection);
       final Formatter output = new Formatter(writer);
 
-      int varIndex = 0;
+      final int varIndex = 0;
       for (final String category : NonNumericNominees.getCategories(connection, tournament)) {
         final String categoryVar = "categoryVar"
             + varIndex;
@@ -180,57 +198,62 @@ public class FinalistLoad {
           output.format("$.finalist.addTeamToCategory(%s, %d);%n", categoryVar, teamNumber);
         }
       }
-
-    } finally {
-      SQLFunctions.close(connection);
     }
   }
 
+  /**
+   * Output the category scores.
+   *
+   * @param writer where to write
+   * @param application the application context
+   * @throws SQLException if a database error occurs
+   */
   public static void outputCategoryScores(final Writer writer,
-                                          final ServletContext application) throws SQLException {
+                                          final ServletContext application)
+      throws SQLException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
+    try (Connection connection = datasource.getConnection()) {
 
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-
-      connection = datasource.getConnection();
       final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
       final int tournament = Queries.getCurrentTournament(connection);
       final Formatter output = new Formatter(writer);
 
-      prep = connection.prepareStatement("SELECT * from FinalScores WHERE tournament = ?");
-      prep.setInt(1, tournament);
-      rs = prep.executeQuery();
-      while (rs.next()) {
-        final int teamNumber = rs.getInt("TeamNumber");
+      try (PreparedStatement prep = connection.prepareStatement("SELECT * from FinalScores WHERE tournament = ?")) {
+        prep.setInt(1, tournament);
 
-        final String teamVar = getTeamVarName(teamNumber);
-        final double overallScore = rs.getDouble("OverallScore");
-        output.format("$.finalist.setCategoryScore(%s, championship, %.02f);%n", teamVar, overallScore);
+        try (ResultSet rs = prep.executeQuery()) {
+          while (rs.next()) {
+            final int teamNumber = rs.getInt("TeamNumber");
 
-        for (final SubjectiveScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
-          final String categoryName = subjectiveElement.getName();
-          final String categoryVar = getCategoryVarName(categoryName);
-          final double catScore = rs.getDouble(categoryName);
-          output.format("$.finalist.setCategoryScore(%s, %s, %.02f);%n", teamVar, categoryVar, catScore);
-        } // foreach category
-      } // foreach team
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-      SQLFunctions.close(connection);
-    }
+            final String teamVar = getTeamVarName(teamNumber);
+            final double overallScore = rs.getDouble("OverallScore");
+            output.format("$.finalist.setCategoryScore(%s, championship, %.02f);%n", teamVar, overallScore);
+
+            for (final SubjectiveScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
+              final String categoryName = subjectiveElement.getName();
+              final String categoryVar = getCategoryVarName(categoryName);
+              final double catScore = rs.getDouble(categoryName);
+              output.format("$.finalist.setCategoryScore(%s, %s, %.02f);%n", teamVar, categoryVar, catScore);
+            } // foreach category
+          } // foreach team
+        } // result set
+      } // prepared statement
+    } // connection
   }
 
+  /**
+   * Output the schedules.
+   *
+   * @param writer where to write
+   * @param application the application context
+   * @throws SQLException if there is a database error
+   */
   public static void outputSchedules(final Writer writer,
-                                     final ServletContext application) throws SQLException {
+                                     final ServletContext application)
+      throws SQLException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
 
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
 
       final int tournament = Queries.getCurrentTournament(connection);
       final Formatter output = new Formatter(writer);
@@ -274,13 +297,13 @@ public class FinalistLoad {
         /*
          * TODO ticket 447
          * output.format("var schedule = [];%n");
-         * 
+         *
          * for (final FinalistDBRow row : schedule.getSchedule()) {
          * var time = new Time(hours, minutes);
          * var newSlot = new Timeslot(time, slotDuration);
          * schedule.push(newSlot);
          * }
-         * 
+         *
          * output.format("$.finalist.sortSchedule(schedule);%n");
          * output.format("$.finalist.setSchedule(division, schedule);%n");
          */
@@ -288,9 +311,6 @@ public class FinalistLoad {
         output.format("}%n");
 
       }
-
-    } finally {
-      SQLFunctions.close(connection);
     }
 
   }

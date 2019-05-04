@@ -20,10 +20,6 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
-
-
-
-
 /**
  * Handle updating the big screen display pages.
  */
@@ -59,6 +55,8 @@ public class DisplayWebSocket {
 
   /**
    * Notify all clients that they should update.
+   *
+   * @param httpApplication the application context to get the displays from
    */
   public static void notifyToUpdate(final ServletContext httpApplication) {
     synchronized (SESSIONS_LOCK) {

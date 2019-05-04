@@ -10,7 +10,7 @@ import javax.servlet.http.HttpSession;
 /**
  * Keys for session variables. Each key has an associated accessor function as
  * well that helps with type safety.
- * 
+ *
  * @author jpschewe
  */
 public final class SessionAttributes {
@@ -50,14 +50,14 @@ public final class SessionAttributes {
 
   /**
    * Key in the session used to store the display name.
-   * 
+   *
    * @see fll.web.DisplayInfo
    */
   public static final String DISPLAY_NAME = "displayName";
 
   /**
    * Get the name for the current display.
-   * 
+   *
    * @param session where to get the information from
    * @return may be null
    */
@@ -68,10 +68,12 @@ public final class SessionAttributes {
   /**
    * Get session attribute and send appropriate error if type is wrong. Note
    * that null is always valid.
-   * 
+   *
    * @param session where to get the attribute
    * @param attribute the attribute to get
    * @param clazz the expected type
+   * @param <T> the expected type
+   * @return the attribute value
    */
   public static <T> T getAttribute(final HttpSession session,
                                    final String attribute,
@@ -89,7 +91,12 @@ public final class SessionAttributes {
   /**
    * Get a session attribute and throw a {@link NullPointerException} if it's
    * null.
-   * 
+   *
+   * @param session where to get the attribute from
+   * @param attribute the name of the attribute to retrieve
+   * @param <T> the type of value stored in the attribute
+   * @param clazz the type of value stored in the attribute
+   * @return the attribute value
    * @see #getAttribute(HttpSession, String, Class)
    */
   public static <T> T getNonNullAttribute(final HttpSession session,

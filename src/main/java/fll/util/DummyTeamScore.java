@@ -14,8 +14,9 @@ import fll.web.playoff.TeamScore;
 /**
  * Team score that is populated from a map of values. This is most often used
  * for testing, but is also useful for
- * {@link Playoff#finishBracket(java.sql.Connection, fll.xml.ChallengeDescription, int, String)}.
- * 
+ * {@link Playoff#finishBracket(java.sql.Connection,
+ * fll.xml.ChallengeDescription, fll.Tournament, String)}.
+ *
  * @author jpschewe
  */
 public class DummyTeamScore extends TeamScore {
@@ -48,8 +49,8 @@ public class DummyTeamScore extends TeamScore {
                         final boolean noShow,
                         final boolean bye) {
     super(teamNumber, runNumber);
-    _simpleGoals = new HashMap<String, Double>(simpleGoals);
-    _enumGoals = new HashMap<String, String>(enumGoals);
+    _simpleGoals = new HashMap<>(simpleGoals);
+    _enumGoals = new HashMap<>(enumGoals);
     this.noShow = noShow;
     this.bye = bye;
   }

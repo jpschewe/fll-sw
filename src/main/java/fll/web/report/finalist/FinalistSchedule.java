@@ -31,7 +31,8 @@ public class FinalistSchedule implements Serializable {
 
   /**
    * Create a schedule.
-   * 
+   *
+   * @param division the group that the schedule is for
    * @param tournament the tournament that the schedule is associated with
    * @param categories key is the category name, value is if the category is
    *          public
@@ -43,7 +44,7 @@ public class FinalistSchedule implements Serializable {
                           final Collection<FinalistDBRow> schedule) {
     this.mTournament = tournament;
     this.mDivision = division;
-    this.mSchedule = Collections.unmodifiableCollection(new LinkedList<FinalistDBRow>(schedule));
+    this.mSchedule = Collections.unmodifiableCollection(new LinkedList<>(schedule));
 
     for (final FinalistCategory row : categories) {
       mCategories.put(row.getCategoryName(), row.getIsPublic());
@@ -53,14 +54,17 @@ public class FinalistSchedule implements Serializable {
 
   /**
    * Load a schedule from the database.
-   * 
+   *
+   * @throws SQLException on a database error
+   * @param division the group that the schedule is for
    * @param connection where to load from
    * @param tournament the tournament to load a schedule for
    */
   public FinalistSchedule(final Connection connection,
                           final int tournament,
-                          final String division) throws SQLException {
-    final Collection<FinalistDBRow> newSchedule = new LinkedList<FinalistDBRow>();
+                          final String division)
+      throws SQLException {
+    final Collection<FinalistDBRow> newSchedule = new LinkedList<>();
     mTournament = tournament;
     mDivision = division;
 
@@ -110,22 +114,22 @@ public class FinalistSchedule implements Serializable {
     }
   }
 
-  private final Map<String, Boolean> mCategories = new HashMap<String, Boolean>();
+  private final Map<String, Boolean> mCategories = new HashMap<>();
 
   /**
    * Unmodifiable version of the categories and which ones are public.
-   * 
+   *
    * @return key=category name, value=is public
    */
   public Map<String, Boolean> getCategories() {
     return Collections.unmodifiableMap(mCategories);
   }
 
-  private final Map<String, String> mRooms = new HashMap<String, String>();
+  private final Map<String, String> mRooms = new HashMap<>();
 
   /**
    * Unmodifiable version of the rooms for each category.
-   * 
+   *
    * @return key=category name, value=room
    */
   public Map<String, String> getRooms() {
@@ -139,7 +143,7 @@ public class FinalistSchedule implements Serializable {
 
   /**
    * The full schedule.
-   * 
+   *
    * @return unmodifiable collection
    */
   public Collection<FinalistDBRow> getSchedule() {
@@ -148,11 +152,12 @@ public class FinalistSchedule implements Serializable {
 
   /**
    * The schedule time slots for the specified category.
-   * 
+   *
+   * @param category the category to get the schedule for
    * @return list sorted by time
    */
   public List<FinalistDBRow> getScheduleForCategory(final String category) {
-    final List<FinalistDBRow> result = new LinkedList<FinalistDBRow>();
+    final List<FinalistDBRow> result = new LinkedList<>();
     for (final FinalistDBRow row : mSchedule) {
       if (row.getCategoryName().equals(category)) {
         result.add(row);
@@ -164,11 +169,12 @@ public class FinalistSchedule implements Serializable {
 
   /**
    * The schedule time slots for the specified team.
-   * 
+   *
+   * @param teamNumber the team to get the schedule for
    * @return list sorted by time
    */
   public List<FinalistDBRow> getScheduleForTeam(final int teamNumber) {
-    final List<FinalistDBRow> result = new LinkedList<FinalistDBRow>();
+    final List<FinalistDBRow> result = new LinkedList<>();
     for (final FinalistDBRow row : mSchedule) {
       if (row.getTeamNumber() == teamNumber) {
         result.add(row);
@@ -193,9 +199,9 @@ public class FinalistSchedule implements Serializable {
   /**
    * Store the schedule to the database. Remove any finalist schedule existing
    * for the tournament.
-   * 
-   * @param connection
-   * @throws SQLException
+   *
+   * @param connection database connection
+   * @throws SQLException on a database error
    */
   public void store(final Connection connection) throws SQLException {
 
@@ -246,17 +252,18 @@ public class FinalistSchedule implements Serializable {
   /**
    * Get the names of all divisions that have finalist schedules
    * stored for the specified tournament.
-   * 
+   *
    * @param connection the database connection
    * @param tournament the tournament id
    * @return the division names
-   * @throws SQLException
+   * @throws SQLException on a database error
    */
   public static Collection<String> getAllDivisions(final Connection connection,
-                                                   final int tournament) throws SQLException {
+                                                   final int tournament)
+      throws SQLException {
     PreparedStatement getDivisions = null;
     ResultSet divisions = null;
-    final Collection<String> result = new LinkedList<String>();
+    final Collection<String> result = new LinkedList<>();
     try {
       getDivisions = connection.prepareStatement("SELECT DISTINCT division FROM finalist_categories WHERE tournament = ?");
       getDivisions.setInt(1, tournament);

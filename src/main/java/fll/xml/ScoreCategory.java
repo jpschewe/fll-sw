@@ -30,7 +30,7 @@ public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
   protected ScoreCategory(final Element ele) {
     mWeight = Double.valueOf(ele.getAttribute(WEIGHT_ATTRIBUTE));
 
-    mGoals = new LinkedList<AbstractGoal>();
+    mGoals = new LinkedList<>();
     for (final Element goalEle : new NodelistElementCollectionAdapter(ele.getChildNodes())) {
       if (Goal.TAG_NAME.equals(goalEle.getNodeName())) {
         final Goal goal = new Goal(goalEle);
@@ -55,7 +55,7 @@ public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
 
   /**
    * The goals for the category in the order they should be displayed.
-   * 
+   *
    * @return unmodifiable list
    */
   public List<AbstractGoal> getGoals() {
@@ -72,8 +72,8 @@ public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
 
   /**
    * Add the specified goal to the end of the list.
-   * 
-   * @param v
+   *
+   * @param v the new goal
    */
   public void addGoal(final AbstractGoal v) {
     mGoals.add(v);
@@ -81,7 +81,7 @@ public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
 
   /**
    * Add a goal at the specified index.
-   * 
+   *
    * @param index the index to add the goal at
    * @param v the goal to add
    * @throws IndexOutOfBoundsException if the index is out of range
@@ -94,7 +94,7 @@ public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
 
   /**
    * Remove the specified goal from the list.
-   * 
+   *
    * @param v the goal to remove
    * @return if the goal was removed
    */
@@ -104,7 +104,7 @@ public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
 
   /**
    * Remove the goal at the specified index.
-   * 
+   *
    * @param index the index of the goal to remove
    * @return the removed goal
    * @throws IndexOutOfBoundsException if the index is out of range
@@ -155,7 +155,7 @@ public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
    * This is done by walking all of the goals and checking their score type.
    * If any goal is floating point, then this category can have a floating
    * point score.
-   * 
+   *
    * @return not null
    */
   public ScoreType getScoreType() {
