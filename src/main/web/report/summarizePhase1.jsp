@@ -15,7 +15,7 @@
 <body>
 	<h1>Summarize Scores</h1>
 
-<!--  ${ERROR} -->
+	<!--  ${ERROR} -->
 	<c:choose>
 		<c:when test="${not empty ERROR}">
 			<p>There was an error summarizing the scores. The most common
@@ -33,24 +33,28 @@
 				high.
 			</p>
 
-			<table border='1'>
-				<tr>
-					<th>Judge</th>
-					<th>Category</th>
-					<th>Judging Group</th>
-					<th>Num Teams Expected</th>
-					<th>Num Teams Scored</th>
-				</tr>
-				<c:forEach items="${judgeSummary}" var="judgeInfo">
+			<c:forEach items="${judgeSummary}" var="entry">
+				<h2>${entry.key}</h2>
+
+				<table border='1'>
 					<tr>
-						<td>${judgeInfo.judge}</td>
-						<td>${judgeInfo.category }</td>
-						<td>${judgeInfo.group}</td>
-						<td>${judgeInfo.numExpected}</td>
-						<td>${judgeInfo.numActual}</td>
+						<th>Category</th>
+						<th>Judge</th>
+						<th>Num Teams Expected</th>
+						<th>Num Teams Scored</th>
 					</tr>
-				</c:forEach>
-			</table>
+
+					<c:forEach items="${entry.value}" var="judgeInfo">
+						<tr>
+							<td>${judgeInfo.category }</td>
+							<td>${judgeInfo.judge}</td>
+							<td>${judgeInfo.numExpected}</td>
+							<td>${judgeInfo.numActual}</td>
+						</tr>
+					</c:forEach>
+				</table>
+
+			</c:forEach>
 
 			<form action="summarizePhase2.jsp">
 				<p>
