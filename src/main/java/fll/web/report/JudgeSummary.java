@@ -7,6 +7,7 @@
 package fll.web.report;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
@@ -76,8 +77,17 @@ public final class JudgeSummary implements Serializable, Comparable<JudgeSummary
   }
 
   @Override
+  public int hashCode() {
+    return Objects.hash(getGroup(), getCategory(), getJudge());
+  }
+
+  @Override
   public boolean equals(final Object o) {
-    if (getClass().equals(o.getClass())) {
+    if (null == o) {
+      return false;
+    } else if (this == o) {
+      return true;
+    } else if (getClass().equals(o.getClass())) {
       return compareTo((JudgeSummary) o) == 0;
     } else {
       return false;
