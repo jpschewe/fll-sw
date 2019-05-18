@@ -12,10 +12,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -39,9 +44,17 @@ import fll.xml.SubjectiveScoreCategory;
 public class SummarizePhase1 {
 
   /**
-   * Page key for judge information. Type is Collection of JudgeSummary.
+   * Page key for judge information. Type is a {@link Map} of station to
+   * {@link Collection} of
+   * JudgeSummary.
    */
   public static final String JUDGE_SUMMARY = "judgeSummary";
+
+  /**
+   * Page key for missing categories. Type is a {@link Map} of station to
+   * {@link Collection} category titles.
+   */
+  public static final String MISSING_CATEGORIES = "missingCategories";
 
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate table name from category")
   public static void populateContext(final ServletContext application,
@@ -64,13 +77,14 @@ public class SummarizePhase1 {
 
       ScoreStandardization.summarizeScores(connection, challengeDescription, tournamentID);
 
-      final SortedMap<String, List<JudgeSummary>> summary = new TreeMap<>();
+      final Map<String, Set<String>> seenCategoryNames = new HashMap<>();
+      final SortedMap<String, SortedSet<JudgeSummary>> summary = new TreeMap<>();
 
-      try (PreparedStatement getJudges = connection.prepareStatement("SELECT id, category, station from Judges"
+      try (final PreparedStatement getJudges = connection.prepareStatement("SELECT id, category, station from Judges"
           + " WHERE Tournament = ?"
           + " ORDER BY station ASC, category ASC")) {
         getJudges.setInt(1, tournamentID);
-        try (ResultSet judges = getJudges.executeQuery()) {
+        try (final ResultSet judges = getJudges.executeQuery()) {
           while (judges.next()) {
             final String judge = judges.getString(1);
             final String categoryName = judges.getString(2);
@@ -79,15 +93,22 @@ public class SummarizePhase1 {
             final int numExpected = getNumScoresExpected(connection, tournamentID, station);
             final int numActual = getNumScoresEntered(connection, judge, categoryName, station, tournamentID);
 
-            final SubjectiveScoreCategory category = challengeDescription.getSubjectiveCategoryByName(categoryName);
-            final String categoryTitle = null == category ? categoryName : category.getTitle();
+            if (numActual > 0) {
+              final String categoryTitle = challengeDescription.getSubjectiveCategoryByName(categoryName).getTitle();
 
-            final List<JudgeSummary> value = summary.computeIfAbsent(station, k -> new LinkedList<>());
-            value.add(new JudgeSummary(judge, categoryTitle, station, numExpected, numActual));
+              final SortedSet<JudgeSummary> value = summary.computeIfAbsent(station, k -> new TreeSet<>());
+              value.add(new JudgeSummary(judge, categoryTitle, station, numExpected, numActual));
+
+              seenCategoryNames.computeIfAbsent(station, k -> new HashSet<>()).add(categoryName);
+            }
 
           }
         } // result set
       } // statement
+
+      // add in entries for missing scores
+
+      addMissingCategories(connection, tournamentID, challengeDescription, seenCategoryNames, summary);
 
       pageContext.setAttribute(JUDGE_SUMMARY, summary);
 
@@ -95,6 +116,33 @@ public class SummarizePhase1 {
       throw new FLLRuntimeException("There was an error talking to the database", e);
     } catch (final ParseException e) {
       throw new FLLInternalException("There was an error parsing the challenge description", e);
+    }
+  }
+
+  private static void addMissingCategories(final Connection connection,
+                                           final int tournamentID,
+                                           final ChallengeDescription challengeDescription,
+                                           final Map<String, Set<String>> seenCategoryNames,
+                                           final SortedMap<String, SortedSet<JudgeSummary>> summary)
+      throws SQLException {
+    final Set<String> allCategoryNames = challengeDescription.getSubjectiveCategories().stream()
+                                                             .map(SubjectiveScoreCategory::getName)
+                                                             .collect(Collectors.toSet());
+
+    for (final Map.Entry<String, Set<String>> entry : seenCategoryNames.entrySet()) {
+      final String judgingGroup = entry.getKey();
+      final Set<String> seenCategories = entry.getValue();
+
+      final Set<String> missingNames = new HashSet<>(allCategoryNames);
+      missingNames.removeAll(seenCategories);
+
+      for (final String missingName : missingNames) {
+        final String title = challengeDescription.getSubjectiveCategoryByName(missingName).getTitle();
+        final int expected = getNumScoresExpected(connection, tournamentID, judgingGroup);
+
+        summary.computeIfAbsent(judgingGroup, k -> new TreeSet<>())
+               .add(new JudgeSummary(null, title, judgingGroup, expected, 0));
+      }
     }
   }
 
