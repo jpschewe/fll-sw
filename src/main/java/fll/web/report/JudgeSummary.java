@@ -76,6 +76,15 @@ public final class JudgeSummary implements Serializable, Comparable<JudgeSummary
   }
 
   @Override
+  public boolean equals(final Object o) {
+    if (getClass().equals(o.getClass())) {
+      return compareTo((JudgeSummary) o) == 0;
+    } else {
+      return false;
+    }
+  }
+
+  @Override
   public int compareTo(final JudgeSummary o) {
     if (getGroup().equals(o.getGroup())) {
       if (getCategory().equals(o.getCategory())) {
