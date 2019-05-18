@@ -30,6 +30,7 @@ import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.xml.ChallengeDescription;
+import fll.xml.SubjectiveScoreCategory;
 
 /**
  * Do first part of summarizing scores and gather information to show the user
@@ -78,8 +79,11 @@ public class SummarizePhase1 {
             final int numExpected = getNumScoresExpected(connection, tournamentID, station);
             final int numActual = getNumScoresEntered(connection, judge, categoryName, station, tournamentID);
 
+            final SubjectiveScoreCategory category = challengeDescription.getSubjectiveCategoryByName(categoryName);
+            final String categoryTitle = null == category ? categoryName : category.getTitle();
+
             final List<JudgeSummary> value = summary.computeIfAbsent(station, k -> new LinkedList<>());
-            value.add(new JudgeSummary(judge, categoryName, station, numExpected, numActual));
+            value.add(new JudgeSummary(judge, categoryTitle, station, numExpected, numActual));
 
           }
         } // result set
