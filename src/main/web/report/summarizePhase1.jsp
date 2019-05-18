@@ -72,7 +72,14 @@ div.content table, div.content th, div.content td {
 								<td>${judgeInfo.category }</td>
 								<td>${judgeInfo.judge}</td>
 								<td>${judgeInfo.numExpected}</td>
-								<td>${judgeInfo.numActual}</td>
+								<c:choose>
+									<c:when test="${judgeInfo.numExpected == judgeInfo.numActual }">
+										<td class='good'>${judgeInfo.numActual}</td>
+									</c:when>
+									<c:otherwise>
+										<td class='missing-score'>${judgeInfo.numActual}</td>
+									</c:otherwise>
+								</c:choose>
 							</tr>
 						</c:forEach>
 					</table>
