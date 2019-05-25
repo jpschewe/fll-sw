@@ -312,15 +312,6 @@ public class SubjectivePdfWriter {
     final PdfPTable closingTable = new PdfPTable(1);
 
     closingTable.setWidthPercentage(100f);
-    final StringBuilder strengths = new StringBuilder();
-    strengths.append("Strengths:");
-    for (final String category : sheetElement.getCategories()) {
-      strengths.append("            ");
-      strengths.append(category);
-    }
-    final PdfPCell strengthsCell = createCell(strengths.toString(), f9b, TOP_ONLY, sheetColor);
-    strengthsCell.setMinimumHeight(18f);
-    closingTable.addCell(strengthsCell);
 
     if (null != description.getCopyright()) {
       // add the copy right statement
