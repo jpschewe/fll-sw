@@ -287,15 +287,13 @@ public class SubjectivePdfWriter {
     commentsTable.addCell(thinkAboutLabel);
 
     // empty space
-    final PdfPCell emptySpaceLeft = createCell(" ", f10b, NO_BORDERS);
+    final PdfPCell emptySpaceLeft = createCell(" ", f6i, NO_BORDERS);
     emptySpaceLeft.setBorderWidthRight(1);
-    final PdfPCell emptySpaceRight = createCell(" ", f10b, NO_BORDERS);
+    final PdfPCell emptySpaceRight = createCell(" ", f6i, NO_BORDERS);
     for (int row = 0; row < height; ++row) {
       commentsTable.addCell(emptySpaceLeft);
       commentsTable.addCell(emptySpaceRight);
     }
-
-    // FIXME rework determinParameters to get more space, but not tiny text
 
     // use back if needed
     final Font useBackFont = new Font(Font.FontFamily.HELVETICA, 8, Font.ITALIC, BaseColor.LIGHT_GRAY);
@@ -325,11 +323,11 @@ public class SubjectivePdfWriter {
     doc.newPage();
   }
 
-  public static Document createStandardDocument() {
-    return new Document(PageSize.LETTER, 36, 36, 20, 36);
+  private static Document createStandardDocument() {
+    return new Document(PageSize.LETTER, 36, 36, 20, 0);
   }
 
-  public PdfPTable createStandardRubricTable() throws DocumentException {
+  private PdfPTable createStandardRubricTable() throws DocumentException {
     final PdfPTable table = new PdfPTable(6);
     table.setWidths(colWidths);
     table.setWidthPercentage(100f);
@@ -486,8 +484,8 @@ public class SubjectivePdfWriter {
     teamInfo.setOrganization("Dummy");
     teamInfo.setTeamName("Dummy");
 
-    for (int commentHeight = 6; commentHeight > 0; --commentHeight) {
-      for (int pointSize = 12; pointSize >= 6; --pointSize) {
+    for (int pointSize = 10; pointSize >= 6; --pointSize) {
+      for (int commentHeight = 20; commentHeight > 2; --commentHeight) {
         final Font font = new Font(Font.FontFamily.HELVETICA, pointSize);
 
         final com.itextpdf.text.Document pdf = SubjectivePdfWriter.createStandardDocument();
