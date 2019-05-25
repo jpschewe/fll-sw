@@ -131,19 +131,20 @@ public class SubjectivePdfWriter {
    * @throws IOException
    * @throws DocumentException
    */
-  public void writeTeamSubjectivePdf(final Document doc,
-                                     final TeamScheduleInfo teamInfo,
-                                     final Font font,
-                                     final int commentHeight)
+  private void writeTeamSubjectivePdf(final Document doc,
+                                      final TeamScheduleInfo teamInfo,
+                                      final Font font,
+                                      final int commentHeight)
       throws MalformedURLException, IOException, DocumentException {
     final PdfPTable table = createStandardRubricTable();
     writeHeader(doc, teamInfo);
     for (final String category : sheetElement.getCategories()) {
       writeRubricTable(table, sheetElement.getTableElement(category), font);
-      writeCommentsSection(table, font, commentHeight);
     }
 
     doc.add(table);
+
+    writeCommentsBlock(doc, commentHeight);
 
     writeEndOfPageRow(doc);
   }
@@ -263,7 +264,51 @@ public class SubjectivePdfWriter {
     }
   }
 
-  public void writeEndOfPageRow(final Document doc) throws DocumentException {
+  private void writeCommentsBlock(final Document doc,
+                                  final int height)
+      throws DocumentException {
+    final PdfPTable commentsTable = new PdfPTable(2);
+    commentsTable.setWidthPercentage(100f);
+
+    final PdfPCell commentsLabel = createCell("Comments", f10b, TOP_ONLY);
+    commentsLabel.setColspan(2);
+    commentsLabel.setHorizontalAlignment(Element.ALIGN_CENTER);
+    commentsTable.addCell(commentsLabel);
+
+    // great job and think about labels
+    final Font sectionFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD
+        | Font.ITALIC, BaseColor.LIGHT_GRAY);
+
+    final PdfPCell greatJob = createCell("Great job...", sectionFont, NO_BORDERS);
+    greatJob.setBorderWidthRight(1);
+    commentsTable.addCell(greatJob);
+
+    final PdfPCell thinkAboutLabel = createCell("Think about...", sectionFont, NO_BORDERS);
+    commentsTable.addCell(thinkAboutLabel);
+
+    // empty space
+    final PdfPCell emptySpaceLeft = createCell(" ", f10b, NO_BORDERS);
+    emptySpaceLeft.setBorderWidthRight(1);
+    final PdfPCell emptySpaceRight = createCell(" ", f10b, NO_BORDERS);
+    for (int row = 0; row < height; ++row) {
+      commentsTable.addCell(emptySpaceLeft);
+      commentsTable.addCell(emptySpaceRight);
+    }
+
+    // FIXME rework determinParameters to get more space, but not tiny text
+
+    // use back if needed
+    final Font useBackFont = new Font(Font.FontFamily.HELVETICA, 8, Font.ITALIC, BaseColor.LIGHT_GRAY);
+    final PdfPCell useBackLabel = createCell("Judges: Use the back for additional comments if needed!", useBackFont,
+                                             NO_BORDERS);
+    useBackLabel.setHorizontalAlignment(Element.ALIGN_CENTER);
+    useBackLabel.setColspan(2);
+    commentsTable.addCell(useBackLabel);
+
+    doc.add(commentsTable);
+  }
+
+  private void writeEndOfPageRow(final Document doc) throws DocumentException {
     final PdfPTable closingTable = new PdfPTable(1);
 
     closingTable.setWidthPercentage(100f);
@@ -484,7 +529,7 @@ public class SubjectivePdfWriter {
     teamInfo.setOrganization("Dummy");
     teamInfo.setTeamName("Dummy");
 
-    for (int commentHeight = 2; commentHeight > 0; --commentHeight) {
+    for (int commentHeight = 6; commentHeight > 0; --commentHeight) {
       for (int pointSize = 12; pointSize >= 6; --pointSize) {
         final Font font = new Font(Font.FontFamily.HELVETICA, pointSize);
 
