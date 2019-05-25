@@ -345,40 +345,6 @@ public class SubjectivePdfWriter {
     return table;
   }
 
-  private void writeCommentsSection(final PdfPTable table,
-                                    final Font baseFont,
-                                    final int height) {
-    PdfPCell commentLabel = null;
-    PdfPCell emptySpace = null;
-
-    final Font font = new Font(baseFont);
-    font.setStyle(Font.ITALIC);
-    // This is the 'Comments' section at the bottom of every table for the judge
-    // to write in
-    commentLabel = createCell("Comments:", font, NO_BORDERS);
-    commentLabel.setRotation(90);
-    commentLabel.setRowspan(1);
-    commentLabel.setBorderWidthLeft(0);
-    commentLabel.setBorderWidthBottom(0);
-    commentLabel.setHorizontalAlignment(Element.ALIGN_CENTER);
-    commentLabel.setVerticalAlignment(Element.ALIGN_CENTER);
-    emptySpace = createCell(" ", font, TOP_ONLY);
-    emptySpace.setMinimumHeight(18f);
-    table.addCell(commentLabel);
-    // Need to add the empty cells so the row is complete and is displayed in
-    // the pdf
-    for (int i1 = 0; i1 < 5; i1++) {
-      table.addCell(emptySpace);
-    }
-
-    emptySpace = createCell(" ", font, NO_BORDERS);
-    for (int i2 = 0; i2 < height; i2++) {
-      for (int i3 = 0; i3 < 6; i3++) {
-        table.addCell(emptySpace);
-      }
-    }
-  }
-
   private void writeRubricTable(final PdfPTable table,
                                 final TableElement tableData,
                                 final Font font) {
