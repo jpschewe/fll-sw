@@ -17,6 +17,7 @@ buildscript {
         classpath 'org.unbroken-dome.gradle-plugins:gradle-testsets-plugin:2.1.1'
         classpath 'org.kordamp:markdown-gradle-plugin:1.2.0'
         classpath 'edu.sc.seis.gradle:launch4j:2.4.4'
+        classpath 'net.sf.saxon:Saxon-HE:9.9.1-3'
     }
     configurations.classpath {
         exclude group: 'com.google.guava', module: 'guava'
@@ -380,7 +381,7 @@ spotbugs {
 tasks.withType(SpotBugsTask) {
     reports {
         xml.withMessages true
-        html.stylesheet resources.text.fromArchiveEntry(configurations.spotbugsStylesheets, 'default.xsl')
+        html.stylesheet resources.text.fromArchiveEntry(configurations.spotbugsStylesheets, 'color.xsl')
     }
 
     task "${it.name}HtmlReport" {
@@ -390,7 +391,7 @@ tasks.withType(SpotBugsTask) {
         def output = file(input.absolutePath.replaceFirst(/\.xml$/, '.html'))
         outputs.file output withPropertyName 'output'
         doLast {
-            def factory = TransformerFactory.newInstance()
+            def factory = TransformerFactory.newInstance('net.sf.saxon.TransformerFactoryImpl', getClass().classLoader)
             def transformer = factory.newTransformer(new StreamSource(reports.html.stylesheet.asFile()));
             transformer.transform(new StreamSource(input), new StreamResult(output))
         }
