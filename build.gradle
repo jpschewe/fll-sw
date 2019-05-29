@@ -17,6 +17,7 @@ buildscript {
         classpath 'org.unbroken-dome.gradle-plugins:gradle-testsets-plugin:2.1.1'
         classpath 'org.kordamp:markdown-gradle-plugin:1.2.0'
         classpath 'edu.sc.seis.gradle:launch4j:2.4.4'
+        classpath 'net.sf.saxon:Saxon-HE:9.9.1-3'
     }
     configurations.classpath {
         exclude group: 'com.google.guava', module: 'guava'
@@ -205,7 +206,7 @@ distributions {
             from(sourceSets.main.output) {
                 into 'classes'
             }
-            from(configurations.runtime) {
+            from(configurations.runtimeClasspath) {
                 into 'lib'
                 }
                 
@@ -318,11 +319,15 @@ task sloccount(type: Exec) {
 task renderWorkflows(dependsOn: [markdownToHtml]) {
     def inputFiles = []
     def outputFiles = []
-    
-    fileTree(documentation_build_dir).matching{include "**/*.dot"}.visit{FileVisitDetails details ->
-        if(!details.isDirectory) {              
-            inputFiles << details.file.path
-            outputFiles << details.file.path + ".pdf"
+    def ioMap = [:]
+
+    fileTree('src/main/documentation/workflows').matching{include "**/*.dot"}.visit{FileVisitDetails details ->
+        if(!details.isDirectory) {
+            def inFile = details.file.path
+            def outFile = project.documentation_build_dir.path + "/workflows/" + details.file.name + ".pdf"
+            inputFiles << inFile
+            outputFiles << outFile
+            ioMap.put(inFile, outFile)
         }
     }
     
@@ -330,12 +335,12 @@ task renderWorkflows(dependsOn: [markdownToHtml]) {
     outputs.files outputFiles
     
     doLast {
-        inputFiles.each{ aFile ->
+      ioMap.each{ inFile, outFile ->
                         exec{
                             commandLine 'dot'
-                            args "-Tpdf", "-O", aFile
+                              args "-Tpdf", "-o", outFile, inFile
                         }
-        }
+      }
     }
 }
 distZip.dependsOn renderWorkflows
@@ -380,7 +385,7 @@ spotbugs {
 tasks.withType(SpotBugsTask) {
     reports {
         xml.withMessages true
-        html.stylesheet resources.text.fromArchiveEntry(configurations.spotbugsStylesheets, 'default.xsl')
+        html.stylesheet resources.text.fromArchiveEntry(configurations.spotbugsStylesheets, 'color.xsl')
     }
 
     task "${it.name}HtmlReport" {
@@ -390,7 +395,7 @@ tasks.withType(SpotBugsTask) {
         def output = file(input.absolutePath.replaceFirst(/\.xml$/, '.html'))
         outputs.file output withPropertyName 'output'
         doLast {
-            def factory = TransformerFactory.newInstance()
+            def factory = TransformerFactory.newInstance('net.sf.saxon.TransformerFactoryImpl', getClass().classLoader)
             def transformer = factory.newTransformer(new StreamSource(reports.html.stylesheet.asFile()));
             transformer.transform(new StreamSource(input), new StreamResult(output))
         }
