@@ -206,7 +206,7 @@ distributions {
             from(sourceSets.main.output) {
                 into 'classes'
             }
-            from(configurations.runtime) {
+            from(configurations.runtimeClasspath) {
                 into 'lib'
                 }
                 
