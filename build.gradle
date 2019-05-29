@@ -319,11 +319,15 @@ task sloccount(type: Exec) {
 task renderWorkflows(dependsOn: [markdownToHtml]) {
     def inputFiles = []
     def outputFiles = []
-    
-    fileTree(documentation_build_dir).matching{include "**/*.dot"}.visit{FileVisitDetails details ->
-        if(!details.isDirectory) {              
-            inputFiles << details.file.path
-            outputFiles << details.file.path + ".pdf"
+    def ioMap = [:]
+
+    fileTree('src/main/documentation/workflows').matching{include "**/*.dot"}.visit{FileVisitDetails details ->
+        if(!details.isDirectory) {
+            def inFile = details.file.path
+            def outFile = project.documentation_build_dir.path + "/workflows/" + details.file.name + ".pdf"
+            inputFiles << inFile
+            outputFiles << outFile
+            ioMap.put(inFile, outFile)
         }
     }
     
@@ -331,12 +335,12 @@ task renderWorkflows(dependsOn: [markdownToHtml]) {
     outputs.files outputFiles
     
     doLast {
-        inputFiles.each{ aFile ->
+      ioMap.each{ inFile, outFile ->
                         exec{
                             commandLine 'dot'
-                            args "-Tpdf", "-O", aFile
+                              args "-Tpdf", "-o", outFile, inFile
                         }
-        }
+      }
     }
 }
 distZip.dependsOn renderWorkflows
