@@ -20,7 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 
-
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -32,8 +31,11 @@ import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfGState;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfPageEventHelper;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfWriter;
 
@@ -44,7 +46,6 @@ import fll.Version;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.util.FP;
-
 import fll.util.PdfUtils;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
@@ -73,7 +74,7 @@ public class ScoresheetGenerator {
   /**
    * Create document with the specified number of sheets. Initially all sheets
    * are empty. They should be filled in using the set methods.
-   * 
+   *
    * @param numSheets the number of sheets on a page
    * @param tournamentName the name of the tournament to display
    * @param description the challenge description to get the goals from
@@ -294,7 +295,7 @@ public class ScoresheetGenerator {
 
   /**
    * Guess the orientation that the document should be.
-   * 
+   *
    * @return true if it should be portrait
    * @throws DocumentException
    * @throws IOException
@@ -324,7 +325,8 @@ public class ScoresheetGenerator {
     } else {
       pdfDoc = new Document(PageSize.LETTER.rotate()); // landscape
     }
-    PdfWriter.getInstance(pdfDoc, out);
+    final PdfWriter writer = PdfWriter.getInstance(pdfDoc, out);
+    writer.setPageEvent(new WatermarkHandler());
 
     // Measurements are always in points (72 per inch)
     // This sets up 1/2 inch margins side margins and 0.35in top and bottom
@@ -774,7 +776,7 @@ public class ScoresheetGenerator {
 
   /**
    * Sets the table label for scoresheet with index i.
-   * 
+   *
    * @param i The 0-based index of the scoresheet to which to assign this table
    *          label.
    * @param table A string with the table label for the specified scoresheet.
@@ -795,7 +797,7 @@ public class ScoresheetGenerator {
 
   /**
    * Sets the division for scoresheet with index i.
-   * 
+   *
    * @param i The 0-based index of the scoresheet to which to assign this table
    *          label.
    * @param divisionLabel the label to use for this division should be
@@ -821,7 +823,7 @@ public class ScoresheetGenerator {
 
   /**
    * Sets the team name for scoresheet with index i.
-   * 
+   *
    * @param i The 0-based index of the scoresheet to which to assign this team
    *          name.
    * @param name A string with the team name for the specified scoresheet.
@@ -842,7 +844,7 @@ public class ScoresheetGenerator {
 
   /**
    * Sets the team number for scoresheet with index i.
-   * 
+   *
    * @param i The 0-based index of the scoresheet to which to assign this team
    *          number.
    * @param number A string with the team number for the specified scoresheet.
@@ -863,7 +865,7 @@ public class ScoresheetGenerator {
 
   /**
    * Sets the time for scoresheet with index i.
-   * 
+   *
    * @param i The 0-based index of the scoresheet to which to assign this time.
    * @param time the time for the specified scoresheet.
    * @throws IllegalArgumentException Thrown if the index is out of valid range.
@@ -876,7 +878,7 @@ public class ScoresheetGenerator {
 
   /**
    * Puts an arbitrary string in the time field.
-   * 
+   *
    * @param i The 0-based index of the scoresheet to which to assign this time.
    * @param time the time for the specified scoresheet.
    * @throws IllegalArgumentException Thrown if the index is out of valid range.
@@ -896,7 +898,7 @@ public class ScoresheetGenerator {
 
   /**
    * Sets the round number descriptor for scoresheet with index i.
-   * 
+   *
    * @param i The 0-based index of the scoresheet to which to assign this round
    *          number.
    * @param round A string with the round number descriptor for the specified
@@ -918,7 +920,7 @@ public class ScoresheetGenerator {
 
   /**
    * Create table for page given number of sheets per page.
-   * 
+   *
    * @param nup
    * @return
    */
@@ -931,4 +933,42 @@ public class ScoresheetGenerator {
     }
     return wholePage;
   }
+
+  private static class WatermarkHandler extends PdfPageEventHelper {
+
+    private final PdfGState gstate;
+
+    private final Font font;
+
+    private final BaseColor color;
+
+    private static final float WATERMARK_OPACITY = 0.3f;
+
+    public WatermarkHandler() {
+      font = FontFactory.getFont(FontFactory.HELVETICA, 52, Font.NORMAL);
+      color = BaseColor.BLACK;
+
+      gstate = new PdfGState();
+      gstate.setFillOpacity(WATERMARK_OPACITY);
+      gstate.setStrokeOpacity(WATERMARK_OPACITY);
+
+    }
+
+    @Override
+    public void onEndPage(final PdfWriter writer,
+                          final Document document) {
+      final PdfContentByte contentunder = writer.getDirectContentUnder();
+      contentunder.saveState();
+      contentunder.setGState(gstate);
+      contentunder.beginText();
+      contentunder.setFontAndSize(font.getBaseFont(), font.getSize());
+      contentunder.setColorFill(color);
+      contentunder.showTextAligned(Element.ALIGN_CENTER, "PRACTICE", document.getPageSize().getWidth() / 2,
+                                  document.getPageSize().getHeight() / 2, 45);
+      contentunder.endText();
+      contentunder.restoreState();
+    }
+
+  }
+
 }
