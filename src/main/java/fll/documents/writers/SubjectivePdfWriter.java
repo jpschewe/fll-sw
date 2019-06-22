@@ -483,8 +483,8 @@ public class SubjectivePdfWriter {
     teamInfo.setOrganization("Dummy");
     teamInfo.setTeamName("Dummy");
 
-    for (int pointSize = 10; pointSize >= 6; --pointSize) {
-      for (int commentHeight = 20; commentHeight > 2; --commentHeight) {
+    for (int commentHeight = 20; commentHeight > 2; --commentHeight) {
+    for (int pointSize = 9; pointSize >= 6; --pointSize) {
         final Font font = new Font(Font.FontFamily.HELVETICA, pointSize);
 
         final com.itextpdf.text.Document pdf = SubjectivePdfWriter.createStandardDocument();
