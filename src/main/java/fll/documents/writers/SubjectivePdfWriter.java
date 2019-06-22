@@ -222,8 +222,7 @@ public class SubjectivePdfWriter {
     // add the instructions to the header
     dirText = "Directions: For each skill area, clearly mark the box that best describes the team's accomplishments.  "
         + "If the team does not demonstrate skill in a particular area, then put an 'X' in the first box for Not Demonstrated (ND).  "
-        + "Please provide as many written comments as you can to acknowledge each teams's hard work and to help teams improve. "
-        + "When you have completed the evaluation, please circle the team's areas of strength.";
+        + "Please provide as many written comments as you can to acknowledge each teams's hard work and to help teams improve. ";
     text = new Phrase(dirText, f9b);
     directions = new Paragraph();
     directions.add(text);
