@@ -271,7 +271,8 @@ public class ScoresheetGenerator {
 
   /**
    * Private support function to create new data arrays for the scoresheet
-   * information. IMPORTANT!!! The value of m_numTeams must be set before the
+   * information. IMPORTANT!!! The value of {@link #m_numSheets} must be set
+   * before the
    * call to this method is made.
    */
   private void initializeArrays() {
@@ -383,14 +384,13 @@ public class ScoresheetGenerator {
     sciC.setPaddingRight(36);
     sciC.setHorizontalAlignment(Element.ALIGN_RIGHT);
 
-    // Create a table with a grid cell for each scoresheet on the page
+    // Create a table with a grid cell for each score sheet on the page
     PdfPTable wholePage = getTableForPage(orientationIsPortrait);
     wholePage.setWidthPercentage(100);
-    for (int i = 0; i < m_numSheets; i++) {
-      if (i > 0
+    for (int sheetIndex = 0; sheetIndex < m_numSheets; sheetIndex++) {
+      if (sheetIndex > 0
           && (orientationIsPortrait
-              || (i
-                  % 2) == 0)) {
+              || Utilities.isEven(sheetIndex))) {
         pdfDoc.newPage();
         wholePage = getTableForPage(orientationIsPortrait);
         wholePage.setWidthPercentage(100);
@@ -415,7 +415,8 @@ public class ScoresheetGenerator {
       timeLc.addElement(timeP);
       teamInfo.addCell(timeLc);
       // Time value cell
-      final Paragraph timeV = new Paragraph(null == m_time[i] ? SHORT_BLANK : m_time[i], COURIER_10PT_NORMAL);
+      final Paragraph timeV = new Paragraph(null == m_time[sheetIndex] ? SHORT_BLANK : m_time[sheetIndex],
+                                            COURIER_10PT_NORMAL);
       final PdfPCell timeVc = new PdfPCell(scoreSheet.getDefaultCell());
       timeVc.addElement(timeV);
       teamInfo.addCell(timeVc);
@@ -427,7 +428,7 @@ public class ScoresheetGenerator {
       tblLc.addElement(tblP);
       teamInfo.addCell(tblLc);
       // Table value cell
-      final Paragraph tblV = new Paragraph(m_table[i], COURIER_10PT_NORMAL);
+      final Paragraph tblV = new Paragraph(m_table[sheetIndex], COURIER_10PT_NORMAL);
       final PdfPCell tblVc = new PdfPCell(scoreSheet.getDefaultCell());
       tblVc.addElement(tblV);
       teamInfo.addCell(tblVc);
@@ -439,7 +440,7 @@ public class ScoresheetGenerator {
       rndlc.addElement(rndP);
       teamInfo.addCell(rndlc);
       // Round number value cell
-      final Paragraph rndV = new Paragraph(m_round[i], COURIER_10PT_NORMAL);
+      final Paragraph rndV = new Paragraph(m_round[sheetIndex], COURIER_10PT_NORMAL);
       final PdfPCell rndVc = new PdfPCell(scoreSheet.getDefaultCell());
       // rndVc.setColspan(2);
       rndVc.addElement(rndV);
@@ -457,21 +458,21 @@ public class ScoresheetGenerator {
       nbrlc.addElement(nbrP);
       teamInfo.addCell(nbrlc);
       // Team number value cell
-      final Paragraph nbrV = new Paragraph(null == m_number[i] ? SHORT_BLANK : String.valueOf(m_number[i]),
-                                           COURIER_10PT_NORMAL);
+      final Paragraph nbrV = new Paragraph(null == m_number[sheetIndex] ? SHORT_BLANK
+          : String.valueOf(m_number[sheetIndex]), COURIER_10PT_NORMAL);
       final PdfPCell nbrVc = new PdfPCell(scoreSheet.getDefaultCell());
       nbrVc.addElement(nbrV);
       teamInfo.addCell(nbrVc);
 
       // Team division label cell
-      final Paragraph divP = new Paragraph(m_divisionLabel[i], ARIAL_10PT_NORMAL);
+      final Paragraph divP = new Paragraph(m_divisionLabel[sheetIndex], ARIAL_10PT_NORMAL);
       divP.setAlignment(Element.ALIGN_RIGHT);
       final PdfPCell divlc = new PdfPCell(scoreSheet.getDefaultCell());
       divlc.addElement(divP);
       divlc.setColspan(2);
       teamInfo.addCell(divlc);
       // Team division value cell
-      final Paragraph divV = new Paragraph(m_division[i], COURIER_10PT_NORMAL);
+      final Paragraph divV = new Paragraph(m_division[sheetIndex], COURIER_10PT_NORMAL);
       final PdfPCell divVc = new PdfPCell(scoreSheet.getDefaultCell());
       divVc.setColspan(2);
       divVc.addElement(divV);
@@ -492,7 +493,7 @@ public class ScoresheetGenerator {
       // Team name value cell
       final PdfPCell nameVc = new PdfPCell(scoreSheet.getDefaultCell());
       nameVc.setColspan(4);
-      nameVc.setCellEvent(new PdfUtils.TruncateContent(m_name[i], COURIER_10PT_NORMAL));
+      nameVc.setCellEvent(new PdfUtils.TruncateContent(m_name[sheetIndex], COURIER_10PT_NORMAL));
       teamInfo.addCell(nameVc);
 
       // add tournament name
@@ -532,7 +533,7 @@ public class ScoresheetGenerator {
         scoreSheet.addCell(copyrightC);
       }
 
-      // the cell in the whole page table that will contain the single score
+      // the cell in the wholePage table that will contain the single score
       // sheet
       final PdfPCell scoresheetCell = new PdfPCell(scoreSheet);
       scoresheetCell.setBorder(0);
@@ -540,8 +541,7 @@ public class ScoresheetGenerator {
 
       // Interior borders between scoresheets on a page
       if (!orientationIsPortrait) {
-        if (i
-            % 2 == 0) {
+        if (Utilities.isEven(sheetIndex)) {
           scoresheetCell.setPaddingRight(0.1f
               * POINTS_PER_INCH);
         } else {
@@ -555,8 +555,7 @@ public class ScoresheetGenerator {
 
       // Add the current table of scoresheets to the document
       if (orientationIsPortrait
-          || (i
-              % 2 != 0)) {
+          || (Utilities.isOdd(sheetIndex))) {
         pdfDoc.add(wholePage);
       }
     }
@@ -740,7 +739,7 @@ public class ScoresheetGenerator {
 
   }
 
-  private int m_numSheets;
+  private final int m_numSheets;
 
   private String m_revision;
 
@@ -766,7 +765,7 @@ public class ScoresheetGenerator {
 
   private PdfPTable m_goalsTable;
 
-  public void setPageTitle(final String title) {
+  private void setPageTitle(final String title) {
     m_pageTitle = title;
   }
 
@@ -883,8 +882,8 @@ public class ScoresheetGenerator {
    * @param time the time for the specified scoresheet.
    * @throws IllegalArgumentException Thrown if the index is out of valid range.
    */
-  public void setTime(final int i,
-                      final String time)
+  private void setTime(final int i,
+                       final String time)
       throws IllegalArgumentException {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
@@ -963,8 +962,9 @@ public class ScoresheetGenerator {
       contentunder.beginText();
       contentunder.setFontAndSize(font.getBaseFont(), font.getSize());
       contentunder.setColorFill(color);
-      contentunder.showTextAligned(Element.ALIGN_CENTER, "PRACTICE", document.getPageSize().getWidth() / 2,
-                                  document.getPageSize().getHeight() / 2, 45);
+      contentunder.showTextAligned(Element.ALIGN_CENTER, "PRACTICE", document.getPageSize().getWidth()
+          / 2, document.getPageSize().getHeight()
+              / 2, 45);
       contentunder.endText();
       contentunder.restoreState();
     }
