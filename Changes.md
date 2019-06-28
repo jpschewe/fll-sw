@@ -1,3 +1,4 @@
+* #725 - rework subjective sheets to have more comment space
 * #726 - improve readability of subjective score summary
 * #711 - handle double quotes in team name on the select team page for score entry
 * #600 - migrate from FindBugs to SpotBugs
