@@ -11,8 +11,6 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-
-
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -33,11 +31,8 @@ import fll.documents.elements.SheetElement;
 import fll.documents.elements.TableElement;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
-
 import fll.util.PdfUtils;
-import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
-import fll.xml.Goal;
 import fll.xml.RubricRange;
 import fll.xml.SubjectiveScoreCategory;
 import net.mtu.eggplant.util.Pair;
@@ -71,13 +66,9 @@ public class SubjectivePdfWriter {
 
   private static final BaseColor rowRed = new BaseColor(0xF7, 0x98, 0x85);
 
-  private final Font f6Red = new Font(Font.FontFamily.HELVETICA, 6, Font.NORMAL, BaseColor.RED);
-
   private final Font f6i = new Font(Font.FontFamily.HELVETICA, 6, Font.ITALIC);
 
   private final Font f8b = new Font(Font.FontFamily.HELVETICA, 8, Font.BOLD);
-
-  private final Font f8bRed = new Font(Font.FontFamily.HELVETICA, 8, Font.BOLD, BaseColor.RED);
 
   private final Font f9b = new Font(Font.FontFamily.HELVETICA, 9, Font.BOLD);
 
@@ -131,7 +122,7 @@ public class SubjectivePdfWriter {
 
   /**
    * Write out a subjective sheet for the specified team.
-   * 
+   *
    * @param doc where to write to
    * @param teamInfo the team information to use when writing
    * @param font the font to use for comments and the rubric
@@ -140,19 +131,20 @@ public class SubjectivePdfWriter {
    * @throws IOException
    * @throws DocumentException
    */
-  public void writeTeamSubjectivePdf(final Document doc,
-                                     final TeamScheduleInfo teamInfo,
-                                     final Font font,
-                                     final int commentHeight)
+  private void writeTeamSubjectivePdf(final Document doc,
+                                      final TeamScheduleInfo teamInfo,
+                                      final Font font,
+                                      final int commentHeight)
       throws MalformedURLException, IOException, DocumentException {
     final PdfPTable table = createStandardRubricTable();
     writeHeader(doc, teamInfo);
     for (final String category : sheetElement.getCategories()) {
       writeRubricTable(table, sheetElement.getTableElement(category), font);
-      writeCommentsSection(table, font, commentHeight);
     }
 
     doc.add(table);
+
+    writeCommentsBlock(doc, commentHeight);
 
     writeEndOfPageRow(doc);
   }
@@ -230,8 +222,7 @@ public class SubjectivePdfWriter {
     // add the instructions to the header
     dirText = "Directions: For each skill area, clearly mark the box that best describes the team's accomplishments.  "
         + "If the team does not demonstrate skill in a particular area, then put an 'X' in the first box for Not Demonstrated (ND).  "
-        + "Please provide as many written comments as you can to acknowledge each teams's hard work and to help teams improve. "
-        + "When you have completed the evaluation, please circle the team's areas of strength.";
+        + "Please provide as many written comments as you can to acknowledge each teams's hard work and to help teams improve. ";
     text = new Phrase(dirText, f9b);
     directions = new Paragraph();
     directions.add(text);
@@ -267,42 +258,57 @@ public class SubjectivePdfWriter {
       doc.add(pageHeaderTable);
       doc.add(directions);
       doc.add(columnTitlesTable);
-    } catch (DocumentException de) {
+    } catch (final DocumentException de) {
       LOGGER.error("Unable to write out the document.", de);
     }
   }
 
-  public void writeEndOfPageRow(final Document doc) throws DocumentException {
-    PdfPTable closingTable = new PdfPTable(1);
+  private void writeCommentsBlock(final Document doc,
+                                  final int height)
+      throws DocumentException {
+    final PdfPTable commentsTable = new PdfPTable(2);
+    commentsTable.setWidthPercentage(100f);
+
+    final PdfPCell commentsLabel = createCell("Comments", f10b, TOP_ONLY);
+    commentsLabel.setColspan(2);
+    commentsLabel.setHorizontalAlignment(Element.ALIGN_CENTER);
+    commentsTable.addCell(commentsLabel);
+
+    // great job and think about labels
+    final Font sectionFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD
+        | Font.ITALIC, BaseColor.LIGHT_GRAY);
+
+    final PdfPCell greatJob = createCell("Great job...", sectionFont, NO_BORDERS);
+    greatJob.setBorderWidthRight(1);
+    commentsTable.addCell(greatJob);
+
+    final PdfPCell thinkAboutLabel = createCell("Think about...", sectionFont, NO_BORDERS);
+    commentsTable.addCell(thinkAboutLabel);
+
+    // empty space
+    final PdfPCell emptySpaceLeft = createCell(" ", f6i, NO_BORDERS);
+    emptySpaceLeft.setBorderWidthRight(1);
+    final PdfPCell emptySpaceRight = createCell(" ", f6i, NO_BORDERS);
+    for (int row = 0; row < height; ++row) {
+      commentsTable.addCell(emptySpaceLeft);
+      commentsTable.addCell(emptySpaceRight);
+    }
+
+    // use back if needed
+    final Font useBackFont = new Font(Font.FontFamily.HELVETICA, 8, Font.ITALIC, BaseColor.LIGHT_GRAY);
+    final PdfPCell useBackLabel = createCell("Judges: Use the back for additional comments if needed!", useBackFont,
+                                             NO_BORDERS);
+    useBackLabel.setHorizontalAlignment(Element.ALIGN_CENTER);
+    useBackLabel.setColspan(2);
+    commentsTable.addCell(useBackLabel);
+
+    doc.add(commentsTable);
+  }
+
+  private void writeEndOfPageRow(final Document doc) throws DocumentException {
+    final PdfPTable closingTable = new PdfPTable(1);
 
     closingTable.setWidthPercentage(100f);
-    final StringBuilder strengths = new StringBuilder();
-    strengths.append("Strengths:");
-    for (final String category : sheetElement.getCategories()) {
-      strengths.append("            ");
-      strengths.append(category);
-    }
-    final PdfPCell strengthsCell = createCell(strengths.toString(), f9b, TOP_ONLY, sheetColor);
-    strengthsCell.setMinimumHeight(18f);
-    closingTable.addCell(strengthsCell);
-
-    boolean somethingRequired = false;
-    for (final AbstractGoal agoal : sheetElement.getSheetData().getGoals()) {
-      if (agoal instanceof Goal) {
-        final Goal goal = (Goal) agoal;
-        if (goal.isRequired()) {
-          somethingRequired = true;
-        }
-      }
-    }
-    if (somethingRequired) {
-      final PdfPCell requiredC = createCell("* Required for Award Consideration ", f6Red, NO_BORDERS);
-      // NO_BORDERS centers
-      requiredC.setHorizontalAlignment(Element.ALIGN_LEFT);
-      closingTable.addCell(requiredC);
-    } else {
-      closingTable.addCell(createCell(" ", f6Red, NO_BORDERS));
-    }
 
     if (null != description.getCopyright()) {
       // add the copy right statement
@@ -316,49 +322,15 @@ public class SubjectivePdfWriter {
     doc.newPage();
   }
 
-  public static Document createStandardDocument() {
-    return new Document(PageSize.LETTER, 36, 36, 20, 36);
+  private static Document createStandardDocument() {
+    return new Document(PageSize.LETTER, 36, 36, 20, 0);
   }
 
-  public PdfPTable createStandardRubricTable() throws DocumentException {
-    PdfPTable table = new PdfPTable(6);
+  private PdfPTable createStandardRubricTable() throws DocumentException {
+    final PdfPTable table = new PdfPTable(6);
     table.setWidths(colWidths);
     table.setWidthPercentage(100f);
     return table;
-  }
-
-  private void writeCommentsSection(final PdfPTable table,
-                                    final Font baseFont,
-                                    final int height) {
-    PdfPCell commentLabel = null;
-    PdfPCell emptySpace = null;
-
-    Font font = new Font(baseFont);
-    font.setStyle(Font.ITALIC);
-    // This is the 'Comments' section at the bottom of every table for the judge
-    // to write in
-    commentLabel = createCell("Comments:", font, NO_BORDERS);
-    commentLabel.setRotation(90);
-    commentLabel.setRowspan(1);
-    commentLabel.setBorderWidthLeft(0);
-    commentLabel.setBorderWidthBottom(0);
-    commentLabel.setHorizontalAlignment(Element.ALIGN_CENTER);
-    commentLabel.setVerticalAlignment(Element.ALIGN_CENTER);
-    emptySpace = createCell(" ", font, TOP_ONLY);
-    emptySpace.setMinimumHeight(18f);
-    table.addCell(commentLabel);
-    // Need to add the empty cells so the row is complete and is displayed in
-    // the pdf
-    for (int i1 = 0; i1 < 5; i1++) {
-      table.addCell(emptySpace);
-    }
-
-    emptySpace = createCell(" ", font, NO_BORDERS);
-    for (int i2 = 0; i2 < height; i2++) {
-      for (int i3 = 0; i3 < 6; i3++) {
-        table.addCell(emptySpace);
-      }
-    }
   }
 
   private void writeRubricTable(final PdfPTable table,
@@ -384,11 +356,6 @@ public class SubjectivePdfWriter {
 
       final Phrase topicAreaP = new Phrase();
       topicAreaP.add(topicAreaC);
-
-      if (rowElement.getGoal().isRequired()) {
-        final Chunk required = new Chunk(" *", f8bRed);
-        topicAreaP.add(required);
-      }
 
       topicArea = new PdfPCell(topicAreaP);
       topicArea.setVerticalAlignment(Element.ALIGN_CENTER);
@@ -419,7 +386,7 @@ public class SubjectivePdfWriter {
                               final Font f,
                               final int borders,
                               final BaseColor color) {
-    PdfPCell result = createCell(text, f, borders);
+    final PdfPCell result = createCell(text, f, borders);
     result.setBackgroundColor(color);
     return result;
   }
@@ -428,7 +395,7 @@ public class SubjectivePdfWriter {
                               final Font f,
                               final int borders,
                               final int alignment) {
-    PdfPCell result = createCell(text, f, borders);
+    final PdfPCell result = createCell(text, f, borders);
     result.setHorizontalAlignment(alignment);
     return result;
   }
@@ -516,11 +483,11 @@ public class SubjectivePdfWriter {
     teamInfo.setOrganization("Dummy");
     teamInfo.setTeamName("Dummy");
 
-    for (int commentHeight = 2; commentHeight > 0; --commentHeight) {
-      for (int pointSize = 12; pointSize >= 6; --pointSize) {
+    for (int commentHeight = 20; commentHeight > 2; --commentHeight) {
+    for (int pointSize = 9; pointSize >= 6; --pointSize) {
         final Font font = new Font(Font.FontFamily.HELVETICA, pointSize);
 
-        com.itextpdf.text.Document pdf = SubjectivePdfWriter.createStandardDocument();
+        final com.itextpdf.text.Document pdf = SubjectivePdfWriter.createStandardDocument();
 
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -548,7 +515,7 @@ public class SubjectivePdfWriter {
 
   /**
    * Create the document
-   * 
+   *
    * @param stream where to write the document
    * @param sheetElement describes the category to write
    * @param schedulerColumn used to determine the schedule information to output
@@ -571,7 +538,7 @@ public class SubjectivePdfWriter {
     final Font font = parameters.getOne();
     final int commentHeight = parameters.getTwo();
 
-    com.itextpdf.text.Document pdf = SubjectivePdfWriter.createStandardDocument();
+    final com.itextpdf.text.Document pdf = SubjectivePdfWriter.createStandardDocument();
 
     PdfWriter.getInstance(pdf, stream);
 
