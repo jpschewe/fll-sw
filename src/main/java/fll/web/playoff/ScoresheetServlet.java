@@ -18,13 +18,12 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.itextpdf.text.DocumentException;
 
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.xml.ChallengeDescription;
@@ -39,7 +38,8 @@ public class ScoresheetServlet extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     Connection connection = null;
     try {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -50,13 +50,15 @@ public class ScoresheetServlet extends BaseFLLServlet {
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=scoreSheet.pdf");
 
-      final boolean orientationIsPortrait = ScoresheetGenerator.guessOrientation(challengeDescription);
+      final Pair<Boolean, Float> orientationResult = ScoresheetGenerator.guessOrientation(challengeDescription);
+      final boolean orientationIsPortrait = orientationResult.getLeft();
+      final float pagesPerScoreSheet = orientationResult.getRight();
 
       // Create the scoresheet generator - must provide correct number of
       // scoresheets
       final ScoresheetGenerator gen = new ScoresheetGenerator(request, connection, tournament, challengeDescription);
 
-      gen.writeFile(response.getOutputStream(), orientationIsPortrait);
+      gen.writeFile(response.getOutputStream(), orientationIsPortrait, pagesPerScoreSheet);
 
     } catch (final SQLException e) {
       final String errorMessage = "There was an error talking to the database";
