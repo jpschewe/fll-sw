@@ -54,7 +54,7 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
 import org.apache.commons.io.IOUtils;
-
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -83,7 +83,6 @@ import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
-
 import fll.util.PdfUtils;
 import fll.util.SimpleFooterHandler;
 import fll.web.playoff.ScoresheetGenerator;
@@ -190,7 +189,7 @@ public class TournamentSchedule implements Serializable {
    * specified and still have times in the afternoon. If there is any time that
    * has an hour before {@link #EARLIEST_HOUR} the time is assumed to be in the
    * afternoon.
-   * 
+   *
    * @param str a string representing a schedule time, if null the return value
    *          is null, if empty the return value is null
    * @return the {@link LocalTime} object for the string
@@ -228,7 +227,7 @@ public class TournamentSchedule implements Serializable {
   /**
    * Conver the time to a string that will be parsed by
    * {@link #parseTime(String)}.
-   * 
+   *
    * @param time the time to format, may be null
    * @return the formatted time, null converts to ""
    */
@@ -255,27 +254,27 @@ public class TournamentSchedule implements Serializable {
     return _matches;
   }
 
-  private final HashSet<String> _tableColors = new HashSet<String>();
+  private final HashSet<String> _tableColors = new HashSet<>();
 
   public Set<String> getTableColors() {
     return Collections.unmodifiableSet(_tableColors);
   }
 
-  private final HashSet<String> _awardGroups = new HashSet<String>();
+  private final HashSet<String> _awardGroups = new HashSet<>();
 
   public Set<String> getAwardGroups() {
     return Collections.unmodifiableSet(_awardGroups);
   }
 
-  private final HashSet<String> _judgingGroups = new HashSet<String>();
+  private final HashSet<String> _judgingGroups = new HashSet<>();
 
   public Set<String> getJudgingGroups() {
     return Collections.unmodifiableSet(_judgingGroups);
   }
 
-  private final LinkedList<TeamScheduleInfo> _schedule = new LinkedList<TeamScheduleInfo>();
+  private final LinkedList<TeamScheduleInfo> _schedule = new LinkedList<>();
 
-  private final HashSet<String> subjectiveStations = new HashSet<String>();
+  private final HashSet<String> subjectiveStations = new HashSet<>();
 
   /**
    * Name of this tournament.
@@ -302,7 +301,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Get the {@link TeamScheduleInfo} for the specified team number.
-   * 
+   *
    * @return null if cannot be found
    */
   public TeamScheduleInfo getSchedInfoForTeam(final int teamNumber) {
@@ -316,7 +315,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Read the tournament schedule from a spreadsheet.
-   * 
+   *
    * @param name the name of the tournament
    * @param stream how to access the spreadsheet
    * @param sheetName the name of the worksheet the data is on
@@ -333,7 +332,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Read the tournament schedule from a CSV file.
-   * 
+   *
    * @param csvFile where to read the schedule from
    * @param subjectiveHeaders the headers for the subjective columns
    * @throws ScheduleParseException
@@ -348,7 +347,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Common construction.
-   * 
+   *
    * @throws IOException
    * @throws ScheduleParseException
    * @throws ParseException
@@ -368,7 +367,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Load a tournament from the database.
-   * 
+   *
    * @param connection
    * @param tournamentID
    * @throws SQLException
@@ -518,8 +517,8 @@ public class TournamentSchedule implements Serializable {
    */
   private static boolean isHeaderLine(final String[] line) {
     boolean retval = false;
-    for (int i = 0; i < line.length; ++i) {
-      if (TEAM_NUMBER_HEADER.equals(line[i])) {
+    for (final String element : line) {
+      if (TEAM_NUMBER_HEADER.equals(element)) {
         retval = true;
       }
     }
@@ -530,7 +529,7 @@ public class TournamentSchedule implements Serializable {
   /**
    * Find the index of the columns. Reads lines until the headers are found or
    * EOF is reached.
-   * 
+   *
    * @return the column information
    * @throws IOException
    * @throws RuntimeException if a header row cannot be found
@@ -554,17 +553,17 @@ public class TournamentSchedule implements Serializable {
    * Figure out how many performance rounds exist in this header line. This
    * method also checks that the corresponding table header exists for each
    * round and that the round numbers are contiguous starting at 1.
-   * 
+   *
    * @throws FLLRuntimeException if there are problems with the performance
    *           round headers found
    */
   private static int countNumRounds(final String[] line) {
-    final SortedSet<Integer> perfRounds = new TreeSet<Integer>();
-    for (int i = 0; i < line.length; ++i) {
-      if (null != line[i]
-          && line[i].startsWith(BASE_PERF_HEADER)
-          && line[i].length() > BASE_PERF_HEADER.length()) {
-        final String perfNumberStr = line[i].substring(BASE_PERF_HEADER.length());
+    final SortedSet<Integer> perfRounds = new TreeSet<>();
+    for (final String element : line) {
+      if (null != element
+          && element.startsWith(BASE_PERF_HEADER)
+          && element.length() > BASE_PERF_HEADER.length()) {
+        final String perfNumberStr = element.substring(BASE_PERF_HEADER.length());
         final Integer perfNumber = Integer.valueOf(perfNumberStr);
         if (!perfRounds.add(perfNumber)) {
           throw new FLLRuntimeException("Found performance rounds num "
@@ -580,7 +579,7 @@ public class TournamentSchedule implements Serializable {
      * corresponding table header exists
      */
     int expectedValue = 1;
-    for (Integer value : perfRounds) {
+    for (final Integer value : perfRounds) {
       if (null == value) {
         throw new FLLInternalException("Found null performance round in header!");
       }
@@ -614,7 +613,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Find the column that contains the specified header.
-   * 
+   *
    * @return the column, null if not found
    */
   private static Integer columnForHeader(final String[] line,
@@ -697,7 +696,7 @@ public class TournamentSchedule implements Serializable {
       perfTableColumn[round] = getColumnForHeader(line, perfTableHeader);
     }
 
-    final Map<Integer, String> subjectiveColumns = new HashMap<Integer, String>();
+    final Map<Integer, String> subjectiveColumns = new HashMap<>();
     for (final String header : subjectiveHeaders) {
       final int column = getColumnForHeader(line, header);
       subjectiveColumns.put(column, header);
@@ -709,7 +708,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Parse the data of the schedule.
-   * 
+   *
    * @throws IOException
    * @throws ScheduleParseException if there is an error with the schedule
    */
@@ -754,7 +753,7 @@ public class TournamentSchedule implements Serializable {
   /**
    * Find the team that is competing earliest after the specified time on the
    * specified table and side in the specified round.
-   * 
+   *
    * @param time the time after which to find a competition
    * @param table the table color
    * @param side the side
@@ -783,7 +782,7 @@ public class TournamentSchedule implements Serializable {
   /**
    * Check if the specified team needs to stay around after their performance to
    * even up the table.
-   * 
+   *
    * @param si the TeamScheduleInfo for the team
    * @param round the round the team is competing at (zero based index)
    * @return the team one needs to compete against in an extra round or null if
@@ -808,7 +807,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Output the detailed schedule.
-   * 
+   *
    * @param directory the directory to put the files in
    * @param baseFilename the base filename
    * @throws DocumentException
@@ -868,7 +867,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Output the schedule for each team.
-   * 
+   *
    * @param params schedule parameters
    * @param pdfFos where to write the schedule
    * @throws DocumentException
@@ -886,7 +885,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Output the performance schedule, sorted by time.
-   * 
+   *
    * @param pdfFos where to write the schedule
    * @throws DocumentException
    */
@@ -899,7 +898,7 @@ public class TournamentSchedule implements Serializable {
   /**
    * Output the subjective schedules with a table for each category and sorted
    * by time.
-   * 
+   *
    * @param pdfFos where to write the schedule
    * @throws DocumentException
    */
@@ -915,7 +914,7 @@ public class TournamentSchedule implements Serializable {
   /**
    * Output the subjective schedules with a table for each category and sorted
    * by judging station, then by time.
-   * 
+   *
    * @param pdfFos where to output the schedule
    * @throws DocumentException
    */
@@ -931,7 +930,7 @@ public class TournamentSchedule implements Serializable {
   /**
    * Output the schedule sorted by team number. This schedule looks much like
    * the input spreadsheet.
-   * 
+   *
    * @param stream where to write the schedule
    * @throws DocumentException
    */
@@ -1024,7 +1023,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Output the detailed schedule for a team for the day.
-   * 
+   *
    * @throws DocumentException
    */
   private void outputTeamSchedule(final SchedParams params,
@@ -1150,7 +1149,7 @@ public class TournamentSchedule implements Serializable {
       throws DocumentException, SQLException, IOException {
     final ScoresheetGenerator scoresheets = new ScoresheetGenerator(getNumberOfRounds()
         * _schedule.size(), description, tournamentName);
-    final SortedMap<PerformanceTime, TeamScheduleInfo> performanceTimes = new TreeMap<PerformanceTime, TeamScheduleInfo>();
+    final SortedMap<PerformanceTime, TeamScheduleInfo> performanceTimes = new TreeMap<>();
     for (int round = 0; round < getNumberOfRounds(); ++round) {
       for (final TeamScheduleInfo si : _schedule) {
         performanceTimes.put(si.getPerf(round), si);
@@ -1174,12 +1173,14 @@ public class TournamentSchedule implements Serializable {
       ++sheetIndex;
     }
 
-    final boolean orientationIsPortrait = ScoresheetGenerator.guessOrientation(description);
-    scoresheets.writeFile(output, orientationIsPortrait);
+    final Pair<Boolean, Float> orientationResult  = ScoresheetGenerator.guessOrientation(description);
+    final boolean orientationIsPortrait = orientationResult.getLeft();
+    final float pagesPerScoreSheet = orientationResult.getRight();
+    scoresheets.writeFile(output, orientationIsPortrait, pagesPerScoreSheet);
   }
 
   private void outputPerformanceSchedule(final Document detailedSchedules) throws DocumentException {
-    final SortedMap<PerformanceTime, TeamScheduleInfo> performanceTimes = new TreeMap<PerformanceTime, TeamScheduleInfo>();
+    final SortedMap<PerformanceTime, TeamScheduleInfo> performanceTimes = new TreeMap<>();
     for (int round = 0; round < getNumberOfRounds(); ++round) {
       for (final TeamScheduleInfo si : _schedule) {
         performanceTimes.put(si.getPerf(round), si);
@@ -1187,7 +1188,7 @@ public class TournamentSchedule implements Serializable {
     }
 
     // list of teams staying around to even up the teams
-    final List<TeamScheduleInfo> teamsMissingOpponents = new LinkedList<TeamScheduleInfo>();
+    final List<TeamScheduleInfo> teamsMissingOpponents = new LinkedList<>();
 
     final PdfPTable table = PdfUtils.createTable(7);
     int currentRow = 0;
@@ -1471,6 +1472,7 @@ public class TournamentSchedule implements Serializable {
       this.name = name;
     }
 
+    @Override
     public int compare(final TeamScheduleInfo one,
                        final TeamScheduleInfo two) {
 
@@ -1513,6 +1515,7 @@ public class TournamentSchedule implements Serializable {
       this.name = name;
     }
 
+    @Override
     public int compare(final TeamScheduleInfo one,
                        final TeamScheduleInfo two) {
 
@@ -1555,6 +1558,7 @@ public class TournamentSchedule implements Serializable {
     private ComparatorByTeam() {
     }
 
+    @Override
     public int compare(final TeamScheduleInfo one,
                        final TeamScheduleInfo two) {
 
@@ -1612,7 +1616,7 @@ public class TournamentSchedule implements Serializable {
 
     // print out the general schedule
     final Formatter output = new Formatter();
-    final Set<String> stations = new HashSet<String>();
+    final Set<String> stations = new HashSet<>();
     stations.addAll(minSubjectiveTimes.keySet());
     stations.addAll(maxSubjectiveTimes.keySet());
     for (final String station : stations) {
@@ -1638,7 +1642,7 @@ public class TournamentSchedule implements Serializable {
   /**
    * Add the data from the specified round of the specified TeamScheduleInfo to
    * matches.
-   * 
+   *
    * @param ti the schedule info
    * @param round the round we care about
    */
@@ -1648,7 +1652,7 @@ public class TournamentSchedule implements Serializable {
     if (_matches.containsKey(ti.getPerfTime(round))) {
       timeMatches = _matches.get(ti.getPerfTime(round));
     } else {
-      timeMatches = new HashMap<String, List<TeamScheduleInfo>>();
+      timeMatches = new HashMap<>();
       _matches.put(ti.getPerfTime(round), timeMatches);
     }
 
@@ -1656,7 +1660,7 @@ public class TournamentSchedule implements Serializable {
     if (timeMatches.containsKey(ti.getPerfTableColor(round))) {
       tableMatches = timeMatches.get(ti.getPerfTableColor(round));
     } else {
-      tableMatches = new LinkedList<TeamScheduleInfo>();
+      tableMatches = new LinkedList<>();
       timeMatches.put(ti.getPerfTableColor(round), tableMatches);
     }
 
@@ -1687,7 +1691,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Find the round of the opponent for a given team in a given round.
-   * 
+   *
    * @param ti
    * @param round
    * @return the round number or -1 if no opponent
@@ -1708,7 +1712,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Find the opponent for a given team in a given round.
-   * 
+   *
    * @param ti
    * @param round
    * @return the team number or null if no opponent
@@ -1781,8 +1785,8 @@ public class TournamentSchedule implements Serializable {
           // If we got an empty string, then we must have hit the end
           return null;
         }
-        String table = line[ci.getPerfTableColumn(perfNum)];
-        String[] tablePieces = table.split(" ");
+        final String table = line[ci.getPerfTableColumn(perfNum)];
+        final String[] tablePieces = table.split(" ");
         if (tablePieces.length != 2) {
           throw new RuntimeException("Error parsing table information from: "
               + table);
@@ -1814,7 +1818,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Check if the schedule exists in the database.
-   * 
+   *
    * @param connection database connection
    * @param tournamentID ID of the tournament to look for
    * @return if a schedule exists in the database for the specified tournament
@@ -1845,7 +1849,7 @@ public class TournamentSchedule implements Serializable {
   /**
    * Store a tournament schedule in the database. This will delete any previous
    * schedule for the same tournament.
-   * 
+   *
    * @param tournamentID the ID of the tournament
    */
   public void storeSchedule(final Connection connection,
@@ -1928,7 +1932,7 @@ public class TournamentSchedule implements Serializable {
   /**
    * Check if the current schedule is consistent with the specified tournament
    * in the database.
-   * 
+   *
    * @param connection the database connection
    * @param tournamentID the tournament to check
    * @return the constraint violations, empty if no violations
@@ -1937,9 +1941,9 @@ public class TournamentSchedule implements Serializable {
   public Collection<ConstraintViolation> compareWithDatabase(final Connection connection,
                                                              final int tournamentID)
       throws SQLException {
-    final Collection<ConstraintViolation> violations = new LinkedList<ConstraintViolation>();
+    final Collection<ConstraintViolation> violations = new LinkedList<>();
     final Map<Integer, TournamentTeam> dbTeams = Queries.getTournamentTeams(connection, tournamentID);
-    final Set<Integer> scheduleTeamNumbers = new HashSet<Integer>();
+    final Set<Integer> scheduleTeamNumbers = new HashSet<>();
     for (final TeamScheduleInfo si : _schedule) {
       scheduleTeamNumbers.add(si.getTeamNumber());
       if (!dbTeams.containsKey(si.getTeamNumber())) {
@@ -2058,7 +2062,7 @@ public class TournamentSchedule implements Serializable {
       System.arraycopy(perfTableColumn, 0, this.perfTableColumn, 0, perfTableColumn.length);
 
       // determine which columns aren't used
-      final List<String> unused = new LinkedList<String>();
+      final List<String> unused = new LinkedList<>();
       for (int column = 0; column < this.headerLine.size(); ++column) {
         boolean match = false;
         if (column == this.teamNumColumn //
@@ -2103,7 +2107,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Find the {@link TeamScheduleInfo} object for the specified team number.
-   * 
+   *
    * @return the schedule info or null if not found
    */
   public TeamScheduleInfo findScheduleInfo(final int team) {
@@ -2190,7 +2194,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Validate the schedule XML document.
-   * 
+   *
    * @throws SAXException on an error
    */
   public static void validateXML(final org.w3c.dom.Document document) throws SAXException {
@@ -2211,20 +2215,20 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Write out to the specified writer.
-   * 
+   *
    * @param outputWriter
    * @throws IOException
    */
   public void writeToCSV(final Writer outputWriter) throws IOException {
     try (final CSVWriter csv = new CSVWriter(outputWriter)) {
 
-      final List<String> line = new ArrayList<String>();
+      final List<String> line = new ArrayList<>();
       line.add(TournamentSchedule.TEAM_NUMBER_HEADER);
       line.add(TournamentSchedule.AWARD_GROUP_HEADER);
       line.add(TournamentSchedule.TEAM_NAME_HEADER);
       line.add(TournamentSchedule.ORGANIZATION_HEADER);
       line.add(TournamentSchedule.JUDGE_GROUP_HEADER);
-      final List<String> categories = Collections.unmodifiableList(new LinkedList<String>(getSubjectiveStations()));
+      final List<String> categories = Collections.unmodifiableList(new LinkedList<>(getSubjectiveStations()));
       for (final String category : categories) {
         line.add(category);
       }
@@ -2262,7 +2266,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Write out the current schedule to a CSV file.
-   * 
+   *
    * @param outputFile where to write
    * @throws IOException
    */
@@ -2280,7 +2284,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Write the schedule as a CSV file to the specified stream.
-   * 
+   *
    * @param stream where to write the schedule
    * @throws IOException if there is a problem writing to the stream
    */

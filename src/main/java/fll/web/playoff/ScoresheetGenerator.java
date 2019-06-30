@@ -19,6 +19,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
@@ -283,6 +284,7 @@ public class ScoresheetGenerator {
     m_divisionLabel = new String[m_numSheets];
     m_division = new String[m_numSheets];
     m_time = new String[m_numSheets];
+    m_isPractice = new boolean[m_numSheets];
   }
 
   private static final Font ARIAL_8PT_NORMAL = FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL,
@@ -297,26 +299,39 @@ public class ScoresheetGenerator {
   /**
    * Guess the orientation that the document should be.
    *
-   * @return true if it should be portrait
+   * @return true if it should be portrait, number of pages per score sheet (0.5,
+   *         1 or greater)
    * @throws DocumentException
    * @throws IOException
    */
-  public static boolean guessOrientation(final ChallengeDescription description) throws DocumentException, IOException {
+  public static Pair<Boolean, Float> guessOrientation(final ChallengeDescription description)
+      throws DocumentException, IOException {
     final ScoresheetGenerator gen = new ScoresheetGenerator(1, description, "dummy");
     final ByteArrayOutputStream out = new ByteArrayOutputStream();
-    gen.writeFile(out, false);
+    // Using landscape, so set pages per sheet to 0.5
+    gen.writeFile(out, false, 0.5f);
     final ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
     final PdfReader reader = new PdfReader(in);
-    if (reader.getNumberOfPages() > 1) {
+    final int numPages = reader.getNumberOfPages();
+    if (numPages > 1) {
       // doesn't fit landscape
-      return true;
+      return Pair.of(true, (float) numPages);
     } else {
-      return false;
+      return Pair.of(false, 0.5f);
     }
   }
 
+  /**
+   * @param out where to write the PDF
+   * @param orientationIsPortrait true if the document is in portrait mode, false
+   *          if landscape (2 score sheets per page)
+   * @param pagesPerScoreSheet number of pages each score sheet takes, used to get
+   *          the practice watermark in the right places
+   * @throws DocumentException
+   */
   public void writeFile(final OutputStream out,
-                        final boolean orientationIsPortrait)
+                        final boolean orientationIsPortrait,
+                        final float pagesPerScoreSheet)
       throws DocumentException {
 
     // This creates our new PDF document and declares its orientation
@@ -327,7 +342,7 @@ public class ScoresheetGenerator {
       pdfDoc = new Document(PageSize.LETTER.rotate()); // landscape
     }
     final PdfWriter writer = PdfWriter.getInstance(pdfDoc, out);
-    writer.setPageEvent(new WatermarkHandler());
+    writer.setPageEvent(new WatermarkHandler(this, pagesPerScoreSheet));
 
     // Measurements are always in points (72 per inch)
     // This sets up 1/2 inch margins side margins and 0.35in top and bottom
@@ -763,6 +778,8 @@ public class ScoresheetGenerator {
 
   private String[] m_time;
 
+  private boolean[] m_isPractice;
+
   private PdfPTable m_goalsTable;
 
   private void setPageTitle(final String title) {
@@ -918,6 +935,39 @@ public class ScoresheetGenerator {
   }
 
   /**
+   * Sets if the score sheet for the specified index is a practice round.
+   *
+   * @param i The 0-based index of the score sheet
+   * @param isPractice true if this is a practice round
+   * @throws IllegalArgumentException Thrown if the index is out of valid range.
+   */
+  public void setPractice(final int i,
+                          final boolean isPractice)
+      throws IllegalArgumentException {
+    if (i < 0) {
+      throw new IllegalArgumentException("Index must not be < 0");
+    }
+    if (i >= m_numSheets) {
+      throw new IllegalArgumentException("Index must be < "
+          + m_numSheets);
+    }
+    m_isPractice[i] = isPractice;
+  }
+
+  /**
+   * Used by {@link WatermarkHandler}.
+   *
+   * @return If index is out of bounds, return false.
+   */
+  /* package */ boolean isPractice(final int index) {
+    if (index >= m_isPractice.length) {
+      return false;
+    } else {
+      return m_isPractice[index];
+    }
+  }
+
+  /**
    * Create table for page given number of sheets per page.
    *
    * @param nup
@@ -941,9 +991,28 @@ public class ScoresheetGenerator {
 
     private final BaseColor color;
 
+    private final float pagesPerScoreSheet;
+
     private static final float WATERMARK_OPACITY = 0.3f;
 
-    public WatermarkHandler() {
+    private static final double PAGES_PER_SHEET_TOLERANCE = 1E-6;
+
+    private final ScoresheetGenerator generator;
+
+    /**
+     * @param pagesPerScoreSheet number of pages per score sheet, 0.5 and values
+     *          greater than or equal to 1 are supported
+     */
+    public WatermarkHandler(final ScoresheetGenerator generator,
+                            final float pagesPerScoreSheet) {
+      if (!FP.equals(pagesPerScoreSheet, 0.5, PAGES_PER_SHEET_TOLERANCE)
+          && !FP.greaterThanOrEqual(pagesPerScoreSheet, 1, PAGES_PER_SHEET_TOLERANCE)) {
+        throw new IllegalArgumentException("Allowed values for pages per score sheet are 0.5 and 1 or greater. Value is: "
+            + pagesPerScoreSheet);
+      }
+      this.pagesPerScoreSheet = pagesPerScoreSheet;
+      this.generator = generator;
+
       font = FontFactory.getFont(FontFactory.HELVETICA, 52, Font.NORMAL);
       color = BaseColor.BLACK;
 
@@ -956,15 +1025,58 @@ public class ScoresheetGenerator {
     @Override
     public void onEndPage(final PdfWriter writer,
                           final Document document) {
+      // Need to determine which score sheet we are on based on page number and pages
+      // per sheet.
+
+      final Rectangle pageSize = document.getPageSize();
+      final float y = pageSize.getHeight()
+          / 2;
+
+      final int currentPageNumber = writer.getCurrentPageNumber();
+      final int indexOfFirstScoreSheetOnPage;
+      if (pagesPerScoreSheet < 1) {
+        indexOfFirstScoreSheetOnPage = (int) Math.floor(currentPageNumber
+            / pagesPerScoreSheet)
+            - 2;
+
+        if (generator.isPractice(indexOfFirstScoreSheetOnPage)) {
+          final float x = pageSize.getWidth()
+              / 4;
+          addWatermark(writer, x, y);
+        }
+
+        // check the second sheet on the page
+        if (generator.isPractice(indexOfFirstScoreSheetOnPage
+            + 1)) {
+          final float x = pageSize.getWidth()
+              * 3
+              / 4;
+          addWatermark(writer, x, y);
+        }
+
+      } else {
+        indexOfFirstScoreSheetOnPage = (int) Math.ceil(currentPageNumber
+            / pagesPerScoreSheet)
+            - 1;
+        if (generator.isPractice(indexOfFirstScoreSheetOnPage)) {
+          final float x = pageSize.getWidth()
+              / 2;
+          addWatermark(writer, x, y);
+        }
+      }
+
+    }
+
+    private void addWatermark(final PdfWriter writer,
+                              final float x,
+                              final float y) {
       final PdfContentByte contentunder = writer.getDirectContentUnder();
       contentunder.saveState();
       contentunder.setGState(gstate);
       contentunder.beginText();
       contentunder.setFontAndSize(font.getBaseFont(), font.getSize());
       contentunder.setColorFill(color);
-      contentunder.showTextAligned(Element.ALIGN_CENTER, "PRACTICE", document.getPageSize().getWidth()
-          / 2, document.getPageSize().getHeight()
-              / 2, 45);
+      contentunder.showTextAligned(Element.ALIGN_CENTER, "PRACTICE", x, y, 45);
       contentunder.endText();
       contentunder.restoreState();
     }
