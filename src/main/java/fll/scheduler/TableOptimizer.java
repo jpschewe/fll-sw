@@ -109,7 +109,8 @@ public class TableOptimizer {
     final Map<String, Integer> tableUse = new HashMap<>();
     for (final TeamScheduleInfo ti : this.schedule.getSchedule()) {
       for (int round = 0; round < ti.getNumberOfRounds(); ++round) {
-        final String tableColor = ti.getPerfTableColor(round);
+        final PerformanceTime performance = ti.getPerf(round);
+        final String tableColor = performance.getTable();
         int count;
         if (tableUse.containsKey(tableColor)) {
           count = tableUse.get(tableColor);

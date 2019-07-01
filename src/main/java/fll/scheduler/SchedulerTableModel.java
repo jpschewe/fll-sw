@@ -25,29 +25,28 @@ import javax.swing.table.AbstractTableModel;
 
   private final List<String> subjectiveColumns;
 
-  private static final Comparator<TeamScheduleInfo> TEAM_NUMBER_COMPARATOR = new Comparator<TeamScheduleInfo>() {
-    public int compare(final TeamScheduleInfo one,
-                       final TeamScheduleInfo two) {
-      if (one.getTeamNumber() < two.getTeamNumber()) {
-        return -1;
-      } else if (one.getTeamNumber() > two.getTeamNumber()) {
-        return 1;
-      } else {
-        return 0;
-      }
-    }
+  private static final Comparator<TeamScheduleInfo> TEAM_NUMBER_COMPARATOR = (one,
+   two) -> {
+   if (one.getTeamNumber() < two.getTeamNumber()) {
+    return -1;
+   } else if (one.getTeamNumber() > two.getTeamNumber()) {
+    return 1;
+   } else {
+    return 0;
+   }
   };
 
   public SchedulerTableModel(final TournamentSchedule schedule) {
     this.schedule = schedule;
-    this.scheduleData = new ArrayList<TeamScheduleInfo>(schedule.getSchedule());
-    this.subjectiveColumns = new ArrayList<String>(schedule.getSubjectiveStations());
+    this.scheduleData = new ArrayList<>(schedule.getSchedule());
+    this.subjectiveColumns = new ArrayList<>(schedule.getSubjectiveStations());
     Collections.sort(scheduleData, TEAM_NUMBER_COMPARATOR);
   }
 
   /**
    * @see javax.swing.table.TableModel#getColumnCount()
    */
+  @Override
   public int getColumnCount() {
     return (JUDGE_COLUMN
         + 1)
@@ -80,6 +79,7 @@ import javax.swing.table.AbstractTableModel;
   /**
    * @see javax.swing.table.TableModel#getRowCount()
    */
+  @Override
   public int getRowCount() {
     return scheduleData.size();
   }
@@ -87,6 +87,7 @@ import javax.swing.table.AbstractTableModel;
   /**
    * @see javax.swing.table.TableModel#getValueAt(int, int)
    */
+  @Override
   public Object getValueAt(final int rowIndex,
                            final int columnIndex) {
     final TeamScheduleInfo schedInfo = scheduleData.get(rowIndex);
@@ -109,15 +110,16 @@ import javax.swing.table.AbstractTableModel;
           - getFirstPerformanceColumn();
       final int round = perfColIdx
           / NUM_COLUMNS_PER_ROUND;
+      final PerformanceTime performance = schedInfo.getPerf(round);
       switch (perfColIdx
           % NUM_COLUMNS_PER_ROUND) {
       case 0:
       case 3:
-        return schedInfo.getPerfTime(round);
+        return performance.getTime();
       case 1:
-        return schedInfo.getPerfTableColor(round);
+        return performance.getTable();
       case 2:
-        return schedInfo.getPerfTableSide(round);
+        return performance.getSide();
       default:
         return null;
       }
@@ -185,7 +187,7 @@ import javax.swing.table.AbstractTableModel;
 
   /**
    * Find the index of the specified team in this model.
-   * 
+   *
    * @param teamNumber
    * @return -1 if none found
    */
