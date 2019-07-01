@@ -27,7 +27,7 @@ public final class TeamScheduleInfo implements Serializable {
   /**
    * Set a performance time. This should only be called from
    * {@link TournamentSchedule} otherwise things can get out of sync.
-   * 
+   *
    * @param idx
    * @param performance
    */
@@ -43,27 +43,6 @@ public final class TeamScheduleInfo implements Serializable {
     return perf[idx];
   }
 
-  /**
-   * @param idx zero based
-   */
-  public LocalTime getPerfTime(final int idx) {
-    return perf[idx].getTime();
-  }
-
-  /**
-   * @param idx zero based
-   */
-  public String getPerfTableColor(final int idx) {
-    return perf[idx].getTable();
-  }
-
-  /**
-   * @param idx zero based
-   */
-  public int getPerfTableSide(final int idx) {
-    return perf[idx].getSide();
-  }
-
   public TeamScheduleInfo(final int numRounds,
                           final int teamNumber) {
     this.numberOfRounds = numRounds;
@@ -73,7 +52,7 @@ public final class TeamScheduleInfo implements Serializable {
 
   /**
    * Find the performance round for the matching time.
-   * 
+   *
    * @param time
    * @return the round, -1 if cannot be found
    */
@@ -89,7 +68,8 @@ public final class TeamScheduleInfo implements Serializable {
   @Override
   public String toString() {
     return "[ScheduleInfo for "
-        + getTeamNumber() + "]";
+        + getTeamNumber()
+        + "]";
   }
 
   @Override
@@ -193,7 +173,7 @@ public final class TeamScheduleInfo implements Serializable {
 
   private final int numberOfRounds;
 
-  private HashMap<String, SubjectiveTime> subjectiveTimes = new HashMap<String, SubjectiveTime>();
+  private final HashMap<String, SubjectiveTime> subjectiveTimes = new HashMap<>();
 
   public Collection<SubjectiveTime> getSubjectiveTimes() {
     return Collections.unmodifiableCollection(subjectiveTimes.values());
@@ -209,7 +189,7 @@ public final class TeamScheduleInfo implements Serializable {
 
   /**
    * Get the subjective time by name.
-   * 
+   *
    * @param name name of a judging station
    * @return null if no time with that name found
    */
@@ -224,16 +204,37 @@ public final class TeamScheduleInfo implements Serializable {
   /**
    * Figure out which round number (0-based) this performance time is for this
    * team.
-   * 
+   *
    * @param performance the performance to find
    * @return the round number or -1 if the performance cannot be found
    */
-  public int computeRound(final PerformanceTime performance) {
+  private int computeRound(final PerformanceTime performance) {
     for (int round = 0; round < perf.length; ++round) {
       if (performance.equals(perf[round])) {
         return round;
       }
     }
     return -1;
+  }
+
+  /**
+   * Compute a display name for the specified performance round.
+   *
+   * @param performance the performance information
+   * @return the name to display, null on error
+   */
+  public String getRoundName(final PerformanceTime performance) {
+    final int roundIndex = computeRound(performance);
+    if (roundIndex < 0) {
+      return null;
+    } else {
+      if (performance.isPractice()) {
+        return String.format("Practice %d", roundIndex
+            + 1);
+      } else {
+        return String.valueOf(roundIndex
+            + 1);
+      }
+    }
   }
 }

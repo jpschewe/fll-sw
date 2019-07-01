@@ -1232,8 +1232,8 @@ public class SchedulerUI extends JFrame {
             // need to check round which round
             int round = 0;
             // using Math.min to handle extra round
-            while (!violation.getPerformance().equals(schedInfo.getPerfTime(Math.min(schedInfo.getNumberOfRounds()
-                - 1, round)))
+            while (!violation.getPerformance().equals(schedInfo.getPerf(Math.min(schedInfo.getNumberOfRounds()
+                - 1, round)).getTime())
                 && round < schedInfo.getNumberOfRounds()) {
               ++round;
               if (round > schedInfo.getNumberOfRounds()) {
