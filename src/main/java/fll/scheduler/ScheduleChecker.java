@@ -75,9 +75,7 @@ public class ScheduleChecker {
     // constraint: tournament:1
     final Map<LocalTime, Set<TeamScheduleInfo>> teamsAtTime = new HashMap<>();
     for (final TeamScheduleInfo si : schedule.getSchedule()) {
-      for (int round = 0; round < schedule.getNumberOfRounds(); ++round) {
-        final PerformanceTime performance = si.getPerf(round);
-
+      for (final PerformanceTime performance : si.getAllPerformances()) {
         final Set<TeamScheduleInfo> teams;
         if (teamsAtTime.containsKey(performance.getTime())) {
           teams = teamsAtTime.get(performance.getTime());
@@ -201,18 +199,14 @@ public class ScheduleChecker {
     checkConstraintTeam3(violations, ti);
 
     // constraint: team:4
-    for (int round = 0; round < schedule.getNumberOfRounds(); ++round) {
-      final PerformanceTime performance = ti.getPerf(round);
-
-      final String performanceName = String.valueOf(round
-          + 1);
+    for (final PerformanceTime performance : ti.getAllPerformances()) {
+      final String performanceName = ti.getRoundName(performance);
       verifyPerformanceVsSubjective(violations, ti, performanceName, performance.getTime());
     }
 
     // constraint: team:5
     final Map<String, PerformanceTime> tableSides = new HashMap<>();
-    for (int round = 0; round < schedule.getNumberOfRounds(); ++round) {
-      final PerformanceTime performance = ti.getPerf(round);
+    for (final PerformanceTime performance : ti.getAllPerformances()) {
       final TeamScheduleInfo opponent = schedule.findOpponent(ti, performance);
       if (null != opponent) {
         if (opponent.getTeamNumber() == ti.getTeamNumber()) {
@@ -247,8 +241,7 @@ public class ScheduleChecker {
 
         int opponentSide = -1;
         // figure out which round matches up
-        for (int oround = 0; oround < schedule.getNumberOfRounds(); ++oround) {
-          final PerformanceTime opponentPerformance = opponent.getPerf(oround);
+        for (final PerformanceTime opponentPerformance : opponent.getAllPerformances()) {
           if (opponentPerformance.getTime().equals(performance.getTime())) {
             opponentSide = opponentPerformance.getSide();
             break;
@@ -262,26 +255,21 @@ public class ScheduleChecker {
                                                  performance.getTime(), message));
         } else {
           if (opponentSide == performance.getSide()) {
-            final String message = String.format("Team %d and team %d are both on table %s side %d at the same time for round %d",
+            final String message = String.format("Team %d and team %d are both on table %s side %d at the same time for round %s",
                                                  ti.getTeamNumber(), opponent.getTeamNumber(), performance.getTable(),
-                                                 performance.getSide(), (round
-                                                     + 1));
+                                                 performance.getSide(), ti.getRoundName(performance));
             violations.add(new ConstraintViolation(ConstraintViolation.Type.HARD, ti.getTeamNumber(), null, null,
                                                    performance.getTime(), message));
           }
         }
 
-        for (int r = round
-            + 1; r < schedule.getNumberOfRounds(); ++r) {
-          final PerformanceTime p = ti.getPerf(r);
+        ti.getAllPerformances().stream().filter(p -> p.getTime().isAfter(performance.getTime())).forEach(p -> {
           final TeamScheduleInfo otherOpponent = schedule.findOpponent(ti, p);
           if (otherOpponent != null
               && opponent.equals(otherOpponent)) {
-            final String message = String.format("Team %d competes against %d more than once rounds: %d, %d",
-                                                 ti.getTeamNumber(), opponent.getTeamNumber(), (round
-                                                     + 1),
-                                                 (r
-                                                     + 1));
+            final String message = String.format("Team %d competes against %d more than once rounds: %s, %s",
+                                                 ti.getTeamNumber(), opponent.getTeamNumber(),
+                                                 ti.getRoundName(performance), ti.getRoundName(p));
             violations.add(new ConstraintViolation(ConstraintViolation.Type.SOFT, ti.getTeamNumber(), null, null,
                                                    performance.getTime(), message));
             violations.add(new ConstraintViolation(ConstraintViolation.Type.SOFT, ti.getTeamNumber(), null, null,
@@ -291,10 +279,10 @@ public class ScheduleChecker {
             violations.add(new ConstraintViolation(ConstraintViolation.Type.SOFT, opponent.getTeamNumber(), null, null,
                                                    p.getTime(), message));
           }
-        }
+        });
       } else {
-        final String message = String.format("Team %d has no opponent for round %d", ti.getTeamNumber(), (round
-            + 1));
+        final String message = String.format("Team %d has no opponent for round %d", ti.getTeamNumber(),
+                                             ti.getRoundName(performance));
         violations.add(new ConstraintViolation(ConstraintViolation.Type.SOFT, ti.getTeamNumber(), null, null,
                                                performance.getTime(), message));
       }
@@ -427,8 +415,7 @@ public class ScheduleChecker {
         times.add(subj.getTime());
       }
 
-      for (int round = 0; round < schedule.getNumberOfRounds(); ++round) {
-        final PerformanceTime performanceTime = si.getPerf(round);
+      for (final PerformanceTime performanceTime : si.getAllPerformances()) {
 
         final String table = performanceTime.getTable();
         final int side = performanceTime.getSide();
