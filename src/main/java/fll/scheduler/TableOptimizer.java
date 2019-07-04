@@ -562,9 +562,8 @@ public class TableOptimizer {
   private static Map<LocalTime, Set<String>> gatherTablesAtTime(final TournamentSchedule schedule) {
     final Map<LocalTime, Set<String>> tablesAtTime = new HashMap<>();
 
-    for (int round = 0; round < schedule.getNumberOfRounds(); ++round) {
-      for (final TeamScheduleInfo si : schedule.getSchedule()) {
-        final PerformanceTime perf = si.getPerf(round);
+    for (final TeamScheduleInfo si : schedule.getSchedule()) {
+    for (final PerformanceTime perf : si.getAllPerformances()) {
 
         Set<String> tables;
         if (tablesAtTime.containsKey(perf.getTime())) {
@@ -739,8 +738,7 @@ public class TableOptimizer {
     final Map<LocalTime, Integer> perfCounts = new HashMap<>();
     final Map<LocalTime, List<String>> perfTables = new HashMap<>();
     for (final TeamScheduleInfo ti : this.schedule.getSchedule()) {
-      for (int round = 0; round < ti.getNumberOfRounds(); ++round) {
-        final PerformanceTime pt = ti.getPerf(round);
+      for (final PerformanceTime pt : ti.getAllPerformances()) {
         final LocalTime time = pt.getTime();
 
         List<String> tables = perfTables.get(time);

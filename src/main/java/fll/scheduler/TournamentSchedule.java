@@ -931,9 +931,7 @@ public class TournamentSchedule implements Serializable {
         table.addCell(PdfUtils.createCell(formatTime(si.getSubjectiveTimeByName(subjectiveStation).getTime())));
       }
 
-      for (int round = 0; round < getNumberOfRounds(); ++round) {
-        final PerformanceTime perf = si.getPerf(round);
-
+      for (final PerformanceTime perf : si.getAllPerformances()) {
         table.addCell(PdfUtils.createCell(formatTime(perf.getTime())));
 
         table.addCell(PdfUtils.createCell(String.format("%s %s", perf.getTable(), perf.getSide())));
@@ -982,18 +980,19 @@ public class TournamentSchedule implements Serializable {
       para.add(Chunk.NEWLINE);
     }
 
-    for (int round = 0; round < getNumberOfRounds(); ++round) {
+    si.enumerateAllPerformances().forEachOrdered(pair -> {
+      final PerformanceTime performance = pair.getLeft();
+      final int round = pair.getRight().intValue();
       para.add(new Chunk(String.format(PERF_HEADER_FORMAT, round
           + 1)
           + ": ", TEAM_HEADER_FONT));
-      final PerformanceTime performance = si.getPerf(round);
       final LocalTime start = performance.getTime();
       final LocalTime end = start.plus(Duration.ofMinutes(params.getPerformanceMinutes()));
       para.add(new Chunk(String.format("%s - %s %s %d", formatTime(start), formatTime(end), performance.getTable(),
                                        performance.getSide()),
                          TEAM_VALUE_FONT));
       para.add(Chunk.NEWLINE);
-    }
+    });
 
     para.add(Chunk.NEWLINE);
     para.add(new Chunk("Performance rounds must start on time, and will start without you. Please ensure your team arrives at least 5 minutes ahead of scheduled time, and checks in.",
@@ -1082,9 +1081,9 @@ public class TournamentSchedule implements Serializable {
     final ScoresheetGenerator scoresheets = new ScoresheetGenerator(getNumberOfRounds()
         * _schedule.size(), description, tournamentName);
     final SortedMap<PerformanceTime, TeamScheduleInfo> performanceTimes = new TreeMap<>();
-    for (int round = 0; round < getNumberOfRounds(); ++round) {
-      for (final TeamScheduleInfo si : _schedule) {
-        performanceTimes.put(si.getPerf(round), si);
+    for (final TeamScheduleInfo si : _schedule) {
+      for (final PerformanceTime pt : si.getAllPerformances()) {
+        performanceTimes.put(pt, si);
       }
     }
 
@@ -1112,9 +1111,9 @@ public class TournamentSchedule implements Serializable {
 
   private void outputPerformanceSchedule(final Document detailedSchedules) throws DocumentException {
     final SortedMap<PerformanceTime, TeamScheduleInfo> performanceTimes = new TreeMap<>();
-    for (int round = 0; round < getNumberOfRounds(); ++round) {
-      for (final TeamScheduleInfo si : _schedule) {
-        performanceTimes.put(si.getPerf(round), si);
+    for (final TeamScheduleInfo si : _schedule) {
+      for (final PerformanceTime pt : si.getAllPerformances()) {
+        performanceTimes.put(pt, si);
       }
     }
 
@@ -1527,8 +1526,7 @@ public class TournamentSchedule implements Serializable {
 
       } // foreach subjective time
 
-      for (int i = 0; i < getNumberOfRounds(); ++i) {
-        final PerformanceTime performance = si.getPerf(i);
+      for (final PerformanceTime performance : si.getAllPerformances()) {
         if (null != performance.getTime()) {
           if (null == minPerf
               || performance.getTime().isBefore(minPerf)) {
@@ -2097,8 +2095,7 @@ public class TournamentSchedule implements Serializable {
           final LocalTime d = si.getSubjectiveTimeByName(category).getTime();
           line.add(TournamentSchedule.formatTime(d));
         }
-        for (int round = 0; round < getNumberOfRounds(); ++round) {
-          final PerformanceTime p = si.getPerf(round);
+        for (final PerformanceTime p : si.getAllPerformances()) {
           line.add(TournamentSchedule.formatTime(p.getTime()));
           line.add(p.getTable()
               + " "
@@ -2169,8 +2166,7 @@ public class TournamentSchedule implements Serializable {
           line.add(formatTime(si.getSubjectiveTimeByName(subjectiveStation).getTime()));
         }
 
-        for (int round = 0; round < getNumberOfRounds(); ++round) {
-          final PerformanceTime perf = si.getPerf(round);
+        for (final PerformanceTime perf : si.getAllPerformances()) {
 
           line.add(formatTime(perf.getTime()));
 
