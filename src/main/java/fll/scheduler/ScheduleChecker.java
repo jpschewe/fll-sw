@@ -311,45 +311,34 @@ public class ScheduleChecker {
       return;
     }
 
-    for (int round = 1; round < schedule.getNumberOfRounds(); ++round) {
-      final int prevRound = round
-          - 1;
-      final PerformanceTime performance = ti.getPerf(round);
-      final Duration perfChangetime;
-      final int prevRoundOpponentRound = schedule.findOpponentRound(ti, prevRound);
-      final int curRoundOpponentRound = schedule.findOpponentRound(ti, round);
-      if (prevRoundOpponentRound != prevRound
-          || curRoundOpponentRound != round) {
-        perfChangetime = getSpecialPerformanceChangetime();
-      } else {
-        perfChangetime = getPerformanceChangetime();
-      }
+    PerformanceTime prevPerformance = null;
+    for (final PerformanceTime performance : ti.getAllPerformances()) {
+      if (null != prevPerformance) {
 
-      final PerformanceTime prevPerformance = ti.getPerf(prevRound);
-      final LocalTime prevRoundStart = prevPerformance.getTime();
-      final LocalTime prevRoundEnd = prevRoundStart.plus(getPerformanceDuration());
-      final LocalTime roundStart = performance.getTime();
-      if (prevRoundEnd.isAfter(roundStart)) {
-        final String message = String.format("Team %d is still in performance %d when they are to start performance %d: %s - %s",
-                                             ti.getTeamNumber(), prevRound
-                                                 + 1,
-                                             round
-                                                 + 1,
-                                             TournamentSchedule.formatTime(prevPerformance.getTime()),
-                                             TournamentSchedule.formatTime(performance.getTime()));
-        violations.add(new ConstraintViolation(ConstraintViolation.Type.HARD, ti.getTeamNumber(), null, null,
-                                               performance.getTime(), message));
-      } else if (prevRoundEnd.plus(perfChangetime).isAfter(roundStart)) {
-        final String message = String.format("Team %d doesn't have enough time (%s) between performance %d and performance %d: %s - %s",
-                                             ti.getTeamNumber(), perfChangetime.toString(), prevRound
-                                                 + 1,
-                                             round
-                                                 + 1,
-                                             TournamentSchedule.formatTime(prevPerformance.getTime()),
-                                             TournamentSchedule.formatTime(performance.getTime()));
-        violations.add(new ConstraintViolation(ConstraintViolation.Type.HARD, ti.getTeamNumber(), null, null,
-                                               performance.getTime(), message));
+        final Duration perfChangetime = getPerformanceChangetime();
+
+        final LocalTime prevRoundStart = prevPerformance.getTime();
+        final LocalTime prevRoundEnd = prevRoundStart.plus(getPerformanceDuration());
+        final LocalTime roundStart = performance.getTime();
+        if (prevRoundEnd.isAfter(roundStart)) {
+          final String message = String.format("Team %d is still in performance %s when they are to start performance %s: %s - %s", //
+                                               ti.getTeamNumber(), ti.getRoundName(prevPerformance),
+                                               ti.getRoundName(performance),
+                                               TournamentSchedule.formatTime(prevPerformance.getTime()),
+                                               TournamentSchedule.formatTime(performance.getTime()));
+          violations.add(new ConstraintViolation(ConstraintViolation.Type.HARD, ti.getTeamNumber(), null, null,
+                                                 performance.getTime(), message));
+        } else if (prevRoundEnd.plus(perfChangetime).isAfter(roundStart)) {
+          final String message = String.format("Team %d doesn't have enough time (%s) between performance %s and performance %s: %s - %s", //
+                                               ti.getTeamNumber(), ti.getRoundName(prevPerformance),
+                                               ti.getRoundName(performance), perfChangetime.toString(),
+                                               TournamentSchedule.formatTime(prevPerformance.getTime()),
+                                               TournamentSchedule.formatTime(performance.getTime()));
+          violations.add(new ConstraintViolation(ConstraintViolation.Type.HARD, ti.getTeamNumber(), null, null,
+                                                 performance.getTime(), message));
+        }
       }
+      prevPerformance = performance;
     }
   }
 
