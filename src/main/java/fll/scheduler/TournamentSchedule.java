@@ -433,7 +433,7 @@ public class TournamentSchedule implements Serializable {
         final int teamNumber = sched.getInt(1);
         final String judgingStation = sched.getString(2);
 
-        final TeamScheduleInfo ti = new TeamScheduleInfo(this.numRounds, teamNumber);
+        final TeamScheduleInfo ti = new TeamScheduleInfo(teamNumber);
         ti.setJudgingGroup(judgingStation);
 
         getSubjective.setInt(2, teamNumber);
@@ -472,10 +472,8 @@ public class TournamentSchedule implements Serializable {
                 + " team: "
                 + teamNumber);
           }
-          final int roundNumber = roundIndex
-              + 1;
-          final PerformanceTime performance = new PerformanceTime(perfTime, tableColor, tableSide, roundNumber, false);
-          ti.setPerf(roundIndex, performance);
+          final PerformanceTime performance = new PerformanceTime(perfTime, tableColor, tableSide, false);
+          ti.addPerformance(performance);
 
           prevRoundIndex = roundIndex;
         }
@@ -744,11 +742,11 @@ public class TournamentSchedule implements Serializable {
     addToSchedule(ti);
 
     // keep track of some meta information
-    for (int round = 0; round < getNumberOfRounds(); ++round) {
-      final PerformanceTime performance = ti.getPerf(round);
+    ti.allPerformances().forEach(performance -> {
       _tableColors.add(performance.getTable());
-      addToMatches(ti, round);
-    }
+      addToMatches(ti, performance);
+    });
+
     _awardGroups.add(ti.getAwardGroup());
     _judgingGroups.add(ti.getJudgingGroup());
   }
@@ -1542,7 +1540,7 @@ public class TournamentSchedule implements Serializable {
           }
         }
 
-      }
+      } // foreach subjective time
 
       for (int i = 0; i < getNumberOfRounds(); ++i) {
         final PerformanceTime performance = si.getPerf(i);
@@ -1559,7 +1557,7 @@ public class TournamentSchedule implements Serializable {
         }
       }
 
-    }
+    } // foreach team
 
     // print out the general schedule
     final Formatter output = new Formatter();
@@ -1591,12 +1589,11 @@ public class TournamentSchedule implements Serializable {
    * matches.
    *
    * @param ti the schedule info
-   * @param round the index of the round we care about
+   * @param performance the performance to add
    */
   private void addToMatches(final TeamScheduleInfo ti,
-                            final int round) {
+                            final PerformanceTime performance) {
     final Map<String, List<TeamScheduleInfo>> timeMatches;
-    final PerformanceTime performance = ti.getPerf(round);
     if (_matches.containsKey(performance.getTime())) {
       timeMatches = _matches.get(performance.getTime());
     } else {
@@ -1616,18 +1613,17 @@ public class TournamentSchedule implements Serializable {
   }
 
   private void removeFromMatches(final TeamScheduleInfo ti,
-                                 final int round) {
-    final PerformanceTime performance = ti.getPerf(round);
+                                 final PerformanceTime performance) {
 
     if (!_matches.containsKey(performance.getTime())) {
       throw new IllegalArgumentException("Cannot find time info for "
-          + round
+          + performance.getTime()
           + " in matches");
     }
     final Map<String, List<TeamScheduleInfo>> timeMatches = _matches.get(performance.getTime());
     if (!timeMatches.containsKey(performance.getTable())) {
       throw new IllegalArgumentException("Cannot find table info for "
-          + round
+          + performance.getTime()
           + " in matches");
     }
     final List<TeamScheduleInfo> tableMatches = timeMatches.get(performance.getTable());
@@ -1635,29 +1631,7 @@ public class TournamentSchedule implements Serializable {
       throw new IllegalArgumentException("Cannot find team "
           + ti.getTeamNumber()
           + " in the matches for round "
-          + round);
-    }
-  }
-
-  /**
-   * Find the round of the opponent for a given team in a given round.
-   *
-   * @param ti
-   * @param round
-   * @return the round number or -1 if no opponent
-   */
-  public int findOpponentRound(final TeamScheduleInfo ti,
-                               final int round) {
-    final PerformanceTime performance = ti.getPerf(round);
-    final List<TeamScheduleInfo> tableMatches = _matches.get(performance.getTime()).get(performance.getTable());
-    if (tableMatches.size() > 1) {
-      if (tableMatches.get(0).equals(ti)) {
-        return tableMatches.get(1).findRoundFortime(performance.getTime());
-      } else {
-        return tableMatches.get(0).findRoundFortime(performance.getTime());
-      }
-    } else {
-      return -1;
+          + performance.getTime());
     }
   }
 
@@ -1714,7 +1688,7 @@ public class TournamentSchedule implements Serializable {
       }
 
       final int teamNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue();
-      final TeamScheduleInfo ti = new TeamScheduleInfo(getNumberOfRounds(), teamNumber);
+      final TeamScheduleInfo ti = new TeamScheduleInfo(teamNumber);
       ti.setTeamName(line[ci.getTeamNameColumn()]);
       ti.setOrganization(line[ci.getOrganizationColumn()]);
       ti.setDivision(line[ci.getDivisionColumn()]);
@@ -1751,9 +1725,9 @@ public class TournamentSchedule implements Serializable {
         final int tableSide = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(tablePieces[1]).intValue();
         final int roundNumber = perfIndex
             + 1;
-        final PerformanceTime performance = new PerformanceTime(perf1Time, tableName, tableSide, roundNumber, false);
+        final PerformanceTime performance = new PerformanceTime(perf1Time, tableName, tableSide, false);
 
-        ti.setPerf(perfIndex, performance);
+        ti.addPerformance(performance);
         if (performance.getSide() > 2
             || performance.getSide() < 1) {
           final String message = "There are only two sides to the table, number must be 1 or 2. team: "
@@ -2078,30 +2052,26 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
-   * @param team the team to rescheduled
+   * @param si the team to rescheduled
    * @param oldTime the old time that the team was scheduled at
    * @param perfTime the new performance information
    */
-  public void reassignTable(final int team,
+  public void reassignTable(final TeamScheduleInfo si,
                             final LocalTime oldTime,
                             final PerformanceTime perfTime) {
-    final TeamScheduleInfo si = findScheduleInfo(team);
-    if (null == si) {
-      throw new IllegalArgumentException("Cannot find team "
-          + team
-          + " in the schedule");
-    }
-    final int round = si.findRoundFortime(oldTime);
-    if (-1 == round) {
+    final PerformanceTime oldPerformanceTime = si.getPerformanceAtTime(oldTime);
+    if (null == oldPerformanceTime) {
       throw new IllegalArgumentException("Team "
-          + team
+          + si.getTeamNumber()
           + " does not have a performance at "
           + oldTime);
     }
 
-    removeFromMatches(si, round);
-    si.setPerf(round, perfTime);
-    addToMatches(si, round);
+    removeFromMatches(si, oldPerformanceTime);
+    si.removePerformance(oldPerformanceTime);
+
+    si.addPerformance(perfTime);
+    addToMatches(si, perfTime);
   }
 
   /**

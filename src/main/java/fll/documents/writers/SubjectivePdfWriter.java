@@ -11,8 +11,6 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-
-
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -33,7 +31,6 @@ import fll.documents.elements.SheetElement;
 import fll.documents.elements.TableElement;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
-
 import fll.util.PdfUtils;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
@@ -131,7 +128,7 @@ public class SubjectivePdfWriter {
 
   /**
    * Write out a subjective sheet for the specified team.
-   * 
+   *
    * @param doc where to write to
    * @param teamInfo the team information to use when writing
    * @param font the font to use for comments and the rubric
@@ -267,13 +264,13 @@ public class SubjectivePdfWriter {
       doc.add(pageHeaderTable);
       doc.add(directions);
       doc.add(columnTitlesTable);
-    } catch (DocumentException de) {
+    } catch (final DocumentException de) {
       LOGGER.error("Unable to write out the document.", de);
     }
   }
 
   public void writeEndOfPageRow(final Document doc) throws DocumentException {
-    PdfPTable closingTable = new PdfPTable(1);
+    final PdfPTable closingTable = new PdfPTable(1);
 
     closingTable.setWidthPercentage(100f);
     final StringBuilder strengths = new StringBuilder();
@@ -321,7 +318,7 @@ public class SubjectivePdfWriter {
   }
 
   public PdfPTable createStandardRubricTable() throws DocumentException {
-    PdfPTable table = new PdfPTable(6);
+    final PdfPTable table = new PdfPTable(6);
     table.setWidths(colWidths);
     table.setWidthPercentage(100f);
     return table;
@@ -333,7 +330,7 @@ public class SubjectivePdfWriter {
     PdfPCell commentLabel = null;
     PdfPCell emptySpace = null;
 
-    Font font = new Font(baseFont);
+    final Font font = new Font(baseFont);
     font.setStyle(Font.ITALIC);
     // This is the 'Comments' section at the bottom of every table for the judge
     // to write in
@@ -419,7 +416,7 @@ public class SubjectivePdfWriter {
                               final Font f,
                               final int borders,
                               final BaseColor color) {
-    PdfPCell result = createCell(text, f, borders);
+    final PdfPCell result = createCell(text, f, borders);
     result.setBackgroundColor(color);
     return result;
   }
@@ -428,7 +425,7 @@ public class SubjectivePdfWriter {
                               final Font f,
                               final int borders,
                               final int alignment) {
-    PdfPCell result = createCell(text, f, borders);
+    final PdfPCell result = createCell(text, f, borders);
     result.setHorizontalAlignment(alignment);
     return result;
   }
@@ -510,7 +507,7 @@ public class SubjectivePdfWriter {
                                                          @Nonnull final SheetElement sheetElement)
       throws MalformedURLException, IOException, DocumentException {
 
-    final TeamScheduleInfo teamInfo = new TeamScheduleInfo(1, 1);
+    final TeamScheduleInfo teamInfo = new TeamScheduleInfo(1);
     teamInfo.setDivision("dummy");
     teamInfo.setJudgingGroup("Dummy");
     teamInfo.setOrganization("Dummy");
@@ -520,7 +517,7 @@ public class SubjectivePdfWriter {
       for (int pointSize = 12; pointSize >= 6; --pointSize) {
         final Font font = new Font(Font.FontFamily.HELVETICA, pointSize);
 
-        com.itextpdf.text.Document pdf = SubjectivePdfWriter.createStandardDocument();
+        final com.itextpdf.text.Document pdf = SubjectivePdfWriter.createStandardDocument();
 
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -548,7 +545,7 @@ public class SubjectivePdfWriter {
 
   /**
    * Create the document
-   * 
+   *
    * @param stream where to write the document
    * @param sheetElement describes the category to write
    * @param schedulerColumn used to determine the schedule information to output
@@ -571,7 +568,7 @@ public class SubjectivePdfWriter {
     final Font font = parameters.getOne();
     final int commentHeight = parameters.getTwo();
 
-    com.itextpdf.text.Document pdf = SubjectivePdfWriter.createStandardDocument();
+    final com.itextpdf.text.Document pdf = SubjectivePdfWriter.createStandardDocument();
 
     PdfWriter.getInstance(pdf, stream);
 

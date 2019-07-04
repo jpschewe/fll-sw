@@ -18,18 +18,15 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
    * @param time see {@link #getTime()}
    * @param table see {@link #getTable()}
    * @param side see {@link #getTable()}
-   * @param round see {@link #getRound()}
    * @param practice see {@link #isPractice()}
    */
   public PerformanceTime(final LocalTime time,
                          final String table,
                          final int side,
-                         final int round,
                          final boolean practice) {
     this.table = table;
     this.side = side;
     this.time = time;
-    this.round = round;
     this.practice = practice;
   }
 
@@ -40,18 +37,6 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
    */
   public boolean isPractice() {
     return practice;
-  }
-
-  private final int round;
-
-  /**
-   * The round number is based on {@link #isPractice()}. There are 2 round 1s, one
-   * for practice and one for regular match play.
-   *
-   * @return 1 based number for displaying round information.
-   */
-  public int getRound() {
-    return round;
   }
 
   private final String table;
