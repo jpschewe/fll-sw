@@ -45,19 +45,10 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.annotation.Nonnull;
-import javax.xml.XMLConstants;
-import javax.xml.transform.Source;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
@@ -90,7 +81,6 @@ import fll.xml.ChallengeDescription;
 import fll.xml.ScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
 import net.mtu.eggplant.util.sql.SQLFunctions;
-import net.mtu.eggplant.xml.XMLUtils;
 
 /**
  * Tournament schedule. Can parse the schedule from a spreadsheet or CSV file.
@@ -154,11 +144,6 @@ public class TournamentSchedule implements Serializable {
   public int getNumberOfRounds() {
     return numRounds;
   }
-
-  /**
-   * XML format for time type.
-   */
-  private static final DateTimeFormatter XML_TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
 
   /**
    * Always output without 24-hour time and without AM/PM.
@@ -2072,73 +2057,6 @@ public class TournamentSchedule implements Serializable {
 
     si.addPerformance(perfTime);
     addToMatches(si, perfTime);
-  }
-
-  /**
-   * Convert the schedule to an XML document that conforms to
-   * fll/resources/schedule.xsd. The document that is returned has already been
-   * run through {@link #validateXML(org.w3c.dom.Document)}.
-   */
-  public org.w3c.dom.Document createXML() {
-    final org.w3c.dom.Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
-
-    final Element top = document.createElementNS(null, "schedule");
-    document.appendChild(top);
-
-    for (final TeamScheduleInfo si : getSchedule()) {
-      final Element team = document.createElementNS(null, "team");
-      top.appendChild(team);
-      team.setAttributeNS(null, "number", String.valueOf(si.getTeamNumber()));
-      team.setAttributeNS(null, "judging_station", si.getJudgingGroup());
-
-      for (final String subjName : si.getKnownSubjectiveStations()) {
-        final LocalTime time = si.getSubjectiveTimeByName(subjName).getTime();
-        final Element subjective = document.createElementNS(null, "subjective");
-        team.appendChild(subjective);
-        subjective.setAttributeNS(null, "name", subjName);
-        subjective.setAttributeNS(null, "time", XML_TIME_FORMAT.format(time));
-      }
-
-      for (int round = 0; round < si.getNumberOfRounds(); ++round) {
-        final PerformanceTime perfTime = si.getPerf(round);
-        final Element perf = document.createElementNS(null, "performance");
-        team.appendChild(perf);
-        perf.setAttributeNS(null, "round", String.valueOf(round
-            + 1));
-        perf.setAttributeNS(null, "table_color", perfTime.getTable());
-        perf.setAttributeNS(null, "table_side", String.valueOf(perfTime.getSide()));
-        perf.setAttributeNS(null, "time", XML_TIME_FORMAT.format(perfTime.getTime()));
-      }
-    }
-
-    try {
-      validateXML(document);
-    } catch (final SAXException e) {
-      throw new FLLInternalException("Schedule XML document is invalid", e);
-    }
-
-    return document;
-  }
-
-  /**
-   * Validate the schedule XML document.
-   *
-   * @throws SAXException on an error
-   */
-  public static void validateXML(final org.w3c.dom.Document document) throws SAXException {
-    try {
-      final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-
-      final SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-      final Source schemaFile = new StreamSource(classLoader.getResourceAsStream("fll/resources/schedule.xsd"));
-      final Schema schema = factory.newSchema(schemaFile);
-
-      final Validator validator = schema.newValidator();
-      validator.validate(new DOMSource(document));
-    } catch (final IOException e) {
-      throw new RuntimeException("Internal error, should never get IOException here", e);
-    }
-
   }
 
   /**
