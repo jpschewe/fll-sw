@@ -80,7 +80,6 @@ import fll.web.playoff.ScoresheetGenerator;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Tournament schedule. Can parse the schedule from a spreadsheet or CSV file.
@@ -378,137 +377,99 @@ public class TournamentSchedule implements Serializable {
     final Tournament currentTournament = Tournament.findTournamentByID(connection, tournamentID);
     name = currentTournament.getName();
 
-    PreparedStatement getSched = null;
-    ResultSet sched = null;
-    PreparedStatement getPerfRounds = null;
-    ResultSet perfRounds = null;
-    PreparedStatement getNumRounds = null;
-    ResultSet numRounds = null;
-    PreparedStatement getSubjective = null;
-    ResultSet subjective = null;
-    PreparedStatement getSubjectiveStations = null;
-    ResultSet stations = null;
-    try {
-      getSubjectiveStations = connection.prepareStatement("SELECT DISTINCT name from sched_subjective WHERE tournament = ?");
+    try (
+        PreparedStatement getSubjectiveStations = connection.prepareStatement("SELECT DISTINCT name from sched_subjective WHERE tournament = ?")) {
       getSubjectiveStations.setInt(1, tournamentID);
-      stations = getSubjectiveStations.executeQuery();
-      while (stations.next()) {
-        final String name = stations.getString(1);
-        subjectiveStations.add(name);
+      try (ResultSet stations = getSubjectiveStations.executeQuery()) {
+        while (stations.next()) {
+          final String name = stations.getString(1);
+          subjectiveStations.add(name);
+        }
       }
-      SQLFunctions.close(stations);
-      stations = null;
-      SQLFunctions.close(getSubjectiveStations);
-      getSubjectiveStations = null;
+    }
 
-      getNumRounds = connection.prepareStatement("SELECT MAX(round) FROM sched_perf_rounds WHERE tournament = ?");
+    // FIXME!!!!
+    try (
+        PreparedStatement getNumRounds = connection.prepareStatement("SELECT MAX(round) FROM sched_perf_rounds WHERE tournament = ?")) {
       getNumRounds.setInt(1, tournamentID);
-      numRounds = getNumRounds.executeQuery();
-      if (numRounds.next()) {
-        this.numRounds = numRounds.getInt(1)
-            + 1;
-      } else {
-        throw new RuntimeException("No rounds found for tournament: "
-            + tournamentID);
+      try (ResultSet numRounds = getNumRounds.executeQuery()) {
+        if (numRounds.next()) {
+          this.numRounds = numRounds.getInt(1)
+              + 1;
+        } else {
+          throw new RuntimeException("No rounds found for tournament: "
+              + tournamentID);
+        }
       }
+    }
 
-      getSched = connection.prepareStatement("SELECT team_number, judging_station"
-          + " FROM schedule"//
-          + " WHERE tournament = ?");
+    try (PreparedStatement getSched = connection.prepareStatement("SELECT team_number, judging_station"
+        + " FROM schedule"//
+        + " WHERE tournament = ?");
+
+        PreparedStatement getPerfRounds = connection.prepareStatement("SELECT perf_time, table_color, table_side, practice" //
+            + " FROM sched_perf_rounds" //
+            + " WHERE tournament = ? AND team_number = ?");
+
+        PreparedStatement getSubjective = connection.prepareStatement("SELECT name, subj_time" //
+            + " FROM sched_subjective" //
+            + " WHERE tournament = ? AND team_number = ?")) {
+
       getSched.setInt(1, tournamentID);
-
-      getPerfRounds = connection.prepareStatement("SELECT round, perf_time, table_color, table_side" //
-          + " FROM sched_perf_rounds" //
-          + " WHERE tournament = ? AND team_number = ?" //
-          + " ORDER BY round ASC");
       getPerfRounds.setInt(1, tournamentID);
 
-      getSubjective = connection.prepareStatement("SELECT name, subj_time" //
-          + " FROM sched_subjective" //
-          + " WHERE tournament = ? AND team_number = ?");
       getSubjective.setInt(1, tournamentID);
 
-      sched = getSched.executeQuery();
-      while (sched.next()) {
-        final int teamNumber = sched.getInt(1);
-        final String judgingStation = sched.getString(2);
+      try (ResultSet sched = getSched.executeQuery()) {
+        while (sched.next()) {
+          final int teamNumber = sched.getInt(1);
+          final String judgingStation = sched.getString(2);
 
-        final TeamScheduleInfo ti = new TeamScheduleInfo(teamNumber);
-        ti.setJudgingGroup(judgingStation);
+          final TeamScheduleInfo ti = new TeamScheduleInfo(teamNumber);
+          ti.setJudgingGroup(judgingStation);
 
-        getSubjective.setInt(2, teamNumber);
-        subjective = getSubjective.executeQuery();
-        while (subjective.next()) {
-          final String name = subjective.getString(1);
-          final Time subjTime = subjective.getTime(2);
-          ti.addSubjectiveTime(new SubjectiveTime(name, subjTime.toLocalTime()));
-        }
-
-        getPerfRounds.setInt(2, teamNumber);
-        perfRounds = getPerfRounds.executeQuery();
-        int prevRoundIndex = -1;
-        while (perfRounds.next()) {
-          final int roundIndex = perfRounds.getInt(1);
-          if (roundIndex != prevRoundIndex
-              + 1) {
-            throw new RuntimeException("Rounds must be consecutive and start at 1. Tournament: "
-                + tournamentID
-                + " team: "
-                + teamNumber
-                + " round: "
-                + (roundIndex
-                    + 1)
-                + " prevRound: "
-                + (prevRoundIndex
-                    + 1));
+          getSubjective.setInt(2, teamNumber);
+          try (ResultSet subjective = getSubjective.executeQuery()) {
+            while (subjective.next()) {
+              final String name = subjective.getString(1);
+              final Time subjTime = subjective.getTime(2);
+              ti.addSubjectiveTime(new SubjectiveTime(name, subjTime.toLocalTime()));
+            }
           }
-          final LocalTime perfTime = perfRounds.getTime(2).toLocalTime();
-          final String tableColor = perfRounds.getString(3);
-          final int tableSide = perfRounds.getInt(4);
-          if (tableSide != 1
-              && tableSide != 2) {
-            throw new RuntimeException("Tables sides must be 1 or 2. Tournament: "
-                + tournamentID
-                + " team: "
-                + teamNumber);
-          }
-          final PerformanceTime performance = new PerformanceTime(perfTime, tableColor, tableSide, false);
-          ti.addPerformance(performance);
 
-          prevRoundIndex = roundIndex;
-        }
-        final String eventDivision = Queries.getEventDivision(connection, teamNumber, tournamentID);
-        ti.setDivision(eventDivision);
+          getPerfRounds.setInt(2, teamNumber);
+          try (ResultSet perfRounds = getPerfRounds.executeQuery()) {
+            while (perfRounds.next()) {
+              final LocalTime perfTime = perfRounds.getTime(1).toLocalTime();
+              final String tableColor = perfRounds.getString(2);
+              final int tableSide = perfRounds.getInt(3);
+              if (tableSide != 1
+                  && tableSide != 2) {
+                throw new RuntimeException("Tables sides must be 1 or 2. Tournament: "
+                    + tournamentID
+                    + " team: "
+                    + teamNumber);
+              }
+              final boolean practice = perfRounds.getBoolean(4);
+              final PerformanceTime performance = new PerformanceTime(perfTime, tableColor, tableSide, practice);
+              ti.addPerformance(performance);
+            } // foreach performance round
+          } // allocate performance ResultSet
 
-        final Team team = Team.getTeamFromDatabase(connection, teamNumber);
-        ti.setOrganization(team.getOrganization());
-        ti.setTeamName(team.getTeamName());
+          final String eventDivision = Queries.getEventDivision(connection, teamNumber, tournamentID);
+          ti.setDivision(eventDivision);
 
-        cacheTeamScheduleInformation(ti);
-      }
+          final Team team = Team.getTeamFromDatabase(connection, teamNumber);
+          ti.setOrganization(team.getOrganization());
+          ti.setTeamName(team.getTeamName());
 
-    } finally {
-      SQLFunctions.close(stations);
-      stations = null;
-      SQLFunctions.close(getSubjectiveStations);
-      getSubjectiveStations = null;
-      SQLFunctions.close(sched);
-      sched = null;
-      SQLFunctions.close(getSched);
-      getSched = null;
-      SQLFunctions.close(perfRounds);
-      perfRounds = null;
-      SQLFunctions.close(getPerfRounds);
-      getPerfRounds = null;
-      SQLFunctions.close(numRounds);
-      numRounds = null;
-      SQLFunctions.close(getNumRounds);
-      getNumRounds = null;
-      SQLFunctions.close(subjective);
-      subjective = null;
-      SQLFunctions.close(getSubjective);
-      getSubjective = null;
-    }
+          cacheTeamScheduleInformation(ti);
+        } // foreach sched result
+
+      } // allocate sched ResultSet
+
+    } // allocate prepared statements
+
   }
 
   /**
@@ -1090,11 +1051,9 @@ public class TournamentSchedule implements Serializable {
       para.add(Chunk.NEWLINE);
     }
 
-    si.enumerateAllPerformances().forEachOrdered(pair -> {
-      final PerformanceTime performance = pair.getLeft();
-      final int round = pair.getRight().intValue();
-      para.add(new Chunk(String.format(PERF_HEADER_FORMAT, round
-          + 1)
+    for (final PerformanceTime performance : si.getAllPerformances()) {
+      final String roundName = si.getRoundName(performance);
+      para.add(new Chunk(roundName
           + ": ", TEAM_HEADER_FONT));
       final LocalTime start = performance.getTime();
       final LocalTime end = start.plus(Duration.ofMinutes(params.getPerformanceMinutes()));
@@ -1102,7 +1061,7 @@ public class TournamentSchedule implements Serializable {
                                        performance.getSide()),
                          TEAM_VALUE_FONT));
       para.add(Chunk.NEWLINE);
-    });
+    }
 
     para.add(Chunk.NEWLINE);
     para.add(new Chunk("Performance rounds must start on time, and will start without you. Please ensure your team arrives at least 5 minutes ahead of scheduled time, and checks in.",
@@ -1885,23 +1844,17 @@ public class TournamentSchedule implements Serializable {
   public static boolean scheduleExistsInDatabase(final Connection connection,
                                                  final int tournamentID)
       throws SQLException {
-    ResultSet rs = null;
-    PreparedStatement prep = null;
-    try {
-      prep = connection.prepareStatement("SELECT COUNT(team_number) FROM schedule where tournament = ?");
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT COUNT(team_number) FROM schedule where tournament = ?")) {
       prep.setInt(1, tournamentID);
-      rs = prep.executeQuery();
-      if (rs.next()) {
-        return rs.getInt(1) > 0;
-      } else {
-        return false;
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      rs = null;
-      SQLFunctions.close(prep);
-      prep = null;
-    }
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          return rs.getInt(1) > 0;
+        } else {
+          return false;
+        }
+      } // ResultSet
+    } // PreparedStatement
   }
 
   /**
@@ -1913,40 +1866,39 @@ public class TournamentSchedule implements Serializable {
   public void storeSchedule(final Connection connection,
                             final int tournamentID)
       throws SQLException {
-    PreparedStatement deletePerfRounds = null;
-    PreparedStatement deleteSchedule = null;
-    PreparedStatement deleteSubjective = null;
-    PreparedStatement insertSchedule = null;
-    PreparedStatement insertPerfRounds = null;
-    PreparedStatement insertSubjective = null;
-    try {
-      // delete previous tournament schedule
-      deletePerfRounds = connection.prepareStatement("DELETE FROM sched_perf_rounds WHERE tournament = ?");
+    // delete previous tournament schedule
+    try (
+        PreparedStatement deletePerfRounds = connection.prepareStatement("DELETE FROM sched_perf_rounds WHERE tournament = ?")) {
       deletePerfRounds.setInt(1, tournamentID);
       deletePerfRounds.executeUpdate();
+    }
 
-      deleteSubjective = connection.prepareStatement("DELETE FROM sched_subjective WHERE tournament = ?");
+    try (
+        PreparedStatement deleteSubjective = connection.prepareStatement("DELETE FROM sched_subjective WHERE tournament = ?")) {
       deleteSubjective.setInt(1, tournamentID);
       deleteSubjective.executeUpdate();
+    }
 
-      deleteSchedule = connection.prepareStatement("DELETE FROM schedule WHERE tournament = ?");
+    try (PreparedStatement deleteSchedule = connection.prepareStatement("DELETE FROM schedule WHERE tournament = ?")) {
       deleteSchedule.setInt(1, tournamentID);
       deleteSchedule.executeUpdate();
+    }
 
-      // insert new tournament schedule
-      insertSchedule = connection.prepareStatement("INSERT INTO schedule"//
-          + " (tournament, team_number, judging_station)"//
-          + " VALUES(?, ?, ?)");
+    // insert new tournament schedule
+    try (PreparedStatement insertSchedule = connection.prepareStatement("INSERT INTO schedule"//
+        + " (tournament, team_number, judging_station)"//
+        + " VALUES(?, ?, ?)");
+        PreparedStatement insertPerfRounds = connection.prepareStatement("INSERT INTO sched_perf_rounds"//
+            + " (tournament, team_number, practice, perf_time, table_color, table_side)"//
+            + " VALUES(?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertSubjective = connection.prepareStatement("INSERT INTO sched_subjective" //
+            + " (tournament, team_number, name, subj_time)" //
+            + " VALUES(?, ?, ?, ?)")) {
+
       insertSchedule.setInt(1, tournamentID);
 
-      insertPerfRounds = connection.prepareStatement("INSERT INTO sched_perf_rounds"//
-          + " (tournament, team_number, round, perf_time, table_color, table_side)"//
-          + " VALUES(?, ?, ?, ?, ?, ?)");
       insertPerfRounds.setInt(1, tournamentID);
 
-      insertSubjective = connection.prepareStatement("INSERT INTO sched_subjective" //
-          + " (tournament, team_number, name, subj_time)" //
-          + " VALUES(?, ?, ?, ?)");
       insertSubjective.setInt(1, tournamentID);
 
       for (final TeamScheduleInfo si : getSchedule()) {
@@ -1955,9 +1907,8 @@ public class TournamentSchedule implements Serializable {
         insertSchedule.executeUpdate();
 
         insertPerfRounds.setInt(2, si.getTeamNumber());
-        for (int round = 0; round < getNumberOfRounds(); ++round) {
-          insertPerfRounds.setInt(3, round);
-          final PerformanceTime performance = si.getPerf(round);
+        for (final PerformanceTime performance : si.getAllPerformances()) {
+          insertPerfRounds.setBoolean(3, performance.isPractice());
           insertPerfRounds.setTime(4, Time.valueOf(performance.getTime()));
           insertPerfRounds.setString(5, performance.getTable());
           insertPerfRounds.setInt(6, performance.getSide());
@@ -1970,22 +1921,9 @@ public class TournamentSchedule implements Serializable {
           insertSubjective.setTime(4, Time.valueOf(subjectiveTime.getTime()));
           insertSubjective.executeUpdate();
         }
-      }
-
-    } finally {
-      SQLFunctions.close(deletePerfRounds);
-      deletePerfRounds = null;
-      SQLFunctions.close(deleteSchedule);
-      deleteSchedule = null;
-      SQLFunctions.close(deleteSubjective);
-      deleteSubjective = null;
-      SQLFunctions.close(insertSchedule);
-      insertSchedule = null;
-      SQLFunctions.close(insertPerfRounds);
-      insertPerfRounds = null;
-      SQLFunctions.close(insertSubjective);
-      insertSubjective = null;
+      } // foreach team
     }
+
   }
 
   /**

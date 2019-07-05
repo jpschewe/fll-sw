@@ -613,6 +613,11 @@ public final class ImportDB {
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 18) {
+      upgrade17To18(connection);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < GenerateDB.DATABASE_VERSION) {
       throw new RuntimeException("Internal error, database version not updated to current instead was: "
           + dbVersion);
@@ -795,6 +800,20 @@ public final class ImportDB {
 
     TournamentParameters.setDefaultRunningHeadToHead(connection, TournamentParameters.RUNNING_HEAD_2_HEAD_DEFAULT);
     setDBVersion(connection, 17);
+  }
+
+  private static void upgrade17To18(final Connection connection) throws SQLException {
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Upgrading database from 17 to 18");
+    }
+
+    try (Statement stmt = connection.createStatement()) {
+      stmt.executeUpdate("ALTER TABLE sched_perf_rounds ADD COLUMN practice BOOLEAN DEFAULT FALSE NOT NULL");
+      stmt.executeUpdate("ALTER TABLE sched_perf_rounds DROP CONSTRAINT sched_perf_rounds_pk");
+      stmt.executeUpdate("ALTER TABLE sched_perf_rounds ADD CONSTRAINT sched_perf_rounds_pk PRIMARY KEY  (tournament, team_number, perf_time)");
+    }
+
+    setDBVersion(connection, 18);
   }
 
   /**
@@ -1393,11 +1412,11 @@ public final class ImportDB {
       SQLFunctions.close(destPrep);
       destPrep = null;
 
-      sourcePrep = sourceConnection.prepareStatement("SELECT team_number, round, perf_time, table_color, table_side" //
+      sourcePrep = sourceConnection.prepareStatement("SELECT team_number, practice, perf_time, table_color, table_side" //
           + " FROM sched_perf_rounds WHERE tournament=?");
       sourcePrep.setInt(1, sourceTournamentID);
       destPrep = destinationConnection.prepareStatement("INSERT INTO sched_perf_rounds" //
-          + " (tournament, team_number, round, perf_time, table_color, table_side)" //
+          + " (tournament, team_number, practice, perf_time, table_color, table_side)" //
           + " VALUES (?, ?, ?, ?, ?, ?)");
       destPrep.setInt(1, destTournamentID);
       sourceRS = sourcePrep.executeQuery();

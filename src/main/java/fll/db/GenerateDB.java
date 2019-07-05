@@ -15,14 +15,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-
 import org.w3c.dom.Document;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
-
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
@@ -38,7 +36,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 17;
+  public static final int DATABASE_VERSION = 18;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -63,7 +61,7 @@ public final class GenerateDB {
   /**
    * Generate a completely new DB from document. This also stores the document
    * in the database for later use.
-   * 
+   *
    * @param document and XML document that describes a tournament
    * @param connection connection to the database to create the tables in
    */
@@ -401,7 +399,7 @@ public final class GenerateDB {
 
   /**
    * Create finalist schedule tables.
-   * 
+   *
    * @param connection
    * @param forceRebuild
    * @param tables
@@ -743,7 +741,7 @@ public final class GenerateDB {
 
   /**
    * Generate the definition of a column for the given goal element.
-   * 
+   *
    * @param goalElement element that represents the goal
    * @return the column definition
    */
@@ -790,7 +788,7 @@ public final class GenerateDB {
 
   /**
    * Create tables for schedule data
-   * 
+   *
    * @param connection
    * @param createConstraints if false, don't create foreign key constraints
    * @throws SQLException
@@ -821,11 +819,11 @@ public final class GenerateDB {
       perfRoundsSql.append("CREATE TABLE sched_perf_rounds (");
       perfRoundsSql.append("  tournament INTEGER NOT NULL");
       perfRoundsSql.append(" ,team_number INTEGER NOT NULL");
-      perfRoundsSql.append(" ,round INTEGER NOT NULL");
       perfRoundsSql.append(" ,perf_time TIME NOT NULL");
       perfRoundsSql.append(" ,table_color LONGVARCHAR NOT NULL");
       perfRoundsSql.append(" ,table_side INTEGER NOT NULL");
-      perfRoundsSql.append(" ,CONSTRAINT sched_perf_rounds_pk PRIMARY KEY (tournament, team_number, round)");
+      perfRoundsSql.append(" ,practice BOOLEAN NOT NULL");
+      perfRoundsSql.append(" ,CONSTRAINT sched_perf_rounds_pk PRIMARY KEY (tournament, team_number, perf_time)");
       if (createConstraints) {
         perfRoundsSql.append(" ,CONSTRAINT sched_perf_rounds_fk1 FOREIGN KEY(tournament, team_number) REFERENCES schedule(tournament, team_number)");
       }
@@ -855,7 +853,7 @@ public final class GenerateDB {
   /**
    * Create tables for mapping schedule columns (schedule columns)
    * to subjective categories.
-   * 
+   *
    * @param connection
    * @throws SQLException
    */
@@ -883,7 +881,7 @@ public final class GenerateDB {
 
   /**
    * Create the table playoff_bracket_teams.
-   * 
+   *
    * @param connection
    */
   /* package */ static void createPlayoffBracketTeams(final Connection connection) throws SQLException {
