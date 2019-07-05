@@ -1207,7 +1207,7 @@ public class SchedulerUI extends JFrame {
 
       final int tmRow = table.convertRowIndexToModel(row);
       final int tmCol = table.convertColumnIndexToModel(column);
-      final int numRounds = getScheduleData().getNumberOfRounds();
+      final int numRounds = getScheduleData().getTotalNumberOfRounds();
       final TeamScheduleInfo schedInfo = getScheduleModel().getSchedInfo(tmRow);
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Checking for violations against team: "
