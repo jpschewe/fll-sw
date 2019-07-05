@@ -776,7 +776,7 @@ public class TournamentSchedule implements Serializable {
       if (null == indexTable) {
         practiceTableColumn[0] = getColumnForHeader(line, String.format(PRACTICE_TABLE_HEADER_FORMAT, 1));
       } else {
-        practiceTableColumn[0] = index.intValue();
+        practiceTableColumn[0] = indexTable.intValue();
       }
     } else {
       for (int round = 0; round < numPracticeRounds; ++round) {
@@ -2155,6 +2155,18 @@ public class TournamentSchedule implements Serializable {
         ) {
           match = true;
         }
+
+        for (final int pc : this.practiceColumn) {
+          if (pc == column) {
+            match = true;
+          }
+        }
+        for (final int ptc : this.practiceTableColumn) {
+          if (ptc == column) {
+            match = true;
+          }
+        }
+
         for (final int pc : this.perfColumn) {
           if (pc == column) {
             match = true;
@@ -2165,6 +2177,7 @@ public class TournamentSchedule implements Serializable {
             match = true;
           }
         }
+
         for (final int sc : this.subjectiveColumns.keySet()) {
           if (sc == column) {
             match = true;
