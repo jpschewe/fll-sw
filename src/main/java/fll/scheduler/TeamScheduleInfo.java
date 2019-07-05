@@ -31,12 +31,18 @@ public final class TeamScheduleInfo implements Serializable {
 
   private final SortedSet<PerformanceTime> performances = new TreeSet<>();
 
-  /* package */ int getNumRegularMatchPlayRounds() {
+  /**
+   * @return number of regular match play rounds
+   */
+  public int getNumRegularMatchPlayRounds() {
     // TODO use Predicate::not when moving to JDK 11+
     return (int) performances.stream().filter(p -> !p.isPractice()).count();
   }
 
-  /* package */ int getNumPracticeRounds() {
+  /**
+   * @return number of practice rounds
+   */
+  public int getNumPracticeRounds() {
     return (int) performances.stream().filter(PerformanceTime::isPractice).count();
   }
 
@@ -52,14 +58,6 @@ public final class TeamScheduleInfo implements Serializable {
    */
   public Stream<PerformanceTime> allPerformances() {
     return performances.stream();
-  }
-
-  /**
-   * @return stream of all performance rounds and their index
-   */
-  public Stream<Pair<PerformanceTime, Long>> enumerateAllPerformances() {
-    return Streams.mapWithIndex(allPerformances(), (performance,
-                                                    index) -> Pair.of(performance, index));
   }
 
   /**
@@ -112,15 +110,6 @@ public final class TeamScheduleInfo implements Serializable {
    */
   public PerformanceTime getPerformanceAtTime(final LocalTime time) {
     return allPerformances().filter(pt -> pt.getTime().equals(time)).findFirst().orElse(null);
-  }
-
-  /**
-   * @param idx zero based
-   * @return the performance with the specified index or null if no performance
-   *         with the specified index exists.
-   */
-  public PerformanceTime getPerf(final int idx) {
-    return enumerateAllPerformances().filter(p -> p.getRight() == idx).map(Pair::getLeft).findFirst().orElse(null);
   }
 
   public TeamScheduleInfo(final int teamNumber) {
