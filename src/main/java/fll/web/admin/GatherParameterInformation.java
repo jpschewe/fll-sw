@@ -16,12 +16,12 @@ import javax.servlet.ServletContext;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
 import fll.Tournament;
 import fll.db.GlobalParameters;
 import fll.db.TournamentParameters;
 import fll.flltools.MhubParameters;
 import fll.web.ApplicationAttributes;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Gather parameter information for edit_all_parameters.jsp.
@@ -41,7 +41,7 @@ public class GatherParameterInformation {
       pageContext.setAttribute("tournaments", tournaments);
 
       pageContext.setAttribute("numSeedingRounds_default", TournamentParameters.getDefaultNumSeedRounds(connection));
-      final Map<Integer, Integer> numSeedingRounds = new HashMap<Integer, Integer>();
+      final Map<Integer, Integer> numSeedingRounds = new HashMap<>();
       for (final Tournament tournament : tournaments) {
         if (TournamentParameters.tournamentParameterValueExists(connection, tournament.getTournamentID(),
                                                                 TournamentParameters.SEEDING_ROUNDS)) {
@@ -51,11 +51,9 @@ public class GatherParameterInformation {
       }
       pageContext.setAttribute("numSeedingRounds", numSeedingRounds);
 
-      // FIXME add boolean for running head to head
-
       pageContext.setAttribute("performanceAdvancementPercentage_default",
                                TournamentParameters.getDefaultPerformanceAdvancementPercentage(connection));
-      final Map<Integer, Integer> performanceAdvancementPercentage = new HashMap<Integer, Integer>();
+      final Map<Integer, Integer> performanceAdvancementPercentage = new HashMap<>();
       for (final Tournament tournament : tournaments) {
         if (TournamentParameters.tournamentParameterValueExists(connection, tournament.getTournamentID(),
                                                                 TournamentParameters.PERFORMANCE_ADVANCEMENT_PERCENTAGE)) {
