@@ -10,7 +10,6 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
@@ -149,7 +148,7 @@ import org.apache.commons.lang3.tuple.Pair;
     } else if (columnIndex == JUDGE_COLUMN) {
       return String.class;
     } else if (columnIndex < getFirstPerformanceColumn()) {
-      return Date.class;
+      return LocalTime.class;
     } else {
       final int perfColIdx = columnIndex
           - getFirstPerformanceColumn();
