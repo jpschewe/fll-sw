@@ -123,6 +123,10 @@ public class TournamentSchedule implements Serializable {
 
   public static final String BASE_PERF_HEADER = "Perf #";
 
+  public static final String BASE_PRACTICE_HEADER = "Practice #";
+
+  public static final String BASE_PRACTICE_HEADER_SHORT = "Practice";
+
   /**
    * Used with {@link String#format(String, Object...)} to create a performance
    * round header.
@@ -131,10 +135,21 @@ public class TournamentSchedule implements Serializable {
       + "%d";
 
   /**
+   * Used with {@link String#format(String, Object...)} to create a practice
+   * round header.
+   */
+  public static final String PRACTICE_HEADER_FORMAT = BASE_PRACTICE_HEADER
+      + "%d";
+
+  /**
    * Used with {@link String#format(String, Object...)} to create a performance
    * table header.
    */
   public static final String TABLE_HEADER_FORMAT = "Perf %d Table";
+
+  public static final String PRACTICE_TABLE_HEADER_FORMAT = "Practice %d Table";
+
+  public static final String PRACTICE_TABLE_HEADER_FORMAT_SHORT = "Practice Table";
 
   private final int numRounds;
 
@@ -535,14 +550,14 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
-   * Figure out how many performance rounds exist in this header line. This
+   * Figure out how many regular match play rounds exist in this header line. This
    * method also checks that the corresponding table header exists for each
    * round and that the round numbers are contiguous starting at 1.
    *
    * @throws FLLRuntimeException if there are problems with the performance
    *           round headers found
    */
-  private static int countNumRounds(final String[] line) {
+  private static int countNumRegularMatchPlayRounds(final String[] line) {
     final SortedSet<Integer> perfRounds = new TreeSet<>();
     for (final String element : line) {
       if (null != element
@@ -583,6 +598,70 @@ public class TournamentSchedule implements Serializable {
             + ". Looking for header '"
             + tableHeader
             + "'");
+      }
+
+      ++expectedValue;
+    }
+
+    return perfRounds.size();
+  }
+
+  private static int countNumPracticeRounds(final String[] line) {
+    final SortedSet<Integer> perfRounds = new TreeSet<>();
+    for (final String element : line) {
+      if (null != element
+          && element.startsWith(BASE_PRACTICE_HEADER)
+          && element.length() > BASE_PRACTICE_HEADER.length()) {
+        final String perfNumberStr = element.substring(BASE_PRACTICE_HEADER.length());
+        final Integer perfNumber = Integer.valueOf(perfNumberStr);
+        if (!perfRounds.add(perfNumber)) {
+          throw new FLLRuntimeException("Found practice rounds num "
+              + perfNumber
+              + " twice in the header: "
+              + Arrays.asList(line));
+        }
+      } else if (null != element
+          && element.equals(BASE_PRACTICE_HEADER_SHORT)) {
+        if (!perfRounds.add(1)) {
+          throw new FLLRuntimeException("Found practice rounds num "
+              + 1
+              + " twice in the header: "
+              + Arrays.asList(line));
+        }
+      }
+    }
+
+    /*
+     * check that the values start at 1, are contiguous, and that the
+     * corresponding table header exists
+     */
+    int expectedValue = 1;
+    for (final Integer value : perfRounds) {
+      if (null == value) {
+        throw new FLLInternalException("Found null practice round in header!");
+      }
+      if (expectedValue != value.intValue()) {
+        throw new FLLRuntimeException("Practice rounds not contiguous after "
+            + (expectedValue
+                - 1)
+            + " found "
+            + value);
+      }
+
+      if (1 == expectedValue
+          && 1 == perfRounds.size()
+          && checkHeaderExists(line, PRACTICE_TABLE_HEADER_FORMAT_SHORT)) {
+        // pass
+        LOGGER.trace("Found short practice table header");
+      } else {
+        final String tableHeader = String.format(PRACTICE_TABLE_HEADER_FORMAT, expectedValue);
+        if (!checkHeaderExists(line, tableHeader)) {
+          throw new FLLRuntimeException("Couldn't find header for round "
+              + expectedValue
+              + ". Looking for header '"
+              + tableHeader
+              + "'");
+        }
       }
 
       ++expectedValue;
@@ -632,10 +711,14 @@ public class TournamentSchedule implements Serializable {
 
   private static ColumnInformation parseHeader(final Collection<String> subjectiveHeaders,
                                                final String[] line) {
-    final int numPerfRounds = countNumRounds(line);
+    final int numPerfRounds = countNumRegularMatchPlayRounds(line);
+    final int numPracticeRounds = countNumPracticeRounds(line);
 
     final int[] perfColumn = new int[numPerfRounds];
     final int[] perfTableColumn = new int[numPerfRounds];
+
+    final int[] practiceColumn = new int[numPracticeRounds];
+    final int[] practiceTableColumn = new int[numPracticeRounds];
 
     final int teamNumColumn = getColumnForHeader(line, TEAM_NUMBER_HEADER);
     final int organizationColumn = getColumnForHeader(line, ORGANIZATION_HEADER);
@@ -681,6 +764,32 @@ public class TournamentSchedule implements Serializable {
       perfTableColumn[round] = getColumnForHeader(line, perfTableHeader);
     }
 
+    if (1 == numPracticeRounds) {
+      // check for short version of headers first, then try long version
+      final Integer index = columnForHeader(line, BASE_PRACTICE_HEADER_SHORT);
+      if (null == index) {
+        practiceColumn[0] = getColumnForHeader(line, String.format(PRACTICE_HEADER_FORMAT, 1));
+      } else {
+        practiceColumn[0] = index.intValue();
+      }
+
+      final Integer indexTable = columnForHeader(line, PRACTICE_TABLE_HEADER_FORMAT_SHORT);
+      if (null == indexTable) {
+        practiceTableColumn[0] = getColumnForHeader(line, String.format(PRACTICE_TABLE_HEADER_FORMAT, 1));
+      } else {
+        practiceTableColumn[0] = index.intValue();
+      }
+    } else {
+      for (int round = 0; round < numPracticeRounds; ++round) {
+        final String perfHeader = String.format(PRACTICE_HEADER_FORMAT, (round
+            + 1));
+        final String perfTableHeader = String.format(PRACTICE_TABLE_HEADER_FORMAT, (round
+            + 1));
+        practiceColumn[round] = getColumnForHeader(line, perfHeader);
+        practiceTableColumn[round] = getColumnForHeader(line, perfTableHeader);
+      }
+    }
+
     final Map<Integer, String> subjectiveColumns = new HashMap<>();
     for (final String header : subjectiveHeaders) {
       final int column = getColumnForHeader(line, header);
@@ -688,7 +797,8 @@ public class TournamentSchedule implements Serializable {
     }
 
     return new ColumnInformation(line, teamNumColumn, organizationColumn, teamNameColumn, divisionColumn,
-                                 subjectiveColumns, judgeGroupColumn, perfColumn, perfTableColumn);
+                                 subjectiveColumns, judgeGroupColumn, perfColumn, perfTableColumn, practiceColumn,
+                                 practiceTableColumn);
   }
 
   /**
@@ -1690,7 +1800,8 @@ public class TournamentSchedule implements Serializable {
 
       ti.setJudgingGroup(line[ci.getJudgeGroupColumn()]);
 
-      for (int perfIndex = 0; perfIndex < getNumberOfRounds(); ++perfIndex) {
+      // parse regular match play rounds
+      for (int perfIndex = 0; perfIndex < ci.getNumPerfs(); ++perfIndex) {
         final String perf1Str = line[ci.getPerfColumn(perfIndex)];
         if (perf1Str.isEmpty()) {
           // If we got an empty string, then we must have hit the end
@@ -1716,6 +1827,39 @@ public class TournamentSchedule implements Serializable {
           final String message = "There are only two sides to the table, number must be 1 or 2. team: "
               + ti.getTeamNumber()
               + " round "
+              + roundNumber;
+          LOGGER.error(message);
+          throw new ScheduleParseException(message);
+        }
+      }
+
+      // parse practice rounds
+      for (int perfIndex = 0; perfIndex < ci.getNumPracticePerfs(); ++perfIndex) {
+        final String perf1Str = line[ci.getPracticePerfColumn(perfIndex)];
+        if (perf1Str.isEmpty()) {
+          // If we got an empty string, then we must have hit the end
+          return null;
+        }
+        final String table = line[ci.getPracticePerfTableColumn(perfIndex)];
+        final String[] tablePieces = table.split(" ");
+        if (tablePieces.length != 2) {
+          throw new RuntimeException("Error parsing table information from: "
+              + table);
+        }
+        final LocalTime perf1Time = parseTime(perf1Str);
+
+        final String tableName = tablePieces[0];
+        final int tableSide = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(tablePieces[1]).intValue();
+        final int roundNumber = perfIndex
+            + 1;
+        final PerformanceTime performance = new PerformanceTime(perf1Time, tableName, tableSide, true);
+
+        ti.addPerformance(performance);
+        if (performance.getSide() > 2
+            || performance.getSide() < 1) {
+          final String message = "There are only two sides to the table, number must be 1 or 2. team: "
+              + ti.getTeamNumber()
+              + " practice round "
               + roundNumber;
           LOGGER.error(message);
           throw new ScheduleParseException(message);
@@ -1955,6 +2099,22 @@ public class TournamentSchedule implements Serializable {
       return perfTableColumn[round];
     }
 
+    private final int[] practiceColumn;
+
+    public int getNumPracticePerfs() {
+      return practiceColumn.length;
+    }
+
+    public int getPracticePerfColumn(final int round) {
+      return practiceColumn[round];
+    }
+
+    private final int[] practiceTableColumn;
+
+    public int getPracticePerfTableColumn(final int round) {
+      return practiceTableColumn[round];
+    }
+
     public ColumnInformation(final String[] headerLine,
                              final int teamNumColumn,
                              final int organizationColumn,
@@ -1963,7 +2123,9 @@ public class TournamentSchedule implements Serializable {
                              final Map<Integer, String> subjectiveColumns,
                              final int judgeGroupColumn,
                              final int[] perfColumn,
-                             final int[] perfTableColumn) {
+                             final int[] perfTableColumn,
+                             final int[] practiceColumn,
+                             final int[] practiceTableColumn) {
       this.headerLine = Collections.unmodifiableList(Arrays.asList(headerLine));
       this.teamNumColumn = teamNumColumn;
       this.organizationColumn = organizationColumn;
@@ -1971,10 +2133,16 @@ public class TournamentSchedule implements Serializable {
       this.divisionColumn = divisionColumn;
       this.subjectiveColumns = subjectiveColumns;
       this.judgeGroupColumn = judgeGroupColumn;
+
       this.perfColumn = new int[perfColumn.length];
       System.arraycopy(perfColumn, 0, this.perfColumn, 0, perfColumn.length);
       this.perfTableColumn = new int[perfTableColumn.length];
       System.arraycopy(perfTableColumn, 0, this.perfTableColumn, 0, perfTableColumn.length);
+
+      this.practiceColumn = new int[practiceColumn.length];
+      System.arraycopy(practiceColumn, 0, this.practiceColumn, 0, practiceColumn.length);
+      this.practiceTableColumn = new int[practiceTableColumn.length];
+      System.arraycopy(practiceTableColumn, 0, this.practiceTableColumn, 0, practiceTableColumn.length);
 
       // determine which columns aren't used
       final List<String> unused = new LinkedList<>();
