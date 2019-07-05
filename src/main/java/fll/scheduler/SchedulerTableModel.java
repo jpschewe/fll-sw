@@ -6,6 +6,7 @@
 
 package fll.scheduler;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -13,6 +14,8 @@ import java.util.Date;
 import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Table model for scheduler information used in {@link SchedulerUI}.
@@ -26,14 +29,14 @@ import javax.swing.table.AbstractTableModel;
   private final List<String> subjectiveColumns;
 
   private static final Comparator<TeamScheduleInfo> TEAM_NUMBER_COMPARATOR = (one,
-   two) -> {
-   if (one.getTeamNumber() < two.getTeamNumber()) {
-    return -1;
-   } else if (one.getTeamNumber() > two.getTeamNumber()) {
-    return 1;
-   } else {
-    return 0;
-   }
+                                                                              two) -> {
+    if (one.getTeamNumber() < two.getTeamNumber()) {
+      return -1;
+    } else if (one.getTeamNumber() > two.getTeamNumber()) {
+      return 1;
+    } else {
+      return 0;
+    }
   };
 
   public SchedulerTableModel(final TournamentSchedule schedule) {
@@ -50,7 +53,8 @@ import javax.swing.table.AbstractTableModel;
   public int getColumnCount() {
     return (JUDGE_COLUMN
         + 1)
-        + subjectiveColumns.size() + (schedule.getTotalNumberOfRounds()
+        + subjectiveColumns.size()
+        + (schedule.getTotalNumberOfRounds()
             * NUM_COLUMNS_PER_ROUND);
   }
 
@@ -73,7 +77,8 @@ import javax.swing.table.AbstractTableModel;
 
   public int getFirstPerformanceColumn() {
     return JUDGE_COLUMN
-        + 1 + subjectiveColumns.size();
+        + 1
+        + subjectiveColumns.size();
   }
 
   @Override
@@ -102,9 +107,24 @@ import javax.swing.table.AbstractTableModel;
     } else {
       final int perfColIdx = columnIndex
           - getFirstPerformanceColumn();
-      final int round = perfColIdx
+
+      final int globalRoundIndex = perfColIdx
           / NUM_COLUMNS_PER_ROUND;
-      final PerformanceTime performance = schedInfo.getPerf(round);
+
+      final PerformanceTime performance;
+      final int numPracticeRounds = schedule.getNumberOfPracticeRounds();
+      if (globalRoundIndex >= numPracticeRounds) {
+        // regular match play rounds are in columns after the practice rounds
+        final int roundIndex = globalRoundIndex
+            - numPracticeRounds;
+        performance = schedInfo.enumerateRegularMatchPlayPerformances().filter(p -> p.getRight() == roundIndex)
+                               .map(Pair::getLeft).findFirst().orElse(null);
+      } else {
+        // practice round
+        performance = schedInfo.enumeratePracticePerformances().filter(p -> p.getRight() == globalRoundIndex)
+                               .map(Pair::getLeft).findFirst().orElse(null);
+      }
+
       switch (perfColIdx
           % NUM_COLUMNS_PER_ROUND) {
       case 0:
@@ -136,7 +156,7 @@ import javax.swing.table.AbstractTableModel;
       switch (perfColIdx
           % NUM_COLUMNS_PER_ROUND) {
       case 0:
-        return Date.class;
+        return LocalTime.class;
       case 1:
         return String.class;
       case 2:
@@ -157,18 +177,32 @@ import javax.swing.table.AbstractTableModel;
       return "Judge";
     } else if (columnIndex < getFirstPerformanceColumn()) {
       return subjectiveColumns.get(columnIndex
-          - JUDGE_COLUMN - 1);
+          - JUDGE_COLUMN
+          - 1);
     } else {
       final int perfColIdx = columnIndex
           - getFirstPerformanceColumn();
-      final int round = perfColIdx
-          / NUM_COLUMNS_PER_ROUND;
+
       switch (perfColIdx
           % NUM_COLUMNS_PER_ROUND) {
       case 0:
-        return "Perf #"
-            + (round
-                + 1);
+        final int globalRoundIndex = perfColIdx
+            / NUM_COLUMNS_PER_ROUND;
+
+        final int numPracticeRounds = schedule.getNumberOfPracticeRounds();
+        if (globalRoundIndex >= numPracticeRounds) {
+          // regular match play
+          final int roundIndex = globalRoundIndex
+              - numPracticeRounds;
+          return "Perf #"
+              + (roundIndex
+                  + 1);
+        } else {
+          // practice round
+          return "Practice #"
+              + (globalRoundIndex
+                  + 1);
+        }
       case 1:
         return "Table";
       case 2:
