@@ -220,14 +220,6 @@ public final class TeamScheduleInfo implements Serializable {
     }
   }
 
-  /**
-   * @return how many rounds are known to this object. This includes both practice
-   *         rounds and regular match play.
-   */
-  public int getNumberOfRounds() {
-    return performances.size();
-  }
-
   private final HashMap<String, SubjectiveTime> subjectiveTimes = new HashMap<>();
 
   public Collection<SubjectiveTime> getSubjectiveTimes() {
