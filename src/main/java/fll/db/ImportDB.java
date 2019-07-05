@@ -808,9 +808,13 @@ public final class ImportDB {
     }
 
     try (Statement stmt = connection.createStatement()) {
-      stmt.executeUpdate("ALTER TABLE sched_perf_rounds ADD COLUMN practice BOOLEAN DEFAULT FALSE NOT NULL");
-      stmt.executeUpdate("ALTER TABLE sched_perf_rounds DROP CONSTRAINT sched_perf_rounds_pk");
-      stmt.executeUpdate("ALTER TABLE sched_perf_rounds ADD CONSTRAINT sched_perf_rounds_pk PRIMARY KEY  (tournament, team_number, perf_time)");
+      // need to check if practice column exists as this can be added in the upgrade
+      // from 1 to 2
+      if (!checkForColumnInTable(connection, "sched_perf_rounds", "practice")) {
+        stmt.executeUpdate("ALTER TABLE sched_perf_rounds ADD COLUMN practice BOOLEAN DEFAULT FALSE NOT NULL");
+        stmt.executeUpdate("ALTER TABLE sched_perf_rounds DROP CONSTRAINT sched_perf_rounds_pk");
+        stmt.executeUpdate("ALTER TABLE sched_perf_rounds ADD CONSTRAINT sched_perf_rounds_pk PRIMARY KEY  (tournament, team_number, perf_time)");
+      }
     }
 
     setDBVersion(connection, 18);
