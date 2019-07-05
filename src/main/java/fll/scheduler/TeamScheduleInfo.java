@@ -31,6 +31,15 @@ public final class TeamScheduleInfo implements Serializable {
 
   private final SortedSet<PerformanceTime> performances = new TreeSet<>();
 
+  /* package */ int getNumRegularMatchPlayRounds() {
+    // TODO use Predicate::not when moving to JDK 11+
+    return (int) performances.stream().filter(p -> !p.isPractice()).count();
+  }
+
+  /* package */ int getNumPracticeRounds() {
+    return (int) performances.stream().filter(PerformanceTime::isPractice).count();
+  }
+
   /**
    * @return unmodifiable version of all performances
    */

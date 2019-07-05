@@ -50,6 +50,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
+import com.diffplug.common.base.Errors;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -150,13 +151,32 @@ public class TournamentSchedule implements Serializable {
 
   public static final String PRACTICE_TABLE_HEADER_FORMAT_SHORT = "Practice Table";
 
-  private final int numRounds;
+  /**
+   * @return Number of rounds in this schedule (practice and regular match play).
+   * @see #getNumberOfPracticeRounds()
+   * @see #getNumberOfRegularMatchPlayRounds()
+   */
+  public int getTotalNumberOfRounds() {
+    return getNumberOfRegularMatchPlayRounds()
+        + getNumberOfPracticeRounds();
+  }
+
+  private final int numRegularMatchPlayRounds;
 
   /**
-   * Number of rounds in this schedule.
+   * @return number of regular match play rounds in this schedule
    */
-  public int getNumberOfRounds() {
-    return numRounds;
+  public int getNumberOfRegularMatchPlayRounds() {
+    return numRegularMatchPlayRounds;
+  }
+
+  private final int numPracticeRounds;
+
+  /**
+   * @return number of practice rounds in this schedule
+   */
+  public int getNumberOfPracticeRounds() {
+    return numPracticeRounds;
   }
 
   /**
@@ -357,7 +377,8 @@ public class TournamentSchedule implements Serializable {
       throws IOException, ParseException, ScheduleParseException {
     this.name = name;
     final ColumnInformation columnInfo = findColumns(reader, subjectiveHeaders);
-    numRounds = columnInfo.getNumPerfs();
+    numRegularMatchPlayRounds = columnInfo.getNumPerfs();
+    numPracticeRounds = columnInfo.getNumPracticePerfs();
     parseData(reader, columnInfo);
     reader.close();
     this.subjectiveStations.clear();
@@ -384,21 +405,6 @@ public class TournamentSchedule implements Serializable {
         while (stations.next()) {
           final String name = stations.getString(1);
           subjectiveStations.add(name);
-        }
-      }
-    }
-
-    // FIXME!!!!
-    try (
-        PreparedStatement getNumRounds = connection.prepareStatement("SELECT MAX(round) FROM sched_perf_rounds WHERE tournament = ?")) {
-      getNumRounds.setInt(1, tournamentID);
-      try (ResultSet numRounds = getNumRounds.executeQuery()) {
-        if (numRounds.next()) {
-          this.numRounds = numRounds.getInt(1)
-              + 1;
-        } else {
-          throw new RuntimeException("No rounds found for tournament: "
-              + tournamentID);
         }
       }
     }
@@ -470,6 +476,38 @@ public class TournamentSchedule implements Serializable {
 
     } // allocate prepared statements
 
+    if (!_schedule.isEmpty()) {
+      this.numRegularMatchPlayRounds = _schedule.get(0).getNumRegularMatchPlayRounds();
+      this.numPracticeRounds = _schedule.get(0).getNumPracticeRounds();
+      validateRounds();
+    } else {
+      this.numRegularMatchPlayRounds = 0;
+      this.numPracticeRounds = 0;
+    }
+
+  }
+
+  private void validateRounds() {
+    for (final TeamScheduleInfo si : _schedule) {
+      if (this.numRegularMatchPlayRounds != si.getNumRegularMatchPlayRounds()) {
+        throw new RuntimeException("Should have "
+            + this.numRegularMatchPlayRounds
+            + " performance rounds for all teams, but found "
+            + si.getNumRegularMatchPlayRounds()
+            + " for team "
+            + si.getTeamNumber());
+      }
+
+      if (this.numPracticeRounds != si.getNumPracticeRounds()) {
+        throw new RuntimeException("Should have "
+            + this.numPracticeRounds
+            + " practice for all teams, but found "
+            + si.getNumPracticeRounds()
+            + " for team "
+            + si.getTeamNumber());
+      }
+
+    }
   }
 
   /**
@@ -941,8 +979,10 @@ public class TournamentSchedule implements Serializable {
 
     final int numColumns = 5
         + subjectiveStations.size()
-        + getNumberOfRounds()
-            * 2;
+        + (getNumberOfRegularMatchPlayRounds()
+            * 2)
+        + (getNumberOfPracticeRounds()
+            * 2);
     final PdfPTable table = PdfUtils.createTable(numColumns);
     final float[] columnWidths = new float[numColumns];
     int idx = 0;
@@ -960,7 +1000,13 @@ public class TournamentSchedule implements Serializable {
       columnWidths[idx] = 2; // time
       ++idx;
     }
-    for (int i = 0; i < getNumberOfRounds(); ++i) {
+    for (int i = 0; i < getNumberOfPracticeRounds(); ++i) {
+      columnWidths[idx] = 2; // time
+      ++idx;
+      columnWidths[idx] = 2; // table
+      ++idx;
+    }
+    for (int i = 0; i < getNumberOfRegularMatchPlayRounds(); ++i) {
       columnWidths[idx] = 2; // time
       ++idx;
       columnWidths[idx] = 2; // table
@@ -982,7 +1028,13 @@ public class TournamentSchedule implements Serializable {
     for (final String subjectiveStation : subjectiveStations) {
       table.addCell(PdfUtils.createHeaderCell(subjectiveStation));
     }
-    for (int round = 0; round < getNumberOfRounds(); ++round) {
+    for (int round = 0; round < getNumberOfPracticeRounds(); ++round) {
+      table.addCell(PdfUtils.createHeaderCell(String.format(PRACTICE_HEADER_FORMAT, round
+          + 1)));
+      table.addCell(PdfUtils.createHeaderCell(String.format(PRACTICE_TABLE_HEADER_FORMAT, round
+          + 1)));
+    }
+    for (int round = 0; round < getNumberOfRegularMatchPlayRounds(); ++round) {
       table.addCell(PdfUtils.createHeaderCell(String.format(PERF_HEADER_FORMAT, round
           + 1)));
       table.addCell(PdfUtils.createHeaderCell(String.format(TABLE_HEADER_FORMAT, round
@@ -1002,11 +1054,20 @@ public class TournamentSchedule implements Serializable {
         table.addCell(PdfUtils.createCell(formatTime(si.getSubjectiveTimeByName(subjectiveStation).getTime())));
       }
 
-      for (final PerformanceTime perf : si.getAllPerformances()) {
+      si.enumeratePracticePerformances().forEachOrdered(Errors.rethrow().wrap(pair -> {
+        final PerformanceTime perf = pair.getLeft();
         table.addCell(PdfUtils.createCell(formatTime(perf.getTime())));
 
         table.addCell(PdfUtils.createCell(String.format("%s %s", perf.getTable(), perf.getSide())));
-      }
+      }));
+
+      si.enumerateRegularMatchPlayPerformances().forEachOrdered(Errors.rethrow().wrap(pair -> {
+        final PerformanceTime perf = pair.getLeft();
+
+        table.addCell(PdfUtils.createCell(formatTime(perf.getTime())));
+
+        table.addCell(PdfUtils.createCell(String.format("%s %s", perf.getTable(), perf.getSide())));
+      }));
 
     }
 
@@ -1147,7 +1208,7 @@ public class TournamentSchedule implements Serializable {
                                       @Nonnull final OutputStream output,
                                       @Nonnull final ChallengeDescription description)
       throws DocumentException, SQLException, IOException {
-    final ScoresheetGenerator scoresheets = new ScoresheetGenerator(getNumberOfRounds()
+    final ScoresheetGenerator scoresheets = new ScoresheetGenerator(getTotalNumberOfRounds()
         * _schedule.size(), description, tournamentName);
     final SortedMap<PerformanceTime, TeamScheduleInfo> performanceTimes = new TreeMap<>();
     for (final TeamScheduleInfo si : _schedule) {
@@ -2182,12 +2243,20 @@ public class TournamentSchedule implements Serializable {
       for (final String category : categories) {
         line.add(category);
       }
-      for (int round = 0; round < getNumberOfRounds(); ++round) {
+      for (int round = 0; round < getNumberOfPracticeRounds(); ++round) {
+        line.add(String.format(TournamentSchedule.PRACTICE_HEADER_FORMAT, round
+            + 1));
+        line.add(String.format(TournamentSchedule.PRACTICE_TABLE_HEADER_FORMAT, round
+            + 1));
+      }
+
+      for (int round = 0; round < getNumberOfRegularMatchPlayRounds(); ++round) {
         line.add(String.format(TournamentSchedule.PERF_HEADER_FORMAT, round
             + 1));
         line.add(String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round
             + 1));
       }
+
       csv.writeNext(line.toArray(new String[line.size()]));
       line.clear();
 
@@ -2201,12 +2270,23 @@ public class TournamentSchedule implements Serializable {
           final LocalTime d = si.getSubjectiveTimeByName(category).getTime();
           line.add(TournamentSchedule.formatTime(d));
         }
-        for (final PerformanceTime p : si.getAllPerformances()) {
+
+        si.enumeratePracticePerformances().forEachOrdered(pair -> {
+          final PerformanceTime p = pair.getLeft();
           line.add(TournamentSchedule.formatTime(p.getTime()));
           line.add(p.getTable()
               + " "
               + p.getSide());
-        }
+        });
+
+        si.enumerateRegularMatchPlayPerformances().forEachOrdered(pair -> {
+          final PerformanceTime p = pair.getLeft();
+          line.add(TournamentSchedule.formatTime(p.getTime()));
+          line.add(p.getTable()
+              + " "
+              + p.getSide());
+        });
+
         csv.writeNext(line.toArray(new String[line.size()]));
         line.clear();
       }
@@ -2238,50 +2318,9 @@ public class TournamentSchedule implements Serializable {
    * @throws IOException if there is a problem writing to the stream
    */
   public void outputScheduleAsCSV(final OutputStream stream) throws IOException {
-
-    try (final CSVWriter csv = new CSVWriter(new OutputStreamWriter(stream, Utilities.DEFAULT_CHARSET))) {
-
-      final List<String> headerLine = new LinkedList<>();
-      headerLine.add(TournamentSchedule.TEAM_NUMBER_HEADER);
-      headerLine.add(TournamentSchedule.TEAM_NAME_HEADER);
-      headerLine.add(TournamentSchedule.ORGANIZATION_HEADER);
-      headerLine.add(TournamentSchedule.JUDGE_GROUP_HEADER);
-      headerLine.add(TournamentSchedule.AWARD_GROUP_HEADER);
-      for (final String station : getSubjectiveStations()) {
-        headerLine.add(station);
-      }
-      for (int round = 0; round < getNumberOfRounds(); ++round) {
-        headerLine.add(String.format(TournamentSchedule.PERF_HEADER_FORMAT, round
-            + 1));
-        headerLine.add(String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round
-            + 1));
-      }
-      csv.writeNext(headerLine.toArray(new String[0]));
-
-      Collections.sort(_schedule, ComparatorByTeam.INSTANCE);
-      for (final TeamScheduleInfo si : _schedule) {
-        final List<String> line = new LinkedList<>();
-
-        line.add(String.valueOf(si.getTeamNumber()));
-        line.add(si.getTeamName());
-        line.add(si.getOrganization());
-        line.add(si.getJudgingGroup());
-        line.add(si.getAwardGroup());
-
-        for (final String subjectiveStation : subjectiveStations) {
-          line.add(formatTime(si.getSubjectiveTimeByName(subjectiveStation).getTime()));
-        }
-
-        for (final PerformanceTime perf : si.getAllPerformances()) {
-
-          line.add(formatTime(perf.getTime()));
-
-          line.add(String.format("%s %s", perf.getTable(), perf.getSide()));
-        }
-
-        csv.writeNext(line.toArray(new String[0]));
-      } // foreach team
-    } // allocate csv writer
+    try (OutputStreamWriter outputWriter = new OutputStreamWriter(stream, Utilities.DEFAULT_CHARSET)) {
+      writeToCSV(outputWriter);
+    }
   }
 
 }

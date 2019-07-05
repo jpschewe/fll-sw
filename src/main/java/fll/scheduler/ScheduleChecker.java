@@ -294,7 +294,7 @@ public class ScheduleChecker {
    */
   private void checkConstraintTeam3(final Collection<ConstraintViolation> violations,
                                     final TeamScheduleInfo ti) {
-    if (schedule.getNumberOfRounds() < 2) {
+    if (schedule.getTotalNumberOfRounds() < 2) {
       // nothing to check
       return;
     }

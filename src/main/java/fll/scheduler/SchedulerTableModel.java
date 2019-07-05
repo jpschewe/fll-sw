@@ -50,7 +50,7 @@ import javax.swing.table.AbstractTableModel;
   public int getColumnCount() {
     return (JUDGE_COLUMN
         + 1)
-        + subjectiveColumns.size() + (schedule.getNumberOfRounds()
+        + subjectiveColumns.size() + (schedule.getTotalNumberOfRounds()
             * NUM_COLUMNS_PER_ROUND);
   }
 
