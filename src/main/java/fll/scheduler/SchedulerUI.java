@@ -1130,7 +1130,7 @@ public class SchedulerUI extends JFrame {
 
   private SchedulerTableModel mScheduleModel;
 
-  SchedulerTableModel getScheduleModel() {
+  /* package */ SchedulerTableModel getScheduleModel() {
     return mScheduleModel;
   }
 
@@ -1207,6 +1207,7 @@ public class SchedulerUI extends JFrame {
 
       final int tmRow = table.convertRowIndexToModel(row);
       final int tmCol = table.convertColumnIndexToModel(column);
+      final int numRounds = getScheduleData().getNumberOfRounds();
       final TeamScheduleInfo schedInfo = getScheduleModel().getSchedInfo(tmRow);
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Checking for violations against team: "
@@ -1232,17 +1233,17 @@ public class SchedulerUI extends JFrame {
             // need to check round which round
             int round = 0;
             // using Math.min to handle extra round
-            while (!violation.getPerformance().equals(schedInfo.getPerf(Math.min(schedInfo.getNumberOfRounds()
+            while (!violation.getPerformance().equals(schedInfo.getPerf(Math.min(numRounds
                 - 1, round)).getTime())
-                && round < schedInfo.getNumberOfRounds()) {
+                && round < numRounds) {
               ++round;
-              if (round > schedInfo.getNumberOfRounds()) {
+              if (round > numRounds) {
                 throw new RuntimeException("Internal error, walked off the end of the round list");
               }
             }
             // handle extra run
-            if (round >= schedInfo.getNumberOfRounds()) {
-              round = schedInfo.getNumberOfRounds()
+            if (round >= numRounds) {
+              round = numRounds
                   - 1;
             }
             final int firstIdx = getScheduleModel().getFirstPerformanceColumn()

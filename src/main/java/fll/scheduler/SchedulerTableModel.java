@@ -76,17 +76,11 @@ import javax.swing.table.AbstractTableModel;
         + 1 + subjectiveColumns.size();
   }
 
-  /**
-   * @see javax.swing.table.TableModel#getRowCount()
-   */
   @Override
   public int getRowCount() {
     return scheduleData.size();
   }
 
-  /**
-   * @see javax.swing.table.TableModel#getValueAt(int, int)
-   */
   @Override
   public Object getValueAt(final int rowIndex,
                            final int columnIndex) {

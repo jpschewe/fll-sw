@@ -1811,7 +1811,7 @@ public class TournamentSchedule implements Serializable {
         insertSchedule.executeUpdate();
 
         insertPerfRounds.setInt(2, si.getTeamNumber());
-        for (int round = 0; round < si.getNumberOfRounds(); ++round) {
+        for (int round = 0; round < getNumberOfRounds(); ++round) {
           insertPerfRounds.setInt(3, round);
           final PerformanceTime performance = si.getPerf(round);
           insertPerfRounds.setTime(4, Time.valueOf(performance.getTime()));
