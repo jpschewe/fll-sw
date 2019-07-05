@@ -33,7 +33,6 @@ import java.text.ParseException;
 import java.time.LocalTime;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -204,7 +203,7 @@ public class SchedulerUI extends JFrame {
 
     mScheduleTable = new JTable();
     mScheduleTable.setAutoCreateRowSorter(true);
-    mScheduleTable.setDefaultRenderer(Date.class, schedTableRenderer);
+    mScheduleTable.setDefaultRenderer(LocalTime.class, schedTableRenderer);
     mScheduleTable.setDefaultRenderer(String.class, schedTableRenderer);
     mScheduleTable.setDefaultRenderer(Integer.class, schedTableRenderer);
     mScheduleTable.setDefaultRenderer(Object.class, schedTableRenderer);
