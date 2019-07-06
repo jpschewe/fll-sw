@@ -91,6 +91,7 @@ function checkServerStatus() {
     timeout : 1000,
     success : function(response) {
       $.subjective.log("server online");
+      serverLoadPage();
     },
     error : function(x, t, m) {
       $.subjective.log("server offline");
