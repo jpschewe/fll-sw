@@ -22,8 +22,6 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-
-
 import fll.Version;
 
 
@@ -38,6 +36,7 @@ public class FooterFilter implements Filter {
   /**
    * @see javax.servlet.Filter#destroy()
    */
+  @Override
   public void destroy() {
     // nothing
   }
@@ -46,6 +45,7 @@ public class FooterFilter implements Filter {
    * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest,
    *      javax.servlet.ServletResponse, javax.servlet.FilterChain)
    */
+  @Override
   public void doFilter(final ServletRequest request,
                        final ServletResponse response,
                        final FilterChain chain) throws IOException, ServletException {
@@ -161,10 +161,12 @@ public class FooterFilter implements Filter {
     formatter.format("<hr />");
     formatter.format("<table>");
     formatter.format("  <tr>");
+    formatter.format("    <td><a href='%s/admin/performance-area.jsp' target='_top'>Performance Area</a></td>", contextPath);
+    formatter.format("    <td><a href='%s/judges-room.jsp' target='_top'>Judges Room</a></td>", contextPath);
     formatter.format("    <td><a href='%s/index.jsp' target='_top'>Main Index</a></td>", contextPath);
     formatter.format("    <td><a href='%s/admin/index.jsp' target='_top'>Admin Index</a></td>", contextPath);
     formatter.format("  </tr>");
-    formatter.format("  <tr><td>Software version: %s</td></tr>", Version.getVersion());
+    formatter.format("  <tr><td colspan='4'>Software version: %s</td></tr>", Version.getVersion());
     formatter.format("</table>");
     formatter.format("%n</body></html>");
   }
@@ -189,6 +191,7 @@ public class FooterFilter implements Filter {
   /**
    * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
    */
+  @Override
   public void init(final FilterConfig filterConfig) throws ServletException {
     // nothing
   }
