@@ -138,18 +138,19 @@ public class ScoresheetGenerator {
     final String numMatchesStr = request.getParameter("numMatches");
     if (null == numMatchesStr) {
       // must have been called asking for blank
-      m_numSheets = 1;
+      m_numSheets = 2;
       initializeArrays();
 
       setPageTitle("");
       for (int i = 0; i < m_numSheets; i++) {
         m_table[i] = SHORT_BLANK;
         m_name[i] = LONG_BLANK;
-        m_round[i] = SHORT_BLANK;
+        m_round[i] = Utilities.isOdd(i) ? "Practice" : SHORT_BLANK;
         m_divisionLabel[i] = AWARD_GROUP_LABEL;
         m_division[i] = SHORT_BLANK;
         m_number[i] = null;
         m_time[i] = null;
+        m_isPractice[i] = Utilities.isOdd(i);
       }
     } else {
       final String division = request.getParameter("division");
@@ -307,15 +308,27 @@ public class ScoresheetGenerator {
   public static Pair<Boolean, Float> guessOrientation(final ChallengeDescription description)
       throws DocumentException, IOException {
     final ScoresheetGenerator gen = new ScoresheetGenerator(1, description, "dummy");
-    final ByteArrayOutputStream out = new ByteArrayOutputStream();
+    final ByteArrayOutputStream outLandscape = new ByteArrayOutputStream();
     // Using landscape, so set pages per sheet to 0.5
-    gen.writeFile(out, false, 0.5f);
-    final ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-    final PdfReader reader = new PdfReader(in);
-    final int numPages = reader.getNumberOfPages();
-    if (numPages > 1) {
+    gen.writeFile(outLandscape, false, 0.5f);
+    final ByteArrayInputStream inLandscape = new ByteArrayInputStream(outLandscape.toByteArray());
+    final PdfReader readerLandscape = new PdfReader(inLandscape);
+    final int numPagesLandscape = readerLandscape.getNumberOfPages();
+    readerLandscape.close();
+
+    if (numPagesLandscape > 1) {
       // doesn't fit landscape
-      return Pair.of(true, (float) numPages);
+
+      // need to run again to compute pages per score sheet
+      final ByteArrayOutputStream outPortrait = new ByteArrayOutputStream();
+      // Using portrait, so set pages per sheet to 1
+      gen.writeFile(outPortrait, true, 1f);
+      final ByteArrayInputStream inPortrait = new ByteArrayInputStream(outPortrait.toByteArray());
+      final PdfReader readerPortrait = new PdfReader(inPortrait);
+      final int numPagesPortrait = readerPortrait.getNumberOfPages();
+      readerPortrait.close();
+
+      return Pair.of(true, (float) numPagesPortrait);
     } else {
       return Pair.of(false, 0.5f);
     }
