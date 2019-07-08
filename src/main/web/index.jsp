@@ -83,10 +83,10 @@
 		<li><a href="DoLogout">Log out</a> Log a computer out so that
 			they need to enter the password again to change scores.</li>
 
-		<li><a href='scoreboard/index.jsp'>Scoreboard</a></li>
+		<li><a href='scoreboard/index.jsp'>Score board</a></li>
 
-		<li><a href='playoff/ScoresheetServlet'>Blank scoresheet for
-				printing (PDF)</a></li>
+		<li><a href='playoff/ScoresheetServlet'>Blank score sheet,
+				one regular match play and one practice (PDF)</a></li>
 
 		<c:forEach items="${challengeDescription.subjectiveCategories}"
 			var="category">
