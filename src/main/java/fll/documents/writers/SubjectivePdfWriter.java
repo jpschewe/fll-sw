@@ -326,7 +326,7 @@ public class SubjectivePdfWriter {
     return new Document(PageSize.LETTER, 36, 36, 20, 0);
   }
 
-  private PdfPTable createStandardRubricTable() throws DocumentException {
+  public PdfPTable createStandardRubricTable() throws DocumentException {
     final PdfPTable table = new PdfPTable(6);
     table.setWidths(colWidths);
     table.setWidthPercentage(100f);
@@ -477,7 +477,7 @@ public class SubjectivePdfWriter {
                                                          @Nonnull final SheetElement sheetElement)
       throws MalformedURLException, IOException, DocumentException {
 
-    final TeamScheduleInfo teamInfo = new TeamScheduleInfo(1, 1);
+    final TeamScheduleInfo teamInfo = new TeamScheduleInfo(1);
     teamInfo.setDivision("dummy");
     teamInfo.setJudgingGroup("Dummy");
     teamInfo.setOrganization("Dummy");

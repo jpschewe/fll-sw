@@ -19,16 +19,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.PosixParser;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
-import fll.Team;
 import fll.Utilities;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
 import fll.util.CSVCellReader;
@@ -56,7 +56,7 @@ public class TableOptimizer {
 
   private File mBestScheduleOutputFile = null;
 
-  private Map<PerformanceTime, Integer> bestPermutation = null;
+  private Map<PerformanceTime, TeamScheduleInfo> bestPermutation = null;
 
   private int bestScore;
 
@@ -107,9 +107,11 @@ public class TableOptimizer {
    */
   private int computeTableUseScore() {
     final Map<String, Integer> tableUse = new HashMap<>();
+
     for (final TeamScheduleInfo ti : this.schedule.getSchedule()) {
-      for (int round = 0; round < ti.getNumberOfRounds(); ++round) {
-        final String tableColor = ti.getPerfTableColor(round);
+
+      ti.allPerformances().forEach(performance -> {
+        final String tableColor = performance.getTable();
         int count;
         if (tableUse.containsKey(tableColor)) {
           count = tableUse.get(tableColor);
@@ -118,7 +120,7 @@ public class TableOptimizer {
         }
         ++count;
         tableUse.put(tableColor, count);
-      } // foreach round
+      });
     } // foreach team
 
     int minUse = Integer.MAX_VALUE;
@@ -142,16 +144,11 @@ public class TableOptimizer {
    *
    * @return key=table info, value=team number
    */
-  private Map<PerformanceTime, Integer> getCurrentTableAssignments(final LocalTime time) {
-    final Map<PerformanceTime, Integer> assignments = new HashMap<>();
+  private Map<PerformanceTime, TeamScheduleInfo> getCurrentTableAssignments(final LocalTime time) {
+    final Map<PerformanceTime, TeamScheduleInfo> assignments = new HashMap<>();
 
     for (final TeamScheduleInfo si : this.schedule.getSchedule()) {
-      for (int round = 0; round < this.schedule.getNumberOfRounds(); ++round) {
-        final PerformanceTime pt = si.getPerf(round);
-        if (time.equals(pt.getTime())) {
-          assignments.put(pt, si.getTeamNumber());
-        }
-      }
+      si.allPerformances().filter(pt -> pt.getTime().equals(time)).forEach(pt -> assignments.put(pt, si));
     }
 
     return assignments;
@@ -163,13 +160,12 @@ public class TableOptimizer {
    *
    * @param checkCanceled if non-null, check if the optimization should finish
    *          early
-   * @return best score found
    */
-  private void computeBestTableOrdering(final List<Integer> teams,
+  private void computeBestTableOrdering(final Map<TeamScheduleInfo, PerformanceTime> originalValues,
                                         final LocalTime time,
                                         final List<String> tables,
                                         final CheckCanceled checkCanceled) {
-    if (teams.isEmpty()) {
+    if (originalValues.isEmpty()) {
       throw new IllegalArgumentException("Must have some teams to check");
     }
 
@@ -178,8 +174,9 @@ public class TableOptimizer {
       bestScore = computeScheduleScore();
     }
 
-    final List<Map<PerformanceTime, Integer>> possibleValues = computePossibleValues(teams, time, tables);
-    for (final Map<PerformanceTime, Integer> possibleValue : possibleValues) {
+    final List<Map<PerformanceTime, TeamScheduleInfo>> possibleValues = computePossibleValues(originalValues, time,
+                                                                                              tables);
+    for (final Map<PerformanceTime, TeamScheduleInfo> possibleValue : possibleValues) {
       if (null != checkCanceled
           && checkCanceled.isCanceled()) {
         // user interrupt
@@ -228,12 +225,14 @@ public class TableOptimizer {
    *
    * @param teams
    * @return list of possible orderings, key=table information, value=team
-   *         number
+   *         schedule information
    */
-  private List<Map<PerformanceTime, Integer>> computePossibleValues(final List<Integer> teams,
-                                                                    final LocalTime time,
-                                                                    final List<String> tables) {
-    final List<Map<PerformanceTime, Integer>> possibleValues = new LinkedList<>();
+  private List<Map<PerformanceTime, TeamScheduleInfo>> computePossibleValues(final Map<TeamScheduleInfo, PerformanceTime> originalValues,
+                                                                             final LocalTime time,
+                                                                             final List<String> tables) {
+    final List<TeamScheduleInfo> teams = new LinkedList<>(originalValues.keySet());
+
+    final List<Map<PerformanceTime, TeamScheduleInfo>> possibleValues = new LinkedList<>();
 
     final boolean oddNumberOfTeams = Utilities.isOdd(teams.size());
 
@@ -249,7 +248,7 @@ public class TableOptimizer {
       boolean validToHaveNullTeam = oddNumberOfTeams;
 
       // convert to valid ordering
-      final Map<PerformanceTime, Integer> assignments = new HashMap<>();
+      final Map<PerformanceTime, TeamScheduleInfo> assignments = new HashMap<>();
       for (int tableColorIndex = 0; tableColorIndex < tables.size(); ++tableColorIndex) {
         final String tableColor = tables.get(tableColorIndex);
 
@@ -258,29 +257,29 @@ public class TableOptimizer {
         final int orderIndex1 = tableColorIndex
             * 2;
         final int teamIndex1 = ordering.get(orderIndex1);
-        final int teamNumber1 = getTeamNumber(teams, teamIndex1);
+        final TeamScheduleInfo team1 = getTeam(teams, teamIndex1);
 
         final int side2 = 2;
         final int orderIndex2 = orderIndex1
             + 1;
         final int teamIndex2 = ordering.get(orderIndex2);
-        final int teamNumber2 = getTeamNumber(teams, teamIndex2);
+        final TeamScheduleInfo team2 = getTeam(teams, teamIndex2);
 
-        if (Team.NULL_TEAM_NUMBER != teamNumber1
-            && Team.NULL_TEAM_NUMBER != teamNumber2) {
-          assignments.put(new PerformanceTime(time, tableColor, side1), teamNumber1);
-          assignments.put(new PerformanceTime(time, tableColor, side2), teamNumber2);
-        } else if (Team.NULL_TEAM_NUMBER != teamNumber1
-            && Team.NULL_TEAM_NUMBER == teamNumber2
+        if (null != team1
+            && null != team2) {
+          assignments.put(new PerformanceTime(time, tableColor, side1, originalValues.get(team1).isPractice()), team1);
+          assignments.put(new PerformanceTime(time, tableColor, side2, originalValues.get(team2).isPractice()), team2);
+        } else if (null != team1
+            && null == team2
             && validToHaveNullTeam) {
-          assignments.put(new PerformanceTime(time, tableColor, side1), teamNumber1);
+          assignments.put(new PerformanceTime(time, tableColor, side1, originalValues.get(team1).isPractice()), team1);
 
           // can only have 1 uneven pairing at a time
           validToHaveNullTeam = false;
-        } else if (Team.NULL_TEAM_NUMBER == teamNumber1
-            && Team.NULL_TEAM_NUMBER != teamNumber2
+        } else if (null == team1
+            && null != team2
             && validToHaveNullTeam) {
-          assignments.put(new PerformanceTime(time, tableColor, side2), teamNumber2);
+          assignments.put(new PerformanceTime(time, tableColor, side2, originalValues.get(team2).isPractice()), team2);
 
           // can only have 1 uneven pairing at a time
           validToHaveNullTeam = false;
@@ -297,32 +296,30 @@ public class TableOptimizer {
   }
 
   /**
-   * Get team number from teams using teamIndex.
+   * Get team from teams using teamIndex.
    *
    * @param teams list of teams
    * @param teamIndex index into teams
-   * @return the team number or {@see Team#NULL_TEAM_NUMBER} if the index is
+   * @return the team number or null if the index is
    *         larger than the list of teams
    */
-  private static int getTeamNumber(final List<Integer> teams,
-                                   final int teamIndex) {
-    final int teamNumber;
+  private static TeamScheduleInfo getTeam(final List<TeamScheduleInfo> teams,
+                                          final int teamIndex) {
     if (teamIndex < teams.size()) {
-      teamNumber = teams.get(teamIndex);
+      return teams.get(teamIndex);
     } else {
-      teamNumber = Team.NULL_TEAM_NUMBER;
+      return null;
     }
-    return teamNumber;
   }
 
-  private void applyPerformanceOrdering(final Map<PerformanceTime, Integer> possibleValue) {
-    for (final Map.Entry<PerformanceTime, Integer> entry : possibleValue.entrySet()) {
-      final int teamNumber = entry.getValue();
+  private void applyPerformanceOrdering(final Map<PerformanceTime, TeamScheduleInfo> possibleValue) {
+    for (final Map.Entry<PerformanceTime, TeamScheduleInfo> entry : possibleValue.entrySet()) {
+      final TeamScheduleInfo team = entry.getValue();
       final PerformanceTime perfTime = entry.getKey();
 
       // can use perfTime.getTime() as oldTime since we know that we're just
       // moving teams across tables
-      schedule.reassignTable(teamNumber, perfTime.getTime(), perfTime);
+      schedule.reassignTable(team, perfTime.getTime(), perfTime);
     }
 
   }
@@ -453,7 +450,7 @@ public class TableOptimizer {
     File schedfile = null;
     final Options options = buildOptions();
     try {
-      final CommandLineParser parser = new PosixParser();
+      final CommandLineParser parser = new DefaultParser();
       final CommandLine cmd = parser.parse(options, args);
 
       schedfile = new File(cmd.getOptionValue(SCHED_FILE_OPTION));
@@ -565,9 +562,8 @@ public class TableOptimizer {
   private static Map<LocalTime, Set<String>> gatherTablesAtTime(final TournamentSchedule schedule) {
     final Map<LocalTime, Set<String>> tablesAtTime = new HashMap<>();
 
-    for (int round = 0; round < schedule.getNumberOfRounds(); ++round) {
-      for (final TeamScheduleInfo si : schedule.getSchedule()) {
-        final PerformanceTime perf = si.getPerf(round);
+    for (final TeamScheduleInfo si : schedule.getSchedule()) {
+    for (final PerformanceTime perf : si.getAllPerformances()) {
 
         Set<String> tables;
         if (tablesAtTime.containsKey(perf.getTime())) {
@@ -742,8 +738,7 @@ public class TableOptimizer {
     final Map<LocalTime, Integer> perfCounts = new HashMap<>();
     final Map<LocalTime, List<String>> perfTables = new HashMap<>();
     for (final TeamScheduleInfo ti : this.schedule.getSchedule()) {
-      for (int round = 0; round < ti.getNumberOfRounds(); ++round) {
-        final PerformanceTime pt = ti.getPerf(round);
+      for (final PerformanceTime pt : ti.getAllPerformances()) {
         final LocalTime time = pt.getTime();
 
         List<String> tables = perfTables.get(time);
@@ -798,35 +793,40 @@ public class TableOptimizer {
   private void optimize(final Set<LocalTime> perfTimes,
                         final CheckCanceled checkCanceled) {
     for (final LocalTime time : perfTimes) {
-      final List<Integer> teams = new ArrayList<>();
+      final Map<TeamScheduleInfo, PerformanceTime> originalPerformances = new HashMap<>();
 
       List<String> tables = null;
       for (final TeamScheduleInfo si : schedule.getSchedule()) {
-        for (int round = 0; round < schedule.getNumberOfRounds(); ++round) {
-          final PerformanceTime pt = si.getPerf(round);
-          if (time.equals(pt.getTime())) {
-            teams.add(si.getTeamNumber());
+        final List<PerformanceTime> pts = si.allPerformances().filter(pt -> pt.getTime().equals(time))
+                                            .collect(Collectors.toList());
+        if (pts.size() > 1) {
+          throw new FLLRuntimeException("Found multiple performances for "
+              + si.getTeamNumber()
+              + " at "
+              + time);
+        } else if (!pts.isEmpty()) {
+          final PerformanceTime pt = pts.get(0);
+          originalPerformances.put(si, pt);
 
-            // choose the tables to use for assignments
-            if (null == tables) {
-              for (int i = 0; null == tables
-                  && i < tableGroups.size(); ++i) {
-                final List<String> group = this.tableGroups.get(i);
-                if (group.contains(pt.getTable())) {
-                  tables = group;
-                }
-              }
-              if (null == tables) {
-                throw new FLLRuntimeException("Cannot find table group for "
-                    + pt.getTable());
+          // choose the tables to use for assignments
+          if (null == tables) {
+            for (int i = 0; null == tables
+                && i < tableGroups.size(); ++i) {
+              final List<String> group = this.tableGroups.get(i);
+              if (group.contains(pt.getTable())) {
+                tables = group;
               }
             }
-
+            if (null == tables) {
+              throw new FLLRuntimeException("Cannot find table group for "
+                  + pt.getTable());
+            }
           }
         }
+
       } // foreach schedule item
 
-      computeBestTableOrdering(teams, time, tables, checkCanceled);
+      computeBestTableOrdering(originalPerformances, time, tables, checkCanceled);
 
     } // foreach time
   }

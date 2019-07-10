@@ -15,16 +15,28 @@ import java.time.LocalTime;
 public final class PerformanceTime implements Comparable<PerformanceTime>, Serializable {
 
   /**
-   * @param time the time
-   * @param table the table color
-   * @param side the table side, one based
+   * @param time see {@link #getTime()}
+   * @param table see {@link #getTable()}
+   * @param side see {@link #getTable()}
+   * @param practice see {@link #isPractice()}
    */
   public PerformanceTime(final LocalTime time,
                          final String table,
-                         final int side) {
+                         final int side,
+                         final boolean practice) {
     this.table = table;
     this.side = side;
     this.time = time;
+    this.practice = practice;
+  }
+
+  private final boolean practice;
+
+  /**
+   * @return true if this is a practice round
+   */
+  public boolean isPractice() {
+    return practice;
   }
 
   private final String table;
@@ -76,9 +88,15 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
   }
 
   private int compareSide(final PerformanceTime other) {
-    return Integer.compare(this.side, other.side);
+    final int cmp = Integer.compare(this.side, other.side);
+    if (0 == cmp) {
+      return Boolean.compare(this.practice, other.practice);
+    } else {
+      return cmp;
+    }
   }
 
+  @Override
   public int compareTo(final PerformanceTime other) {
     if (null != this.time) {
       final int timeCompare = this.time.compareTo(other.time);
@@ -97,7 +115,11 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
 
   @Override
   public String toString() {
-    return "time: " + TournamentSchedule.formatTime(getTime()) + " table: "
-        + getTable() + " side: " + getSide();
+    return "time: "
+        + TournamentSchedule.formatTime(getTime())
+        + " table: "
+        + getTable()
+        + " side: "
+        + getSide();
   }
 }

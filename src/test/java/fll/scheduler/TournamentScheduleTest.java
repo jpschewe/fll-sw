@@ -130,13 +130,13 @@ public class TournamentScheduleTest {
       final CellFileReader reader = new ExcelCellReader(scheduleStream, sheetName);
       final ColumnInformation columnInfo = TournamentSchedule.findColumns(reader, new LinkedList<String>());
 
-      final Collection<String> possibleSubjectiveHeaders = new LinkedList<String>();
+      final Collection<String> possibleSubjectiveHeaders = new LinkedList<>();
       possibleSubjectiveHeaders.add(TournamentScheduleTest.TECHNICAL_HEADER);
       possibleSubjectiveHeaders.add(TournamentScheduleTest.RESEARCH_HEADER);
       possibleSubjectiveHeaders.add("Presentation");
 
       // prompt for which headers are subjective
-      final Collection<String> subjectiveHeaders = new LinkedList<String>();
+      final Collection<String> subjectiveHeaders = new LinkedList<>();
       for (final String unused : columnInfo.getUnusedColumns()) {
         if (possibleSubjectiveHeaders.contains(unused)) {
           subjectiveHeaders.add(unused);
@@ -154,35 +154,6 @@ public class TournamentScheduleTest {
                                                                               tournament.getTournamentID());
       assertTrue(existsAfter, "Schedule should exist now that it's been stored");
 
-      final Document doc = schedule.createXML();
-      assertNotNull(doc, "Should have non-null schedule document");
-
-    } finally {
-      SQLFunctions.close(memConnection);
-      memConnection = null;
-    }
-  }
-
-  @Test
-  public void testEmptyScheduleXML() throws SQLException, UnsupportedEncodingException {
-    Utilities.loadDBDriver();
-
-    final String url = "jdbc:hsqldb:mem:ut_ts_test_empty_xml";
-    Connection memConnection = null;
-    try {
-      final InputStream stream = TournamentScheduleTest.class.getResourceAsStream("/fll/db/data/challenge-test.xml");
-      assertNotNull(stream);
-      final Document document = ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
-
-      memConnection = DriverManager.getConnection(url);
-
-      GenerateDB.generateDB(document, memConnection);
-
-      final TournamentSchedule schedule = new TournamentSchedule(memConnection, 1);
-
-      final Document doc = schedule.createXML();
-      assertNotNull(doc, "Should have non-null schedule document");
-
     } finally {
       SQLFunctions.close(memConnection);
       memConnection = null;
@@ -193,7 +164,7 @@ public class TournamentScheduleTest {
    * Test that we can parse a 12 hour formatted schedule
    * and a 24 hour formatted schedule and that they come
    * out the same.
-   * 
+   *
    * @throws IOException
    * @throws InvalidFormatException
    * @throws ScheduleParseException
@@ -202,7 +173,7 @@ public class TournamentScheduleTest {
   @Test
   public void testScheduleTimeFormat()
       throws InvalidFormatException, IOException, ParseException, ScheduleParseException {
-    final Collection<String> possibleSubjectiveHeaders = new LinkedList<String>();
+    final Collection<String> possibleSubjectiveHeaders = new LinkedList<>();
     possibleSubjectiveHeaders.add("Core Values");
     possibleSubjectiveHeaders.add("Design");
     possibleSubjectiveHeaders.add("Project");
@@ -229,7 +200,7 @@ public class TournamentScheduleTest {
 
   /**
    * Load a schedule.
-   * 
+   *
    * @param path Where to load from
    * @param possibleSubjectiveHeaders the subjective entry headers to look for
    * @return the loaded schedule
@@ -254,7 +225,7 @@ public class TournamentScheduleTest {
     final ColumnInformation columnInfo = TournamentSchedule.findColumns(reader, new LinkedList<String>());
 
     // prompt for which headers are subjective
-    final Collection<String> subjectiveHeaders = new LinkedList<String>();
+    final Collection<String> subjectiveHeaders = new LinkedList<>();
     for (final String unused : columnInfo.getUnusedColumns()) {
       if (possibleSubjectiveHeaders.contains(unused)) {
         subjectiveHeaders.add(unused);
@@ -276,7 +247,7 @@ public class TournamentScheduleTest {
    * The test assumes that it is executing from the base build directory or the
    * root of the repository.
    * All schedule files that end in '.xls' will be loaded.
-   * 
+   *
    * @throws ScheduleParseException
    * @throws ParseException
    * @throws IOException
@@ -299,7 +270,7 @@ public class TournamentScheduleTest {
                                                            TrueFileFilter.INSTANCE);
     assertTrue(!schedules.isEmpty(), "Didn't find any schedules");
 
-    final Collection<String> possibleSubjectiveHeaders = new LinkedList<String>();
+    final Collection<String> possibleSubjectiveHeaders = new LinkedList<>();
     possibleSubjectiveHeaders.add("Core Values");
     possibleSubjectiveHeaders.add("Design");
     possibleSubjectiveHeaders.add("Project");
