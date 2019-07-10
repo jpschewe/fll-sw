@@ -19,7 +19,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
-
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
@@ -32,8 +32,11 @@ import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfGState;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfPageEventHelper;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfWriter;
 
@@ -44,7 +47,6 @@ import fll.Version;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.util.FP;
-
 import fll.util.PdfUtils;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
@@ -73,7 +75,7 @@ public class ScoresheetGenerator {
   /**
    * Create document with the specified number of sheets. Initially all sheets
    * are empty. They should be filled in using the set methods.
-   * 
+   *
    * @param numSheets the number of sheets on a page
    * @param tournamentName the name of the tournament to display
    * @param description the challenge description to get the goals from
@@ -136,18 +138,19 @@ public class ScoresheetGenerator {
     final String numMatchesStr = request.getParameter("numMatches");
     if (null == numMatchesStr) {
       // must have been called asking for blank
-      m_numSheets = 1;
+      m_numSheets = 2;
       initializeArrays();
 
       setPageTitle("");
       for (int i = 0; i < m_numSheets; i++) {
         m_table[i] = SHORT_BLANK;
         m_name[i] = LONG_BLANK;
-        m_round[i] = SHORT_BLANK;
+        m_round[i] = Utilities.isOdd(i) ? "Practice" : SHORT_BLANK;
         m_divisionLabel[i] = AWARD_GROUP_LABEL;
         m_division[i] = SHORT_BLANK;
         m_number[i] = null;
         m_time[i] = null;
+        m_isPractice[i] = Utilities.isOdd(i);
       }
     } else {
       final String division = request.getParameter("division");
@@ -270,7 +273,8 @@ public class ScoresheetGenerator {
 
   /**
    * Private support function to create new data arrays for the scoresheet
-   * information. IMPORTANT!!! The value of m_numTeams must be set before the
+   * information. IMPORTANT!!! The value of {@link #m_numSheets} must be set
+   * before the
    * call to this method is made.
    */
   private void initializeArrays() {
@@ -281,6 +285,7 @@ public class ScoresheetGenerator {
     m_divisionLabel = new String[m_numSheets];
     m_division = new String[m_numSheets];
     m_time = new String[m_numSheets];
+    m_isPractice = new boolean[m_numSheets];
   }
 
   private static final Font ARIAL_8PT_NORMAL = FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL,
@@ -294,27 +299,52 @@ public class ScoresheetGenerator {
 
   /**
    * Guess the orientation that the document should be.
-   * 
-   * @return true if it should be portrait
+   *
+   * @return true if it should be portrait, number of pages per score sheet (0.5,
+   *         1 or greater)
    * @throws DocumentException
    * @throws IOException
    */
-  public static boolean guessOrientation(final ChallengeDescription description) throws DocumentException, IOException {
+  public static Pair<Boolean, Float> guessOrientation(final ChallengeDescription description)
+      throws DocumentException, IOException {
     final ScoresheetGenerator gen = new ScoresheetGenerator(1, description, "dummy");
-    final ByteArrayOutputStream out = new ByteArrayOutputStream();
-    gen.writeFile(out, false);
-    final ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-    final PdfReader reader = new PdfReader(in);
-    if (reader.getNumberOfPages() > 1) {
+    final ByteArrayOutputStream outLandscape = new ByteArrayOutputStream();
+    // Using landscape, so set pages per sheet to 0.5
+    gen.writeFile(outLandscape, false, 0.5f);
+    final ByteArrayInputStream inLandscape = new ByteArrayInputStream(outLandscape.toByteArray());
+    final PdfReader readerLandscape = new PdfReader(inLandscape);
+    final int numPagesLandscape = readerLandscape.getNumberOfPages();
+    readerLandscape.close();
+
+    if (numPagesLandscape > 1) {
       // doesn't fit landscape
-      return true;
+
+      // need to run again to compute pages per score sheet
+      final ByteArrayOutputStream outPortrait = new ByteArrayOutputStream();
+      // Using portrait, so set pages per sheet to 1
+      gen.writeFile(outPortrait, true, 1f);
+      final ByteArrayInputStream inPortrait = new ByteArrayInputStream(outPortrait.toByteArray());
+      final PdfReader readerPortrait = new PdfReader(inPortrait);
+      final int numPagesPortrait = readerPortrait.getNumberOfPages();
+      readerPortrait.close();
+
+      return Pair.of(true, (float) numPagesPortrait);
     } else {
-      return false;
+      return Pair.of(false, 0.5f);
     }
   }
 
+  /**
+   * @param out where to write the PDF
+   * @param orientationIsPortrait true if the document is in portrait mode, false
+   *          if landscape (2 score sheets per page)
+   * @param pagesPerScoreSheet number of pages each score sheet takes, used to get
+   *          the practice watermark in the right places
+   * @throws DocumentException
+   */
   public void writeFile(final OutputStream out,
-                        final boolean orientationIsPortrait)
+                        final boolean orientationIsPortrait,
+                        final float pagesPerScoreSheet)
       throws DocumentException {
 
     // This creates our new PDF document and declares its orientation
@@ -324,7 +354,8 @@ public class ScoresheetGenerator {
     } else {
       pdfDoc = new Document(PageSize.LETTER.rotate()); // landscape
     }
-    PdfWriter.getInstance(pdfDoc, out);
+    final PdfWriter writer = PdfWriter.getInstance(pdfDoc, out);
+    writer.setPageEvent(new WatermarkHandler(this, pagesPerScoreSheet));
 
     // Measurements are always in points (72 per inch)
     // This sets up 1/2 inch margins side margins and 0.35in top and bottom
@@ -381,14 +412,13 @@ public class ScoresheetGenerator {
     sciC.setPaddingRight(36);
     sciC.setHorizontalAlignment(Element.ALIGN_RIGHT);
 
-    // Create a table with a grid cell for each scoresheet on the page
+    // Create a table with a grid cell for each score sheet on the page
     PdfPTable wholePage = getTableForPage(orientationIsPortrait);
     wholePage.setWidthPercentage(100);
-    for (int i = 0; i < m_numSheets; i++) {
-      if (i > 0
+    for (int sheetIndex = 0; sheetIndex < m_numSheets; sheetIndex++) {
+      if (sheetIndex > 0
           && (orientationIsPortrait
-              || (i
-                  % 2) == 0)) {
+              || Utilities.isEven(sheetIndex))) {
         pdfDoc.newPage();
         wholePage = getTableForPage(orientationIsPortrait);
         wholePage.setWidthPercentage(100);
@@ -413,7 +443,8 @@ public class ScoresheetGenerator {
       timeLc.addElement(timeP);
       teamInfo.addCell(timeLc);
       // Time value cell
-      final Paragraph timeV = new Paragraph(null == m_time[i] ? SHORT_BLANK : m_time[i], COURIER_10PT_NORMAL);
+      final Paragraph timeV = new Paragraph(null == m_time[sheetIndex] ? SHORT_BLANK : m_time[sheetIndex],
+                                            COURIER_10PT_NORMAL);
       final PdfPCell timeVc = new PdfPCell(scoreSheet.getDefaultCell());
       timeVc.addElement(timeV);
       teamInfo.addCell(timeVc);
@@ -425,7 +456,7 @@ public class ScoresheetGenerator {
       tblLc.addElement(tblP);
       teamInfo.addCell(tblLc);
       // Table value cell
-      final Paragraph tblV = new Paragraph(m_table[i], COURIER_10PT_NORMAL);
+      final Paragraph tblV = new Paragraph(m_table[sheetIndex], COURIER_10PT_NORMAL);
       final PdfPCell tblVc = new PdfPCell(scoreSheet.getDefaultCell());
       tblVc.addElement(tblV);
       teamInfo.addCell(tblVc);
@@ -437,7 +468,7 @@ public class ScoresheetGenerator {
       rndlc.addElement(rndP);
       teamInfo.addCell(rndlc);
       // Round number value cell
-      final Paragraph rndV = new Paragraph(m_round[i], COURIER_10PT_NORMAL);
+      final Paragraph rndV = new Paragraph(m_round[sheetIndex], COURIER_10PT_NORMAL);
       final PdfPCell rndVc = new PdfPCell(scoreSheet.getDefaultCell());
       // rndVc.setColspan(2);
       rndVc.addElement(rndV);
@@ -455,21 +486,21 @@ public class ScoresheetGenerator {
       nbrlc.addElement(nbrP);
       teamInfo.addCell(nbrlc);
       // Team number value cell
-      final Paragraph nbrV = new Paragraph(null == m_number[i] ? SHORT_BLANK : String.valueOf(m_number[i]),
-                                           COURIER_10PT_NORMAL);
+      final Paragraph nbrV = new Paragraph(null == m_number[sheetIndex] ? SHORT_BLANK
+          : String.valueOf(m_number[sheetIndex]), COURIER_10PT_NORMAL);
       final PdfPCell nbrVc = new PdfPCell(scoreSheet.getDefaultCell());
       nbrVc.addElement(nbrV);
       teamInfo.addCell(nbrVc);
 
       // Team division label cell
-      final Paragraph divP = new Paragraph(m_divisionLabel[i], ARIAL_10PT_NORMAL);
+      final Paragraph divP = new Paragraph(m_divisionLabel[sheetIndex], ARIAL_10PT_NORMAL);
       divP.setAlignment(Element.ALIGN_RIGHT);
       final PdfPCell divlc = new PdfPCell(scoreSheet.getDefaultCell());
       divlc.addElement(divP);
       divlc.setColspan(2);
       teamInfo.addCell(divlc);
       // Team division value cell
-      final Paragraph divV = new Paragraph(m_division[i], COURIER_10PT_NORMAL);
+      final Paragraph divV = new Paragraph(m_division[sheetIndex], COURIER_10PT_NORMAL);
       final PdfPCell divVc = new PdfPCell(scoreSheet.getDefaultCell());
       divVc.setColspan(2);
       divVc.addElement(divV);
@@ -490,7 +521,7 @@ public class ScoresheetGenerator {
       // Team name value cell
       final PdfPCell nameVc = new PdfPCell(scoreSheet.getDefaultCell());
       nameVc.setColspan(4);
-      nameVc.setCellEvent(new PdfUtils.TruncateContent(m_name[i], COURIER_10PT_NORMAL));
+      nameVc.setCellEvent(new PdfUtils.TruncateContent(m_name[sheetIndex], COURIER_10PT_NORMAL));
       teamInfo.addCell(nameVc);
 
       // add tournament name
@@ -530,7 +561,7 @@ public class ScoresheetGenerator {
         scoreSheet.addCell(copyrightC);
       }
 
-      // the cell in the whole page table that will contain the single score
+      // the cell in the wholePage table that will contain the single score
       // sheet
       final PdfPCell scoresheetCell = new PdfPCell(scoreSheet);
       scoresheetCell.setBorder(0);
@@ -538,8 +569,7 @@ public class ScoresheetGenerator {
 
       // Interior borders between scoresheets on a page
       if (!orientationIsPortrait) {
-        if (i
-            % 2 == 0) {
+        if (Utilities.isEven(sheetIndex)) {
           scoresheetCell.setPaddingRight(0.1f
               * POINTS_PER_INCH);
         } else {
@@ -553,8 +583,7 @@ public class ScoresheetGenerator {
 
       // Add the current table of scoresheets to the document
       if (orientationIsPortrait
-          || (i
-              % 2 != 0)) {
+          || (Utilities.isOdd(sheetIndex))) {
         pdfDoc.add(wholePage);
       }
     }
@@ -738,7 +767,7 @@ public class ScoresheetGenerator {
 
   }
 
-  private int m_numSheets;
+  private final int m_numSheets;
 
   private String m_revision;
 
@@ -762,9 +791,11 @@ public class ScoresheetGenerator {
 
   private String[] m_time;
 
+  private boolean[] m_isPractice;
+
   private PdfPTable m_goalsTable;
 
-  public void setPageTitle(final String title) {
+  private void setPageTitle(final String title) {
     m_pageTitle = title;
   }
 
@@ -774,7 +805,7 @@ public class ScoresheetGenerator {
 
   /**
    * Sets the table label for scoresheet with index i.
-   * 
+   *
    * @param i The 0-based index of the scoresheet to which to assign this table
    *          label.
    * @param table A string with the table label for the specified scoresheet.
@@ -795,7 +826,7 @@ public class ScoresheetGenerator {
 
   /**
    * Sets the division for scoresheet with index i.
-   * 
+   *
    * @param i The 0-based index of the scoresheet to which to assign this table
    *          label.
    * @param divisionLabel the label to use for this division should be
@@ -821,7 +852,7 @@ public class ScoresheetGenerator {
 
   /**
    * Sets the team name for scoresheet with index i.
-   * 
+   *
    * @param i The 0-based index of the scoresheet to which to assign this team
    *          name.
    * @param name A string with the team name for the specified scoresheet.
@@ -842,7 +873,7 @@ public class ScoresheetGenerator {
 
   /**
    * Sets the team number for scoresheet with index i.
-   * 
+   *
    * @param i The 0-based index of the scoresheet to which to assign this team
    *          number.
    * @param number A string with the team number for the specified scoresheet.
@@ -863,7 +894,7 @@ public class ScoresheetGenerator {
 
   /**
    * Sets the time for scoresheet with index i.
-   * 
+   *
    * @param i The 0-based index of the scoresheet to which to assign this time.
    * @param time the time for the specified scoresheet.
    * @throws IllegalArgumentException Thrown if the index is out of valid range.
@@ -876,13 +907,13 @@ public class ScoresheetGenerator {
 
   /**
    * Puts an arbitrary string in the time field.
-   * 
+   *
    * @param i The 0-based index of the scoresheet to which to assign this time.
    * @param time the time for the specified scoresheet.
    * @throws IllegalArgumentException Thrown if the index is out of valid range.
    */
-  public void setTime(final int i,
-                      final String time)
+  private void setTime(final int i,
+                       final String time)
       throws IllegalArgumentException {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
@@ -896,7 +927,7 @@ public class ScoresheetGenerator {
 
   /**
    * Sets the round number descriptor for scoresheet with index i.
-   * 
+   *
    * @param i The 0-based index of the scoresheet to which to assign this round
    *          number.
    * @param round A string with the round number descriptor for the specified
@@ -917,8 +948,41 @@ public class ScoresheetGenerator {
   }
 
   /**
+   * Sets if the score sheet for the specified index is a practice round.
+   *
+   * @param i The 0-based index of the score sheet
+   * @param isPractice true if this is a practice round
+   * @throws IllegalArgumentException Thrown if the index is out of valid range.
+   */
+  public void setPractice(final int i,
+                          final boolean isPractice)
+      throws IllegalArgumentException {
+    if (i < 0) {
+      throw new IllegalArgumentException("Index must not be < 0");
+    }
+    if (i >= m_numSheets) {
+      throw new IllegalArgumentException("Index must be < "
+          + m_numSheets);
+    }
+    m_isPractice[i] = isPractice;
+  }
+
+  /**
+   * Used by {@link WatermarkHandler}.
+   *
+   * @return If index is out of bounds, return false.
+   */
+  /* package */ boolean isPractice(final int index) {
+    if (index >= m_isPractice.length) {
+      return false;
+    } else {
+      return m_isPractice[index];
+    }
+  }
+
+  /**
    * Create table for page given number of sheets per page.
-   * 
+   *
    * @param nup
    * @return
    */
@@ -931,4 +995,105 @@ public class ScoresheetGenerator {
     }
     return wholePage;
   }
+
+  private static class WatermarkHandler extends PdfPageEventHelper {
+
+    private final PdfGState gstate;
+
+    private final Font font;
+
+    private final BaseColor color;
+
+    private final float pagesPerScoreSheet;
+
+    private static final float WATERMARK_OPACITY = 0.3f;
+
+    private static final double PAGES_PER_SHEET_TOLERANCE = 1E-6;
+
+    private final ScoresheetGenerator generator;
+
+    /**
+     * @param pagesPerScoreSheet number of pages per score sheet, 0.5 and values
+     *          greater than or equal to 1 are supported
+     */
+    public WatermarkHandler(final ScoresheetGenerator generator,
+                            final float pagesPerScoreSheet) {
+      if (!FP.equals(pagesPerScoreSheet, 0.5, PAGES_PER_SHEET_TOLERANCE)
+          && !FP.greaterThanOrEqual(pagesPerScoreSheet, 1, PAGES_PER_SHEET_TOLERANCE)) {
+        throw new IllegalArgumentException("Allowed values for pages per score sheet are 0.5 and 1 or greater. Value is: "
+            + pagesPerScoreSheet);
+      }
+      this.pagesPerScoreSheet = pagesPerScoreSheet;
+      this.generator = generator;
+
+      font = FontFactory.getFont(FontFactory.HELVETICA, 52, Font.NORMAL);
+      color = BaseColor.BLACK;
+
+      gstate = new PdfGState();
+      gstate.setFillOpacity(WATERMARK_OPACITY);
+      gstate.setStrokeOpacity(WATERMARK_OPACITY);
+
+    }
+
+    @Override
+    public void onEndPage(final PdfWriter writer,
+                          final Document document) {
+      // Need to determine which score sheet we are on based on page number and pages
+      // per sheet.
+
+      final Rectangle pageSize = document.getPageSize();
+      final float y = pageSize.getHeight()
+          / 2;
+
+      final int currentPageNumber = writer.getCurrentPageNumber();
+      final int indexOfFirstScoreSheetOnPage;
+      if (pagesPerScoreSheet < 1) {
+        indexOfFirstScoreSheetOnPage = (int) Math.floor(currentPageNumber
+            / pagesPerScoreSheet)
+            - 2;
+
+        if (generator.isPractice(indexOfFirstScoreSheetOnPage)) {
+          final float x = pageSize.getWidth()
+              / 4;
+          addWatermark(writer, x, y);
+        }
+
+        // check the second sheet on the page
+        if (generator.isPractice(indexOfFirstScoreSheetOnPage
+            + 1)) {
+          final float x = pageSize.getWidth()
+              * 3
+              / 4;
+          addWatermark(writer, x, y);
+        }
+
+      } else {
+        indexOfFirstScoreSheetOnPage = (int) Math.ceil(currentPageNumber
+            / pagesPerScoreSheet)
+            - 1;
+        if (generator.isPractice(indexOfFirstScoreSheetOnPage)) {
+          final float x = pageSize.getWidth()
+              / 2;
+          addWatermark(writer, x, y);
+        }
+      }
+
+    }
+
+    private void addWatermark(final PdfWriter writer,
+                              final float x,
+                              final float y) {
+      final PdfContentByte contentunder = writer.getDirectContentUnder();
+      contentunder.saveState();
+      contentunder.setGState(gstate);
+      contentunder.beginText();
+      contentunder.setFontAndSize(font.getBaseFont(), font.getSize());
+      contentunder.setColorFill(color);
+      contentunder.showTextAligned(Element.ALIGN_CENTER, "PRACTICE", x, y, 45);
+      contentunder.endText();
+      contentunder.restoreState();
+    }
+
+  }
+
 }

@@ -32,10 +32,10 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.PosixParser;
 
 import com.opencsv.CSVWriter;
 
@@ -161,7 +161,7 @@ public class GreedySolver {
     File datafile = null;
     try {
       // TODO update command line parser
-      final CommandLineParser parser = new PosixParser();
+      final CommandLineParser parser = new DefaultParser();
       final CommandLine cmd = parser.parse(options, args);
 
       if (cmd.hasOption(OPTIMIZE_OPTION)) {
@@ -1519,7 +1519,7 @@ public class GreedySolver {
                     + 1));
                 final int displayedSide = side
                     + 1;
-                perfTimes.add(new PerformanceTime(time, tableName, displayedSide));
+                perfTimes.add(new PerformanceTime(time, tableName, displayedSide, false));
               }
             }
           }

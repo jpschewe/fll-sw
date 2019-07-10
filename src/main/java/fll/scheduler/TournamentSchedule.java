@@ -45,20 +45,12 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.annotation.Nonnull;
-import javax.xml.XMLConstants;
-import javax.xml.transform.Source;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
 
 import org.apache.commons.io.IOUtils;
-
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 
+import com.diffplug.common.base.Errors;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -83,15 +75,12 @@ import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
-
 import fll.util.PdfUtils;
 import fll.util.SimpleFooterHandler;
 import fll.web.playoff.ScoresheetGenerator;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
-import net.mtu.eggplant.util.sql.SQLFunctions;
-import net.mtu.eggplant.xml.XMLUtils;
 
 /**
  * Tournament schedule. Can parse the schedule from a spreadsheet or CSV file.
@@ -134,6 +123,10 @@ public class TournamentSchedule implements Serializable {
 
   public static final String BASE_PERF_HEADER = "Perf #";
 
+  public static final String BASE_PRACTICE_HEADER = "Practice #";
+
+  public static final String BASE_PRACTICE_HEADER_SHORT = "Practice";
+
   /**
    * Used with {@link String#format(String, Object...)} to create a performance
    * round header.
@@ -142,24 +135,49 @@ public class TournamentSchedule implements Serializable {
       + "%d";
 
   /**
+   * Used with {@link String#format(String, Object...)} to create a practice
+   * round header.
+   */
+  public static final String PRACTICE_HEADER_FORMAT = BASE_PRACTICE_HEADER
+      + "%d";
+
+  /**
    * Used with {@link String#format(String, Object...)} to create a performance
    * table header.
    */
   public static final String TABLE_HEADER_FORMAT = "Perf %d Table";
 
-  private final int numRounds;
+  public static final String PRACTICE_TABLE_HEADER_FORMAT = "Practice %d Table";
+
+  public static final String PRACTICE_TABLE_HEADER_FORMAT_SHORT = "Practice Table";
 
   /**
-   * Number of rounds in this schedule.
+   * @return Number of rounds in this schedule (practice and regular match play).
+   * @see #getNumberOfPracticeRounds()
+   * @see #getNumberOfRegularMatchPlayRounds()
    */
-  public int getNumberOfRounds() {
-    return numRounds;
+  public int getTotalNumberOfRounds() {
+    return getNumberOfRegularMatchPlayRounds()
+        + getNumberOfPracticeRounds();
   }
 
+  private final int numRegularMatchPlayRounds;
+
   /**
-   * XML format for time type.
+   * @return number of regular match play rounds in this schedule
    */
-  private static final DateTimeFormatter XML_TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
+  public int getNumberOfRegularMatchPlayRounds() {
+    return numRegularMatchPlayRounds;
+  }
+
+  private final int numPracticeRounds;
+
+  /**
+   * @return number of practice rounds in this schedule
+   */
+  public int getNumberOfPracticeRounds() {
+    return numPracticeRounds;
+  }
 
   /**
    * Always output without 24-hour time and without AM/PM.
@@ -190,7 +208,7 @@ public class TournamentSchedule implements Serializable {
    * specified and still have times in the afternoon. If there is any time that
    * has an hour before {@link #EARLIEST_HOUR} the time is assumed to be in the
    * afternoon.
-   * 
+   *
    * @param str a string representing a schedule time, if null the return value
    *          is null, if empty the return value is null
    * @return the {@link LocalTime} object for the string
@@ -228,7 +246,7 @@ public class TournamentSchedule implements Serializable {
   /**
    * Conver the time to a string that will be parsed by
    * {@link #parseTime(String)}.
-   * 
+   *
    * @param time the time to format, may be null
    * @return the formatted time, null converts to ""
    */
@@ -255,27 +273,27 @@ public class TournamentSchedule implements Serializable {
     return _matches;
   }
 
-  private final HashSet<String> _tableColors = new HashSet<String>();
+  private final HashSet<String> _tableColors = new HashSet<>();
 
   public Set<String> getTableColors() {
     return Collections.unmodifiableSet(_tableColors);
   }
 
-  private final HashSet<String> _awardGroups = new HashSet<String>();
+  private final HashSet<String> _awardGroups = new HashSet<>();
 
   public Set<String> getAwardGroups() {
     return Collections.unmodifiableSet(_awardGroups);
   }
 
-  private final HashSet<String> _judgingGroups = new HashSet<String>();
+  private final HashSet<String> _judgingGroups = new HashSet<>();
 
   public Set<String> getJudgingGroups() {
     return Collections.unmodifiableSet(_judgingGroups);
   }
 
-  private final LinkedList<TeamScheduleInfo> _schedule = new LinkedList<TeamScheduleInfo>();
+  private final LinkedList<TeamScheduleInfo> _schedule = new LinkedList<>();
 
-  private final HashSet<String> subjectiveStations = new HashSet<String>();
+  private final HashSet<String> subjectiveStations = new HashSet<>();
 
   /**
    * Name of this tournament.
@@ -302,7 +320,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Get the {@link TeamScheduleInfo} for the specified team number.
-   * 
+   *
    * @return null if cannot be found
    */
   public TeamScheduleInfo getSchedInfoForTeam(final int teamNumber) {
@@ -316,7 +334,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Read the tournament schedule from a spreadsheet.
-   * 
+   *
    * @param name the name of the tournament
    * @param stream how to access the spreadsheet
    * @param sheetName the name of the worksheet the data is on
@@ -333,7 +351,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Read the tournament schedule from a CSV file.
-   * 
+   *
    * @param csvFile where to read the schedule from
    * @param subjectiveHeaders the headers for the subjective columns
    * @throws ScheduleParseException
@@ -348,7 +366,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Common construction.
-   * 
+   *
    * @throws IOException
    * @throws ScheduleParseException
    * @throws ParseException
@@ -359,7 +377,8 @@ public class TournamentSchedule implements Serializable {
       throws IOException, ParseException, ScheduleParseException {
     this.name = name;
     final ColumnInformation columnInfo = findColumns(reader, subjectiveHeaders);
-    numRounds = columnInfo.getNumPerfs();
+    numRegularMatchPlayRounds = columnInfo.getNumPerfs();
+    numPracticeRounds = columnInfo.getNumPracticePerfs();
     parseData(reader, columnInfo);
     reader.close();
     this.subjectiveStations.clear();
@@ -368,7 +387,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Load a tournament from the database.
-   * 
+   *
    * @param connection
    * @param tournamentID
    * @throws SQLException
@@ -379,136 +398,115 @@ public class TournamentSchedule implements Serializable {
     final Tournament currentTournament = Tournament.findTournamentByID(connection, tournamentID);
     name = currentTournament.getName();
 
-    PreparedStatement getSched = null;
-    ResultSet sched = null;
-    PreparedStatement getPerfRounds = null;
-    ResultSet perfRounds = null;
-    PreparedStatement getNumRounds = null;
-    ResultSet numRounds = null;
-    PreparedStatement getSubjective = null;
-    ResultSet subjective = null;
-    PreparedStatement getSubjectiveStations = null;
-    ResultSet stations = null;
-    try {
-      getSubjectiveStations = connection.prepareStatement("SELECT DISTINCT name from sched_subjective WHERE tournament = ?");
+    try (
+        PreparedStatement getSubjectiveStations = connection.prepareStatement("SELECT DISTINCT name from sched_subjective WHERE tournament = ?")) {
       getSubjectiveStations.setInt(1, tournamentID);
-      stations = getSubjectiveStations.executeQuery();
-      while (stations.next()) {
-        final String name = stations.getString(1);
-        subjectiveStations.add(name);
+      try (ResultSet stations = getSubjectiveStations.executeQuery()) {
+        while (stations.next()) {
+          final String name = stations.getString(1);
+          subjectiveStations.add(name);
+        }
       }
-      SQLFunctions.close(stations);
-      stations = null;
-      SQLFunctions.close(getSubjectiveStations);
-      getSubjectiveStations = null;
+    }
 
-      getNumRounds = connection.prepareStatement("SELECT MAX(round) FROM sched_perf_rounds WHERE tournament = ?");
-      getNumRounds.setInt(1, tournamentID);
-      numRounds = getNumRounds.executeQuery();
-      if (numRounds.next()) {
-        this.numRounds = numRounds.getInt(1)
-            + 1;
-      } else {
-        throw new RuntimeException("No rounds found for tournament: "
-            + tournamentID);
-      }
+    try (PreparedStatement getSched = connection.prepareStatement("SELECT team_number, judging_station"
+        + " FROM schedule"//
+        + " WHERE tournament = ?");
 
-      getSched = connection.prepareStatement("SELECT team_number, judging_station"
-          + " FROM schedule"//
-          + " WHERE tournament = ?");
+        PreparedStatement getPerfRounds = connection.prepareStatement("SELECT perf_time, table_color, table_side, practice" //
+            + " FROM sched_perf_rounds" //
+            + " WHERE tournament = ? AND team_number = ?");
+
+        PreparedStatement getSubjective = connection.prepareStatement("SELECT name, subj_time" //
+            + " FROM sched_subjective" //
+            + " WHERE tournament = ? AND team_number = ?")) {
+
       getSched.setInt(1, tournamentID);
-
-      getPerfRounds = connection.prepareStatement("SELECT round, perf_time, table_color, table_side" //
-          + " FROM sched_perf_rounds" //
-          + " WHERE tournament = ? AND team_number = ?" //
-          + " ORDER BY round ASC");
       getPerfRounds.setInt(1, tournamentID);
 
-      getSubjective = connection.prepareStatement("SELECT name, subj_time" //
-          + " FROM sched_subjective" //
-          + " WHERE tournament = ? AND team_number = ?");
       getSubjective.setInt(1, tournamentID);
 
-      sched = getSched.executeQuery();
-      while (sched.next()) {
-        final int teamNumber = sched.getInt(1);
-        final String judgingStation = sched.getString(2);
+      try (ResultSet sched = getSched.executeQuery()) {
+        while (sched.next()) {
+          final int teamNumber = sched.getInt(1);
+          final String judgingStation = sched.getString(2);
 
-        final TeamScheduleInfo ti = new TeamScheduleInfo(this.numRounds, teamNumber);
-        ti.setJudgingGroup(judgingStation);
+          final TeamScheduleInfo ti = new TeamScheduleInfo(teamNumber);
+          ti.setJudgingGroup(judgingStation);
 
-        getSubjective.setInt(2, teamNumber);
-        subjective = getSubjective.executeQuery();
-        while (subjective.next()) {
-          final String name = subjective.getString(1);
-          final Time subjTime = subjective.getTime(2);
-          ti.addSubjectiveTime(new SubjectiveTime(name, subjTime.toLocalTime()));
-        }
-
-        getPerfRounds.setInt(2, teamNumber);
-        perfRounds = getPerfRounds.executeQuery();
-        int prevRound = -1;
-        while (perfRounds.next()) {
-          final int round = perfRounds.getInt(1);
-          if (round != prevRound
-              + 1) {
-            throw new RuntimeException("Rounds must be consecutive and start at 1. Tournament: "
-                + tournamentID
-                + " team: "
-                + teamNumber
-                + " round: "
-                + (round
-                    + 1)
-                + " prevRound: "
-                + (prevRound
-                    + 1));
+          getSubjective.setInt(2, teamNumber);
+          try (ResultSet subjective = getSubjective.executeQuery()) {
+            while (subjective.next()) {
+              final String name = subjective.getString(1);
+              final Time subjTime = subjective.getTime(2);
+              ti.addSubjectiveTime(new SubjectiveTime(name, subjTime.toLocalTime()));
+            }
           }
-          final LocalTime perfTime = perfRounds.getTime(2).toLocalTime();
-          final String tableColor = perfRounds.getString(3);
-          final int tableSide = perfRounds.getInt(4);
-          if (tableSide != 1
-              && tableSide != 2) {
-            throw new RuntimeException("Tables sides must be 1 or 2. Tournament: "
-                + tournamentID
-                + " team: "
-                + teamNumber);
-          }
-          final PerformanceTime performance = new PerformanceTime(perfTime, tableColor, tableSide);
-          ti.setPerf(round, performance);
 
-          prevRound = round;
-        }
-        final String eventDivision = Queries.getEventDivision(connection, teamNumber, tournamentID);
-        ti.setDivision(eventDivision);
+          getPerfRounds.setInt(2, teamNumber);
+          try (ResultSet perfRounds = getPerfRounds.executeQuery()) {
+            while (perfRounds.next()) {
+              final LocalTime perfTime = perfRounds.getTime(1).toLocalTime();
+              final String tableColor = perfRounds.getString(2);
+              final int tableSide = perfRounds.getInt(3);
+              if (tableSide != 1
+                  && tableSide != 2) {
+                throw new RuntimeException("Tables sides must be 1 or 2. Tournament: "
+                    + tournamentID
+                    + " team: "
+                    + teamNumber);
+              }
+              final boolean practice = perfRounds.getBoolean(4);
+              final PerformanceTime performance = new PerformanceTime(perfTime, tableColor, tableSide, practice);
+              ti.addPerformance(performance);
+            } // foreach performance round
+          } // allocate performance ResultSet
 
-        final Team team = Team.getTeamFromDatabase(connection, teamNumber);
-        ti.setOrganization(team.getOrganization());
-        ti.setTeamName(team.getTeamName());
+          final String eventDivision = Queries.getEventDivision(connection, teamNumber, tournamentID);
+          ti.setDivision(eventDivision);
 
-        cacheTeamScheduleInformation(ti);
+          final Team team = Team.getTeamFromDatabase(connection, teamNumber);
+          ti.setOrganization(team.getOrganization());
+          ti.setTeamName(team.getTeamName());
+
+          cacheTeamScheduleInformation(ti);
+        } // foreach sched result
+
+      } // allocate sched ResultSet
+
+    } // allocate prepared statements
+
+    if (!_schedule.isEmpty()) {
+      this.numRegularMatchPlayRounds = _schedule.get(0).getNumRegularMatchPlayRounds();
+      this.numPracticeRounds = _schedule.get(0).getNumPracticeRounds();
+      validateRounds();
+    } else {
+      this.numRegularMatchPlayRounds = 0;
+      this.numPracticeRounds = 0;
+    }
+
+  }
+
+  private void validateRounds() {
+    for (final TeamScheduleInfo si : _schedule) {
+      if (this.numRegularMatchPlayRounds != si.getNumRegularMatchPlayRounds()) {
+        throw new RuntimeException("Should have "
+            + this.numRegularMatchPlayRounds
+            + " performance rounds for all teams, but found "
+            + si.getNumRegularMatchPlayRounds()
+            + " for team "
+            + si.getTeamNumber());
       }
 
-    } finally {
-      SQLFunctions.close(stations);
-      stations = null;
-      SQLFunctions.close(getSubjectiveStations);
-      getSubjectiveStations = null;
-      SQLFunctions.close(sched);
-      sched = null;
-      SQLFunctions.close(getSched);
-      getSched = null;
-      SQLFunctions.close(perfRounds);
-      perfRounds = null;
-      SQLFunctions.close(getPerfRounds);
-      getPerfRounds = null;
-      SQLFunctions.close(numRounds);
-      numRounds = null;
-      SQLFunctions.close(getNumRounds);
-      getNumRounds = null;
-      SQLFunctions.close(subjective);
-      subjective = null;
-      SQLFunctions.close(getSubjective);
-      getSubjective = null;
+      if (this.numPracticeRounds != si.getNumPracticeRounds()) {
+        throw new RuntimeException("Should have "
+            + this.numPracticeRounds
+            + " practice for all teams, but found "
+            + si.getNumPracticeRounds()
+            + " for team "
+            + si.getTeamNumber());
+      }
+
     }
   }
 
@@ -518,8 +516,8 @@ public class TournamentSchedule implements Serializable {
    */
   private static boolean isHeaderLine(final String[] line) {
     boolean retval = false;
-    for (int i = 0; i < line.length; ++i) {
-      if (TEAM_NUMBER_HEADER.equals(line[i])) {
+    for (final String element : line) {
+      if (TEAM_NUMBER_HEADER.equals(element)) {
         retval = true;
       }
     }
@@ -530,7 +528,7 @@ public class TournamentSchedule implements Serializable {
   /**
    * Find the index of the columns. Reads lines until the headers are found or
    * EOF is reached.
-   * 
+   *
    * @return the column information
    * @throws IOException
    * @throws RuntimeException if a header row cannot be found
@@ -551,20 +549,20 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
-   * Figure out how many performance rounds exist in this header line. This
+   * Figure out how many regular match play rounds exist in this header line. This
    * method also checks that the corresponding table header exists for each
    * round and that the round numbers are contiguous starting at 1.
-   * 
+   *
    * @throws FLLRuntimeException if there are problems with the performance
    *           round headers found
    */
-  private static int countNumRounds(final String[] line) {
-    final SortedSet<Integer> perfRounds = new TreeSet<Integer>();
-    for (int i = 0; i < line.length; ++i) {
-      if (null != line[i]
-          && line[i].startsWith(BASE_PERF_HEADER)
-          && line[i].length() > BASE_PERF_HEADER.length()) {
-        final String perfNumberStr = line[i].substring(BASE_PERF_HEADER.length());
+  private static int countNumRegularMatchPlayRounds(final String[] line) {
+    final SortedSet<Integer> perfRounds = new TreeSet<>();
+    for (final String element : line) {
+      if (null != element
+          && element.startsWith(BASE_PERF_HEADER)
+          && element.length() > BASE_PERF_HEADER.length()) {
+        final String perfNumberStr = element.substring(BASE_PERF_HEADER.length());
         final Integer perfNumber = Integer.valueOf(perfNumberStr);
         if (!perfRounds.add(perfNumber)) {
           throw new FLLRuntimeException("Found performance rounds num "
@@ -580,7 +578,7 @@ public class TournamentSchedule implements Serializable {
      * corresponding table header exists
      */
     int expectedValue = 1;
-    for (Integer value : perfRounds) {
+    for (final Integer value : perfRounds) {
       if (null == value) {
         throw new FLLInternalException("Found null performance round in header!");
       }
@@ -607,6 +605,70 @@ public class TournamentSchedule implements Serializable {
     return perfRounds.size();
   }
 
+  private static int countNumPracticeRounds(final String[] line) {
+    final SortedSet<Integer> perfRounds = new TreeSet<>();
+    for (final String element : line) {
+      if (null != element
+          && element.startsWith(BASE_PRACTICE_HEADER)
+          && element.length() > BASE_PRACTICE_HEADER.length()) {
+        final String perfNumberStr = element.substring(BASE_PRACTICE_HEADER.length());
+        final Integer perfNumber = Integer.valueOf(perfNumberStr);
+        if (!perfRounds.add(perfNumber)) {
+          throw new FLLRuntimeException("Found practice rounds num "
+              + perfNumber
+              + " twice in the header: "
+              + Arrays.asList(line));
+        }
+      } else if (null != element
+          && element.equals(BASE_PRACTICE_HEADER_SHORT)) {
+        if (!perfRounds.add(1)) {
+          throw new FLLRuntimeException("Found practice rounds num "
+              + 1
+              + " twice in the header: "
+              + Arrays.asList(line));
+        }
+      }
+    }
+
+    /*
+     * check that the values start at 1, are contiguous, and that the
+     * corresponding table header exists
+     */
+    int expectedValue = 1;
+    for (final Integer value : perfRounds) {
+      if (null == value) {
+        throw new FLLInternalException("Found null practice round in header!");
+      }
+      if (expectedValue != value.intValue()) {
+        throw new FLLRuntimeException("Practice rounds not contiguous after "
+            + (expectedValue
+                - 1)
+            + " found "
+            + value);
+      }
+
+      if (1 == expectedValue
+          && 1 == perfRounds.size()
+          && checkHeaderExists(line, PRACTICE_TABLE_HEADER_FORMAT_SHORT)) {
+        // pass
+        LOGGER.trace("Found short practice table header");
+      } else {
+        final String tableHeader = String.format(PRACTICE_TABLE_HEADER_FORMAT, expectedValue);
+        if (!checkHeaderExists(line, tableHeader)) {
+          throw new FLLRuntimeException("Couldn't find header for round "
+              + expectedValue
+              + ". Looking for header '"
+              + tableHeader
+              + "'");
+        }
+      }
+
+      ++expectedValue;
+    }
+
+    return perfRounds.size();
+  }
+
   private static boolean checkHeaderExists(final String[] line,
                                            final String header) {
     return null != columnForHeader(line, header);
@@ -614,7 +676,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Find the column that contains the specified header.
-   * 
+   *
    * @return the column, null if not found
    */
   private static Integer columnForHeader(final String[] line,
@@ -648,10 +710,14 @@ public class TournamentSchedule implements Serializable {
 
   private static ColumnInformation parseHeader(final Collection<String> subjectiveHeaders,
                                                final String[] line) {
-    final int numPerfRounds = countNumRounds(line);
+    final int numPerfRounds = countNumRegularMatchPlayRounds(line);
+    final int numPracticeRounds = countNumPracticeRounds(line);
 
     final int[] perfColumn = new int[numPerfRounds];
     final int[] perfTableColumn = new int[numPerfRounds];
+
+    final int[] practiceColumn = new int[numPracticeRounds];
+    final int[] practiceTableColumn = new int[numPracticeRounds];
 
     final int teamNumColumn = getColumnForHeader(line, TEAM_NUMBER_HEADER);
     final int organizationColumn = getColumnForHeader(line, ORGANIZATION_HEADER);
@@ -697,19 +763,46 @@ public class TournamentSchedule implements Serializable {
       perfTableColumn[round] = getColumnForHeader(line, perfTableHeader);
     }
 
-    final Map<Integer, String> subjectiveColumns = new HashMap<Integer, String>();
+    if (1 == numPracticeRounds) {
+      // check for short version of headers first, then try long version
+      final Integer index = columnForHeader(line, BASE_PRACTICE_HEADER_SHORT);
+      if (null == index) {
+        practiceColumn[0] = getColumnForHeader(line, String.format(PRACTICE_HEADER_FORMAT, 1));
+      } else {
+        practiceColumn[0] = index.intValue();
+      }
+
+      final Integer indexTable = columnForHeader(line, PRACTICE_TABLE_HEADER_FORMAT_SHORT);
+      if (null == indexTable) {
+        practiceTableColumn[0] = getColumnForHeader(line, String.format(PRACTICE_TABLE_HEADER_FORMAT, 1));
+      } else {
+        practiceTableColumn[0] = indexTable.intValue();
+      }
+    } else {
+      for (int round = 0; round < numPracticeRounds; ++round) {
+        final String perfHeader = String.format(PRACTICE_HEADER_FORMAT, (round
+            + 1));
+        final String perfTableHeader = String.format(PRACTICE_TABLE_HEADER_FORMAT, (round
+            + 1));
+        practiceColumn[round] = getColumnForHeader(line, perfHeader);
+        practiceTableColumn[round] = getColumnForHeader(line, perfTableHeader);
+      }
+    }
+
+    final Map<Integer, String> subjectiveColumns = new HashMap<>();
     for (final String header : subjectiveHeaders) {
       final int column = getColumnForHeader(line, header);
       subjectiveColumns.put(column, header);
     }
 
     return new ColumnInformation(line, teamNumColumn, organizationColumn, teamNameColumn, divisionColumn,
-                                 subjectiveColumns, judgeGroupColumn, perfColumn, perfTableColumn);
+                                 subjectiveColumns, judgeGroupColumn, perfColumn, perfTableColumn, practiceColumn,
+                                 practiceTableColumn);
   }
 
   /**
    * Parse the data of the schedule.
-   * 
+   *
    * @throws IOException
    * @throws ScheduleParseException if there is an error with the schedule
    */
@@ -743,72 +836,18 @@ public class TournamentSchedule implements Serializable {
     addToSchedule(ti);
 
     // keep track of some meta information
-    for (int round = 0; round < getNumberOfRounds(); ++round) {
-      _tableColors.add(ti.getPerfTableColor(round));
-      addToMatches(ti, round);
-    }
+    ti.allPerformances().forEach(performance -> {
+      _tableColors.add(performance.getTable());
+      addToMatches(ti, performance);
+    });
+
     _awardGroups.add(ti.getAwardGroup());
     _judgingGroups.add(ti.getJudgingGroup());
   }
 
   /**
-   * Find the team that is competing earliest after the specified time on the
-   * specified table and side in the specified round.
-   * 
-   * @param time the time after which to find a competition
-   * @param table the table color
-   * @param side the side
-   * @param round the round - zero based index
-   */
-  private TeamScheduleInfo findNextTeam(final LocalTime time,
-                                        final String table,
-                                        final int side,
-                                        final int round) {
-    TeamScheduleInfo retval = null;
-    for (final TeamScheduleInfo si : _schedule) {
-      if (table.equals(si.getPerfTableColor(round))
-          && side == si.getPerfTableSide(round)
-          && si.getPerfTime(round).isAfter(time)) {
-        if (retval == null) {
-          retval = si;
-        } else if (null != si.getPerfTime(round)
-            && si.getPerfTime(round).isBefore(retval.getPerfTime(round))) {
-          retval = si;
-        }
-      }
-    }
-    return retval;
-  }
-
-  /**
-   * Check if the specified team needs to stay around after their performance to
-   * even up the table.
-   * 
-   * @param si the TeamScheduleInfo for the team
-   * @param round the round the team is competing at (zero based index)
-   * @return the team one needs to compete against in an extra round or null if
-   *         the team does not need to stay
-   */
-  public TeamScheduleInfo checkIfTeamNeedsToStay(final TeamScheduleInfo si,
-                                                 final int round) {
-    final int otherSide = 2 == si.getPerfTableSide(round) ? 1 : 2;
-    final TeamScheduleInfo next = findNextTeam(si.getPerfTime(round), si.getPerfTableColor(round), otherSide, round);
-
-    if (null != next) {
-      final TeamScheduleInfo nextOpponent = findOpponent(next, round);
-      if (null == nextOpponent) {
-        return next;
-      } else {
-        return null;
-      }
-    } else {
-      return null;
-    }
-  }
-
-  /**
    * Output the detailed schedule.
-   * 
+   *
    * @param directory the directory to put the files in
    * @param baseFilename the base filename
    * @throws DocumentException
@@ -868,7 +907,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Output the schedule for each team.
-   * 
+   *
    * @param params schedule parameters
    * @param pdfFos where to write the schedule
    * @throws DocumentException
@@ -886,7 +925,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Output the performance schedule, sorted by time.
-   * 
+   *
    * @param pdfFos where to write the schedule
    * @throws DocumentException
    */
@@ -899,7 +938,7 @@ public class TournamentSchedule implements Serializable {
   /**
    * Output the subjective schedules with a table for each category and sorted
    * by time.
-   * 
+   *
    * @param pdfFos where to write the schedule
    * @throws DocumentException
    */
@@ -915,7 +954,7 @@ public class TournamentSchedule implements Serializable {
   /**
    * Output the subjective schedules with a table for each category and sorted
    * by judging station, then by time.
-   * 
+   *
    * @param pdfFos where to output the schedule
    * @throws DocumentException
    */
@@ -931,7 +970,7 @@ public class TournamentSchedule implements Serializable {
   /**
    * Output the schedule sorted by team number. This schedule looks much like
    * the input spreadsheet.
-   * 
+   *
    * @param stream where to write the schedule
    * @throws DocumentException
    */
@@ -940,8 +979,10 @@ public class TournamentSchedule implements Serializable {
 
     final int numColumns = 5
         + subjectiveStations.size()
-        + getNumberOfRounds()
-            * 2;
+        + (getNumberOfRegularMatchPlayRounds()
+            * 2)
+        + (getNumberOfPracticeRounds()
+            * 2);
     final PdfPTable table = PdfUtils.createTable(numColumns);
     final float[] columnWidths = new float[numColumns];
     int idx = 0;
@@ -959,7 +1000,13 @@ public class TournamentSchedule implements Serializable {
       columnWidths[idx] = 2; // time
       ++idx;
     }
-    for (int i = 0; i < getNumberOfRounds(); ++i) {
+    for (int i = 0; i < getNumberOfPracticeRounds(); ++i) {
+      columnWidths[idx] = 2; // time
+      ++idx;
+      columnWidths[idx] = 2; // table
+      ++idx;
+    }
+    for (int i = 0; i < getNumberOfRegularMatchPlayRounds(); ++i) {
       columnWidths[idx] = 2; // time
       ++idx;
       columnWidths[idx] = 2; // table
@@ -981,7 +1028,13 @@ public class TournamentSchedule implements Serializable {
     for (final String subjectiveStation : subjectiveStations) {
       table.addCell(PdfUtils.createHeaderCell(subjectiveStation));
     }
-    for (int round = 0; round < getNumberOfRounds(); ++round) {
+    for (int round = 0; round < getNumberOfPracticeRounds(); ++round) {
+      table.addCell(PdfUtils.createHeaderCell(String.format(PRACTICE_HEADER_FORMAT, round
+          + 1)));
+      table.addCell(PdfUtils.createHeaderCell(String.format(PRACTICE_TABLE_HEADER_FORMAT, round
+          + 1)));
+    }
+    for (int round = 0; round < getNumberOfRegularMatchPlayRounds(); ++round) {
       table.addCell(PdfUtils.createHeaderCell(String.format(PERF_HEADER_FORMAT, round
           + 1)));
       table.addCell(PdfUtils.createHeaderCell(String.format(TABLE_HEADER_FORMAT, round
@@ -1001,13 +1054,20 @@ public class TournamentSchedule implements Serializable {
         table.addCell(PdfUtils.createCell(formatTime(si.getSubjectiveTimeByName(subjectiveStation).getTime())));
       }
 
-      for (int round = 0; round < getNumberOfRounds(); ++round) {
-        final PerformanceTime perf = si.getPerf(round);
+      si.enumeratePracticePerformances().forEachOrdered(Errors.rethrow().wrap(pair -> {
+        final PerformanceTime perf = pair.getLeft();
+        table.addCell(PdfUtils.createCell(formatTime(perf.getTime())));
+
+        table.addCell(PdfUtils.createCell(String.format("%s %s", perf.getTable(), perf.getSide())));
+      }));
+
+      si.enumerateRegularMatchPlayPerformances().forEachOrdered(Errors.rethrow().wrap(pair -> {
+        final PerformanceTime perf = pair.getLeft();
 
         table.addCell(PdfUtils.createCell(formatTime(perf.getTime())));
 
         table.addCell(PdfUtils.createCell(String.format("%s %s", perf.getTable(), perf.getSide())));
-      }
+      }));
 
     }
 
@@ -1024,7 +1084,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Output the detailed schedule for a team for the day.
-   * 
+   *
    * @throws DocumentException
    */
   private void outputTeamSchedule(final SchedParams params,
@@ -1052,14 +1112,14 @@ public class TournamentSchedule implements Serializable {
       para.add(Chunk.NEWLINE);
     }
 
-    for (int round = 0; round < getNumberOfRounds(); ++round) {
-      para.add(new Chunk(String.format(PERF_HEADER_FORMAT, round
-          + 1)
+    for (final PerformanceTime performance : si.getAllPerformances()) {
+      final String roundName = si.getRoundName(performance);
+      para.add(new Chunk(roundName
           + ": ", TEAM_HEADER_FONT));
-      final LocalTime start = si.getPerfTime(round);
+      final LocalTime start = performance.getTime();
       final LocalTime end = start.plus(Duration.ofMinutes(params.getPerformanceMinutes()));
-      para.add(new Chunk(String.format("%s - %s %s %d", formatTime(start), formatTime(end), si.getPerfTableColor(round),
-                                       si.getPerfTableSide(round)),
+      para.add(new Chunk(String.format("%s - %s %s %d", formatTime(start), formatTime(end), performance.getTable(),
+                                       performance.getSide()),
                          TEAM_VALUE_FONT));
       para.add(Chunk.NEWLINE);
     }
@@ -1148,12 +1208,12 @@ public class TournamentSchedule implements Serializable {
                                       @Nonnull final OutputStream output,
                                       @Nonnull final ChallengeDescription description)
       throws DocumentException, SQLException, IOException {
-    final ScoresheetGenerator scoresheets = new ScoresheetGenerator(getNumberOfRounds()
+    final ScoresheetGenerator scoresheets = new ScoresheetGenerator(getTotalNumberOfRounds()
         * _schedule.size(), description, tournamentName);
-    final SortedMap<PerformanceTime, TeamScheduleInfo> performanceTimes = new TreeMap<PerformanceTime, TeamScheduleInfo>();
-    for (int round = 0; round < getNumberOfRounds(); ++round) {
-      for (final TeamScheduleInfo si : _schedule) {
-        performanceTimes.put(si.getPerf(round), si);
+    final SortedMap<PerformanceTime, TeamScheduleInfo> performanceTimes = new TreeMap<>();
+    for (final TeamScheduleInfo si : _schedule) {
+      for (final PerformanceTime pt : si.getAllPerformances()) {
+        performanceTimes.put(pt, si);
       }
     }
 
@@ -1161,33 +1221,34 @@ public class TournamentSchedule implements Serializable {
     for (final Map.Entry<PerformanceTime, TeamScheduleInfo> entry : performanceTimes.entrySet()) {
       final PerformanceTime performance = entry.getKey();
       final TeamScheduleInfo si = entry.getValue();
-      final int round = si.computeRound(performance);
 
       scoresheets.setTime(sheetIndex, performance.getTime());
       scoresheets.setTable(sheetIndex, String.format("%s %d", performance.getTable(), performance.getSide()));
-      scoresheets.setRound(sheetIndex, String.valueOf(round
-          + 1));
+      scoresheets.setRound(sheetIndex, si.getRoundName(performance));
       scoresheets.setNumber(sheetIndex, si.getTeamNumber());
       scoresheets.setDivision(sheetIndex, ScoresheetGenerator.AWARD_GROUP_LABEL, si.getAwardGroup());
       scoresheets.setName(sheetIndex, si.getTeamName());
+      scoresheets.setPractice(sheetIndex, performance.isPractice());
 
       ++sheetIndex;
     }
 
-    final boolean orientationIsPortrait = ScoresheetGenerator.guessOrientation(description);
-    scoresheets.writeFile(output, orientationIsPortrait);
+    final Pair<Boolean, Float> orientationResult = ScoresheetGenerator.guessOrientation(description);
+    final boolean orientationIsPortrait = orientationResult.getLeft();
+    final float pagesPerScoreSheet = orientationResult.getRight();
+    scoresheets.writeFile(output, orientationIsPortrait, pagesPerScoreSheet);
   }
 
   private void outputPerformanceSchedule(final Document detailedSchedules) throws DocumentException {
-    final SortedMap<PerformanceTime, TeamScheduleInfo> performanceTimes = new TreeMap<PerformanceTime, TeamScheduleInfo>();
-    for (int round = 0; round < getNumberOfRounds(); ++round) {
-      for (final TeamScheduleInfo si : _schedule) {
-        performanceTimes.put(si.getPerf(round), si);
+    final SortedMap<PerformanceTime, TeamScheduleInfo> performanceTimes = new TreeMap<>();
+    for (final TeamScheduleInfo si : _schedule) {
+      for (final PerformanceTime pt : si.getAllPerformances()) {
+        performanceTimes.put(pt, si);
       }
     }
 
     // list of teams staying around to even up the teams
-    final List<TeamScheduleInfo> teamsMissingOpponents = new LinkedList<TeamScheduleInfo>();
+    final List<TeamScheduleInfo> teamsMissingOpponents = new LinkedList<>();
 
     final PdfPTable table = PdfUtils.createTable(7);
     int currentRow = 0;
@@ -1217,18 +1278,17 @@ public class TournamentSchedule implements Serializable {
     for (final Map.Entry<PerformanceTime, TeamScheduleInfo> entry : performanceTimes.entrySet()) {
       final PerformanceTime performance = entry.getKey();
       final TeamScheduleInfo si = entry.getValue();
-      final int round = si.computeRound(performance);
 
       // check if team is missing an opponent
       final BaseColor backgroundColor;
-      if (null == findOpponent(si, round)) {
+      if (null == findOpponent(si, performance)) {
         teamsMissingOpponents.add(si);
         backgroundColor = BaseColor.MAGENTA;
       } else {
         backgroundColor = null;
       }
 
-      final LocalTime performanceTime = si.getPerfTime(round);
+      final LocalTime performanceTime = performance.getTime();
       final float topBorderWidth;
       if (Objects.equals(performanceTime, prevTime)) {
         topBorderWidth = Rectangle.UNDEFINED;
@@ -1260,14 +1320,13 @@ public class TournamentSchedule implements Serializable {
       cell.setBorderWidthTop(topBorderWidth);
       table.addCell(cell);
 
-      cell = PdfUtils.createCell(si.getPerfTableColor(round)
+      cell = PdfUtils.createCell(performance.getTable()
           + " "
-          + si.getPerfTableSide(round), backgroundColor);
+          + performance.getSide(), backgroundColor);
       cell.setBorderWidthTop(topBorderWidth);
       table.addCell(cell);
 
-      cell = PdfUtils.createCell(String.valueOf(round
-          + 1));
+      cell = PdfUtils.createCell(si.getRoundName(performance));
       cell.setBorderWidthTop(topBorderWidth);
       table.addCell(cell);
       table.completeRow();
@@ -1471,6 +1530,7 @@ public class TournamentSchedule implements Serializable {
       this.name = name;
     }
 
+    @Override
     public int compare(final TeamScheduleInfo one,
                        final TeamScheduleInfo two) {
 
@@ -1513,6 +1573,7 @@ public class TournamentSchedule implements Serializable {
       this.name = name;
     }
 
+    @Override
     public int compare(final TeamScheduleInfo one,
                        final TeamScheduleInfo two) {
 
@@ -1555,6 +1616,7 @@ public class TournamentSchedule implements Serializable {
     private ComparatorByTeam() {
     }
 
+    @Override
     public int compare(final TeamScheduleInfo one,
                        final TeamScheduleInfo two) {
 
@@ -1592,27 +1654,27 @@ public class TournamentSchedule implements Serializable {
           }
         }
 
-      }
+      } // foreach subjective time
 
-      for (int i = 0; i < getNumberOfRounds(); ++i) {
-        if (null != si.getPerfTime(i)) {
+      for (final PerformanceTime performance : si.getAllPerformances()) {
+        if (null != performance.getTime()) {
           if (null == minPerf
-              || si.getPerfTime(i).isBefore(minPerf)) {
-            minPerf = si.getPerfTime(i);
+              || performance.getTime().isBefore(minPerf)) {
+            minPerf = performance.getTime();
           }
 
           if (null == maxPerf
-              || si.getPerfTime(i).isAfter(maxPerf)) {
-            maxPerf = si.getPerfTime(i);
+              || performance.getTime().isAfter(maxPerf)) {
+            maxPerf = performance.getTime();
           }
         }
       }
 
-    }
+    } // foreach team
 
     // print out the general schedule
     final Formatter output = new Formatter();
-    final Set<String> stations = new HashSet<String>();
+    final Set<String> stations = new HashSet<>();
     stations.addAll(minSubjectiveTimes.keySet());
     stations.addAll(maxSubjectiveTimes.keySet());
     for (final String station : stations) {
@@ -1638,84 +1700,67 @@ public class TournamentSchedule implements Serializable {
   /**
    * Add the data from the specified round of the specified TeamScheduleInfo to
    * matches.
-   * 
+   *
    * @param ti the schedule info
-   * @param round the round we care about
+   * @param performance the performance to add
    */
   private void addToMatches(final TeamScheduleInfo ti,
-                            final int round) {
+                            final PerformanceTime performance) {
     final Map<String, List<TeamScheduleInfo>> timeMatches;
-    if (_matches.containsKey(ti.getPerfTime(round))) {
-      timeMatches = _matches.get(ti.getPerfTime(round));
+    if (_matches.containsKey(performance.getTime())) {
+      timeMatches = _matches.get(performance.getTime());
     } else {
-      timeMatches = new HashMap<String, List<TeamScheduleInfo>>();
-      _matches.put(ti.getPerfTime(round), timeMatches);
+      timeMatches = new HashMap<>();
+      _matches.put(performance.getTime(), timeMatches);
     }
 
     final List<TeamScheduleInfo> tableMatches;
-    if (timeMatches.containsKey(ti.getPerfTableColor(round))) {
-      tableMatches = timeMatches.get(ti.getPerfTableColor(round));
+    if (timeMatches.containsKey(performance.getTable())) {
+      tableMatches = timeMatches.get(performance.getTable());
     } else {
-      tableMatches = new LinkedList<TeamScheduleInfo>();
-      timeMatches.put(ti.getPerfTableColor(round), tableMatches);
+      tableMatches = new LinkedList<>();
+      timeMatches.put(performance.getTable(), tableMatches);
     }
 
     tableMatches.add(ti);
   }
 
   private void removeFromMatches(final TeamScheduleInfo ti,
-                                 final int round) {
-    if (!_matches.containsKey(ti.getPerfTime(round))) {
+                                 final PerformanceTime performance) {
+
+    if (!_matches.containsKey(performance.getTime())) {
       throw new IllegalArgumentException("Cannot find time info for "
-          + round
+          + performance.getTime()
           + " in matches");
     }
-    final Map<String, List<TeamScheduleInfo>> timeMatches = _matches.get(ti.getPerfTime(round));
-    if (!timeMatches.containsKey(ti.getPerfTableColor(round))) {
+    final Map<String, List<TeamScheduleInfo>> timeMatches = _matches.get(performance.getTime());
+    if (!timeMatches.containsKey(performance.getTable())) {
       throw new IllegalArgumentException("Cannot find table info for "
-          + round
+          + performance.getTime()
           + " in matches");
     }
-    final List<TeamScheduleInfo> tableMatches = timeMatches.get(ti.getPerfTableColor(round));
+    final List<TeamScheduleInfo> tableMatches = timeMatches.get(performance.getTable());
     if (!tableMatches.remove(ti)) {
       throw new IllegalArgumentException("Cannot find team "
           + ti.getTeamNumber()
           + " in the matches for round "
-          + round);
-    }
-  }
-
-  /**
-   * Find the round of the opponent for a given team in a given round.
-   * 
-   * @param ti
-   * @param round
-   * @return the round number or -1 if no opponent
-   */
-  public int findOpponentRound(final TeamScheduleInfo ti,
-                               final int round) {
-    final List<TeamScheduleInfo> tableMatches = _matches.get(ti.getPerfTime(round)).get(ti.getPerfTableColor(round));
-    if (tableMatches.size() > 1) {
-      if (tableMatches.get(0).equals(ti)) {
-        return tableMatches.get(1).findRoundFortime(ti.getPerfTime(round));
-      } else {
-        return tableMatches.get(0).findRoundFortime(ti.getPerfTime(round));
-      }
-    } else {
-      return -1;
+          + performance.getTime());
     }
   }
 
   /**
    * Find the opponent for a given team in a given round.
-   * 
-   * @param ti
-   * @param round
+   *
+   * @param ti the team schedule information
+   * @param performance the {@link PerformanceTime} object to find the opponent
+   *          for
    * @return the team number or null if no opponent
    */
   public TeamScheduleInfo findOpponent(final TeamScheduleInfo ti,
-                                       final int round) {
-    final List<TeamScheduleInfo> tableMatches = _matches.get(ti.getPerfTime(round)).get(ti.getPerfTableColor(round));
+                                       final PerformanceTime performance) {
+    final LocalTime performanceTime = performance.getTime();
+    final String table = performance.getTable();
+    final List<TeamScheduleInfo> tableMatches = _matches.get(performanceTime).get(table);
     if (tableMatches.size() > 1) {
       if (tableMatches.get(0).equals(tableMatches.get(1))) {
         throw new FLLRuntimeException("Internal error, _matches is inconsistent. Has team competing against itself");
@@ -1756,7 +1801,7 @@ public class TournamentSchedule implements Serializable {
       }
 
       final int teamNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue();
-      final TeamScheduleInfo ti = new TeamScheduleInfo(getNumberOfRounds(), teamNumber);
+      final TeamScheduleInfo ti = new TeamScheduleInfo(teamNumber);
       ti.setTeamName(line[ci.getTeamNameColumn()]);
       ti.setOrganization(line[ci.getOrganizationColumn()]);
       ti.setDivision(line[ci.getDivisionColumn()]);
@@ -1775,30 +1820,67 @@ public class TournamentSchedule implements Serializable {
 
       ti.setJudgingGroup(line[ci.getJudgeGroupColumn()]);
 
-      for (int perfNum = 0; perfNum < getNumberOfRounds(); ++perfNum) {
-        final String perf1Str = line[ci.getPerfColumn(perfNum)];
+      // parse regular match play rounds
+      for (int perfIndex = 0; perfIndex < ci.getNumPerfs(); ++perfIndex) {
+        final String perf1Str = line[ci.getPerfColumn(perfIndex)];
         if (perf1Str.isEmpty()) {
           // If we got an empty string, then we must have hit the end
           return null;
         }
-        String table = line[ci.getPerfTableColumn(perfNum)];
-        String[] tablePieces = table.split(" ");
+        final String table = line[ci.getPerfTableColumn(perfIndex)];
+        final String[] tablePieces = table.split(" ");
         if (tablePieces.length != 2) {
           throw new RuntimeException("Error parsing table information from: "
               + table);
         }
         final LocalTime perf1Time = parseTime(perf1Str);
-        final PerformanceTime performance = new PerformanceTime(perf1Time, tablePieces[0],
-                                                                Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(tablePieces[1])
-                                                                                                        .intValue());
-        ti.setPerf(perfNum, performance);
-        if (ti.getPerfTableSide(perfNum) > 2
-            || ti.getPerfTableSide(perfNum) < 1) {
-          final String message = "There are only two sides to the table, number must be 1 or 2 team: "
+
+        final String tableName = tablePieces[0];
+        final int tableSide = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(tablePieces[1]).intValue();
+        final int roundNumber = perfIndex
+            + 1;
+        final PerformanceTime performance = new PerformanceTime(perf1Time, tableName, tableSide, false);
+
+        ti.addPerformance(performance);
+        if (performance.getSide() > 2
+            || performance.getSide() < 1) {
+          final String message = "There are only two sides to the table, number must be 1 or 2. team: "
               + ti.getTeamNumber()
               + " round "
-              + (perfNum
-                  + 1);
+              + roundNumber;
+          LOGGER.error(message);
+          throw new ScheduleParseException(message);
+        }
+      }
+
+      // parse practice rounds
+      for (int perfIndex = 0; perfIndex < ci.getNumPracticePerfs(); ++perfIndex) {
+        final String perf1Str = line[ci.getPracticePerfColumn(perfIndex)];
+        if (perf1Str.isEmpty()) {
+          // If we got an empty string, then we must have hit the end
+          return null;
+        }
+        final String table = line[ci.getPracticePerfTableColumn(perfIndex)];
+        final String[] tablePieces = table.split(" ");
+        if (tablePieces.length != 2) {
+          throw new RuntimeException("Error parsing table information from: "
+              + table);
+        }
+        final LocalTime perf1Time = parseTime(perf1Str);
+
+        final String tableName = tablePieces[0];
+        final int tableSide = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(tablePieces[1]).intValue();
+        final int roundNumber = perfIndex
+            + 1;
+        final PerformanceTime performance = new PerformanceTime(perf1Time, tableName, tableSide, true);
+
+        ti.addPerformance(performance);
+        if (performance.getSide() > 2
+            || performance.getSide() < 1) {
+          final String message = "There are only two sides to the table, number must be 1 or 2. team: "
+              + ti.getTeamNumber()
+              + " practice round "
+              + roundNumber;
           LOGGER.error(message);
           throw new ScheduleParseException(message);
         }
@@ -1814,7 +1896,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Check if the schedule exists in the database.
-   * 
+   *
    * @param connection database connection
    * @param tournamentID ID of the tournament to look for
    * @return if a schedule exists in the database for the specified tournament
@@ -1823,68 +1905,61 @@ public class TournamentSchedule implements Serializable {
   public static boolean scheduleExistsInDatabase(final Connection connection,
                                                  final int tournamentID)
       throws SQLException {
-    ResultSet rs = null;
-    PreparedStatement prep = null;
-    try {
-      prep = connection.prepareStatement("SELECT COUNT(team_number) FROM schedule where tournament = ?");
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT COUNT(team_number) FROM schedule where tournament = ?")) {
       prep.setInt(1, tournamentID);
-      rs = prep.executeQuery();
-      if (rs.next()) {
-        return rs.getInt(1) > 0;
-      } else {
-        return false;
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      rs = null;
-      SQLFunctions.close(prep);
-      prep = null;
-    }
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          return rs.getInt(1) > 0;
+        } else {
+          return false;
+        }
+      } // ResultSet
+    } // PreparedStatement
   }
 
   /**
    * Store a tournament schedule in the database. This will delete any previous
    * schedule for the same tournament.
-   * 
+   *
    * @param tournamentID the ID of the tournament
    */
   public void storeSchedule(final Connection connection,
                             final int tournamentID)
       throws SQLException {
-    PreparedStatement deletePerfRounds = null;
-    PreparedStatement deleteSchedule = null;
-    PreparedStatement deleteSubjective = null;
-    PreparedStatement insertSchedule = null;
-    PreparedStatement insertPerfRounds = null;
-    PreparedStatement insertSubjective = null;
-    try {
-      // delete previous tournament schedule
-      deletePerfRounds = connection.prepareStatement("DELETE FROM sched_perf_rounds WHERE tournament = ?");
+    // delete previous tournament schedule
+    try (
+        PreparedStatement deletePerfRounds = connection.prepareStatement("DELETE FROM sched_perf_rounds WHERE tournament = ?")) {
       deletePerfRounds.setInt(1, tournamentID);
       deletePerfRounds.executeUpdate();
+    }
 
-      deleteSubjective = connection.prepareStatement("DELETE FROM sched_subjective WHERE tournament = ?");
+    try (
+        PreparedStatement deleteSubjective = connection.prepareStatement("DELETE FROM sched_subjective WHERE tournament = ?")) {
       deleteSubjective.setInt(1, tournamentID);
       deleteSubjective.executeUpdate();
+    }
 
-      deleteSchedule = connection.prepareStatement("DELETE FROM schedule WHERE tournament = ?");
+    try (PreparedStatement deleteSchedule = connection.prepareStatement("DELETE FROM schedule WHERE tournament = ?")) {
       deleteSchedule.setInt(1, tournamentID);
       deleteSchedule.executeUpdate();
+    }
 
-      // insert new tournament schedule
-      insertSchedule = connection.prepareStatement("INSERT INTO schedule"//
-          + " (tournament, team_number, judging_station)"//
-          + " VALUES(?, ?, ?)");
+    // insert new tournament schedule
+    try (PreparedStatement insertSchedule = connection.prepareStatement("INSERT INTO schedule"//
+        + " (tournament, team_number, judging_station)"//
+        + " VALUES(?, ?, ?)");
+        PreparedStatement insertPerfRounds = connection.prepareStatement("INSERT INTO sched_perf_rounds"//
+            + " (tournament, team_number, practice, perf_time, table_color, table_side)"//
+            + " VALUES(?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertSubjective = connection.prepareStatement("INSERT INTO sched_subjective" //
+            + " (tournament, team_number, name, subj_time)" //
+            + " VALUES(?, ?, ?, ?)")) {
+
       insertSchedule.setInt(1, tournamentID);
 
-      insertPerfRounds = connection.prepareStatement("INSERT INTO sched_perf_rounds"//
-          + " (tournament, team_number, round, perf_time, table_color, table_side)"//
-          + " VALUES(?, ?, ?, ?, ?, ?)");
       insertPerfRounds.setInt(1, tournamentID);
 
-      insertSubjective = connection.prepareStatement("INSERT INTO sched_subjective" //
-          + " (tournament, team_number, name, subj_time)" //
-          + " VALUES(?, ?, ?, ?)");
       insertSubjective.setInt(1, tournamentID);
 
       for (final TeamScheduleInfo si : getSchedule()) {
@@ -1893,11 +1968,11 @@ public class TournamentSchedule implements Serializable {
         insertSchedule.executeUpdate();
 
         insertPerfRounds.setInt(2, si.getTeamNumber());
-        for (int round = 0; round < si.getNumberOfRounds(); ++round) {
-          insertPerfRounds.setInt(3, round);
-          insertPerfRounds.setTime(4, Time.valueOf(si.getPerfTime(round)));
-          insertPerfRounds.setString(5, si.getPerfTableColor(round));
-          insertPerfRounds.setInt(6, si.getPerfTableSide(round));
+        for (final PerformanceTime performance : si.getAllPerformances()) {
+          insertPerfRounds.setBoolean(3, performance.isPractice());
+          insertPerfRounds.setTime(4, Time.valueOf(performance.getTime()));
+          insertPerfRounds.setString(5, performance.getTable());
+          insertPerfRounds.setInt(6, performance.getSide());
           insertPerfRounds.executeUpdate();
         }
 
@@ -1907,28 +1982,15 @@ public class TournamentSchedule implements Serializable {
           insertSubjective.setTime(4, Time.valueOf(subjectiveTime.getTime()));
           insertSubjective.executeUpdate();
         }
-      }
-
-    } finally {
-      SQLFunctions.close(deletePerfRounds);
-      deletePerfRounds = null;
-      SQLFunctions.close(deleteSchedule);
-      deleteSchedule = null;
-      SQLFunctions.close(deleteSubjective);
-      deleteSubjective = null;
-      SQLFunctions.close(insertSchedule);
-      insertSchedule = null;
-      SQLFunctions.close(insertPerfRounds);
-      insertPerfRounds = null;
-      SQLFunctions.close(insertSubjective);
-      insertSubjective = null;
+      } // foreach team
     }
+
   }
 
   /**
    * Check if the current schedule is consistent with the specified tournament
    * in the database.
-   * 
+   *
    * @param connection the database connection
    * @param tournamentID the tournament to check
    * @return the constraint violations, empty if no violations
@@ -1937,9 +1999,9 @@ public class TournamentSchedule implements Serializable {
   public Collection<ConstraintViolation> compareWithDatabase(final Connection connection,
                                                              final int tournamentID)
       throws SQLException {
-    final Collection<ConstraintViolation> violations = new LinkedList<ConstraintViolation>();
+    final Collection<ConstraintViolation> violations = new LinkedList<>();
     final Map<Integer, TournamentTeam> dbTeams = Queries.getTournamentTeams(connection, tournamentID);
-    final Set<Integer> scheduleTeamNumbers = new HashSet<Integer>();
+    final Set<Integer> scheduleTeamNumbers = new HashSet<>();
     for (final TeamScheduleInfo si : _schedule) {
       scheduleTeamNumbers.add(si.getTeamNumber());
       if (!dbTeams.containsKey(si.getTeamNumber())) {
@@ -2036,6 +2098,22 @@ public class TournamentSchedule implements Serializable {
       return perfTableColumn[round];
     }
 
+    private final int[] practiceColumn;
+
+    public int getNumPracticePerfs() {
+      return practiceColumn.length;
+    }
+
+    public int getPracticePerfColumn(final int round) {
+      return practiceColumn[round];
+    }
+
+    private final int[] practiceTableColumn;
+
+    public int getPracticePerfTableColumn(final int round) {
+      return practiceTableColumn[round];
+    }
+
     public ColumnInformation(final String[] headerLine,
                              final int teamNumColumn,
                              final int organizationColumn,
@@ -2044,7 +2122,9 @@ public class TournamentSchedule implements Serializable {
                              final Map<Integer, String> subjectiveColumns,
                              final int judgeGroupColumn,
                              final int[] perfColumn,
-                             final int[] perfTableColumn) {
+                             final int[] perfTableColumn,
+                             final int[] practiceColumn,
+                             final int[] practiceTableColumn) {
       this.headerLine = Collections.unmodifiableList(Arrays.asList(headerLine));
       this.teamNumColumn = teamNumColumn;
       this.organizationColumn = organizationColumn;
@@ -2052,13 +2132,19 @@ public class TournamentSchedule implements Serializable {
       this.divisionColumn = divisionColumn;
       this.subjectiveColumns = subjectiveColumns;
       this.judgeGroupColumn = judgeGroupColumn;
+
       this.perfColumn = new int[perfColumn.length];
       System.arraycopy(perfColumn, 0, this.perfColumn, 0, perfColumn.length);
       this.perfTableColumn = new int[perfTableColumn.length];
       System.arraycopy(perfTableColumn, 0, this.perfTableColumn, 0, perfTableColumn.length);
 
+      this.practiceColumn = new int[practiceColumn.length];
+      System.arraycopy(practiceColumn, 0, this.practiceColumn, 0, practiceColumn.length);
+      this.practiceTableColumn = new int[practiceTableColumn.length];
+      System.arraycopy(practiceTableColumn, 0, this.practiceTableColumn, 0, practiceTableColumn.length);
+
       // determine which columns aren't used
-      final List<String> unused = new LinkedList<String>();
+      final List<String> unused = new LinkedList<>();
       for (int column = 0; column < this.headerLine.size(); ++column) {
         boolean match = false;
         if (column == this.teamNumColumn //
@@ -2069,6 +2155,18 @@ public class TournamentSchedule implements Serializable {
         ) {
           match = true;
         }
+
+        for (final int pc : this.practiceColumn) {
+          if (pc == column) {
+            match = true;
+          }
+        }
+        for (final int ptc : this.practiceTableColumn) {
+          if (ptc == column) {
+            match = true;
+          }
+        }
+
         for (final int pc : this.perfColumn) {
           if (pc == column) {
             match = true;
@@ -2079,6 +2177,7 @@ public class TournamentSchedule implements Serializable {
             match = true;
           }
         }
+
         for (final int sc : this.subjectiveColumns.keySet()) {
           if (sc == column) {
             match = true;
@@ -2103,7 +2202,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Find the {@link TeamScheduleInfo} object for the specified team number.
-   * 
+   *
    * @return the schedule info or null if not found
    */
   public TeamScheduleInfo findScheduleInfo(final int team) {
@@ -2116,124 +2215,61 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
-   * @param team the team to rescheduled
+   * @param si the team to rescheduled
    * @param oldTime the old time that the team was scheduled at
    * @param perfTime the new performance information
    */
-  public void reassignTable(final int team,
+  public void reassignTable(final TeamScheduleInfo si,
                             final LocalTime oldTime,
                             final PerformanceTime perfTime) {
-    final TeamScheduleInfo si = findScheduleInfo(team);
-    if (null == si) {
-      throw new IllegalArgumentException("Cannot find team "
-          + team
-          + " in the schedule");
-    }
-    final int round = si.findRoundFortime(oldTime);
-    if (-1 == round) {
+    final PerformanceTime oldPerformanceTime = si.getPerformanceAtTime(oldTime);
+    if (null == oldPerformanceTime) {
       throw new IllegalArgumentException("Team "
-          + team
+          + si.getTeamNumber()
           + " does not have a performance at "
           + oldTime);
     }
 
-    removeFromMatches(si, round);
-    si.setPerf(round, perfTime);
-    addToMatches(si, round);
-  }
+    removeFromMatches(si, oldPerformanceTime);
+    si.removePerformance(oldPerformanceTime);
 
-  /**
-   * Convert the schedule to an XML document that conforms to
-   * fll/resources/schedule.xsd. The document that is returned has already been
-   * run through {@link #validateXML(org.w3c.dom.Document)}.
-   */
-  public org.w3c.dom.Document createXML() {
-    final org.w3c.dom.Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
-
-    final Element top = document.createElementNS(null, "schedule");
-    document.appendChild(top);
-
-    for (final TeamScheduleInfo si : getSchedule()) {
-      final Element team = document.createElementNS(null, "team");
-      top.appendChild(team);
-      team.setAttributeNS(null, "number", String.valueOf(si.getTeamNumber()));
-      team.setAttributeNS(null, "judging_station", si.getJudgingGroup());
-
-      for (final String subjName : si.getKnownSubjectiveStations()) {
-        final LocalTime time = si.getSubjectiveTimeByName(subjName).getTime();
-        final Element subjective = document.createElementNS(null, "subjective");
-        team.appendChild(subjective);
-        subjective.setAttributeNS(null, "name", subjName);
-        subjective.setAttributeNS(null, "time", XML_TIME_FORMAT.format(time));
-      }
-
-      for (int round = 0; round < si.getNumberOfRounds(); ++round) {
-        final PerformanceTime perfTime = si.getPerf(round);
-        final Element perf = document.createElementNS(null, "performance");
-        team.appendChild(perf);
-        perf.setAttributeNS(null, "round", String.valueOf(round
-            + 1));
-        perf.setAttributeNS(null, "table_color", perfTime.getTable());
-        perf.setAttributeNS(null, "table_side", String.valueOf(perfTime.getSide()));
-        perf.setAttributeNS(null, "time", XML_TIME_FORMAT.format(perfTime.getTime()));
-      }
-    }
-
-    try {
-      validateXML(document);
-    } catch (final SAXException e) {
-      throw new FLLInternalException("Schedule XML document is invalid", e);
-    }
-
-    return document;
-  }
-
-  /**
-   * Validate the schedule XML document.
-   * 
-   * @throws SAXException on an error
-   */
-  public static void validateXML(final org.w3c.dom.Document document) throws SAXException {
-    try {
-      final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-
-      final SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-      final Source schemaFile = new StreamSource(classLoader.getResourceAsStream("fll/resources/schedule.xsd"));
-      final Schema schema = factory.newSchema(schemaFile);
-
-      final Validator validator = schema.newValidator();
-      validator.validate(new DOMSource(document));
-    } catch (final IOException e) {
-      throw new RuntimeException("Internal error, should never get IOException here", e);
-    }
-
+    si.addPerformance(perfTime);
+    addToMatches(si, perfTime);
   }
 
   /**
    * Write out to the specified writer.
-   * 
+   *
    * @param outputWriter
    * @throws IOException
    */
   public void writeToCSV(final Writer outputWriter) throws IOException {
     try (final CSVWriter csv = new CSVWriter(outputWriter)) {
 
-      final List<String> line = new ArrayList<String>();
+      final List<String> line = new ArrayList<>();
       line.add(TournamentSchedule.TEAM_NUMBER_HEADER);
       line.add(TournamentSchedule.AWARD_GROUP_HEADER);
       line.add(TournamentSchedule.TEAM_NAME_HEADER);
       line.add(TournamentSchedule.ORGANIZATION_HEADER);
       line.add(TournamentSchedule.JUDGE_GROUP_HEADER);
-      final List<String> categories = Collections.unmodifiableList(new LinkedList<String>(getSubjectiveStations()));
+      final List<String> categories = Collections.unmodifiableList(new LinkedList<>(getSubjectiveStations()));
       for (final String category : categories) {
         line.add(category);
       }
-      for (int round = 0; round < getNumberOfRounds(); ++round) {
+      for (int round = 0; round < getNumberOfPracticeRounds(); ++round) {
+        line.add(String.format(TournamentSchedule.PRACTICE_HEADER_FORMAT, round
+            + 1));
+        line.add(String.format(TournamentSchedule.PRACTICE_TABLE_HEADER_FORMAT, round
+            + 1));
+      }
+
+      for (int round = 0; round < getNumberOfRegularMatchPlayRounds(); ++round) {
         line.add(String.format(TournamentSchedule.PERF_HEADER_FORMAT, round
             + 1));
         line.add(String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round
             + 1));
       }
+
       csv.writeNext(line.toArray(new String[line.size()]));
       line.clear();
 
@@ -2247,13 +2283,23 @@ public class TournamentSchedule implements Serializable {
           final LocalTime d = si.getSubjectiveTimeByName(category).getTime();
           line.add(TournamentSchedule.formatTime(d));
         }
-        for (int round = 0; round < getNumberOfRounds(); ++round) {
-          final PerformanceTime p = si.getPerf(round);
+
+        si.enumeratePracticePerformances().forEachOrdered(pair -> {
+          final PerformanceTime p = pair.getLeft();
           line.add(TournamentSchedule.formatTime(p.getTime()));
           line.add(p.getTable()
               + " "
               + p.getSide());
-        }
+        });
+
+        si.enumerateRegularMatchPlayPerformances().forEachOrdered(pair -> {
+          final PerformanceTime p = pair.getLeft();
+          line.add(TournamentSchedule.formatTime(p.getTime()));
+          line.add(p.getTable()
+              + " "
+              + p.getSide());
+        });
+
         csv.writeNext(line.toArray(new String[line.size()]));
         line.clear();
       }
@@ -2262,7 +2308,7 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Write out the current schedule to a CSV file.
-   * 
+   *
    * @param outputFile where to write
    * @throws IOException
    */
@@ -2280,56 +2326,14 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Write the schedule as a CSV file to the specified stream.
-   * 
+   *
    * @param stream where to write the schedule
    * @throws IOException if there is a problem writing to the stream
    */
   public void outputScheduleAsCSV(final OutputStream stream) throws IOException {
-
-    try (final CSVWriter csv = new CSVWriter(new OutputStreamWriter(stream, Utilities.DEFAULT_CHARSET))) {
-
-      final List<String> headerLine = new LinkedList<>();
-      headerLine.add(TournamentSchedule.TEAM_NUMBER_HEADER);
-      headerLine.add(TournamentSchedule.TEAM_NAME_HEADER);
-      headerLine.add(TournamentSchedule.ORGANIZATION_HEADER);
-      headerLine.add(TournamentSchedule.JUDGE_GROUP_HEADER);
-      headerLine.add(TournamentSchedule.AWARD_GROUP_HEADER);
-      for (final String station : getSubjectiveStations()) {
-        headerLine.add(station);
-      }
-      for (int round = 0; round < getNumberOfRounds(); ++round) {
-        headerLine.add(String.format(TournamentSchedule.PERF_HEADER_FORMAT, round
-            + 1));
-        headerLine.add(String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round
-            + 1));
-      }
-      csv.writeNext(headerLine.toArray(new String[0]));
-
-      Collections.sort(_schedule, ComparatorByTeam.INSTANCE);
-      for (final TeamScheduleInfo si : _schedule) {
-        final List<String> line = new LinkedList<>();
-
-        line.add(String.valueOf(si.getTeamNumber()));
-        line.add(si.getTeamName());
-        line.add(si.getOrganization());
-        line.add(si.getJudgingGroup());
-        line.add(si.getAwardGroup());
-
-        for (final String subjectiveStation : subjectiveStations) {
-          line.add(formatTime(si.getSubjectiveTimeByName(subjectiveStation).getTime()));
-        }
-
-        for (int round = 0; round < getNumberOfRounds(); ++round) {
-          final PerformanceTime perf = si.getPerf(round);
-
-          line.add(formatTime(perf.getTime()));
-
-          line.add(String.format("%s %s", perf.getTable(), perf.getSide()));
-        }
-
-        csv.writeNext(line.toArray(new String[0]));
-      } // foreach team
-    } // allocate csv writer
+    try (OutputStreamWriter outputWriter = new OutputStreamWriter(stream, Utilities.DEFAULT_CHARSET)) {
+      writeToCSV(outputWriter);
+    }
   }
 
 }

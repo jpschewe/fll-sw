@@ -6,6 +6,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.stream.Stream;
+
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.google.common.collect.Streams;
 
 /**
  * Holds data about the schedule for a team.
@@ -22,74 +29,98 @@ public final class TeamScheduleInfo implements Serializable {
 
   private String judgingGroup;
 
-  private final PerformanceTime[] perf;
+  private final SortedSet<PerformanceTime> performances = new TreeSet<>();
 
   /**
-   * Set a performance time. This should only be called from
+   * @return number of regular match play rounds
+   */
+  public int getNumRegularMatchPlayRounds() {
+    // TODO use Predicate::not when moving to JDK 11+
+    return (int) performances.stream().filter(p -> !p.isPractice()).count();
+  }
+
+  /**
+   * @return number of practice rounds
+   */
+  public int getNumPracticeRounds() {
+    return (int) performances.stream().filter(PerformanceTime::isPractice).count();
+  }
+
+  /**
+   * @return unmodifiable version of all performances
+   */
+  public SortedSet<PerformanceTime> getAllPerformances() {
+    return Collections.unmodifiableSortedSet(performances);
+  }
+
+  /**
+   * @return stream of all performance rounds
+   */
+  public Stream<PerformanceTime> allPerformances() {
+    return performances.stream();
+  }
+
+  /**
+   * @return stream of all practice performance rounds and their index within
+   *         practice rounds
+   */
+  public Stream<Pair<PerformanceTime, Long>> enumeratePracticePerformances() {
+    return Streams.mapWithIndex(allPerformances().filter(PerformanceTime::isPractice), (performance,
+                                                                                        index) -> Pair.of(performance,
+                                                                                                          index));
+  }
+
+  /**
+   * @return stream of all regular match play performance rounds and their index
+   *         within
+   *         practice rounds
+   */
+  public Stream<Pair<PerformanceTime, Long>> enumerateRegularMatchPlayPerformances() {
+    // TODO use Predicate::not when moving to Java 11+
+    return Streams.mapWithIndex(allPerformances().filter(pt -> !pt.isPractice()), (performance,
+                                                                                   index) -> Pair.of(performance,
+                                                                                                     index));
+  }
+
+  /**
+   * Add a performance. This should only be called from
    * {@link TournamentSchedule} otherwise things can get out of sync.
-   * 
-   * @param idx
+   *
    * @param performance
    */
-  /* package */void setPerf(final int idx,
-                            final PerformanceTime performance) {
-    perf[idx] = performance;
+  /* package */void addPerformance(final PerformanceTime performance) {
+    performances.add(performance);
   }
 
   /**
-   * @param idx zero based
+   * Removes the first performance found at the specified time.
+   *
+   * @param time the time of the performance
+   * @return if a performance was removed
    */
-  public PerformanceTime getPerf(final int idx) {
-    return perf[idx];
+  /* package */ boolean removePerformance(final PerformanceTime performance) {
+    return performances.remove(performance);
   }
 
   /**
-   * @param idx zero based
+   * Find the first performance at the specified time.
+   *
+   * @param time the time to find a performance at
+   * @return the performance or null if not found
    */
-  public LocalTime getPerfTime(final int idx) {
-    return perf[idx].getTime();
+  public PerformanceTime getPerformanceAtTime(final LocalTime time) {
+    return allPerformances().filter(pt -> pt.getTime().equals(time)).findFirst().orElse(null);
   }
 
-  /**
-   * @param idx zero based
-   */
-  public String getPerfTableColor(final int idx) {
-    return perf[idx].getTable();
-  }
-
-  /**
-   * @param idx zero based
-   */
-  public int getPerfTableSide(final int idx) {
-    return perf[idx].getSide();
-  }
-
-  public TeamScheduleInfo(final int numRounds,
-                          final int teamNumber) {
-    this.numberOfRounds = numRounds;
-    this.perf = new PerformanceTime[numRounds];
+  public TeamScheduleInfo(final int teamNumber) {
     this.teamNumber = teamNumber;
-  }
-
-  /**
-   * Find the performance round for the matching time.
-   * 
-   * @param time
-   * @return the round, -1 if cannot be found
-   */
-  public int findRoundFortime(final LocalTime time) {
-    for (int round = 0; round < perf.length; ++round) {
-      if (perf[round].getTime().equals(time)) {
-        return round;
-      }
-    }
-    return -1;
   }
 
   @Override
   public String toString() {
     return "[ScheduleInfo for "
-        + getTeamNumber() + "]";
+        + getTeamNumber()
+        + "]";
   }
 
   @Override
@@ -187,13 +218,7 @@ public final class TeamScheduleInfo implements Serializable {
     }
   }
 
-  public int getNumberOfRounds() {
-    return numberOfRounds;
-  }
-
-  private final int numberOfRounds;
-
-  private HashMap<String, SubjectiveTime> subjectiveTimes = new HashMap<String, SubjectiveTime>();
+  private final HashMap<String, SubjectiveTime> subjectiveTimes = new HashMap<>();
 
   public Collection<SubjectiveTime> getSubjectiveTimes() {
     return Collections.unmodifiableCollection(subjectiveTimes.values());
@@ -209,7 +234,7 @@ public final class TeamScheduleInfo implements Serializable {
 
   /**
    * Get the subjective time by name.
-   * 
+   *
    * @param name name of a judging station
    * @return null if no time with that name found
    */
@@ -224,16 +249,39 @@ public final class TeamScheduleInfo implements Serializable {
   /**
    * Figure out which round number (0-based) this performance time is for this
    * team.
-   * 
+   *
    * @param performance the performance to find
    * @return the round number or -1 if the performance cannot be found
    */
   public int computeRound(final PerformanceTime performance) {
-    for (int round = 0; round < perf.length; ++round) {
-      if (performance.equals(perf[round])) {
-        return round;
+    final Stream<Pair<PerformanceTime, Long>> stream;
+    if (performance.isPractice()) {
+      stream = enumeratePracticePerformances();
+    } else {
+      stream = enumerateRegularMatchPlayPerformances();
+    }
+    return stream.filter(p -> p.getLeft().equals(performance)).map(Pair::getRight).findFirst().orElse(Long.valueOf(-1))
+                 .intValue();
+  }
+
+  /**
+   * Compute a display name for the specified performance round.
+   *
+   * @param performance the performance information
+   * @return the name to display, null on error
+   */
+  public String getRoundName(final PerformanceTime performance) {
+    final int roundIndex = computeRound(performance);
+    if (roundIndex < 0) {
+      return null;
+    } else {
+      if (performance.isPractice()) {
+        return String.format("Practice %d", roundIndex
+            + 1);
+      } else {
+        return String.valueOf(roundIndex
+            + 1);
       }
     }
-    return -1;
   }
 }

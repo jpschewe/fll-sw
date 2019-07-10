@@ -33,7 +33,6 @@ import java.text.ParseException;
 import java.time.LocalTime;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -76,6 +75,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.w3c.dom.Document;
 
@@ -204,7 +204,7 @@ public class SchedulerUI extends JFrame {
 
     mScheduleTable = new JTable();
     mScheduleTable.setAutoCreateRowSorter(true);
-    mScheduleTable.setDefaultRenderer(Date.class, schedTableRenderer);
+    mScheduleTable.setDefaultRenderer(LocalTime.class, schedTableRenderer);
     mScheduleTable.setDefaultRenderer(String.class, schedTableRenderer);
     mScheduleTable.setDefaultRenderer(Integer.class, schedTableRenderer);
     mScheduleTable.setDefaultRenderer(Object.class, schedTableRenderer);
@@ -851,7 +851,8 @@ public class SchedulerUI extends JFrame {
                 JOptionPane.showMessageDialog(SchedulerUI.this, "Scoresheets written '"
                     + scoresheetFile.getAbsolutePath()
                     + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
-              } // not canceled
+              } // not
+                // canceled
             } // tournament name
           } // valid descriptor location
         } // yes to write score sheets
@@ -1130,7 +1131,7 @@ public class SchedulerUI extends JFrame {
 
   private SchedulerTableModel mScheduleModel;
 
-  SchedulerTableModel getScheduleModel() {
+  /* package */ SchedulerTableModel getScheduleModel() {
     return mScheduleModel;
   }
 
@@ -1229,25 +1230,31 @@ public class SchedulerUI extends JFrame {
             // should be highlighted
             violationTypes.add(violation.getType());
           } else if (null != violation.getPerformance()) {
-            // need to check round which round
-            int round = 0;
-            // using Math.min to handle extra round
-            while (!violation.getPerformance().equals(schedInfo.getPerfTime(Math.min(schedInfo.getNumberOfRounds()
-                - 1, round)))
-                && round < schedInfo.getNumberOfRounds()) {
-              ++round;
-              if (round > schedInfo.getNumberOfRounds()) {
-                throw new RuntimeException("Internal error, walked off the end of the round list");
-              }
+            final LocalTime violationPerformanceTime = violation.getPerformance();
+
+            final Pair<PerformanceTime, Long> practiceResult = schedInfo.enumeratePracticePerformances()
+                                                                        .filter(p -> p.getLeft().getTime()
+                                                                                      .equals(violationPerformanceTime))
+                                                                        .findFirst().orElse(null);
+
+            final Pair<PerformanceTime, Long> regularMatchPlayResult = schedInfo.enumerateRegularMatchPlayPerformances()
+                                                                                .filter(p -> p.getLeft().getTime()
+                                                                                              .equals(violationPerformanceTime))
+                                                                                .findFirst().orElse(null);
+            final int firstIdx;
+            if (null != practiceResult) {
+              firstIdx = practiceResult.getRight().intValue()
+                  * SchedulerTableModel.NUM_COLUMNS_PER_ROUND;
+            } else if (null != regularMatchPlayResult) {
+              firstIdx = (getScheduleData().getNumberOfPracticeRounds()
+                  * SchedulerTableModel.NUM_COLUMNS_PER_ROUND)
+                  + (regularMatchPlayResult.getRight().intValue()
+                      * SchedulerTableModel.NUM_COLUMNS_PER_ROUND);
+            } else {
+              throw new RuntimeException("Internal error, cannot find performance at time "
+                  + violationPerformanceTime);
             }
-            // handle extra run
-            if (round >= schedInfo.getNumberOfRounds()) {
-              round = schedInfo.getNumberOfRounds()
-                  - 1;
-            }
-            final int firstIdx = getScheduleModel().getFirstPerformanceColumn()
-                + (round
-                    * SchedulerTableModel.NUM_COLUMNS_PER_ROUND);
+
             final int lastIdx = firstIdx
                 + SchedulerTableModel.NUM_COLUMNS_PER_ROUND
                 - 1;
@@ -1257,8 +1264,7 @@ public class SchedulerUI extends JFrame {
             }
 
             if (LOGGER.isTraceEnabled()) {
-              LOGGER.trace("Violation is in performance round: "
-                  + round //
+              LOGGER.trace("Violation "
                   + " team: "
                   + schedInfo.getTeamNumber() //
                   + " firstIdx: "
