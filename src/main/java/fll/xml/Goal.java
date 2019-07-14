@@ -14,6 +14,8 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -38,6 +40,8 @@ public class Goal extends AbstractGoal {
 
   public static final String REQUIRED_ATTRIBUTE = "required";
 
+  private static final Logger LOGGER = LogManager.getLogger();
+
   /**
    * Create the goal from an XML element.
    *
@@ -59,6 +63,7 @@ public class Goal extends AbstractGoal {
       mRequired = false;
     }
 
+    int minSeen = Integer.MAX_VALUE;
     mRubric = new LinkedList<>();
     final NodelistElementCollectionAdapter rubricEles = new NodelistElementCollectionAdapter(ele.getElementsByTagName(RubricRange.RUBRIC_TAG_NAME));
     if (rubricEles.hasNext()) {
@@ -66,7 +71,21 @@ public class Goal extends AbstractGoal {
       for (final Element rangeEle : new NodelistElementCollectionAdapter(rubricEle.getElementsByTagName(RubricRange.TAG_NAME))) {
         final RubricRange range = new RubricRange(rangeEle);
         mRubric.add(range);
+
+        minSeen = Math.min(minSeen, range.getMin());
       }
+    }
+
+    // handle old challenge descriptions that don't have "ND" for 0
+    if (!mRubric.isEmpty()
+        && ScoreType.INTEGER.equals(mScoreType)
+        && minSeen > mMin) {
+      LOGGER.warn("Found goal without 'ND' rubric range for minimum value: {}", getName());
+      final RubricRange range = new RubricRange("");
+      range.setShortDescription("ND");
+      range.setMin(0);
+      range.setMax(0);
+      mRubric.add(range);
     }
 
     mValues = new LinkedList<>();
