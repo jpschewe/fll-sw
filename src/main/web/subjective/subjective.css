@@ -28,8 +28,21 @@
 	background-color: LawnGreen;
 }
 
+td.border-right {
+	border-right: 2px solid black;
+}
+
+table.score-entry {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+td.center {
+	text-align: center;
+}
+
 button.ui-btn.selected-score {
 	border-style: inset;
 	border-width: 2px;
-	background-color: red;
+	background-color: LawnGreen;
 }

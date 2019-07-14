@@ -587,6 +587,33 @@ function createScoreRow(goal, subscore) {
   $("#enter-score_score-content").append(row);
 }
 
+/**
+ * 
+ * @returns total number of columns to represent all scores in the rubric ranges
+ */
+function populateEnterScoreRubricTitles(table) {
+  var firstGoal = $.subjective.getCurrentCategory().goals[0];
+  
+  var ranges = firstGoal.rubric;
+  ranges.sort(rangeSort);
+
+  var totalColumns = 0;
+  
+  var row = $("<tr></tr>");
+  row.empty();
+  $.each(ranges, function(index, range) {
+    var numColumns = range.max - range.min + 1;
+    var cell = $("<th colspan='" + numColumns + "'>" + range.title + "</th>");
+    row.append(cell);
+  
+    totalColumns += numColumns;
+  });
+  
+  table.append(row);
+  
+  return totalColumns;
+}
+
 $(document).on("pagebeforeshow", "#enter-score-page", function(event) {
 
   var currentTeam = $.subjective.getCurrentTeam();
@@ -605,7 +632,37 @@ $(document).on("pagebeforeshow", "#enter-score-page", function(event) {
     $("#enter-score-note-text").val("");
   }
 
-  $("#enter-score_score-content").empty();
+  var table = $("#enter-score_score-table");
+  table.empty();
+
+  var totalColumns = populateEnterScoreRubricTitles(table);
+  
+  var prevCategory = null;
+  $.each($.subjective.getCurrentCategory().goals, function(index, goal) {
+    if (goal.enumerated) {
+      alert("Enumerated goals not supported: " + goal.name);
+    } else {
+      var subscore = null;
+      if ($.subjective.isScoreCompleted(score)) {
+        subscore = score.standardSubScores[goal.name];
+      }
+
+      if (prevCategory != goal.category) {
+        if (goal.category != null && "" != goal.category) {
+          var bar = $("<tr><td colspan='" + totalColumns + "' class='ui-bar-a'>" + goal.category + "</td></tr>");
+          table.append(bar);
+        }
+      }
+      
+      //FIXME createScoreRow(goal, subscore);
+      
+      prevCategory = goal.category;
+    }
+  });
+
+  
+  
+  /*    
   var prevCategory = null;
   $.each($.subjective.getCurrentCategory().goals, function(index, goal) {
     if (goal.enumerated) {
@@ -632,7 +689,8 @@ $(document).on("pagebeforeshow", "#enter-score-page", function(event) {
   // clear out temp state so that we don't get it again
   $.subjective.setTempScore(null);
   $.subjective.setCurrentGoal(null);
-
+*/
+  
   $("#enter-score-page").trigger("create");
 });
 
@@ -707,6 +765,10 @@ function rangeSort(a, b) {
   } else {
     return 0;
   }
+}
+
+function getScoreRange(goal) {
+  return goal.max - goal.min + 1;
 }
 
 function populateRubric(goal) {
