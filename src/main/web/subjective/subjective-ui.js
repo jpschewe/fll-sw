@@ -524,7 +524,7 @@ function recomputeTotal() {
   $("#enter-score_total-score").text(total);
 }
 
-function createScoreRows(table, totalColumns, goal, subscore) {
+function addGoalHeaderToScoreEntry(table, totalColumns, goal) {
   var goalDescriptionRow = $("<tr></tr>");
   var goalDescriptionCell = $("<td colspan='" + totalColumns + "'></td>");
   var goalDescTable = $("<table></table>");
@@ -536,69 +536,66 @@ function createScoreRows(table, totalColumns, goal, subscore) {
   goalDescriptionCell.append(goalDescTable);
   goalDescriptionRow.append(goalDescriptionCell);
   table.append(goalDescriptionRow);
-  
-  /*
-  var row = $("<div class=\"ui-grid-b ui-responsive\"></div>");
+}
 
-  var categoryBlock = $("<div class=\"ui-block-a\"></div>");
-  var categoryLabel = $("<p>" + goal.category + "</p>");
-  categoryBlock.append(categoryLabel);
-  row.append(categoryBlock);
+function addRubricHeaderToScoreEntry(table, goal, ranges) {
 
-  var titleBlock = $("<div class=\"ui-block-b\"></div>");
-  var titleLabel = $("<p>" + goal.title + "</p>");
-  titleBlock.append(titleLabel);
-  row.append(titleBlock);
+  var row = $("<tr></tr>");
 
-  var rightBlock = $("<div class=\"ui-block-c\"></div>");
-  var rightContainer = $("<div class=\"ui-grid-a ui-responsive\"></div>");
-  rightBlock.append(rightContainer);
-
-  var scoreBlock = $("<div class=\"ui-block-a\"></div>");
-  var scoreSelect = $("<select id=\"enter-score_" + goal.name + "\"></select>");
-  scoreSelect.change(function() {
-    recomputeTotal();
+  $.each(ranges, function(index, range) {
+    var numColumns = range.max - range.min + 1;
+    var cell = $("<td colspan='" + numColumns
+        + "' class='border-right center'>" + range.shortDescription + "</td>");
+    row.append(cell);
   });
-  if (goal.scoreType == "INTEGER") {
-    for (var v = Number(goal.min); v <= Number(goal.max); ++v) {
-      var selected = "";
-      if (null != subscore && subscore == v) {
-        selected = "selected";
+
+  table.append(row);
+
+}
+
+function addScoreButtonsToScoreEntry(table, goal, ranges) {
+
+  var buttonRow = $("<tr></tr>");
+  $.each(ranges, function(index, range) {
+    if (goal.scoreType == "INTEGER") {
+      for (var score = range.min; score <= range.max; ++score) {
+        var scoreCell = $("<td></td>");
+        if (score == range.max) {
+          scoreCell.addClass('border-right');
+        }
+
+        var scoreButton = $("<button class='ui-btn ui-corner-all ui-shadow score-button'>"
+            + score + "</button>")
+        scoreButton.attr('id', goal.name + '_' + 'score_' + score);
+        scoreButton.attr('score_value', score);
+        scoreCell.append(scoreButton);
+
+        buttonRow.append(scoreCell);
       }
-      var option = $("<option value=\"" + v + "\" " + selected + " >" + v
-          + "</option>");
-      scoreSelect.append(option);
+    } else {
+      alert("Non-integer goals are not supported: " + goal.name);
     }
-  } else {
-    alert("Non-integer goals are not supported: " + goal.name);
-  }
-
-  scoreBlock.append(scoreSelect);
-  rightContainer.append(scoreBlock);
-
-  var rubricBlock = $("<div class=\"ui-block-b\"></div>");
-  rightContainer.append(rubricBlock);
-  var rubricButton = $("<button class=\"ui-btn ui-corner-all ui-icon-arrow-r ui-btn-icon-notext ui-btn-inline\"></button>");
-  rubricBlock.append(rubricButton);
-  rubricButton.click(function() {
-    var currentTeam = $.subjective.getCurrentTeam();
-    var score = $.subjective.getScore(currentTeam.teamNumber);
-    if (null == score) {
-      score = createNewScore();
-    }
-
-    var scoreCopy = $.extend(true, {}, score);
-    saveToScoreObject(scoreCopy);
-    scoreCopy.deleted = false;
-    $.subjective.setTempScore(scoreCopy);
-    $.subjective.setCurrentGoal(goal);
-    $.mobile.navigate("#rubric-page");
   });
 
-  row.append(rightContainer);
+  table.append(buttonRow);
 
-  $("#enter-score_score-content").append(row);
-  */
+}
+
+function createScoreRows(table, totalColumns, goal, subscore) {
+  addGoalHeaderToScoreEntry(table, totalColumns, goal);
+
+  var ranges = goal.rubric;
+  ranges.sort(rangeSort);
+
+  //FIXME addRubricHeaderToScoreEntry(table, goal, ranges);
+
+  addScoreButtonsToScoreEntry(table, goal, ranges);
+  
+  table.append($("<tr><td colspan='" + totalColumns + "'>&nbsp;</td></tr>"));
+
+  // FIXME how to track current score?
+
+  // FIXME button handler to set current button and clear all others
 }
 
 /**
@@ -607,106 +604,98 @@ function createScoreRows(table, totalColumns, goal, subscore) {
  */
 function populateEnterScoreRubricTitles(table) {
   var firstGoal = $.subjective.getCurrentCategory().goals[0];
-  
+
   var ranges = firstGoal.rubric;
   ranges.sort(rangeSort);
 
   var totalColumns = 0;
-  
+
   var row = $("<tr></tr>");
   row.empty();
   $.each(ranges, function(index, range) {
     var numColumns = range.max - range.min + 1;
     var cell = $("<th colspan='" + numColumns + "'>" + range.title + "</th>");
     row.append(cell);
-  
+
     totalColumns += numColumns;
   });
-  
+
   table.append(row);
-  
+
   return totalColumns;
 }
 
-$(document).on("pagebeforeshow", "#enter-score-page", function(event) {
+$(document).on(
+    "pagebeforeshow",
+    "#enter-score-page",
+    function(event) {
 
-  var currentTeam = $.subjective.getCurrentTeam();
-  $("#enter-score_team-number").text(currentTeam.teamNumber);
-  $("#enter-score_team-name").text(currentTeam.teamName);
+      var currentTeam = $.subjective.getCurrentTeam();
+      $("#enter-score_team-number").text(currentTeam.teamNumber);
+      $("#enter-score_team-name").text(currentTeam.teamName);
 
-  // load the saved score if needed
-  var score = $.subjective.getTempScore();
-  if (null == score) {
-    score = $.subjective.getScore(currentTeam.teamNumber);
-  }
-
-  if (null != score) {
-    $("#enter-score-note-text").val(score.note);
-  } else {
-    $("#enter-score-note-text").val("");
-  }
-
-  var table = $("#enter-score_score-table");
-  table.empty();
-
-  var totalColumns = populateEnterScoreRubricTitles(table);
-  
-  var prevCategory = null;
-  $.each($.subjective.getCurrentCategory().goals, function(index, goal) {
-    if (goal.enumerated) {
-      alert("Enumerated goals not supported: " + goal.name);
-    } else {
-      var subscore = null;
-      if ($.subjective.isScoreCompleted(score)) {
-        subscore = score.standardSubScores[goal.name];
+      // load the saved score if needed
+      var score = $.subjective.getTempScore();
+      if (null == score) {
+        score = $.subjective.getScore(currentTeam.teamNumber);
       }
 
-      if (prevCategory != goal.category) {
-        if (goal.category != null && "" != goal.category) {
-          var bar = $("<tr><td colspan='" + totalColumns + "' class='ui-bar-a'>" + goal.category + "</td></tr>");
-          table.append(bar);
+      if (null != score) {
+        $("#enter-score-note-text").val(score.note);
+      } else {
+        $("#enter-score-note-text").val("");
+      }
+
+      var table = $("#enter-score_score-table");
+      table.empty();
+
+      var totalColumns = populateEnterScoreRubricTitles(table);
+
+      var prevCategory = null;
+      $.each($.subjective.getCurrentCategory().goals, function(index, goal) {
+        if (goal.enumerated) {
+          alert("Enumerated goals not supported: " + goal.name);
+        } else {
+          var subscore = null;
+          if ($.subjective.isScoreCompleted(score)) {
+            subscore = score.standardSubScores[goal.name];
+          }
+
+          if (prevCategory != goal.category) {
+            if (goal.category != null && "" != goal.category) {
+              var bar = $("<tr><td colspan='" + totalColumns
+                  + "' class='ui-bar-a'>" + goal.category + "</td></tr>");
+              table.append(bar);
+            }
+          }
+
+          createScoreRows(table, totalColumns, goal, subscore);
+
+          prevCategory = goal.category;
         }
-      }
-      
-      createScoreRows(table, totalColumns, goal, subscore);
-      
-      prevCategory = goal.category;
-    }
-  });
+      });
 
-  
-  
-  /*    
-  var prevCategory = null;
-  $.each($.subjective.getCurrentCategory().goals, function(index, goal) {
-    if (goal.enumerated) {
-      alert("Enumerated goals not supported: " + goal.name);
-    } else {
-      var subscore = null;
-      if ($.subjective.isScoreCompleted(score)) {
-        subscore = score.standardSubScores[goal.name];
-      }
+      /*
+       * var prevCategory = null;
+       * $.each($.subjective.getCurrentCategory().goals, function(index, goal) {
+       * if (goal.enumerated) { alert("Enumerated goals not supported: " +
+       * goal.name); } else { var subscore = null; if
+       * ($.subjective.isScoreCompleted(score)) { subscore =
+       * score.standardSubScores[goal.name]; }
+       * 
+       * if (prevCategory != goal.category) { if (goal.category != null && "" !=
+       * goal.category) { var separator = $("<div class='ui-bar-a'>" +
+       * goal.category + "</div>");
+       * $("#enter-score_score-content").append(separator); } }
+       * createScoreRow(goal, subscore); prevCategory = goal.category; } });
+       * 
+       * recomputeTotal();
+       *  // clear out temp state so that we don't get it again
+       * $.subjective.setTempScore(null); $.subjective.setCurrentGoal(null);
+       */
 
-      if (prevCategory != goal.category) {
-        if (goal.category != null && "" != goal.category) {
-          var separator = $("<div class='ui-bar-a'>" + goal.category + "</div>");
-          $("#enter-score_score-content").append(separator);
-        }
-      }
-      createScoreRow(goal, subscore);
-      prevCategory = goal.category;
-    }
-  });
-
-  recomputeTotal();
-
-  // clear out temp state so that we don't get it again
-  $.subjective.setTempScore(null);
-  $.subjective.setCurrentGoal(null);
-*/
-  
-  $("#enter-score-page").trigger("create");
-});
+      $("#enter-score-page").trigger("create");
+    });
 
 $(document).on("pageinit", "#enter-score-page", function(event) {
   $("#enter-score_save-score").click(function() {
