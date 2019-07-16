@@ -524,7 +524,20 @@ function recomputeTotal() {
   $("#enter-score_total-score").text(total);
 }
 
-function createScoreRow(goal, subscore) {
+function createScoreRows(table, totalColumns, goal, subscore) {
+  var goalDescriptionRow = $("<tr></tr>");
+  var goalDescriptionCell = $("<td colspan='" + totalColumns + "'></td>");
+  var goalDescTable = $("<table></table>");
+  var goalDescRow = $("<tr></tr>");
+  goalDescRow.append($("<th width='25%'>" + goal.title + "</th>"));
+  goalDescRow.append($("<td width='5%'>&nbsp;</td>"));
+  goalDescRow.append($("<td width='70%'>" + goal.description + "</td>"));
+  goalDescTable.append(goalDescRow);
+  goalDescriptionCell.append(goalDescTable);
+  goalDescriptionRow.append(goalDescriptionCell);
+  table.append(goalDescriptionRow);
+  
+  /*
   var row = $("<div class=\"ui-grid-b ui-responsive\"></div>");
 
   var categoryBlock = $("<div class=\"ui-block-a\"></div>");
@@ -585,6 +598,7 @@ function createScoreRow(goal, subscore) {
   row.append(rightContainer);
 
   $("#enter-score_score-content").append(row);
+  */
 }
 
 /**
@@ -654,7 +668,7 @@ $(document).on("pagebeforeshow", "#enter-score-page", function(event) {
         }
       }
       
-      //FIXME createScoreRow(goal, subscore);
+      createScoreRows(table, totalColumns, goal, subscore);
       
       prevCategory = goal.category;
     }
