@@ -587,9 +587,9 @@ function createScoreRows(table, totalColumns, goal, subscore) {
   var ranges = goal.rubric;
   ranges.sort(rangeSort);
 
-  //FIXME addRubricHeaderToScoreEntry(table, goal, ranges);
+  addRubricHeaderToScoreEntry(table, goal, ranges);
 
-  addScoreButtonsToScoreEntry(table, goal, ranges);
+  //addScoreButtonsToScoreEntry(table, goal, ranges);
   
   table.append($("<tr><td colspan='" + totalColumns + "'>&nbsp;</td></tr>"));
 
