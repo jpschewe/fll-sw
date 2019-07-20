@@ -33,6 +33,7 @@ td.border-right {
 }
 
 table.score-entry {
+	table-layout: fixed;
 	width: 100%;
 	border-collapse: collapse;
 }
@@ -41,11 +42,12 @@ td.center {
 	text-align: center;
 }
 
-button.ui-btn.score-button.selected-score {
-	border-style: inset;
-	border-width: 2px;
-	background-color: LawnGreen;
+.score-slider-cell input {
+	display: none;
 }
 
-button.ui-btn.score-button {
+.score-slider-cell .ui-slider-track {
+	margin-left: 0px;
+	margin-right: 0px;
 }
+
