@@ -51,3 +51,7 @@ td.center {
 	margin-right: 0px;
 }
 
+table.score-entry .selected-range {
+	background-color: LawnGreen;
+}
+
