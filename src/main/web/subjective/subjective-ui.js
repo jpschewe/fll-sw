@@ -548,49 +548,23 @@ function addGoalHeaderToScoreEntry(table, totalColumns, goal) {
   table.append(goalDescriptionRow);
 }
 
-function addRubricHeaderToScoreEntry(table, goal, ranges) {
+function getRubricCellId(goal, rangeIndex) {
+  return goal.name + "_" + rangeIndex;
+}
+
+function addRubricToScoreEntry(table, goal, ranges) {
 
   var row = $("<tr></tr>");
 
   $.each(ranges, function(index, range) {
     var numColumns = range.max - range.min + 1;
     var cell = $("<td colspan='" + numColumns
-        + "' class='border-right center'>" + range.shortDescription + "</td>");
+        + "' class='border-right center' id='" + getRubricCellId(goal, index)
+        + "'>" + range.shortDescription + "</td>");
     row.append(cell);
   });
 
   table.append(row);
-
-}
-
-function addScoreButtonsToScoreEntry(table, goal, ranges) {
-
-  var buttonRow = $("<tr></tr>");
-  $
-      .each(
-          ranges,
-          function(index, range) {
-            if (goal.scoreType == "INTEGER") {
-              for (var score = range.min; score <= range.max; ++score) {
-                var scoreCell = $("<td></td>");
-                if (score == range.max) {
-                  scoreCell.addClass('border-right');
-                }
-
-                var scoreButton = $("<button class='ui-btn ui-corner-all ui-shadow score-button'>"
-                    + score + "</button>")
-                scoreButton.attr('id', goal.name + '_' + 'score_' + score);
-                scoreButton.attr('score_value', score);
-                scoreCell.append(scoreButton);
-
-                buttonRow.append(scoreCell);
-              }
-            } else {
-              alert("Non-integer goals are not supported: " + goal.name);
-            }
-          });
-
-  table.append(buttonRow);
 
 }
 
@@ -620,9 +594,27 @@ function addSliderToScoreEntry(table, goal, totalColumns, ranges, subscore) {
   row.append(cell);
 
   table.append(row);
+  
+  highlightRubric(goal, ranges, initValue);
 }
 
-function addEventsToSlider(goal) {
+function highlightRubric(goal, ranges, value) {
+
+  $.each(ranges, function(index, range) {
+    var rangeCell = $("#" + getRubricCellId(goal, index));
+    if(range.min <= value && value <= range.max) {
+      rangeCell.addClass("selected-range");
+    } else {
+      rangeCell.removeClass("selected-range");
+    }    
+  });
+
+}
+
+function addEventsToSlider(goal, ranges) {
+  var ranges = goal.rubric;
+  ranges.sort(rangeSort);
+
   var sliderId = getScoreItemName(goal);
 
   var slider = $("#" + sliderId);
@@ -631,8 +623,11 @@ function addEventsToSlider(goal) {
   });
 
   slider.on("change", function() {
-    $.subjective.log("change value for " + sliderId + ": " + slider.val());
-
+    var value = slider.val();
+    $.subjective.log("change value for " + sliderId + ": " + value);
+    
+    highlightRubric(goal, ranges, value);
+    
     recomputeTotal();
   });
 
@@ -644,9 +639,8 @@ function createScoreRows(table, totalColumns, goal, subscore) {
   var ranges = goal.rubric;
   ranges.sort(rangeSort);
 
-  addRubricHeaderToScoreEntry(table, goal, ranges);
+  addRubricToScoreEntry(table, goal, ranges);
 
-  // addScoreButtonsToScoreEntry(table, goal, ranges);
   addSliderToScoreEntry(table, goal, totalColumns, ranges, subscore);
 
   table.append($("<tr><td colspan='" + totalColumns + "'>&nbsp;</td></tr>"));
