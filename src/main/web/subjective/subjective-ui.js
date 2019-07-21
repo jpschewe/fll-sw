@@ -507,6 +507,16 @@ function saveToScoreObject(score) {
   });
 }
 
+/**
+ * 
+ * @param goal
+ *          the goal to get the score item name for
+ * @returns the name/id used for the input element that holds the score
+ */
+function getScoreItemName(goal) {
+  return "enter-score_" + goal.name;
+}
+
 function recomputeTotal() {
   var currentTeam = $.subjective.getCurrentTeam();
   var score = $.subjective.getScore(currentTeam.teamNumber);
@@ -516,7 +526,7 @@ function recomputeTotal() {
     if (goal.enumerated) {
       alert("Enumerated goals not supported: " + goal.name);
     } else {
-      var subscore = Number($("#enter-score_" + goal.name).val());
+      var subscore = Number($("#" + getScoreItemName(goal)).val());
       var multiplier = Number(goal.multiplier);
       total = total + subscore * multiplier;
     }
@@ -584,28 +594,46 @@ function addScoreButtonsToScoreEntry(table, goal, ranges) {
 
 }
 
-function addSliderToScoreEntry(table, goal, totalColumns, ranges) {
+function addSliderToScoreEntry(table, goal, totalColumns, ranges, subscore) {
+  var initValue;
+  if (null == subscore) {
+    initValue = goal.initialValue;
+  } else {
+    initValue = subscore;
+  }
+
   var row = $("<tr></tr>");
   var cell = $("<td class='score-slider-cell' colspan='" + totalColumns
       + "'></td>");
 
-  var sliderId = 'slider_' + goal.name;
+  var sliderId = getScoreItemName(goal);
   var label = $("<label for='" + sliderId
       + "' class='ui-hidden-accessible'></label>");
   cell.append(label);
 
   var slider = $("<input type='range' name='" + sliderId + "' id='" + sliderId
-      + "' min='" + goal.min + "' max='" + goal.max + "' value='"
-      + goal.initialValue + "' />");
+      + "' min='" + goal.min + "' max='" + goal.max + "' value='" + initValue
+      + "' />");
 
   cell.append(slider);
 
   row.append(cell);
 
   table.append(row);
+}
 
-  slider.on("slidestop", function(event) {
-    $.subjective.log("slider value: " + slider.val());
+function addEventsToSlider(goal) {
+  var sliderId = getScoreItemName(goal);
+
+  var slider = $("#" + sliderId);
+  slider.slider({
+    highlight : true
+  });
+
+  slider.on("change", function() {
+    $.subjective.log("change value for " + sliderId + ": " + slider.val());
+
+    recomputeTotal();
   });
 
 }
@@ -619,13 +647,9 @@ function createScoreRows(table, totalColumns, goal, subscore) {
   addRubricHeaderToScoreEntry(table, goal, ranges);
 
   // addScoreButtonsToScoreEntry(table, goal, ranges);
-  addSliderToScoreEntry(table, goal, totalColumns, ranges);
+  addSliderToScoreEntry(table, goal, totalColumns, ranges, subscore);
 
   table.append($("<tr><td colspan='" + totalColumns + "'>&nbsp;</td></tr>"));
-
-  // FIXME how to track current score?
-
-  // FIXME button handler to set current button and clear all others
 }
 
 /**
@@ -723,15 +747,16 @@ $(document).on(
        * $.subjective.setTempScore(null); $.subjective.setCurrentGoal(null);
        */
 
+      // read the intial value
+      recomputeTotal();
+
       $("#enter-score-page").trigger("create");
 
-      $("#slider_problem_identification").slider({
-        highlight : true,
-        stop : function(event, ui) {
-          $.subjective.log("later value: " + $(this).val());
-        }
+      // events need to be added after the page create
+      $.each($.subjective.getCurrentCategory().goals, function(index, goal) {
+        addEventsToSlider(goal);
       });
-      
+
     });
 
 $(document).on("pageinit", "#enter-score-page", function(event) {
