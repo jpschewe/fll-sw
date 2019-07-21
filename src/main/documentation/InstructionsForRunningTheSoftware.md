@@ -10,6 +10,8 @@ See the [Minnesota Notes page](MinnesotaNotes.md) for details specific to runnin
 
 See the [training presentation](training/computer-training.odp) for an overview presentation of running a tournament.
 
+See [challenge description notes](challenge-description.md) for information about writing challenge descriptions.
+
 ## Loading from a saved database
 
 If you, or someone else, setup the database previously you can then load that database onto the server. To do that visit http://localhost:9080/setup on the server and then use the middle section of the page to specify a database to load. If you connect from the server you don't need to know the username and password.
