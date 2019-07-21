@@ -8,6 +8,8 @@ package fll.scheduler;
 
 import java.io.Serializable;
 import java.time.LocalTime;
+import java.util.Comparator;
+import java.util.Objects;
 
 /**
  * Represents performance judging time.
@@ -121,5 +123,36 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
         + getTable()
         + " side: "
         + getSide();
+  }
+
+  /**
+   * Sort performance times by table, then by time.
+   * Null is not supported.
+   */
+  public static final class ByTableThenTime implements Comparator<PerformanceTime> {
+
+    /**
+     * Single instance to save memory.
+     */
+    public static final ByTableThenTime INSTANCE = new ByTableThenTime();
+
+    private ByTableThenTime() {
+    }
+
+    @Override
+    public int compare(final PerformanceTime o1,
+                       final PerformanceTime o2) {
+      Objects.requireNonNull(o1);
+      Objects.requireNonNull(o2);
+
+      final int tableCompare = o1.compareTable(o2);
+      if (0 == tableCompare) {
+        final int timeCompare = o1.time.compareTo(o2.time);
+        return timeCompare;
+      } else {
+        return tableCompare;
+      }
+    }
+
   }
 }

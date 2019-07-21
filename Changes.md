@@ -1,3 +1,4 @@
+* #729 - sort the regular match play performance sheets by table then time 
 * #727 - Add support for practice rounds
 * #719 - Add judges room and performance area to the footer
 * #725 - rework subjective sheets to have more comment space
