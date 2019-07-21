@@ -129,7 +129,7 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
    * Sort performance times by table, then by time.
    * Null is not supported.
    */
-  public static final class ByTableThenTime implements Comparator<PerformanceTime> {
+  public static final class ByTableThenTime implements Comparator<PerformanceTime>, Serializable {
 
     /**
      * Single instance to save memory.
