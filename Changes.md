@@ -1,3 +1,4 @@
+* #708 - prompt user to confirm when reloading the subjective application
 * #734 - respect initial value in the subjective scoring web application
 * #727 - Add support for practice rounds
 * #719 - Add judges room and performance area to the footer
