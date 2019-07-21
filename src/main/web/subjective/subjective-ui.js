@@ -1000,3 +1000,11 @@ function displayTournamentName(displayElement) {
   }
   displayElement.text("Tournament: " + tournamentName);
 }
+
+
+window.onbeforeunload = function ()
+{
+  // most browsers won't show the custom message, but we can try
+  // returning anything other than undefined will cause the user to be prompted
+    return "Are you sure you want to leave?";
+};
