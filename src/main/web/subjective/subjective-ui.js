@@ -501,7 +501,7 @@ function saveToScoreObject(score) {
     if (goal.enumerated) {
       alert("Enumerated goals not supported: " + goal.name);
     } else {
-      var subscore = Number($("#enter-score_" + goal.name).val());
+      var subscore = Number($("#" + getScoreItemName(goal)).val());
       score.standardSubScores[goal.name] = subscore;
     }
   });
