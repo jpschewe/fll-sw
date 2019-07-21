@@ -1,3 +1,4 @@
+* #734 - respect initial value in the subjective scoring web application
 * #727 - Add support for practice rounds
 * #719 - Add judges room and performance area to the footer
 * #725 - rework subjective sheets to have more comment space
