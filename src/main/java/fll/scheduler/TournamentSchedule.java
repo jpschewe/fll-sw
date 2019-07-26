@@ -1197,6 +1197,8 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
+   * Sheets are sorted by table and then by time.
+   *
    * @param tournamentName the name of the tournament to put in the sheets
    * @param output where to output
    * @param description where to get the goals from
@@ -1210,7 +1212,7 @@ public class TournamentSchedule implements Serializable {
       throws DocumentException, SQLException, IOException {
     final ScoresheetGenerator scoresheets = new ScoresheetGenerator(getTotalNumberOfRounds()
         * _schedule.size(), description, tournamentName);
-    final SortedMap<PerformanceTime, TeamScheduleInfo> performanceTimes = new TreeMap<>();
+    final SortedMap<PerformanceTime, TeamScheduleInfo> performanceTimes = new TreeMap<>(PerformanceTime.ByTableThenTime.INSTANCE);
     for (final TeamScheduleInfo si : _schedule) {
       for (final PerformanceTime pt : si.getAllPerformances()) {
         performanceTimes.put(pt, si);
