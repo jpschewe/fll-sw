@@ -658,9 +658,6 @@ public class FullTournamentTest {
     // generate reports
 
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-        + "report/CategorizedScores");
-
-    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "report/CategoryScoresByJudge");
 
     IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
