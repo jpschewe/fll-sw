@@ -27,8 +27,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-
-
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -54,7 +52,6 @@ import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.util.FLLRuntimeException;
 import fll.util.FP;
-
 import fll.util.PdfUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
@@ -71,6 +68,12 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  */
 @WebServlet("/report/FinalComputedScores")
 public final class FinalComputedScores extends BaseFLLServlet {
+
+  /**
+   * If 2 scores are within this amount of each other they are
+   * considered a tie.
+   */
+  public static final double TIE_TOLERANCE = 1E-6;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -131,7 +134,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
   /**
    * Determine which teams meet the performance hurdle.
    * This is computed per division and stored in mTeamsMeetingPerformanceHurdle.
-   * 
+   *
    * @param performanceHurdle the percentage hurdle as a floating point number
    *          between 0 and 1. Outside this range causes the return value to be
    *          empty.
@@ -338,7 +341,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           score = Double.NaN;
         }
 
-        if (!FP.equals(score, prevScore, 1E-6)) {
+        if (!FP.equals(score, prevScore, TIE_TOLERANCE)) {
           rank += numTied;
           numTied = 1;
         } else {
@@ -359,6 +362,90 @@ public final class FinalComputedScores extends BaseFLLServlet {
   }
 
   /**
+   * Used with
+   * {@link FinalComputedScores#iterateOverSubjectiveScores(Connection, SubjectiveScoreCategory, WinnerType, Tournament, String, String, SubjectiveScoreVisitor)}.
+   */
+  @FunctionalInterface
+  public interface SubjectiveScoreVisitor {
+    /**
+     * @param teamNumber the number of the team
+     * @param score the score of the team
+     * @param rank the rank of the team in the judging group
+     */
+    void visit(int teamNumber,
+               double score,
+               int rank);
+  }
+
+  /**
+   * Iterate over the standardized scores for a subjective category.
+   *
+   * @param connection database connection
+   * @param category the category to select scores for
+   * @param winnerCriteria who is the winner
+   * @param tournament which tournament to get scores for
+   * @param awardGroup which award group
+   * @param judgingStation which judging station
+   * @param visitor called with the data
+   * @throws SQLException if a database error occurs
+   */
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name is column name, winner criteria determines the sort")
+  public static void iterateOverSubjectiveScores(final Connection connection,
+                                                 final SubjectiveScoreCategory category,
+                                                 final WinnerType winnerCriteria,
+                                                 final Tournament tournament,
+                                                 final String awardGroup,
+                                                 final String judgingStation,
+                                                 final SubjectiveScoreVisitor visitor)
+      throws SQLException {
+
+    final String catName = category.getName();
+
+    try (final PreparedStatement prep = connection.prepareStatement("SELECT FinalScores.TeamNumber, FinalScores."
+        + catName //
+        + " FROM FinalScores, TournamentTeams" //
+        + " WHERE FinalScores.Tournament = ?" //
+        + " AND TournamentTeams.Tournament = FinalScores.Tournament" //
+        + " AND TournamentTeams.event_division = ?"//
+        + " AND TournamentTeams.TeamNumber = FinalScores.TeamNumber"//
+        + " AND TournamentTeams.judging_station = ?" //
+        + " ORDER BY FinalScores."
+        + catName
+        + " "
+        + winnerCriteria.getSortString())) {
+      prep.setInt(1, tournament.getTournamentID());
+      prep.setString(2, awardGroup);
+
+      prep.setString(3, judgingStation);
+
+      int numTied = 1;
+      int rank = 0;
+      double prevScore = Double.NaN;
+      try (final ResultSet rs = prep.executeQuery()) {
+        while (rs.next()) {
+          final int teamNumber = rs.getInt(1);
+          double score = rs.getDouble(2);
+          if (rs.wasNull()) {
+            score = Double.NaN;
+          }
+
+          if (!FP.equals(score, prevScore, TIE_TOLERANCE)) {
+            rank += numTied;
+            numTied = 1;
+          } else {
+            ++numTied;
+          }
+
+          visitor.visit(teamNumber, score, rank);
+
+          prevScore = score;
+        }
+
+      } // try ResultSet
+    } // try PreparedStatment
+  }
+
+  /**
    * @return category -> {Judging Group -> {team number -> rank}}
    * @throws SQLException
    */
@@ -372,66 +459,29 @@ public final class FinalComputedScores extends BaseFLLServlet {
     final Map<ScoreCategory, Map<String, Map<Integer, Integer>>> retval = new HashMap<>();
     final List<String> judgingStations = Queries.getJudgingStations(connection, tournament.getTournamentID());
 
-    for (int cat = 0; cat < subjectiveCategories.length; cat++) {
-      final String catName = subjectiveCategories[cat].getName();
-
+    for (final SubjectiveScoreCategory category : subjectiveCategories) {
       final Map<String, Map<Integer, Integer>> categoryRanks = new HashMap<>();
 
-      try (final PreparedStatement prep = connection.prepareStatement("SELECT FinalScores.TeamNumber, FinalScores."
-          + catName //
-          + " FROM FinalScores, TournamentTeams" //
-          + " WHERE FinalScores.Tournament = ?" //
-          + " AND TournamentTeams.Tournament = FinalScores.Tournament" //
-          + " AND TournamentTeams.event_division = ?"//
-          + " AND TournamentTeams.TeamNumber = FinalScores.TeamNumber"//
-          + " AND TournamentTeams.judging_station = ?" //
-          + " ORDER BY FinalScores."
-          + catName
-          + " "
-          + winnerCriteria.getSortString())) {
-        prep.setInt(1, tournament.getTournamentID());
-        prep.setString(2, awardGroup);
+      for (final String judgingStation : judgingStations) {
 
-        for (final String judgingStation : judgingStations) {
-          prep.setString(3, judgingStation);
+        final Map<Integer, Integer> rankedTeams = new HashMap<>();
 
-          final Map<Integer, Integer> rankedTeams = new HashMap<>();
+        iterateOverSubjectiveScores(connection, category, winnerCriteria, tournament, awardGroup, judgingStation,
+                                    (teamNumber,
+                                     score,
+                                     rank) -> {
+                                      rankedTeams.put(teamNumber, rank);
+                                    });
 
-          int numTied = 1;
-          int rank = 0;
-          double prevScore = Double.NaN;
-          try (final ResultSet rs = prep.executeQuery()) {
-            while (rs.next()) {
-              final int teamNumber = rs.getInt(1);
-              double score = rs.getDouble(2);
-              if (rs.wasNull()) {
-                score = Double.NaN;
-              }
+        categoryRanks.put(judgingStation, rankedTeams);
 
-              if (!FP.equals(score, prevScore, 1E-6)) {
-                rank += numTied;
-                numTied = 1;
-              } else {
-                ++numTied;
-              }
+      } // foreach judging station
 
-              rankedTeams.put(teamNumber, rank);
+      retval.put(category, categoryRanks);
 
-              prevScore = score;
-            }
-
-            categoryRanks.put(judgingStation, rankedTeams);
-
-          } // try ResultSet
-        } // foreach judging station
-
-        retval.put(subjectiveCategories[cat], categoryRanks);
-
-      } // try PreparedStatement
     } // foreach category
 
     return retval;
-
   }
 
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table name")
@@ -808,7 +858,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
     divTable.addCell("");
 
-    PdfPCell blankCell = new PdfPCell();
+    final PdfPCell blankCell = new PdfPCell();
     blankCell.setBorder(0);
     blankCell.setBorderWidthBottom(1.0f);
     blankCell.setColspan(relativeWidths.length);

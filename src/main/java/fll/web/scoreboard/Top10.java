@@ -25,8 +25,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.db.GlobalParameters;
@@ -34,10 +32,10 @@ import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.flltools.displaySystem.list.SetArray;
 import fll.util.FP;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.report.FinalComputedScores;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreType;
 import fll.xml.WinnerType;
@@ -60,6 +58,7 @@ public class Top10 extends BaseFLLServlet {
    */
   public static final int MAX_ORG_NAME = 20;
 
+  @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -165,8 +164,8 @@ public class Top10 extends BaseFLLServlet {
   /**
    * Used for processing the result of a score query.
    */
-  private static interface ProcessScoreEntry {
-    public void execute(final String teamName,
+  private interface ProcessScoreEntry {
+    void execute(final String teamName,
                         final int teamNumber,
                         final String organization,
                         @Nonnull final String formattedScore,
@@ -272,7 +271,7 @@ public class Top10 extends BaseFLLServlet {
 
   /**
    * Get the displayed data as a list for flltools.
-   * 
+   *
    * @param awardGroupName the award group to get scores for
    * @param application get all of the appropriate parameters
    * @return payload for the set array message
@@ -354,7 +353,7 @@ public class Top10 extends BaseFLLServlet {
           int rank = 0;
           while (rs.next()) {
             final double score = rs.getDouble("MaxOfComputedScore");
-            if (!FP.equals(score, prevScore, 1E-6)) {
+            if (!FP.equals(score, prevScore, FinalComputedScores.TIE_TOLERANCE)) {
               rank = i;
             }
 
