@@ -655,11 +655,6 @@ public class FullTournamentTest {
   }
 
   private void checkReports(final WebDriver selenium) throws IOException, SAXException, InterruptedException {
-    // generate reports
-
-    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-        + "report/CategoryScoresByJudge");
-
     IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
         + "report/FinalComputedScores"), "application/pdf", null);
 
