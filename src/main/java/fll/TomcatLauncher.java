@@ -53,16 +53,29 @@ public class TomcatLauncher {
     final ProtectionDomain classDomain = TomcatLauncher.class.getProtectionDomain();
     final CodeSource codeSource = classDomain.getCodeSource();
     final URL codeLocation = codeSource.getLocation();
+    LOGGER.debug("codeLocation: "
+        + codeLocation);
+
     try {
       final File codeLocationFile = new File(codeLocation.toURI());
+      LOGGER.debug("codeLocationFile: "
+          + codeLocationFile);
+
       final Path path = codeLocationFile.toPath();
+      LOGGER.debug("codeLocationPath: "
+          + path);
 
       final Path classesPath;
       if (!Files.isDirectory(path)) {
-        classesPath = path.getParent();
-        LOGGER.debug("Path to class files is a file "
-            + path
-            + " using parent directory as the classes location");
+        if (path.toString().endsWith(".exe")) {
+          LOGGER.debug("Code source path ends with exe, assuming that classes directory is <path to exe>/classes");
+          classesPath = path.getParent().resolve("classes");
+        } else {
+          classesPath = path.getParent();
+          LOGGER.debug("code location file '"
+              + path
+              + "' using parent directory as the classes location");
+        }
       } else {
         classesPath = path;
       }
