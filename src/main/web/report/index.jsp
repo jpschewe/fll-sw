@@ -139,11 +139,6 @@
 		<li><a href="unverifiedRuns.jsp">Unverified runs</a>. Unverfied
 			performance runs.</li>
 
-		<li><a href="CategoryScoresByJudge">Categorized Scores by
-				judge</a>. This shows the top teams for each judge. This is useful for
-			checking the winners of each category when there is only 1 judge for
-			each team in a category.</li>
-
 		<li><a href="PerformanceScoreDump">CSV file containing all
 				performance scores</a>, excluding byes. This is useful to manually
 			determine awards for most consistent or most improved robot
