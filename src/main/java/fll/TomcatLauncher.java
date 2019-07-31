@@ -11,6 +11,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.Objects;
@@ -69,7 +70,12 @@ public class TomcatLauncher {
       if (!Files.isDirectory(path)) {
         if (path.toString().endsWith(".exe")) {
           LOGGER.debug("Code source path ends with exe, assuming that classes directory is <path to exe>/classes");
-          classesPath = path.getParent().resolve("classes");
+          final Path parent = path.getParent();
+          if (null != parent) {
+            classesPath = parent.resolve("classes");
+          } else {
+            classesPath = Paths.get("classes");
+          }
         } else {
           classesPath = path.getParent();
           LOGGER.debug("code location file '"
