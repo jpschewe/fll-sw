@@ -1,3 +1,4 @@
+* #745 - make slider handle more obvious in the subjective web application
 * #743 - fix finding of web root when running from launch4j executable
 * #708 - prompt user to confirm when reloading the subjective application
 * #734 - respect initial value in the subjective scoring web application

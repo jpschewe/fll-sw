@@ -51,6 +51,10 @@ td.center {
 	margin-right: 0px;
 }
 
+.score-slider-cell .ui-slider-handle {
+	background-color: black;
+}
+
 table.score-entry .selected-range {
 	background-color: LawnGreen;
 }
