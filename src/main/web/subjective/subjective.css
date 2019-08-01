@@ -1,0 +1,61 @@
+.ui-grid-b>.ui-block-a.team-info {
+	width: 70%;
+}
+
+.ui-grid-b>.ui-block-b.score {
+	width: 10%;
+	text-align: center;
+}
+
+.ui-grid-b>.ui-block-c.edit {
+	width: 20%;
+}
+
+.tie {
+	background-color: red;
+	color: white;
+}
+
+.text-left {
+	text-align: left
+}
+
+.no-show {
+	background-color: yellow;
+}
+
+.score {
+	background-color: LawnGreen;
+}
+
+td.border-right {
+	border-right: 2px solid black;
+}
+
+table.score-entry {
+	table-layout: fixed;
+	width: 100%;
+	border-collapse: collapse;
+}
+
+td.center {
+	text-align: center;
+}
+
+.score-slider-cell input {
+	display: none;
+}
+
+.score-slider-cell .ui-slider-track {
+	margin-left: 0px;
+	margin-right: 0px;
+}
+
+.score-slider-cell .ui-slider-handle {
+	background-color: black;
+}
+
+table.score-entry .selected-range {
+	background-color: LawnGreen;
+}
+

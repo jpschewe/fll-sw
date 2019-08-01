@@ -45,7 +45,7 @@ function promptForJudgingGroup() {
   $.mobile.navigate("#choose-judging-group-page");
 }
 
-function promptForReload() {
+function promptForReload() {  
   $("#index-page_choose_clear").show();
 }
 

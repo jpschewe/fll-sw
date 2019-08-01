@@ -27,8 +27,6 @@
   var _allScores;
   var _teamTimeCache;
   var _currentTeam;
-  var _tempScore;
-  var _currentGoal;
   var _scoreEntryBackPage;
   var _categoryColumnMapping;
 
@@ -44,8 +42,6 @@
     _allScores = {};
     _teamTimeCache = {};
     _currentTeam = null;
-    _tempScore = null;
-    _currentGoal = null;
     _scoreEntryBackPage = null;
     _categoryColumnMapping = null;
   }
@@ -108,16 +104,6 @@
       _currentTeam = value;
     }
 
-    value = $.jStorage.get(STORAGE_PREFIX + "_tempScore");
-    if (null != value) {
-      _tempScore = value;
-    }
-
-    value = $.jStorage.get(STORAGE_PREFIX + "_currentGoal");
-    if (null != value) {
-      _currentGoal = value;
-    }
-
     value = $.jStorage.get(STORAGE_PREFIX + "_scoreEntryBackPage");
     if (null != value) {
       _scoreEntryBackPage = value;
@@ -143,8 +129,6 @@
     $.jStorage.set(STORAGE_PREFIX + "_allScores", _allScores);
     $.jStorage.set(STORAGE_PREFIX + "_teamTimeCache", _teamTimeCache);
     $.jStorage.set(STORAGE_PREFIX + "_currentTeam", _currentTeam);
-    $.jStorage.set(STORAGE_PREFIX + "_tempScore", _tempScore);
-    $.jStorage.set(STORAGE_PREFIX + "_currentGoal", _currentGoal);
     $.jStorage.set(STORAGE_PREFIX + "_scoreEntryBackPage", _scoreEntryBackPage);
     $.jStorage.set(STORAGE_PREFIX + "_categoryColumnMapping",
         _categoryColumnMapping);
@@ -854,29 +838,6 @@
         });
       });
       return modified;
-    },
-
-    /**
-     * Save a score to be retrieved later. Only one temp score can be saved at a
-     * time. This is meant to store a score object to be retrieved later without
-     * effecting the scores that will be sent.
-     */
-    setTempScore : function(score) {
-      _tempScore = score;
-      _save();
-    },
-
-    getTempScore : function() {
-      return _tempScore;
-    },
-
-    setCurrentGoal : function(goal) {
-      _currentGoal = goal;
-      _save();
-    },
-
-    getCurrentGoal : function() {
-      return _currentGoal;
     },
 
     setScoreEntryBackPage : function(page) {
