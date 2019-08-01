@@ -4,6 +4,8 @@
 <head>
 <title>Subjective Scoring</title>
 
+<meta charset="utf-8"/>
+
 <meta
   name="viewport"
   content="width=device-width, initial-scale=1">
@@ -36,38 +38,8 @@
 <script
   type='text/javascript'
   src='subjective-ui.js'></script>
-
-<style>
-.ui-grid-b>.ui-block-a.team-info {
-	width: 70%;
-}
-
-.ui-grid-b>.ui-block-b.score {
-	width: 10%;
-	text-align: center;
-}
-
-.ui-grid-b>.ui-block-c.edit {
-	width: 20%;
-}
-
-.tie {
-	background-color: red;
-	color: white;
-}
-
-.text-left {
-	text-align: left
-}
-
-.no-show {
-background-color: yellow;
-}
-
-.score {
-background-color: LawnGreen;
-}
-</style>
+  
+<link rel="stylesheet" href="subjective.css" />
 
 </head>
 
@@ -123,6 +95,9 @@ background-color: LawnGreen;
       role="main">
       <div id='choose-judging-group_judging-groups'></div>
 
+    <div>Do not use the browser forward and back buttons unless instructed to do so. 
+    Do not reload the page when offline. 
+    Attempting to reload the page will prompt you that you may loose data.</div>
     </div>
     <!-- /content -->
 
@@ -406,7 +381,8 @@ background-color: LawnGreen;
       class="ui-content"
       role="main">
 
-      <div id='enter-score_score-content'></div>
+      <table id='enter-score_score-table' class="score-entry">      
+      </table>
 
     </div>
     <!-- /content -->
@@ -467,73 +443,6 @@ background-color: LawnGreen;
 
   </div>
   <!-- end enter-score-page -->
-
-  <div
-    data-role="page"
-    id='rubric-page'>
-
-    <div
-      data-role="header"
-      data-position="fixed">
-
-      <div class="ui-grid-a">
-
-        <div class="ui-block-a">
-          <span id="rubric-category"></span>
-        </div>
-
-        <div class="ui-block-b">
-          <span id="rubric-goal-title"></span>
-        </div>
-
-        <div class="ui-block-a">Score</div>
-
-        <div class="ui-block-b">
-          <select id="rubric-score"></select>
-        </div>
-
-      </div>
-      <!-- end grid -->
-
-      <div id="rubric-description"></div>
-
-    </div>
-    <!-- /header -->
-
-    <div
-      class="ui-content"
-      role="main">
-
-      <div id='rubric-content'></div>
-
-    </div>
-    <!-- /content -->
-
-    <div
-      data-role="footer"
-      data-position="fixed">
-
-      <div class="ui-grid-a ui-responsive">
-
-        <div class="ui-block-a">
-          <button
-            id='rubric-save-score'
-            data-mini="true">Save Changes</button>
-        </div>
-
-        <div class="ui-block-b">
-          <button
-            id='rubric-cancel-score'
-            data-mini="true">Cancel Changes</button>
-        </div>
-
-      </div>
-
-    </div>
-    <!-- /footer -->
-
-  </div>
-  <!-- end rubric-page -->
 
   <div
     data-role="page"

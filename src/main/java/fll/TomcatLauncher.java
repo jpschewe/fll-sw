@@ -11,6 +11,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.Objects;
@@ -53,16 +54,34 @@ public class TomcatLauncher {
     final ProtectionDomain classDomain = TomcatLauncher.class.getProtectionDomain();
     final CodeSource codeSource = classDomain.getCodeSource();
     final URL codeLocation = codeSource.getLocation();
+    LOGGER.debug("codeLocation: "
+        + codeLocation);
+
     try {
       final File codeLocationFile = new File(codeLocation.toURI());
+      LOGGER.debug("codeLocationFile: "
+          + codeLocationFile);
+
       final Path path = codeLocationFile.toPath();
+      LOGGER.debug("codeLocationPath: "
+          + path);
 
       final Path classesPath;
       if (!Files.isDirectory(path)) {
-        classesPath = path.getParent();
-        LOGGER.debug("Path to class files is a file "
-            + path
-            + " using parent directory as the classes location");
+        if (path.toString().endsWith(".exe")) {
+          LOGGER.debug("Code source path ends with exe, assuming that classes directory is <path to exe>/classes");
+          final Path parent = path.getParent();
+          if (null != parent) {
+            classesPath = parent.resolve("classes");
+          } else {
+            classesPath = Paths.get("classes");
+          }
+        } else {
+          classesPath = path.getParent();
+          LOGGER.debug("code location file '"
+              + path
+              + "' using parent directory as the classes location");
+        }
       } else {
         classesPath = path;
       }

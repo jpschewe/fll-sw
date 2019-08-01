@@ -501,10 +501,20 @@ function saveToScoreObject(score) {
     if (goal.enumerated) {
       alert("Enumerated goals not supported: " + goal.name);
     } else {
-      var subscore = Number($("#enter-score_" + goal.name).val());
+      var subscore = Number($("#" + getScoreItemName(goal)).val());
       score.standardSubScores[goal.name] = subscore;
     }
   });
+}
+
+/**
+ * 
+ * @param goal
+ *          the goal to get the score item name for
+ * @returns the name/id used for the input element that holds the score
+ */
+function getScoreItemName(goal) {
+  return "enter-score_" + goal.name;
 }
 
 function recomputeTotal() {
@@ -516,7 +526,7 @@ function recomputeTotal() {
     if (goal.enumerated) {
       alert("Enumerated goals not supported: " + goal.name);
     } else {
-      var subscore = Number($("#enter-score_" + goal.name).val());
+      var subscore = Number($("#" + getScoreItemName(goal)).val());
       var multiplier = Number(goal.multiplier);
       total = total + subscore * multiplier;
     }
@@ -524,117 +534,201 @@ function recomputeTotal() {
   $("#enter-score_total-score").text(total);
 }
 
-function createScoreRow(goal, subscore) {
-  var row = $("<div class=\"ui-grid-b ui-responsive\"></div>");
-
-  var categoryBlock = $("<div class=\"ui-block-a\"></div>");
-  var categoryLabel = $("<p>" + goal.category + "</p>");
-  categoryBlock.append(categoryLabel);
-  row.append(categoryBlock);
-
-  var titleBlock = $("<div class=\"ui-block-b\"></div>");
-  var titleLabel = $("<p>" + goal.title + "</p>");
-  titleBlock.append(titleLabel);
-  row.append(titleBlock);
-
-  var rightBlock = $("<div class=\"ui-block-c\"></div>");
-  var rightContainer = $("<div class=\"ui-grid-a ui-responsive\"></div>");
-  rightBlock.append(rightContainer);
-
-  var scoreBlock = $("<div class=\"ui-block-a\"></div>");
-  var scoreSelect = $("<select id=\"enter-score_" + goal.name + "\"></select>");
-  scoreSelect.change(function() {
-    recomputeTotal();
-  });
-  if (goal.scoreType == "INTEGER") {
-    for (var v = Number(goal.min); v <= Number(goal.max); ++v) {
-      var selected = "";
-      if (null != subscore && subscore == v) {
-        selected = "selected";
-      }
-      var option = $("<option value=\"" + v + "\" " + selected + " >" + v
-          + "</option>");
-      scoreSelect.append(option);
-    }
-  } else {
-    alert("Non-integer goals are not supported: " + goal.name);
-  }
-
-  scoreBlock.append(scoreSelect);
-  rightContainer.append(scoreBlock);
-
-  var rubricBlock = $("<div class=\"ui-block-b\"></div>");
-  rightContainer.append(rubricBlock);
-  var rubricButton = $("<button class=\"ui-btn ui-corner-all ui-icon-arrow-r ui-btn-icon-notext ui-btn-inline\"></button>");
-  rubricBlock.append(rubricButton);
-  rubricButton.click(function() {
-    var currentTeam = $.subjective.getCurrentTeam();
-    var score = $.subjective.getScore(currentTeam.teamNumber);
-    if (null == score) {
-      score = createNewScore();
-    }
-
-    var scoreCopy = $.extend(true, {}, score);
-    saveToScoreObject(scoreCopy);
-    scoreCopy.deleted = false;
-    $.subjective.setTempScore(scoreCopy);
-    $.subjective.setCurrentGoal(goal);
-    $.mobile.navigate("#rubric-page");
-  });
-
-  row.append(rightContainer);
-
-  $("#enter-score_score-content").append(row);
+function addGoalHeaderToScoreEntry(table, totalColumns, goal) {
+  var goalDescriptionRow = $("<tr></tr>");
+  var goalDescriptionCell = $("<td colspan='" + totalColumns + "'></td>");
+  var goalDescTable = $("<table></table>");
+  var goalDescRow = $("<tr></tr>");
+  goalDescRow.append($("<th width='25%'>" + goal.title + "</th>"));
+  goalDescRow.append($("<td width='5%'>&nbsp;</td>"));
+  goalDescRow.append($("<td width='70%'>" + goal.description + "</td>"));
+  goalDescTable.append(goalDescRow);
+  goalDescriptionCell.append(goalDescTable);
+  goalDescriptionRow.append(goalDescriptionCell);
+  table.append(goalDescriptionRow);
 }
 
-$(document).on("pagebeforeshow", "#enter-score-page", function(event) {
+function getRubricCellId(goal, rangeIndex) {
+  return goal.name + "_" + rangeIndex;
+}
 
-  var currentTeam = $.subjective.getCurrentTeam();
-  $("#enter-score_team-number").text(currentTeam.teamNumber);
-  $("#enter-score_team-name").text(currentTeam.teamName);
+function addRubricToScoreEntry(table, goal, ranges) {
 
-  // load the saved score if needed
-  var score = $.subjective.getTempScore();
-  if (null == score) {
-    score = $.subjective.getScore(currentTeam.teamNumber);
-  }
+  var row = $("<tr></tr>");
 
-  if (null != score) {
-    $("#enter-score-note-text").val(score.note);
+  $.each(ranges, function(index, range) {
+    var numColumns = range.max - range.min + 1;
+    var cell = $("<td colspan='" + numColumns
+        + "' class='border-right center' id='" + getRubricCellId(goal, index)
+        + "'>" + range.shortDescription + "</td>");
+    row.append(cell);
+  });
+
+  table.append(row);
+
+}
+
+function addSliderToScoreEntry(table, goal, totalColumns, ranges, subscore) {
+  var initValue;
+  if (null == subscore) {
+    initValue = goal.initialValue;
   } else {
-    $("#enter-score-note-text").val("");
+    initValue = subscore;
   }
 
-  $("#enter-score_score-content").empty();
-  var prevCategory = null;
-  $.each($.subjective.getCurrentCategory().goals, function(index, goal) {
-    if (goal.enumerated) {
-      alert("Enumerated goals not supported: " + goal.name);
-    } else {
-      var subscore = null;
-      if ($.subjective.isScoreCompleted(score)) {
-        subscore = score.standardSubScores[goal.name];
-      }
+  var row = $("<tr></tr>");
+  var cell = $("<td class='score-slider-cell' colspan='" + totalColumns
+      + "'></td>");
 
-      if (prevCategory != goal.category) {
-        if (goal.category != null && "" != goal.category) {
-          var separator = $("<div class='ui-bar-a'>" + goal.category + "</div>");
-          $("#enter-score_score-content").append(separator);
-        }
-      }
-      createScoreRow(goal, subscore);
-      prevCategory = goal.category;
+  var sliderId = getScoreItemName(goal);
+  var label = $("<label for='" + sliderId
+      + "' class='ui-hidden-accessible'></label>");
+  cell.append(label);
+
+  var slider = $("<input type='range' name='" + sliderId + "' id='" + sliderId
+      + "' min='" + goal.min + "' max='" + goal.max + "' value='" + initValue
+      + "' />");
+
+  cell.append(slider);
+
+  row.append(cell);
+
+  table.append(row);
+
+  highlightRubric(goal, ranges, initValue);
+}
+
+function highlightRubric(goal, ranges, value) {
+
+  $.each(ranges, function(index, range) {
+    var rangeCell = $("#" + getRubricCellId(goal, index));
+    if (range.min <= value && value <= range.max) {
+      rangeCell.addClass("selected-range");
+    } else {
+      rangeCell.removeClass("selected-range");
     }
   });
 
-  recomputeTotal();
+}
 
-  // clear out temp state so that we don't get it again
-  $.subjective.setTempScore(null);
-  $.subjective.setCurrentGoal(null);
+function addEventsToSlider(goal, ranges) {
+  var ranges = goal.rubric;
+  ranges.sort(rangeSort);
 
-  $("#enter-score-page").trigger("create");
-});
+  var sliderId = getScoreItemName(goal);
+
+  var slider = $("#" + sliderId);
+  slider.slider({
+    highlight : true
+  });
+
+  slider.on("change", function() {
+    var value = slider.val();
+    $.subjective.log("change value for " + sliderId + ": " + value);
+
+    highlightRubric(goal, ranges, value);
+
+    recomputeTotal();
+  });
+
+}
+
+function createScoreRows(table, totalColumns, goal, subscore) {
+  addGoalHeaderToScoreEntry(table, totalColumns, goal);
+
+  var ranges = goal.rubric;
+  ranges.sort(rangeSort);
+
+  addRubricToScoreEntry(table, goal, ranges);
+
+  addSliderToScoreEntry(table, goal, totalColumns, ranges, subscore);
+
+  table.append($("<tr><td colspan='" + totalColumns + "'>&nbsp;</td></tr>"));
+}
+
+/**
+ * 
+ * @returns total number of columns to represent all scores in the rubric ranges
+ */
+function populateEnterScoreRubricTitles(table) {
+  var firstGoal = $.subjective.getCurrentCategory().goals[0];
+
+  var ranges = firstGoal.rubric;
+  ranges.sort(rangeSort);
+
+  var totalColumns = 0;
+
+  var row = $("<tr></tr>");
+  row.empty();
+  $.each(ranges, function(index, range) {
+    var numColumns = range.max - range.min + 1;
+    var cell = $("<th colspan='" + numColumns + "'>" + range.title + "</th>");
+    row.append(cell);
+
+    totalColumns += numColumns;
+  });
+
+  table.append(row);
+
+  return totalColumns;
+}
+
+$(document).on(
+    "pagebeforeshow",
+    "#enter-score-page",
+    function(event) {
+
+      var currentTeam = $.subjective.getCurrentTeam();
+      $("#enter-score_team-number").text(currentTeam.teamNumber);
+      $("#enter-score_team-name").text(currentTeam.teamName);
+
+      var score = $.subjective.getScore(currentTeam.teamNumber);
+      if (null != score) {
+        $("#enter-score-note-text").val(score.note);
+      } else {
+        $("#enter-score-note-text").val("");
+      }
+
+      var table = $("#enter-score_score-table");
+      table.empty();
+
+      var totalColumns = populateEnterScoreRubricTitles(table);
+
+      var prevCategory = null;
+      $.each($.subjective.getCurrentCategory().goals, function(index, goal) {
+        if (goal.enumerated) {
+          alert("Enumerated goals not supported: " + goal.name);
+        } else {
+          var subscore = null;
+          if ($.subjective.isScoreCompleted(score)) {
+            subscore = score.standardSubScores[goal.name];
+          }
+
+          if (prevCategory != goal.category) {
+            if (goal.category != null && "" != goal.category) {
+              var bar = $("<tr><td colspan='" + totalColumns
+                  + "' class='ui-bar-a'>" + goal.category + "</td></tr>");
+              table.append(bar);
+            }
+          }
+
+          createScoreRows(table, totalColumns, goal, subscore);
+
+          prevCategory = goal.category;
+        }
+      });
+
+      // read the intial value
+      recomputeTotal();
+
+      $("#enter-score-page").trigger("create");
+
+      // events need to be added after the page create
+      $.each($.subjective.getCurrentCategory().goals, function(index, goal) {
+        addEventsToSlider(goal);
+      });
+
+    });
 
 $(document).on("pageinit", "#enter-score-page", function(event) {
   $("#enter-score_save-score").click(function() {
@@ -695,10 +789,6 @@ $(document).on("pageinit", "#enter-score-page", function(event) {
 
 });
 
-function setRubricScore(value) {
-  $("#rubric-score").val(value).selectmenu("refresh", true);
-}
-
 function rangeSort(a, b) {
   if (a.min < b.min) {
     return -1;
@@ -709,104 +799,9 @@ function rangeSort(a, b) {
   }
 }
 
-function populateRubric(goal) {
-  $("#rubric-content").empty();
-
-  var ranges = goal.rubric;
-  ranges.sort(rangeSort);
-
-  var ndGrid = $("<div class=\"ui-grid-a\"></div>");
-  var ndBlockA = $("<div class=\"ui-grid-a rubric-not-done\">Not Done</div>");
-  var ndBlockB = $("<div class=\"ui-grid-b\"></div>");
-  var ndButton = $("<button>Set</button>");
-  ndButton.click(function() {
-    setRubricScore(0);
-  });
-  ndBlockB.append(ndButton);
-  ndGrid.append(ndBlockA);
-  ndGrid.append(ndBlockB);
-  $("#rubric-content").append(ndGrid);
-
-  $.each(ranges, function(index, range) {
-    var titleDiv = $("<div class=\"rubric-title\">" + range.title + " ("
-        + range.min + "-" + range.max + ")<div>");
-    $("#rubric-content").append(titleDiv);
-
-    var grid = $("<div class=\"ui-grid-a\"></div>");
-    var blockA = $("<div class=\"ui-grid-a\"></div>");
-    blockA.text(range.fullDescription);
-
-    var blockB = $("<div class=\"ui-grid-b\"></div>");
-    var button = $("<button>Set</button>");
-    button.click(function() {
-      var mid = Math.floor((range.min + range.max) / 2);
-      setRubricScore(mid);
-    });
-    blockB.append(button);
-
-    grid.append(blockA);
-    grid.append(blockB);
-    $("#rubric-content").append(grid);
-
-  });
+function getScoreRange(goal) {
+  return goal.max - goal.min + 1;
 }
-
-$(document).on("pagebeforeshow", "#rubric-page", function(event) {
-
-  var goal = $.subjective.getCurrentGoal();
-
-  if (goal.scoreType == "INTEGER") {
-    for (var v = Number(goal.min); v <= Number(goal.max); ++v) {
-      var option = $("<option value=\"" + v + "\">" + v + "</option>");
-      $("#rubric-score").append(option);
-    }
-  } else {
-    alert("Non-integer goals are not supported: " + goal.name);
-  }
-
-  $("#rubric-category").text(goal.category);
-  $("#rubric-goal-title").text(goal.title);
-  $("#rubric-description").text(goal.description);
-
-  populateRubric(goal);
-
-  $("#rubric-page").trigger("create");
-});
-
-$(document).on("pageshow", "#rubric-page", function(event) {
-  var score = $.subjective.getTempScore();
-  var goal = $.subjective.getCurrentGoal();
-
-  var subscore;
-  if (goal.enumerated) {
-    subscore = null;
-    $.subjective.log("enumerated score: " + score.enumSubScores[goal.name]);
-  } else {
-    subscore = score.standardSubScores[goal.name];
-  }
-  setRubricScore(subscore);
-
-});
-
-$(document).on("pageinit", "#rubric-page", function(event) {
-  $("#rubric-save-score").click(function() {
-    var score = $.subjective.getTempScore();
-    var goal = $.subjective.getCurrentGoal();
-    if (goal.enumerated) {
-      alert("Enumerated unsupported");
-    } else {
-      score.standardSubScores[goal.name] = $("#rubric-score").val();
-      $.subjective.setTempScore(score);
-      $.mobile.navigate("#enter-score-page");
-    }
-
-  });
-
-  $("#rubric-cancel-score").click(function() {
-    $.mobile.navigate("#enter-score-page");
-  });
-
-});
 
 function populateScoreSummary() {
   $("#score-summary_content").empty();
@@ -1005,3 +1000,11 @@ function displayTournamentName(displayElement) {
   }
   displayElement.text("Tournament: " + tournamentName);
 }
+
+
+window.onbeforeunload = function ()
+{
+  // most browsers won't show the custom message, but we can try
+  // returning anything other than undefined will cause the user to be prompted
+    return "Are you sure you want to leave?";
+};
