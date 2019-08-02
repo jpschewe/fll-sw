@@ -513,7 +513,7 @@ public class Launcher extends JFrame {
       final Path check = classesPath.resolve(location).resolve("fll-sw.html");
       if (Files.exists(check)
           && Files.isRegularFile(check)) {
-        return check;
+        return check.normalize();
       }
     }
     return null;
@@ -531,7 +531,7 @@ public class Launcher extends JFrame {
       final Path check = webroot.resolve("sponsor_logos");
       if (Files.exists(check)
           && Files.isDirectory(check)) {
-        return check;
+        return check.normalize();
       } else {
         return null;
       }
@@ -550,7 +550,7 @@ public class Launcher extends JFrame {
       final Path check = webroot.resolve("slideshow");
       if (Files.exists(check)
           && Files.isDirectory(check)) {
-        return check;
+        return check.normalize();
       } else {
         return null;
       }
@@ -569,7 +569,7 @@ public class Launcher extends JFrame {
       final Path check = webroot.resolve("custom");
       if (Files.exists(check)
           && Files.isDirectory(check)) {
-        return check;
+        return check.normalize();
       } else {
         return null;
       }
@@ -610,7 +610,7 @@ public class Launcher extends JFrame {
       final Path check = classesPath.resolve(location).resolve("index.html");
       if (Files.exists(check)
           && Files.isRegularFile(check)) {
-        return check;
+        return check.normalize();
       }
     }
     return null;
