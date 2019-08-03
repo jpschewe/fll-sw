@@ -226,12 +226,15 @@ public class FinalistLoad {
         prep.setInt(1, tournament.getTournamentID());
 
         try (ResultSet rs = prep.executeQuery()) {
+          // defined by load.jsp
+          final String championshipCategoryVar = "championship";
           while (rs.next()) {
             final int teamNumber = rs.getInt("TeamNumber");
 
             final String teamVar = getTeamVarName(teamNumber);
             final double overallScore = rs.getDouble("OverallScore");
-            output.format("$.finalist.setCategoryScore(%s, championship, %.02f);%n", teamVar, overallScore);
+            output.format("$.finalist.setCategoryScore(%s, %s, %.02f);%n", teamVar, championshipCategoryVar,
+                          overallScore);
           } // foreach team
         } // result set
       } // prepared statement
