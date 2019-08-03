@@ -648,9 +648,11 @@ function createScoreRows(table, totalColumns, goal, subscore) {
 
 /**
  * 
+ * @param table where to put the information
+ * @param hidden true if the row should be hidden
  * @returns total number of columns to represent all scores in the rubric ranges
  */
-function populateEnterScoreRubricTitles(table) {
+function populateEnterScoreRubricTitles(table, hidden) {
   var firstGoal = $.subjective.getCurrentCategory().goals[0];
 
   var ranges = firstGoal.rubric;
@@ -659,7 +661,10 @@ function populateEnterScoreRubricTitles(table) {
   var totalColumns = 0;
 
   var row = $("<tr></tr>");
-  row.empty();
+  if(hidden) {
+    row.addClass('hidden');
+  }
+  
   $.each(ranges, function(index, range) {
     var numColumns = range.max - range.min + 1;
     var cell = $("<th colspan='" + numColumns + "'>" + range.title + "</th>");
@@ -692,8 +697,12 @@ $(document).on(
       var table = $("#enter-score_score-table");
       table.empty();
 
-      var totalColumns = populateEnterScoreRubricTitles(table);
+      var totalColumns = populateEnterScoreRubricTitles(table, true);
 
+      // put rubric titles in the top header
+      var headerTable = $("#enter-score_score-table_header");
+      populateEnterScoreRubricTitles(headerTable, false)
+      
       var prevCategory = null;
       $.each($.subjective.getCurrentCategory().goals, function(index, goal) {
         if (goal.enumerated) {
