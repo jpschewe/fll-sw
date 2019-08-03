@@ -10,7 +10,7 @@ Award Group
 At each tournament a team is put into an award group.
 An award group is a group of teams that are competing against each other.
 There are one set of awards for each award group.
-Teams in different award groups may compete on opposite sides of the performance table from each other during the seeding rounds.
+Teams in different award groups may compete on opposite sides of the performance table from each other during regular match play.
 This is OK because teams are just going for the best score at this point and not really competing against the team on the other side of the table.
 
 Judging Group
@@ -94,6 +94,19 @@ This allows each judge to come up with their best team early in the day and allo
 ![Example Tournament Configurations](tournament-groups.png)
 
 
+Performance Runs
+================
+
+There are 3 types of performance runs.
+
+Practice - Each team may be scheduled for one or more practice rounds on the regular performance tables. 
+The score sheet for this run is clearly marked as practice and the score is not entered into the computer. 
+The purpose of this run is for a team to become familiar with how the scoring is done and how the regular match play will proceed.
+
+Regular Match Play - these are the performance rounds that count towards advancement. 
+Each team commonly has 3 regular match play rounds and the best score is used.
+
+Head to head - these are extra rounds at the end of the tournament and are described above.
 
 
  

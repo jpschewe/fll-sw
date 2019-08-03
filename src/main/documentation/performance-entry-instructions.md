@@ -25,7 +25,7 @@ These are the instructions that we follow in Minnesota.
   
 ## Head to Head and ties
 
-Entering scores for head to head is done the same way as the seeding rounds.
+Entering scores for head to head is done the same way as regular match play.
 However a tie may occur because during head to had the teams on a table are competing against each other.
 
 
