@@ -88,12 +88,12 @@
 			control what is displayed on the screens</li>
 
 		<li><a href="CheckSubjectiveEmpty">Export performance data
-				for judges server</a>. This is done once the seeding rounds have been
-			complete. If doing finalist scheduling, the initial head to head
-			brackets need to be created before doing this export. This file needs
-			to goto the judges room.</li>
+				for judges server</a>. This is done once regular match play is complete.
+			If doing finalist scheduling, the initial head to head brackets need
+			to be created before doing this export. This file needs to goto the
+			judges room.</li>
 
-		<li>Once the seeding rounds have been completed you will need to
+		<li>Once regular match play has been completed you will need to
 			setup the <a href="<c:url value='/playoff' />" target="_h2h">head
 				to head brackets</a>.
 		</li>
@@ -125,8 +125,7 @@
 	<h2>Other useful pages</h2>
 	<ul>
 		<li>
-			<form
-				action="<c:url value='ChangeScorePageText' />" method='post'>
+			<form action="<c:url value='ChangeScorePageText' />" method='post'>
 				Scoring display text: <input type='text' name='ScorePageText'
 					value='<c:out value="${ScorePageText}"/>'> <input
 					type='submit' value='Change text'> <a

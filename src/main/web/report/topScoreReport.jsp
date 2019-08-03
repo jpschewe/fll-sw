@@ -9,11 +9,11 @@
 <head>
 <link rel="stylesheet" type="text/css"
 	href="<c:url value='/style/fll-sw.css'/>" />
-<title>Top seeding round scores</title>
+<title>Top regular match play round scores</title>
 </head>
 <body>
 
-	<h1>Top seeding round scores</h1>
+	<h1>Top regular match play round scores</h1>
 
 	<c:forEach var="entry" items="${scoreMap}">
 		<h2>

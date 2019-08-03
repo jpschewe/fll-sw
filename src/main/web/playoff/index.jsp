@@ -49,7 +49,7 @@
 
 			<p>
 				Scores for the head to head brackets are entered just like the
-				scores for the seeding rounds using the <a
+				scores for regular match play using the <a
 					href='<c:url value="/scoreEntry/select_team.jsp"/>' target='_new'>Score
 					Entry</a> page. If a team leaves the tournament before head to head,
 				they should be entered as a No Show on the Score Entry page. If a
@@ -65,8 +65,8 @@
 
 				<li>
 					<form name='check' action='CheckSeedingRounds' method='POST'>
-						Check to make sure all teams have scores entered for each seeding
-						round. <input type='submit' id='check_seeding_rounds'
+						Check to make sure all teams have scores entered for each regular
+						match play round. <input type='submit' id='check_seeding_rounds'
 							value='Check Seeding Rounds' />
 
 					</form>
@@ -77,9 +77,9 @@
 					<form name='initialize' action='StorePlayoffParameters'
 						method='POST'>
 						<b>WARNING: Do not initialize any head to head brackets until
-							all seeding runs have been recorded!</b> Doing so will automatically
-						add bye runs to the teams that don't have enough seeding runs.<br />
-						Select Bracket:
+							regular match play rounds have been recorded!</b> Doing so will
+						automatically add bye runs to the teams that don't have enough
+						regular match play rounds.<br /> Select Bracket:
 						<c:set var="init_disabled" value="disabled" />
 						<select id='initialize-division' name='division'>
 							<c:forEach items="${playoff_data.uninitializedBrackets }"
