@@ -1,3 +1,4 @@
+* #746 - lock rubric range titles in the subjective web application header
 * #728 - Document regular match play terminology
 * #748 - remove ".." from paths sent to desktop applications. This allows the HTML page to properly open on Windows.
 * #745 - make slider handle more obvious in the subjective web application
