@@ -26,7 +26,8 @@
 			scores.</li>
 
 		<li><a href="topScoreReport.jsp">Top performance scores</a>. This
-			creates a text report of the top seeding round scores by award group.</li>
+			creates a text report of the top regular match play round scores by
+			award group.</li>
 
 		<li><a href='FinalComputedScores' target="_blank">Final
 				Computed Scores</a>. This is the report that the head judge will want to

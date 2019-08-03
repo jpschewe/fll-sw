@@ -11,7 +11,7 @@
 </head>
 
 <body>
-  <h1>Check Seeding Rounds</h1>
+  <h1>Check Regular Match Play Rounds</h1>
 
   <div class='status-message'>${message}</div>
   <%-- clear out the message, so that we don't see it again --%>
@@ -22,10 +22,10 @@
 
   <c:choose>
     <c:when test="${empty playoff_data.teamsNeedingSeedingRuns}">
-      <p>No teams are missing seeding rounds.</p>
+      <p>No teams are missing regular match play rounds.</p>
     </c:when>
     <c:otherwise>
-      <p>Teams missing some seeding rounds. Teams with no runs are
+      <p>Teams missing some regular match play rounds. Teams with no runs are
         excluded from this check.</p>
       <ul>
         <c:forEach

@@ -86,7 +86,7 @@ This has caught many data entry errors in previous tournaments.
 
 ### Head to Head
   * When it comes time to do head to head, make sure you initialize the brackets on the [head to head page](http://localhost:9080/playoff/index.jsp) before entering scores. If you attempt to enter head to head scores before initializing the brackets, you will get an error message. Don't worry, nothing is broken, you just need to initialize the brackets first.
-    * When you initialize head to head brackets you will be asked how to seed the teams into the brackets. In most cases you want to choose "Use the best score from the seeding rounds".
+    * When you initialize head to head brackets you will be asked how to seed the teams into the brackets. In most cases you want to choose "Use the best score from regular match play".
   * You can print out the brackets by going to the admin/printable bracket page, under the Head to Head link on the main index, for each division and printing that out.
   * You can goto the printable bracket page and then keep refreshing the page. As scores are entered the bracket will fill out. Clicking the print scoresheets button at the top will create a PDF of the score sheets for the rounds that can be determined and haven't been printed yet. If you want to reprint some scoresheets you just check the box next to the round to print and then click the print scoresheets button.
   * Scores are entered per the [Performance Score Entry Instructions](performance-entry-instructions.md)

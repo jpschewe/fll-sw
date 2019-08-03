@@ -41,7 +41,7 @@ public class ExportPerformanceData extends BaseFLLServlet {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
     try (Connection connection = datasource.getConnection()) {
-      DumpDB.exportDatabase(response, application, "_perf-after-seeding", challengeDocument, connection);
+      DumpDB.exportDatabase(response, application, "_perf-after-regular-match-play", challengeDocument, connection);
     } catch (final SQLException sqle) {
       throw new RuntimeException(sqle);
     }

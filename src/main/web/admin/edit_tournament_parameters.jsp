@@ -55,7 +55,7 @@
 
 			<!-- num seeding rounds -->
 			<div>
-				<b>Seeding Rounds</b>
+				<b>Number of Regular Match Play Rounds</b>
 				<c:choose>
 					<c:when test="${numSeedingSoundsDisabled}">
 						<i>This parameters cannot be changed once any performance
@@ -66,8 +66,8 @@
 					<c:otherwise>
 						<a href='javascript:display("SeedingRoundsHelp")'>[help]</a>
 						<div id='SeedingRoundsHelp' class='help' style='display: none'>
-							This parameter specifies the number of seeding rounds. The
-							seeding rounds are used for the performance score in the final
+							This parameter specifies the number of rounds in regular match play. Regular
+							match play rounds are used for the performance score in the final
 							report and are typically used to rank teams for the initial head
 							to head round. <a href='javascript:hide("SeedingRoundsHelp")'>[hide]</a>
 						</div>
@@ -84,7 +84,7 @@
 				<c:choose>
 					<c:when test="${runningHeadToHeadDisabled }">
 						<i>This parameter cannot be changed once any performance
-							scores beyond the seeding rounds have been entered or there is an
+							scores beyond the number of regular match play rounds have been entered or there is an
 							initialized playoff bracket.</i>
 						<input type="checkbox" name="running_head_to_head"
 							id="running_head_to_head" readonly ${runningHeadToHeadChecked }/>
