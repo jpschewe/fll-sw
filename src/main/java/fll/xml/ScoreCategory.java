@@ -23,7 +23,7 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
  * Base for {@link SubjectiveScoreCategory} and
  * {@link PerformanceScoreCategory}.
  */
-public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
+public abstract class ScoreCategory implements Evaluatable, Serializable, GoalScope {
 
   public static final String WEIGHT_ATTRIBUTE = "weight";
 
@@ -172,5 +172,12 @@ public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
       ele.appendChild(goalEle);
     }
   }
+
+  /**
+   * The name of the category must be a valid database string.
+   *
+   * @return the name of the category
+   */
+  public abstract String getName();
 
 }
