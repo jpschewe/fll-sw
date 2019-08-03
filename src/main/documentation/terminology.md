@@ -10,7 +10,7 @@ Award Group
 At each tournament a team is put into an award group.
 An award group is a group of teams that are competing against each other.
 There are one set of awards for each award group.
-Teams in different award groups may compete on opposite sides of the performance table from each other during the seeding rounds.
+Teams in different award groups may compete on opposite sides of the performance table from each other during regular match play.
 This is OK because teams are just going for the best score at this point and not really competing against the team on the other side of the table.
 
 Judging Group

@@ -165,7 +165,7 @@
 						tools</li>
 
 					<li><a href="<c:url value='/admin/PerformanceSheets' />"
-						target="_new">Performance sheets for the seeding rounds</a></li>
+						target="_new">Performance sheets for regular match play</a></li>
 
 					<c:forEach items="${challengeDescription.subjectiveCategories}"
 						var="category">
@@ -320,7 +320,7 @@
 
 			</ul></li>
 
-		<li>Once the seeding rounds have been completed you will need to
+		<li>Once regular match play has been completed you will need to
 			setup the <a href="../playoff" target="_new">head to head
 				brackets</a>.
 		</li>

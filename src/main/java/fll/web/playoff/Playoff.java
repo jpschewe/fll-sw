@@ -11,7 +11,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -22,7 +21,6 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-
 
 import com.diffplug.common.base.Errors;
 
@@ -36,7 +34,6 @@ import fll.util.DummyTeamScore;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.FP;
-
 import fll.xml.AbstractGoal;
 import fll.xml.BracketSortType;
 import fll.xml.ChallengeDescription;
@@ -67,7 +64,7 @@ public final class Playoff {
   /**
    * Build the list of teams ordered from top to bottom (visually) of a single
    * elimination bracket.
-   * 
+   *
    * @param connection connection to the database
    * @param teams the teams in the playoffs
    * @return a List of teams
@@ -96,20 +93,18 @@ public final class Playoff {
       for (int i = 0; i < randoms.length; ++i) {
         randoms[i] = generator.nextDouble();
       }
-      Collections.sort(seedingOrder, new Comparator<Team>() {
-        public int compare(final Team one,
-                           final Team two) {
-          final int oneIdx = seedingOrder.indexOf(one);
-          final int twoIdx = seedingOrder.indexOf(two);
-          return Double.compare(randoms[oneIdx], randoms[twoIdx]);
-        }
-      });
+      Collections.sort(seedingOrder, (one,
+       two) -> {
+     final int oneIdx = seedingOrder.indexOf(one);
+     final int twoIdx = seedingOrder.indexOf(two);
+     return Double.compare(randoms[oneIdx], randoms[twoIdx]);
+    });
     } else {
       // standard seeding
       final int tournament = Queries.getCurrentTournament(connection);
       final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, tournament);
       if (numSeedingRounds < 1) {
-        throw new FLLRuntimeException("Cannot initialize playoff brackets using scores from seeding rounds when the number of seeing rounds is less than 1");
+        throw new FLLRuntimeException("Cannot initialize playoff brackets using scores from regular match play when the number of regular match play rounds is less than 1");
       }
 
       seedingOrder = Queries.getPlayoffSeedingOrder(connection, winnerCriteria, teams);
@@ -123,7 +118,7 @@ public final class Playoff {
     final int[] seeding = computeInitialBrackets(seedingOrder.size());
 
     // give byes to the last byesNeeded teams.
-    final List<Team> list = new LinkedList<Team>();
+    final List<Team> list = new LinkedList<>();
     for (final int element : seeding) {
       if (element > seedingOrder.size()) {
         list.add(Team.BYE);
@@ -146,7 +141,7 @@ public final class Playoff {
    * and the score data contained in the request object. Calls
    * Queries.updateScoreTotals() to ensure the ComputedScore column is up to
    * date.
-   * 
+   *
    * @param connection Database connection with write access to Performance
    *          table.
    * @param performanceElement the XML element representing the performance
@@ -188,7 +183,7 @@ public final class Playoff {
   /**
    * Decide who is the winner of runNumber. Calls Queries.updateScoreTotals() to
    * ensure the ComputedScore column is up to date
-   * 
+   *
    * @param connection database connection with write access to Performance
    *          table
    * @param performanceElement the XML element representing the performance
@@ -226,7 +221,7 @@ public final class Playoff {
 
   /**
    * Pick the winner between the scores of two teams
-   * 
+   *
    * @return the winner, null on a tie or a missing score
    */
   private static Team pickWinner(final PerformanceScoreCategory perf,
@@ -275,7 +270,7 @@ public final class Playoff {
 
   /**
    * Evaluate the tiebreaker to determine the winner.
-   * 
+   *
    * @param tiebreakerElement the element from the XML document specifying the
    *          tiebreaker
    * @param teamAScore team A's score information
@@ -306,7 +301,7 @@ public final class Playoff {
   /**
    * Insert a by run for a given team, tournament, run number in the performance
    * table.
-   * 
+   *
    * @throws SQLException on a database error
    */
   public static void insertBye(final Connection connection,
@@ -335,7 +330,7 @@ public final class Playoff {
 
   /**
    * Get the performance score for the given team, tournament and run number
-   * 
+   *
    * @throws SQLException on a database error
    * @throws IllegalArgumentException if no score exists
    */
@@ -376,7 +371,7 @@ public final class Playoff {
 
   /**
    * Get the value of NoShow for the given team, tournament and run number
-   * 
+   *
    * @throws SQLException on a database error
    * @throws IllegalArgumentException if no score exists
    */
@@ -390,7 +385,7 @@ public final class Playoff {
 
   /**
    * Get the value of Bye for the given team, tournament and run number
-   * 
+   *
    * @throws SQLException on a database error
    * @throws IllegalArgumentException if no score exists
    */
@@ -409,7 +404,7 @@ public final class Playoff {
    * Make sure that the teams listed here are not involved in any unfinished
    * playoffs, otherwise there will be problems.
    * </p>
-   * 
+   *
    * @param connection the connection
    * @param division the playoff division that the specified teams are in
    * @param enableThird true if 3rd place bracket needs to be computed
@@ -443,7 +438,7 @@ public final class Playoff {
     // buildInitialBracketOrder to be a power of 2. It always should be.
     final List<? extends Team> firstRound = buildInitialBracketOrder(connection, bracketSort, winnerCriteria, teams);
 
-    final List<Integer> teamNumbers = new LinkedList<Integer>();
+    final List<Integer> teamNumbers = new LinkedList<>();
     for (final Team t : firstRound) {
       teamNumbers.add(t.getTeamNumber());
     }
@@ -639,7 +634,7 @@ public final class Playoff {
   /**
    * Determine the max performance run number used by any playoff bracket that
    * any of the listed teams have been involved in.
-   * 
+   *
    * @param connection the database connection
    * @param currentTournament the tournament
    * @param teamNumbers the team numbers to check
@@ -688,7 +683,7 @@ public final class Playoff {
 
   /**
    * Maximum playoff round, this is the final winner.
-   * 
+   *
    * @param connection
    * @param tournament the tournament
    * @param playoffDivision the bracket name
@@ -710,7 +705,7 @@ public final class Playoff {
 
   /**
    * Get max performance run number for playoff division.
-   * 
+   *
    * @param playoffDivision the division to check
    * @return performance round, -1 if there are no playoff rounds for this
    *         division
@@ -743,7 +738,7 @@ public final class Playoff {
 
   /**
    * Compute the assignments to the initial playoff brackets.
-   * 
+   *
    * @param numTeams will be rounded up to the next power of 2
    * @return the initial bracket index 0 plays 1, 2 plays 3, will have size of
    *         numTeams rounded up to next power of 2
@@ -753,7 +748,7 @@ public final class Playoff {
     if (numTeams < 1) {
       throw new IllegalArgumentException("numTeams must be greater than or equal to 1 found: "
           + numTeams
-          + " perhaps teams have not had scores entered for seeding rounds?");
+          + " perhaps teams have not had scores entered for regular match play?");
     }
 
     int n = numTeams;
@@ -798,7 +793,7 @@ public final class Playoff {
    * Check if a number is a power of 2. Found at
    * http://sabbour.wordpress.com/2008/07/24/interview-question-check-that
    * -an-integer-is-a-power-of-two/
-   * 
+   *
    * @param n the number
    * @return if the number is a power of 2
    */
@@ -812,7 +807,7 @@ public final class Playoff {
   /**
    * Get the list of playoff brackets at the specified tournament as a List of
    * Strings.
-   * 
+   *
    * @param connection the database connection
    * @return the List of brackets sorted by bracket name
    * @throws SQLException on a database error
@@ -820,7 +815,7 @@ public final class Playoff {
   public static List<String> getPlayoffBrackets(final Connection connection,
                                                 final int tournament)
       throws SQLException {
-    final List<String> list = new LinkedList<String>();
+    final List<String> list = new LinkedList<>();
 
     PreparedStatement prep = null;
     ResultSet rs = null;
@@ -841,7 +836,7 @@ public final class Playoff {
 
   /**
    * Check if a particular playoff bracket is unfinished.
-   * 
+   *
    * @param connection the database connection
    * @param tournamentId the tournament
    * @param bracketName the bracket to check
@@ -871,7 +866,7 @@ public final class Playoff {
 
   /**
    * Find all unfinished playoff brackets.
-   * 
+   *
    * @param connection the database connection
    * @param tournamentId the tournament
    * @throws SQLException on a database error
@@ -890,7 +885,7 @@ public final class Playoff {
 
   /**
    * Check if some teams are involved in a playoff bracket that isn't finished.
-   * 
+   *
    * @param teamNumbers the teams to check, NULL, BYE and TIE team
    *          numbers will be ignored as they can be in multiple playoffs at the
    *          same time
@@ -946,7 +941,7 @@ public final class Playoff {
 
   /**
    * Insert byes for the specified teams up through baseRunNumber (inclusive).
-   * 
+   *
    * @throws SQLException
    */
   static private void insertByes(final Connection connection,
@@ -965,7 +960,7 @@ public final class Playoff {
   /**
    * Determine the playoff bracket number given a team number and performance
    * run number (1-based).
-   * 
+   *
    * @param connection the database connection
    * @param tournamentId id of the tournament
    * @param teamNumber the team
@@ -1009,7 +1004,7 @@ public final class Playoff {
    * Find the playoff round run number for the specified division and
    * performance
    * run number in the tournament.
-   * 
+   *
    * @return the playoff round or -1 if not found
    */
   public static int getPlayoffRound(final Connection connection,
@@ -1043,13 +1038,13 @@ public final class Playoff {
 
   /**
    * Given a team, get the playoff brackets that the team is associated with.
-   * 
+   *
    * @return the brackets, may be an empty list
    */
   public static List<String> getPlayoffBracketsForTeam(final Connection connection,
                                                        final int teamNumber)
       throws SQLException {
-    final List<String> ret = new LinkedList<String>();
+    final List<String> ret = new LinkedList<>();
     final int tournament = Queries.getCurrentTournament(connection);
     PreparedStatement prep = null;
     ResultSet rs = null;
@@ -1073,7 +1068,7 @@ public final class Playoff {
 
   /**
    * Given a team and run number, get the playoff division
-   * 
+   *
    * @param tournamentId the tournament
    * @param runNumber the performance run number
    * @return the division or null if not found
@@ -1109,7 +1104,7 @@ public final class Playoff {
   /**
    * Given a team number and playoff round get the performance run number in the
    * current tournament
-   * 
+   *
    * @return the run number or -1 if not found
    * @throws SQLException
    */
@@ -1147,7 +1142,7 @@ public final class Playoff {
   /**
    * Get the list of team numbers that are in the specified playoff bracket.
    * The bracket may not be initialized yet.
-   * 
+   *
    * @throws SQLException
    */
   public static List<Integer> getTeamNumbersForPlayoffBracket(final Connection connection,
@@ -1204,12 +1199,12 @@ public final class Playoff {
 
   /**
    * Protected for testing.
-   * 
+   *
    * @param challenge the challenge description
    * @param simpleGoals populated with simple goal initial values
    * @param enumGoals populated with enum goal initial values
    */
-  protected static final void populateInitialScoreMaps(final ChallengeDescription challenge,
+  protected static void populateInitialScoreMaps(final ChallengeDescription challenge,
                                                        final Map<String, Double> simpleGoals,
                                                        final Map<String, String> enumGoals) {
     for (final AbstractGoal agoal : challenge.getPerformance().getGoals()) {
@@ -1280,7 +1275,7 @@ public final class Playoff {
    * changes.
    * If an exception occurs the database is consistent, but the bracket will not
    * be finished.
-   * 
+   *
    * @param connection the database connection
    * @param tournament the tournament that the bracket is in
    * @param bracketName the name of the head to head bracket
@@ -1424,7 +1419,7 @@ public final class Playoff {
   /**
    * Compute the 3rd place database line given the database line of a team
    * competing in the semi-finals.
-   * 
+   *
    * @param dbLine the line of a team in the semi-finals
    * @return the database line that the team will be in if they lost in the
    *         semi-finals
@@ -1438,7 +1433,7 @@ public final class Playoff {
 
   /**
    * This method is the inverse of {@link #computeThirdPlaceDbLine(int)}.
-   * 
+   *
    * @param thirdPlaceDbLine a database line in the 3rd place bracket
    * @return a database line in the semi-finals
    */
