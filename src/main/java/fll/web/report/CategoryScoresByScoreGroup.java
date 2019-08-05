@@ -43,12 +43,13 @@ import fll.xml.WinnerType;
 
 /**
  * Display the report for scores by score group.
- * 
+ *
  * @author jpschewe
  */
 @WebServlet("/report/CategoryScoresByScoreGroup")
 public class CategoryScoresByScoreGroup extends BaseFLLServlet {
 
+  @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -81,7 +82,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
     }
   }
 
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table column, winner criteria determines sort")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "winner criteria determines sort")
   private void generateReport(final Connection connection,
                               final Document pdfDoc,
                               final ChallengeDescription challengeDescription,
@@ -99,32 +100,38 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
       final String catName = catElement.getName();
       final String catTitle = catElement.getTitle();
 
+      // 1 - tournament
+      // 2 - category
+      // 3 - tournament
+      // 4 - award group
+      // 5 - judging group
       try (PreparedStatement prep = connection.prepareStatement("SELECT "//
-          + " Teams.TeamNumber, Teams.TeamName, Teams.Organization, FinalScores."
-          + catName //
-          + " FROM Teams, FinalScores" //
-          + " WHERE FinalScores.Tournament = ?" //
-          + " AND FinalScores.TeamNumber = Teams.TeamNumber" //
-          + " AND FinalScores.TeamNumber IN (" //
+          + " Teams.TeamNumber, Teams.TeamName, Teams.Organization, standardized_score" //
+          + " FROM Teams, final_scores" //
+          + " WHERE final_scores.tournament = ?" //
+          + " AND final_scores.team_number = Teams.TeamNumber" //
+          + " AND final_scores.category = ?" //
+          + " AND final_scores.goal_group IS NULL"//
+          + " AND final_scores.team_number IN (" //
           + "   SELECT TeamNumber FROM TournamentTeams"//
           + "   WHERE Tournament = ?" //
           + "   AND event_division = ?" //
           + "   AND judging_station = ?)" //
-          + " ORDER BY "
-          + catName
+          + " ORDER BY standardized_score"
           + " "
           + winnerCriteria.getSortString() //
       )) {
         prep.setInt(1, tournament.getTournamentID());
-        prep.setInt(2, tournament.getTournamentID());
+        prep.setString(2, catName);
+        prep.setInt(3, tournament.getTournamentID());
 
         for (final String division : eventDivisions) {
           for (final String judgingGroup : judgingGroups) {
             final PdfPTable table = PdfUtils.createTable(4);
 
             createHeader(table, challengeTitle, catTitle, division, judgingGroup, tournament);
-            prep.setString(3, division);
-            prep.setString(4, judgingGroup);
+            prep.setString(4, division);
+            prep.setString(5, judgingGroup);
 
             boolean haveData = false;
             try (ResultSet rs = prep.executeQuery()) {
