@@ -69,13 +69,13 @@ public class SummarizePhase1 {
       Queries.updateScoreTotals(challengeDescription, connection);
 
       try {
-        ScoreStandardization.standardizeSubjectiveScores(connection, challengeDescription, tournamentID);
+        ScoreStandardization.standardizeSubjectiveScores(connection, tournamentID);
       } catch (final TooFewScoresException e) {
         pageContext.setAttribute("ERROR", e.getMessage());
         return;
       }
 
-      ScoreStandardization.summarizeScores(connection, challengeDescription, tournamentID);
+      ScoreStandardization.summarizeScores(connection, tournamentID);
 
       final Map<String, Set<String>> seenCategoryNames = new HashMap<>();
       final SortedMap<String, SortedSet<JudgeSummary>> summary = new TreeMap<>();

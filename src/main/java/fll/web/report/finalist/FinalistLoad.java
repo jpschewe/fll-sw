@@ -222,17 +222,18 @@ public class FinalistLoad {
       final Tournament tournament = Tournament.getCurrentTournament(connection);
       final Formatter output = new Formatter(writer);
 
-      try (PreparedStatement prep = connection.prepareStatement("SELECT * from FinalScores WHERE tournament = ?")) {
+      try (
+          PreparedStatement prep = connection.prepareStatement("SELECT team_number, overall_score from overall_scores WHERE tournament = ?")) {
         prep.setInt(1, tournament.getTournamentID());
 
         try (ResultSet rs = prep.executeQuery()) {
           // defined by load.jsp
           final String championshipCategoryVar = "championship";
           while (rs.next()) {
-            final int teamNumber = rs.getInt("TeamNumber");
-
+            final int teamNumber = rs.getInt(1);
             final String teamVar = getTeamVarName(teamNumber);
-            final double overallScore = rs.getDouble("OverallScore");
+
+            final double overallScore = rs.getDouble(2);
             output.format("$.finalist.setCategoryScore(%s, %s, %.02f);%n", teamVar, championshipCategoryVar,
                           overallScore);
           } // foreach team

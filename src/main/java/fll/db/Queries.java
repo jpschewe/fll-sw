@@ -1543,61 +1543,68 @@ public final class Queries {
 
   /**
    * Compute the total scores for all entered subjective scores.
+   * This populates the table subjecive_computed_scores.
    *
    * @param connection
    * @throws SQLException
    */
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
   private static void updateSubjectiveScoreTotals(final ChallengeDescription description,
                                                   final Connection connection,
                                                   final int tournament)
       throws SQLException {
-    PreparedStatement updatePrep = null;
-    PreparedStatement selectPrep = null;
-    ResultSet rs = null;
-    try {
-      // Subjective ---
-      for (final SubjectiveScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
-        final String categoryName = subjectiveElement.getName();
 
-        // build up the SQL
-        updatePrep = connection.prepareStatement("UPDATE "//
-            + categoryName //
-            + " SET ComputedTotal = ? WHERE TeamNumber = ? AND Tournament = ? AND Judge = ?");
-        selectPrep = connection.prepareStatement("SELECT * FROM " //
-            + categoryName //
-            + " WHERE Tournament = ?");
-        selectPrep.setInt(1, tournament);
-        updatePrep.setInt(3, tournament);
-        rs = selectPrep.executeQuery();
-        while (rs.next()) {
-          final int teamNumber = rs.getInt("TeamNumber");
-          final TeamScore teamScore = new DatabaseTeamScore(teamNumber, rs);
-          final double computedTotal;
-          if (teamScore.isNoShow()) {
-            computedTotal = Double.NaN;
-          } else {
-            computedTotal = subjectiveElement.evaluate(teamScore);
-          }
-          if (Double.isNaN(computedTotal)) {
-            updatePrep.setNull(1, Types.DOUBLE);
-          } else {
-            updatePrep.setDouble(1, computedTotal);
-          }
-          updatePrep.setInt(2, teamNumber);
-          final String judge = rs.getString("Judge");
-          updatePrep.setString(4, judge);
-          updatePrep.executeUpdate();
-        }
-        rs.close();
-        updatePrep.close();
-        selectPrep.close();
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(updatePrep);
-      SQLFunctions.close(selectPrep);
+    try (
+        PreparedStatement deletePrep = connection.prepareStatement("DELETE FROM subjective_computed_scores WHERE tournament = ?")) {
+      deletePrep.setInt(1, tournament);
+      deletePrep.executeUpdate();
     }
+
+    for (final SubjectiveScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
+      final String categoryName = subjectiveElement.getName();
+
+      try (PreparedStatement insertPrep = connection.prepareStatement("INSERT INTO subjective_computed_scores"//
+          + " (category, goal_group, tournament, team_number, judge, computed_total, no_show) " //
+          + " VALUES(?, ?, ?, ?, ?, ?, ?)");
+          PreparedStatement selectPrep = connection.prepareStatement("SELECT * FROM " //
+              + categoryName //
+              + " WHERE Tournament = ?")) {
+        selectPrep.setInt(1, tournament);
+
+        insertPrep.setString(1, categoryName);
+        insertPrep.setInt(3, tournament);
+
+        try (ResultSet rs = selectPrep.executeQuery()) {
+          while (rs.next()) {
+            final int teamNumber = rs.getInt("TeamNumber");
+            insertPrep.setInt(4, teamNumber);
+
+            final TeamScore teamScore = new DatabaseTeamScore(teamNumber, rs);
+            final double computedTotal;
+            if (teamScore.isNoShow()) {
+              computedTotal = Double.NaN;
+            } else {
+              computedTotal = subjectiveElement.evaluate(teamScore);
+            }
+
+            final String judge = rs.getString("Judge");
+            insertPrep.setString(5, judge);
+
+            // insert category score
+            insertPrep.setNull(2, Types.VARCHAR);
+            if (Double.isNaN(computedTotal)) {
+              insertPrep.setNull(6, Types.DOUBLE);
+            } else {
+              insertPrep.setDouble(6, computedTotal);
+            }
+            insertPrep.setBoolean(7, teamScore.isNoShow());
+            insertPrep.executeUpdate();
+
+            // FIXME add goal groups here, create map of group name to total value
+
+          } // foreach result
+        } // ResultSet
+      } // prepared statements
+    } // foreach category
   }
 
   /**

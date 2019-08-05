@@ -36,7 +36,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 18;
+  public static final int DATABASE_VERSION = 19;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -188,7 +188,7 @@ public final class GenerateDB {
       stmt.executeUpdate("DROP TABLE IF EXISTS Judges CASCADE");
       stmt.executeUpdate("CREATE TABLE Judges ("
           + "  id varchar(64) NOT NULL,"//
-          + "  category varchar(64) NOT NULL," //
+          + "  category longvarchar NOT NULL," //
           + "  Tournament INTEGER NOT NULL," //
           + "  station varchar(64) NOT NULL," //
           + "  CONSTRAINT judges_pk PRIMARY KEY (id,category,Tournament,station)"//
@@ -252,11 +252,7 @@ public final class GenerateDB {
 
       }
 
-      // loop over each subjective category
-      final StringBuilder finalScores = new StringBuilder();
-      finalScores.append("CREATE TABLE FinalScores (");
-      finalScores.append("TeamNumber integer NOT NULL,");
-      finalScores.append("Tournament INTEGER NOT NULL,");
+      // loop over each subjective category and create a table for it
       for (final SubjectiveScoreCategory categoryElement : description.getSubjectiveCategories()) {
         createStatement.setLength(0);
 
@@ -279,8 +275,6 @@ public final class GenerateDB {
               + ",");
         }
         createStatement.append(" note longvarchar DEFAULT NULL,");
-        createStatement.append(" ComputedTotal float DEFAULT NULL,");
-        createStatement.append(" StandardizedScore float default NULL,");
         createStatement.append(" CONSTRAINT "
             + tableName
             + "_pk PRIMARY KEY (TeamNumber, Tournament, Judge)");
@@ -292,23 +286,11 @@ public final class GenerateDB {
             + "_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)");
         createStatement.append(");");
         stmt.executeUpdate(createStatement.toString());
-
-        finalScores.append(tableName
-            + " float default NULL,");
       }
 
-      // Table structure for table 'FinalScores'
-      finalScores.append(" performance float default NULL,");
-      finalScores.append(" OverallScore float,");
-      finalScores.append("CONSTRAINT final_scores_pk PRIMARY KEY (TeamNumber, Tournament)");
-      finalScores.append(",CONSTRAINT final_scores_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber)");
-      finalScores.append(",CONSTRAINT final_scores_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)");
-      finalScores.append(")");
-      stmt.executeUpdate("DROP TABLE IF EXISTS FinalScores CASCADE");
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug(finalScores.toString());
-      }
-      stmt.executeUpdate(finalScores.toString());
+      createSubjectiveComputedScoresTable(connection, true);
+      createFinalScoresTable(connection, true);
+      createOverallScoresTable(connection, true);
 
       // --------------- create views ---------------
 
@@ -847,6 +829,94 @@ public final class GenerateDB {
     } finally {
       SQLFunctions.close(stmt);
       stmt = null;
+    }
+  }
+
+  /**
+   * Create the subjective_computed_scores table.
+   *
+   * @param connection database connection
+   * @param createConstraints true if creating constraints, false when using from
+   *          {@link ImportDB} to upgrade a database
+   */
+  /* package */ static void createSubjectiveComputedScoresTable(final Connection connection,
+                                                                final boolean createConstraints)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+      final StringBuilder sql = new StringBuilder();
+      sql.append("CREATE TABLE subjective_computed_scores (");
+      sql.append("  category LONGVARCHAR NOT NULL");
+      sql.append(" ,goal_group LONGVARCHAR");
+      sql.append(" ,tournament INTEGER NOT NULL");
+      sql.append(" ,team_number INTEGER NOT NULL");
+      sql.append(" ,judge VARCHAR(64) NOT NULL");
+      sql.append(" ,computed_total float");
+      sql.append(" ,no_show BOOLEAN DEFAULT FALSE NOT NULL");
+      sql.append(" ,standardized_score float");
+      if (createConstraints) {
+        sql.append(" ,CONSTRAINT subjective_computed_scores_pk1 PRIMARY KEY (category, goal_group, team_number, tournament, judge)");
+        sql.append(" ,CONSTRAINT subjective_computed_scores_fk1 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
+        sql.append(" ,CONSTRAINT subjective_computed_scores_fk2 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
+      }
+      sql.append(")");
+
+      stmt.executeUpdate(sql.toString());
+    }
+  }
+
+  /**
+   * Create the final_scores table.
+   *
+   * @param connection database connection
+   * @param createConstraints true if creating constraints, false when using from
+   *          {@link ImportDB} to upgrade a database
+   */
+  /* package */ static void createFinalScoresTable(final Connection connection,
+                                                   final boolean createConstraints)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+      final StringBuilder sql = new StringBuilder();
+      sql.append("CREATE TABLE final_scores (");
+      sql.append("  category LONGVARCHAR NOT NULL");
+      sql.append(" ,goal_group LONGVARCHAR");
+      sql.append(" ,tournament INTEGER NOT NULL");
+      sql.append(" ,team_number INTEGER NOT NULL");
+      sql.append(" ,final_score float");
+      if (createConstraints) {
+        sql.append(" ,CONSTRAINT final_scores_pk1 PRIMARY KEY (category, goal_group, team_number, tournament)");
+        sql.append(" ,CONSTRAINT final_scores_fk1 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
+        sql.append(" ,CONSTRAINT final_scores_fk2 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
+      }
+      sql.append(")");
+
+      stmt.executeUpdate(sql.toString());
+    }
+  }
+
+  /**
+   * Create the overall_scores table.
+   *
+   * @param connection database connection
+   * @param createConstraints true if creating constraints, false when using from
+   *          {@link ImportDB} to upgrade a database
+   */
+  /* package */ static void createOverallScoresTable(final Connection connection,
+                                                     final boolean createConstraints)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+      final StringBuilder sql = new StringBuilder();
+      sql.append("CREATE TABLE overall_scores (");
+      sql.append("  tournament INTEGER NOT NULL");
+      sql.append(" ,team_number INTEGER NOT NULL");
+      sql.append(" ,overall_score float");
+      if (createConstraints) {
+        sql.append(" ,CONSTRAINT overall_scores_pk PRIMARY KEY (team_number, tournament)");
+        sql.append(" ,CONSTRAINT overall_scores_fk1 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
+        sql.append(" ,CONSTRAINT overall_scores_fk2 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
+      }
+      sql.append(")");
+
+      stmt.executeUpdate(sql.toString());
     }
   }
 

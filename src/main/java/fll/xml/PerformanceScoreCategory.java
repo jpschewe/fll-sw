@@ -213,9 +213,14 @@ public class PerformanceScoreCategory extends ScoreCategory {
     return ele;
   }
 
+  /**
+   * Category name for {@link #getName()}.
+   */
+  public static final String CATEGORY_NAME = "performance";
+
   @Override
   public String getName() {
-    return "performance";
+    return CATEGORY_NAME;
   }
 
 }
