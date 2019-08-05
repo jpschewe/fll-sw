@@ -165,7 +165,7 @@ public class FullTournamentTest {
         computeFinalScores(selenium);
 
         LOGGER.info("Checking the reports");
-        checkReports(selenium);
+        checkReports();
 
         LOGGER.info("Checking rank and scores");
         checkRankAndScores(testTournamentName);
@@ -654,7 +654,7 @@ public class FullTournamentTest {
     assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
   }
 
-  private void checkReports(final WebDriver selenium) throws IOException, SAXException, InterruptedException {
+  private void checkReports() throws IOException, SAXException, InterruptedException {
     IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
         + "report/FinalComputedScores"), "application/pdf", null);
 
