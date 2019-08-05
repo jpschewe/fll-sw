@@ -669,13 +669,13 @@ public class FullTournamentTest {
     // check ranking and scores
     final double scoreFP = 1E-1; // just check to one decimal place
 
-    final String sqlTemplate = "SELECT FinalScores.TeamNumber, FinalScores.OverallScore" //
-        + " FROM FinalScores, current_tournament_teams, Tournaments" //
-        + " WHERE FinalScores.TeamNumber = current_tournament_teams.TeamNumber" //
+    final String sqlTemplate = "SELECT final_scores.team_number, final_scores.overall_score" //
+        + " FROM final_scores, current_tournament_teams, Tournaments" //
+        + " WHERE final_scores.team_number = current_tournament_teams.TeamNumber" //
         + " AND Tournaments.Name = '%s'"
-        + " AND FinalScores.Tournament = Tournaments.tournament_id" //
+        + " AND final_scores.tournament = Tournaments.tournament_id" //
         + " AND current_tournament_teams.event_division = '%s'" //
-        + " ORDER BY FinalScores.OverallScore DESC";
+        + " ORDER BY final_scores.overall_score DESC";
 
     // division 1
     final int[] division1ExpectedRank = { 2636, 3127, 3439, 4462, 3125, 2116, 2104, 2113 };
@@ -692,10 +692,10 @@ public class FullTournamentTest {
             + row);
       }
 
-      final int teamNumber = Integer.parseInt(row.get("teamnumber"));
+      final int teamNumber = Integer.parseInt(row.get("team_number"));
       assertEquals(division1ExpectedRank[rank], teamNumber, "Division I Ranking is incorrect for rank: "
           + rank);
-      final double score = Double.valueOf(row.get("overallscore"));
+      final double score = Double.valueOf(row.get("overall_score"));
       assertEquals(division1ExpectedScores[rank], score, scoreFP, "Overall score incorrect for team: "
           + teamNumber);
 
@@ -712,10 +712,10 @@ public class FullTournamentTest {
 
     rank = 0;
     for (final Map<String, String> row : div2Result.getData()) {
-      final int teamNumber = Integer.parseInt(row.get("teamnumber"));
+      final int teamNumber = Integer.parseInt(row.get("team_number"));
       assertEquals(division2ExpectedRank[rank], teamNumber, "Division II Ranking is incorrect for rank: "
           + rank);
-      final double score = Double.valueOf(row.get("overallscore"));
+      final double score = Double.valueOf(row.get("overall_score"));
       assertEquals(division2ExpectedScores[rank], score, scoreFP, "Overall score incorrect for team: "
           + teamNumber);
 
