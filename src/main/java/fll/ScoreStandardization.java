@@ -242,7 +242,7 @@ public final class ScoreStandardization {
   }
 
   /**
-   * Updates FinalScores with the sum of the the scores times the weights for
+   * Updates overall_scores with the sum of the the scores times the weights for
    * the given tournament.
    *
    * @param connection database connection

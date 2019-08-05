@@ -311,47 +311,48 @@ public final class FinalComputedScores extends BaseFLLServlet {
       throws SQLException {
     final Map<Integer, Integer> rankedTeams = new HashMap<>();
 
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = connection.prepareStatement("SELECT FinalScores.TeamNumber, FinalScores.performance"
-          + " FROM FinalScores, TournamentTeams" //
-          + " WHERE FinalScores.Tournament = ?" //
-          + " AND TournamentTeams.Tournament = FinalScores.Tournament" //
-          + " AND TournamentTeams.event_division = ?"//
-          + " AND TournamentTeams.TeamNumber = FinalScores.TeamNumber"//
-          + " ORDER BY FinalScores.performance "
-          + winnerCriteria.getSortString());
+    // 1 - tournament
+    // 2 - award group
+    // 3 - category
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT final_scores.TeamNumber, final_scores.standardized_score"
+            + " FROM final_scores, TournamentTeams" //
+            + " WHERE final_scores.Tournament = ?" //
+            + " AND TournamentTeams.Tournament = final_scores.tournament" //
+            + " AND TournamentTeams.event_division = ?"//
+            + " AND TournamentTeams.TeamNumber = final_scores.team_number"//
+            + " AND final_scores.category = ?" //
+            + " AND final_scores.goal_group IS NULL" //
+            + " ORDER BY final_scores.standardized_score "
+            + winnerCriteria.getSortString())) {
       prep.setInt(1, tournament.getTournamentID());
       prep.setString(2, awawrdGroup);
+      prep.setString(3, PerformanceScoreCategory.CATEGORY_NAME);
 
       int numTied = 1;
       int rank = 0;
       double prevScore = Double.NaN;
-      rs = prep.executeQuery();
-      while (rs.next()) {
-        final int teamNumber = rs.getInt(1);
-        double score = rs.getDouble(2);
-        if (rs.wasNull()) {
-          score = Double.NaN;
-        }
+      try (ResultSet rs = prep.executeQuery()) {
+        while (rs.next()) {
+          final int teamNumber = rs.getInt(1);
+          double score = rs.getDouble(2);
+          if (rs.wasNull()) {
+            score = Double.NaN;
+          }
 
-        if (!FP.equals(score, prevScore, TIE_TOLERANCE)) {
-          rank += numTied;
-          numTied = 1;
-        } else {
-          ++numTied;
-        }
+          if (!FP.equals(score, prevScore, TIE_TOLERANCE)) {
+            rank += numTied;
+            numTied = 1;
+          } else {
+            ++numTied;
+          }
 
-        rankedTeams.put(teamNumber, rank);
+          rankedTeams.put(teamNumber, rank);
 
-        prevScore = score;
-      }
-
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
+          prevScore = score;
+        } // foreach result
+      } // result set
+    } // prepared statement
 
     return rankedTeams;
   }
@@ -384,7 +385,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
    * @param visitor called with the data
    * @throws SQLException if a database error occurs
    */
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name is column name, winner criteria determines the sort")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "winner criteria determines the sort")
   public static void iterateOverSubjectiveScores(final Connection connection,
                                                  final SubjectiveScoreCategory category,
                                                  final WinnerType winnerCriteria,
@@ -394,24 +395,23 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                                  final SubjectiveScoreVisitor visitor)
       throws SQLException {
 
-    final String catName = category.getName();
-
-    try (final PreparedStatement prep = connection.prepareStatement("SELECT FinalScores.TeamNumber, FinalScores."
-        + catName //
-        + " FROM FinalScores, TournamentTeams" //
-        + " WHERE FinalScores.Tournament = ?" //
-        + " AND TournamentTeams.Tournament = FinalScores.Tournament" //
-        + " AND TournamentTeams.event_division = ?"//
-        + " AND TournamentTeams.TeamNumber = FinalScores.TeamNumber"//
-        + " AND TournamentTeams.judging_station = ?" //
-        + " ORDER BY FinalScores."
-        + catName
-        + " "
-        + winnerCriteria.getSortString())) {
+    try (
+        final PreparedStatement prep = connection.prepareStatement("SELECT final_scores.TeamNumber, final_scores.standardized_score"//
+            + " FROM final_scores, TournamentTeams" //
+            + " WHERE final_scores.tournament = ?" //
+            + " AND TournamentTeams.Tournament = tinal_scores.tournament" //
+            + " AND TournamentTeams.event_division = ?"//
+            + " AND TournamentTeams.TeamNumber = final_scores.team_number"//
+            + " AND TournamentTeams.judging_station = ?" //
+            + " AND final_scores.category = ?" //
+            + " AND final_scores.goal_group IS NULL" //
+            + " ORDER BY final_scores.standardized_score"
+            + " "
+            + winnerCriteria.getSortString())) {
       prep.setInt(1, tournament.getTournamentID());
       prep.setString(2, awardGroup);
-
       prep.setString(3, judgingStation);
+      prep.setString(4, category.getName());
 
       int numTied = 1;
       int rank = 0;

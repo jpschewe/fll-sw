@@ -1467,8 +1467,22 @@ public final class Queries {
       SQLFunctions.close(prep);
       prep = null;
 
-      // delete from FinalScores
-      prep = connection.prepareStatement("DELETE FROM FinalScores WHERE TeamNumber = ?");
+      // delete from final_scores
+      prep = connection.prepareStatement("DELETE FROM final_scores WHERE team_number = ?");
+      prep.setInt(1, teamNumber);
+      prep.executeUpdate();
+      SQLFunctions.close(prep);
+      prep = null;
+
+      // delete from overall_scores
+      prep = connection.prepareStatement("DELETE FROM overall_scores WHERE team_number = ?");
+      prep.setInt(1, teamNumber);
+      prep.executeUpdate();
+      SQLFunctions.close(prep);
+      prep = null;
+
+      // delete from overall_scores
+      prep = connection.prepareStatement("DELETE FROM subjective_computed_scores WHERE team_number = ?");
       prep.setInt(1, teamNumber);
       prep.executeUpdate();
       SQLFunctions.close(prep);
@@ -1826,8 +1840,22 @@ public final class Queries {
       prep.executeUpdate();
       SQLFunctions.close(prep);
 
-      // delete from FinalScores
-      prep = connection.prepareStatement("DELETE FROM FinalScores WHERE TeamNumber = ? AND Tournament = ?");
+      // delete from final_scores
+      prep = connection.prepareStatement("DELETE FROM final_scores WHERE team_number = ? AND tournament = ?");
+      prep.setInt(1, teamNumber);
+      prep.setInt(2, currentTournament);
+      prep.executeUpdate();
+      SQLFunctions.close(prep);
+
+      // delete from overall_scores
+      prep = connection.prepareStatement("DELETE FROM overall_scores WHERE team_number = ? AND tournament = ?");
+      prep.setInt(1, teamNumber);
+      prep.setInt(2, currentTournament);
+      prep.executeUpdate();
+      SQLFunctions.close(prep);
+
+      // delete from subjective_computed_scores
+      prep = connection.prepareStatement("DELETE FROM subjective_computed_scores WHERE team_number = ? AND tournament = ?");
       prep.setInt(1, teamNumber);
       prep.setInt(2, currentTournament);
       prep.executeUpdate();
