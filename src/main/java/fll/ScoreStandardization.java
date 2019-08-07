@@ -126,8 +126,9 @@ public final class ScoreStandardization {
         + "   category, goal_group, tournament, team_number, Avg(standardized_score)" //
         + "   FROM subjective_computed_scores"
         + "   WHERE standardized_score IS NOT NULL" //
-        + "   GROUP BY category, goal_group, team_number)" //
-        + " WHERE tournament = ?")) {
+        + "     AND tournament = ?" //
+        + "   GROUP BY category, goal_group, tournament, team_number)" //
+    )) {
       updatePrep.setInt(1, tournament);
       updatePrep.executeUpdate();
     }
