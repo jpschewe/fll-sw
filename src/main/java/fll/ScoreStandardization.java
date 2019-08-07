@@ -178,7 +178,7 @@ public final class ScoreStandardization {
         + " FROM subjective_computed_scores" //
         + " WHERE tournament = ?" //
         + "   AND computed_total IS NOT NULL" //
-        + "   AND NoShow = false"//
+        + "   AND no_show = false"//
         + " GROUP BY category, goal_group, judge" //
     );
         /*
