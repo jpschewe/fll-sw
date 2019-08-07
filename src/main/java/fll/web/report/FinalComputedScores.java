@@ -316,7 +316,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
     // 3 - category
     // 4 - goal group
     try (
-        PreparedStatement prep = connection.prepareStatement("SELECT final_scores.TeamNumber, final_scores.standardized_score"
+        PreparedStatement prep = connection.prepareStatement("SELECT final_scores.team_number, final_scores.final_score"
             + " FROM final_scores, TournamentTeams" //
             + " WHERE final_scores.Tournament = ?" //
             + " AND TournamentTeams.Tournament = final_scores.tournament" //
@@ -324,7 +324,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
             + " AND TournamentTeams.TeamNumber = final_scores.team_number"//
             + " AND final_scores.category = ?" //
             + " AND final_scores.goal_group = ?" //
-            + " ORDER BY final_scores.standardized_score "
+            + " ORDER BY final_scores.final_score "
             + winnerCriteria.getSortString())) {
       prep.setInt(1, tournament.getTournamentID());
       prep.setString(2, awawrdGroup);
@@ -398,16 +398,16 @@ public final class FinalComputedScores extends BaseFLLServlet {
       throws SQLException {
 
     try (
-        final PreparedStatement prep = connection.prepareStatement("SELECT final_scores.TeamNumber, final_scores.standardized_score"//
+        final PreparedStatement prep = connection.prepareStatement("SELECT final_scores.team_number, final_scores.final_score"//
             + " FROM final_scores, TournamentTeams" //
             + " WHERE final_scores.tournament = ?" //
-            + " AND TournamentTeams.Tournament = tinal_scores.tournament" //
+            + " AND TournamentTeams.Tournament = final_scores.tournament" //
             + " AND TournamentTeams.event_division = ?"//
             + " AND TournamentTeams.TeamNumber = final_scores.team_number"//
             + " AND TournamentTeams.judging_station = ?" //
             + " AND final_scores.category = ?" //
             + " AND final_scores.goal_group = ?" //
-            + " ORDER BY final_scores.standardized_score"
+            + " ORDER BY final_scores.final_score"
             + " "
             + winnerCriteria.getSortString())) {
       prep.setInt(1, tournament.getTournamentID());
@@ -508,8 +508,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
             + " FROM overall_scores, Teams, current_tournament_teams WHERE overall_scores.tournament = ?"//
             + " AND current_tournament_teams.event_division = ?"//
             + " AND current_tournament_teams.TeamNumber = Teams.TeamNumber" //
+            + " AND current_tournament_teams.TeamNumber = overall_scores.team_number" //
             + " ORDER BY overall_scores.overall_score "
-            + winnerCriteria.getSortString()
+            + winnerCriteria.getSortString() //
             + ", Teams.TeamNumber" //
         )) {
       overallPrep.setInt(1, tournament.getTournamentID());
