@@ -314,6 +314,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
     // 1 - tournament
     // 2 - award group
     // 3 - category
+    // 4 - goal group
     try (
         PreparedStatement prep = connection.prepareStatement("SELECT final_scores.TeamNumber, final_scores.standardized_score"
             + " FROM final_scores, TournamentTeams" //
@@ -322,12 +323,13 @@ public final class FinalComputedScores extends BaseFLLServlet {
             + " AND TournamentTeams.event_division = ?"//
             + " AND TournamentTeams.TeamNumber = final_scores.team_number"//
             + " AND final_scores.category = ?" //
-            + " AND final_scores.goal_group IS NULL" //
+            + " AND final_scores.goal_group = ?" //
             + " ORDER BY final_scores.standardized_score "
             + winnerCriteria.getSortString())) {
       prep.setInt(1, tournament.getTournamentID());
       prep.setString(2, awawrdGroup);
       prep.setString(3, PerformanceScoreCategory.CATEGORY_NAME);
+      prep.setString(4, "");
 
       int numTied = 1;
       int rank = 0;
@@ -404,7 +406,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
             + " AND TournamentTeams.TeamNumber = final_scores.team_number"//
             + " AND TournamentTeams.judging_station = ?" //
             + " AND final_scores.category = ?" //
-            + " AND final_scores.goal_group IS NULL" //
+            + " AND final_scores.goal_group = ?" //
             + " ORDER BY final_scores.standardized_score"
             + " "
             + winnerCriteria.getSortString())) {
@@ -412,6 +414,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
       prep.setString(2, awardGroup);
       prep.setString(3, judgingStation);
       prep.setString(4, category.getName());
+      prep.setString(5, "");
 
       int numTied = 1;
       int rank = 0;
@@ -637,10 +640,11 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                          final Map<Integer, Integer> rankInCategory)
       throws SQLException {
     try (
-        PreparedStatement finalScorePrep = connection.prepareStatement("SELECT final_score FROM final_scores WHERE category = ? AND goal_group IS NULL AND tournament = ? AND team_number = ?")) {
+        PreparedStatement finalScorePrep = connection.prepareStatement("SELECT final_score FROM final_scores WHERE category = ? AND goal_group = ? AND tournament = ? AND team_number = ?")) {
       finalScorePrep.setString(1, category.getName());
-      finalScorePrep.setInt(2, tournament.getTournamentID());
-      finalScorePrep.setInt(3, teamNumber);
+      finalScorePrep.setString(2, "");
+      finalScorePrep.setInt(3, tournament.getTournamentID());
+      finalScorePrep.setInt(4, teamNumber);
       try (ResultSet finalScoreResult = finalScorePrep.executeQuery()) {
 
         final double scaledScore;
@@ -853,8 +857,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
       throws SQLException {
     try (PreparedStatement prep = connection.prepareStatement("SELECT computed_total"
         + " FROM subjective_computed_scores"
-        + " WHERE team_number = ? AND tournament = ? AND category = ? AND goal_group IS NULL ORDER BY computed_total "
+        + " WHERE team_number = ? AND tournament = ? AND category = ? AND goal_group = ? ORDER BY computed_total "
         + ascDesc)) {
+      prep.setString(4, "");
 
       // Next, one column containing the raw score for each subjective
       // category with weight > 0

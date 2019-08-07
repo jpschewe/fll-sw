@@ -1606,7 +1606,7 @@ public final class Queries {
             insertPrep.setBoolean(7, teamScore.isNoShow());
 
             // insert category score
-            insertPrep.setNull(2, Types.VARCHAR);
+            insertPrep.setString(2, "");
             if (Double.isNaN(computedTotal)) {
               insertPrep.setNull(6, Types.DOUBLE);
             } else {

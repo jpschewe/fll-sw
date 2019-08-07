@@ -9,7 +9,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
@@ -79,7 +78,7 @@ public final class ScoreStandardization {
                 PreparedStatement select = connection.prepareStatement("SELECT TeamNumber, ((Score - ?) * ?) + ? FROM performance_seeding_max");
                 PreparedStatement insert = connection.prepareStatement("INSERT INTO final_scores (category, goal_group, tournament, team_number, final_score) VALUES(?, ?, ?, ?, ?)")) {
               insert.setString(1, PerformanceScoreCategory.CATEGORY_NAME);
-              insert.setNull(2, Types.VARCHAR);
+              insert.setString(2, "");
               insert.setInt(3, tournament);
 
               select.setDouble(1, sgMean);
@@ -272,25 +271,28 @@ public final class ScoreStandardization {
 
     // insert new values
     try (
-        PreparedStatement selectPrep = connection.prepareStatement("SELECT category, final_score FROM final_scores WHERE goal_group IS NULL AND tournament = ? AND team_number = ?");
+        PreparedStatement selectPrep = connection.prepareStatement("SELECT category, final_score FROM final_scores WHERE goal_group = ? AND tournament = ? AND team_number = ?");
         PreparedStatement insertPrep = connection.prepareStatement("INSERT INTO overall_scores (tournament, team_number, overall_score) VALUES (?, ?, ?)")) {
-      selectPrep.setInt(1, currentTournament.getTournamentID());
+      selectPrep.setString(1, "");
+      selectPrep.setInt(2, currentTournament.getTournamentID());
       insertPrep.setInt(1, currentTournament.getTournamentID());
 
       // compute scores for all teams treating NULL as 0
       for (final int teamNumber : tournamentTeams.keySet()) {
         double overallScore = 0;
 
-        selectPrep.setInt(2, teamNumber);
+        selectPrep.setInt(3, teamNumber);
         try (ResultSet selectResult = selectPrep.executeQuery()) {
-          final String categoryName = selectResult.getString(1);
+          while (selectResult.next()) {
+            final String categoryName = selectResult.getString(1);
 
-          if (categoryWeights.containsKey(categoryName)) {
-            final double weight = categoryWeights.get(categoryName);
-            final double score = selectResult.getDouble(2);
-            overallScore += score
-                * weight;
-          }
+            if (categoryWeights.containsKey(categoryName)) {
+              final double weight = categoryWeights.get(categoryName);
+              final double score = selectResult.getDouble(2);
+              overallScore += score
+                  * weight;
+            }
+          } // foreach result
         } // selectResult
 
         insertPrep.setInt(2, teamNumber);

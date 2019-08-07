@@ -182,7 +182,7 @@ public class SummarizePhase1 {
         + " WHERE tournament = ?" //
         + " AND judge = ?" //
         + " AND category = ?" //
-        + " AND goal_group is NULL" //
+        + " AND goal_group = ?" //
         + " AND ( computed_total IS NOT NULL OR no_show = true )"//
         + " AND team_number IN (" //
         + "  SELECT TeamNumber FROM TournamentTeams" //
@@ -192,8 +192,9 @@ public class SummarizePhase1 {
       getActual.setInt(1, tournamentID);
       getActual.setString(2, judge);
       getActual.setString(3, categoryName);
-      getActual.setInt(4, tournamentID);
-      getActual.setString(5, station);
+      getActual.setString(4, "");
+      getActual.setInt(5, tournamentID);
+      getActual.setString(6, station);
       try (ResultSet actual = getActual.executeQuery()) {
         if (actual.next()) {
           numActual = actual.getInt(1);

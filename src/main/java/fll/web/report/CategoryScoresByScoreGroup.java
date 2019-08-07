@@ -102,16 +102,17 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
 
       // 1 - tournament
       // 2 - category
-      // 3 - tournament
-      // 4 - award group
-      // 5 - judging group
+      // 3 - goal group
+      // 4 - tournament
+      // 5 - award group
+      // 6 - judging group
       try (PreparedStatement prep = connection.prepareStatement("SELECT "//
           + " Teams.TeamNumber, Teams.TeamName, Teams.Organization, standardized_score" //
           + " FROM Teams, final_scores" //
           + " WHERE final_scores.tournament = ?" //
           + " AND final_scores.team_number = Teams.TeamNumber" //
           + " AND final_scores.category = ?" //
-          + " AND final_scores.goal_group IS NULL"//
+          + " AND final_scores.goal_group = ?"//
           + " AND final_scores.team_number IN (" //
           + "   SELECT TeamNumber FROM TournamentTeams"//
           + "   WHERE Tournament = ?" //
@@ -124,14 +125,15 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
         prep.setInt(1, tournament.getTournamentID());
         prep.setString(2, catName);
         prep.setInt(3, tournament.getTournamentID());
+        prep.setString(4, "");
 
         for (final String division : eventDivisions) {
           for (final String judgingGroup : judgingGroups) {
             final PdfPTable table = PdfUtils.createTable(4);
 
             createHeader(table, challengeTitle, catTitle, division, judgingGroup, tournament);
-            prep.setString(4, division);
-            prep.setString(5, judgingGroup);
+            prep.setString(5, division);
+            prep.setString(6, judgingGroup);
 
             boolean haveData = false;
             try (ResultSet rs = prep.executeQuery()) {
