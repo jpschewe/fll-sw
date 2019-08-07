@@ -1,3 +1,4 @@
+* #730 - Add table for each goal group within a subjective category to the subjective score report
 * #748 - remove ".." from paths sent to desktop applications. This allows the HTML page to properly open on Windows.
 * #745 - make slider handle more obvious in the subjective web application
 * #743 - fix finding of web root when running from launch4j executable

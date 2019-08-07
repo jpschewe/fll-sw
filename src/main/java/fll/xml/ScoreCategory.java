@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
@@ -156,6 +157,16 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
   }
 
   /**
+   * Get all goal groups defined for this category.
+   *
+   * @return a newly created collection
+   */
+  @Nonnull
+  public Collection<String> getGoalGroups() {
+    return getGoals().stream().map(AbstractGoal::getCategory).filter(x -> null != x).collect(Collectors.toSet());
+  }
+
+  /**
    * Compute scores per goal group.
    *
    * @param teamScore the score to evaluate
@@ -176,7 +187,8 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
       final double goalScore = g.getComputedScore(teamScore);
 
       final String goalGroup = g.getCategory();
-      if (null != goalGroup) {
+      if (null != goalGroup
+          && !goalGroup.trim().isEmpty()) {
         goalGroupScores.merge(goalGroup, goalScore, Double::sum);
       }
     }
