@@ -848,7 +848,7 @@ public final class GenerateDB {
       final StringBuilder sql = new StringBuilder();
       sql.append("CREATE TABLE subjective_computed_scores (");
       sql.append("  category LONGVARCHAR NOT NULL");
-      sql.append(" ,goal_group LONGVARCHAR");
+      sql.append(" ,goal_group LONGVARCHAR NOT NULL");
       sql.append(" ,tournament INTEGER NOT NULL");
       sql.append(" ,team_number INTEGER NOT NULL");
       sql.append(" ,judge VARCHAR(64) NOT NULL");
@@ -856,7 +856,7 @@ public final class GenerateDB {
       sql.append(" ,no_show BOOLEAN DEFAULT FALSE NOT NULL");
       sql.append(" ,standardized_score float");
       if (createConstraints) {
-        sql.append(" ,CONSTRAINT subjective_computed_scores_pk1 UNIQUE (category, goal_group, team_number, tournament, judge)");
+        sql.append(" ,CONSTRAINT subjective_computed_scores_pk1 PRIMARY KEY (category, goal_group, team_number, tournament, judge)");
         sql.append(" ,CONSTRAINT subjective_computed_scores_fk1 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
         sql.append(" ,CONSTRAINT subjective_computed_scores_fk2 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
       }
@@ -882,12 +882,12 @@ public final class GenerateDB {
       final StringBuilder sql = new StringBuilder();
       sql.append("CREATE TABLE final_scores (");
       sql.append("  category LONGVARCHAR NOT NULL");
-      sql.append(" ,goal_group LONGVARCHAR");
+      sql.append(" ,goal_group LONGVARCHAR NOT NULL");
       sql.append(" ,tournament INTEGER NOT NULL");
       sql.append(" ,team_number INTEGER NOT NULL");
       sql.append(" ,final_score float");
       if (createConstraints) {
-        sql.append(" ,CONSTRAINT final_scores_pk01 UNIQUE (category, goal_group, team_number, tournament)");
+        sql.append(" ,CONSTRAINT final_scores_pk01 PRIMARY KEY (category, goal_group, team_number, tournament)");
         sql.append(" ,CONSTRAINT final_scores_fk01 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
         sql.append(" ,CONSTRAINT final_scores_fk02 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
       }
