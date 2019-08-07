@@ -100,7 +100,7 @@ public final class Queries {
           + categoryName
           + ".Tournament" //
           + " AND Judges.category = ?" //
-          + " AND ComputedTotal IS NOT NULL");
+      );
       prep.setInt(2, tournament);
       prep.setString(3, categoryName);
 
