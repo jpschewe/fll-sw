@@ -1603,6 +1603,8 @@ public final class Queries {
             final String judge = rs.getString("Judge");
             insertPrep.setString(5, judge);
 
+            insertPrep.setBoolean(7, teamScore.isNoShow());
+
             // insert category score
             insertPrep.setNull(2, Types.VARCHAR);
             if (Double.isNaN(computedTotal)) {
@@ -1610,10 +1612,22 @@ public final class Queries {
             } else {
               insertPrep.setDouble(6, computedTotal);
             }
-            insertPrep.setBoolean(7, teamScore.isNoShow());
             insertPrep.executeUpdate();
 
-            // FIXME add goal groups here, create map of group name to total value
+            // insert goal group scores
+            final Map<String, Double> goalGroupScores = subjectiveElement.getGoalGroupScores(teamScore);
+            for (final Map.Entry<String, Double> entry : goalGroupScores.entrySet()) {
+              final String group = entry.getKey();
+              final double score = entry.getValue();
+
+              insertPrep.setString(2, group);
+              if (Double.isNaN(score)) {
+                insertPrep.setNull(6, Types.DOUBLE);
+              } else {
+                insertPrep.setDouble(6, score);
+              }
+              insertPrep.executeUpdate();
+            }
 
           } // foreach result
         } // ResultSet
