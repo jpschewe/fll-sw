@@ -107,7 +107,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
       // 5 - award group
       // 6 - judging group
       try (PreparedStatement prep = connection.prepareStatement("SELECT "//
-          + " Teams.TeamNumber, Teams.TeamName, Teams.Organization, standardized_score" //
+          + " Teams.TeamNumber, Teams.TeamName, Teams.Organization, final_scores.final_score" //
           + " FROM Teams, final_scores" //
           + " WHERE final_scores.tournament = ?" //
           + " AND final_scores.team_number = Teams.TeamNumber" //
