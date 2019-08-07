@@ -843,6 +843,8 @@ public final class GenerateDB {
                                                                 final boolean createConstraints)
       throws SQLException {
     try (Statement stmt = connection.createStatement()) {
+      stmt.executeUpdate("DROP TABLE IF EXISTS subjective_computed_scores CASCADE");
+
       final StringBuilder sql = new StringBuilder();
       sql.append("CREATE TABLE subjective_computed_scores (");
       sql.append("  category LONGVARCHAR NOT NULL");
@@ -875,6 +877,8 @@ public final class GenerateDB {
                                                    final boolean createConstraints)
       throws SQLException {
     try (Statement stmt = connection.createStatement()) {
+      stmt.executeUpdate("DROP TABLE IF EXISTS final_scores CASCADE");
+
       final StringBuilder sql = new StringBuilder();
       sql.append("CREATE TABLE final_scores (");
       sql.append("  category LONGVARCHAR NOT NULL");
@@ -904,6 +908,8 @@ public final class GenerateDB {
                                                      final boolean createConstraints)
       throws SQLException {
     try (Statement stmt = connection.createStatement()) {
+      stmt.executeUpdate("DROP TABLE IF EXISTS overall_scores CASCADE");
+
       final StringBuilder sql = new StringBuilder();
       sql.append("CREATE TABLE overall_scores (");
       sql.append("  tournament INTEGER NOT NULL");
