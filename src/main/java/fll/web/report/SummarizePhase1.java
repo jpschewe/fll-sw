@@ -69,13 +69,13 @@ public class SummarizePhase1 {
       Queries.updateScoreTotals(challengeDescription, connection);
 
       try {
-        ScoreStandardization.standardizeSubjectiveScores(connection, challengeDescription, tournamentID);
+        ScoreStandardization.standardizeSubjectiveScores(connection, tournamentID);
       } catch (final TooFewScoresException e) {
         pageContext.setAttribute("ERROR", e.getMessage());
         return;
       }
 
-      ScoreStandardization.summarizeScores(connection, challengeDescription, tournamentID);
+      ScoreStandardization.summarizeScores(connection, tournamentID);
 
       final Map<String, Set<String>> seenCategoryNames = new HashMap<>();
       final SortedMap<String, SortedSet<JudgeSummary>> summary = new TreeMap<>();
@@ -178,20 +178,23 @@ public class SummarizePhase1 {
       throws SQLException {
     int numActual = -1;
     try (PreparedStatement getActual = connection.prepareStatement("SELECT COUNT(*)" //
-        + " FROM "
-        + categoryName //
+        + " FROM subjective_computed_scores"
         + " WHERE tournament = ?" //
-        + " AND Judge = ?" //
-        + " AND ( ComputedTotal IS NOT NULL OR NoShow = true )"//
-        + " AND TeamNumber IN (" //
+        + " AND judge = ?" //
+        + " AND category = ?" //
+        + " AND goal_group = ?" //
+        + " AND ( computed_total IS NOT NULL OR no_show = true )"//
+        + " AND team_number IN (" //
         + "  SELECT TeamNumber FROM TournamentTeams" //
         + "    WHERE Tournament = ?" //
         + "    AND judging_station = ?" //
         + ")")) {
       getActual.setInt(1, tournamentID);
       getActual.setString(2, judge);
-      getActual.setInt(3, tournamentID);
-      getActual.setString(4, station);
+      getActual.setString(3, categoryName);
+      getActual.setString(4, "");
+      getActual.setInt(5, tournamentID);
+      getActual.setString(6, station);
       try (ResultSet actual = getActual.executeQuery()) {
         if (actual.next()) {
           numActual = actual.getInt(1);

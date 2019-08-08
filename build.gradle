@@ -129,7 +129,7 @@ dependencies {
 
     implementation group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
     implementation group: "commons-cli", name: "commons-cli", version: "1.4"
-    implementation group: "org.hsqldb", name: "hsqldb", version: "2.4.1"
+    implementation group: "org.hsqldb", name: "hsqldb", version: "2.5.0"
     
     implementation group: "com.itextpdf", name: "itextpdf", version: project.itext_version
     

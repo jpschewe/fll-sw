@@ -67,7 +67,11 @@ public abstract class AbstractGoal implements Serializable {
       mDescription = null;
     }
 
-    mCategory = ele.getAttribute(CATEGORY_ATTRIBUTE);
+    if (ele.hasAttribute(CATEGORY_ATTRIBUTE)) {
+      mCategory = ele.getAttribute(CATEGORY_ATTRIBUTE);
+    } else {
+      mCategory = null;
+    }
   }
 
   /**

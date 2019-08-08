@@ -35,13 +35,13 @@ public class PerformanceScoreCategory extends ScoreCategory {
 
     mMinimumScore = Double.valueOf(ele.getAttribute(MINIMUM_SCORE_ATTRIBUTE));
 
-    mRestrictions = new LinkedList<Restriction>();
+    mRestrictions = new LinkedList<>();
     for (final Element restrictEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(Restriction.TAG_NAME))) {
       final Restriction restrict = new Restriction(restrictEle, this);
       mRestrictions.add(restrict);
     }
 
-    mTiebreaker = new LinkedList<TiebreakerTest>();
+    mTiebreaker = new LinkedList<>();
     final NodeList tiebreakerElements = ele.getElementsByTagName(TIE_BREAKER_TAG_NAME);
     if (0 != tiebreakerElements.getLength()) {
       final Element tiebreakerElement = (Element) tiebreakerElements.item(0);
@@ -68,7 +68,7 @@ public class PerformanceScoreCategory extends ScoreCategory {
 
   /**
    * Get the restrictions.
-   * 
+   *
    * @return unmodifiable collection
    */
   public Collection<Restriction> getRestrictions() {
@@ -77,7 +77,7 @@ public class PerformanceScoreCategory extends ScoreCategory {
 
   /**
    * Add a restriction.
-   * 
+   *
    * @param v the restriction to add
    */
   public void addRestriction(final Restriction v) {
@@ -86,7 +86,7 @@ public class PerformanceScoreCategory extends ScoreCategory {
 
   /**
    * Remove a restriction.
-   * 
+   *
    * @param v the restriction to remove
    * @return if the restriction was removed
    */
@@ -96,7 +96,7 @@ public class PerformanceScoreCategory extends ScoreCategory {
 
   /**
    * Replace the restrictions.
-   * 
+   *
    * @param v the new value
    */
   public void setRestrictions(final List<Restriction> v) {
@@ -108,7 +108,7 @@ public class PerformanceScoreCategory extends ScoreCategory {
 
   /**
    * Get the tiebreaker tests. These are checked in order.
-   * 
+   *
    * @return unmodifiable list
    */
   public List<TiebreakerTest> getTiebreaker() {
@@ -117,7 +117,7 @@ public class PerformanceScoreCategory extends ScoreCategory {
 
   /**
    * Add a test to the end of the tiebreaker list.
-   * 
+   *
    * @param v the test to add
    */
   public void addTiebreakerTest(final TiebreakerTest v) {
@@ -126,7 +126,7 @@ public class PerformanceScoreCategory extends ScoreCategory {
 
   /**
    * Add a test at the specified index in the tiebreaker list.
-   * 
+   *
    * @param index the index to add the test at
    * @param v the test to add
    */
@@ -138,7 +138,7 @@ public class PerformanceScoreCategory extends ScoreCategory {
 
   /**
    * Remove the specified test from the list of tiebreakers.
-   * 
+   *
    * @param v the tiebreaker to remove
    * @return if the tiebreaker was removed
    */
@@ -148,7 +148,7 @@ public class PerformanceScoreCategory extends ScoreCategory {
 
   /**
    * Remove the tiebreaker test at the specified index.
-   * 
+   *
    * @param index the index to remove at
    * @return the test that was removed
    */
@@ -158,7 +158,7 @@ public class PerformanceScoreCategory extends ScoreCategory {
 
   /**
    * Replace the tiebreakers.
-   * 
+   *
    * @param v the new value
    */
   public void setTiebreaker(final List<TiebreakerTest> v) {
@@ -211,6 +211,16 @@ public class PerformanceScoreCategory extends ScoreCategory {
     }
 
     return ele;
+  }
+
+  /**
+   * Category name for {@link #getName()}.
+   */
+  public static final String CATEGORY_NAME = "performance";
+
+  @Override
+  public String getName() {
+    return CATEGORY_NAME;
   }
 
 }

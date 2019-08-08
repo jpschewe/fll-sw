@@ -1,3 +1,4 @@
+* #730 - Add table for each goal group within a subjective category to the subjective score report
 * #746 - lock rubric range titles in the subjective web application header
 * #728 - Document regular match play terminology
 * #748 - remove ".." from paths sent to desktop applications. This allows the HTML page to properly open on Windows.

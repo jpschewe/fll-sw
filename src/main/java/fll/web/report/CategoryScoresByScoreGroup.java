@@ -11,7 +11,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -43,12 +45,13 @@ import fll.xml.WinnerType;
 
 /**
  * Display the report for scores by score group.
- * 
+ *
  * @author jpschewe
  */
 @WebServlet("/report/CategoryScoresByScoreGroup")
 public class CategoryScoresByScoreGroup extends BaseFLLServlet {
 
+  @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -81,7 +84,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
     }
   }
 
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table column, winner criteria determines sort")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "winner criteria determines sort")
   private void generateReport(final Connection connection,
                               final Document pdfDoc,
                               final ChallengeDescription challengeDescription,
@@ -99,67 +102,79 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
       final String catName = catElement.getName();
       final String catTitle = catElement.getTitle();
 
+      // 1 - tournament
+      // 2 - category
+      // 3 - goal group
+      // 4 - tournament
+      // 5 - award group
+      // 6 - judging group
       try (PreparedStatement prep = connection.prepareStatement("SELECT "//
-          + " Teams.TeamNumber, Teams.TeamName, Teams.Organization, FinalScores."
-          + catName //
-          + " FROM Teams, FinalScores" //
-          + " WHERE FinalScores.Tournament = ?" //
-          + " AND FinalScores.TeamNumber = Teams.TeamNumber" //
-          + " AND FinalScores.TeamNumber IN (" //
+          + " Teams.TeamNumber, Teams.TeamName, Teams.Organization, final_scores.final_score" //
+          + " FROM Teams, final_scores" //
+          + " WHERE final_scores.tournament = ?" //
+          + " AND final_scores.team_number = Teams.TeamNumber" //
+          + " AND final_scores.category = ?" //
+          + " AND final_scores.goal_group = ?"//
+          + " AND final_scores.team_number IN (" //
           + "   SELECT TeamNumber FROM TournamentTeams"//
           + "   WHERE Tournament = ?" //
           + "   AND event_division = ?" //
           + "   AND judging_station = ?)" //
-          + " ORDER BY "
-          + catName
+          + " ORDER BY final_scores.final_score"
           + " "
           + winnerCriteria.getSortString() //
       )) {
         prep.setInt(1, tournament.getTournamentID());
-        prep.setInt(2, tournament.getTournamentID());
+        prep.setString(2, catName);
+        prep.setInt(4, tournament.getTournamentID());
 
-        for (final String division : eventDivisions) {
-          for (final String judgingGroup : judgingGroups) {
-            final PdfPTable table = PdfUtils.createTable(4);
+        final Set<String> goalGroups = new HashSet<>(catElement.getGoalGroups());
+        goalGroups.add(""); // raw category
+        for (final String goalGroup : goalGroups) {
+          prep.setString(3, goalGroup);
 
-            createHeader(table, challengeTitle, catTitle, division, judgingGroup, tournament);
-            prep.setString(3, division);
-            prep.setString(4, judgingGroup);
+          for (final String division : eventDivisions) {
+            for (final String judgingGroup : judgingGroups) {
+              final PdfPTable table = PdfUtils.createTable(4);
 
-            boolean haveData = false;
-            try (ResultSet rs = prep.executeQuery()) {
-              while (rs.next()) {
-                haveData = true;
+              createHeader(table, challengeTitle, catTitle, goalGroup, division, judgingGroup, tournament);
+              prep.setString(5, division);
+              prep.setString(6, judgingGroup);
 
-                final int teamNumber = rs.getInt(1);
-                final String teamName = rs.getString(2);
-                final String organization = rs.getString(3);
+              boolean haveData = false;
+              try (ResultSet rs = prep.executeQuery()) {
+                while (rs.next()) {
+                  haveData = true;
 
-                table.addCell(PdfUtils.createCell(String.valueOf(teamNumber)));
-                table.addCell(PdfUtils.createCell(null == teamName ? "" : teamName));
-                table.addCell(PdfUtils.createCell(null == organization ? "" : organization));
-                double score = rs.getDouble(4);
-                if (rs.wasNull()) {
-                  score = Double.NaN;
-                }
-                if (Double.isNaN(score)) {
-                  table.addCell(PdfUtils.createCell("No Score"));
-                } else {
-                  table.addCell(PdfUtils.createCell(Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(score)));
-                }
-              } // foreach result
-            } // allocate rs
+                  final int teamNumber = rs.getInt(1);
+                  final String teamName = rs.getString(2);
+                  final String organization = rs.getString(3);
 
-            if (haveData) {
-              table.keepRowsTogether(0);
-              pdfDoc.add(table);
+                  table.addCell(PdfUtils.createCell(String.valueOf(teamNumber)));
+                  table.addCell(PdfUtils.createCell(null == teamName ? "" : teamName));
+                  table.addCell(PdfUtils.createCell(null == organization ? "" : organization));
+                  double score = rs.getDouble(4);
+                  if (rs.wasNull()) {
+                    score = Double.NaN;
+                  }
+                  if (Double.isNaN(score)) {
+                    table.addCell(PdfUtils.createCell("No Score"));
+                  } else {
+                    table.addCell(PdfUtils.createCell(Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(score)));
+                  }
+                } // foreach result
+              } // allocate rs
 
-              pdfDoc.add(Chunk.NEXTPAGE);
-            }
+              if (haveData) {
+                table.keepRowsTogether(0);
+                pdfDoc.add(table);
 
-          } // foreach station
-        } // foreach division
+                pdfDoc.add(Chunk.NEXTPAGE);
+              }
 
+            } // foreach station
+          } // foreach division
+        } // foreach goal group
       } // allocate prep
     } // foreach category
 
@@ -168,6 +183,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
   private void createHeader(final PdfPTable table,
                             final String challengeTitle,
                             final String catTitle,
+                            final String goalGroup,
                             final String division,
                             final String judgingGroup,
                             final Tournament tournament)
@@ -177,8 +193,16 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
     tournamentCell.setColspan(4);
     table.addCell(tournamentCell);
 
-    final PdfPCell categoryHeader = PdfUtils.createHeaderCell(String.format("Category: %s - Award Group: %s - JudgingGroup: %s",
-                                                                            catTitle, division, judgingGroup));
+    final PdfPCell categoryHeader;
+    if (null == goalGroup
+        || goalGroup.trim().isEmpty()) {
+      categoryHeader = PdfUtils.createHeaderCell(String.format("Category: %s - Award Group: %s - JudgingGroup: %s",
+                                                               catTitle, division, judgingGroup));
+    } else {
+      categoryHeader = PdfUtils.createHeaderCell(String.format("Category: %s - Goal Group - %s - Award Group: %s - JudgingGroup: %s",
+                                                               catTitle, goalGroup, division, judgingGroup));
+    }
+
     categoryHeader.setColspan(4);
     table.addCell(categoryHeader);
 

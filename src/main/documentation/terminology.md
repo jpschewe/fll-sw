@@ -53,6 +53,21 @@ Goals in a subjective category are scored within a range by a judge.
 Each judge may use different parts of the range and therefore may come up with a different score for the same team than another judge.
 For this reason, to determine the winner in a subjective category a single judge must see all teams in an award group or finalist judging must be used.
 
+
+Grouping goals
+==============
+
+Each score category contains one or more goals. 
+The goals may also be grouped into goal categories.
+In the challenge description setting the "category" attribute of a goal specifies the name of the grouping for the goals.
+One should order the goals so that all goals in the same group are next to each other. 
+This may be enforced in the future version of the software.
+
+This grouping can be useful for making it clear which goals are related to each other on the performance score sheets.
+This grouping is also used on the subjective score sheets to create sub-categories that are sometimes used to give extra awards.
+ 
+
+
 Head to Head
 ============
 

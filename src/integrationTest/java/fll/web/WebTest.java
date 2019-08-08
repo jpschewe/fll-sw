@@ -8,7 +8,6 @@ package fll.web;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.WebDriver;
@@ -48,7 +47,6 @@ public class WebTest {
                                             "playoff/index.jsp", "playoff/check.jsp?division=__all__",
                                             // "playoff/remoteMain.jsp",
                                             "report/index.jsp",
-                                            // "report/CategorizedScores",
                                             // "scoreboard/index.jsp",
                                             // "scoreboard/main.jsp",
                                             // "scoreboard_800/main.jsp",

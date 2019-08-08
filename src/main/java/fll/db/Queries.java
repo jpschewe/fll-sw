@@ -29,19 +29,15 @@ import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
-
 import org.w3c.dom.Document;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import fll.CategoryRank;
 import fll.Team;
-import fll.TeamRanking;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
-
 import fll.web.playoff.BracketUpdate;
 import fll.web.playoff.DatabaseTeamScore;
 import fll.web.playoff.H2HUpdateWebSocket;
@@ -71,117 +67,6 @@ public final class Queries {
   }
 
   /**
-   * Compute the score group for a team. Normally this comes from the schedule,
-   * but it may need to be computed off of the judges.
-   */
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate table name from category")
-  public static String computeScoreGroupForTeam(final Connection connection,
-                                                final int tournament,
-                                                final String categoryName,
-                                                final int teamNumber)
-      throws SQLException {
-    // otherwise build up the score group name based upon the judges
-    final StringBuilder scoreGroup = new StringBuilder();
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = connection.prepareStatement("SELECT Judge FROM "
-          + categoryName
-          + " WHERE TeamNumber = ? AND Tournament = ? AND ComputedTotal IS NOT NULL ORDER BY Judge");
-      prep.setInt(2, tournament);
-      prep.setInt(1, teamNumber);
-      rs = prep.executeQuery();
-      boolean first = true;
-      while (rs.next()) {
-        if (!first) {
-          scoreGroup.append("-");
-        } else {
-          first = false;
-        }
-        scoreGroup.append(rs.getString(1));
-      }
-      SQLFunctions.close(rs);
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
-    return scoreGroup.toString();
-  }
-
-  /**
-   * Compute the score groups that each team are in for a given category.
-   * 
-   * @param connection the connection to the database
-   * @param tournament the tournament to work within
-   * @param division the division to compute the score groups for
-   * @param categoryName the database name of the category
-   * @return Score groups. Map is name of score group to collection of teams in
-   *         that score group
-   */
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
-  private static Map<String, Collection<Integer>> computeScoreGroups(final Connection connection,
-                                                                     final int tournament,
-                                                                     final String division,
-                                                                     final String categoryName)
-      throws SQLException {
-    final Map<String, Collection<Integer>> scoreGroups = new HashMap<String, Collection<Integer>>();
-
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = connection.prepareStatement("SELECT DISTINCT Judges.station"
-          + " FROM "
-          + categoryName
-          + ", Judges" //
-          + " WHERE TeamNumber = ?" //
-          + " AND Judges.Tournament = ?" //
-          + " AND Judges.id = "
-          + categoryName
-          + ".Judge" //
-          + " AND Judges.Tournament = "
-          + categoryName
-          + ".Tournament" //
-          + " AND Judges.category = ?" //
-          + " AND ComputedTotal IS NOT NULL");
-      prep.setInt(2, tournament);
-      prep.setString(3, categoryName);
-
-      // foreach team, put the team in a score group
-      for (final TournamentTeam team : Queries.getTournamentTeams(connection).values()) {
-        // only show the teams for the division that we are looking at right
-        // now
-        if (division.equals(team.getAwardGroup())) {
-          final int teamNum = team.getTeamNumber();
-          final StringBuilder scoreGroup = new StringBuilder();
-          prep.setInt(1, teamNum);
-          rs = prep.executeQuery();
-          boolean first = true;
-          while (rs.next()) {
-            if (!first) {
-              scoreGroup.append("-");
-            } else {
-              first = false;
-            }
-            scoreGroup.append(rs.getString(1));
-          }
-          SQLFunctions.close(rs);
-
-          final String scoreGroupStr = scoreGroup.toString();
-          if (!scoreGroups.containsKey(scoreGroupStr)) {
-            scoreGroups.put(scoreGroupStr, new LinkedList<Integer>());
-          }
-          scoreGroups.get(scoreGroupStr).add(teamNum);
-        }
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
-
-    return scoreGroups;
-  }
-
-  /**
    * Get a map of teams for this tournament keyed on team number. Uses the table
    * TournamentTeams to determine which teams should be included.
    */
@@ -196,7 +81,7 @@ public final class Queries {
   public static Map<Integer, TournamentTeam> getTournamentTeams(final Connection connection,
                                                                 final int tournamentID)
       throws SQLException {
-    final SortedMap<Integer, TournamentTeam> tournamentTeams = new TreeMap<Integer, TournamentTeam>();
+    final SortedMap<Integer, TournamentTeam> tournamentTeams = new TreeMap<>();
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
@@ -238,7 +123,7 @@ public final class Queries {
   /**
    * Get the list of event divisions at the specified tournament as a List of
    * Strings.
-   * 
+   *
    * @param connection the database connection
    * @return the List of divisions. List of strings. Sorted by name.
    * @throws SQLException on a database error
@@ -247,7 +132,7 @@ public final class Queries {
   public static List<String> getAwardGroups(final Connection connection,
                                             final int tournament)
       throws SQLException {
-    final List<String> list = new LinkedList<String>();
+    final List<String> list = new LinkedList<>();
 
     PreparedStatement prep = null;
     ResultSet rs = null;
@@ -268,7 +153,7 @@ public final class Queries {
 
   /**
    * Get the list of team numbers that are in the specified event division.
-   * 
+   *
    * @param connection
    * @param tournament
    * @param division
@@ -303,7 +188,7 @@ public final class Queries {
   /**
    * Get the list of judging stations for the specified tournament as a List of
    * Strings.
-   * 
+   *
    * @param connection database connection
    * @param tournament the tournament to get the stations for
    * @return the judging stations
@@ -311,7 +196,7 @@ public final class Queries {
   public static List<String> getJudgingStations(final Connection connection,
                                                 final int tournament)
       throws SQLException {
-    final List<String> result = new LinkedList<String>();
+    final List<String> result = new LinkedList<>();
 
     PreparedStatement prep = null;
     ResultSet rs = null;
@@ -328,252 +213,6 @@ public final class Queries {
       SQLFunctions.close(prep);
     }
     return result;
-  }
-
-  /**
-   * Get the ranking of all teams in all categories.
-   * 
-   * @return Map with key of team number and value is the ranking information
-   *         for that team.
-   */
-  public static Map<Integer, TeamRanking> getTeamRankings(final Connection connection,
-                                                          final ChallengeDescription challengeDescription)
-      throws SQLException {
-    final Map<Integer, TeamRanking> teamRankings = new HashMap<Integer, TeamRanking>();
-    final int tournament = getCurrentTournament(connection);
-    final List<String> divisions = getAwardGroups(connection);
-
-    final WinnerType winnerCriteria = challengeDescription.getWinner();
-    final String ascDesc = winnerCriteria.getSortString();
-
-    // find the performance ranking
-    determinePerformanceRanking(connection, ascDesc, tournament, divisions, teamRankings);
-
-    // find the subjective category rankings
-    determineSubjectiveRanking(connection, ascDesc, tournament, divisions, challengeDescription, teamRankings);
-
-    // find the overall ranking
-    determineOverallRanking(connection, ascDesc, tournament, divisions, teamRankings);
-
-    return teamRankings;
-  }
-
-  /**
-   * Determine the subjective category ranking for all teams at a tournament.
-   * 
-   * @param connection
-   * @param tournament
-   * @param divisions
-   * @param rankingMap
-   * @throws SQLException
-   */
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate select statement")
-  private static void determineSubjectiveRanking(final Connection connection,
-                                                 final String ascDesc,
-                                                 final int tournament,
-                                                 final List<String> divisions,
-                                                 final ChallengeDescription challengeDescription,
-                                                 final Map<Integer, TeamRanking> teamRankings)
-      throws SQLException {
-
-    // cache the subjective categories title->dbname
-    final Map<String, String> subjectiveCategories = new HashMap<String, String>();
-    for (final SubjectiveScoreCategory cat : challengeDescription.getSubjectiveCategories()) {
-      final String title = cat.getTitle();
-      final String name = cat.getName();
-      subjectiveCategories.put(title, name);
-    }
-
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      for (final String division : divisions) {
-
-        // foreach subjective category
-        for (final Map.Entry<String, String> entry : subjectiveCategories.entrySet()) {
-          final String categoryTitle = entry.getKey();
-          final String categoryName = entry.getValue();
-
-          final Map<String, Collection<Integer>> scoreGroups = Queries.computeScoreGroups(connection, tournament,
-                                                                                          division, categoryName);
-
-          // select from FinalScores
-          for (final Map.Entry<String, Collection<Integer>> sgEntry : scoreGroups.entrySet()) {
-            final Collection<Integer> teamScores = sgEntry.getValue();
-
-            final String teamSelect = StringUtils.join(teamScores.iterator(), ", ");
-            prep = connection.prepareStatement("SELECT Teams.TeamNumber,FinalScores."
-                + categoryName //
-                + " FROM Teams, FinalScores" //
-                + " WHERE FinalScores.TeamNumber IN ( "
-                + teamSelect
-                + ")" //
-                + " AND Teams.TeamNumber = FinalScores.TeamNumber" //
-                + " AND FinalScores.Tournament = ?" //
-                + " ORDER BY" //
-                + " CASE when FinalScores."
-                + categoryName
-                + " IS NULL THEN 1 ELSE 0 END ASC" //
-                + ",FinalScores."
-                + categoryName
-                + " "
-                + ascDesc //
-                + ",Teams.TeamNumber");
-
-            prep.setInt(1, tournament);
-            rs = prep.executeQuery();
-            final String rankingGroup = String.format("award group %s judging group %s", division, sgEntry.getKey());
-
-            processTeamRankings(teamRankings, categoryTitle, rankingGroup, rs);
-          } // end foreach score group
-        } // end foreach category
-      } // end foreach division
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
-  }
-
-  /**
-   * Determine the overall ranking for all teams at a tournament.
-   * 
-   * @param connection
-   * @param tournament
-   * @param divisions
-   * @param rankingMap
-   * @throws SQLException
-   */
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to compute sort order")
-  private static void determineOverallRanking(final Connection connection,
-                                              final String ascDesc,
-                                              final int tournament,
-                                              final List<String> divisions,
-                                              final Map<Integer, TeamRanking> teamRankings)
-      throws SQLException {
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = connection.prepareStatement("SELECT Teams.TeamNumber, FinalScores.OverallScore" //
-          + " FROM Teams,FinalScores,current_tournament_teams" //
-          + " WHERE FinalScores.TeamNumber = Teams.TeamNumber" //
-          + " AND FinalScores.Tournament = ?"//
-          + " AND current_tournament_teams.event_division = ?" //
-          + " AND current_tournament_teams.TeamNumber = Teams.TeamNumber" //
-          + " ORDER BY" //
-          + " CASE when FinalScores.OverallScore IS NULL THEN 1 ELSE 0 END ASC" //
-          + ",FinalScores.OverallScore "
-          + ascDesc //
-          + ",Teams.TeamNumber");
-      prep.setInt(1, tournament);
-      for (final String division : divisions) {
-        prep.setString(2, division);
-        rs = prep.executeQuery();
-        final String rankingGroup = String.format("award group %s", division);
-        processTeamRankings(teamRankings, CategoryRank.OVERALL_CATEGORY_NAME, rankingGroup, rs);
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
-  }
-
-  /**
-   * Process the team rankings from the executed query. It is assumed that the
-   * query returns first an int that is the team number and then a double that
-   * is the score. <code>teamMap</code> is populated with the data. The
-   * ResultSet is closed by this function.
-   */
-  private static void processTeamRankings(final Map<Integer, TeamRanking> teamRankings,
-                                          final String categoryTitle,
-                                          final String rankingGroup,
-                                          final ResultSet rs)
-      throws SQLException {
-    final List<Integer> ranks = new LinkedList<Integer>();
-    final List<Integer> teams = new LinkedList<Integer>();
-
-    int numTeams = 0;
-    int tieRank = 1;
-    int rank = 1;
-    double prevScore = Double.NaN;
-    while (rs.next()) {
-      final int team = rs.getInt(1);
-      double score = rs.getDouble(2);
-      teams.add(team);
-      if (rs.wasNull()) {
-        ranks.add(CategoryRank.NO_SHOW_RANK);
-      } else if (Math.abs(score
-          - prevScore) < 0.001) {
-        // 3 decimal places should be considered equal
-        ranks.add(tieRank);
-      } else {
-        tieRank = rank;
-        ranks.add(rank);
-      }
-
-      // setup for next round
-      prevScore = score;
-
-      // increment rank counter
-      ++rank;
-      ++numTeams;
-    } // end score group rank
-
-    for (int i = 0; i < ranks.size(); ++i) {
-      final CategoryRank catRank = new CategoryRank(rankingGroup, categoryTitle, ranks.get(i), numTeams);
-      TeamRanking teamRank = teamRankings.get(teams.get(i));
-      if (null == teamRank) {
-        teamRank = new TeamRanking(teams.get(i));
-        teamRankings.put(teams.get(i), teamRank);
-      }
-      teamRank.setRankForCategory(categoryTitle, catRank);
-    }
-
-    SQLFunctions.close(rs);
-  }
-
-  /**
-   * Determine the performance ranking for all teams at a tournament.
-   * 
-   * @param connection
-   * @param tournament
-   * @param divisions
-   * @param rankingMap
-   * @throws SQLException
-   */
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to compute sort order")
-  private static void determinePerformanceRanking(final Connection connection,
-                                                  final String ascDesc,
-                                                  final int tournament,
-                                                  final List<String> divisions,
-                                                  final Map<Integer, TeamRanking> teamRankings)
-      throws SQLException {
-
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = connection.prepareStatement("SELECT Teams.TeamNumber, FinalScores.performance" //
-          + " FROM Teams,FinalScores,current_tournament_teams" //
-          + " WHERE FinalScores.TeamNumber = Teams.TeamNumber" //
-          + " AND FinalScores.Tournament = ?" //
-          + " AND current_tournament_teams.event_division = ?" //
-          + " AND current_tournament_teams.TeamNumber = Teams.TeamNumber"//
-          + " ORDER BY" //
-          + " CASE when FinalScores.performance IS NULL THEN 1 ELSE 0 END ASC" //
-          + ",FinalScores.performance "
-          + ascDesc //
-          + ",Teams.TeamNumber");
-
-      prep.setInt(1, tournament);
-      for (final String division : divisions) {
-        prep.setString(2, division);
-        rs = prep.executeQuery();
-        final String rankingGroup = String.format("award group %s", division);
-        processTeamRankings(teamRankings, CategoryRank.PERFORMANCE_CATEGORY_NAME, rankingGroup, rs);
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
   }
 
   /**
@@ -638,7 +277,7 @@ public final class Queries {
 
   /**
    * Insert or update a performance score.
-   * 
+   *
    * @throws SQLException on a database error.
    * @throws RuntimeException if a parameter is missing.
    * @throws ParseException if the team number cannot be parsed
@@ -671,7 +310,7 @@ public final class Queries {
   /**
    * Insert a performance score into the database. All of the values are
    * expected to be in request.
-   * 
+   *
    * @throws SQLException on a database error.
    * @throws RuntimeException if a parameter is missing.
    * @throws ParseException if the team number cannot be parsed
@@ -711,7 +350,7 @@ public final class Queries {
   /**
    * Insert a performance score into the database and do all appropriate updates
    * to the playoff tables and notifications to the UI code.
-   * 
+   *
    * @param connection the database connection
    * @param description the challenge description
    * @param tournament which tournament
@@ -853,7 +492,7 @@ public final class Queries {
   /**
    * Update a performance score in the database. All of the values are expected
    * to be in request.
-   * 
+   *
    * @return the number of rows updated, should be 0 or 1
    * @throws SQLException on a database error.
    * @throws ParseException if the XML document is invalid.
@@ -1137,7 +776,7 @@ public final class Queries {
   /**
    * Delete a performance score in the database. All of the values are expected
    * to be in request.
-   * 
+   *
    * @throws RuntimeException if a parameter is missing or if the playoff meta
    *           data would become inconsistent due to the deletion.
    * @throws ParseException if the numbers in the request can't be parsed as
@@ -1362,7 +1001,7 @@ public final class Queries {
 
   /**
    * Get head to head bracket update data for initializing a display.
-   * 
+   *
    * @param connection the database connection
    * @param bracketName the bracket name
    * @param firstPlayoffRound the first playoff round to include
@@ -1443,7 +1082,7 @@ public final class Queries {
 
   /**
    * Get the division that a team is in for the current tournament.
-   * 
+   *
    * @param teamNumber the team's number
    * @return the event division for the team
    * @throws SQLException on a database error
@@ -1458,7 +1097,7 @@ public final class Queries {
 
   /**
    * Get the division that a team is in for the specified tournament.
-   * 
+   *
    * @param teamNumber the team's number
    * @param tournamentID ID of tournament
    * @return the event division for the team or null if the team cannot be found
@@ -1489,7 +1128,7 @@ public final class Queries {
 
   /**
    * Get the judging group that a team is in for the specified tournament.
-   * 
+   *
    * @param teamNumber the team's number
    * @param tournamentID ID of tournament
    * @return the judging group for the team or null if not found
@@ -1541,7 +1180,7 @@ public final class Queries {
    * Get a list of team numbers that have fewer runs than seeding rounds. This
    * uses only verified performance scores, so scores that have not been
    * double-checked will show up in this report as not entered.
-   * 
+   *
    * @param connection connection to the database
    * @param tournamentTeams keyed by team number
    * @param verifiedScoresOnly True if the database query should use only
@@ -1586,13 +1225,13 @@ public final class Queries {
    * The {@link ResultSet} contains a single parameter that is the team number.
    * These numbers are mapped to team objects through
    * <code>tournamentTeams</code>.
-   * 
+   *
    * @throws RuntimeException if a team couldn't be found in the map
    */
   private static List<Team> collectTeamsFromQuery(final Map<Integer, ? extends Team> tournamentTeams,
                                                   final ResultSet rs)
       throws SQLException {
-    final List<Team> list = new LinkedList<Team>();
+    final List<Team> list = new LinkedList<>();
     while (rs.next()) {
       final int teamNumber = rs.getInt(1);
       final Team team = tournamentTeams.get(teamNumber);
@@ -1611,7 +1250,7 @@ public final class Queries {
    * include unverified scores, the assumption being that if you performed the
    * seeding round checks, which exclude unverified scores, you really do want
    * to advance teams.
-   * 
+   *
    * @param connection connection to the database
    * @param winnerCriteria what determines a winner
    * @return a List of teams
@@ -1624,14 +1263,14 @@ public final class Queries {
                                                   final Collection<? extends Team> teams)
       throws SQLException, RuntimeException {
 
-    final List<Integer> teamNumbers = new LinkedList<Integer>();
+    final List<Integer> teamNumbers = new LinkedList<>();
     for (final Team t : teams) {
       teamNumbers.add(t.getTeamNumber());
     }
 
     final String teamNumbersStr = StringUtils.join(teamNumbers, ",");
 
-    final List<Team> retval = new ArrayList<Team>();
+    final List<Team> retval = new ArrayList<>();
 
     PreparedStatement prep = null;
     ResultSet rs = null;
@@ -1669,7 +1308,7 @@ public final class Queries {
 
   /**
    * Get the current tournament from the database.
-   * 
+   *
    * @return the tournament, or DUMMY if not set. There should always be a DUMMY
    *         tournament in the Tournaments table. If DUMMY is returned the
    *         current tournament is set to 'DUMMY'
@@ -1682,7 +1321,7 @@ public final class Queries {
 
   /**
    * Get the current tournament from the database.
-   * 
+   *
    * @return the tournament ID
    */
   public static int getCurrentTournament(final Connection connection) throws SQLException {
@@ -1697,7 +1336,7 @@ public final class Queries {
 
   /**
    * Set the current tournament in the database.
-   * 
+   *
    * @param connection db connection
    * @param tournamentID the new value for the current tournament
    */
@@ -1714,7 +1353,7 @@ public final class Queries {
    * Delete a team from the database. This clears team from the Teams table and
    * all tables specified by the challengeDocument. It is not an error if the
    * team doesn't exist.
-   * 
+   *
    * @param teamNumber team to delete
    * @param connection connection to database, needs delete privileges
    * @throws SQLException on an error talking to the database
@@ -1755,8 +1394,22 @@ public final class Queries {
       SQLFunctions.close(prep);
       prep = null;
 
-      // delete from FinalScores
-      prep = connection.prepareStatement("DELETE FROM FinalScores WHERE TeamNumber = ?");
+      // delete from final_scores
+      prep = connection.prepareStatement("DELETE FROM final_scores WHERE team_number = ?");
+      prep.setInt(1, teamNumber);
+      prep.executeUpdate();
+      SQLFunctions.close(prep);
+      prep = null;
+
+      // delete from overall_scores
+      prep = connection.prepareStatement("DELETE FROM overall_scores WHERE team_number = ?");
+      prep.setInt(1, teamNumber);
+      prep.executeUpdate();
+      SQLFunctions.close(prep);
+      prep = null;
+
+      // delete from overall_scores
+      prep = connection.prepareStatement("DELETE FROM subjective_computed_scores WHERE team_number = ?");
       prep.setInt(1, teamNumber);
       prep.executeUpdate();
       SQLFunctions.close(prep);
@@ -1801,7 +1454,7 @@ public final class Queries {
 
   /**
    * Defaults to current tournament.
-   * 
+   *
    * @see #updateScoreTotals(ChallengeDescription, Connection, int)
    */
   public static void updateScoreTotals(final ChallengeDescription description,
@@ -1813,7 +1466,7 @@ public final class Queries {
 
   /**
    * Total the scores in the database for the specified tournament.
-   * 
+   *
    * @param connection connection to database, needs write privileges
    * @param tournament tournament to update score totals for
    * @throws SQLException if an error occurs
@@ -1831,7 +1484,8 @@ public final class Queries {
 
   /**
    * Compute the total scores for all entered subjective scores.
-   * 
+   * This populates the table subjecive_computed_scores.
+   *
    * @param connection
    * @throws SQLException
    */
@@ -1840,58 +1494,79 @@ public final class Queries {
                                                   final Connection connection,
                                                   final int tournament)
       throws SQLException {
-    PreparedStatement updatePrep = null;
-    PreparedStatement selectPrep = null;
-    ResultSet rs = null;
-    try {
-      // Subjective ---
-      for (final SubjectiveScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
-        final String categoryName = subjectiveElement.getName();
 
-        // build up the SQL
-        updatePrep = connection.prepareStatement("UPDATE "//
-            + categoryName //
-            + " SET ComputedTotal = ? WHERE TeamNumber = ? AND Tournament = ? AND Judge = ?");
-        selectPrep = connection.prepareStatement("SELECT * FROM " //
-            + categoryName //
-            + " WHERE Tournament = ?");
-        selectPrep.setInt(1, tournament);
-        updatePrep.setInt(3, tournament);
-        rs = selectPrep.executeQuery();
-        while (rs.next()) {
-          final int teamNumber = rs.getInt("TeamNumber");
-          final TeamScore teamScore = new DatabaseTeamScore(teamNumber, rs);
-          final double computedTotal;
-          if (teamScore.isNoShow()) {
-            computedTotal = Double.NaN;
-          } else {
-            computedTotal = subjectiveElement.evaluate(teamScore);
-          }
-          if (Double.isNaN(computedTotal)) {
-            updatePrep.setNull(1, Types.DOUBLE);
-          } else {
-            updatePrep.setDouble(1, computedTotal);
-          }
-          updatePrep.setInt(2, teamNumber);
-          final String judge = rs.getString("Judge");
-          updatePrep.setString(4, judge);
-          updatePrep.executeUpdate();
-        }
-        rs.close();
-        updatePrep.close();
-        selectPrep.close();
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(updatePrep);
-      SQLFunctions.close(selectPrep);
+    try (
+        PreparedStatement deletePrep = connection.prepareStatement("DELETE FROM subjective_computed_scores WHERE tournament = ?")) {
+      deletePrep.setInt(1, tournament);
+      deletePrep.executeUpdate();
     }
+
+    for (final SubjectiveScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
+      final String categoryName = subjectiveElement.getName();
+
+      try (PreparedStatement insertPrep = connection.prepareStatement("INSERT INTO subjective_computed_scores"//
+          + " (category, goal_group, tournament, team_number, judge, computed_total, no_show) " //
+          + " VALUES(?, ?, ?, ?, ?, ?, ?)");
+          PreparedStatement selectPrep = connection.prepareStatement("SELECT * FROM " //
+              + categoryName //
+              + " WHERE Tournament = ?")) {
+        selectPrep.setInt(1, tournament);
+
+        insertPrep.setString(1, categoryName);
+        insertPrep.setInt(3, tournament);
+
+        try (ResultSet rs = selectPrep.executeQuery()) {
+          while (rs.next()) {
+            final int teamNumber = rs.getInt("TeamNumber");
+            insertPrep.setInt(4, teamNumber);
+
+            final TeamScore teamScore = new DatabaseTeamScore(teamNumber, rs);
+            final double computedTotal;
+            if (teamScore.isNoShow()) {
+              computedTotal = Double.NaN;
+            } else {
+              computedTotal = subjectiveElement.evaluate(teamScore);
+            }
+
+            final String judge = rs.getString("Judge");
+            insertPrep.setString(5, judge);
+
+            insertPrep.setBoolean(7, teamScore.isNoShow());
+
+            // insert category score
+            insertPrep.setString(2, "");
+            if (Double.isNaN(computedTotal)) {
+              insertPrep.setNull(6, Types.DOUBLE);
+            } else {
+              insertPrep.setDouble(6, computedTotal);
+            }
+            insertPrep.executeUpdate();
+
+            // insert goal group scores
+            final Map<String, Double> goalGroupScores = subjectiveElement.getGoalGroupScores(teamScore);
+            for (final Map.Entry<String, Double> entry : goalGroupScores.entrySet()) {
+              final String group = entry.getKey();
+              final double score = entry.getValue();
+
+              insertPrep.setString(2, group);
+              if (Double.isNaN(score)) {
+                insertPrep.setNull(6, Types.DOUBLE);
+              } else {
+                insertPrep.setDouble(6, score);
+              }
+              insertPrep.executeUpdate();
+            }
+
+          } // foreach result
+        } // ResultSet
+      } // prepared statements
+    } // foreach category
   }
 
   /**
    * Compute the total scores for all entered performance scores. Uses both
    * verified and unverified scores.
-   * 
+   *
    * @param connection connection to the database
    * @param tournament the tournament to update scores for.
    * @throws SQLException
@@ -1957,7 +1632,7 @@ public final class Queries {
 
   /**
    * Get all tournament IDs that this team is in.
-   * 
+   *
    * @param connection database connection
    * @param teamNumber team number to search for
    * @return collection of all tournament IDs that this team is in
@@ -2001,8 +1676,8 @@ public final class Queries {
           + " AND TournamentTeams.Tournament = Tournaments.tournament_id");
       prep.setInt(1, teamNumber);
       rs = prep.executeQuery();
-      final List<Integer> tournaments = new LinkedList<Integer>();
-      final List<Integer> nextTournaments = new LinkedList<Integer>();
+      final List<Integer> tournaments = new LinkedList<>();
+      final List<Integer> nextTournaments = new LinkedList<>();
       while (rs.next()) {
         final int tournament = rs.getInt(1);
         if (rs.wasNull()) {
@@ -2051,7 +1726,7 @@ public final class Queries {
 
   /**
    * Set the judging station for a given team at the specified tournament.
-   * 
+   *
    * @param connection db connection
    * @param teamNumber the team's number
    * @param tournamentID the tournament
@@ -2107,8 +1782,22 @@ public final class Queries {
       prep.executeUpdate();
       SQLFunctions.close(prep);
 
-      // delete from FinalScores
-      prep = connection.prepareStatement("DELETE FROM FinalScores WHERE TeamNumber = ? AND Tournament = ?");
+      // delete from final_scores
+      prep = connection.prepareStatement("DELETE FROM final_scores WHERE team_number = ? AND tournament = ?");
+      prep.setInt(1, teamNumber);
+      prep.setInt(2, currentTournament);
+      prep.executeUpdate();
+      SQLFunctions.close(prep);
+
+      // delete from overall_scores
+      prep = connection.prepareStatement("DELETE FROM overall_scores WHERE team_number = ? AND tournament = ?");
+      prep.setInt(1, teamNumber);
+      prep.setInt(2, currentTournament);
+      prep.executeUpdate();
+      SQLFunctions.close(prep);
+
+      // delete from subjective_computed_scores
+      prep = connection.prepareStatement("DELETE FROM subjective_computed_scores WHERE team_number = ? AND tournament = ?");
       prep.setInt(1, teamNumber);
       prep.setInt(2, currentTournament);
       prep.executeUpdate();
@@ -2153,7 +1842,7 @@ public final class Queries {
 
   /**
    * Get the previous tournament for this team, given the current tournament.
-   * 
+   *
    * @param connection the database connection
    * @param teamNumber the team number
    * @param currentTournament the current tournament to use to find the previous
@@ -2192,7 +1881,7 @@ public final class Queries {
 
   /**
    * Add a team to the database.
-   * 
+   *
    * @return null on success, the name of the other team with the same team
    *         number on an error
    * @throws FLLRuntimeException if the team number is an internal team number
@@ -2237,7 +1926,7 @@ public final class Queries {
    * Check if a team is assigned to a tournament. If you are checking for a number
    * of teams against the same tournament, then
    * {@link #getTournamentTeams(Connection, int)} will be more efficient.
-   * 
+   *
    * @param connection the database connection
    * @param teamNumber the team number to check
    * @param tournament the tournament ID to check
@@ -2260,7 +1949,7 @@ public final class Queries {
 
   /**
    * Add a team to a tournament.
-   * 
+   *
    * @param connection database connection
    * @param teamNumber the team to add
    * @param tournament the tournament id of the tournament to be added to
@@ -2388,7 +2077,7 @@ public final class Queries {
   /**
    * Make sure all of the judges are properly assigned for the current
    * tournament
-   * 
+   *
    * @param connection the database connection
    * @return true if everything is ok
    */
@@ -2423,7 +2112,7 @@ public final class Queries {
    * Determines whether or not the playoff data table has been initialized for
    * the specified division. Uses the current tournament value obtained from
    * getCurrentTournament().
-   * 
+   *
    * @param connection The database connection to use.
    * @param division The division to check in the current tournament.
    * @return A boolean, true if the PlayoffData table has been initialized,
@@ -2441,7 +2130,7 @@ public final class Queries {
   /**
    * Check if playoff data is initialized for the specified tournament and
    * division.
-   * 
+   *
    * @param connection The database connection to use.
    * @param tournamentID The tournament to check
    * @param division The division to check in the current tournament.
@@ -2476,7 +2165,7 @@ public final class Queries {
 
   /**
    * Check if any playoff bracket is initialized for the specified tournament.
-   * 
+   *
    * @param connection database connection
    * @param tournamentID tournament ID
    * @return true if any playoff bracket is initialized in the tournament
@@ -2506,7 +2195,7 @@ public final class Queries {
   /**
    * Query for whether the specified team has advanced to the specified
    * (playoff) round.
-   * 
+   *
    * @param connection The database connection to use.
    * @param roundNumber The round number to check. Must be greater than # of
    *          seeding rounds.
@@ -2572,7 +2261,7 @@ public final class Queries {
    * <td>continue at the top</td>
    * </tr>
    * </ol>
-   * 
+   *
    * @param index the division index
    */
   public static String getColorForIndex(final int index) throws SQLException {
@@ -2594,7 +2283,7 @@ public final class Queries {
 
   /**
    * Get the value of Bye for the given team number, tournament and run number
-   * 
+   *
    * @return true if the score is a bye, false if it's not a bye or the score
    *         does not exist
    * @throws SQLException on a database error
@@ -2626,7 +2315,7 @@ public final class Queries {
   /**
    * Get the value of NoShow for the given team number, tournament and run
    * number
-   * 
+   *
    * @return true if the score is a No Show, false if it's not a bye or the
    *         score does not exist
    * @throws SQLException on a database error
@@ -2684,7 +2373,7 @@ public final class Queries {
 
   /**
    * Get prepared statement that gets Verified, NoShow, Bye columns for a score.
-   * 
+   *
    * @param connection
    * @return 1 is tournament, 2 is teamNumber, 3 is runNumber
    * @throws SQLException
@@ -2706,7 +2395,7 @@ public final class Queries {
    * round of the playoff bracket.
    * This method cannot be used for internal team numbers as they may reference
    * multiple lines.
-   * 
+   *
    * @param connection Database connection to use.
    * @param tournament Tournament identifier.
    * @param teamNumber Team number for which to look.
@@ -2752,7 +2441,7 @@ public final class Queries {
   /**
    * Gets the number of the team from the PlayoffData table given the
    * tournament, division, line number, and playoff round.
-   * 
+   *
    * @param connection Database connection.
    * @param tournament Tournament identifier.
    * @param division Division string.
@@ -2799,7 +2488,7 @@ public final class Queries {
   /**
    * Returns the number of playoff rounds for the specified division. Depends on
    * the PlayoffData table having been initialized for that division.
-   * 
+   *
    * @param connection The database connection.
    * @param division The division for which to get the number of playoff rounds.
    * @return The number of playoff rounds in the specified division, or 0 if
@@ -2822,7 +2511,7 @@ public final class Queries {
   /**
    * Returns the max number of playoff rounds all divisions. Depends on the
    * PlayoffData table having been initialized for that division.
-   * 
+   *
    * @param connection The database connection.
    * @return The maximum number of playoff rounds in all divisions, or 0 if
    *         brackets have not been initialized.
@@ -2844,7 +2533,7 @@ public final class Queries {
 
   /**
    * Get size of first playoff round.
-   * 
+   *
    * @param connection Database connection to use.
    * @param division The playoff division for which to look up round 1 size.
    * @return The size of the first round of the playoffs. This is always a power
@@ -2916,7 +2605,7 @@ public final class Queries {
   /**
    * Get the database version. If no version information exists in the database,
    * the version is 0.
-   * 
+   *
    * @param connection the database to check
    * @return the database version
    * @throws SQLException
@@ -2932,12 +2621,12 @@ public final class Queries {
 
   /**
    * Get all team numbers.
-   * 
+   *
    * @param connection
    * @return all team numbers
    */
   public static Collection<Integer> getAllTeamNumbers(final Connection connection) throws SQLException {
-    final Set<Integer> allTeamNumbers = new HashSet<Integer>();
+    final Set<Integer> allTeamNumbers = new HashSet<>();
     Statement stmt = null;
     ResultSet rs = null;
     try {
@@ -2956,7 +2645,7 @@ public final class Queries {
   /**
    * Test if a performance score exists for the given team, tournament and run
    * number
-   * 
+   *
    * @throws SQLException on a database error
    */
   public static boolean performanceScoreExists(final Connection connection,
@@ -2969,7 +2658,7 @@ public final class Queries {
 
   /**
    * Get a team's performance score for a specific tournament.
-   * 
+   *
    * @param connection database connection
    * @param tournament the id of the tournament to work with
    * @param teamNumber which team to get the score for
@@ -3006,7 +2695,7 @@ public final class Queries {
   /**
    * Get the max performance run number completed for the specified team in the
    * current tournament. This does not check the verified flag.
-   * 
+   *
    * @param connection database connection
    * @param teamNumber the team to check
    * @return the max run number or 0 if no performance runs have been completed
@@ -3036,7 +2725,7 @@ public final class Queries {
   /**
    * Get the max performance run number completed for all teams in the
    * current tournament. This does not check the verified flag.
-   * 
+   *
    * @param connection database connection
    * @return the max run number or 0 if no performance runs have been completed
    * @throws SQLException
@@ -3111,7 +2800,7 @@ public final class Queries {
   /**
    * Check if the authentication table is empty or doesn't exist. This will
    * create the authentication table if it doesn't exist.
-   * 
+   *
    * @return true if the authentication table is missing or empty
    */
   public static boolean isAuthenticationEmpty(final Connection connection) throws SQLException {
@@ -3139,7 +2828,7 @@ public final class Queries {
 
   /**
    * Get the hashed password for a user for checking.
-   * 
+   *
    * @param connection
    * @param user
    * @return the password or null
@@ -3172,7 +2861,7 @@ public final class Queries {
 
   /**
    * Get the authentication information.
-   * 
+   *
    * @param connection
    * @return key is user, value is hashed pass
    */
@@ -3184,7 +2873,7 @@ public final class Queries {
 
     Statement stmt = null;
     ResultSet rs = null;
-    Map<String, String> retval = new HashMap<String, String>();
+    final Map<String, String> retval = new HashMap<>();
     try {
       stmt = connection.createStatement();
       rs = stmt.executeQuery("SELECT fll_user, fll_pass FROM fll_authentication");
@@ -3202,7 +2891,7 @@ public final class Queries {
 
   /**
    * Add a valid login to the database.
-   * 
+   *
    * @param magicKey
    */
   public static void addValidLogin(final Connection connection,
@@ -3222,7 +2911,7 @@ public final class Queries {
 
   /**
    * Check if any of the specified login keys matches one that was stored.
-   * 
+   *
    * @param keys the keys to check
    * @return the username that the key matches, null otherwise
    */
@@ -3337,7 +3026,7 @@ public final class Queries {
    * Get the list of current users known to the system.
    */
   public static Collection<String> getUsers(final Connection connection) throws SQLException {
-    final Collection<String> users = new LinkedList<String>();
+    final Collection<String> users = new LinkedList<>();
     Statement stmt = null;
     ResultSet rs = null;
     try {
@@ -3357,7 +3046,7 @@ public final class Queries {
   /**
    * Delete all subjective scores for the specified team in the
    * specified category.
-   * 
+   *
    * @param categoryName the name of the category to delete scores from
    * @param teamNumber the team number
    * @param tournamentID the id of the tournament
