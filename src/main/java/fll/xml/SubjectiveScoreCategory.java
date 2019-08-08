@@ -24,7 +24,7 @@ public class SubjectiveScoreCategory extends ScoreCategory {
 
   /**
    * Construct from the provided XML element.
-   * 
+   *
    * @param ele where to get the information from
    */
   public SubjectiveScoreCategory(final Element ele) {
@@ -35,7 +35,7 @@ public class SubjectiveScoreCategory extends ScoreCategory {
 
   /**
    * Default constructor when no XML element is available.
-   * 
+   *
    * @param name see {@link #getName()}
    * @param title see {@link #getTitle()}
    */
@@ -48,11 +48,7 @@ public class SubjectiveScoreCategory extends ScoreCategory {
 
   private String mName;
 
-  /**
-   * The name of the category must be a valid database string.
-   * 
-   * @return The name
-   */
+  @Override
   public String getName() {
     return mName;
   }

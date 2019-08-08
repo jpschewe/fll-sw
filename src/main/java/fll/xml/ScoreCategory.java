@@ -9,8 +9,13 @@ package fll.xml;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nonnull;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -23,7 +28,7 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
  * Base for {@link SubjectiveScoreCategory} and
  * {@link PerformanceScoreCategory}.
  */
-public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
+public abstract class ScoreCategory implements Evaluatable, Serializable, GoalScope {
 
   public static final String WEIGHT_ATTRIBUTE = "weight";
 
@@ -140,14 +145,54 @@ public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
     if (!teamScore.scoreExists()) {
       return Double.NaN;
     } else if (teamScore.isNoShow()) {
-      return 0;
+      return 0D;
     }
 
     double total = 0;
     for (final AbstractGoal g : getGoals()) {
-      total += g.getComputedScore(teamScore);
+      final double goalScore = g.getComputedScore(teamScore);
+      total += goalScore;
     }
     return total;
+  }
+
+  /**
+   * Get all goal groups defined for this category.
+   *
+   * @return a newly created collection
+   */
+  @Nonnull
+  public Collection<String> getGoalGroups() {
+    return getGoals().stream().map(AbstractGoal::getCategory).filter(x -> null != x).collect(Collectors.toSet());
+  }
+
+  /**
+   * Compute scores per goal group.
+   *
+   * @param teamScore the score to evaluate
+   * @return goal group -> score, empty map if no score or a no show or no groups
+   *         defined
+   */
+  @Nonnull
+  public Map<String, Double> getGoalGroupScores(final TeamScore teamScore) {
+    final Map<String, Double> goalGroupScores = new HashMap<>();
+
+    if (!teamScore.scoreExists()) {
+      return goalGroupScores;
+    } else if (teamScore.isNoShow()) {
+      return goalGroupScores;
+    }
+
+    for (final AbstractGoal g : getGoals()) {
+      final double goalScore = g.getComputedScore(teamScore);
+
+      final String goalGroup = g.getCategory();
+      if (null != goalGroup
+          && !goalGroup.trim().isEmpty()) {
+        goalGroupScores.merge(goalGroup, goalScore, Double::sum);
+      }
+    }
+    return goalGroupScores;
   }
 
   /**
@@ -172,5 +217,12 @@ public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
       ele.appendChild(goalEle);
     }
   }
+
+  /**
+   * The name of the category must be a valid database string.
+   *
+   * @return the name of the category
+   */
+  public abstract String getName();
 
 }

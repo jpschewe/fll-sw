@@ -12,19 +12,23 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Formatter;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
+import fll.Tournament;
 import fll.TournamentTeam;
 import fll.db.NonNumericNominees;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.WebUtils;
 import fll.web.playoff.Playoff;
+import fll.web.report.FinalComputedScores;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
+import fll.xml.WinnerType;
 
 /**
  * Support for /report/finalist/load.jsp.
@@ -215,30 +219,53 @@ public class FinalistLoad {
     try (Connection connection = datasource.getConnection()) {
 
       final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
-      final int tournament = Queries.getCurrentTournament(connection);
+      final Tournament tournament = Tournament.getCurrentTournament(connection);
       final Formatter output = new Formatter(writer);
 
-      try (PreparedStatement prep = connection.prepareStatement("SELECT * from FinalScores WHERE tournament = ?")) {
-        prep.setInt(1, tournament);
+      try (
+          PreparedStatement prep = connection.prepareStatement("SELECT team_number, overall_score from overall_scores WHERE tournament = ?")) {
+        prep.setInt(1, tournament.getTournamentID());
 
         try (ResultSet rs = prep.executeQuery()) {
+          // defined by load.jsp
+          final String championshipCategoryVar = "championship";
           while (rs.next()) {
-            final int teamNumber = rs.getInt("TeamNumber");
-
+            final int teamNumber = rs.getInt(1);
             final String teamVar = getTeamVarName(teamNumber);
-            final double overallScore = rs.getDouble("OverallScore");
-            output.format("$.finalist.setCategoryScore(%s, championship, %.02f);%n", teamVar, overallScore);
 
-            for (final SubjectiveScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
-              final String categoryName = subjectiveElement.getName();
-              final String categoryVar = getCategoryVarName(categoryName);
-              final double catScore = rs.getDouble(categoryName);
-              output.format("$.finalist.setCategoryScore(%s, %s, %.02f);%n", teamVar, categoryVar, catScore);
-            } // foreach category
+            final double overallScore = rs.getDouble(2);
+            output.format("$.finalist.setCategoryScore(%s, %s, %.02f);%n", teamVar, championshipCategoryVar,
+                          overallScore);
           } // foreach team
         } // result set
       } // prepared statement
+
+      final WinnerType winnerCriteria = description.getWinner();
+      final List<String> awardGroups = Queries.getAwardGroups(connection, tournament.getTournamentID());
+      final List<String> judgingStations = Queries.getJudgingStations(connection, tournament.getTournamentID());
+      for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {
+        final String categoryName = category.getName();
+        final String categoryVar = getCategoryVarName(categoryName);
+
+        for (final String awardGroup : awardGroups) {
+          for (final String judgingStation : judgingStations) {
+            FinalComputedScores.iterateOverSubjectiveScores(connection, category, winnerCriteria, tournament,
+                                                            awardGroup, judgingStation, (teamNumber,
+                                                                                         score,
+                                                                                         rank) -> {
+
+                                                              final String teamVar = getTeamVarName(teamNumber);
+
+                                                              output.format("$.finalist.setCategoryScore(%s, %s, %.02f);%n",
+                                                                            teamVar, categoryVar, score);
+
+                                                            });
+          } // judging station
+        } // award group
+      } // category
+
     } // connection
+
   }
 
   /**

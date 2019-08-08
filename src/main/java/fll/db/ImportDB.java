@@ -618,6 +618,11 @@ public final class ImportDB {
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 19) {
+      upgrade18To19(connection);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < GenerateDB.DATABASE_VERSION) {
       throw new RuntimeException("Internal error, database version not updated to current instead was: "
           + dbVersion);
@@ -816,6 +821,18 @@ public final class ImportDB {
     }
 
     setDBVersion(connection, 18);
+  }
+
+  private static void upgrade18To19(final Connection connection) throws SQLException {
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Upgrading database from 18 to 19");
+    }
+
+    GenerateDB.createSubjectiveComputedScoresTable(connection, false);
+    GenerateDB.createFinalScoresTable(connection, false);
+    GenerateDB.createOverallScoresTable(connection, false);
+
+    setDBVersion(connection, 19);
   }
 
   /**
