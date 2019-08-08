@@ -67,79 +67,6 @@ public final class Queries {
   }
 
   /**
-   * Compute the score groups that each team are in for a given category.
-   *
-   * @param connection the connection to the database
-   * @param tournament the tournament to work within
-   * @param division the division to compute the score groups for
-   * @param categoryName the database name of the category
-   * @return Score groups. Map is name of score group to collection of teams in
-   *         that score group
-   */
-  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
-  private static Map<String, Collection<Integer>> computeScoreGroups(final Connection connection,
-                                                                     final int tournament,
-                                                                     final String division,
-                                                                     final String categoryName)
-      throws SQLException {
-    final Map<String, Collection<Integer>> scoreGroups = new HashMap<>();
-
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = connection.prepareStatement("SELECT DISTINCT Judges.station"
-          + " FROM "
-          + categoryName
-          + ", Judges" //
-          + " WHERE TeamNumber = ?" //
-          + " AND Judges.Tournament = ?" //
-          + " AND Judges.id = "
-          + categoryName
-          + ".Judge" //
-          + " AND Judges.Tournament = "
-          + categoryName
-          + ".Tournament" //
-          + " AND Judges.category = ?" //
-      );
-      prep.setInt(2, tournament);
-      prep.setString(3, categoryName);
-
-      // foreach team, put the team in a score group
-      for (final TournamentTeam team : Queries.getTournamentTeams(connection).values()) {
-        // only show the teams for the division that we are looking at right
-        // now
-        if (division.equals(team.getAwardGroup())) {
-          final int teamNum = team.getTeamNumber();
-          final StringBuilder scoreGroup = new StringBuilder();
-          prep.setInt(1, teamNum);
-          rs = prep.executeQuery();
-          boolean first = true;
-          while (rs.next()) {
-            if (!first) {
-              scoreGroup.append("-");
-            } else {
-              first = false;
-            }
-            scoreGroup.append(rs.getString(1));
-          }
-          SQLFunctions.close(rs);
-
-          final String scoreGroupStr = scoreGroup.toString();
-          if (!scoreGroups.containsKey(scoreGroupStr)) {
-            scoreGroups.put(scoreGroupStr, new LinkedList<Integer>());
-          }
-          scoreGroups.get(scoreGroupStr).add(teamNum);
-        }
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
-
-    return scoreGroups;
-  }
-
-  /**
    * Get a map of teams for this tournament keyed on team number. Uses the table
    * TournamentTeams to determine which teams should be included.
    */
@@ -1562,6 +1489,7 @@ public final class Queries {
    * @param connection
    * @throws SQLException
    */
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
   private static void updateSubjectiveScoreTotals(final ChallengeDescription description,
                                                   final Connection connection,
                                                   final int tournament)
