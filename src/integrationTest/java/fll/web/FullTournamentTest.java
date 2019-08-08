@@ -669,13 +669,13 @@ public class FullTournamentTest {
     // check ranking and scores
     final double scoreFP = 1E-1; // just check to one decimal place
 
-    final String sqlTemplate = "SELECT final_scores.team_number, final_scores.overall_score" //
-        + " FROM final_scores, current_tournament_teams, Tournaments" //
-        + " WHERE final_scores.team_number = current_tournament_teams.TeamNumber" //
+    final String sqlTemplate = "SELECT overall_scores.team_number, overall_scores.overall_score" //
+        + " FROM overall_scores, current_tournament_teams, Tournaments" //
+        + " WHERE overall_scores.team_number = current_tournament_teams.TeamNumber" //
         + " AND Tournaments.Name = '%s'"
-        + " AND final_scores.tournament = Tournaments.tournament_id" //
+        + " AND overall_scores.tournament = Tournaments.tournament_id" //
         + " AND current_tournament_teams.event_division = '%s'" //
-        + " ORDER BY final_scores.overall_score DESC";
+        + " ORDER BY overall_scores.overall_score DESC";
 
     // division 1
     final int[] division1ExpectedRank = { 2636, 3127, 3439, 4462, 3125, 2116, 2104, 2113 };
