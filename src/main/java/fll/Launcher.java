@@ -126,27 +126,6 @@ public class Launcher extends JFrame {
 
       ensureSingleInstance(frame);
 
-      frame.addWindowListener(new WindowAdapter() {
-        @Override
-        @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "Exiting from main is OK")
-        public void windowClosing(final WindowEvent e) {
-          System.exit(0);
-        }
-
-        @Override
-        @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "Exiting from main is OK")
-        public void windowClosed(final WindowEvent e) {
-          System.exit(0);
-        }
-      });
-      // should be able to watch for window closing, but hidden works
-      frame.addComponentListener(new ComponentAdapter() {
-        @Override
-        @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "Exiting from main is OK")
-        public void componentHidden(final ComponentEvent e) {
-          System.exit(0);
-        }
-      });
       GraphicsUtils.centerWindow(frame);
 
       frame.setVisible(true);
@@ -178,7 +157,16 @@ public class Launcher extends JFrame {
 
   public Launcher() {
     super();
-    setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+    // allow us to prevent closing the window
+    setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+
+    addWindowListener(new WindowAdapter() {
+      @Override
+      public void windowClosing(final WindowEvent e) {
+        maybeExit();
+      }
+    });
+
     setApplicationIcon(this);
 
     final Container cpane = getContentPane();
@@ -297,13 +285,31 @@ public class Launcher extends JFrame {
 
     final JButton exit = new JButton("Exit");
     exit.addActionListener(ae -> {
-      setVisible(false);
+      maybeExit();
     });
     cpane.add(exit, BorderLayout.SOUTH);
 
     pack();
 
     startWebserverMonitor();
+  }
+
+  /**
+   * Prompt the user if the webserver is running.
+   */
+  @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "This method is ment to close the application")
+  private void maybeExit() {
+    if (mServerOnline) {
+      final int result = JOptionPane.showConfirmDialog(this,
+                                                       "Closing the launcher will stop the web server. Are you sure you want to close?",
+                                                       "Question", JOptionPane.YES_NO_OPTION);
+      if (JOptionPane.NO_OPTION == result) {
+        return;
+      }
+    }
+    // close
+    this.dispose();
+    System.exit(0);
   }
 
   private void startWebserverMonitor() {

@@ -1,3 +1,4 @@
+* #717 - Confirm closing the launcher when the web server is running
 * #730 - Add table for each goal group within a subjective category to the subjective score report
 * #746 - lock rubric range titles in the subjective web application header
 * #728 - Document regular match play terminology
