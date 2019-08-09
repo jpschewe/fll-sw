@@ -1254,7 +1254,7 @@ public class TournamentSchedule implements Serializable {
 
     final PdfPTable table = PdfUtils.createTable(7);
     int currentRow = 0;
-    table.setWidths(new float[] { 2, 1, 3, 3, 2, 2, 2 });
+    table.setWidths(new float[] { 2, 2, 3, 3, 2, 2, 2 });
 
     final PdfPCell tournamentCell = PdfUtils.createHeaderCell("Tournament: "
         + getName()
