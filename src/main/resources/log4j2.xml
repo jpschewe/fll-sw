@@ -39,8 +39,9 @@
 		<!-- database connection information -->
 		<!-- <Logger name="database" level="TRACE"/> -->
 
+	<!-- leave debugging on to track down problems loading files on Windows -->
+	<Logger name="fll.TomcatLauncher" level="TRACE" />
 		<!-- stuff for debugging -->
-		<Logger name="fll.TomcatLauncher" level="TRACE" />
 
 		<!-- <Logger name="org.apache.catalina.startup.ContextConfig" level="TRACE"/> 
 			<Logger name="org.apache.tomcat.util.scan.StandardJarScanner" level="TRACE"/> -->
