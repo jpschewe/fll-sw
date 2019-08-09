@@ -1298,6 +1298,8 @@ public class TournamentSchedule implements Serializable {
         // keep the rows with the same times together
         table.getRow(currentRow
             - 1).setMayNotBreak(true);
+        LOGGER.trace("Setting may not break for row {} time {}", (currentRow
+            - 1), performanceTime);
       } else {
         topBorderWidth = TIME_SEPARATOR_LINE_WIDTH;
       }
