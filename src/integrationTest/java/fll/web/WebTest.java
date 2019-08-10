@@ -49,7 +49,7 @@ public class WebTest {
                                             "report/index.jsp",
                                             // "scoreboard/index.jsp",
                                             // "scoreboard/main.jsp",
-                                            // "scoreboard_800/main.jsp",
+                                            // "scoreboard/main_small.jsp",
                                             "scoreEntry/select_team.jsp", "setup/index.jsp",
                                             "troubleshooting/index.jsp", };
       for (final String page : pages) {
