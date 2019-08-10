@@ -34,6 +34,7 @@ import fll.flltools.displaySystem.list.SetArray;
 import fll.util.FP;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.web.DisplayInfo;
 import fll.web.SessionAttributes;
 import fll.web.report.FinalComputedScores;
 import fll.xml.ChallengeDescription;
@@ -72,6 +73,7 @@ public class Top10 extends BaseFLLServlet {
     final String showOrgStr = request.getParameter("showOrganization");
     final boolean showOrg = null == showOrgStr ? true : Boolean.parseBoolean(showOrgStr);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
 
     try (Connection connection = datasource.getConnection()) {
       final Integer divisionIndexObj = SessionAttributes.getAttribute(session, "divisionIndex", Integer.class);
@@ -82,7 +84,8 @@ public class Top10 extends BaseFLLServlet {
         awardGroupIndex = divisionIndexObj.intValue();
       }
       ++awardGroupIndex;
-      final List<String> awardGroups = Queries.getAwardGroups(connection);
+
+      final List<String> awardGroups = displayInfo.determineScoreboardAwardGroups(Queries.getAwardGroups(connection));
       if (awardGroupIndex >= awardGroups.size()) {
         awardGroupIndex = 0;
       }
@@ -166,10 +169,10 @@ public class Top10 extends BaseFLLServlet {
    */
   private interface ProcessScoreEntry {
     void execute(final String teamName,
-                        final int teamNumber,
-                        final String organization,
-                        @Nonnull final String formattedScore,
-                        final int rank);
+                 final int teamNumber,
+                 final String organization,
+                 @Nonnull final String formattedScore,
+                 final int rank);
   }
 
   /**
