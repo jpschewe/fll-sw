@@ -148,7 +148,9 @@
 			<!-- welcome -->
 
 			<tr>
-				<th>Scoreboard</th>
+				<th>Scoreboard<br /> Select the award groups to show on the
+					display (non checked is the same as all checked)
+				</th>
 				<c:forEach items="${displayInformation}" var="displayInfo">
 					<td><c:choose>
 							<c:when test="${displayInfo.scoreboard}">
@@ -161,7 +163,29 @@
 									name="${displayInfo.remotePageFormParamName}"
 									value='scoreboard' />
 							</c:otherwise>
-						</c:choose></td>
+						</c:choose> <br /> <!-- choose award groups --> 
+						<c:forEach
+							items="${allAwardGroups}" var="awardGroup"
+							varStatus="agIterStatus">
+							<c:choose>
+								<c:when
+									test="${ displayInfo.determineScoreboardAwardGroups(allAwardGroups).contains(awardGroup) }">
+									<input type="checkbox"
+										name="${displayInfo.awardGroupsFormParamName}"
+										id="${displayInfo.awardGroupsFormParamName}${agIterStatus.index}"
+										value="${awardGroup}" checked />
+								</c:when>
+								<c:otherwise>
+									<input type="checkbox"
+										name="${displayInfo.awardGroupsFormParamName}"
+										id="${displayInfo.awardGroupsFormParamName}${agIterStatus.index}"
+										value="${awardGroup}" />
+								</c:otherwise>
+							</c:choose>
+							<label
+								for="${displayInfo.awardGroupsFormParamName}${agIterStatus.index}">${awardGroup}</label>
+							<br />
+						</c:forEach></td>
 				</c:forEach>
 			</tr>
 			<!--  Scoreboard -->

@@ -704,6 +704,14 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
         return filtered;
       }
     }
-
   }
+
+  /**
+   * @return the parameter name for the remote page
+   */
+  public String getAwardGroupsFormParamName() {
+    return getFormParamPrefix()
+        + "awardGroups";
+  }
+
 }
