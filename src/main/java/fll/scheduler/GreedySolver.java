@@ -160,7 +160,6 @@ public class GreedySolver {
     boolean optimize = false;
     File datafile = null;
     try {
-      // TODO update command line parser
       final CommandLineParser parser = new DefaultParser();
       final CommandLine cmd = parser.parse(options, args);
 
