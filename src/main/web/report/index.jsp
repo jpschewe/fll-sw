@@ -38,6 +38,10 @@
 			category by judging group. This is useful for checking the winners of
 			each category.</li>
 
+		<li><a href="PerformanceReport" target="_blank">Performance
+				report</a>. This displays the performance scores for each team
+			(including head to head) and computes some statistics on the scores.</li>
+
 		<li><a href="PerformanceScoreReport" target="_blank">Performance
 				Score Report</a>. This displays the details of the performance runs for
 			each team.</li>
