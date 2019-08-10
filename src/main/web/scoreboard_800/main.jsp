@@ -4,12 +4,9 @@
 <head>
 <script language=javascript>
   var width = screen.width;
-  var height = screen.height;
   if (screen.width >= 1024) {
     //redirect to 1024x768 scoreboard
     location.href = '<c:url value="/scoreboard/main.jsp"/>';
-  } else {
-    window.resizeTo(width, height);
   }
 </script>
 <style type='text/css'>
