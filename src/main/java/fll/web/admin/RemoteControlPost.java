@@ -7,6 +7,7 @@
 package fll.web.admin;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -58,10 +59,14 @@ public class RemoteControlPost extends BaseFLLServlet {
         LOGGER.trace("\tnum brackets:");
         for (int i = 0; i < numBrackets; ++i) {
           LOGGER.trace("\t\tplayoffDivision "
-              + i + ": " + request.getParameter(display.getHead2HeadBracketFormParamName(i)));
+              + i
+              + ": "
+              + request.getParameter(display.getHead2HeadBracketFormParamName(i)));
 
           LOGGER.trace("\t\tplayoffRoundNumber "
-              + i + ": " + request.getParameter(display.getHead2HeadFirstRoundFormParamName(i)));
+              + i
+              + ": "
+              + request.getParameter(display.getHead2HeadFirstRoundFormParamName(i)));
         }
         LOGGER.trace("\tdelete? "
             + request.getParameter(display.getDeleteFormParamName()));
@@ -111,6 +116,9 @@ public class RemoteControlPost extends BaseFLLServlet {
           brackets.add(bracketInfo);
         }
         display.setBrackets(brackets);
+
+        final List<String> awardGroupsToDisplay = Arrays.asList(request.getParameterValues(display.getAwardGroupsFormParamName()));
+        display.setScoreboardAwardGroups(awardGroupsToDisplay);
       }
     }
 
