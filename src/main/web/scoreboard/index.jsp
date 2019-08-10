@@ -13,7 +13,7 @@
   <ul>
     <li><a href='<c:url value="main.jsp" />' target="_blank">Primary Scoreboard
         (1024x768)</a></li>
-    <li><a href='<c:url value="/scoreboard_800/main.jsp" />' target="_blank">Primary
+    <li><a href='<c:url value="/scoreboard/main_small.jsp" />' target="_blank">Primary
         Scoreboard (800x600)</a></li>
 
     <li><a href='<c:url value="allteams.jsp"/>' target="_blank">All Teams, All

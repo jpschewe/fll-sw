@@ -15,6 +15,7 @@ Documentation on the database schema, API, workflows, etc. for the [current rele
     * When library versions change, it's good to remove the .classpath file and then have gradle recreate it
   1. Build by executing `./gradlew classes`
   1. Start the application with `./gradlew run`
+    * Start the webserver right away with `./rgadlew run --args="--start-web"`
   1. Run tests with `./gradlew test`
     * integration tests are `./gradlew integrationTest`
   1. We have a continuous integration server running using [Jenkins](http://jenkins-ci.org/). You can access it at [http://mtu.net/jenkins/job/FLL-SW/](http://mtu.net/jenkins/job/FLL-SW/). There is a job for each active branch.
