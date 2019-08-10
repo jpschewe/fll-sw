@@ -21,15 +21,13 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-
-
 import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
-
 import fll.web.ApplicationAttributes;
+import fll.web.DisplayInfo;
 import fll.web.SessionAttributes;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreType;
@@ -72,38 +70,43 @@ public class AllTeams {
       final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection, tournamentId);
       final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection, tournamentId);
 
+      final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
+      final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(Queries.getAwardGroups(connection));
+
       prep.setInt(1, tournamentId);
       prep.setBoolean(3, !runningHeadToHead);
       prep.setInt(4, numSeedingRuns);
 
-      final List<String> awardGroups = Queries.getAwardGroups(connection, tournamentId);
       final List<TournamentTeam> teamsWithScores = new LinkedList<>();
       final Map<Integer, String> teamHeaderColor = new HashMap<>();
       final Map<Integer, List<ComputedPerformanceScore>> scores = new HashMap<>();
       for (final Map.Entry<Integer, TournamentTeam> entry : tournamentTeams.entrySet()) {
+        final TournamentTeam team = entry.getValue();
 
-        final String headerColor = Queries.getColorForIndex(awardGroups.indexOf(entry.getValue().getAwardGroup()));
-        teamHeaderColor.put(entry.getKey(), headerColor);
+        if (awardGroupsToDisplay.contains(team.getAwardGroup())) {
+          final String headerColor = Queries.getColorForIndex(awardGroupsToDisplay.indexOf(team.getAwardGroup()));
+          teamHeaderColor.put(entry.getKey(), headerColor);
 
-        prep.setInt(2, entry.getKey());
+          prep.setInt(2, entry.getKey());
 
-        final List<ComputedPerformanceScore> teamScores = new LinkedList<>();
-        try (final ResultSet rs = prep.executeQuery()) {
-          while (rs.next()) {
-            final ComputedPerformanceScore score = new ComputedPerformanceScore(floatingPointScores, rs.getInt(1),
-                                                                                rs.getBoolean(2), rs.getDouble(3));
-            teamScores.add(score);
+          final List<ComputedPerformanceScore> teamScores = new LinkedList<>();
+          try (final ResultSet rs = prep.executeQuery()) {
+            while (rs.next()) {
+              final ComputedPerformanceScore score = new ComputedPerformanceScore(floatingPointScores, rs.getInt(1),
+                                                                                  rs.getBoolean(2), rs.getDouble(3));
+              teamScores.add(score);
 
-            ++numScores;
+              ++numScores;
+            }
           }
-        }
 
-        if (!teamScores.isEmpty()) {
-          teamsWithScores.add(entry.getValue());
-          scores.put(entry.getKey(), teamScores);
-        }
+          if (!teamScores.isEmpty()) {
+            teamsWithScores.add(entry.getValue());
+            scores.put(entry.getKey(), teamScores);
+          }
+        } // if in displayed award groups
 
-      }
+      } // foreach tournament team
 
       final List<String> sponsorLogos = getSponsorLogos(application);
 
@@ -139,7 +142,7 @@ public class AllTeams {
 
   /**
    * Get the URsponsor logo filenames relative to "/sponsor_logos".
-   * 
+   *
    * @return sorted sponsor logos list
    */
   private static List<String> getSponsorLogos(final ServletContext application) {
