@@ -16,6 +16,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -659,6 +660,50 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
       return mParent.getHead2HeadFirstRoundFormParamName(mIndex);
     }
 
+  } // class H2HBracketDisplay
+
+  private final List<String> scoreboardAwardGroups = new LinkedList<>();
+
+  /**
+   * @return the award groups to display on the score board, may be empty meaning
+   *         display all
+   */
+  @Nonnull
+  public List<String> getScoreboardAwardGroups() {
+    return Collections.unmodifiableList(scoreboardAwardGroups);
   }
 
+  /**
+   * @param v see {@link #getScoreboardAwardGroups()}
+   */
+  public void setScoreboardAwardGroups(final List<String> v) {
+    scoreboardAwardGroups.clear();
+    scoreboardAwardGroups.addAll(v);
+  }
+
+  /**
+   * Helper function for {@link #getScoreboardAwardGroups()} that handles the
+   * configured value being empty or not matching any of the award groups for the
+   * tournament.
+   *
+   * @param allAwardGroups filter from this list
+   * @return the configured award groups or all if none are configured
+   */
+  @Nonnull
+  public List<String> determineScoreboardAwardGroups(final List<String> allAwardGroups) {
+    final List<String> configuredGroups = getScoreboardAwardGroups();
+    if (configuredGroups.isEmpty()) {
+      return allAwardGroups;
+    } else {
+      // filter to those selected
+      final List<String> filtered = allAwardGroups.stream().filter(v -> configuredGroups.contains(v))
+                                                  .collect(Collectors.toList());
+      if (filtered.isEmpty()) {
+        return allAwardGroups;
+      } else {
+        return filtered;
+      }
+    }
+
+  }
 }
