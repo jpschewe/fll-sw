@@ -103,9 +103,7 @@ SPAN.TIE {
 </head>
 <body>
   <span id="top">&nbsp;</span>
-  <div
-    id="dummy"
-    style="position: absolute">
+
     <br />
     <c:forEach
       items="${allBracketData}"
@@ -125,9 +123,7 @@ SPAN.TIE {
         <br />
       </c:if>
     </c:forEach>
-
     <span id="bottom">&nbsp;</span>
-  </div>
 
 </body>
 </html>

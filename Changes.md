@@ -1,3 +1,4 @@
+* #721 - Remove pause from the bottom of the head to head bracket scrolling
 * #716 - Add command line option to start webserver immediately
 * #720 - Add performance score report for finalist judging
 * #717 - Confirm closing the launcher when the web server is running
