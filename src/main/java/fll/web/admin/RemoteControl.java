@@ -15,15 +15,11 @@ import javax.servlet.ServletContext;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
-
-
 import fll.db.Queries;
-
 import fll.web.ApplicationAttributes;
 import fll.web.playoff.Playoff;
 import fll.web.report.finalist.FinalistSchedule;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Context information for remoteControl.jsp.
@@ -61,6 +57,8 @@ public class RemoteControl {
 
       final Collection<String> finalistDivisions = FinalistSchedule.getAllDivisions(connection, currentTournament);
       pageContext.setAttribute("finalistDivisions", finalistDivisions);
+
+      pageContext.setAttribute("allAwardGroups", Queries.getAwardGroups(connection, currentTournament));
 
     } catch (final SQLException e) {
       LOGGER.error(e.getMessage(), e);
