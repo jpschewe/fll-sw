@@ -85,7 +85,8 @@ public class Top10 extends BaseFLLServlet {
       }
       ++awardGroupIndex;
 
-      final List<String> awardGroups = displayInfo.determineScoreboardAwardGroups(Queries.getAwardGroups(connection));
+      final List<String> allAwardGroups = Queries.getAwardGroups(connection);
+      final List<String> awardGroups = displayInfo.determineScoreboardAwardGroups(allAwardGroups);
       if (awardGroupIndex >= awardGroups.size()) {
         awardGroupIndex = 0;
       }
@@ -123,7 +124,7 @@ public class Top10 extends BaseFLLServlet {
           --numColumns;
         }
         formatter.format("<th colspan='%d' bgcolor='%s'>Top Performance Scores: %s</th>", numColumns,
-                         Queries.getColorForIndex(awardGroupIndex), awardGroupName);
+                         Queries.getColorForIndex(allAwardGroups.indexOf(awardGroupName)), awardGroupName);
         formatter.format("</tr>%n");
 
         processScores(application, awardGroupName, (teamName,

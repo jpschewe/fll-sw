@@ -71,7 +71,8 @@ public class AllTeams {
       final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection, tournamentId);
 
       final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
-      final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(Queries.getAwardGroups(connection));
+      final List<String> allAwardGroups = Queries.getAwardGroups(connection);
+      final List<String> awardGroupsToDisplay = displayInfo.determineScoreboardAwardGroups(allAwardGroups);
 
       prep.setInt(1, tournamentId);
       prep.setBoolean(3, !runningHeadToHead);
@@ -84,7 +85,7 @@ public class AllTeams {
         final TournamentTeam team = entry.getValue();
 
         if (awardGroupsToDisplay.contains(team.getAwardGroup())) {
-          final String headerColor = Queries.getColorForIndex(awardGroupsToDisplay.indexOf(team.getAwardGroup()));
+          final String headerColor = Queries.getColorForIndex(allAwardGroups.indexOf(team.getAwardGroup()));
           teamHeaderColor.put(entry.getKey(), headerColor);
 
           prep.setInt(2, entry.getKey());
