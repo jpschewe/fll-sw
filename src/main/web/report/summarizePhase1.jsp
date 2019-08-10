@@ -96,7 +96,7 @@ div.content table, div.content th, div.content td {
 
 				</c:forEach>
 
-				<form action="summarizePhase2.jsp">
+				<form action="SummarizePhase2">
 					<p>
 						If this does not look correct, go back to the <a
 							href="../index.jsp">main page and correct the scores</a>.

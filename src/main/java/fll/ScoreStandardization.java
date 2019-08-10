@@ -252,7 +252,7 @@ public final class ScoreStandardization {
   public static void updateTeamTotalScores(final Connection connection,
                                            final ChallengeDescription description,
                                            final int tournament)
-      throws SQLException, ParseException {
+      throws SQLException  {
     final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection, tournament);
 
     final Map<String, Double> categoryWeights = new HashMap<>();
