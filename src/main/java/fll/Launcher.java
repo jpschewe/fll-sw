@@ -42,6 +42,11 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 
 import org.apache.catalina.LifecycleException;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.scheduler.SchedulerUI;
@@ -104,6 +109,23 @@ public class Launcher extends JFrame {
     }
   }
 
+  private static final String OPT_START_WEB = "start-web";
+
+  private static final String OPT_HELP = "help";
+
+  private static Options buildOptions() {
+    final Options options = new Options();
+    options.addOption(null, OPT_START_WEB, false, "immediately start the webserver");
+    options.addOption("h", OPT_HELP, false, "immediately start the webserver");
+
+    return options;
+  }
+
+  private static void usage(final Options options) {
+    final HelpFormatter formatter = new HelpFormatter();
+    formatter.printHelp("Launcher", options);
+  }
+
   public static void main(final String[] args) {
     GuiExceptionHandler.registerExceptionHandler();
 
@@ -121,6 +143,27 @@ public class Launcher extends JFrame {
       LOGGER.warn("Cross platform look and feel unsupported?", e);
     }
 
+    final Options options = buildOptions();
+    // parse options
+    boolean startWeb = false;
+    try {
+      final CommandLineParser parser = new DefaultParser();
+      final CommandLine cmd = parser.parse(options, args);
+
+      if (cmd.hasOption(OPT_START_WEB)) {
+        startWeb = true;
+      }
+      if (cmd.hasOption(OPT_HELP)) {
+        usage(options);
+        System.exit(0);
+      }
+
+    } catch (final org.apache.commons.cli.ParseException pe) {
+      LOGGER.error(pe.getMessage());
+      usage(options);
+      System.exit(1);
+    }
+
     try {
       final Launcher frame = new Launcher();
 
@@ -129,6 +172,10 @@ public class Launcher extends JFrame {
       GraphicsUtils.centerWindow(frame);
 
       frame.setVisible(true);
+
+      if (startWeb) {
+        frame.startWebserver(false);
+      }
     } catch (final Exception e) {
       LOGGER.fatal("Unexpected error", e);
       JOptionPane.showMessageDialog(null, "Unexpected error: "
@@ -186,7 +233,7 @@ public class Launcher extends JFrame {
     webserverStartButton = new JButton("Start web server");
 
     webserverStartButton.addActionListener(ae -> {
-      startWebserver();
+      startWebserver(true);
     });
     buttonBox.add(webserverStartButton);
 
@@ -457,14 +504,16 @@ public class Launcher extends JFrame {
 
   private TomcatLauncher webserverLauncher = null;
 
-  private void startWebserver() {
+  private void startWebserver(final boolean loadFrontPage) {
     if (null == webserverLauncher) {
       webserverLauncher = new TomcatLauncher();
     }
     try {
       webserverLauncher.start();
 
-      loadFllHtml();
+      if (loadFrontPage) {
+        loadFllHtml();
+      }
     } catch (final LifecycleException e) {
       LOGGER.fatal("Unexpected error starting webserver", e);
       JOptionPane.showMessageDialog(null, "Unexpected error starting webserver: "
