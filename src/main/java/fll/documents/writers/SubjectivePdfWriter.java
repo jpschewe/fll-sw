@@ -269,8 +269,7 @@ public class SubjectivePdfWriter {
 
   private static Pair<Integer, int[]> getTableColumnInformation(final int numRubricTitles) {
     final List<Integer> colWidthsList = new LinkedList<>();
-    colWidthsList.add(4);
-    colWidthsList.add(4);
+    colWidthsList.add(4); // goal group
     for (int i = 0; i < numRubricTitles; ++i) {
       colWidthsList.add(23);
     }
@@ -278,7 +277,7 @@ public class SubjectivePdfWriter {
     final int[] colWidths = colWidthsList.stream().mapToInt(Integer::intValue).toArray();
 
     return Pair.of(numRubricTitles
-        + 2, colWidths);
+        + 1, colWidths);
   }
 
   private void writeCommentsBlock(final Document doc,
@@ -393,8 +392,6 @@ public class SubjectivePdfWriter {
 
       // These are the cells with the descriptions for each level of
       // accomplishment
-      table.addCell(createCell("ND", font, NO_BORDERS));
-
       for (final RubricRange rubricRange : rowElement.getSortedRubricRanges()) {
         final String shortDescription = rubricRange.getShortDescription().trim().replaceAll("\\s+", " ");
         table.addCell(createCell(shortDescription, font, NO_TOP_BOTTOM));
