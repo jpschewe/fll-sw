@@ -7,9 +7,12 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalTime;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.annotation.Nonnull;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
@@ -35,7 +38,6 @@ import fll.util.PdfUtils;
 import fll.xml.ChallengeDescription;
 import fll.xml.RubricRange;
 import fll.xml.SubjectiveScoreCategory;
-import net.mtu.eggplant.util.Pair;
 
 public class SubjectivePdfWriter {
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
@@ -57,8 +59,6 @@ public class SubjectivePdfWriter {
   private final static int NO_TOP_LEFT = 5;
 
   private final static int TOP_ONLY = 6;
-
-  private static final int[] colWidths = { 4, 4, 23, 23, 23, 23 };
 
   private static final BaseColor rowBlue = new BaseColor(0xB4, 0xCD, 0xED);
 
@@ -136,8 +136,10 @@ public class SubjectivePdfWriter {
                                       final Font font,
                                       final int commentHeight)
       throws MalformedURLException, IOException, DocumentException {
-    final PdfPTable table = createStandardRubricTable();
-    writeHeader(doc, teamInfo);
+    final Pair<Integer, int[]> headerInfo = getTableColumnInformation(sheetElement.getRubricRangeTitles());
+
+    final PdfPTable table = createStandardRubricTable(headerInfo.getLeft(), headerInfo.getRight());
+    writeHeader(doc, teamInfo, headerInfo.getLeft(), headerInfo.getRight());
     for (final String category : sheetElement.getCategories()) {
       writeRubricTable(table, sheetElement.getTableElement(category), font);
     }
@@ -150,7 +152,9 @@ public class SubjectivePdfWriter {
   }
 
   private void writeHeader(final Document doc,
-                           final TeamScheduleInfo teamInfo)
+                           final TeamScheduleInfo teamInfo,
+                           final int numColumns,
+                           final int[] colWidths)
       throws MalformedURLException, IOException, DocumentException {
     Image image = null;
     PdfPTable pageHeaderTable = null;
@@ -240,8 +244,8 @@ public class SubjectivePdfWriter {
 
     final List<String> rubricRangeTitles = sheetElement.getRubricRangeTitles();
 
-    columnTitlesTable = new PdfPTable(rubricRangeTitles.size()
-        + 2);
+    columnTitlesTable = new PdfPTable(numColumns);
+
     columnTitlesTable.setSpacingBefore(5);
     columnTitlesTable.setWidthPercentage(100f);
     columnTitlesTable.setWidths(colWidths);
@@ -261,6 +265,24 @@ public class SubjectivePdfWriter {
     } catch (final DocumentException de) {
       LOGGER.error("Unable to write out the document.", de);
     }
+  }
+
+  private static Pair<Integer, int[]> getTableColumnInformation(final List<String> rubricTitles) {
+    final List<Integer> colWidthsList = new LinkedList<>();
+    colWidthsList.add(4); // goal group
+
+    rubricTitles.stream().forEach(title -> {
+      if (title.length() <= 2) {
+        // likely "ND", save some space
+        colWidthsList.add(4);
+      } else {
+        colWidthsList.add(23);
+      }
+    });
+
+    final int[] colWidths = colWidthsList.stream().mapToInt(Integer::intValue).toArray();
+
+    return Pair.of(colWidths.length, colWidths);
   }
 
   private void writeCommentsBlock(final Document doc,
@@ -326,8 +348,10 @@ public class SubjectivePdfWriter {
     return new Document(PageSize.LETTER, 36, 36, 20, 0);
   }
 
-  public PdfPTable createStandardRubricTable() throws DocumentException {
-    final PdfPTable table = new PdfPTable(6);
+  private PdfPTable createStandardRubricTable(final int numColumns,
+                                              final int[] colWidths)
+      throws DocumentException {
+    final PdfPTable table = new PdfPTable(numColumns);
     table.setWidths(colWidths);
     table.setWidthPercentage(100f);
     return table;
@@ -373,8 +397,6 @@ public class SubjectivePdfWriter {
 
       // These are the cells with the descriptions for each level of
       // accomplishment
-      table.addCell(createCell("ND", font, NO_BORDERS));
-
       for (final RubricRange rubricRange : rowElement.getSortedRubricRanges()) {
         final String shortDescription = rubricRange.getShortDescription().trim().replaceAll("\\s+", " ");
         table.addCell(createCell(shortDescription, font, NO_TOP_BOTTOM));
@@ -484,7 +506,7 @@ public class SubjectivePdfWriter {
     teamInfo.setTeamName("Dummy");
 
     for (int commentHeight = 20; commentHeight > 2; --commentHeight) {
-    for (int pointSize = 9; pointSize >= 6; --pointSize) {
+      for (int pointSize = 9; pointSize >= 6; --pointSize) {
         final Font font = new Font(Font.FontFamily.HELVETICA, pointSize);
 
         final com.itextpdf.text.Document pdf = SubjectivePdfWriter.createStandardDocument();
@@ -504,13 +526,13 @@ public class SubjectivePdfWriter {
         final ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
         final PdfReader reader = new PdfReader(in);
         if (reader.getNumberOfPages() == 1) {
-          return new Pair<>(font, commentHeight);
+          return Pair.of(font, commentHeight);
         }
       } // font size
     } // comment height
 
     // no font size fit, just use 10 with comment height 2
-    return new Pair<>(new Font(Font.FontFamily.HELVETICA, 10), 2);
+    return Pair.of(new Font(Font.FontFamily.HELVETICA, 10), 2);
   }
 
   /**
@@ -535,8 +557,8 @@ public class SubjectivePdfWriter {
       throws DocumentException, MalformedURLException, IOException {
 
     final Pair<Font, Integer> parameters = determineParameters(description, tournamentName, sheetElement);
-    final Font font = parameters.getOne();
-    final int commentHeight = parameters.getTwo();
+    final Font font = parameters.getLeft();
+    final int commentHeight = parameters.getRight();
 
     final com.itextpdf.text.Document pdf = SubjectivePdfWriter.createStandardDocument();
 
