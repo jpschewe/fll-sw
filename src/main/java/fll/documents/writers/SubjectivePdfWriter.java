@@ -136,7 +136,7 @@ public class SubjectivePdfWriter {
                                       final Font font,
                                       final int commentHeight)
       throws MalformedURLException, IOException, DocumentException {
-    final Pair<Integer, int[]> headerInfo = getTableColumnInformation(sheetElement.getRubricRangeTitles().size());
+    final Pair<Integer, int[]> headerInfo = getTableColumnInformation(sheetElement.getRubricRangeTitles());
 
     final PdfPTable table = createStandardRubricTable(headerInfo.getLeft(), headerInfo.getRight());
     writeHeader(doc, teamInfo, headerInfo.getLeft(), headerInfo.getRight());
@@ -267,17 +267,22 @@ public class SubjectivePdfWriter {
     }
   }
 
-  private static Pair<Integer, int[]> getTableColumnInformation(final int numRubricTitles) {
+  private static Pair<Integer, int[]> getTableColumnInformation(final List<String> rubricTitles) {
     final List<Integer> colWidthsList = new LinkedList<>();
     colWidthsList.add(4); // goal group
-    for (int i = 0; i < numRubricTitles; ++i) {
-      colWidthsList.add(23);
-    }
+
+    rubricTitles.stream().forEach(title -> {
+      if (title.length() <= 2) {
+        // likely "ND", save some space
+        colWidthsList.add(4);
+      } else {
+        colWidthsList.add(23);
+      }
+    });
 
     final int[] colWidths = colWidthsList.stream().mapToInt(Integer::intValue).toArray();
 
-    return Pair.of(numRubricTitles
-        + 1, colWidths);
+    return Pair.of(colWidths.length, colWidths);
   }
 
   private void writeCommentsBlock(final Document doc,
