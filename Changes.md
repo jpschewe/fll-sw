@@ -1,3 +1,4 @@
+* #751 - remove duplicated headers in subjective web application
 * #706 - Allow one to choose which award groups are on each scoreboard display
 * #721 - Remove pause from the bottom of the head to head bracket scrolling
 * #716 - Add command line option to start webserver immediately

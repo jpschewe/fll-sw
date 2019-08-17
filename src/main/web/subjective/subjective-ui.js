@@ -701,6 +701,7 @@ $(document).on(
 
       // put rubric titles in the top header
       var headerTable = $("#enter-score_score-table_header");
+      headerTable.empty();
       populateEnterScoreRubricTitles(headerTable, false)
       
       var prevCategory = null;
