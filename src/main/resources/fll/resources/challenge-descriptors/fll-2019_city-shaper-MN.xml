@@ -133,6 +133,331 @@ only by the Robot"
 			<value value="zero" title="0" score="0" />
 		</goal>
 
+		<!-- FIXME add bonus - each mission with a score gets 5 points EXCEPT 14 
+			gets 0 and 2 gets 10 -->
+		<computedGoal name="small_area_bonus_m01"
+			title="Small Inspection Area Bonus - M01" category="Bonus">
+			<switch>
+				<case>
+					<left>
+						<term>
+							<goalRef goal="m01_robot_bridge" scoreType="computed" />
+						</term>
+						<term>
+							<goalRef goal="m01_flags" scoreType="computed" />
+						</term>
+					</left>
+					<greater-than />
+					<right>
+						<constant value="0" />
+					</right>
+				</case>
+				<result>
+					<constant value="5" />
+				</result>
+				<default>
+					<constant value="0" />
+				</default>
+			</switch>
+		</computedGoal>
+
+
+		<computedGoal name="small_area_bonus_m02"
+			title="Small Inspection Area Bonus - M02" category="Bonus">
+			<switch>
+				<case>
+					<left>
+						<term>
+							<goalRef goal="m02_crane_lowered" scoreType="computed" />
+						</term>
+						<term>
+							<goalRef goal="m02_independent_supported"
+								scoreType="computed" />
+						</term>
+						<term>
+							<goalRef goal="m02_blue_circle" scoreType="computed" />
+						</term>
+					</left>
+					<greater-than />
+					<right>
+						<constant value="0" />
+					</right>
+				</case>
+				<result>
+					<constant value="10" />
+				</result>
+				<default>
+					<constant value="0" />
+				</default>
+			</switch>
+		</computedGoal>
+
+		<computedGoal name="small_area_bonus_m03"
+			title="Small Inspection Area Bonus - M03" category="Bonus">
+			<switch>
+				<case>
+					<left>
+						<term>
+							<goalRef goal="m03_inspection_drone" scoreType="computed" />
+						</term>
+					</left>
+					<greater-than />
+					<right>
+						<constant value="0" />
+					</right>
+				</case>
+				<result>
+					<constant value="5" />
+				</result>
+				<default>
+					<constant value="0" />
+				</default>
+			</switch>
+		</computedGoal>
+
+		<computedGoal name="small_area_bonus_m04"
+			title="Small Inspection Area Bonus - M04" category="Bonus">
+			<switch>
+				<case>
+					<left>
+						<term>
+							<goalRef goal="m04_crater_crossing" scoreType="computed" />
+						</term>
+					</left>
+					<greater-than />
+					<right>
+						<constant value="0" />
+					</right>
+				</case>
+				<result>
+					<constant value="5" />
+				</result>
+				<default>
+					<constant value="0" />
+				</default>
+			</switch>
+		</computedGoal>
+
+		<computedGoal name="small_area_bonus_m05"
+			title="Small Inspection Area Bonus - M05" category="Bonus">
+			<switch>
+				<case>
+					<left>
+						<term>
+							<goalRef goal="m05_treehouse_large_branches"
+								scoreType="computed" />
+						</term>
+						<term>
+							<goalRef goal="m05_treehouse_small_branches"
+								scoreType="computed" />
+						</term>
+					</left>
+					<greater-than />
+					<right>
+						<constant value="0" />
+					</right>
+				</case>
+				<result>
+					<constant value="5" />
+				</result>
+				<default>
+					<constant value="0" />
+				</default>
+			</switch>
+		</computedGoal>
+
+
+		<computedGoal name="small_area_bonus_m06"
+			title="Small Inspection Area Bonus - M06" category="Bonus">
+			<switch>
+				<case>
+					<left>
+						<term>
+							<goalRef goal="m06_traffic_jam" scoreType="computed" />
+						</term>
+					</left>
+					<greater-than />
+					<right>
+						<constant value="0" />
+					</right>
+				</case>
+				<result>
+					<constant value="5" />
+				</result>
+				<default>
+					<constant value="0" />
+				</default>
+			</switch>
+		</computedGoal>
+
+
+		<computedGoal name="small_area_bonus_m07"
+			title="Small Inspection Area Bonus - M07" category="Bonus">
+			<switch>
+				<case>
+					<left>
+						<term>
+							<goalRef goal="m07_swing" scoreType="computed" />
+						</term>
+					</left>
+					<greater-than />
+					<right>
+						<constant value="0" />
+					</right>
+				</case>
+				<result>
+					<constant value="5" />
+				</result>
+				<default>
+					<constant value="0" />
+				</default>
+			</switch>
+		</computedGoal>
+
+		<computedGoal name="small_area_bonus_m08"
+			title="Small Inspection Area Bonus - M08" category="Bonus">
+			<switch>
+				<case>
+					<left>
+						<term>
+							<goalRef goal="m08_elevator" scoreType="computed" />
+						</term>
+					</left>
+					<greater-than />
+					<right>
+						<constant value="0" />
+					</right>
+				</case>
+				<result>
+					<constant value="5" />
+				</result>
+				<default>
+					<constant value="0" />
+				</default>
+			</switch>
+		</computedGoal>
+
+		<computedGoal name="small_area_bonus_m09"
+			title="Small Inspection Area Bonus - M09" category="Bonus">
+			<switch>
+				<case>
+					<left>
+						<term>
+							<goalRef goal="m09_safety_factor" scoreType="computed" />
+						</term>
+					</left>
+					<greater-than />
+					<right>
+						<constant value="0" />
+					</right>
+				</case>
+				<result>
+					<constant value="5" />
+				</result>
+				<default>
+					<constant value="0" />
+				</default>
+			</switch>
+		</computedGoal>
+
+		<computedGoal name="small_area_bonus_m10"
+			title="Small Inspection Area Bonus - M10" category="Bonus">
+			<switch>
+				<case>
+					<left>
+						<term>
+							<goalRef goal="m10_steel_construction"
+								scoreType="computed" />
+						</term>
+					</left>
+					<greater-than />
+					<right>
+						<constant value="0" />
+					</right>
+				</case>
+				<result>
+					<constant value="5" />
+				</result>
+				<default>
+					<constant value="0" />
+				</default>
+			</switch>
+		</computedGoal>
+
+		<computedGoal name="small_area_bonus_m11"
+			title="Small Inspection Area Bonus - M11" category="Bonus">
+			<switch>
+				<case>
+					<left>
+						<term>
+							<goalRef goal="m11_innovative_structure"
+								scoreType="computed" />
+						</term>
+					</left>
+					<greater-than />
+					<right>
+						<constant value="0" />
+					</right>
+				</case>
+				<result>
+					<constant value="5" />
+				</result>
+				<default>
+					<constant value="0" />
+				</default>
+			</switch>
+		</computedGoal>
+
+		<computedGoal name="small_area_bonus_m12"
+			title="Small Inspection Area Bonus - M12" category="Bonus">
+			<switch>
+				<case>
+					<left>
+						<term>
+							<goalRef goal="m12_circles" scoreType="computed" />
+						</term>
+						<term>
+							<goalRef goal="m12_levels" scoreType="computed" />
+						</term>
+					</left>
+					<greater-than />
+					<right>
+						<constant value="0" />
+					</right>
+				</case>
+				<result>
+					<constant value="5" />
+				</result>
+				<default>
+					<constant value="0" />
+				</default>
+			</switch>
+		</computedGoal>
+
+		<computedGoal name="small_area_bonus_m13"
+			title="Small Inspection Area Bonus - M13" category="Bonus">
+			<switch>
+				<case>
+					<left>
+						<term>
+							<goalRef goal="m13_sustainability_upgrades"
+								scoreType="computed" />
+						</term>
+					</left>
+					<greater-than />
+					<right>
+						<constant value="0" />
+					</right>
+				</case>
+				<result>
+					<constant value="5" />
+				</result>
+				<default>
+					<constant value="0" />
+				</default>
+			</switch>
+		</computedGoal>
+
 		<tiebreaker>
 
 			<test winner="HIGH">
