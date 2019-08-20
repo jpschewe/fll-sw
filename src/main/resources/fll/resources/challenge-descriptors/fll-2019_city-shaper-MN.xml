@@ -52,9 +52,8 @@ only by the Robot"
 			max="1" multiplier="10" category="M04">
 		</goal>
 
-		<!-- FIXME: how many units? -->
 		<goal initialValue="0" name="m05_treehouse_large_branches"
-			title="M05 - Treehouse - Large Branches" min="0" max="1"
+			title="M05 - Treehouse - Large Branches" min="0" max="16"
 			multiplier="10" category="M05">
 		</goal>
 
@@ -84,7 +83,7 @@ only by the Robot"
 
 
 		<goal initialValue="0" name="m09_safety_factor"
-			title="M09 - Safety Factor - beams" min="0" max="1" multiplier="10"
+			title="M09 - Safety Factor - beams" min="0" max="6" multiplier="10"
 			category="M09">
 		</goal>
 
@@ -104,17 +103,25 @@ only by the Robot"
 		</goal>
 
 
-		<!-- FIXME how many units? -->
 		<goal initialValue="0" name="m12_circles"
 			title="M012 - Color matching units in Circle" category="M12" min="0"
 			max="7" multiplier="10">
 		</goal>
 
-		<!-- FIXME how many levels? -->
 		<goal name="m12_levels" title="M12 - Levels" initialValue="0"
-			min="0" max="10" multiplier="5" category="M12" />
+			min="0" max="28" multiplier="5" category="M12" />
 
-		<!-- FIXME cannot score levels without circles -->
+		<!-- cannot score levels without circles -->
+		<restriction lowerBound="1" upperBound="100"
+			message="Cannot score in the levels without units in circles">
+			<term>
+				<goalRef goal="m12_circles" scoreType="raw" />
+			</term>
+			<term>
+				<constant value="-1" />
+				<goalRef goal="m12_levels" scoreType="raw" />
+			</term>
+		</restriction>
 
 
 		<goal name="m13_sustainability_upgrades"
@@ -133,30 +140,38 @@ only by the Robot"
 			<value value="zero" title="0" score="0" />
 		</goal>
 
-		<!-- FIXME add bonus - each mission with a score gets 5 points EXCEPT 14 
-			gets 0 and 2 gets 10 -->
+		<!-- bonus - each mission with a score gets 5 points EXCEPT 14 gets 0 and 
+			2 gets 10 -->
 		<computedGoal name="small_area_bonus_m01"
 			title="Small Inspection Area Bonus - M01" category="Bonus">
 			<switch>
 				<case>
-					<left>
+					<condition>
+						<left>
+							<term>
+								<goalRef goal="m01_robot_bridge" scoreType="computed" />
+							</term>
+							<term>
+								<goalRef goal="m01_flags" scoreType="computed" />
+							</term>
+						</left>
+						<greater-than />
+						<right>
+							<term>
+								<constant value="0" />
+							</term>
+						</right>
+					</condition>
+					<result>
 						<term>
-							<goalRef goal="m01_robot_bridge" scoreType="computed" />
+							<constant value="5" />
 						</term>
-						<term>
-							<goalRef goal="m01_flags" scoreType="computed" />
-						</term>
-					</left>
-					<greater-than />
-					<right>
-						<constant value="0" />
-					</right>
+					</result>
 				</case>
-				<result>
-					<constant value="5" />
-				</result>
 				<default>
-					<constant value="0" />
+					<term>
+						<constant value="0" />
+					</term>
 				</default>
 			</switch>
 		</computedGoal>
@@ -166,28 +181,36 @@ only by the Robot"
 			title="Small Inspection Area Bonus - M02" category="Bonus">
 			<switch>
 				<case>
-					<left>
+					<condition>
+						<left>
+							<term>
+								<goalRef goal="m02_crane_lowered" scoreType="computed" />
+							</term>
+							<term>
+								<goalRef goal="m02_independent_supported"
+									scoreType="computed" />
+							</term>
+							<term>
+								<goalRef goal="m02_blue_circle" scoreType="computed" />
+							</term>
+						</left>
+						<greater-than />
+						<right>
+							<term>
+								<constant value="0" />
+							</term>
+						</right>
+					</condition>
+					<result>
 						<term>
-							<goalRef goal="m02_crane_lowered" scoreType="computed" />
+							<constant value="10" />
 						</term>
-						<term>
-							<goalRef goal="m02_independent_supported"
-								scoreType="computed" />
-						</term>
-						<term>
-							<goalRef goal="m02_blue_circle" scoreType="computed" />
-						</term>
-					</left>
-					<greater-than />
-					<right>
-						<constant value="0" />
-					</right>
+					</result>
 				</case>
-				<result>
-					<constant value="10" />
-				</result>
 				<default>
-					<constant value="0" />
+					<term>
+						<constant value="0" />
+					</term>
 				</default>
 			</switch>
 		</computedGoal>
@@ -196,21 +219,30 @@ only by the Robot"
 			title="Small Inspection Area Bonus - M03" category="Bonus">
 			<switch>
 				<case>
-					<left>
+					<condition>
+						<left>
+							<term>
+								<goalRef goal="m03_inspection_drone"
+									scoreType="computed" />
+							</term>
+						</left>
+						<greater-than />
+						<right>
+							<term>
+								<constant value="0" />
+							</term>
+						</right>
+					</condition>
+					<result>
 						<term>
-							<goalRef goal="m03_inspection_drone" scoreType="computed" />
+							<constant value="5" />
 						</term>
-					</left>
-					<greater-than />
-					<right>
-						<constant value="0" />
-					</right>
+					</result>
 				</case>
-				<result>
-					<constant value="5" />
-				</result>
 				<default>
-					<constant value="0" />
+					<term>
+						<constant value="0" />
+					</term>
 				</default>
 			</switch>
 		</computedGoal>
@@ -219,21 +251,29 @@ only by the Robot"
 			title="Small Inspection Area Bonus - M04" category="Bonus">
 			<switch>
 				<case>
-					<left>
+					<condition>
+						<left>
+							<term>
+								<goalRef goal="m04_crater_crossing" scoreType="computed" />
+							</term>
+						</left>
+						<greater-than />
+						<right>
+							<term>
+								<constant value="0" />
+							</term>
+						</right>
+					</condition>
+					<result>
 						<term>
-							<goalRef goal="m04_crater_crossing" scoreType="computed" />
+							<constant value="5" />
 						</term>
-					</left>
-					<greater-than />
-					<right>
-						<constant value="0" />
-					</right>
+					</result>
 				</case>
-				<result>
-					<constant value="5" />
-				</result>
 				<default>
-					<constant value="0" />
+					<term>
+						<constant value="0" />
+					</term>
 				</default>
 			</switch>
 		</computedGoal>
@@ -242,26 +282,34 @@ only by the Robot"
 			title="Small Inspection Area Bonus - M05" category="Bonus">
 			<switch>
 				<case>
-					<left>
+					<condition>
+						<left>
+							<term>
+								<goalRef goal="m05_treehouse_large_branches"
+									scoreType="computed" />
+							</term>
+							<term>
+								<goalRef goal="m05_treehouse_small_branches"
+									scoreType="computed" />
+							</term>
+						</left>
+						<greater-than />
+						<right>
+							<term>
+								<constant value="0" />
+							</term>
+						</right>
+					</condition>
+					<result>
 						<term>
-							<goalRef goal="m05_treehouse_large_branches"
-								scoreType="computed" />
+							<constant value="5" />
 						</term>
-						<term>
-							<goalRef goal="m05_treehouse_small_branches"
-								scoreType="computed" />
-						</term>
-					</left>
-					<greater-than />
-					<right>
-						<constant value="0" />
-					</right>
+					</result>
 				</case>
-				<result>
-					<constant value="5" />
-				</result>
 				<default>
-					<constant value="0" />
+					<term>
+						<constant value="0" />
+					</term>
 				</default>
 			</switch>
 		</computedGoal>
@@ -271,21 +319,29 @@ only by the Robot"
 			title="Small Inspection Area Bonus - M06" category="Bonus">
 			<switch>
 				<case>
-					<left>
+					<condition>
+						<left>
+							<term>
+								<goalRef goal="m06_traffic_jam" scoreType="computed" />
+							</term>
+						</left>
+						<greater-than />
+						<right>
+							<term>
+								<constant value="0" />
+							</term>
+						</right>
+					</condition>
+					<result>
 						<term>
-							<goalRef goal="m06_traffic_jam" scoreType="computed" />
+							<constant value="5" />
 						</term>
-					</left>
-					<greater-than />
-					<right>
-						<constant value="0" />
-					</right>
+					</result>
 				</case>
-				<result>
-					<constant value="5" />
-				</result>
 				<default>
-					<constant value="0" />
+					<term>
+						<constant value="0" />
+					</term>
 				</default>
 			</switch>
 		</computedGoal>
@@ -295,21 +351,29 @@ only by the Robot"
 			title="Small Inspection Area Bonus - M07" category="Bonus">
 			<switch>
 				<case>
-					<left>
+					<condition>
+						<left>
+							<term>
+								<goalRef goal="m07_swing" scoreType="computed" />
+							</term>
+						</left>
+						<greater-than />
+						<right>
+							<term>
+								<constant value="0" />
+							</term>
+						</right>
+					</condition>
+					<result>
 						<term>
-							<goalRef goal="m07_swing" scoreType="computed" />
+							<constant value="5" />
 						</term>
-					</left>
-					<greater-than />
-					<right>
-						<constant value="0" />
-					</right>
+					</result>
 				</case>
-				<result>
-					<constant value="5" />
-				</result>
 				<default>
-					<constant value="0" />
+					<term>
+						<constant value="0" />
+					</term>
 				</default>
 			</switch>
 		</computedGoal>
@@ -318,21 +382,29 @@ only by the Robot"
 			title="Small Inspection Area Bonus - M08" category="Bonus">
 			<switch>
 				<case>
-					<left>
+					<condition>
+						<left>
+							<term>
+								<goalRef goal="m08_elevator" scoreType="computed" />
+							</term>
+						</left>
+						<greater-than />
+						<right>
+							<term>
+								<constant value="0" />
+							</term>
+						</right>
+					</condition>
+					<result>
 						<term>
-							<goalRef goal="m08_elevator" scoreType="computed" />
+							<constant value="5" />
 						</term>
-					</left>
-					<greater-than />
-					<right>
-						<constant value="0" />
-					</right>
+					</result>
 				</case>
-				<result>
-					<constant value="5" />
-				</result>
 				<default>
-					<constant value="0" />
+					<term>
+						<constant value="0" />
+					</term>
 				</default>
 			</switch>
 		</computedGoal>
@@ -341,21 +413,29 @@ only by the Robot"
 			title="Small Inspection Area Bonus - M09" category="Bonus">
 			<switch>
 				<case>
-					<left>
+					<condition>
+						<left>
+							<term>
+								<goalRef goal="m09_safety_factor" scoreType="computed" />
+							</term>
+						</left>
+						<greater-than />
+						<right>
+							<term>
+								<constant value="0" />
+							</term>
+						</right>
+					</condition>
+					<result>
 						<term>
-							<goalRef goal="m09_safety_factor" scoreType="computed" />
+							<constant value="5" />
 						</term>
-					</left>
-					<greater-than />
-					<right>
-						<constant value="0" />
-					</right>
+					</result>
 				</case>
-				<result>
-					<constant value="5" />
-				</result>
 				<default>
-					<constant value="0" />
+					<term>
+						<constant value="0" />
+					</term>
 				</default>
 			</switch>
 		</computedGoal>
@@ -364,22 +444,30 @@ only by the Robot"
 			title="Small Inspection Area Bonus - M10" category="Bonus">
 			<switch>
 				<case>
-					<left>
+					<condition>
+						<left>
+							<term>
+								<goalRef goal="m10_steel_construction"
+									scoreType="computed" />
+							</term>
+						</left>
+						<greater-than />
+						<right>
+							<term>
+								<constant value="0" />
+							</term>
+						</right>
+					</condition>
+					<result>
 						<term>
-							<goalRef goal="m10_steel_construction"
-								scoreType="computed" />
+							<constant value="5" />
 						</term>
-					</left>
-					<greater-than />
-					<right>
-						<constant value="0" />
-					</right>
+					</result>
 				</case>
-				<result>
-					<constant value="5" />
-				</result>
 				<default>
-					<constant value="0" />
+					<term>
+						<constant value="0" />
+					</term>
 				</default>
 			</switch>
 		</computedGoal>
@@ -388,22 +476,30 @@ only by the Robot"
 			title="Small Inspection Area Bonus - M11" category="Bonus">
 			<switch>
 				<case>
-					<left>
+					<condition>
+						<left>
+							<term>
+								<goalRef goal="m11_innovative_structure"
+									scoreType="computed" />
+							</term>
+						</left>
+						<greater-than />
+						<right>
+							<term>
+								<constant value="0" />
+							</term>
+						</right>
+					</condition>
+					<result>
 						<term>
-							<goalRef goal="m11_innovative_structure"
-								scoreType="computed" />
+							<constant value="5" />
 						</term>
-					</left>
-					<greater-than />
-					<right>
-						<constant value="0" />
-					</right>
+					</result>
 				</case>
-				<result>
-					<constant value="5" />
-				</result>
 				<default>
-					<constant value="0" />
+					<term>
+						<constant value="0" />
+					</term>
 				</default>
 			</switch>
 		</computedGoal>
@@ -412,24 +508,32 @@ only by the Robot"
 			title="Small Inspection Area Bonus - M12" category="Bonus">
 			<switch>
 				<case>
-					<left>
+					<condition>
+						<left>
+							<term>
+								<goalRef goal="m12_circles" scoreType="computed" />
+							</term>
+							<term>
+								<goalRef goal="m12_levels" scoreType="computed" />
+							</term>
+						</left>
+						<greater-than />
+						<right>
+							<term>
+								<constant value="0" />
+							</term>
+						</right>
+					</condition>
+					<result>
 						<term>
-							<goalRef goal="m12_circles" scoreType="computed" />
+							<constant value="5" />
 						</term>
-						<term>
-							<goalRef goal="m12_levels" scoreType="computed" />
-						</term>
-					</left>
-					<greater-than />
-					<right>
-						<constant value="0" />
-					</right>
+					</result>
 				</case>
-				<result>
-					<constant value="5" />
-				</result>
 				<default>
-					<constant value="0" />
+					<term>
+						<constant value="0" />
+					</term>
 				</default>
 			</switch>
 		</computedGoal>
@@ -438,22 +542,30 @@ only by the Robot"
 			title="Small Inspection Area Bonus - M13" category="Bonus">
 			<switch>
 				<case>
-					<left>
+					<condition>
+						<left>
+							<term>
+								<goalRef goal="m13_sustainability_upgrades"
+									scoreType="computed" />
+							</term>
+						</left>
+						<greater-than />
+						<right>
+							<term>
+								<constant value="0" />
+							</term>
+						</right>
+					</condition>
+					<result>
 						<term>
-							<goalRef goal="m13_sustainability_upgrades"
-								scoreType="computed" />
+							<constant value="5" />
 						</term>
-					</left>
-					<greater-than />
-					<right>
-						<constant value="0" />
-					</right>
+					</result>
 				</case>
-				<result>
-					<constant value="5" />
-				</result>
 				<default>
-					<constant value="0" />
+					<term>
+						<constant value="0" />
+					</term>
 				</default>
 			</switch>
 		</computedGoal>
