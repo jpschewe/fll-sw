@@ -112,9 +112,10 @@ only by the Robot"
 			min="0" max="28" multiplier="5" category="M12" />
 
 		<!-- cannot score levels without circles -->
-		<restriction lowerBound="1" upperBound="100"
-			message="Cannot score in the levels without units in circles">
+		<restriction lowerBound="0" upperBound="10000"
+			message="Cannot score levels without units in circles">
 			<term>
+				<constant value="100" />
 				<goalRef goal="m12_circles" scoreType="raw" />
 			</term>
 			<term>
