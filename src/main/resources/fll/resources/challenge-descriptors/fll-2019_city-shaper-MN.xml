@@ -58,11 +58,20 @@ only by the Robot"
 		</goal>
 
 		<goal initialValue="0" name="m05_treehouse_small_branches"
-			title="M05 - Treehouse - Small Branches" min="0" max="1"
+			title="M05 - Treehouse - Small Branches" min="0" max="16"
 			multiplier="15" category="M05">
 		</goal>
 
-		<!-- FIXME add restriction for units on M05 -->
+		<restriction lowerBound="0" upperBound="16"
+			message="There are only 16 units">
+			<term>
+				<goalRef goal="m05_treehouse_large_branches" scoreType="raw" />
+			</term>
+			<term>
+				<goalRef goal="m05_treehouse_small_branches" scoreType="raw" />
+			</term>
+		</restriction>
+
 
 		<goal initialValue="0" name="m06_traffic_jam"
 			title="M06 - Traffic Jam - Lifted" category="M06" min="0" max="1"
