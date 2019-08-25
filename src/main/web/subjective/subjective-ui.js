@@ -624,8 +624,6 @@ function addEventsToSlider(goal, ranges) {
 
   slider.on("change", function() {
     var value = slider.val();
-    $.subjective.log("change value for " + sliderId + ": " + value);
-
     highlightRubric(goal, ranges, value);
 
     recomputeTotal();
