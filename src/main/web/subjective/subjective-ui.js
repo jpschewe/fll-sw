@@ -646,8 +646,10 @@ function createScoreRows(table, totalColumns, goal, subscore) {
 
 /**
  * 
- * @param table where to put the information
- * @param hidden true if the row should be hidden
+ * @param table
+ *          where to put the information
+ * @param hidden
+ *          true if the row should be hidden
  * @returns total number of columns to represent all scores in the rubric ranges
  */
 function populateEnterScoreRubricTitles(table, hidden) {
@@ -659,10 +661,10 @@ function populateEnterScoreRubricTitles(table, hidden) {
   var totalColumns = 0;
 
   var row = $("<tr></tr>");
-  if(hidden) {
+  if (hidden) {
     row.addClass('hidden');
   }
-  
+
   $.each(ranges, function(index, range) {
     var numColumns = range.max - range.min + 1;
     var cell = $("<th colspan='" + numColumns + "'>" + range.title + "</th>");
@@ -701,7 +703,7 @@ $(document).on(
       var headerTable = $("#enter-score_score-table_header");
       headerTable.empty();
       populateEnterScoreRubricTitles(headerTable, false)
-      
+
       var prevCategory = null;
       $.each($.subjective.getCurrentCategory().goals, function(index, goal) {
         if (goal.enumerated) {
@@ -1009,10 +1011,8 @@ function displayTournamentName(displayElement) {
   displayElement.text("Tournament: " + tournamentName);
 }
 
-
-window.onbeforeunload = function ()
-{
+window.onbeforeunload = function() {
   // most browsers won't show the custom message, but we can try
   // returning anything other than undefined will cause the user to be prompted
-    return "Are you sure you want to leave?";
+  return "Are you sure you want to leave?";
 };
