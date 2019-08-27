@@ -252,7 +252,11 @@ public class SubjectivePdfWriter {
     columnTitlesTable.addCell(createCell("", f10b, NO_BORDERS)); // goal group
 
     for (final String title : rubricRangeTitles) {
-      columnTitlesTable.addCell(createCell(title, f10b, NO_BORDERS));
+      if (null == title) {
+        columnTitlesTable.addCell(createCell("", f10b, NO_BORDERS));
+      } else {
+        columnTitlesTable.addCell(createCell(title, f10b, NO_BORDERS));
+      }
     }
     columnTitlesTable.setSpacingAfter(3);
 
