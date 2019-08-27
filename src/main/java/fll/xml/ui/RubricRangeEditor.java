@@ -18,11 +18,7 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import org.apache.commons.lang3.StringUtils;
-
-
 import fll.util.FormatterUtils;
-
 import fll.util.TextAreaEditor;
 import fll.xml.RubricRange;
 
@@ -200,12 +196,8 @@ public final class RubricRangeEditor extends JPanel implements Validatable {
   public boolean checkValidity(final Collection<String> messagesToDisplay) {
     final List<String> messages = new LinkedList<>();
 
-    if (StringUtils.isBlank(mTitle.getText())) {
-      messages.add("The rubric range must have a title");
-    }
-
-    if (getRange().getMin() >= getRange().getMax()) {
-      messages.add("Minimum value must be less than maximum value");
+    if (getRange().getMin() > getRange().getMax()) {
+      messages.add("Minimum value must be less than or equal to maximum value");
     }
 
     if (!messages.isEmpty()) {
