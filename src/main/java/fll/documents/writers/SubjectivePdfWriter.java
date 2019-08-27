@@ -398,8 +398,13 @@ public class SubjectivePdfWriter {
       // These are the cells with the descriptions for each level of
       // accomplishment
       for (final RubricRange rubricRange : rowElement.getSortedRubricRanges()) {
-        final String shortDescription = rubricRange.getShortDescription().trim().replaceAll("\\s+", " ");
-        table.addCell(createCell(shortDescription, font, NO_TOP_BOTTOM));
+        final String rawShortDescription = rubricRange.getShortDescription();
+        if (null == rawShortDescription) {
+          table.addCell(createCell("", font, NO_TOP_BOTTOM));
+        } else {
+          final String shortDescription = rawShortDescription.trim().replaceAll("\\s+", " ");
+          table.addCell(createCell(shortDescription, font, NO_TOP_BOTTOM));
+        }
       }
     }
   }
