@@ -1,3 +1,4 @@
+* #758 - Allow rubric ranges to not have titles - this is needed for "ND"
 * #752 - update subjective sheet writer code to handle "ND" being part of the challenge description rubric
 * #751 - remove duplicated headers in subjective web application
 * #706 - Allow one to choose which award groups are on each scoreboard display

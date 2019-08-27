@@ -233,7 +233,13 @@
             <xsd:attribute
               name="title"
               type="xsd:string"
-              use="required" />
+              use="optional">
+              <xsd:annotation>
+              <xsd:documentation>
+              The title should always be specified. However there are some instances such as "ND" where a title is not desired.
+              </xsd:documentation>
+              </xsd:annotation>
+              </xsd:attribute>
             <xsd:attribute
               name="min"
               type="xsd:nonNegativeInteger"

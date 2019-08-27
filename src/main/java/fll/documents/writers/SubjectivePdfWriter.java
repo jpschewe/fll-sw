@@ -249,11 +249,14 @@ public class SubjectivePdfWriter {
     columnTitlesTable.setSpacingBefore(5);
     columnTitlesTable.setWidthPercentage(100f);
     columnTitlesTable.setWidths(colWidths);
-    columnTitlesTable.addCell(createCell("", f10b, NO_BORDERS));
-    columnTitlesTable.addCell(createCell("", f10b, NO_BORDERS));
+    columnTitlesTable.addCell(createCell("", f10b, NO_BORDERS)); // goal group
 
     for (final String title : rubricRangeTitles) {
-      columnTitlesTable.addCell(createCell(title, f10b, NO_BORDERS));
+      if (null == title) {
+        columnTitlesTable.addCell(createCell("", f10b, NO_BORDERS));
+      } else {
+        columnTitlesTable.addCell(createCell(title, f10b, NO_BORDERS));
+      }
     }
     columnTitlesTable.setSpacingAfter(3);
 
@@ -398,8 +401,13 @@ public class SubjectivePdfWriter {
       // These are the cells with the descriptions for each level of
       // accomplishment
       for (final RubricRange rubricRange : rowElement.getSortedRubricRanges()) {
-        final String shortDescription = rubricRange.getShortDescription().trim().replaceAll("\\s+", " ");
-        table.addCell(createCell(shortDescription, font, NO_TOP_BOTTOM));
+        final String rawShortDescription = rubricRange.getShortDescription();
+        if (null == rawShortDescription) {
+          table.addCell(createCell("", font, NO_TOP_BOTTOM));
+        } else {
+          final String shortDescription = rawShortDescription.trim().replaceAll("\\s+", " ");
+          table.addCell(createCell(shortDescription, font, NO_TOP_BOTTOM));
+        }
       }
     }
   }
