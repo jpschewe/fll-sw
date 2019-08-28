@@ -223,7 +223,7 @@ public class RubricRange implements Serializable {
    * @return an XML element with the information from this range
    */
   public Element toXml(final Document doc) {
-    if (mMin >= mMax) {
+    if (mMin > mMax) {
       throw new FLLRuntimeException("Minimum value must be less than maximum value");
     }
 
