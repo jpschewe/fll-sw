@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <fll title="2019 Minnesota FIRST LEGO League - City Shaper"
 	copyright="2010 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST) and The LEGO Group. Used by special permission. All rights reserved."
-	revision="1" schemaVersion="2">
+	revision="2" schemaVersion="2">
 
 	<Performance minimumScore="0" weight="1">
 
@@ -11,10 +11,21 @@
 		</goal>
 
 		<goal initialValue="0" name="m01_flags"
-			title="M01 - Elevated places - Number of flags that are clearly raised any distance,
-only by the Robot"
+			title="M01 - Elevated places - Number of flags that are clearly raised any distance, only by the Robot"
 			min="0" max="2" multiplier="15" category="M01">
 		</goal>
+
+		<restriction lowerBound="0" upperBound="2"
+			message="Cannot score flags without bridge">
+			<term>
+				<constant value="2" />
+				<goalRef goal="m01_robot_bridge" scoreType="raw" />
+			</term>
+			<term>
+				<constant value="-1" />
+				<goalRef goal="m01_flags" scoreType="raw" />
+			</term>
+		</restriction>
 
 		<goal initialValue="0" name="m02_crane_lowered"
 			title="M02 - Crane - Lowered from the Guide Hole" min="0" max="1"
@@ -44,11 +55,11 @@ only by the Robot"
 
 
 		<goal initialValue="0" name="m03_inspection_drone"
-			title="M03 - Inspection Drone - supported by axel" category="M03"
+			title="M03 - Inspection Drone - supported by Axel A" category="M03"
 			min="0" max="1" multiplier="10" />
 
 		<goal initialValue="0" name="m04_crater_crossing"
-			title="M04 - Design for Wildlife - Bat supported by Branch" min="0"
+			title="M04 - Design for Wildlife - Bat supported by Branch B" min="0"
 			max="1" multiplier="10" category="M04">
 		</goal>
 
@@ -74,8 +85,8 @@ only by the Robot"
 
 
 		<goal initialValue="0" name="m06_traffic_jam"
-			title="M06 - Traffic Jam - Lifted" category="M06" min="0" max="1"
-			multiplier="10" />
+			title="M06 - Traffic Jam - Lifted and Independent" category="M06"
+			min="0" max="1" multiplier="10" />
 
 
 		<goal initialValue="0" name="m07_swing"
@@ -112,9 +123,19 @@ only by the Robot"
 		</goal>
 
 
-		<goal initialValue="0" name="m12_circles"
-			title="M012 - Color matching units in Circle" category="M12" min="0"
-			max="7" multiplier="10">
+		<goal initialValue="0" name="m12_circles_red"
+			title="M012 - Color matching units in Circle Red" category="M12"
+			min="0" max="1" multiplier="10">
+		</goal>
+
+		<goal initialValue="0" name="m12_circles_tan"
+			title="M012 - Color matching units in Circle Tan" category="M12"
+			min="0" max="1" multiplier="10">
+		</goal>
+
+		<goal initialValue="0" name="m12_circles_white"
+			title="M012 - Color matching units in Circle White" category="M12"
+			min="0" max="1" multiplier="10">
 		</goal>
 
 		<goal name="m12_levels" title="M12 - Levels" initialValue="0"
