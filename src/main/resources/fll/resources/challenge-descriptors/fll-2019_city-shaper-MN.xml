@@ -145,9 +145,17 @@
 		<restriction lowerBound="0" upperBound="10000"
 			message="Cannot score levels without units in circles">
 			<term>
-				<constant value="100" />
-				<goalRef goal="m12_circles" scoreType="raw" />
+				<constant value="30" />
+				<goalRef goal="m12_circles_red" scoreType="raw" />
 			</term>
+            <term>
+                <constant value="30" />
+                <goalRef goal="m12_circles_tan" scoreType="raw" />
+            </term>
+            <term>
+                <constant value="30" />
+                <goalRef goal="m12_circles_white" scoreType="raw" />
+            </term>
 			<term>
 				<constant value="-1" />
 				<goalRef goal="m12_levels" scoreType="raw" />
@@ -542,8 +550,14 @@
 					<condition>
 						<left>
 							<term>
-								<goalRef goal="m12_circles" scoreType="computed" />
+								<goalRef goal="m12_circles_red" scoreType="computed" />
 							</term>
+                            <term>
+                                <goalRef goal="m12_circles_tan" scoreType="computed" />
+                            </term>
+                            <term>
+                                <goalRef goal="m12_circles_white" scoreType="computed" />
+                            </term>
 							<term>
 								<goalRef goal="m12_levels" scoreType="computed" />
 							</term>
