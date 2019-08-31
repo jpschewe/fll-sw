@@ -220,6 +220,7 @@ distributions {
                 // web elements
             from(project.web_build_dir) {
                 into 'web'
+                exclude '**/WEB-INF/flldb*'
             }
             
             // documentation
@@ -365,6 +366,22 @@ distTar.dependsOn createDatabaseDiagram
 launch4j {
         mainClassName = project.mainClassName
         icon = "${projectDir}/src/main/resources/fll/resources/fll-sw.ico"
+        
+        dontWrapJar = true
+        errTitle = "FLL-SW"
+        classpath = ["%EXEDIR%/classes", "%EXEDIR%/lib/*.jar"]
+
+        maxHeapPercent = 75        
+        
+        fileDescription = "FIRST Lego League Scoring Software"
+        productName = "FLL-SW"
+        copyright = "GPL"
+        
+/* for debugging classpath information        
+        headerType = "console"
+        jvmOptions = ["-Dlog4j2.debug=true"]
+        */
+        
 }
 distZip.dependsOn createExe
 distTar.dependsOn createExe

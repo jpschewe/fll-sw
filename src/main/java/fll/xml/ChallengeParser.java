@@ -564,6 +564,8 @@ public final class ChallengeParser {
    *         software
    */
   public static Collection<URL> getAllKnownChallengeDescriptorURLs() {
+    LOGGER.debug("Top of getAllKnownChallengeDescriptorURLs");
+
     final String baseDir = "fll/resources/challenge-descriptors/";
 
     final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -573,8 +575,12 @@ public final class ChallengeParser {
       return Collections.emptyList();
     }
 
+    LOGGER.debug("Found challenge descriptors directory as {}", directory);
+
     final Collection<URL> urls = new LinkedList<>();
     if ("file".equals(directory.getProtocol())) {
+      LOGGER.debug("Using file protocol");
+
       try {
         final URI uri = directory.toURI();
         final File fileDir = new File(uri);
@@ -597,9 +603,12 @@ public final class ChallengeParser {
             + e.getMessage(), e);
       }
     } else if (directory.getProtocol().equals("jar")) {
+      LOGGER.debug("Using jar protocol");
+
       final CodeSource src = XMLUtils.class.getProtectionDomain().getCodeSource();
       if (null != src) {
         final URL jar = src.getLocation();
+        LOGGER.debug("src location {}", jar);
 
         try (JarInputStream zip = new JarInputStream(jar.openStream())) {
           JarEntry ze = null;
