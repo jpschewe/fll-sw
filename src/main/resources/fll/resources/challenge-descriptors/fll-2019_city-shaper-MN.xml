@@ -5,6 +5,9 @@
 
 	<Performance minimumScore="0" weight="1">
 
+		<goal name="small_inspection_area"
+			title="Fit in Small Inspection Area" min="0" max="1" multiplier="0" />
+
 		<goal initialValue="0" name="m01_robot_bridge"
 			title="M01 - Elevated places - Robot is Supported by the Bridge"
 			min="0" max="1" multiplier="20" category="M01">
@@ -188,10 +191,7 @@
 					<condition>
 						<left>
 							<term>
-								<goalRef goal="m01_robot_bridge" scoreType="computed" />
-							</term>
-							<term>
-								<goalRef goal="m01_flags" scoreType="computed" />
+								<goalRef goal="small_inspection_area" scoreType="raw" />
 							</term>
 						</left>
 						<greater-than />
@@ -201,11 +201,36 @@
 							</term>
 						</right>
 					</condition>
-					<result>
-						<term>
-							<constant value="5" />
-						</term>
-					</result>
+					<switch>
+						<case>
+							<condition>
+								<left>
+									<term>
+										<goalRef goal="m01_robot_bridge" scoreType="computed" />
+									</term>
+									<term>
+										<goalRef goal="m01_flags" scoreType="computed" />
+									</term>
+								</left>
+								<greater-than />
+								<right>
+									<term>
+										<constant value="0" />
+									</term>
+								</right>
+							</condition>
+							<result>
+								<term>
+									<constant value="5" />
+								</term>
+							</result>
+						</case>
+						<default>
+							<term>
+								<constant value="0" />
+							</term>
+						</default>
+					</switch>
 				</case>
 				<default>
 					<term>
@@ -213,6 +238,7 @@
 					</term>
 				</default>
 			</switch>
+
 		</computedGoal>
 
 
@@ -223,14 +249,7 @@
 					<condition>
 						<left>
 							<term>
-								<goalRef goal="m02_crane_lowered" scoreType="computed" />
-							</term>
-							<term>
-								<goalRef goal="m02_independent_supported"
-									scoreType="computed" />
-							</term>
-							<term>
-								<goalRef goal="m02_blue_circle" scoreType="computed" />
+								<goalRef goal="small_inspection_area" scoreType="raw" />
 							</term>
 						</left>
 						<greater-than />
@@ -240,11 +259,40 @@
 							</term>
 						</right>
 					</condition>
-					<result>
-						<term>
-							<constant value="10" />
-						</term>
-					</result>
+					<switch>
+						<case>
+							<condition>
+								<left>
+									<term>
+										<goalRef goal="m02_crane_lowered" scoreType="computed" />
+									</term>
+									<term>
+										<goalRef goal="m02_independent_supported"
+											scoreType="computed" />
+									</term>
+									<term>
+										<goalRef goal="m02_blue_circle" scoreType="computed" />
+									</term>
+								</left>
+								<greater-than />
+								<right>
+									<term>
+										<constant value="0" />
+									</term>
+								</right>
+							</condition>
+							<result>
+								<term>
+									<constant value="10" />
+								</term>
+							</result>
+						</case>
+						<default>
+							<term>
+								<constant value="0" />
+							</term>
+						</default>
+					</switch>
 				</case>
 				<default>
 					<term>
@@ -261,8 +309,7 @@
 					<condition>
 						<left>
 							<term>
-								<goalRef goal="m03_inspection_drone"
-									scoreType="computed" />
+								<goalRef goal="small_inspection_area" scoreType="raw" />
 							</term>
 						</left>
 						<greater-than />
@@ -272,11 +319,34 @@
 							</term>
 						</right>
 					</condition>
-					<result>
-						<term>
-							<constant value="5" />
-						</term>
-					</result>
+					<switch>
+						<case>
+							<condition>
+								<left>
+									<term>
+										<goalRef goal="m03_inspection_drone"
+											scoreType="computed" />
+									</term>
+								</left>
+								<greater-than />
+								<right>
+									<term>
+										<constant value="0" />
+									</term>
+								</right>
+							</condition>
+							<result>
+								<term>
+									<constant value="5" />
+								</term>
+							</result>
+						</case>
+						<default>
+							<term>
+								<constant value="0" />
+							</term>
+						</default>
+					</switch>
 				</case>
 				<default>
 					<term>
@@ -293,7 +363,7 @@
 					<condition>
 						<left>
 							<term>
-								<goalRef goal="m04_crater_crossing" scoreType="computed" />
+								<goalRef goal="small_inspection_area" scoreType="raw" />
 							</term>
 						</left>
 						<greater-than />
@@ -303,11 +373,34 @@
 							</term>
 						</right>
 					</condition>
-					<result>
-						<term>
-							<constant value="5" />
-						</term>
-					</result>
+					<switch>
+						<case>
+							<condition>
+								<left>
+									<term>
+										<goalRef goal="m04_crater_crossing"
+											scoreType="computed" />
+									</term>
+								</left>
+								<greater-than />
+								<right>
+									<term>
+										<constant value="0" />
+									</term>
+								</right>
+							</condition>
+							<result>
+								<term>
+									<constant value="5" />
+								</term>
+							</result>
+						</case>
+						<default>
+							<term>
+								<constant value="0" />
+							</term>
+						</default>
+					</switch>
 				</case>
 				<default>
 					<term>
@@ -324,12 +417,7 @@
 					<condition>
 						<left>
 							<term>
-								<goalRef goal="m05_treehouse_large_branches"
-									scoreType="computed" />
-							</term>
-							<term>
-								<goalRef goal="m05_treehouse_small_branches"
-									scoreType="computed" />
+								<goalRef goal="small_inspection_area" scoreType="raw" />
 							</term>
 						</left>
 						<greater-than />
@@ -339,11 +427,38 @@
 							</term>
 						</right>
 					</condition>
-					<result>
-						<term>
-							<constant value="5" />
-						</term>
-					</result>
+					<switch>
+						<case>
+							<condition>
+								<left>
+									<term>
+										<goalRef goal="m05_treehouse_large_branches"
+											scoreType="computed" />
+									</term>
+									<term>
+										<goalRef goal="m05_treehouse_small_branches"
+											scoreType="computed" />
+									</term>
+								</left>
+								<greater-than />
+								<right>
+									<term>
+										<constant value="0" />
+									</term>
+								</right>
+							</condition>
+							<result>
+								<term>
+									<constant value="5" />
+								</term>
+							</result>
+						</case>
+						<default>
+							<term>
+								<constant value="0" />
+							</term>
+						</default>
+					</switch>
 				</case>
 				<default>
 					<term>
@@ -361,7 +476,7 @@
 					<condition>
 						<left>
 							<term>
-								<goalRef goal="m06_traffic_jam" scoreType="computed" />
+								<goalRef goal="small_inspection_area" scoreType="raw" />
 							</term>
 						</left>
 						<greater-than />
@@ -371,11 +486,33 @@
 							</term>
 						</right>
 					</condition>
-					<result>
-						<term>
-							<constant value="5" />
-						</term>
-					</result>
+					<switch>
+						<case>
+							<condition>
+								<left>
+									<term>
+										<goalRef goal="m06_traffic_jam" scoreType="computed" />
+									</term>
+								</left>
+								<greater-than />
+								<right>
+									<term>
+										<constant value="0" />
+									</term>
+								</right>
+							</condition>
+							<result>
+								<term>
+									<constant value="5" />
+								</term>
+							</result>
+						</case>
+						<default>
+							<term>
+								<constant value="0" />
+							</term>
+						</default>
+					</switch>
 				</case>
 				<default>
 					<term>
@@ -393,7 +530,7 @@
 					<condition>
 						<left>
 							<term>
-								<goalRef goal="m07_swing" scoreType="computed" />
+								<goalRef goal="small_inspection_area" scoreType="raw" />
 							</term>
 						</left>
 						<greater-than />
@@ -403,11 +540,33 @@
 							</term>
 						</right>
 					</condition>
-					<result>
-						<term>
-							<constant value="5" />
-						</term>
-					</result>
+					<switch>
+						<case>
+							<condition>
+								<left>
+									<term>
+										<goalRef goal="m07_swing" scoreType="computed" />
+									</term>
+								</left>
+								<greater-than />
+								<right>
+									<term>
+										<constant value="0" />
+									</term>
+								</right>
+							</condition>
+							<result>
+								<term>
+									<constant value="5" />
+								</term>
+							</result>
+						</case>
+						<default>
+							<term>
+								<constant value="0" />
+							</term>
+						</default>
+					</switch>
 				</case>
 				<default>
 					<term>
@@ -424,7 +583,7 @@
 					<condition>
 						<left>
 							<term>
-								<goalRef goal="m08_elevator" scoreType="computed" />
+								<goalRef goal="small_inspection_area" scoreType="raw" />
 							</term>
 						</left>
 						<greater-than />
@@ -434,11 +593,33 @@
 							</term>
 						</right>
 					</condition>
-					<result>
-						<term>
-							<constant value="5" />
-						</term>
-					</result>
+					<switch>
+						<case>
+							<condition>
+								<left>
+									<term>
+										<goalRef goal="m08_elevator" scoreType="computed" />
+									</term>
+								</left>
+								<greater-than />
+								<right>
+									<term>
+										<constant value="0" />
+									</term>
+								</right>
+							</condition>
+							<result>
+								<term>
+									<constant value="5" />
+								</term>
+							</result>
+						</case>
+						<default>
+							<term>
+								<constant value="0" />
+							</term>
+						</default>
+					</switch>
 				</case>
 				<default>
 					<term>
@@ -455,7 +636,7 @@
 					<condition>
 						<left>
 							<term>
-								<goalRef goal="m09_safety_factor" scoreType="computed" />
+								<goalRef goal="small_inspection_area" scoreType="raw" />
 							</term>
 						</left>
 						<greater-than />
@@ -465,11 +646,33 @@
 							</term>
 						</right>
 					</condition>
-					<result>
-						<term>
-							<constant value="5" />
-						</term>
-					</result>
+					<switch>
+						<case>
+							<condition>
+								<left>
+									<term>
+										<goalRef goal="m09_safety_factor" scoreType="computed" />
+									</term>
+								</left>
+								<greater-than />
+								<right>
+									<term>
+										<constant value="0" />
+									</term>
+								</right>
+							</condition>
+							<result>
+								<term>
+									<constant value="5" />
+								</term>
+							</result>
+						</case>
+						<default>
+							<term>
+								<constant value="0" />
+							</term>
+						</default>
+					</switch>
 				</case>
 				<default>
 					<term>
@@ -486,8 +689,7 @@
 					<condition>
 						<left>
 							<term>
-								<goalRef goal="m10_steel_construction"
-									scoreType="computed" />
+								<goalRef goal="small_inspection_area" scoreType="raw" />
 							</term>
 						</left>
 						<greater-than />
@@ -497,11 +699,34 @@
 							</term>
 						</right>
 					</condition>
-					<result>
-						<term>
-							<constant value="5" />
-						</term>
-					</result>
+					<switch>
+						<case>
+							<condition>
+								<left>
+									<term>
+										<goalRef goal="m10_steel_construction"
+											scoreType="computed" />
+									</term>
+								</left>
+								<greater-than />
+								<right>
+									<term>
+										<constant value="0" />
+									</term>
+								</right>
+							</condition>
+							<result>
+								<term>
+									<constant value="5" />
+								</term>
+							</result>
+						</case>
+						<default>
+							<term>
+								<constant value="0" />
+							</term>
+						</default>
+					</switch>
 				</case>
 				<default>
 					<term>
@@ -518,8 +743,7 @@
 					<condition>
 						<left>
 							<term>
-								<goalRef goal="m11_innovative_structure"
-									scoreType="computed" />
+								<goalRef goal="small_inspection_area" scoreType="raw" />
 							</term>
 						</left>
 						<greater-than />
@@ -529,11 +753,34 @@
 							</term>
 						</right>
 					</condition>
-					<result>
-						<term>
-							<constant value="5" />
-						</term>
-					</result>
+					<switch>
+						<case>
+							<condition>
+								<left>
+									<term>
+										<goalRef goal="m11_innovative_structure"
+											scoreType="computed" />
+									</term>
+								</left>
+								<greater-than />
+								<right>
+									<term>
+										<constant value="0" />
+									</term>
+								</right>
+							</condition>
+							<result>
+								<term>
+									<constant value="5" />
+								</term>
+							</result>
+						</case>
+						<default>
+							<term>
+								<constant value="0" />
+							</term>
+						</default>
+					</switch>
 				</case>
 				<default>
 					<term>
@@ -550,16 +797,7 @@
 					<condition>
 						<left>
 							<term>
-								<goalRef goal="m12_circles_red" scoreType="computed" />
-							</term>
-							<term>
-								<goalRef goal="m12_circles_tan" scoreType="computed" />
-							</term>
-							<term>
-								<goalRef goal="m12_circles_white" scoreType="computed" />
-							</term>
-							<term>
-								<goalRef goal="m12_levels" scoreType="computed" />
+								<goalRef goal="small_inspection_area" scoreType="raw" />
 							</term>
 						</left>
 						<greater-than />
@@ -569,11 +807,42 @@
 							</term>
 						</right>
 					</condition>
-					<result>
-						<term>
-							<constant value="5" />
-						</term>
-					</result>
+					<switch>
+						<case>
+							<condition>
+								<left>
+									<term>
+										<goalRef goal="m12_circles_red" scoreType="computed" />
+									</term>
+									<term>
+										<goalRef goal="m12_circles_tan" scoreType="computed" />
+									</term>
+									<term>
+										<goalRef goal="m12_circles_white" scoreType="computed" />
+									</term>
+									<term>
+										<goalRef goal="m12_levels" scoreType="computed" />
+									</term>
+								</left>
+								<greater-than />
+								<right>
+									<term>
+										<constant value="0" />
+									</term>
+								</right>
+							</condition>
+							<result>
+								<term>
+									<constant value="5" />
+								</term>
+							</result>
+						</case>
+						<default>
+							<term>
+								<constant value="0" />
+							</term>
+						</default>
+					</switch>
 				</case>
 				<default>
 					<term>
@@ -590,8 +859,7 @@
 					<condition>
 						<left>
 							<term>
-								<goalRef goal="m13_sustainability_upgrades"
-									scoreType="computed" />
+								<goalRef goal="small_inspection_area" scoreType="raw" />
 							</term>
 						</left>
 						<greater-than />
@@ -601,11 +869,34 @@
 							</term>
 						</right>
 					</condition>
-					<result>
-						<term>
-							<constant value="5" />
-						</term>
-					</result>
+					<switch>
+						<case>
+							<condition>
+								<left>
+									<term>
+										<goalRef goal="m13_sustainability_upgrades"
+											scoreType="computed" />
+									</term>
+								</left>
+								<greater-than />
+								<right>
+									<term>
+										<constant value="0" />
+									</term>
+								</right>
+							</condition>
+							<result>
+								<term>
+									<constant value="5" />
+								</term>
+							</result>
+						</case>
+						<default>
+							<term>
+								<constant value="0" />
+							</term>
+						</default>
+					</switch>
 				</case>
 				<default>
 					<term>
