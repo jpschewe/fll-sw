@@ -148,14 +148,14 @@
 				<constant value="30" />
 				<goalRef goal="m12_circles_red" scoreType="raw" />
 			</term>
-            <term>
-                <constant value="30" />
-                <goalRef goal="m12_circles_tan" scoreType="raw" />
-            </term>
-            <term>
-                <constant value="30" />
-                <goalRef goal="m12_circles_white" scoreType="raw" />
-            </term>
+			<term>
+				<constant value="30" />
+				<goalRef goal="m12_circles_tan" scoreType="raw" />
+			</term>
+			<term>
+				<constant value="30" />
+				<goalRef goal="m12_circles_white" scoreType="raw" />
+			</term>
 			<term>
 				<constant value="-1" />
 				<goalRef goal="m12_levels" scoreType="raw" />
@@ -169,7 +169,7 @@
 
 
 		<goal name="m14_precision"
-			title="M14 - Precision - Number of Tokens on Field">
+			title="M14 - Precision - Number of Tokens on Field" initialValue="60">
 			<value value="six" title="6" score="60" />
 			<value value="five" title="5" score="45" />
 			<value value="four" title="4" score="30" />
@@ -552,12 +552,12 @@
 							<term>
 								<goalRef goal="m12_circles_red" scoreType="computed" />
 							</term>
-                            <term>
-                                <goalRef goal="m12_circles_tan" scoreType="computed" />
-                            </term>
-                            <term>
-                                <goalRef goal="m12_circles_white" scoreType="computed" />
-                            </term>
+							<term>
+								<goalRef goal="m12_circles_tan" scoreType="computed" />
+							</term>
+							<term>
+								<goalRef goal="m12_circles_white" scoreType="computed" />
+							</term>
 							<term>
 								<goalRef goal="m12_levels" scoreType="computed" />
 							</term>
