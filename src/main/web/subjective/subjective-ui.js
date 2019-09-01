@@ -581,21 +581,45 @@ function addSliderToScoreEntry(table, goal, totalColumns, ranges, subscore) {
       + "'></td>");
 
   var sliderId = getScoreItemName(goal);
-  var label = $("<label for='" + sliderId
-      + "' class='ui-hidden-accessible'></label>");
-  cell.append(label);
 
-  var slider = $("<input type='range' name='" + sliderId + "' id='" + sliderId
-      + "' min='" + goal.min + "' max='" + goal.max + "' value='" + initValue
-      + "' />");
+  var $sliderContainer = $("<div id='" + sliderId + "-container'></div>");
+  cell.append($sliderContainer);
 
-  cell.append(slider);
+  var $slider = $("<input type='range' class='ui-hidden-accessible' name='"
+      + sliderId + "' id='" + sliderId + "' min='" + goal.min + "' max='"
+      + goal.max + "' value='" + initValue + "'></input>");
+
+  $sliderContainer.append($slider);
 
   row.append(cell);
 
   table.append(row);
 
   highlightRubric(goal, ranges, initValue);
+}
+
+function setSliderTicks(goal) {
+  var sliderId = getScoreItemName(goal);
+
+  var $slider = $("#" + sliderId);
+  var $track = $("#" + sliderId + "-container .ui-slider-track");
+
+  var max = goal.max;
+  var min = goal.min;
+  var spacing = 100 / (max - min);
+
+  /*
+   * $.subjective.log("Creating slider ticks for " + goal.name + " min: " + min + "
+   * max: " + max + " spacing: " + spacing);
+   */
+
+  $slider.find('.sliderTickMark').remove();
+  for (var i = 0; i <= max - min; i++) {
+    var $tick = $('<span class="sliderTickMark">&nbsp;</span>');
+    $tick.css('left', (spacing * i) + '%');
+    $track.prepend($tick);
+  }
+
 }
 
 function highlightRubric(goal, ranges, value) {
@@ -612,23 +636,25 @@ function highlightRubric(goal, ranges, value) {
 }
 
 function addEventsToSlider(goal, ranges) {
+
   var ranges = goal.rubric;
   ranges.sort(rangeSort);
 
   var sliderId = getScoreItemName(goal);
+  var $slider = $("#" + sliderId);
 
-  var slider = $("#" + sliderId);
-  slider.slider({
+  $slider.slider({
     highlight : true
   });
 
-  slider.on("change", function() {
-    var value = slider.val();
+  setSliderTicks(goal);
+
+  $slider.on("change", function() {
+    var value = $slider.val();
     highlightRubric(goal, ranges, value);
 
     recomputeTotal();
   });
-
 }
 
 function createScoreRows(table, totalColumns, goal, subscore) {

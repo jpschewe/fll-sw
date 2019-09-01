@@ -1,3 +1,4 @@
+* #755 - Put tick marks on the score entry sliders in the subjective web application
 * #753 - Add score sheet instructions to the challenge description file
 * #758 - Allow rubric ranges to not have titles - this is needed for "ND"
 * #752 - update subjective sheet writer code to handle "ND" being part of the challenge description rubric
