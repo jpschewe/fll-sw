@@ -67,7 +67,7 @@ public class RubricRange implements Serializable {
     final NodelistElementCollectionAdapter descriptions = new NodelistElementCollectionAdapter(ele.getElementsByTagName(DESCRIPTION_TAG_NAME));
     if (descriptions.hasNext()) {
       final Element descriptionEle = descriptions.next();
-      mDescription = removeExtraWhitespace(descriptionEle.getTextContent());
+      mDescription = ChallengeDescription.removeExtraWhitespace(descriptionEle.getTextContent());
     } else {
       mDescription = null;
     }
@@ -88,18 +88,6 @@ public class RubricRange implements Serializable {
     mMax = 1;
     mDescription = null;
     mShortDescription = null;
-  }
-
-  private static String removeExtraWhitespace(final String str) {
-    if (null == str) {
-      return str;
-    }
-
-    String result = str.trim();
-    result = result.replace('\r', ' ');
-    result = result.replace('\n', ' ');
-    result = result.replaceAll("\\s+", " ");
-    return result;
   }
 
   private String mTitle;
@@ -135,7 +123,7 @@ public class RubricRange implements Serializable {
    * @param v see {@link #getDescription()}
    */
   public void setDescription(final String v) {
-    mDescription = removeExtraWhitespace(v);
+    mDescription = ChallengeDescription.removeExtraWhitespace(v);
   }
 
   private String mShortDescription;

@@ -15,13 +15,12 @@ import javax.swing.JLabel;
 
 import org.apache.commons.lang3.StringUtils;
 
-
 import fll.util.FormatterUtils;
-
+import fll.util.TextAreaEditor;
 import fll.xml.SubjectiveScoreCategory;
 
 /**
- * 
+ *
  */
 public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
 
@@ -32,6 +31,8 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
   private final JFormattedTextField mNameEditor;
 
   private final SubjectiveScoreCategory mSubjectiveCategory;
+
+  private final TextAreaEditor mScoreSheetInstructions;
 
   public SubjectiveCategoryEditor(final SubjectiveScoreCategory category) {
     super(category);
@@ -78,6 +79,14 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
 
     nameContainer.add(Box.createHorizontalGlue());
 
+    final Box scoreSheetInstructionsContainer = Box.createHorizontalBox();
+    add(scoreSheetInstructionsContainer, 4); // just below weight
+    scoreSheetInstructionsContainer.add(new JLabel("Instructions: "));
+
+    mScoreSheetInstructions = new TextAreaEditor(4, 40);
+    scoreSheetInstructionsContainer.add(mScoreSheetInstructions);
+    mScoreSheetInstructions.setText(mSubjectiveCategory.getScoreSheetInstructions());
+
     mTitleEditor.setValue(mSubjectiveCategory.getTitle());
     mNameEditor.setValue(mSubjectiveCategory.getName());
   }
@@ -104,6 +113,8 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
     } catch (final ParseException e) {
       LOGGER.debug("Got parse exception committing changes to name, assuming bad value and ignoring", e);
     }
+
+    mSubjectiveCategory.setScoreSheetInstructions(mScoreSheetInstructions.getText());
   }
 
   protected void fireTitleChange(final String oldTitle,
@@ -121,6 +132,10 @@ public class SubjectiveCategoryEditor extends ScoreCategoryEditor {
 
     if (StringUtils.isBlank(mNameEditor.getText())) {
       messages.add("The category must have a name");
+    }
+
+    if (StringUtils.isBlank(mScoreSheetInstructions.getText())) {
+      messages.add("The instructions must not be empty");
     }
   }
 
