@@ -35,7 +35,7 @@ public class ChallengeDescription implements Serializable {
   /**
    * It's assumed that this element is the root element from the Document from
    * {@link ChallengeParser#parse(java.io.Reader)}.
-   * 
+   *
    * @param ele the challenge description
    */
   public ChallengeDescription(final Element ele) {
@@ -64,7 +64,7 @@ public class ChallengeDescription implements Serializable {
    * {@link WinnerType#HIGH} for {@link #getWinner()}, null for
    * {@link #getCopyright()}, an empty {@link #getPerformance()} and no
    * {@link #getSubjectiveCategories()}.
-   * 
+   *
    * @param title the title of the challenge
    */
   public ChallengeDescription(@Nonnull final String title) {
@@ -80,7 +80,7 @@ public class ChallengeDescription implements Serializable {
 
   /**
    * Copyright statement for the challenge.
-   * 
+   *
    * @return the statement or null if there is no copyright
    */
   public String getCopyright() {
@@ -99,7 +99,7 @@ public class ChallengeDescription implements Serializable {
   /**
    * The name of the challenge description, it cannot be null, but may be the
    * empty string, although this is not advised.
-   * 
+   *
    * @return the title of the tournament
    */
   @Nonnull
@@ -120,7 +120,7 @@ public class ChallengeDescription implements Serializable {
   /**
    * This is used to keep track of changes, it can be an empty string, but not
    * null.
-   * 
+   *
    * @return the revision of the description
    */
   @Nonnull
@@ -155,7 +155,7 @@ public class ChallengeDescription implements Serializable {
   /**
    * Since {@link PerformanceScoreCategory} is mutable, this should not be
    * needed except to add or remove the performance element.
-   * 
+   *
    * @param v setting the value to null will remove the element
    */
   public void setPerformance(final PerformanceScoreCategory v) {
@@ -175,7 +175,7 @@ public class ChallengeDescription implements Serializable {
    * Add a subjective category to the end of the list.
    * Since {@link ScoreCategory} is mutable, this does not check that the names
    * are unique. That needs to be done by a higher level class.
-   * 
+   *
    * @param v the category to add
    */
   public void addSubjectiveCategory(final SubjectiveScoreCategory v) {
@@ -186,7 +186,7 @@ public class ChallengeDescription implements Serializable {
    * Add a subjective category at the specified index.
    * Since {@link ScoreCategory} is mutable, this does not check that the names
    * are unique. That needs to be done by a higher level class.
-   * 
+   *
    * @param v the category to add
    * @param index the index to add the category at
    */
@@ -198,7 +198,7 @@ public class ChallengeDescription implements Serializable {
 
   /**
    * Remove a subjective category.
-   * 
+   *
    * @param v the category to remove
    * @return if the category was removed
    * @see List#remove(Object)
@@ -209,7 +209,7 @@ public class ChallengeDescription implements Serializable {
 
   /**
    * Remove the subjective category at the specified index.
-   * 
+   *
    * @param index the index to remove the element from
    * @return the category that was removed
    */
@@ -232,7 +232,7 @@ public class ChallengeDescription implements Serializable {
 
   /**
    * Create the XML for the current state of this challenge description.
-   * 
+   *
    * @return a non-null document.
    */
   public Document toXml() {
@@ -258,6 +258,23 @@ public class ChallengeDescription implements Serializable {
     }
 
     return document;
+  }
+
+  /**
+   *
+   * @param str remove carriage returns and multiple spaces
+   * @return string without the line endings and multiple spaces in a row
+   */
+  /*package*/ static String removeExtraWhitespace(final String str) {
+    if (null == str) {
+      return str;
+    }
+
+    String result = str.trim();
+    result = result.replace('\r', ' ');
+    result = result.replace('\n', ' ');
+    result = result.replaceAll("\\s+", " ");
+    return result;
   }
 
 }
