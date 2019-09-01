@@ -76,8 +76,8 @@ public class Restriction extends BasicPolynomial {
 
     populateXml(doc, ele);
 
-    ele.setAttribute(LOWER_BOUND_ATTRIBUTE, Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mLowerBound));
-    ele.setAttribute(UPPER_BOUND_ATTRIBUTE, Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mUpperBound));
+    ele.setAttribute(LOWER_BOUND_ATTRIBUTE, Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mLowerBound));
+    ele.setAttribute(UPPER_BOUND_ATTRIBUTE, Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mUpperBound));
     ele.setAttribute(MESSAGE_ATTRIBUTE, mMessage);
 
     return ele;

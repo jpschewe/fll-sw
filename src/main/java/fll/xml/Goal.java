@@ -80,7 +80,7 @@ public class Goal extends AbstractGoal {
     if (!mRubric.isEmpty()
         && ScoreType.INTEGER.equals(mScoreType)
         && minSeen > mMin) {
-      LOGGER.warn("Found goal without 'ND' rubric range for minimum value: {}", getName());
+      LOGGER.debug("Found goal without 'ND' rubric range for minimum value: {}", getName());
       final RubricRange range = new RubricRange("");
       range.setShortDescription("ND");
       range.setMin(0);
@@ -336,11 +336,12 @@ public class Goal extends AbstractGoal {
     populateXml(doc, ele);
 
     if (!isEnumerated()) {
-      ele.setAttribute(MIN_ATTRIBUTE, Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mMin));
-      ele.setAttribute(MAX_ATTRIBUTE, Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mMax));
-      ele.setAttribute(MULTIPLIER_ATTRIBUTE, Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mMultiplier));
+      ele.setAttribute(MIN_ATTRIBUTE, Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mMin));
+      ele.setAttribute(MAX_ATTRIBUTE, Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mMax));
+      ele.setAttribute(MULTIPLIER_ATTRIBUTE, Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mMultiplier));
     }
-    ele.setAttribute(INITIAL_VALUE_ATTRIBUTE, Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mInitialValue));
+    ele.setAttribute(INITIAL_VALUE_ATTRIBUTE,
+                     Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mInitialValue));
 
     ele.setAttribute(ChallengeParser.SCORE_TYPE_ATTRIBUTE, mScoreType.toXmlString());
     ele.setAttribute(REQUIRED_ATTRIBUTE, Boolean.toString(mRequired));
