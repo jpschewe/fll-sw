@@ -37,7 +37,6 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
-
 import org.hsqldb.jdbc.JDBCDataSource;
 
 import com.opencsv.CSVReader;
@@ -45,7 +44,6 @@ import com.opencsv.CSVReader;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.ImportDB;
 import fll.util.FLLRuntimeException;
-
 import fll.xml.ScoreType;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -66,6 +64,19 @@ public final class Utilities {
     // setup the number format instance to be 2 decimal places
     FLOATING_POINT_NUMBER_FORMAT_INSTANCE.setMaximumFractionDigits(2);
     FLOATING_POINT_NUMBER_FORMAT_INSTANCE.setMinimumFractionDigits(2);
+  }
+
+  /**
+   * Single instance of the floating point NumberFormat instance to save on
+   * overhead
+   * and to use for consistency of formatting. Compatible with XML floating point fields.
+   */
+  public static final NumberFormat XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE = NumberFormat.getInstance();
+  static {
+    // setup the number format instance to be 2 decimal places
+    XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.setMaximumFractionDigits(2);
+    XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.setMinimumFractionDigits(2);
+    XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.setGroupingUsed(false);
   }
 
   /**
@@ -94,7 +105,7 @@ public final class Utilities {
    * {@link au.com.bytecode.opencsv.CSVWriter#writeAll(ResultSet, boolean)} with
    * includeColumnNames set to true. This method assumes that the table to be
    * created does not exist, an error will be reported if it does.
-   * 
+   *
    * @param connection the database connection to create the table within
    * @param tablename name of the table to create
    * @param reader where to read the data from, a {@link CSVReader} will be
@@ -183,7 +194,7 @@ public final class Utilities {
 
   /**
    * Convert data to type and put in prepared statement at index.
-   * 
+   *
    * @param data the data as a string
    * @param type the sql type that the data is to be converted to
    * @param prep the prepared statement to insert into
@@ -296,7 +307,7 @@ public final class Utilities {
   /**
    * Test that the database behind the connection is initialized. Checks for the
    * existence of the TournamentParameters tables.
-   * 
+   *
    * @param connection the connection to check
    * @return true if the database is initialized
    */
@@ -353,7 +364,7 @@ public final class Utilities {
 
   /**
    * Create a datasource for the specified database
-   * 
+   *
    * @param database the database to connect to, assumed to be a filename
    * @return a datasource
    */
@@ -370,7 +381,7 @@ public final class Utilities {
 
   /**
    * Create a datasource for the specified memory database
-   * 
+   *
    * @param database the database to connect to, assumed to be a filename
    * @return a datasource
    */
@@ -387,7 +398,7 @@ public final class Utilities {
 
   /**
    * Create a {@link DataSource} attached database with the specified URL.
-   * 
+   *
    * @param myURL the URL to the database
    * @return the DataSource
    */
@@ -409,37 +420,33 @@ public final class Utilities {
   /**
    * Filter used to select only graphics files
    */
-  private static final FilenameFilter GRAPHICS_FILTER = new FilenameFilter() {
-    public boolean accept(final File dir,
-                          final String name) {
-      final String lowerName = name.toLowerCase();
-      if (lowerName.endsWith(".png")
-          || lowerName.endsWith(".jpg")
-          || lowerName.endsWith(".jpeg")
-          || lowerName.endsWith(".gif")) {
-        return true;
-      } else {
-        return false;
-      }
-    }
+  private static final FilenameFilter GRAPHICS_FILTER = (dir,
+   name) -> {
+   final String lowerName = name.toLowerCase();
+   if (lowerName.endsWith(".png")
+     || lowerName.endsWith(".jpg")
+     || lowerName.endsWith(".jpeg")
+     || lowerName.endsWith(".gif")) {
+    return true;
+   } else {
+    return false;
+   }
   };
 
   /**
    * Filter used to select only directories
    */
-  private static final FileFilter DIRFILTER = new FileFilter() {
-    public boolean accept(final File f) {
-      if (f.isDirectory()) {
-        return true;
-      } else {
-        return false;
-      }
+  private static final FileFilter DIRFILTER = f -> {
+    if (f.isDirectory()) {
+      return true;
+    } else {
+      return false;
     }
   };
 
   /**
    * Find all graphic files in the specified directory
-   * 
+   *
    * @param directory which directory to search in
    * @return paths to all files, sorted
    */
@@ -453,7 +460,7 @@ public final class Utilities {
   /**
    * Build a list of file found in the specified directories. This
    * method will search recursively.
-   * 
+   *
    * @param prefix prefix path, this should be "" initially
    * @param directories directories to look in
    * @param output the list of image files (output parameter)
@@ -510,7 +517,7 @@ public final class Utilities {
 
   /**
    * Determine the extension given a filename
-   * 
+   *
    * @param filename the filename
    * @return the extension, or null if there isn't one
    */
@@ -582,7 +589,7 @@ public final class Utilities {
   /**
    * Read an integer property and fail if the property doesn't have a value or
    * doesn't parse a a number.
-   * 
+   *
    * @param properties where to read the property from
    * @param property the property to read
    * @return the value
@@ -604,7 +611,7 @@ public final class Utilities {
   /**
    * Read an integer property and fail if the property doesn't parse
    * as a number.
-   * 
+   *
    * @param properties where to read the property from
    * @param property the property to read
    * @param defaultValue the value to use if the property doesn't exist
@@ -626,7 +633,7 @@ public final class Utilities {
   /**
    * Read a boolean property and fail if the property doesn't have a value.
    * "1" and "true" (case insensitive) are true, everything else is false.
-   * 
+   *
    * @param properties where to read the property from
    * @param property the property to read
    * @return the value
@@ -649,7 +656,7 @@ public final class Utilities {
   /**
    * Read a boolean property and fail if the property doesn't have a value.
    * "1" and "true" (case insensitive) are true, everything else is false.
-   * 
+   *
    * @param properties where to read the property from
    * @param property the property to read
    * @param defaultValue the value to use if the property is not found
@@ -670,7 +677,7 @@ public final class Utilities {
 
   /**
    * Check if a number is even.
-   * 
+   *
    * @param number the number to check
    * @return true if the number is even
    */
@@ -681,7 +688,7 @@ public final class Utilities {
 
   /**
    * Check if a number is odd.
-   * 
+   *
    * @param number the number to check
    * @return true if the number is odd
    */
@@ -691,7 +698,7 @@ public final class Utilities {
 
   /**
    * Parse a string of the form [integer, integer, ...].
-   * 
+   *
    * @param str string to parse
    * @return array of integers
    * @throws FLLRuntimeException if the string cannot be parsed
@@ -702,13 +709,13 @@ public final class Utilities {
       return new int[0];
     }
 
-    int lbracket = str.indexOf('[');
+    final int lbracket = str.indexOf('[');
     if (-1 == lbracket) {
       throw new FLLRuntimeException("No '[' found in string: '"
           + str
           + "'");
     }
-    int rbracket = str.indexOf(']', lbracket);
+    final int rbracket = str.indexOf(']', lbracket);
     if (-1 == rbracket) {
       throw new FLLRuntimeException("No ']' found in string: '"
           + str
@@ -733,7 +740,7 @@ public final class Utilities {
 
   /**
    * Parse a string of the form [string, string, ...].
-   * 
+   *
    * @param str string to parse, handles null and empty
    * @return array of strings
    * @throws FLLRuntimeException if the string cannot be parsed
@@ -744,13 +751,13 @@ public final class Utilities {
       return new String[0];
     }
 
-    int lbracket = str.indexOf('[');
+    final int lbracket = str.indexOf('[');
     if (-1 == lbracket) {
       throw new FLLRuntimeException("No '[' found in string: '"
           + str
           + "'");
     }
-    int rbracket = str.indexOf(']', lbracket);
+    final int rbracket = str.indexOf(']', lbracket);
     if (-1 == rbracket) {
       throw new FLLRuntimeException("No ']' found in string: '"
           + str

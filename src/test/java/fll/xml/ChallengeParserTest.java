@@ -15,7 +15,6 @@ import java.io.Reader;
 import java.net.URL;
 import java.util.Collection;
 
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Document;
@@ -36,7 +35,7 @@ public class ChallengeParserTest {
    * Load illegal-restriction.xml and ensure an exception is thrown on the
    * illegal reference. This checks for a bad reference in a term element of a
    * restriction.
-   * 
+   *
    * @throws IOException Test error
    */
   @Test
@@ -59,7 +58,7 @@ public class ChallengeParserTest {
    * Load illegal-tiebreaker-ref.xml and ensure an exception is thrown on the
    * illegal reference. This checks for a bad reference in a term element of a
    * tiebreaker.
-   * 
+   *
    * @throws IOException test error
    */
   @Test
@@ -80,7 +79,7 @@ public class ChallengeParserTest {
 
   /**
    * Load all-elements.xml and make sure there are no errors.
-   * 
+   *
    * @throws IOException test error
    */
   @Test
@@ -97,7 +96,7 @@ public class ChallengeParserTest {
    * Load illegal-computed-enumgoal-ref.xml and ensure an exception is thrown on
    * the illegal reference. This checks for a bad reference in a goalRef element
    * of a computed goal.
-   * 
+   *
    * @throws IOException test error
    */
   @Test
@@ -120,7 +119,7 @@ public class ChallengeParserTest {
    * Load illegal-computed-goal-ref.xml and ensure an exception is thrown on the
    * illegal reference. This checks for a bad reference in a term element of a
    * computed goal.
-   * 
+   *
    * @throws IOException test error
    */
   @Test
@@ -143,7 +142,7 @@ public class ChallengeParserTest {
    * Load subjective-computed-goal-ref-other-category. This ensure that a
    * computed goal in one subjective category cannot reference a goal in another
    * subjective category.
-   * 
+   *
    * @throws IOException test error
    */
   @Test
@@ -167,7 +166,7 @@ public class ChallengeParserTest {
   /**
    * Load subjective-duplicate-goals.xml. This checks if two goals having the
    * same name in the same category is caught as an error.
-   * 
+   *
    * @throws IOException test error
    */
   @Test
@@ -190,7 +189,7 @@ public class ChallengeParserTest {
   /**
    * Load subjective-two-categories-same-goal.xml. This ensure that two
    * subjective categories can have goals with the same name.
-   * 
+   *
    * @throws IOException test error
    */
   @Test
@@ -207,7 +206,7 @@ public class ChallengeParserTest {
   /**
    * Check that enum goals referenced in a polynomial of a computed goal use the
    * computed score and not the raw score.
-   * 
+   *
    * @throws IOException test error
    */
   @Test
@@ -226,7 +225,7 @@ public class ChallengeParserTest {
   /**
    * Check that enum goals referenced in a polynomial of a tiebreaker use the
    * computed score and not the raw score.
-   * 
+   *
    * @throws IOException test error
    */
   @Test
@@ -246,7 +245,7 @@ public class ChallengeParserTest {
   /**
    * Check that enum goals referenced in a polynomial of a restriction use the
    * computed score and not the raw score.
-   * 
+   *
    * @throws IOException test error
    */
   @Test
@@ -265,7 +264,7 @@ public class ChallengeParserTest {
 
   /**
    * Check that a regular goal cannot show up in an enum condition.
-   * 
+   *
    * @throws IOException test error
    */
   @Test
@@ -282,7 +281,7 @@ public class ChallengeParserTest {
 
   /**
    * Check that setting an initial value below the minimum for a goal fails.
-   * 
+   *
    * @throws IOException test error
    */
   @Test
@@ -299,7 +298,7 @@ public class ChallengeParserTest {
 
   /**
    * Check that setting an initial value above the maximum for a goal fails.
-   * 
+   *
    * @throws IOException test error
    */
   @Test
@@ -317,7 +316,7 @@ public class ChallengeParserTest {
   /**
    * Check that setting an initial value for an enum goal that doesn't match an
    * enum value fails.
-   * 
+   *
    * @throws IOException test error
    */
   @Test
@@ -335,7 +334,7 @@ public class ChallengeParserTest {
 
   /**
    * Check that a variableRef is not allowed in a tiebreaker.
-   * 
+   *
    * @throws IOException test error
    */
   @Test
@@ -357,7 +356,7 @@ public class ChallengeParserTest {
 
   /**
    * Check that a variableRef is not allowed in a restriction.
-   * 
+   *
    * @throws IOException test error
    */
   @Test
@@ -379,7 +378,7 @@ public class ChallengeParserTest {
 
   /**
    * Check that a two variables in a computed goal may not have the same name.
-   * 
+   *
    * @throws IOException test error
    */
   @Test
@@ -400,7 +399,7 @@ public class ChallengeParserTest {
 
   /**
    * Check that all known challenge descriptors are still valid.
-   * 
+   *
    * @throws IOException
    */
   @Test
@@ -422,7 +421,7 @@ public class ChallengeParserTest {
 
   /**
    * Check that computed goals referencing computed goals is OK.
-   * 
+   *
    * @throws IOException test error
    */
   @Test
@@ -435,7 +434,7 @@ public class ChallengeParserTest {
 
   /**
    * Check that computed goals with circular reference are not allowed.
-   * 
+   *
    * @throws IOException test error
    */
   @Test

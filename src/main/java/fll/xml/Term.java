@@ -32,7 +32,7 @@ public class Term extends Object implements Evaluatable, Serializable {
 
   /**
    * Create a new term.
-   * 
+   *
    * @param ele the XML element that represents the term
    * @param goalScope the scope to lookup goals in
    * @param variableScope the scope to lookup variables in, may be null
@@ -78,7 +78,7 @@ public class Term extends Object implements Evaluatable, Serializable {
     mCoefficient = 1;
   }
 
-  private final Collection<GoalRef> mGoals = new LinkedList<GoalRef>();
+  private final Collection<GoalRef> mGoals = new LinkedList<>();
 
   /**
    * @return unmodifiable collection
@@ -89,7 +89,7 @@ public class Term extends Object implements Evaluatable, Serializable {
 
   /**
    * Add a goal reference.
-   * 
+   *
    * @param v the goal reference to add
    */
   public void addGoal(final GoalRef v) {
@@ -98,7 +98,7 @@ public class Term extends Object implements Evaluatable, Serializable {
 
   /**
    * Remove a goal reference.
-   * 
+   *
    * @param v the goal to remove (only the first goal is removed if there are
    *          multiple instances of the goal)
    * @return if the goal reference was found and removed
@@ -108,7 +108,7 @@ public class Term extends Object implements Evaluatable, Serializable {
     return mGoals.remove(v);
   }
 
-  private final List<VariableRef> mVariables = new LinkedList<VariableRef>();
+  private final List<VariableRef> mVariables = new LinkedList<>();
 
   /**
    * @return unmodifiable collection
@@ -119,7 +119,7 @@ public class Term extends Object implements Evaluatable, Serializable {
 
   /**
    * Add a variable reference.
-   * 
+   *
    * @param var the variable reference to add
    */
   public void addVariable(final VariableRef var) {
@@ -128,7 +128,7 @@ public class Term extends Object implements Evaluatable, Serializable {
 
   /**
    * Remove a variable reference
-   * 
+   *
    * @param var the variable reference to remove (only the first one is removed if
    *          there are multiple entries)
    * @return if the variable reference was found and removed
@@ -167,7 +167,8 @@ public class Term extends Object implements Evaluatable, Serializable {
 
   private Element createConstantElement(final Document doc) {
     final Element ele = doc.createElement(CONSTANT_TAG_NAME);
-    ele.setAttribute(CONSTANT_VALUE_ATTRIBUTE, Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mCoefficient));
+    ele.setAttribute(CONSTANT_VALUE_ATTRIBUTE,
+                     Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mCoefficient));
     return ele;
   }
 
