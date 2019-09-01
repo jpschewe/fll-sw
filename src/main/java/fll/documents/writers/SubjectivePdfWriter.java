@@ -161,7 +161,6 @@ public class SubjectivePdfWriter {
     PdfPTable columnTitlesTable = null;
     PdfPCell headerCell = null;
     Paragraph directions = null;
-    String dirText = null;
     Phrase text = null;
 
     // set up the header for proper spacing
@@ -224,9 +223,7 @@ public class SubjectivePdfWriter {
     pageHeaderTable.addCell(createCell(tournamentName, f6i, NO_BORDERS, Element.ALIGN_RIGHT));
 
     // add the instructions to the header
-    dirText = "Directions: For each skill area, clearly mark the box that best describes the team's accomplishments.  "
-        + "If the team does not demonstrate skill in a particular area, then put an 'X' in the first box for Not Demonstrated (ND).  "
-        + "Please provide as many written comments as you can to acknowledge each teams's hard work and to help teams improve. ";
+    final String dirText = scoreCategory.getScoreSheetInstructions();
     text = new Phrase(dirText, f9b);
     directions = new Paragraph();
     directions.add(text);

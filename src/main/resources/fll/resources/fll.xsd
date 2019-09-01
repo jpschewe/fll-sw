@@ -141,20 +141,25 @@
   </xsd:element>
 
   <xsd:element name="subjectiveCategory">
-    <xsd:complexType>
-      <xsd:sequence maxOccurs="unbounded">
-        <xsd:sequence
-          minOccurs="0"
-          maxOccurs="unbounded">
-          <xsd:element
-            ref="goal"
-            maxOccurs="unbounded" />
-          <xsd:element
-            ref="computedGoal"
-            minOccurs="0"
-            maxOccurs="unbounded" />
-        </xsd:sequence>
-      </xsd:sequence>
+	<xsd:complexType>
+		<xsd:sequence maxOccurs="1">
+			<xsd:element name="scoreSheetInstructions" minOccurs="0"
+				maxOccurs="1" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation>
+						Instructions that are printed at the top of the score sheet.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+
+			<xsd:sequence maxOccurs="unbounded">
+				<xsd:sequence minOccurs="0" maxOccurs="unbounded">
+					<xsd:element ref="goal" maxOccurs="unbounded" />
+					<xsd:element ref="computedGoal" minOccurs="0"
+						maxOccurs="unbounded" />
+				</xsd:sequence>
+			</xsd:sequence>
+		</xsd:sequence>
       <xsd:attribute
         name="name"
         type="databaseName"

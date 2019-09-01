@@ -11,6 +11,8 @@ import javax.annotation.Nonnull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
+
 /**
  * Description of a subjective category.
  */
@@ -18,9 +20,18 @@ public class SubjectiveScoreCategory extends ScoreCategory {
 
   public static final String TAG_NAME = "subjectiveCategory";
 
-  public static final String NAME_ATTRIBUTE = "name";
+  private static final String NAME_ATTRIBUTE = "name";
 
-  public static final String TITLE_ATTRIBUTE = "title";
+  private static final String TITLE_ATTRIBUTE = "title";
+
+  /**
+   * The XML attribute to write the description to.
+   */
+  private static final String SCORE_SHEET_INSTRUCTIONS_TAG_NAME = "scoreSheetInstructions";
+
+  private static final String DEFAULT_SCORE_SHEET_TEXT = "Directions: For each skill area, clearly mark the box that best describes the team's accomplishments.  "
+      + "If the team does not demonstrate skill in a particular area, then put an 'X' in the first box for Not Demonstrated (ND).  "
+      + "Please provide as many written comments as you can to acknowledge each teams's hard work and to help teams improve. ";
 
   /**
    * Construct from the provided XML element.
@@ -31,6 +42,15 @@ public class SubjectiveScoreCategory extends ScoreCategory {
     super(ele);
     mName = ele.getAttribute(NAME_ATTRIBUTE);
     mTitle = ele.getAttribute(TITLE_ATTRIBUTE);
+
+    final NodelistElementCollectionAdapter elements = new NodelistElementCollectionAdapter(ele.getElementsByTagName(SCORE_SHEET_INSTRUCTIONS_TAG_NAME));
+    if (elements.hasNext()) {
+      final Element descriptionEle = elements.next();
+      scoreSheetInstructions = ChallengeDescription.removeExtraWhitespace(descriptionEle.getTextContent());
+    } else {
+      scoreSheetInstructions = DEFAULT_SCORE_SHEET_TEXT;
+    }
+
   }
 
   /**
@@ -44,6 +64,7 @@ public class SubjectiveScoreCategory extends ScoreCategory {
     super();
     mName = name;
     mTitle = title;
+    scoreSheetInstructions = DEFAULT_SCORE_SHEET_TEXT;
   }
 
   private String mName;
@@ -70,12 +91,36 @@ public class SubjectiveScoreCategory extends ScoreCategory {
     return mTitle;
   }
 
+  /**
+   * @param v see {@Link #getTitle()}
+   */
   public void setTitle(final String v) {
     mTitle = v;
   }
 
+  private String scoreSheetInstructions;
+
+  /**
+   * @return instructions for the judges
+   */
+  public String getScoreSheetInstructions() {
+    return scoreSheetInstructions;
+  }
+
+  /**
+   * @param v see {@Link #getScoreSheetInstructions()}
+   */
+  public void setScoreSheetInstructions(final String v) {
+    this.scoreSheetInstructions = v;
+  }
+
   public Element toXml(final Document doc) {
     final Element ele = doc.createElement(TAG_NAME);
+
+    final Element scoreSheetInstructionsEle = doc.createElement(SCORE_SHEET_INSTRUCTIONS_TAG_NAME);
+    scoreSheetInstructionsEle.appendChild(doc.createTextNode(scoreSheetInstructions));
+    ele.appendChild(scoreSheetInstructionsEle);
+
     populateXml(doc, ele);
 
     ele.setAttribute(NAME_ATTRIBUTE, mName);
