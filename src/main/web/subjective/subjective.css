@@ -63,3 +63,18 @@ table.score-entry .selected-range {
 	display: none;
 }
 
+span.sliderTickMark {
+    position: absolute;
+    left: 100%;
+    top: 0%;
+    margin-left: -10px;
+    margin-top: -2.5px;
+    font-size: 12px;
+    font-weight: normal;
+
+    /* draw a hollow circle */
+    border-radius: 50%;
+    width: 15px;
+    border: solid 2px black;
+}
+
