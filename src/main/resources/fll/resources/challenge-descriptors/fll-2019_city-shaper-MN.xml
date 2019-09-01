@@ -814,6 +814,10 @@
     </tiebreaker>
   </Performance>
   <subjectiveCategory name="project" title="Innovation Project" weight="1.00">
+    <scoreSheetInstructions>For each skill area, clearly mark the box that best describes the team's accomplishments. Teams should
+demonstrate everything at the level; if they are missing part, mark the level below. If the team does not demonstrate
+an area, put an 'X' in the first box for Not Demonstrated (ND). Please provide as many written comments as you can
+to acknowledge each team’s hard work and to help teams improve. Use the back for additional comments if needed.</scoreSheetInstructions>
     <goal category="Research" initialValue="0.00" max="12.00" min="0.00" multiplier="1.00" name="problem_identification" required="true" scoreType="INTEGER" title="Problem Identification* ">
       <description>Clear definition of the problem being studied</description>
       <rubric>
@@ -994,12 +998,12 @@
         </range>
       </rubric>
     </goal>
-    <scoreSheetInstructions>For each skill area, clearly mark the box that best describes the team's accomplishments. Teams should
-demonstrate everything at the level; if they are missing part, mark the level below. If the team does not demonstrate
-an area, put an 'X' in the first box for Not Demonstrated (ND). Please provide as many written comments as you can
-to acknowledge each team’s hard work and to help teams improve. Use the back for additional comments if needed.</scoreSheetInstructions>
   </subjectiveCategory>
   <subjectiveCategory name="core_values" title="Core Values" weight="1.00">
+    <scoreSheetInstructions>For each skill area, clearly mark the box that best describes the team's accomplishments. If the team does not
+demonstrate skill in a particular area, then put an 'X' in the first box for Not Demonstrated (ND). Please provide as
+many written comments as you can to acknowledge each team’s hard work and to help teams improve. Use the back
+for additional comments if needed.</scoreSheetInstructions>
     <goal category="Inspiration" initialValue="0.00" max="12.00" min="0.00" multiplier="1.00" name="discovery" required="false" scoreType="INTEGER" title="Discovery">
       <description>Team explored and improved skills or ideas within all three aspects (Robot, Innovation Project, Core Values) of FIRST LEGO League; used creativity and persistence to solve problems</description>
       <rubric>
@@ -1180,12 +1184,13 @@ to acknowledge each team’s hard work and to help teams improve. Use the back f
         </range>
       </rubric>
     </goal>
-    <scoreSheetInstructions>For each skill area, clearly mark the box that best describes the team's accomplishments. If the team does not
-demonstrate skill in a particular area, then put an 'X' in the first box for Not Demonstrated (ND). Please provide as
-many written comments as you can to acknowledge each team’s hard work and to help teams improve. Use the back
-for additional comments if needed.</scoreSheetInstructions>
   </subjectiveCategory>
   <subjectiveCategory name="robot_design" title="Robot Design" weight="0.50">
+    <scoreSheetInstructions>For each Robot Design criteria, clearly mark the box that best describes the ability of the team to demonstrate or
+provide evidence (such as analysis or test data) that their robot and processes meet that level of achievement. If the
+team does NOT describe a particular criteria at all, then put an 'X' in the first box for Not Demonstrated (ND). Please
+provide as many written comments as you can to acknowledge each team’s hard work and to help teams improve.
+Use the back for additional comments if needed.</scoreSheetInstructions>
     <goal category="Mechanical Design" initialValue="0.00" max="12.00" min="0.00" multiplier="1.00" name="durability" required="false" scoreType="INTEGER" title="Durability">
       <description>Robot designed to maintain structural intergrity and have the ability to withstand rigors of competition.</description>
       <rubric>
@@ -1366,13 +1371,9 @@ for additional comments if needed.</scoreSheetInstructions>
         </range>
       </rubric>
     </goal>
-    <scoreSheetInstructions>For each Robot Design criteria, clearly mark the box that best describes the ability of the team to demonstrate or
-provide evidence (such as analysis or test data) that their robot and processes meet that level of achievement. If the
-team does NOT describe a particular criteria at all, then put an 'X' in the first box for Not Demonstrated (ND). Please
-provide as many written comments as you can to acknowledge each team’s hard work and to help teams improve.
-Use the back for additional comments if needed.</scoreSheetInstructions>
   </subjectiveCategory>
   <subjectiveCategory name="robot_programming" title="Programming" weight="0.50">
+    <scoreSheetInstructions>Directions: For each skill area, clearly mark the box that best describes the team's accomplishments.  If the team does not demonstrate skill in a particular area, then put an 'X' in the first box for Not Demonstrated (ND).  Please provide as many written comments as you can to acknowledge each teams's hard work and to help teams improve. </scoreSheetInstructions>
     <goal category="MN Programming" initialValue="0.00" max="12.00" min="0.00" multiplier="1.00" name="code_structure" required="false" scoreType="INTEGER" title="Code Structure and Reuse">
       <description>Programs show proper use of variables, loops, subroutines and there is an understanding of code reuse.</description>
       <rubric>
@@ -1533,6 +1534,5 @@ Use the back for additional comments if needed.</scoreSheetInstructions>
         </range>
       </rubric>
     </goal>
-    <scoreSheetInstructions>Directions: For each skill area, clearly mark the box that best describes the team's accomplishments.  If the team does not demonstrate skill in a particular area, then put an 'X' in the first box for Not Demonstrated (ND).  Please provide as many written comments as you can to acknowledge each teams's hard work and to help teams improve. </scoreSheetInstructions>
   </subjectiveCategory>
 </fll>
