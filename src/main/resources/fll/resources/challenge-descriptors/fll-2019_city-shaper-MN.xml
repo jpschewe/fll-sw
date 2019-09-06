@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<fll copyright="2010 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST) and The LEGO Group. Used by special permission. All rights reserved." revision="3" schemaVersion="2" title="2019 Minnesota FIRST LEGO League - City Shaper" winner="HIGH">
+<fll copyright="2010 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST) and The LEGO Group. Used by special permission. All rights reserved." revision="4" schemaVersion="2" title="2019 Minnesota FIRST LEGO League - City Shaper" winner="HIGH">
   <Performance minimumScore="0.00" weight="1.00">
     <goal initialValue="0.00" max="1.00" min="0.00" multiplier="0.00" name="small_inspection_area" required="false" scoreType="INTEGER" title="Fit in Small Inspection Area"/>
     <goal category="M01" initialValue="0.00" max="1.00" min="0.00" multiplier="20.00" name="m01_robot_bridge" required="false" scoreType="INTEGER" title="M01 - Elevated places - Robot is Supported by the Bridge"/>
@@ -814,10 +814,7 @@
     </tiebreaker>
   </Performance>
   <subjectiveCategory name="project" title="Innovation Project" weight="1.00">
-    <scoreSheetInstructions>For each skill area, clearly mark the box that best describes the team's accomplishments. Teams should
-demonstrate everything at the level; if they are missing part, mark the level below. If the team does not demonstrate
-an area, put an 'X' in the first box for Not Demonstrated (ND). Please provide as many written comments as you can
-to acknowledge each team’s hard work and to help teams improve. Use the back for additional comments if needed.</scoreSheetInstructions>
+    <scoreSheetInstructions>For each skill area, clearly mark the box that best describes the team's accomplishments. Teams should demonstrate everything at the level; if they are missing part, mark the level below. If the team does not demonstrate an area, put an 'X' in the first box for Not Demonstrated (ND). Please provide as many written comments as you can to acknowledge each team's hard work and to help teams improve. Use the back for additional comments if needed.</scoreSheetInstructions>
     <goal category="Research" initialValue="0.00" max="12.00" min="0.00" multiplier="1.00" name="problem_identification" required="true" scoreType="INTEGER" title="Problem Identification* ">
       <description>Clear definition of the problem being studied</description>
       <rubric>
@@ -1000,10 +997,7 @@ to acknowledge each team’s hard work and to help teams improve. Use the back f
     </goal>
   </subjectiveCategory>
   <subjectiveCategory name="core_values" title="Core Values" weight="1.00">
-    <scoreSheetInstructions>For each skill area, clearly mark the box that best describes the team's accomplishments. If the team does not
-demonstrate skill in a particular area, then put an 'X' in the first box for Not Demonstrated (ND). Please provide as
-many written comments as you can to acknowledge each team’s hard work and to help teams improve. Use the back
-for additional comments if needed.</scoreSheetInstructions>
+    <scoreSheetInstructions>For each skill area, clearly mark the box that best describes the team's accomplishments. If the team does not demonstrate skill in a particular area, then put an 'X' in the first box for Not Demonstrated (ND). Please provide as many written comments as you can to acknowledge each team's hard work and to help teams improve. Use the back for additional comments if needed.</scoreSheetInstructions>
     <goal category="Inspiration" initialValue="0.00" max="12.00" min="0.00" multiplier="1.00" name="discovery" required="false" scoreType="INTEGER" title="Discovery">
       <description>Team explored and improved skills or ideas within all three aspects (Robot, Innovation Project, Core Values) of FIRST LEGO League; used creativity and persistence to solve problems</description>
       <rubric>
@@ -1186,11 +1180,7 @@ for additional comments if needed.</scoreSheetInstructions>
     </goal>
   </subjectiveCategory>
   <subjectiveCategory name="robot_design" title="Robot Design" weight="0.50">
-    <scoreSheetInstructions>For each Robot Design criteria, clearly mark the box that best describes the ability of the team to demonstrate or
-provide evidence (such as analysis or test data) that their robot and processes meet that level of achievement. If the
-team does NOT describe a particular criteria at all, then put an 'X' in the first box for Not Demonstrated (ND). Please
-provide as many written comments as you can to acknowledge each team’s hard work and to help teams improve.
-Use the back for additional comments if needed.</scoreSheetInstructions>
+    <scoreSheetInstructions>For each Robot Design criteria, clearly mark the box that best describes the ability of the team to demonstrate or provide evidence (such as analysis or test data) that their robot and processes meet that level of achievement. If the team does NOT describe a particular criteria at all, then put an 'X' in the first box for Not Demonstrated (ND). Please provide as many written comments as you can to acknowledge each team's hard work and to help teams improve. Use the back for additional comments if needed.</scoreSheetInstructions>
     <goal category="Mechanical Design" initialValue="0.00" max="12.00" min="0.00" multiplier="1.00" name="durability" required="false" scoreType="INTEGER" title="Durability">
       <description>Robot designed to maintain structural intergrity and have the ability to withstand rigors of competition.</description>
       <rubric>
@@ -1373,24 +1363,44 @@ Use the back for additional comments if needed.</scoreSheetInstructions>
     </goal>
   </subjectiveCategory>
   <subjectiveCategory name="robot_programming" title="Programming" weight="0.50">
-    <scoreSheetInstructions>Directions: For each skill area, clearly mark the box that best describes the team's accomplishments.  If the team does not demonstrate skill in a particular area, then put an 'X' in the first box for Not Demonstrated (ND).  Please provide as many written comments as you can to acknowledge each teams's hard work and to help teams improve. </scoreSheetInstructions>
-    <goal category="MN Programming" initialValue="0.00" max="12.00" min="0.00" multiplier="1.00" name="code_structure" required="false" scoreType="INTEGER" title="Code Structure and Reuse">
-      <description>Programs show proper use of variables, loops, subroutines and there is an understanding of code reuse.</description>
+    <scoreSheetInstructions>Directions: For each skill area, clearly mark the box that best describes the team's accomplishments. If the team does not demonstrate skill in a particular area, then put an 'X' in the first box for Not Demonstrated (ND). Please provide as many written comments as you can to acknowledge each teams's hard work and to help teams improve.</scoreSheetInstructions>
+    <goal category="MN Programming" initialValue="0.00" max="12.00" min="0.00" multiplier="1.00" name="code_structure" required="false" scoreType="INTEGER" title="Code Structure">
+      <description>Programs show proper use of variables, loops, condition and parameters.</description>
       <rubric>
         <range max="0" min="0" shortDescription="ND" title="">
           <description/>
         </range>
-        <range max="3" min="1" shortDescription="variables, loops, subroutines and conditions defined, but not used" title="Beginning">
+        <range max="3" min="1" shortDescription="variables, loops and conditions / parameters defined, but not used" title="Beginning">
           <description/>
         </range>
-        <range max="6" min="4" shortDescription="variables, loops, subroutines and conditions exist, but not fully understood or utilized" title="Developing">
+        <range max="6" min="4" shortDescription="variables, loops, conditions / parameters  exist, but not fully understood or utilized" title="Developing">
           <description/>
         </range>
-        <range max="9" min="7" shortDescription="variables, loops, subroutines and conditions are used and understood.  some signs of code reuse" title="Accomplished">
+        <range max="9" min="7" shortDescription="variables, loops, conditions / parameters  are used and understood." title="Accomplished">
           <description>Some signs of code reuse.</description>
         </range>
-        <range max="12" min="10" shortDescription="variables, loops, subroutines and conditions are used effectively.  code reuse evident and understood" title="Exemplary">
+        <range max="12" min="10" shortDescription="variables, loops, conditions / parameters are used effectively." title="Exemplary">
           <description>Code reuse evident and understood.</description>
+        </range>
+      </rubric>
+    </goal>
+    <goal category="MN Programming" initialValue="0.00" max="12.00" min="0.00" multiplier="1.00" name="code_reuse" required="false" scoreType="INTEGER" title="Code Reuse">
+      <description>Programs show proper use of MyBlocks, subroutines and/or comon methods and there is an understanding of code reuse.</description>
+      <rubric>
+        <range max="0" min="0" shortDescription="ND" title="">
+          <description/>
+        </range>
+        <range max="3" min="1" shortDescription="MyBlocks, subroutines and / or common methods defined, but not used" title="Beginning">
+          <description/>
+        </range>
+        <range max="6" min="4" shortDescription="MyBlocks, subroutines and / or common methods exist, but not  fully used or utilized" title="Developing">
+          <description/>
+        </range>
+        <range max="9" min="7" shortDescription="MyBlocks, subroutines and / or common methods are used and understood.  some signs of code reuse" title="Accomplished">
+          <description/>
+        </range>
+        <range max="12" min="10" shortDescription="MyBlocks, subroutines and / or common methods are used effectively.  code reuse evident and understood" title="Exemplary">
+          <description>Programs show proper use of code reuse, subroutines and/or comon methods and there is an understanding of code reuse.</description>
         </range>
       </rubric>
     </goal>
