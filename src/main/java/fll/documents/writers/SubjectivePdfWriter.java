@@ -205,12 +205,21 @@ public class SubjectivePdfWriter {
     pageHeaderTable.addCell(headerCell);
 
     // put the rest of the header cells on the table
-    final PdfPCell titleCell = createCell(scoreCategory.getTitle(), f20b, borders, Element.ALIGN_LEFT);
-    titleCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+    final Chunk categoryTitle = new Chunk(scoreCategory.getTitle(), f20b);
+    final Chunk teamNumberTitle = new Chunk("    Team Number: " + teamInfo.getTeamNumber(), f12b);
+    final Paragraph titlePara = new Paragraph();
+    titlePara.add(categoryTitle);
+    titlePara.add(teamNumberTitle);
+    final PdfPCell titleCell = new PdfPCell(titlePara);
+    if (LOGGER.isTraceEnabled()) {
+      titleCell.setBorder(1);
+    } else {
+      titleCell.setBorder(0);
+    }
+    titleCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+
+    titleCell.setColspan(2);
     pageHeaderTable.addCell(titleCell);
-    final PdfPCell teamNumberCell = createCell("Team Number: "
-        + teamInfo.getTeamNumber(), f12b, borders, Element.ALIGN_LEFT);
-    pageHeaderTable.addCell(teamNumberCell);
 
     final String scheduledTimeStr;
     if (null == scheduleColumn) {
