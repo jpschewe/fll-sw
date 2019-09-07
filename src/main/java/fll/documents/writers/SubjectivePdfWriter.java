@@ -202,9 +202,9 @@ public class SubjectivePdfWriter {
     headerCell.setVerticalAlignment(Element.ALIGN_TOP);
     // make sure there is enough height for the team number and the team name
     headerCell.setMinimumHeight(45);
+    pageHeaderTable.addCell(headerCell);
 
     // put the rest of the header cells on the table
-    pageHeaderTable.addCell(headerCell);
     final PdfPCell titleCell = createCell(scoreCategory.getTitle(), f20b, borders, Element.ALIGN_LEFT);
     titleCell.setHorizontalAlignment(Element.ALIGN_CENTER);
     pageHeaderTable.addCell(titleCell);
