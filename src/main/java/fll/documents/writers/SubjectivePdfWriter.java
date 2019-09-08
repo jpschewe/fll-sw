@@ -497,6 +497,7 @@ public class SubjectivePdfWriter {
       result.setBorderWidthBottom(1);
       result.setBorderWidthLeft(1);
       result.setBorderWidthRight(1);
+      break;
     default:
       break;
     }
