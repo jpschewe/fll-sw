@@ -52,7 +52,11 @@ td.center {
 }
 
 .score-slider-cell .ui-slider-handle {
-	background-color: black;
+	background-color: black;	
+}
+
+.score-slider-cell .ui-slider-handle:hover {
+    background-color: black;    
 }
 
 table.score-entry .selected-range {
