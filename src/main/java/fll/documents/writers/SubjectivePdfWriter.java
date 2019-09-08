@@ -60,6 +60,8 @@ public class SubjectivePdfWriter {
 
   private final static int TOP_ONLY = 6;
 
+  private static final int ALL_BORDERS = 7;
+
   private static final BaseColor rowBlue = new BaseColor(0xB4, 0xCD, 0xED);
 
   private static final BaseColor rowYellow = new BaseColor(0xFF, 0xFF, 0xC8);
@@ -174,6 +176,13 @@ public class SubjectivePdfWriter {
     pageHeaderTable.setWidthPercentage(100f);
     pageHeaderTable.setSpacingBefore(0f);
 
+    final int borders;
+    if (LOGGER.isTraceEnabled()) {
+      borders = ALL_BORDERS;
+    } else {
+      borders = NO_BORDERS;
+    }
+
     // get the FLL image to put on the document
     final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
     final URL imageUrl = classLoader.getResource("fll/resources/documents/FLLHeader.png");
@@ -185,19 +194,32 @@ public class SubjectivePdfWriter {
     // put the image in the header cell
     headerCell = new PdfPCell(image, false);
     headerCell.setRowspan(2);
-    headerCell.setBorder(0);
+    if (LOGGER.isTraceEnabled()) {
+      headerCell.setBorder(1);
+    } else {
+      headerCell.setBorder(0);
+    }
     headerCell.setVerticalAlignment(Element.ALIGN_TOP);
     // make sure there is enough height for the team number and the team name
     headerCell.setMinimumHeight(45);
+    pageHeaderTable.addCell(headerCell);
 
     // put the rest of the header cells on the table
-    pageHeaderTable.addCell(headerCell);
-    final PdfPCell titleCell = createCell(scoreCategory.getTitle(), f20b, NO_BORDERS, Element.ALIGN_LEFT);
-    titleCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+    final Chunk categoryTitle = new Chunk(scoreCategory.getTitle(), f20b);
+    final Chunk teamNumberTitle = new Chunk("    Team Number: " + teamInfo.getTeamNumber(), f12b);
+    final Paragraph titlePara = new Paragraph();
+    titlePara.add(categoryTitle);
+    titlePara.add(teamNumberTitle);
+    final PdfPCell titleCell = new PdfPCell(titlePara);
+    if (LOGGER.isTraceEnabled()) {
+      titleCell.setBorder(1);
+    } else {
+      titleCell.setBorder(0);
+    }
+    titleCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+
+    titleCell.setColspan(2);
     pageHeaderTable.addCell(titleCell);
-    final PdfPCell teamNumberCell = createCell("Team Number: "
-        + teamInfo.getTeamNumber(), f12b, NO_BORDERS, Element.ALIGN_LEFT);
-    pageHeaderTable.addCell(teamNumberCell);
 
     final String scheduledTimeStr;
     if (null == scheduleColumn) {
@@ -207,20 +229,20 @@ public class SubjectivePdfWriter {
       scheduledTimeStr = TournamentSchedule.formatTime(scheduledTime);
     }
     pageHeaderTable.addCell(createCell("Time: "
-        + scheduledTimeStr, f12b, NO_BORDERS, Element.ALIGN_RIGHT));
+        + scheduledTimeStr, f12b, borders, Element.ALIGN_RIGHT));
 
     final PdfPCell roomCell = createCell("Judging Room: "
-        + teamInfo.getAwardGroup(), f10b, NO_BORDERS, Element.ALIGN_LEFT);
+        + teamInfo.getAwardGroup(), f10b, borders, Element.ALIGN_LEFT);
     roomCell.setHorizontalAlignment(Element.ALIGN_CENTER);
     pageHeaderTable.addCell(roomCell);
 
-    final PdfPCell teamNameCell = createCell(null, f12b, NO_BORDERS, Element.ALIGN_LEFT);
+    final PdfPCell teamNameCell = createCell(null, f12b, borders, Element.ALIGN_LEFT);
     final String teamNameText = "Name: "
         + teamInfo.getTeamName();
     teamNameCell.setCellEvent(new PdfUtils.TruncateContent(teamNameText, f12b));
     pageHeaderTable.addCell(teamNameCell);
 
-    pageHeaderTable.addCell(createCell(tournamentName, f6i, NO_BORDERS, Element.ALIGN_RIGHT));
+    pageHeaderTable.addCell(createCell(tournamentName, f6i, borders, Element.ALIGN_RIGHT));
 
     // add the instructions to the header
     final String dirText = scoreCategory.getScoreSheetInstructions();
@@ -246,13 +268,13 @@ public class SubjectivePdfWriter {
     columnTitlesTable.setSpacingBefore(5);
     columnTitlesTable.setWidthPercentage(100f);
     columnTitlesTable.setWidths(colWidths);
-    columnTitlesTable.addCell(createCell("", f10b, NO_BORDERS)); // goal group
+    columnTitlesTable.addCell(createCell("", f10b, borders)); // goal group
 
     for (final String title : rubricRangeTitles) {
       if (null == title) {
-        columnTitlesTable.addCell(createCell("", f10b, NO_BORDERS));
+        columnTitlesTable.addCell(createCell("", f10b, borders));
       } else {
-        columnTitlesTable.addCell(createCell(title, f10b, NO_BORDERS));
+        columnTitlesTable.addCell(createCell(title, f10b, borders));
       }
     }
     columnTitlesTable.setSpacingAfter(3);
@@ -469,6 +491,12 @@ public class SubjectivePdfWriter {
     case TOP_ONLY:
       result.setBorderWidth(0);
       result.setBorderWidthTop(1);
+      break;
+    case ALL_BORDERS:
+      result.setBorderWidthTop(1);
+      result.setBorderWidthBottom(1);
+      result.setBorderWidthLeft(1);
+      result.setBorderWidthRight(1);
       break;
     default:
       break;
