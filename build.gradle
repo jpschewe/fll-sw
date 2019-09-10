@@ -245,10 +245,10 @@ distributions {
             }
             from("$buildDir/reports/tests/") {
                 into 'web/documentation/reports'
-                }
+            }
             from("$buildDir/reports/spotbugs/") {
                 into 'web/documentation/reports/spotbugs'
-                }
+            }
             from("$buildDir/reports/cobertura/") {
                 into 'web/documentation/reports/coverage'
             }
