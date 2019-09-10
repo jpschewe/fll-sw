@@ -8,6 +8,9 @@ import javax.xml.transform.stream.StreamSource
 
 import static org.gradle.api.tasks.PathSensitivity.NONE
 
+import java.nio.file.Paths
+
+
 buildscript {
     repositories {
         jcenter()
@@ -116,7 +119,7 @@ ext {
     mainClassName = 'fll.Launcher'
     
     // java download urls
-    java_download_base = new File(project.buildDir, 'bundled-java')
+    java_download_base = project.buildDir.toPath().resolve('bundled-java')
     
     java_windows_url = 'https://download.java.net/java/GA/jdk12.0.2/e482c34c86bd4bf8b56c0b35558996b9/10/GPL/openjdk-12.0.2_windows-x64_bin.zip'
     java_windows_checksum = 'a30bed3d6d62f6ae1052aaf3c6956aaee8e3deb2f50f155575112f3f29411fba'
@@ -220,39 +223,42 @@ integrationTest.dependsOn copyWeb
 // the web application classes stay outside of a jar file and Tomcat will properly
 // process the annotations. For some reason Tomcat won't process the annotations
 // inside of a jar file.
+def baseDistribution = copySpec {
+    from(sourceSets.main.output) {
+        into 'classes'
+    }
+    from(configurations.runtimeClasspath) {
+        into 'lib'
+    }
+        
+    // web elements
+    from(project.web_build_dir) {
+        into 'web'
+        exclude '**/WEB-INF/flldb*'
+    }
+    
+    // documentation
+    from(project.documentation_build_dir) {
+        into 'web/documentation'
+    }
+    from(javadoc) {
+        into 'web/documentation/api'
+    }
+    from("$buildDir/reports/tests/") {
+        into 'web/documentation/reports'
+    }
+    from("$buildDir/reports/spotbugs/") {
+        into 'web/documentation/reports/spotbugs'
+    }
+    from("$buildDir/reports/cobertura/") {
+        into 'web/documentation/reports/coverage'
+    }
+}
+
 distributions {
     main {
-        contents {
-            from(sourceSets.main.output) {
-                into 'classes'
-            }
-            from(configurations.runtimeClasspath) {
-                into 'lib'
-                }
-                
-                // web elements
-            from(project.web_build_dir) {
-                into 'web'
-                exclude '**/WEB-INF/flldb*'
-            }
-            
-            // documentation
-            from(project.documentation_build_dir) {
-                into 'web/documentation'
-            }
-            from(javadoc) {
-                into 'web/documentation/api'
-            }
-            from("$buildDir/reports/tests/") {
-                into 'web/documentation/reports'
-            }
-            from("$buildDir/reports/spotbugs/") {
-                into 'web/documentation/reports/spotbugs'
-            }
-            from("$buildDir/reports/cobertura/") {
-                into 'web/documentation/reports/coverage'
-            }
-            
+        contents {            
+            with baseDistribution
             from("$buildDir/launch4j/fll-sw.exe")
         }
     }
@@ -485,7 +491,7 @@ dependencyUpdates.resolutionStrategy {
 
 task downloadJavaWindows(type: Download) {
     src project.java_windows_url
-    dest new File(project.java_download_base, 'windows-java.zip')
+    dest project.java_download_base.resolve('windows-java.zip').toFile()
     overwrite false
 }
 task verifyJavaWindows(type: Verify, dependsOn: downloadJavaWindows) {
@@ -493,4 +499,19 @@ task verifyJavaWindows(type: Verify, dependsOn: downloadJavaWindows) {
     algorithm 'SHA-256'
     checksum project.java_windows_checksum
 }
+task uncompressJavaWindows(type: Copy, dependsOn: verifyJavaWindows) {
+    from zipTree(downloadJavaWindows.dest)
+    into project.java_download_base.resolve('windows')
+} 
+    
+distributions {
+    windows {
+        baseName = 'windows'
+        contents {
+            with baseDistribution
+            from("$buildDir/bundled-java/windows/")
+        }        
+    }
+}
+
 
