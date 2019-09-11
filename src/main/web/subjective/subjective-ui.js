@@ -557,9 +557,17 @@ function addRubricToScoreEntry(table, goal, ranges) {
   var row = $("<tr></tr>");
 
   $.each(ranges, function(index, range) {
+    // skip the right border on the last cell
+    var borderClass;
+    if(index >= ranges.length-1) {
+      borderClass = "";
+    } else {
+      borderClass = "border-right";
+    }
+    
     var numColumns = range.max - range.min + 1;
     var cell = $("<td colspan='" + numColumns
-        + "' class='border-right center' id='" + getRubricCellId(goal, index)
+        + "' class='" + borderClass + " center' id='" + getRubricCellId(goal, index)
         + "'>" + range.shortDescription + "</td>");
     row.append(cell);
   });
@@ -581,21 +589,45 @@ function addSliderToScoreEntry(table, goal, totalColumns, ranges, subscore) {
       + "'></td>");
 
   var sliderId = getScoreItemName(goal);
-  var label = $("<label for='" + sliderId
-      + "' class='ui-hidden-accessible'></label>");
-  cell.append(label);
 
-  var slider = $("<input type='range' name='" + sliderId + "' id='" + sliderId
-      + "' min='" + goal.min + "' max='" + goal.max + "' value='" + initValue
-      + "' />");
+  var $sliderContainer = $("<div id='" + sliderId + "-container'></div>");
+  cell.append($sliderContainer);
 
-  cell.append(slider);
+  var $slider = $("<input type='range' class='ui-hidden-accessible' name='"
+      + sliderId + "' id='" + sliderId + "' min='" + goal.min + "' max='"
+      + goal.max + "' value='" + initValue + "'></input>");
+
+  $sliderContainer.append($slider);
 
   row.append(cell);
 
   table.append(row);
 
   highlightRubric(goal, ranges, initValue);
+}
+
+function setSliderTicks(goal) {
+  var sliderId = getScoreItemName(goal);
+
+  var $slider = $("#" + sliderId);
+  var $track = $("#" + sliderId + "-container .ui-slider-track");
+
+  var max = goal.max;
+  var min = goal.min;
+  var spacing = 100 / (max - min);
+
+  /*
+   * $.subjective.log("Creating slider ticks for " + goal.name + " min: " + min + "
+   * max: " + max + " spacing: " + spacing);
+   */
+
+  $slider.find('.sliderTickMark').remove();
+  for (var i = 0; i <= max - min; i++) {
+    var $tick = $('<span class="sliderTickMark">&nbsp;</span>');
+    $tick.css('left', (spacing * i) + '%');
+    $track.prepend($tick);
+  }
+
 }
 
 function highlightRubric(goal, ranges, value) {
@@ -612,25 +644,25 @@ function highlightRubric(goal, ranges, value) {
 }
 
 function addEventsToSlider(goal, ranges) {
+
   var ranges = goal.rubric;
   ranges.sort(rangeSort);
 
   var sliderId = getScoreItemName(goal);
+  var $slider = $("#" + sliderId);
 
-  var slider = $("#" + sliderId);
-  slider.slider({
+  $slider.slider({
     highlight : true
   });
 
-  slider.on("change", function() {
-    var value = slider.val();
-    $.subjective.log("change value for " + sliderId + ": " + value);
+  setSliderTicks(goal);
 
+  $slider.on("change", function() {
+    var value = $slider.val();
     highlightRubric(goal, ranges, value);
 
     recomputeTotal();
   });
-
 }
 
 function createScoreRows(table, totalColumns, goal, subscore) {
@@ -648,8 +680,10 @@ function createScoreRows(table, totalColumns, goal, subscore) {
 
 /**
  * 
- * @param table where to put the information
- * @param hidden true if the row should be hidden
+ * @param table
+ *          where to put the information
+ * @param hidden
+ *          true if the row should be hidden
  * @returns total number of columns to represent all scores in the rubric ranges
  */
 function populateEnterScoreRubricTitles(table, hidden) {
@@ -661,10 +695,10 @@ function populateEnterScoreRubricTitles(table, hidden) {
   var totalColumns = 0;
 
   var row = $("<tr></tr>");
-  if(hidden) {
+  if (hidden) {
     row.addClass('hidden');
   }
-  
+
   $.each(ranges, function(index, range) {
     var numColumns = range.max - range.min + 1;
     var cell = $("<th colspan='" + numColumns + "'>" + range.title + "</th>");
@@ -703,7 +737,7 @@ $(document).on(
       var headerTable = $("#enter-score_score-table_header");
       headerTable.empty();
       populateEnterScoreRubricTitles(headerTable, false)
-      
+
       var prevCategory = null;
       $.each($.subjective.getCurrentCategory().goals, function(index, goal) {
         if (goal.enumerated) {
@@ -1011,10 +1045,8 @@ function displayTournamentName(displayElement) {
   displayElement.text("Tournament: " + tournamentName);
 }
 
-
-window.onbeforeunload = function ()
-{
+window.onbeforeunload = function() {
   // most browsers won't show the custom message, but we can try
   // returning anything other than undefined will cause the user to be prompted
-    return "Are you sure you want to leave?";
+  return "Are you sure you want to leave?";
 };
