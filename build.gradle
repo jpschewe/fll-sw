@@ -513,5 +513,7 @@ distributions {
         }        
     }
 }
+windowsDistZip.dependsOn uncompressJavaWindows
+windowsDistTar.dependsOn uncompressJavaWindows
 
 
