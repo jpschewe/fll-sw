@@ -259,7 +259,7 @@ distributions {
     main {
         contents {            
             with baseDistribution
-            from("$buildDir/launch4j/fll-sw.exe")
+            from(createExe.dest)
         }
     }
 }
@@ -382,7 +382,7 @@ task createDatabaseDiagram(type: JavaExec, dependsOn: [markdownToHtml]) {
 distZip.dependsOn createDatabaseDiagram
 distTar.dependsOn createDatabaseDiagram
 
-launch4j {
+createExe {
         mainClassName = project.mainClassName
         icon = "${projectDir}/src/main/resources/fll/resources/fll-sw.ico"
         
