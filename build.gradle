@@ -224,6 +224,10 @@ integrationTest.dependsOn copyWeb
 // process the annotations. For some reason Tomcat won't process the annotations
 // inside of a jar file.
 def baseDistribution = copySpec {
+    from("src/main/dist/") {
+        exclude 'fll-sw.sh'
+    }
+    
     from(sourceSets.main.output) {
         into 'classes'
     }
