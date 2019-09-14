@@ -520,6 +520,7 @@ distributions {
         contents {
             with baseDistribution
             from("$buildDir/bundled-java/windows/")
+            from(createExe.dest)
         }        
     }
 }
