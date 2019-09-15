@@ -210,14 +210,21 @@ javadoc {
     failOnError = false
 }
 
+task distributionDependencies {
+    doLast {
+        println "Distribution dependnecies"
+    }
+}
+distTar.dependsOn distributionDependencies
+distZip.dependsOn distributionDependencies
+installDist.dependsOn distributionDependencies
+
 // copy webapp files
 task copyWeb(type: Copy) {
     from 'src/main/web'
     into project.web_build_dir
 }
-distTar.dependsOn copyWeb
-distZip.dependsOn copyWeb
-integrationTest.dependsOn copyWeb
+distributionDependencies.dependsOn copyWeb
 
 // Configure the distribution plugin instead of using the application plugin so that
 // the web application classes stay outside of a jar file and Tomcat will properly
@@ -285,8 +292,7 @@ markdownToHtml {
         definitionLists = true
         tables = true   
 }
-distTar.dependsOn markdownToHtml
-distZip.dependsOn markdownToHtml
+distributionDependencies.dependsOn markdownToHtml
 
 
 // write log4j config for JspC
@@ -374,8 +380,7 @@ task renderWorkflows(dependsOn: [markdownToHtml]) {
       }
     }
 }
-distZip.dependsOn renderWorkflows
-distTar.dependsOn renderWorkflows
+distributionDependencies.dependsOn renderWorkflows
 
 task createDatabaseDiagram(type: JavaExec, dependsOn: [markdownToHtml]) {
     classpath = sourceSets.main.runtimeClasspath
@@ -383,8 +388,7 @@ task createDatabaseDiagram(type: JavaExec, dependsOn: [markdownToHtml]) {
     main = "fll.db.GenerateDatabaseDiagram"
     args new File(project.documentation_build_dir, "database-diagram").absolutePath
 }
-distZip.dependsOn createDatabaseDiagram
-distTar.dependsOn createDatabaseDiagram
+distributionDependencies.dependsOn createDatabaseDiagram
 
 createExe {
         mainClassName = project.mainClassName
@@ -410,8 +414,7 @@ createExe {
         
         
 }
-distZip.dependsOn createExe
-distTar.dependsOn createExe
+distributionDependencies.dependsOn createExe
 
 
 configurations {
@@ -453,13 +456,10 @@ tasks.withType(SpotBugsTask) {
     }
     it.finalizedBy "${it.name}HtmlReport"
 }
-// these tasks are crated in the loop above
-distZip.dependsOn spotbugsMainHtmlReport
-distTar.dependsOn spotbugsMainHtmlReport
-distZip.dependsOn spotbugsTestHtmlReport
-distTar.dependsOn spotbugsTestHtmlReport
-distZip.dependsOn spotbugsIntegrationTestHtmlReport
-distTar.dependsOn spotbugsIntegrationTestHtmlReport
+// these tasks are created in the loop above
+distributionDependencies.dependsOn spotbugsMainHtmlReport
+distributionDependencies.dependsOn spotbugsTestHtmlReport
+distributionDependencies.dependsOn spotbugsIntegrationTestHtmlReport
 
 gitProperties {
     gitPropertiesDir = "${buildDir}/resources/main/fll/resources"
@@ -476,8 +476,7 @@ task writeLaunchJar(type: Jar) {
         "Class-Path": "classes/\n " + configurations.runtimeClasspath.collect { "lib/" + it.getName() }.join(' \n '))
     }
 }
-distZip.dependsOn writeLaunchJar
-distTar.dependsOn writeLaunchJar
+distributionDependencies.dependsOn writeLaunchJar
 
 cobertura {
     coverageFormats = [ 'html', 'xml' ]
@@ -496,6 +495,28 @@ dependencyUpdates.resolutionStrategy {
         }
     }
 }
+
+   
+distributions {
+    windows {
+        baseName = 'windows'
+        contents {
+            with baseDistribution
+            from("$buildDir/bundled-java/windows/")
+            from(createExe.dest)
+        }        
+    }
+}
+
+task windowsDistributionDependencies {
+    doLast {
+        println "Windows distribution dependnecies"
+    }
+}
+windowsDistributionDependencies.dependsOn distributionDependencies
+windowsDistTar.dependsOn windowsDistributionDependencies
+windowsDistZip.dependsOn windowsDistributionDependencies
+installWindowsDist.dependsOn windowsDistributionDependencies
 
 task downloadJavaWindows(type: Download) {
     src project.java_windows_url
@@ -517,19 +538,8 @@ uncompressJavaWindows.doFirst {
         include '**/bin/server/classes.jsa'
     }
 }
-    
-distributions {
-    windows {
-        baseName = 'windows'
-        contents {
-            with baseDistribution
-            from("$buildDir/bundled-java/windows/")
-            from(createExe.dest)
-        }        
-    }
-}
-windowsDistZip.dependsOn uncompressJavaWindows
-windowsDistTar.dependsOn uncompressJavaWindows
+windowsDistributionDependencies.dependsOn uncompressJavaWindows
+
 
 installWindowsDist.doFirst {
     // Need to remove read-only file from JDK release
@@ -537,5 +547,3 @@ installWindowsDist.doFirst {
         include '**/bin/server/classes.jsa'
     }
 }
-
-
