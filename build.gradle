@@ -206,7 +206,7 @@ dependencies {
 
 
 task distributionDependencies {
-    doLast {
+    doFirst {
         println "Distribution dependnecies"
     }
 }
@@ -491,7 +491,8 @@ dependencyUpdates.resolutionStrategy {
     }
 }
 
-   
+
+// start Windows distribution tasks   
 distributions {
     windows {
         baseName = 'windows'
@@ -542,3 +543,62 @@ installWindowsDist.doFirst {
         include '**/bin/server/classes.jsa'
     }
 }
+// end Windows distribution tasks
+
+// start Linux distribution tasks
+distributions {
+    linux {
+        baseName = 'linux'
+        contents {
+            with baseDistribution
+            from("$buildDir/bundled-java/linux/")
+            from(createExe.dest)
+            from("src/main/dist/") {
+                include 'fll-sw.sh'
+            }            
+        }        
+    }
+}
+
+task linuxDistributionDependencies {
+    doFirst {
+        println "Linux distribution dependnecies"
+    }
+}
+linuxDistributionDependencies.dependsOn distributionDependencies
+linuxDistTar.dependsOn linuxDistributionDependencies
+linuxDistZip.dependsOn linuxDistributionDependencies
+installLinuxDist.dependsOn linuxDistributionDependencies
+
+task downloadJavaLinux(type: Download) {
+    src project.java_linux_url
+    dest project.java_download_base.resolve('linux-java.tar.gz').toFile()
+    overwrite false
+}
+task verifyJavaLinux(type: Verify, dependsOn: downloadJavaLinux) {
+    src downloadJavaLinux.dest
+    algorithm 'SHA-256'
+    checksum project.java_linux_checksum
+}
+task uncompressJavaLinux(type: Copy, dependsOn: verifyJavaLinux) {    
+    from tarTree(downloadJavaLinux.dest)
+    into project.java_download_base.resolve('linux')
+} 
+uncompressJavaLinux.doFirst {
+    // Need to remove read-only file from JDK release
+    delete fileTree(project.java_download_base.resolve('linux')) {
+        include '**/lib/server/classes.jsa'
+        include '**/legal/**'
+    }
+}
+linuxDistributionDependencies.dependsOn uncompressJavaLinux
+
+
+installLinuxDist.doFirst {
+    // Need to remove read-only file from JDK release
+    delete fileTree("$buildDir/install/linux") {
+        include '**/lib/server/classes.jsa'
+        include '**/legal/**'
+    }
+}
+// end Linux distribution tasks
