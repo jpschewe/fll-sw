@@ -1,3 +1,4 @@
+* #399 - Add distributions that include a bundled JDK so that Java doesn't need to be installed
 * #753 - Add score sheet instructions to the challenge description file
 * #758 - Allow rubric ranges to not have titles - this is needed for "ND"
 * #752 - update subjective sheet writer code to handle "ND" being part of the challenge description rubric
