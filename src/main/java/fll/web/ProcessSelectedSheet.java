@@ -22,12 +22,13 @@ import javax.servlet.http.HttpSession;
 public final class ProcessSelectedSheet extends BaseFLLServlet {
 
   /**
-   * Key in the sesession where <code>promptForSheetName.jsp</code> expects to
-   * find a {@link List} of {@link String} objects to present to the user for
+   * Key in the session where <code>promptForSheetName.jsp</code> expects to
+   * find a {@link java.util.List} of {@link String} objects to present to the user for
    * choosing the sheet name.
    */
   public static final String SHEET_NAMES_KEY = "sheetNames";
 
+  @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
