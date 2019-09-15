@@ -54,7 +54,7 @@ public final class WebUtils {
 
   /**
    * Take a URL and make it absolute by prepending the context path.
-   * 
+   *
    * @param application the servlet context
    * @param url expected to begin with a slash
    * @return the absolute URL
@@ -73,7 +73,7 @@ public final class WebUtils {
    * <p>
    * The method calling this method should return right away.
    * </p>
-   * 
+   *
    * @param application
    * @param url
    * @throws IOException See {@link HttpServletResponse#sendRedirect(String)}
@@ -117,11 +117,11 @@ public final class WebUtils {
   /**
    * Compute the host names and store them in the application. This is done in the
    * background to avoid issues with DNS timeouts.
-   * 
+   *
    * @param application where to store the hostnames
-   * @see #HOSTNAME_KEY
-   * @see #HOSTNAME_EXPIRATION_KEY
-   * @see #EXPIRATION
+   * @see #HOSTNAMES_KEY
+   * @see #HOSTNAMES_EXPIRATION_KEY
+   * @see #HOSTNAME_LIFETIME
    */
   public static void updateHostNamesInBackground(final ServletContext application) {
     ForkJoinPool.commonPool().execute(() -> {
@@ -135,7 +135,7 @@ public final class WebUtils {
   /**
    * Get all URLs that this host can be access via. The scheme of the URLs is
    * determined by the scheme of the request.
-   * 
+   *
    * @param request the request
    * @param application where to get the stored hostnames and optionally update
    *          the hostnames
@@ -151,7 +151,7 @@ public final class WebUtils {
     }
 
     @SuppressWarnings("unchecked") // can't store generics in ServletContext
-    final Collection<String> hostNames = (Collection<String>) ApplicationAttributes.getAttribute(application,
+    final Collection<String> hostNames = ApplicationAttributes.getAttribute(application,
                                                                                                  HOSTNAMES_KEY,
                                                                                                  Collection.class);
     if (null == hostNames) {
@@ -170,7 +170,7 @@ public final class WebUtils {
    * Get the host address for the specified address. For IPv4 addresses this just
    * calls {@link InetAddress#getHostAddress()}. For IPv6 addresses, the same
    * method is called, however the scope ID needs to be removed.
-   * 
+   *
    * @param address the address to convert
    * @return the IP address as a string.
    */
@@ -191,7 +191,7 @@ public final class WebUtils {
 
   /**
    * Get all IP addresses associated with this host.
-   * 
+   *
    * @return collection of IP addresses
    */
   public static Collection<InetAddress> getAllIPs() {
@@ -218,12 +218,12 @@ public final class WebUtils {
    * Get all names that this computer is known as. This includes all IP addresses
    * and all host names that are found by doing a reverse lookup on each IP
    * address. Due to the DNS lookups, this method may be slow.
-   * 
+   *
    * @return collection of names
    * @see #getAllIPs()
    */
   public static Collection<String> getAllHostNames() {
-    final Collection<String> hostNames = new LinkedList<String>();
+    final Collection<String> hostNames = new LinkedList<>();
 
     for (final InetAddress address : getAllIPs()) {
       if (address instanceof Inet4Address) {
@@ -270,7 +270,7 @@ public final class WebUtils {
    * Check if the web request is authenticated.
    * If the connection is from localhost it's
    * allowed.
-   * 
+   *
    * @param request the web request
    * @param application the application context
    * @return true if authenticated, false otherwise
@@ -349,7 +349,7 @@ public final class WebUtils {
 
   /**
    * Get a parameter value, trim it and if it's empty return null.
-   * 
+   *
    * @param request the request to get the parameter from
    * @param parameterName the name of the parameter to find
    * @return the parameter value, null if the parameter isn't present OR the
@@ -373,13 +373,13 @@ public final class WebUtils {
   /**
    * Based on
    * https://stackoverflow.com/questions/2222238/httpservletrequest-to-complete-url.
-   * 
+   *
    * @param request a request
    * @return the full url, including query string
    * @see HttpServletRequest#getQueryString()
    * @see HttpServletRequest#getRequestURL()
    */
-  public static String getFullURL(HttpServletRequest request) {
+  public static String getFullURL(final HttpServletRequest request) {
     final StringBuilder requestURL = new StringBuilder(request.getRequestURL().toString());
     final String queryString = request.getQueryString();
 

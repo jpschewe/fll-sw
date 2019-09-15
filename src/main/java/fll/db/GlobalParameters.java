@@ -71,7 +71,7 @@ public final class GlobalParameters {
 
   /**
    * Get a global parameter from the database that is a double.
-   * 
+   *
    * @param connection the database connection
    * @param parameter the parameter name
    * @return the value
@@ -101,7 +101,7 @@ public final class GlobalParameters {
 
   /**
    * Get a global parameter from the database that is an int.
-   * 
+   *
    * @param connection the database connection
    * @param parameter the parameter name
    * @return the value
@@ -131,7 +131,7 @@ public final class GlobalParameters {
 
   /**
    * Get a string global parameter.
-   * 
+   *
    * @return the value of the parameter, may be null
    * @throws IllegalArgumentException if the parameter cannot be found
    */
@@ -173,7 +173,7 @@ public final class GlobalParameters {
    * Get the challenge document out of the database. This method doesn't
    * validate the document, since it's assumed that the document was validated
    * before it was put in the database.
-   * 
+   *
    * @param connection connection to the database
    * @return the document
    * @throws FLLRuntimeException if the document cannot be found
@@ -259,7 +259,7 @@ public final class GlobalParameters {
 
   /**
    * Get a global parameter from the database that is a boolean.
-   * 
+   *
    * @param connection the database connection
    * @param parameter the parameter name
    * @return the value
@@ -310,12 +310,12 @@ public final class GlobalParameters {
   /**
    * Get the standardized mean used for normalization. All scores are normalized
    * such that the mean of the scores is this value.
-   * 
+   *
    * @param connection the database connection
    * @return the value (should be greater than 0)
    * @throws SQLException if there is an error talking to the database
-   * @see {@link #STANDARDIZED_MEAN}
-   * @see {@link #STANDARDIZED_MEAN_DEFAULT}
+   * @see #STANDARDIZED_MEAN
+   * @see #STANDARDIZED_MEAN_DEFAULT
    */
   public static double getStandardizedMean(@Nonnull final Connection connection) throws SQLException {
     return getDoubleGlobalParameter(connection, STANDARDIZED_MEAN);
@@ -324,12 +324,12 @@ public final class GlobalParameters {
   /**
    * Get the standardized sigma. During normalization this value specifies how the
    * number of points for 1 standard deviation from the mean.
-   * 
+   *
    * @param connection the database connection
    * @return the value (should be greater than 0)
    * @throws SQLException if there is an error talking to the database
-   * @see {@link #STANDARDIZED_SIGMA}
-   * @see {@link #STANDARDIZED_SIGMA_DEFAULT}
+   * @see #STANDARDIZED_SIGMA
+   * @see #STANDARDIZED_SIGMA_DEFAULT
    */
   public static double getStandardizedSigma(@Nonnull final Connection connection) throws SQLException {
     return getDoubleGlobalParameter(connection, STANDARDIZED_SIGMA);
@@ -343,7 +343,7 @@ public final class GlobalParameters {
    * Some control over the scroll rate of the all teams part of the score board.
    * The value is nominally the number of milliseconds to display each row of the
    * display for.
-   * 
+   *
    * @param connection the database connection
    * @return the nominal scroll rate
    * @throws SQLException if there is a problem talking to the database
@@ -358,7 +358,7 @@ public final class GlobalParameters {
 
   /**
    * See {@link #getAllTeamsMsPerRow(Connection)}.
-   * 
+   *
    * @param connection the database connection
    * @param value the new value
    * @throws SQLException if there is a problem talking to the database
@@ -377,7 +377,7 @@ public final class GlobalParameters {
    * Some control over the scroll rate of the head to head brackets.
    * The value is nominally the number of milliseconds to display each row of the
    * display for.
-   * 
+   *
    * @param connection the database connection
    * @return the nominal scroll rate
    * @throws SQLException if there is a problem talking to the database
@@ -392,7 +392,7 @@ public final class GlobalParameters {
 
   /**
    * See {@link #getHeadToHeadMsPerRow(Connection)}.
-   * 
+   *
    * @param connection the database connection
    * @param value the new value
    * @throws SQLException if there is a problem talking to the database

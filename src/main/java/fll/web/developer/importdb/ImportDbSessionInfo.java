@@ -34,7 +34,7 @@ public final class ImportDbSessionInfo {
   }
 
   /**
-   * @param v see {@Link #getImportDataSource()}
+   * @param v see {@link #getImportDataSource()}
    */
   public void setImportDataSource(final DataSource v) {
     dbimport = v;
@@ -68,7 +68,7 @@ public final class ImportDbSessionInfo {
 
   /**
    * @return an unmodifiable collection of the missing teams
-   * @see #setMissingTeams(List)
+   * @see #setMissingTeams(Collection)
    */
   @Nonnull
   public Collection<Team> getMissingTeams() {
@@ -148,7 +148,7 @@ public final class ImportDbSessionInfo {
    * This is a URL that is passed to
    * {@link HttpServletResponse#sendRedirect(String)} when {@link ExecuteImport}
    * finishes successfully. The default is the developer index.
-   * 
+   *
    * @return the URL to redirect to on success
    */
   public String getRedirectURL() {

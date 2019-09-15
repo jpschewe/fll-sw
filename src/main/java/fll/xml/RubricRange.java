@@ -78,7 +78,7 @@ public class RubricRange implements Serializable {
   /**
    * Default constructor. {@link #getDescription()} is null,
    * {@link #getShortDescription()} is null, {@link #getMin()} is 0,
-   * {@Link #getMax()} is 1.
+   * {@link #getMax()} is 1.
    *
    * @param title the title of the range
    */
@@ -100,7 +100,7 @@ public class RubricRange implements Serializable {
   }
 
   /**
-   * @param v see {@Link #getTitle()}
+   * @param v see {@link #getTitle()}
    */
   public void setTitle(final String v) {
     mTitle = v;
