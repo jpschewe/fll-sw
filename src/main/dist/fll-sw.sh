@@ -22,20 +22,31 @@ mypath=$(cd "$(dirname "$0")" && pwd -L) || fatal "Unable to determine script di
 # OS specific support.  $var _must_ be set to either true or false.
 cygwin=false;
 darwin=false;
+linux=false;
 case "`uname`" in
   CYGWIN*) cygwin=true ;;
   Darwin*) darwin=true ;;
+  Linux*) linux=true ;;
 esac
 
-# check for bundled JDK
-for dir in "${mypath}"/jdk-*; do
-    if [ -e "${dir}/bin/java" ]; then
-        JAVA_HOME=${dir}
-    fi
-done
+if $linux ; then
+    # check for bundled JDK
+    for dir in "${mypath}"/jdk-*; do
+        if [ -e "${dir}/bin/java" ]; then
+            JAVA_HOME=${dir}
+        fi
+    done
+fi
 
 
 if $darwin ; then
+    # check for bundled JDK
+    for dir in "${mypath}"/jdk-*/Contents/Home; do
+        if [ -e "${dir}/bin/java" ]; then
+            JAVA_HOME=${dir}
+        fi
+    done
+    
     if [ -z "${JAVA_HOME}" ] ; then
         # best option is first
         for java_dir in \

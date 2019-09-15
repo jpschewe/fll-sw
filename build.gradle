@@ -602,3 +602,62 @@ installLinuxDist.doFirst {
     }
 }
 // end Linux distribution tasks
+
+
+// start Mac distribution tasks
+distributions {
+    mac {
+        baseName = 'mac'
+        contents {
+            with baseDistribution
+            from("$buildDir/bundled-java/mac/")
+            from(createExe.dest)
+            from("src/main/dist/") {
+                include 'fll-sw.sh'
+            }            
+        }        
+    }
+}
+
+task macDistributionDependencies {
+    doFirst {
+        println "Mac distribution dependnecies"
+    }
+}
+macDistributionDependencies.dependsOn distributionDependencies
+macDistTar.dependsOn macDistributionDependencies
+macDistZip.dependsOn macDistributionDependencies
+installMacDist.dependsOn macDistributionDependencies
+
+task downloadJavaMac(type: Download) {
+    src project.java_mac_url
+    dest project.java_download_base.resolve('mac-java.tar.gz').toFile()
+    overwrite false
+}
+task verifyJavaMac(type: Verify, dependsOn: downloadJavaMac) {
+    src downloadJavaMac.dest
+    algorithm 'SHA-256'
+    checksum project.java_mac_checksum
+}
+task uncompressJavaMac(type: Copy, dependsOn: verifyJavaMac) {    
+    from tarTree(downloadJavaMac.dest)
+    into project.java_download_base.resolve('mac')
+} 
+uncompressJavaMac.doFirst {
+    // Need to remove read-only file from JDK release
+    delete fileTree(project.java_download_base.resolve('mac')) {
+        include '**/lib/server/classes.jsa'
+        include '**/legal/**'
+    }
+}
+macDistributionDependencies.dependsOn uncompressJavaMac
+
+
+installMacDist.doFirst {
+    // Need to remove read-only file from JDK release
+    delete fileTree("$buildDir/install/mac") {
+        include '**/lib/server/classes.jsa'
+        include '**/legal/**'
+    }
+}
+// end Mac distribution tasks
