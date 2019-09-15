@@ -35,7 +35,9 @@ import fll.documents.elements.TableElement;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.util.PdfUtils;
+import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
+import fll.xml.Goal;
 import fll.xml.RubricRange;
 import fll.xml.SubjectiveScoreCategory;
 
@@ -67,6 +69,10 @@ public class SubjectivePdfWriter {
   private static final BaseColor rowYellow = new BaseColor(0xFF, 0xFF, 0xC8);
 
   private static final BaseColor rowRed = new BaseColor(0xF7, 0x98, 0x85);
+
+  private final Font f6Red = new Font(Font.FontFamily.HELVETICA, 6, Font.NORMAL, BaseColor.RED);
+
+  private final Font f8bRed = new Font(Font.FontFamily.HELVETICA, 8, Font.BOLD, BaseColor.RED);
 
   private final Font f6i = new Font(Font.FontFamily.HELVETICA, 6, Font.ITALIC);
 
@@ -206,7 +212,8 @@ public class SubjectivePdfWriter {
 
     // put the rest of the header cells on the table
     final Chunk categoryTitle = new Chunk(scoreCategory.getTitle(), f20b);
-    final Chunk teamNumberTitle = new Chunk("    Team Number: " + teamInfo.getTeamNumber(), f12b);
+    final Chunk teamNumberTitle = new Chunk("    Team Number: "
+        + teamInfo.getTeamNumber(), f12b);
     final Paragraph titlePara = new Paragraph();
     titlePara.add(categoryTitle);
     titlePara.add(teamNumberTitle);
@@ -354,6 +361,24 @@ public class SubjectivePdfWriter {
 
     closingTable.setWidthPercentage(100f);
 
+    boolean somethingRequired = false;
+    for (final AbstractGoal agoal : sheetElement.getSheetData().getGoals()) {
+      if (agoal instanceof Goal) {
+        final Goal goal = (Goal) agoal;
+        if (goal.isRequired()) {
+          somethingRequired = true;
+        }
+      }
+    }
+    if (somethingRequired) {
+      final PdfPCell requiredC = createCell("* Required for Award Consideration ", f6Red, NO_BORDERS);
+      // NO_BORDERS centers
+      requiredC.setHorizontalAlignment(Element.ALIGN_LEFT);
+      closingTable.addCell(requiredC);
+    } else {
+      closingTable.addCell(createCell(" ", f6Red, NO_BORDERS));
+    }
+
     if (null != description.getCopyright()) {
       // add the copy right statement
       final PdfPCell copyrightC = createCell("\u00A9"
@@ -402,6 +427,11 @@ public class SubjectivePdfWriter {
 
       final Phrase topicAreaP = new Phrase();
       topicAreaP.add(topicAreaC);
+
+      if (rowElement.getGoal().isRequired()) {
+        final Chunk required = new Chunk(" *", f8bRed);
+        topicAreaP.add(required);
+      }
 
       topicArea = new PdfPCell(topicAreaP);
       topicArea.setVerticalAlignment(Element.ALIGN_CENTER);
