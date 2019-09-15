@@ -63,7 +63,43 @@ pipeline {
           } // timestamps
         } // throttle
       } // steps           
-    } // build and test stage
+    } // Distribution stage
+    
+    stage('Linux Distribution') {
+      steps {
+        throttle(['fll-sw']) { 
+          timestamps {
+            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE', message: 'Assuming distribution failed because a new version of OpenJDK was released') {
+              fllSwGradle('linuxDistTar')
+            }
+          } // timestamps
+        } // throttle
+      } // steps           
+    } // Linux Distribution stage
+
+    stage('Mac Distribution') {
+      steps {
+        throttle(['fll-sw']) { 
+          timestamps {
+            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE', message: 'Assuming distribution failed because a new version of OpenJDK was released') {
+              fllSwGradle('macDistTar')
+            }
+          } // timestamps
+        } // throttle
+      } // steps           
+    } // Linux Distribution stage
+    
+    stage('Windows Distribution') {
+      steps {
+        throttle(['fll-sw']) { 
+          timestamps {
+            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE', message: 'Assuming distribution failed because a new version of OpenJDK was released') {
+              fllSwGradle('windowsDistZip')
+            }
+          } // timestamps
+        } // throttle
+      } // steps           
+    } // Windows Distribution stage
     
     /*
     stage('Publish documentation') {
