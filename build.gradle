@@ -204,6 +204,10 @@ dependencies {
     
 }
 
+tasks.withType(Tar){
+    compression = Compression.GZIP
+    extension = 'tar.gz'
+}
 
 task distributionDependencies {
     doFirst {
