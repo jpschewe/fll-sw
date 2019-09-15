@@ -70,9 +70,9 @@ public class SubjectivePdfWriter {
 
   private static final BaseColor rowRed = new BaseColor(0xF7, 0x98, 0x85);
 
-  private final Font f6Red = new Font(Font.FontFamily.HELVETICA, 6, Font.NORMAL, BaseColor.RED);
-
   private final Font f8bRed = new Font(Font.FontFamily.HELVETICA, 8, Font.BOLD, BaseColor.RED);
+
+  private final Font f9bRed = new Font(Font.FontFamily.HELVETICA, 9, Font.BOLD, BaseColor.RED);
 
   private final Font f6i = new Font(Font.FontFamily.HELVETICA, 6, Font.ITALIC);
 
@@ -168,7 +168,6 @@ public class SubjectivePdfWriter {
     PdfPTable pageHeaderTable = null;
     PdfPTable columnTitlesTable = null;
     PdfPCell headerCell = null;
-    Paragraph directions = null;
     Phrase text = null;
 
     // set up the header for proper spacing
@@ -254,9 +253,19 @@ public class SubjectivePdfWriter {
     // add the instructions to the header
     final String dirText = scoreCategory.getScoreSheetInstructions();
     text = new Phrase(dirText, f9b);
-    directions = new Paragraph();
+    final Paragraph directions = new Paragraph();
     directions.add(text);
     directions.setLeading(10f);
+
+    boolean somethingRequired = false;
+    for (final AbstractGoal agoal : sheetElement.getSheetData().getGoals()) {
+      if (agoal instanceof Goal) {
+        final Goal goal = (Goal) agoal;
+        if (goal.isRequired()) {
+          somethingRequired = true;
+        }
+      }
+    }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // TOP TITLE BAR START
@@ -290,6 +299,13 @@ public class SubjectivePdfWriter {
     try {
       doc.add(pageHeaderTable);
       doc.add(directions);
+
+      if (somethingRequired) {
+        final Paragraph requiredPara = new Paragraph();
+        requiredPara.add(new Phrase("* Required for Award Consideration", f9bRed));
+        doc.add(requiredPara);
+      }
+
       doc.add(columnTitlesTable);
     } catch (final DocumentException de) {
       LOGGER.error("Unable to write out the document.", de);
@@ -360,24 +376,6 @@ public class SubjectivePdfWriter {
     final PdfPTable closingTable = new PdfPTable(1);
 
     closingTable.setWidthPercentage(100f);
-
-    boolean somethingRequired = false;
-    for (final AbstractGoal agoal : sheetElement.getSheetData().getGoals()) {
-      if (agoal instanceof Goal) {
-        final Goal goal = (Goal) agoal;
-        if (goal.isRequired()) {
-          somethingRequired = true;
-        }
-      }
-    }
-    if (somethingRequired) {
-      final PdfPCell requiredC = createCell("* Required for Award Consideration ", f6Red, NO_BORDERS);
-      // NO_BORDERS centers
-      requiredC.setHorizontalAlignment(Element.ALIGN_LEFT);
-      closingTable.addCell(requiredC);
-    } else {
-      closingTable.addCell(createCell(" ", f6Red, NO_BORDERS));
-    }
 
     if (null != description.getCopyright()) {
       // add the copy right statement
