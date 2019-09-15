@@ -205,11 +205,6 @@ dependencies {
 }
 
 
-javadoc {
-    // TODO: Need to fix the errors eventually
-    failOnError = false
-}
-
 task distributionDependencies {
     doLast {
         println "Distribution dependnecies"
