@@ -505,7 +505,6 @@ dependencyUpdates.resolutionStrategy {
 // start Windows distribution tasks   
 distributions {
     windows {
-        baseName = 'windows'
         contents {
             with baseDistribution
             from("$buildDir/bundled-java/windows/")
@@ -558,7 +557,6 @@ installWindowsDist.doFirst {
 // start Linux distribution tasks
 distributions {
     linux {
-        baseName = 'linux'
         contents {
             with baseDistribution
             from("$buildDir/bundled-java/linux/")
@@ -617,7 +615,6 @@ installLinuxDist.doFirst {
 // start Mac distribution tasks
 distributions {
     mac {
-        baseName = 'mac'
         contents {
             with baseDistribution
             from("$buildDir/bundled-java/mac/")
