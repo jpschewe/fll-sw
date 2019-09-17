@@ -66,6 +66,7 @@ pipeline {
     } // Distribution stage
     
     stage('Linux Distribution') {
+      agent { label "linux" }
       steps {
         throttle(['fll-sw']) { 
           timestamps {
