@@ -60,7 +60,7 @@ pipeline {
         throttle(['fll-sw']) { 
           timestamps {
             fllSwGradle('distZip')
-            stash includes: 'build/**', name: 'build_data'
+            stash name: 'build_data', includes: 'build/**', excludes: "build/tmp/**"
           } // timestamps
         } // throttle
       } // steps           
