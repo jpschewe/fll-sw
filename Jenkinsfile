@@ -60,35 +60,11 @@ pipeline {
         throttle(['fll-sw']) { 
           timestamps {
             fllSwGradle('distZip')
+            stash includes: 'build/**', name: 'build_data'
           } // timestamps
         } // throttle
       } // steps           
     } // Distribution stage
-    
-    stage('Linux Distribution') {
-      agent { label "linux" }
-      steps {
-        throttle(['fll-sw']) { 
-          timestamps {
-            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE', message: 'Assuming distribution failed because a new version of OpenJDK was released') {
-              fllSwGradle('linuxDistTar')
-            }
-          } // timestamps
-        } // throttle
-      } // steps           
-    } // Linux Distribution stage
-
-    stage('Mac Distribution') {
-      steps {
-        throttle(['fll-sw']) { 
-          timestamps {
-            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE', message: 'Assuming distribution failed because a new version of OpenJDK was released') {
-              fllSwGradle('macDistTar')
-            }
-          } // timestamps
-        } // throttle
-      } // steps           
-    } // Linux Distribution stage
     
     stage('Windows Distribution') {
       steps {
@@ -102,6 +78,34 @@ pipeline {
       } // steps           
     } // Windows Distribution stage
     
+    stage('Linux Distribution') {
+      agent { label "linux" }
+      steps {
+        throttle(['fll-sw']) { 
+          timestamps {
+            unstash name: 'build_data'
+            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE', message: 'Assuming distribution failed because a new version of OpenJDK was released') {
+              fllSwGradle('linuxDistTar')
+            }
+          } // timestamps
+        } // throttle
+      } // steps           
+    } // Linux Distribution stage
+
+    stage('Mac Distribution') {
+      agent { label "linux" }
+      steps {
+        throttle(['fll-sw']) { 
+          timestamps {
+            unstash name: 'build_data'
+            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE', message: 'Assuming distribution failed because a new version of OpenJDK was released') {
+              fllSwGradle('macDistTar')
+            }
+          } // timestamps
+        } // throttle
+      } // steps           
+    } // Linux Distribution stage
+        
     /*
     stage('Publish documentation') {
       steps {    
