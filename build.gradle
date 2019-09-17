@@ -10,6 +10,7 @@ import static org.gradle.api.tasks.PathSensitivity.NONE
 
 import java.nio.file.Paths
 
+import org.apache.tools.ant.filters.FixCrLfFilter;
 
 buildscript {
     repositories {
@@ -236,9 +237,7 @@ integrationTest.dependsOn copyWeb
 // process the annotations. For some reason Tomcat won't process the annotations
 // inside of a jar file.
 def baseDistribution = copySpec {
-    from("src/main/dist/") {
-        exclude 'fll-sw.sh'
-    }
+    from("src/main/root-docs/")
     
     from(sourceSets.main.output) {
         into 'classes'
@@ -270,11 +269,17 @@ def baseDistribution = copySpec {
         into 'web/documentation/reports/coverage'
     }
 }
+// make sure that the launch script has Unix line endings
+def launchScriptDist = copySpec {
+    from("src/main/launch-script/")
+    filter(FixCrLfFilter.class, eol:FixCrLfFilter.CrLf.newInstance("lf"))
+}
 
 distributions {
     main {
         contents {            
             with baseDistribution
+            with launchScriptDist
             from(createExe.dest)
         }
     }
@@ -559,11 +564,9 @@ distributions {
     linux {
         contents {
             with baseDistribution
+            with launchScriptDist
             from("$buildDir/bundled-java/linux/")
             from(createExe.dest)
-            from("src/main/dist/") {
-                include 'fll-sw.sh'
-            }            
         }        
     }
 }
@@ -617,11 +620,9 @@ distributions {
     mac {
         contents {
             with baseDistribution
+            with launchScriptDist
             from("$buildDir/bundled-java/mac/")
             from(createExe.dest)
-            from("src/main/dist/") {
-                include 'fll-sw.sh'
-            }            
         }        
     }
 }
