@@ -25,9 +25,9 @@
       <value score="10.00" title="Partly in any Circle" value="partly"/>
       <value score="0.00" title="No" value="no"/>
     </goal>
-    <goal category="M12" initialValue="0.00" max="1.00" min="0.00" multiplier="10.00" name="m12_circles_red" required="false" scoreType="INTEGER" title="M012 - Color matching units in Circle Red"/>
-    <goal category="M12" initialValue="0.00" max="1.00" min="0.00" multiplier="10.00" name="m12_circles_tan" required="false" scoreType="INTEGER" title="M012 - Color matching units in Circle Tan"/>
-    <goal category="M12" initialValue="0.00" max="1.00" min="0.00" multiplier="10.00" name="m12_circles_white" required="false" scoreType="INTEGER" title="M012 - Color matching units in Circle White"/>
+    <goal category="M12" initialValue="0.00" max="1.00" min="0.00" multiplier="10.00" name="m12_circles_red" required="false" scoreType="INTEGER" title="M12 - Color matching unit(s) in Circle Red"/>
+    <goal category="M12" initialValue="0.00" max="1.00" min="0.00" multiplier="10.00" name="m12_circles_tan" required="false" scoreType="INTEGER" title="M012 - Color matching unit(s) in Circle Tan"/>
+    <goal category="M12" initialValue="0.00" max="1.00" min="0.00" multiplier="10.00" name="m12_circles_white" required="false" scoreType="INTEGER" title="M012 - Color matching unit(s) in Circle White"/>
     <goal category="M12" initialValue="0.00" max="28.00" min="0.00" multiplier="5.00" name="m12_levels" required="false" scoreType="INTEGER" title="M12 - Levels"/>
     <goal category="M13" initialValue="0.00" max="3.00" min="0.00" multiplier="10.00" name="m13_sustainability_upgrades" required="false" scoreType="INTEGER" title="M13 - Sustainability Upgrades"/>
     <goal initialValue="60.00" name="m14_precision" required="false" scoreType="INTEGER" title="M14 - Precision - Number of Tokens on Field">
