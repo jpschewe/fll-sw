@@ -60,11 +60,55 @@ pipeline {
         throttle(['fll-sw']) { 
           timestamps {
             fllSwGradle('distZip')
+            stash name: 'build_data', includes: 'build/**', excludes: "build/tmp/**"
           } // timestamps
         } // throttle
       } // steps           
-    } // build and test stage
+    } // Distribution stage
     
+    stage('Windows Distribution') {
+      steps {
+        throttle(['fll-sw']) { 
+          timestamps {
+            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE', message: 'Assuming distribution failed because a new version of OpenJDK was released') {
+              fllSwGradle('windowsDistZip')
+            }
+            stash name: 'windows_distribution', includes: 'build/distributions/*'
+          } // timestamps
+        } // throttle
+      } // steps           
+    } // Windows Distribution stage
+    
+    stage('Linux Distribution') {
+      agent { label "linux" }
+      steps {
+        throttle(['fll-sw']) { 
+          timestamps {
+            unstash name: 'build_data'
+            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE', message: 'Assuming distribution failed because a new version of OpenJDK was released') {
+              fllSwGradle('linuxDistTar')
+            }
+            stash name: 'linux_distribution', includes: 'build/distributions/*'
+          } // timestamps
+        } // throttle
+      } // steps           
+    } // Linux Distribution stage
+
+    stage('Mac Distribution') {
+      agent { label "linux" }
+      steps {
+        throttle(['fll-sw']) { 
+          timestamps {
+            unstash name: 'build_data'
+            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE', message: 'Assuming distribution failed because a new version of OpenJDK was released') {
+              fllSwGradle('macDistTar')
+            }
+            stash name: 'mac_distribution', includes: 'build/distributions/*'
+          } // timestamps
+        } // throttle
+      } // steps           
+    } // Linux Distribution stage
+        
     /*
     stage('Publish documentation') {
       steps {    
@@ -84,6 +128,11 @@ pipeline {
     
   post {
     always {
+      unstash name: 'build_data'
+      unstash name: 'windows_distribution'
+      unstash name: 'linux_distribution'
+      unstash name: 'mac_distribution'
+      
       archiveArtifacts artifacts: '*.log,screenshots/,build/reports/,build/distributions/'
                         
       recordIssues tool: taskScanner(includePattern: '**/*.java,**/*.jsp,**/*.jspf,**/*.xml', excludePattern: 'checkstyle*.xml', highTags: 'FIXME,HACK', normalTags: 'TODO')

@@ -27,11 +27,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
 
-
-
 import fll.Utilities;
 import fll.util.FormatterUtils;
-
 import fll.xml.AbstractConditionStatement;
 import fll.xml.AbstractGoal;
 import fll.xml.BasicPolynomial;
@@ -46,9 +43,7 @@ import fll.xml.ScoreCategory;
 import fll.xml.SwitchStatement;
 import fll.xml.Term;
 import fll.xml.Variable;
-import fll.xml.ui.MovableExpandablePanel.DeleteEvent;
 import fll.xml.ui.MovableExpandablePanel.DeleteEventListener;
-import fll.xml.ui.MovableExpandablePanel.MoveEvent;
 import fll.xml.ui.MovableExpandablePanel.MoveEvent.MoveDirection;
 import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 
@@ -115,80 +110,72 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
     mGoalEditorContainer = Box.createVerticalBox();
     add(mGoalEditorContainer);
 
-    mGoalMoveListener = new MoveEventListener() {
-
-      @Override
-      public void requestedMove(final MoveEvent e) {
-        final int oldIndex = Utilities.getIndexOfComponent(mGoalEditorContainer, e.getComponent());
-        if (oldIndex < 0) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Unable to find source of move event in goal container");
-          }
-          return;
+    mGoalMoveListener = e -> {
+      final int oldIndex = Utilities.getIndexOfComponent(mGoalEditorContainer, e.getComponent());
+      if (oldIndex < 0) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Unable to find source of move event in goal container");
         }
-
-        final int newIndex;
-        if (e.getDirection() == MoveDirection.DOWN) {
-          newIndex = oldIndex
-              + 1;
-        } else {
-          newIndex = oldIndex
-              - 1;
-        }
-
-        if (newIndex < 0
-            || newIndex >= mGoalEditorContainer.getComponentCount()) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Can't move component outside the container oldIndex: "
-                + oldIndex
-                + " newIndex: "
-                + newIndex);
-          }
-          return;
-        }
-
-        // update editor list
-        final AbstractGoalEditor editor = mGoalEditors.remove(oldIndex);
-        mGoalEditors.add(newIndex, editor);
-
-        // update the UI
-        mGoalEditorContainer.add(e.getComponent(), newIndex);
-        mGoalEditorContainer.validate();
-
-        // update the order in the challenge description
-        final AbstractGoal goal = mCategory.removeGoal(oldIndex);
-        mCategory.addGoal(newIndex, goal);
+        return;
       }
+
+      final int newIndex;
+      if (e.getDirection() == MoveDirection.DOWN) {
+        newIndex = oldIndex
+            + 1;
+      } else {
+        newIndex = oldIndex
+            - 1;
+      }
+
+      if (newIndex < 0
+          || newIndex >= mGoalEditorContainer.getComponentCount()) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Can't move component outside the container oldIndex: "
+              + oldIndex
+              + " newIndex: "
+              + newIndex);
+        }
+        return;
+      }
+
+      // update editor list
+      final AbstractGoalEditor editor = mGoalEditors.remove(oldIndex);
+      mGoalEditors.add(newIndex, editor);
+
+      // update the UI
+      mGoalEditorContainer.add(e.getComponent(), newIndex);
+      mGoalEditorContainer.validate();
+
+      // update the order in the challenge description
+      final AbstractGoal goal = mCategory.removeGoal(oldIndex);
+      mCategory.addGoal(newIndex, goal);
     };
 
-    mGoalDeleteListener = new DeleteEventListener() {
-
-      @Override
-      public void requestDelete(final DeleteEvent e) {
-        final int confirm = JOptionPane.showConfirmDialog(ScoreCategoryEditor.this,
-                                                          "Are you sure that you want to delete the goal?",
-                                                          "Confirm Delete", JOptionPane.YES_NO_OPTION);
-        if (confirm != JOptionPane.YES_OPTION) {
-          return;
-        }
-
-        final int index = Utilities.getIndexOfComponent(mGoalEditorContainer, e.getComponent());
-        if (index < 0) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Unable to find source of delete event in goal container");
-          }
-          return;
-        }
-
-        // update editor list
-        mGoalEditors.remove(index);
-
-        // update the challenge description
-        mCategory.removeGoal(index);
-
-        // update the UI
-        GuiUtils.removeFromContainer(mGoalEditorContainer, index);
+    mGoalDeleteListener = e -> {
+      final int confirm = JOptionPane.showConfirmDialog(ScoreCategoryEditor.this,
+                                                        "Are you sure that you want to delete the goal?",
+                                                        "Confirm Delete", JOptionPane.YES_NO_OPTION);
+      if (confirm != JOptionPane.YES_OPTION) {
+        return;
       }
+
+      final int index = Utilities.getIndexOfComponent(mGoalEditorContainer, e.getComponent());
+      if (index < 0) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Unable to find source of delete event in goal container");
+        }
+        return;
+      }
+
+      // update editor list
+      mGoalEditors.remove(index);
+
+      // update the challenge description
+      mCategory.removeGoal(index);
+
+      // update the UI
+      GuiUtils.removeFromContainer(mGoalEditorContainer, index);
     };
 
     mWeight.setValue(mCategory.getWeight());
@@ -198,8 +185,7 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
   }
 
   /**
-   * @return the category being edited, may be null if
-   *         {@link #setCategory(ScoreCategory)} hasn't been called
+   * @return the category being edited
    */
   public ScoreCategory getCategory() {
     return mCategory;
@@ -262,12 +248,13 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
   }
 
   /**
-   * Called by {@link #checkValidity()}. If the list is empty after the call, then
+   * Called by {@link #checkValidity(Collection)}. If the list is empty after the
+   * call, then
    * the goal is valid, otherwise the goal is invalid and the messages will be
    * displayed to the user.
    * Subclasses should override this to add extra checks. Make sure to call the
    * parent class method.
-   * 
+   *
    * @param messages put invalid messages in the list.
    */
   protected void gatherValidityMessages(final Collection<String> messages) {
@@ -384,7 +371,7 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
 
   /**
    * Find all computed goals that are directly referenced by the source goal.
-   * 
+   *
    * @param source the source goal
    * @return the referenced goals
    */

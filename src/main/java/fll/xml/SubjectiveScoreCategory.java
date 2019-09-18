@@ -92,7 +92,7 @@ public class SubjectiveScoreCategory extends ScoreCategory {
   }
 
   /**
-   * @param v see {@Link #getTitle()}
+   * @param v see {@link #getTitle()}
    */
   public void setTitle(final String v) {
     mTitle = v;
@@ -108,7 +108,7 @@ public class SubjectiveScoreCategory extends ScoreCategory {
   }
 
   /**
-   * @param v see {@Link #getScoreSheetInstructions()}
+   * @param v see {@link #getScoreSheetInstructions()}
    */
   public void setScoreSheetInstructions(final String v) {
     this.scoreSheetInstructions = v;
