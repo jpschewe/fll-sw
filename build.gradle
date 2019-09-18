@@ -405,32 +405,30 @@ task createDatabaseDiagram(type: JavaExec, dependsOn: [markdownToHtml]) {
 distributionDependencies.dependsOn createDatabaseDiagram
 
 createExe {
-        mainClassName = project.mainClassName
-        icon = "${projectDir}/src/main/resources/fll/resources/fll-sw.ico"
-        
-        dontWrapJar = true
-        errTitle = "FLL-SW"
-        classpath = ["%EXEDIR%/classes", "%EXEDIR%/lib/*.jar"]
+    mainClassName = project.mainClassName
+    icon = "${projectDir}/src/main/resources/fll/resources/fll-sw.ico"
+    
+    dontWrapJar = true
+    errTitle = "FLL-SW"
+    classpath = ["%EXEDIR%/classes", "%EXEDIR%/lib/*.jar"]
 
-        maxHeapPercent = 75        
-        
-        fileDescription = "FIRST Lego League Scoring Software"
-        productName = "FLL-SW"
-        copyright = "GPL"
-        
-        bundledJrePath = "jdk-12.0.2"
-        bundledJre64Bit = true
-        bundledJreAsFallback = false
+    maxHeapPercent = 75        
+    
+    fileDescription = "FIRST Lego League Scoring Software"
+    productName = "FLL-SW"
+    copyright = "GPL"
+    
+    bundledJrePath = "jdk-12.0.2"
+    bundledJre64Bit = true
+    bundledJreAsFallback = false
 
-        // should noe need to specify this https://github.com/TheBoegl/gradle-launch4j/issues/88        
-        jreMinVersion = project.targetCompatibility
-        
-        // for debugging classpath information        
-        //headerType = "console"
-        //jvmOptions = ["-Dlog4j2.debug=true"]
-        
-        
-}
+    // should noe need to specify this https://github.com/TheBoegl/gradle-launch4j/issues/88        
+    jreMinVersion = project.targetCompatibility
+    
+    // for debugging classpath information        
+    //headerType = "console"
+    //jvmOptions = ["-Dlog4j2.debug=true"]
+ }
 distributionDependencies.dependsOn createExe
 
 
