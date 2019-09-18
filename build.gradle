@@ -135,6 +135,10 @@ ext {
 
 group = 'fll'
 
+// set version of Java that the source confirms to. 
+// The bytecode will be for this version of Java as well, unless targetCompatibility is specified.
+sourceCompatibility = 1.8
+
 dependencies {
     implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: project.tomcat_version
     implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-jasper', version: project.tomcat_version
