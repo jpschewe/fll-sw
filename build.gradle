@@ -419,8 +419,8 @@ createExe {
         bundledJreAsFallback = true
         
         // for debugging classpath information        
-        headerType = "console"
-        jvmOptions = ["-Dlog4j2.debug=true"]
+        //headerType = "console"
+        //jvmOptions = ["-Dlog4j2.debug=true"]
         
         
 }
