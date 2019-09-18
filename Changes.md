@@ -1,3 +1,4 @@
+* #399 - Add distributions that include a bundled JDK so that Java doesn't need to be installed
 * #764 - Add labels to fields in the subjective web application
 * #755 - Put tick marks on the score entry sliders in the subjective web application
 * #753 - Add score sheet instructions to the challenge description file

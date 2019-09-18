@@ -8,6 +8,10 @@ import javax.xml.transform.stream.StreamSource
 
 import static org.gradle.api.tasks.PathSensitivity.NONE
 
+import java.nio.file.Paths
+
+import org.apache.tools.ant.filters.FixCrLfFilter;
+
 buildscript {
     repositories {
         jcenter()
@@ -36,6 +40,7 @@ plugins {
     id 'net.saliman.cobertura' version '2.6.0'
     id "com.gorylenko.gradle-git-properties" version "2.0.0"
     id "com.github.ben-manes.versions" version "0.21.0" // adds dependencyUpdates task
+    id "de.undercouch.download" version "4.0.0" // file download
 }
 
 // needs to use old plugin mechanism otherwise I can't set the extra properties
@@ -113,10 +118,26 @@ ext {
     jspPackage = "fll.jsp"
 
     mainClassName = 'fll.Launcher'
+    
+    // java download urls
+    java_download_base = project.buildDir.toPath().resolve('bundled-java')
+    
+    java_windows_url = 'https://download.java.net/java/GA/jdk12.0.2/e482c34c86bd4bf8b56c0b35558996b9/10/GPL/openjdk-12.0.2_windows-x64_bin.zip'
+    java_windows_checksum = 'a30bed3d6d62f6ae1052aaf3c6956aaee8e3deb2f50f155575112f3f29411fba'
+    
+    java_mac_url = 'https://download.java.net/java/GA/jdk12.0.2/e482c34c86bd4bf8b56c0b35558996b9/10/GPL/openjdk-12.0.2_osx-x64_bin.tar.gz'
+    java_mac_checksum = '675a739ab89b28a8db89510f87cb2ec3206ec6662fb4b4996264c16c72cdd2a1'
+    
+    java_linux_url = 'https://download.java.net/java/GA/jdk12.0.2/e482c34c86bd4bf8b56c0b35558996b9/10/GPL/openjdk-12.0.2_linux-x64_bin.tar.gz'
+    java_linux_checksum = '75998a6ebf477467aa5fb68227a67733f0e77e01f737d4dfbc01e617e59106ed'
 }
 
 
 group = 'fll'
+
+// set version of Java that the source confirms to. 
+// The bytecode will be for this version of Java as well, unless targetCompatibility is specified.
+sourceCompatibility = 1.8
 
 dependencies {
     implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: project.tomcat_version
@@ -188,59 +209,82 @@ dependencies {
     
 }
 
+tasks.withType(Tar){
+    compression = Compression.GZIP
+    extension = 'tar.gz'
+}
 
 javadoc {
     // TODO: Need to fix the errors eventually
     failOnError = false
 }
 
+task distributionDependencies {
+    doFirst {
+        println "Distribution dependnecies"
+    }
+}
+distTar.dependsOn distributionDependencies
+distZip.dependsOn distributionDependencies
+installDist.dependsOn distributionDependencies
+
 // copy webapp files
 task copyWeb(type: Copy) {
     from 'src/main/web'
     into project.web_build_dir
 }
-distTar.dependsOn copyWeb
-distZip.dependsOn copyWeb
+distributionDependencies.dependsOn copyWeb
 integrationTest.dependsOn copyWeb
 
 // Configure the distribution plugin instead of using the application plugin so that
 // the web application classes stay outside of a jar file and Tomcat will properly
 // process the annotations. For some reason Tomcat won't process the annotations
 // inside of a jar file.
+def baseDistribution = copySpec {
+    from("src/main/root-docs/")
+    
+    from(sourceSets.main.output) {
+        into 'classes'
+    }
+    from(configurations.runtimeClasspath) {
+        into 'lib'
+    }
+        
+    // web elements
+    from(project.web_build_dir) {
+        into 'web'
+        exclude '**/WEB-INF/flldb*'
+    }
+    
+    // documentation
+    from(project.documentation_build_dir) {
+        into 'web/documentation'
+    }
+    from(javadoc) {
+        into 'web/documentation/api'
+    }
+    from("$buildDir/reports/tests/") {
+        into 'web/documentation/reports'
+    }
+    from("$buildDir/reports/spotbugs/") {
+        into 'web/documentation/reports/spotbugs'
+    }
+    from("$buildDir/reports/cobertura/") {
+        into 'web/documentation/reports/coverage'
+    }
+}
+// make sure that the launch script has Unix line endings
+def launchScriptDist = copySpec {
+    from("src/main/launch-script/")
+    filter(FixCrLfFilter.class, eol:FixCrLfFilter.CrLf.newInstance("lf"))
+}
+
 distributions {
     main {
-        contents {
-            from(sourceSets.main.output) {
-                into 'classes'
-            }
-            from(configurations.runtimeClasspath) {
-                into 'lib'
-                }
-                
-                // web elements
-            from(project.web_build_dir) {
-                into 'web'
-                exclude '**/WEB-INF/flldb*'
-            }
-            
-            // documentation
-            from(project.documentation_build_dir) {
-                into 'web/documentation'
-            }
-            from(javadoc) {
-                into 'web/documentation/api'
-            }
-            from("$buildDir/reports/tests/") {
-                into 'web/documentation/reports'
-                }
-            from("$buildDir/reports/spotbugs/") {
-                into 'web/documentation/reports/spotbugs'
-                }
-            from("$buildDir/reports/cobertura/") {
-                into 'web/documentation/reports/coverage'
-            }
-            
-            from("$buildDir/launch4j/fll-sw.exe")
+        contents {            
+            with baseDistribution
+            with launchScriptDist
+            from(createExe.dest)
         }
     }
 }
@@ -262,8 +306,7 @@ markdownToHtml {
         definitionLists = true
         tables = true   
 }
-distTar.dependsOn markdownToHtml
-distZip.dependsOn markdownToHtml
+distributionDependencies.dependsOn markdownToHtml
 
 
 // write log4j config for JspC
@@ -351,8 +394,7 @@ task renderWorkflows(dependsOn: [markdownToHtml]) {
       }
     }
 }
-distZip.dependsOn renderWorkflows
-distTar.dependsOn renderWorkflows
+distributionDependencies.dependsOn renderWorkflows
 
 task createDatabaseDiagram(type: JavaExec, dependsOn: [markdownToHtml]) {
     classpath = sourceSets.main.runtimeClasspath
@@ -360,31 +402,34 @@ task createDatabaseDiagram(type: JavaExec, dependsOn: [markdownToHtml]) {
     main = "fll.db.GenerateDatabaseDiagram"
     args new File(project.documentation_build_dir, "database-diagram").absolutePath
 }
-distZip.dependsOn createDatabaseDiagram
-distTar.dependsOn createDatabaseDiagram
+distributionDependencies.dependsOn createDatabaseDiagram
 
-launch4j {
-        mainClassName = project.mainClassName
-        icon = "${projectDir}/src/main/resources/fll/resources/fll-sw.ico"
-        
-        dontWrapJar = true
-        errTitle = "FLL-SW"
-        classpath = ["%EXEDIR%/classes", "%EXEDIR%/lib/*.jar"]
+createExe {
+    mainClassName = project.mainClassName
+    icon = "${projectDir}/src/main/resources/fll/resources/fll-sw.ico"
+    
+    dontWrapJar = true
+    errTitle = "FLL-SW"
+    classpath = ["%EXEDIR%/classes", "%EXEDIR%/lib/*.jar"]
 
-        maxHeapPercent = 75        
-        
-        fileDescription = "FIRST Lego League Scoring Software"
-        productName = "FLL-SW"
-        copyright = "GPL"
-        
-/* for debugging classpath information        
-        headerType = "console"
-        jvmOptions = ["-Dlog4j2.debug=true"]
-        */
-        
-}
-distZip.dependsOn createExe
-distTar.dependsOn createExe
+    maxHeapPercent = 75        
+    
+    fileDescription = "FIRST Lego League Scoring Software"
+    productName = "FLL-SW"
+    copyright = "GPL"
+    
+    bundledJrePath = "jdk-12.0.2"
+    bundledJre64Bit = true
+    bundledJreAsFallback = false
+
+    // should noe need to specify this https://github.com/TheBoegl/gradle-launch4j/issues/88        
+    jreMinVersion = project.targetCompatibility
+    
+    // for debugging classpath information        
+    //headerType = "console"
+    //jvmOptions = ["-Dlog4j2.debug=true"]
+ }
+distributionDependencies.dependsOn createExe
 
 
 configurations {
@@ -426,13 +471,10 @@ tasks.withType(SpotBugsTask) {
     }
     it.finalizedBy "${it.name}HtmlReport"
 }
-// these tasks are crated in the loop above
-distZip.dependsOn spotbugsMainHtmlReport
-distTar.dependsOn spotbugsMainHtmlReport
-distZip.dependsOn spotbugsTestHtmlReport
-distTar.dependsOn spotbugsTestHtmlReport
-distZip.dependsOn spotbugsIntegrationTestHtmlReport
-distTar.dependsOn spotbugsIntegrationTestHtmlReport
+// these tasks are created in the loop above
+distributionDependencies.dependsOn spotbugsMainHtmlReport
+distributionDependencies.dependsOn spotbugsTestHtmlReport
+distributionDependencies.dependsOn spotbugsIntegrationTestHtmlReport
 
 gitProperties {
     gitPropertiesDir = "${buildDir}/resources/main/fll/resources"
@@ -449,8 +491,7 @@ task writeLaunchJar(type: Jar) {
         "Class-Path": "classes/\n " + configurations.runtimeClasspath.collect { "lib/" + it.getName() }.join(' \n '))
     }
 }
-distZip.dependsOn writeLaunchJar
-distTar.dependsOn writeLaunchJar
+distributionDependencies.dependsOn writeLaunchJar
 
 cobertura {
     coverageFormats = [ 'html', 'xml' ]
@@ -469,3 +510,167 @@ dependencyUpdates.resolutionStrategy {
         }
     }
 }
+
+
+// start Windows distribution tasks   
+distributions {
+    windows {
+        contents {
+            with baseDistribution
+            from("$buildDir/bundled-java/windows/")
+            from(createExe.dest)
+        }        
+    }
+}
+
+task windowsDistributionDependencies {
+    doLast {
+        println "Windows distribution dependnecies"
+    }
+}
+windowsDistributionDependencies.dependsOn distributionDependencies
+windowsDistTar.dependsOn windowsDistributionDependencies
+windowsDistZip.dependsOn windowsDistributionDependencies
+installWindowsDist.dependsOn windowsDistributionDependencies
+
+task downloadJavaWindows(type: Download) {
+    src project.java_windows_url
+    dest project.java_download_base.resolve('windows-java.zip').toFile()
+    overwrite false
+}
+task verifyJavaWindows(type: Verify, dependsOn: downloadJavaWindows) {
+    src downloadJavaWindows.dest
+    algorithm 'SHA-256'
+    checksum project.java_windows_checksum
+}
+task uncompressJavaWindows(type: Copy, dependsOn: verifyJavaWindows) {    
+    from zipTree(downloadJavaWindows.dest)
+    into project.java_download_base.resolve('windows')
+} 
+uncompressJavaWindows.doFirst {
+    // Need to remove read-only file from JDK release
+    delete fileTree(project.java_download_base.resolve('windows')) {
+        include '**/bin/server/classes.jsa'
+    }
+}
+windowsDistributionDependencies.dependsOn uncompressJavaWindows
+
+
+installWindowsDist.doFirst {
+    // Need to remove read-only file from JDK release
+    delete fileTree("$buildDir/install/windows") {
+        include '**/bin/server/classes.jsa'
+    }
+}
+// end Windows distribution tasks
+
+// start Linux distribution tasks
+distributions {
+    linux {
+        contents {
+            with baseDistribution
+            with launchScriptDist
+            from("$buildDir/bundled-java/linux/")
+            from(createExe.dest)
+        }        
+    }
+}
+
+task linuxDistributionDependencies {
+    doFirst {
+        println "Linux distribution dependnecies"
+    }
+}
+linuxDistributionDependencies.dependsOn distributionDependencies
+linuxDistTar.dependsOn linuxDistributionDependencies
+linuxDistZip.dependsOn linuxDistributionDependencies
+installLinuxDist.dependsOn linuxDistributionDependencies
+
+task downloadJavaLinux(type: Download) {
+    src project.java_linux_url
+    dest project.java_download_base.resolve('linux-java.tar.gz').toFile()
+    overwrite false
+}
+task verifyJavaLinux(type: Verify, dependsOn: downloadJavaLinux) {
+    src downloadJavaLinux.dest
+    algorithm 'SHA-256'
+    checksum project.java_linux_checksum
+}
+task uncompressJavaLinux(type: Copy, dependsOn: verifyJavaLinux) {    
+    from tarTree(downloadJavaLinux.dest)
+    into project.java_download_base.resolve('linux')
+} 
+uncompressJavaLinux.doFirst {
+    // Need to remove read-only file from JDK release
+    delete fileTree(project.java_download_base.resolve('linux')) {
+        include '**/lib/server/classes.jsa'
+        include '**/legal/**'
+    }
+}
+linuxDistributionDependencies.dependsOn uncompressJavaLinux
+
+
+installLinuxDist.doFirst {
+    // Need to remove read-only file from JDK release
+    delete fileTree("$buildDir/install/linux") {
+        include '**/lib/server/classes.jsa'
+        include '**/legal/**'
+    }
+}
+// end Linux distribution tasks
+
+
+// start Mac distribution tasks
+distributions {
+    mac {
+        contents {
+            with baseDistribution
+            with launchScriptDist
+            from("$buildDir/bundled-java/mac/")
+            from(createExe.dest)
+        }        
+    }
+}
+
+task macDistributionDependencies {
+    doFirst {
+        println "Mac distribution dependnecies"
+    }
+}
+macDistributionDependencies.dependsOn distributionDependencies
+macDistTar.dependsOn macDistributionDependencies
+macDistZip.dependsOn macDistributionDependencies
+installMacDist.dependsOn macDistributionDependencies
+
+task downloadJavaMac(type: Download) {
+    src project.java_mac_url
+    dest project.java_download_base.resolve('mac-java.tar.gz').toFile()
+    overwrite false
+}
+task verifyJavaMac(type: Verify, dependsOn: downloadJavaMac) {
+    src downloadJavaMac.dest
+    algorithm 'SHA-256'
+    checksum project.java_mac_checksum
+}
+task uncompressJavaMac(type: Copy, dependsOn: verifyJavaMac) {    
+    from tarTree(downloadJavaMac.dest)
+    into project.java_download_base.resolve('mac')
+} 
+uncompressJavaMac.doFirst {
+    // Need to remove read-only file from JDK release
+    delete fileTree(project.java_download_base.resolve('mac')) {
+        include '**/lib/server/classes.jsa'
+        include '**/legal/**'
+    }
+}
+macDistributionDependencies.dependsOn uncompressJavaMac
+
+
+installMacDist.doFirst {
+    // Need to remove read-only file from JDK release
+    delete fileTree("$buildDir/install/mac") {
+        include '**/lib/server/classes.jsa'
+        include '**/legal/**'
+    }
+}
+// end Mac distribution tasks

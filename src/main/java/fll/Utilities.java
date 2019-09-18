@@ -69,7 +69,8 @@ public final class Utilities {
   /**
    * Single instance of the floating point NumberFormat instance to save on
    * overhead
-   * and to use for consistency of formatting. Compatible with XML floating point fields.
+   * and to use for consistency of formatting. Compatible with XML floating point
+   * fields.
    */
   public static final NumberFormat XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE = NumberFormat.getInstance();
   static {
@@ -102,7 +103,7 @@ public final class Utilities {
   /**
    * Load a CSV file into an SQL table. Assumes that the first line in the CSV
    * file specifies the column names. This method is meant as the inverse of
-   * {@link au.com.bytecode.opencsv.CSVWriter#writeAll(ResultSet, boolean)} with
+   * {@link com.opencsv.CSVWriter#writeAll(ResultSet, boolean)} with
    * includeColumnNames set to true. This method assumes that the table to be
    * created does not exist, an error will be reported if it does.
    *
@@ -421,16 +422,16 @@ public final class Utilities {
    * Filter used to select only graphics files
    */
   private static final FilenameFilter GRAPHICS_FILTER = (dir,
-   name) -> {
-   final String lowerName = name.toLowerCase();
-   if (lowerName.endsWith(".png")
-     || lowerName.endsWith(".jpg")
-     || lowerName.endsWith(".jpeg")
-     || lowerName.endsWith(".gif")) {
-    return true;
-   } else {
-    return false;
-   }
+                                                         name) -> {
+    final String lowerName = name.toLowerCase();
+    if (lowerName.endsWith(".png")
+        || lowerName.endsWith(".jpg")
+        || lowerName.endsWith(".jpeg")
+        || lowerName.endsWith(".gif")) {
+      return true;
+    } else {
+      return false;
+    }
   };
 
   /**

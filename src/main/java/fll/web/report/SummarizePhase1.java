@@ -45,14 +45,14 @@ public class SummarizePhase1 {
 
   /**
    * Page key for judge information. Type is a {@link Map} of station to
-   * {@link Collection} of
+   * {@link java.util.Collection} of
    * JudgeSummary.
    */
   public static final String JUDGE_SUMMARY = "judgeSummary";
 
   /**
    * Page key for missing categories. Type is a {@link Map} of station to
-   * {@link Collection} category titles.
+   * {@link java.util.Collection} category titles.
    */
   public static final String MISSING_CATEGORIES = "missingCategories";
 
