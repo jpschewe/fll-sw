@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<fll copyright="2010 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST) and The LEGO Group. Used by special permission. All rights reserved." revision="4" schemaVersion="2" title="2019 Minnesota FIRST LEGO League - City Shaper" winner="HIGH">
+<fll copyright="2010 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST) and The LEGO Group. Used by special permission. All rights reserved." revision="5" schemaVersion="2" title="2019 Minnesota FIRST LEGO League - City Shaper" winner="HIGH">
   <Performance minimumScore="0.00" weight="1.00">
     <goal initialValue="0.00" max="1.00" min="0.00" multiplier="0.00" name="small_inspection_area" required="false" scoreType="INTEGER" title="Fit in Small Inspection Area"/>
     <goal category="M01" initialValue="0.00" max="1.00" min="0.00" multiplier="20.00" name="m01_robot_bridge" required="false" scoreType="INTEGER" title="M01 - Elevated places - Robot is Supported by the Bridge"/>
@@ -815,7 +815,7 @@
   </Performance>
   <subjectiveCategory name="project" title="Innovation Project" weight="1.00">
     <scoreSheetInstructions>For each skill area, clearly mark the box that best describes the team's accomplishments. Teams should demonstrate everything at the level; if they are missing part, mark the level below. If the team does not demonstrate an area, put an 'X' in the first box for Not Demonstrated (ND). Please provide as many written comments as you can to acknowledge each team's hard work and to help teams improve. Use the back for additional comments if needed.</scoreSheetInstructions>
-    <goal category="Research" initialValue="0.00" max="12.00" min="0.00" multiplier="1.00" name="problem_identification" required="true" scoreType="INTEGER" title="Problem Identification* ">
+    <goal category="Research" initialValue="0.00" max="12.00" min="0.00" multiplier="1.00" name="problem_identification" required="true" scoreType="INTEGER" title="Problem Identification ">
       <description>Clear definition of the problem being studied</description>
       <rubric>
         <range max="0" min="0" shortDescription="ND" title="">
@@ -875,7 +875,7 @@
         </range>
       </rubric>
     </goal>
-    <goal category="Innovative Solution" initialValue="0.00" max="12.00" min="0.00" multiplier="1.00" name="team_solution" required="true" scoreType="INTEGER" title="Team Solution*">
+    <goal category="Innovative Solution" initialValue="0.00" max="12.00" min="0.00" multiplier="1.00" name="team_solution" required="true" scoreType="INTEGER" title="Team Solution">
       <description>Clear explanation of the proposed solution and description of how it solves the problem</description>
       <rubric>
         <range max="0" min="0" shortDescription="ND" title="">
@@ -935,7 +935,7 @@
         </range>
       </rubric>
     </goal>
-    <goal category="Presentation" initialValue="0.00" max="12.00" min="0.00" multiplier="1.00" name="sharing" required="true" scoreType="INTEGER" title="Sharing*">
+    <goal category="Presentation" initialValue="0.00" max="12.00" min="0.00" multiplier="1.00" name="sharing" required="true" scoreType="INTEGER" title="Sharing">
       <description>Degree to which the team shared their Project before the tournament with others who might benefit from the team's efforts</description>
       <rubric>
         <range max="0" min="0" shortDescription="ND" title="">
