@@ -12,8 +12,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.GenerateDB;
 import fll.db.Queries;
@@ -21,12 +19,11 @@ import fll.web.playoff.BracketData;
 import fll.web.playoff.BracketData.TeamBracketCell;
 import fll.web.playoff.DatabaseTeamScore;
 import fll.web.playoff.Playoff;
-import fll.web.playoff.TeamScore;
 import fll.xml.PerformanceScoreCategory;
 
 /**
  * Methods used to generate or interpret JSON
- * 
+ *
  * @author jjkoletar
  */
 public final class JsonUtilities {
@@ -97,10 +94,10 @@ public final class JsonUtilities {
                                                                    final BracketData bracketData,
                                                                    final boolean showOnlyVerifiedScores,
                                                                    final boolean showFinalsScores) {
-    final List<BracketLeafResultSet> datalist = new LinkedList<BracketLeafResultSet>();
+    final List<BracketLeafResultSet> datalist = new LinkedList<>();
     try {
       final int currentTournament = Queries.getCurrentTournament(connection);
-      for (Map.Entry<Integer, Integer> entry : ids.entrySet()) {
+      for (final Map.Entry<Integer, Integer> entry : ids.entrySet()) {
         final int dbLine = entry.getKey();
         final int playoffRound = entry.getValue();
 
@@ -117,24 +114,26 @@ public final class JsonUtilities {
         final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection, currentTournament);
         final int teamNumber = tbc.getTeam().getTeamNumber();
         final int runNumber = Playoff.getRunNumber(connection, division, teamNumber, playoffRound);
-        final TeamScore teamScore = new DatabaseTeamScore(GenerateDB.PERFORMANCE_TABLE_NAME, currentTournament,
-                                                          teamNumber, runNumber, connection);
-        final double computedTeamScore = perf.evaluate(teamScore);
-        final boolean realScore = !Double.isNaN(computedTeamScore);
-        final boolean noShow = Queries.isNoShow(connection, currentTournament, tbc.getTeam().getTeamNumber(),
-                                                runNumber);
-        // Sane request checks
-        final String leafId = BracketData.constructLeafId(bracketIdx, dbLine, playoffRound);
-        if (noShow) {
-          datalist.add(new BracketLeafResultSet(tbc, -2.0, leafId));
-        } else if (!realScore
-            || !showOnlyVerifiedScores || Queries.isVerified(connection, currentTournament, teamNumber, runNumber)) {
-          if ((playoffRound == numPlayoffRounds
-              && !showFinalsScores)
-              || !realScore) {
-            datalist.add(new BracketLeafResultSet(tbc, -1.0, leafId));
-          } else {
-            datalist.add(new BracketLeafResultSet(tbc, computedTeamScore, leafId));
+        try (DatabaseTeamScore teamScore = new DatabaseTeamScore(GenerateDB.PERFORMANCE_TABLE_NAME, currentTournament,
+                                                                 teamNumber, runNumber, connection)) {
+          final double computedTeamScore = perf.evaluate(teamScore);
+          final boolean realScore = !Double.isNaN(computedTeamScore);
+          final boolean noShow = Queries.isNoShow(connection, currentTournament, tbc.getTeam().getTeamNumber(),
+                                                  runNumber);
+          // Sane request checks
+          final String leafId = BracketData.constructLeafId(bracketIdx, dbLine, playoffRound);
+          if (noShow) {
+            datalist.add(new BracketLeafResultSet(tbc, -2.0, leafId));
+          } else if (!realScore
+              || !showOnlyVerifiedScores
+              || Queries.isVerified(connection, currentTournament, teamNumber, runNumber)) {
+            if ((playoffRound == numPlayoffRounds
+                && !showFinalsScores)
+                || !realScore) {
+              datalist.add(new BracketLeafResultSet(tbc, -1.0, leafId));
+            } else {
+              datalist.add(new BracketLeafResultSet(tbc, computedTeamScore, leafId));
+            }
           }
         }
       }

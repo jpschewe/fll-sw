@@ -23,8 +23,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-
-
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
@@ -46,7 +44,6 @@ import fll.db.GenerateDB;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.util.FP;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.playoff.DatabaseTeamScore;
@@ -77,10 +74,10 @@ public class PerformanceScoreReport extends BaseFLLServlet {
   private static final String REPORT_TITLE = "Performance Score Report";
 
   @Override
-  protected void processRequest(HttpServletRequest request,
-                                HttpServletResponse response,
-                                ServletContext application,
-                                HttpSession session)
+  protected void processRequest(final HttpServletRequest request,
+                                final HttpServletResponse response,
+                                final ServletContext application,
+                                final HttpSession session)
       throws IOException, ServletException {
     Connection connection = null;
     try {
@@ -114,7 +111,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
         para.add(new Chunk("No teams in the tournament."));
         document.add(para);
       } else {
-        for (Map.Entry<Integer, TournamentTeam> entry : teams.entrySet()) {
+        for (final Map.Entry<Integer, TournamentTeam> entry : teams.entrySet()) {
           headerHandler.setTeamInfo(entry.getValue());
 
           outputTeam(connection, document, tournament, challengeDescription, numSeedingRounds, entry.getValue());
@@ -169,7 +166,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
 
     final PerformanceScoreCategory performance = challenge.getPerformance();
 
-    final TeamScore[] scores = getScores(connection, tournament, team, numSeedingRounds);
+    final DatabaseTeamScore[] scores = getScores(connection, tournament, team, numSeedingRounds);
     for (final AbstractGoal goal : performance.getGoals()) {
       final double bestScore = bestScoreForGoal(scores, goal);
 
@@ -257,6 +254,11 @@ public class PerformanceScoreReport extends BaseFLLServlet {
 
     }
 
+    // cleanup scores
+    for (final DatabaseTeamScore score : scores) {
+      score.close();
+    }
+
     document.add(table);
 
     final Paragraph definitionPara = new Paragraph();
@@ -293,12 +295,12 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     return bestScore;
   }
 
-  private TeamScore[] getScores(final Connection connection,
-                                final Tournament tournament,
-                                final TournamentTeam team,
-                                final int numSeedingRounds)
+  private DatabaseTeamScore[] getScores(final Connection connection,
+                                        final Tournament tournament,
+                                        final TournamentTeam team,
+                                        final int numSeedingRounds)
       throws SQLException {
-    final TeamScore[] scores = new TeamScore[numSeedingRounds];
+    final DatabaseTeamScore[] scores = new DatabaseTeamScore[numSeedingRounds];
     for (int runNumber = 1; runNumber <= numSeedingRounds; ++runNumber) {
       scores[runNumber
           - 1] = new DatabaseTeamScore(GenerateDB.PERFORMANCE_TABLE_NAME, tournament.getTournamentID(),
