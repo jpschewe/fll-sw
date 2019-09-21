@@ -94,11 +94,11 @@ public final class Playoff {
         randoms[i] = generator.nextDouble();
       }
       Collections.sort(seedingOrder, (one,
-       two) -> {
-     final int oneIdx = seedingOrder.indexOf(one);
-     final int twoIdx = seedingOrder.indexOf(two);
-     return Double.compare(randoms[oneIdx], randoms[twoIdx]);
-    });
+                                      two) -> {
+        final int oneIdx = seedingOrder.indexOf(one);
+        final int twoIdx = seedingOrder.indexOf(two);
+        return Double.compare(randoms[oneIdx], randoms[twoIdx]);
+      });
     } else {
       // standard seeding
       final int tournament = Queries.getCurrentTournament(connection);
@@ -171,13 +171,12 @@ public final class Playoff {
                                 final TeamScore teamBScore,
                                 final int runNumber)
       throws SQLException, ParseException {
-    final TeamScore teamAScore = new DatabaseTeamScore(GenerateDB.PERFORMANCE_TABLE_NAME, tournament,
-                                                       teamA.getTeamNumber(), runNumber, connection);
-    final Team retval = pickWinner(performanceElement, tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB,
-                                   teamBScore);
-    teamAScore.cleanup();
-    teamBScore.cleanup();
-    return retval;
+    try (DatabaseTeamScore teamAScore = new DatabaseTeamScore(GenerateDB.PERFORMANCE_TABLE_NAME, tournament,
+                                                              teamA.getTeamNumber(), runNumber, connection)) {
+      final Team retval = pickWinner(performanceElement, tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB,
+                                     teamBScore);
+      return retval;
+    }
   }
 
   /**
@@ -208,15 +207,15 @@ public final class Playoff {
                                 final Team teamB,
                                 final int runNumber)
       throws SQLException, ParseException {
-    final TeamScore teamAScore = new DatabaseTeamScore(GenerateDB.PERFORMANCE_TABLE_NAME, tournament,
-                                                       teamA.getTeamNumber(), runNumber, connection);
-    final TeamScore teamBScore = new DatabaseTeamScore("Performance", tournament, teamB.getTeamNumber(), runNumber,
-                                                       connection);
-    final Team retval = pickWinner(performanceElement, tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB,
-                                   teamBScore);
-    teamAScore.cleanup();
-    teamBScore.cleanup();
-    return retval;
+    try (
+        DatabaseTeamScore teamAScore = new DatabaseTeamScore(GenerateDB.PERFORMANCE_TABLE_NAME, tournament,
+                                                             teamA.getTeamNumber(), runNumber, connection);
+        DatabaseTeamScore teamBScore = new DatabaseTeamScore("Performance", tournament, teamB.getTeamNumber(),
+                                                             runNumber, connection)) {
+      final Team retval = pickWinner(performanceElement, tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB,
+                                     teamBScore);
+      return retval;
+    }
   }
 
   /**
@@ -1205,8 +1204,8 @@ public final class Playoff {
    * @param enumGoals populated with enum goal initial values
    */
   protected static void populateInitialScoreMaps(final ChallengeDescription challenge,
-                                                       final Map<String, Double> simpleGoals,
-                                                       final Map<String, String> enumGoals) {
+                                                 final Map<String, Double> simpleGoals,
+                                                 final Map<String, String> enumGoals) {
     for (final AbstractGoal agoal : challenge.getPerformance().getGoals()) {
       if (agoal instanceof Goal) {
         final Goal goal = (Goal) agoal;
