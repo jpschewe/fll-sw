@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -27,6 +28,7 @@ import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 
@@ -73,6 +75,8 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
 
       final Document pdfDoc = PdfUtils.createPortraitPdfDoc(response.getOutputStream(), new SimpleFooterHandler());
 
+      addLegend(pdfDoc);
+
       generateReport(connection, pdfDoc, challengeDescription, tournament);
 
       pdfDoc.close();
@@ -82,6 +86,12 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
     } catch (final DocumentException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  private void addLegend(final Document pdf) throws DocumentException {
+    final String legendText = String.format("@ - zero score on required goal");
+    final Phrase phrase = new Phrase(legendText);
+    pdf.add(phrase);
   }
 
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "winner criteria determines sort")
@@ -98,7 +108,9 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
     final Collection<String> eventDivisions = Queries.getAwardGroups(connection);
     final Collection<String> judgingGroups = Queries.getJudgingStations(connection, tournament.getTournamentID());
 
-    for (final SubjectiveScoreCategory catElement : subjectiveCategories) {
+    final Iterator<SubjectiveScoreCategory> iter = subjectiveCategories.iterator();
+    while (iter.hasNext()) {
+      final SubjectiveScoreCategory catElement = iter.next();
       final String catName = catElement.getName();
       final String catTitle = catElement.getTitle();
 
@@ -160,7 +172,17 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
                   if (Double.isNaN(score)) {
                     table.addCell(PdfUtils.createCell("No Score"));
                   } else {
-                    table.addCell(PdfUtils.createCell(Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(score)));
+                    final boolean zeroInRequiredGoal = FinalComputedScores.checkZeroInRequiredGoal(connection,
+                                                                                                   tournament,
+                                                                                                   catElement,
+                                                                                                   teamNumber);
+
+                    final StringBuilder scoreText = new StringBuilder();
+                    scoreText.append(Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(score));
+                    if (zeroInRequiredGoal) {
+                      scoreText.append(" @");
+                    }
+                    table.addCell(PdfUtils.createCell(scoreText.toString()));
                   }
                 } // foreach result
               } // allocate rs
