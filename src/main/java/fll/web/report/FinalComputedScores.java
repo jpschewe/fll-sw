@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -55,7 +56,9 @@ import fll.util.FP;
 import fll.util.PdfUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.web.playoff.DatabaseTeamScore;
 import fll.xml.ChallengeDescription;
+import fll.xml.Goal;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreCategory;
 import fll.xml.ScoreType;
@@ -860,7 +863,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
         + " FROM subjective_computed_scores"
         + " WHERE team_number = ? AND tournament = ? AND category = ? AND goal_group = ? ORDER BY computed_total "
         + ascDesc)) {
-      prep.setString(4, "");
+      prep.setString(4, ""); // goal group empty will give score for whole category
 
       // Next, one column containing the raw score for each subjective
       // category with weight > 0
@@ -885,8 +888,22 @@ public final class FinalComputedScores extends BaseFLLServlet {
                 rawScoreText.append(Utilities.getFormatForScoreType(catElement.getScoreType()).format(v));
               }
             }
-            final PdfPCell subjCell = new PdfPCell((!scoreSeen ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED)
-                : new Phrase(rawScoreText.toString(), ARIAL_8PT_NORMAL)));
+
+            final Font scoreFont;
+            final String scoreText;
+            if (!scoreSeen) {
+              scoreFont = ARIAL_8PT_NORMAL_RED;
+              scoreText = "No Score";
+            } else {
+              final boolean zeroInRequiredGoal = checkZeroInRequiredGoal(connection, tournament, catElement,
+                                                                         teamNumber);
+              if (zeroInRequiredGoal) {
+                rawScoreText.append(" *");
+              }
+              scoreFont = ARIAL_8PT_NORMAL;
+              scoreText = rawScoreText.toString();
+            }
+            final PdfPCell subjCell = new PdfPCell(new Phrase(scoreText, scoreFont));
             subjCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
             subjCell.setBorder(0);
             curteam.addCell(subjCell);
@@ -894,6 +911,51 @@ public final class FinalComputedScores extends BaseFLLServlet {
         } // category weight greater than 0
       } // foreach subjective category
     } // PreparedStatement
+  }
+
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
+  private static boolean checkZeroInRequiredGoal(final Connection connection,
+                                                 final Tournament tournament,
+                                                 final ScoreCategory category,
+                                                 final int teamNumber)
+      throws SQLException {
+    final Set<Goal> requiredGoals = category.getAllGoals().stream().filter(g -> g instanceof Goal).map(g -> (Goal) g)
+                                            .filter(Goal::isRequired).collect(Collectors.toSet());
+
+    if (!requiredGoals.isEmpty()) {
+      boolean zeroInRequiredGoal = false;
+
+      try (PreparedStatement prep = connection.prepareStatement("SELECT * FROM "
+          + category.getName()
+          + " WHERE TeamNumber = ? AND Tournament = ?")) {
+        prep.setInt(1, teamNumber);
+        prep.setInt(2, tournament.getTournamentID());
+        try (ResultSet rs = prep.executeQuery()) {
+          while (!zeroInRequiredGoal
+              && rs.next()) {
+            try (DatabaseTeamScore score = new DatabaseTeamScore(teamNumber, rs)) {
+
+              final Iterator<Goal> iter = requiredGoals.iterator();
+              while (!zeroInRequiredGoal
+                  && iter.hasNext()) {
+                final Goal goal = iter.next();
+                final double goalScore = score.getRawScore(goal.getName());
+                if (FP.equals(0, goalScore, TIE_TOLERANCE)) {
+                  zeroInRequiredGoal = true;
+                }
+              }
+
+            } // score
+          }
+
+        } // result set
+      } // prepared statement
+
+      return zeroInRequiredGoal;
+    } else {
+      // no required goals
+      return false;
+    }
   }
 
   private PdfPTable createHeader(final String challengeTitle,
@@ -943,7 +1005,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
         hurdleText = "";
       }
 
-      _legendText = String.format("%sbold - top team in a category & judging group (rank), %.2f == average ; %.2f = 1 standard deviation",
+      _legendText = String.format("%sbold - top team in a category & judging group (rank), %.2f == average ; %.2f = 1 standard deviation, * - zero score on required goal",
                                   hurdleText, standardMean, standardSigma);
     }
 

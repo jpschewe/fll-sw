@@ -1,3 +1,4 @@
+* #757 - Add an asterisk next to scores in the final report where a team scored zero on a required goal
 * #399 - Add distributions that include a bundled JDK so that Java doesn't need to be installed
 * #764 - Add labels to fields in the subjective web application
 * #755 - Put tick marks on the score entry sliders in the subjective web application
