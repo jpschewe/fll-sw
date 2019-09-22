@@ -929,11 +929,21 @@ public final class FinalComputedScores extends BaseFLLServlet {
     } // PreparedStatement
   }
 
+  /**
+   * Check if there is a zero score for a required goal in the specified category.
+   *
+   * @param connection the database connection
+   * @param tournament which tournament is being worked with
+   * @param category the category to check
+   * @param teamNumber the team to check
+   * @return true if there is a zero in a required goal
+   * @throws SQLException on a database error
+   */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
-  private static boolean checkZeroInRequiredGoal(final Connection connection,
-                                                 final Tournament tournament,
-                                                 final ScoreCategory category,
-                                                 final int teamNumber)
+  public static boolean checkZeroInRequiredGoal(final Connection connection,
+                                                final Tournament tournament,
+                                                final ScoreCategory category,
+                                                final int teamNumber)
       throws SQLException {
     final Set<Goal> requiredGoals = category.getAllGoals().stream().filter(g -> g instanceof Goal).map(g -> (Goal) g)
                                             .filter(Goal::isRequired).collect(Collectors.toSet());
