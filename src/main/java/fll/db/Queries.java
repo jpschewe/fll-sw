@@ -1520,43 +1520,43 @@ public final class Queries {
             final int teamNumber = rs.getInt("TeamNumber");
             insertPrep.setInt(4, teamNumber);
 
-            final TeamScore teamScore = new DatabaseTeamScore(teamNumber, rs);
-            final double computedTotal;
-            if (teamScore.isNoShow()) {
-              computedTotal = Double.NaN;
-            } else {
-              computedTotal = subjectiveElement.evaluate(teamScore);
-            }
+            try (DatabaseTeamScore teamScore = new DatabaseTeamScore(teamNumber, rs)) {
+              final double computedTotal;
+              if (teamScore.isNoShow()) {
+                computedTotal = Double.NaN;
+              } else {
+                computedTotal = subjectiveElement.evaluate(teamScore);
+              }
 
-            final String judge = rs.getString("Judge");
-            insertPrep.setString(5, judge);
+              final String judge = rs.getString("Judge");
+              insertPrep.setString(5, judge);
 
-            insertPrep.setBoolean(7, teamScore.isNoShow());
+              insertPrep.setBoolean(7, teamScore.isNoShow());
 
-            // insert category score
-            insertPrep.setString(2, "");
-            if (Double.isNaN(computedTotal)) {
-              insertPrep.setNull(6, Types.DOUBLE);
-            } else {
-              insertPrep.setDouble(6, computedTotal);
-            }
-            insertPrep.executeUpdate();
-
-            // insert goal group scores
-            final Map<String, Double> goalGroupScores = subjectiveElement.getGoalGroupScores(teamScore);
-            for (final Map.Entry<String, Double> entry : goalGroupScores.entrySet()) {
-              final String group = entry.getKey();
-              final double score = entry.getValue();
-
-              insertPrep.setString(2, group);
-              if (Double.isNaN(score)) {
+              // insert category score
+              insertPrep.setString(2, "");
+              if (Double.isNaN(computedTotal)) {
                 insertPrep.setNull(6, Types.DOUBLE);
               } else {
-                insertPrep.setDouble(6, score);
+                insertPrep.setDouble(6, computedTotal);
               }
               insertPrep.executeUpdate();
-            }
 
+              // insert goal group scores
+              final Map<String, Double> goalGroupScores = subjectiveElement.getGoalGroupScores(teamScore);
+              for (final Map.Entry<String, Double> entry : goalGroupScores.entrySet()) {
+                final String group = entry.getKey();
+                final double score = entry.getValue();
+
+                insertPrep.setString(2, group);
+                if (Double.isNaN(score)) {
+                  insertPrep.setNull(6, Types.DOUBLE);
+                } else {
+                  insertPrep.setDouble(6, score);
+                }
+                insertPrep.executeUpdate();
+              }
+            } // team score
           } // foreach result
         } // ResultSet
       } // prepared statements
@@ -1593,12 +1593,14 @@ public final class Queries {
         if (!rs.getBoolean("Bye")) {
           final int teamNumber = rs.getInt("TeamNumber");
           final int runNumber = rs.getInt("RunNumber");
-          final TeamScore teamScore = new DatabaseTeamScore(teamNumber, runNumber, rs);
           final double computedTotal;
-          if (teamScore.isNoShow()) {
-            computedTotal = Double.NaN;
-          } else {
-            computedTotal = performanceElement.evaluate(teamScore);
+
+          try (DatabaseTeamScore teamScore = new DatabaseTeamScore(teamNumber, runNumber, rs)) {
+            if (teamScore.isNoShow()) {
+              computedTotal = Double.NaN;
+            } else {
+              computedTotal = performanceElement.evaluate(teamScore);
+            }
           }
 
           if (LOGGER.isTraceEnabled()) {

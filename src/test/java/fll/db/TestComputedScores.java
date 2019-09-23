@@ -33,14 +33,14 @@ import fll.xml.PerformanceScoreCategory;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
- * 
+ *
  */
 @ExtendWith(TestUtils.InitializeLogging.class)
 public class TestComputedScores {
 
   /**
    * Check the score computation that was a problem in 2009 where 0 != 0.
-   * 
+   *
    * @param args
    * @throws SQLException
    * @throws ParseException
@@ -80,11 +80,13 @@ public class TestComputedScores {
       selectPrep.setInt(2, teamNumber);
       selectPrep.setInt(3, runNumber);
       rs = selectPrep.executeQuery();
-      assertNotNull(rs,"Error getting performance scores");
+      assertNotNull(rs, "Error getting performance scores");
       assertTrue(rs.next(), "No scores found");
 
-      final double computedTotal = performanceElement.evaluate(new DatabaseTeamScore(teamNumber, runNumber, rs));
-      assertEquals(expectedTotal, computedTotal, 0D);
+      try (DatabaseTeamScore score = new DatabaseTeamScore(teamNumber, runNumber, rs)) {
+        final double computedTotal = performanceElement.evaluate(score);
+        assertEquals(expectedTotal, computedTotal, 0D);
+      }
 
     } finally {
       if (!tempFile.delete()) {

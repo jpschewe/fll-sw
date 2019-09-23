@@ -18,7 +18,7 @@ public abstract class TeamScore {
 
   /**
    * Create a non-performance TeamScore for the specified team.
-   * 
+   *
    * @param teamNumber
    */
   public TeamScore(final int teamNumber) {
@@ -27,7 +27,7 @@ public abstract class TeamScore {
 
   /**
    * Create a performance TeamScore for the specified team and run number.
-   * 
+   *
    * @param runNumber 1-based run number
    */
   public TeamScore(final int teamNumber,
@@ -38,7 +38,7 @@ public abstract class TeamScore {
 
   /**
    * The team that this score is for.
-   * 
+   *
    * @return the team
    */
   public final int getTeamNumber() {
@@ -50,21 +50,21 @@ public abstract class TeamScore {
   /**
    * Check if the score exists. If it doesn't exist, the other score methods
    * will throw a RuntimeException
-   * 
+   *
    * @return true if the score exists
    */
   public abstract boolean scoreExists();
 
   /**
    * Is this score a no show?
-   * 
+   *
    * @return true if this score is a no show
    */
   public abstract boolean isNoShow();
 
   /**
    * Is this score a bye?
-   * 
+   *
    * @return true if this score is a no show
    */
   public abstract boolean isBye();
@@ -73,7 +73,7 @@ public abstract class TeamScore {
    * What run do these scores apply to?
    * This is a 1-based number. It will be {@link #NON_PERFORMANCE_RUN_NUMBER} if
    * this is not a performance score.
-   * 
+   *
    * @return the run for the scores
    */
   public final int getRunNumber() {
@@ -84,7 +84,7 @@ public abstract class TeamScore {
 
   /**
    * The raw score for a particular simple goal, as a double.
-   * 
+   *
    * @param goalName the goal to get the score for
    * @return the score, NaN if there is no score for the specified name
    */
@@ -92,18 +92,10 @@ public abstract class TeamScore {
 
   /**
    * The raw score for a particular enumerated goal, as a String.
-   * 
+   *
    * @param goalName the goal to get the score for
    * @return the score, null if there is no score for the specified name
    */
   public abstract String getEnumRawScore(String goalName);
-
-  /**
-   * Cleanup any resources used. The object is no longer valid after a call to
-   * cleanup.
-   */
-  public void cleanup() {
-    // nothing by default
-  }
 
 }
