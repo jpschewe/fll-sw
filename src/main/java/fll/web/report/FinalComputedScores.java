@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -35,14 +36,8 @@ import com.itextpdf.text.Font;
 import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
-import com.itextpdf.text.Rectangle;
-import com.itextpdf.text.pdf.BaseFont;
-import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfPageEventHelper;
-import com.itextpdf.text.pdf.PdfTemplate;
-import com.itextpdf.text.pdf.PdfWriter;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
@@ -55,7 +50,9 @@ import fll.util.FP;
 import fll.util.PdfUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.web.playoff.DatabaseTeamScore;
 import fll.xml.ChallengeDescription;
+import fll.xml.Goal;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreCategory;
 import fll.xml.ScoreType;
@@ -119,10 +116,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
       response.setHeader("Content-Disposition", "filename=finalComputedScores.pdf");
 
       final String challengeTitle = challengeDescription.getTitle();
-      final FooterHandler pageHandler = new FooterHandler(percentageHurdle, standardMean, standardSigma);
 
       generateReport(connection, response.getOutputStream(), challengeDescription, challengeTitle, tournament,
-                     pageHandler, bestTeams);
+                     bestTeams, percentageHurdle, standardMean, standardSigma);
 
     } catch (final SQLException e) {
       throw new RuntimeException(e);
@@ -210,8 +206,10 @@ public final class FinalComputedScores extends BaseFLLServlet {
                               final ChallengeDescription challengeDescription,
                               final String challengeTitle,
                               final Tournament tournament,
-                              final PdfPageEventHelper pageHandler,
-                              final Set<Integer> bestTeams)
+                              final Set<Integer> bestTeams,
+                              final int percentageHurdle,
+                              final double standardMean,
+                              final double standardSigma)
       throws SQLException, IOException {
     if (tournament.getTournamentID() != Queries.getCurrentTournament(connection)) {
       throw new FLLRuntimeException("Cannot generate final score report for a tournament other than the current tournament");
@@ -222,7 +220,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
     try {
       // This creates our new PDF document and declares it to be in portrait
       // orientation
-      final Document pdfDoc = PdfUtils.createPortraitPdfDoc(out, pageHandler);
+      final Document pdfDoc = PdfUtils.createPortraitPdfDoc(out, null);
 
       final Iterator<String> agIter = Queries.getAwardGroups(connection).iterator();
       while (agIter.hasNext()) {
@@ -291,12 +289,34 @@ public final class FinalComputedScores extends BaseFLLServlet {
         }
       }
 
+      addLegend(pdfDoc, percentageHurdle, standardMean, standardSigma);
+
       pdfDoc.close();
     } catch (final ParseException pe) {
       throw new RuntimeException("Error parsing category weight!", pe);
     } catch (final DocumentException de) {
       throw new RuntimeException("Error creating PDF document!", de);
     }
+  }
+
+  @SuppressFBWarnings(value = { "VA_FORMAT_STRING_USES_NEWLINE" }, justification = "Need carriage returns in strings for Pdf library")
+  private void addLegend(final Document pdf,
+                         final int percentageHurdle,
+                         final double standardMean,
+                         final double standardSigma)
+      throws DocumentException {
+    final String hurdleText;
+    if (percentageHurdle > 0
+        && percentageHurdle < 100) {
+      hurdleText = String.format("* - teams in the top %d%% of performance scores\n", percentageHurdle);
+    } else {
+      hurdleText = "";
+    }
+
+    final String legendText = String.format("%sbold score - top team in a category & judging group (rank)\n%.2f == average ; %.2f = 1 standard deviation\n@ - zero score on required goal",
+                                            hurdleText, standardMean, standardSigma);
+    final Phrase phrase = new Phrase(legendText, TIMES_12PT_NORMAL);
+    pdf.add(phrase);
   }
 
   /**
@@ -860,7 +880,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
         + " FROM subjective_computed_scores"
         + " WHERE team_number = ? AND tournament = ? AND category = ? AND goal_group = ? ORDER BY computed_total "
         + ascDesc)) {
-      prep.setString(4, "");
+      prep.setString(4, ""); // goal group empty will give score for whole category
 
       // Next, one column containing the raw score for each subjective
       // category with weight > 0
@@ -885,8 +905,22 @@ public final class FinalComputedScores extends BaseFLLServlet {
                 rawScoreText.append(Utilities.getFormatForScoreType(catElement.getScoreType()).format(v));
               }
             }
-            final PdfPCell subjCell = new PdfPCell((!scoreSeen ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED)
-                : new Phrase(rawScoreText.toString(), ARIAL_8PT_NORMAL)));
+
+            final Font scoreFont;
+            final String scoreText;
+            if (!scoreSeen) {
+              scoreFont = ARIAL_8PT_NORMAL_RED;
+              scoreText = "No Score";
+            } else {
+              final boolean zeroInRequiredGoal = checkZeroInRequiredGoal(connection, tournament, catElement,
+                                                                         teamNumber);
+              if (zeroInRequiredGoal) {
+                rawScoreText.append(" @");
+              }
+              scoreFont = ARIAL_8PT_NORMAL;
+              scoreText = rawScoreText.toString();
+            }
+            final PdfPCell subjCell = new PdfPCell(new Phrase(scoreText, scoreFont));
             subjCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
             subjCell.setBorder(0);
             curteam.addCell(subjCell);
@@ -894,6 +928,61 @@ public final class FinalComputedScores extends BaseFLLServlet {
         } // category weight greater than 0
       } // foreach subjective category
     } // PreparedStatement
+  }
+
+  /**
+   * Check if there is a zero score for a required goal in the specified category.
+   *
+   * @param connection the database connection
+   * @param tournament which tournament is being worked with
+   * @param category the category to check
+   * @param teamNumber the team to check
+   * @return true if there is a zero in a required goal
+   * @throws SQLException on a database error
+   */
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
+  public static boolean checkZeroInRequiredGoal(final Connection connection,
+                                                final Tournament tournament,
+                                                final ScoreCategory category,
+                                                final int teamNumber)
+      throws SQLException {
+    final Set<Goal> requiredGoals = category.getAllGoals().stream().filter(g -> g instanceof Goal).map(g -> (Goal) g)
+                                            .filter(Goal::isRequired).collect(Collectors.toSet());
+
+    if (!requiredGoals.isEmpty()) {
+      boolean zeroInRequiredGoal = false;
+
+      try (PreparedStatement prep = connection.prepareStatement("SELECT * FROM "
+          + category.getName()
+          + " WHERE TeamNumber = ? AND Tournament = ?")) {
+        prep.setInt(1, teamNumber);
+        prep.setInt(2, tournament.getTournamentID());
+        try (ResultSet rs = prep.executeQuery()) {
+          while (!zeroInRequiredGoal
+              && rs.next()) {
+            try (DatabaseTeamScore score = new DatabaseTeamScore(teamNumber, rs)) {
+
+              final Iterator<Goal> iter = requiredGoals.iterator();
+              while (!zeroInRequiredGoal
+                  && iter.hasNext()) {
+                final Goal goal = iter.next();
+                final double goalScore = score.getRawScore(goal.getName());
+                if (FP.equals(0, goalScore, TIE_TOLERANCE)) {
+                  zeroInRequiredGoal = true;
+                }
+              }
+
+            } // score
+          }
+
+        } // result set
+      } // prepared statement
+
+      return zeroInRequiredGoal;
+    } else {
+      // no required goals
+      return false;
+    }
   }
 
   private PdfPTable createHeader(final String challengeTitle,
@@ -920,69 +1009,5 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
     return header;
   }
-
-  private static class FooterHandler extends PdfPageEventHelper {
-
-    private PdfTemplate _tpl;
-
-    private BaseFont _headerFooterFont;
-
-    private final String _legendText;
-
-    /**
-     * @param percentageHurdle percentage as an integer between 0 and 100
-     */
-    public FooterHandler(final int percentageHurdle,
-                         final double standardMean,
-                         final double standardSigma) {
-      final String hurdleText;
-      if (percentageHurdle > 0
-          && percentageHurdle < 100) {
-        hurdleText = String.format("* - teams in the top %d%% of performance scores, ", percentageHurdle);
-      } else {
-        hurdleText = "";
-      }
-
-      _legendText = String.format("%sbold - top team in a category & judging group (rank), %.2f == average ; %.2f = 1 standard deviation",
-                                  hurdleText, standardMean, standardSigma);
-    }
-
-    @Override
-    public void onOpenDocument(final PdfWriter writer,
-                               final Document document) {
-      _headerFooterFont = TIMES_12PT_NORMAL.getBaseFont();
-
-      // initialization of the footer template
-      _tpl = writer.getDirectContent().createTemplate(100, 100);
-      _tpl.setBoundingBox(new Rectangle(-20, -20, 100, 100));
-    }
-
-    @Override
-    public void onEndPage(final PdfWriter writer,
-                          final Document document) {
-      final PdfContentByte cb = writer.getDirectContent();
-      cb.saveState();
-
-      // compose the footer
-
-      final float textSize = _headerFooterFont.getWidthPoint(_legendText, 12);
-      final float textBase = document.bottom()
-          - 20;
-      cb.beginText();
-      cb.setFontAndSize(_headerFooterFont, 12);
-
-      final float adjust = _headerFooterFont.getWidthPoint("0", 12);
-      cb.setTextMatrix(document.right()
-          - textSize
-          - adjust, textBase);
-      cb.showText(_legendText);
-      cb.endText();
-      cb.addTemplate(_tpl, document.right()
-          - adjust, textBase);
-
-      cb.restoreState();
-    }
-
-  } // class FooterHandler
 
 } // class FinalComputedScores

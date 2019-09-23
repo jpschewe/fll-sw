@@ -8,8 +8,6 @@ package fll.util;
 
 import java.io.OutputStream;
 
-
-
 import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
@@ -98,6 +96,8 @@ public final class PdfUtils {
   /**
    * Create a simple PDF document using portrait letter orientation.
    * The document is opened by this method.
+   *
+   * @param pageHandler handler for page events, may be null
    */
   public static Document createPortraitPdfDoc(final OutputStream out,
                                               final PdfPageEvent pageHandler)
@@ -111,6 +111,8 @@ public final class PdfUtils {
   /**
    * Create a simple PDF document using landscape letter orientation.
    * The document is opened by this method.
+   *
+   * @param pageHandler handler for page events, may be null
    */
   public static Document createLandscapePdfDoc(final OutputStream out,
                                                final PdfPageEvent pageHandler)
@@ -124,7 +126,8 @@ public final class PdfUtils {
   /**
    * Common code for document creation. Sets margins and page event handler.
    * This method opens the document.
-   * 
+   *
+   * @param pageHandler handler for page events, may be null
    * @throws DocumentException
    */
   private static void commonPdfDocCreate(final OutputStream out,
@@ -132,7 +135,9 @@ public final class PdfUtils {
                                          final Document pdfDoc)
       throws DocumentException {
     final PdfWriter writer = PdfWriter.getInstance(pdfDoc, out);
-    writer.setPageEvent(pageHandler);
+    if (null != pageHandler) {
+      writer.setPageEvent(pageHandler);
+    }
 
     // Measurements are always in points (72 per inch) - This sets up 1/2 inch
     // margins
@@ -156,7 +161,7 @@ public final class PdfUtils {
    * https://developers.itextpdf.com/examples/tables-itext5/fit-text-cell.
    * Use this class by calling
    * <code>cell.setCellEvent(new TruncateContent(...))</code>
-   * 
+   *
    * @see PdfPCell#setCellEvent(PdfPCellEvent)
    */
   public static final class TruncateContent implements PdfPCellEvent {
@@ -167,7 +172,7 @@ public final class PdfUtils {
     /**
      * Create an object that will display the text with the specified font and
      * truncate the text if needed.
-     * 
+     *
      * @param content what to display
      * @param font the font to use
      */
@@ -177,13 +182,14 @@ public final class PdfUtils {
       this.font = font;
     }
 
+    @Override
     public void cellLayout(final PdfPCell cell,
                            final Rectangle position,
                            final PdfContentByte[] canvases) {
       try {
         final BaseFont bf = font.getCalculatedBaseFont(false);
         float availableWidth = position.getWidth();
-        float contentWidth = bf.getWidthPoint(content, font.getSize());
+        final float contentWidth = bf.getWidthPoint(content, font.getSize());
 
         final String newContent;
         if (contentWidth > availableWidth) {

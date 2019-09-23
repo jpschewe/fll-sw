@@ -562,7 +562,7 @@ public class Launcher extends JFrame {
     final String[] possibleLocations = { //
                                          "../../src/main/dist", // eclipse
                                          "..", // distribution
-                                         "../../../../src/main/dist" // gradle
+                                         "../../../../src/main/root-docs" // gradle
     };
     for (final String location : possibleLocations) {
       final Path check = classesPath.resolve(location).resolve("fll-sw.html");
