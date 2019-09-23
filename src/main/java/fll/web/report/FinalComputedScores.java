@@ -299,6 +299,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
     }
   }
 
+  @SuppressFBWarnings(value = { "VA_FORMAT_STRING_USES_NEWLINE" }, justification = "Need carriage returns in strings for Pdf library")
   private void addLegend(final Document pdf,
                          final int percentageHurdle,
                          final double standardMean,
