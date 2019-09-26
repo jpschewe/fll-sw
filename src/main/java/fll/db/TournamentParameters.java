@@ -11,10 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-
-
 import fll.util.FLLInternalException;
-
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -35,13 +32,13 @@ public final class TournamentParameters {
 
   public static final String RUNNING_HEAD_2_HEAD = "RunningHeadToHead";
 
-  public static final boolean RUNNING_HEAD_2_HEAD_DEFAULT = true;
+  public static final boolean RUNNING_HEAD_2_HEAD_DEFAULT = false;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * Get the value of a tournament parameter
-   * 
+   *
    * @param connection
    * @param paramName
    * @throws SQLException
@@ -78,7 +75,7 @@ public final class TournamentParameters {
 
   /**
    * Get the value of a tournament parameter
-   * 
+   *
    * @param connection
    * @param paramName
    * @throws SQLException
@@ -115,7 +112,7 @@ public final class TournamentParameters {
 
   /**
    * Get the default value of a tournament parameter
-   * 
+   *
    * @param connection
    * @param paramName
    * @throws SQLException
@@ -150,7 +147,7 @@ public final class TournamentParameters {
 
   /**
    * Get the default value of a tournament parameter
-   * 
+   *
    * @param connection
    * @param paramName
    * @throws SQLException
@@ -185,7 +182,7 @@ public final class TournamentParameters {
 
   /**
    * Check if a value exists for a parameter for a tournament.
-   * 
+   *
    * @param connection the database connection
    * @param tournament the tournament to check
    * @param paramName the parameter to check for
@@ -212,7 +209,7 @@ public final class TournamentParameters {
 
   /**
    * Unset a tournament parameter.
-   * 
+   *
    * @param connection
    * @param tournament
    * @param paramName
@@ -334,7 +331,7 @@ public final class TournamentParameters {
 
   /**
    * Get the number of seeding rounds from the database.
-   * 
+   *
    * @return the number of seeding rounds
    * @throws SQLException on a database error
    */
@@ -353,7 +350,7 @@ public final class TournamentParameters {
 
   /**
    * Set the number of seeding rounds.
-   * 
+   *
    * @param connection the connection
    * @param newSeedingRounds the new value of seeding rounds
    */
@@ -399,7 +396,7 @@ public final class TournamentParameters {
    * Get the performance advancement threshold percentage.
    * To advance to the next level of competition teams
    * should be in the top X% of performance score.
-   * 
+   *
    * @return integer percentage, 40 -> 40%
    * @throws SQLException on a database error
    */
