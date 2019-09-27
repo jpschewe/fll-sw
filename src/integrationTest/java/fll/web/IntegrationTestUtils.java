@@ -909,8 +909,7 @@ public final class IntegrationTestUtils {
       element.click();
     }
 
-    selenium.findElement(By.name("submit")).click();
-    ;
+    selenium.findElement(By.id("submit")).click();
 
     assertNotNull(selenium.findElement(By.id("success")));
   }
