@@ -120,8 +120,9 @@ public final class IntegrationTestUtils {
    *
    * @param selenium the test controller
    * @param url the page to load
-   * @throws IOException
-   * @throws InterruptedException
+   * @throws IOException if there is an error from selenium
+   * @throws InterruptedException if we are interrupted waiting for the page to
+   *           load
    */
   public static void loadPage(final WebDriver selenium,
                               final String url)
@@ -886,6 +887,32 @@ public final class IntegrationTestUtils {
           + screenshot);
     }
     SCREENSHOT_TAKER.saveDesktopAsPng(screenshot.getAbsolutePath());
+  }
+
+  /**
+   * Set the running head to head tournament parameter. Make sure that the current
+   * tournament is set before calling this method.
+   *
+   * @param selenium the web driver
+   * @param runningHeadToHead the value of running head to head
+   * @throws InterruptedException see {@link #loadPage(WebDriver, String)}
+   * @throws IOException see {@link #loadPage(WebDriver, String)}
+   */
+  public static void setRunningHeadToHead(final WebDriver selenium,
+                                          final boolean runningHeadToHead)
+      throws IOException, InterruptedException {
+    loadPage(selenium, TestUtils.URL_ROOT
+        + "admin/edit_tournament_parameters.jsp");
+
+    final WebElement element = selenium.findElement(By.id("running_head_to_head"));
+    if (runningHeadToHead != element.isSelected()) {
+      element.click();
+    }
+
+    selenium.findElement(By.name("submit")).click();
+    ;
+
+    assertNotNull(selenium.findElement(By.id("success")));
   }
 
 }
