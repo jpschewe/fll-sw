@@ -343,7 +343,7 @@ public final class GenerateDB {
           + performanceColumns.toString()
           + " FROM Performance WHERE Verified = TRUE");
 
-      setDefaultParameters(connection);
+      setDefaultParameters(connection, TournamentParameters.RUNNING_HEAD_2_HEAD_DEFAULT);
 
     } finally {
       SQLFunctions.close(stmt);
@@ -584,8 +584,10 @@ public final class GenerateDB {
   /**
    * Put the default parameters (global and tournament) in the database if they
    * don't already exist.
+   *
+   * @param headToHead what to set running head to head to, if upgrading this is true, otherwise it's the default value
    */
-  /* package */static void setDefaultParameters(final Connection connection) throws SQLException {
+  /* package */static void setDefaultParameters(final Connection connection, final boolean headToHead) throws SQLException {
     createInternalTournament(connection);
 
     PreparedStatement globalInsert = null;
@@ -635,7 +637,7 @@ public final class GenerateDB {
       }
 
       if (!TournamentParameters.defaultParameterExists(connection, TournamentParameters.RUNNING_HEAD_2_HEAD)) {
-        TournamentParameters.setDefaultRunningHeadToHead(connection, TournamentParameters.RUNNING_HEAD_2_HEAD_DEFAULT);
+        TournamentParameters.setDefaultRunningHeadToHead(connection, headToHead);
       }
 
     } finally {
