@@ -198,6 +198,10 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
   private static final Font TIMES_12PT_NORMAL = FontFactory.getFont(FontFactory.TIMES, 12, Font.NORMAL);
 
+  private static final BaseColor TOP_SCORE_BACKGROUND = new BaseColor(BaseColor.LIGHT_GRAY.getRed(),
+                                                                    BaseColor.LIGHT_GRAY.getGreen(),
+                                                                    BaseColor.LIGHT_GRAY.getBlue());
+
   /**
    * Generate the actual report.
    */
@@ -714,6 +718,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
         final PdfPCell subjCell = new PdfPCell(new Phrase(scoreText, scoreFont));
         subjCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
         subjCell.setBorder(0);
+        if (1 == rank) {
+          subjCell.setBackgroundColor(TOP_SCORE_BACKGROUND);
+        }
         curteam.addCell(subjCell);
       } // finalScoreResult
     } // finalScorePrep
