@@ -13,7 +13,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.IOException;
 import java.io.InputStream;
 
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,7 +27,6 @@ import org.xml.sax.SAXException;
 
 import fll.TestUtils;
 import fll.db.GenerateDB;
-
 import fll.web.IntegrationTestUtils;
 import fll.xml.BracketSortType;
 
@@ -90,6 +88,8 @@ public class TestAJAXBrackets {
       selenium.findElement(By.id("finished")).click();
 
       IntegrationTestUtils.changeNumSeedingRounds(selenium, 0);
+
+      IntegrationTestUtils.setRunningHeadToHead(selenium, true);
 
       // init brackets
       IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
