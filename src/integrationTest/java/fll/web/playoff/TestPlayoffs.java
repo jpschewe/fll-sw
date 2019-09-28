@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.io.InputStream;
 
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.Alert;
@@ -22,7 +21,6 @@ import org.openqa.selenium.support.ui.Select;
 
 import fll.TestUtils;
 import fll.db.GenerateDB;
-
 import fll.web.IntegrationTestUtils;
 
 /**
@@ -51,6 +49,8 @@ public class TestPlayoffs {
       IntegrationTestUtils.initializeDatabase(selenium, challengeStream);
 
       IntegrationTestUtils.setTournament(selenium, GenerateDB.DUMMY_TOURNAMENT_NAME);
+
+      IntegrationTestUtils.setRunningHeadToHead(selenium, true);
 
       // add 4 teams to dummy tournament
       for (int teamNumber = 0; teamNumber < 4; ++teamNumber) {
