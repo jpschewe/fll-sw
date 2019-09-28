@@ -233,6 +233,9 @@ public class FullTournamentTest {
     final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(testDataConn,
                                                                           sourceTournament.getTournamentID());
 
+    final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(testDataConn,
+                                                                                sourceTournament.getTournamentID());
+
     // --- initialize database ---
     LOGGER.info("Initializing the database");
     IntegrationTestUtils.initializeDatabase(selenium, challengeDocument);
@@ -247,6 +250,9 @@ public class FullTournamentTest {
 
     LOGGER.info("Setting current tournament");
     IntegrationTestUtils.setTournament(selenium, sourceTournament.getName());
+
+    LOGGER.info("Setting head to head parameter");
+    IntegrationTestUtils.setRunningHeadToHead(selenium, runningHeadToHead);
 
     LOGGER.info("Loading the schedule");
     uploadSchedule(selenium, testDataConn, sourceTournament, outputDirectory);

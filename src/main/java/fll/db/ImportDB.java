@@ -554,7 +554,8 @@ public final class ImportDB {
     }
 
     // tournament parameters existed after version 1
-    GenerateDB.setDefaultParameters(connection);
+    // previous tournaments always ran head to head
+    GenerateDB.setDefaultParameters(connection, true);
 
     dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 2) {
@@ -803,7 +804,8 @@ public final class ImportDB {
       LOGGER.trace("Upgrading database from 16 to 17");
     }
 
-    TournamentParameters.setDefaultRunningHeadToHead(connection, TournamentParameters.RUNNING_HEAD_2_HEAD_DEFAULT);
+    // all old databases are running head to head
+    TournamentParameters.setDefaultRunningHeadToHead(connection, true);
     setDBVersion(connection, 17);
   }
 
