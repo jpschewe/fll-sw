@@ -73,7 +73,7 @@
       name='dbdump'> <input
       type='submit'
       name='createdb'
-      value='Upload Saved Database'
+      value='Upload Current Database'
       onclick='return confirmOverwrite()' />
 
     <hr />
