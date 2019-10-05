@@ -1034,10 +1034,10 @@ public class FullTournamentTest {
             } // foreach goal
 
             // check that the submit button is active
-            assertTrue(selenium.findElement(By.id("submit")).isEnabled(),
+            assertTrue(selenium.findElement(By.id("submit_score")).isEnabled(),
                        "Submit button is not enabled, invalid score entered");
 
-            selenium.findElement(By.id("submit")).click();
+            selenium.findElement(By.id("submit_score")).click();
           } // not NoShow
 
           Thread.sleep(50);

@@ -35,8 +35,19 @@ body {
 </style>
 
 <script
+  type="text/javascript"
+  src="<c:url value='/extlib/jquery-1.11.1.min.js' />"></script>
+
+<link rel="stylesheet"
+    type="text/css"
+    href="<c:url value='/extlib/jquery-ui-1.12.1/jquery-ui.min.css' />" />
+
+<script type="text/javascript"
+    src="<c:url value='/extlib/jquery-ui-1.12.1/jquery-ui.min.js' />"></script>
+
+<script
   type='text/javascript'
-  src='../extlib/jquery-1.11.1.min.js'></script>
+  src='scoreEntry.js'></script>
 
 <script type="text/javascript">
     <c:if test="${not isBye}">
@@ -53,8 +64,6 @@ function submit_NoShow() {
 }
 
 function init() {
-  $("#verification-warning").hide();
-
   // disable text selection
   document.onselectstart=new Function ("return false")
 
@@ -96,10 +105,10 @@ function check_restrictions() {
 <%ScoreEntry.generateCheckRestrictionsBody(out, application);%>
 
   if(error_found) {
-    $("#submit").attr('disabled', true);
+    $("#submit_score").attr('disabled', true);
     $("#score-errors").show();
   } else {
-    $("#submit").attr('disabled', false);
+    $("#submit_score").attr('disabled', false);
     $("#score-errors").hide();
   }
 }
@@ -149,10 +158,6 @@ return m;
 }
 }
 
-$(document).ready(function() {
-init();
-});
-
 </script>
 
 </head>
@@ -169,7 +174,9 @@ init();
   <form
     action="SubmitScoreEntry"
     method="POST"
-    name="scoreEntry">
+    name="scoreEntry"
+    id="scoreEntry"
+    >
     <input
       type='hidden'
       name='NoShow'
@@ -340,18 +347,16 @@ init();
                     <c:when test="${1 == EditFlag}">
                       <input
                         type='submit'
-                        id='submit'
-                        name='submit'
+                        id='submit_score'
+                        name='submit_score'
                         value='Submit Score'
                         onclick='return confirm(verification())'>
                     </c:when>
                     <c:otherwise>
-                      <input
-                        type='submit'
-                        id='submit'
-                        name='submit'
-                        value='Submit Score'
-                        onclick='return confirm("Submit Data -- Are you sure?")'>
+                      <button
+                      type='button'
+                        id='submit_score'
+                        >Submit Score</button>
                     </c:otherwise>
                   </c:choose>
                 </c:if> <input
@@ -384,5 +389,10 @@ init();
     <!-- end table to center everything -->
   </form>
   <!-- end score entry form -->
+
+	<div id="confirm-score-submit">
+		<p>Submit Data -- Are you sure?</p>
+	</div>
+
 </body>
 </html>
