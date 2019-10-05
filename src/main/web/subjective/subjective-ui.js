@@ -559,16 +559,16 @@ function addRubricToScoreEntry(table, goal, ranges) {
   $.each(ranges, function(index, range) {
     // skip the right border on the last cell
     var borderClass;
-    if(index >= ranges.length-1) {
+    if (index >= ranges.length - 1) {
       borderClass = "";
     } else {
       borderClass = "border-right";
     }
-    
+
     var numColumns = range.max - range.min + 1;
-    var cell = $("<td colspan='" + numColumns
-        + "' class='" + borderClass + " center' id='" + getRubricCellId(goal, index)
-        + "'>" + range.shortDescription + "</td>");
+    var cell = $("<td colspan='" + numColumns + "' class='" + borderClass
+        + " center' id='" + getRubricCellId(goal, index) + "'>"
+        + range.shortDescription + "</td>");
     row.append(cell);
   });
 
