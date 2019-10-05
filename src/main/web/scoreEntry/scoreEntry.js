@@ -12,12 +12,14 @@ $(document).ready(function() {
     modal : true,
     buttons : [ {
       text : "Yes",
+      id: "confirm-score-submit_yes",
       click : function() {
         $(this).dialog("close");
         $("#scoreEntry").submit();
       }
     }, {
       text : "No",
+      id: "confirm-score-submit_no",
       click : function() {
         $(this).dialog("close");
       }

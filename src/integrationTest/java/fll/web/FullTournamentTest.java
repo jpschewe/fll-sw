@@ -52,7 +52,9 @@ import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -972,6 +974,13 @@ public class FullTournamentTest {
 
           if (rs.getBoolean("NoShow")) {
             selenium.findElement(By.id("no_show")).click();
+
+            final Alert confirmScoreChange = selenium.switchTo().alert();
+            if (LOGGER.isTraceEnabled()) {
+              LOGGER.trace("Confirmation text: "
+                  + confirmScoreChange.getText());
+            }
+            confirmScoreChange.accept();
           } else {
             // walk over challenge descriptor to get all element names and then
             // use the values from rs
@@ -1038,16 +1047,15 @@ public class FullTournamentTest {
                        "Submit button is not enabled, invalid score entered");
 
             selenium.findElement(By.id("submit_score")).click();
+
+            // wait for dialog element
+            final WebElement confirmScoreYesButton = (new WebDriverWait(selenium,
+                                                                        IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS)).until(ExpectedConditions.presenceOfElementLocated(By.id("confirm-score-submit_yes")));
+
+            confirmScoreYesButton.click();
           } // not NoShow
 
           Thread.sleep(50);
-
-          final Alert confirmScoreChange = selenium.switchTo().alert();
-          if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Confirmation text: "
-                + confirmScoreChange.getText());
-          }
-          confirmScoreChange.accept();
 
           assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.name("error")), "Errors: ");
         } else {
