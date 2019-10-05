@@ -548,9 +548,9 @@ task uncompressJavaWindows(type: Copy, dependsOn: verifyJavaWindows) {
 } 
 uncompressJavaWindows.doFirst {
     // Need to remove read-only file from JDK release
-    deletefileTree(project.java_download_base.resolve("windows")) {
+  delete(fileTree(project.java_download_base.resolve("windows")) {
         include "**/bin/server/classes.jsa"
-    }
+          })
 }
 windowsDistributionDependencies.dependsOn(uncompressJavaWindows)
 
