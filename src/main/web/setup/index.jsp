@@ -64,7 +64,21 @@
       option below.</p>
 
     <hr />
-    <p>You can select a description that shipped with the software</p>
+    
+     <p>Initialize the database based upon a previously saved database.</p>
+
+    <input
+      type='file'
+      size='32'
+      name='dbdump'> <input
+      type='submit'
+      name='createdb'
+      value='Upload Saved Database'
+      onclick='return confirmOverwrite()' />
+
+    <hr />
+    
+    <p>Select a description that shipped with the software. Use this option if a database has not been provided.</p>
     <select
       id='description'
       name='description'>
@@ -86,21 +100,8 @@
 
 
     <hr />
-    <p>Or initialize the database based upon a previously saved
-      database that was created using the download database link on the
-      administration page.</p>
 
-    <input
-      type='file'
-      size='32'
-      name='dbdump'> <input
-      type='submit'
-      name='createdb'
-      value='Upload Saved Database'
-      onclick='return confirmOverwrite()' />
-
-    <hr />
-    <p>Or provide your own custom challenge description file</p>
+    <p>Provide your own custom challenge description file (advanced users only)</p>
     <input
       type='file'
       size='32'
