@@ -9,6 +9,7 @@ $(document).ready(function() {
 
   $("#confirm-score-submit").dialog({
     autoOpen : false,
+    modal : true,
     buttons : [ {
       text : "Yes",
       click : function() {
