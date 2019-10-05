@@ -16,7 +16,7 @@
 <script type="text/javascript"
 	src="<c:url value='/extlib/jquery-1.11.1.min.js' />"></script>
 
-<link rel="stylesheet"
+<link rel="stylesheet" type="text/css"
 	href="<c:url value='/extlib/jquery-ui-1.12.1/jquery-ui.min.css' />" />
 
 <script type="text/javascript"
