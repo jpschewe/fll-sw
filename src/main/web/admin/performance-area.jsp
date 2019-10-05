@@ -38,7 +38,7 @@
 </head>
 
 <body>
-	<h1>${challengeDescription.title }(Scoring Coordinator)</h1>
+	<h1>${challengeDescription.title }(ScoringCoordinator)</h1>
 
 	<div class='status-message'>${message}</div>
 	<%-- clear out the message, so that we don't see it again --%>
@@ -56,14 +56,26 @@
 	<ol>
 
 		<li><a target="_init" href="<c:url value='/setup' />">Database
-				setup</a> - Initialize the database first thing in the morning or the
-			night before.</li>
+				setup</a> - Ask the Lead Scoring Coordinator if the database is already
+			added to the server. If not, click Database setup. Do this the night
+			before the tournament, or the first thing the day of the tournament.
+			<ul>
+				<li>When setting up the database you will be prompted to create
+					a username and password. Pick something that isn't going to be
+					obvious to those at the tournament and is easy to type into a
+					tablet. This keeps non-officials from being able to change scores
+					if they get onto the network that the server is on.</li>
+				<li>If the database was already setup, make sure to get the
+					username and password from the person that did the setup. If you
+					cannot get this information, either run database setup or use the
+					Create User link on the Admin Index from the server computer.</li>
+			</ul></li>
 
-		<li>Current tournament is ${currentTournament.description }.
+		<li>
 			<form id='currentTournament'
 				action="<c:url value='/admin/SetCurrentTournament' />" method="post">
-				Change tournament to <select id='currentTournamentSelect'
-					name='currentTournament'>
+				Change tournament to the correct tournament and click Submit. <select
+					id='currentTournamentSelect' name='currentTournament'>
 					<c:forEach items="${tournaments }" var="tournament">
 						<c:choose>
 							<c:when
@@ -81,44 +93,93 @@
 			</form>
 		</li>
 
+		<li>Test the printer by printing something useful. See Other
+			Useful Tasks below.</li>
 
+		<li>Set up Scoring Computers
+			<ol>
+				<li>Connect to the correct FLL wireless network</li>
+				<li>Open Chrome (or other browser if Chrome is not installed)</li>
+				<li>Put server address in the address bar and hit enter. This
+					address is provided under the section Server Addresses on the
+					Scoring Coordinator page.</li>
+				<li>Enter the username and password specified above when
+					running database setup.</li>
+			</ol>
+		</li>
 
-		<li><a target="_remote_control" id='remote-control'
-			href='remoteControl.jsp'>Remote control of display</a> - used to
-			control what is displayed on the screens</li>
+		<li>Set up the display computer and projector
+			<ol>
+				<li>Connect to the correct FLL wireless network</li>
+				<li>Open Chrome (or other browser if Chrome is not installed)</li>
+				<li>Put server address in the address bar and hit enter. This
+					address is provided under the section Server Addresses on the
+					Scoring Coordinator page.</li>
+				<li>If you have more than one display, then name the display
+					computer. It is useful to use "Left" and "Right" or "Lakes" and
+					"Woods" depending on how you will be using the additional screens.</li>
+				<li>After clicking Submit, Alt-Tab to the new browser window
+					that was opened.</li>
+				<li>Press F11 to make the window full screen, hiding the
+					address bar and buttons. You may need to move the mouse pointer out
+					of the way as well.</li>
+			</ol>
+		</li>
+
+		<li>On the server click on <a target="_remote_control"
+			id='remote-control' href='remoteControl.jsp'>Control the Remote
+				display</a>. This is used to control what is displayed on the screens
+		</li>
 
 		<li><a href="CheckSubjectiveEmpty">Export performance data
-				for judges server</a>. This is done once regular match play is complete.
-			If doing finalist scheduling, the initial head to head brackets need
-			to be created before doing this export. This file needs to goto the
-			judges room.</li>
+				for judges server</a>. Save this file to the Red PERF Data flash drive
+			and deliver to the judges room.
+			<ul>
+				<li>At <b>Regionals</b>: This is done between the 3 performance
+					rounds and the Just For Fun round.
+				</li>
+				<li>At <b>Sectionals</b>: This is done between the regular
+					match play and Head to Head.
+				</li>
+				<li>A <b>State</b>: This is done between regular match play and
+					Head to Head. The initial head to head brackets need to be created
+					before doing this export.
+				</li>
+			</ul></li>
 
+		<li><a href='database.flldb'>Download the final database</a> -
+			send this to the lead Scoring Coordinator</li>
+
+	</ol>
+
+	<h2>Sectionals and State</h2>
+	Sections and State run a Head to Head competition after regular match
+	play.
+
+	<ol>
 		<li>Once regular match play has been completed you will need to
 			setup the <a href="<c:url value='/playoff' />" target="_h2h">head
 				to head brackets</a>.
 		</li>
 
 
-		<li>
+		<li><b>State Only</b>
 			<form name="import-finalist" action="ProcessImportFinalist"
 				method="POST" ENCTYPE="multipart/form-data">
-				<i>If this tournament does not have finalist judging, skip this
-					step.</i> Specify the file that was exported from the judges server
-				with the finalist data <input type="file" size="32"
-					name="finalistFile" />
+				Specify the file that was exported from the judges server with the
+				finalist data <input type="file" size="32" name="finalistFile" />
 
 				<!-- performance file upload button -->
 				<input id='uploadFinalistData' type="submit" value="Upload" />
-			</form>
-		</li>
+			</form></li>
 
-		<li><a href='<c:url value="/report/PlayoffReport" />'
+		<li>Print the <a href='<c:url value="/report/PlayoffReport" />'
 			target="_blank">Winners of each head to head bracket</a>. This is
-			needed for the awards ceremony.</li>
+			needed for the awards ceremony.
+		</li>
 
 		<li><a href='database.flldb'>Download the final database</a> -
 			send this to the lead computer person</li>
-
 
 	</ol>
 
@@ -158,6 +219,5 @@
 		<li><a href="<c:url value='/admin/PerformanceSchedule' />"
 			target="_new">Performance Schedule</a></li>
 	</ul>
-
 </body>
 </html>
