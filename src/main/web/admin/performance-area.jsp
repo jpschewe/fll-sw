@@ -38,7 +38,7 @@
 </head>
 
 <body>
-	<h1>${challengeDescription.title }(PerformanceArea)</h1>
+	<h1>${challengeDescription.title }(Scoring Coordinator)</h1>
 
 	<div class='status-message'>${message}</div>
 	<%-- clear out the message, so that we don't see it again --%>

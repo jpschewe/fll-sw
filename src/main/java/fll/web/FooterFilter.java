@@ -161,7 +161,7 @@ public class FooterFilter implements Filter {
     formatter.format("<hr />");
     formatter.format("<table>");
     formatter.format("  <tr>");
-    formatter.format("    <td><a href='%s/admin/performance-area.jsp' target='_top'>Performance Area</a></td>", contextPath);
+    formatter.format("    <td><a href='%s/admin/performance-area.jsp' target='_top'>Scoring Coordinator</a></td>", contextPath);
     formatter.format("    <td><a href='%s/judges-room.jsp' target='_top'>Judges Room</a></td>", contextPath);
     formatter.format("    <td><a href='%s/index.jsp' target='_top'>Main Index</a></td>", contextPath);
     formatter.format("    <td><a href='%s/admin/index.jsp' target='_top'>Admin Index</a></td>", contextPath);
