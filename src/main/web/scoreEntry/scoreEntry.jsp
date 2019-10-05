@@ -376,7 +376,7 @@ return m;
                 <td colspan='2'><input
                   type='submit'
                   id='no_show'
-                  name='submit'
+                  name='no_show'
                   value='No Show'
                   onclick='return submit_NoShow()'></td>
               </c:if>
