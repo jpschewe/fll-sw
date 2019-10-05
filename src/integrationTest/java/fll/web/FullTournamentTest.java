@@ -1167,7 +1167,7 @@ public class FullTournamentTest {
             selenium.findElement(By.id("Verified_yes")).click();
 
             // submit score
-            selenium.findElement(By.id("submit")).click();
+            selenium.findElement(By.id("submit_score")).click();
           } // not NoShow
 
           Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
