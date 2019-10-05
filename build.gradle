@@ -6,7 +6,7 @@ import javax.xml.transform.TransformerFactory
 import javax.xml.transform.stream.StreamResult
 import javax.xml.transform.stream.StreamSource
 
-import static org.gradle.api.tasks.PathSensitivity.NONE
+import org.gradle.api.tasks.PathSensitivity
 
 import java.nio.file.Paths
 
@@ -221,20 +221,20 @@ javadoc {
 
 task distributionDependencies {
     doFirst {
-        println "Distribution dependnecies"
+      println("Distribution dependnecies")
     }
 }
-distTar.dependsOn distributionDependencies
-distZip.dependsOn distributionDependencies
-installDist.dependsOn distributionDependencies
+distTar.dependsOn(distributionDependencies)
+distZip.dependsOn(distributionDependencies)
+installDist.dependsOn(distributionDependencies)
 
 // copy webapp files
 task copyWeb(type: Copy) {
-    from "src/main/web"
-    into project.web_build_dir
+  from("src/main/web")
+  into(project.web_build_dir)
 }
-distributionDependencies.dependsOn copyWeb
-integrationTest.dependsOn copyWeb
+distributionDependencies.dependsOn(copyWeb)
+integrationTest.dependsOn(copyWeb)
 
 // Configure the distribution plugin instead of using the application plugin so that
 // the web application classes stay outside of a jar file and Tomcat will properly
@@ -282,8 +282,8 @@ def launchScriptDist = copySpec {
 distributions {
     main {
         contents {            
-            with baseDistribution
-            with launchScriptDist
+            with(baseDistribution)
+            with(launchScriptDist)
             from(createExe.dest)
         }
     }
@@ -306,7 +306,7 @@ markdownToHtml {
         definitionLists = true
         tables = true   
 }
-distributionDependencies.dependsOn markdownToHtml
+distributionDependencies.dependsOn(markdownToHtml)
 
 
 // write log4j config for JspC
@@ -324,8 +324,8 @@ task writeJspcProperties(type: WriteProperties) {
 // the output isn't used other than to check if there are errors in the build
 task jspToJava(type: JavaExec, dependsOn: [compileJava, writeJspcProperties]) {
 
-    inputs.dir jspSrc
-    outputs.dir jspJavaSrc
+    inputs.dir(jspSrc)
+    outputs.dir(jspJavaSrc)
 
     File xmlPartial = file("$jspJavaSrc/WEB-INF/web.xml.partial")
 
@@ -355,7 +355,7 @@ task jspToJava(type: JavaExec, dependsOn: [compileJava, writeJspcProperties]) {
         file("$jspJavaSrc/WEB-INF/web.xml").text = mergedXML
     }
 }
-check.dependsOn jspToJava
+check.dependsOn(jspToJava)
 
 
 cpdCheck {
@@ -364,7 +364,7 @@ cpdCheck {
 }
 
 task sloccount(type: Exec) {
-        commandLine "cloc", "--by-file", "--xml", "--out", "$buildDir/reports/sloccount/cloc.xml", "src"
+    commandLine("cloc", "--by-file", "--xml", "--out", "$buildDir/reports/sloccount/cloc.xml", "src")
 }
 
 task renderWorkflows(dependsOn: [markdownToHtml]) {
@@ -382,27 +382,26 @@ task renderWorkflows(dependsOn: [markdownToHtml]) {
         }
     }
     
-    inputs.files inputFiles
-    outputs.files outputFiles
+    inputs.files(inputFiles)
+    outputs.files(outputFiles)
     
     doLast {
       ioMap.each{ inFile, outFile ->
                         exec{
-                            commandLine "dot"
-                              args "-Tpdf", "-o", outFile, inFile
+          commandLine("dot", "-Tpdf", "-o", outFile, inFile)
                         }
       }
     }
 }
-distributionDependencies.dependsOn renderWorkflows
+distributionDependencies.dependsOn(renderWorkflows)
 
 task createDatabaseDiagram(type: JavaExec, dependsOn: [markdownToHtml]) {
     classpath = sourceSets.main.runtimeClasspath
     
     main = "fll.db.GenerateDatabaseDiagram"
-    args new File(project.documentation_build_dir, "database-diagram").absolutePath
+    args (new File(project.documentation_build_dir, "database-diagram").absolutePath)
 }
-distributionDependencies.dependsOn createDatabaseDiagram
+distributionDependencies.dependsOn(createDatabaseDiagram)
 
 createExe {
     mainClassName = project.mainClassName
@@ -428,16 +427,16 @@ createExe {
     // for debugging classpath information        
     //headerType = "console"
     //jvmOptions = ["-Dlog4j2.debug=true"]
- }
-distributionDependencies.dependsOn createExe
+}
+distributionDependencies.dependsOn(createExe)
 
 
 configurations {
-    spotbugsStylesheets { transitive false }
+    spotbugsStylesheets { transitive = false }
 }
 
 dependencies {
-    spotbugsStylesheets "com.github.spotbugs:spotbugs:$spotbugs.toolVersion"
+  spotbugsStylesheets("com.github.spotbugs:spotbugs:$spotbugs.toolVersion")
 }
 
 spotbugs {
@@ -453,28 +452,28 @@ spotbugs {
 // some extra tasks so that we can generate html AND xml
 tasks.withType(SpotBugsTask) {
     reports {
-        xml.withMessages true
-        html.stylesheet resources.text.fromArchiveEntry(configurations.spotbugsStylesheets, "color.xsl")
+        xml.withMessages = true
+        html.stylesheet = resources.text.fromArchiveEntry(configurations.spotbugsStylesheets, "color.xsl")
     }
 
     task "${it.name}HtmlReport" {
         def input = reports.xml.destination
-        inputs.file reports.html.stylesheet.asFile() withPropertyName "spotbugsStylesheet" withPathSensitivity NONE
-        inputs.files fileTree(input) withPropertyName "input" withPathSensitivity NONE skipWhenEmpty()
+        inputs.file(reports.html.stylesheet.asFile()).withPropertyName("spotbugsStylesheet").withPathSensitivity(PathSensitivity.NONE)
+        inputs.files(fileTree(input)).withPropertyName("input").withPathSensitivity(PathSensitivity.NONE) skipWhenEmpty()
         def output = file(input.absolutePath.replaceFirst(/\.xml$/, ".html"))
-        outputs.file output withPropertyName "output"
+        outputs.file(output).withPropertyName("output")
         doLast {
             def factory = TransformerFactory.newInstance("net.sf.saxon.TransformerFactoryImpl", getClass().classLoader)
             def transformer = factory.newTransformer(new StreamSource(reports.html.stylesheet.asFile()));
             transformer.transform(new StreamSource(input), new StreamResult(output))
         }
     }
-    it.finalizedBy "${it.name}HtmlReport"
+    it.finalizedBy("${it.name}HtmlReport")
 }
 // these tasks are created in the loop above
-distributionDependencies.dependsOn spotbugsMainHtmlReport
-distributionDependencies.dependsOn spotbugsTestHtmlReport
-distributionDependencies.dependsOn spotbugsIntegrationTestHtmlReport
+distributionDependencies.dependsOn(spotbugsMainHtmlReport)
+distributionDependencies.dependsOn(spotbugsTestHtmlReport)
+distributionDependencies.dependsOn(spotbugsIntegrationTestHtmlReport)
 
 gitProperties {
     gitPropertiesDir = "${buildDir}/resources/main/fll/resources"
@@ -491,7 +490,7 @@ task writeLaunchJar(type: Jar) {
         "Class-Path": "classes/\n " + configurations.runtimeClasspath.collect { "lib/" + it.getName() }.join(" \n "))
     }
 }
-distributionDependencies.dependsOn writeLaunchJar
+distributionDependencies.dependsOn(writeLaunchJar)
 
 cobertura {
     coverageFormats = [ "html", "xml" ]
@@ -516,7 +515,7 @@ dependencyUpdates.resolutionStrategy {
 distributions {
     windows {
         contents {
-            with baseDistribution
+            with(baseDistribution)
             from("$buildDir/bundled-java/windows/")
             from(createExe.dest)
         }        
@@ -525,42 +524,42 @@ distributions {
 
 task windowsDistributionDependencies {
     doLast {
-        println "Windows distribution dependnecies"
+      println("Windows distribution dependnecies")
     }
 }
-windowsDistributionDependencies.dependsOn distributionDependencies
-windowsDistTar.dependsOn windowsDistributionDependencies
-windowsDistZip.dependsOn windowsDistributionDependencies
-installWindowsDist.dependsOn windowsDistributionDependencies
+windowsDistributionDependencies.dependsOn(distributionDependencies)
+windowsDistTar.dependsOn(windowsDistributionDependencies)
+windowsDistZip.dependsOn(windowsDistributionDependencies)
+  installWindowsDist.dependsOn(windowsDistributionDependencies)
 
 task downloadJavaWindows(type: Download) {
-    src project.java_windows_url
-    dest project.java_download_base.resolve("windows-java.zip").toFile()
-    overwrite false
+    src(project.java_windows_url)
+    dest(project.java_download_base.resolve("windows-java.zip").toFile())
+    overwrite(false)
 }
 task verifyJavaWindows(type: Verify, dependsOn: downloadJavaWindows) {
-    src downloadJavaWindows.dest
-    algorithm "SHA-256"
-    checksum project.java_windows_checksum
+    src(downloadJavaWindows.dest)
+    algorithm("SHA-256")
+    checksum(project.java_windows_checksum)
 }
 task uncompressJavaWindows(type: Copy, dependsOn: verifyJavaWindows) {    
-    from zipTree(downloadJavaWindows.dest)
-    into project.java_download_base.resolve("windows")
+    from(zipTree(downloadJavaWindows.dest))
+    into(project.java_download_base.resolve("windows"))
 } 
 uncompressJavaWindows.doFirst {
     // Need to remove read-only file from JDK release
-    delete fileTree(project.java_download_base.resolve("windows")) {
+    deletefileTree(project.java_download_base.resolve("windows")) {
         include "**/bin/server/classes.jsa"
     }
 }
-windowsDistributionDependencies.dependsOn uncompressJavaWindows
+windowsDistributionDependencies.dependsOn(uncompressJavaWindows)
 
 
 installWindowsDist.doFirst {
     // Need to remove read-only file from JDK release
-    delete fileTree("$buildDir/install/windows") {
+  delete(fileTree("$buildDir/install/windows") {
         include "**/bin/server/classes.jsa"
-    }
+          })
 }
 // end Windows distribution tasks
 
@@ -568,8 +567,8 @@ installWindowsDist.doFirst {
 distributions {
     linux {
         contents {
-            with baseDistribution
-            with launchScriptDist
+            with(baseDistribution)
+            with(launchScriptDist)
             from("$buildDir/bundled-java/linux/")
             from(createExe.dest)
         }        
@@ -578,44 +577,44 @@ distributions {
 
 task linuxDistributionDependencies {
     doFirst {
-        println "Linux distribution dependnecies"
+        println("Linux distribution dependnecies")
     }
 }
-linuxDistributionDependencies.dependsOn distributionDependencies
-linuxDistTar.dependsOn linuxDistributionDependencies
-linuxDistZip.dependsOn linuxDistributionDependencies
-installLinuxDist.dependsOn linuxDistributionDependencies
+linuxDistributionDependencies.dependsOn(distributionDependencies)
+linuxDistTar.dependsOn(linuxDistributionDependencies)
+linuxDistZip.dependsOn(linuxDistributionDependencies)
+installLinuxDist.dependsOn(linuxDistributionDependencies)
 
 task downloadJavaLinux(type: Download) {
-    src project.java_linux_url
-    dest project.java_download_base.resolve("linux-java.tar.gz").toFile()
-    overwrite false
+    src(project.java_linux_url)
+    dest(project.java_download_base.resolve("linux-java.tar.gz").toFile())
+    overwrite(false)
 }
 task verifyJavaLinux(type: Verify, dependsOn: downloadJavaLinux) {
-    src downloadJavaLinux.dest
-    algorithm "SHA-256"
-    checksum project.java_linux_checksum
+    src(downloadJavaLinux.dest)
+    algorithm("SHA-256")
+    checksum(project.java_linux_checksum)
 }
 task uncompressJavaLinux(type: Copy, dependsOn: verifyJavaLinux) {    
-    from tarTree(downloadJavaLinux.dest)
-    into project.java_download_base.resolve("linux")
+    from(tarTree(downloadJavaLinux.dest))
+    into(project.java_download_base.resolve("linux"))
 } 
 uncompressJavaLinux.doFirst {
     // Need to remove read-only file from JDK release
-    delete fileTree(project.java_download_base.resolve("linux")) {
+  delete(fileTree(project.java_download_base.resolve("linux")) {
         include "**/lib/server/classes.jsa"
         include "**/legal/**"
-    }
+          })
 }
-linuxDistributionDependencies.dependsOn uncompressJavaLinux
+linuxDistributionDependencies.dependsOn(uncompressJavaLinux)
 
 
 installLinuxDist.doFirst {
     // Need to remove read-only file from JDK release
-    delete fileTree("$buildDir/install/linux") {
+  delete(fileTree("$buildDir/install/linux") {
         include "**/lib/server/classes.jsa"
         include "**/legal/**"
-    }
+          })
 }
 // end Linux distribution tasks
 
@@ -624,8 +623,8 @@ installLinuxDist.doFirst {
 distributions {
     mac {
         contents {
-            with baseDistribution
-            with launchScriptDist
+            with(baseDistribution)
+            with(launchScriptDist)
             from("$buildDir/bundled-java/mac/")
             from(createExe.dest)
         }        
@@ -634,43 +633,43 @@ distributions {
 
 task macDistributionDependencies {
     doFirst {
-        println "Mac distribution dependnecies"
+      println("Mac distribution dependnecies")
     }
 }
-macDistributionDependencies.dependsOn distributionDependencies
-macDistTar.dependsOn macDistributionDependencies
-macDistZip.dependsOn macDistributionDependencies
-installMacDist.dependsOn macDistributionDependencies
+macDistributionDependencies.dependsOn(distributionDependencies)
+macDistTar.dependsOn(macDistributionDependencies)
+macDistZip.dependsOn(macDistributionDependencies)
+installMacDist.dependsOn(macDistributionDependencies)
 
 task downloadJavaMac(type: Download) {
-    src project.java_mac_url
-    dest project.java_download_base.resolve("mac-java.tar.gz").toFile()
-    overwrite false
+    src(project.java_mac_url)
+    dest(project.java_download_base.resolve("mac-java.tar.gz").toFile())
+    overwrite(false)
 }
 task verifyJavaMac(type: Verify, dependsOn: downloadJavaMac) {
-    src downloadJavaMac.dest
-    algorithm "SHA-256"
-    checksum project.java_mac_checksum
+    src(downloadJavaMac.dest)
+    algorithm("SHA-256")
+    checksum(project.java_mac_checksum)
 }
 task uncompressJavaMac(type: Copy, dependsOn: verifyJavaMac) {    
-    from tarTree(downloadJavaMac.dest)
-    into project.java_download_base.resolve("mac")
+    from(tarTree(downloadJavaMac.dest))
+    into(project.java_download_base.resolve("mac"))
 } 
 uncompressJavaMac.doFirst {
     // Need to remove read-only file from JDK release
-    delete fileTree(project.java_download_base.resolve("mac")) {
+  delete(fileTree(project.java_download_base.resolve("mac")) {
         include "**/lib/server/classes.jsa"
         include "**/legal/**"
-    }
+          })
 }
-macDistributionDependencies.dependsOn uncompressJavaMac
+macDistributionDependencies.dependsOn(uncompressJavaMac)
 
 
 installMacDist.doFirst {
     // Need to remove read-only file from JDK release
-    delete fileTree("$buildDir/install/mac") {
+  delete(fileTree("$buildDir/install/mac") {
         include "**/lib/server/classes.jsa"
         include "**/legal/**"
-    }
+          })
 }
 // end Mac distribution tasks
