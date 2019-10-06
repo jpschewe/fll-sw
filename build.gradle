@@ -6,7 +6,7 @@ import javax.xml.transform.TransformerFactory
 import javax.xml.transform.stream.StreamResult
 import javax.xml.transform.stream.StreamSource
 
-import static org.gradle.api.tasks.PathSensitivity.NONE
+import org.gradle.api.tasks.PathSensitivity
 
 import java.nio.file.Paths
 
@@ -17,27 +17,27 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath group: 'com.cinnober.gradle', name: 'semver-git', version: '2.4.0'
-        classpath 'org.unbroken-dome.gradle-plugins:gradle-testsets-plugin:2.1.1'
-        classpath 'org.kordamp:markdown-gradle-plugin:1.2.0'
-        classpath 'net.sf.saxon:Saxon-HE:9.9.1-3'
+      classpath(group: "com.cinnober.gradle", name: "semver-git", version: "2.4.0")
+        classpath("org.unbroken-dome.gradle-plugins:gradle-testsets-plugin:2.1.1")
+        classpath("org.kordamp:markdown-gradle-plugin:1.2.0")
+        classpath("net.sf.saxon:Saxon-HE:9.9.1-3")
     }
     configurations.classpath {
-        exclude group: 'com.google.guava', module: 'guava'
+      exclude(group: "com.google.guava", module: "guava")
     }
 }    
 
 plugins {
-    id 'java'
-    id 'distribution'
+    id "java"
+    id "distribution"
     id "com.dorongold.task-tree" version "1.3.1"
-    id 'org.unbroken-dome.test-sets' version "2.1.1"
-    id 'eclipse'
-    id 'org.kordamp.markdown.convert' version "1.2.0"       
-    id 'com.github.spotbugs' version '1.7.1'
+    id "org.unbroken-dome.test-sets" version "2.1.1"
+    id "eclipse"
+    id "org.kordamp.markdown.convert" version "1.2.0"       
+    id "com.github.spotbugs" version "1.7.1"
     id "de.aaschmid.cpd" version "1.2"
-    id 'edu.sc.seis.launch4j' version '2.4.6'
-    id 'net.saliman.cobertura' version '2.6.0'
+    id "edu.sc.seis.launch4j" version "2.4.6"
+    id "net.saliman.cobertura" version "2.6.0"
     id "com.gorylenko.gradle-git-properties" version "2.0.0"
     id "com.github.ben-manes.versions" version "0.21.0" // adds dependencyUpdates task
     id "de.undercouch.download" version "4.0.0" // file download
@@ -48,7 +48,7 @@ ext.nextVersion = "patch"
 ext.snapshotSuffix = "beta.<count>+g<sha><dirty>"
 // optionally: ext.dirtyMarker = "-dirty" (default) replaces <dirty> in snapshotSuffix
 // optionally: ext.gitDescribeArgs = '--match *[0-9].[0-9]*.[0-9]*' (default) or other arguments for git describe.
-apply plugin: 'com.cinnober.gradle.semver-git'
+apply plugin: "com.cinnober.gradle.semver-git"
 
 repositories {
     mavenLocal()
@@ -65,20 +65,20 @@ eclipse {
             withXml {
                 def node = it.asNode()
                 // add web as resource entry
-                node.appendNode( 'classpathentry', [ kind: 'src', path: 'src/main/web', output: 'bin/web']) 
+                node.appendNode( "classpathentry", [ kind: "src", path: "src/main/web", output: "bin/web"]) 
             }
             
             // remove entries added due to issue with testsets
             // https://github.com/unbroken-dome/gradle-testsets-plugin/issues/77
             whenMerged {
-                entries.removeAll{it.kind == 'lib' && (it.path.endsWith('build/classes/java/test') || it.path.endsWith('build/resources/test'))}
+                entries.removeAll{it.kind == "lib" && (it.path.endsWith("build/classes/java/test") || it.path.endsWith("build/resources/test"))}
             }
         }
     }
 }
 
 dependencies {
-    jspc 'org.apache.ant:ant:1.10.1'
+  jspc("org.apache.ant:ant:1.10.1")
 }
 
 testSets {
@@ -89,11 +89,11 @@ integrationTest.mustRunAfter test
 
 test {
     useJUnitPlatform()
-        ignoreFailures Boolean.getBoolean("test.ignoreFailures") 
+    ignoreFailures = Boolean.getBoolean("test.ignoreFailures") 
 }
 integrationTest {
     useJUnitPlatform()
-        ignoreFailures Boolean.getBoolean("test.ignoreFailures") 
+    ignoreFailures = Boolean.getBoolean("test.ignoreFailures") 
 }
 repositories {
     //mavenLocal()
@@ -108,110 +108,110 @@ ext {
     poi_version = "4.0.1"
     junit_version = "5.4.0"
     log4j_version = "2.11.2"
-    spotbugs_version = '3.1.12'
+    spotbugs_version = "3.1.12"
 
-    web_build_dir = new File(project.buildDir, 'web')
-    documentation_build_dir = new File(project.buildDir, 'gen-documentation')    
+    web_build_dir = new File(project.buildDir, "web")
+    documentation_build_dir = new File(project.buildDir, "gen-documentation")    
     
-    jspSrc = 'src/main/web'
+    jspSrc = "src/main/web"
     jspJavaSrc = new File(project.buildDir, "jsp-java-source")
     jspPackage = "fll.jsp"
 
-    mainClassName = 'fll.Launcher'
+    mainClassName = "fll.Launcher"
     
     // java download urls
-    java_download_base = project.buildDir.toPath().resolve('bundled-java')
+    java_download_base = project.buildDir.toPath().resolve("bundled-java")
     
-    java_windows_url = 'https://download.java.net/java/GA/jdk12.0.2/e482c34c86bd4bf8b56c0b35558996b9/10/GPL/openjdk-12.0.2_windows-x64_bin.zip'
-    java_windows_checksum = 'a30bed3d6d62f6ae1052aaf3c6956aaee8e3deb2f50f155575112f3f29411fba'
+    java_windows_url = "https://download.java.net/java/GA/jdk12.0.2/e482c34c86bd4bf8b56c0b35558996b9/10/GPL/openjdk-12.0.2_windows-x64_bin.zip"
+    java_windows_checksum = "a30bed3d6d62f6ae1052aaf3c6956aaee8e3deb2f50f155575112f3f29411fba"
     
-    java_mac_url = 'https://download.java.net/java/GA/jdk12.0.2/e482c34c86bd4bf8b56c0b35558996b9/10/GPL/openjdk-12.0.2_osx-x64_bin.tar.gz'
-    java_mac_checksum = '675a739ab89b28a8db89510f87cb2ec3206ec6662fb4b4996264c16c72cdd2a1'
+    java_mac_url = "https://download.java.net/java/GA/jdk12.0.2/e482c34c86bd4bf8b56c0b35558996b9/10/GPL/openjdk-12.0.2_osx-x64_bin.tar.gz"
+    java_mac_checksum = "675a739ab89b28a8db89510f87cb2ec3206ec6662fb4b4996264c16c72cdd2a1"
     
-    java_linux_url = 'https://download.java.net/java/GA/jdk12.0.2/e482c34c86bd4bf8b56c0b35558996b9/10/GPL/openjdk-12.0.2_linux-x64_bin.tar.gz'
-    java_linux_checksum = '75998a6ebf477467aa5fb68227a67733f0e77e01f737d4dfbc01e617e59106ed'
+    java_linux_url = "https://download.java.net/java/GA/jdk12.0.2/e482c34c86bd4bf8b56c0b35558996b9/10/GPL/openjdk-12.0.2_linux-x64_bin.tar.gz"
+    java_linux_checksum = "75998a6ebf477467aa5fb68227a67733f0e77e01f737d4dfbc01e617e59106ed"
 }
 
 
-group = 'fll'
+group = "fll"
 
 // set version of Java that the source confirms to. 
 // The bytecode will be for this version of Java as well, unless targetCompatibility is specified.
 sourceCompatibility = 1.8
 
 dependencies {
-    implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: project.tomcat_version
-    implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-jasper', version: project.tomcat_version
-    implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-websocket', version: project.tomcat_version
-    implementation group: 'org.apache.tomcat', name: 'tomcat-jasper', version: project.tomcat_version
-    implementation group: 'org.apache.tomcat', name: 'tomcat-jasper-el', version: project.tomcat_version
-    implementation group: 'org.apache.tomcat', name: 'tomcat-jsp-api', version: project.tomcat_version
+  implementation(group: "org.apache.tomcat.embed", name: "tomcat-embed-core", version: project.tomcat_version)
+  implementation(group: "org.apache.tomcat.embed", name: "tomcat-embed-jasper", version: project.tomcat_version)
+  implementation(group: "org.apache.tomcat.embed", name: "tomcat-embed-websocket", version: project.tomcat_version)
+  implementation(group: "org.apache.tomcat", name: "tomcat-jasper", version: project.tomcat_version)
+  implementation(group: "org.apache.tomcat", name: "tomcat-jasper-el", version: project.tomcat_version)
+  implementation(group: "org.apache.tomcat", name: "tomcat-jsp-api", version: project.tomcat_version)
 
-    implementation group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
-    implementation group: "commons-cli", name: "commons-cli", version: "1.4"
-    implementation group: "org.hsqldb", name: "hsqldb", version: "2.5.0"
+  implementation(group: "org.apache.commons", name: "commons-lang3", version: "3.8.1")
+  implementation(group: "commons-cli", name: "commons-cli", version: "1.4")
+  implementation(group: "org.hsqldb", name: "hsqldb", version: "2.5.0")
     
-    implementation group: "com.itextpdf", name: "itextpdf", version: project.itext_version
+  implementation(group: "com.itextpdf", name: "itextpdf", version: project.itext_version)
     
-    runtimeOnly group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: project.log4j_version
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: project.log4j_version    
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: project.log4j_version    
+  runtimeOnly(group: "org.apache.logging.log4j", name: "log4j-slf4j-impl", version: project.log4j_version)
+  implementation(group: "org.apache.logging.log4j", name: "log4j-api", version: project.log4j_version    )
+  implementation(group: "org.apache.logging.log4j", name: "log4j-core", version: project.log4j_version    )
     
-    implementation group: "org.slf4j", name: "slf4j-api", version: project.slf4j_version
+  implementation(group: "org.slf4j", name: "slf4j-api", version: project.slf4j_version)
     
-    implementation group: "org.apache.poi", name: "poi-ooxml", version: project.poi_version
+  implementation(group: "org.apache.poi", name: "poi-ooxml", version: project.poi_version)
     
-    compileOnly group: "com.github.spotbugs", name: "spotbugs-annotations", version: project.spotbugs_version
-    compileOnly group: 'net.jcip', name: 'jcip-annotations', version: '1.0'
-    compileOnly group: "com.google.code.findbugs", name: "jsr305", version: "3.0.1"
+  compileOnly(group: "com.github.spotbugs", name: "spotbugs-annotations", version: project.spotbugs_version)
+  compileOnly(group: "net.jcip", name: "jcip-annotations", version: "1.0")
+  compileOnly(group: "com.google.code.findbugs", name: "jsr305", version: "3.0.1")
     
-    implementation group: "com.fasterxml.jackson.core", name: "jackson-databind", version: project.jackson_version
-    implementation group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: project.jackson_version
+  implementation(group: "com.fasterxml.jackson.core", name: "jackson-databind", version: project.jackson_version)
+  implementation(group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: project.jackson_version)
 
-    implementation group: "net.sourceforge.schemaspy", name: "schemaspy", version: "5.0.0"
+  implementation(group: "net.sourceforge.schemaspy", name: "schemaspy", version: "5.0.0")
             
-    implementation group: "dnsjava", name: "dnsjava", version: "2.1.8"
+  implementation(group: "dnsjava", name: "dnsjava", version: "2.1.8")
     
-    implementation group: "commons-fileupload", name: "commons-fileupload", version: "1.4"
+  implementation(group: "commons-fileupload", name: "commons-fileupload", version: "1.4")
     
-    implementation group: "org.apache.tika", name: "tika-core", version: "1.20"
+  implementation(group: "org.apache.tika", name: "tika-core", version: "1.20")
     
-    implementation group: "com.diffplug.durian", name: "durian-core", version: "1.2.0"
+  implementation(group: "com.diffplug.durian", name: "durian-core", version: "1.2.0")
         
-    implementation group: "it.sauronsoftware", name: "junique", version: "1.0.4"
+  implementation(group: "it.sauronsoftware", name: "junique", version: "1.0.4")
             
-    implementation group: "com.googlecode.log4jdbc", name: "log4jdbc", version: "1.2"
+  implementation(group: "com.googlecode.log4jdbc", name: "log4jdbc", version: "1.2")
     
-    implementation group: "net.java.linoleum", name: "jlfgr", version: "1_0"
+  implementation(group: "net.java.linoleum", name: "jlfgr", version: "1_0")
     
-    runtimeOnly group: "javax.servlet", name: "jstl", version: "1.2"
+  runtimeOnly(group: "javax.servlet", name: "jstl", version: "1.2")
     
-    implementation group: "com.opencsv", name: "opencsv", version: "4.5"
+  implementation(group: "com.opencsv", name: "opencsv", version: "4.5")
     
-    implementation group: "net.mtu.eggplant", name: "JonsInfra", version: "2.0.1"   
+  implementation(group: "net.mtu.eggplant", name: "JonsInfra", version: "2.0.1"   )
     
-    implementation group: "com.google.guava", name: "guava", version: "23.5-jre"
+  implementation(group: "com.google.guava", name: "guava", version: "23.5-jre")
     
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: project.junit_version
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: project.junit_version
-    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: project.junit_version
+  testImplementation(group: "org.junit.jupiter", name: "junit-jupiter-api", version: project.junit_version)
+  testImplementation(group: "org.junit.jupiter", name: "junit-jupiter-params", version: project.junit_version)
+  testRuntimeOnly(group: "org.junit.jupiter", name: "junit-jupiter-engine", version: project.junit_version)
     
-    testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.1'
+  testImplementation(group: "org.hamcrest", name: "hamcrest", version: "2.1")
     
     // allow integration tests to reference code in the test directory
-    integrationTestImplementation sourceSets.test.output
+  integrationTestImplementation(sourceSets.test.output)
         
-    integrationTestImplementation group: 'org.easytesting', name: 'fest-swing', version: '1.2.1'
-    integrationTestImplementation group: 'net.sourceforge.htmlunit', name: 'htmlunit', version: '2.34.1'
-    integrationTestImplementation group: 'org.seleniumhq.selenium', name: 'selenium-server', version: '3.141.59'
-    integrationTestImplementation group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '3.3.0'
-    integrationTestImplementation group: 'io.github.artsok', name: 'rerunner-jupiter', version: '2.0.1'
+  integrationTestImplementation(group: "org.easytesting", name: "fest-swing", version: "1.2.1")
+  integrationTestImplementation(group: "net.sourceforge.htmlunit", name: "htmlunit", version: "2.34.1")
+  integrationTestImplementation(group: "org.seleniumhq.selenium", name: "selenium-server", version: "3.141.59")
+  integrationTestImplementation(group: "io.github.bonigarcia", name: "webdrivermanager", version: "3.3.0")
+  integrationTestImplementation(group: "io.github.artsok", name: "rerunner-jupiter", version: "2.0.1")
     
 }
 
 tasks.withType(Tar){
     compression = Compression.GZIP
-    extension = 'tar.gz'
+    extension = "tar.gz"
 }
 
 javadoc {
@@ -221,20 +221,20 @@ javadoc {
 
 task distributionDependencies {
     doFirst {
-        println "Distribution dependnecies"
+      println("Distribution dependnecies")
     }
 }
-distTar.dependsOn distributionDependencies
-distZip.dependsOn distributionDependencies
-installDist.dependsOn distributionDependencies
+distTar.dependsOn(distributionDependencies)
+distZip.dependsOn(distributionDependencies)
+installDist.dependsOn(distributionDependencies)
 
 // copy webapp files
 task copyWeb(type: Copy) {
-    from 'src/main/web'
-    into project.web_build_dir
+  from("src/main/web")
+  into(project.web_build_dir)
 }
-distributionDependencies.dependsOn copyWeb
-integrationTest.dependsOn copyWeb
+distributionDependencies.dependsOn(copyWeb)
+integrationTest.dependsOn(copyWeb)
 
 // Configure the distribution plugin instead of using the application plugin so that
 // the web application classes stay outside of a jar file and Tomcat will properly
@@ -244,33 +244,33 @@ def baseDistribution = copySpec {
     from("src/main/root-docs/")
     
     from(sourceSets.main.output) {
-        into 'classes'
+        into "classes"
     }
     from(configurations.runtimeClasspath) {
-        into 'lib'
+        into "lib"
     }
         
     // web elements
     from(project.web_build_dir) {
-        into 'web'
-        exclude '**/WEB-INF/flldb*'
+        into "web"
+        exclude "**/WEB-INF/flldb*"
     }
     
     // documentation
     from(project.documentation_build_dir) {
-        into 'web/documentation'
+        into "web/documentation"
     }
     from(javadoc) {
-        into 'web/documentation/api'
+        into "web/documentation/api"
     }
     from("$buildDir/reports/tests/") {
-        into 'web/documentation/reports'
+        into "web/documentation/reports"
     }
     from("$buildDir/reports/spotbugs/") {
-        into 'web/documentation/reports/spotbugs'
+        into "web/documentation/reports/spotbugs"
     }
     from("$buildDir/reports/cobertura/") {
-        into 'web/documentation/reports/coverage'
+        into "web/documentation/reports/coverage"
     }
 }
 // make sure that the launch script has Unix line endings
@@ -282,8 +282,8 @@ def launchScriptDist = copySpec {
 distributions {
     main {
         contents {            
-            with baseDistribution
-            with launchScriptDist
+            with(baseDistribution)
+            with(launchScriptDist)
             from(createExe.dest)
         }
     }
@@ -299,33 +299,33 @@ task run(type: JavaExec, dependsOn: [copyWeb, classes]) {
 
 // convert markdown documentation and copy non-markdown documentation
 markdownToHtml {
-        sourceDir = file('src/main/documentation')
+        sourceDir = file("src/main/documentation")
         outputDir = project.documentation_build_dir
         autoLinks = true
         fencedCodeBlocks = true
         definitionLists = true
         tables = true   
 }
-distributionDependencies.dependsOn markdownToHtml
+distributionDependencies.dependsOn(markdownToHtml)
 
 
 // write log4j config for JspC
 task writeJspcProperties(type: WriteProperties) {
     outputFile = new File(project.buildDir, "log4j.jspc.properties")
-    property('log4j.rootLogger', 'WARN, stdout')
-    property('log4j.logger.org.apache', 'INFO, stdout')
-    property('log4j.appender.stdout', 'org.apache.log4j.ConsoleAppender')
-    property('log4j.appender.stdout.Target', 'System.out')
-    property('log4j.appender.stdout.layout', 'org.apache.log4j.PatternLayout')
-    property('log4j.appender.stdout.layout.ConversionPattern', '%d [%C] %m%n')
+    property("log4j.rootLogger", "WARN, stdout")
+    property("log4j.logger.org.apache", "INFO, stdout")
+    property("log4j.appender.stdout", "org.apache.log4j.ConsoleAppender")
+    property("log4j.appender.stdout.Target", "System.out")
+    property("log4j.appender.stdout.layout", "org.apache.log4j.PatternLayout")
+    property("log4j.appender.stdout.layout.ConversionPattern", "%d [%C] %m%n")
 }
 
 // call JspC to test compile the JSP files
 // the output isn't used other than to check if there are errors in the build
 task jspToJava(type: JavaExec, dependsOn: [compileJava, writeJspcProperties]) {
 
-    inputs.dir jspSrc
-    outputs.dir jspJavaSrc
+    inputs.dir(jspSrc)
+    outputs.dir(jspJavaSrc)
 
     File xmlPartial = file("$jspJavaSrc/WEB-INF/web.xml.partial")
 
@@ -338,24 +338,24 @@ task jspToJava(type: JavaExec, dependsOn: [compileJava, writeJspcProperties]) {
     }
 
     classpath = configurations.jspc + sourceSets.main.runtimeClasspath
-    main = 'org.apache.jasper.JspC'
+    main = "org.apache.jasper.JspC"
     jvmArgs "-Dlog4j.configuration=file:$buildDir/log4j.jspc.properties"
 
-    args '-webapp', jspSrc,
-            '-d', jspJavaSrc,
-            '-p', jspPackage,
-            '-webxmlencoding', 'UTF-8',
-            '-webinc', xmlPartial.absolutePath
+    args "-webapp", jspSrc,
+            "-d", jspJavaSrc,
+            "-p", jspPackage,
+            "-webxmlencoding", "UTF-8",
+            "-webinc", xmlPartial.absolutePath
 
     doLast {
         // Merge the partial XML with the original
         String originalXML = file("$jspSrc/WEB-INF/web.xml").text
         String xmlToMerge = xmlPartial.text
-        String mergedXML = originalXML.replaceFirst('(?s)(<web-app.*?>)', '$1' + xmlToMerge)
+        String mergedXML = originalXML.replaceFirst("(?s)(<web-app.*?>)", "\$1" + xmlToMerge)
         file("$jspJavaSrc/WEB-INF/web.xml").text = mergedXML
     }
 }
-check.dependsOn jspToJava
+check.dependsOn(jspToJava)
 
 
 cpdCheck {
@@ -364,7 +364,7 @@ cpdCheck {
 }
 
 task sloccount(type: Exec) {
-        commandLine 'cloc', '--by-file', '--xml', '--out', "$buildDir/reports/sloccount/cloc.xml", 'src'
+    commandLine("cloc", "--by-file", "--xml", "--out", "$buildDir/reports/sloccount/cloc.xml", "src")
 }
 
 task renderWorkflows(dependsOn: [markdownToHtml]) {
@@ -372,7 +372,7 @@ task renderWorkflows(dependsOn: [markdownToHtml]) {
     def outputFiles = []
     def ioMap = [:]
 
-    fileTree('src/main/documentation/workflows').matching{include "**/*.dot"}.visit{FileVisitDetails details ->
+    fileTree("src/main/documentation/workflows").matching{include "**/*.dot"}.visit{FileVisitDetails details ->
         if(!details.isDirectory) {
             def inFile = details.file.path
             def outFile = project.documentation_build_dir.path + "/workflows/" + details.file.name + ".pdf"
@@ -382,27 +382,26 @@ task renderWorkflows(dependsOn: [markdownToHtml]) {
         }
     }
     
-    inputs.files inputFiles
-    outputs.files outputFiles
+    inputs.files(inputFiles)
+    outputs.files(outputFiles)
     
     doLast {
       ioMap.each{ inFile, outFile ->
                         exec{
-                            commandLine 'dot'
-                              args "-Tpdf", "-o", outFile, inFile
+          commandLine("dot", "-Tpdf", "-o", outFile, inFile)
                         }
       }
     }
 }
-distributionDependencies.dependsOn renderWorkflows
+distributionDependencies.dependsOn(renderWorkflows)
 
 task createDatabaseDiagram(type: JavaExec, dependsOn: [markdownToHtml]) {
     classpath = sourceSets.main.runtimeClasspath
     
     main = "fll.db.GenerateDatabaseDiagram"
-    args new File(project.documentation_build_dir, "database-diagram").absolutePath
+    args (new File(project.documentation_build_dir, "database-diagram").absolutePath)
 }
-distributionDependencies.dependsOn createDatabaseDiagram
+distributionDependencies.dependsOn(createDatabaseDiagram)
 
 createExe {
     mainClassName = project.mainClassName
@@ -428,16 +427,16 @@ createExe {
     // for debugging classpath information        
     //headerType = "console"
     //jvmOptions = ["-Dlog4j2.debug=true"]
- }
-distributionDependencies.dependsOn createExe
+}
+distributionDependencies.dependsOn(createExe)
 
 
 configurations {
-    spotbugsStylesheets { transitive false }
+    spotbugsStylesheets { transitive = false }
 }
 
 dependencies {
-    spotbugsStylesheets "com.github.spotbugs:spotbugs:$spotbugs.toolVersion"
+  spotbugsStylesheets("com.github.spotbugs:spotbugs:$spotbugs.toolVersion")
 }
 
 spotbugs {
@@ -453,28 +452,28 @@ spotbugs {
 // some extra tasks so that we can generate html AND xml
 tasks.withType(SpotBugsTask) {
     reports {
-        xml.withMessages true
-        html.stylesheet resources.text.fromArchiveEntry(configurations.spotbugsStylesheets, 'color.xsl')
+        xml.withMessages = true
+        html.stylesheet = resources.text.fromArchiveEntry(configurations.spotbugsStylesheets, "color.xsl")
     }
 
     task "${it.name}HtmlReport" {
         def input = reports.xml.destination
-        inputs.file reports.html.stylesheet.asFile() withPropertyName 'spotbugsStylesheet' withPathSensitivity NONE
-        inputs.files fileTree(input) withPropertyName 'input' withPathSensitivity NONE skipWhenEmpty()
-        def output = file(input.absolutePath.replaceFirst(/\.xml$/, '.html'))
-        outputs.file output withPropertyName 'output'
+        inputs.file(reports.html.stylesheet.asFile()).withPropertyName("spotbugsStylesheet").withPathSensitivity(PathSensitivity.NONE)
+        inputs.files(fileTree(input)).withPropertyName("input").withPathSensitivity(PathSensitivity.NONE) skipWhenEmpty()
+        def output = file(input.absolutePath.replaceFirst(/\.xml$/, ".html"))
+        outputs.file(output).withPropertyName("output")
         doLast {
-            def factory = TransformerFactory.newInstance('net.sf.saxon.TransformerFactoryImpl', getClass().classLoader)
+            def factory = TransformerFactory.newInstance("net.sf.saxon.TransformerFactoryImpl", getClass().classLoader)
             def transformer = factory.newTransformer(new StreamSource(reports.html.stylesheet.asFile()));
             transformer.transform(new StreamSource(input), new StreamResult(output))
         }
     }
-    it.finalizedBy "${it.name}HtmlReport"
+    it.finalizedBy("${it.name}HtmlReport")
 }
 // these tasks are created in the loop above
-distributionDependencies.dependsOn spotbugsMainHtmlReport
-distributionDependencies.dependsOn spotbugsTestHtmlReport
-distributionDependencies.dependsOn spotbugsIntegrationTestHtmlReport
+distributionDependencies.dependsOn(spotbugsMainHtmlReport)
+distributionDependencies.dependsOn(spotbugsTestHtmlReport)
+distributionDependencies.dependsOn(spotbugsIntegrationTestHtmlReport)
 
 gitProperties {
     gitPropertiesDir = "${buildDir}/resources/main/fll/resources"
@@ -488,24 +487,24 @@ task writeLaunchJar(type: Jar) {
         "Implementation-Title": project.name,
         "Implementation-Version": version,
         "Main-Class": project.mainClassName,
-        "Class-Path": "classes/\n " + configurations.runtimeClasspath.collect { "lib/" + it.getName() }.join(' \n '))
+        "Class-Path": "classes/\n " + configurations.runtimeClasspath.collect { "lib/" + it.getName() }.join(" \n "))
     }
 }
-distributionDependencies.dependsOn writeLaunchJar
+distributionDependencies.dependsOn(writeLaunchJar)
 
 cobertura {
-    coverageFormats = [ 'html', 'xml' ]
+    coverageFormats = [ "html", "xml" ]
 }
 
 
 dependencyUpdates.resolutionStrategy {
     componentSelection { rules ->
         rules.all { ComponentSelection selection ->
-            boolean rejected = ['alpha', 'beta', 'rc', 'cr', 'm', 'preview', 'b', 'ea'].any { qualifier ->
+            boolean rejected = ["alpha", "beta", "rc", "cr", "m", "preview", "b", "ea"].any { qualifier ->
             selection.candidate.version ==~ /(?i).*[.-]${qualifier}[.\d-+]*/
             }
             if (rejected) {
-                selection.reject('Release candidate')
+                selection.reject("Release candidate")
             }
         }
     }
@@ -516,7 +515,7 @@ dependencyUpdates.resolutionStrategy {
 distributions {
     windows {
         contents {
-            with baseDistribution
+            with(baseDistribution)
             from("$buildDir/bundled-java/windows/")
             from(createExe.dest)
         }        
@@ -525,42 +524,42 @@ distributions {
 
 task windowsDistributionDependencies {
     doLast {
-        println "Windows distribution dependnecies"
+      println("Windows distribution dependnecies")
     }
 }
-windowsDistributionDependencies.dependsOn distributionDependencies
-windowsDistTar.dependsOn windowsDistributionDependencies
-windowsDistZip.dependsOn windowsDistributionDependencies
-installWindowsDist.dependsOn windowsDistributionDependencies
+windowsDistributionDependencies.dependsOn(distributionDependencies)
+windowsDistTar.dependsOn(windowsDistributionDependencies)
+windowsDistZip.dependsOn(windowsDistributionDependencies)
+  installWindowsDist.dependsOn(windowsDistributionDependencies)
 
 task downloadJavaWindows(type: Download) {
-    src project.java_windows_url
-    dest project.java_download_base.resolve('windows-java.zip').toFile()
-    overwrite false
+    src(project.java_windows_url)
+    dest(project.java_download_base.resolve("windows-java.zip").toFile())
+    overwrite(false)
 }
 task verifyJavaWindows(type: Verify, dependsOn: downloadJavaWindows) {
-    src downloadJavaWindows.dest
-    algorithm 'SHA-256'
-    checksum project.java_windows_checksum
+    src(downloadJavaWindows.dest)
+    algorithm("SHA-256")
+    checksum(project.java_windows_checksum)
 }
 task uncompressJavaWindows(type: Copy, dependsOn: verifyJavaWindows) {    
-    from zipTree(downloadJavaWindows.dest)
-    into project.java_download_base.resolve('windows')
+    from(zipTree(downloadJavaWindows.dest))
+    into(project.java_download_base.resolve("windows"))
 } 
 uncompressJavaWindows.doFirst {
     // Need to remove read-only file from JDK release
-    delete fileTree(project.java_download_base.resolve('windows')) {
-        include '**/bin/server/classes.jsa'
-    }
+  delete(fileTree(project.java_download_base.resolve("windows")) {
+        include "**/bin/server/classes.jsa"
+          })
 }
-windowsDistributionDependencies.dependsOn uncompressJavaWindows
+windowsDistributionDependencies.dependsOn(uncompressJavaWindows)
 
 
 installWindowsDist.doFirst {
     // Need to remove read-only file from JDK release
-    delete fileTree("$buildDir/install/windows") {
-        include '**/bin/server/classes.jsa'
-    }
+  delete(fileTree("$buildDir/install/windows") {
+        include "**/bin/server/classes.jsa"
+          })
 }
 // end Windows distribution tasks
 
@@ -568,8 +567,8 @@ installWindowsDist.doFirst {
 distributions {
     linux {
         contents {
-            with baseDistribution
-            with launchScriptDist
+            with(baseDistribution)
+            with(launchScriptDist)
             from("$buildDir/bundled-java/linux/")
             from(createExe.dest)
         }        
@@ -578,44 +577,44 @@ distributions {
 
 task linuxDistributionDependencies {
     doFirst {
-        println "Linux distribution dependnecies"
+        println("Linux distribution dependnecies")
     }
 }
-linuxDistributionDependencies.dependsOn distributionDependencies
-linuxDistTar.dependsOn linuxDistributionDependencies
-linuxDistZip.dependsOn linuxDistributionDependencies
-installLinuxDist.dependsOn linuxDistributionDependencies
+linuxDistributionDependencies.dependsOn(distributionDependencies)
+linuxDistTar.dependsOn(linuxDistributionDependencies)
+linuxDistZip.dependsOn(linuxDistributionDependencies)
+installLinuxDist.dependsOn(linuxDistributionDependencies)
 
 task downloadJavaLinux(type: Download) {
-    src project.java_linux_url
-    dest project.java_download_base.resolve('linux-java.tar.gz').toFile()
-    overwrite false
+    src(project.java_linux_url)
+    dest(project.java_download_base.resolve("linux-java.tar.gz").toFile())
+    overwrite(false)
 }
 task verifyJavaLinux(type: Verify, dependsOn: downloadJavaLinux) {
-    src downloadJavaLinux.dest
-    algorithm 'SHA-256'
-    checksum project.java_linux_checksum
+    src(downloadJavaLinux.dest)
+    algorithm("SHA-256")
+    checksum(project.java_linux_checksum)
 }
 task uncompressJavaLinux(type: Copy, dependsOn: verifyJavaLinux) {    
-    from tarTree(downloadJavaLinux.dest)
-    into project.java_download_base.resolve('linux')
+    from(tarTree(downloadJavaLinux.dest))
+    into(project.java_download_base.resolve("linux"))
 } 
 uncompressJavaLinux.doFirst {
     // Need to remove read-only file from JDK release
-    delete fileTree(project.java_download_base.resolve('linux')) {
-        include '**/lib/server/classes.jsa'
-        include '**/legal/**'
-    }
+  delete(fileTree(project.java_download_base.resolve("linux")) {
+        include "**/lib/server/classes.jsa"
+        include "**/legal/**"
+          })
 }
-linuxDistributionDependencies.dependsOn uncompressJavaLinux
+linuxDistributionDependencies.dependsOn(uncompressJavaLinux)
 
 
 installLinuxDist.doFirst {
     // Need to remove read-only file from JDK release
-    delete fileTree("$buildDir/install/linux") {
-        include '**/lib/server/classes.jsa'
-        include '**/legal/**'
-    }
+  delete(fileTree("$buildDir/install/linux") {
+        include "**/lib/server/classes.jsa"
+        include "**/legal/**"
+          })
 }
 // end Linux distribution tasks
 
@@ -624,8 +623,8 @@ installLinuxDist.doFirst {
 distributions {
     mac {
         contents {
-            with baseDistribution
-            with launchScriptDist
+            with(baseDistribution)
+            with(launchScriptDist)
             from("$buildDir/bundled-java/mac/")
             from(createExe.dest)
         }        
@@ -634,43 +633,43 @@ distributions {
 
 task macDistributionDependencies {
     doFirst {
-        println "Mac distribution dependnecies"
+      println("Mac distribution dependnecies")
     }
 }
-macDistributionDependencies.dependsOn distributionDependencies
-macDistTar.dependsOn macDistributionDependencies
-macDistZip.dependsOn macDistributionDependencies
-installMacDist.dependsOn macDistributionDependencies
+macDistributionDependencies.dependsOn(distributionDependencies)
+macDistTar.dependsOn(macDistributionDependencies)
+macDistZip.dependsOn(macDistributionDependencies)
+installMacDist.dependsOn(macDistributionDependencies)
 
 task downloadJavaMac(type: Download) {
-    src project.java_mac_url
-    dest project.java_download_base.resolve('mac-java.tar.gz').toFile()
-    overwrite false
+    src(project.java_mac_url)
+    dest(project.java_download_base.resolve("mac-java.tar.gz").toFile())
+    overwrite(false)
 }
 task verifyJavaMac(type: Verify, dependsOn: downloadJavaMac) {
-    src downloadJavaMac.dest
-    algorithm 'SHA-256'
-    checksum project.java_mac_checksum
+    src(downloadJavaMac.dest)
+    algorithm("SHA-256")
+    checksum(project.java_mac_checksum)
 }
 task uncompressJavaMac(type: Copy, dependsOn: verifyJavaMac) {    
-    from tarTree(downloadJavaMac.dest)
-    into project.java_download_base.resolve('mac')
+    from(tarTree(downloadJavaMac.dest))
+    into(project.java_download_base.resolve("mac"))
 } 
 uncompressJavaMac.doFirst {
     // Need to remove read-only file from JDK release
-    delete fileTree(project.java_download_base.resolve('mac')) {
-        include '**/lib/server/classes.jsa'
-        include '**/legal/**'
-    }
+  delete(fileTree(project.java_download_base.resolve("mac")) {
+        include "**/lib/server/classes.jsa"
+        include "**/legal/**"
+          })
 }
-macDistributionDependencies.dependsOn uncompressJavaMac
+macDistributionDependencies.dependsOn(uncompressJavaMac)
 
 
 installMacDist.doFirst {
     // Need to remove read-only file from JDK release
-    delete fileTree("$buildDir/install/mac") {
-        include '**/lib/server/classes.jsa'
-        include '**/legal/**'
-    }
+  delete(fileTree("$buildDir/install/mac") {
+        include "**/lib/server/classes.jsa"
+        include "**/legal/**"
+          })
 }
 // end Mac distribution tasks
