@@ -6,7 +6,7 @@
 
 <html>
 <head>
-<title>Performance Area</title>
+<title>Scoring Coordinator</title>
 <link rel="stylesheet" type="text/css"
 	href="<c:url value='/style/fll-sw.css'/>" />
 
@@ -38,7 +38,7 @@
 </head>
 
 <body>
-	<h1>${challengeDescription.title }(Scoring Coordinator)</h1>
+	<h1>Scoring Coordinator - ${challengeDescription.title }</h1>
 
 	<div class='status-message'>${message}</div>
 	<%-- clear out the message, so that we don't see it again --%>
