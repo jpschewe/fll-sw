@@ -1,3 +1,4 @@
+* #768 - Confirm zero scores in the subjective web application are not No Shows
 * #769 - Add light grey background to top scores on final scores report to make them easier to see
 * #757 - Add an asterisk next to scores in the final report where a team scored zero on a required goal
 * #399 - Add distributions that include a bundled JDK so that Java doesn't need to be installed
