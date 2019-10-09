@@ -43,8 +43,8 @@
 		<li><a href="<c:url value='/judges-room.jsp' />">Judges room</a>
 			- follow this link on the judges room server</li>
 
-		<li><a href="<c:url value='/admin/performance-area.jsp' />">Performance
-				area</a> - follow this link on the performance area server</li>
+		<li><a href="<c:url value='/admin/performance-area.jsp' />">Scoring
+				Coordinator</a></li>
 
 		<li><a href="public">Public landing page</a> A list of pages that
 			the public may want to visit if they are allowed to connect to the
