@@ -19,9 +19,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 
-
 import fll.util.FLLRuntimeException;
-
 import fll.web.BaseFLLServlet;
 import fll.web.ProcessSelectedSheet;
 import fll.web.SessionAttributes;
@@ -71,6 +69,13 @@ public class UploadSchedule extends BaseFLLServlet {
         WebUtils.sendRedirect(application, response, "/admin/index.jsp");
         return;
       } else {
+        // the write call below will fail if the file already exists
+        if (!file.delete()) {
+          final String errorMessage = "Unable to delete temporary file: "
+              + file;
+          LOGGER.error(errorMessage);
+          throw new FLLRuntimeException(errorMessage);
+        }
         scheduleFileItem.write(file);
 
         uploadScheduleData.setScheduleFile(file);
