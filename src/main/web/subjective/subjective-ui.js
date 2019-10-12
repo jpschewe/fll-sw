@@ -812,7 +812,7 @@ function enterNoShow() {
 $(document).on("pageinit", "#enter-score-page", function(event) {
   $("#enter-score_save-score").click(function() {
 
-    var totalScore = $("#enter-score_total-score").val();
+    var totalScore = parseInt($("#enter-score_total-score").text());
     if (totalScore == 0) {
       $("#enter-score_confirm-zero").popup("open");
     } else {
