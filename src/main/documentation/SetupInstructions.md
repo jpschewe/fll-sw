@@ -113,16 +113,12 @@ You can download the current version of the software by clicking on the button b
 Unzipping this file will create a directory called fll-sw that contains the various zip files referenced here.
 If you do not have a zip tool to open up the archives you can use the jar tool that comes with Java and follow the instructions below.
 
-  1. Install Java
   1. Copy the zip file to the directory you want to uncompress it in
-  1. Open a command prompt, on windows use Start->Run->command return
-  1. Change to the directory you put the zip file in, on windows cd <path to zip file>
-  1. Execute jar -xf zipfile
+  1. Right click on the file and extract here
   1. You should now have the files uncompressed in a directory and you can move them around as needed.
   1. [Install Java (the JRE) 1.8 or higher](InstallJava.md) (the language everything is written in). If you downloaded a version of the software is the JRE bundled in, then you can skip this step for the server. This needs to be done on the server and on any machines that will be used to enter subjective scores.
   1. Test the server
       1. Open an explorer window to the directory you you unzipped install file into. It should be called something like fll-sw-<version>
-      1. Unzip the install file to a location that you want to run from.
       1. Run fll-sw.exe (fll-sw.sh on Linux and Mac)
         * This will bring up the launcher
       1. Click on Start Webserver        
@@ -130,7 +126,7 @@ If you do not have a zip tool to open up the archives you can use the jar tool t
         * Server errors will show up here. 
         * If you are running Windows XP or later, you may get prompted by the firewall dialog asking if Java has permission to use the network, you need to click Unlock otherwise clients won't be able to connect
       1. If the database has already been initialized, then you're done unless you want to change the challenge descriptor. If so, click on the setup database link. If the database has not been initialized, then you'll be redirected to the setup page.
-          1. Select the challenge descriptor or upload one and click submit
+          1. Upload the current database or select the challenge descriptor click the submit button next to the chosen option
           1. If this succeeds, click on the link to the main page
           1. From here you'll be instructed to enter a username and password. This is used to access all pages that can make changes or display information that the teams should not see.
       1. Goto the Instructions page for information on using these pages
@@ -138,19 +134,21 @@ If you do not have a zip tool to open up the archives you can use the jar tool t
       1. From the score entry computers and scoreboard computers make sure you can also get to this page, replacing localhost with the IP address of the server
       * You can find links to copy to the score entry computers at the bottom of the main page
   1. Subjective
-      1. Follow the instructions above for installing Java
-      1. Unzip subjective.zip to a location on the computer
-      1. Goto a computer that's connected to the server and goto the main page, then Administration then Download the datafile for subjective score entry
-      1. Save this file somewhere on the computer used for subjective score entry, this can be copied around with a floppy
-      1. Run subjective.bat from the location you unzipped subjective.zip and when prompted give it the location of the subjective.zip file that was downloaded from the server
-      1. Enter scores for teams by selecting the category tab at the top then entering the scores under each subcategory
-      1. Save often
-      1. When done, quit the application and copy the file back to a computer that has access to the server
-      1. Goto Adminstration and click on the Browse button next to Upload the datafile for subjective scores
-      1. Select the file you just copied
-      1. Click upload and if all is well you'll be returned to the Adminstration page again
-  1. When you're done for the day you should make a copy of the database for the head of your state.
-      1. The database can be downloaded from the performance area page and from the admin index page
+      * Web application. This is the preferred method. The web application can be run on tablets, laptops or desktops, phones are generally too hard to use for this. There is a link to the subjective web application from the main index.
+      * Stand-alone application
+          1. Follow the instructions above for installing Java
+          1. Unzip subjective.zip to a location on the computer
+          1. Goto a computer that's connected to the server and goto the main page, then Administration then Download the datafile for subjective score entry
+          1. Save this file somewhere on the computer used for subjective score entry, this can be copied around with a floppy
+          1. Run subjective.bat from the location you unzipped subjective.zip and when prompted give it the location of the subjective.zip file that was downloaded from the server
+          1. Enter scores for teams by selecting the category tab at the top then entering the scores under each subcategory
+          1. Save often
+          1. When done, quit the application and copy the file back to a computer that has access to the server
+          1. Goto Adminstration and click on the Browse button next to Upload the datafile for subjective scores
+          1. Select the file you just copied
+          1. Click upload and if all is well you'll be returned to the Adminstration page again
+  1. When you're done for the day you should make a copy of the database for the Lead Scoring Coordinator.
+      1. The database can be downloaded from the Scoring Coordinator page or from the admin index page
       1. Shut down the web server
   1. For those interested in looking at the source and possibly making changes the source can be found [here](Home.md). Developers please look at README.developer. Any changes that you do make need to be sent back to me under the terms of the GPL. I look forward to any fixes you make. Please follow the coding standards listed [here](http://mtu.net/%7Ejpschewe/java/CodingStandards.html).
   1. Once you're done with the tournament you might want to uninstall everything. This can be accomplished by deleting the JAVA_HOME environment variable. Then uninstalling the JDK from the control panel.
