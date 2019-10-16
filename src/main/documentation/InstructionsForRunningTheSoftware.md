@@ -14,7 +14,7 @@ See [challenge description notes](challenge-description.md) for information abou
 
 ## Loading from a saved database
 
-If you, or someone else, setup the database previously you can then load that database onto the server. To do that visit http://localhost:9080/setup on the server and then use the middle section of the page to specify a database to load. If you connect from the server you don't need to know the username and password.
+If you, or someone else, setup the database previously you can then load that database onto the server. To do that visit http://localhost:9080/setup on the server and then use the first section of the page to specify a database to load. If you connect from the server you don't need to know the username and password.
 
 ## Setup of tournament without a saved database
 
@@ -123,7 +123,7 @@ Once the finalist schedule has been stored, the schedule can be printed or displ
 
 ## End of tournament
 
-  * Download the database from the admin page and send it to your head computer person.
+  * Download the database from the Scoring Coordinator page or the admin page and send it to your head computer person.
 
 ## Troubleshooting
 
