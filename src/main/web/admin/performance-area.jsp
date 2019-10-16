@@ -93,6 +93,10 @@
 			</form>
 		</li>
 
+        <li><a target="_edit_parameters"
+            href="<c:url value='/admin/edit_tournament_parameters.jsp'/>">Edit
+                tournament parameters</a> - should not be needed for most tournaments.</li>
+
 		<li>Test the printer by printing something useful. See Other
 			Useful Tasks below.</li>
 
