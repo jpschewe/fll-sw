@@ -1,3 +1,5 @@
+* #771 - updates to the 2019 performance score sheet and add extra space between team info and goals
+
 Release 14.0.0
 ==============
 * #768 - Confirm zero scores in the subjective web application are not No Shows
