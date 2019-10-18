@@ -19,7 +19,7 @@
 		<li><a href="http://mtu.net/~jpschewe">Jon Schewe</a></li>
 		<li><a href="http://mtu.net/~engstrom">Eric Engstrom</a></li>
 		<li>Dan Churchill</li>
-		<li>Jeremy Koletar</li>
+		<li><a href="https://jj.koletar.com">Jeremy Koletar</a></li>
 		<li>Mark Schleusner</li>
 	</ul>
 
