@@ -109,22 +109,6 @@ function check_restrictions() {
 <%ScoreEntry.generateIncrementMethods(out, application, pageContext);%>
 </c:if> <!-- end check for bye -->
 
-/**
- * Called when the cancel button is clicked.
- */
-function CancelClicked() {
-  <c:choose>	
-  <c:when test="${EditFlag}">
-  if (confirm("Cancel and lose changes?") == true) {
-  </c:when>
-  <c:otherwise>
-  if (confirm("Cancel and lose data?") == true) {
-  </c:otherwise>
-  </c:choose>
-    window.location.href= "select_team.jsp";
-  }
-}
-
 </script>
 
 </head>
@@ -324,11 +308,10 @@ function CancelClicked() {
                         >Submit Score</button>
                 </c:if> 
                 
-                <input
+                <button
                 type='button'
                 id='cancel'
-                value='Cancel'
-                onclick='CancelClicked()'> 
+                >Cancel</button> 
                 
                 <c:if
                   test="${EditFlag and isLastRun}">
