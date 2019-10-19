@@ -390,8 +390,8 @@ return m;
   </form>
   <!-- end score entry form -->
 
-	<div id="confirm-score-submit">
-		<p>Submit Data -- Are you sure?</p>
+	<div id="yesno-dialog">
+		<p id='yesno-dialog_text'></p>
 	</div>
 
 </body>
