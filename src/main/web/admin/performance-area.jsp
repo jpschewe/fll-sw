@@ -6,7 +6,7 @@
 
 <html>
 <head>
-<title>Performance Area</title>
+<title>Scoring Coordinator</title>
 <link rel="stylesheet" type="text/css"
 	href="<c:url value='/style/fll-sw.css'/>" />
 
@@ -38,7 +38,7 @@
 </head>
 
 <body>
-	<h1>${challengeDescription.title }(ScoringCoordinator)</h1>
+	<h1>Scoring Coordinator - ${challengeDescription.title }</h1>
 
 	<div class='status-message'>${message}</div>
 	<%-- clear out the message, so that we don't see it again --%>
@@ -92,6 +92,10 @@
 				</select> <input type='submit' name='change_tournament' value='Submit'>
 			</form>
 		</li>
+
+        <li><a target="_edit_parameters"
+            href="<c:url value='/admin/edit_tournament_parameters.jsp'/>">Edit
+                tournament parameters</a> - should not be needed for most tournaments.</li>
 
 		<li>Test the printer by printing something useful. See Other
 			Useful Tasks below.</li>

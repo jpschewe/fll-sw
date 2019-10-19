@@ -35,7 +35,6 @@ import javax.sql.DataSource;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.io.IOUtils;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -48,7 +47,6 @@ import fll.Utilities;
 import fll.db.Queries;
 import fll.subjective.SubjectiveUtils;
 import fll.util.FLLRuntimeException;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.UploadProcessor;
@@ -69,6 +67,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -84,6 +83,13 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
       UploadProcessor.processUpload(request);
 
       final FileItem subjectiveFileItem = (FileItem) request.getAttribute("subjectiveFile");
+      // the write call below will fail if the file already exists
+      if (!file.delete()) {
+        final String errorMessage = "Unable to delete temporary file: "
+            + file;
+        LOGGER.error(errorMessage);
+        throw new FLLRuntimeException(errorMessage);
+      }
       subjectiveFileItem.write(file);
 
       final String overwriteStr = (String) request.getAttribute("overwrite_all");
@@ -156,7 +162,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
   /**
    * Save the data stored in file to the database and update the subjective
    * score totals.
-   * 
+   *
    * @param file the file to read the data from
    * @param connection the database connection to write to
    * @param overwrite if true, then overwrite ALL scores in the database, not just
@@ -285,7 +291,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
   /**
    * Remove subjective score rows from database that are empty. These
    * are rows that have null for all scores and is not a no show.
-   * 
+   *
    * @param connection database connection
    * @param tournamentId which tournament to work on
    * @param challengeDescription the challenge description
@@ -302,7 +308,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
   /**
    * Remove rows from the specified subjective category that are empty. These
    * are rows that have null for all scores and is not a no show.
-   * 
+   *
    * @param currentTournament
    * @param connection
    * @param categoryName
