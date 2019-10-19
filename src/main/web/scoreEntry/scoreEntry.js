@@ -27,9 +27,17 @@ $(document).ready(function() {
   })
 
   $("#submit_score").click(function(e) {
+    $("#delete").val("false");
+    
     $("#yesno-dialog_text").text("Submit Data -- Are you sure?");
     $("#yesno-dialog").dialog("open");
   });
 
+  $("#submit_delete").click(function(e) {
+    $("#delete").val("true");
+    
+    $("#yesno-dialog_text").text("Are you sure you want to delete this score?");
+    $("#yesno-dialog").dialog("open");
+  });
 
 }); // end ready function

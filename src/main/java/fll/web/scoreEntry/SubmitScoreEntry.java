@@ -48,7 +48,8 @@ public class SubmitScoreEntry extends BaseFLLServlet {
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
     try (Connection connection = datasource.getConnection()) {
-      if (null != request.getParameter("delete")) {
+      final boolean deleteScore = Boolean.valueOf(request.getParameter("delete"));
+      if (deleteScore) {
         Queries.deletePerformanceScore(connection, request);
       } else if (null != request.getParameter("EditFlag")) {
         final int rowsUpdated = Queries.updatePerformanceScore(challengeDescription, connection, request);

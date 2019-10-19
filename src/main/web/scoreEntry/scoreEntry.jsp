@@ -179,7 +179,13 @@ return m;
     >
     <input
       type='hidden'
+      id='NoShow'
       name='NoShow'
+      value="false" />
+    <input
+      type='hidden'
+      id='delete'
+      name='delete'
       value="false" />
 
     <c:if test="${1 == EditFlag}">
@@ -365,12 +371,11 @@ return m;
                 value='Cancel'
                 onclick='CancelClicked()'> <c:if
                   test="${1 == EditFlag and isLastRun}">
-                  <input
-                    type='submit'
-                    id='delete'
-                    name='delete'
-                    value='Delete Score'
-                    onclick='return confirm("Are you sure you want to delete this score?")'>
+                  <button
+                    type='button'
+                    id='submit_delete'
+                    name='submit_delete'
+                    >Delete Score</button>
                 </c:if></td>
               <c:if test="${not isBye}">
                 <td colspan='2'><input
