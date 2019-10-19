@@ -52,9 +52,7 @@ import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -1042,17 +1040,8 @@ public class FullTournamentTest {
               } // !computed
             } // foreach goal
 
-            // check that the submit button is active
-            assertTrue(selenium.findElement(By.id("submit_score")).isEnabled(),
-                       "Submit button is not enabled, invalid score entered");
+            IntegrationTestUtils.submitPerformanceScore(selenium);
 
-            selenium.findElement(By.id("submit_score")).click();
-
-            // wait for dialog element
-            final WebElement confirmScoreYesButton = (new WebDriverWait(selenium,
-                                                                        IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS)).until(ExpectedConditions.presenceOfElementLocated(By.id("yesno-dialog_yes")));
-
-            confirmScoreYesButton.click();
           } // not NoShow
 
           Thread.sleep(50);
