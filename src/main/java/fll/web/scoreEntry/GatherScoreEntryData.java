@@ -187,8 +187,7 @@ public class GatherScoreEntryData extends BaseFLLServlet {
         session.setAttribute("body_background", "transparent");
       }
 
-      response.sendRedirect(response.encodeRedirectURL("scoreEntry.jsp?EditFlag="
-          + request.getParameter("EditFlag")));
+      request.getRequestDispatcher("scoreEntry.jsp").forward(request, response);
     } catch (final ParseException pe) {
       throw new RuntimeException(pe);
     } catch (final SQLException e) {
