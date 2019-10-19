@@ -1,3 +1,4 @@
+* #313 - Use JQuery UI dialog on the score entry page so that the button text can be customized 
 * #769 - Add light grey background to top scores on final scores report to make them easier to see
 * #757 - Add an asterisk next to scores in the final report where a team scored zero on a required goal
 * #399 - Add distributions that include a bundled JDK so that Java doesn't need to be installed
