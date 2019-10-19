@@ -1050,7 +1050,7 @@ public class FullTournamentTest {
 
             // wait for dialog element
             final WebElement confirmScoreYesButton = (new WebDriverWait(selenium,
-                                                                        IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS)).until(ExpectedConditions.presenceOfElementLocated(By.id("confirm-score-submit_yes")));
+                                                                        IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS)).until(ExpectedConditions.presenceOfElementLocated(By.id("yesno-dialog_yes")));
 
             confirmScoreYesButton.click();
           } // not NoShow

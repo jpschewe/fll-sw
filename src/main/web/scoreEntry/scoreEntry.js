@@ -7,19 +7,19 @@ $(document).ready(function() {
 
   $("#verification-warning").hide();
 
-  $("#confirm-score-submit").dialog({
+  $("#yesno-dialog").dialog({
     autoOpen : false,
     modal : true,
     buttons : [ {
       text : "Yes",
-      id: "confirm-score-submit_yes",
+      id: "yesno-dialog_yes",
       click : function() {
         $(this).dialog("close");
         $("#scoreEntry").submit();
       }
     }, {
       text : "No",
-      id: "confirm-score-submit_no",
+      id: "yesno-dialog_no",
       click : function() {
         $(this).dialog("close");
       }
@@ -27,7 +27,8 @@ $(document).ready(function() {
   })
 
   $("#submit_score").click(function(e) {
-    $("#confirm-score-submit").dialog("open");
+    $("#yesno-dialog_text").text("Submit Data -- Are you sure?");
+    $("#yesno-dialog").dialog("open");
   });
 
 
