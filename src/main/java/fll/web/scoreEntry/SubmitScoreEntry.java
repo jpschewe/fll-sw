@@ -19,12 +19,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-
-
 import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.xml.ChallengeDescription;
@@ -51,7 +48,7 @@ public class SubmitScoreEntry extends BaseFLLServlet {
       final boolean deleteScore = Boolean.valueOf(request.getParameter("delete"));
       if (deleteScore) {
         Queries.deletePerformanceScore(connection, request);
-      } else if (null != request.getParameter("EditFlag")) {
+      } else if (Boolean.valueOf(request.getParameter("EditFlag"))) {
         final int rowsUpdated = Queries.updatePerformanceScore(challengeDescription, connection, request);
         if (0 == rowsUpdated) {
           throw new FLLInternalException("No rows updated - did the score get deleted?");

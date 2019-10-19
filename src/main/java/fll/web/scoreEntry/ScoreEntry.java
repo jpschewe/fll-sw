@@ -17,18 +17,18 @@ import java.util.Formatter;
 import java.util.List;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspWriter;
+import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
-
 
 import fll.Team;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.util.FP;
-
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
 import fll.xml.AbstractConditionStatement;
@@ -69,6 +69,42 @@ public final class ScoreEntry {
   private static final int INDENT_LEVEL = 2;
 
   private ScoreEntry() {
+  }
+
+  /**
+   * Set variables in the page context.
+   *
+   * @param request the web request
+   * @param pageContext where to store the values
+   */
+  public static void populateContext(final HttpServletRequest request,
+                                     final PageContext pageContext) {
+    pageContext.setAttribute("EditFlag", Boolean.valueOf(request.getParameter("EditFlag")));
+  }
+
+  /**
+   * Calls either {@link #generateInitForNewScore(JspWriter, ServletContext)} or
+   * {@link #generateInitForScoreEdit(JspWriter, ServletContext, HttpSession)}
+   * based on the value of the EditFlag.
+   *
+   * @param writer where to write HTML
+   * @param application application context
+   * @param session session context
+   * @throws IOException if there is an error writing to the output stream
+   * @throws ParseException if there is an error parsing values from the contexts
+   * @throws SQLException if there is a problem talking to the database
+   */
+  public static void generateInit(final JspWriter writer,
+                                  final ServletContext application,
+                                  final HttpSession session,
+                                  final PageContext pageContext)
+      throws IOException, ParseException, SQLException {
+    final boolean editFlag = (Boolean) pageContext.getAttribute("EditFlag");
+    if (editFlag) {
+      generateInitForScoreEdit(writer, application, session);
+    } else {
+      generateInitForNewScore(writer, application);
+    }
   }
 
   /**
@@ -122,12 +158,18 @@ public final class ScoreEntry {
    * Genrate the increment methods and variable declarations for the goals in
    * the performance element of document. Generate the methods to compute goals
    * as well.
-   * 
+   *
+   * @param writer where to write the text
+   * @param application application context
+   * @param pageContext used to get the edit flag state
    * @throws ParseException
    */
   public static void generateIncrementMethods(final Writer writer,
-                                              final ServletContext application)
+                                              final ServletContext application,
+                                              final PageContext pageContext)
       throws IOException, ParseException {
+    final boolean editFlag = (Boolean) pageContext.getAttribute("EditFlag");
+
     final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final PerformanceScoreCategory performanceElement = description.getPerformance();
     final Formatter formatter = new Formatter(writer);
@@ -200,11 +242,15 @@ public final class ScoreEntry {
     formatter.format("var Verified;%n");
     formatter.format("function %s(newValue) {%n", getSetMethodName("Verified"));
     formatter.format("  Verified = newValue;%n");
-    formatter.format("  if (newValue == 1 && document.getElementsByName('EditFlag').length == 0) {");
-    formatter.format("    $('#verification-warning').show();");
-    formatter.format("  } else if (newValue == 0) {");
-    formatter.format("    $('#verification-warning').hide();");
-    formatter.format("  }");
+
+    if (!editFlag) {
+      formatter.format("  if (newValue == 1) {");
+      formatter.format("    $('#verification-warning').show();");
+      formatter.format("  } else if (newValue == 0) {");
+      formatter.format("    $('#verification-warning').hide();");
+      formatter.format("  }");
+    }
+
     formatter.format("  refresh();%n");
     formatter.format("}%n%n%n");
   }
@@ -323,7 +369,7 @@ public final class ScoreEntry {
 
   /**
    * Output the body for the check_restrictions method.
-   * 
+   *
    * @param writer where to write
    * @throws IOException
    * @throws ParseException
@@ -508,7 +554,7 @@ public final class ScoreEntry {
 
   /**
    * Generate a the buttons for a simple goal.
-   * 
+   *
    * @param goalEle
    * @param name
    * @param writer
@@ -801,7 +847,7 @@ public final class ScoreEntry {
   /**
    * The name of the javascript variable that represents the raw score for a
    * goal
-   * 
+   *
    * @param goalName
    * @return
    */
@@ -926,7 +972,7 @@ public final class ScoreEntry {
   /**
    * Convert a polynomial to a string. Handles both {@link BasicPolynomial} and
    * {@link ComplexPolynomial}.
-   * 
+   *
    * @param poly the polynomial
    * @return the string that represents the polynomial
    * @throws ParseException
@@ -981,7 +1027,7 @@ public final class ScoreEntry {
   /**
    * Make the appropriate modifications to <code>value</code> to reflect the
    * specified floating point handling
-   * 
+   *
    * @param value the expression
    * @param floatingPoint the floating point handling
    * @return value with the floating point handling applied
@@ -1038,11 +1084,11 @@ public final class ScoreEntry {
     formatter.format("%sif(", ifPrefix);
 
     if (ele instanceof ConditionStatement) {
-      ConditionStatement cond = (ConditionStatement) ele;
+      final ConditionStatement cond = (ConditionStatement) ele;
       formatter.format("%s %s %s", polyToString(cond.getLeft()), ineqToString(ele.getComparison()),
                        polyToString(cond.getRight()));
     } else if (ele instanceof EnumConditionStatement) {
-      EnumConditionStatement cond = (EnumConditionStatement) ele;
+      final EnumConditionStatement cond = (EnumConditionStatement) ele;
       final String leftStr;
       if (null != cond.getLeftGoal()) {
         leftStr = getVarNameForRawScore(cond.getLeftGoal().getName());
