@@ -559,16 +559,16 @@ function addRubricToScoreEntry(table, goal, ranges) {
   $.each(ranges, function(index, range) {
     // skip the right border on the last cell
     var borderClass;
-    if(index >= ranges.length-1) {
+    if (index >= ranges.length - 1) {
       borderClass = "";
     } else {
       borderClass = "border-right";
     }
-    
+
     var numColumns = range.max - range.min + 1;
-    var cell = $("<td colspan='" + numColumns
-        + "' class='" + borderClass + " center' id='" + getRubricCellId(goal, index)
-        + "'>" + range.shortDescription + "</td>");
+    var cell = $("<td colspan='" + numColumns + "' class='" + borderClass
+        + " center' id='" + getRubricCellId(goal, index) + "'>"
+        + range.shortDescription + "</td>");
     row.append(cell);
   });
 
@@ -774,27 +774,50 @@ $(document).on(
 
     });
 
+function saveScore() {
+  var currentTeam = $.subjective.getCurrentTeam();
+  var score = $.subjective.getScore(currentTeam.teamNumber);
+  if (null == score) {
+    score = createNewScore();
+  }
+  score.modified = true;
+  score.deleted = false;
+  score.noShow = false;
+
+  var text = $("#enter-score-note-text").val();
+  score.note = text;
+  $.subjective.log("note text: " + score.note);
+
+  saveToScoreObject(score);
+
+  $.subjective.saveScore(score);
+
+  $.mobile.navigate($.subjective.getScoreEntryBackPage());
+}
+
+function enterNoShow() {
+  var currentTeam = $.subjective.getCurrentTeam();
+  var score = $.subjective.getScore(currentTeam.teamNumber);
+  if (null == score) {
+    score = createNewScore();
+  }
+  score.modified = true;
+  score.noShow = true;
+  score.deleted = false;
+  $.subjective.saveScore(score);
+
+  $.mobile.navigate($.subjective.getScoreEntryBackPage());
+}
+
 $(document).on("pageinit", "#enter-score-page", function(event) {
   $("#enter-score_save-score").click(function() {
 
-    var currentTeam = $.subjective.getCurrentTeam();
-    var score = $.subjective.getScore(currentTeam.teamNumber);
-    if (null == score) {
-      score = createNewScore();
+    var totalScore = parseInt($("#enter-score_total-score").text());
+    if (totalScore == 0) {
+      $("#enter-score_confirm-zero").popup("open");
+    } else {
+      saveScore();
     }
-    score.modified = true;
-    score.deleted = false;
-    score.noShow = false;
-
-    var text = $("#enter-score-note-text").val();
-    score.note = text;
-    $.subjective.log("note text: " + score.note);
-
-    saveToScoreObject(score);
-
-    $.subjective.saveScore(score);
-
-    $.mobile.navigate($.subjective.getScoreEntryBackPage());
   });
 
   $("#enter-score_cancel-score").click(function() {
@@ -818,17 +841,15 @@ $(document).on("pageinit", "#enter-score-page", function(event) {
   });
 
   $("#enter-score_noshow-score").click(function() {
-    var currentTeam = $.subjective.getCurrentTeam();
-    var score = $.subjective.getScore(currentTeam.teamNumber);
-    if (null == score) {
-      score = createNewScore();
-    }
-    score.modified = true;
-    score.noShow = true;
-    score.deleted = false;
-    $.subjective.saveScore(score);
+    enterNoShow();
+  });
 
-    $.mobile.navigate($.subjective.getScoreEntryBackPage());
+  $("#enter-score_confirm-zero_yes").click(function() {
+    saveScore();
+  });
+
+  $("#enter-score_confirm-zero_no-show").click(function() {
+    enterNoShow();
   });
 
 });

@@ -538,6 +538,18 @@ public class ScoresheetGenerator {
 
       scoreSheet.addCell(teamInfoCell);
 
+      // space and horizontal line
+      final PdfPCell spacerCell = new PdfPCell(scoreSheet.getDefaultCell());
+      spacerCell.setMinimumHeight(10);
+      spacerCell.setBorderWidthTop(0);
+      spacerCell.setBorderWidthBottom(1);
+      spacerCell.setBorderWidthLeft(0);
+      spacerCell.setBorderWidthRight(0);
+      spacerCell.setVerticalAlignment(Element.ALIGN_CENTER);
+      spacerCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+      spacerCell.setColspan(2);
+      scoreSheet.addCell(spacerCell);
+
       if (null != m_goalsTable) {
         final PdfPCell goalCell = new PdfPCell(m_goalsTable);
         goalCell.setBorder(0);

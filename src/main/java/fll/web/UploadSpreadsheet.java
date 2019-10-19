@@ -19,10 +19,9 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 
-
 import fll.Utilities;
 import fll.util.ExcelCellReader;
-
+import fll.util.FLLRuntimeException;
 
 /**
  * Handle uploading a spreadsheet (csv or Excel). The filename is stored in the
@@ -57,6 +56,7 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
    */
   public static final String SHEET_NAME_KEY = "sheetName";
 
+  @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -82,6 +82,13 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Wrote data to: "
             + file.getAbsolutePath());
+      }
+      // the write call below will fail if the file already exists
+      if (!file.delete()) {
+        final String errorMessage = "Unable to delete temporary file: "
+            + file;
+        LOGGER.error(errorMessage);
+        throw new FLLRuntimeException(errorMessage);
       }
       fileItem.write(file);
       session.setAttribute(SPREADSHEET_FILE_KEY, file.getAbsolutePath());
