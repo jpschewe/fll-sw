@@ -17,7 +17,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -176,12 +175,8 @@ public class TestAJAXBrackets {
       scoreEntryWindow.findElement(By.id("verify_submit")).click();
 
       scoreEntryWindow.findElement(By.id("Verified_yes")).click();
-      scoreEntryWindow.findElement(By.id("submit")).click();
 
-      final Alert confirmVerifyChange = scoreEntryWindow.switchTo().alert();
-      LOGGER.info("Confirmation text: "
-          + confirmVerifyChange.getText());
-      confirmVerifyChange.accept();
+      IntegrationTestUtils.submitPerformanceScore(scoreEntryWindow);
 
       // give the web server a chance to catch up
       Thread.sleep(30000);

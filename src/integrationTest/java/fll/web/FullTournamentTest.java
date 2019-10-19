@@ -48,11 +48,12 @@ import org.fest.swing.security.NoExitSecurityManagerInstaller;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -973,12 +974,10 @@ public class FullTournamentTest {
           if (rs.getBoolean("NoShow")) {
             selenium.findElement(By.id("no_show")).click();
 
-            final Alert confirmScoreChange = selenium.switchTo().alert();
-            if (LOGGER.isTraceEnabled()) {
-              LOGGER.trace("Confirmation text: "
-                  + confirmScoreChange.getText());
-            }
-            confirmScoreChange.accept();
+            final WebElement confirmScoreYesButton = (new WebDriverWait(selenium,
+                                                                        IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS)).until(ExpectedConditions.presenceOfElementLocated(By.id("yesno-dialog_yes")));
+
+            confirmScoreYesButton.click();
           } else {
             // walk over challenge descriptor to get all element names and then
             // use the values from rs
@@ -1164,12 +1163,10 @@ public class FullTournamentTest {
           LOGGER.debug("Checking for an alert");
 
           // confirm selection, not going to bother checking the text
-          final Alert confirmScoreChange = selenium.switchTo().alert();
-          if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Confirmation text: "
-                + confirmScoreChange.getText());
-          }
-          confirmScoreChange.accept();
+          final WebElement confirmScoreYesButton = (new WebDriverWait(selenium,
+                                                                      IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS)).until(ExpectedConditions.presenceOfElementLocated(By.id("yesno-dialog_yes")));
+
+          confirmScoreYesButton.click();
 
           // give the web server a chance to catch up
           Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
