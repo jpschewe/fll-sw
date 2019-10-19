@@ -7,6 +7,7 @@ $(document)
         function() {
           init();
 
+          // if set, return true to submit, false to skip submit
           var yesCallback = null;
 
           $("#verification-warning").hide();
@@ -20,11 +21,14 @@ $(document)
               click : function() {
                 $(this).dialog("close");
 
+                var dosubmit = true;
                 if (null != yesCallback) {
-                  yesCallback();
+                  dosubmit = yesCallback();
                 }
 
-                $("#scoreEntry").submit();
+                if (dosubmit) {
+                  $("#scoreEntry").submit();
+                }
               }
             }, {
               text : "No",
@@ -63,6 +67,7 @@ $(document)
               function(e) {
                 yesCallback = function() {
                   $("#delete").val("true");
+                  return true;
                 };
 
                 $("#yesno-dialog_text").text(
@@ -75,9 +80,26 @@ $(document)
               $("#NoShow").val("true");
               Verified = 1;
               refresh();
+              return true;
             };
 
             $("#yesno-dialog_text").text("Are you sure this is a 'No Show'?");
+            $("#yesno-dialog").dialog("open");
+          });
+
+          $("#cancel").click(function(e) {
+            yesCallback = function() {
+              window.location.href = "select_team.jsp";
+              return false;
+            };
+
+            var text;
+            if (EditFlag) {
+              text = "Cancel and lose changes?";
+            } else {
+              text = "Cancel and lose data?"
+            }
+            $("#yesno-dialog_text").text(text);
             $("#yesno-dialog").dialog("open");
           });
 
