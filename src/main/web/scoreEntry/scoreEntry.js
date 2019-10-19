@@ -7,6 +7,8 @@ $(document)
         function() {
           init();
 
+          var yesCallback = null;
+
           $("#verification-warning").hide();
 
           $("#yesno-dialog").dialog({
@@ -17,6 +19,11 @@ $(document)
               id : "yesno-dialog_yes",
               click : function() {
                 $(this).dialog("close");
+
+                if (null != yesCallback) {
+                  yesCallback();
+                }
+
                 $("#scoreEntry").submit();
               }
             }, {
@@ -31,7 +38,7 @@ $(document)
           $("#submit_score")
               .click(
                   function(e) {
-                    $("#delete").val("false");
+                    yesCallback = null;
 
                     var text = "";
                     if (EditFlag) {
@@ -54,11 +61,24 @@ $(document)
 
           $("#submit_delete").click(
               function(e) {
-                $("#delete").val("true");
+                yesCallback = function() {
+                  $("#delete").val("true");
+                };
 
                 $("#yesno-dialog_text").text(
                     "Are you sure you want to delete this score?");
                 $("#yesno-dialog").dialog("open");
               });
+
+          $("#no_show").click(function(e) {
+            yesCallback = function() {
+              $("#NoShow").val("true");
+              Verified = 1;
+              refresh();
+            };
+
+            $("#yesno-dialog_text").text("Are you sure this is a 'No Show'?");
+            $("#yesno-dialog").dialog("open");
+          });
 
         }); // end ready function

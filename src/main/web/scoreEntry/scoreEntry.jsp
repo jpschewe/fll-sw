@@ -61,17 +61,6 @@ EditFlag = true;
 
     <c:if test="${not isBye}">
 
-
-function submit_NoShow() {
- retval = confirm("Are you sure this is a 'No Show'?") 
- if(retval) {
-  document.scoreEntry.NoShow.value = true;
-  Verified = 1;
-  refresh();
- }
- return retval;
-}
-
 function init() {
   // disable text selection
   document.onselectstart=new Function ("return false")
@@ -353,12 +342,12 @@ function CancelClicked() {
                 </td>
                 
               <c:if test="${not isBye}">
-                <td colspan='2'><input
-                  type='submit'
+                <td colspan='2'>
+                <button
+                  type='button'
                   id='no_show'
                   name='no_show'
-                  value='No Show'
-                  onclick='return submit_NoShow()'></td>
+                  value='No Show'>No Show</button></td>
               </c:if>
               
             </tr>
