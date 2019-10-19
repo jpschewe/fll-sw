@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
 import fll.Team;
 import fll.TournamentTeam;
 import fll.Utilities;
@@ -32,6 +31,7 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.playoff.Playoff;
 import fll.xml.ChallengeDescription;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Gather the data required for scoreEntry.jsp.
@@ -48,8 +48,6 @@ public class GatherScoreEntryData extends BaseFLLServlet {
     Connection connection = null;
     try {
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
-
-      session.setAttribute("EditFlag", request.getParameter("EditFlag"));
 
       // support the unverified runs select box
       final String lTeamNum = request.getParameter("TeamNumber");
@@ -89,7 +87,7 @@ public class GatherScoreEntryData extends BaseFLLServlet {
 
       // what run number we're going to edit/enter
       int lRunNumber;
-      if ("1".equals(request.getParameter("EditFlag"))) {
+      if (Boolean.valueOf(request.getParameter("EditFlag"))) {
         if (null == runNumberStr) {
           session.setAttribute(SessionAttributes.MESSAGE,
                                "<p name='error' class='error'>Please choose a run number when editing scores</p>");
@@ -174,7 +172,7 @@ public class GatherScoreEntryData extends BaseFLLServlet {
       session.setAttribute("previousVerified", previousVerified);
 
       if (lRunNumber <= numSeedingRounds) {
-        if ("1".equals(request.getParameter("EditFlag"))) {
+        if (Boolean.valueOf(request.getParameter("EditFlag"))) {
           session.setAttribute("top_info_color", "yellow");
         } else {
           session.setAttribute("top_info_color", "#e0e0e0");
@@ -183,13 +181,14 @@ public class GatherScoreEntryData extends BaseFLLServlet {
         session.setAttribute("top_info_color", "#00ff00");
       }
 
-      if ("1".equals(request.getParameter("EditFlag"))) {
+      if (Boolean.valueOf(request.getParameter("EditFlag"))) {
         session.setAttribute("body_background", "yellow");
       } else {
         session.setAttribute("body_background", "transparent");
       }
 
-      response.sendRedirect(response.encodeRedirectURL("scoreEntry.jsp"));
+      response.sendRedirect(response.encodeRedirectURL("scoreEntry.jsp?EditFlag="
+          + request.getParameter("EditFlag")));
     } catch (final ParseException pe) {
       throw new RuntimeException(pe);
     } catch (final SQLException e) {
