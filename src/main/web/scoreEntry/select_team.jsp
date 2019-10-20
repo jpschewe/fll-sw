@@ -134,7 +134,7 @@ $(document).ready(function() {
             <input type="checkbox"
                    name='EditFlag'
                    id='EditFlagLeft'
-                   value="1"
+                   value="true"
                    onclick="editFlagBoxClicked()" />
             <b><label for="EditFlagLeft">Correct or double-check this score</label></b>
           </td>
@@ -166,7 +166,7 @@ $(document).ready(function() {
       
       <td valign='top'> <!-- right table -->
       <form action="GatherScoreEntryData" method="POST" name="verify">
-      <input type="hidden" name='EditFlag' value="1" />
+      <input type="hidden" name='EditFlag' value="true" />
       
       <table>
         <tr align='left' valign='top'>

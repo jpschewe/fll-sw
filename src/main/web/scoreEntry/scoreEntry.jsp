@@ -2,10 +2,14 @@
 
 <%@ page import="fll.web.scoreEntry.ScoreEntry"%>
 
+<%
+    fll.web.scoreEntry.ScoreEntry.populateContext(request, pageContext);
+%>
+
 <html>
 <head>
 <c:choose>
-  <c:when test="${1 == EditFlag}">
+  <c:when test="${EditFlag}">
     <title>Score Edit</title>
   </c:when>
   <c:otherwise>
@@ -35,38 +39,33 @@ body {
 </style>
 
 <script
+  type="text/javascript"
+  src="<c:url value='/extlib/jquery-1.11.1.min.js' />"></script>
+
+<link rel="stylesheet"
+    type="text/css"
+    href="<c:url value='/extlib/jquery-ui-1.12.1/jquery-ui.min.css' />" />
+
+<script type="text/javascript"
+    src="<c:url value='/extlib/jquery-ui-1.12.1/jquery-ui.min.js' />"></script>
+
+<script
   type='text/javascript'
-  src='../extlib/jquery-1.11.1.min.js'></script>
+  src='scoreEntry.js'></script>
 
 <script type="text/javascript">
+var EditFlag = false;
+<c:if test="${EditFlag}">
+EditFlag = true;
+</c:if>
+
     <c:if test="${not isBye}">
 
-
-function submit_NoShow() {
- retval = confirm("Are you sure this is a 'No Show'?") 
- if(retval) {
-  document.scoreEntry.NoShow.value = true;
-  Verified = 1;
-  refresh();
- }
- return retval;
-}
-
 function init() {
-  $("#verification-warning").hide();
-
   // disable text selection
   document.onselectstart=new Function ("return false")
 
-  <c:choose>
-  <c:when test="${1 == EditFlag}">
-  <%ScoreEntry.generateInitForScoreEdit(out, application, session);%>
-  </c:when>
-  <c:otherwise>
-  <%ScoreEntry.generateInitForNewScore(out, application);%>
-
-  </c:otherwise>
-  </c:choose>
+  <%ScoreEntry.generateInit(out, application, session, pageContext);%>
 
   refresh();
   
@@ -96,10 +95,10 @@ function check_restrictions() {
 <%ScoreEntry.generateCheckRestrictionsBody(out, application);%>
 
   if(error_found) {
-    $("#submit").attr('disabled', true);
+    $("#submit_score").attr('disabled', true);
     $("#score-errors").show();
   } else {
-    $("#submit").attr('disabled', false);
+    $("#submit_score").attr('disabled', false);
     $("#score-errors").hide();
   }
 }
@@ -107,51 +106,8 @@ function check_restrictions() {
 <%ScoreEntry.generateIsConsistent(out, application);%>
 
 
-<%ScoreEntry.generateIncrementMethods(out, application);%>
+<%ScoreEntry.generateIncrementMethods(out, application, pageContext);%>
 </c:if> <!-- end check for bye -->
-
-/**
- * Called when the cancel button is clicked.
- */
-function CancelClicked() {
-  <c:choose>	
-  <c:when test="${1 == EditFlag}">
-  if (confirm("Cancel and lose changes?") == true) {
-  </c:when>
-  <c:otherwise>
-  if (confirm("Cancel and lose data?") == true) {
-  </c:otherwise>
-  </c:choose>
-    window.location.href= "select_team.jsp";
-  }
-}
-/**
- * Called to check verified flag
- */
-function verification() {
-if (Verified == 1)
-{
-	// Smarter Score Popups
-	if (savedTotalScore!=document.scoreEntry.totalScore.value)
-	 {
-		 m = "You are changing and verifying a score -- are you sure?";
-	 }
-	 else
-	 {
-		 m = "You are verifying a score -- are you sure?";
-	 }
-return m;
-}
-else 
-{
-m = "You are submitting a score without verification -- are you sure?";
-return m;
-}
-}
-
-$(document).ready(function() {
-init();
-});
 
 </script>
 
@@ -169,19 +125,27 @@ init();
   <form
     action="SubmitScoreEntry"
     method="POST"
-    name="scoreEntry">
+    name="scoreEntry"
+    id="scoreEntry"
+    >
     <input
       type='hidden'
+      id='NoShow'
       name='NoShow'
       value="false" />
+    <input
+      type='hidden'
+      id='delete'
+      name='delete'
+      value="false" />
 
-    <c:if test="${1 == EditFlag}">
       <input
         type='hidden'
         name='EditFlag'
-        value='1'
-        readonly>
-    </c:if>
+        id='EditFlag'
+        value='${EditFlag}'
+        readonly />
+    
     <input
       type='hidden'
       name='RunNumber'
@@ -225,7 +189,7 @@ init();
                     <td
                       valign="middle"
                       align="center"><c:choose>
-                        <c:when test="${1 == EditFlag}">
+                        <c:when test="${EditFlag}">
                           <font
                             face="Arial"
                             size="4">Score Edit</font>
@@ -335,46 +299,40 @@ init();
             <tr>
               <td
                 colspan='3'
-                align='right'><c:if test="${not isBye}">
-                  <c:choose>
-                    <c:when test="${1 == EditFlag}">
-                      <input
-                        type='submit'
-                        id='submit'
-                        name='submit'
-                        value='Submit Score'
-                        onclick='return confirm(verification())'>
-                    </c:when>
-                    <c:otherwise>
-                      <input
-                        type='submit'
-                        id='submit'
-                        name='submit'
-                        value='Submit Score'
-                        onclick='return confirm("Submit Data -- Are you sure?")'>
-                    </c:otherwise>
-                  </c:choose>
-                </c:if> <input
+                align='right'>
+                
+                <c:if test="${not isBye}">
+                      <button
+                      type='button'
+                        id='submit_score'
+                        >Submit Score</button>
+                </c:if> 
+                
+                <button
                 type='button'
                 id='cancel'
-                value='Cancel'
-                onclick='CancelClicked()'> <c:if
-                  test="${1 == EditFlag and isLastRun}">
-                  <input
-                    type='submit'
-                    id='delete'
-                    name='delete'
-                    value='Delete Score'
-                    onclick='return confirm("Are you sure you want to delete this score?")'>
-                </c:if></td>
+                >Cancel</button> 
+                
+                <c:if
+                  test="${EditFlag and isLastRun}">
+                  <button
+                    type='button'
+                    id='submit_delete'
+                    name='submit_delete'
+                    >Delete Score</button>
+                </c:if>
+                
+                </td>
+                
               <c:if test="${not isBye}">
-                <td colspan='2'><input
-                  type='submit'
+                <td colspan='2'>
+                <button
+                  type='button'
                   id='no_show'
-                  name='submit'
-                  value='No Show'
-                  onclick='return submit_NoShow()'></td>
+                  name='no_show'
+                  value='No Show'>No Show</button></td>
               </c:if>
+              
             </tr>
           </table> <!-- end score entry table  -->
 
@@ -384,5 +342,10 @@ init();
     <!-- end table to center everything -->
   </form>
   <!-- end score entry form -->
+
+	<div id="yesno-dialog">
+		<p id='yesno-dialog_text'></p>
+	</div>
+
 </body>
 </html>
