@@ -2,7 +2,7 @@
 
 pipeline {
 
-  options { buildDiscarder(logRotator(numToKeepStr: '10')) }
+  options { buildDiscarder(logRotator(numToKeepStr: '5')) }
 
   agent {
     label 'fll-build'
