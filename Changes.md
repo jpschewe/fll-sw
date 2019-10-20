@@ -1,4 +1,4 @@
-Release 14.0.1
+Release 14.0.2
 ==============
 * #313 - Use JQuery UI dialog on the score entry page so that the button text can be customized 
 * #771 - updates to the 2019 performance score sheet and add extra space between team info and goals
