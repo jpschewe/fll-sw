@@ -17,9 +17,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
@@ -177,12 +175,8 @@ public class TestAJAXBrackets {
       scoreEntryWindow.findElement(By.id("verify_submit")).click();
 
       scoreEntryWindow.findElement(By.id("Verified_yes")).click();
-      scoreEntryWindow.findElement(By.id("submit")).click();
 
-      final Alert confirmVerifyChange = scoreEntryWindow.switchTo().alert();
-      LOGGER.info("Confirmation text: "
-          + confirmVerifyChange.getText());
-      confirmVerifyChange.accept();
+      IntegrationTestUtils.submitPerformanceScore(scoreEntryWindow);
 
       // give the web server a chance to catch up
       Thread.sleep(30000);
@@ -218,28 +212,7 @@ public class TestAJAXBrackets {
     for (int i = 0; i < score; i++) {
       webDriver.findElement(By.id("inc_score_1")).click();
     }
-    webDriver.findElement(By.id("submit")).click();
 
-    Alert confirmScoreChange = null;
-    final int maxAttempts = 5;
-    int attempt = 0;
-    while (null == confirmScoreChange
-        && attempt <= maxAttempts) {
-      try {
-        confirmScoreChange = webDriver.switchTo().alert();
-        LOGGER.info("Confirmation text: "
-            + confirmScoreChange.getText());
-        confirmScoreChange.accept();
-      } catch (final NoAlertPresentException ex) {
-        ++attempt;
-        confirmScoreChange = null;
-
-        if (attempt >= maxAttempts) {
-          throw ex;
-        } else {
-          LOGGER.warn("Trouble finding alert, trying again", ex);
-        }
-      }
-    }
+    IntegrationTestUtils.submitPerformanceScore(webDriver);
   }
 }

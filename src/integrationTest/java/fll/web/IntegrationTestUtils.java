@@ -64,7 +64,9 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.w3c.dom.Document;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -914,4 +916,23 @@ public final class IntegrationTestUtils {
     assertNotNull(selenium.findElement(By.id("success")));
   }
 
+  /**
+   * Click the submit score button and the confirmation dialog.
+   * An assertion violation occurs if the submit button is not enabled.
+   *
+   * @param selenium the web driver
+   */
+  public static void submitPerformanceScore(final WebDriver selenium) {
+    // check that the submit button is active
+    assertTrue(selenium.findElement(By.id("submit_score")).isEnabled(),
+               "Submit button is not enabled, invalid score entered");
+
+    selenium.findElement(By.id("submit_score")).click();
+
+    // wait for dialog element
+    final WebElement confirmScoreYesButton = (new WebDriverWait(selenium,
+                                                                IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS)).until(ExpectedConditions.presenceOfElementLocated(By.id("yesno-dialog_yes")));
+
+    confirmScoreYesButton.click();
+  }
 }

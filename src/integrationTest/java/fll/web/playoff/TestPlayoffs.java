@@ -14,7 +14,6 @@ import java.io.InputStream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.Select;
@@ -29,8 +28,6 @@ import fll.web.IntegrationTestUtils;
 @ExtendWith(TestUtils.InitializeLogging.class)
 @ExtendWith(IntegrationTestUtils.TomcatRequired.class)
 public class TestPlayoffs {
-
-  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * Test that when trying to enter a score for a team that hasn't advanced to a
@@ -125,11 +122,6 @@ public class TestPlayoffs {
     selenium.findElement(By.name("g1")).sendKeys(String.valueOf(teamNumber));
     selenium.findElement(By.id("Verified_yes")).click();
 
-    selenium.findElement(By.id("submit")).click();
-
-    final Alert confirmScoreChange = selenium.switchTo().alert();
-    LOGGER.info("Confirmation text: "
-        + confirmScoreChange.getText());
-    confirmScoreChange.accept();
+    IntegrationTestUtils.submitPerformanceScore(selenium);
   }
 }
