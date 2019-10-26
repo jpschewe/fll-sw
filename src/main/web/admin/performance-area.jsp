@@ -1,6 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%
+	fll.web.MainIndex.populateContext(request, application, pageContext);
 	fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
 %>
 
@@ -53,6 +54,16 @@
 		The current tournament is <b>${tournamentTitle }</b>
 	</p>
 
+	<h2>Server addresses</h2>
+	<p>These are the addresses that can be used on the judges
+		electronic devices to connect to this server.</p>
+	<ul>
+		<c:forEach items="${urls}" var="url">
+			<li><a href="${url }">${url }</a></li>
+		</c:forEach>
+	</ul>
+
+	<h2>Tournament steps</h2>
 	<ol>
 
 		<li><a target="_init" href="<c:url value='/setup' />">Database
@@ -93,9 +104,9 @@
 			</form>
 		</li>
 
-        <li><a target="_edit_parameters"
-            href="<c:url value='/admin/edit_tournament_parameters.jsp'/>">Edit
-                tournament parameters</a> - should not be needed for most tournaments.</li>
+		<li><a target="_edit_parameters"
+			href="<c:url value='/admin/edit_tournament_parameters.jsp'/>">Edit
+				tournament parameters</a> - should not be needed for most tournaments.</li>
 
 		<li>Test the printer by printing something useful. See Other
 			Useful Tasks below.</li>

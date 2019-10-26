@@ -1,3 +1,4 @@
+* Add server addresses to the top of the scoring coordinator and judges room pages
 * Send users back to the page that they came from after setting the current tournament
 
 Release 14.0.2
