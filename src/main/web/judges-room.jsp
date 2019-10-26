@@ -38,6 +38,17 @@
 		The current tournament is <b>${tournamentTitle }</b>
 	</p>
 
+	<h2>Server addresses</h2>
+	<p>These are the addresses that can be used on the judges
+		electronic devices to connect to this server.</p>
+	<ul>
+		<c:forEach items="${urls}" var="url">
+			<li><a href="${url }">${url }</a></li>
+		</c:forEach>
+	</ul>
+
+
+	<h2>Tournament steps</h2>
 	<ol>
 		<li><a target="_init" href="<c:url value='/setup' />">Database
 				setup</a> - Initialize the database first thing in the morning or the
@@ -138,17 +149,6 @@
 			person</li>
 
 	</ol>
-
-
-	<h2>Server addresses</h2>
-	<p>These are the addresses that can be used on the judges
-		electronic devices to connect to this server.</p>
-	<ul>
-		<c:forEach items="${urls}" var="url">
-			<li><a href="${url }">${url }</a></li>
-		</c:forEach>
-	</ul>
-
 
 	<h2>Finalist scheduling</h2>
 	<p>This is used at tournaments where there is more than 1 judging
