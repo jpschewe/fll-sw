@@ -17,15 +17,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
-
-
 import fll.Tournament;
 import fll.db.Queries;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Set the current tournament.
@@ -35,10 +31,12 @@ public class SetCurrentTournament extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     final StringBuilder message = new StringBuilder();
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
@@ -70,7 +68,8 @@ public class SetCurrentTournament extends BaseFLLServlet {
 
     session.setAttribute("message", message.toString());
 
-    response.sendRedirect(response.encodeRedirectURL("index.jsp"));
+    final String referrer = request.getHeader("referer");
+    response.sendRedirect(response.encodeRedirectURL(referrer == null ? "index.jsp" : referrer));
 
   }
 }
