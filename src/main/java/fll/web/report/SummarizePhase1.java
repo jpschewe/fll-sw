@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
@@ -57,9 +59,17 @@ public class SummarizePhase1 {
   public static final String MISSING_CATEGORIES = "missingCategories";
 
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate table name from category")
-  public static void populateContext(final ServletContext application,
+  public static void populateContext(final HttpServletRequest request,
+                                     final ServletContext application,
+                                     final HttpSession session,
                                      final PageContext pageContext)
       throws IOException, ServletException {
+    // clear the redirect if sent here directly from index.jsp
+    final String referrer = request.getHeader("referer");
+    if (referrer.endsWith("index.jsp")) {
+      session.removeAttribute(PromptSummarizeScores.SUMMARY_REDIRECT_KEY);
+    }
+
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 

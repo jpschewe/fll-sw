@@ -1,3 +1,4 @@
+* #767 - Always redirect back to the index page when computing summarized scores from the index
 * Add server addresses to the top of the scoring coordinator and judges room pages
 * Send users back to the page that they came from after setting the current tournament
 
