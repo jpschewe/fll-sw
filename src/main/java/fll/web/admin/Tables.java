@@ -29,7 +29,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Java code used in tables.jsp
- * 
+ *
  * @version $Revision$
  */
 public final class Tables {
@@ -51,7 +51,7 @@ public final class Tables {
     try {
       connection = datasource.getConnection();
       final int tournament = Queries.getCurrentTournament(connection);
-      final String submitButton = request.getParameter("submit");
+      final String submitButton = request.getParameter("submit_data");
 
       int rowIndex = 0;
       while (null != request.getParameter("SideA"
@@ -149,7 +149,7 @@ public final class Tables {
   /**
    * Generate a row in the judges table defaulting the form elemenets to the
    * given information.
-   * 
+   *
    * @param out where to print element in the list
    * @param row the row being generated, used for naming form elements
    * @param sideA Label for side A of the table, can be null
@@ -188,7 +188,7 @@ public final class Tables {
 
   /**
    * Replace the tables for a tournament.
-   * 
+   *
    * @param connection the database connection
    * @param tournamentId the tournament id
    * @param tables the new tables, each pair is side 1 and side 2 of the table
@@ -232,7 +232,7 @@ public final class Tables {
   /**
    * Commit the subjective data from request to the database and redirect
    * response back to index.jsp.
-   * 
+   *
    * @param tournament the current tournament
    */
   private static String commitData(final HttpServletRequest request,
@@ -278,7 +278,7 @@ public final class Tables {
 
   /**
    * Check if tables are assigned for the specified tournament.
-   * 
+   *
    * @param connection database connection
    * @param tournamentID tournament ID
    * @return true if the tables have been assigned
