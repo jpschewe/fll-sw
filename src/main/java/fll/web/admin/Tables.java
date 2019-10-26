@@ -136,8 +136,8 @@ public final class Tables {
         }
 
         out.println("</table>");
-        out.println("<input type='submit' name='submit' id='add_row' value='Add Row'>");
-        out.println("<input type='submit' name='submit' id='finished' value='Finished'>");
+        out.println("<input type='submit' name='submit_data' id='add_row' value='Add Row'>");
+        out.println("<input type='submit' name='submit_data' id='finished' value='Finished'>");
       }
 
       out.println("</form>");
