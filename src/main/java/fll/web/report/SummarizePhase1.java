@@ -66,7 +66,8 @@ public class SummarizePhase1 {
       throws IOException, ServletException {
     // clear the redirect if sent here directly from index.jsp
     final String referrer = request.getHeader("referer");
-    if (referrer.endsWith("index.jsp")) {
+    if (null == referrer
+        || referrer.endsWith("index.jsp")) {
       session.removeAttribute(PromptSummarizeScores.SUMMARY_REDIRECT_KEY);
     }
 
