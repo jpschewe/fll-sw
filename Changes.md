@@ -1,3 +1,4 @@
+* #770 - rename all html fields with names or ids equal to 'submit'
 * Add server addresses to the top of the scoring coordinator and judges room pages
 * Send users back to the page that they came from after setting the current tournament
 

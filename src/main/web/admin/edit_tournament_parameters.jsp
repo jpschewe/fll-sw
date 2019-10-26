@@ -121,7 +121,7 @@
 
 			</div>
 
-			<input type="submit" id='submit' value='Submit' />
+			<input type="submit" id='submit_data' name='submit_data' value='Submit' />
 
 		</form>
 	</div>

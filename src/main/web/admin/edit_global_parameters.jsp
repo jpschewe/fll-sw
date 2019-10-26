@@ -194,7 +194,7 @@
 			</table>
 
 
-			<input type='submit' value='Save Changes' id='submit' />
+			<input type='submit' value='Save Changes' id='submit_data' name='submit_data' />
 		</form>
 
 	</div>
