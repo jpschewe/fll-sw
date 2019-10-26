@@ -373,7 +373,7 @@
 
 		</table>
 
-		<input type='submit' name='submit' value='Submit' />
+		<input type='submit' name='submit_data' value='Submit' />
 
 	</form>
 

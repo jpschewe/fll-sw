@@ -55,7 +55,7 @@
 		</div>
 
 
-		<input type="submit" id='submit' />
+		<input type="submit" id='submit_data' />
 	</form>
 
 </body>

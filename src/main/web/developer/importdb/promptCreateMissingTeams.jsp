@@ -31,7 +31,7 @@
 			</c:forEach>
 		</table>
 
-		<input name='submit' type='submit' value="Add teams" />
+		<input name='submit_data' type='submit' value="Add teams" />
 	</form>
 
 	<p>

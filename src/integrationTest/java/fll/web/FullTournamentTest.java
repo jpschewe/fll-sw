@@ -392,7 +392,7 @@ public class FullTournamentTest {
 
       // accept default schedule constraints
       assertTrue(selenium.getCurrentUrl().contains("scheduleConstraints"));
-      selenium.findElement(By.id("submit")).click();
+      selenium.findElement(By.id("submit_data")).click();
       Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
 
       // check that we're on the choose headers page and set the header
@@ -405,7 +405,7 @@ public class FullTournamentTest {
             + ":header")));
         select.selectByVisibleText(map.getScheduleColumn());
       }
-      selenium.findElement(By.id("submit")).click();
+      selenium.findElement(By.id("submit_data")).click();
 
       Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
 
