@@ -101,7 +101,7 @@ public class TestAJAXBrackets {
       IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
           + "admin/remoteControl.jsp");
       selenium.findElement(By.cssSelector("[type='radio'][name='remotePage'][value='playoffs']")).click();
-      selenium.findElement(By.name("submit")).click();
+      selenium.findElement(By.name("submit_data")).click();
       Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
 
       // open brackets

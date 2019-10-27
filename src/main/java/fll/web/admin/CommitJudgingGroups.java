@@ -20,11 +20,8 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-
-
 import fll.TournamentTeam;
 import fll.db.Queries;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -99,7 +96,7 @@ public class CommitJudgingGroups extends BaseFLLServlet {
 
       final int currentTournamentID = Queries.getCurrentTournament(connection);
 
-      if ("Commit".equals(request.getParameter("submit"))) {
+      if ("Commit".equals(request.getParameter("submit_data"))) {
 
         final Map<Integer, TournamentTeam> teams = Queries.getTournamentTeams(connection, currentTournamentID);
         for (final Map.Entry<Integer, TournamentTeam> entry : teams.entrySet()) {
@@ -123,7 +120,7 @@ public class CommitJudgingGroups extends BaseFLLServlet {
                 for (final SubjectiveScoreCategory category : challengeDescription.getSubjectiveCategories()) {
                   Queries.deleteSubjectiveScores(connection, category.getName(), teamNumber, currentTournamentID);
                 }
-                
+
                 Queries.setJudgingGroup(connection, teamNumber, currentTournamentID, newJudgingGroup);
               }
             }
