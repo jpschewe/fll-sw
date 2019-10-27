@@ -18,16 +18,13 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-
-
-import net.mtu.eggplant.util.sql.SQLFunctions;
 import fll.Tournament;
 import fll.db.Queries;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.WebUtils;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Support for and handle the result from promptSummarizeScores.jsp.
@@ -52,6 +49,8 @@ public class PromptSummarizeScores extends BaseFLLServlet {
       WebUtils.sendRedirect(application, response, "summarizePhase1.jsp");
     } else {
       final String url = SessionAttributes.getAttribute(session, SUMMARY_REDIRECT_KEY, String.class);
+      LOGGER.debug("redirect is {}", url);
+
       if (null == url) {
         WebUtils.sendRedirect(application, response, "index.jsp");
       } else {
@@ -64,7 +63,7 @@ public class PromptSummarizeScores extends BaseFLLServlet {
    * Check if summary scores need to be updated. If they do, redirect and set
    * the session variable SUMMARY_REDIRECT to point to
    * redirect.
-   * 
+   *
    * @param redirect the page to visit once the scores have been summarized
    * @return if the summary scores need to be updated, the calling method should
    *         return immediately if this is true as a redirect has been executed.
@@ -90,9 +89,14 @@ public class PromptSummarizeScores extends BaseFLLServlet {
           LOGGER.trace("Needs summary update");
         }
 
-        session.setAttribute(SUMMARY_REDIRECT_KEY, redirect);
-        WebUtils.sendRedirect(application, response, "promptSummarizeScores.jsp");
-        return true;
+        if (null != session.getAttribute(SUMMARY_REDIRECT_KEY)) {
+          LOGGER.debug("redirect has already been set, it must be the case that the user is skipping summarization, allow it");
+          return false;
+        } else {
+          session.setAttribute(SUMMARY_REDIRECT_KEY, redirect);
+          WebUtils.sendRedirect(application, response, "promptSummarizeScores.jsp");
+          return true;
+        }
       } else {
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("No updated needed");
@@ -104,7 +108,7 @@ public class PromptSummarizeScores extends BaseFLLServlet {
     } catch (final SQLException e) {
       LOGGER.error(e, e);
       throw new RuntimeException(e);
-    } catch (IOException e) {
+    } catch (final IOException e) {
       LOGGER.error(e, e);
       throw new RuntimeException(e);
     } finally {

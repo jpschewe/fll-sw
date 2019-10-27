@@ -2,7 +2,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%
-	SummarizePhase1.populateContext(application, pageContext);
+	SummarizePhase1.populateContext(request, application, session, pageContext);
 %>
 
 <html>
