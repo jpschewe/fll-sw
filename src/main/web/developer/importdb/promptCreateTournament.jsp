@@ -17,7 +17,7 @@
 		<p>The tournament '${importDbSessionInfo.tournamentName}' does not
 			exist in the destination database, create it?</p>
 
-		<input name='submit' type='submit' value="Yes" /> <input name='submit'
+		<input name='submit_data' type='submit' value="Yes" /> <input name='submit_data'
 			type='submit' value="No" />
 	</form>
 

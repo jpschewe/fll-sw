@@ -9,7 +9,6 @@ package fll.web.slideshow;
 import java.io.IOException;
 import java.io.InputStream;
 
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
@@ -17,7 +16,6 @@ import org.openqa.selenium.WebDriver;
 
 import fll.TestUtils;
 import fll.db.GenerateDB;
-
 import fll.web.DisplayInfo;
 import fll.web.InitializeDatabaseTest;
 import fll.web.IntegrationTestUtils;
@@ -59,7 +57,7 @@ public class SlideshowTest {
           + DisplayInfo.SLIDESHOW_REMOTE_PAGE
           + "']")).click();
       selenium.findElement(By.name("slideInterval")).sendKeys("5");
-      selenium.findElement(By.name("submit")).click();
+      selenium.findElement(By.name("submit_data")).click();
       Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
 
       selenium.findElement(By.id("success"));

@@ -18,17 +18,14 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-
-
 import fll.Tournament;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
 /**
  * Servlet to create a tournament.
- * 
+ *
  * @author jpschewe
  */
 @WebServlet("/developer/importdb/CreateTournament")
@@ -36,6 +33,7 @@ public class CreateTournament extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOG = org.apache.logging.log4j.LogManager.getLogger();
 
+  @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -47,7 +45,7 @@ public class CreateTournament extends BaseFLLServlet {
     session.setAttribute(SessionAttributes.REDIRECT_URL, null);
 
     try {
-      final String answer = (String) request.getParameter("submit");
+      final String answer = request.getParameter("submit_data");
       if (LOG.isTraceEnabled()) {
         LOG.trace("Submit to CreateTournament: '"
             + answer
@@ -79,7 +77,7 @@ public class CreateTournament extends BaseFLLServlet {
   /**
    * Create the tournament that is in the session variable
    * <code>selectedTournament</code>.
-   * 
+   *
    * @param session the session
    * @throws SQLException
    */
@@ -107,7 +105,7 @@ public class CreateTournament extends BaseFLLServlet {
   /**
    * Create a tournament from the source in the dest. This recurses on
    * nextTournament if needed.
-   * 
+   *
    * @throws SQLException
    */
   private static void createTournament(final Connection sourceConnection,

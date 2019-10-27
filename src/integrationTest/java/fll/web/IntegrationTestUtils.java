@@ -675,7 +675,7 @@ public final class IntegrationTestUtils {
 
     final Select sort = new Select(selenium.findElement(By.id("sort")));
     sort.selectByValue(bracketSort.name());
-    selenium.findElement(By.id("submit")).click();
+    selenium.findElement(By.id("submit_data")).click();
     Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
     assertFalse(isElementPresent(selenium, By.id("exception-handler")), "Error loading page");
   }
@@ -723,7 +723,7 @@ public final class IntegrationTestUtils {
 
     selenium.findElement(By.id("seeding_rounds")).sendKeys(String.valueOf(newValue));
 
-    selenium.findElement(By.id("submit")).click();
+    selenium.findElement(By.id("submit_data")).click();
 
     selenium.findElement(By.id("success"));
   }
@@ -911,7 +911,7 @@ public final class IntegrationTestUtils {
       element.click();
     }
 
-    selenium.findElement(By.id("submit")).click();
+    selenium.findElement(By.id("submit_data")).click();
 
     assertNotNull(selenium.findElement(By.id("success")));
   }

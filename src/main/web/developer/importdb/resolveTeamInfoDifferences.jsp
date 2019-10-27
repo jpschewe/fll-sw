@@ -31,7 +31,7 @@
 		</c:forEach>
 
 
-		<input name='submit' type='submit' value="Apply Changes" />
+		<input name='submit_data' type='submit' value="Apply Changes" />
 	</form>
 
 	<p>

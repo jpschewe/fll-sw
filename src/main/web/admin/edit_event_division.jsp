@@ -75,10 +75,10 @@
 
     <input
       type='submit'
-      name='submit'
+      name='submit_data'
       value='Commit' /> <input
       type='submit'
-      name='submit'
+      name='submit_data'
       value='Cancel' />
   </form>
 

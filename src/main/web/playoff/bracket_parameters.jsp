@@ -82,7 +82,7 @@
 			</c:forEach>
 		</c:if>
 
-		<input type='submit' id='submit' value='Submit'
+		<input type='submit' id='submit_data' value='Submit'
 			onclick='return sanityCheck()' />
 
 	</form>

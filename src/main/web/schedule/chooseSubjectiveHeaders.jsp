@@ -73,7 +73,7 @@
 
 		</table>
 
-		<input type="submit" id='submit' onsubmit="return validateForm()" />
+		<input type="submit" id='submit_data' onsubmit="return validateForm()" />
 	</form>
 
 </body>
