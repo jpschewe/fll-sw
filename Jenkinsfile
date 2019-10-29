@@ -139,7 +139,9 @@ pipeline {
                 
       recordIssues tool: java()  
 
-      recordIssues tool: javaDoc()      
+      recordIssues tool: javaDoc()
+
+      checkstyle pattern: '**/build/reports/checkstyle/*.xml'
 
       emailext recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']], 
           to: 'jpschewe@mtu.net',
