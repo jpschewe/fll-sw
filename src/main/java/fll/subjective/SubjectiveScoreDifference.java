@@ -37,18 +37,25 @@ public abstract class SubjectiveScoreDifference {
   }
 
   /**
-   * The value in the master document. Subclasses should override this with a
+   * Subclasses should override this with a
    * specific type.
+   *
+   * @return The value in the master document
    */
   public abstract Object getMasterValue();
 
   /**
-   * The value in the compare document. Subclasses should override this with a
+   * Subclasses should override this with a
    * specific type.
+   *
+   * @return The value in the compare document
    */
   public abstract Object getCompareValue();
 
-  public SubjectiveScoreDifference(final String category, final String subcategory, final int teamNumber, final String judge) {
+  public SubjectiveScoreDifference(final String category,
+                                   final String subcategory,
+                                   final int teamNumber,
+                                   final String judge) {
     this.category = category;
     this.subcategory = subcategory;
     this.teamNumber = teamNumber;

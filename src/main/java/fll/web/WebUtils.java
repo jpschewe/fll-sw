@@ -74,8 +74,9 @@ public final class WebUtils {
    * The method calling this method should return right away.
    * </p>
    *
-   * @param application
-   * @param url
+   * @param application used to create an absolute URL
+   * @param response used to send the redirect
+   * @param url the url to redirect to
    * @throws IOException See {@link HttpServletResponse#sendRedirect(String)}
    * @see #makeAbsoluteURL(ServletContext, String)
    * @see HttpServletResponse#sendRedirect(String)
@@ -151,9 +152,8 @@ public final class WebUtils {
     }
 
     @SuppressWarnings("unchecked") // can't store generics in ServletContext
-    final Collection<String> hostNames = ApplicationAttributes.getAttribute(application,
-                                                                                                 HOSTNAMES_KEY,
-                                                                                                 Collection.class);
+    final Collection<String> hostNames = ApplicationAttributes.getAttribute(application, HOSTNAMES_KEY,
+                                                                            Collection.class);
     if (null == hostNames) {
       // no data yet
       return Collections.emptyList();
@@ -252,7 +252,8 @@ public final class WebUtils {
   }
 
   /**
-   * Take a string and quote it for Javascript.
+   * @param str the string to quote
+   * @return a string suitable to be used in javascript
    */
   public static String quoteJavascriptString(final String str) {
     if (null == str
@@ -337,7 +338,8 @@ public final class WebUtils {
   }
 
   /**
-   * Escape the string to be used in the value of a form field.
+   * @param str the string that needs to be escaped
+   * @return A string suitable to be used in a form field
    */
   public static String escapeForHtmlFormValue(final String str) {
     if (null == str) {

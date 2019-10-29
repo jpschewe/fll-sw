@@ -36,7 +36,8 @@ public class Term extends Object implements Evaluatable, Serializable {
    * @param ele the XML element that represents the term
    * @param goalScope the scope to lookup goals in
    * @param variableScope the scope to lookup variables in, may be null
-   * @throws VariablRefNotAllowedException
+   * @throws VariablRefNotAllowedException if there is no variable scope and a
+   *           variable reference is found
    */
   public Term(final Element ele,
               final GoalScope goalScope,

@@ -24,14 +24,16 @@ public final class UploadProcessor {
   private UploadProcessor() {
     // no instances
   }
-  
+
   /**
    * Processes <code>request</code> as a file upload and puts the results back
    * in the <code>request</code> object. Each parameter that is a file upload
    * has a value of type {@link FileItem}. Other parameters have values of type
    * {@link String}.
-   * 
-   * @param request
+   *
+   * @param request the web request
+   * @throws FileUploadException see
+   *           {@link ServletFileUpload#parseRequest(HttpServletRequest)}
    */
   public static void processUpload(final HttpServletRequest request) throws FileUploadException {
     // Parse the request
