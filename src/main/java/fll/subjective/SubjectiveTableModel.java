@@ -50,6 +50,10 @@ public final class SubjectiveTableModel extends AbstractTableModel {
   }
 
   /**
+   * @param subjectiveCategory the category to create the table for
+   * @param schedule the to use to display times, may be null
+   * @param scheduleColumnMappings if there is a schedule, this maps the schedule
+   *          columns to categories
    * @param scoreDocument XML document that represents the teams that are being
    *          scored along with the judges and the current set of scores
    */
@@ -72,7 +76,9 @@ public final class SubjectiveTableModel extends AbstractTableModel {
   }
 
   /**
-   * Get the score elements for the specified category.
+   * @return the score elements for the specified category.
+   * @param scoreDocument the document to read
+   * @param categoryName the category to get score elements for
    */
   public static List<Element> getScoreElements(final Document scoreDocument,
                                                final String categoryName) {
@@ -483,6 +489,9 @@ public final class SubjectiveTableModel extends AbstractTableModel {
 
   /**
    * Get the score element at index
+   *
+   * @param index the index to get an element at
+   * @return the element
    */
   private Element getScoreElement(final int index) {
     return _scoreElements[index];
@@ -491,8 +500,8 @@ public final class SubjectiveTableModel extends AbstractTableModel {
   /**
    * Get the row index for a team number and judge
    *
-   * @param teamNumber
-   * @param judge
+   * @param teamNumber the team number
+   * @param judge the name of the judge
    * @return the row index, -1 if one cannot be found
    */
   public int getRowForTeamAndJudge(final int teamNumber,
@@ -534,7 +543,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
   }
 
   /**
-   * Find out how many goals there are.
+   * @return how many goals there are.
    */
   public int getNumGoals() {
     return _goals.size();
@@ -550,7 +559,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
   /**
    * Find column for subcategory title.
    *
-   * @param subcategory
+   * @param subcategory the subcategory
    * @return the column, -1 if it cannot be found
    */
   public int getColForSubcategory(final String subcategory) {

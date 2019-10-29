@@ -12,13 +12,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.util.FLLInternalException;
 import fll.web.playoff.TeamScore;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 public class SwitchStatement implements Evaluatable, Serializable {
 
@@ -37,7 +36,7 @@ public class SwitchStatement implements Evaluatable, Serializable {
 
   /**
    * Construct a switch statement from an XML document.
-   * 
+   *
    * @param ele the element to parse
    * @param goalScope where to lookup goals
    * @param variableScope where to lookup variables
@@ -46,7 +45,7 @@ public class SwitchStatement implements Evaluatable, Serializable {
                          final GoalScope goalScope,
                          final VariableScope variableScope) {
     ComplexPolynomial defaultCase = null;
-    mCases = new LinkedList<CaseStatement>();
+    mCases = new LinkedList<>();
     for (final Element caseEle : new NodelistElementCollectionAdapter(ele.getChildNodes())) {
       if (CaseStatement.TAG_NAME.equals(caseEle.getNodeName())) {
         final CaseStatement cs = new CaseStatement(caseEle, goalScope, variableScope);
@@ -78,7 +77,7 @@ public class SwitchStatement implements Evaluatable, Serializable {
 
   /**
    * Add a case statement to the end of the case statements.
-   * 
+   *
    * @param v the case statement to add
    */
   public void addCase(final CaseStatement v) {
@@ -87,7 +86,7 @@ public class SwitchStatement implements Evaluatable, Serializable {
 
   /**
    * Add a case statement at the specified position.
-   * 
+   *
    * @param index the index to add the case statement at
    * @param v the case statement to add
    */
@@ -99,7 +98,7 @@ public class SwitchStatement implements Evaluatable, Serializable {
 
   /**
    * Remove a case statement
-   * 
+   *
    * @param v the case statement to remove
    * @return true if the case statement was removed
    */
@@ -109,10 +108,10 @@ public class SwitchStatement implements Evaluatable, Serializable {
 
   /**
    * Remove a case statement at a specified position
-   * 
+   *
    * @param index the position to remove from
    * @return the case statement that was removed
-   * @throws IndexOutOfBoundsException
+   * @throws IndexOutOfBoundsException see {@link List#remove(int)}
    */
   public CaseStatement removeCase(final int index) throws IndexOutOfBoundsException {
     return mCases.remove(index);
@@ -124,7 +123,7 @@ public class SwitchStatement implements Evaluatable, Serializable {
    * The default case for this switch statement.
    * This may be null until {@link #toXml(Document)} or
    * {@link #evaluate(TeamScore)} are called.
-   * 
+   *
    * @return the polynomial, may be null
    */
   public ComplexPolynomial getDefaultCase() {
