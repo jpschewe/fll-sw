@@ -677,7 +677,8 @@ installMacDist.doFirst {
 
 
 checkstyle {
-    config = resources.text.fromFile("checkstyle.xml", "UTF-8")
+    configDir = file("$projectDir")
+    configFile = file("checkstyle.xml")
     showViolations = true
     ignoreFailures = true
     toolVersion = "8.10"
