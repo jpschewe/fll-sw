@@ -9,7 +9,7 @@ package fll.web.playoff;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Basic information for a head to head bracket
+ * Basic information for a head to head bracket.
  */
 public class BracketInfo {
 
@@ -21,19 +21,19 @@ public class BracketInfo {
     this.lastRound = lastRound;
   }
 
-  private int firstRound;
+  private final int firstRound;
 
   public final int getFirstRound() {
     return firstRound;
   }
 
-  private int lastRound;
+  private final int lastRound;
 
   public final int getLastRound() {
     return lastRound;
   }
 
-  private String bracketName;
+  private final String bracketName;
 
   public final String getBracketName() {
     return bracketName;

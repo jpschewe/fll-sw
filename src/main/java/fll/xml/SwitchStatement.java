@@ -19,10 +19,19 @@ import fll.util.FLLInternalException;
 import fll.web.playoff.TeamScore;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
+/**
+ * A switch statement in the challenge description.
+ */
 public class SwitchStatement implements Evaluatable, Serializable {
 
+  /**
+   * XML tag for the switch statement.
+   */
   public static final String TAG_NAME = "switch";
 
+  /**
+   * XML tag for the default case of the switch statement.
+   */
   public static final String DEFAULT_TAG_NAME = "default";
 
   /**
@@ -71,6 +80,9 @@ public class SwitchStatement implements Evaluatable, Serializable {
 
   private final List<CaseStatement> mCases;
 
+  /**
+   * @return the cases in the switch statement
+   */
   public List<CaseStatement> getCases() {
     return Collections.unmodifiableList(mCases);
   }
@@ -89,6 +101,7 @@ public class SwitchStatement implements Evaluatable, Serializable {
    *
    * @param index the index to add the case statement at
    * @param v the case statement to add
+   * @throws IndexOutOfBoundsException see {@link List#add(int, Object)}
    */
   public void addCase(final int index,
                       final CaseStatement v)
@@ -97,7 +110,7 @@ public class SwitchStatement implements Evaluatable, Serializable {
   }
 
   /**
-   * Remove a case statement
+   * Remove a case statement.
    *
    * @param v the case statement to remove
    * @return true if the case statement was removed
@@ -107,7 +120,7 @@ public class SwitchStatement implements Evaluatable, Serializable {
   }
 
   /**
-   * Remove a case statement at a specified position
+   * Remove a case statement at a specified position.
    *
    * @param index the position to remove from
    * @return the case statement that was removed
@@ -150,6 +163,11 @@ public class SwitchStatement implements Evaluatable, Serializable {
     return getDefaultCase().evaluate(teamScore);
   }
 
+  /**
+   * @param doc the document the XML element is to be added to, used to create
+   *          elements
+   * @return the XML element for the current state
+   */
   public Element toXml(final Document doc) {
     final Element ele = doc.createElement(TAG_NAME);
 

@@ -23,7 +23,7 @@ import fll.util.FormatterUtils;
 
   private final JFormattedTextField durationEditor;
 
-  public SubjectiveStationEditor() {
+  /* package */ SubjectiveStationEditor() {
     super();
     setLayout(new FlowLayout());
 

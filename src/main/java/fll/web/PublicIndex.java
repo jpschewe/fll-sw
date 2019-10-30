@@ -14,18 +14,17 @@ import javax.servlet.ServletContext;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
-
-
 import fll.db.Queries;
-
 import fll.web.report.finalist.FinalistSchedule;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Populate the page context for the public index page.
  */
-public class PublicIndex {
+public final class PublicIndex {
+
+  private PublicIndex() {
+  }
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
