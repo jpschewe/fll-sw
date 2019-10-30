@@ -22,13 +22,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-
 import org.w3c.dom.Document;
 
 import fll.Utilities;
 import fll.db.GlobalParameters;
 import fll.util.FLLRuntimeException;
-
 import fll.xml.ChallengeDescription;
 
 /**
@@ -42,14 +40,19 @@ public class InitFilter implements Filter {
   /**
    * @see javax.servlet.Filter#destroy()
    */
+  @Override
   public void destroy() {
     // nothing
   }
 
   /**
+   * @param request the HTTP request
+   * @param response the response that is filtered
+   * @param chain the chain of filters
    * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest,
    *      javax.servlet.ServletResponse, javax.servlet.FilterChain)
    */
+  @Override
   public void doFilter(final ServletRequest request,
                        final ServletResponse response,
                        final FilterChain chain)
@@ -99,7 +102,7 @@ public class InitFilter implements Filter {
 
   /**
    * Check if the path needs security.
-   * 
+   *
    * @param contextPath the contet of the web app
    * @param path the path to the requested resource
    * @return true if a valid login is required for this resource
@@ -157,7 +160,7 @@ public class InitFilter implements Filter {
 
   /**
    * Check if the path needs init to be called.
-   * 
+   *
    * @param contextPath the contet of the web app
    * @param path the path to the requested resource
    * @return true if initalize needs to be called
@@ -189,7 +192,7 @@ public class InitFilter implements Filter {
   /**
    * Check if the current connection is authenticated or the page doesn't
    * require authentication.
-   * 
+   *
    * @param request request
    * @param response response
    * @param session session for the request
@@ -216,11 +219,12 @@ public class InitFilter implements Filter {
   /**
    * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
    */
+  @Override
   public void init(final FilterConfig filterConfig) throws ServletException {
     // nothing
   }
 
-  private static final Object initLock = new Object();
+  private static final Object INIT_LOCK = new Object();
 
   /**
    * @param request
@@ -233,7 +237,7 @@ public class InitFilter implements Filter {
                                     final ServletContext application)
       throws IOException, RuntimeException {
 
-    synchronized (initLock) {
+    synchronized (INIT_LOCK) {
 
       // make sure that we compute the host names as soon as possible
       WebUtils.updateHostNamesInBackground(application);

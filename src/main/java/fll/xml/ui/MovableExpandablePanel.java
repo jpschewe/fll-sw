@@ -98,21 +98,21 @@ public class MovableExpandablePanel extends JPanel {
      * The direction to move the widget.
      */
     public enum MoveDirection {
-    /**
-     * Move the widget up.
-     */
-    UP,
-    /**
-     * Move the widget down.
-     */
-    DOWN
+      /**
+       * Move the widget up.
+       */
+      UP,
+      /**
+       * Move the widget down.
+       */
+      DOWN
     }
 
     private final MoveDirection mDirection;
 
     /**
      * Create a new event.
-     * 
+     *
      * @param source see {@link #getComponent()}
      * @param direction see {@link #getDirection()}
      */
@@ -141,11 +141,13 @@ public class MovableExpandablePanel extends JPanel {
   /**
    * Listen for move events.
    */
-  public static interface MoveEventListener extends EventListener {
+  public interface MoveEventListener extends EventListener {
     /**
      * The component should be moved.
+     *
+     * @param e the event showing what is being moved
      */
-    public void requestedMove(final MoveEvent e);
+    void requestedMove(MoveEvent e);
 
   }
 
@@ -167,7 +169,7 @@ public class MovableExpandablePanel extends JPanel {
 
   /**
    * Notify listeners of a requested move.
-   * 
+   *
    * @param direction which direction the component should move
    */
   protected void fireMoveEventListener(final MoveEvent.MoveDirection direction) {
@@ -185,7 +187,7 @@ public class MovableExpandablePanel extends JPanel {
 
     /**
      * Create a new event.
-     * 
+     *
      * @param source see {@link #getComponent()}
      */
     public DeleteEvent(final JComponent source) {
@@ -204,22 +206,33 @@ public class MovableExpandablePanel extends JPanel {
   /**
    * Listen for delete events.
    */
-  public static interface DeleteEventListener extends EventListener {
+  public interface DeleteEventListener extends EventListener {
     /**
      * The component should be deleted.
+     *
+     * @param e the event specifying information about the delete request
      */
-    public void requestDelete(final DeleteEvent e);
+    void requestDelete(DeleteEvent e);
 
   }
 
+  /**
+   * @param l the listener to add
+   */
   public void addDeleteEventListener(final DeleteEventListener l) {
     mListeners.add(DeleteEventListener.class, l);
   }
 
+  /**
+   * @param l the listener to remove
+   */
   public void removeDeleteEventListener(final DeleteEventListener l) {
     mListeners.remove(DeleteEventListener.class, l);
   }
 
+  /**
+   * Send a notification about a delete event.
+   */
   protected void fireDeleteEventListener() {
     final DeleteEvent event = new DeleteEvent(this);
 
