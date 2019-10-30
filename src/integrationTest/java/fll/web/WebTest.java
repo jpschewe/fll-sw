@@ -16,7 +16,6 @@ import org.xml.sax.SAXException;
 import fll.TestUtils;
 import fll.db.GenerateDB;
 
-
 /**
  * Basic tests of loading pages.
  */
@@ -29,7 +28,11 @@ public class WebTest {
   /**
    * Basic load of the pages.
    *
-   * @throws InterruptedException
+   * @param selenium the browser driver
+   * @throws InterruptedException on test failure
+   * @throws IOException on test failure
+   * @throws MalformedURLException on test failure
+   * @throws SAXException on test failure
    */
   @Test
   public void testPages(final WebDriver selenium)
@@ -72,8 +75,9 @@ public class WebTest {
   /**
    * Test changing tournaments to DUMMY and then back to State.
    *
-   * @throws IOException
-   * @throws InterruptedException
+   * @param selenium the browser driver
+   * @throws IOException on test failure
+   * @throws InterruptedException on test failure
    */
   @Test
   public void testChangeTournament(final WebDriver selenium) throws IOException, InterruptedException {

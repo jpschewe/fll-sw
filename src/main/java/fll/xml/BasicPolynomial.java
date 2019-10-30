@@ -106,7 +106,7 @@ public class BasicPolynomial implements Evaluatable, Serializable {
   }
 
   /**
-   * Add a term at the specified index in the polynomial
+   * Add a term at the specified index in the polynomial.
    *
    * @param index the index to add the term at
    * @param v the term to add

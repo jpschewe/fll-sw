@@ -18,9 +18,7 @@ import javax.swing.JPanel;
 
 import org.apache.commons.lang3.StringUtils;
 
-
 import fll.util.FormatterUtils;
-
 import fll.xml.GoalScope;
 import fll.xml.Variable;
 
@@ -44,6 +42,11 @@ public class VariableEditor extends JPanel implements Validatable {
     return variable;
   }
 
+  /**
+   *
+   * @param variable the variable to edit
+   * @param goalScope the scope to lookup goals in
+   */
   public VariableEditor(@Nonnull final Variable variable,
                         @Nonnull final GoalScope goalScope) {
     super(new GridBagLayout());
@@ -87,6 +90,12 @@ public class VariableEditor extends JPanel implements Validatable {
 
   }
 
+  /**
+   * First a name change event.
+   *
+   * @param oldName the old name
+   * @param newName the new name
+   */
   protected void fireNameChange(final String oldName,
                                 final String newName) {
     firePropertyChange("name", oldName, newName);

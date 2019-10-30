@@ -33,7 +33,9 @@ import fll.xml.WinnerType;
 /**
  * Support for /report/finalist/load.jsp.
  */
-public class FinalistLoad {
+public final class FinalistLoad {
+  private FinalistLoad() {
+  }
 
   /**
    * The name of the javascript variable that represents the team.

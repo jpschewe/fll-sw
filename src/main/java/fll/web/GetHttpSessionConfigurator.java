@@ -17,6 +17,9 @@ import javax.websocket.server.ServerEndpointConfig.Configurator;
  */
 public class GetHttpSessionConfigurator extends Configurator {
 
+  /**
+   * Name of the key storing the http session object.
+   */
   public static final String HTTP_SESSION_KEY = "httpSession";
 
   @Override

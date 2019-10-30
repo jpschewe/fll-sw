@@ -25,14 +25,29 @@ import fll.util.FLLInternalException;
 import fll.util.FP;
 import fll.web.playoff.TeamScore;
 
+/**
+ * Base type for goals in the challenge description.
+ */
 public abstract class AbstractGoal implements Serializable {
 
+  /**
+   * XML attribute for category (aka. goal group).
+   */
   public static final String CATEGORY_ATTRIBUTE = "category";
 
+  /**
+   * XML attribute for goal title.
+   */
   public static final String TITLE_ATTRIBUTE = "title";
 
+  /**
+   * XML attribute for goal name.
+   */
   public static final String NAME_ATTRIBUTE = "name";
 
+  /**
+   * XML tag for goal description.
+   */
   public static final String DESCRIPTION_TAG_NAME = "description";
 
   private final PropertyChangeSupport propChangeSupport;
@@ -169,7 +184,7 @@ public abstract class AbstractGoal implements Serializable {
    * @param teamScore the score to evaluate
    * @return the score or NaN if there is currently no score for this goal
    */
-  public abstract double getRawScore(final TeamScore teamScore);
+  public abstract double getRawScore(TeamScore teamScore);
 
   /**
    * Get the computed score.
@@ -177,7 +192,7 @@ public abstract class AbstractGoal implements Serializable {
    * @param teamScore the score to evaluate
    * @return the score or NaN if there is currently no score for this goal
    */
-  public abstract double getComputedScore(final TeamScore teamScore);
+  public abstract double getComputedScore(TeamScore teamScore);
 
   /**
    * @return true if this is a computed goal
@@ -234,6 +249,10 @@ public abstract class AbstractGoal implements Serializable {
     }
   }
 
+  /**
+   * @param score the raw score
+   * @return the value after the score type has been applied
+   */
   protected final double applyScoreType(final double score) {
     switch (getScoreType()) {
     case FLOAT:
@@ -246,6 +265,10 @@ public abstract class AbstractGoal implements Serializable {
     }
   }
 
+  /**
+   * @param document the document used to create elements
+   * @param ele the goal element to be populated with this object's state
+   */
   protected void populateXml(final Document document,
                              final Element ele) {
     ele.setAttribute(NAME_ATTRIBUTE, getName());
@@ -275,7 +298,11 @@ public abstract class AbstractGoal implements Serializable {
     }
   }
 
-  public abstract Element toXml(final Document doc);
+  /**
+   * @param doc the document to create elements with
+   * @return XML element that represents the current state
+   */
+  public abstract Element toXml(Document doc);
 
   /**
    * Add a listener for property change events.

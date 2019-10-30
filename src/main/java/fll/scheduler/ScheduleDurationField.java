@@ -17,10 +17,7 @@ import javax.swing.JFormattedTextField;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.MaskFormatter;
 
-
-
 import fll.util.FLLInternalException;
-
 
 /**
  * Field for displaying schedule durations.
@@ -32,14 +29,14 @@ import fll.util.FLLInternalException;
   /**
    * Default constructor, sets value to 0.
    */
-  public ScheduleDurationField() {
+  /* package */ ScheduleDurationField() {
     this(Duration.ofMinutes(0));
   }
 
   /**
    * @param value the duration to use for the initial value, may not be null
    */
-  public ScheduleDurationField(final Duration value) {
+  /* package */ ScheduleDurationField(final Duration value) {
     setInputVerifier(new TimeVerifier());
 
     try {
@@ -57,7 +54,7 @@ import fll.util.FLLInternalException;
 
   /**
    * Retrieve the current value as a {@link Duration} object
-   * 
+   *
    * @return Current value as a {@link Duration} object
    * @throws java.text.ParseException
    */
@@ -70,7 +67,7 @@ import fll.util.FLLInternalException;
   /**
    * Parse a duration of the format ##:## assuming hours and minutes.
    * Leading underscores are ignored.
-   * 
+   *
    * @param str the string to parse
    * @return null if the string cannot be parsed as a duration
    */
@@ -89,8 +86,8 @@ import fll.util.FLLInternalException;
     final String minutesStr = str.substring(colonIndex
         + 1);
 
-    final Duration minutes  = Duration.ofMinutes(Integer.parseInt(minutesStr));
-    if(hoursStr.isEmpty()) {
+    final Duration minutes = Duration.ofMinutes(Integer.parseInt(minutesStr));
+    if (hoursStr.isEmpty()) {
       return minutes;
     } else {
       final Duration total = minutes.plusHours(Integer.parseInt(hoursStr));
@@ -100,13 +97,16 @@ import fll.util.FLLInternalException;
 
   /**
    * Set the current value.
-   * 
+   *
    * @param duration the new value, cannot be null
    */
   public void setDuration(final Duration duration) {
     final long asMinutes = duration.toMinutes();
-    final long hours = asMinutes / 60;
-    final long minutes = asMinutes - (hours * 60);
+    final long hours = asMinutes
+        / 60;
+    final long minutes = asMinutes
+        - (hours
+            * 60);
     final String formatted = String.format("%02d:%02d", hours, minutes);
     setValue(formatted);
   }
@@ -116,7 +116,7 @@ import fll.util.FLLInternalException;
    * This allows the string to be parsed as a valid duration if the hours is
    * only a
    * single digit.
-   * 
+   *
    * @param raw the raw string
    * @return the string without the leading underscore
    */

@@ -14,16 +14,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-
-
 import fll.Tournament;
 import fll.db.Queries;
-
 
 /**
  * Code for /index.jsp.
  */
-public class MainIndex {
+public final class MainIndex {
+  private MainIndex() {
+  }
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -33,9 +32,8 @@ public class MainIndex {
    * <ul>
    * <li>tournamentTitle - display name of the tournament</li>
    * <li>urls - URLs to access the server - collection of string</li>
-   * slash</li>
    * </ul>
-   * 
+   *
    * @param request the request object
    * @param application used for application variables
    * @param pageContext populated with the specified variables
