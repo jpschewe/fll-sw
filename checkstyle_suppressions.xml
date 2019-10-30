@@ -6,7 +6,7 @@
 
 <suppressions>
 
-  <suppress files=".+\.(?:png|gif|jpg|jpeg)$" checks=".*"/>  
+  <suppress files=".+\.(?:png|gif|jpg|jpeg|svg|zip)$" checks=".*"/>  
 
   
 </suppressions>
