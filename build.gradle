@@ -681,5 +681,5 @@ checkstyle {
     configFile = file("checkstyle.xml")
     showViolations = true
     ignoreFailures = true
-    toolVersion = "8.10"
+    toolVersion = "8.18"
 }
