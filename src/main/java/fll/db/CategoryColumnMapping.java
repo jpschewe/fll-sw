@@ -21,6 +21,10 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  */
 public class CategoryColumnMapping implements Serializable {
 
+  /**
+   * @param categoryName see {@link #getCategoryName()}
+   * @param scheduleColumn see {@link #getScheduleColumn()}
+   */
   public CategoryColumnMapping(final String categoryName,
                                final String scheduleColumn) {
     mCategoryName = categoryName;
@@ -29,22 +33,34 @@ public class CategoryColumnMapping implements Serializable {
 
   private final String mCategoryName;
 
+  /**
+   * @return the name of the category
+   */
   public String getCategoryName() {
     return mCategoryName;
   }
 
   private final String mScheduleColumn;
 
+  /**
+   * @return the schedule column that matches to the category name
+   */
   public String getScheduleColumn() {
     return mScheduleColumn;
   }
 
   /**
    * Store a set of mappings for a tournament to the database.
+   *
+   * @param connection the database to store the data in
+   * @param tournamentId the id of the tournament
+   * @param categoryColumnMappings the data to store
+   * @throws SQLException if there is a problem talking to the database
    */
   public static void store(final Connection connection,
                            final int tournamentId,
-                           final Collection<CategoryColumnMapping> categoryColumnMappings) throws SQLException {
+                           final Collection<CategoryColumnMapping> categoryColumnMappings)
+      throws SQLException {
     PreparedStatement insert = null;
     PreparedStatement delete = null;
     try {
@@ -70,10 +86,16 @@ public class CategoryColumnMapping implements Serializable {
 
   /**
    * Load a set of mappings for a tournament from the database.
+   *
+   * @param connection where to load the data from
+   * @param tournamentId specify the tournament to load
+   * @throws SQLException if there is a database error
+   * @return the loaded data
    */
   public static Collection<CategoryColumnMapping> load(final Connection connection,
-                                                       final int tournamentId) throws SQLException {
-    final Collection<CategoryColumnMapping> mappings = new LinkedList<CategoryColumnMapping>();
+                                                       final int tournamentId)
+      throws SQLException {
+    final Collection<CategoryColumnMapping> mappings = new LinkedList<>();
 
     PreparedStatement get = null;
     ResultSet found = null;

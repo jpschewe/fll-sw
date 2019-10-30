@@ -12,31 +12,32 @@ package fll.util;
 public class FLLInternalException extends RuntimeException {
 
   /**
-   * 
+   *
    */
   public FLLInternalException() {
     super();
   }
 
   /**
-   * @param message
+   * @param message passed to parent class
    */
   public FLLInternalException(final String message) {
     super(message);
   }
 
   /**
-   * @param cause
+   * @param cause passed to parent class
    */
   public FLLInternalException(final Throwable cause) {
     super(cause);
   }
 
   /**
-   * @param message
-   * @param cause
+   * @param message passed to parent class
+   * @param cause passed to parent class
    */
-  public FLLInternalException(final String message, final Throwable cause) {
+  public FLLInternalException(final String message,
+                              final Throwable cause) {
     super(message, cause);
   }
 
