@@ -37,6 +37,15 @@ pipeline {
       }
     }
 
+    stage('Checkstyle analysis') {
+      steps { 
+        fllSwGradle('checkstyleMain')
+        fllSwGradle('checkstyleTest')
+        fllSwGradle('checkstyleIntegrationTest')
+        recordIssues tool: checkstyle(pattern: 'build/reports/checkstyle/*.xml')
+      }
+    }
+
     stage('Tests') {
       steps {
         // runs all of the test tasks
@@ -52,15 +61,6 @@ pipeline {
         fllSwGradle('spotbugsTest')
         fllSwGradle('spotbugsIntegrationTest')
         recordIssues tool: spotBugs(pattern: 'build/reports/spotbugs/*.xml', useRankAsPriority: true), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
-      }
-    }
-
-    stage('Checkstyle analysis') {
-      steps { 
-        fllSwGradle('checkstyleMain')
-        fllSwGradle('checkstyleTest')
-        fllSwGradle('checkstyleIntegrationTest')
-        recordIssues tool: checkstyle(pattern: 'build/reports/checkstyle/*.xml')
       }
     }
 
