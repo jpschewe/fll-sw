@@ -281,7 +281,7 @@ public class ScheduleChecker {
           }
         });
       } else {
-        final String message = String.format("Team %d has no opponent for round %d", ti.getTeamNumber(),
+        final String message = String.format("Team %d has no opponent for round %s", ti.getTeamNumber(),
                                              ti.getRoundName(performance));
         violations.add(new ConstraintViolation(ConstraintViolation.Type.SOFT, ti.getTeamNumber(), null, null,
                                                performance.getTime(), message));
