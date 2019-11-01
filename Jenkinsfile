@@ -42,7 +42,7 @@ pipeline {
         fllSwGradle('checkstyleMain')
         fllSwGradle('checkstyleTest')
         fllSwGradle('checkstyleIntegrationTest')
-        recordIssues tool: checkstyle(pattern: 'build/reports/checkstyle/*.xml')
+        recordIssues tool: checkStyle(pattern: 'build/reports/checkstyle/*.xml')
       }
     }
 
