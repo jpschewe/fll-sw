@@ -273,6 +273,9 @@ def baseDistribution = copySpec {
     from("$buildDir/reports/cobertura/") {
         into "web/documentation/reports/coverage"
     }
+    from("$buildDir/reports/checkstyle/") {
+        into "web/documentation/reports/checkstyle"
+    }
 }
 // make sure that the launch script has Unix line endings
 def launchScriptDist = copySpec {
