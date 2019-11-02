@@ -27,7 +27,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import fll.db.Queries;
@@ -41,12 +40,10 @@ import fll.scheduler.TournamentSchedule.ColumnInformation;
 import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
 import fll.util.FLLRuntimeException;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.WebUtils;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Read the uploaded file, then check for constraint
@@ -71,10 +68,8 @@ public class CheckViolations extends BaseFLLServlet {
     Objects.requireNonNull(scheduleFile);
 
     final String sheetName = uploadScheduleData.getSelectedSheet();
-    Connection connection = null;
-    try {
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
-      connection = datasource.getConnection();
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
 
       // if uploadSchedule_subjectiveHeaders is set, then use this as the list
       // of subjective headers
@@ -106,7 +101,7 @@ public class CheckViolations extends BaseFLLServlet {
       } else {
         name = fullname;
       }
-      final List<String> subjectiveHeaders = new LinkedList<String>();
+      final List<String> subjectiveHeaders = new LinkedList<>();
       for (final SubjectiveStation station : subjectiveStations) {
         subjectiveHeaders.add(station.getName());
       }
@@ -159,8 +154,6 @@ public class CheckViolations extends BaseFLLServlet {
       LOGGER.error(message, e);
       throw new FLLRuntimeException(message, e);
     } finally {
-      SQLFunctions.close(connection);
-
       session.setAttribute(UploadScheduleData.KEY, uploadScheduleData);
     }
   }
