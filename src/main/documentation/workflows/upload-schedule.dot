@@ -1,22 +1,15 @@
 digraph UploadSchedule {
 
-"admin_index.jsp" -> UploadSchedule [label="uploadSpreadsheet"];
+"admin_index.jsp" -> UploadSpreadsheet [label="uploadSpreadsheet"];
 
-UploadSchedule -> CheckScheduleExists;
+UploadSpreadsheet -> CheckScheduleExists [label="uploadRedirect"];
 
 CheckScheduleExists -> "promptForOverwrite.jsp" [label="if schedule exists"];
 
-"promptForOverwrite.jsp" -> GetSheetNames [label="if overwrite"];
-"promptForOverwrite.jsp" -> "admin_index.jsp" [label="if no overwrite"];
+"promptForOverwrite.jsp" -> "scheduleConstraints.jsp" [label="yes"];
+"promptForOverwrite.jsp" -> "admin_index.jsp" [label="no"];
 
-CheckScheduleExists -> GetSheetNames;
-
-GetSheetNames -> "admin_index.jsp" [label="if no sheets found"];
-GetSheetNames -> "promptForSheetName.jsp" [label="if 2+ sheets found"];
-GetSheetNames -> "scheduleConstraints.jsp" [label="if 1 sheet found or specified sheet selected"];
-
-"promptForSheetName.jsp" -> ProcessSelectedSheet;
-ProcessSelectedSheet -> GetSheetNames;
+CheckScheduleExists -> "scheduleConstraints.jsp";
 
 "scheduleConstraints.jsp" -> ProcessScheduleConstraints;
 ProcessScheduleConstraints -> CheckViolations;

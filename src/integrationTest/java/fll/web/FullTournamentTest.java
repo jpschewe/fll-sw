@@ -385,7 +385,7 @@ public class FullTournamentTest {
       // upload the saved file
       IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
           + "admin/index.jsp");
-      final WebElement fileInput = selenium.findElement(By.name("scheduleFile"));
+      final WebElement fileInput = selenium.findElement(By.id("scheduleFile"));
       fileInput.sendKeys(outputFile.toAbsolutePath().toString());
       selenium.findElement(By.id("upload-schedule")).click();
       assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.id("error")));
