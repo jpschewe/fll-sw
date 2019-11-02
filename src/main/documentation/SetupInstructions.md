@@ -153,6 +153,15 @@ If you do not have a zip tool to open up the archives you can use the jar tool t
   1. For those interested in looking at the source and possibly making changes the source can be found [here](Home.md). Developers please look at README.developer. Any changes that you do make need to be sent back to me under the terms of the GPL. I look forward to any fixes you make. Please follow the coding standards listed [here](http://mtu.net/%7Ejpschewe/java/CodingStandards.html).
   1. Once you're done with the tournament you might want to uninstall everything. This can be accomplished by deleting the JAVA_HOME environment variable. Then uninstalling the JDK from the control panel.
 
+Creating the database
+======================
+
+This is done by the Lead Scoring Coordinator for a set of tournaments.
+
+Visit [Create DB notes](create-db-notes.md) for instructions on
+setting up the initial database to be shared with other Scoring
+Coordinators.
+
 Sponsor Logos
 =============
 

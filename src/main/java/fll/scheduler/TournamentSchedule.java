@@ -1992,13 +1992,35 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
+   * Find teams that are in this schedule and not in the database.
+   *
+   * @param connection the database connection
+   * @param tournamentID the tournament to check
+   * @return teams not in the database, empty if all teams are in the database
+   * @throws SQLException on a database error
+   */
+  public Collection<TeamScheduleInfo> findTeamsNotInDatabase(final Connection connection,
+                                                             final int tournamentID)
+      throws SQLException {
+    final Collection<TeamScheduleInfo> missingTeams = new LinkedList<>();
+    final Map<Integer, TournamentTeam> dbTeams = Queries.getTournamentTeams(connection, tournamentID);
+
+    for (final TeamScheduleInfo si : _schedule) {
+      if (!dbTeams.containsKey(si.getTeamNumber())) {
+        missingTeams.add(si);
+      }
+    }
+    return missingTeams;
+  }
+
+  /**
    * Check if the current schedule is consistent with the specified tournament
    * in the database.
    *
    * @param connection the database connection
    * @param tournamentID the tournament to check
    * @return the constraint violations, empty if no violations
-   * @throws SQLException
+   * @throws SQLException on a database error
    */
   public Collection<ConstraintViolation> compareWithDatabase(final Connection connection,
                                                              final int tournamentID)
@@ -2009,8 +2031,6 @@ public class TournamentSchedule implements Serializable {
     for (final TeamScheduleInfo si : _schedule) {
       scheduleTeamNumbers.add(si.getTeamNumber());
       if (!dbTeams.containsKey(si.getTeamNumber())) {
-        // TODO: could support adding teams to the database based upon the
-        // schedule
         violations.add(new ConstraintViolation(ConstraintViolation.Type.HARD, si.getTeamNumber(), null, null, null,
                                                "Team "
                                                    + si.getTeamNumber()

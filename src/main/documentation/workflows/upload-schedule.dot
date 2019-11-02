@@ -12,15 +12,25 @@ CheckScheduleExists -> "promptForOverwrite.jsp" [label="if schedule exists"];
 CheckScheduleExists -> "scheduleConstraints.jsp";
 
 "scheduleConstraints.jsp" -> ProcessScheduleConstraints;
-ProcessScheduleConstraints -> CheckViolations;
+ProcessScheduleConstraints -> LoadSchedule;
+
+LoadSchedule -> CheckMissingTeams;
+
+CheckMissingTeams -> CheckViolations;
+CheckMissingTeams -> "promptAddScheduleTeams.jsp" [label="if teams in schedule not in database"];
+
+"promptAddScheduleTeams.jsp" -> AddScheduleTeams [label="Add teams"];
+"promptAddScheduleTeams.jsp" -> CheckViolations [label="Do not add teams"];
+
+AddScheduleTeams -> CheckMissingTeams;
 
 CheckViolations -> "promptForEventDivisions.jsp" [label="if no violations"];
 CheckViolations -> "displayHardViolations.jsp" [label="if hard violations found"];
 CheckViolations -> "displaySoftViolations.jsp" [label="if no hard violations"];
 
-CheckViolations -> "chooseSubjectiveHeaders.jsp" [label="if subjective stations not specified and unused schedule columns"];
+LoadSchedule -> "chooseSubjectiveHeaders.jsp" [label="if subjective stations not specified and unused schedule columns"];
 "chooseSubjectiveHeaders.jsp" -> ProcessSubjectiveHeaders;
-ProcessSubjectiveHeaders -> CheckViolations;
+ProcessSubjectiveHeaders -> LoadSchedule;
 
 "displayHardViolations.jsp" -> "admin_index.jsp";
 
