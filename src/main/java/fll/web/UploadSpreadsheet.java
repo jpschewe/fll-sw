@@ -107,17 +107,32 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
       }
 
     } catch (final FileUploadException e) {
-      message.append("<p class='error'>Error processing team data upload: "
+      final String baseMessage = "Error processing spreadsheet upload";
+      message.append("<p class='error'>"
+          + baseMessage
+          + ": "
           + e.getMessage()
           + "</p>");
       LOGGER.error(e, e);
-      throw new RuntimeException("Error processing team data upload", e);
+      throw new RuntimeException(baseMessage, e);
+    } catch (final IOException e) {
+      final String baseMessage = "Error reading spreadsheet";
+      message.append("<p class='error'>"
+          + baseMessage
+          + ": "
+          + e.getMessage()
+          + "</p>");
+      LOGGER.error(e, e);
+      throw new RuntimeException(baseMessage, e);
     } catch (final Exception e) {
-      message.append("<p class='error'>Error saving team data into the database: "
+      final String baseMessage = "Error saving file to disk";
+      message.append("<p class='error'>"
+          + baseMessage
+          + ": "
           + e.getMessage()
           + "</p>");
       LOGGER.error(e, e);
-      throw new RuntimeException("Error saving team data into the database", e);
+      throw new RuntimeException(baseMessage, e);
     }
 
     session.setAttribute("message", message.toString());
