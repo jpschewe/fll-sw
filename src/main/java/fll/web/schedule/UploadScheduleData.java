@@ -19,6 +19,7 @@ import fll.db.CategoryColumnMapping;
 import fll.scheduler.ConstraintViolation;
 import fll.scheduler.SchedParams;
 import fll.scheduler.SubjectiveStation;
+import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 
 /**
@@ -56,7 +57,7 @@ public class UploadScheduleData implements Serializable {
 
   /**
    * If {@link #getScheduleFile()} is a spreadsheet, then the selected sheet name.
-   * 
+   *
    * @return null until set
    */
   public String getSelectedSheet() {
@@ -70,7 +71,7 @@ public class UploadScheduleData implements Serializable {
     selectedSheet = v;
   }
 
-  private LinkedList<ConstraintViolation> violations = new LinkedList<>();
+  private final LinkedList<ConstraintViolation> violations = new LinkedList<>();
 
   /**
    * @return the violations found in the uploaded schedule, initially empty,
@@ -106,7 +107,7 @@ public class UploadScheduleData implements Serializable {
     schedule = v;
   }
 
-  private LinkedList<CategoryColumnMapping> categoryColumnMappings = new LinkedList<>();
+  private final LinkedList<CategoryColumnMapping> categoryColumnMappings = new LinkedList<>();
 
   /**
    * @return the mappings of categories to schedule columns, initially empty,
@@ -185,7 +186,7 @@ public class UploadScheduleData implements Serializable {
    * This object is used when checking the uploaded schedule for constraint
    * violations.
    * It defaults to the result of {@link SchedParams#SchedParams()}.
-   * 
+   *
    * @return the sched params, not that it is mutable and NOT a copy of the
    *         internal data
    */
@@ -199,5 +200,22 @@ public class UploadScheduleData implements Serializable {
    */
   public void setSchedParams(@Nonnull final SchedParams v) {
     schedParams = v;
+  }
+
+  private final LinkedList<TeamScheduleInfo> missingTeams = new LinkedList<>();
+
+  /**
+   * @return teams in the schedule and not in the database
+   */
+  public Collection<TeamScheduleInfo> getMissingTeams() {
+    return missingTeams;
+  }
+
+  /**
+   * @param v see {@link #getMissingTeams()}
+   */
+  public void setMissingTeams(final Collection<TeamScheduleInfo> v) {
+    missingTeams.clear();
+    missingTeams.addAll(v);
   }
 }

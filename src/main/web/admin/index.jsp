@@ -1,7 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%
-fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
+	fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
 %>
 
 <html>
@@ -55,7 +55,7 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
                 </c:if>
                 Upload the datafile for teams. This file can be tab
                 separated or comma separated or an Excel file (xls and
-                xlsx supported).
+                xlsx are supported).
                 <input type="file" size="32" id='teams_file' name="file">
                 <input type='hidden' name='uploadRedirect'
                     value="<c:url value='/admin/UploadTeams'/>" />
@@ -175,7 +175,8 @@ fll.web.admin.AdminIndex.populateContext(application, session, pageContext);
             <div id='ScheduleHelp' class='help' style='display: none'>
                 Uploading the schedule isn't required, but if uploaded
                 will be used when displaying information in final
-                reports.
+                reports. Teams can be added directly to the current
+                tournament through a schedule.
                 <a href='javascript:hide("ScheduleHelp")'>[hide]</a>
             </div>
 
