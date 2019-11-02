@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<fll copyright="2010 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST) and The LEGO Group. Used by special permission. All rights reserved." revision="7" schemaVersion="2" title="2019 Minnesota FIRST LEGO League - City Shaper" winner="HIGH">
+<fll copyright="2010 The United States Foundation for Inspiration and Recognition of Science and Technology (FIRST) and The LEGO Group. Used by special permission. All rights reserved." revision="8" schemaVersion="2" title="2019 Minnesota FIRST LEGO League - City Shaper" winner="HIGH">
   <Performance minimumScore="0.00" weight="1.00">
     <goal initialValue="0.00" max="1.00" min="0.00" multiplier="0.00" name="small_inspection_area" required="false" scoreType="INTEGER" title="Fit in Small Inspection Area"/>
     <goal category="M01" initialValue="0.00" max="1.00" min="0.00" multiplier="20.00" name="m01_robot_bridge" required="false" scoreType="INTEGER" title="M01 - Elevated places - Robot is Supported by the Bridge"/>
     <goal category="M01" initialValue="0.00" max="2.00" min="0.00" multiplier="15.00" name="m01_flags" required="false" scoreType="INTEGER" title="M01 - Elevated places - Number of flags that are clearly raised any distance, only by the Robot"/>
-    <goal category="M02" initialValue="0.00" max="1.00" min="0.00" multiplier="20.00" name="m02_crane_lowered" required="false" scoreType="INTEGER" title="M02 - Crane - Lowered from the Guide Hole"/>
-    <goal category="M02" initialValue="0.00" max="1.00" min="0.00" multiplier="15.00" name="m02_independent_supported" required="false" scoreType="INTEGER" title="M02 - Independent and Supported by another Blue unit"/>
-    <goal category="M02" initialValue="0.00" max="1.00" min="0.00" multiplier="15.00" name="m02_blue_circle" required="false" scoreType="INTEGER" title="M02 - Completely in the Blue Circle"/>
+    <goal category="M02" initialValue="0.00" max="1.00" min="0.00" multiplier="20.00" name="m02_crane_lowered" required="false" scoreType="INTEGER" title="M02 - Crane - Hooked Blue Unit Lowered from the Guide Hole"/>
+    <goal category="M02" initialValue="0.00" max="1.00" min="0.00" multiplier="15.00" name="m02_independent_supported" required="false" scoreType="INTEGER" title="M02 - HBU Independent and Supported by another Blue unit"/>
+    <goal category="M02" initialValue="0.00" max="1.00" min="0.00" multiplier="15.00" name="m02_blue_circle" required="false" scoreType="INTEGER" title="M02 - HBU Supported by Blue Unit AND Level 1 Completely in Blue Circle"/>
     <goal category="M03" initialValue="0.00" max="1.00" min="0.00" multiplier="10.00" name="m03_inspection_drone" required="false" scoreType="INTEGER" title="M03 - Inspection Drone - supported by Axel A"/>
     <goal category="M04" initialValue="0.00" max="1.00" min="0.00" multiplier="10.00" name="m04_crater_crossing" required="false" scoreType="INTEGER" title="M04 - Design for Wildlife - Bat supported by Branch B"/>
-    <goal category="M05" initialValue="0.00" max="16.00" min="0.00" multiplier="10.00" name="m05_treehouse_large_branches" required="false" scoreType="INTEGER" title="M05 - Treehouse - Large Branches"/>
-    <goal category="M05" initialValue="0.00" max="16.00" min="0.00" multiplier="15.00" name="m05_treehouse_small_branches" required="false" scoreType="INTEGER" title="M05 - Treehouse - Small Branches"/>
+    <goal category="M05" initialValue="0.00" max="16.00" min="0.00" multiplier="10.00" name="m05_treehouse_large_branches" required="false" scoreType="INTEGER" title="M05 - Treehouse - # Units in Large Branches"/>
+    <goal category="M05" initialValue="0.00" max="16.00" min="0.00" multiplier="15.00" name="m05_treehouse_small_branches" required="false" scoreType="INTEGER" title="M05 - Treehouse - # Units in Small Branches"/>
     <goal category="M06" initialValue="0.00" max="1.00" min="0.00" multiplier="10.00" name="m06_traffic_jam" required="false" scoreType="INTEGER" title="M06 - Traffic Jam - Lifted and Independent"/>
     <goal category="M07" initialValue="0.00" max="1.00" min="0.00" multiplier="20.00" name="m07_swing" required="false" scoreType="INTEGER" title="M07 - Swing Released"/>
     <goal category="M08" initialValue="0.00" name="m08_elevator" required="false" scoreType="INTEGER" title="M08 - Elevator">
@@ -18,7 +18,7 @@
       <value score="15.00" title="Blue Car Down" value="blue_car_down"/>
       <value score="0.00" title="Neither" value="neither"/>
     </goal>
-    <goal category="M09" initialValue="0.00" max="6.00" min="0.00" multiplier="10.00" name="m09_safety_factor" required="false" scoreType="INTEGER" title="M09 - Safety Factor - beams"/>
+    <goal category="M09" initialValue="0.00" max="6.00" min="0.00" multiplier="10.00" name="m09_safety_factor" required="false" scoreType="INTEGER" title="M09 - Safety Factor - # of Beams Knocked at least 1/2 way down"/>
     <goal category="M10" initialValue="0.00" max="1.00" min="0.00" multiplier="20.00" name="m10_steel_construction" required="false" scoreType="INTEGER" title="M10 - Steel Construction - standing independent"/>
     <goal category="M11" initialValue="0.00" name="m11_innovative_structure" required="false" scoreType="INTEGER" title="M11 - Innovative Structure">
       <value score="15.00" title="Completely in any Circle" value="completely"/>
