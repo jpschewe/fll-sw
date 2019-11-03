@@ -25,8 +25,8 @@ There are some warnings in the schedule.
 
 <p>
 Do you want to proceed and use this schedule?
-<a id='yes' href='<c:url value="/schedule/promptForEventDivisions.jsp"/>'>Yes</a>
-<a id='no' href='<c:url value="/admin/index.jsp"/>'>No</a>
+<a id='yes' href='<c:url value="/schedule/promptForEventDivisions.jsp"/>'><button>Yes</button></a>
+<a id='no' href='<c:url value="/admin/index.jsp"/>'><button>No</button></a>
 </p>
 
 </body>
