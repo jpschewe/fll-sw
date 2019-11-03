@@ -127,6 +127,10 @@ public class LoadSchedule extends BaseFLLServlet {
       }
       uploadScheduleData.setSchedule(schedule);
 
+      if (!scheduleFile.delete()) {
+        scheduleFile.deleteOnExit();
+      }
+
     } catch (final SQLException e) {
       final String message = "Error talking to the database";
       LOGGER.error(message, e);
