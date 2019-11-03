@@ -24,7 +24,7 @@ CheckMissingTeams -> "promptAddScheduleTeams.jsp" [label="if teams in schedule n
 
 AddScheduleTeams -> CheckMissingTeams;
 
-CheckViolations -> "promptForEventDivisions.jsp" [label="if no violations"];
+CheckViolations -> "CommitSchedule" [label="if no violations"];
 CheckViolations -> "displayHardViolations.jsp" [label="if hard violations found"];
 CheckViolations -> "displaySoftViolations.jsp" [label="if no hard violations"];
 
@@ -34,16 +34,7 @@ ProcessSubjectiveHeaders -> LoadSchedule;
 
 "displayHardViolations.jsp" -> "admin_index.jsp";
 
-"displaySoftViolations.jsp" -> "promptForEventDivisions.jsp" [label="if ok"];
+"displaySoftViolations.jsp" -> "CommitSchedule" [label="if ok"];
 "displaySoftViolations.jsp" -> "admin_index.jsp" [label="if not ok"];
-
-"promptForEventDivisions.jsp" -> GatherEventDivisionChanges [label="if set event divisions"];
-"promptForEventDivisions.jsp" -> CommitSchedule;
-
-GatherEventDivisionChanges -> "displayEventDivisionConfirmation.jsp";
-
-"displayEventDivisionConfirmation.jsp" -> CommitEventDivisions [label="if ok to make changes"];
-"displayEventDivisionConfirmation.jsp" -> CommitSchedule [label="if skip changes"];
-CommitEventDivisions -> CommitSchedule
 
 }

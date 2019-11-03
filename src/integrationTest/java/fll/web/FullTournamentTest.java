@@ -418,19 +418,6 @@ public class FullTournamentTest {
         Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
       }
 
-      // set event divisions
-      if (selenium.getCurrentUrl().contains("promptForEventDivision")) {
-        selenium.findElement(By.id("yes")).click();
-
-        Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
-
-        // assume the values are fine
-        assertThat(selenium.getCurrentUrl(), containsString("displayEventDivisionConfirmation"));
-        selenium.findElement(By.id("yes")).click();
-
-        Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
-      }
-
       // check that it all worked
       assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.id("error")));
       assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
