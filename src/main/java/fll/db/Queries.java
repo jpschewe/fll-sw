@@ -2021,7 +2021,7 @@ public final class Queries {
   }
 
   /**
-   * Update a team event division.
+   * Update a team award group (event division).
    */
   public static void updateTeamEventDivision(final Connection connection,
                                              final int number,
