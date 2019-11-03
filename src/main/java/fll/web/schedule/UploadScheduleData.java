@@ -200,4 +200,38 @@ public class UploadScheduleData implements Serializable {
     missingTeams.clear();
     missingTeams.addAll(v);
   }
+
+  private final LinkedList<GatherTeamInformationChanges.TeamNameDifference> nameDifferences = new LinkedList<>();
+
+  /**
+   * @return name differences between the schedule and the database
+   */
+  public Collection<GatherTeamInformationChanges.TeamNameDifference> getNameDifferences() {
+    return nameDifferences;
+  }
+
+  /**
+   * @param v see {@link #getNameDifferences()}
+   */
+  public void setNameDifferences(final Collection<GatherTeamInformationChanges.TeamNameDifference> v) {
+    nameDifferences.clear();
+    nameDifferences.addAll(v);
+  }
+
+  private final LinkedList<GatherTeamInformationChanges.TeamOrganizationDifference> organizationDifferences = new LinkedList<>();
+
+  /**
+   * @return organization differences between the schedule and the database
+   */
+  public Collection<GatherTeamInformationChanges.TeamOrganizationDifference> getOrganizationDifferences() {
+    return organizationDifferences;
+  }
+
+  /**
+   * @param v see {@link #getOrganizationDifferences()}
+   */
+  public void setOrganizationDifferences(final Collection<GatherTeamInformationChanges.TeamOrganizationDifference> v) {
+    organizationDifferences.clear();
+    organizationDifferences.addAll(v);
+  }
 }
