@@ -3,22 +3,31 @@
 <html>
 <head>
 <title>Upload Schedule</title>
-<link rel="stylesheet" type="text/css" href="<c:url value='/style/fll-sw.css'/>" />
+<link rel="stylesheet" type="text/css"
+    href="<c:url value='/style/fll-sw.css'/>" />
 </head>
 
 <body>
-<h1>Upload Schedule</h1>
+    <h1>Upload Schedule</h1>
 
-<div class='status-message'>${message}</div>
-<%-- clear out the message, so that we don't see it again --%>
-<c:remove var="message" />
+    <div class='status-message'>${message}</div>
+    <%-- clear out the message, so that we don't see it again --%>
+    <c:remove var="message" />
 
-<p>
-Would you like to set the award groups based upon the information in the schedule data file? 
-You will be prompted with the changes before they are committed.<br/>
-<a id='yes' href='<c:url value="/schedule/GatherEventDivisionChanges"/>'>Yes</a>
-<a id='no' href='<c:url value="/schedule/CommitSchedule"/>'>No</a>
-</p>
+    <p>
+        Would you like to set the award groups based upon the
+        information in the schedule data file? You will be prompted with
+        the changes before they are committed.
+        <br />
+
+        <a id='yes'
+            href='<c:url value="/schedule/GatherEventDivisionChanges"/>'>
+            <button>Yes</button>
+        </a>
+        <a id='no' href='<c:url value="/schedule/CommitSchedule"/>'>
+            <button>No</button>
+        </a>
+    </p>
 
 </body>
 </html>
