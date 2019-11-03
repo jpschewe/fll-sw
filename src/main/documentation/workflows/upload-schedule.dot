@@ -24,9 +24,17 @@ CheckMissingTeams -> "promptAddScheduleTeams.jsp" [label="if teams in schedule n
 
 AddScheduleTeams -> CheckMissingTeams;
 
-CheckViolations -> "CommitSchedule" [label="if no violations"];
+CheckViolations -> "GatherTeamInformationChanges" [label="if no violations"];
 CheckViolations -> "displayHardViolations.jsp" [label="if hard violations found"];
 CheckViolations -> "displaySoftViolations.jsp" [label="if no hard violations"];
+
+"GatherTeamInformationChanges" -> "CommitSchedule" [label="if no changes"];
+"GatherTeamInformationChanges" -> "promptTeamInformationChanges.jsp";
+
+"promptTeamInformationChanges.jsp" -> "CommitTeamInformationChanges";
+"promptTeamInformationChanges.jsp" -> "CommitSchedule" [label="if skip changes"];
+
+"CommitTeamInformationChanges" -> "CommitSchedule";
 
 LoadSchedule -> "chooseSubjectiveHeaders.jsp" [label="if subjective stations not specified and unused schedule columns"];
 "chooseSubjectiveHeaders.jsp" -> ProcessSubjectiveHeaders;
@@ -34,7 +42,7 @@ ProcessSubjectiveHeaders -> LoadSchedule;
 
 "displayHardViolations.jsp" -> "admin_index.jsp";
 
-"displaySoftViolations.jsp" -> "CommitSchedule" [label="if ok"];
+"displaySoftViolations.jsp" -> "GatherTeamInformationChanges" [label="if ok"];
 "displaySoftViolations.jsp" -> "admin_index.jsp" [label="if not ok"];
 
 }
