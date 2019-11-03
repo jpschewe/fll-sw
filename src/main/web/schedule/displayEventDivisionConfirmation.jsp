@@ -15,37 +15,33 @@
     <%-- clear out the message, so that we don't see it again --%>
     <c:remove var="message" />
 
-    <form name="choose_headers" method='POST'
-        action='ProcessSubjectiveHeaders'>
-        <p>These are the award groups that will be assigned. Note
-            that this information can be changed later.</p>
-        <table border='1'>
+    <p>These are the award groups that will be assigned. Note that
+        this information can be changed later.</p>
+    <table border='1'>
+        <tr>
+            <th>Team Number</th>
+            <th>Team Name</th>
+            <th>Award Group</th>
+        </tr>
+        <c:forEach items="${uploadScheduleData.eventDivisionInfo }"
+            var="info">
             <tr>
-                <th>Team Number</th>
-                <th>Team Name</th>
-                <th>Award Group</th>
+                <td>${info.teamNumber}</td>
+                <td>${info.teamName}</td>
+                <td>${info.eventDivision}</td>
             </tr>
-            <c:forEach items="${uploadScheduleData.eventDivisionInfo }"
-                var="info">
-                <tr>
-                    <td>${info.teamNumber}</td>
-                    <td>${info.teamName}</td>
-                    <td>${info.eventDivision}</td>
-                </tr>
-            </c:forEach>
-        </table>
+        </c:forEach>
+    </table>
 
 
-        <a id='yes'
-            href='<c:url value="/schedule/CommitEventDivisions"/>'>
-            <button>Yes, these changes look OK</button>
-        </a>
-        <br />
-        <a id='no' href='<c:url value="/schedule/CommitSchedule"/>'>
-            <button>No, don't assign award groups</button>
-        </a>
-        <br />
-    </form>
+    <a id='yes' href='<c:url value="/schedule/CommitEventDivisions"/>'>
+        <button>Yes, these changes look OK</button>
+    </a>
+    <br />
+    <a id='no' href='<c:url value="/schedule/CommitSchedule"/>'>
+        <button>No, don't assign award groups</button>
+    </a>
+    <br />
 
 </body>
 </html>
