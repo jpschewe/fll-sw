@@ -22,14 +22,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-
-
 import fll.db.CategoryColumnMapping;
 import fll.db.Queries;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -97,7 +94,7 @@ public class CommitSchedule extends BaseFLLServlet {
   }
 
   /**
-   * Set judging_station to be the info from the schedule
+   * Set judging station and award group to be the info from the schedule
    */
   private void assignJudgingGroups(final Connection connection,
                                    final int tournamentID,
@@ -108,6 +105,7 @@ public class CommitSchedule extends BaseFLLServlet {
       final String group = si.getJudgingGroup();
       final int teamNumber = si.getTeamNumber();
       Queries.updateTeamJudgingGroups(connection, teamNumber, tournamentID, group);
+      Queries.updateTeamEventDivision(connection, teamNumber, tournamentID, si.getAwardGroup());
     }
 
   }
