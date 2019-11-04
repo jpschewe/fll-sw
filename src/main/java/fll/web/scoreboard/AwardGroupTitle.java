@@ -22,7 +22,10 @@ import fll.web.DisplayInfo;
 /**
  * Helper for award-group-title.jsp.
  */
-public class AwardGroupTitle {
+public final class AwardGroupTitle {
+
+  private AwardGroupTitle() {
+  }
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -37,7 +40,7 @@ public class AwardGroupTitle {
                                      final HttpSession session,
                                      final PageContext pageContext) {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    try (final Connection connection = datasource.getConnection()) {
+    try (Connection connection = datasource.getConnection()) {
 
       final DisplayInfo displayInfo = DisplayInfo.getInfoForDisplay(application, session);
       final List<String> allAwardGroups = Queries.getAwardGroups(connection);

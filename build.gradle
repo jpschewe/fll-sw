@@ -41,6 +41,7 @@ plugins {
     id "com.gorylenko.gradle-git-properties" version "2.0.0"
     id "com.github.ben-manes.versions" version "0.21.0" // adds dependencyUpdates task
     id "de.undercouch.download" version "4.0.0" // file download
+    id "checkstyle"
 }
 
 // needs to use old plugin mechanism otherwise I can't set the extra properties
@@ -271,6 +272,9 @@ def baseDistribution = copySpec {
     }
     from("$buildDir/reports/cobertura/") {
         into "web/documentation/reports/coverage"
+    }
+    from("$buildDir/reports/checkstyle/") {
+        into "web/documentation/reports/checkstyle"
     }
 }
 // make sure that the launch script has Unix line endings
@@ -673,3 +677,12 @@ installMacDist.doFirst {
           })
 }
 // end Mac distribution tasks
+
+
+checkstyle {
+    configDir = file("$projectDir")
+    configFile = file("checkstyle.xml")
+    showViolations = true
+    ignoreFailures = true
+    toolVersion = "8.18"
+}

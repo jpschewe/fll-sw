@@ -22,7 +22,6 @@ import org.w3c.dom.Document;
 import fll.TestUtils;
 import fll.Utilities;
 
-
 /**
  * Test various aspects of the XML document parsing.
  */
@@ -400,7 +399,7 @@ public class ChallengeParserTest {
   /**
    * Check that all known challenge descriptors are still valid.
    *
-   * @throws IOException
+   * @throws IOException on test error
    */
   @Test
   public void testAllDescriptors() throws IOException {

@@ -37,6 +37,15 @@ pipeline {
       }
     }
 
+    stage('Checkstyle analysis') {
+      steps { 
+        fllSwGradle('checkstyleMain')
+        fllSwGradle('checkstyleTest')
+        fllSwGradle('checkstyleIntegrationTest')
+        recordIssues tool: checkStyle(pattern: 'build/reports/checkstyle/*.xml')
+      }
+    }
+
     stage('Tests') {
       steps {
         // runs all of the test tasks
@@ -54,7 +63,7 @@ pipeline {
         recordIssues tool: spotBugs(pattern: 'build/reports/spotbugs/*.xml', useRankAsPriority: true), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
       }
     }
-    
+
     stage('Distribution') {
       steps {
         throttle(['fll-sw']) { 
@@ -139,7 +148,7 @@ pipeline {
                 
       recordIssues tool: java()  
 
-      recordIssues tool: javaDoc()      
+      recordIssues tool: javaDoc()
 
       emailext recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']], 
           to: 'jpschewe@mtu.net',

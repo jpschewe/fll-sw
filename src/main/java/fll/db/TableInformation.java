@@ -12,7 +12,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,24 +41,36 @@ public final class TableInformation implements Serializable {
 
   private final String mSideA;
 
+  /**
+   * @return name of one side of the table
+   */
   public String getSideA() {
     return mSideA;
   }
 
   private final String mSideB;
 
+  /**
+   * @return name of the other side of the table
+   */
   public String getSideB() {
     return mSideB;
   }
 
   private final boolean mUse;
 
+  /**
+   * @return if this table pair is to be used
+   */
   public boolean getUse() {
     return mUse;
   }
 
   private final int mId;
 
+  /**
+   * @return the id of the table pair
+   */
   public int getId() {
     return mId;
   }
@@ -81,7 +92,7 @@ public final class TableInformation implements Serializable {
                                                     final int tournament,
                                                     final String division)
       throws SQLException {
-    final List<Integer> tableIds = new LinkedList<Integer>();
+    final List<Integer> tableIds = new LinkedList<>();
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
@@ -105,11 +116,12 @@ public final class TableInformation implements Serializable {
 
   /**
    * Get table information for a tournament.
-   * 
-   * @param connection
-   * @param tournament
-   * @param division
+   *
+   * @param connection where to get the table information from
+   * @param tournament the tournament to get the information from
+   * @param division the award group to get the table information for
    * @return Tables listed by least used first
+   * @throws SQLException if there is a database error
    */
   public static List<TableInformation> getTournamentTableInformation(final Connection connection,
                                                                      final int tournament,
@@ -117,12 +129,12 @@ public final class TableInformation implements Serializable {
       throws SQLException {
     final List<Integer> tableIdsForDivision = getTablesForDivision(connection, tournament, division);
 
-    final List<TableInformation> tableInfo = new LinkedList<TableInformation>();
+    final List<TableInformation> tableInfo = new LinkedList<>();
     PreparedStatement getAllTables = null;
     ResultSet allTables = null;
     PreparedStatement prep = null;
     ResultSet rs = null;
-    final Map<Integer, Integer> tableUsage = new HashMap<Integer, Integer>();
+    final Map<Integer, Integer> tableUsage = new HashMap<>();
     try {
       // get all tables
       getAllTables = connection.prepareStatement("select tablenames.PairID, tablenames.SideA, tablenames.SideB" //
@@ -161,24 +173,20 @@ public final class TableInformation implements Serializable {
       }
 
       // sort by table usage
-      Collections.sort(tableInfo, new Comparator<TableInformation>() {
-        @Override
-        public int compare(final TableInformation one,
-                           final TableInformation two) {
-          final Integer oneUse = tableUsage.get(one.getId());
-          final Integer twoUse = tableUsage.get(two.getId());
-          if (null == oneUse
-              && null == twoUse) {
-            return 0;
-          } else if (null == oneUse) {
-            return -1;
-          } else if (null == twoUse) {
-            return 1;
-          } else {
-            return oneUse.compareTo(twoUse);
-          }
+      Collections.sort(tableInfo, (one,
+                                   two) -> {
+        final Integer oneUse = tableUsage.get(one.getId());
+        final Integer twoUse = tableUsage.get(two.getId());
+        if (null == oneUse
+            && null == twoUse) {
+          return 0;
+        } else if (null == oneUse) {
+          return -1;
+        } else if (null == twoUse) {
+          return 1;
+        } else {
+          return oneUse.compareTo(twoUse);
         }
-
       });
 
     } finally {
@@ -193,7 +201,7 @@ public final class TableInformation implements Serializable {
 
   /**
    * Given a table side, find the table information that matches.
-   * 
+   *
    * @param tableInfo the list of all table information to look in
    * @param tableSide the table side to match
    * @return the table information or null

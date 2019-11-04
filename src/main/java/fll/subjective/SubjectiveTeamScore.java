@@ -15,7 +15,7 @@ import fll.web.playoff.TeamScore;
 /**
  * Represents a team score from a score element used inside the subjective table
  * model.
- * 
+ *
  * @author jpschewe
  */
 /* package */class SubjectiveTeamScore extends TeamScore {
@@ -23,10 +23,11 @@ import fll.web.playoff.TeamScore;
   /**
    * @param categoryDescription passed to superclass
    * @param scoreElement the score element that describes the team score
+   * @throws ParseException if there is an error parsing the team number
    */
-  public SubjectiveTeamScore(final Element scoreEle) throws ParseException {
+  /* package */ SubjectiveTeamScore(final Element scoreEle) throws ParseException {
     super(Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(scoreEle.getAttribute("teamNumber")).intValue());
-    _scoreEle = scoreEle;
+    this.scoreEle = scoreEle;
   }
 
   @Override
@@ -34,7 +35,7 @@ import fll.web.playoff.TeamScore;
     if (!scoreExists()) {
       return null;
     } else {
-      final Element subEle = SubjectiveUtils.getSubscoreElement(_scoreEle, goalName);
+      final Element subEle = SubjectiveUtils.getSubscoreElement(scoreEle, goalName);
       if (null == subEle) {
         return null;
       } else {
@@ -50,7 +51,7 @@ import fll.web.playoff.TeamScore;
 
   @Override
   public double getRawScore(final String goalName) {
-    final Element subEle = SubjectiveUtils.getSubscoreElement(_scoreEle, goalName);
+    final Element subEle = SubjectiveUtils.getSubscoreElement(scoreEle, goalName);
     if (null == subEle) {
       return Double.NaN;
     } else {
@@ -71,7 +72,7 @@ import fll.web.playoff.TeamScore;
     if (!scoreExists()) {
       return false;
     } else {
-      return Boolean.valueOf(_scoreEle.getAttribute("NoShow"));
+      return Boolean.valueOf(scoreEle.getAttribute("NoShow"));
     }
   }
 
@@ -88,5 +89,5 @@ import fll.web.playoff.TeamScore;
     return true;
   }
 
-  private final Element _scoreEle;
+  private final Element scoreEle;
 }

@@ -30,17 +30,13 @@ import javax.swing.border.EtchedBorder;
 
 import org.apache.commons.lang3.StringUtils;
 
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.util.FormatterUtils;
-
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.WinnerType;
-import fll.xml.ui.MovableExpandablePanel.DeleteEvent;
 import fll.xml.ui.MovableExpandablePanel.DeleteEventListener;
-import fll.xml.ui.MovableExpandablePanel.MoveEvent;
 import fll.xml.ui.MovableExpandablePanel.MoveEvent.MoveDirection;
 import fll.xml.ui.MovableExpandablePanel.MoveEventListener;
 
@@ -86,6 +82,24 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
 
   private final ValidityPanel subjectiveValid;
 
+  /**
+   * Number of columns for a short text field.
+   */
+  public static final int SHORT_TEXT_WIDTH = 20;
+
+  /**
+   * Number of columns for a medium text field.
+   */
+  public static final int MEDIUM_TEXT_WIDTH = 40;
+
+  /**
+   * Number of columns for a long text field.
+   */
+  public static final int LONG_TEXT_WIDTH = 80;
+
+  /**
+   * @param description the challenge description to edit
+   */
   public ChallengeDescriptionEditor(@Nonnull final ChallengeDescription description) {
     super(new BorderLayout());
     this.mDescription = description;
@@ -132,7 +146,7 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
       }
     });
 
-    mTitleEditor.setColumns(80);
+    mTitleEditor.setColumns(LONG_TEXT_WIDTH);
     mTitleEditor.setMaximumSize(mTitleEditor.getPreferredSize());
     mTitleEditor.setValue(mDescription.getTitle());
 
@@ -155,7 +169,7 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
       }
     });
 
-    mRevisionEditor.setColumns(20);
+    mRevisionEditor.setColumns(SHORT_TEXT_WIDTH);
     mRevisionEditor.setMaximumSize(mRevisionEditor.getPreferredSize());
     mRevisionEditor.setValue(mDescription.getRevision());
 
@@ -178,7 +192,7 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
       }
     });
 
-    mCopyrightEditor.setColumns(80);
+    mCopyrightEditor.setColumns(LONG_TEXT_WIDTH);
     mCopyrightEditor.setMaximumSize(mCopyrightEditor.getPreferredSize());
     mCopyrightEditor.setValue(mDescription.getCopyright());
 
@@ -235,80 +249,72 @@ public final class ChallengeDescriptionEditor extends JPanel implements Validata
     mSubjectiveContainer = Box.createVerticalBox();
     subjectiveTopContainer.add(mSubjectiveContainer);
 
-    mSubjectiveMoveListener = new MoveEventListener() {
-
-      @Override
-      public void requestedMove(final MoveEvent e) {
-        final int oldIndex = Utilities.getIndexOfComponent(mSubjectiveContainer, e.getComponent());
-        if (oldIndex < 0) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Unable to find source of move event in subjective container");
-          }
-          return;
+    mSubjectiveMoveListener = e -> {
+      final int oldIndex = Utilities.getIndexOfComponent(mSubjectiveContainer, e.getComponent());
+      if (oldIndex < 0) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Unable to find source of move event in subjective container");
         }
-
-        final int newIndex;
-        if (e.getDirection() == MoveDirection.DOWN) {
-          newIndex = oldIndex
-              + 1;
-        } else {
-          newIndex = oldIndex
-              - 1;
-        }
-
-        if (newIndex < 0
-            || newIndex >= mSubjectiveContainer.getComponentCount()) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Can't move component outside the container oldIndex: "
-                + oldIndex
-                + " newIndex: "
-                + newIndex);
-          }
-          return;
-        }
-
-        // update editor list
-        final SubjectiveCategoryEditor editor = mSubjectiveEditors.remove(oldIndex);
-        mSubjectiveEditors.add(newIndex, editor);
-
-        // update the UI
-        mSubjectiveContainer.add(editor, newIndex);
-        mSubjectiveContainer.validate();
-
-        // update the order in the challenge description
-        final SubjectiveScoreCategory category = mDescription.removeSubjectiveCategory(oldIndex);
-        mDescription.addSubjectiveCategory(newIndex, category);
+        return;
       }
+
+      final int newIndex;
+      if (e.getDirection() == MoveDirection.DOWN) {
+        newIndex = oldIndex
+            + 1;
+      } else {
+        newIndex = oldIndex
+            - 1;
+      }
+
+      if (newIndex < 0
+          || newIndex >= mSubjectiveContainer.getComponentCount()) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Can't move component outside the container oldIndex: "
+              + oldIndex
+              + " newIndex: "
+              + newIndex);
+        }
+        return;
+      }
+
+      // update editor list
+      final SubjectiveCategoryEditor editor = mSubjectiveEditors.remove(oldIndex);
+      mSubjectiveEditors.add(newIndex, editor);
+
+      // update the UI
+      mSubjectiveContainer.add(editor, newIndex);
+      mSubjectiveContainer.validate();
+
+      // update the order in the challenge description
+      final SubjectiveScoreCategory category = mDescription.removeSubjectiveCategory(oldIndex);
+      mDescription.addSubjectiveCategory(newIndex, category);
     };
 
-    mSubjectiveDeleteListener = new DeleteEventListener() {
-
-      @Override
-      public void requestDelete(final DeleteEvent e) {
-        final int confirm = JOptionPane.showConfirmDialog(ChallengeDescriptionEditor.this,
-                                                          "Are you sure that you want to delete the subjective category?",
-                                                          "Confirm Delete", JOptionPane.YES_NO_OPTION);
-        if (confirm != JOptionPane.YES_OPTION) {
-          return;
-        }
-
-        final int index = Utilities.getIndexOfComponent(mSubjectiveContainer, e.getComponent());
-        if (index < 0) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Unable to find source of delete event in subjective category container");
-          }
-          return;
-        }
-
-        // update editor list
-        mSubjectiveEditors.remove(index);
-
-        // update the challenge description
-        mDescription.removeSubjectiveCategory(index);
-
-        // update the UI
-        GuiUtils.removeFromContainer(mSubjectiveContainer, index);
+    mSubjectiveDeleteListener = e -> {
+      final int confirm = JOptionPane.showConfirmDialog(ChallengeDescriptionEditor.this,
+                                                        "Are you sure that you want to delete the subjective category?",
+                                                        "Confirm Delete", JOptionPane.YES_NO_OPTION);
+      if (confirm != JOptionPane.YES_OPTION) {
+        return;
       }
+
+      final int index = Utilities.getIndexOfComponent(mSubjectiveContainer, e.getComponent());
+      if (index < 0) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Unable to find source of delete event in subjective category container");
+        }
+        return;
+      }
+
+      // update editor list
+      mSubjectiveEditors.remove(index);
+
+      // update the challenge description
+      mDescription.removeSubjectiveCategory(index);
+
+      // update the UI
+      GuiUtils.removeFromContainer(mSubjectiveContainer, index);
     };
 
     mDescription.getSubjectiveCategories().forEach(this::addSubjectiveCategory);

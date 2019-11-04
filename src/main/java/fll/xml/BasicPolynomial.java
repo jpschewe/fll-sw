@@ -25,8 +25,15 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
  */
 public class BasicPolynomial implements Evaluatable, Serializable {
 
+  /**
+   * XML attribute for storing the {@link #getFloatingPoint()} data.
+   */
   public static final String FLOATING_POINT_ATTRIBUTE = "floatingPoint";
 
+  /**
+   * @param ele XM element holding the polynomial
+   * @param goalScope used to lookup goals referenced by the polynomial
+   */
   public BasicPolynomial(@Nonnull final Element ele,
                          @Nonnull final GoalScope goalScope) {
     this(ele, goalScope, null);
@@ -61,6 +68,9 @@ public class BasicPolynomial implements Evaluatable, Serializable {
 
   private FloatingPointType mFloatingPoint;
 
+  /**
+   * @return the floating point type for the polynomial
+   */
   @Nonnull
   public FloatingPointType getFloatingPoint() {
     return mFloatingPoint;
@@ -73,6 +83,10 @@ public class BasicPolynomial implements Evaluatable, Serializable {
     mFloatingPoint = v;
   }
 
+  /**
+   * @param value the value to apply the floating point type to
+   * @return the value after the floating point type is applied
+   */
   protected final double applyFloatingPointType(final double value) {
     switch (getFloatingPoint()) {
     case DECIMAL:
@@ -106,7 +120,7 @@ public class BasicPolynomial implements Evaluatable, Serializable {
   }
 
   /**
-   * Add a term at the specified index in the polynomial
+   * Add a term at the specified index in the polynomial.
    *
    * @param index the index to add the term at
    * @param v the term to add
@@ -156,6 +170,12 @@ public class BasicPolynomial implements Evaluatable, Serializable {
     return applyFloatingPointType(score);
   }
 
+  /**
+   * Store the polynomial into an XML element.
+   *
+   * @param doc the document used to create elements
+   * @param ele the element to store the data in
+   */
   public void populateXml(final Document doc,
                           final Element ele) {
     for (final Term term : mTerms) {
