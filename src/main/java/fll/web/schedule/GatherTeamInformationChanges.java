@@ -7,6 +7,7 @@
 package fll.web.schedule;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -62,12 +63,13 @@ public class GatherTeamInformationChanges extends BaseFLLServlet {
 
         if (!schedInfo.getTeamName().equals(dbTeam.getTeamName())) {
           nameDifferences.add(new TeamNameDifference(schedInfo.getTeamNumber(), dbTeam.getTeamName(),
-                                                 schedInfo.getTeamName()));
+                                                     schedInfo.getTeamName()));
         }
 
         if (!schedInfo.getOrganization().equals(dbTeam.getOrganization())) {
-          organizationDifferences.add(new TeamOrganizationDifference(schedInfo.getTeamNumber(), dbTeam.getOrganization(),
-                                                                 schedInfo.getOrganization()));
+          organizationDifferences.add(new TeamOrganizationDifference(schedInfo.getTeamNumber(),
+                                                                     dbTeam.getOrganization(),
+                                                                     schedInfo.getOrganization()));
         }
       });
 
@@ -92,7 +94,8 @@ public class GatherTeamInformationChanges extends BaseFLLServlet {
   /**
    * Helper class for tracking team name differences.
    */
-  public static final class TeamNameDifference {
+  public static final class TeamNameDifference implements Serializable {
+
     /**
      * @param number see {@link #getNumber()}
      * @param oldName see {@link #getOldName()}
@@ -137,7 +140,7 @@ public class GatherTeamInformationChanges extends BaseFLLServlet {
   /**
    * Helper class for tracking team organization differences.
    */
-  public static final class TeamOrganizationDifference {
+  public static final class TeamOrganizationDifference implements Serializable {
     /**
      * @param number see {@link #getNumber()}
      * @param oldOrganization see {@link #getOldOrganization()}
