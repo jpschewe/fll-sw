@@ -1,3 +1,5 @@
+Release 14.1.0
+==============
 * #775 - Allow teams to be added to the database during schedule upload
 * #770 - Rename all HTML fields with names or IDs equal to 'submit'
 * #767 - Allow one to skip score summarization to generate a report
