@@ -77,7 +77,7 @@ import fll.xml.AbstractGoal;
       fireTitleChange(oldTitle, newTitle);
     });
 
-    mTitleEditor.setColumns(80);
+    mTitleEditor.setColumns(ChallengeDescriptionEditor.LONG_TEXT_WIDTH);
     mTitleEditor.setMaximumSize(mTitleEditor.getPreferredSize());
 
     gbc = new GridBagConstraints();
@@ -99,7 +99,7 @@ import fll.xml.AbstractGoal;
       goal.setName(newValue);
     });
 
-    mNameEditor.setColumns(40);
+    mNameEditor.setColumns(ChallengeDescriptionEditor.MEDIUM_TEXT_WIDTH);
     mNameEditor.setMaximumSize(mNameEditor.getPreferredSize());
 
     gbc = new GridBagConstraints();
@@ -107,7 +107,7 @@ import fll.xml.AbstractGoal;
     gbc.anchor = GridBagConstraints.FIRST_LINE_END;
     add(new JLabel("Description: "), gbc);
 
-    mDescriptionEditor = new TextAreaEditor(2, 40);
+    mDescriptionEditor = new TextAreaEditor(2, ChallengeDescriptionEditor.MEDIUM_TEXT_WIDTH);
     gbc = new GridBagConstraints();
     gbc.weightx = 1;
     gbc.anchor = GridBagConstraints.FIRST_LINE_START;
