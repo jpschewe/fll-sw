@@ -2,7 +2,7 @@
 
 <html>
 <head>
-<title>Upload Schedule</title>
+<title>Update team information (Upload Schedule)</title>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
 </head>

@@ -2,7 +2,7 @@
 
 <html>
 <head>
-<title>FLL-SW</title>
+<title>Specify schedule constraints (Upload Schedule)</title>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
 
@@ -20,7 +20,7 @@
 </head>
 
 <body>
-    <h1>Specify schedule constraints</h1>
+    <h1>Specify schedule constraints (Upload Schedule)</h1>
 
     <div class='status-message'>${message}</div>
     <%-- clear out the message, so that we don't see it again --%>
