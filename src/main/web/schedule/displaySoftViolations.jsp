@@ -2,13 +2,13 @@
 
 <html>
 <head>
-<title>Upload Schedule</title>
+<title>Violations (Upload Schedule)</title>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
 </head>
 
 <body>
-    <h1>Upload Schedule</h1>
+    <h1>Violations (Upload Schedule)</h1>
 
     <div class='status-message'>${message}</div>
     <%-- clear out the message, so that we don't see it again --%>

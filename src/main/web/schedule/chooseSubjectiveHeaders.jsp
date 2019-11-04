@@ -6,7 +6,7 @@
 
 <html>
 <head>
-<title>FLL-SW</title>
+<title>Choose Subjective Headers (Upload Schedule)</title>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
 
@@ -24,7 +24,7 @@
 </head>
 
 <body>
-    <h1>Choose Subjective Headers</h1>
+    <h1>Choose Subjective Headers (Upload Schedule)</h1>
 
     <div class='status-message'>${message}</div>
     <%-- clear out the message, so that we don't see it again --%>

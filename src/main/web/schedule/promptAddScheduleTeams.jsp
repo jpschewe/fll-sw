@@ -4,7 +4,7 @@
 <head>
 <link rel="stylesheet" type="text/css"
     href="<c:url value='/style/fll-sw.css'/>" />
-<title>Add missing teams</title>
+<title>Add missing teams (Upload Schedule)</title>
 </head>
 
 <body>
