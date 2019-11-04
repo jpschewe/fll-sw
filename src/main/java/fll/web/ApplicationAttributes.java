@@ -40,18 +40,28 @@ public final class ApplicationAttributes {
 
   /**
    * {@link org.w3c.dom.Document} that holds the current challenge descriptor.
+   * See {@link #getChallengeDocument(ServletContext)}.
    */
   public static final String CHALLENGE_DOCUMENT = "challengeDocument";
 
+  /**
+   * @param application application variable store
+   * @return the stored challenge description XML
+   */
   public static Document getChallengeDocument(final ServletContext application) {
     return getAttribute(application, CHALLENGE_DOCUMENT, Document.class);
   }
 
   /**
    * {@link ChallengeDescription} that describes the current tournament.
+   * See {@link #getChallengeDescription(ServletContext)}
    */
   public static final String CHALLENGE_DESCRIPTION = "challengeDescription";
 
+  /**
+   * @param application application variable store
+   * @return the stored challenge description
+   */
   public static ChallengeDescription getChallengeDescription(final ServletContext application) {
     return getAttribute(application, CHALLENGE_DESCRIPTION, ChallengeDescription.class);
   }
@@ -101,6 +111,10 @@ public final class ApplicationAttributes {
     }
   }
 
+  /**
+   * @param application application variable store
+   * @return the database connection
+   */
   public static DataSource getDataSource(final ServletContext application) {
     return getAttribute(application, ApplicationAttributes.DATASOURCE, DataSource.class);
   }

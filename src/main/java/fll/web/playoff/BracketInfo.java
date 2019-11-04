@@ -13,6 +13,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class BracketInfo {
 
+  /**
+   * @param bracketName see {@link #getBracketName()}
+   * @param firstRound see {@Link #getFirstRound()}
+   * @param lastRound see {@link #getLastRound()}
+   */
   public BracketInfo(@JsonProperty("bracketName") final String bracketName,
                      @JsonProperty("firstRound") final int firstRound,
                      @JsonProperty("lastRound") final int lastRound) {
@@ -23,18 +28,27 @@ public class BracketInfo {
 
   private final int firstRound;
 
+  /**
+   * @return the first round to display
+   */
   public final int getFirstRound() {
     return firstRound;
   }
 
   private final int lastRound;
 
+  /**
+   * @return the last round to display
+   */
   public final int getLastRound() {
     return lastRound;
   }
 
   private final String bracketName;
 
+  /**
+   * @return the name of the bracket
+   */
   public final String getBracketName() {
     return bracketName;
   }

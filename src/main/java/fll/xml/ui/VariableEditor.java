@@ -43,7 +43,6 @@ public class VariableEditor extends JPanel implements Validatable {
   }
 
   /**
-   *
    * @param variable the variable to edit
    * @param goalScope the scope to lookup goals in
    */
@@ -76,7 +75,7 @@ public class VariableEditor extends JPanel implements Validatable {
       fireNameChange(oldName, newName);
     });
 
-    mNameEditor.setColumns(80);
+    mNameEditor.setColumns(ChallengeDescriptionEditor.LONG_TEXT_WIDTH);
     mNameEditor.setMaximumSize(mNameEditor.getPreferredSize());
 
     polyEditor = new PolynomialEditor(variable, goalScope, null);
