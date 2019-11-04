@@ -22,12 +22,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
 import fll.db.Queries;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -41,6 +38,7 @@ public class CommitJudges extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -72,7 +70,7 @@ public class CommitJudges extends BaseFLLServlet {
   /**
    * Commit the subjective data from request to the database and redirect
    * response back to index.jsp.
-   * 
+   *
    * @param tournament the current tournament
    */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
@@ -82,8 +80,8 @@ public class CommitJudges extends BaseFLLServlet {
     PreparedStatement prep = null;
     try {
       // save old judge information
-      Collection<JudgeInformation> oldJudges = JudgeInformation.getJudges(connection, tournament);
-      final Set<JudgeInformation> oldJudgeInfo = new HashSet<JudgeInformation>();
+      final Collection<JudgeInformation> oldJudges = JudgeInformation.getJudges(connection, tournament);
+      final Set<JudgeInformation> oldJudgeInfo = new HashSet<>();
       oldJudgeInfo.addAll(oldJudges);
 
       // delete old data in judges
@@ -102,7 +100,7 @@ public class CommitJudges extends BaseFLLServlet {
                                                                                         GatherJudgeInformation.JUDGES_KEY,
                                                                                         Collection.class);
 
-      final Set<JudgeInformation> newJudgeInfo = new HashSet<JudgeInformation>();
+      final Set<JudgeInformation> newJudgeInfo = new HashSet<>();
       for (final JudgeInformation info : judges) {
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("Doing insert for id: "

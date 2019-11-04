@@ -9,10 +9,15 @@ package fll.web.playoff;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Basic information for a head to head bracket
+ * Basic information for a head to head bracket.
  */
 public class BracketInfo {
 
+  /**
+   * @param bracketName see {@link #getBracketName()}
+   * @param firstRound see {@Link #getFirstRound()}
+   * @param lastRound see {@link #getLastRound()}
+   */
   public BracketInfo(@JsonProperty("bracketName") final String bracketName,
                      @JsonProperty("firstRound") final int firstRound,
                      @JsonProperty("lastRound") final int lastRound) {
@@ -21,20 +26,29 @@ public class BracketInfo {
     this.lastRound = lastRound;
   }
 
-  private int firstRound;
+  private final int firstRound;
 
+  /**
+   * @return the first round to display
+   */
   public final int getFirstRound() {
     return firstRound;
   }
 
-  private int lastRound;
+  private final int lastRound;
 
+  /**
+   * @return the last round to display
+   */
   public final int getLastRound() {
     return lastRound;
   }
 
-  private String bracketName;
+  private final String bracketName;
 
+  /**
+   * @return the name of the bracket
+   */
   public final String getBracketName() {
     return bracketName;
   }

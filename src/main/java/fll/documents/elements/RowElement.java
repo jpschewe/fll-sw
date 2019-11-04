@@ -29,57 +29,63 @@ public class RowElement {
 
   /**
    * The rubric ranges sorted with the least first.
-   * 
+   *
    * @return unmodifiable list
    */
   public List<RubricRange> getSortedRubricRanges() {
     return goal.getRubric();
   }
 
+  /**
+   * @param goal the goal the row is for
+   */
   public RowElement(final Goal goal) {
     this.goal = goal;
     this.rowDescription = null == goal.getDescription() ? "" : goal.getDescription().trim().replaceAll("\\s+", " ");
   }
 
+  @Override
   public String toString() {
-    final String NL = System.lineSeparator();
+    final String newline = System.lineSeparator();
     final StringBuilder output = new StringBuilder();
     output.append("-RowElementStart----------------------------------");
-    output.append(NL);
+    output.append(newline);
     output.append("Catagory: ");
     output.append(getCategory());
-    output.append(NL);
+    output.append(newline);
     output.append("Row Title: ");
     output.append(getRowTitle());
-    output.append(NL);
+    output.append(newline);
     output.append("Row Description: ");
     output.append(rowDescription);
-    output.append(NL);
+    output.append(newline);
     return output.toString();
   }
 
-  /** Inspiration for example (90 degrees on the left side of the table) */
+  /**
+   * @return the goal group, for example "Inspiration" (90 degrees on the left
+   *         side of the table)
+   */
   public String getCategory() {
     return goal.getCategory();
   }
 
-  /** Discovery for example (left side of the colored row) */
+  /**
+   * @return the title on the left side of the colored row
+   */
   public String getRowTitle() {
     return goal.getTitle();
   }
-  
+
   /**
-   * The goal that defines this RowElement.
+   * @return The goal that defines this RowElement.
    */
   public Goal getGoal() {
     return goal;
   }
 
   /**
-   * Balanced emphasis on all three aspects (Robot, Project, Core Values) of
-   * FLL; its not just about winning awards (right side of the colored row).
-   * 
-   * Extra spaces and line endings have been removed.
+   * @return the description of the goal
    */
   public String getDescription() {
     return rowDescription;

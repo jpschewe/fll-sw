@@ -24,10 +24,19 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
  */
 public class Term extends Object implements Evaluatable, Serializable {
 
+  /**
+   * XML tag for the term element.
+   */
   public static final String TAG_NAME = "term";
 
+  /**
+   * XML tag for the constant element in a term.
+   */
   public static final String CONSTANT_TAG_NAME = "constant";
 
+  /**
+   * XML attribute for the constant.
+   */
   public static final String CONSTANT_VALUE_ATTRIBUTE = "value";
 
   /**
@@ -36,7 +45,7 @@ public class Term extends Object implements Evaluatable, Serializable {
    * @param ele the XML element that represents the term
    * @param goalScope the scope to lookup goals in
    * @param variableScope the scope to lookup variables in, may be null
-   * @throws VariablRefNotAllowedException if there is no variable scope and a
+   * @throws VariableRefNotAllowedException if there is no variable scope and a
    *           variable reference is found
    */
   public Term(final Element ele,
@@ -128,7 +137,7 @@ public class Term extends Object implements Evaluatable, Serializable {
   }
 
   /**
-   * Remove a variable reference
+   * Remove a variable reference.
    *
    * @param var the variable reference to remove (only the first one is removed if
    *          there are multiple entries)
@@ -158,10 +167,16 @@ public class Term extends Object implements Evaluatable, Serializable {
 
   private double mCoefficient;
 
+  /**
+   * @return the coefficient of the term
+   */
   public double getCoefficient() {
     return mCoefficient;
   }
 
+  /**
+   * @param v see {@link #getCoefficient()}
+   */
   public void setCoefficient(final double v) {
     mCoefficient = v;
   }
@@ -173,6 +188,10 @@ public class Term extends Object implements Evaluatable, Serializable {
     return ele;
   }
 
+  /**
+   * @param doc the XML document used to create elements
+   * @return the XML element representing the current state
+   */
   public Element toXml(final Document doc) {
     final Element ele = doc.createElement(TAG_NAME);
 

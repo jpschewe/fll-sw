@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fll.Version;
 
 /**
- * GET: "version"
+ * GET: "version".
  */
 @WebServlet("/api/Version")
 public class VersionServlet extends HttpServlet {

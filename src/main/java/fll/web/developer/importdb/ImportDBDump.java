@@ -16,13 +16,11 @@ import javax.sql.DataSource;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
-
 import org.w3c.dom.Document;
 
 import fll.Utilities;
 import fll.db.GlobalParameters;
 import fll.db.ImportDB;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -31,7 +29,7 @@ import fll.xml.ChallengeParser;
 
 /**
  * Import a database dump into the existing database.
- * 
+ *
  * @author jpschewe
  */
 @WebServlet("/developer/importdb/ImportDBDump")
@@ -48,17 +46,18 @@ public class ImportDBDump extends BaseFLLServlet {
    * Keep track of the number of database imports so that the database names are
    * unique.
    */
-  private static int _importdbCount = 0;
+  private static int importdbCount = 0;
 
   /**
    * @return an integer to differentiate in-memory databases.
    */
   public static int getNextDBCount() {
     synchronized (ImportDBDump.class) {
-      return _importdbCount++;
+      return importdbCount++;
     }
   }
 
+  @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -133,10 +132,11 @@ public class ImportDBDump extends BaseFLLServlet {
 
   /**
    * Compare challenge descriptions between 2 databases.
-   * 
+   *
    * @param sourceConnection the first database to compare
    * @param destConnection the second database to compare
    * @return message to the user if there are errors, null if everything is OK
+   * @throws SQLException if there is an error talking to the database
    */
   public static String checkChallengeDescriptors(final Connection sourceConnection,
                                                  final Connection destConnection)

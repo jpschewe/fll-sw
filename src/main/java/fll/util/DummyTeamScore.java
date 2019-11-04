@@ -49,8 +49,8 @@ public class DummyTeamScore extends TeamScore {
                         final boolean noShow,
                         final boolean bye) {
     super(teamNumber, runNumber);
-    _simpleGoals = new HashMap<>(simpleGoals);
-    _enumGoals = new HashMap<>(enumGoals);
+    this.simpleGoals = new HashMap<>(simpleGoals);
+    this.enumGoals = new HashMap<>(enumGoals);
     this.noShow = noShow;
     this.bye = bye;
   }
@@ -60,8 +60,8 @@ public class DummyTeamScore extends TeamScore {
     if (!scoreExists()) {
       return null;
     } else {
-      if (_enumGoals.containsKey(goalName)) {
-        return _enumGoals.get(goalName);
+      if (enumGoals.containsKey(goalName)) {
+        return enumGoals.get(goalName);
       } else {
         return null;
       }
@@ -73,8 +73,8 @@ public class DummyTeamScore extends TeamScore {
     if (!scoreExists()) {
       return Double.NaN;
     } else {
-      if (_simpleGoals.containsKey(goalName)) {
-        return _simpleGoals.get(goalName);
+      if (simpleGoals.containsKey(goalName)) {
+        return simpleGoals.get(goalName);
       } else {
         return Double.NaN;
       }
@@ -100,7 +100,7 @@ public class DummyTeamScore extends TeamScore {
     return true;
   }
 
-  private final Map<String, Double> _simpleGoals;
+  private final Map<String, Double> simpleGoals;
 
-  private final Map<String, String> _enumGoals;
+  private final Map<String, String> enumGoals;
 }
