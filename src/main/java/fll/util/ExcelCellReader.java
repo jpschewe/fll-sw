@@ -16,11 +16,9 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -55,9 +53,15 @@ public class ExcelCellReader extends CellFileReader {
   private final Sheet sheet;
 
   /**
-   * Check if we believe this file to be an Excel file.
-   *
-   * @throws IOException
+   * If a number and it's rounded value are equal to this precision, then the
+   * number is an integer.
+   */
+  private static final double INTEGER_FP_CHECK = 1E-10;
+
+  /**
+   * @param file see {@link #isExcelFile(Path)}
+   * @throws IOException see {@link #isExcelFile(Path)}
+   * @return see {@link #isExcelFile(Path)}
    */
   public static boolean isExcelFile(final File file) throws IOException {
     return isExcelFile(file.toPath());
@@ -66,7 +70,9 @@ public class ExcelCellReader extends CellFileReader {
   /**
    * Check if we believe this file to be an Excel file.
    *
-   * @throws IOException
+   * @param path the path to check
+   * @throws IOException if there is an error detecting the file type
+   * @return true if this is an excel file
    */
   public static boolean isExcelFile(final Path path) throws IOException {
     if (null == path) {
@@ -99,7 +105,12 @@ public class ExcelCellReader extends CellFileReader {
     return !isCsvFile;
   }
 
-  public static List<String> getAllSheetNames(final File file) throws InvalidFormatException, IOException {
+  /**
+   * @param file the file to read
+   * @return see {@link #getAllSheetNames(InputStream)}
+   * @throws IOException see {@link #getAllSheetNames(InputStream)}
+   */
+  public static List<String> getAllSheetNames(final File file) throws IOException {
     FileInputStream fis = null;
     try {
       fis = new FileInputStream(file);
@@ -116,10 +127,11 @@ public class ExcelCellReader extends CellFileReader {
   /**
    * Get the names of all sheets in the specified stream.
    *
-   * @throws IOException
-   * @throws InvalidFormatException
+   * @param stream the file to read
+   * @throws IOException if there is an error reading the file
+   * @return the names of the sheets found in the workbook
    */
-  public static List<String> getAllSheetNames(final InputStream stream) throws InvalidFormatException, IOException {
+  public static List<String> getAllSheetNames(final InputStream stream) throws IOException {
     final List<String> sheetNames = new LinkedList<>();
 
     final Workbook workbook = createWorkbook(stream);
@@ -131,8 +143,8 @@ public class ExcelCellReader extends CellFileReader {
     return sheetNames;
   }
 
-  private static Workbook createWorkbook(final InputStream file) throws IOException, InvalidFormatException {
-    try (final InputStream stream = new PushbackInputStream(file)) {
+  private static Workbook createWorkbook(final InputStream file) throws IOException {
+    try (InputStream stream = new PushbackInputStream(file)) {
       final Workbook workbook = WorkbookFactory.create(stream);
       return workbook;
     }
@@ -144,12 +156,11 @@ public class ExcelCellReader extends CellFileReader {
    * @param file where to read the excel file from, this is read into memory and
    *          then can be closed after the constructor is finished
    * @param sheetName the sheet to read
-   * @throws IOException
-   * @throws InvalidFormatException
+   * @throws IOException if there is an error reading the file
    */
   public ExcelCellReader(final InputStream file,
                          final String sheetName)
-      throws IOException, InvalidFormatException {
+      throws IOException {
     workbook = createWorkbook(file);
     if (workbook instanceof HSSFWorkbook) {
       formulaEvaluator = new HSSFFormulaEvaluator((HSSFWorkbook) workbook);
@@ -165,17 +176,11 @@ public class ExcelCellReader extends CellFileReader {
     formatter = new DataFormatter();
   }
 
-  /**
-   * @see fll.util.CellFileReader#getLineNumber()
-   */
   @Override
   public long getLineNumber() {
     return lineNumber;
   }
 
-  /**
-   * @see fll.util.CellFileReader#readNext()
-   */
   @Override
   @SuppressFBWarnings(value = "PZLA_PREFER_ZERO_LENGTH_ARRAYS", justification = "Return null rather than zero length array so that we know when we hit EFO")
   public String[] readNext() throws IOException {
@@ -205,7 +210,7 @@ public class ExcelCellReader extends CellFileReader {
             str = TournamentSchedule.DATE_FORMAT_AM_PM_SS.get().format(date);
           } else {
             // check for integer
-            if (FP.equals(d, Math.round(d), 1e-10)) {
+            if (FP.equals(d, Math.round(d), INTEGER_FP_CHECK)) {
               str = String.valueOf((int) d);
             } else {
               str = formatter.formatCellValue(cell, formulaEvaluator);

@@ -19,6 +19,7 @@ import fll.db.CategoryColumnMapping;
 import fll.scheduler.ConstraintViolation;
 import fll.scheduler.SchedParams;
 import fll.scheduler.SubjectiveStation;
+import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 
 /**
@@ -56,7 +57,7 @@ public class UploadScheduleData implements Serializable {
 
   /**
    * If {@link #getScheduleFile()} is a spreadsheet, then the selected sheet name.
-   * 
+   *
    * @return null until set
    */
   public String getSelectedSheet() {
@@ -70,7 +71,7 @@ public class UploadScheduleData implements Serializable {
     selectedSheet = v;
   }
 
-  private LinkedList<ConstraintViolation> violations = new LinkedList<>();
+  private final LinkedList<ConstraintViolation> violations = new LinkedList<>();
 
   /**
    * @return the violations found in the uploaded schedule, initially empty,
@@ -106,7 +107,7 @@ public class UploadScheduleData implements Serializable {
     schedule = v;
   }
 
-  private LinkedList<CategoryColumnMapping> categoryColumnMappings = new LinkedList<>();
+  private final LinkedList<CategoryColumnMapping> categoryColumnMappings = new LinkedList<>();
 
   /**
    * @return the mappings of categories to schedule columns, initially empty,
@@ -123,24 +124,6 @@ public class UploadScheduleData implements Serializable {
   public void setCategoryColumnMappings(@Nonnull final Collection<CategoryColumnMapping> v) {
     categoryColumnMappings.clear();
     categoryColumnMappings.addAll(v);
-  }
-
-  private final LinkedList<EventDivisionInfo> eventDivisionInfo = new LinkedList<>();
-
-  /**
-   * @return event division information, initially empty, unmodifiable list
-   */
-  @Nonnull
-  public List<EventDivisionInfo> getEventDivisionInfo() {
-    return Collections.unmodifiableList(eventDivisionInfo);
-  }
-
-  /**
-   * @param v see {@link #getEventDivisionInfo()}
-   */
-  public void setEventDivisionInfo(@Nonnull final List<EventDivisionInfo> v) {
-    eventDivisionInfo.clear();
-    eventDivisionInfo.addAll(v);
   }
 
   private LinkedList<SubjectiveStation> subjectiveStations = null;
@@ -185,7 +168,7 @@ public class UploadScheduleData implements Serializable {
    * This object is used when checking the uploaded schedule for constraint
    * violations.
    * It defaults to the result of {@link SchedParams#SchedParams()}.
-   * 
+   *
    * @return the sched params, not that it is mutable and NOT a copy of the
    *         internal data
    */
@@ -199,5 +182,56 @@ public class UploadScheduleData implements Serializable {
    */
   public void setSchedParams(@Nonnull final SchedParams v) {
     schedParams = v;
+  }
+
+  private final LinkedList<TeamScheduleInfo> missingTeams = new LinkedList<>();
+
+  /**
+   * @return teams in the schedule and not in the database
+   */
+  public Collection<TeamScheduleInfo> getMissingTeams() {
+    return missingTeams;
+  }
+
+  /**
+   * @param v see {@link #getMissingTeams()}
+   */
+  public void setMissingTeams(final Collection<TeamScheduleInfo> v) {
+    missingTeams.clear();
+    missingTeams.addAll(v);
+  }
+
+  private final LinkedList<GatherTeamInformationChanges.TeamNameDifference> nameDifferences = new LinkedList<>();
+
+  /**
+   * @return name differences between the schedule and the database
+   */
+  public Collection<GatherTeamInformationChanges.TeamNameDifference> getNameDifferences() {
+    return nameDifferences;
+  }
+
+  /**
+   * @param v see {@link #getNameDifferences()}
+   */
+  public void setNameDifferences(final Collection<GatherTeamInformationChanges.TeamNameDifference> v) {
+    nameDifferences.clear();
+    nameDifferences.addAll(v);
+  }
+
+  private final LinkedList<GatherTeamInformationChanges.TeamOrganizationDifference> organizationDifferences = new LinkedList<>();
+
+  /**
+   * @return organization differences between the schedule and the database
+   */
+  public Collection<GatherTeamInformationChanges.TeamOrganizationDifference> getOrganizationDifferences() {
+    return organizationDifferences;
+  }
+
+  /**
+   * @param v see {@link #getOrganizationDifferences()}
+   */
+  public void setOrganizationDifferences(final Collection<GatherTeamInformationChanges.TeamOrganizationDifference> v) {
+    organizationDifferences.clear();
+    organizationDifferences.addAll(v);
   }
 }

@@ -27,10 +27,10 @@ import fll.web.WebUtils;
 public class ProcessScheduleConstraints extends BaseFLLServlet {
 
   @Override
-  protected void processRequest(HttpServletRequest request,
-                                HttpServletResponse response,
-                                ServletContext application,
-                                HttpSession session)
+  protected void processRequest(final HttpServletRequest request,
+                                final HttpServletResponse response,
+                                final ServletContext application,
+                                final HttpSession session)
       throws IOException, ServletException {
 
     final UploadScheduleData uploadScheduleData = SessionAttributes.getNonNullAttribute(session, UploadScheduleData.KEY,
@@ -39,24 +39,21 @@ public class ProcessScheduleConstraints extends BaseFLLServlet {
 
       final String changeTimeDurationStr = request.getParameter("changeTimeDuration");
       Objects.requireNonNull(changeTimeDurationStr, "Missing parameter 'changeTimeDuration'");
-
       final int changeTimeDuration = Integer.parseInt(changeTimeDurationStr);
       uploadScheduleData.getSchedParams().setChangetimeMinutes(changeTimeDuration);
 
       final String performanceChangeTimeDurationStr = request.getParameter("performanceChangeTimeDuration");
       Objects.requireNonNull(performanceChangeTimeDurationStr, "Missing parameter 'performanceChangeTimeDuration'");
-
       final int performanceChangeTimeDuration = Integer.parseInt(performanceChangeTimeDurationStr);
       uploadScheduleData.getSchedParams().setPerformanceChangetimeMinutes(performanceChangeTimeDuration);
 
       final String performanceDurationStr = request.getParameter("performanceDuration");
       Objects.requireNonNull(performanceDurationStr, "Missing parameter 'performanceDuration'");
-
       final int performanceDuration = Integer.parseInt(performanceDurationStr);
       uploadScheduleData.getSchedParams().setPerformanceMinutes(performanceDuration);
 
-      WebUtils.sendRedirect(application, response, "CheckViolations");
-      
+      WebUtils.sendRedirect(application, response, "LoadSchedule");
+
     } finally {
       session.setAttribute(UploadScheduleData.KEY, uploadScheduleData);
     }

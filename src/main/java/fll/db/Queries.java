@@ -2002,6 +2002,12 @@ public final class Queries {
 
   /**
    * Update a team in the database.
+   *
+   * @param organization the new organization
+   * @param connection the database connection
+   * @param number the team number
+   * @param name the new name
+   * @throws SQLException if there is a database error
    */
   public static void updateTeam(final Connection connection,
                                 final int number,
@@ -2021,7 +2027,7 @@ public final class Queries {
   }
 
   /**
-   * Update a team event division.
+   * Update a team award group (event division).
    */
   public static void updateTeamEventDivision(final Connection connection,
                                              final int number,
