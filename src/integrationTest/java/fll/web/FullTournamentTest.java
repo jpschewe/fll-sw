@@ -385,7 +385,7 @@ public class FullTournamentTest {
       // upload the saved file
       IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
           + "admin/index.jsp");
-      final WebElement fileInput = selenium.findElement(By.name("scheduleFile"));
+      final WebElement fileInput = selenium.findElement(By.id("scheduleFile"));
       fileInput.sendKeys(outputFile.toAbsolutePath().toString());
       selenium.findElement(By.id("upload-schedule")).click();
       assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.id("error")));
@@ -413,19 +413,6 @@ public class FullTournamentTest {
       // violations
       assertThat(selenium.getCurrentUrl(), not(containsString("displayHardViolations")));
       if (selenium.getCurrentUrl().contains("displaySoftViolations")) {
-        selenium.findElement(By.id("yes")).click();
-
-        Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
-      }
-
-      // set event divisions
-      if (selenium.getCurrentUrl().contains("promptForEventDivision")) {
-        selenium.findElement(By.id("yes")).click();
-
-        Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
-
-        // assume the values are fine
-        assertThat(selenium.getCurrentUrl(), containsString("displayEventDivisionConfirmation"));
         selenium.findElement(By.id("yes")).click();
 
         Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);

@@ -1,4 +1,5 @@
-* #770 - rename all html fields with names or ids equal to 'submit'
+* #775 - Allow teams to be added to the database during schedule upload
+* #770 - Rename all HTML fields with names or IDs equal to 'submit'
 * #767 - Allow one to skip score summarization to generate a report
 * #767 - Always redirect back to the index page when computing summarized scores from the index
 * Add server addresses to the top of the scoring coordinator and judges room pages

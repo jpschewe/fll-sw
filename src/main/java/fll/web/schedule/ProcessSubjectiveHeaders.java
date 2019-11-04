@@ -48,10 +48,10 @@ public class ProcessSubjectiveHeaders extends BaseFLLServlet {
 
       final List<String> unusedHeaders = uploadScheduleData.getUnusedHeaders();
 
-      final Collection<CategoryColumnMapping> categoryColumns = new LinkedList<CategoryColumnMapping>();
+      final Collection<CategoryColumnMapping> categoryColumns = new LinkedList<>();
 
       // get params for subjectiveHeader
-      final List<SubjectiveStation> subjectiveStations = new LinkedList<SubjectiveStation>();
+      final List<SubjectiveStation> subjectiveStations = new LinkedList<>();
 
       for (final SubjectiveScoreCategory cat : challenge.getSubjectiveCategories()) {
         final String value = request.getParameter(cat.getName()
@@ -77,7 +77,7 @@ public class ProcessSubjectiveHeaders extends BaseFLLServlet {
       uploadScheduleData.setCategoryColumnMappings(categoryColumns);
       uploadScheduleData.setSubjectiveStations(subjectiveStations);
 
-      WebUtils.sendRedirect(application, response, "/schedule/CheckViolations");
+      WebUtils.sendRedirect(application, response, "/schedule/LoadSchedule");
     } finally {
       session.setAttribute(UploadScheduleData.KEY, uploadScheduleData);
     }
