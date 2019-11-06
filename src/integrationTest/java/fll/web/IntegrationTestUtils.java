@@ -32,7 +32,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.catalina.LifecycleException;
 import org.apache.http.Header;
@@ -600,8 +599,8 @@ public final class IntegrationTestUtils {
           + type);
     }
 
-    selenium.manage().timeouts().implicitlyWait(WAIT_FOR_PAGE_LOAD_MS, TimeUnit.MILLISECONDS);
-    selenium.manage().timeouts().pageLoadTimeout(60, TimeUnit.SECONDS);
+    //selenium.manage().timeouts().implicitlyWait(WAIT_FOR_PAGE_LOAD_MS, TimeUnit.MILLISECONDS);
+    //selenium.manage().timeouts().pageLoadTimeout(60, TimeUnit.SECONDS);
 
     // get some information from the driver
     LOGGER.info("Selenium driver: "
