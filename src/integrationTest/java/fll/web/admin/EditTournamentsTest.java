@@ -33,19 +33,15 @@ public class EditTournamentsTest {
     try {
       final InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml");
       IntegrationTestUtils.initializeDatabase(selenium, challengeStream);
-      Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
 
-      selenium.findElement(By.linkText("Admin Index")).click();
-      Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
+      IntegrationTestUtils.waitForElement(selenium, By.linkText("Admin Index")).click();
 
-      selenium.findElement(By.id("add-edit-tournaments")).click();
-      Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
+      IntegrationTestUtils.waitForElement(selenium, By.id("add-edit-tournaments")).click();
 
-      selenium.findElement(By.id("addRow")).click();
-      Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
+      IntegrationTestUtils.waitForElement(selenium, By.id("addRow")).click();
 
       // get num rows
-      final WebElement numRowsEle = selenium.findElement(By.name("numRows"));
+      final WebElement numRowsEle = IntegrationTestUtils.waitForElement(selenium, By.name("numRows"));
       final String numRowsStr = numRowsEle.getAttribute("value");
       assertNotNull(numRowsStr);
       final int numRows = Integer.parseInt(numRowsStr);
