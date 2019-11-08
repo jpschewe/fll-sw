@@ -29,6 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -96,6 +97,12 @@ public final class IntegrationTestUtils {
    * How long to wait for pages to load before checking for elements.
    */
   public static final long WAIT_FOR_PAGE_LOAD_MS = 100;
+
+  /**
+   * Maximum amount of time to wait for an element to appear. Nominally this is a
+   * page load.
+   */
+  public static final Duration WAIT_FOR_ELEMENT = Duration.ofMillis(2500);
 
   private IntegrationTestUtils() {
     // no instances
@@ -235,7 +242,8 @@ public final class IntegrationTestUtils {
     Thread.sleep(2
         * WAIT_FOR_PAGE_LOAD_MS);
 
-    driver.findElement(By.id("success"));
+    new WebDriverWait(driver,
+                      IntegrationTestUtils.WAIT_FOR_ELEMENT.getSeconds()).until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
 
     // setup user
     final WebElement userElement = driver.findElement(By.name("user"));
@@ -599,8 +607,9 @@ public final class IntegrationTestUtils {
           + type);
     }
 
-    //selenium.manage().timeouts().implicitlyWait(WAIT_FOR_PAGE_LOAD_MS, TimeUnit.MILLISECONDS);
-    //selenium.manage().timeouts().pageLoadTimeout(60, TimeUnit.SECONDS);
+    // selenium.manage().timeouts().implicitlyWait(WAIT_FOR_PAGE_LOAD_MS,
+    // TimeUnit.MILLISECONDS);
+    // selenium.manage().timeouts().pageLoadTimeout(60, TimeUnit.SECONDS);
 
     // get some information from the driver
     LOGGER.info("Selenium driver: "
