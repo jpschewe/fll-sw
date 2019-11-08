@@ -218,10 +218,9 @@ public final class IntegrationTestUtils {
 
       driver.get(TestUtils.URL_ROOT
           + "setup/");
-      Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
     }
 
-    final WebElement fileEle = driver.findElement(By.name("xmldocument"));
+    final WebElement fileEle = waitForElement(driver, By.name("xmldocument"));
     fileEle.sendKeys(challengeFile.toAbsolutePath().toString());
 
     final WebElement reinitDB = driver.findElement(By.name("reinitializeDatabase"));
@@ -240,13 +239,10 @@ public final class IntegrationTestUtils {
       }
     }
 
-    Thread.sleep(2
-        * WAIT_FOR_PAGE_LOAD_MS);
-
     waitForElement(driver, By.id("success"));
 
     // setup user
-    final WebElement userElement = driver.findElement(By.name("user"));
+    final WebElement userElement = waitForElement(driver, By.name("user"));
     userElement.sendKeys(TEST_USERNAME);
 
     final WebElement passElement = driver.findElement(By.name("pass"));
@@ -257,10 +253,8 @@ public final class IntegrationTestUtils {
 
     final WebElement submitElement = driver.findElement(By.name("submit_create_user"));
     submitElement.click();
-    Thread.sleep(2
-        * WAIT_FOR_PAGE_LOAD_MS);
 
-    driver.findElement(By.id("success-create-user"));
+    waitForElement(driver, By.id("success-create-user"));
 
     login(driver);
 
@@ -290,10 +284,9 @@ public final class IntegrationTestUtils {
 
         selenium.get(TestUtils.URL_ROOT
             + "setup/");
-        Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
       }
 
-      final WebElement dbEle = selenium.findElement(By.name("dbdump"));
+      final WebElement dbEle = IntegrationTestUtils.waitForElement(selenium, By.name("dbdump"));
       dbEle.sendKeys(dumpFile.getAbsolutePath());
 
       final WebElement createEle = selenium.findElement(By.name("createdb"));
@@ -312,10 +305,7 @@ public final class IntegrationTestUtils {
         }
       }
 
-      Thread.sleep(2
-          * WAIT_FOR_PAGE_LOAD_MS);
-
-      selenium.findElement(By.id("success"));
+      IntegrationTestUtils.waitForElement(selenium, By.id("success"));
 
       // setup user
       final WebElement userElement = selenium.findElement(By.name("user"));
@@ -329,10 +319,8 @@ public final class IntegrationTestUtils {
 
       final WebElement submitElement = selenium.findElement(By.name("submit_create_user"));
       submitElement.click();
-      Thread.sleep(2
-          * WAIT_FOR_PAGE_LOAD_MS);
 
-      selenium.findElement(By.id("success-create-user"));
+      IntegrationTestUtils.waitForElement(selenium, By.id("success-create-user"));
 
       login(selenium);
     } finally {
@@ -508,17 +496,15 @@ public final class IntegrationTestUtils {
         + "admin/index.jsp");
 
     selenium.findElement(By.linkText("Add a team")).click();
-    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
 
-    selenium.findElement(By.name("teamNumber")).sendKeys(String.valueOf(teamNumber));
+    IntegrationTestUtils.waitForElement(selenium, By.name("teamNumber")).sendKeys(String.valueOf(teamNumber));
     selenium.findElement(By.name("teamName")).sendKeys(teamName);
     selenium.findElement(By.name("organization")).sendKeys(organization);
 
     selenium.findElement(By.id("tournament_"
         + tournament.getTournamentID())).click();
-    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
 
-    final WebElement eventDivision = selenium.findElement(By.id("event_division_"
+    final WebElement eventDivision = IntegrationTestUtils.waitForElement(selenium, By.id("event_division_"
         + tournament.getTournamentID()));
     final Select eventDivisionSel = new Select(eventDivision);
     eventDivisionSel.selectByValue(division);
@@ -529,9 +515,8 @@ public final class IntegrationTestUtils {
     judgingStationSel.selectByValue(division);
 
     selenium.findElement(By.name("commit")).click();
-    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
 
-    selenium.findElement(By.id("success"));
+    IntegrationTestUtils.waitForElement(selenium, By.id("success"));
   }
 
   /**
@@ -667,11 +652,12 @@ public final class IntegrationTestUtils {
         + "playoff");
 
     selenium.findElement(By.id("create-bracket")).click();
-    Thread.sleep(WAIT_FOR_PAGE_LOAD_MS);
 
-    selenium.findElement(By.xpath("//input[@value='Create Head to Head Bracket for Award Group "
-        + awardGroup
-        + "']")).click();
+    IntegrationTestUtils.waitForElement(selenium,
+                                        By.xpath("//input[@value='Create Head to Head Bracket for Award Group "
+                                            + awardGroup
+                                            + "']"))
+                        .click();
     assertTrue(isElementPresent(selenium, By.id("success")), "Error creating bracket for award group: "
         + awardGroup);
 
@@ -938,8 +924,7 @@ public final class IntegrationTestUtils {
     selenium.findElement(By.id("submit_score")).click();
 
     // wait for dialog element
-    final WebElement confirmScoreYesButton = (new WebDriverWait(selenium,
-                                                                IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS)).until(ExpectedConditions.presenceOfElementLocated(By.id("yesno-dialog_yes")));
+    final WebElement confirmScoreYesButton = waitForElement(selenium, By.id("yesno-dialog_yes"));
 
     confirmScoreYesButton.click();
   }

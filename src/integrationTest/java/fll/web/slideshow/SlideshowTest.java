@@ -51,16 +51,14 @@ public class SlideshowTest {
           + "/admin/");
 
       selenium.findElement(By.id("remote-control")).click();
-      Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
 
-      selenium.findElement(By.xpath("//input[@name='remotePage' and @value='"
+      IntegrationTestUtils.waitForElement(selenium, By.xpath("//input[@name='remotePage' and @value='"
           + DisplayInfo.SLIDESHOW_REMOTE_PAGE
           + "']")).click();
       selenium.findElement(By.name("slideInterval")).sendKeys("5");
       selenium.findElement(By.name("submit_data")).click();
-      Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
 
-      selenium.findElement(By.id("success"));
+      IntegrationTestUtils.waitForElement(selenium, By.id("success"));
 
       IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
           + "/slideshow.jsp");
