@@ -962,7 +962,7 @@ public class FullTournamentTest {
             selenium.findElement(By.id("no_show")).click();
 
             final WebElement confirmScoreYesButton = (new WebDriverWait(selenium,
-                                                                        IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS)).until(ExpectedConditions.presenceOfElementLocated(By.id("yesno-dialog_yes")));
+                                                                        IntegrationTestUtils.WAIT_FOR_ELEMENT.getSeconds())).until(ExpectedConditions.presenceOfElementLocated(By.id("yesno-dialog_yes")));
 
             confirmScoreYesButton.click();
           } else {
@@ -1151,7 +1151,7 @@ public class FullTournamentTest {
 
           // confirm selection, not going to bother checking the text
           final WebElement confirmScoreYesButton = (new WebDriverWait(selenium,
-                                                                      IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS)).until(ExpectedConditions.presenceOfElementLocated(By.id("yesno-dialog_yes")));
+                                                                      IntegrationTestUtils.WAIT_FOR_ELEMENT.getSeconds())).until(ExpectedConditions.presenceOfElementLocated(By.id("yesno-dialog_yes")));
 
           confirmScoreYesButton.click();
 
