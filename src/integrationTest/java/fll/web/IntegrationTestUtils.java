@@ -59,6 +59,7 @@ import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -242,8 +243,7 @@ public final class IntegrationTestUtils {
     Thread.sleep(2
         * WAIT_FOR_PAGE_LOAD_MS);
 
-    new WebDriverWait(driver,
-                      IntegrationTestUtils.WAIT_FOR_ELEMENT.getSeconds()).until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
+    waitForElement(driver, By.id("success"));
 
     // setup user
     final WebElement userElement = driver.findElement(By.name("user"));
@@ -943,4 +943,21 @@ public final class IntegrationTestUtils {
 
     confirmScoreYesButton.click();
   }
+
+  /**
+   * Wait for an element to appear.
+   *
+   * @param driver the web browser driver
+   * @param locator how to locate the element
+   * @return the element
+   * @see #WAIT_FOR_ELEMENT
+   * @see WebDriverWait
+   */
+  public static WebElement waitForElement(final WebDriver driver,
+                                          final By locator)
+      throws TimeoutException {
+    return new WebDriverWait(driver,
+                             IntegrationTestUtils.WAIT_FOR_ELEMENT.getSeconds()).until(ExpectedConditions.presenceOfElementLocated(locator));
+  }
+
 }

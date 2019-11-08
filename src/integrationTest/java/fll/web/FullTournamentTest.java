@@ -51,9 +51,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -961,8 +959,8 @@ public class FullTournamentTest {
           if (rs.getBoolean("NoShow")) {
             selenium.findElement(By.id("no_show")).click();
 
-            final WebElement confirmScoreYesButton = (new WebDriverWait(selenium,
-                                                                        IntegrationTestUtils.WAIT_FOR_ELEMENT.getSeconds())).until(ExpectedConditions.presenceOfElementLocated(By.id("yesno-dialog_yes")));
+            final WebElement confirmScoreYesButton = IntegrationTestUtils.waitForElement(selenium,
+                                                                                         By.id("yesno-dialog_yes"));
 
             confirmScoreYesButton.click();
           } else {
@@ -1150,8 +1148,8 @@ public class FullTournamentTest {
           LOGGER.debug("Checking for an alert");
 
           // confirm selection, not going to bother checking the text
-          final WebElement confirmScoreYesButton = (new WebDriverWait(selenium,
-                                                                      IntegrationTestUtils.WAIT_FOR_ELEMENT.getSeconds())).until(ExpectedConditions.presenceOfElementLocated(By.id("yesno-dialog_yes")));
+          final WebElement confirmScoreYesButton = IntegrationTestUtils.waitForElement(selenium,
+                                                                                       By.id("yesno-dialog_yes"));
 
           confirmScoreYesButton.click();
 
