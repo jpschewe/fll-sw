@@ -29,7 +29,6 @@ import fll.web.BaseFLLServlet;
 import fll.web.CookieUtils;
 import fll.web.DoLogin;
 import fll.web.SessionAttributes;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Create a user if.
@@ -43,21 +42,21 @@ public class CreateUser extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
 
-    PreparedStatement addUser = null;
-    PreparedStatement checkUser = null;
-    ResultSet rs = null;
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
 
       final String user = request.getParameter("user");
       final String pass = request.getParameter("pass");
       final String passCheck = request.getParameter("pass_check");
       if (null == pass
-          || null == passCheck || null == user || user.isEmpty() || pass.isEmpty() || passCheck.isEmpty()) {
+          || null == passCheck
+          || null == user
+          || user.isEmpty()
+          || pass.isEmpty()
+          || passCheck.isEmpty()) {
         LOGGER.debug("Missing information on form");
         session.setAttribute(SessionAttributes.MESSAGE,
                              "<p class='error'>You must enter all information in the form.</p>");
@@ -73,26 +72,34 @@ public class CreateUser extends BaseFLLServlet {
         return;
       }
 
-      checkUser = connection.prepareStatement("SELECT fll_user FROM fll_authentication WHERE fll_user = ?");
-      checkUser.setString(1, user);
-      rs = checkUser.executeQuery();
-      if (rs.next()) {
-        LOGGER.debug("User already exists");
-        session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>Username '"
-            + user + "' already exists.</p>");
-        response.sendRedirect(response.encodeRedirectURL("createUsername.jsp"));
-        return;
+      try (
+          PreparedStatement checkUser = connection.prepareStatement("SELECT fll_user FROM fll_authentication WHERE fll_user = ?")) {
+        checkUser.setString(1, user);
+        try (ResultSet rs = checkUser.executeQuery()) {
+          if (rs.next()) {
+            LOGGER.debug("User already exists");
+            session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>Username '"
+                + user
+                + "' already exists.</p>");
+            response.sendRedirect(response.encodeRedirectURL("createUsername.jsp"));
+            return;
+          }
+        }
       }
 
       final String hashedPass = DigestUtils.md5Hex(pass);
-      addUser = connection.prepareStatement("INSERT INTO fll_authentication (fll_user, fll_pass) VALUES(?, ?)");
-      addUser.setString(1, user);
-      addUser.setString(2, hashedPass);
-      addUser.executeUpdate();
+      try (
+          PreparedStatement addUser = connection.prepareStatement("INSERT INTO fll_authentication (fll_user, fll_pass) VALUES(?, ?)")) {
+        addUser.setString(1, user);
+        addUser.setString(2, hashedPass);
+        addUser.executeUpdate();
+      }
 
       LOGGER.debug("Created user");
-      session.setAttribute(SessionAttributes.MESSAGE, "<p class='success' id='success-create-user'>Successfully created user '"
-          + user + "'</p>");
+      session.setAttribute(SessionAttributes.MESSAGE,
+                           "<p class='success' id='success-create-user'>Successfully created user '"
+                               + user
+                               + "'</p>");
 
       // do a login if not already logged in
       final Collection<String> loginKeys = CookieUtils.findLoginKey(request);
@@ -107,11 +114,6 @@ public class CreateUser extends BaseFLLServlet {
 
     } catch (final SQLException e) {
       throw new RuntimeException(e);
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(checkUser);
-      SQLFunctions.close(addUser);
-      SQLFunctions.close(connection);
     }
 
   }
