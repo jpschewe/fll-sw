@@ -12,6 +12,7 @@ import java.io.IOException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.xml.sax.SAXException;
 
 import fll.TestUtils;
@@ -29,10 +30,10 @@ public class QueryTest {
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   @Test
-  public void test0(final WebDriver selenium) throws IOException, SAXException, InterruptedException {
+  public void test0(final WebDriver selenium, WebDriverWait seleniumWait) throws IOException, SAXException, InterruptedException {
     try {
       IntegrationTestUtils.initializeDatabaseFromDump(selenium,
-                                                      TestUtils.class.getResourceAsStream("/fll/data/testdb.flldb"));
+                                                      seleniumWait, TestUtils.class.getResourceAsStream("/fll/data/testdb.flldb"));
 
       final String query = "SELECT * FROM Tournaments";
       final QueryHandler.ResultData result = WebTestUtils.executeServerQuery(query);

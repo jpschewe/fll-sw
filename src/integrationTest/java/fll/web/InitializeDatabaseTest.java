@@ -6,6 +6,7 @@ import java.io.InputStream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import fll.TestUtils;
 
@@ -20,13 +21,16 @@ public class InitializeDatabaseTest {
 
   /**
    * @param selenium browser driver
+   * @param seleniumWait wait for elements
    * @throws IOException on test failure
    * @throws InterruptedException on test failure
    */
   @Test
-  public void testInitializeDatabase(final WebDriver selenium) throws IOException, InterruptedException {
+  public void testInitializeDatabase(final WebDriver selenium,
+                                     final WebDriverWait seleniumWait)
+      throws IOException, InterruptedException {
     try (InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml")) {
-      IntegrationTestUtils.initializeDatabase(selenium, challengeStream);
+      IntegrationTestUtils.initializeDatabase(selenium, seleniumWait, challengeStream);
     } catch (final IOException | RuntimeException | AssertionError e) {
       LOGGER.fatal(e, e);
       IntegrationTestUtils.storeScreenshot(selenium);

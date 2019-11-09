@@ -59,7 +59,6 @@ import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -103,7 +102,7 @@ public final class IntegrationTestUtils {
    * Maximum amount of time to wait for an element to appear. Nominally this is a
    * page load.
    */
-  public static final Duration WAIT_FOR_ELEMENT = Duration.ofMillis(2500);
+  public static final Duration WAIT_FOR_ELEMENT = Duration.ofSeconds(3);
 
   private IntegrationTestUtils() {
     // no instances
@@ -154,11 +153,13 @@ public final class IntegrationTestUtils {
    * Initialize the database using the given challenge document.
    *
    * @param driver the test controller
+   * @param driverWait wait for elements
    * @param challengeDocument the challenge descriptor
    * @throws IOException
    * @throws InterruptedException
    */
   public static void initializeDatabase(final WebDriver driver,
+                                        final WebDriverWait driverWait,
                                         final Document challengeDocument)
       throws IOException, InterruptedException {
     assertNotNull(challengeDocument);
@@ -168,7 +169,7 @@ public final class IntegrationTestUtils {
       XMLUtils.writeXML(challengeDocument, writer);
     }
     try {
-      initializeDatabase(driver, challengeFile);
+      initializeDatabase(driver, driverWait, challengeFile);
     } finally {
       Files.delete(challengeFile);
     }
@@ -178,11 +179,13 @@ public final class IntegrationTestUtils {
    * Initialize the database using the given challenge descriptor.
    *
    * @param driver the test controller
+   * @param driverWait wait for elements
    * @param challengeStream the challenge descriptor
    * @throws IOException
    * @throws InterruptedException
    */
   public static void initializeDatabase(final WebDriver driver,
+                                        final WebDriverWait driverWait,
                                         final InputStream challengeStream)
       throws IOException, InterruptedException {
     assertNotNull(challengeStream);
@@ -190,7 +193,7 @@ public final class IntegrationTestUtils {
     final Path challengeFile = Files.createTempFile("fll", ".xml");
     Files.copy(challengeStream, challengeFile, StandardCopyOption.REPLACE_EXISTING);
     try {
-      initializeDatabase(driver, challengeFile);
+      initializeDatabase(driver, driverWait, challengeFile);
     } finally {
       Files.delete(challengeFile);
     }
@@ -200,12 +203,14 @@ public final class IntegrationTestUtils {
    * Initialize the database using the given challenge descriptor.
    *
    * @param driver the test controller
+   * @param driverWait used to wait for elements
    * @param challengeFile a file to read the challenge description from. This
    *          file will not be deleted.
    * @throws InterruptedException
    * @throws IOException
    */
   public static void initializeDatabase(final WebDriver driver,
+                                        final WebDriverWait driverWait,
                                         final Path challengeFile)
       throws InterruptedException {
 
@@ -220,7 +225,7 @@ public final class IntegrationTestUtils {
           + "setup/");
     }
 
-    final WebElement fileEle = waitForElement(driver, By.name("xmldocument"));
+    final WebElement fileEle = driverWait.until(ExpectedConditions.elementToBeClickable(By.name("xmldocument")));
     fileEle.sendKeys(challengeFile.toAbsolutePath().toString());
 
     final WebElement reinitDB = driver.findElement(By.name("reinitializeDatabase"));
@@ -239,10 +244,10 @@ public final class IntegrationTestUtils {
       }
     }
 
-    waitForElement(driver, By.id("success"));
+    driverWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
 
     // setup user
-    final WebElement userElement = waitForElement(driver, By.name("user"));
+    final WebElement userElement = driverWait.until(ExpectedConditions.elementToBeClickable(By.name("user")));
     userElement.sendKeys(TEST_USERNAME);
 
     final WebElement passElement = driver.findElement(By.name("pass"));
@@ -254,7 +259,7 @@ public final class IntegrationTestUtils {
     final WebElement submitElement = driver.findElement(By.name("submit_create_user"));
     submitElement.click();
 
-    waitForElement(driver, By.id("success-create-user"));
+    driverWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success-create-user")));
 
     login(driver);
 
@@ -264,12 +269,14 @@ public final class IntegrationTestUtils {
    * Initialize a database from a zip file.
    *
    * @param selenium the test controller
+   * @param seleniumWait wait for elements
    * @param inputStream input stream that has database to load in it, this input
    *          stream is closed by this method upon successful completion
    * @throws IOException
    * @throws InterruptedException
    */
   public static void initializeDatabaseFromDump(final WebDriver selenium,
+                                                final WebDriverWait seleniumWait,
                                                 final InputStream inputStream)
       throws IOException, InterruptedException {
     assertNotNull(inputStream);
@@ -286,8 +293,8 @@ public final class IntegrationTestUtils {
             + "setup/");
       }
 
-      final WebElement dbEle = IntegrationTestUtils.waitForElement(selenium, By.name("dbdump"));
-      dbEle.sendKeys(dumpFile.getAbsolutePath());
+      seleniumWait.until(ExpectedConditions.elementToBeClickable(By.name("dbdump")))
+                  .sendKeys(dumpFile.getAbsolutePath());
 
       final WebElement createEle = selenium.findElement(By.name("createdb"));
       createEle.click();
@@ -305,7 +312,7 @@ public final class IntegrationTestUtils {
         }
       }
 
-      IntegrationTestUtils.waitForElement(selenium, By.id("success"));
+      seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
 
       // setup user
       final WebElement userElement = selenium.findElement(By.name("user"));
@@ -320,7 +327,7 @@ public final class IntegrationTestUtils {
       final WebElement submitElement = selenium.findElement(By.name("submit_create_user"));
       submitElement.click();
 
-      IntegrationTestUtils.waitForElement(selenium, By.id("success-create-user"));
+      seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success-create-user")));
 
       login(selenium);
     } finally {
@@ -481,9 +488,11 @@ public final class IntegrationTestUtils {
   /**
    * Add a team to a tournament.
    *
+   * @param seleniumWait used to wait for elements
    * @throws InterruptedException
    */
   public static void addTeam(final WebDriver selenium,
+                             final WebDriverWait seleniumWait,
                              final int teamNumber,
                              final String teamName,
                              final String organization,
@@ -497,15 +506,16 @@ public final class IntegrationTestUtils {
 
     selenium.findElement(By.linkText("Add a team")).click();
 
-    IntegrationTestUtils.waitForElement(selenium, By.name("teamNumber")).sendKeys(String.valueOf(teamNumber));
+    seleniumWait.until(ExpectedConditions.elementToBeClickable(By.name("teamNumber")))
+                .sendKeys(String.valueOf(teamNumber));
     selenium.findElement(By.name("teamName")).sendKeys(teamName);
     selenium.findElement(By.name("organization")).sendKeys(organization);
 
     selenium.findElement(By.id("tournament_"
         + tournament.getTournamentID())).click();
 
-    final WebElement eventDivision = IntegrationTestUtils.waitForElement(selenium, By.id("event_division_"
-        + tournament.getTournamentID()));
+    final WebElement eventDivision = seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("event_division_"
+        + tournament.getTournamentID())));
     final Select eventDivisionSel = new Select(eventDivision);
     eventDivisionSel.selectByValue(division);
 
@@ -516,7 +526,7 @@ public final class IntegrationTestUtils {
 
     selenium.findElement(By.name("commit")).click();
 
-    IntegrationTestUtils.waitForElement(selenium, By.id("success"));
+    seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
   }
 
   /**
@@ -638,13 +648,36 @@ public final class IntegrationTestUtils {
     return selenium;
   }
 
+  /**
+   * Uses {@link BracketSortType#SEEDING} as the sort.
+   *
+   * @param selenium passed along
+   * @param seleniumWait passed along
+   * @param awardGroup passed along
+   * @throws IOException test error
+   * @throws InterruptedException test error
+   * @see #initializePlayoffsForAwardGroup(WebDriver, WebDriverWait, String,
+   *      BracketSortType)
+   */
   public static void initializePlayoffsForAwardGroup(final WebDriver selenium,
+                                                     final WebDriverWait seleniumWait,
                                                      final String awardGroup)
       throws IOException, InterruptedException {
-    initializePlayoffsForAwardGroup(selenium, awardGroup, BracketSortType.SEEDING);
+    initializePlayoffsForAwardGroup(selenium, seleniumWait, awardGroup, BracketSortType.SEEDING);
   }
 
+  /**
+   * Initialize playoffs for the specified award group.
+   *
+   * @param selenium web browser controller
+   * @param seleniumWait wait for elements
+   * @param awardGroup the award group
+   * @param bracketSort how to sort teams
+   * @throws IOException test error
+   * @throws InterruptedException test error
+   */
   public static void initializePlayoffsForAwardGroup(final WebDriver selenium,
+                                                     final WebDriverWait seleniumWait,
                                                      final String awardGroup,
                                                      final BracketSortType bracketSort)
       throws IOException, InterruptedException {
@@ -653,11 +686,9 @@ public final class IntegrationTestUtils {
 
     selenium.findElement(By.id("create-bracket")).click();
 
-    IntegrationTestUtils.waitForElement(selenium,
-                                        By.xpath("//input[@value='Create Head to Head Bracket for Award Group "
-                                            + awardGroup
-                                            + "']"))
-                        .click();
+    seleniumWait.until(ExpectedConditions.elementToBeClickable(By.xpath("//input[@value='Create Head to Head Bracket for Award Group "
+        + awardGroup
+        + "']"))).click();
     assertTrue(isElementPresent(selenium, By.id("success")), "Error creating bracket for award group: "
         + awardGroup);
 
@@ -805,6 +836,8 @@ public final class IntegrationTestUtils {
 
     private static final String WEBDRIVER_KEY = "WebDriver";
 
+    private static final String WAIT_KEY = "Wait";
+
     private Store getStore(final ExtensionContext context) {
       return context.getStore(Namespace.create(getClass(), context.getRequiredTestMethod()));
     }
@@ -818,6 +851,12 @@ public final class IntegrationTestUtils {
         throw new RuntimeException(e);
       }
       getStore(context).put(TOMCAT_LAUNCHER_KEY, launcher);
+
+      final WebDriver selenium = createWebDriver();
+      getStore(context).put(WEBDRIVER_KEY, selenium);
+
+      final WebDriverWait wait = new WebDriverWait(selenium, WAIT_FOR_ELEMENT.getSeconds());
+      getStore(context).put(WAIT_KEY, wait);
     }
 
     @Override
@@ -842,18 +881,33 @@ public final class IntegrationTestUtils {
                                      final ExtensionContext extensionContext)
         throws ParameterResolutionException {
       final Class<?> type = parameterContext.getParameter().getType();
-      return WebDriver.class.isAssignableFrom(type);
+      return WebDriver.class.isAssignableFrom(type)
+          || WebDriverWait.class.isAssignableFrom(type);
     }
 
     @Override
     public Object resolveParameter(final ParameterContext parameterContext,
                                    final ExtensionContext extensionContext)
         throws ParameterResolutionException {
-      final WebDriver selenium = createWebDriver();
-
-      getStore(extensionContext).put(WEBDRIVER_KEY, selenium);
-
-      return selenium;
+      final Class<?> type = parameterContext.getParameter().getType();
+      if (WebDriver.class.isAssignableFrom(type)) {
+        final WebDriver selenium = getStore(extensionContext).remove(WEBDRIVER_KEY, WebDriver.class);
+        if (null != selenium) {
+          return selenium;
+        } else {
+          throw new ParameterResolutionException("The webdriver has not been created. This is an internal error");
+        }
+      } else if (WebDriverWait.class.isAssignableFrom(type)) {
+        final WebDriverWait wait = getStore(extensionContext).remove(WAIT_KEY, WebDriverWait.class);
+        if (null != wait) {
+          return wait;
+        } else {
+          throw new ParameterResolutionException("The webdriver wait has not been created. This is an internal error");
+        }
+      } else {
+        throw new ParameterResolutionException("Unknown parameter type: "
+            + type.getName());
+      }
     }
   }
 
@@ -890,17 +944,19 @@ public final class IntegrationTestUtils {
    * tournament is set before calling this method.
    *
    * @param selenium the web driver
+   * @param seleniumWait wait for elements
    * @param runningHeadToHead the value of running head to head
    * @throws InterruptedException see {@link #loadPage(WebDriver, String)}
    * @throws IOException see {@link #loadPage(WebDriver, String)}
    */
   public static void setRunningHeadToHead(final WebDriver selenium,
+                                          final WebDriverWait seleniumWait,
                                           final boolean runningHeadToHead)
       throws IOException, InterruptedException {
     loadPage(selenium, TestUtils.URL_ROOT
         + "admin/edit_tournament_parameters.jsp");
 
-    final WebElement element = selenium.findElement(By.id("running_head_to_head"));
+    final WebElement element = seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("running_head_to_head")));
     if (runningHeadToHead != element.isSelected()) {
       element.click();
     }
@@ -915,8 +971,10 @@ public final class IntegrationTestUtils {
    * An assertion violation occurs if the submit button is not enabled.
    *
    * @param selenium the web driver
+   * @param seleniumWait wait for elements
    */
-  public static void submitPerformanceScore(final WebDriver selenium) {
+  public static void submitPerformanceScore(final WebDriver selenium,
+                                            final WebDriverWait seleniumWait) {
     // check that the submit button is active
     assertTrue(selenium.findElement(By.id("submit_score")).isEnabled(),
                "Submit button is not enabled, invalid score entered");
@@ -924,25 +982,9 @@ public final class IntegrationTestUtils {
     selenium.findElement(By.id("submit_score")).click();
 
     // wait for dialog element
-    final WebElement confirmScoreYesButton = waitForElement(selenium, By.id("yesno-dialog_yes"));
+    final WebElement confirmScoreYesButton = seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("yesno-dialog_yes")));
 
     confirmScoreYesButton.click();
-  }
-
-  /**
-   * Wait for an element to appear.
-   *
-   * @param driver the web browser driver
-   * @param locator how to locate the element
-   * @return the element
-   * @see #WAIT_FOR_ELEMENT
-   * @see WebDriverWait
-   */
-  public static WebElement waitForElement(final WebDriver driver,
-                                          final By locator)
-      throws TimeoutException {
-    return new WebDriverWait(driver,
-                             IntegrationTestUtils.WAIT_FOR_ELEMENT.getSeconds()).until(ExpectedConditions.presenceOfElementLocated(locator));
   }
 
 }

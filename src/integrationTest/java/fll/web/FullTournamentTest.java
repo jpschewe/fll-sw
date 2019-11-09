@@ -51,7 +51,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -128,6 +130,8 @@ public class FullTournamentTest {
   /**
    * Test a full tournament. This tests to make sure everything works normally.
    *
+   * @param selenium the web browser driver
+   * @param seleniumWait the object to use to wait for elements
    * @throws MalformedURLException test error
    * @throws IOException test error
    * @throws ClassNotFoundException test error
@@ -139,8 +143,10 @@ public class FullTournamentTest {
    * @throws SAXException test error
    */
   @RepeatedIfExceptionsTest(repeats = 3)
-  public void testFullTournament(final WebDriver selenium) throws IOException, ClassNotFoundException,
-      InstantiationException, IllegalAccessException, ParseException, SQLException, InterruptedException, SAXException {
+  public void testFullTournament(final WebDriver selenium,
+                                 final WebDriverWait seleniumWait)
+      throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, ParseException,
+      SQLException, InterruptedException, SAXException {
     try {
       Class.forName("org.hsqldb.jdbcDriver").newInstance();
 
@@ -158,7 +164,7 @@ public class FullTournamentTest {
           Files.createDirectories(outputDirectory);
         }
 
-        replayTournament(selenium, testDataConn, testTournamentName, outputDirectory);
+        replayTournament(selenium, seleniumWait, testDataConn, testTournamentName, outputDirectory);
 
         LOGGER.info("Computing final scores");
         computeFinalScores(selenium);
@@ -204,6 +210,7 @@ public class FullTournamentTest {
    * Replay a tournament.
    *
    * @param selenium the web driver to use
+   * @param seleniumWait used to wait for elements
    * @param testDataConn connection to the source data
    * @param testTournamentName name of the tournament to create
    * @param outputDirectory where to save files, must not be null and must exist
@@ -214,6 +221,7 @@ public class FullTournamentTest {
    * @throws SAXException
    */
   public void replayTournament(final WebDriver selenium,
+                               final WebDriverWait seleniumWait,
                                final Connection testDataConn,
                                final String testTournamentName,
                                final Path outputDirectory)
@@ -237,7 +245,7 @@ public class FullTournamentTest {
 
     // --- initialize database ---
     LOGGER.info("Initializing the database");
-    IntegrationTestUtils.initializeDatabase(selenium, challengeDocument);
+    IntegrationTestUtils.initializeDatabase(selenium, seleniumWait, challengeDocument);
 
     LOGGER.info("Loading teams");
     loadTeams(selenium, testDataConn, sourceTournament, outputDirectory);
@@ -251,7 +259,7 @@ public class FullTournamentTest {
     IntegrationTestUtils.setTournament(selenium, sourceTournament.getName());
 
     LOGGER.info("Setting head to head parameter");
-    IntegrationTestUtils.setRunningHeadToHead(selenium, runningHeadToHead);
+    IntegrationTestUtils.setRunningHeadToHead(selenium, seleniumWait, runningHeadToHead);
 
     LOGGER.info("Loading the schedule");
     uploadSchedule(selenium, testDataConn, sourceTournament, outputDirectory);
@@ -315,7 +323,7 @@ public class FullTournamentTest {
             for (final String awardGroup : awardGroups) {
               LOGGER.info("Initializing playoff brackets for division "
                   + awardGroup);
-              IntegrationTestUtils.initializePlayoffsForAwardGroup(selenium, awardGroup);
+              IntegrationTestUtils.initializePlayoffsForAwardGroup(selenium, seleniumWait, awardGroup);
             }
             initializedPlayoff = true;
           }
@@ -326,12 +334,14 @@ public class FullTournamentTest {
           // for each score in a run
           while (rs.next()) {
             final int teamNumber = rs.getInt(1);
-            enterPerformanceScore(selenium, testDataConn, performanceElement, sourceTournament, runNumber, teamNumber);
+            enterPerformanceScore(selenium, seleniumWait, testDataConn, performanceElement, sourceTournament, runNumber,
+                                  teamNumber);
 
             // give the web server a chance to catch up
             Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
 
-            verifyPerformanceScore(selenium, testDataConn, performanceElement, sourceTournament, runNumber, teamNumber);
+            verifyPerformanceScore(selenium, seleniumWait, testDataConn, performanceElement, sourceTournament,
+                                   runNumber, teamNumber);
           }
         }
 
@@ -913,10 +923,9 @@ public class FullTournamentTest {
    * Enter a teams performance score. Data is pulled from testDataConn and
    * pushed to the website.
    *
-   * @param selenium TODO
-   * @throws InterruptedException
    */
   private void enterPerformanceScore(final WebDriver selenium,
+                                     final WebDriverWait seleniumWait,
                                      final Connection testDataConn,
                                      final PerformanceScoreCategory performanceElement,
                                      final Tournament sourceTournament,
@@ -959,9 +968,7 @@ public class FullTournamentTest {
           if (rs.getBoolean("NoShow")) {
             selenium.findElement(By.id("no_show")).click();
 
-            final WebElement confirmScoreYesButton = IntegrationTestUtils.waitForElement(selenium,
-                                                                                         By.id("yesno-dialog_yes"));
-
+            final WebElement confirmScoreYesButton = seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("yesno-dialog_yes")));
             confirmScoreYesButton.click();
           } else {
             // walk over challenge descriptor to get all element names and then
@@ -1024,7 +1031,7 @@ public class FullTournamentTest {
               } // !computed
             } // foreach goal
 
-            IntegrationTestUtils.submitPerformanceScore(selenium);
+            IntegrationTestUtils.submitPerformanceScore(selenium, seleniumWait);
 
           } // not NoShow
 
@@ -1046,10 +1053,9 @@ public class FullTournamentTest {
    * Enter a teams performance score. Data is pulled from testDataConn and
    * pushed to the website.
    *
-   * @param selenium TODO
-   * @throws InterruptedException
    */
   private void verifyPerformanceScore(final WebDriver selenium,
+                                      final WebDriverWait seleniumWait,
                                       final Connection testDataConn,
                                       final PerformanceScoreCategory performanceElement,
                                       final Tournament sourceTournament,
@@ -1148,9 +1154,7 @@ public class FullTournamentTest {
           LOGGER.debug("Checking for an alert");
 
           // confirm selection, not going to bother checking the text
-          final WebElement confirmScoreYesButton = IntegrationTestUtils.waitForElement(selenium,
-                                                                                       By.id("yesno-dialog_yes"));
-
+          final WebElement confirmScoreYesButton = seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("yesno-dialog_yes")));
           confirmScoreYesButton.click();
 
           // give the web server a chance to catch up
