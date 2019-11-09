@@ -19,6 +19,8 @@
 
 	<Loggers>
 		<!-- stuff for debugging -->
+        <Logger name="fll.web.admin.CreateUser" level="TRACE" />
+        <Logger name="fll.web.MainIndex" level="TRACE" />
 
 		<!-- for debugging the database, set levels to something lower than fatal 
 			to actually see log output -->
