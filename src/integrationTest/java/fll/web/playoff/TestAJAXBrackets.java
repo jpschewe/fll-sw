@@ -21,6 +21,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.xml.sax.SAXException;
 
 import fll.TestUtils;
@@ -41,17 +42,27 @@ public class TestAJAXBrackets {
 
   private WebDriver bracketsWindow;
 
+  private WebDriverWait bracketsWait;
+
   private WebDriver scoreEntryWindow;
 
+  private WebDriverWait scoreEntryWait;
+
   private WebDriver scoresheetWindow;
+
+  private WebDriverWait scoresheetWait;
 
   @BeforeEach
   public void setUp() throws Exception {
     bracketsWindow = IntegrationTestUtils.createWebDriver();
+    bracketsWait = new WebDriverWait(bracketsWindow, IntegrationTestUtils.WAIT_FOR_ELEMENT.getSeconds());
 
     scoreEntryWindow = IntegrationTestUtils.createWebDriver();
+    scoreEntryWait = new WebDriverWait(scoreEntryWindow, IntegrationTestUtils.WAIT_FOR_ELEMENT.getSeconds());
 
     scoresheetWindow = IntegrationTestUtils.createWebDriver();
+    scoresheetWait = new WebDriverWait(scoresheetWindow, IntegrationTestUtils.WAIT_FOR_ELEMENT.getSeconds());
+
   }
 
   @AfterEach
@@ -68,14 +79,17 @@ public class TestAJAXBrackets {
   }
 
   @Test
-  public void testAJAXBracketsInFull(final WebDriver selenium) throws IOException, SAXException, InterruptedException {
+  public void testAJAXBracketsInFull(final WebDriver selenium,
+                                     final WebDriverWait seleniumWait)
+      throws IOException, SAXException, InterruptedException {
     try {
       // Setup our playoffs
       final InputStream challenge = TestAJAXBrackets.class.getResourceAsStream("data/very-simple.xml");
-      IntegrationTestUtils.initializeDatabase(selenium, challenge);
+      IntegrationTestUtils.initializeDatabase(selenium, seleniumWait, challenge);
       IntegrationTestUtils.setTournament(selenium, GenerateDB.DUMMY_TOURNAMENT_NAME);
       for (int i = 1; i < 6; ++i) {
-        IntegrationTestUtils.addTeam(selenium, i, String.valueOf(i), "htk", "1", GenerateDB.DUMMY_TOURNAMENT_NAME);
+        IntegrationTestUtils.addTeam(selenium, seleniumWait, i, String.valueOf(i), "htk", "1",
+                                     GenerateDB.DUMMY_TOURNAMENT_NAME);
       }
       // table labels
       IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
@@ -87,7 +101,7 @@ public class TestAJAXBrackets {
 
       IntegrationTestUtils.changeNumSeedingRounds(selenium, 0);
 
-      IntegrationTestUtils.setRunningHeadToHead(selenium, true);
+      IntegrationTestUtils.setRunningHeadToHead(selenium, seleniumWait, true);
 
       // init brackets
       IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
@@ -95,7 +109,8 @@ public class TestAJAXBrackets {
 
       final String division = "1";
 
-      IntegrationTestUtils.initializePlayoffsForAwardGroup(selenium, division, BracketSortType.ALPHA_TEAM);
+      IntegrationTestUtils.initializePlayoffsForAwardGroup(selenium, seleniumWait, division,
+                                                           BracketSortType.ALPHA_TEAM);
 
       // set display to show the head to head brackets
       IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
@@ -145,7 +160,7 @@ public class TestAJAXBrackets {
       // bracketsWindow.setSpeed("300");
 
       // enter unverified score for team 4
-      enterScore(scoreEntryWindow, "4", 1);
+      enterScore(scoreEntryWindow, scoreEntryWait, "4", 1);
 
       final String scoreTextBefore = bracketsWindow.findElement(By.id("0-3-1")).getText();
       // final String scoreTextBefore =
@@ -176,7 +191,7 @@ public class TestAJAXBrackets {
 
       scoreEntryWindow.findElement(By.id("Verified_yes")).click();
 
-      IntegrationTestUtils.submitPerformanceScore(scoreEntryWindow);
+      IntegrationTestUtils.submitPerformanceScore(scoreEntryWindow, scoreEntryWait);
 
       // give the web server a chance to catch up
       Thread.sleep(30000);
@@ -203,6 +218,7 @@ public class TestAJAXBrackets {
   }
 
   private void enterScore(final WebDriver webDriver,
+                          final WebDriverWait webDriverWait,
                           final String team,
                           final int score) {
     final Select teamSelect = new Select(webDriver.findElement(By.id("select-teamnumber")));
@@ -213,6 +229,6 @@ public class TestAJAXBrackets {
       webDriver.findElement(By.id("inc_score_1")).click();
     }
 
-    IntegrationTestUtils.submitPerformanceScore(webDriver);
+    IntegrationTestUtils.submitPerformanceScore(webDriver, webDriverWait);
   }
 }

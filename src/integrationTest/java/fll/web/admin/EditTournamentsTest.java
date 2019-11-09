@@ -16,6 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import fll.TestUtils;
 import fll.web.InitializeDatabaseTest;
@@ -29,19 +31,21 @@ import fll.web.IntegrationTestUtils;
 public class EditTournamentsTest {
 
   @Test
-  public void testAddTournament(final WebDriver selenium) throws IOException, InterruptedException {
+  public void testAddTournament(final WebDriver selenium,
+                                final WebDriverWait seleniumWait)
+      throws IOException, InterruptedException {
     try {
       final InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml");
-      IntegrationTestUtils.initializeDatabase(selenium, challengeStream);
+      IntegrationTestUtils.initializeDatabase(selenium, seleniumWait, challengeStream);
 
-      IntegrationTestUtils.waitForElement(selenium, By.linkText("Admin Index")).click();
+      seleniumWait.until(ExpectedConditions.elementToBeClickable(By.linkText("Admin Index"))).click();
 
-      IntegrationTestUtils.waitForElement(selenium, By.id("add-edit-tournaments")).click();
+      seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("add-edit-tournaments"))).click();
 
-      IntegrationTestUtils.waitForElement(selenium, By.id("addRow")).click();
+      seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("addRow"))).click();
 
       // get num rows
-      final WebElement numRowsEle = IntegrationTestUtils.waitForElement(selenium, By.name("numRows"));
+      final WebElement numRowsEle = seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.name("numRows")));
       final String numRowsStr = numRowsEle.getAttribute("value");
       assertNotNull(numRowsStr);
       final int numRows = Integer.parseInt(numRowsStr);

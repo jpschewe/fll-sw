@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import fll.TestUtils;
 import fll.db.GenerateDB;
@@ -34,24 +35,27 @@ public class TestPlayoffs {
    * particular playoff round results in an error message and the user being
    * sent back to the select team page.
    *
+   * @param seleniumWait TODO
    * @throws IOException
    * @throws InterruptedException
    */
   @Test
-  public void testNotAdvanced(final WebDriver selenium) throws IOException, InterruptedException {
+  public void testNotAdvanced(final WebDriver selenium,
+                              final WebDriverWait seleniumWait)
+      throws IOException, InterruptedException {
     try {
       // initialize database using simple challenge descriptor that just has 1
       // goal from 1 - 100
       final InputStream challengeStream = TestPlayoffs.class.getResourceAsStream("data/simple.xml");
-      IntegrationTestUtils.initializeDatabase(selenium, challengeStream);
+      IntegrationTestUtils.initializeDatabase(selenium, seleniumWait, challengeStream);
 
       IntegrationTestUtils.setTournament(selenium, GenerateDB.DUMMY_TOURNAMENT_NAME);
 
-      IntegrationTestUtils.setRunningHeadToHead(selenium, true);
+      IntegrationTestUtils.setRunningHeadToHead(selenium, seleniumWait, true);
 
       // add 4 teams to dummy tournament
       for (int teamNumber = 0; teamNumber < 4; ++teamNumber) {
-        IntegrationTestUtils.addTeam(selenium, teamNumber, "team "
+        IntegrationTestUtils.addTeam(selenium, seleniumWait, teamNumber, "team "
             + teamNumber, "org", "1", GenerateDB.DUMMY_TOURNAMENT_NAME);
       }
 
@@ -60,26 +64,26 @@ public class TestPlayoffs {
 
       // enter 1 score for all teams equal to their team number
       for (int teamNumber = 0; teamNumber < 4; ++teamNumber) {
-        enterTeamScore(selenium, teamNumber);
+        enterTeamScore(selenium, seleniumWait, teamNumber);
 
         assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.name("error")), "Errors: ");
       }
 
       // initialize playoffs
-      IntegrationTestUtils.initializePlayoffsForAwardGroup(selenium, "1");
+      IntegrationTestUtils.initializePlayoffsForAwardGroup(selenium, seleniumWait, "1");
 
       IntegrationTestUtils.assertNoException(selenium);
 
       // enter score for teams 3 and 0 with 3 winning
-      enterTeamScore(selenium, 3);
+      enterTeamScore(selenium, seleniumWait, 3);
       assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.name("error")), "Errors: ");
-      enterTeamScore(selenium, 0);
+      enterTeamScore(selenium, seleniumWait, 0);
       assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.name("error")), "Errors: ");
 
       // enter score for teams 2 and 1 with 1 winning
-      enterTeamScore(selenium, 2);
+      enterTeamScore(selenium, seleniumWait, 2);
       assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.name("error")), "Errors: ");
-      enterTeamScore(selenium, 1);
+      enterTeamScore(selenium, seleniumWait, 1);
       assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.name("error")), "Errors: ");
 
       // attempt to enter score for 0
@@ -109,6 +113,7 @@ public class TestPlayoffs {
   }
 
   private void enterTeamScore(final WebDriver selenium,
+                              final WebDriverWait seleniumWait,
                               final int teamNumber)
       throws IOException, InterruptedException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
@@ -122,6 +127,6 @@ public class TestPlayoffs {
     selenium.findElement(By.name("g1")).sendKeys(String.valueOf(teamNumber));
     selenium.findElement(By.id("Verified_yes")).click();
 
-    IntegrationTestUtils.submitPerformanceScore(selenium);
+    IntegrationTestUtils.submitPerformanceScore(selenium, seleniumWait);
   }
 }

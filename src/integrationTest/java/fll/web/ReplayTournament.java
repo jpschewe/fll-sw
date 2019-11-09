@@ -24,6 +24,7 @@ import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import fll.TestUtils;
 import fll.Tournament;
@@ -89,8 +90,10 @@ public class ReplayTournament {
         // run
         final FullTournamentTest replay = new FullTournamentTest();
         final WebDriver selenium = IntegrationTestUtils.createWebDriver(driver);
+        final WebDriverWait seleniumWait = new WebDriverWait(selenium,
+                                                             IntegrationTestUtils.WAIT_FOR_ELEMENT.getSeconds());
         try {
-          replay.replayTournament(selenium, testDataConn, testTournament.getName(), outputDirectory);
+          replay.replayTournament(selenium, seleniumWait, testDataConn, testTournament.getName(), outputDirectory);
         } finally {
           selenium.quit();
         }
