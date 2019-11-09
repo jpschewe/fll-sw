@@ -42,27 +42,20 @@ public class TestAJAXBrackets {
 
   private WebDriver bracketsWindow;
 
-  private WebDriverWait bracketsWait;
-
   private WebDriver scoreEntryWindow;
 
   private WebDriverWait scoreEntryWait;
 
   private WebDriver scoresheetWindow;
 
-  private WebDriverWait scoresheetWait;
-
   @BeforeEach
   public void setUp() throws Exception {
     bracketsWindow = IntegrationTestUtils.createWebDriver();
-    bracketsWait = new WebDriverWait(bracketsWindow, IntegrationTestUtils.WAIT_FOR_ELEMENT.getSeconds());
 
     scoreEntryWindow = IntegrationTestUtils.createWebDriver();
     scoreEntryWait = new WebDriverWait(scoreEntryWindow, IntegrationTestUtils.WAIT_FOR_ELEMENT.getSeconds());
 
     scoresheetWindow = IntegrationTestUtils.createWebDriver();
-    scoresheetWait = new WebDriverWait(scoresheetWindow, IntegrationTestUtils.WAIT_FOR_ELEMENT.getSeconds());
-
   }
 
   @AfterEach
