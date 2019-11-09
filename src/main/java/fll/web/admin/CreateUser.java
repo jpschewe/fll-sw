@@ -21,8 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
 import org.apache.commons.codec.digest.DigestUtils;
 
 import fll.db.Queries;
@@ -31,12 +29,15 @@ import fll.web.BaseFLLServlet;
 import fll.web.CookieUtils;
 import fll.web.DoLogin;
 import fll.web.SessionAttributes;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Create a user if.
  */
 @WebServlet("/admin/CreateUser")
 public class CreateUser extends BaseFLLServlet {
+
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   @Override
   protected void processRequest(final HttpServletRequest request,
@@ -57,6 +58,7 @@ public class CreateUser extends BaseFLLServlet {
       final String passCheck = request.getParameter("pass_check");
       if (null == pass
           || null == passCheck || null == user || user.isEmpty() || pass.isEmpty() || passCheck.isEmpty()) {
+        LOGGER.debug("Missing information on form");
         session.setAttribute(SessionAttributes.MESSAGE,
                              "<p class='error'>You must enter all information in the form.</p>");
         response.sendRedirect(response.encodeRedirectURL("createUsername.jsp"));
@@ -64,6 +66,7 @@ public class CreateUser extends BaseFLLServlet {
       }
 
       if (!pass.equals(passCheck)) {
+        LOGGER.debug("Password check doesn't match");
         session.setAttribute(SessionAttributes.MESSAGE,
                              "<p class='error'>Password and password check do not match.</p>");
         response.sendRedirect(response.encodeRedirectURL("createUsername.jsp"));
@@ -74,6 +77,7 @@ public class CreateUser extends BaseFLLServlet {
       checkUser.setString(1, user);
       rs = checkUser.executeQuery();
       if (rs.next()) {
+        LOGGER.debug("User already exists");
         session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>Username '"
             + user + "' already exists.</p>");
         response.sendRedirect(response.encodeRedirectURL("createUsername.jsp"));
@@ -86,6 +90,7 @@ public class CreateUser extends BaseFLLServlet {
       addUser.setString(2, hashedPass);
       addUser.executeUpdate();
 
+      LOGGER.debug("Created user");
       session.setAttribute(SessionAttributes.MESSAGE, "<p class='success' id='success-create-user'>Successfully created user '"
           + user + "'</p>");
 
@@ -93,8 +98,10 @@ public class CreateUser extends BaseFLLServlet {
       final Collection<String> loginKeys = CookieUtils.findLoginKey(request);
       final String authenticatedUser = Queries.checkValidLogin(connection, loginKeys);
       if (null == authenticatedUser) {
+        LOGGER.debug("Doing login");
         DoLogin.doLogin(request, response, application, session);
       } else {
+        LOGGER.debug("Redirecting to index");
         response.sendRedirect(response.encodeRedirectURL("index.jsp"));
       }
 
