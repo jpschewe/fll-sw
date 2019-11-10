@@ -1,3 +1,5 @@
+* #551 - use waits instead of sleeps in the web tests to decrease test time
+
 Release 14.1.0
 ==============
 * #775 - Allow teams to be added to the database during schedule upload
