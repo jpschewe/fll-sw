@@ -510,18 +510,16 @@ public class FullTournamentTest {
     --maxIndex;
 
     // make sure the row exists to enter the judge
-    if (maxIndex < judgeIndex) {
-      for (; maxIndex < judgeIndex; ++maxIndex) {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Adding a row to the judges entry form to get to: "
-              + judgeIndex);
-          IntegrationTestUtils.storeScreenshot(selenium);
-        }
-        selenium.findElement(By.id("add_rows")).click();
-
-        final String expectedId = String.format("id%d", maxIndex);
-        seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id(expectedId)));
+    for (; maxIndex < judgeIndex; ++maxIndex) {
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Adding a row to the judges entry form to get to: "
+            + judgeIndex);
+        IntegrationTestUtils.storeScreenshot(selenium);
       }
+      selenium.findElement(By.id("add_rows")).click();
+
+      final String expectedId = String.format("id%d", maxIndex);
+      seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id(expectedId)));
     }
 
     selenium.findElement(By.name("id"
