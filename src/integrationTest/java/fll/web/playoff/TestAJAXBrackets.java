@@ -53,7 +53,7 @@ public class TestAJAXBrackets {
     bracketsWindow = IntegrationTestUtils.createWebDriver();
 
     scoreEntryWindow = IntegrationTestUtils.createWebDriver();
-    scoreEntryWait = new WebDriverWait(scoreEntryWindow, IntegrationTestUtils.WAIT_FOR_ELEMENT.getSeconds());
+    scoreEntryWait = IntegrationTestUtils.createWebDriverWait(scoreEntryWindow);
 
     scoresheetWindow = IntegrationTestUtils.createWebDriver();
   }
