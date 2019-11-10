@@ -269,7 +269,7 @@ public class FullTournamentTest {
                                                                                   + "_02-schedule-loaded.flldb"));
 
     LOGGER.info("Assigning judges");
-    assignJudges(selenium, testDataConn, sourceTournament);
+    assignJudges(selenium, seleniumWait, testDataConn, sourceTournament);
 
     IntegrationTestUtils.downloadFile(new URL(TestUtils.URL_ROOT
         + "admin/database.flldb"), "application/zip", outputDirectory.resolve(
@@ -495,11 +495,12 @@ public class FullTournamentTest {
   }
 
   private void assignJudge(final WebDriver selenium,
+                           final WebDriverWait seleniumWait,
                            final String id,
                            final String category,
                            final String station,
                            final int judgeIndex)
-      throws IOException, InterruptedException {
+      throws IOException {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Assigning judge '"
           + id
@@ -511,18 +512,27 @@ public class FullTournamentTest {
           + judgeIndex);
     }
 
-    // make sure the row exists
-    while (!IntegrationTestUtils.isElementPresent(selenium, By.name("id"
-        + String.valueOf(judgeIndex)))) {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Adding a row to the judges entry form to get to: "
-            + judgeIndex);
-        IntegrationTestUtils.storeScreenshot(selenium);
-      }
-      selenium.findElement(By.id("add_rows")).click();
+    // determine current max row
+    int maxIndex = 1;
+    while (IntegrationTestUtils.isElementPresent(selenium, By.name(String.format("id%d", maxIndex)))) {
+      ++maxIndex;
+    }
+    // decrement by one since this index wasn't found
+    --maxIndex;
 
-      // let the javascript do it's work
-      Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
+    // make sure the row exists to enter the judge
+    if (maxIndex < judgeIndex) {
+      for (; maxIndex < judgeIndex; ++maxIndex) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Adding a row to the judges entry form to get to: "
+              + judgeIndex);
+          IntegrationTestUtils.storeScreenshot(selenium);
+        }
+        selenium.findElement(By.id("add_rows")).click();
+
+        final String expectedId = String.format("id%d", maxIndex);
+        seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id(expectedId)));
+      }
     }
 
     selenium.findElement(By.name("id"
@@ -539,6 +549,7 @@ public class FullTournamentTest {
   }
 
   private void assignJudges(final WebDriver selenium,
+                            final WebDriverWait seleniumWait,
                             final Connection testDataConn,
                             final Tournament sourceTournament)
       throws IOException, SQLException, InterruptedException {
@@ -553,7 +564,7 @@ public class FullTournamentTest {
     int judgeIndex = 1;
     for (final JudgeInformation judge : judges) {
 
-      assignJudge(selenium, judge.getId(), judge.getCategory(), judge.getGroup(), judgeIndex);
+      assignJudge(selenium, seleniumWait, judge.getId(), judge.getCategory(), judge.getGroup(), judgeIndex);
 
       ++judgeIndex;
     }
@@ -587,13 +598,13 @@ public class FullTournamentTest {
   /**
    * Load the teams from testDataConnection.
    *
-   * @param selenium TODO
+   * @param selenium the browser driver
    * @param testDataConnection where to get the teams from
    * @param outputDirectory where to write the teams file, may be null in which
    *          case a temp file will be used
-   * @throws IOException
-   * @throws SQLException
-   * @throws InterruptedException
+   * @throws IOException test error
+   * @throws SQLException test error
+   * @throws InterruptedException test error
    */
   private void loadTeams(final WebDriver selenium,
                          final Connection testDataConnection,
@@ -922,7 +933,6 @@ public class FullTournamentTest {
   /**
    * Enter a teams performance score. Data is pulled from testDataConn and
    * pushed to the website.
-   *
    */
   private void enterPerformanceScore(final WebDriver selenium,
                                      final WebDriverWait seleniumWait,
@@ -1052,7 +1062,6 @@ public class FullTournamentTest {
   /**
    * Enter a teams performance score. Data is pulled from testDataConn and
    * pushed to the website.
-   *
    */
   private void verifyPerformanceScore(final WebDriver selenium,
                                       final WebDriverWait seleniumWait,
