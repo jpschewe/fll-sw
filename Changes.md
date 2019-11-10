@@ -1,3 +1,5 @@
+Release 14.1.1
+==============
 * #779 - correct bug in upload schedule workflow that prevented Excel workbooks from being used 
 
 Release 14.1.0
