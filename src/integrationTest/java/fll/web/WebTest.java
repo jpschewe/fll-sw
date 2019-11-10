@@ -67,7 +67,7 @@ public class WebTest {
 
         final String url = TestUtils.URL_ROOT
             + page;
-        IntegrationTestUtils.loadPage(selenium, url);
+        IntegrationTestUtils.loadPage(selenium, seleniumWait, url);
       }
     } catch (final IOException | RuntimeException | AssertionError e) {
       LOGGER.fatal(e, e);
@@ -91,9 +91,9 @@ public class WebTest {
       IntegrationTestUtils.initializeDatabaseFromDump(selenium, seleniumWait,
                                                       TestUtils.class.getResourceAsStream("/fll/data/testdb.flldb"));
 
-      IntegrationTestUtils.setTournament(selenium, GenerateDB.DUMMY_TOURNAMENT_NAME);
+      IntegrationTestUtils.setTournament(selenium, seleniumWait, GenerateDB.DUMMY_TOURNAMENT_NAME);
 
-      IntegrationTestUtils.setTournament(selenium, GenerateDB.DROP_TOURNAMENT_NAME);
+      IntegrationTestUtils.setTournament(selenium, seleniumWait, GenerateDB.DROP_TOURNAMENT_NAME);
     } catch (final IOException | RuntimeException | AssertionError e) {
       LOGGER.fatal(e, e);
       IntegrationTestUtils.storeScreenshot(selenium);

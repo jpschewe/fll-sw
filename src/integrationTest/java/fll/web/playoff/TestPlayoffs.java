@@ -49,7 +49,7 @@ public class TestPlayoffs {
       final InputStream challengeStream = TestPlayoffs.class.getResourceAsStream("data/simple.xml");
       IntegrationTestUtils.initializeDatabase(selenium, seleniumWait, challengeStream);
 
-      IntegrationTestUtils.setTournament(selenium, GenerateDB.DUMMY_TOURNAMENT_NAME);
+      IntegrationTestUtils.setTournament(selenium, seleniumWait, GenerateDB.DUMMY_TOURNAMENT_NAME);
 
       IntegrationTestUtils.setRunningHeadToHead(selenium, seleniumWait, true);
 
@@ -60,7 +60,7 @@ public class TestPlayoffs {
       }
 
       // set seeding rounds to 1
-      IntegrationTestUtils.changeNumSeedingRounds(selenium, 1);
+      IntegrationTestUtils.changeNumSeedingRounds(selenium, seleniumWait, 1);
 
       // enter 1 score for all teams equal to their team number
       for (int teamNumber = 0; teamNumber < 4; ++teamNumber) {
@@ -87,7 +87,7 @@ public class TestPlayoffs {
       assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.name("error")), "Errors: ");
 
       // attempt to enter score for 0
-      IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+      IntegrationTestUtils.loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
           + "scoreEntry/select_team.jsp");
       final Select teamSelect = new Select(selenium.findElement(By.id("select-teamnumber")));
       teamSelect.selectByValue("0");
@@ -116,7 +116,7 @@ public class TestPlayoffs {
                               final WebDriverWait seleniumWait,
                               final int teamNumber)
       throws IOException, InterruptedException {
-    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+    IntegrationTestUtils.loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
         + "scoreEntry/select_team.jsp");
 
     final Select teamSelect = new Select(selenium.findElement(By.id("select-teamnumber")));

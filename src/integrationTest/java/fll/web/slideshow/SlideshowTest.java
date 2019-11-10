@@ -46,12 +46,12 @@ public class SlideshowTest {
       final InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml");
       IntegrationTestUtils.initializeDatabase(selenium, seleniumWait, challengeStream);
 
-      IntegrationTestUtils.setTournament(selenium, GenerateDB.DUMMY_TOURNAMENT_NAME);
+      IntegrationTestUtils.setTournament(selenium, seleniumWait, GenerateDB.DUMMY_TOURNAMENT_NAME);
 
       // add a dummy team so that we have something in the database
       IntegrationTestUtils.addTeam(selenium, seleniumWait, 1, "team", "org", "1", GenerateDB.DUMMY_TOURNAMENT_NAME);
 
-      IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+      IntegrationTestUtils.loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
           + "/admin/");
 
       selenium.findElement(By.id("remote-control")).click();
@@ -64,7 +64,7 @@ public class SlideshowTest {
 
       seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
 
-      IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+      IntegrationTestUtils.loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
           + "/slideshow.jsp");
 
     } catch (final RuntimeException e) {
