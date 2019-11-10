@@ -34,6 +34,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+
 import org.apache.catalina.LifecycleException;
 import org.apache.http.Header;
 import org.apache.http.client.ClientProtocolException;
@@ -99,10 +101,18 @@ public final class IntegrationTestUtils {
   public static final long WAIT_FOR_PAGE_LOAD_MS = 100;
 
   /**
-   * Maximum amount of time to wait for an element to appear. Nominally this is a
-   * page load.
+   * Maximum amount of time to wait for an element to appear.
+   *
+   * @see #createWebDriverWait(WebDriver)
    */
-  public static final Duration WAIT_FOR_ELEMENT = Duration.ofSeconds(3);
+  private static final Duration WAIT_FOR_ELEMENT = Duration.ofSeconds(3);
+
+  /**
+   * How long to wait between polls of the page for a web element with the waiter.
+   *
+   * @see #createWebDriverWait(WebDriver)
+   */
+  private static final Duration WAIT_FOR_ELEMENT_POLL_INTERVAL = Duration.ofMillis(100);
 
   private IntegrationTestUtils() {
     // no instances
@@ -855,7 +865,7 @@ public final class IntegrationTestUtils {
       final WebDriver selenium = createWebDriver();
       getStore(context).put(WEBDRIVER_KEY, selenium);
 
-      final WebDriverWait wait = new WebDriverWait(selenium, WAIT_FOR_ELEMENT.getSeconds());
+      final WebDriverWait wait = createWebDriverWait(selenium);
       getStore(context).put(WAIT_KEY, wait);
     }
 
@@ -987,4 +997,14 @@ public final class IntegrationTestUtils {
     confirmScoreYesButton.click();
   }
 
+  /**
+   * Create a waiter for the specified driver.
+   *
+   * @param selenium web browser driver
+   * @return waiter for elements
+   */
+  @Nonnull
+  public static WebDriverWait createWebDriverWait(final WebDriver selenium) {
+    return new WebDriverWait(selenium, WAIT_FOR_ELEMENT.getSeconds(), WAIT_FOR_ELEMENT_POLL_INTERVAL.toMillis());
+  }
 }

@@ -90,8 +90,7 @@ public class ReplayTournament {
         // run
         final FullTournamentTest replay = new FullTournamentTest();
         final WebDriver selenium = IntegrationTestUtils.createWebDriver(driver);
-        final WebDriverWait seleniumWait = new WebDriverWait(selenium,
-                                                             IntegrationTestUtils.WAIT_FOR_ELEMENT.getSeconds());
+        final WebDriverWait seleniumWait = IntegrationTestUtils.createWebDriverWait(selenium);
         try {
           replay.replayTournament(selenium, seleniumWait, testDataConn, testTournament.getName(), outputDirectory);
         } finally {
