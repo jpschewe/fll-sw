@@ -24,7 +24,6 @@ import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
-import fll.web.ProcessSelectedSheet;
 import fll.web.SessionAttributes;
 import fll.web.UploadSpreadsheet;
 import fll.web.WebUtils;
@@ -37,13 +36,8 @@ public class CheckScheduleExists extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
-  /**
-   * Clear out session variables used by the schedule upload workflow.
-   */
-  public static void clearSesionVariables(final HttpSession session) {
+  private static void clearSesionVariables(final HttpSession session) {
     session.removeAttribute(UploadScheduleData.KEY);
-    session.removeAttribute(ProcessSelectedSheet.SHEET_NAMES_KEY);
-    session.removeAttribute(UploadSpreadsheet.SHEET_NAME_KEY);
   }
 
   @Override
@@ -62,6 +56,8 @@ public class CheckScheduleExists extends BaseFLLServlet {
 
     final String sheetName = SessionAttributes.getAttribute(session, UploadSpreadsheet.SHEET_NAME_KEY, String.class);
     uploadScheduleData.setSelectedSheet(sheetName);
+
+    LOGGER.debug("File: {} Sheet: {}", uploadScheduleData.getScheduleFile(), uploadScheduleData.getSelectedSheet());
 
     session.setAttribute(UploadScheduleData.KEY, uploadScheduleData);
 

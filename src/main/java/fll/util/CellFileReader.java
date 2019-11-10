@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
+import java.util.Objects;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
@@ -33,23 +33,24 @@ public abstract class CellFileReader implements Closeable {
 
   /**
    * Read the next line
-   * 
+   *
    * @return the line as an array of Strings
    * @throws IOException
    */
   public abstract String[] readNext() throws IOException;
 
+  @Override
   public abstract void close() throws IOException;
 
   /**
    * Open file and create the appropriate cell reader for it. If this file is a
    * spreadsheet, then the sheet name must be specified.
-   * 
+   *
    * @param file the file to open
    * @param sheetName the sheet to load in the file, ignored if a CSV/TSV file
    * @return the appropriate cell reader
-   * @throws IOException
-   * @throws InvalidFormatException
+   * @throws IOException if there is a problem reading the file
+   * @throws InvalidFormatException if there is a problem reading the Excel file
    */
   public static CellFileReader createCellReader(final File file,
                                                 final String sheetName)
@@ -57,11 +58,23 @@ public abstract class CellFileReader implements Closeable {
     return createCellReader(file.toPath(), sheetName);
   }
 
+  /**
+   * Read either an Excel file or a CSV file
+   *
+   * @param file the file to read
+   * @param sheetName the sheet in an Excel file to read, null if reading a CSV
+   *          file
+   * @return the appropriate cell reader
+   * @throws InvalidFormatException if there is a problem reading the Excel file
+   * @throws IOException if there is a problem reading the file
+   */
   public static CellFileReader createCellReader(final Path file,
                                                 final String sheetName)
       throws InvalidFormatException, IOException {
     if (ExcelCellReader.isExcelFile(file)) {
       try (final InputStream fis = Files.newInputStream(file)) {
+        Objects.requireNonNull(sheetName, "Sheet name cannot be null when reading an Excel file");
+
         return new ExcelCellReader(fis, sheetName);
       }
     } else {

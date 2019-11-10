@@ -22,6 +22,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import fll.Utilities;
 import fll.util.ExcelCellReader;
 import fll.util.FLLRuntimeException;
+import fll.web.schedule.UploadScheduleData;
 
 /**
  * Handle uploading a spreadsheet (csv or Excel). The filename is stored in the
@@ -50,6 +51,15 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
   public static final String UPLOAD_REDIRECT_KEY = "uploadRedirect";
 
   /**
+   * Clear out session variables used by the upload spreadsheet workflow.
+   */
+  private static void clearSesionVariables(final HttpSession session) {
+    session.removeAttribute(UploadScheduleData.KEY);
+    session.removeAttribute(ProcessSelectedSheet.SHEET_NAMES_KEY);
+    session.removeAttribute(UploadSpreadsheet.SHEET_NAME_KEY);
+  }
+
+  /**
    * Session key for the name of the sheet in the spreadsheet to load.
    * This will be null if a CSV file was loaded.
    * The data type is {@link String}.
@@ -62,6 +72,7 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
+    clearSesionVariables(session);
 
     final StringBuilder message = new StringBuilder();
     String nextPage;
@@ -75,14 +86,13 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
             + request.getParameterMap());
       }
       session.setAttribute(UploadSpreadsheet.UPLOAD_REDIRECT_KEY, uploadRedirect);
+      LOGGER.debug("Redirect: {}", uploadRedirect);
 
       final FileItem fileItem = (FileItem) request.getAttribute("file");
       final String extension = Utilities.determineExtension(fileItem.getName());
       final File file = File.createTempFile("fll", extension);
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Wrote data to: "
-            + file.getAbsolutePath());
-      }
+      LOGGER.debug("Wrote data to: {}", file.getAbsolutePath());
+
       // the write call below will fail if the file already exists
       if (!file.delete()) {
         final String errorMessage = "Unable to delete temporary file: "
@@ -95,6 +105,9 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
 
       if (ExcelCellReader.isExcelFile(file)) {
         final List<String> sheetNames = ExcelCellReader.getAllSheetNames(file);
+
+        LOGGER.debug("Excel file with sheets: {}", sheetNames);
+
         if (sheetNames.size() > 1) {
           session.setAttribute(ProcessSelectedSheet.SHEET_NAMES_KEY, sheetNames);
           nextPage = "promptForSheetName.jsp";
@@ -135,6 +148,7 @@ public final class UploadSpreadsheet extends BaseFLLServlet {
       throw new RuntimeException(baseMessage, e);
     }
 
+    LOGGER.debug("Redirecting to {}", nextPage);
     session.setAttribute("message", message.toString());
     response.sendRedirect(response.encodeRedirectURL(nextPage));
   }
