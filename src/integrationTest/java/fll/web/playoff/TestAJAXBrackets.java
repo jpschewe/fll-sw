@@ -115,7 +115,7 @@ public class TestAJAXBrackets {
 
       // open brackets
       IntegrationTestUtils.loadPage(bracketsWindow, seleniumWait, TestUtils.URL_ROOT
-          + "playoff/remoteControlBrackets.jsp?scroll=false");
+          + "playoff/remoteControlBrackets.jsp?scroll=false", ExpectedConditions.urlContains("remoteControlBrackets"));
 
       // open score entry
       IntegrationTestUtils.loadPage(scoreEntryWindow, seleniumWait, TestUtils.URL_ROOT

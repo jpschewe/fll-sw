@@ -30,7 +30,7 @@ public class WebTest {
    * Basic load of the pages.
    *
    * @param selenium the browser driver
-   * @param seleniumWait TODO
+   * @param seleniumWait wait for elements
    * @throws InterruptedException on test failure
    * @throws IOException on test failure
    * @throws MalformedURLException on test failure
