@@ -67,6 +67,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -132,20 +133,34 @@ public final class IntegrationTestUtils {
   }
 
   /**
+   * Calls {@link #loadPage(WebDriver, WebDriverWait, String, ExpectedCondition)}
+   * with a condition checking that the current url contains the specified url.
+   *
+   * @param selenium web driver
+   * @param seleniumWait wait for elements
+   * @param url the url to load an check
+   */
+  public static void loadPage(final WebDriver selenium,
+                              final WebDriverWait seleniumWait,
+                              final String url) {
+    loadPage(selenium, seleniumWait, url, ExpectedConditions.urlContains(url));
+  }
+
+  /**
    * Load a page and check to make sure the page didn't crash.
    *
    * @param selenium the test controller
    * @param seleniumWait wait for elements
    * @param url the page to load
-   * @throws IOException if there is an error from selenium
+   * @param pageLoaded condition to know when the page has loaded
    */
   public static void loadPage(final WebDriver selenium,
                               final WebDriverWait seleniumWait,
-                              final String url)
-      throws IOException {
+                              final String url,
+                              final ExpectedCondition<Boolean> pageLoaded) {
     selenium.get(url);
 
-    seleniumWait.until(ExpectedConditions.urlContains(url));
+    seleniumWait.until(pageLoaded);
 
     assertNoException(selenium);
   }
