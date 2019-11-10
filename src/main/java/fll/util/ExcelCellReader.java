@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
@@ -80,12 +81,7 @@ public class ExcelCellReader extends CellFileReader {
     }
 
     final String contentType = new Tika().detect(path);
-    if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("Detected content type: "
-          + contentType
-          + " for "
-          + path);
-    }
+    LOGGER.trace("Detected content type: {} for {}", contentType, path);
 
     final boolean isCsvFile;
     if (null == contentType) {
@@ -102,7 +98,10 @@ public class ExcelCellReader extends CellFileReader {
     } else {
       isCsvFile = false;
     }
-    return !isCsvFile;
+
+    final boolean isExcelFile = !isCsvFile;
+    LOGGER.trace("Excel? {}", isExcelFile);
+    return isExcelFile;
   }
 
   /**
@@ -161,6 +160,9 @@ public class ExcelCellReader extends CellFileReader {
   public ExcelCellReader(final InputStream file,
                          final String sheetName)
       throws IOException {
+    Objects.requireNonNull(file);
+    Objects.requireNonNull(sheetName, "Sheet name cannot be null");
+
     workbook = createWorkbook(file);
     if (workbook instanceof HSSFWorkbook) {
       formulaEvaluator = new HSSFFormulaEvaluator((HSSFWorkbook) workbook);
