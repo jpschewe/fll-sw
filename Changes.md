@@ -1,3 +1,5 @@
+* #779 - correct bug in upload schedule workflow that prevented Excel workbooks from being used 
+
 Release 14.1.0
 ==============
 * #775 - Allow teams to be added to the database during schedule upload
