@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.xml.sax.SAXException;
@@ -110,7 +111,7 @@ public class TestAJAXBrackets {
           + "admin/remoteControl.jsp");
       selenium.findElement(By.cssSelector("[type='radio'][name='remotePage'][value='playoffs']")).click();
       selenium.findElement(By.name("submit_data")).click();
-      Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
+      seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
 
       // open brackets
       IntegrationTestUtils.loadPage(bracketsWindow, TestUtils.URL_ROOT
