@@ -121,7 +121,7 @@ public class TestAJAXBrackets {
           + "playoff/remoteControlBrackets.jsp?scroll=false", ExpectedConditions.urlContains("remoteControlBrackets"));
 
       // open score entry
-      IntegrationTestUtils.loadPage(scoreEntryWindow, seleniumWait, TestUtils.URL_ROOT
+      IntegrationTestUtils.loadPage(scoreEntryWindow, scoreEntryWait, TestUtils.URL_ROOT
           + "scoreEntry/select_team.jsp");
 
       // give windows a little time to get their bearings
@@ -130,7 +130,7 @@ public class TestAJAXBrackets {
       // selenium.waitForCondition("window.timerRan", JS_EVAL_TIMEOUT);
 
       // assign tables for the scoresheets
-      IntegrationTestUtils.loadPage(scoresheetWindow, seleniumWait, TestUtils.URL_ROOT
+      IntegrationTestUtils.loadPage(scoresheetWindow, scoreEntryWait, TestUtils.URL_ROOT
           + "playoff/scoregenbrackets.jsp?division="
           + division
           + "&firstRound=1&lastRound=7");
