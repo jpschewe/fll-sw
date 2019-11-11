@@ -43,6 +43,8 @@ public class TestAJAXBrackets {
 
   private WebDriver bracketsWindow;
 
+  private WebDriverWait bracketsWait;
+
   private WebDriver scoreEntryWindow;
 
   private WebDriverWait scoreEntryWait;
@@ -52,6 +54,7 @@ public class TestAJAXBrackets {
   @BeforeEach
   public void setUp() throws Exception {
     bracketsWindow = IntegrationTestUtils.createWebDriver();
+    bracketsWait = IntegrationTestUtils.createWebDriverWait(bracketsWindow);
 
     scoreEntryWindow = IntegrationTestUtils.createWebDriver();
     scoreEntryWait = IntegrationTestUtils.createWebDriverWait(scoreEntryWindow);
@@ -114,7 +117,7 @@ public class TestAJAXBrackets {
       seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
 
       // open brackets
-      IntegrationTestUtils.loadPage(bracketsWindow, seleniumWait, TestUtils.URL_ROOT
+      IntegrationTestUtils.loadPage(bracketsWindow, bracketsWait, TestUtils.URL_ROOT
           + "playoff/remoteControlBrackets.jsp?scroll=false", ExpectedConditions.urlContains("remoteControlBrackets"));
 
       // open score entry
