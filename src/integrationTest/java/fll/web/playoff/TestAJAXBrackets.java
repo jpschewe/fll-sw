@@ -51,6 +51,8 @@ public class TestAJAXBrackets {
 
   private WebDriver scoresheetWindow;
 
+  private WebDriverWait scoresheetWait;
+
   @BeforeEach
   public void setUp() throws Exception {
     bracketsWindow = IntegrationTestUtils.createWebDriver();
@@ -60,6 +62,7 @@ public class TestAJAXBrackets {
     scoreEntryWait = IntegrationTestUtils.createWebDriverWait(scoreEntryWindow);
 
     scoresheetWindow = IntegrationTestUtils.createWebDriver();
+    scoresheetWait = IntegrationTestUtils.createWebDriverWait(scoresheetWindow);
   }
 
   @AfterEach
@@ -130,7 +133,7 @@ public class TestAJAXBrackets {
       // selenium.waitForCondition("window.timerRan", JS_EVAL_TIMEOUT);
 
       // assign tables for the scoresheets
-      IntegrationTestUtils.loadPage(scoresheetWindow, scoreEntryWait, TestUtils.URL_ROOT
+      IntegrationTestUtils.loadPage(scoresheetWindow, scoresheetWait, TestUtils.URL_ROOT
           + "playoff/scoregenbrackets.jsp?division="
           + division
           + "&firstRound=1&lastRound=7");
