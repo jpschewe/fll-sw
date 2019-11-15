@@ -89,7 +89,6 @@ import fll.xml.ChallengeDescription;
 import fll.xml.Goal;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
-import io.github.artsok.RepeatedIfExceptionsTest;
 
 /**
  * Test a full tournament.
@@ -142,7 +141,6 @@ public class FullTournamentTest {
    * @throws InterruptedException test error
    * @throws SAXException test error
    */
-  @RepeatedIfExceptionsTest(repeats = 3)
   public void testFullTournament(final WebDriver selenium,
                                  final WebDriverWait seleniumWait)
       throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, ParseException,
