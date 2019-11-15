@@ -34,7 +34,7 @@ plugins {
     id "org.unbroken-dome.test-sets" version "2.1.1"
     id "eclipse"
     id "org.kordamp.markdown.convert" version "1.2.0"       
-    id "com.github.spotbugs" version "1.7.1"
+    id "com.github.spotbugs" version "2.0.1"
     id "de.aaschmid.cpd" version "1.2"
     id "edu.sc.seis.launch4j" version "2.4.6"
     id "net.saliman.cobertura" version "2.6.0"
@@ -109,7 +109,7 @@ ext {
     poi_version = "4.0.1"
     junit_version = "5.4.0"
     log4j_version = "2.11.2"
-    spotbugs_version = "3.1.12"
+    spotbugs_version = "4.0.0-beta4"
 
     web_build_dir = new File(project.buildDir, "web")
     documentation_build_dir = new File(project.buildDir, "gen-documentation")    
