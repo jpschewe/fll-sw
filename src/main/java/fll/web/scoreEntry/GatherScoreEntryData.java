@@ -116,7 +116,9 @@ public class GatherScoreEntryData extends BaseFLLServlet {
           lRunNumber = runNumber;
         }
       } else {
-        if (nextRunNumber > numSeedingRounds) {
+        final boolean runningHeadToHead = TournamentParameters.getRunningHeadToHead(connection, tournament);
+        if (runningHeadToHead
+            && nextRunNumber > numSeedingRounds) {
           if (null == Playoff.involvedInUnfinishedPlayoff(connection, tournament,
                                                           Collections.singletonList(teamNumber))) {
             session.setAttribute(SessionAttributes.MESSAGE, "<p name='error' class='error'>Selected team ("
