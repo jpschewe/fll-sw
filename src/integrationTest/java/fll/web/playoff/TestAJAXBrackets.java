@@ -39,8 +39,6 @@ public class TestAJAXBrackets {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
-  public static final String JS_EVAL_TIMEOUT = "10000";
-
   private WebDriver bracketsWindow;
 
   private WebDriverWait bracketsWait;
@@ -193,10 +191,8 @@ public class TestAJAXBrackets {
 
       IntegrationTestUtils.submitPerformanceScore(scoreEntryWindow, scoreEntryWait);
 
-      // give the web server a chance to catch up
-      Thread.sleep(30000);
-
-      final String scoreTextAfter = bracketsWindow.findElement(By.id("0-3-1")).getText();
+      final WebElement bracketElement = bracketsWait.until(ExpectedConditions.presenceOfElementLocated(By.id("0-3-1")));
+      final String scoreTextAfter = bracketElement.getText();
       // final String scoreTextAfter =
       // String.valueOf(seleniumJS.executeScript("window.document.getElementById('0-3-1').innerHTML"));
       if (LOGGER.isDebugEnabled()) {
