@@ -245,10 +245,15 @@ public final class IntegrationTestUtils {
     final WebElement fileEle = driverWait.until(ExpectedConditions.elementToBeClickable(By.name("xmldocument")));
     fileEle.sendKeys(challengeFile.toAbsolutePath().toString());
 
+    final boolean expectAlert = driver.getPageSource()
+                                      .contains("This will erase ALL scores and team information in the database");
+
     final WebElement reinitDB = driver.findElement(By.name("reinitializeDatabase"));
     reinitDB.click();
 
-    handleDatabaseEraseConfirmation(driver, driverWait);
+    if (expectAlert) {
+      handleDatabaseEraseConfirmation(driver, driverWait);
+    }
 
     driverWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
 
@@ -304,10 +309,15 @@ public final class IntegrationTestUtils {
       seleniumWait.until(ExpectedConditions.elementToBeClickable(By.name("dbdump")))
                   .sendKeys(dumpFile.getAbsolutePath());
 
+      final boolean expectAlert = selenium.getPageSource()
+                                          .contains("This will erase ALL scores and team information in the database");
+
       final WebElement createEle = selenium.findElement(By.name("createdb"));
       createEle.click();
 
-      handleDatabaseEraseConfirmation(selenium, seleniumWait);
+      if (expectAlert) {
+        handleDatabaseEraseConfirmation(selenium, seleniumWait);
+      }
 
       seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
 
@@ -337,13 +347,11 @@ public final class IntegrationTestUtils {
 
   private static void handleDatabaseEraseConfirmation(final WebDriver selenium,
                                                       final WebDriverWait seleniumWait) {
-    if (selenium.getPageSource().contains("This will erase ALL scores and team information in the database")) {
-      seleniumWait.until(ExpectedConditions.alertIsPresent());
-      final Alert confirmCreateDB = selenium.switchTo().alert();
-      LOGGER.info("Confirmation text: "
-          + confirmCreateDB.getText());
-      confirmCreateDB.accept();
-    }
+    seleniumWait.until(ExpectedConditions.alertIsPresent());
+    final Alert confirmCreateDB = selenium.switchTo().alert();
+    LOGGER.info("Confirmation text: "
+        + confirmCreateDB.getText());
+    confirmCreateDB.accept();
   }
 
   /**
