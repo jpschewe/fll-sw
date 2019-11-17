@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -58,7 +57,6 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
@@ -96,8 +94,6 @@ public final class IntegrationTestUtils {
   public static final String TEST_USERNAME = "fll";
 
   public static final String TEST_PASSWORD = "Lego";
-
-  private static final long WAIT_FOR_ALERT_MS = 100;
 
   /**
    * Maximum amount of time to wait for an element to appear.
@@ -252,7 +248,7 @@ public final class IntegrationTestUtils {
     final WebElement reinitDB = driver.findElement(By.name("reinitializeDatabase"));
     reinitDB.click();
 
-    acceptOptionalAlert(driver);
+    handleDatabaseEraseConfirmation(driver, driverWait);
 
     driverWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
 
@@ -273,26 +269,6 @@ public final class IntegrationTestUtils {
 
     login(driver, driverWait);
 
-  }
-
-  private static void acceptOptionalAlert(final WebDriver driver) {
-    try {
-      Thread.sleep(WAIT_FOR_ALERT_MS);
-    } catch (final InterruptedException e) {
-      fail("Failed during wait before checking for alert: "
-          + e.getMessage());
-    }
-
-    try {
-      final Alert confirmCreateDB = driver.switchTo().alert();
-      LOGGER.info("Confirmation text: "
-          + confirmCreateDB.getText());
-      confirmCreateDB.accept();
-    } catch (final NoAlertPresentException e) {
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("No alert found, assuming the database was empty and didn't need an alert.");
-      }
-    }
   }
 
   /**
@@ -331,7 +307,7 @@ public final class IntegrationTestUtils {
       final WebElement createEle = selenium.findElement(By.name("createdb"));
       createEle.click();
 
-      acceptOptionalAlert(selenium);
+      handleDatabaseEraseConfirmation(selenium, seleniumWait);
 
       seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
 
@@ -357,6 +333,17 @@ public final class IntegrationTestUtils {
       }
     }
     login(selenium, seleniumWait);
+  }
+
+  private static void handleDatabaseEraseConfirmation(final WebDriver selenium,
+                                                      final WebDriverWait seleniumWait) {
+    if (selenium.getPageSource().contains("This will erase ALL scores and team information in the database")) {
+      seleniumWait.until(ExpectedConditions.alertIsPresent());
+      final Alert confirmCreateDB = selenium.switchTo().alert();
+      LOGGER.info("Confirmation text: "
+          + confirmCreateDB.getText());
+      confirmCreateDB.accept();
+    }
   }
 
   /**
