@@ -11,6 +11,7 @@ import java.net.MalformedURLException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.xml.sax.SAXException;
 
 import fll.TestUtils;
@@ -29,13 +30,15 @@ public class WebTest {
    * Basic load of the pages.
    *
    * @param selenium the browser driver
+   * @param seleniumWait wait for elements
    * @throws InterruptedException on test failure
    * @throws IOException on test failure
    * @throws MalformedURLException on test failure
    * @throws SAXException on test failure
    */
   @Test
-  public void testPages(final WebDriver selenium)
+  public void testPages(final WebDriver selenium,
+                        final WebDriverWait seleniumWait)
       throws SAXException, MalformedURLException, IOException, InterruptedException {
     try {
       final String[] pages = new String[] { //
@@ -59,12 +62,12 @@ public class WebTest {
         LOGGER.info("Testing page #"
             + page
             + "#");
-        IntegrationTestUtils.initializeDatabaseFromDump(selenium,
+        IntegrationTestUtils.initializeDatabaseFromDump(selenium, seleniumWait,
                                                         TestUtils.class.getResourceAsStream("/fll/data/testdb.flldb"));
 
         final String url = TestUtils.URL_ROOT
             + page;
-        IntegrationTestUtils.loadPage(selenium, url);
+        IntegrationTestUtils.loadPage(selenium, seleniumWait, url);
       }
     } catch (final IOException | RuntimeException | AssertionError e) {
       LOGGER.fatal(e, e);
@@ -76,18 +79,21 @@ public class WebTest {
    * Test changing tournaments to DUMMY and then back to State.
    *
    * @param selenium the browser driver
+   * @param seleniumWait TODO
    * @throws IOException on test failure
    * @throws InterruptedException on test failure
    */
   @Test
-  public void testChangeTournament(final WebDriver selenium) throws IOException, InterruptedException {
+  public void testChangeTournament(final WebDriver selenium,
+                                   final WebDriverWait seleniumWait)
+      throws IOException, InterruptedException {
     try {
-      IntegrationTestUtils.initializeDatabaseFromDump(selenium,
+      IntegrationTestUtils.initializeDatabaseFromDump(selenium, seleniumWait,
                                                       TestUtils.class.getResourceAsStream("/fll/data/testdb.flldb"));
 
-      IntegrationTestUtils.setTournament(selenium, GenerateDB.DUMMY_TOURNAMENT_NAME);
+      IntegrationTestUtils.setTournament(selenium, seleniumWait, GenerateDB.DUMMY_TOURNAMENT_NAME);
 
-      IntegrationTestUtils.setTournament(selenium, GenerateDB.DROP_TOURNAMENT_NAME);
+      IntegrationTestUtils.setTournament(selenium, seleniumWait, GenerateDB.DROP_TOURNAMENT_NAME);
     } catch (final IOException | RuntimeException | AssertionError e) {
       LOGGER.fatal(e, e);
       IntegrationTestUtils.storeScreenshot(selenium);
