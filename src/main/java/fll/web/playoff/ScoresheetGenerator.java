@@ -476,7 +476,7 @@ public class ScoresheetGenerator {
 
       final PdfPCell temp1 = new PdfPCell(scoreSheet.getDefaultCell());
       // temp1.setColspan(2);
-      temp1.addElement(new Paragraph("Judge ____", ARIAL_8PT_NORMAL));
+      temp1.addElement(new Paragraph("Ref ____", ARIAL_8PT_NORMAL));
       teamInfo.addCell(temp1);
 
       // Team number label cell
