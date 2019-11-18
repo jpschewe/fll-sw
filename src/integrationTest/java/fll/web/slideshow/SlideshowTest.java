@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import fll.TestUtils;
 import fll.db.GenerateDB;
@@ -36,33 +38,33 @@ public class SlideshowTest {
    * @throws InterruptedException
    */
   @Test
-  public void testSlideshowInterval(final WebDriver selenium) throws IOException, InterruptedException {
+  public void testSlideshowInterval(final WebDriver selenium,
+                                    final WebDriverWait seleniumWait)
+      throws IOException, InterruptedException {
     LOGGER.info("Top testSlideshowInterval");
     try {
       final InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml");
-      IntegrationTestUtils.initializeDatabase(selenium, challengeStream);
+      IntegrationTestUtils.initializeDatabase(selenium, seleniumWait, challengeStream);
 
-      IntegrationTestUtils.setTournament(selenium, GenerateDB.DUMMY_TOURNAMENT_NAME);
+      IntegrationTestUtils.setTournament(selenium, seleniumWait, GenerateDB.DUMMY_TOURNAMENT_NAME);
 
       // add a dummy team so that we have something in the database
-      IntegrationTestUtils.addTeam(selenium, 1, "team", "org", "1", GenerateDB.DUMMY_TOURNAMENT_NAME);
+      IntegrationTestUtils.addTeam(selenium, seleniumWait, 1, "team", "org", "1", GenerateDB.DUMMY_TOURNAMENT_NAME);
 
-      IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+      IntegrationTestUtils.loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
           + "/admin/");
 
       selenium.findElement(By.id("remote-control")).click();
-      Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
 
-      selenium.findElement(By.xpath("//input[@name='remotePage' and @value='"
+      seleniumWait.until(ExpectedConditions.elementToBeClickable(By.xpath("//input[@name='remotePage' and @value='"
           + DisplayInfo.SLIDESHOW_REMOTE_PAGE
-          + "']")).click();
+          + "']"))).click();
       selenium.findElement(By.name("slideInterval")).sendKeys("5");
       selenium.findElement(By.name("submit_data")).click();
-      Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
 
-      selenium.findElement(By.id("success"));
+      seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
 
-      IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+      IntegrationTestUtils.loadPage(selenium, seleniumWait, TestUtils.URL_ROOT
           + "/slideshow.jsp");
 
     } catch (final RuntimeException e) {

@@ -1,3 +1,4 @@
+* #551 - use waits instead of sleeps in the web tests to decrease test time
 * #780 - Fix problem entering runs after regular match play when head to head is not used
 
 Release 14.1.1

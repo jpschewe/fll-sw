@@ -142,7 +142,7 @@ pipeline {
       unstash name: 'linux_distribution'
       unstash name: 'mac_distribution'
       
-      archiveArtifacts artifacts: '*.log,screenshots/,build/reports/,build/distributions/'
+      archiveArtifacts artifacts: '**/*.log,screenshots/,build/distributions/'
                         
       recordIssues tool: taskScanner(includePattern: '**/*.java,**/*.jsp,**/*.jspf,**/*.xml', excludePattern: 'checkstyle*.xml', highTags: 'FIXME,HACK', normalTags: 'TODO')
                 

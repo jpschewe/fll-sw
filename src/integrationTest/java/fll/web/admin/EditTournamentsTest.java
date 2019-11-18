@@ -16,6 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import fll.TestUtils;
 import fll.web.InitializeDatabaseTest;
@@ -29,23 +31,21 @@ import fll.web.IntegrationTestUtils;
 public class EditTournamentsTest {
 
   @Test
-  public void testAddTournament(final WebDriver selenium) throws IOException, InterruptedException {
+  public void testAddTournament(final WebDriver selenium,
+                                final WebDriverWait seleniumWait)
+      throws IOException, InterruptedException {
     try {
       final InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml");
-      IntegrationTestUtils.initializeDatabase(selenium, challengeStream);
-      Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
+      IntegrationTestUtils.initializeDatabase(selenium, seleniumWait, challengeStream);
 
-      selenium.findElement(By.linkText("Admin Index")).click();
-      Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
+      seleniumWait.until(ExpectedConditions.elementToBeClickable(By.linkText("Admin Index"))).click();
 
-      selenium.findElement(By.id("add-edit-tournaments")).click();
-      Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
+      seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("add-edit-tournaments"))).click();
 
-      selenium.findElement(By.id("addRow")).click();
-      Thread.sleep(IntegrationTestUtils.WAIT_FOR_PAGE_LOAD_MS);
+      seleniumWait.until(ExpectedConditions.elementToBeClickable(By.id("addRow"))).click();
 
       // get num rows
-      final WebElement numRowsEle = selenium.findElement(By.name("numRows"));
+      final WebElement numRowsEle = seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.name("numRows")));
       final String numRowsStr = numRowsEle.getAttribute("value");
       assertNotNull(numRowsStr);
       final int numRows = Integer.parseInt(numRowsStr);
