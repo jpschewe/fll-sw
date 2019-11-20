@@ -1,3 +1,5 @@
+* #782 - Make "practice" text lighter on score sheet
+* #784 - Put "Ref" at the top of performance score sheets rather than "Judge"
 * #551 - use waits instead of sleeps in the web tests to decrease test time
 * #780 - Fix problem entering runs after regular match play when head to head is not used
 
