@@ -476,7 +476,7 @@ public class ScoresheetGenerator {
 
       final PdfPCell temp1 = new PdfPCell(scoreSheet.getDefaultCell());
       // temp1.setColspan(2);
-      temp1.addElement(new Paragraph("Judge ____", ARIAL_8PT_NORMAL));
+      temp1.addElement(new Paragraph("Ref ____", ARIAL_8PT_NORMAL));
       teamInfo.addCell(temp1);
 
       // Team number label cell
@@ -1018,7 +1018,7 @@ public class ScoresheetGenerator {
 
     private final float pagesPerScoreSheet;
 
-    private static final float WATERMARK_OPACITY = 0.3f;
+    private static final float WATERMARK_OPACITY = 0.2f;
 
     private static final double PAGES_PER_SHEET_TOLERANCE = 1E-6;
 
