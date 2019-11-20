@@ -1018,7 +1018,7 @@ public class ScoresheetGenerator {
 
     private final float pagesPerScoreSheet;
 
-    private static final float WATERMARK_OPACITY = 0.1f;
+    private static final float WATERMARK_OPACITY = 0.2f;
 
     private static final double PAGES_PER_SHEET_TOLERANCE = 1E-6;
 
