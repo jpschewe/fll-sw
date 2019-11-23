@@ -1,3 +1,5 @@
+* #781 - ensure that goals in a goal group are contiguous in the challenge description
+
 Release 14.2.0
 ==============
 * #782 - Make "practice" text lighter on score sheet
