@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
@@ -273,96 +274,140 @@ public final class ChallengeParser {
     for (final Element childNode : new NodelistElementCollectionAdapter(rootElement.getChildNodes())) {
       if ("Performance".equals(childNode.getNodeName())
           || "SubjectiveCategory".equals(childNode.getNodeName())) {
-        final Element childElement = childNode;
-
-        // get all nodes named goal at any level under category element
-        final Map<String, Element> simpleGoals = new HashMap<>();
-        for (final Element element : new NodelistElementCollectionAdapter(childElement.getElementsByTagName("goal"))) {
-          final String name = element.getAttribute("name");
-          simpleGoals.put(name, element);
-
-          // check initial values
-          final double initialValue = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("initialValue"))
-                                                                                     .doubleValue();
-          if (ChallengeParser.isEnumeratedGoal(element)) {
-            boolean foundMatch = false;
-            for (final Element valueEle : new NodelistElementCollectionAdapter(element.getChildNodes())) {
-              final double score = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(valueEle.getAttribute("score"))
-                                                                                  .doubleValue();
-              if (FP.equals(score, initialValue, INITIAL_VALUE_TOLERANCE)) {
-                foundMatch = true;
-              }
-            }
-            if (!foundMatch) {
-              throw new InvalidInitialValue(String.format("Initial value for %s(%f) does not match the score of any value element within the goal",
-                                                          name, initialValue));
-            }
-
-          } else {
-            final double min = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min"))
-                                                                              .doubleValue();
-            final double max = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max"))
-                                                                              .doubleValue();
-            if (FP.lessThan(initialValue, min, INITIAL_VALUE_TOLERANCE)) {
-              throw new InvalidInitialValue(String.format("Initial value for %s(%f) is less than min(%f)", name,
-                                                          initialValue, min));
-            }
-            if (FP.greaterThan(initialValue, max, INITIAL_VALUE_TOLERANCE)) {
-              throw new InvalidInitialValue(String.format("Initial value for %s(%f) is greater than max(%f)", name,
-                                                          initialValue, max));
-            }
-          }
-        } // foreach goal
-
-        // for all computedGoals
-        final Map<String, Element> computedGoals = new HashMap<>();
-        for (final Element computedGoalElement : new NodelistElementCollectionAdapter(childElement.getElementsByTagName("computedGoal"))) {
-          final String name = computedGoalElement.getAttribute("name");
-          computedGoals.put(name, computedGoalElement);
-
-          for (final Element goalRefElement : new NodelistElementCollectionAdapter(computedGoalElement.getElementsByTagName("enumGoalRef"))) {
-
-            // can't reference a non-enum goal with goalRef in enumCond
-            final String referencedGoalName = goalRefElement.getAttribute("goal");
-            final Element referencedGoalElement = simpleGoals.get(referencedGoalName);
-            if (!ChallengeParser.isEnumeratedGoal(referencedGoalElement)) {
-              throw new InvalidEnumCondition("Computed goal '"
-                  + computedGoalElement.getAttribute("name")
-                  + "' has an enumGoalRef element that references goal '"
-                  + referencedGoalName
-                  + " "
-                  + referencedGoalElement
-                  + "' which is not an enumerated goal");
-            }
-          } // foreach goalRef element
-
-        } // end foreach computed goal
-
-        // computed and non-computed goals
-        final Map<String, Element> allGoals = new HashMap<>();
-        allGoals.putAll(simpleGoals);
-        allGoals.putAll(computedGoals);
-
-        checkForCircularDependencies(computedGoals);
-
-        for (final Element termElement : new NodelistElementCollectionAdapter(childElement.getElementsByTagName("goalRef"))) {
-          final String goalValueType = termElement.getAttribute("scoreType");
-          final String referencedGoalName = termElement.getAttribute("goal");
-          final Element referencedGoalElement = allGoals.get(referencedGoalName);
-          if (null != referencedGoalElement
-              && "raw".equals(goalValueType)
-              && (ChallengeParser.isEnumeratedGoal(referencedGoalElement)
-                  || ChallengeParser.isComputedGoal(referencedGoalElement))) {
-            // can't use the raw score of an enum inside a polynomial term
-            throw new IllegalScoreTypeUseException("Cannot use the raw score from an enumerated or computed goal in a polynomial term.  Referenced goal '"
-                + referencedGoalName
-                + "'");
-          }
-        } // foreach term
-
+        validateCategory(childNode);
       } // end if child node (performance or subjective)
     } // end foreach child node
   } // end validateDocument
+
+  private static void validateCategory(final Element categoryElement) throws ParseException {
+    validateGoalGrouping(categoryElement);
+
+    // get all nodes named goal at any level under category element
+    final Map<String, Element> simpleGoals = new HashMap<>();
+    for (final Element goalElement : new NodelistElementCollectionAdapter(categoryElement.getElementsByTagName("goal"))) {
+      final String name = goalElement.getAttribute("name");
+      simpleGoals.put(name, goalElement);
+
+      validateGoalInitialValue(goalElement, name);
+    } // foreach goal
+
+    final Map<String, Element> computedGoals = validateComputedGoals(categoryElement, simpleGoals);
+
+    // computed and non-computed goals
+    final Map<String, Element> allGoals = new HashMap<>();
+    allGoals.putAll(simpleGoals);
+    allGoals.putAll(computedGoals);
+
+    checkForCircularDependencies(computedGoals);
+
+    validateGoalRefs(categoryElement, allGoals);
+  }
+
+  private static void validateGoalGrouping(final Element categoryElement) {
+
+    final Set<String> seenGoalGroupNames = new HashSet<>();
+    String prevGoalGroupName = null;
+    for (final Element childNode : new NodelistElementCollectionAdapter(categoryElement.getChildNodes())) {
+      if ("goal".equals(childNode.getNodeName())
+          || "computedGoal".equals(childNode.getNodeName())) {
+
+        final String goalGroupName = childNode.getAttribute(AbstractGoal.CATEGORY_ATTRIBUTE);
+        if (!goalGroupName.trim().isEmpty()) {
+
+          if (!Objects.equals(prevGoalGroupName, goalGroupName)) {
+            // start of a goal group
+            if (seenGoalGroupNames.contains(goalGroupName)) {
+              throw new GoalGroupSplitException(goalGroupName);
+            }
+
+            seenGoalGroupNames.add(goalGroupName);
+          }
+        }
+
+        prevGoalGroupName = goalGroupName;
+      } // if goal type
+    } // foreach child
+  }
+
+  private static void validateGoalRefs(final Element categoryElement,
+                                       final Map<String, Element> allGoals) {
+    for (final Element termElement : new NodelistElementCollectionAdapter(categoryElement.getElementsByTagName("goalRef"))) {
+      final String goalValueType = termElement.getAttribute("scoreType");
+      final String referencedGoalName = termElement.getAttribute("goal");
+      final Element referencedGoalElement = allGoals.get(referencedGoalName);
+      if (null != referencedGoalElement
+          && "raw".equals(goalValueType)
+          && (ChallengeParser.isEnumeratedGoal(referencedGoalElement)
+              || ChallengeParser.isComputedGoal(referencedGoalElement))) {
+        // can't use the raw score of an enum inside a polynomial term
+        throw new IllegalScoreTypeUseException("Cannot use the raw score from an enumerated or computed goal in a polynomial term.  Referenced goal '"
+            + referencedGoalName
+            + "'");
+      }
+    } // foreach goalRef
+  }
+
+  private static Map<String, Element> validateComputedGoals(final Element categoryElement,
+                                                            final Map<String, Element> simpleGoals) {
+    final Map<String, Element> computedGoals = new HashMap<>();
+    for (final Element computedGoalElement : new NodelistElementCollectionAdapter(categoryElement.getElementsByTagName("computedGoal"))) {
+      final String name = computedGoalElement.getAttribute("name");
+      computedGoals.put(name, computedGoalElement);
+
+      for (final Element goalRefElement : new NodelistElementCollectionAdapter(computedGoalElement.getElementsByTagName("enumGoalRef"))) {
+
+        // can't reference a non-enum goal with goalRef in enumCond
+        final String referencedGoalName = goalRefElement.getAttribute("goal");
+        final Element referencedGoalElement = simpleGoals.get(referencedGoalName);
+        if (!ChallengeParser.isEnumeratedGoal(referencedGoalElement)) {
+          throw new InvalidEnumCondition("Computed goal '"
+              + computedGoalElement.getAttribute("name")
+              + "' has an enumGoalRef element that references goal '"
+              + referencedGoalName
+              + " "
+              + referencedGoalElement
+              + "' which is not an enumerated goal");
+        }
+      } // foreach goalRef element
+
+    } // end foreach computed goal
+    return computedGoals;
+  }
+
+  private static void validateGoalInitialValue(final Element goalElement,
+                                               final String name)
+      throws ParseException {
+    final double initialValue = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(goalElement.getAttribute("initialValue"))
+                                                                                   .doubleValue();
+    if (ChallengeParser.isEnumeratedGoal(goalElement)) {
+      boolean foundMatch = false;
+      for (final Element valueEle : new NodelistElementCollectionAdapter(goalElement.getChildNodes())) {
+        final double score = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(valueEle.getAttribute("score"))
+                                                                                .doubleValue();
+        if (FP.equals(score, initialValue, INITIAL_VALUE_TOLERANCE)) {
+          foundMatch = true;
+        }
+      }
+      if (!foundMatch) {
+        throw new InvalidInitialValue(String.format("Initial value for %s(%f) does not match the score of any value element within the goal",
+                                                    name, initialValue));
+      }
+
+    } else {
+      final double min = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(goalElement.getAttribute("min"))
+                                                                            .doubleValue();
+      final double max = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(goalElement.getAttribute("max"))
+                                                                            .doubleValue();
+      if (FP.lessThan(initialValue, min, INITIAL_VALUE_TOLERANCE)) {
+        throw new InvalidInitialValue(String.format("Initial value for %s(%f) is less than min(%f)", name, initialValue,
+                                                    min));
+      }
+      if (FP.greaterThan(initialValue, max, INITIAL_VALUE_TOLERANCE)) {
+        throw new InvalidInitialValue(String.format("Initial value for %s(%f) is greater than max(%f)", name,
+                                                    initialValue, max));
+      }
+    }
+  }
 
   /**
    * @param computedGoals

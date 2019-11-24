@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -276,6 +277,31 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
     }
 
     checkCircularReferences(messages);
+
+    validateGoalGrouping(messages);
+
+  }
+
+  private void validateGoalGrouping(final Collection<String> messages) {
+
+    final Set<String> seenGoalGroupNames = new HashSet<>();
+    String prevGoalGroupName = null;
+    for (final AbstractGoal ag : mCategory.getGoals()) {
+      final String goalGroupName = ag.getCategory();
+      if (!goalGroupName.trim().isEmpty()) {
+
+        if (!Objects.equals(prevGoalGroupName, goalGroupName)) {
+          // start of a goal group
+          if (seenGoalGroupNames.contains(goalGroupName)) {
+            messages.add(String.format("Goal group '%s' has non-contiguous goals", goalGroupName));
+          }
+
+          seenGoalGroupNames.add(goalGroupName);
+        }
+      }
+
+      prevGoalGroupName = goalGroupName;
+    } // foreach goal
   }
 
   @Override
