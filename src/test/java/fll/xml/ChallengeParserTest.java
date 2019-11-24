@@ -6,6 +6,7 @@
 package fll.xml;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -447,6 +448,38 @@ public class ChallengeParserTest {
       exception = true;
     }
     assertTrue(exception, "Expected an exception due to circular references.");
+  }
+
+  /**
+   * Load goal-group_simple-split.xml and ensure an exception is thrown on the
+   * split goal group.
+   *
+   * @throws IOException Test error
+   */
+  @Test
+  public void testGoalGroupSplitSimple() throws IOException {
+    try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/goal-group_simple-split.xml")) {
+      assertNotNull(stream);
+      assertThrows(GoalGroupSplitException.class, () -> {
+        ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
+      });
+    }
+  }
+
+  /**
+   * Load goal-group_split-with-null.xml and ensure an exception is thrown on the
+   * split goal group.
+   *
+   * @throws IOException Test error
+   */
+  @Test
+  public void testGoalGroupSplitWithNull() throws IOException {
+    try (InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/goal-group_split-with-null.xml")) {
+      assertNotNull(stream);
+      assertThrows(GoalGroupSplitException.class, () -> {
+        ChallengeParser.parse(new InputStreamReader(stream, Utilities.DEFAULT_CHARSET));
+      });
+    }
   }
 
 }
