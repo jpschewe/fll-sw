@@ -233,18 +233,6 @@
   $.subjective = {
 
     /**
-     * @return the version of the software deployed
-     */
-    getVersion : function() {
-      var version = "@APP-VERSION@";
-      if (version.indexOf("APP-VERSION") > -1) {
-        return "devel";
-      } else {
-        return version;
-      }
-    },
-
-    /**
      * Clear all data from local storage.
      */
     clearAllData : function() {
