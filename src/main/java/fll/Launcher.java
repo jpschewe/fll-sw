@@ -51,6 +51,7 @@ import org.apache.commons.cli.Options;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.scheduler.SchedulerUI;
 import fll.subjective.SubjectiveFrame;
+import fll.tomcat.TomcatLauncher;
 import fll.util.GuiExceptionHandler;
 import fll.xml.ui.ChallengeDescriptionFrame;
 import it.sauronsoftware.junique.AlreadyLockedException;
