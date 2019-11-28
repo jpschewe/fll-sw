@@ -423,7 +423,7 @@ createExe {
     bundledJre64Bit = true
     bundledJreAsFallback = false
 
-    // should noe need to specify this https://github.com/TheBoegl/gradle-launch4j/issues/88        
+    // should not need to specify this https://github.com/TheBoegl/gradle-launch4j/issues/88        
     jreMinVersion = project.targetCompatibility
     
     // for debugging classpath information        
