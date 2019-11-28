@@ -23,11 +23,9 @@ import javax.servlet.ServletContext;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-
 import org.w3c.dom.Document;
 
 import fll.Utilities;
-
 import fll.web.ApplicationAttributes;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
@@ -69,11 +67,11 @@ public class SetupIndex {
 
     /**
      * Get some information about the known challenge descriptions.
-     * 
+     *
      * @return list sorted by name and then revision
      */
     public static List<DescriptionInfo> getAllKnownChallengeDescriptionInfo() {
-      final List<DescriptionInfo> descriptions = new LinkedList<DescriptionInfo>();
+      final List<DescriptionInfo> descriptions = new LinkedList<>();
 
       final Collection<URL> urls = ChallengeParser.getAllKnownChallengeDescriptorURLs();
       for (final URL url : urls) {
@@ -86,8 +84,12 @@ public class SetupIndex {
             descriptions.add(new DescriptionInfo(url, description));
           }
         } catch (final IOException e) {
+          LOGGER.error("I/O Error reading description: "
+              + url.toString(), e);
+        } catch (final RuntimeException e) {
           LOGGER.error("Error reading description: "
               + url.toString(), e);
+          throw e;
         }
       }
 
@@ -124,6 +126,7 @@ public class SetupIndex {
       return mDescription.getRevision();
     }
 
+    @Override
     public int compareTo(final DescriptionInfo other) {
       if (null == other) {
         return 1;

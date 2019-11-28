@@ -107,7 +107,7 @@ ext {
     tomcat_version = "9.0.17"
     itext_version = "5.5.13.1"
     poi_version = "4.0.1"
-    junit_version = "5.4.0"
+    junit_version = "5.5.2"
     log4j_version = "2.11.2"
     spotbugs_version = "4.0.0-beta4"
 
