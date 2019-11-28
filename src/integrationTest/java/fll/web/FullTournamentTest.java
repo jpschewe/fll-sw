@@ -47,6 +47,7 @@ import org.fest.swing.edt.FailOnThreadViolationRepaintManager;
 import org.fest.swing.security.NoExitSecurityManagerInstaller;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -141,6 +142,7 @@ public class FullTournamentTest {
    * @throws InterruptedException test error
    * @throws SAXException test error
    */
+  @Test
   public void testFullTournament(final WebDriver selenium,
                                  final WebDriverWait seleniumWait)
       throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, ParseException,
