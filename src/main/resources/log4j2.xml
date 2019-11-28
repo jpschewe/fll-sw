@@ -54,6 +54,9 @@
 
         <!-- end stuff for debugging -->
 
+        <!-- output access logs -->
+        <Logger name="fll.tomcat.Log4jAccessLog" level="INFO" />
+
         <!-- ignore strict errors from htmlunit for now -->
         <Logger
             name="com.gargoylesoftware.htmlunit.javascript.StrictErrorReporter"

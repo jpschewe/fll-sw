@@ -1,3 +1,4 @@
+* #786 - Configure tomcat to write access logs to log4j
 * #781 - ensure that goals in a goal group are contiguous in the challenge description
 
 Release 14.2.0
