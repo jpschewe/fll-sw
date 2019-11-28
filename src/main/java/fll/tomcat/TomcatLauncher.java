@@ -4,7 +4,7 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
-package fll;
+package fll.tomcat;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -17,11 +17,15 @@ import java.security.ProtectionDomain;
 import java.util.Objects;
 
 import org.apache.catalina.LifecycleException;
+import org.apache.catalina.Valve;
 import org.apache.catalina.WebResourceRoot;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.catalina.valves.AccessLogValve;
 import org.apache.catalina.webresources.DirResourceSet;
 import org.apache.catalina.webresources.StandardRoot;
+
+import fll.Launcher;
 
 /**
  * Launcher for embedded tomcat.
@@ -121,6 +125,18 @@ public class TomcatLauncher {
                                                  "/"));
 
     ctx.setResources(resources);
+
+    // clear previous AccessLogValve
+    for (final Valve vl : tomcat.getHost().getPipeline().getValves()) {
+      if (vl.getClass().equals(AccessLogValve.class)) {
+        tomcat.getHost().getPipeline().removeValve(vl);
+      }
+    }
+
+    // add log4j access log valve
+    final Log4jAccessLog accessLogValve = new Log4jAccessLog();
+    accessLogValve.setPattern("%h \"%r\" %s %S");
+    tomcat.getHost().getPipeline().addValve(accessLogValve);
   }
 
   /**

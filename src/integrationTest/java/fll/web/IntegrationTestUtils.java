@@ -74,9 +74,9 @@ import org.w3c.dom.Document;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.TestUtils;
-import fll.TomcatLauncher;
 import fll.Tournament;
 import fll.Utilities;
+import fll.tomcat.TomcatLauncher;
 import fll.util.FLLInternalException;
 import fll.web.api.TournamentsServlet;
 import fll.xml.BracketSortType;
