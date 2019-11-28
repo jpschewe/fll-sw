@@ -1,69 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="warn">
-	<Appenders>
-		<!-- limit CONSOLE to be info -->
-		<Console name="CONSOLE" target="SYSTEM_OUT">
-			<PatternLayout
-				pattern="%r [%t] %p %c %notEmpty{%x} %notEmpty{%X}- %m%n" />
-		</Console>
+    <Appenders>
+        <!-- limit CONSOLE to be info -->
+        <Console name="CONSOLE" target="SYSTEM_OUT">
+            <PatternLayout
+                pattern="%r [%t] %p %c %notEmpty{%x} %notEmpty{%X}- %m%n" />
+        </Console>
 
-		<RollingFile name="LOGFILE"
-			filePattern="logs/fll-sw_%d{yyyy-MM-dd_HH-mm-ss}.%i.log">
-			<PatternLayout
-				pattern="%r [%t] %p %c %notEmpty{%x} %notEmpty{%X}- %m%n" />
-			<Policies>
-				<OnStartupTriggeringPolicy />
-			</Policies>
-		</RollingFile>
-	</Appenders>
+        <RollingFile name="LOGFILE"
+            filePattern="logs/fll-sw_%d{yyyy-MM-dd_HH-mm-ss}.%i.log">
+            <PatternLayout
+                pattern="%r [%t] %p %c %notEmpty{%x} %notEmpty{%X}- %m%n" />
+            <Policies>
+                <OnStartupTriggeringPolicy />
+            </Policies>
+        </RollingFile>
+    </Appenders>
 
-	<Loggers>
-		<!-- stuff for debugging -->
+    <Loggers>
+        <!-- stuff for debugging -->
 
-		<!-- for debugging the database, set levels to something lower than fatal 
-			to actually see log output -->
-		<Logger name="log4jdbc.debug" level="FATAL" />
+        <!-- for debugging the database, set levels to something lower than 
+            fatal to actually see log output -->
+        <Logger name="log4jdbc.debug" level="FATAL" />
 
-		<!-- log SQL queries -->
-		<Logger name="jdbc.sqlonly" level="FATAL" />
+        <!-- log SQL queries -->
+        <Logger name="jdbc.sqlonly" level="FATAL" />
 
-		<!-- log SQL timing -->
-		<Logger name="jdbc.sqltiming" level="FATAL" />
+        <!-- log SQL timing -->
+        <Logger name="jdbc.sqltiming" level="FATAL" />
 
-		<!-- log everything, except result sets - this can be lots of information -->
-		<Logger name="jdbc.audit" level="FATAL" />
+        <!-- log everything, except result sets - this can be lots of information -->
+        <Logger name="jdbc.audit" level="FATAL" />
 
-		<!-- log result sets -->
-		<Logger name="jdbc.resultset" level="FATAL" />
+        <!-- log result sets -->
+        <Logger name="jdbc.resultset" level="FATAL" />
 
-		<!-- database connection information -->
-		<!-- <Logger name="database" level="TRACE"/> -->
+        <!-- database connection information -->
+        <!-- <Logger name="database" level="TRACE"/> -->
 
-	<!-- leave debugging on to track down problems loading files on Windows -->
-	<Logger name="fll.TomcatLauncher" level="TRACE" />
-		<!-- stuff for debugging -->
+        <!-- leave debugging on to track down problems loading files on Windows -->
+        <Logger name="fll.tomcat.TomcatLauncher" level="TRACE" />
+        <!-- stuff for debugging -->
 
-		<!-- <Logger name="org.apache.catalina.startup.ContextConfig" level="TRACE"/> 
-			<Logger name="org.apache.tomcat.util.scan.StandardJarScanner" level="TRACE"/> -->
+        <!-- <Logger name="org.apache.catalina.startup.ContextConfig" level="TRACE"/> 
+            <Logger name="org.apache.tomcat.util.scan.StandardJarScanner" level="TRACE"/> -->
 
-		<!-- <Logger name="org.apache.jasper.servlet.TldScanner"><level value="TRACE"/></logger> -->
-
-
-		<!-- log connection open/close - helps tracking down leaks -->
-		<Logger name="jdbc.connection" level="WARN" />
-
-		<!-- end stuff for debugging -->
+        <!-- <Logger name="org.apache.jasper.servlet.TldScanner"><level value="TRACE"/></logger> -->
 
 
-		<!-- ignore strict errors from htmlunit for now -->
-		<logger
-			name="com.gargoylesoftware.htmlunit.javascript.StrictErrorReporter"
-			level="FATAL" />
+        <!-- log connection open/close - helps tracking down leaks -->
+        <Logger name="jdbc.connection" level="WARN" />
 
-		<Root level="WARN">
-			<AppenderRef ref="CONSOLE" />
-			<AppenderRef ref="LOGFILE" />
-		</Root>
-	</Loggers>
+        <!-- end stuff for debugging -->
+
+
+        <!-- ignore strict errors from htmlunit for now -->
+        <logger
+            name="com.gargoylesoftware.htmlunit.javascript.StrictErrorReporter"
+            level="FATAL" />
+
+        <Root level="WARN">
+            <AppenderRef ref="CONSOLE" />
+            <AppenderRef ref="LOGFILE" />
+        </Root>
+    </Loggers>
 
 </Configuration>
