@@ -1,3 +1,4 @@
+* #749 - Remove error about jar file not found when running under windows
 * #787 - Fix launching fll-sw.html from Launcher when run from Eclipse
 * #786 - Configure tomcat to write access logs to log4j
 * #781 - ensure that goals in a goal group are contiguous in the challenge description

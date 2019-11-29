@@ -412,7 +412,10 @@ createExe {
     dontWrapJar = true
     errTitle = "FLL-SW"
     classpath = ["%EXEDIR%/classes", "%EXEDIR%/lib/*.jar"]
-
+    // need to specify a jar file that we know will exist as a dependency, 
+    // otherwise launch4j will look for the jar file created from the build
+    jar = "lib/log4j-core-" + project.log4j_version + ".jar"
+    
     maxHeapPercent = 75        
     
     fileDescription = "FIRST Lego League Scoring Software"
