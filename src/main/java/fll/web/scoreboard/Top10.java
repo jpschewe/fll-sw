@@ -178,7 +178,7 @@ public class Top10 extends BaseFLLServlet {
 
   /**
    * @param application application context
-   * @return awardGroup -> sorted scores
+   * @return awardGroup to sorted scores
    * @throws SQLException if there is a problem talking to the database
    */
   public static Map<String, List<ScoreEntry>> getTableAsMap(@Nonnull final ServletContext application)
