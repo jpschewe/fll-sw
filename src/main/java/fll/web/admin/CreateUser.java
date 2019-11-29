@@ -45,6 +45,8 @@ public class CreateUser extends BaseFLLServlet {
                                 final HttpSession session)
       throws IOException, ServletException {
 
+    LOGGER.trace("Top of CreateUser");
+
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
 
