@@ -24,6 +24,8 @@ import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.valves.AccessLogValve;
 import org.apache.catalina.webresources.DirResourceSet;
 import org.apache.catalina.webresources.StandardRoot;
+import org.apache.tomcat.JarScanner;
+import org.apache.tomcat.util.scan.StandardJarScanner;
 
 import fll.Launcher;
 
@@ -125,6 +127,13 @@ public class TomcatLauncher {
                                                  "/"));
 
     ctx.setResources(resources);
+
+    final JarScanner jarScanner = ctx.getJarScanner();
+    if (jarScanner instanceof StandardJarScanner) {
+      // all of the jar files we need should be on the classpath, no need to check the
+      // manifest of jar files for additional jar files
+      ((StandardJarScanner) jarScanner).setScanManifest(false);
+    }
 
     // clear previous AccessLogValve
     for (final Valve vl : tomcat.getHost().getPipeline().getValves()) {
