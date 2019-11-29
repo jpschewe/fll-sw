@@ -67,8 +67,8 @@ public class DoLogin extends BaseFLLServlet {
       // check for authentication table
       if (Queries.isAuthenticationEmpty(connection)) {
         LOGGER.warn("No authentication information in the database");
-        session.setAttribute(SessionAttributes.MESSAGE,
-                             "<p class='error'>No authentication information in the database - see administrator</p>");
+        SessionAttributes.appendToMessage(session,
+                                          "<p class='error'>No authentication information in the database - see administrator</p>");
         response.sendRedirect(response.encodeRedirectURL("login.jsp"));
         return;
       }
@@ -81,8 +81,7 @@ public class DoLogin extends BaseFLLServlet {
           || null == pass
           || pass.isEmpty()) {
         LOGGER.warn("Form fields missing");
-        session.setAttribute(SessionAttributes.MESSAGE,
-                             "<p class='error'>You must fill out all fields in the form.</p>");
+        SessionAttributes.appendToMessage(session, "<p class='error'>You must fill out all fields in the form.</p>");
         response.sendRedirect(response.encodeRedirectURL("login.jsp"));
         return;
       }
@@ -124,7 +123,7 @@ public class DoLogin extends BaseFLLServlet {
 
       LOGGER.warn("Incorrect login credentials user: "
           + user);
-      session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>Incorrect login information provided</p>");
+      SessionAttributes.appendToMessage(session, "<p class='error'>Incorrect login information provided</p>");
       response.sendRedirect(response.encodeRedirectURL("login.jsp"));
       return;
     } catch (final SQLException e) {

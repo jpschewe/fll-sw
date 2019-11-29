@@ -60,16 +60,14 @@ public class CreateUser extends BaseFLLServlet {
           || pass.isEmpty()
           || passCheck.isEmpty()) {
         LOGGER.debug("Missing information on form");
-        session.setAttribute(SessionAttributes.MESSAGE,
-                             "<p class='error'>You must enter all information in the form.</p>");
+        SessionAttributes.appendToMessage(session, "<p class='error'>You must enter all information in the form.</p>");
         response.sendRedirect(response.encodeRedirectURL("createUsername.jsp"));
         return;
       }
 
       if (!pass.equals(passCheck)) {
         LOGGER.debug("Password check doesn't match");
-        session.setAttribute(SessionAttributes.MESSAGE,
-                             "<p class='error'>Password and password check do not match.</p>");
+        SessionAttributes.appendToMessage(session, "<p class='error'>Password and password check do not match.</p>");
         response.sendRedirect(response.encodeRedirectURL("createUsername.jsp"));
         return;
       }
@@ -80,7 +78,7 @@ public class CreateUser extends BaseFLLServlet {
         try (ResultSet rs = checkUser.executeQuery()) {
           if (rs.next()) {
             LOGGER.debug("User already exists");
-            session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>Username '"
+            SessionAttributes.appendToMessage(session, "<p class='error'>Username '"
                 + user
                 + "' already exists.</p>");
             response.sendRedirect(response.encodeRedirectURL("createUsername.jsp"));
@@ -98,10 +96,10 @@ public class CreateUser extends BaseFLLServlet {
       }
 
       LOGGER.debug("Created user");
-      session.setAttribute(SessionAttributes.MESSAGE,
-                           "<p class='success' id='success-create-user'>Successfully created user '"
-                               + user
-                               + "'</p>");
+      SessionAttributes.appendToMessage(session,
+                                        "<p class='success' id='success-create-user'>Successfully created user '"
+                                            + user
+                                            + "'</p>");
 
       // do a login if not already logged in
       final Collection<String> loginKeys = CookieUtils.findLoginKey(request);

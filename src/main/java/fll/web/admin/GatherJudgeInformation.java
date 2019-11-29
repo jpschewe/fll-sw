@@ -23,13 +23,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
 import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -66,10 +63,12 @@ public class GatherJudgeInformation extends BaseFLLServlet {
    */
   public static final String ALL_DIVISIONS = "All";
 
+  @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Top of GatherJudgeInformation.processRequest");
     }
@@ -100,7 +99,7 @@ public class GatherJudgeInformation extends BaseFLLServlet {
 
       response.sendRedirect(response.encodeRedirectURL("judges.jsp"));
 
-      session.setAttribute(SessionAttributes.MESSAGE, message.toString());
+      SessionAttributes.appendToMessage(session, message.toString());
 
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
@@ -113,7 +112,8 @@ public class GatherJudgeInformation extends BaseFLLServlet {
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
   private static boolean checkForEnteredSubjectiveScores(final Connection connection,
                                                          final List<SubjectiveScoreCategory> subjectiveCategories,
-                                                         final int tournament) throws SQLException {
+                                                         final int tournament)
+      throws SQLException {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
@@ -135,14 +135,15 @@ public class GatherJudgeInformation extends BaseFLLServlet {
   }
 
   private List<String> gatherJudgingStations(final Connection connection,
-                                             final int tournament) throws SQLException {
+                                             final int tournament)
+      throws SQLException {
     final List<String> stations = Queries.getJudgingStations(connection, tournament);
 
     return stations;
   }
 
   private Map<String, String> gatherCategories(final List<SubjectiveScoreCategory> subjectiveCategories) {
-    final Map<String, String> categories = new HashMap<String, String>();
+    final Map<String, String> categories = new HashMap<>();
     for (final SubjectiveScoreCategory element : subjectiveCategories) {
       final String categoryName = element.getName();
       final String categoryTitle = element.getTitle();

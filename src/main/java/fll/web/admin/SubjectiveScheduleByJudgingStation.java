@@ -18,20 +18,16 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
-
-
 import com.itextpdf.text.DocumentException;
 
 import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.WebUtils;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * @see TournamentSchedule#outputSubjectiveSchedulesByJudgingStation(java.io.OutputStream)
@@ -45,7 +41,8 @@ public class SubjectiveScheduleByJudgingStation extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     try {
@@ -54,8 +51,7 @@ public class SubjectiveScheduleByJudgingStation extends BaseFLLServlet {
       final int currentTournamentID = Queries.getCurrentTournament(connection);
 
       if (!TournamentSchedule.scheduleExistsInDatabase(connection, currentTournamentID)) {
-        session.setAttribute(SessionAttributes.MESSAGE,
-                             "<p class='error'>There is no schedule for this tournament.</p>");
+        SessionAttributes.appendToMessage(session, "<p class='error'>There is no schedule for this tournament.</p>");
         WebUtils.sendRedirect(application, response, "/admin/index.jsp");
         return;
       }

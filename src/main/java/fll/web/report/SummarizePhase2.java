@@ -51,7 +51,7 @@ public class SummarizePhase2 extends BaseFLLServlet {
 
       final String errorMsg = ScoreStandardization.checkDataConsistency(connection);
       if (null == errorMsg) {
-        session.setAttribute(SessionAttributes.MESSAGE, "<p id='success'><i>Successfully summarized scores</i></p>");
+        SessionAttributes.appendToMessage(session, "<p id='success'><i>Successfully summarized scores</i></p>");
 
         final String redirect = SessionAttributes.getAttribute(session, PromptSummarizeScores.SUMMARY_REDIRECT_KEY,
                                                                String.class);
@@ -61,7 +61,7 @@ public class SummarizePhase2 extends BaseFLLServlet {
           response.sendRedirect(response.encodeRedirectURL(redirect));
         }
       } else {
-        session.setAttribute(SessionAttributes.MESSAGE, "<font class='error'>"
+        SessionAttributes.appendToMessage(session, "<font class='error'>"
             + errorMsg
             + "</font>");
         response.sendRedirect(response.encodeRedirectURL("index.jsp"));

@@ -53,9 +53,6 @@ public class CheckSeedingRounds extends BaseFLLServlet {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
       final StringBuilder message = new StringBuilder();
-      if (null != SessionAttributes.getMessage(session)) {
-        message.append(SessionAttributes.getMessage(session));
-      }
 
       final PlayoffSessionData data = SessionAttributes.getNonNullAttribute(session, PlayoffIndex.SESSION_DATA,
                                                                             PlayoffSessionData.class);
@@ -65,7 +62,7 @@ public class CheckSeedingRounds extends BaseFLLServlet {
       final List<Team> less = Queries.getTeamsNeedingSeedingRuns(connection, tournamentTeams, true);
       data.setTeamsNeedingSeedingRounds(less);
 
-      session.setAttribute(SessionAttributes.MESSAGE, message.toString());
+      SessionAttributes.appendToMessage(session, message.toString());
       response.sendRedirect(response.encodeRedirectURL("checkSeedingRoundsResult.jsp"));
 
     } catch (final SQLException e) {

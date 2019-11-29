@@ -45,7 +45,8 @@ public final class Tables {
                                   final ServletContext application,
                                   final HttpSession session,
                                   final HttpServletRequest request,
-                                  final HttpServletResponse response) throws SQLException, IOException, ParseException {
+                                  final HttpServletResponse response)
+      throws SQLException, IOException, ParseException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     try {
@@ -59,15 +60,18 @@ public final class Tables {
               + 1))) {
         ++rowIndex;
         out.println("<!-- found a row "
-            + rowIndex + "-->");
+            + rowIndex
+            + "-->");
       }
       if ("Add Row".equals(submitButton)) {
         out.println("<!-- adding another row to "
-            + rowIndex + "-->");
+            + rowIndex
+            + "-->");
         ++rowIndex;
       }
       out.println("<!-- final count of rows is "
-          + rowIndex + "-->");
+          + rowIndex
+          + "-->");
       final int numRows = rowIndex
           + 1;
 
@@ -79,10 +83,12 @@ public final class Tables {
       }
 
       if (null == submitButton
-          || "Add Row".equals(submitButton) || null != errorString) {
+          || "Add Row".equals(submitButton)
+          || null != errorString) {
         if (null != errorString) {
           out.println("<p id='error'><font color='red'>"
-              + errorString + "</font></p>");
+              + errorString
+              + "</font></p>");
         }
 
         out.println("<p>Table labels should be unique. These labels must occur in pairs, where a label refers to a single side of a table. E.g. If the skirt of a table was red on one side and green on the other, the labels could be Red and Green, but if the table was red all around they could be Red1 and Red2.</p>");
@@ -161,25 +167,33 @@ public final class Tables {
                                   final int row,
                                   final String sideA,
                                   final String sideB,
-                                  final String delete) throws IOException {
+                                  final String delete)
+      throws IOException {
     out.println("<tr>");
     out.print("  <td><input type='text' name='SideA"
-        + row + "'");
+        + row
+        + "'");
     if (null != sideA) {
       out.print(" value='"
-          + sideA + "'");
+          + sideA
+          + "'");
     }
     out.println("></td>");
     out.print("  <td><input type='text' name='SideB"
-        + row + "'");
+        + row
+        + "'");
     if (null != sideA) {
       out.print(" value='"
-          + sideB + "'");
+          + sideB
+          + "'");
     }
     out.println("></td>");
 
     out.println("  <td><input type='checkbox' value='checked' name='delete"
-        + row + "' " + (null == delete ? "" : delete) + ">");
+        + row
+        + "' "
+        + (null == delete ? "" : delete)
+        + ">");
 
     out.println("  </td>");
 
@@ -196,7 +210,8 @@ public final class Tables {
    */
   public static void replaceTablesForTournament(final Connection connection,
                                                 final int tournamentId,
-                                                final List<Pair<String, String>> tables) throws SQLException {
+                                                final List<Pair<String, String>> tables)
+      throws SQLException {
     PreparedStatement deleteNames = null;
     PreparedStatement deleteInfo = null;
     PreparedStatement insert = null;
@@ -239,7 +254,8 @@ public final class Tables {
                                    final HttpServletResponse response,
                                    final HttpSession session,
                                    final Connection connection,
-                                   final int tournament) throws SQLException, IOException {
+                                   final int tournament)
+      throws SQLException, IOException {
     final List<Pair<String, String>> tables = new LinkedList<>();
 
     int row = 0;
@@ -271,7 +287,7 @@ public final class Tables {
     replaceTablesForTournament(connection, tournament, tables);
 
     // finally redirect to index.jsp
-    session.setAttribute(SessionAttributes.MESSAGE, "<p id='success'><i>Successfully assigned tables</i></p>");
+    SessionAttributes.appendToMessage(session, "<p id='success'><i>Successfully assigned tables</i></p>");
     response.sendRedirect(response.encodeRedirectURL("index.jsp"));
     return null;
   }
@@ -285,7 +301,8 @@ public final class Tables {
    * @throws SQLException
    */
   static public boolean tablesAssigned(final Connection connection,
-                                       final int tournamentID) throws SQLException {
+                                       final int tournamentID)
+      throws SQLException {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {

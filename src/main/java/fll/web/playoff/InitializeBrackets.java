@@ -21,13 +21,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-
-
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.db.Queries;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -50,10 +47,6 @@ public class InitializeBrackets extends BaseFLLServlet {
       throws IOException, ServletException {
 
     final StringBuilder message = new StringBuilder();
-    final String existingMessage = SessionAttributes.getMessage(session);
-    if (null != existingMessage) {
-      message.append(existingMessage);
-    }
 
     /*
      * Parameters: division - String for the division. enableThird - has value
@@ -64,7 +57,7 @@ public class InitializeBrackets extends BaseFLLServlet {
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
     Connection connection = null;
 
-    String redirect = "index.jsp";
+    final String redirect = "index.jsp";
     try {
       connection = datasource.getConnection();
 
@@ -78,7 +71,8 @@ public class InitializeBrackets extends BaseFLLServlet {
         message.append("<p class='error'>No playoff bracket specified.</p>");
       } else if (Queries.isPlayoffDataInitialized(connection, data.getBracket())) {
         message.append("<p class='warning'>Playoffs have already been initialized for playoff bracket "
-            + data.getBracket() + ".</p>");
+            + data.getBracket()
+            + ".</p>");
       } else {
         final List<Integer> teamNumbersInBracket = Playoff.getTeamNumbersForPlayoffBracket(connection,
                                                                                            currentTournamentID,
@@ -99,19 +93,21 @@ public class InitializeBrackets extends BaseFLLServlet {
         }
 
         message.append("<p id='success'>Playoffs have been successfully initialized for division "
-            + data.getBracket() + ".</p>");
+            + data.getBracket()
+            + ".</p>");
       }
 
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
-          + sqle.getMessage() + "</p>");
+          + sqle.getMessage()
+          + "</p>");
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error saving team data into the database", sqle);
     } finally {
       SQLFunctions.close(connection);
     }
 
-    session.setAttribute(SessionAttributes.MESSAGE, message.toString());
+    SessionAttributes.appendToMessage(session, message.toString());
     response.sendRedirect(response.encodeRedirectURL(redirect));
   }
 

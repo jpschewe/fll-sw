@@ -42,7 +42,8 @@ public class CommitJudges extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Top of CommitJudges.processRequest");
     }
@@ -55,7 +56,7 @@ public class CommitJudges extends BaseFLLServlet {
       commitData(session, connection, Queries.getCurrentTournament(connection));
 
       // finally redirect to index.jsp
-      session.setAttribute(SessionAttributes.MESSAGE, "<p id='success'><i>Successfully assigned judges</i></p>");
+      SessionAttributes.appendToMessage(session, "<p id='success'><i>Successfully assigned judges</i></p>");
       response.sendRedirect(response.encodeRedirectURL("index.jsp"));
 
     } catch (final SQLException e) {
@@ -76,7 +77,8 @@ public class CommitJudges extends BaseFLLServlet {
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
   private static void commitData(final HttpSession session,
                                  final Connection connection,
-                                 final int tournament) throws SQLException, IOException {
+                                 final int tournament)
+      throws SQLException, IOException {
     PreparedStatement prep = null;
     try {
       // save old judge information
@@ -104,7 +106,11 @@ public class CommitJudges extends BaseFLLServlet {
       for (final JudgeInformation info : judges) {
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("Doing insert for id: "
-              + info.getId() + " category: " + info.getCategory() + " station: " + info.getGroup());
+              + info.getId()
+              + " category: "
+              + info.getCategory()
+              + " station: "
+              + info.getGroup());
         }
 
         newJudgeInfo.add(info);

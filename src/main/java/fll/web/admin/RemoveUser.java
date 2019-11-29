@@ -20,12 +20,12 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.CookieUtils;
 import fll.web.SessionAttributes;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Java code to handle removing of users.
@@ -61,7 +61,8 @@ public class RemoveUser extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     try {
@@ -72,7 +73,7 @@ public class RemoveUser extends BaseFLLServlet {
           && !userToRemove.isEmpty()) {
         Queries.removeUser(connection, userToRemove);
 
-        session.setAttribute(SessionAttributes.MESSAGE, "<p id='success'>Removed user '"
+        SessionAttributes.appendToMessage(session, "<p id='success'>Removed user '"
             + userToRemove);
 
       }
