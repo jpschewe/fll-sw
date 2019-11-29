@@ -17,13 +17,10 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-
-
 import fll.Tournament;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
 import fll.scheduler.TournamentSchedule;
-
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
 import fll.xml.ChallengeDescription;
@@ -37,7 +34,7 @@ public class AdminIndex {
 
   /**
    * Populate page context with variables for the admin index page.
-   * 
+   *
    * @param application the application context
    * @param session the session context
    * @param pageContext populated with variables
@@ -46,10 +43,6 @@ public class AdminIndex {
                                      final HttpSession session,
                                      final PageContext pageContext) {
     final StringBuilder message = new StringBuilder();
-    final String existingMessage = SessionAttributes.getMessage(session);
-    if (null != existingMessage) {
-      message.append(existingMessage);
-    }
 
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
@@ -90,7 +83,7 @@ public class AdminIndex {
       throw new RuntimeException("Error talking to the database", sqle);
     }
 
-    session.setAttribute(SessionAttributes.MESSAGE, message.toString());
+    SessionAttributes.appendToMessage(session, message.toString());
   }
 
 }

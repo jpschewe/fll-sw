@@ -29,9 +29,6 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspWriter;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
-
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -41,11 +38,11 @@ import fll.db.GenerateDB;
 import fll.db.Queries;
 import fll.util.CellFileReader;
 import fll.util.FLLRuntimeException;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UploadSpreadsheet;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Java code for uploading team data to the database. Called from
@@ -56,6 +53,7 @@ public final class UploadTeams extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -100,14 +98,14 @@ public final class UploadTeams extends BaseFLLServlet {
         }
       }
     }
-    session.setAttribute(SessionAttributes.MESSAGE, message.toString());
+    SessionAttributes.appendToMessage(session, message.toString());
     response.sendRedirect(response.encodeRedirectURL("teamColumnSelection.jsp"));
 
   }
 
   /**
    * Take file and parse it as tab delimited.
-   * 
+   *
    * @param file the file that the teams are in
    * @param connection the database connection to connect to
    * @param session used to store the list of columns in a format suitable for
@@ -143,7 +141,7 @@ public final class UploadTeams extends BaseFLLServlet {
 
     // iterate over each column name and append to appropriate buffers
     boolean first = true;
-    final List<String> columnNamesSeen = new LinkedList<String>();
+    final List<String> columnNamesSeen = new LinkedList<>();
     for (final String header : columnNames) {
       final String columnName = sanitizeColumnName(header);
       if (LOGGER.isDebugEnabled()) {
@@ -231,7 +229,7 @@ public final class UploadTeams extends BaseFLLServlet {
                   try {
                     v = Integer.parseInt(value.trim());
                     finalValue = String.valueOf(v);
-                  } catch (NumberFormatException e) {
+                  } catch (final NumberFormatException e) {
                     finalValue = value.trim();
                   }
                 }
@@ -265,7 +263,7 @@ public final class UploadTeams extends BaseFLLServlet {
    * <li>Insert the new teams into the Teams table</li>
    * <li>update tournament teams table</li>
    * </ul>
-   * 
+   *
    * @param connection connection with admin priviliges to DB
    * @param request used to get the information about which columns are mapped
    *          to which
@@ -289,7 +287,7 @@ public final class UploadTeams extends BaseFLLServlet {
     if (null == teamNumberColumn
         || "".equals(teamNumberColumn)) {
       // Error, redirect back to teamColumnSelection.jsp with error message
-      session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>You must specify a column for TeamNumber</p>");
+      SessionAttributes.appendToMessage(session, "<p class='error'>You must specify a column for TeamNumber</p>");
       response.sendRedirect(response.encodeRedirectURL("teamColumnSelection.jsp"));
       return false;
     }
@@ -337,7 +335,7 @@ public final class UploadTeams extends BaseFLLServlet {
       }
 
       if (!verifyNoDuplicateTeamNumbers(connection, message, teamNumberColumn)) {
-        session.setAttribute(SessionAttributes.MESSAGE, message);
+        SessionAttributes.appendToMessage(session, message.toString());
         response.sendRedirect(response.encodeRedirectURL("teamColumnSelection.jsp"));
         return false;
       }
@@ -368,10 +366,9 @@ public final class UploadTeams extends BaseFLLServlet {
 
           if (((int) Math.floor(num.doubleValue()) != (int) Math.ceil(num.doubleValue()))
               || num.intValue() < 0) {
-            session.setAttribute(SessionAttributes.MESSAGE,
-                                 "<p class='error'>All team numbers must be positive integers: "
-                                     + num
-                                     + "</p>");
+            SessionAttributes.appendToMessage(session, "<p class='error'>All team numbers must be positive integers: "
+                + num
+                + "</p>");
             response.sendRedirect(response.encodeRedirectURL("index.jsp"));
             return false;
           }
@@ -431,7 +428,7 @@ public final class UploadTeams extends BaseFLLServlet {
 
   /**
    * Check if there are any team numbers in AllTeams that are in Teams.
-   * 
+   *
    * @param connection
    * @param message
    * @return true if no problems, false otherwise (message will be updated)
@@ -482,7 +479,7 @@ public final class UploadTeams extends BaseFLLServlet {
 
   /**
    * Update TournamentTeams table with newly inserted teams.
-   * 
+   *
    * @param connection database connection
    * @param teamNumberColumn which column in AllTeams contains the team
    *          number

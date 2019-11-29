@@ -15,11 +15,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import fll.util.CellFileReader;
-
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UploadSpreadsheet;
@@ -39,6 +37,7 @@ public final class UploadTeamTournamentAssignments extends BaseFLLServlet {
    */
   public static final String ADVANCE_FILE_KEY = "advanceFile";
 
+  @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -59,18 +58,19 @@ public final class UploadTeamTournamentAssignments extends BaseFLLServlet {
       putHeadersInSession(file, sheetName, session);
     } catch (final IOException | InvalidFormatException e) {
       message.append("<p class='error'>Error reading headers from file: "
-          + e.getMessage() + "</p>");
+          + e.getMessage()
+          + "</p>");
       LOGGER.error(e, e);
       throw new RuntimeException("Error reading headers from file", e);
     }
-    session.setAttribute(SessionAttributes.MESSAGE, message.toString());
+    SessionAttributes.appendToMessage(session, message.toString());
     response.sendRedirect(response.encodeRedirectURL("chooseAdvancementColumns.jsp"));
 
   }
 
   /**
    * Get the headers from the file.
-   * 
+   *
    * @param file the file that the data is in
    * @param session used to store the headers, attribute is "fileHeaders" and is
    *          of type String[]

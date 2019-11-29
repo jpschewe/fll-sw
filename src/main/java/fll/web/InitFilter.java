@@ -249,8 +249,8 @@ public class InitFilter implements Filter {
         final boolean dbinitialized = Utilities.testDatabaseInitialized(connection);
         if (!dbinitialized) {
           LOGGER.warn("Database not initialized, redirecting to setup");
-          session.setAttribute(SessionAttributes.MESSAGE,
-                               "<p class='error'>The database is not yet initialized. Please create the database.</p>");
+          SessionAttributes.appendToMessage(session,
+                                            "<p class='error'>The database is not yet initialized. Please create the database.</p>");
           response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
               + "/setup/index.jsp"));
           return false;
@@ -265,8 +265,8 @@ public class InitFilter implements Filter {
             final Document document = GlobalParameters.getChallengeDocument(connection);
             if (null == document) {
               LOGGER.warn("Could not find challenge descriptor");
-              session.setAttribute(SessionAttributes.MESSAGE,
-                                   "<p class='error'>Could not find xml challenge description in the database! Please create the database.</p>");
+              SessionAttributes.appendToMessage(session,
+                                                "<p class='error'>Could not find xml challenge description in the database! Please create the database.</p>");
               response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
                   + "/setup/index.jsp"));
               return false;
@@ -277,7 +277,7 @@ public class InitFilter implements Filter {
             application.setAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION, challengeDescription);
           } catch (final FLLRuntimeException e) {
             LOGGER.error("Error getting challenge document", e);
-            session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>"
+            SessionAttributes.appendToMessage(session, "<p class='error'>"
                 + e.getMessage()
                 + " Please create the database.</p>");
             response.sendRedirect(response.encodeRedirectURL(request.getContextPath()

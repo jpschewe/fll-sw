@@ -18,14 +18,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-
-
 import com.itextpdf.text.DocumentException;
 
 import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -50,8 +47,7 @@ public class ScheduleByTeam extends BaseFLLServlet {
       final int currentTournamentID = Queries.getCurrentTournament(connection);
 
       if (!TournamentSchedule.scheduleExistsInDatabase(connection, currentTournamentID)) {
-        session.setAttribute(SessionAttributes.MESSAGE,
-                             "<p class='error'>There is no schedule for this tournament.</p>");
+        SessionAttributes.appendToMessage(session, "<p class='error'>There is no schedule for this tournament.</p>");
         WebUtils.sendRedirect(application, response, "/admin/index.jsp");
         return;
       }

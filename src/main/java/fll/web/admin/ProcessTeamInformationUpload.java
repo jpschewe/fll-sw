@@ -22,7 +22,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import fll.Team;
@@ -31,7 +30,6 @@ import fll.db.Queries;
 import fll.util.CellFileReader;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -45,6 +43,7 @@ public final class ProcessTeamInformationUpload extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -80,11 +79,12 @@ public final class ProcessTeamInformationUpload extends BaseFLLServlet {
 
     } catch (final SQLException | IOException | ParseException | InvalidFormatException e) {
       message.append("<p class='error'>Error saving team information into the database: "
-          + e.getMessage() + "</p>");
+          + e.getMessage()
+          + "</p>");
       LOGGER.error(e, e);
       throw new FLLRuntimeException("Error saving team assignments into the database", e);
     } finally {
-      session.setAttribute(SessionAttributes.MESSAGE, message.toString());
+      SessionAttributes.appendToMessage(session, message.toString());
 
       Files.delete(file);
 
@@ -119,8 +119,10 @@ public final class ProcessTeamInformationUpload extends BaseFLLServlet {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Column names size: "
           + columnNames.length //
-          + " names: " + Arrays.asList(columnNames).toString() //
-          + " teamNumber column: " + teamNumberColumnName);
+          + " names: "
+          + Arrays.asList(columnNames).toString() //
+          + " teamNumber column: "
+          + teamNumberColumnName);
     }
 
     int teamNumColumnIdx = -1;
@@ -129,7 +131,8 @@ public final class ProcessTeamInformationUpload extends BaseFLLServlet {
     int index = 0;
     while (index < columnNames.length
         && (-1 == teamNumColumnIdx
-            || -1 == teamNameColumnIdx || -1 == organizationColumnIdx)) {
+            || -1 == teamNameColumnIdx
+            || -1 == organizationColumnIdx)) {
       if (-1 == teamNumColumnIdx
           && teamNumberColumnName.equals(columnNames[index])) {
         teamNumColumnIdx = index;
@@ -150,7 +153,8 @@ public final class ProcessTeamInformationUpload extends BaseFLLServlet {
 
     if (-1 == teamNumColumnIdx) {
       throw new FLLInternalException("Cannot find index for team number column '"
-          + teamNumberColumnName + "'");
+          + teamNumberColumnName
+          + "'");
     }
 
     int rowsProcessed = 0;
@@ -188,7 +192,8 @@ public final class ProcessTeamInformationUpload extends BaseFLLServlet {
     }
 
     message.append("<p>Successfully processed "
-        + rowsProcessed + " rows of data</p>");
+        + rowsProcessed
+        + " rows of data</p>");
 
   }
 

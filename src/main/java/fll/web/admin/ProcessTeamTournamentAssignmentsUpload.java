@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import fll.Tournament;
@@ -31,7 +30,6 @@ import fll.db.Queries;
 import fll.util.CellFileReader;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -47,6 +45,7 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -113,7 +112,7 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
       LOGGER.error(e, e);
       throw new RuntimeException("Error saving team assignments into the database", e);
     } finally {
-      session.setAttribute(SessionAttributes.MESSAGE, message.toString());
+      SessionAttributes.appendToMessage(session, message.toString());
 
       if (!file.delete()) {
         file.deleteOnExit();
@@ -126,7 +125,7 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
 
   /**
    * Make the changes
-   * 
+   *
    * @throws InvalidFormatException
    */
   private static void processFile(@Nonnull final Connection connection,

@@ -52,8 +52,8 @@ public class GatherScoreEntryData extends BaseFLLServlet {
       // support the unverified runs select box
       final String lTeamNum = request.getParameter("TeamNumber");
       if (null == lTeamNum) {
-        session.setAttribute(SessionAttributes.MESSAGE,
-                             "<p name='error' class='error'>Attempted to load score entry page without providing a team number.</p>");
+        SessionAttributes.appendToMessage(session,
+                                          "<p name='error' class='error'>Attempted to load score entry page without providing a team number.</p>");
         response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
         return;
       }
@@ -89,8 +89,8 @@ public class GatherScoreEntryData extends BaseFLLServlet {
       int lRunNumber;
       if (Boolean.valueOf(request.getParameter("EditFlag"))) {
         if (null == runNumberStr) {
-          session.setAttribute(SessionAttributes.MESSAGE,
-                               "<p name='error' class='error'>Please choose a run number when editing scores</p>");
+          SessionAttributes.appendToMessage(session,
+                                            "<p name='error' class='error'>Please choose a run number when editing scores</p>");
           response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
           return;
         }
@@ -99,17 +99,16 @@ public class GatherScoreEntryData extends BaseFLLServlet {
           lRunNumber = nextRunNumber
               - 1;
           if (lRunNumber < 1) {
-            session.setAttribute(SessionAttributes.MESSAGE,
-                                 "<p name='error' class='error'>Selected team has no performance score for this tournament.</p>");
+            SessionAttributes.appendToMessage(session,
+                                              "<p name='error' class='error'>Selected team has no performance score for this tournament.</p>");
             response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
             return;
           }
         } else {
           if (!Queries.performanceScoreExists(connection, tournament, teamNumber, runNumber)) {
-            session.setAttribute(SessionAttributes.MESSAGE,
-                                 "<p name='error' class='error'>Team has not yet competed in run "
-                                     + runNumber
-                                     + ".  Please choose a valid run number.</p>");
+            SessionAttributes.appendToMessage(session, "<p name='error' class='error'>Team has not yet competed in run "
+                + runNumber
+                + ".  Please choose a valid run number.</p>");
             response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
             return;
           }
@@ -121,7 +120,7 @@ public class GatherScoreEntryData extends BaseFLLServlet {
             && nextRunNumber > numSeedingRounds) {
           if (null == Playoff.involvedInUnfinishedPlayoff(connection, tournament,
                                                           Collections.singletonList(teamNumber))) {
-            session.setAttribute(SessionAttributes.MESSAGE, "<p name='error' class='error'>Selected team ("
+            SessionAttributes.appendToMessage(session, "<p name='error' class='error'>Selected team ("
                 + teamNumber
                 + ") is not involved in an unfinished head to head bracket. Please double check that the head to head brackets were properly initialized"
                 + " If you were intending to double check a score, you probably just forgot to check"
@@ -129,8 +128,8 @@ public class GatherScoreEntryData extends BaseFLLServlet {
             response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
             return;
           } else if (!Queries.didTeamReachPlayoffRound(connection, nextRunNumber, teamNumber)) {
-            session.setAttribute(SessionAttributes.MESSAGE,
-                                 "<p name='error' class='error' id='error-not-advanced'>Selected team has not advanced to the next head to head round.</p>");
+            SessionAttributes.appendToMessage(session,
+                                              "<p name='error' class='error' id='error-not-advanced'>Selected team has not advanced to the next head to head round.</p>");
             response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
             return;
           }
