@@ -170,7 +170,7 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
    * Compute scores per goal group.
    *
    * @param teamScore the score to evaluate
-   * @return goal group -> score, empty map if no score or a no show or no groups
+   * @return goal group to score, empty map if no score or a no show or no groups
    *         defined
    */
   @Nonnull

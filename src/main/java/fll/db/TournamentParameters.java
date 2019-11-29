@@ -397,7 +397,7 @@ public final class TournamentParameters {
    * To advance to the next level of competition teams
    * should be in the top X% of performance score.
    *
-   * @return integer percentage, 40 -> 40%
+   * @return integer percentage, 40 means 40%
    * @throws SQLException on a database error
    */
   public static int getPerformanceAdvancementPercentage(final Connection connection,
