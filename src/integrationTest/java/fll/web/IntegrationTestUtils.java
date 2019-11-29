@@ -270,6 +270,8 @@ public final class IntegrationTestUtils {
     final WebElement submitElement = driver.findElement(By.name("submit_create_user"));
     submitElement.click();
 
+    LOGGER.trace("Submitted create user page");
+
     driverWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success-create-user")));
 
     login(driver, driverWait);
