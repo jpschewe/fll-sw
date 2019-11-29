@@ -561,7 +561,7 @@ public class Launcher extends JFrame {
     final Path classesPath = TomcatLauncher.getClassesPath();
 
     final String[] possibleLocations = { //
-                                         "../../src/main/dist", // eclipse
+                                         "../../src/main/root-docs", // eclipse
                                          "..", // distribution
                                          "../../../../src/main/root-docs" // gradle
     };
