@@ -60,7 +60,7 @@ public class EditTournamentsTest {
       lastRow.sendKeys("test tournament");
       selenium.findElement(By.name("commit")).click();
 
-      selenium.findElement(By.id("success"));
+      seleniumWait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.id("success")));
     } catch (final RuntimeException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
