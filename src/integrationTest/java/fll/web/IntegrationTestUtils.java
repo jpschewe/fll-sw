@@ -250,6 +250,7 @@ public final class IntegrationTestUtils {
 
     final WebElement reinitDB = driver.findElement(By.name("reinitializeDatabase"));
     reinitDB.click();
+    LOGGER.trace("Clicked reinitializeDatabase");
 
     if (expectAlert) {
       handleDatabaseEraseConfirmation(driver, driverWait);
@@ -316,6 +317,7 @@ public final class IntegrationTestUtils {
 
       final WebElement createEle = selenium.findElement(By.name("createdb"));
       createEle.click();
+      LOGGER.trace("Clicked createdb button");
 
       if (expectAlert) {
         handleDatabaseEraseConfirmation(selenium, seleniumWait);
