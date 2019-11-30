@@ -8,7 +8,6 @@ package fll.web.developer;
 
 import java.io.IOException;
 
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.WebDriver;
@@ -16,7 +15,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.xml.sax.SAXException;
 
 import fll.TestUtils;
-
 import fll.web.IntegrationTestUtils;
 import fll.web.WebTestUtils;
 
@@ -29,8 +27,16 @@ public class QueryTest {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  /**
+   *
+   * @param selenium web driver
+   * @param seleniumWait wait for elements
+   * @throws IOException test error
+   * @throws SAXException test error
+   * @throws InterruptedException test error
+   */
   @Test
-  public void test0(final WebDriver selenium, WebDriverWait seleniumWait) throws IOException, SAXException, InterruptedException {
+  public void test0(final WebDriver selenium, final WebDriverWait seleniumWait) throws IOException, SAXException, InterruptedException {
     try {
       IntegrationTestUtils.initializeDatabaseFromDump(selenium,
                                                       seleniumWait, TestUtils.class.getResourceAsStream("/fll/data/testdb.flldb"));
@@ -41,8 +47,8 @@ public class QueryTest {
         LOGGER.info(colName);
       }
     } catch (final IOException | RuntimeException | AssertionError e) {
-      LOGGER.fatal(e, e);
       IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
     }
   }
 
