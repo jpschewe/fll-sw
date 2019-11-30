@@ -32,7 +32,6 @@ public class InitializeDatabaseTest {
     try (InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml")) {
       IntegrationTestUtils.initializeDatabase(selenium, seleniumWait, challengeStream);
     } catch (final IOException | RuntimeException | AssertionError e) {
-      LOGGER.fatal(e, e);
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
     }

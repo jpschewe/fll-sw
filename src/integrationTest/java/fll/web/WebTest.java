@@ -70,8 +70,8 @@ public class WebTest {
         IntegrationTestUtils.loadPage(selenium, seleniumWait, url);
       }
     } catch (final IOException | RuntimeException | AssertionError e) {
-      LOGGER.fatal(e, e);
       IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
     }
   }
 
@@ -95,8 +95,8 @@ public class WebTest {
 
       IntegrationTestUtils.setTournament(selenium, seleniumWait, GenerateDB.DROP_TOURNAMENT_NAME);
     } catch (final IOException | RuntimeException | AssertionError e) {
-      LOGGER.fatal(e, e);
       IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
     }
   }
 
