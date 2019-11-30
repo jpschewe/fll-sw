@@ -377,8 +377,10 @@ public final class ChallengeParser {
   private static void validateGoalInitialValue(final Element goalElement,
                                                final String name)
       throws ParseException {
-    final double initialValue = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(goalElement.getAttribute("initialValue"))
+    final double initialValue = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(goalElement.getAttribute(Goal.INITIAL_VALUE_ATTRIBUTE))
                                                                                    .doubleValue();
+    LOGGER.debug("Raw initialValue: {}", goalElement.getAttribute(Goal.INITIAL_VALUE_ATTRIBUTE));
+
     if (ChallengeParser.isEnumeratedGoal(goalElement)) {
       boolean foundMatch = false;
       for (final Element valueEle : new NodelistElementCollectionAdapter(goalElement.getChildNodes())) {
@@ -394,10 +396,14 @@ public final class ChallengeParser {
       }
 
     } else {
-      final double min = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(goalElement.getAttribute("min"))
+      final double min = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(goalElement.getAttribute(Goal.MIN_ATTRIBUTE))
                                                                             .doubleValue();
-      final double max = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(goalElement.getAttribute("max"))
+      final double max = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(goalElement.getAttribute(Goal.MAX_ATTRIBUTE))
                                                                             .doubleValue();
+
+      LOGGER.debug("Raw min: {}", goalElement.getAttribute(Goal.MIN_ATTRIBUTE));
+      LOGGER.debug("Raw max: {}", goalElement.getAttribute(Goal.MAX_ATTRIBUTE));
+
       if (FP.lessThan(initialValue, min, INITIAL_VALUE_TOLERANCE)) {
         throw new InvalidInitialValue(String.format("Initial value for %s(%f) is less than min(%f)", name, initialValue,
                                                     min));
