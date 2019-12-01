@@ -379,7 +379,8 @@ public final class ChallengeParser {
       throws ParseException {
     final double initialValue = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(goalElement.getAttribute(Goal.INITIAL_VALUE_ATTRIBUTE))
                                                                                    .doubleValue();
-    LOGGER.trace("Raw initialValue: {}", goalElement.getAttribute(Goal.INITIAL_VALUE_ATTRIBUTE));
+    LOGGER.trace("{} Raw initialValue: {} parsed: {}", name, goalElement.getAttribute(Goal.INITIAL_VALUE_ATTRIBUTE),
+                 initialValue);
 
     if (ChallengeParser.isEnumeratedGoal(goalElement)) {
       boolean foundMatch = false;
@@ -401,8 +402,8 @@ public final class ChallengeParser {
       final double max = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(goalElement.getAttribute(Goal.MAX_ATTRIBUTE))
                                                                             .doubleValue();
 
-      LOGGER.trace("Raw min: {}", goalElement.getAttribute(Goal.MIN_ATTRIBUTE));
-      LOGGER.trace("Raw max: {}", goalElement.getAttribute(Goal.MAX_ATTRIBUTE));
+      LOGGER.trace("{} Raw min: {} parsed: {}", name, goalElement.getAttribute(Goal.MIN_ATTRIBUTE), min);
+      LOGGER.trace("{} Raw max: {} parsed: {}", name, goalElement.getAttribute(Goal.MAX_ATTRIBUTE), max);
 
       if (FP.lessThan(initialValue, min, INITIAL_VALUE_TOLERANCE)) {
         throw new InvalidInitialValue(String.format("Initial value for %s(%f) is less than min(%f)", name, initialValue,
