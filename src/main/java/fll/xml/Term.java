@@ -184,7 +184,7 @@ public class Term extends Object implements Evaluatable, Serializable {
   private Element createConstantElement(final Document doc) {
     final Element ele = doc.createElement(CONSTANT_TAG_NAME);
     ele.setAttribute(CONSTANT_VALUE_ATTRIBUTE,
-                     Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mCoefficient));
+                     Utilities.getXmlFloatingPointNumberFormat().format(mCoefficient));
     return ele;
   }
 

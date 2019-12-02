@@ -336,12 +336,12 @@ public class Goal extends AbstractGoal {
     populateXml(doc, ele);
 
     if (!isEnumerated()) {
-      ele.setAttribute(MIN_ATTRIBUTE, Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mMin));
-      ele.setAttribute(MAX_ATTRIBUTE, Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mMax));
-      ele.setAttribute(MULTIPLIER_ATTRIBUTE, Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mMultiplier));
+      ele.setAttribute(MIN_ATTRIBUTE, Utilities.getXmlFloatingPointNumberFormat().format(mMin));
+      ele.setAttribute(MAX_ATTRIBUTE, Utilities.getXmlFloatingPointNumberFormat().format(mMax));
+      ele.setAttribute(MULTIPLIER_ATTRIBUTE, Utilities.getXmlFloatingPointNumberFormat().format(mMultiplier));
     }
     ele.setAttribute(INITIAL_VALUE_ATTRIBUTE,
-                     Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mInitialValue));
+                     Utilities.getXmlFloatingPointNumberFormat().format(mInitialValue));
 
     ele.setAttribute(ChallengeParser.SCORE_TYPE_ATTRIBUTE, mScoreType.toXmlString());
     ele.setAttribute(REQUIRED_ATTRIBUTE, Boolean.toString(mRequired));

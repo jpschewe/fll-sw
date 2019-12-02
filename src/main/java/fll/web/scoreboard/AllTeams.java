@@ -160,9 +160,9 @@ public class AllTeams {
         mScoreString = "No Show";
       } else {
         if (floatingPointScores) {
-          mScoreString = Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(score);
+          mScoreString = Utilities.getFloatingPointNumberFormat().format(score);
         } else {
-          mScoreString = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.format(score);
+          mScoreString = Utilities.getIntegerNumberFormat().format(score);
         }
       }
     }

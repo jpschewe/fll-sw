@@ -395,7 +395,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
         if (overwrite
             || (scoreElement.hasAttribute("modified")
                 && "true".equalsIgnoreCase(scoreElement.getAttribute("modified")))) {
-          final int teamNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(scoreElement.getAttribute("teamNumber"))
+          final int teamNumber = Utilities.getIntegerNumberFormat().parse(scoreElement.getAttribute("teamNumber"))
                                                                          .intValue();
 
           if (LOGGER.isTraceEnabled()) {

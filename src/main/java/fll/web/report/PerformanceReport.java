@@ -156,10 +156,10 @@ public class PerformanceReport extends BaseFLLServlet {
             final String scoresText = scoresToText(rawScoreFormat, scores);
             table.addCell(PdfUtils.createCell(scoresText));
 
-            table.addCell(PdfUtils.createCell(Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(minScore)));
-            table.addCell(PdfUtils.createCell(Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(maxScore)));
-            table.addCell(PdfUtils.createCell(Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(average)));
-            table.addCell(PdfUtils.createCell(Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(stdev)));
+            table.addCell(PdfUtils.createCell(Utilities.getFloatingPointNumberFormat().format(minScore)));
+            table.addCell(PdfUtils.createCell(Utilities.getFloatingPointNumberFormat().format(maxScore)));
+            table.addCell(PdfUtils.createCell(Utilities.getFloatingPointNumberFormat().format(average)));
+            table.addCell(PdfUtils.createCell(Utilities.getFloatingPointNumberFormat().format(stdev)));
           } // foreach result
         } // allocate rs
 

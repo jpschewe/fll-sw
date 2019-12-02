@@ -378,7 +378,7 @@ public final class ChallengeParser {
                                                final String name)
       throws ParseException {
     final String rawInitialValue = goalElement.getAttribute(Goal.INITIAL_VALUE_ATTRIBUTE);
-    final Number parsedInitialValue = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(rawInitialValue);
+    final Number parsedInitialValue = Utilities.getXmlFloatingPointNumberFormat().parse(rawInitialValue);
     final double initialValue = parsedInitialValue.doubleValue();
     LOGGER.trace("{} Raw initialValue: '{}' parsed: {} double: {}", name, rawInitialValue, parsedInitialValue,
                  initialValue);
@@ -386,7 +386,7 @@ public final class ChallengeParser {
     if (ChallengeParser.isEnumeratedGoal(goalElement)) {
       boolean foundMatch = false;
       for (final Element valueEle : new NodelistElementCollectionAdapter(goalElement.getChildNodes())) {
-        final double score = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(valueEle.getAttribute("score"))
+        final double score = Utilities.getXmlFloatingPointNumberFormat().parse(valueEle.getAttribute("score"))
                                                                                 .doubleValue();
         if (FP.equals(score, initialValue, INITIAL_VALUE_TOLERANCE)) {
           foundMatch = true;
@@ -399,10 +399,10 @@ public final class ChallengeParser {
 
     } else {
       final String rawMin = goalElement.getAttribute(Goal.MIN_ATTRIBUTE);
-      final Number numMin = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(rawMin);
+      final Number numMin = Utilities.getXmlFloatingPointNumberFormat().parse(rawMin);
       final double min = numMin.doubleValue();
       final String rawMax = goalElement.getAttribute(Goal.MAX_ATTRIBUTE);
-      final Number numMax = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(rawMax);
+      final Number numMax = Utilities.getXmlFloatingPointNumberFormat().parse(rawMax);
       final double max = numMax.doubleValue();
 
       LOGGER.trace("{} Raw min: '{}' parsed: {} double: {}", name, rawMin, numMin, min);

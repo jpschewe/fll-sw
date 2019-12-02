@@ -362,7 +362,7 @@ public final class UploadTeams extends BaseFLLServlet {
               + " into Teams");
         }
         try {
-          final Number num = Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(teamNumStr);
+          final Number num = Utilities.getFloatingPointNumberFormat().parse(teamNumStr);
 
           if (((int) Math.floor(num.doubleValue()) != (int) Math.ceil(num.doubleValue()))
               || num.intValue() < 0) {
