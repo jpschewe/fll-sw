@@ -377,9 +377,10 @@ public final class ChallengeParser {
   private static void validateGoalInitialValue(final Element goalElement,
                                                final String name)
       throws ParseException {
-    final double initialValue = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(goalElement.getAttribute(Goal.INITIAL_VALUE_ATTRIBUTE))
-                                                                                   .doubleValue();
-    LOGGER.trace("{} Raw initialValue: {} parsed: {}", name, goalElement.getAttribute(Goal.INITIAL_VALUE_ATTRIBUTE),
+    final String rawInitialValue = goalElement.getAttribute(Goal.INITIAL_VALUE_ATTRIBUTE);
+    final Number parsedInitialValue = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(rawInitialValue);
+    final double initialValue = parsedInitialValue.doubleValue();
+    LOGGER.trace("{} Raw initialValue: '{}' parsed: {} double: {}", name, rawInitialValue, parsedInitialValue,
                  initialValue);
 
     if (ChallengeParser.isEnumeratedGoal(goalElement)) {
@@ -397,13 +398,15 @@ public final class ChallengeParser {
       }
 
     } else {
-      final double min = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(goalElement.getAttribute(Goal.MIN_ATTRIBUTE))
-                                                                            .doubleValue();
-      final double max = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(goalElement.getAttribute(Goal.MAX_ATTRIBUTE))
-                                                                            .doubleValue();
+      final String rawMin = goalElement.getAttribute(Goal.MIN_ATTRIBUTE);
+      final Number numMin = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(rawMin);
+      final double min = numMin.doubleValue();
+      final String rawMax = goalElement.getAttribute(Goal.MAX_ATTRIBUTE);
+      final Number numMax = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(rawMax);
+      final double max = numMax.doubleValue();
 
-      LOGGER.trace("{} Raw min: {} parsed: {}", name, goalElement.getAttribute(Goal.MIN_ATTRIBUTE), min);
-      LOGGER.trace("{} Raw max: {} parsed: {}", name, goalElement.getAttribute(Goal.MAX_ATTRIBUTE), max);
+      LOGGER.trace("{} Raw min: '{}' parsed: {} double: {}", name, rawMin, numMin, min);
+      LOGGER.trace("{} Raw max: '{}' parsed: {} double: {}", name, rawMax, numMax, max);
 
       if (FP.lessThan(initialValue, min, INITIAL_VALUE_TOLERANCE)) {
         throw new InvalidInitialValue(String.format("Initial value for %s(%f) is less than min(%f)", name, initialValue,
