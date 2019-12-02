@@ -327,13 +327,13 @@ public final class Queries {
     if (null == teamNumberStr) {
       throw new RuntimeException("Missing parameter: TeamNumber");
     }
-    final int teamNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue();
+    final int teamNumber = Utilities.getIntegerNumberFormat().parse(teamNumberStr).intValue();
 
     final String runNumberStr = request.getParameter("RunNumber");
     if (null == runNumberStr) {
       throw new RuntimeException("Missing parameter: RunNumber");
     }
-    final int runNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(runNumberStr).intValue();
+    final int runNumber = Utilities.getIntegerNumberFormat().parse(runNumberStr).intValue();
 
     final String noShow = request.getParameter("NoShow");
     if (null == noShow) {
@@ -514,13 +514,13 @@ public final class Queries {
     if (null == teamNumberStr) {
       throw new FLLRuntimeException("Missing parameter: TeamNumber");
     }
-    final int teamNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue();
+    final int teamNumber = Utilities.getIntegerNumberFormat().parse(teamNumberStr).intValue();
 
     final String runNumberStr = request.getParameter("RunNumber");
     if (null == runNumberStr) {
       throw new FLLRuntimeException("Missing parameter: RunNumber");
     }
-    final int runNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(runNumberStr).intValue();
+    final int runNumber = Utilities.getIntegerNumberFormat().parse(runNumberStr).intValue();
 
     final String noShow = request.getParameter("NoShow");
     if (null == noShow) {
@@ -792,13 +792,13 @@ public final class Queries {
     if (null == teamNumberStr) {
       throw new RuntimeException("Missing parameter: TeamNumber");
     }
-    final int teamNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue();
+    final int teamNumber = Utilities.getIntegerNumberFormat().parse(teamNumberStr).intValue();
 
     final String runNumber = request.getParameter("RunNumber");
     if (null == runNumber) {
       throw new RuntimeException("Missing parameter: RunNumber");
     }
-    final int irunNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(runNumber).intValue();
+    final int irunNumber = Utilities.getIntegerNumberFormat().parse(runNumber).intValue();
     final int numSeedingRounds = TournamentParameters.getNumSeedingRounds(connection, currentTournament);
 
     final int dbLine = getPlayoffTableLineNumber(connection, currentTournament, teamNumber, irunNumber);

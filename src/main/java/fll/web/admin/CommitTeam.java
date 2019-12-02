@@ -79,7 +79,7 @@ public class CommitTeam extends BaseFLLServlet {
     try {
       connection = datasource.getConnection();
       // parse the numbers first so that we don't get a partial commit
-      final int teamNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(request.getParameter("teamNumber"))
+      final int teamNumber = Utilities.getIntegerNumberFormat().parse(request.getParameter("teamNumber"))
                                                                      .intValue();
 
       String redirect = null;

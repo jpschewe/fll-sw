@@ -1804,7 +1804,7 @@ public class TournamentSchedule implements Serializable {
         return null;
       }
 
-      final int teamNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue();
+      final int teamNumber = Utilities.getIntegerNumberFormat().parse(teamNumberStr).intValue();
       final TeamScheduleInfo ti = new TeamScheduleInfo(teamNumber);
       ti.setTeamName(line[ci.getTeamNameColumn()]);
       ti.setOrganization(line[ci.getOrganizationColumn()]);
@@ -1840,7 +1840,7 @@ public class TournamentSchedule implements Serializable {
         final LocalTime perf1Time = parseTime(perf1Str);
 
         final String tableName = tablePieces[0];
-        final int tableSide = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(tablePieces[1]).intValue();
+        final int tableSide = Utilities.getIntegerNumberFormat().parse(tablePieces[1]).intValue();
         final int roundNumber = perfIndex
             + 1;
         final PerformanceTime performance = new PerformanceTime(perf1Time, tableName, tableSide, false);
@@ -1873,7 +1873,7 @@ public class TournamentSchedule implements Serializable {
         final LocalTime perf1Time = parseTime(perf1Str);
 
         final String tableName = tablePieces[0];
-        final int tableSide = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(tablePieces[1]).intValue();
+        final int tableSide = Utilities.getIntegerNumberFormat().parse(tablePieces[1]).intValue();
         final int roundNumber = perfIndex
             + 1;
         final PerformanceTime performance = new PerformanceTime(perf1Time, tableName, tableSide, true);

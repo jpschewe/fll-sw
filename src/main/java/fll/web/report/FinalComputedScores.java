@@ -630,7 +630,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
           final PdfPCell pCell = new PdfPCell((Double.isNaN(overallScore) ? new Phrase("No Score"
               + overallScoreSuffix, ARIAL_8PT_NORMAL_RED)
-              : new Phrase(Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(overallScore)
+              : new Phrase(Utilities.getFloatingPointNumberFormat().format(overallScore)
                   + overallScoreSuffix, ARIAL_8PT_NORMAL)));
           pCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
           pCell.setBorder(0);
@@ -709,7 +709,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
         if (Double.isNaN(scaledScore)) {
           overallScoreText = "No Score";
         } else {
-          overallScoreText = Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(scaledScore);
+          overallScoreText = Utilities.getFloatingPointNumberFormat().format(scaledScore);
         }
 
         final String scoreText = overallScoreText
