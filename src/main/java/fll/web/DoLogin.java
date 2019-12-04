@@ -104,7 +104,7 @@ public class DoLogin extends BaseFLLServlet {
           if (null == redirect) {
             redirect = "index.jsp";
           }
-          LOGGER.trace("Redirecting to {}", redirect);
+          LOGGER.trace("Redirecting to {} with message '{}'", redirect, SessionAttributes.getMessage(session));
           response.sendRedirect(response.encodeRedirectURL(redirect));
           return;
         } else {
