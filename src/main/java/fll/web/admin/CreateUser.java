@@ -27,7 +27,6 @@ import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.CookieUtils;
-import fll.web.DoLogin;
 import fll.web.SessionAttributes;
 
 /**
@@ -106,7 +105,7 @@ public class CreateUser extends BaseFLLServlet {
       final String authenticatedUser = Queries.checkValidLogin(connection, loginKeys);
       if (null == authenticatedUser) {
         LOGGER.debug("Doing login");
-        DoLogin.doLogin(request, response, application, session);
+        request.getRequestDispatcher("/DoLogin").forward(request, response);
       } else {
         LOGGER.debug("Redirecting to index");
         response.sendRedirect(response.encodeRedirectURL("index.jsp"));
