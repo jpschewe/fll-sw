@@ -64,8 +64,8 @@ public class InitFilter implements Filter {
       final String path = httpRequest.getRequestURI();
       final HttpSession session = httpRequest.getSession();
 
-      LOGGER.trace("Loading {} message: {} referer: {}", path, SessionAttributes.getMessage(session),
-                   httpRequest.getHeader("referer"));
+      LOGGER.trace("Loading {} message: {} referer: {} session: {}", path, SessionAttributes.getMessage(session),
+                   httpRequest.getHeader("referer"), session.getId());
 
       final ServletContext application = session.getServletContext();
 
