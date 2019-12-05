@@ -64,6 +64,9 @@ public class InitFilter implements Filter {
       final String path = httpRequest.getRequestURI();
       final HttpSession session = httpRequest.getSession();
 
+      LOGGER.trace("Loading {} message: {} referer: {}", path, SessionAttributes.getMessage(session),
+                   httpRequest.getHeader("referer"));
+
       final ServletContext application = session.getServletContext();
 
       // call init before check security, if a page doesn't need init,
@@ -95,6 +98,8 @@ public class InitFilter implements Filter {
           return;
         }
       }
+    } else {
+      LOGGER.trace("Non-servlet request: {}", request);
     }
 
     chain.doFilter(request, response);
