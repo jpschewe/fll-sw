@@ -258,25 +258,9 @@ public final class IntegrationTestUtils {
 
     driverWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
 
-    // setup user
-    final WebElement userElement = driverWait.until(ExpectedConditions.elementToBeClickable(By.name("user")));
-    userElement.sendKeys(TEST_USERNAME);
-
-    final WebElement passElement = driver.findElement(By.name("pass"));
-    passElement.sendKeys(TEST_PASSWORD);
-
-    final WebElement passCheckElement = driver.findElement(By.name("pass_check"));
-    passCheckElement.sendKeys(TEST_PASSWORD);
-
-    final WebElement submitElement = driver.findElement(By.name("submit_create_user"));
-    submitElement.click();
-
-    LOGGER.trace("Submitted create user page");
-
-    driverWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success-create-user")));
+    createUser(driver, driverWait);
 
     login(driver, driverWait);
-
   }
 
   /**
@@ -325,20 +309,7 @@ public final class IntegrationTestUtils {
 
       seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
 
-      // setup user
-      final WebElement userElement = selenium.findElement(By.name("user"));
-      userElement.sendKeys(TEST_USERNAME);
-
-      final WebElement passElement = selenium.findElement(By.name("pass"));
-      passElement.sendKeys(TEST_PASSWORD);
-
-      final WebElement passCheckElement = selenium.findElement(By.name("pass_check"));
-      passCheckElement.sendKeys(TEST_PASSWORD);
-
-      final WebElement submitElement = selenium.findElement(By.name("submit_create_user"));
-      submitElement.click();
-
-      seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success-create-user")));
+      createUser(selenium, seleniumWait);
 
       login(selenium, seleniumWait);
     } finally {
@@ -347,6 +318,26 @@ public final class IntegrationTestUtils {
       }
     }
     login(selenium, seleniumWait);
+  }
+
+  private static void createUser(final WebDriver selenium,
+                                 final WebDriverWait seleniumWait) {
+    seleniumWait.until(ExpectedConditions.urlContains("createUsername.jsp"));
+
+    final WebElement userElement = seleniumWait.until(ExpectedConditions.elementToBeClickable(By.name("user")));
+    userElement.sendKeys(TEST_USERNAME);
+
+    final WebElement passElement = selenium.findElement(By.name("pass"));
+    passElement.sendKeys(TEST_PASSWORD);
+
+    final WebElement passCheckElement = selenium.findElement(By.name("pass_check"));
+    passCheckElement.sendKeys(TEST_PASSWORD);
+
+    final WebElement submitElement = selenium.findElement(By.name("submit_create_user"));
+    submitElement.click();
+    LOGGER.trace("Submitted create user page");
+
+    seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success-create-user")));
   }
 
   private static void handleDatabaseEraseConfirmation(final WebDriver selenium,
