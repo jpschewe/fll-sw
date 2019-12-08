@@ -793,7 +793,7 @@ public final class ScoreEntry {
       final String value = valueEle.getValue();
       final String id = getIDForEnumRadio(goalName, value);
       writer.println("      <tr>");
-      writer.println("        <td>");
+      writer.println("        <td class='right'>");
       writer.println("          <input type='radio' name='"
           + goalName
           + "' value='"
