@@ -228,6 +228,7 @@ public final class IntegrationTestUtils {
                                         final WebDriverWait driverWait,
                                         final Path challengeFile) {
 
+    LOGGER.trace("Visiting setup");
     driver.get(TestUtils.URL_ROOT
         + "setup/");
 
@@ -236,8 +237,10 @@ public final class IntegrationTestUtils {
                                            ExpectedConditions.urlContains("/setup")));
 
     if (isElementPresent(driver, By.name("submit_login"))) {
+      LOGGER.trace("Login required");
       login(driver, driverWait);
 
+      LOGGER.trace("Visiting setup after login");
       driver.get(TestUtils.URL_ROOT
           + "setup/");
     }
@@ -258,8 +261,10 @@ public final class IntegrationTestUtils {
 
     driverWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
 
+    LOGGER.trace("Found database success, calling createUser");
     createUser(driver, driverWait);
 
+    LOGGER.trace("Finished with create user, calling login");
     login(driver, driverWait);
   }
 
