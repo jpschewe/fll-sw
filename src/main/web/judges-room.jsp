@@ -142,7 +142,7 @@
 
 		<li><a target="_report"
 			href="<c:url value='/report/index.jsp' />">Generate reports</a> -
-			this is done ones all of the subjective scores are in</li>
+			this is done once all of the subjective scores are in</li>
 
 		<li><a href="<c:url value='/admin/DownloadJudgesDatabase' />">Download
 				the final judges room database</a> and send it to the head computer
