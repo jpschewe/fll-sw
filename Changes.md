@@ -1,3 +1,4 @@
+* #789 - add to documentation to make it clear that reports can be generated with partial data
 * #788 - right-align radio buttons on the score entry page to put them near the labels
 * #749 - Remove error about jar file not found when running under windows
 * #787 - Fix launching fll-sw.html from Launcher when run from Eclipse
