@@ -325,6 +325,8 @@ task writeJspcProperties(type: WriteProperties) {
 // call JspC to test compile the JSP files
 // the output isn't used other than to check if there are errors in the build
 task jspToJava(type: JavaExec, dependsOn: [compileJava, writeJspcProperties]) {
+    group = "Build"
+    description = "Convert JSP files to Java"
 
     inputs.dir(jspSrc)
     outputs.dir(jspJavaSrc)
@@ -366,10 +368,16 @@ cpdCheck {
 }
 
 task sloccount(type: Exec) {
+    group = "Documentation"
+    description = "Count number of lines of code"
+
     commandLine("cloc", "--by-file", "--xml", "--out", "$buildDir/reports/sloccount/cloc.xml", "src")
 }
 
 task renderWorkflows(dependsOn: [markdownToHtml]) {
+    group = "Documentation"
+    description = "Render workflows as PDFs"
+
     def inputFiles = []
     def outputFiles = []
     def ioMap = [:]
@@ -398,6 +406,9 @@ task renderWorkflows(dependsOn: [markdownToHtml]) {
 distributionDependencies.dependsOn(renderWorkflows)
 
 task createDatabaseDiagram(type: JavaExec, dependsOn: [markdownToHtml]) {
+    group = "Documentation"
+    description = "Creates a diagram of the database"
+    
     classpath = sourceSets.main.runtimeClasspath
     
     main = "fll.db.GenerateDatabaseDiagram"
