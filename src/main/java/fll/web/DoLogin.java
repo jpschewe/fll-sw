@@ -22,7 +22,6 @@ import javax.sql.DataSource;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import fll.db.Queries;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Handle login credentials and if incorrect redirect back to login page.
@@ -60,9 +59,8 @@ public class DoLogin extends BaseFLLServlet {
                              final HttpSession session)
       throws IOException, ServletException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+
+    try (final Connection connection = datasource.getConnection()) {
 
       // check for authentication table
       if (Queries.isAuthenticationEmpty(connection)) {
@@ -82,7 +80,7 @@ public class DoLogin extends BaseFLLServlet {
           || pass.isEmpty()) {
         LOGGER.warn("Form fields missing");
         SessionAttributes.appendToMessage(session, "<p class='error'>You must fill out all fields in the form.</p>");
-        response.sendRedirect(response.encodeRedirectURL("login.jsp"));
+        response.sendRedirect(response.encodeRedirectURL("/login.jsp"));
         return;
       }
       final String hashedPass = DigestUtils.md5Hex(pass);
@@ -102,7 +100,7 @@ public class DoLogin extends BaseFLLServlet {
 
           String redirect = SessionAttributes.getRedirectURL(session);
           if (null == redirect) {
-            redirect = "index.jsp";
+            redirect = "/index.jsp";
           }
           LOGGER.trace("Redirecting to {} with message '{}'", redirect, SessionAttributes.getMessage(session));
           response.sendRedirect(response.encodeRedirectURL(redirect));
@@ -114,12 +112,10 @@ public class DoLogin extends BaseFLLServlet {
 
       LOGGER.warn("Incorrect login credentials user: {}", user);
       SessionAttributes.appendToMessage(session, "<p class='error'>Incorrect login information provided</p>");
-      response.sendRedirect(response.encodeRedirectURL("login.jsp"));
+      response.sendRedirect(response.encodeRedirectURL("/login.jsp"));
       return;
     } catch (final SQLException e) {
       throw new RuntimeException(e);
-    } finally {
-      SQLFunctions.close(connection);
     }
   }
 
