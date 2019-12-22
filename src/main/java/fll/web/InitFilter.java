@@ -101,6 +101,7 @@ public class InitFilter implements Filter {
       LOGGER.trace("Non-servlet request: {}", request);
     }
 
+    LOGGER.trace("Bottom of doFilter");
     chain.doFilter(request, response);
   }
 
@@ -208,8 +209,11 @@ public class InitFilter implements Filter {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException {
+    LOGGER.trace("Top of checkSecurity");
 
     if (WebUtils.checkAuthenticated(request, application)) {
+      LOGGER.trace("Returning true from checkSecurity");
+
       return true;
     } else {
       session.setAttribute(SessionAttributes.REDIRECT_URL, WebUtils.getFullURL(request));
@@ -240,6 +244,7 @@ public class InitFilter implements Filter {
                                     final HttpSession session,
                                     final ServletContext application)
       throws IOException, RuntimeException {
+    LOGGER.trace("Top of initialize");
 
     synchronized (INIT_LOCK) {
 
@@ -294,6 +299,7 @@ public class InitFilter implements Filter {
         throw new RuntimeException(e);
       }
 
+      LOGGER.trace("Bottom of initialize returning true");
       return true;
 
     } // lock
