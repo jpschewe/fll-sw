@@ -259,6 +259,8 @@ public final class IntegrationTestUtils {
       handleDatabaseEraseConfirmation(driver, driverWait);
     }
 
+    waitForDatabaseInit();
+
     driverWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
 
     LOGGER.trace("Found database success, calling createUser");
@@ -312,6 +314,8 @@ public final class IntegrationTestUtils {
         handleDatabaseEraseConfirmation(selenium, seleniumWait);
       }
 
+      waitForDatabaseInit();
+
       seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
 
       createUser(selenium, seleniumWait);
@@ -323,6 +327,20 @@ public final class IntegrationTestUtils {
       }
     }
     login(selenium, seleniumWait);
+  }
+
+  /**
+   * Checking for the success page right away seems to be causing the setup index
+   * to be hit first. So
+   * instead sleep for a short time to let everything catch up.
+   */
+  private static void waitForDatabaseInit() {
+    try {
+      Thread.sleep(500);
+    } catch (final InterruptedException e) {
+      LOGGER.warn("Interrupted waiting for database init, continuing", e);
+    }
+
   }
 
   private static void createUser(final WebDriver selenium,
