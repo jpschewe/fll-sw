@@ -48,7 +48,6 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
@@ -871,46 +870,34 @@ public class TournamentSchedule implements Serializable {
           + " exists, but isn't a directory");
     }
 
-    OutputStream pdfFos = null;
-    try {
-      final File byDivision = new File(directory, baseFilename
-          + "-subjective-by-division.pdf");
-
-      pdfFos = new FileOutputStream(byDivision);
+    final File byDivision = new File(directory, baseFilename
+        + "-subjective-by-division.pdf");
+    try (OutputStream pdfFos = new FileOutputStream(byDivision)) {
       outputSubjectiveSchedulesByJudgingStation(pdfFos);
-      IOUtils.closeQuietly(pdfFos);
-      pdfFos = null;
+    }
 
-      final File byCategory = new File(directory, baseFilename
-          + "-subjective-by-category.pdf");
-      pdfFos = new FileOutputStream(byCategory);
+    final File byCategory = new File(directory, baseFilename
+        + "-subjective-by-category.pdf");
+    try (OutputStream pdfFos = new FileOutputStream(byCategory)) {
       outputSubjectiveSchedulesByCategory(pdfFos);
-      IOUtils.closeQuietly(pdfFos);
-      pdfFos = null;
+    }
 
-      final File byTime = new File(directory, baseFilename
-          + "-subjective-by-time.pdf");
-      pdfFos = new FileOutputStream(byTime);
+    final File byTime = new File(directory, baseFilename
+        + "-subjective-by-time.pdf");
+    try (OutputStream pdfFos = new FileOutputStream(byTime)) {
       outputSubjectiveSchedulesByTimeOnly(pdfFos);
-      IOUtils.closeQuietly(pdfFos);
-      pdfFos = null;
+    }
 
-      final File performance = new File(directory, baseFilename
-          + "-performance.pdf");
-      pdfFos = new FileOutputStream(performance);
+    final File performance = new File(directory, baseFilename
+        + "-performance.pdf");
+    try (OutputStream pdfFos = new FileOutputStream(performance)) {
       outputPerformanceScheduleByTime(pdfFos);
-      IOUtils.closeQuietly(pdfFos);
-      pdfFos = null;
+    }
 
-      final File teamSchedules = new File(directory, baseFilename
-          + "-team-schedules.pdf");
-      pdfFos = new FileOutputStream(teamSchedules);
+    final File teamSchedules = new File(directory, baseFilename
+        + "-team-schedules.pdf");
+    try (OutputStream pdfFos = new FileOutputStream(teamSchedules)) {
       outputTeamSchedules(params, pdfFos);
-      IOUtils.closeQuietly(pdfFos);
-      pdfFos = null;
-
-    } finally {
-      IOUtils.closeQuietly(pdfFos);
     }
   }
 
