@@ -196,8 +196,9 @@
                     </li>
                     <li>
                         <a href="SubjectiveScheduleByJudgingStation"
-                            target="_new">Subjective schedule sorted
-                            by judging group, then time</a>
+                            target="_new">Subjective schedule split
+                            by category and sorted by judging group,
+                            then time</a>
                     </li>
                     <li>
                         <a href="SubjectiveScheduleByCategory"
