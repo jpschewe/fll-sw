@@ -18,26 +18,22 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
-
-
 import com.itextpdf.text.DocumentException;
 
 import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.WebUtils;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
- * @see TournamentSchedule#outputSubjectiveSchedulesByTime(java.io.OutputStream)
+ * @see TournamentSchedule#outputSubjectiveSchedulesByCategory(java.io.OutputStream)
  */
-@WebServlet("/admin/SubjectiveScheduleByTime")
-public class SubjectiveScheduleByTime extends BaseFLLServlet {
+@WebServlet("/admin/SubjectiveScheduleByCategory")
+public class SubjectiveScheduleByCategory extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -64,8 +60,8 @@ public class SubjectiveScheduleByTime extends BaseFLLServlet {
 
       response.reset();
       response.setContentType("application/pdf");
-      response.setHeader("Content-Disposition", "filename=subjectiveByTime.pdf");
-      schedule.outputSubjectiveSchedulesByTime(response.getOutputStream());
+      response.setHeader("Content-Disposition", "filename=subjectiveByCategoryAndTime.pdf");
+      schedule.outputSubjectiveSchedulesByCategory(response.getOutputStream());
 
     } catch (final DocumentException e) {
       LOGGER.error(e.getMessage(), e);
