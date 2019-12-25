@@ -206,6 +206,10 @@
                             by category and sorted by time</a>
                     </li>
                     <li>
+                        <a href="SubjectiveScheduleByTime" target="_new">Subjective
+                            schedule sorted by time</a>
+                    </li>
+                    <li>
                         <a href="PerformanceSchedule" target="_new">Performance
                             Schedule</a>
                     </li>
