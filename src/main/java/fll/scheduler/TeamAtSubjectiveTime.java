@@ -6,6 +6,8 @@
 
 package fll.scheduler;
 
+import java.util.Objects;
+
 import com.google.common.collect.ComparisonChain;
 
 /**
@@ -46,6 +48,24 @@ import com.google.common.collect.ComparisonChain;
                           .compare(this.getTeamInfo().getAwardGroup(), other.getTeamInfo().getAwardGroup()) //
                           .compare(this.getTeamInfo().getTeamNumber(), other.getTeamInfo().getTeamNumber()) //
                           .result();
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(this.getSubjTime(), this.getTeamInfo());
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (o == this) {
+      return true;
+    } else if (null == o) {
+      return false;
+    } else if (o.getClass().equals(this.getClass())) {
+      return 0 == compareTo((TeamAtSubjectiveTime) o);
+    } else {
+      return false;
+    }
   }
 
 }
