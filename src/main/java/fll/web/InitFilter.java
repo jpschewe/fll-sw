@@ -224,9 +224,6 @@ public class InitFilter implements Filter {
     }
   }
 
-  /**
-   * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
-   */
   @Override
   public void init(final FilterConfig filterConfig) throws ServletException {
     // nothing
