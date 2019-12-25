@@ -36,7 +36,8 @@
 
     <p>
         The current tournament is
-        <b>${tournamentTitle }</b>
+        <b>${tournament.description} on ${tournament.dateString}
+            [${tournament.name}]</b>
     </p>
 
     <h2>Server addresses</h2>

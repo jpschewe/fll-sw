@@ -30,7 +30,7 @@ public final class MainIndex {
    * Populate the page context with information for the jsp.
    * pageContext:
    * <ul>
-   * <li>tournamentTitle - display name of the tournament</li>
+   * <li>tournament - current {@link Tournament} object</li>
    * <li>urls - URLs to access the server - collection of string</li>
    * </ul>
    *
@@ -48,7 +48,7 @@ public final class MainIndex {
 
       final int tournamentId = Queries.getCurrentTournament(connection);
       final Tournament tournament = Tournament.findTournamentByID(connection, tournamentId);
-      pageContext.setAttribute("tournamentTitle", tournament.getDescription());
+      pageContext.setAttribute("tournament", tournament);
 
       pageContext.setAttribute("urls", WebUtils.getAllUrls(request, application));
     } catch (final SQLException sqle) {

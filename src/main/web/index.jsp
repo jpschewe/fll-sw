@@ -21,8 +21,10 @@
 
 
 	<p>
-		The current tournament is <b>${tournamentTitle }</b>
-	</p>
+        The current tournament is
+        <b>${tournament.description} on ${tournament.dateString}
+            [${tournament.name}]</b>
+    </p>
 
 	<h2>Computer types</h2>
 
