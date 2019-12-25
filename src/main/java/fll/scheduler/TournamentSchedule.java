@@ -882,7 +882,7 @@ public class TournamentSchedule implements Serializable {
       final File byTime = new File(directory, baseFilename
           + "-subjective-by-time.pdf");
       pdfFos = new FileOutputStream(byTime);
-      outputSubjectiveSchedulesByTime(pdfFos);
+      outputSubjectiveSchedulesByCategory(pdfFos);
       IOUtils.closeQuietly(pdfFos);
       pdfFos = null;
 
@@ -942,10 +942,10 @@ public class TournamentSchedule implements Serializable {
    * @param pdfFos where to write the schedule
    * @throws DocumentException
    */
-  public void outputSubjectiveSchedulesByTime(final OutputStream pdfFos) throws DocumentException {
+  public void outputSubjectiveSchedulesByCategory(final OutputStream pdfFos) throws DocumentException {
     final Document detailedSchedulesByTime = PdfUtils.createPortraitPdfDoc(pdfFos, new SimpleFooterHandler());
     for (final String subjectiveStation : subjectiveStations) {
-      outputSubjectiveScheduleByTime(detailedSchedulesByTime, subjectiveStation);
+      outputSubjectiveScheduleByCategory(detailedSchedulesByTime, subjectiveStation);
       detailedSchedulesByTime.add(Chunk.NEXTPAGE);
     }
     detailedSchedulesByTime.close();
@@ -996,7 +996,7 @@ public class TournamentSchedule implements Serializable {
     ++idx;
     columnWidths[idx] = 2; // division
     ++idx;
-    for (int i = 0; i < subjectiveStations.size(); ++i) {
+    for (final String subjectiveStation : subjectiveStations) {
       columnWidths[idx] = 2; // time
       ++idx;
     }
@@ -1429,8 +1429,8 @@ public class TournamentSchedule implements Serializable {
 
   }
 
-  private void outputSubjectiveScheduleByTime(final Document detailedSchedules,
-                                              final String subjectiveStation)
+  private void outputSubjectiveScheduleByCategory(final Document detailedSchedules,
+                                                  final String subjectiveStation)
       throws DocumentException {
     final PdfPTable table = PdfUtils.createTable(6);
     int currentRow = 0;

@@ -74,16 +74,15 @@
                     pick a column from your data file to match against
                     each piece of team data that the software uses. You
                     can select the same column for multiple pieces of
-                    data.
-                    <a href='javascript:hide("UploadTeamsHelp")'>[hide]</a>
+                    data. <a href='javascript:hide("UploadTeamsHelp")'>[hide]</a>
                 </div>
 
             </form>
         </li>
 
         <li>
-            <a href='editTeam.jsp'>Add a team</a>
-            <a href='javascript:display("AddTeamHelp")'>[help]</a>
+            <a href='editTeam.jsp'>Add a team</a> <a
+                href='javascript:display("AddTeamHelp")'>[help]</a>
             <div id='AddTeamHelp' class='help' style='display: none'>
                 This can be used to add a team to the software that
                 wasn't added through the team upload. This may be used
@@ -94,16 +93,15 @@
                 that they have a schedule for where to go when and that
                 they get judged properly. In most cases this function
                 should not be used at the tournament, but rather before
-                the tournament.
-                <a href='javascript:hide("AddTeamHelp")'>[hide]</a>
+                the tournament. <a href='javascript:hide("AddTeamHelp")'>[hide]</a>
             </div>
         </li>
 
         <li>
             <a id='add-edit-tournaments'
                 href='<c:url value="tournaments.jsp"/>'>Add or Edit
-                Tournaments</a>
-            <a href='javascript:display("EditTournamentHelp")'>[help]</a>
+                Tournaments</a> <a
+                href='javascript:display("EditTournamentHelp")'>[help]</a>
             <div id='EditTournamentHelp' class='help'
                 style='display: none'>
                 This is an optional step. Use this page to modify the
@@ -117,8 +115,7 @@
 
         <li>
             <a href='DisplayTournamentAssignments'>Display
-                Tournament Assignments</a>
-            <a
+                Tournament Assignments</a> <a
                 href='javascript:display("DisplayTournamentAssignmentsHelp")'>[help]</a>
             <div id='DisplayTournamentAssignmentsHelp' class='help'
                 style='display: none'>
@@ -162,22 +159,21 @@
 
         <li>
             <a href="edit_tournament_parameters.jsp">Edit tournament
-                parameters</a>
-            - should not be needed for most tournaments.
+                parameters</a> - should not be needed for most tournaments.
         </li>
 
         <li>
             <c:if test="${scheduleUploaded }">
                 <span class='completed'>DONE </span>
             </c:if>
-            Upload schedule for current tournament.
-            <a href='javascript:display("ScheduleHelp")'>[help]</a>
+            Upload schedule for current tournament. <a
+                href='javascript:display("ScheduleHelp")'>[help]</a>
             <div id='ScheduleHelp' class='help' style='display: none'>
                 Uploading the schedule isn't required, but if uploaded
                 will be used when displaying information in final
                 reports. Teams can be added directly to the current
-                tournament through a schedule.
-                <a href='javascript:hide("ScheduleHelp")'>[hide]</a>
+                tournament through a schedule. <a
+                    href='javascript:hide("ScheduleHelp")'>[hide]</a>
             </div>
 
             <form id='uploadSchedule'
@@ -204,8 +200,9 @@
                             by judging group, then time</a>
                     </li>
                     <li>
-                        <a href="SubjectiveScheduleByTime" target="_new">Subjective
-                            schedule sorted by time</a>
+                        <a href="SubjectiveScheduleByCategory"
+                            target="_new">Subjective schedule split
+                            by category and sorted by time</a>
                     </li>
                     <li>
                         <a href="PerformanceSchedule" target="_new">Performance
@@ -213,8 +210,8 @@
                     </li>
                     <li>
                         <a href="<c:url value='/admin/ScheduleAsCsv' />"
-                            target="_new">Full Schedule as CSV</a>
-                        - for use with scheduling tools
+                            target="_new">Full Schedule as CSV</a> - for
+                        use with scheduling tools
                     </li>
 
                     <li>
@@ -240,9 +237,8 @@
 
         <li>
             <a id='change-award-groups' href='edit_event_division.jsp'>Change
-                award group assignments for the current tournament</a>
-            .
-            <a href='javascript:display("EventDivisionHelp")'>[help]</a>
+                award group assignments for the current tournament</a> . <a
+                href='javascript:display("EventDivisionHelp")'>[help]</a>
             <div id='EventDivisionHelp' class='help'
                 style='display: none'>
                 This information is typically specified in the schedule
@@ -257,9 +253,8 @@
 
         <li>
             <a href='edit_judging_groups.jsp'>Change judging groups
-                assignments for the current tournament</a>
-            .
-            <a href='javascript:display("JudgingGroupHelp")'>[help]</a>
+                assignments for the current tournament</a> . <a
+                href='javascript:display("JudgingGroupHelp")'>[help]</a>
             <div id='JudgingGroupHelp' class='help'
                 style='display: none'>
                 This information is typically specified in the schedule
@@ -288,8 +283,8 @@
                     display pages. There is only 1 or 2 lines of space
                     available, so keep it short. This can be used to
                     notify participants and spectators of when the next
-                    break will be over.
-                    <a href='javascript:hide("ScorePageTextHelp")'>[hide]</a>
+                    break will be over. <a
+                        href='javascript:hide("ScorePageTextHelp")'>[hide]</a>
                 </div>
             </form>
         </li>
@@ -309,8 +304,7 @@
                 <span class='completed'>DONE </span>
             </c:if>
             <a href='<c:url value="tables.jsp"/>'>Assign Table
-                Labels</a>
-            (for scoresheet printing during head to head)
+                Labels</a> (for scoresheet printing during head to head)
         </li>
 
 
@@ -337,10 +331,9 @@
 
                 <li>
                     <a href="subjective-data.fll">Download the data
-                        file for subjective score entry.</a>
-                    Should be downloaded after each subjective score
-                    upload to lessen chance of data loss due to
-                    overwrite.
+                        file for subjective score entry.</a> Should be
+                    downloaded after each subjective score upload to
+                    lessen chance of data loss due to overwrite.
                 </li>
 
                 <li>
@@ -371,8 +364,7 @@
                             database. This option is useful when
                             restoring the subjective scores after
                             initializing the database from another
-                            server.
-                            <a
+                            server. <a
                                 href='javascript:hide("subjective_overwrite_help")'>[hide]</a>
                         </div>
 
@@ -389,10 +381,10 @@
                     <ul>
                         <li>
                             <a href="CheckSubjectiveEmpty">Export
-                                performance data for judges server</a>
-                            . If doing finalist scheduling, the initial
-                            head to head brackets need to be created
-                            before doing this export.
+                                performance data for judges server</a> . If
+                            doing finalist scheduling, the initial head
+                            to head brackets need to be created before
+                            doing this export.
                         </li>
 
                         <li>
@@ -438,8 +430,8 @@
 
         <li>
             Once regular match play has been completed you will need to
-            setup the
-            <a href="../playoff" target="_new">head to head brackets</a>
+            setup the <a href="../playoff" target="_new">head to
+                head brackets</a>
         </li>
 
     </ol>
