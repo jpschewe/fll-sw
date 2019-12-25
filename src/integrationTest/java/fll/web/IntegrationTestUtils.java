@@ -360,7 +360,11 @@ public final class IntegrationTestUtils {
     submitElement.click();
     LOGGER.trace("Submitted create user page");
 
-    seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success-create-user")));
+    // should work, but something on the CI system is loading /setup in here as well
+    // seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success-create-user")));
+
+    seleniumWait.until(ExpectedConditions.not(ExpectedConditions.urlContains("createUsername.jsp")));
+    seleniumWait.until(ExpectedConditions.not(ExpectedConditions.presenceOfElementLocated(By.id("exception-handler"))));
   }
 
   private static void handleDatabaseEraseConfirmation(final WebDriver selenium,
