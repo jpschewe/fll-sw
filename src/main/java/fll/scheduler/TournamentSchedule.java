@@ -996,7 +996,7 @@ public class TournamentSchedule implements Serializable {
     ++idx;
     columnWidths[idx] = 2; // division
     ++idx;
-    for (final String subjectiveStation : subjectiveStations) {
+    for (int i = 0; i < subjectiveStations.size(); ++i) {
       columnWidths[idx] = 2; // time
       ++idx;
     }
