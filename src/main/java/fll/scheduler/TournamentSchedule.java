@@ -880,7 +880,7 @@ public class TournamentSchedule implements Serializable {
       pdfFos = null;
 
       final File byTime = new File(directory, baseFilename
-          + "-subjective-by-time.pdf");
+          + "-subjective-by-category.pdf");
       pdfFos = new FileOutputStream(byTime);
       outputSubjectiveSchedulesByCategory(pdfFos);
       IOUtils.closeQuietly(pdfFos);
