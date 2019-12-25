@@ -117,7 +117,7 @@ public class Launcher extends JFrame {
   private static Options buildOptions() {
     final Options options = new Options();
     options.addOption(null, OPT_START_WEB, false, "immediately start the webserver");
-    options.addOption("h", OPT_HELP, false, "immediately start the webserver");
+    options.addOption("h", OPT_HELP, false, "help");
 
     return options;
   }
