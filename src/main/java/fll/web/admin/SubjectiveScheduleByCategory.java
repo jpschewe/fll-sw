@@ -30,10 +30,10 @@ import fll.web.WebUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
- * @see TournamentSchedule#outputSubjectiveSchedulesByTimeOnly(java.io.OutputStream)
+ * @see TournamentSchedule#outputSubjectiveSchedulesByCategory(java.io.OutputStream)
  */
-@WebServlet("/admin/SubjectiveScheduleByTime")
-public class SubjectiveScheduleByTime extends BaseFLLServlet {
+@WebServlet("/admin/SubjectiveScheduleByCategory")
+public class SubjectiveScheduleByCategory extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -41,8 +41,7 @@ public class SubjectiveScheduleByTime extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session)
-      throws IOException, ServletException {
+                                final HttpSession session) throws IOException, ServletException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     try {
@@ -61,8 +60,8 @@ public class SubjectiveScheduleByTime extends BaseFLLServlet {
 
       response.reset();
       response.setContentType("application/pdf");
-      response.setHeader("Content-Disposition", "filename=subjectiveByTime.pdf");
-      schedule.outputSubjectiveSchedulesByTimeOnly(response.getOutputStream());
+      response.setHeader("Content-Disposition", "filename=subjectiveByCategoryAndTime.pdf");
+      schedule.outputSubjectiveSchedulesByCategory(response.getOutputStream());
 
     } catch (final DocumentException e) {
       LOGGER.error(e.getMessage(), e);
