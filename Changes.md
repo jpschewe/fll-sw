@@ -1,3 +1,4 @@
+* #797 - add subjective schedule sorted only by time across all judging stations
 * #790 - add date and tournament name to display on main pages
 * #789 - add to documentation to make it clear that reports can be generated with partial data
 * #788 - right-align radio buttons on the score entry page to put them near the labels
