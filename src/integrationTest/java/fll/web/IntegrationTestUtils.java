@@ -364,7 +364,6 @@ public final class IntegrationTestUtils {
     // seleniumWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success-create-user")));
 
     seleniumWait.until(ExpectedConditions.not(ExpectedConditions.urlContains("createUsername.jsp")));
-    seleniumWait.until(ExpectedConditions.not(ExpectedConditions.presenceOfElementLocated(By.id("exception-handler"))));
   }
 
   private static void handleDatabaseEraseConfirmation(final WebDriver selenium,
