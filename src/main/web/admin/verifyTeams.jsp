@@ -11,7 +11,7 @@ final DataSource datasource = ApplicationAttributes.getDataSource(application);
 final Connection connection = datasource.getConnection();
 
 if(null == session.getAttribute("columnSelectOptions")) {
-	session.setAttribute(SessionAttributes.MESSAGE, 
+	SessionAttributes.appendToMessage(session, 
 			"<p class='error'>Error columnSelectOptions not set.</p>");
 	response.sendRedirect(response.encodeRedirectURL("index.jsp"));
 	return;

@@ -22,13 +22,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
 import fll.Utilities;
 import fll.db.Queries;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -44,6 +41,7 @@ public class VerifyJudges extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  @Override
   @SuppressFBWarnings(value = "XSS_REQUEST_PARAMETER_TO_JSP_WRITER", justification = "Checking category name retrieved from request against valid category names")
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -71,13 +69,14 @@ public class VerifyJudges extends BaseFLLServlet {
       // Set. Use set so there are no duplicates
       final List<SubjectiveScoreCategory> subjectiveCategories = challengeDescription.getSubjectiveCategories();
 
-      final int numRows = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(request.getParameter("total_num_rows")).intValue();
+      final int numRows = Utilities.getIntegerNumberFormat().parse(request.getParameter("total_num_rows"))
+                                                                  .intValue();
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Found num rows: "
             + numRows);
       }
 
-      final Collection<JudgeInformation> judges = new LinkedList<JudgeInformation>();
+      final Collection<JudgeInformation> judges = new LinkedList<>();
 
       // walk request and push judge id into the Set, if not null or empty,
       // in the value for each category in the hash.
@@ -113,7 +112,9 @@ public class VerifyJudges extends BaseFLLServlet {
 
           if (!found) {
             warning.append("You should specify at least one judge for category '"
-                + categoryName + "' at judging station '" + jstation
+                + categoryName
+                + "' at judging station '"
+                + jstation
                 + "'<br/> This is OK if some judges will be entered through the web application.");
           }
 
@@ -133,7 +134,7 @@ public class VerifyJudges extends BaseFLLServlet {
           message.append(warning);
           message.append("</p>");
         }
-        session.setAttribute(SessionAttributes.MESSAGE, message.toString());
+        SessionAttributes.appendToMessage(session, message.toString());
         response.sendRedirect(response.encodeRedirectURL("judges.jsp"));
       } else {
         if (warning.length() > 0) {
@@ -141,7 +142,7 @@ public class VerifyJudges extends BaseFLLServlet {
           message.append("<p class='warning' id='warning'>");
           message.append(warning);
           message.append("</p>");
-          session.setAttribute(SessionAttributes.MESSAGE, message.toString());
+          SessionAttributes.appendToMessage(session, message.toString());
         }
         response.sendRedirect(response.encodeRedirectURL("displayJudges.jsp"));
       }

@@ -126,7 +126,7 @@ public class ImportDBDump extends BaseFLLServlet {
       throw new RuntimeException("Error loading data into the database", sqle);
     }
 
-    session.setAttribute(SessionAttributes.MESSAGE, message.toString());
+    SessionAttributes.appendToMessage(session, message.toString());
     response.sendRedirect(response.encodeRedirectURL(SessionAttributes.getRedirectURL(session)));
   }
 

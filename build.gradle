@@ -85,6 +85,10 @@ dependencies {
 testSets {
     integrationTest
 }
+integrationTest {
+    // have selenium log through log4j
+    systemProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager")
+}
 // don't depend on check so that users can skip these on a basic check. check.dependsOn integrationTest
 integrationTest.mustRunAfter test
 
@@ -155,8 +159,8 @@ dependencies {
   implementation(group: "com.itextpdf", name: "itextpdf", version: project.itext_version)
     
   runtimeOnly(group: "org.apache.logging.log4j", name: "log4j-slf4j-impl", version: project.log4j_version)
-  implementation(group: "org.apache.logging.log4j", name: "log4j-api", version: project.log4j_version    )
-  implementation(group: "org.apache.logging.log4j", name: "log4j-core", version: project.log4j_version    )
+  implementation(group: "org.apache.logging.log4j", name: "log4j-api", version: project.log4j_version)
+  implementation(group: "org.apache.logging.log4j", name: "log4j-core", version: project.log4j_version)
     
   implementation(group: "org.slf4j", name: "slf4j-api", version: project.slf4j_version)
     
@@ -205,7 +209,11 @@ dependencies {
   integrationTestImplementation(group: "org.easytesting", name: "fest-swing", version: "1.2.1")
   integrationTestImplementation(group: "net.sourceforge.htmlunit", name: "htmlunit", version: "2.34.1")
   integrationTestImplementation(group: "org.seleniumhq.selenium", name: "selenium-server", version: "3.141.59")
-  integrationTestImplementation(group: "io.github.bonigarcia", name: "webdrivermanager", version: "3.3.0")    
+  integrationTestImplementation(group: "io.github.bonigarcia", name: "webdrivermanager", version: "3.7.1")
+  
+  // make selenium log to log4j
+  integrationTestImplementation(group: "org.apache.logging.log4j", name: "log4j-jul", version: project.log4j_version)
+      
 }
 
 tasks.withType(Tar){

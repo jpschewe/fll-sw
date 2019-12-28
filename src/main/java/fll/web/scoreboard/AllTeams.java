@@ -45,10 +45,6 @@ public class AllTeams {
                                      final HttpSession session,
                                      final PageContext pageContext) {
     final StringBuilder message = new StringBuilder();
-    final String existingMessage = SessionAttributes.getMessage(session);
-    if (null != existingMessage) {
-      message.append(existingMessage);
-    }
 
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
     final boolean floatingPointScores = challengeDescription.getPerformance().getScoreType() == ScoreType.FLOAT;
@@ -136,7 +132,7 @@ public class AllTeams {
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);
     } finally {
-      session.setAttribute(SessionAttributes.MESSAGE, message.toString());
+      SessionAttributes.appendToMessage(session, message.toString());
     }
 
   }
@@ -164,9 +160,9 @@ public class AllTeams {
         mScoreString = "No Show";
       } else {
         if (floatingPointScores) {
-          mScoreString = Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(score);
+          mScoreString = Utilities.getFloatingPointNumberFormat().format(score);
         } else {
-          mScoreString = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.format(score);
+          mScoreString = Utilities.getIntegerNumberFormat().format(score);
         }
       }
     }

@@ -178,7 +178,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
                                                                                                    teamNumber);
 
                     final StringBuilder scoreText = new StringBuilder();
-                    scoreText.append(Utilities.FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(score));
+                    scoreText.append(Utilities.getFloatingPointNumberFormat().format(score));
                     if (zeroInRequiredGoal) {
                       scoreText.append(" @");
                     }

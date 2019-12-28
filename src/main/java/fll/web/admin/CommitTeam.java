@@ -20,14 +20,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-
-
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -63,10 +60,12 @@ public class CommitTeam extends BaseFLLServlet {
    */
   public static final String EVENT_DIVISION = "event_division";
 
+  @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Top of CommitTeam.doPost");
     }
@@ -80,7 +79,8 @@ public class CommitTeam extends BaseFLLServlet {
     try {
       connection = datasource.getConnection();
       // parse the numbers first so that we don't get a partial commit
-      final int teamNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(request.getParameter("teamNumber")).intValue();
+      final int teamNumber = Utilities.getIntegerNumberFormat().parse(request.getParameter("teamNumber"))
+                                                                     .intValue();
 
       String redirect = null;
       if (null != request.getParameter("delete")) {
@@ -90,7 +90,8 @@ public class CommitTeam extends BaseFLLServlet {
         }
         Queries.deleteTeam(teamNumber, challengeDescription, connection);
         message.append("<p id='success'>Successfully deleted team "
-            + teamNumber + "</p>");
+            + teamNumber
+            + "</p>");
 
         redirect = "index.jsp";
       } else {
@@ -109,12 +110,15 @@ public class CommitTeam extends BaseFLLServlet {
           final String otherTeam = Queries.addTeam(connection, teamNumber, teamName, organization);
           if (null != otherTeam) {
             message.append("<p class='error'>Error, team number "
-                + teamNumber + " is already assigned.</p>");
+                + teamNumber
+                + " is already assigned.</p>");
             LOGGER.error("TeamNumber "
-                + teamNumber + " is already assigned");
+                + teamNumber
+                + " is already assigned");
           } else {
             message.append("<p id='success'>Successfully added team "
-                + teamNumber + "</p>");
+                + teamNumber
+                + "</p>");
           }
         } else {
           if (LOGGER.isDebugEnabled()) {
@@ -126,7 +130,8 @@ public class CommitTeam extends BaseFLLServlet {
 
           Queries.updateTeam(connection, teamNumber, teamName, organization);
           message.append("<p id='success'>Successfully updated a team "
-              + teamNumber + "'s info</p>");
+              + teamNumber
+              + "'s info</p>");
         }
 
         // assign tournaments
@@ -141,7 +146,9 @@ public class CommitTeam extends BaseFLLServlet {
 
             if (LOGGER.isDebugEnabled()) {
               LOGGER.debug("Checking if "
-                  + teamNumber + " should be assigned to tournament " + tournament.getName());
+                  + teamNumber
+                  + " should be assigned to tournament "
+                  + tournament.getName());
             }
 
             if (Boolean.valueOf(request.getParameter("tournament_"
@@ -149,7 +156,9 @@ public class CommitTeam extends BaseFLLServlet {
 
               if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Team "
-                    + teamNumber + " has checked tournament " + tournament.getName());
+                    + teamNumber
+                    + " has checked tournament "
+                    + tournament.getName());
               }
 
               final String eventDivision = request.getParameter("event_division_"
@@ -160,7 +169,9 @@ public class CommitTeam extends BaseFLLServlet {
               if (!previouslyAssignedTournaments.contains(tournament.getTournamentID())) {
                 if (LOGGER.isDebugEnabled()) {
                   LOGGER.debug("Adding team "
-                      + teamNumber + " to tournament " + tournament.getName());
+                      + teamNumber
+                      + " to tournament "
+                      + tournament.getName());
                 }
 
                 // add to tournament
@@ -176,7 +187,7 @@ public class CommitTeam extends BaseFLLServlet {
                 }
 
                 final String prevJudgingGroup = Queries.getJudgingGroup(connection, teamNumber,
-                                                                            tournament.getTournamentID());
+                                                                        tournament.getTournamentID());
                 if (!judgingGroup.equals(prevJudgingGroup)) {
                   Queries.setJudgingGroup(connection, teamNumber, tournament.getTournamentID(), judgingGroup);
                 }
@@ -186,14 +197,14 @@ public class CommitTeam extends BaseFLLServlet {
               // team was removed from tournament
               Queries.deleteTeamFromTournament(connection, description, teamNumber, tournament.getTournamentID());
             }
-            
+
           } // playoffs not initialized
         } // foreach tournament
 
       } // not deleting team
 
       if (message.length() > 0) {
-        session.setAttribute(SessionAttributes.MESSAGE, message.toString());
+        SessionAttributes.appendToMessage(session, message.toString());
       }
 
       response.sendRedirect(response.encodeRedirectURL(redirect));
