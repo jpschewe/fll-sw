@@ -19,6 +19,7 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import fll.db.Queries;
+import fll.scheduler.ScheduleWriter;
 import fll.scheduler.TournamentSchedule;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
@@ -58,7 +59,7 @@ public class PerformanceSchedule extends BaseFLLServlet {
       response.reset();
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=performanceSchedule.pdf");
-      schedule.outputPerformanceScheduleByTime(response.getOutputStream());
+      ScheduleWriter.outputPerformanceScheduleByTime(schedule, response.getOutputStream());
 
     } catch (final SQLException sqle) {
       LOGGER.error(sqle.getMessage(), sqle);
