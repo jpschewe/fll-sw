@@ -159,6 +159,7 @@ dependencies {
   implementation(group: "com.itextpdf", name: "itextpdf", version: project.itext_version)
     
   runtimeOnly(group: "org.apache.logging.log4j", name: "log4j-slf4j-impl", version: project.log4j_version)
+  runtimeOnly(group: "org.apache.logging.log4j", name: "log4j-jcl", version: project.log4j_version)
   implementation(group: "org.apache.logging.log4j", name: "log4j-api", version: project.log4j_version)
   implementation(group: "org.apache.logging.log4j", name: "log4j-core", version: project.log4j_version)
     
