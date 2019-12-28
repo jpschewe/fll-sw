@@ -5,6 +5,7 @@
  */
 package fll.scheduler;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -52,7 +53,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import com.diffplug.common.base.Errors;
-import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
@@ -890,8 +890,8 @@ public class TournamentSchedule implements Serializable {
 
     final File performance = new File(directory, baseFilename
         + "-performance.pdf");
-    try (OutputStream pdfFos = new FileOutputStream(performance)) {
-      outputPerformanceScheduleByTime(pdfFos);
+    try (OutputStream pdfFos = new BufferedOutputStream(new FileOutputStream(performance))) {
+      ScheduleWriter.outputPerformanceScheduleByTime(this, pdfFos);
     }
 
     final File teamSchedules = new File(directory, baseFilename
@@ -917,18 +917,6 @@ public class TournamentSchedule implements Serializable {
       outputTeamSchedule(params, teamDoc, si);
     }
     teamDoc.close();
-  }
-
-  /**
-   * Output the performance schedule, sorted by time.
-   *
-   * @param pdfFos where to write the schedule
-   * @throws DocumentException
-   */
-  public void outputPerformanceScheduleByTime(final OutputStream pdfFos) throws DocumentException {
-    final Document performanceDoc = PdfUtils.createPortraitPdfDoc(pdfFos, new SimpleFooterHandler());
-    outputPerformanceSchedule(performanceDoc);
-    performanceDoc.close();
   }
 
   /**
@@ -1235,125 +1223,6 @@ public class TournamentSchedule implements Serializable {
     final boolean orientationIsPortrait = orientationResult.getLeft();
     final float pagesPerScoreSheet = orientationResult.getRight();
     scoresheets.writeFile(output, orientationIsPortrait, pagesPerScoreSheet);
-  }
-
-  private void outputPerformanceSchedule(final Document detailedSchedules) throws DocumentException {
-    final SortedMap<PerformanceTime, TeamScheduleInfo> performanceTimes = new TreeMap<>();
-    for (final TeamScheduleInfo si : _schedule) {
-      for (final PerformanceTime pt : si.getAllPerformances()) {
-        performanceTimes.put(pt, si);
-      }
-    }
-
-    // list of teams staying around to even up the teams
-    final List<TeamScheduleInfo> teamsMissingOpponents = new LinkedList<>();
-
-    final PdfPTable table = PdfUtils.createTable(7);
-    int currentRow = 0;
-    table.setWidths(new float[] { 2, 2, 3, 3, 2, 2, 2 });
-
-    final PdfPCell tournamentCell = PdfUtils.createHeaderCell("Tournament: "
-        + getName()
-        + " Performance");
-    tournamentCell.setColspan(7);
-    table.addCell(tournamentCell);
-    table.completeRow();
-    ++currentRow;
-
-    table.addCell(PdfUtils.createHeaderCell(TEAM_NUMBER_HEADER));
-    table.addCell(PdfUtils.createHeaderCell(AWARD_GROUP_HEADER));
-    table.addCell(PdfUtils.createHeaderCell(ORGANIZATION_HEADER));
-    table.addCell(PdfUtils.createHeaderCell(TEAM_NAME_HEADER));
-    table.addCell(PdfUtils.createHeaderCell("Time"));
-    table.addCell(PdfUtils.createHeaderCell("Table"));
-    table.addCell(PdfUtils.createHeaderCell("Round"));
-    table.completeRow();
-    ++currentRow;
-
-    table.setHeaderRows(1);
-
-    LocalTime prevTime = null;
-    for (final Map.Entry<PerformanceTime, TeamScheduleInfo> entry : performanceTimes.entrySet()) {
-      final PerformanceTime performance = entry.getKey();
-      final TeamScheduleInfo si = entry.getValue();
-
-      // check if team is missing an opponent
-      final BaseColor backgroundColor;
-      if (null == findOpponent(si, performance)) {
-        teamsMissingOpponents.add(si);
-        backgroundColor = BaseColor.MAGENTA;
-      } else {
-        backgroundColor = null;
-      }
-
-      final LocalTime performanceTime = performance.getTime();
-      final float topBorderWidth;
-      if (Objects.equals(performanceTime, prevTime)) {
-        topBorderWidth = Rectangle.UNDEFINED;
-
-        // keep the rows with the same times together
-        table.getRow(currentRow
-            - 1).setMayNotBreak(true);
-        LOGGER.trace("Setting may not break for row {} time {}", (currentRow
-            - 1), performanceTime);
-      } else {
-        topBorderWidth = TIME_SEPARATOR_LINE_WIDTH;
-      }
-
-      PdfPCell cell = PdfUtils.createCell(String.valueOf(si.getTeamNumber()));
-      cell.setBorderWidthTop(topBorderWidth);
-      table.addCell(cell);
-
-      cell = PdfUtils.createCell(si.getAwardGroup());
-      cell.setBorderWidthTop(topBorderWidth);
-      table.addCell(cell);
-
-      cell = PdfUtils.createCell(si.getOrganization());
-      cell.setBorderWidthTop(topBorderWidth);
-      table.addCell(cell);
-
-      cell = PdfUtils.createCell(si.getTeamName());
-      cell.setBorderWidthTop(topBorderWidth);
-      table.addCell(cell);
-
-      cell = PdfUtils.createCell(formatTime(performanceTime), backgroundColor);
-      cell.setBorderWidthTop(topBorderWidth);
-      table.addCell(cell);
-
-      cell = PdfUtils.createCell(performance.getTable()
-          + " "
-          + performance.getSide(), backgroundColor);
-      cell.setBorderWidthTop(topBorderWidth);
-      table.addCell(cell);
-
-      cell = PdfUtils.createCell(si.getRoundName(performance));
-      cell.setBorderWidthTop(topBorderWidth);
-      table.addCell(cell);
-      table.completeRow();
-
-      ++currentRow;
-      prevTime = performanceTime;
-    }
-
-    detailedSchedules.add(table);
-
-    // output teams staying
-    if (!teamsMissingOpponents.isEmpty()) {
-      final String formatString = "Team %d does not have an opponent.";
-      final PdfPTable stayingTable = PdfUtils.createTable(1);
-      for (final TeamScheduleInfo si : teamsMissingOpponents) {
-        stayingTable.addCell(PdfUtils.createCell(new Formatter().format(formatString, si.getTeamNumber()).toString(),
-                                                 BaseColor.MAGENTA));
-      }
-      detailedSchedules.add(stayingTable);
-
-    }
-
-    // make sure the last row isn't by itself
-    table.getRow(currentRow
-        - 1).setMayNotBreak(true);
-
-    detailedSchedules.add(Chunk.NEXTPAGE);
   }
 
   private void outputSubjectiveScheduleByDivision(final Document detailedSchedules,
