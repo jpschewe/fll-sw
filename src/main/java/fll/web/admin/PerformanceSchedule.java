@@ -18,11 +18,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import com.itextpdf.text.DocumentException;
-
 import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
-import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -63,9 +60,6 @@ public class PerformanceSchedule extends BaseFLLServlet {
       response.setHeader("Content-Disposition", "filename=performanceSchedule.pdf");
       schedule.outputPerformanceScheduleByTime(response.getOutputStream());
 
-    } catch (final DocumentException e) {
-      LOGGER.error(e.getMessage(), e);
-      throw new FLLInternalException("Got error writing schedule", e);
     } catch (final SQLException sqle) {
       LOGGER.error(sqle.getMessage(), sqle);
       throw new RuntimeException("Error saving team data into the database", sqle);
