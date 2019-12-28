@@ -64,6 +64,9 @@ public class InitFilter implements Filter {
       final String path = httpRequest.getRequestURI();
       final HttpSession session = httpRequest.getSession();
 
+      LOGGER.trace("Loading {} message: {} referer: {} session: {}", path, SessionAttributes.getMessage(session),
+                   httpRequest.getHeader("referer"), session.getId());
+
       final ServletContext application = session.getServletContext();
 
       // call init before check security, if a page doesn't need init,
@@ -80,13 +83,6 @@ public class InitFilter implements Filter {
           LOGGER.debug("Returning after initialize did redirect");
           return;
         }
-
-        // keep browser from caching any content
-        httpResponse.setHeader("Cache-Control", "no-store"); // HTTP 1.1
-        httpResponse.setHeader("Pragma", "no-cache"); // HTTP 1.0
-        httpResponse.setDateHeader("Expires", 0); // prevents caching at the
-                                                  // proxy server
-
       }
 
       if (needsSecurity) {
@@ -95,8 +91,17 @@ public class InitFilter implements Filter {
           return;
         }
       }
+
+      // keep browser from caching any content
+      httpResponse.setHeader("Cache-Control", "no-store"); // HTTP 1.1
+      httpResponse.setHeader("Pragma", "no-cache"); // HTTP 1.0
+      httpResponse.setDateHeader("Expires", 0); // proxy server cache
+
+    } else {
+      LOGGER.trace("Non-servlet request: {}", request);
     }
 
+    LOGGER.trace("Bottom of doFilter");
     chain.doFilter(request, response);
   }
 
@@ -204,8 +209,11 @@ public class InitFilter implements Filter {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException {
+    LOGGER.trace("Top of checkSecurity");
 
     if (WebUtils.checkAuthenticated(request, application)) {
+      LOGGER.trace("Returning true from checkSecurity");
+
       return true;
     } else {
       session.setAttribute(SessionAttributes.REDIRECT_URL, WebUtils.getFullURL(request));
@@ -216,9 +224,6 @@ public class InitFilter implements Filter {
     }
   }
 
-  /**
-   * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
-   */
   @Override
   public void init(final FilterConfig filterConfig) throws ServletException {
     // nothing
@@ -236,6 +241,7 @@ public class InitFilter implements Filter {
                                     final HttpSession session,
                                     final ServletContext application)
       throws IOException, RuntimeException {
+    LOGGER.trace("Top of initialize");
 
     synchronized (INIT_LOCK) {
 
@@ -249,8 +255,8 @@ public class InitFilter implements Filter {
         final boolean dbinitialized = Utilities.testDatabaseInitialized(connection);
         if (!dbinitialized) {
           LOGGER.warn("Database not initialized, redirecting to setup");
-          session.setAttribute(SessionAttributes.MESSAGE,
-                               "<p class='error'>The database is not yet initialized. Please create the database.</p>");
+          SessionAttributes.appendToMessage(session,
+                                            "<p class='error'>The database is not yet initialized. Please create the database.</p>");
           response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
               + "/setup/index.jsp"));
           return false;
@@ -265,8 +271,8 @@ public class InitFilter implements Filter {
             final Document document = GlobalParameters.getChallengeDocument(connection);
             if (null == document) {
               LOGGER.warn("Could not find challenge descriptor");
-              session.setAttribute(SessionAttributes.MESSAGE,
-                                   "<p class='error'>Could not find xml challenge description in the database! Please create the database.</p>");
+              SessionAttributes.appendToMessage(session,
+                                                "<p class='error'>Could not find xml challenge description in the database! Please create the database.</p>");
               response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
                   + "/setup/index.jsp"));
               return false;
@@ -277,7 +283,7 @@ public class InitFilter implements Filter {
             application.setAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION, challengeDescription);
           } catch (final FLLRuntimeException e) {
             LOGGER.error("Error getting challenge document", e);
-            session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>"
+            SessionAttributes.appendToMessage(session, "<p class='error'>"
                 + e.getMessage()
                 + " Please create the database.</p>");
             response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
@@ -290,6 +296,7 @@ public class InitFilter implements Filter {
         throw new RuntimeException(e);
       }
 
+      LOGGER.trace("Bottom of initialize returning true");
       return true;
 
     } // lock

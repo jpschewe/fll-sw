@@ -22,11 +22,9 @@ import javax.sql.DataSource;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 
-
 import fll.Utilities;
 import fll.db.ImportDB;
 import fll.db.Queries;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -127,7 +125,7 @@ public class ProcessImportPerformance extends BaseFLLServlet {
       throw new RuntimeException("Error loading data into the database", sqle);
     }
 
-    session.setAttribute(SessionAttributes.MESSAGE, message.toString());
+    SessionAttributes.appendToMessage(session, message.toString());
     response.sendRedirect(response.encodeRedirectURL(SessionAttributes.getRedirectURL(session)));
   }
 

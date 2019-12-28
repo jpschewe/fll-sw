@@ -54,17 +54,37 @@ public final class Utilities {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
+  private static final ThreadLocal<NumberFormat> FLOATING_POINT_NUMBER_FORMAT_INSTANCE = new ThreadLocal<NumberFormat>() {
+    @Override
+    protected NumberFormat initialValue() {
+      final NumberFormat format = NumberFormat.getInstance();
+      // setup the number format instance to be 2 decimal places
+      format.setMaximumFractionDigits(2);
+      format.setMinimumFractionDigits(2);
+      return format;
+    }
+  };
+
   /**
    * Single instance of the floating point NumberFormat instance to save on
    * overhead
    * and to use for consistency of formatting.
    */
-  public static final NumberFormat FLOATING_POINT_NUMBER_FORMAT_INSTANCE = NumberFormat.getInstance();
-  static {
-    // setup the number format instance to be 2 decimal places
-    FLOATING_POINT_NUMBER_FORMAT_INSTANCE.setMaximumFractionDigits(2);
-    FLOATING_POINT_NUMBER_FORMAT_INSTANCE.setMinimumFractionDigits(2);
+  public static NumberFormat getFloatingPointNumberFormat() {
+    return FLOATING_POINT_NUMBER_FORMAT_INSTANCE.get();
   }
+
+  private static final ThreadLocal<NumberFormat> XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE = new ThreadLocal<NumberFormat>() {
+    @Override
+    protected NumberFormat initialValue() {
+      final NumberFormat format = NumberFormat.getInstance();
+      // setup the number format instance to be 2 decimal places
+      format.setMaximumFractionDigits(2);
+      format.setMinimumFractionDigits(2);
+      format.setGroupingUsed(false);
+      return format;
+    }
+  };
 
   /**
    * Single instance of the floating point NumberFormat instance to save on
@@ -72,22 +92,27 @@ public final class Utilities {
    * and to use for consistency of formatting. Compatible with XML floating point
    * fields.
    */
-  public static final NumberFormat XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE = NumberFormat.getInstance();
-  static {
-    // setup the number format instance to be 2 decimal places
-    XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.setMaximumFractionDigits(2);
-    XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.setMinimumFractionDigits(2);
-    XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.setGroupingUsed(false);
+  public static NumberFormat getXmlFloatingPointNumberFormat() {
+    return XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.get();
   }
+
+  private static final ThreadLocal<NumberFormat> INTEGER_NUMBER_FORMAT_INSTANCE = new ThreadLocal<NumberFormat>() {
+    @Override
+    protected NumberFormat initialValue() {
+      return NumberFormat.getIntegerInstance();
+    }
+  };
 
   /**
    * Single instance of the integer NumberFormat instance to save on overhead
    * and to use for consistency of formatting.
    */
-  public static final NumberFormat INTEGER_NUMBER_FORMAT_INSTANCE = NumberFormat.getIntegerInstance();
+  public static NumberFormat getIntegerNumberFormat() {
+    return INTEGER_NUMBER_FORMAT_INSTANCE.get();
+  }
 
   public static NumberFormat getFormatForScoreType(final ScoreType type) {
-    return type == ScoreType.FLOAT ? FLOATING_POINT_NUMBER_FORMAT_INSTANCE : INTEGER_NUMBER_FORMAT_INSTANCE;
+    return type == ScoreType.FLOAT ? getFloatingPointNumberFormat() : getIntegerNumberFormat();
   }
 
   /**

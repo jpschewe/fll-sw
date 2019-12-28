@@ -23,13 +23,10 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-
-
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -45,7 +42,7 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
 
   /**
    * Populate the context for create_playoff_division.jsp.
-   * 
+   *
    * @param application
    */
   public static void populateContext(final ServletContext application,
@@ -81,10 +78,6 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
                                 final HttpSession session)
       throws IOException, ServletException {
     final StringBuilder message = new StringBuilder();
-    final String existingMessage = SessionAttributes.getMessage(session);
-    if (null != existingMessage) {
-      message.append(existingMessage);
-    }
 
     String redirect = "index.jsp";
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -113,7 +106,7 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
           redirect = "create_playoff_division.jsp";
         } else {
           final String[] selectedTeams = request.getParameterValues("selected_team");
-          final List<Integer> teamNumbers = new LinkedList<Integer>();
+          final List<Integer> teamNumbers = new LinkedList<>();
           for (final String teamStr : selectedTeams) {
             final int num = Integer.parseInt(teamStr);
             teamNumbers.add(num);
@@ -137,7 +130,7 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
 
         boolean done = false;
 
-        Enumeration<String> paramNames = request.getParameterNames();
+        final Enumeration<String> paramNames = request.getParameterNames();
         while (paramNames.hasMoreElements()) {
           final String paramName = paramNames.nextElement();
           if (paramName.startsWith("create_award_group_")) {
@@ -201,7 +194,7 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
       SQLFunctions.close(connection);
     }
 
-    session.setAttribute(SessionAttributes.MESSAGE, message.toString());
+    SessionAttributes.appendToMessage(session, message.toString());
     response.sendRedirect(response.encodeRedirectURL(redirect));
 
   }

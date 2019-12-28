@@ -18,11 +18,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-
-
 import fll.Tournament;
 import fll.db.TournamentParameters;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -42,10 +39,6 @@ public class StoreTournamentParameters extends BaseFLLServlet {
                                 final HttpSession session)
       throws IOException, ServletException {
     final StringBuilder message = new StringBuilder();
-    final String existingMessage = SessionAttributes.getMessage(session);
-    if (null != existingMessage) {
-      message.append(existingMessage);
-    }
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
@@ -72,7 +65,7 @@ public class StoreTournamentParameters extends BaseFLLServlet {
       throw new RuntimeException("Error saving tournament parameters to the database", sqle);
     }
 
-    session.setAttribute(SessionAttributes.MESSAGE, message.toString());
+    SessionAttributes.appendToMessage(session, message.toString());
     response.sendRedirect(response.encodeRedirectURL("edit_tournament_parameters.jsp"));
   }
 

@@ -55,10 +55,6 @@ public class GatherBugReport extends BaseFLLServlet {
     ZipOutputStream zipOut = null;
     final StringBuilder message = new StringBuilder();
     try {
-      if (null != SessionAttributes.getMessage(session)) {
-        message.append(SessionAttributes.getMessage(session));
-      }
-
       connection = datasource.getConnection();
       final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
@@ -91,7 +87,7 @@ public class GatherBugReport extends BaseFLLServlet {
 
       message.append(String.format("<i>Bug report saved to '%s', please notify the computer person in charge to look for bug report files.</i>",
                                    bugReportFile.getAbsolutePath()));
-      session.setAttribute(SessionAttributes.MESSAGE, message);
+      SessionAttributes.appendToMessage(session, message.toString());
 
       response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
           + "/"));

@@ -14,16 +14,12 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
-
-
 import fll.db.Queries;
 import fll.db.TournamentParameters;
-
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
 import fll.web.admin.Tables;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Populate context for playoff index page.
@@ -42,10 +38,6 @@ public class PlayoffIndex {
                                      final PageContext pageContext) {
 
     final StringBuilder message = new StringBuilder();
-    final String existingMessage = SessionAttributes.getMessage(session);
-    if (null != existingMessage) {
-      message.append(existingMessage);
-    }
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
@@ -73,7 +65,7 @@ public class PlayoffIndex {
       SQLFunctions.close(connection);
     }
 
-    session.setAttribute(SessionAttributes.MESSAGE, message.toString());
+    SessionAttributes.appendToMessage(session, message.toString());
   }
 
 }

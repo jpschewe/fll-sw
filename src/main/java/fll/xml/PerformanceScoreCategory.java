@@ -193,7 +193,7 @@ public class PerformanceScoreCategory extends ScoreCategory {
     populateXml(doc, ele);
 
     ele.setAttribute(MINIMUM_SCORE_ATTRIBUTE,
-                     Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mMinimumScore));
+                     Utilities.getXmlFloatingPointNumberFormat().format(mMinimumScore));
 
     for (final Restriction restrict : mRestrictions) {
       final Element restrictEle = restrict.toXml(doc);

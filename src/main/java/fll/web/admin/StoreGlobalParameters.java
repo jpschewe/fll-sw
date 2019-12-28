@@ -20,10 +20,8 @@ import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
 
-
 import fll.db.GlobalParameters;
 import fll.flltools.MhubParameters;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -43,10 +41,6 @@ public class StoreGlobalParameters extends BaseFLLServlet {
                                 final HttpSession session)
       throws IOException, ServletException {
     final StringBuilder message = new StringBuilder();
-    final String existingMessage = SessionAttributes.getMessage(session);
-    if (null != existingMessage) {
-      message.append(existingMessage);
-    }
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
@@ -86,7 +80,7 @@ public class StoreGlobalParameters extends BaseFLLServlet {
       throw new RuntimeException("Error saving team data into the database", sqle);
     }
 
-    session.setAttribute(SessionAttributes.MESSAGE, message.toString());
+    SessionAttributes.appendToMessage(session, message.toString());
     response.sendRedirect(response.encodeRedirectURL("edit_global_parameters.jsp"));
   }
 }

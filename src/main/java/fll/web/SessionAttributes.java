@@ -34,6 +34,23 @@ public final class SessionAttributes {
   }
 
   /**
+   * Append some text to the message in the session.
+   *
+   * @param session where to get/store the information
+   * @param msg the text to append to the message
+   */
+  public static void appendToMessage(final HttpSession session,
+                                     final String msg) {
+    final String prevMessage = getMessage(session);
+    final StringBuilder builder = new StringBuilder();
+    if (null != prevMessage) {
+      builder.append(prevMessage);
+    }
+    builder.append(msg);
+    session.setAttribute(MESSAGE, builder.toString());
+  }
+
+  /**
    * Key in the session used to store the URL to redirect to after the current
    * operation completes.
    * The type is a {@link String}.

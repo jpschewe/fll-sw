@@ -210,7 +210,7 @@ public abstract class ScoreCategory implements Evaluatable, Serializable, GoalSc
 
   public void populateXml(final Document doc,
                           final Element ele) {
-    ele.setAttribute(WEIGHT_ATTRIBUTE, Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mWeight));
+    ele.setAttribute(WEIGHT_ATTRIBUTE, Utilities.getXmlFloatingPointNumberFormat().format(mWeight));
 
     for (final AbstractGoal goal : mGoals) {
       final Element goalEle = goal.toXml(doc);

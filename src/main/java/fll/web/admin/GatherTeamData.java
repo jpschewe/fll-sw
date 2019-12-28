@@ -105,7 +105,7 @@ public class GatherTeamData {
         page.setAttribute("addTeam", false);
 
         // check parsing the team number to be sure that we fail right away
-        final int teamNumber = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue();
+        final int teamNumber = Utilities.getIntegerNumberFormat().parse(teamNumberStr).intValue();
 
         // track current division and judging station for team so that it can be
         // selected

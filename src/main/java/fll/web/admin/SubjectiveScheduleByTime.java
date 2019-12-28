@@ -51,8 +51,7 @@ public class SubjectiveScheduleByTime extends BaseFLLServlet {
       final int currentTournamentID = Queries.getCurrentTournament(connection);
 
       if (!TournamentSchedule.scheduleExistsInDatabase(connection, currentTournamentID)) {
-        session.setAttribute(SessionAttributes.MESSAGE,
-                             "<p class='error'>There is no schedule for this tournament.</p>");
+        SessionAttributes.appendToMessage(session, "<p class='error'>There is no schedule for this tournament.</p>");
         WebUtils.sendRedirect(application, response, "/admin/index.jsp");
         return;
       }

@@ -377,12 +377,16 @@ public final class ChallengeParser {
   private static void validateGoalInitialValue(final Element goalElement,
                                                final String name)
       throws ParseException {
-    final double initialValue = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(goalElement.getAttribute("initialValue"))
-                                                                                   .doubleValue();
+    final String rawInitialValue = goalElement.getAttribute(Goal.INITIAL_VALUE_ATTRIBUTE);
+    final Number parsedInitialValue = Utilities.getXmlFloatingPointNumberFormat().parse(rawInitialValue);
+    final double initialValue = parsedInitialValue.doubleValue();
+    LOGGER.trace("{} Raw initialValue: '{}' parsed: {} double: {}", name, rawInitialValue, parsedInitialValue,
+                 initialValue);
+
     if (ChallengeParser.isEnumeratedGoal(goalElement)) {
       boolean foundMatch = false;
       for (final Element valueEle : new NodelistElementCollectionAdapter(goalElement.getChildNodes())) {
-        final double score = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(valueEle.getAttribute("score"))
+        final double score = Utilities.getXmlFloatingPointNumberFormat().parse(valueEle.getAttribute("score"))
                                                                                 .doubleValue();
         if (FP.equals(score, initialValue, INITIAL_VALUE_TOLERANCE)) {
           foundMatch = true;
@@ -394,10 +398,16 @@ public final class ChallengeParser {
       }
 
     } else {
-      final double min = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(goalElement.getAttribute("min"))
-                                                                            .doubleValue();
-      final double max = Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.parse(goalElement.getAttribute("max"))
-                                                                            .doubleValue();
+      final String rawMin = goalElement.getAttribute(Goal.MIN_ATTRIBUTE);
+      final Number numMin = Utilities.getXmlFloatingPointNumberFormat().parse(rawMin);
+      final double min = numMin.doubleValue();
+      final String rawMax = goalElement.getAttribute(Goal.MAX_ATTRIBUTE);
+      final Number numMax = Utilities.getXmlFloatingPointNumberFormat().parse(rawMax);
+      final double max = numMax.doubleValue();
+
+      LOGGER.trace("{} Raw min: '{}' parsed: {} double: {}", name, rawMin, numMin, min);
+      LOGGER.trace("{} Raw max: '{}' parsed: {} double: {}", name, rawMax, numMax, max);
+
       if (FP.lessThan(initialValue, min, INITIAL_VALUE_TOLERANCE)) {
         throw new InvalidInitialValue(String.format("Initial value for %s(%f) is less than min(%f)", name, initialValue,
                                                     min));

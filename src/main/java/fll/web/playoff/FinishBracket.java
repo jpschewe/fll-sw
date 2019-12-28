@@ -19,12 +19,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-
-
 import fll.Tournament;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -54,7 +51,7 @@ public class FinishBracket extends BaseFLLServlet {
       final String bracketName = request.getParameter("bracket");
       if (null == bracketName
           || "".equals(bracketName)) {
-        session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>No playoff bracket specified to finish</p>");
+        SessionAttributes.appendToMessage(session, "<p class='error'>No playoff bracket specified to finish</p>");
         WebUtils.sendRedirect(application, response, "/playoff/index.jsp");
         return;
       }
@@ -67,13 +64,13 @@ public class FinishBracket extends BaseFLLServlet {
         LOGGER.warn("Could not finish bracket "
             + bracketName
             + ", must have been a tie");
-        session.setAttribute(SessionAttributes.MESSAGE, "<p id='error'>Error finishing playoff bracket "
+        SessionAttributes.appendToMessage(session, "<p id='error'>Error finishing playoff bracket "
             + bracketName
             + ". Perhaps it ends in a tie?</p>");
       } else {
         LOGGER.info("Finished playoff bracket "
             + bracketName);
-        session.setAttribute(SessionAttributes.MESSAGE, "<p id='success'>Finished playoff bracket "
+        SessionAttributes.appendToMessage(session, "<p id='success'>Finished playoff bracket "
             + bracketName
             + ".</p>");
       }

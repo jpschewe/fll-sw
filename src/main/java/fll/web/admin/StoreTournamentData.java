@@ -22,12 +22,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-
-
 import fll.Tournament;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -68,7 +65,7 @@ public class StoreTournamentData extends BaseFLLServlet {
 
       message.append("<p id='success'>Committed tournament changes.</p>");
 
-      session.setAttribute(SessionAttributes.MESSAGE, message.toString());
+      SessionAttributes.appendToMessage(session, message.toString());
 
       // finally redirect to index.jsp
       // out.println("DEBUG: normally you'd be redirected to <a

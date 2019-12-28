@@ -867,7 +867,7 @@ public class FullTournamentTest {
             for (int rowIdx = 0; rowIdx < tableModel.getRowCount(); ++rowIdx) {
               final Object teamNumberRaw = tableModel.getValueAt(rowIdx, teamNumberColumn);
               assertNotNull(teamNumberRaw);
-              final int value = Utilities.INTEGER_NUMBER_FORMAT_INSTANCE.parse(teamNumberRaw.toString()).intValue();
+              final int value = Utilities.getIntegerNumberFormat().parse(teamNumberRaw.toString()).intValue();
 
               if (LOGGER.isTraceEnabled()) {
                 LOGGER.trace("Checking if "

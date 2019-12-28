@@ -20,17 +20,13 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
-
-
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.WebUtils;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Uninitialize a playoff division.
@@ -44,7 +40,8 @@ public class UninitializePlayoff extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
+                                final HttpSession session)
+      throws IOException, ServletException {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
@@ -63,7 +60,7 @@ public class UninitializePlayoff extends BaseFLLServlet {
       final String division = request.getParameter("division");
       if (null == division
           || "".equals(division)) {
-        session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>No playoff bracket specified to uninitialize</p>");
+        SessionAttributes.appendToMessage(session, "<p class='error'>No playoff bracket specified to uninitialize</p>");
         WebUtils.sendRedirect(application, response, "/playoff/index.jsp");
         return;
       }
@@ -113,8 +110,9 @@ public class UninitializePlayoff extends BaseFLLServlet {
       LOGGER.info("Uninitialized playoff division "
           + division);
 
-      session.setAttribute(SessionAttributes.MESSAGE, "<p id='success'>Uninitialized playoff bracket "
-          + division + ".</p>");
+      SessionAttributes.appendToMessage(session, "<p id='success'>Uninitialized playoff bracket "
+          + division
+          + ".</p>");
       WebUtils.sendRedirect(application, response, "/playoff/index.jsp");
     } catch (final SQLException e) {
       LOGGER.error(e.getMessage(), e);

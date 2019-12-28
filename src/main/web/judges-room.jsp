@@ -175,7 +175,7 @@
         <li>
             <a target="_report"
                 href="<c:url value='/report/index.jsp' />">Generate
-                reports</a> - this is done ones all of the subjective scores
+                reports</a> - this is done once all of the subjective scores
             are in. <a href='javascript:display("ReportHelp")'>[help]</a>
             <div id='ReportHelp' class='help' style='display: none'>
                 It is best to not generate the reports until all scores

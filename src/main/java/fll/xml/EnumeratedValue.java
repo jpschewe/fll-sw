@@ -97,7 +97,7 @@ public class EnumeratedValue implements Serializable {
 
   public Element toXml(final Document document) {
     final Element ele = document.createElement(TAG_NAME);
-    ele.setAttribute(SCORE_ATTRIBUTE, Utilities.XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.format(mScore));
+    ele.setAttribute(SCORE_ATTRIBUTE, Utilities.getXmlFloatingPointNumberFormat().format(mScore));
     ele.setAttribute(TITLE_ATTRIBUTE, mTitle);
     ele.setAttribute(VALUE_ATTRIBUTE, mValue);
     return ele;

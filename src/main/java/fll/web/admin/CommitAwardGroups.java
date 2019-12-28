@@ -42,10 +42,6 @@ public class CommitAwardGroups extends BaseFLLServlet {
                                      final HttpSession session,
                                      final PageContext pageContext) {
     final StringBuilder message = new StringBuilder();
-    final String existingMessage = SessionAttributes.getMessage(session);
-    if (null != existingMessage) {
-      message.append(existingMessage);
-    }
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
@@ -61,14 +57,15 @@ public class CommitAwardGroups extends BaseFLLServlet {
 
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
-          + sqle.getMessage() + "</p>");
+          + sqle.getMessage()
+          + "</p>");
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error saving team data into the database", sqle);
     } finally {
       SQLFunctions.close(connection);
     }
 
-    session.setAttribute(SessionAttributes.MESSAGE, message.toString());
+    SessionAttributes.appendToMessage(session, message.toString());
 
   }
 
@@ -80,10 +77,6 @@ public class CommitAwardGroups extends BaseFLLServlet {
       throws IOException, ServletException {
 
     final StringBuilder message = new StringBuilder();
-    final String existingMessage = SessionAttributes.getMessage(session);
-    if (null != existingMessage) {
-      message.append(existingMessage);
-    }
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
@@ -123,14 +116,15 @@ public class CommitAwardGroups extends BaseFLLServlet {
 
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
-          + sqle.getMessage() + "</p>");
+          + sqle.getMessage()
+          + "</p>");
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error saving award group data into the database", sqle);
     } finally {
       SQLFunctions.close(connection);
     }
 
-    session.setAttribute(SessionAttributes.MESSAGE, message.toString());
+    SessionAttributes.appendToMessage(session, message.toString());
 
     // send back to the admin index
     response.sendRedirect(response.encodeRedirectURL("index.jsp"));
