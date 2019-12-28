@@ -5,6 +5,7 @@
  */
 package fll.scheduler;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -38,6 +39,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -47,12 +49,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
+import javax.xml.transform.TransformerException;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.fop.apps.FOPException;
+import org.apache.fop.apps.FopFactory;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.w3c.dom.Element;
 
 import com.diffplug.common.base.Errors;
-import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
@@ -76,12 +81,14 @@ import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
+import fll.util.FOPUtils;
 import fll.util.PdfUtils;
 import fll.util.SimpleFooterHandler;
 import fll.web.playoff.ScoresheetGenerator;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
+import net.mtu.eggplant.xml.XMLUtils;
 
 /**
  * Tournament schedule. Can parse the schedule from a spreadsheet or CSV file.
@@ -890,7 +897,7 @@ public class TournamentSchedule implements Serializable {
 
     final File performance = new File(directory, baseFilename
         + "-performance.pdf");
-    try (OutputStream pdfFos = new FileOutputStream(performance)) {
+    try (OutputStream pdfFos = new BufferedOutputStream(new FileOutputStream(performance))) {
       outputPerformanceScheduleByTime(pdfFos);
     }
 
@@ -923,12 +930,16 @@ public class TournamentSchedule implements Serializable {
    * Output the performance schedule, sorted by time.
    *
    * @param pdfFos where to write the schedule
-   * @throws DocumentException
+   * @throws IOException error writing to the stream
    */
-  public void outputPerformanceScheduleByTime(final OutputStream pdfFos) throws DocumentException {
-    final Document performanceDoc = PdfUtils.createPortraitPdfDoc(pdfFos, new SimpleFooterHandler());
-    outputPerformanceSchedule(performanceDoc);
-    performanceDoc.close();
+  public void outputPerformanceScheduleByTime(final OutputStream pdfFos) throws IOException {
+    try {
+      final org.w3c.dom.Document performanceDoc = createPerformanceSchedule();
+      final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
+      FOPUtils.renderPdf(fopFactory, performanceDoc, pdfFos);
+    } catch (FOPException | TransformerException e) {
+      throw new FLLInternalException("Error creating the performance schedule PDF", e);
+    }
   }
 
   /**
@@ -1237,7 +1248,17 @@ public class TournamentSchedule implements Serializable {
     scoresheets.writeFile(output, orientationIsPortrait, pagesPerScoreSheet);
   }
 
-  private void outputPerformanceSchedule(final Document detailedSchedules) throws DocumentException {
+  /**
+   * Standard border for table cells in points.
+   */
+  private static final double STANDARD_BORDER_WIDTH = 0.5;
+
+  /**
+   * Think border for table cells in points.
+   */
+  private static final double THICK_BORDER_WIDTH = 2;
+
+  private org.w3c.dom.Document createPerformanceSchedule() {
     final SortedMap<PerformanceTime, TeamScheduleInfo> performanceTimes = new TreeMap<>();
     for (final TeamScheduleInfo si : _schedule) {
       for (final PerformanceTime pt : si.getAllPerformances()) {
@@ -1248,112 +1269,173 @@ public class TournamentSchedule implements Serializable {
     // list of teams staying around to even up the teams
     final List<TeamScheduleInfo> teamsMissingOpponents = new LinkedList<>();
 
-    final PdfPTable table = PdfUtils.createTable(7);
-    int currentRow = 0;
-    table.setWidths(new float[] { 2, 2, 3, 3, 2, 2, 2 });
+    final org.w3c.dom.Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
 
-    final PdfPCell tournamentCell = PdfUtils.createHeaderCell("Tournament: "
-        + getName()
-        + " Performance");
-    tournamentCell.setColspan(7);
-    table.addCell(tournamentCell);
-    table.completeRow();
-    ++currentRow;
+    final Element rootElement = FOPUtils.createXslFoRoot(document);
+    document.appendChild(rootElement);
+    
+    final Element layoutMasterSet = FOPUtils.createXslFoElement(document, "layout-master-set");
+    rootElement.appendChild(layoutMasterSet);
 
-    table.addCell(PdfUtils.createHeaderCell(TEAM_NUMBER_HEADER));
-    table.addCell(PdfUtils.createHeaderCell(AWARD_GROUP_HEADER));
-    table.addCell(PdfUtils.createHeaderCell(ORGANIZATION_HEADER));
-    table.addCell(PdfUtils.createHeaderCell(TEAM_NAME_HEADER));
-    table.addCell(PdfUtils.createHeaderCell("Time"));
-    table.addCell(PdfUtils.createHeaderCell("Table"));
-    table.addCell(PdfUtils.createHeaderCell("Round"));
-    table.completeRow();
-    ++currentRow;
+    final String pageMasterName = "simple";
+    FOPUtils.createSimplePageMaster(document, layoutMasterSet, pageMasterName);
 
-    table.setHeaderRows(1);
+    final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
+    rootElement.appendChild(pageSequence);
+
+    final Element footer = FOPUtils.createSimpleFooter(document);
+    pageSequence.appendChild(footer);
+
+    final Element documentBody = FOPUtils.createBody(document);
+    pageSequence.appendChild(documentBody);
+
+    final Element table = FOPUtils.createBasicTable(document);
+    documentBody.appendChild(table);
+
+    table.appendChild(FOPUtils.createTableColumn(document, 2));
+    table.appendChild(FOPUtils.createTableColumn(document, 2));
+    table.appendChild(FOPUtils.createTableColumn(document, 3));
+    table.appendChild(FOPUtils.createTableColumn(document, 3));
+    table.appendChild(FOPUtils.createTableColumn(document, 2));
+    table.appendChild(FOPUtils.createTableColumn(document, 2));
+    table.appendChild(FOPUtils.createTableColumn(document, 2));
+
+    final Element header = FOPUtils.createTableHeader(document);
+    table.appendChild(header);
+
+    final String[] headerNames = new String[] { TEAM_NUMBER_HEADER, AWARD_GROUP_HEADER, ORGANIZATION_HEADER,
+                                                TEAM_NAME_HEADER, "Time", "Table", "Round" };
+
+    final Element headerRow1 = FOPUtils.createXslFoElement(document, "table-row");
+    header.appendChild(headerRow1);
+
+    final Element tournamentHeader = FOPUtils.createTableCell(document, Optional.of(FOPUtils.TEXT_ALIGN_CENTER),
+                                                              String.format("Tournament: %s Performance", getName()));
+    headerRow1.appendChild(tournamentHeader);
+    tournamentHeader.setAttribute("number-columns-spanned", String.valueOf(headerNames.length));
+    FOPUtils.addTopBorder(tournamentHeader, STANDARD_BORDER_WIDTH);
+    FOPUtils.addBottomBorder(tournamentHeader, STANDARD_BORDER_WIDTH);
+    FOPUtils.addLeftBorder(tournamentHeader, STANDARD_BORDER_WIDTH);
+    FOPUtils.addRightBorder(tournamentHeader, STANDARD_BORDER_WIDTH);
+
+    final Element headerRow2 = FOPUtils.createXslFoElement(document, "table-row");
+    header.appendChild(headerRow2);
+
+    for (final String headerName : headerNames) {
+      final Element headerCell = FOPUtils.createTableCell(document, Optional.of(FOPUtils.TEXT_ALIGN_CENTER),
+                                                          headerName);
+      headerRow2.appendChild(headerCell);
+      FOPUtils.addBorders(headerCell, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH,
+                          STANDARD_BORDER_WIDTH);
+    }
+
+    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    table.appendChild(tableBody);
 
     LocalTime prevTime = null;
+    Element prevRow = null;
     for (final Map.Entry<PerformanceTime, TeamScheduleInfo> entry : performanceTimes.entrySet()) {
+      final Element row = FOPUtils.createXslFoElement(document, "table-row");
+      tableBody.appendChild(row);
+
       final PerformanceTime performance = entry.getKey();
       final TeamScheduleInfo si = entry.getValue();
 
       // check if team is missing an opponent
-      final BaseColor backgroundColor;
       if (null == findOpponent(si, performance)) {
         teamsMissingOpponents.add(si);
-        backgroundColor = BaseColor.MAGENTA;
-      } else {
-        backgroundColor = null;
+        row.setAttribute("background-color", "magenta");
       }
 
       final LocalTime performanceTime = performance.getTime();
-      final float topBorderWidth;
+      final double topBorderWidth;
       if (Objects.equals(performanceTime, prevTime)) {
-        topBorderWidth = Rectangle.UNDEFINED;
+        topBorderWidth = STANDARD_BORDER_WIDTH;
 
         // keep the rows with the same times together
-        table.getRow(currentRow
-            - 1).setMayNotBreak(true);
-        LOGGER.trace("Setting may not break for row {} time {}", (currentRow
-            - 1), performanceTime);
+        row.setAttribute("keep-with-previous", "always");
       } else {
-        topBorderWidth = TIME_SEPARATOR_LINE_WIDTH;
+        topBorderWidth = THICK_BORDER_WIDTH;
       }
 
-      PdfPCell cell = PdfUtils.createCell(String.valueOf(si.getTeamNumber()));
-      cell.setBorderWidthTop(topBorderWidth);
-      table.addCell(cell);
+      final Element teamNumberCell = FOPUtils.createTableCell(document, Optional.of(FOPUtils.TEXT_ALIGN_CENTER),
+                                                              String.valueOf(si.getTeamNumber()));
+      row.appendChild(teamNumberCell);
+      FOPUtils.addBorders(teamNumberCell, topBorderWidth, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH,
+                          STANDARD_BORDER_WIDTH);
 
-      cell = PdfUtils.createCell(si.getAwardGroup());
-      cell.setBorderWidthTop(topBorderWidth);
-      table.addCell(cell);
+      final Element awardGroupCell = FOPUtils.createTableCell(document, Optional.of(FOPUtils.TEXT_ALIGN_CENTER),
+                                                              String.valueOf(si.getAwardGroup()));
+      row.appendChild(awardGroupCell);
+      FOPUtils.addBorders(awardGroupCell, topBorderWidth, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH,
+                          STANDARD_BORDER_WIDTH);
 
-      cell = PdfUtils.createCell(si.getOrganization());
-      cell.setBorderWidthTop(topBorderWidth);
-      table.addCell(cell);
+      final Element organizationCell = FOPUtils.createTableCell(document, Optional.of(FOPUtils.TEXT_ALIGN_CENTER),
+                                                                String.valueOf(si.getOrganization()));
+      row.appendChild(organizationCell);
+      FOPUtils.addBorders(organizationCell, topBorderWidth, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH,
+                          STANDARD_BORDER_WIDTH);
 
-      cell = PdfUtils.createCell(si.getTeamName());
-      cell.setBorderWidthTop(topBorderWidth);
-      table.addCell(cell);
+      final Element teamNameCell = FOPUtils.createTableCell(document, Optional.of(FOPUtils.TEXT_ALIGN_CENTER),
+                                                            String.valueOf(si.getTeamName()));
+      row.appendChild(teamNameCell);
+      FOPUtils.addBorders(teamNameCell, topBorderWidth, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH,
+                          STANDARD_BORDER_WIDTH);
 
-      cell = PdfUtils.createCell(formatTime(performanceTime), backgroundColor);
-      cell.setBorderWidthTop(topBorderWidth);
-      table.addCell(cell);
+      final Element timeCell = FOPUtils.createTableCell(document, Optional.of(FOPUtils.TEXT_ALIGN_CENTER),
+                                                        formatTime(performanceTime));
+      row.appendChild(timeCell);
+      FOPUtils.addBorders(timeCell, topBorderWidth, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH,
+                          STANDARD_BORDER_WIDTH);
 
-      cell = PdfUtils.createCell(performance.getTable()
-          + " "
-          + performance.getSide(), backgroundColor);
-      cell.setBorderWidthTop(topBorderWidth);
-      table.addCell(cell);
+      final Element perfTableCell = FOPUtils.createTableCell(document, Optional.of(FOPUtils.TEXT_ALIGN_CENTER),
+                                                             performance.getTable()
+                                                                 + " "
+                                                                 + performance.getSide());
+      row.appendChild(perfTableCell);
+      FOPUtils.addBorders(perfTableCell, topBorderWidth, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH,
+                          STANDARD_BORDER_WIDTH);
 
-      cell = PdfUtils.createCell(si.getRoundName(performance));
-      cell.setBorderWidthTop(topBorderWidth);
-      table.addCell(cell);
-      table.completeRow();
+      final Element perfRoundCell = FOPUtils.createTableCell(document, Optional.of(FOPUtils.TEXT_ALIGN_CENTER),
+                                                             si.getRoundName(performance));
+      row.appendChild(perfRoundCell);
+      FOPUtils.addBorders(perfRoundCell, topBorderWidth, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH,
+                          STANDARD_BORDER_WIDTH);
 
-      ++currentRow;
       prevTime = performanceTime;
+      prevRow = row;
     }
-
-    detailedSchedules.add(table);
 
     // output teams staying
     if (!teamsMissingOpponents.isEmpty()) {
       final String formatString = "Team %d does not have an opponent.";
-      final PdfPTable stayingTable = PdfUtils.createTable(1);
+      final Element stayingTable = FOPUtils.createBasicTable(document);
+      documentBody.appendChild(stayingTable);
+
+      stayingTable.appendChild(FOPUtils.createTableColumn(document, 1));
+
+      final Element stayingTableBody = FOPUtils.createXslFoElement(document, "table-body");
+      stayingTable.appendChild(stayingTableBody);
+
       for (final TeamScheduleInfo si : teamsMissingOpponents) {
-        stayingTable.addCell(PdfUtils.createCell(new Formatter().format(formatString, si.getTeamNumber()).toString(),
-                                                 BaseColor.MAGENTA));
+        final Element stayingTableRow = FOPUtils.createXslFoElement(document, "table-row");
+        stayingTableBody.appendChild(stayingTableRow);
+
+        stayingTableRow.setAttribute("background-color", "magenta");
+
+        final Element stayingTableCell = FOPUtils.createTableCell(document, Optional.of(FOPUtils.TEXT_ALIGN_CENTER),
+                                                                  String.format(formatString, si.getTeamNumber()));
+        stayingTableRow.appendChild(stayingTableCell);
       }
-      detailedSchedules.add(stayingTable);
 
     }
 
     // make sure the last row isn't by itself
-    table.getRow(currentRow
-        - 1).setMayNotBreak(true);
+    if (null != prevRow) {
+      prevRow.setAttribute("keep-with-previous", "always");
+    }
 
-    detailedSchedules.add(Chunk.NEXTPAGE);
+    return document;
   }
 
   private void outputSubjectiveScheduleByDivision(final Document detailedSchedules,
