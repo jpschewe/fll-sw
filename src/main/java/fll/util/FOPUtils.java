@@ -54,7 +54,7 @@ public final class FOPUtils {
   public static Element createRoot(final Document document) {
     final Element rootElement = createXslFoElement(document, "root");
     rootElement.setAttribute("xmlns:fo", XSL_FO_NAMESPACE);
-    
+
     // get rid of warnings about not being able to find fonts
     rootElement.setAttribute("font-family", "Times");
 
@@ -75,18 +75,22 @@ public final class FOPUtils {
   }
 
   /**
-   * Create 8.5" x 11" page with half inch margins and 1 inch footer and header.
+   * Create 8.5" x 11" page with half inch margins and 0.3 inch footer and no
+   * header.
    * 
    * @param document used to create the elements
    * @param layoutMasterSet the master set element
    * @param name the name of the page master
    * @see #createSimplePageMaster(Document, Element, String, double, double,
    *      double, double, double, double, double, double)
+   * @throws IllegalArgumentException see {#link
+   *           {@link #createSimplePageMaster(Document, Element, String, double, double, double, double, double, double, double, double)}
    */
   public static void createSimplePageMaster(final Document document,
                                             final Element layoutMasterSet,
-                                            final String name) {
-    createSimplePageMaster(document, layoutMasterSet, name, 8.5, 11, 0.5, 0.5, 0.5, 0.5, 1, 1);
+                                            final String name)
+      throws IllegalArgumentException {
+    createSimplePageMaster(document, layoutMasterSet, name, 8.5, 11, 0.5, 0.5, 0.5, 0.5, 0, 0.3);
   }
 
   /**
@@ -101,6 +105,8 @@ public final class FOPUtils {
    * @param bottomMargin margin in inches
    * @param headerHeight height in inches
    * @param footerHeight height in inches
+   * @throws IllegalArgumentException if there is not enough room for the header
+   *           or footer
    */
   public static void createSimplePageMaster(final Document document,
                                             final Element layoutMasterSet,
@@ -112,7 +118,17 @@ public final class FOPUtils {
                                             final double topMargin,
                                             final double bottomMargin,
                                             final double headerHeight,
-                                            final double footerHeight) {
+                                            final double footerHeight)
+      throws IllegalArgumentException {
+    if (headerHeight > topMargin) {
+      throw new IllegalArgumentException(String.format("Header height (%f) cannot be greater than the top margin (%f)",
+                                                       headerHeight, topMargin));
+    }
+    if (footerHeight > bottomMargin) {
+      throw new IllegalArgumentException(String.format("Footer height (%f) cannot be greater than the bottom margin (%f)",
+                                                       footerHeight, bottomMargin));
+    }
+
     final Element simplePageMaster = createXslFoElement(document, "simple-page-master");
     simplePageMaster.setAttribute("master-name", name);
     simplePageMaster.setAttribute("page-height", String.format("%fin", pageHeight));
