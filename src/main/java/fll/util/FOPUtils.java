@@ -51,9 +51,12 @@ public final class FOPUtils {
    * @param document used to create the element
    * @return the root element
    */
-  public static Element createXslFoRoot(final Document document) {
+  public static Element createRoot(final Document document) {
     final Element rootElement = createXslFoElement(document, "root");
     rootElement.setAttribute("xmlns:fo", XSL_FO_NAMESPACE);
+    
+    // get rid of warnings about not being able to find fonts
+    rootElement.setAttribute("font-family", "Times");
 
     return rootElement;
   }
