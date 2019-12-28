@@ -197,6 +197,11 @@ dependencies {
     
   implementation(group: "com.google.guava", name: "guava", version: "23.5-jre")
     
+  implementation(group: "org.apache.xmlgraphics", name: "fop", version: "2.4") {
+    // only needed for BMP and TIFF formats
+    exclude(group: "com.sun.media", module: "jai-codec")
+  }
+    
   testImplementation(group: "org.junit.jupiter", name: "junit-jupiter-api", version: project.junit_version)
   testImplementation(group: "org.junit.jupiter", name: "junit-jupiter-params", version: project.junit_version)
   testRuntimeOnly(group: "org.junit.jupiter", name: "junit-jupiter-engine", version: project.junit_version)
