@@ -1,0 +1,113 @@
+/*
+ * Copyright (c) 2019 High Tech Kids.  All rights reserved
+ * HighTechKids is on the web at: http://www.hightechkids.org
+ * This code is released under GPL; see LICENSE.txt for details.
+ */
+
+package fll.web.api;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Optional;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
+
+import org.apache.commons.io.IOUtils;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import fll.db.AwardWinner;
+import fll.db.Queries;
+import fll.db.SubjectiveAwardWinners;
+import fll.util.FLLRuntimeException;
+import fll.web.ApplicationAttributes;
+
+/**
+ * Get and set extra subjective award winners.
+ * The gets/sets a {@link Collection} of {@link AwardWinner} objects.
+ * Post result is of type {@link PostResult}.
+ */
+@WebServlet("/api/SubjectiveExtraAwardWinners")
+public class SubjectiveExtraAwardWinners extends HttpServlet {
+
+  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
+  @Override
+  protected final void doGet(final HttpServletRequest request,
+                             final HttpServletResponse response)
+      throws IOException, ServletException {
+    final ServletContext application = getServletContext();
+
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
+
+      final ObjectMapper jsonMapper = new ObjectMapper();
+
+      response.reset();
+      response.setContentType("application/json");
+      final PrintWriter writer = response.getWriter();
+
+      final int currentTournament = Queries.getCurrentTournament(connection);
+      final Collection<AwardWinner> winners = SubjectiveAwardWinners.getExtraAwardWinners(connection,
+                                                                                          currentTournament);
+
+      jsonMapper.writeValue(writer, winners);
+    } catch (final SQLException e) {
+      throw new FLLRuntimeException(e);
+    }
+  }
+
+  @Override
+  protected final void doPost(final HttpServletRequest request,
+                              final HttpServletResponse response)
+      throws IOException, ServletException {
+    final ObjectMapper jsonMapper = new ObjectMapper();
+    response.reset();
+    response.setContentType("application/json");
+
+    final ServletContext application = getServletContext();
+
+    final StringWriter debugWriter = new StringWriter();
+    IOUtils.copy(request.getReader(), debugWriter);
+
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Read data: "
+          + debugWriter.toString());
+    }
+
+    final Reader reader = new StringReader(debugWriter.toString());
+    final PrintWriter writer = response.getWriter();
+
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
+
+      final int currentTournament = Queries.getCurrentTournament(connection);
+
+      final Collection<AwardWinner> winners = jsonMapper.readValue(reader,
+                                                                   AwardWinner.AwardWinnerCollectionTypeInformation.INSTANCE);
+
+      SubjectiveAwardWinners.storeExtraAwardWinners(connection, currentTournament, winners);
+      final PostResult result = new PostResult(true, Optional.empty());
+      response.reset();
+      jsonMapper.writeValue(writer, result);
+
+    } catch (final SQLException e) {
+      final PostResult result = new PostResult(false, Optional.ofNullable(e.getMessage()));
+      jsonMapper.writeValue(writer, result);
+    }
+
+  }
+
+}
