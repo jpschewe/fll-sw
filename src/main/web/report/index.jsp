@@ -92,6 +92,11 @@
             ceremony.
         </li>
 
+        <li>
+            <a href="edit-award-winners.jsp" target="_blank">Enter
+                the winners of awards for use in the awards report</a>
+        </li>
+
     </ol>
 
 

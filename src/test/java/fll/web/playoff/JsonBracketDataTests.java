@@ -91,7 +91,7 @@ public class JsonBracketDataTests {
     // Ask for round 1 leaf 1
     int dbLine = 3;
     query.put(dbLine, 1);
-    final ObjectMapper jsonMapper = new ObjectMapper();
+    final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
     List<BracketLeafResultSet> leaves = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, 0,
                                                                               playoff.getConnection(),

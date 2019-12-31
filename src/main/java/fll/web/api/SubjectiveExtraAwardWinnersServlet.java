@@ -26,8 +26,10 @@ import javax.sql.DataSource;
 
 import org.apache.commons.io.IOUtils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import fll.Utilities;
 import fll.db.AwardWinner;
 import fll.db.Queries;
 import fll.db.SubjectiveAwardWinners;
@@ -40,7 +42,7 @@ import fll.web.ApplicationAttributes;
  * Post result is of type {@link PostResult}.
  */
 @WebServlet("/api/SubjectiveExtraAwardWinners")
-public class SubjectiveExtraAwardWinners extends HttpServlet {
+public class SubjectiveExtraAwardWinnersServlet extends HttpServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -53,7 +55,7 @@ public class SubjectiveExtraAwardWinners extends HttpServlet {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
 
-      final ObjectMapper jsonMapper = new ObjectMapper();
+      final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
       response.reset();
       response.setContentType("application/json");
@@ -73,7 +75,7 @@ public class SubjectiveExtraAwardWinners extends HttpServlet {
   protected final void doPost(final HttpServletRequest request,
                               final HttpServletResponse response)
       throws IOException, ServletException {
-    final ObjectMapper jsonMapper = new ObjectMapper();
+    final ObjectMapper jsonMapper = Utilities.createJsonMapper();
     response.reset();
     response.setContentType("application/json");
 
@@ -100,12 +102,16 @@ public class SubjectiveExtraAwardWinners extends HttpServlet {
 
       SubjectiveAwardWinners.storeExtraAwardWinners(connection, currentTournament, winners);
       final PostResult result = new PostResult(true, Optional.empty());
-      response.reset();
       jsonMapper.writeValue(writer, result);
 
     } catch (final SQLException e) {
       final PostResult result = new PostResult(false, Optional.ofNullable(e.getMessage()));
       jsonMapper.writeValue(writer, result);
+    } catch (final JsonProcessingException e) {
+      final PostResult result = new PostResult(false, Optional.ofNullable(e.getMessage()));
+      jsonMapper.writeValue(writer, result);
+
+      throw new FLLRuntimeException(e);
     }
 
   }

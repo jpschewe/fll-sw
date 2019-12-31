@@ -28,14 +28,13 @@ import javax.websocket.OnMessage;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
-
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
+import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -74,7 +73,7 @@ public class H2HUpdateWebSocket {
                                  final int currentTournament)
       throws IOException, SQLException {
     synchronized (SESSIONS_LOCK) {
-      final ObjectMapper jsonMapper = new ObjectMapper();
+      final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
       ALL_SESSIONS.add(session);
 
@@ -125,7 +124,7 @@ public class H2HUpdateWebSocket {
     final Reader reader = new StringReader(msg);
 
     try {
-      final ObjectMapper jsonMapper = new ObjectMapper();
+      final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
       // may get passed a javascript object with extra fields, just ignore them
       // this happens when BracketInfo is subclassed and the subclass is passed
@@ -186,7 +185,7 @@ public class H2HUpdateWebSocket {
         } // foreach h2h bracket
 
         // expose all bracketInfo to the javascript
-        final ObjectMapper jsonMapper = new ObjectMapper();
+        final ObjectMapper jsonMapper = Utilities.createJsonMapper();
         try (final StringWriter writer = new StringWriter()) {
           jsonMapper.writeValue(writer, message);
           final String allBracketInfoJson = writer.toString();
@@ -259,7 +258,7 @@ public class H2HUpdateWebSocket {
 
       final Set<Session> toRemove = new HashSet<>();
 
-      final ObjectMapper jsonMapper = new ObjectMapper();
+      final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
       final StringWriter writer = new StringWriter();
 

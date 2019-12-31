@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.Utilities;
 import fll.web.BaseFLLServlet;
 import fll.web.DisplayInfo;
 
@@ -39,7 +40,7 @@ public class DisplayQueryServlet extends BaseFLLServlet {
     final String url = pickURL(displayInfo, request);
     final DisplayResponse displayResponse = new DisplayResponse(url);
 
-    final ObjectMapper jsonMapper = new ObjectMapper();
+    final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
     response.reset();
     response.setContentType("application/json");

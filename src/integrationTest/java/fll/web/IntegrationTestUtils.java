@@ -509,7 +509,7 @@ public final class IntegrationTestUtils {
     }
 
     // get the JSON
-    final ObjectMapper jsonMapper = new ObjectMapper();
+    final ObjectMapper jsonMapper = Utilities.createJsonMapper();
     final Reader reader = new StringReader(json);
 
     final Collection<Tournament> tournaments = jsonMapper.readValue(reader,

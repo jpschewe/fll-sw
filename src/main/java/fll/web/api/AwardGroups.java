@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 High Tech Kids.  All rights reserved
+ * Copyright (c) 2013 High Tech Kids.  All rights reserved
  * HighTechKids is on the web at: http://www.hightechkids.org
  * This code is released under GPL; see LICENSE.txt for details.
  */
@@ -20,35 +20,26 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
-
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Utilities;
-import fll.db.CategoryColumnMapping;
 import fll.db.Queries;
-
 import fll.web.ApplicationAttributes;
 
 /**
- * Get returns a Collection of @link{CategoryColumnMapping} objects.
+ * Collection of names of the award groups in the current tournament.
  */
-@WebServlet("/api/CategoryScheduleMapping/*")
-public class CategoryScheduleMappingServlet extends HttpServlet {
-
-  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+@WebServlet("/api/AwardGroups")
+public class AwardGroups extends HttpServlet {
 
   @Override
   protected final void doGet(final HttpServletRequest request,
-                             final HttpServletResponse response) throws IOException, ServletException {
+                             final HttpServletResponse response)
+      throws IOException, ServletException {
     final ServletContext application = getServletContext();
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
 
       final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
@@ -56,16 +47,11 @@ public class CategoryScheduleMappingServlet extends HttpServlet {
       response.setContentType("application/json");
       final PrintWriter writer = response.getWriter();
 
-      final int currentTournament = Queries.getCurrentTournament(connection);
+      final Collection<String> awardGroups = Queries.getAwardGroups(connection);
 
-      final Collection<CategoryColumnMapping> mappings = CategoryColumnMapping.load(connection, currentTournament);
-
-      jsonMapper.writeValue(writer, mappings);      
+      jsonMapper.writeValue(writer, awardGroups);
     } catch (final SQLException e) {
-      LOGGER.fatal("Database Exception", e);
       throw new RuntimeException(e);
-    } finally {
-      SQLFunctions.close(connection);
     }
 
   }

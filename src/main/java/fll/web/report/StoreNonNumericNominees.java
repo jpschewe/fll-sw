@@ -24,6 +24,7 @@ import javax.sql.DataSource;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import fll.Utilities;
 import fll.db.NonNumericNominees;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
@@ -62,7 +63,7 @@ public class StoreNonNumericNominees extends BaseFLLServlet {
       }
 
       // decode JSON
-      final ObjectMapper jsonMapper = new ObjectMapper();
+      final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
       final Collection<NonNumericNominees> nominees = jsonMapper.readValue(nomineesStr,
                                                                            NonNumericNomineesTypeInformation.INSTANCE);
