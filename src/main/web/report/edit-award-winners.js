@@ -21,6 +21,11 @@ var _extraAwardWinners = [];
 // list of AwardWinnerData
 var _extraAwardWinnerData = [];
 
+// list of AwardWinner
+var _overallAwardWinners = [];
+// list of AwardWinnerData
+var _overallAwardWinnerData = [];
+
 // name -> ScoreCategory
 var _subjectiveCategories = {};
 
@@ -51,6 +56,23 @@ function createAwardWinner(data) {
   }
 }
 
+/**
+ * 
+ * @param data
+ *          the AwardWinnerData
+ * @returns OverallAwardWinner or null if the team number is not set
+ */
+function createOverallAwardWinner(data) {
+  var teamNumber = data.teamElement.val();
+  if (teamNumber && teamNumber != "") {
+    var categoryName = data.nameFunc();
+    return new OverallAwardWinner(categoryName, teamNumber,
+        data.descriptionElement.val())
+  } else {
+    return null;
+  }
+}
+
 $(document).ready(function() {
 
   loadFromServer(function() {
@@ -66,10 +88,15 @@ $(document).ready(function() {
   $("#store_winners").click(function() {
     storeChallengeWinners();
     storeExtraWinners();
+    storeOverallWinners();
   });
 
   $("#extra-award-winners_add-category").click(function() {
     addExtraCategory(null)
+  });
+
+  $("#overall-award-winners_add-category").click(function() {
+    addOverallCategory(null)
   });
 
 }); // end ready function
@@ -121,9 +148,32 @@ function storeExtraWinners() {
   }
 }
 
+function storeOverallWinners() {
+  var winners = [];
+  $.each(_overallAwardWinnerData, function(i, data) {
+    var winner = createOverallAwardWinner(data);
+    if (winner) {
+      winners.push(winner);
+    }
+  });
+
+  if (winners.length) {
+    // send to server
+    var jsonData = JSON.stringify(winners);
+    $.post("/api/SubjectiveOverallAwardWinners", jsonData, function(response) {
+      if (!response.success) {
+        alert("Error sending overall award winners: " + response.message);
+      }
+    }, 'json');
+  } else {
+    _log("No overall winners to store");
+  }
+}
+
 function initPage() {
   initChallengeWinners();
   initExtraWinners();
+  initOverallWinners();
 }
 
 function initChallengeWinners() {
@@ -247,6 +297,71 @@ function initExtraWinners() {
 
   $.each(knownCategories, function(i, category) {
     addExtraCategory(category);
+  });
+}
+
+/**
+ * 
+ * @param name
+ *          the name of the category (may be null)
+ */
+function addOverallCategory(name) {
+  var categoryItem = $("<li></li>");
+  $("#overall-award-winners").append(categoryItem);
+
+  var categoryEle = $("<input type='text' />");
+  categoryItem.append(categoryEle);
+  if (name) {
+    categoryEle.val(name);
+  }
+
+  var categoryList = $("<ul></ul>");
+  categoryItem.append(categoryList);
+
+  var nameFunc = function() {
+    return categoryEle.val();
+  };
+
+  var addTeamButton = $("<button>Add Team</button>");
+  categoryItem.append(addTeamButton);
+
+  var teamList = $("<ul></ul>");
+  categoryItem.append(teamList);
+
+  addTeamButton.click(function() {
+    addTeam(null, _overallAwardWinnerData, nameFunc, null, teamList);
+  });
+
+  var enterNewTeam = true;
+  if (name) {
+    $.each(_overallAwardWinners, function(i, winner) {
+      if (winner.name == name) {
+        addTeam(winner, _overallAwardWinnerData, nameFunc, null, teamList);
+        enterNewTeam = false;
+      }
+    }); // foreach loaded winner
+  }
+
+  if (enterNewTeam) {
+    // add an empty team if there weren't any loaded from the server
+    addTeam(null, _overallAwardWinnerData, nameFunc, null, teamList);
+  }
+
+}
+
+function initOverallWinners() {
+  _overallAwardWinnerData = [];
+  $("#overall-award-winners").empty();
+
+  var knownCategories = [];
+  $.each(_overallAwardWinners, function(i, winner) {
+    if (!knownCategories.includes(winner.name)) {
+      knownCategories.push(winner.name);
+    }
+  });
+
+  $.each(knownCategories, function(i, category) {
+    addOverallCategory(category);
   });
 }
 
@@ -380,6 +495,14 @@ function loadExtraAwardWinners() {
   });
 }
 
+function loadOverallAwardWinners() {
+  _overallAwardWinners = [];
+
+  return $.getJSON("/api/SubjectiveOverallAwardWinners", function(winners) {
+    _overallAwardWinners = winners;
+  });
+}
+
 /**
  * Load the award groups.
  * 
@@ -436,6 +559,12 @@ function loadFromServer(doneCallback, failCallback) {
     failCallback("Extra award winners");
   });
   waitList.push(loadExtraAwardWinnersPromise);
+
+  var loadOverallAwardWinnersPromise = loadOverallAwardWinners();
+  loadOverallAwardWinnersPromise.fail(function() {
+    failCallback("Overall award winners");
+  });
+  waitList.push(loadOverallAwardWinnersPromise);
 
   var loadAwardGroupsPromise = loadAwardGroups();
   loadAwardGroupsPromise.fail(function() {
