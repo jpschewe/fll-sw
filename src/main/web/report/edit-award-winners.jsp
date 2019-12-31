@@ -15,7 +15,8 @@
     src="<c:url value='/extlib/jstorage-0.4.11.min.js'/>"></script>
 
 <script type='text/javascript' src="<c:url value='/js/fll-objects.js'/>"></script>
-<script type='text/javascript' src="<c:url value='/js/fll-functions.js'/>"></script>
+<script type='text/javascript'
+    src="<c:url value='/js/fll-functions.js'/>"></script>
 
 <script type='text/javascript' src="edit-award-winners.js"></script>
 
@@ -29,13 +30,28 @@
     <%-- clear out the message, so that we don't see it again --%>
     <c:remove var="message" />
 
-    <p>Specify the winners for each of the subjective categories
-        defined in the challenge description. Enter team numbers in the
-        first box for each award. Enter the description for the award in
-        the space under the team; this field may be left blank if no
-        description is needed.</p>
-    <div id="challenge-award-winners"></div>
+    <h2>Instructions</h2>
+    <p>Enter team numbers in the first box for each award. Enter the
+        description for the award in the space under the team; this
+        field may be left blank if no description is needed.</p>
 
+    <h2>Challenge awards</h2>
+    <p>Specify the winners for each of the subjective categories
+        defined in the challenge description.</p>
+    <ul id="challenge-award-winners"></ul>
+
+    <h2>Extra awards per award group</h2>
+    <p>Specify the winners of additional awards that are per award
+        group.</p>
+    <button id="extra-award-winners_add-category">Add Category</button>
+    <ul id="extra-award-winners"></ul>
+
+    <h2>Extra overall awards</h2>
+    <p>Specify the winners of awards that are not per award group
+        (judges, etc.)</p>
+    <button id="overall-award-winners_add-category">Add
+        Category</button>
+    <ul id="overall-award-winners"></ul>
 
     <button id="store_winners">Store Winners</button>
 </html>
