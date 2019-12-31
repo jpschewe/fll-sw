@@ -293,6 +293,7 @@ public final class GenerateDB {
       createOverallScoresTable(connection, true);
 
       createSubjectiveAwardWinnerTables(connection, true);
+      createAdvancingTeamsTable(connection, true);
 
       // --------------- create views ---------------
 
@@ -1037,4 +1038,24 @@ public final class GenerateDB {
       stmt.executeUpdate(subjectiveChallengeAward.toString());
     }
   }
+
+  /* package */ static void createAdvancingTeamsTable(final Connection connection,
+                                                      final boolean createConstraints)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+      final StringBuilder sql = new StringBuilder();
+      sql.append("CREATE TABLE advancing_teams (");
+      sql.append("  tournament_id INTEGER NOT NULL");
+      sql.append(" ,team_number INTEGER NOT NULL");
+      sql.append(" ,award_group LONGVARCHAR");
+      if (createConstraints) {
+        sql.append(" ,CONSTRAINT advancing_teams_pk PRIMARY KEY (tournament_id, team_number)");
+        sql.append(" ,CONSTRAINT advancing_teams_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
+        sql.append(" ,CONSTRAINT advancing_teams_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
+      }
+      sql.append(")");
+      stmt.executeUpdate(sql.toString());
+    }
+  }
+
 }

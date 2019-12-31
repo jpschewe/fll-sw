@@ -846,6 +846,7 @@ public final class ImportDB {
     LOGGER.trace("Upgrading database from 19 to 20");
 
     GenerateDB.createSubjectiveAwardWinnerTables(connection, false);
+    GenerateDB.createAdvancingTeamsTable(connection, false);
 
     setDBVersion(connection, 20);
   }
