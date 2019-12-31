@@ -174,7 +174,7 @@ public final class WebTestUtils {
 
     final String responseData = getPageSource(response);
 
-    final ObjectMapper jsonMapper = new ObjectMapper();
+    final ObjectMapper jsonMapper = Utilities.createJsonMapper();
     final QueryHandler.ResultData result = jsonMapper.readValue(responseData, QueryHandler.ResultData.class);
     assertNull(result.getError(), "SQL Error: "
         + result.getError());

@@ -24,6 +24,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Tournament;
+import fll.Utilities;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import net.mtu.eggplant.util.sql.SQLFunctions;
@@ -44,7 +45,7 @@ public class TournamentsServlet extends HttpServlet {
     try {
       connection = datasource.getConnection();
 
-      final ObjectMapper jsonMapper = new ObjectMapper();
+      final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
       response.reset();
       response.setContentType("application/json");

@@ -37,6 +37,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.SubjectiveScore;
 import fll.Tournament;
+import fll.Utilities;
 import fll.db.Queries;
 
 import fll.web.ApplicationAttributes;
@@ -127,7 +128,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
         prep = null;
       }
 
-      final ObjectMapper jsonMapper = new ObjectMapper();
+      final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
       response.reset();
       response.setContentType("application/json");
@@ -150,7 +151,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
                               final HttpServletResponse response)
       throws IOException, ServletException {
     int numModified = 0;
-    final ObjectMapper jsonMapper = new ObjectMapper();
+    final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
     final ServletContext application = getServletContext();
 

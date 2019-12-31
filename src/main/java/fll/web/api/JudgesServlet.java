@@ -35,6 +35,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
+import fll.Utilities;
 import fll.db.Queries;
 
 import fll.web.ApplicationAttributes;
@@ -58,7 +59,7 @@ public class JudgesServlet extends HttpServlet {
     try {
       connection = datasource.getConnection();
 
-      final ObjectMapper jsonMapper = new ObjectMapper();
+      final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
       response.reset();
       response.setContentType("application/json");
@@ -80,7 +81,7 @@ public class JudgesServlet extends HttpServlet {
   @Override
   protected final void doPost(final HttpServletRequest request,
                               final HttpServletResponse response) throws IOException, ServletException {
-    final ObjectMapper jsonMapper = new ObjectMapper();
+    final ObjectMapper jsonMapper = Utilities.createJsonMapper();
     response.reset();
     response.setContentType("application/json");
     final PrintWriter writer = response.getWriter();

@@ -23,6 +23,7 @@ import javax.sql.DataSource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Team;
+import fll.Utilities;
 import fll.db.GlobalParameters;
 import fll.util.FLLInternalException;
 
@@ -73,7 +74,7 @@ public class RemoteControlBrackets {
       pageContext.setAttribute("allBracketData", allBracketData);
 
       // expose allBracketData to the javascript
-      final ObjectMapper jsonMapper = new ObjectMapper();
+      final ObjectMapper jsonMapper = Utilities.createJsonMapper();
       final StringWriter writer = new StringWriter();
       try {
         jsonMapper.writeValue(writer, allBracketData);
