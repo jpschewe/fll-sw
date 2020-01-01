@@ -14,6 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Optional;
 
 import org.w3c.dom.Document;
 
@@ -510,11 +511,15 @@ public final class GenerateDB {
           + " ,subjective_modified TIMESTAMP DEFAULT NULL" //
           + " ,summary_computed TIMESTAMP DEFAULT NULL" //
           + " ,tournament_date DATE DEFAULT NULL" //
+          + " ,level VARCHAR(128) DEFAULT NULL" //
+          + " ,next_level VARCHAR(128) DEFAULT NULL" //
           + " ,CONSTRAINT tournaments_pk PRIMARY KEY (tournament_id)" //
           + " ,CONSTRAINT name_unique UNIQUE(Name)" //
           + ")");
-      Tournament.createTournament(connection, DUMMY_TOURNAMENT_NAME, "Default dummy tournament", null);
-      Tournament.createTournament(connection, DROP_TOURNAMENT_NAME, "Dummy tournament for teams that drop out", null);
+      Tournament.createTournament(connection, DUMMY_TOURNAMENT_NAME, "Default dummy tournament", null, Optional.empty(),
+                                  Optional.empty());
+      Tournament.createTournament(connection, DROP_TOURNAMENT_NAME, "Dummy tournament for teams that drop out", null,
+                                  Optional.empty(), Optional.empty());
 
       // add internal tournament for default values and such
       createInternalTournament(connection);

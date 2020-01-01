@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -287,7 +288,8 @@ public final class ImportDB {
     final Tournament destTournament = Tournament.findTournamentByName(destConnection, sourceTournament.getName());
     if (null == destTournament) {
       Tournament.createTournament(destConnection, sourceTournament.getName(), sourceTournament.getDescription(),
-                                  sourceTournament.getDate());
+                                  sourceTournament.getDate(), sourceTournament.getLevel(),
+                                  sourceTournament.getNextLevel());
     }
   }
 
@@ -848,6 +850,12 @@ public final class ImportDB {
     GenerateDB.createSubjectiveAwardWinnerTables(connection, false);
     GenerateDB.createAdvancingTeamsTable(connection, false);
 
+    // add level and next_level to Tournaments
+    try (Statement stmt = connection.createStatement()) {
+      stmt.executeUpdate("ALTER TABLE tournaments ADD COLUMN level VARCHAR(128) DEFAULT NULL");
+      stmt.executeUpdate("ALTER TABLE tournaments ADD COLUMN next_level VARCHAR(128) DEFAULT NULL");
+    }
+
     setDBVersion(connection, 20);
   }
 
@@ -1213,7 +1221,8 @@ public final class ImportDB {
         if (!GenerateDB.INTERNAL_TOURNAMENT_NAME.equals(entry.getKey())) {
           final Tournament tournament = Tournament.findTournamentByName(connection, entry.getKey());
           if (null == tournament) {
-            Tournament.createTournament(connection, entry.getKey(), entry.getValue(), null);
+            Tournament.createTournament(connection, entry.getKey(), entry.getValue(), null, Optional.empty(),
+                                        Optional.empty());
           }
         }
       }

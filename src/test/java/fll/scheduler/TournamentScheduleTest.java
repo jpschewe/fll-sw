@@ -26,6 +26,7 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
@@ -96,7 +97,7 @@ public class TournamentScheduleTest {
 
       GenerateDB.generateDB(document, memConnection);
 
-      Tournament.createTournament(memConnection, tournamentName, null, null);
+      Tournament.createTournament(memConnection, tournamentName, null, null, Optional.empty(), Optional.empty());
       final Tournament tournament = Tournament.findTournamentByName(memConnection, tournamentName);
       assertNotNull(tournament);
 

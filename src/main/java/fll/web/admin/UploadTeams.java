@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -548,7 +549,8 @@ public final class UploadTeams extends BaseFLLServlet {
           final String tournamentName = rs.getString(2);
           Tournament tournament = Tournament.findTournamentByName(connection, tournamentName);
           if (null == tournament) {
-            Tournament.createTournament(connection, tournamentName, tournamentName, null);
+            Tournament.createTournament(connection, tournamentName, tournamentName, null, Optional.empty(),
+                                        Optional.empty());
             tournament = Tournament.findTournamentByName(connection, tournamentName);
           }
 
