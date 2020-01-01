@@ -240,8 +240,8 @@ public class AwardsReport extends BaseFLLServlet {
         final Element descriptionRow = FOPUtils.createXslFoElement(document, "table-row");
         tableBody.appendChild(descriptionRow);
 
-        final Element descriptionCell = FOPUtils.createTableCell(document, Optional.empty(),
-                                                                 winner.getDescription().get());
+        final Element descriptionCell = FOPUtils.createTableCell(document, Optional.empty(), "\u00A0\u00A0"
+            + winner.getDescription().get());
         descriptionRow.appendChild(descriptionCell);
 
         descriptionCell.setAttribute("number-columns-spanned", String.valueOf(3));
@@ -307,13 +307,12 @@ public class AwardsReport extends BaseFLLServlet {
             final Element descriptionRow = FOPUtils.createXslFoElement(document, "table-row");
             tableBody.appendChild(descriptionRow);
 
-            final Element descriptionCell = FOPUtils.createTableCell(document, Optional.empty(),
-                                                                     winner.getDescription().get());
+            final Element descriptionCell = FOPUtils.createTableCell(document, Optional.empty(), "\u00A0\u00A0"
+                + winner.getDescription().get());
             descriptionRow.appendChild(descriptionCell);
 
             descriptionCell.setAttribute("number-columns-spanned", String.valueOf(3));
           }
-
         } // foreach winner
       } // have winners in award group
     } // foreach award group
