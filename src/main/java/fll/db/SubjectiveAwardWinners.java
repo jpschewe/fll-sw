@@ -78,7 +78,7 @@ public final class SubjectiveAwardWinners {
    * @see #storeExtraAwardWinners(Connection, int, Collection)
    */
   public static List<AwardWinner> getExtraAwardWinners(final Connection connection,
-                                                             final int tournamentId)
+                                                       final int tournamentId)
       throws SQLException {
     return getAwardWinners(connection, tournamentId, "subjective_extra_award");
   }
@@ -98,10 +98,18 @@ public final class SubjectiveAwardWinners {
         while (rs.next()) {
           final String name = rs.getString(1);
           final int teamNumber = rs.getInt(2);
-          final String description = rs.getString(3);
+          final String descriptionStr = rs.getString(3);
           final String awardGroup = rs.getString(4);
 
-          final AwardWinner winner = new AwardWinner(name, awardGroup, teamNumber, Optional.of(description));
+          final Optional<String> description;
+          if (null == descriptionStr
+              || descriptionStr.trim().isEmpty()) {
+            description = Optional.empty();
+          } else {
+            description = Optional.of(descriptionStr);
+          }
+
+          final AwardWinner winner = new AwardWinner(name, awardGroup, teamNumber, description);
           result.add(winner);
         }
       }
@@ -132,7 +140,8 @@ public final class SubjectiveAwardWinners {
       for (final AwardWinner winner : winners) {
         prep.setString(2, winner.getName());
         prep.setInt(3, winner.getTeamNumber());
-        if (winner.getDescription().isPresent()) {
+        if (winner.getDescription().isPresent()
+            && !winner.getDescription().get().trim().isEmpty()) {
           prep.setString(4, winner.getDescription().get());
         } else {
           prep.setNull(4, Types.LONGVARCHAR);
@@ -151,7 +160,7 @@ public final class SubjectiveAwardWinners {
    * @see #storeOverallAwardWinners(Connection, int, Collection)
    */
   public static List<OverallAwardWinner> getOverallAwardWinners(final Connection connection,
-                                                                      final int tournamentId)
+                                                                final int tournamentId)
       throws SQLException {
     final List<OverallAwardWinner> result = new LinkedList<>();
     try (
@@ -163,9 +172,17 @@ public final class SubjectiveAwardWinners {
         while (rs.next()) {
           final String name = rs.getString(1);
           final int teamNumber = rs.getInt(2);
-          final String description = rs.getString(3);
+          final String descriptionStr = rs.getString(3);
 
-          final OverallAwardWinner winner = new OverallAwardWinner(name, teamNumber, Optional.of(description));
+          final Optional<String> description;
+          if (null == descriptionStr
+              || descriptionStr.trim().isEmpty()) {
+            description = Optional.empty();
+          } else {
+            description = Optional.of(descriptionStr);
+          }
+
+          final OverallAwardWinner winner = new OverallAwardWinner(name, teamNumber, description);
           result.add(winner);
         }
       }
@@ -201,7 +218,8 @@ public final class SubjectiveAwardWinners {
       for (final OverallAwardWinner winner : winners) {
         prep.setString(2, winner.getName());
         prep.setInt(3, winner.getTeamNumber());
-        if (winner.getDescription().isPresent()) {
+        if (winner.getDescription().isPresent()
+            && !winner.getDescription().get().trim().isEmpty()) {
           prep.setString(4, winner.getDescription().get());
         } else {
           prep.setNull(4, Types.LONGVARCHAR);
