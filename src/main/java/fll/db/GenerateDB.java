@@ -36,7 +36,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 19;
+  public static final int DATABASE_VERSION = 20;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -993,6 +993,8 @@ public final class GenerateDB {
                                                               final boolean createConstraints)
       throws SQLException {
     try (Statement stmt = connection.createStatement()) {
+      stmt.executeUpdate("DROP TABLE IF EXISTS subjective_overall_award CASCADE");
+
       final StringBuilder subjectiveOverallAward = new StringBuilder();
       subjectiveOverallAward.append("CREATE TABLE subjective_overall_award (");
       subjectiveOverallAward.append("  tournament_id INTEGER NOT NULL");
@@ -1006,6 +1008,8 @@ public final class GenerateDB {
       }
       subjectiveOverallAward.append(")");
       stmt.executeUpdate(subjectiveOverallAward.toString());
+
+      stmt.executeUpdate("DROP TABLE IF EXISTS subjective_extra_award CASCADE");
 
       final StringBuilder subjectiveExtraAward = new StringBuilder();
       subjectiveExtraAward.append("CREATE TABLE subjective_extra_award (");
@@ -1021,6 +1025,8 @@ public final class GenerateDB {
       }
       subjectiveExtraAward.append(")");
       stmt.executeUpdate(subjectiveExtraAward.toString());
+
+      stmt.executeUpdate("DROP TABLE IF EXISTS subjective_challenge_award CASCADE");
 
       final StringBuilder subjectiveChallengeAward = new StringBuilder();
       subjectiveChallengeAward.append("CREATE TABLE subjective_challenge_award (");
@@ -1043,6 +1049,8 @@ public final class GenerateDB {
                                                       final boolean createConstraints)
       throws SQLException {
     try (Statement stmt = connection.createStatement()) {
+      stmt.executeUpdate("DROP TABLE IF EXISTS advancing_teams CASCADE");
+
       final StringBuilder sql = new StringBuilder();
       sql.append("CREATE TABLE advancing_teams (");
       sql.append("  tournament_id INTEGER NOT NULL");
