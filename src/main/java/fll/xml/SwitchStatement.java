@@ -184,4 +184,22 @@ public class SwitchStatement implements Evaluatable, Serializable {
     return ele;
   }
 
+  /**
+   * Computed based on the cases
+   * 
+   * @return score type of the switch statement
+   */
+  public ScoreType getScoreType() {
+    final boolean hasFloatingPointCases = getCases().stream().anyMatch(g -> g.getScoreType() == ScoreType.FLOAT);
+    if (!hasFloatingPointCases) {
+      if (FloatingPointType.DECIMAL.equals(getDefaultCase().getFloatingPoint())) {
+        return ScoreType.FLOAT;
+      } else {
+        return ScoreType.INTEGER;
+      }
+    } else {
+      return ScoreType.FLOAT;
+    }
+  }
+
 }

@@ -182,4 +182,22 @@ public class CaseStatement implements Evaluatable, Serializable {
     return ele;
   }
 
+  /**
+   * Computed the value based on {@link #getResultPoly()} and
+   * {@link #getResultSwitch()}.
+   * 
+   * @return score type for the statement
+   */
+  public ScoreType getScoreType() {
+    if (null != getResultPoly()) {
+      if (FloatingPointType.DECIMAL.equals(getResultPoly().getFloatingPoint())) {
+        return ScoreType.FLOAT;
+      } else {
+        return ScoreType.INTEGER;
+      }
+    } else {
+      return getResultSwitch().getScoreType();
+    }
+  }
+
 }
