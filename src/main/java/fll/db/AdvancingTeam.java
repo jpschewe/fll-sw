@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -63,16 +64,16 @@ public class AdvancingTeam implements Serializable {
   /**
    * @param connection database connection
    * @param tournamentId the tournament to load teams for
-   * @return the advancing teams
+   * @return the advancing teams sorted by group and then team number
    * @throws SQLException on a database err
    */
-  public static Collection<AdvancingTeam> loadAdvancingTeams(final Connection connection,
-                                                             final int tournamentId)
+  public static List<AdvancingTeam> loadAdvancingTeams(final Connection connection,
+                                                       final int tournamentId)
       throws SQLException {
-    final Collection<AdvancingTeam> result = new LinkedList<>();
+    final List<AdvancingTeam> result = new LinkedList<>();
     try (PreparedStatement prep = connection.prepareStatement("SELECT team_number, award_group" //
         + " FROM advancing_teams" //
-        + " WHERE tournament_id = ?")) {
+        + " WHERE tournament_id = ? ORDER BY award_group, team_number")) {
       prep.setInt(1, tournamentId);
       try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {

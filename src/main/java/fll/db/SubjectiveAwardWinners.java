@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.Utilities;
 
 /**
  * Methods to loading and storing {@link AwardWinner} and
@@ -98,16 +99,8 @@ public final class SubjectiveAwardWinners {
         while (rs.next()) {
           final String name = rs.getString(1);
           final int teamNumber = rs.getInt(2);
-          final String descriptionStr = rs.getString(3);
+          final Optional<String> description = Utilities.convertEmptyStringToNull(rs.getString(3));
           final String awardGroup = rs.getString(4);
-
-          final Optional<String> description;
-          if (null == descriptionStr
-              || descriptionStr.trim().isEmpty()) {
-            description = Optional.empty();
-          } else {
-            description = Optional.of(descriptionStr);
-          }
 
           final AwardWinner winner = new AwardWinner(name, awardGroup, teamNumber, description);
           result.add(winner);
@@ -172,15 +165,7 @@ public final class SubjectiveAwardWinners {
         while (rs.next()) {
           final String name = rs.getString(1);
           final int teamNumber = rs.getInt(2);
-          final String descriptionStr = rs.getString(3);
-
-          final Optional<String> description;
-          if (null == descriptionStr
-              || descriptionStr.trim().isEmpty()) {
-            description = Optional.empty();
-          } else {
-            description = Optional.of(descriptionStr);
-          }
+          final Optional<String> description = Utilities.convertEmptyStringToNull(rs.getString(3));
 
           final OverallAwardWinner winner = new OverallAwardWinner(name, teamNumber, description);
           result.add(winner);

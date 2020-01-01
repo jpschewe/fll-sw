@@ -35,8 +35,10 @@ import org.w3c.dom.Element;
 
 import fll.Team;
 import fll.Tournament;
+import fll.db.AdvancingTeam;
 import fll.db.AwardWinner;
 import fll.db.OverallAwardWinner;
+import fll.db.Queries;
 import fll.db.SubjectiveAwardWinners;
 import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
@@ -123,6 +125,9 @@ public class AwardsReport extends BaseFLLServlet {
     addSubjectiveChallengeWinners(connection, document, documentBody, tournament);
     addSubjectiveExtraWinners(connection, document, documentBody, tournament);
     addSubjectiveOverallWinners(connection, document, documentBody, tournament);
+
+    final Element advancingElement = addAdvancingTeams(connection, document, tournament);
+    documentBody.appendChild(advancingElement);
 
     return document;
   }
@@ -443,4 +448,98 @@ public class AwardsReport extends BaseFLLServlet {
     titleBuilder.append(" Award Winners");
     return titleBuilder.toString();
   }
+
+  private Element addAdvancingTeams(final Connection connection,
+                                    final Document document,
+                                    final Tournament tournament)
+      throws SQLException {
+    final Element container = FOPUtils.createXslFoElement(document, "block-container");
+    container.setAttribute("keep-together.within-page", "always");
+
+    container.appendChild(FOPUtils.createHorizontalLine(document, 2));
+
+    final Element categoryTitleBlock = FOPUtils.createXslFoElement(document, "block");
+    container.appendChild(categoryTitleBlock);
+    categoryTitleBlock.setAttribute("font-weight", "bold");
+    if (tournament.getNextLevel().isPresent()) {
+      categoryTitleBlock.appendChild(document.createTextNode(String.format("Teams advancing to %ss",
+                                                                           tournament.getNextLevel().get())));
+    } else {
+      categoryTitleBlock.appendChild(document.createTextNode(String.format("Teams advancing to the next tournament",
+                                                                           tournament.getNextLevel().get())));
+    }
+
+    final Element table = FOPUtils.createBasicTable(document);
+    container.appendChild(table);
+
+    table.appendChild(FOPUtils.createTableColumn(document, 2));
+    table.appendChild(FOPUtils.createTableColumn(document, 1));
+    table.appendChild(FOPUtils.createTableColumn(document, 6));
+
+    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    table.appendChild(tableBody);
+
+    final List<AdvancingTeam> advancing = AdvancingTeam.loadAdvancingTeams(connection, tournament.getTournamentID());
+    final Map<String, List<AdvancingTeam>> organizedAdvancing = new HashMap<>();
+    for (final AdvancingTeam advance : advancing) {
+      final List<AdvancingTeam> agAdvancing = organizedAdvancing.computeIfAbsent(advance.getGroup(),
+                                                                                 k -> new LinkedList<>());
+      agAdvancing.add(advance);
+    }
+
+    final List<String> awardGroups = Queries.getAwardGroups(connection, tournament.getTournamentID());
+    // twice to get the regular award groups first
+    for (final Map.Entry<String, List<AdvancingTeam>> entry : organizedAdvancing.entrySet()) {
+      final String group = entry.getKey();
+      if (awardGroups.contains(group)) {
+        final List<AdvancingTeam> groupAdvancing = entry.getValue();
+        outputAdvancingTeams(connection, document, tableBody, group, groupAdvancing);
+      }
+    }
+    for (final Map.Entry<String, List<AdvancingTeam>> entry : organizedAdvancing.entrySet()) {
+      final String group = entry.getKey();
+      if (!awardGroups.contains(group)) {
+        final List<AdvancingTeam> groupAdvancing = entry.getValue();
+        outputAdvancingTeams(connection, document, tableBody, group, groupAdvancing);
+      }
+    }
+
+    return container;
+  }
+
+  private void outputAdvancingTeams(final Connection connection,
+                                    final Document document,
+                                    final Element tableBody,
+                                    final String group,
+                                    final List<AdvancingTeam> groupAdvancing)
+      throws SQLException {
+    boolean first = true;
+    for (final AdvancingTeam winner : groupAdvancing) {
+      final Element row = FOPUtils.createXslFoElement(document, "table-row");
+      tableBody.appendChild(row);
+
+      if (first) {
+        row.appendChild(FOPUtils.createTableCell(document, Optional.empty(), String.format("%s:", group)));
+        first = false;
+      } else {
+        row.appendChild(FOPUtils.createTableCell(document, Optional.empty(), ""));
+      }
+
+      row.appendChild(FOPUtils.createTableCell(document, Optional.empty(), String.valueOf(winner.getTeamNumber())));
+
+      final int teamNumber = winner.getTeamNumber();
+      final Team team = Team.getTeamFromDatabase(connection, teamNumber);
+      row.appendChild(FOPUtils.createTableCell(document, Optional.empty(), String.valueOf(team.getTeamName())));
+
+    } // foreach advancing
+
+    // add some spacing
+    final Element emptyRow = FOPUtils.createXslFoElement(document, "table-row");
+    tableBody.appendChild(emptyRow);
+    final Element emptyCell = FOPUtils.createTableCell(document, Optional.empty(), "\u00A0");
+    emptyRow.appendChild(emptyCell);
+    emptyCell.setAttribute("number-columns-spanned", String.valueOf(3));
+
+  }
+
 }

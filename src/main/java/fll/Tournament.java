@@ -160,12 +160,14 @@ public final class Tournament implements Serializable {
       } else {
         prep.setDate(3, java.sql.Date.valueOf(date));
       }
-      if (level.isPresent()) {
+      if (level.isPresent()
+          && !level.get().trim().isEmpty()) {
         prep.setString(4, level.get());
       } else {
         prep.setNull(4, Types.LONGVARCHAR);
       }
-      if (nextLevel.isPresent()) {
+      if (nextLevel.isPresent()
+          && !nextLevel.get().trim().isEmpty()) {
         prep.setString(5, nextLevel.get());
       } else {
         prep.setNull(5, Types.LONGVARCHAR);
@@ -194,8 +196,8 @@ public final class Tournament implements Serializable {
           final java.sql.Date d = rs.getDate(4);
           final LocalDate date = null == d ? null : d.toLocalDate();
 
-          final Optional<String> level = Optional.ofNullable(rs.getString(5));
-          final Optional<String> nextLevel = Optional.ofNullable(rs.getString(6));
+          final Optional<String> level = Utilities.convertEmptyStringToNull(rs.getString(5));
+          final Optional<String> nextLevel = Utilities.convertEmptyStringToNull(rs.getString(6));
 
           final Tournament tournament = new Tournament(tournamentID, name, location, date, level, nextLevel);
           retval.add(tournament);
@@ -236,8 +238,8 @@ public final class Tournament implements Serializable {
           final String location = rs.getString(2);
           final java.sql.Date d = rs.getDate(3);
           final LocalDate date = null == d ? null : d.toLocalDate();
-          final Optional<String> level = Optional.ofNullable(rs.getString(4));
-          final Optional<String> nextLevel = Optional.ofNullable(rs.getString(5));
+          final Optional<String> level = Utilities.convertEmptyStringToNull(rs.getString(4));
+          final Optional<String> nextLevel = Utilities.convertEmptyStringToNull(rs.getString(5));
 
           return new Tournament(id, name, location, date, level, nextLevel);
         } else {
@@ -267,8 +269,8 @@ public final class Tournament implements Serializable {
           final String location = rs.getString(2);
           final java.sql.Date d = rs.getDate(3);
           final LocalDate date = null == d ? null : d.toLocalDate();
-          final Optional<String> level = Optional.ofNullable(rs.getString(4));
-          final Optional<String> nextLevel = Optional.ofNullable(rs.getString(5));
+          final Optional<String> level = Utilities.convertEmptyStringToNull(rs.getString(4));
+          final Optional<String> nextLevel = Utilities.convertEmptyStringToNull(rs.getString(5));
           return new Tournament(tournamentID, name, location, date, level, nextLevel);
         } else {
           return null;
@@ -493,12 +495,14 @@ public final class Tournament implements Serializable {
       } else {
         updatePrep.setDate(3, java.sql.Date.valueOf(date));
       }
-      if (level.isPresent()) {
+      if (level.isPresent()
+          && !level.get().trim().isEmpty()) {
         updatePrep.setString(4, level.get());
       } else {
         updatePrep.setNull(4, Types.VARCHAR);
       }
-      if (nextLevel.isPresent()) {
+      if (nextLevel.isPresent()
+          && !nextLevel.get().trim().isEmpty()) {
         updatePrep.setString(5, nextLevel.get());
       } else {
         updatePrep.setNull(5, Types.VARCHAR);

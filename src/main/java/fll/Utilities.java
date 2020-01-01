@@ -33,6 +33,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 
 import javax.sql.DataSource;
@@ -832,5 +833,20 @@ public final class Utilities {
    */
   public static ObjectMapper createJsonMapper() {
     return new ObjectMapper().registerModule(new Jdk8Module());
+  }
+
+  /**
+   * Trim <code>str</code> and if empty or null return {@link Optional#empty()}.
+   * 
+   * @param str the string to check
+   * @return the optional
+   */
+  public static Optional<String> convertEmptyStringToNull(final String str) {
+    if (null == str
+        || str.trim().isEmpty()) {
+      return Optional.empty();
+    } else {
+      return Optional.of(str.trim());
+    }
   }
 }
