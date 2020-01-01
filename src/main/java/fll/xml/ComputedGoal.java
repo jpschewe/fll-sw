@@ -133,7 +133,7 @@ public class ComputedGoal extends AbstractGoal implements VariableScope {
 
   @Override
   public ScoreType getScoreType() {
-    return ScoreType.FLOAT;
+    return getSwitch().getScoreType();
   }
 
   @Override
