@@ -451,6 +451,9 @@ function addTeam(awardWinner, dataList, categoryNameFunc, awardGroup, teamList) 
   var orgEle = $("<input readonly disabled />");
   teamEle.append(orgEle);
 
+  var agEle = $("<input readonly disabled />");
+  teamEle.append(agEle);
+
   teamEle.append("<br/>");
   var descriptionEle = $("<textarea cols='80' rows='3'/>");
   teamEle.append(descriptionEle);
@@ -465,6 +468,7 @@ function addTeam(awardWinner, dataList, categoryNameFunc, awardGroup, teamList) 
     if (!teamNum || "" == teamNum) {
       nameEle.val("");
       orgEle.val("");
+      agEle.val("");
     } else {
       var team = _teams[teamNum];
       if (typeof (team) == 'undefined') {
@@ -474,6 +478,7 @@ function addTeam(awardWinner, dataList, categoryNameFunc, awardGroup, teamList) 
       } else {
         nameEle.val(team.teamName);
         orgEle.val(team.organization);
+        agEle.val(team.awardGroup);
       }
     }
     $(this).data('oldVal', teamNum);
@@ -783,6 +788,9 @@ function addAdvancingTeam(advancing, dataList, groupNameFunc, teamList) {
 
   var orgEle = $("<input readonly disabled />");
   teamEle.append(orgEle);
+  
+  var agEle = $("<input readonly disabled />");
+  teamEle.append(agEle);
 
   var data = new AdvancingTeamData(groupNameFunc, numEle);
   dataList.push(data);
@@ -793,6 +801,7 @@ function addAdvancingTeam(advancing, dataList, groupNameFunc, teamList) {
     if (!teamNum || "" == teamNum) {
       nameEle.val("");
       orgEle.val("");
+      agEle.val("");
     } else {
       var team = _teams[teamNum];
       if (typeof (team) == 'undefined') {
@@ -802,6 +811,7 @@ function addAdvancingTeam(advancing, dataList, groupNameFunc, teamList) {
       } else {
         nameEle.val(team.teamName);
         orgEle.val(team.organization);
+        agEle.val(team.awardGroup);
       }
     }
     $(this).data('oldVal', teamNum);
