@@ -166,7 +166,8 @@ public class AwardsReport extends BaseFLLServlet {
     for (final Map.Entry<String, Map<String, List<AwardWinner>>> agEntry : organizedWinners.entrySet()) {
       final String categoryName = agEntry.getKey();
       final Map<String, List<AwardWinner>> categoryWinners = agEntry.getValue();
-      addSubjectiveAwardGroupWinners(connection, document, documentBody, categoryName, categoryWinners);
+      final Element container = addSubjectiveAwardGroupWinners(connection, document, categoryName, categoryWinners);
+      documentBody.appendChild(container);
     }
   }
 
@@ -189,7 +190,8 @@ public class AwardsReport extends BaseFLLServlet {
       final String categoryName = entry.getKey();
       final List<OverallAwardWinner> categoryWinners = entry.getValue();
       if (!categoryWinners.isEmpty()) {
-        addSubjectiveOverallWinners(connection, document, documentBody, categoryName, categoryWinners);
+        final Element container = addSubjectiveOverallWinners(connection, document, categoryName, categoryWinners);
+        documentBody.appendChild(container);
       }
     }
   }
@@ -197,21 +199,23 @@ public class AwardsReport extends BaseFLLServlet {
   /**
    * @param categoryWinners awardGroup to list of winners
    */
-  private void addSubjectiveOverallWinners(final Connection connection,
-                                           final Document document,
-                                           final Element documentBody,
-                                           final String categoryName,
-                                           final List<OverallAwardWinner> categoryWinners)
+  private Element addSubjectiveOverallWinners(final Connection connection,
+                                              final Document document,
+                                              final String categoryName,
+                                              final List<OverallAwardWinner> categoryWinners)
       throws SQLException {
-    documentBody.appendChild(FOPUtils.createHorizontalLine(document, 2));
+    final Element container = FOPUtils.createXslFoElement(document, "block-container");
+    container.setAttribute("keep-together.within-page", "always");
+
+    container.appendChild(FOPUtils.createHorizontalLine(document, 2));
 
     final Element categoryTitleBlock = FOPUtils.createXslFoElement(document, "block");
-    documentBody.appendChild(categoryTitleBlock);
+    container.appendChild(categoryTitleBlock);
     categoryTitleBlock.setAttribute("font-weight", "bold");
     categoryTitleBlock.appendChild(document.createTextNode(String.format("%s Award", categoryName)));
 
     final Element table = FOPUtils.createBasicTable(document);
-    documentBody.appendChild(table);
+    container.appendChild(table);
 
     table.appendChild(FOPUtils.createTableColumn(document, 2));
     table.appendChild(FOPUtils.createTableColumn(document, 1));
@@ -244,26 +248,29 @@ public class AwardsReport extends BaseFLLServlet {
       }
     } // foreach winner
 
+    return container;
   }
 
   /**
    * @param categoryWinners awardGroup to list of winners
    */
-  private void addSubjectiveAwardGroupWinners(final Connection connection,
-                                              final Document document,
-                                              final Element documentBody,
-                                              final String categoryName,
-                                              final Map<String, List<AwardWinner>> categoryWinners)
+  private Element addSubjectiveAwardGroupWinners(final Connection connection,
+                                                 final Document document,
+                                                 final String categoryName,
+                                                 final Map<String, List<AwardWinner>> categoryWinners)
       throws SQLException {
-    documentBody.appendChild(FOPUtils.createHorizontalLine(document, 2));
+    final Element container = FOPUtils.createXslFoElement(document, "block-container");
+    container.setAttribute("keep-together.within-page", "always");
+
+    container.appendChild(FOPUtils.createHorizontalLine(document, 2));
 
     final Element categoryTitleBlock = FOPUtils.createXslFoElement(document, "block");
-    documentBody.appendChild(categoryTitleBlock);
+    container.appendChild(categoryTitleBlock);
     categoryTitleBlock.setAttribute("font-weight", "bold");
     categoryTitleBlock.appendChild(document.createTextNode(String.format("%s Award", categoryName)));
 
     final Element table = FOPUtils.createBasicTable(document);
-    documentBody.appendChild(table);
+    container.appendChild(table);
 
     table.appendChild(FOPUtils.createTableColumn(document, 2));
     table.appendChild(FOPUtils.createTableColumn(document, 1));
@@ -311,6 +318,7 @@ public class AwardsReport extends BaseFLLServlet {
       } // have winners in award group
     } // foreach award group
 
+    return container;
   }
 
   private void addPerformance(final Connection connection,
