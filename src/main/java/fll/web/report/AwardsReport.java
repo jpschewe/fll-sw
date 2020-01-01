@@ -36,6 +36,7 @@ import org.w3c.dom.Element;
 import fll.Team;
 import fll.Tournament;
 import fll.db.AwardWinner;
+import fll.db.OverallAwardWinner;
 import fll.db.SubjectiveAwardWinners;
 import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
@@ -120,6 +121,8 @@ public class AwardsReport extends BaseFLLServlet {
     addPerformance(connection, document, documentBody, description);
 
     addSubjectiveChallengeWinners(connection, document, documentBody, tournament);
+    addSubjectiveExtraWinners(connection, document, documentBody, tournament);
+    addSubjectiveOverallWinners(connection, document, documentBody, tournament);
 
     return document;
   }
@@ -132,6 +135,25 @@ public class AwardsReport extends BaseFLLServlet {
     final List<AwardWinner> winners = SubjectiveAwardWinners.getChallengeAwardWinners(connection,
                                                                                       tournament.getTournamentID());
 
+    addSubjectiveWinners(connection, document, documentBody, winners);
+  }
+
+  private void addSubjectiveExtraWinners(final Connection connection,
+                                         final Document document,
+                                         final Element documentBody,
+                                         final Tournament tournament)
+      throws SQLException {
+    final List<AwardWinner> winners = SubjectiveAwardWinners.getExtraAwardWinners(connection,
+                                                                                  tournament.getTournamentID());
+
+    addSubjectiveWinners(connection, document, documentBody, winners);
+  }
+
+  private void addSubjectiveWinners(final Connection connection,
+                                    final Document document,
+                                    final Element documentBody,
+                                    final List<AwardWinner> winners)
+      throws SQLException {
     final Map<String, Map<String, List<AwardWinner>>> organizedWinners = new HashMap<>();
     for (final AwardWinner winner : winners) {
       final Map<String, List<AwardWinner>> agWinners = organizedWinners.computeIfAbsent(winner.getName(),
@@ -146,6 +168,82 @@ public class AwardsReport extends BaseFLLServlet {
       final Map<String, List<AwardWinner>> categoryWinners = agEntry.getValue();
       addSubjectiveAwardGroupWinners(connection, document, documentBody, categoryName, categoryWinners);
     }
+  }
+
+  private void addSubjectiveOverallWinners(final Connection connection,
+                                           final Document document,
+                                           final Element documentBody,
+                                           final Tournament tournament)
+      throws SQLException {
+    final List<OverallAwardWinner> winners = SubjectiveAwardWinners.getOverallAwardWinners(connection,
+                                                                                           tournament.getTournamentID());
+
+    final Map<String, List<OverallAwardWinner>> organizedWinners = new HashMap<>();
+    for (final OverallAwardWinner winner : winners) {
+      final List<OverallAwardWinner> categoryWinners = organizedWinners.computeIfAbsent(winner.getName(),
+                                                                                        k -> new LinkedList<>());
+      categoryWinners.add(winner);
+    }
+
+    for (final Map.Entry<String, List<OverallAwardWinner>> entry : organizedWinners.entrySet()) {
+      final String categoryName = entry.getKey();
+      final List<OverallAwardWinner> categoryWinners = entry.getValue();
+      if (!categoryWinners.isEmpty()) {
+        addSubjectiveOverallWinners(connection, document, documentBody, categoryName, categoryWinners);
+      }
+    }
+  }
+
+  /**
+   * @param categoryWinners awardGroup to list of winners
+   */
+  private void addSubjectiveOverallWinners(final Connection connection,
+                                           final Document document,
+                                           final Element documentBody,
+                                           final String categoryName,
+                                           final List<OverallAwardWinner> categoryWinners)
+      throws SQLException {
+    documentBody.appendChild(FOPUtils.createHorizontalLine(document, 2));
+
+    final Element categoryTitleBlock = FOPUtils.createXslFoElement(document, "block");
+    documentBody.appendChild(categoryTitleBlock);
+    categoryTitleBlock.setAttribute("font-weight", "bold");
+    categoryTitleBlock.appendChild(document.createTextNode(String.format("%s Award", categoryName)));
+
+    final Element table = FOPUtils.createBasicTable(document);
+    documentBody.appendChild(table);
+
+    table.appendChild(FOPUtils.createTableColumn(document, 2));
+    table.appendChild(FOPUtils.createTableColumn(document, 1));
+    table.appendChild(FOPUtils.createTableColumn(document, 6));
+
+    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    table.appendChild(tableBody);
+
+    for (final OverallAwardWinner winner : categoryWinners) {
+      final Element row = FOPUtils.createXslFoElement(document, "table-row");
+      tableBody.appendChild(row);
+
+      row.appendChild(FOPUtils.createTableCell(document, Optional.empty(), "Winner:"));
+
+      row.appendChild(FOPUtils.createTableCell(document, Optional.empty(), String.valueOf(winner.getTeamNumber())));
+
+      final int teamNumber = winner.getTeamNumber();
+      final Team team = Team.getTeamFromDatabase(connection, teamNumber);
+      row.appendChild(FOPUtils.createTableCell(document, Optional.empty(), String.valueOf(team.getTeamName())));
+
+      if (winner.getDescription().isPresent()) {
+        final Element descriptionRow = FOPUtils.createXslFoElement(document, "table-row");
+        tableBody.appendChild(descriptionRow);
+
+        final Element descriptionCell = FOPUtils.createTableCell(document, Optional.empty(),
+                                                                 winner.getDescription().get());
+        descriptionRow.appendChild(descriptionCell);
+
+        descriptionCell.setAttribute("number-columns-spanned", String.valueOf(3));
+      }
+    } // foreach winner
+
   }
 
   /**
@@ -166,11 +264,10 @@ public class AwardsReport extends BaseFLLServlet {
 
     final Element table = FOPUtils.createBasicTable(document);
     documentBody.appendChild(table);
-    table.setAttribute("width", "75%");
 
     table.appendChild(FOPUtils.createTableColumn(document, 2));
     table.appendChild(FOPUtils.createTableColumn(document, 1));
-    table.appendChild(FOPUtils.createTableColumn(document, 3));
+    table.appendChild(FOPUtils.createTableColumn(document, 6));
 
     final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
     table.appendChild(tableBody);
@@ -198,6 +295,18 @@ public class AwardsReport extends BaseFLLServlet {
           final int teamNumber = winner.getTeamNumber();
           final Team team = Team.getTeamFromDatabase(connection, teamNumber);
           row.appendChild(FOPUtils.createTableCell(document, Optional.empty(), String.valueOf(team.getTeamName())));
+
+          if (winner.getDescription().isPresent()) {
+            final Element descriptionRow = FOPUtils.createXslFoElement(document, "table-row");
+            tableBody.appendChild(descriptionRow);
+
+            final Element descriptionCell = FOPUtils.createTableCell(document, Optional.empty(),
+                                                                     winner.getDescription().get());
+            descriptionRow.appendChild(descriptionCell);
+
+            descriptionCell.setAttribute("number-columns-spanned", String.valueOf(3));
+          }
+
         } // foreach winner
       } // have winners in award group
     } // foreach award group
