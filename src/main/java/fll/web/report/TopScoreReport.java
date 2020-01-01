@@ -6,14 +6,18 @@
 
 package fll.web.report;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.jsp.PageContext;
+import javax.sql.DataSource;
 
+import fll.web.ApplicationAttributes;
 import fll.web.scoreboard.Top10;
+import fll.xml.ChallengeDescription;
 
 /**
  * Gather data for topScoreReport.jsp.
@@ -28,8 +32,12 @@ public class TopScoreReport {
   public static void populateContext(final ServletContext application,
                                      final PageContext pageContext)
       throws SQLException {
-    final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMap(application);
-    pageContext.setAttribute("scoreMap", scores);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
+    try (Connection connection = datasource.getConnection()) {
+      final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMap(connection, description);
+      pageContext.setAttribute("scoreMap", scores);
+    }
   }
 
 }

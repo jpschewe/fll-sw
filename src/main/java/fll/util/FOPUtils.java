@@ -404,4 +404,23 @@ public final class FOPUtils {
     block.appendChild(leader);
     return block;
   }
+
+  /**
+   * @param document used to create elements
+   * @param thickness the thickness of the line in points
+   * @return block containing the horizontal line
+   */
+  public static Element createHorizontalLine(final Document document,
+                                             final int thickness) {
+    final Element lineBlock = FOPUtils.createXslFoElement(document, "block");
+
+    final Element line = FOPUtils.createXslFoElement(document, "leader");
+    line.setAttribute("leader-pattern", "rule");
+    line.setAttribute("leader-length", "100%");
+    line.setAttribute("rule-style", "solid");
+    line.setAttribute("rule-thickness", String.format("%dpt", thickness));
+    lineBlock.appendChild(line);
+
+    return lineBlock;
+  }
 }
