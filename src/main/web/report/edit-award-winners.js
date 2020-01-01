@@ -497,6 +497,7 @@ function addTeam(awardWinner, dataList, categoryNameFunc, awardGroup, teamList) 
 
   if (awardWinner) {
     numEle.val(awardWinner.teamNumber);
+    numEle.change();
     descriptionEle.val(awardWinner.description);
   }
 
@@ -824,6 +825,7 @@ function addAdvancingTeam(advancing, dataList, groupNameFunc, teamList) {
 
   if (advancing) {
     numEle.val(advancing.teamNumber);
+    numEle.change();
   }
 
 }
