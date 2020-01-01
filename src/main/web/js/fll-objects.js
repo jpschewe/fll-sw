@@ -53,3 +53,11 @@ function OverallAwardWinner(name, teamNumber, description) {
   this.teamNumber = teamNumber;
   this.description = description;
 }
+
+/**
+ * Javascript parallel of fll.db.AdvancingTeam.
+ */
+function AdvancingTeam(teamNumber, group) {
+  this.teamNumber = teamNumber;
+  this.group = group;
+}
