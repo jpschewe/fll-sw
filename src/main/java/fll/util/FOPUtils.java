@@ -140,7 +140,7 @@ public final class FOPUtils {
     simplePageMaster.setAttribute("margin-right", String.format("%fin", rightMargin));
 
     final Element body = createXslFoElement(document, "region-body");
-    body.setAttribute("margin-top", "0in");
+    body.setAttribute("margin-top", String.format("%fin", headerHeight));
     simplePageMaster.appendChild(body);
 
     final Element header = createXslFoElement(document, "region-before");
@@ -392,5 +392,16 @@ public final class FOPUtils {
 
     // Start XSLT transformation and FOP processing
     transformer.transform(src, res);
+  }
+
+  /**
+   * @param document used to create elements
+   * @return block containing a blank line
+   */
+  public static Element createBlankLine(final Document document) {
+    final Element block = createXslFoElement(document, "block");
+    final Element leader = createXslFoElement(document, "leader");
+    block.appendChild(leader);
+    return block;
   }
 }
