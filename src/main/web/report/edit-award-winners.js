@@ -32,6 +32,11 @@ var _subjectiveCategories = {};
 // list of names
 var _awardGroups = [];
 
+// list of AdvancingTeam
+var _advancingTeams = [];
+// list of AdvancingTeamData
+var _advancingTeamData = [];
+
 function AwardWinnerData(nameFunc, awardGroup, teamElement, descriptionElement) {
   this.nameFunc = nameFunc;
   this.awardGroup = awardGroup;
@@ -50,7 +55,7 @@ function createAwardWinner(data) {
   if (teamNumber && teamNumber != "") {
     var categoryName = data.nameFunc();
     return new AwardWinner(categoryName, data.awardGroup, teamNumber,
-        data.descriptionElement.val())
+        data.descriptionElement.val());
   } else {
     return null;
   }
@@ -67,7 +72,7 @@ function createOverallAwardWinner(data) {
   if (teamNumber && teamNumber != "") {
     var categoryName = data.nameFunc();
     return new OverallAwardWinner(categoryName, teamNumber,
-        data.descriptionElement.val())
+        data.descriptionElement.val());
   } else {
     return null;
   }
@@ -89,6 +94,7 @@ $(document).ready(function() {
     storeChallengeWinners();
     storeExtraWinners();
     storeOverallWinners();
+    storeAdvancingTeams();
   });
 
   $("#extra-award-winners_add-category").click(function() {
@@ -97,6 +103,10 @@ $(document).ready(function() {
 
   $("#overall-award-winners_add-category").click(function() {
     addOverallCategory(null)
+  });
+
+  $("#advancing-teams_add-group").click(function() {
+    addAdvancingGroup(null, true);
   });
 
 }); // end ready function
@@ -170,10 +180,33 @@ function storeOverallWinners() {
   }
 }
 
+function storeAdvancingTeams() {
+  var advancing = [];
+  $.each(_advancingTeamData, function(i, data) {
+    var adTeam = createAdvancingTeam(data);
+    if (adTeam) {
+      advancing.push(adTeam);
+    }
+  });
+
+  if (advancing.length) {
+    // send to server
+    var jsonData = JSON.stringify(advancing);
+    $.post("/api/AdvancingTeams", jsonData, function(response) {
+      if (!response.success) {
+        alert("Error sending advancing teams: " + response.message);
+      }
+    }, 'json');
+  } else {
+    _log("No advancing teams to store");
+  }
+}
+
 function initPage() {
   initChallengeWinners();
   initExtraWinners();
   initOverallWinners();
+  initAdvancingTeams();
 }
 
 function initChallengeWinners() {
@@ -516,6 +549,14 @@ function loadAwardGroups() {
   });
 }
 
+function loadAdvancingTeams() {
+  _advancingTeams = [];
+
+  return $.getJSON("/api/AdvancingTeams", function(data) {
+    _advancingTeams = data;
+  });
+}
+
 /**
  * Load all data from server.
  * 
@@ -572,7 +613,183 @@ function loadFromServer(doneCallback, failCallback) {
   });
   waitList.push(loadAwardGroupsPromise);
 
+  var loadAdvancingTeamsPromise = loadAdvancingTeams();
+  loadAdvancingTeamsPromise.fail(function() {
+    failCallback("Advancing Teams");
+  });
+  waitList.push(loadAdvancingTeamsPromise);
+
   $.when.apply($, waitList).done(function() {
     doneCallback();
   });
+}
+
+function AdvancingTeamData(nameFunc, teamElement) {
+  this.nameFunc = nameFunc;
+  this.teamElement = teamElement;
+}
+
+/**
+ * 
+ * @param data
+ *          the AdvancingTeamData
+ * @returns AdvancingTeam or null if the team number is not set
+ */
+function createAdvancingTeam(data) {
+  var teamNumber = data.teamElement.val();
+  if (teamNumber && teamNumber != "") {
+    var groupName = data.nameFunc();
+    return new AdvancingTeam(teamNumber, groupName);
+  } else {
+    return null;
+  }
+}
+
+function initAdvancingTeams() {
+  _advancingTeamData = [];
+  $("#advancing-teams").empty();
+
+  $.each(_awardGroups, function(i, group) {
+    addAdvancingGroup(group, false);
+  });
+
+  var knownGroups = [];
+  $.each(_advancingTeams, function(i, advancing) {
+    if (!knownGroups.includes(advancing.group)
+        && !_awardGroups.includes(advancing.group)) {
+      knownGroups.push(advancing.group);
+    }
+  });
+
+  $.each(knownGroups, function(i, group) {
+    addAdvancingGroup(group, true);
+  });
+}
+
+function addAdvancingGroup(group, editable) {
+  var groupItem = $("<li></li>");
+  $("#advancing-teams").append(groupItem);
+
+  var nameFunc;
+  var groupEle;
+  if (editable) {
+    groupEle = $("<input type='text' />");
+    nameFunc = function() {
+      return groupEle.val();
+    };
+    if (group) {
+      groupEle.val(group);
+    }
+  } else {
+    if (!group) {
+      alert("Internal Error: Cannot have an unnammed non-editable group");
+      return;
+    }
+
+    groupEle = $("<span>" + group + "</span>");
+    nameFunc = function() {
+      return group;
+    }
+  }
+  groupItem.append(groupEle);
+
+  var groupList = $("<ul></ul>");
+  groupItem.append(groupList);
+
+  var addTeamButton = $("<button>Add Team</button>");
+  groupItem.append(addTeamButton);
+
+  var teamList = $("<ul></ul>");
+  groupItem.append(teamList);
+
+  addTeamButton.click(function() {
+    addAdvancingTeam(null, _advancingTeamData, nameFunc, teamList);
+  });
+
+  var enterNewTeam = true;
+  if (group) {
+    $.each(_advancingTeams, function(i, advancing) {
+      if (advancing.group == group) {
+        addAdvancingTeam(advancing, _advancingTeamData, nameFunc, teamList);
+        enterNewTeam = false;
+      }
+    }); // foreach loaded winner
+  }
+
+  if (enterNewTeam) {
+    // add an empty team if there weren't any loaded from the server
+    addAdvancingTeam(null, _advancingTeamData, nameFunc, teamList);
+  }
+}
+
+/**
+ * Add a team section to the advancing team specified list. Update dataList with
+ * an instance of AdvancingTeamData for this element.
+ * 
+ * @param advancing
+ *          used to populate the elements (may be null)
+ * @param dataList
+ *          list of AwardWinnerData objects (modified)
+ * @param groupNameFunc
+ *          function to get the group name
+ * @param teamList
+ *          the list element to add to
+ */
+function addAdvancingTeam(advancing, dataList, groupNameFunc, teamList) {
+
+  var teamEle = $("<li></li>");
+  teamList.append(teamEle);
+
+  var numEle = $("<input type='text' />");
+  teamEle.append(numEle);
+
+  var nameEle = $("<input readonly disabled />");
+  teamEle.append(nameEle);
+
+  var orgEle = $("<input readonly disabled />");
+  teamEle.append(orgEle);
+
+  var data = new AdvancingTeamData(groupNameFunc, numEle);
+  dataList.push(data);
+
+  numEle.change(function() {
+    var teamNum = $(this).val();
+    var prevTeam = $(this).data('oldVal');
+    if (!teamNum || "" == teamNum) {
+      nameEle.val("");
+      orgEle.val("");
+    } else {
+      var team = _teams[teamNum];
+      if (typeof (team) == 'undefined') {
+        alert("Team number " + teamNum + " does not exist");
+        $(this).val(prevTeam);
+        teamNum = prevTeam; // for the set of oldVal below
+      } else {
+        nameEle.val(team.teamName);
+        orgEle.val(team.organization);
+      }
+    }
+    $(this).data('oldVal', teamNum);
+  });
+
+  var deleteButton = $("<button>Delete</button>");
+  teamEle.append(deleteButton);
+  deleteButton.click(function() {
+    var teamNum = numEle.val();
+    var reallyDelete = false;
+    if ("" != teamNum) {
+      reallyDelete = confirm("Are you sure you want to delete this team?");
+    } else {
+      reallyDelete = true;
+    }
+    if (reallyDelete) {
+      teamEle.remove();
+      removeFromArray(dataList, data);
+    }
+  });
+
+  if (advancing) {
+    numEle.val(advancing.teamNumber);
+  }
+
 }

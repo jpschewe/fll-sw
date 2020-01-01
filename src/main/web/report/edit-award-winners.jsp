@@ -53,5 +53,11 @@
         Category</button>
     <ul id="overall-award-winners"></ul>
 
-    <button id="store_winners">Store Winners</button>
+    <h2>Advancing Teams</h2>
+    <p>Specify the teams advancing to the next tournament. The group
+        names will be used in the awards report.</p>
+    <button id="advancing-teams_add-group">Add Group</button>
+    <ul id="advancing-teams"></ul>
+
+    <button id="store_winners">Store Data</button>
 </html>
