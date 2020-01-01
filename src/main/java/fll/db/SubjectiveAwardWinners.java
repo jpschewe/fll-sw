@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -43,12 +44,12 @@ public final class SubjectiveAwardWinners {
   /**
    * @param connection database connection
    * @param tournamentId the tournament to get winners for
-   * @return the winners
+   * @return the winners sorted by category, award group, team number
    * @throws SQLException if an error occurs talking to the database
    * @see #storeChallengeAwardWinners(Connection, int, Collection)
    */
-  public static Collection<AwardWinner> getChallengeAwardWinners(final Connection connection,
-                                                                 final int tournamentId)
+  public static List<AwardWinner> getChallengeAwardWinners(final Connection connection,
+                                                           final int tournamentId)
       throws SQLException {
     return getAwardWinners(connection, tournamentId, "subjective_challenge_award");
   }
@@ -72,25 +73,25 @@ public final class SubjectiveAwardWinners {
   /**
    * @param connection database connection
    * @param tournamentId the tournament to get winners for
-   * @return the winners
+   * @return the winners sorted by category, award group, team number
    * @throws SQLException if an error occurs talking to the database
    * @see #storeExtraAwardWinners(Connection, int, Collection)
    */
-  public static Collection<AwardWinner> getExtraAwardWinners(final Connection connection,
+  public static List<AwardWinner> getExtraAwardWinners(final Connection connection,
                                                              final int tournamentId)
       throws SQLException {
     return getAwardWinners(connection, tournamentId, "subjective_extra_award");
   }
 
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Table name is passed to method")
-  private static Collection<AwardWinner> getAwardWinners(final Connection connection,
-                                                         final int tournamentId,
-                                                         final String tablename)
+  private static List<AwardWinner> getAwardWinners(final Connection connection,
+                                                   final int tournamentId,
+                                                   final String tablename)
       throws SQLException {
-    final Collection<AwardWinner> result = new LinkedList<>();
+    final List<AwardWinner> result = new LinkedList<>();
     try (PreparedStatement prep = connection.prepareStatement("SELECT name, team_number, description, award_group FROM "
         + tablename
-        + " WHERE tournament_id = ?")) {
+        + " WHERE tournament_id = ? ORDER BY name, award_group, team_number")) {
       prep.setInt(1, tournamentId);
 
       try (ResultSet rs = prep.executeQuery()) {
@@ -145,17 +146,17 @@ public final class SubjectiveAwardWinners {
   /**
    * @param connection database connection
    * @param tournamentId the tournament to get winners for
-   * @return the winners
+   * @return the winners sorted by category, team number
    * @throws SQLException if an error occurs talking to the database
    * @see #storeOverallAwardWinners(Connection, int, Collection)
    */
-  public static Collection<OverallAwardWinner> getOverallAwardWinners(final Connection connection,
+  public static List<OverallAwardWinner> getOverallAwardWinners(final Connection connection,
                                                                       final int tournamentId)
       throws SQLException {
-    final Collection<OverallAwardWinner> result = new LinkedList<>();
+    final List<OverallAwardWinner> result = new LinkedList<>();
     try (
         PreparedStatement prep = connection.prepareStatement("SELECT name, team_number, description FROM subjective_overall_award"
-            + " WHERE tournament_id = ?")) {
+            + " WHERE tournament_id = ? ORDER BY name, team_number")) {
       prep.setInt(1, tournamentId);
 
       try (ResultSet rs = prep.executeQuery()) {
