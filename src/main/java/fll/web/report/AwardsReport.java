@@ -13,6 +13,9 @@ import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -33,6 +36,7 @@ import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.web.scoreboard.Top10;
 import fll.xml.ChallengeDescription;
 import net.mtu.eggplant.xml.XMLUtils;
 
@@ -108,11 +112,40 @@ public class AwardsReport extends BaseFLLServlet {
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
 
-    final Element test = FOPUtils.createXslFoElement(document, "block");
-    documentBody.appendChild(test);
-    test.appendChild(document.createTextNode("hello world"));
+    addPerformance(connection, document, documentBody, description);
 
     return document;
+  }
+
+  private void addPerformance(final Connection connection,
+                              final Document document,
+                              final Element documentBody,
+                              final ChallengeDescription description)
+      throws SQLException {
+    documentBody.appendChild(FOPUtils.createHorizontalLine(document, 2));
+
+    final Element categoryTitleBlock = FOPUtils.createXslFoElement(document, "block");
+    documentBody.appendChild(categoryTitleBlock);
+    categoryTitleBlock.setAttribute("font-weight", "bold");
+
+    categoryTitleBlock.appendChild(document.createTextNode("Robot Performance Award - top score from regular match play"));
+
+    final Map<String, List<Top10.ScoreEntry>> scores = Top10.getTableAsMap(connection, description);
+
+    for (final Map.Entry<String, List<Top10.ScoreEntry>> entry : scores.entrySet()) {
+      final String group = entry.getKey();
+
+      final Optional<Top10.ScoreEntry> winner = entry.getValue().stream().findFirst();
+      if (winner.isPresent()) {
+        final Element block = FOPUtils.createXslFoElement(document, "block");
+        documentBody.appendChild(block);
+
+        final String text = String.format("Winner %s: %d %s with a score of: %s", group, winner.get().getTeamNumber(),
+                                          winner.get().getTeamName(), winner.get().getFormattedScore());
+        block.appendChild(document.createTextNode(text));
+      }
+    }
+
   }
 
   private Element createHeader(final Document document,
@@ -137,7 +170,7 @@ public class AwardsReport extends BaseFLLServlet {
     staticContent.appendChild(subtitleBlock);
     subtitleBlock.setAttribute("text-align-last", "justify");
     subtitleBlock.setAttribute("font-weight", "bold");
-    
+
     final String tournamentName = null == tournament.getDescription() ? tournament.getName()
         : tournament.getDescription();
     final String tournamentTitle;
@@ -159,15 +192,6 @@ public class AwardsReport extends BaseFLLServlet {
     }
 
     staticContent.appendChild(FOPUtils.createBlankLine(document));
-
-    final Element lineBlock = FOPUtils.createXslFoElement(document, "block");
-    staticContent.appendChild(lineBlock);
-    final Element line = FOPUtils.createXslFoElement(document, "leader");
-    line.setAttribute("leader-pattern", "rule");
-    line.setAttribute("leader-length", "100%");
-    line.setAttribute("rule-style", "solid");
-    line.setAttribute("rule-thickness", "2pt");
-    lineBlock.appendChild(line);
 
     return staticContent;
   }
