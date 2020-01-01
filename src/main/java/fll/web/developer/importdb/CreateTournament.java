@@ -116,7 +116,8 @@ public class CreateTournament extends BaseFLLServlet {
       throws SQLException {
     final Tournament sourceTournament = Tournament.findTournamentByName(sourceConnection, tournamentName);
     Tournament.createTournament(destConnection, sourceTournament.getName(), sourceTournament.getDescription(),
-                                sourceTournament.getDate());
+                                sourceTournament.getDate(), sourceTournament.getLevel(),
+                                sourceTournament.getNextLevel());
     message.append("<p>Created tournament "
         + sourceTournament.getName()
         + "</p>");

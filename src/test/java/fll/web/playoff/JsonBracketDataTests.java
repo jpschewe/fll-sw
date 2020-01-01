@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -280,7 +281,8 @@ public class JsonBracketDataTests {
     GenerateDB.generateDB(document, connection);
 
     final int tournament = 2;
-    Tournament.createTournament(connection, "Playoff Test Tournament", "Test", null);
+    Tournament.createTournament(connection, "Playoff Test Tournament", "Test", null, Optional.empty(),
+                                Optional.empty());
     Queries.setCurrentTournament(connection, tournament); // 2 is tournament ID
     TournamentParameters.setNumSeedingRounds(connection, tournament, 0);
     // make teams
