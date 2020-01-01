@@ -97,16 +97,22 @@ $(document).ready(function() {
     storeAdvancingTeams();
   });
 
+  var extraCategoryCount = 1;
   $("#extra-award-winners_add-category").click(function() {
-    addExtraCategory(null)
+    addExtraCategory("Category " + extraCategoryCount);
+    extraCategoryCount = extraCategoryCount + 1;
   });
 
+  var overallCategoryCount = 1;
   $("#overall-award-winners_add-category").click(function() {
-    addOverallCategory(null)
+    addOverallCategory("Category " + overallCategoryCount);
+    overallCategoryCount = overallCategoryCount + 1;
   });
 
+  var advancingGroupCount = 1;
   $("#advancing-teams_add-group").click(function() {
-    addAdvancingGroup(null, true);
+    addAdvancingGroup("Group " + advancingGroupCount, true);
+    advancingGroupCount = advancingGroupCount + 1;
   });
 
 }); // end ready function
@@ -272,9 +278,18 @@ function addExtraCategory(name) {
 
   var categoryEle = $("<input type='text' />");
   categoryItem.append(categoryEle);
-  if (name) {
-    categoryEle.val(name);
-  }
+  categoryEle.val(name);
+  categoryEle.data('oldVal', name);
+  categoryEle.change(function() {
+    var newName = $(this).val();
+    var oldValue = $(this).data('oldVal');
+    if (null == newName || "" == newName) {
+      $(this).val(oldValue);
+      alert("All categories must have non-empty names");
+    } else {
+      $(this).data('oldVal', newName);
+    }
+  });
 
   var categoryList = $("<ul></ul>");
   categoryItem.append(categoryList);
@@ -344,9 +359,18 @@ function addOverallCategory(name) {
 
   var categoryEle = $("<input type='text' />");
   categoryItem.append(categoryEle);
-  if (name) {
-    categoryEle.val(name);
-  }
+  categoryEle.val(name);
+  categoryEle.data('oldVal', name);
+  categoryEle.change(function() {
+    var newName = $(this).val();
+    var oldValue = $(this).data('oldVal');
+    if (null == newName || "" == newName) {
+      alert("All categories must have non-empty names");
+      $(this).val(oldValue);
+    } else {
+      $(this).data('oldVal', newName);
+    }
+  });
 
   var categoryList = $("<ul></ul>");
   categoryItem.append(categoryList);
@@ -677,9 +701,19 @@ function addAdvancingGroup(group, editable) {
     nameFunc = function() {
       return groupEle.val();
     };
-    if (group) {
-      groupEle.val(group);
-    }
+    groupEle.val(group);
+
+    groupEle.data('oldVal', group);
+    groupEle.change(function() {
+      var newName = $(this).val();
+      var oldValue = $(this).data('oldVal');
+      if (null == newName || "" == newName) {
+        alert("All groups must have non-empty names");
+        $(this).val(oldValue);
+      } else {
+        $(this).data('oldVal', newName);
+      }
+    });
   } else {
     if (!group) {
       alert("Internal Error: Cannot have an unnammed non-editable group");
