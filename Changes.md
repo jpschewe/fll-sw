@@ -1,3 +1,4 @@
+* #795 - add report for awards
 * #722 - Fix splitting of times across pages in the performance schedule
 * #797 - add subjective schedule sorted only by time across all judging stations
 * #790 - add date and tournament name to display on main pages
