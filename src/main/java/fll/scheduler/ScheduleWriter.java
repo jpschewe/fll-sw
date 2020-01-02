@@ -13,7 +13,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -117,7 +116,7 @@ public final class ScheduleWriter {
     final Element headerRow1 = FOPUtils.createXslFoElement(document, "table-row");
     header.appendChild(headerRow1);
 
-    final Element tournamentHeader = FOPUtils.createTableCell(document, Optional.of(FOPUtils.TEXT_ALIGN_CENTER),
+    final Element tournamentHeader = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                               String.format("Tournament: %s Performance",
                                                                             schedule.getName()));
     headerRow1.appendChild(tournamentHeader);
@@ -131,8 +130,7 @@ public final class ScheduleWriter {
     header.appendChild(headerRow2);
 
     for (final String headerName : headerNames) {
-      final Element headerCell = FOPUtils.createTableCell(document, Optional.of(FOPUtils.TEXT_ALIGN_CENTER),
-                                                          headerName);
+      final Element headerCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, headerName);
       headerRow2.appendChild(headerCell);
       FOPUtils.addBorders(headerCell, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH,
                           STANDARD_BORDER_WIDTH);
@@ -167,37 +165,37 @@ public final class ScheduleWriter {
         topBorderWidth = THICK_BORDER_WIDTH;
       }
 
-      final Element teamNumberCell = FOPUtils.createTableCell(document, Optional.of(FOPUtils.TEXT_ALIGN_CENTER),
+      final Element teamNumberCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                               String.valueOf(si.getTeamNumber()));
       row.appendChild(teamNumberCell);
       FOPUtils.addBorders(teamNumberCell, topBorderWidth, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH,
                           STANDARD_BORDER_WIDTH);
 
-      final Element awardGroupCell = FOPUtils.createTableCell(document, Optional.of(FOPUtils.TEXT_ALIGN_CENTER),
+      final Element awardGroupCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                               String.valueOf(si.getAwardGroup()));
       row.appendChild(awardGroupCell);
       FOPUtils.addBorders(awardGroupCell, topBorderWidth, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH,
                           STANDARD_BORDER_WIDTH);
 
-      final Element organizationCell = FOPUtils.createTableCell(document, Optional.of(FOPUtils.TEXT_ALIGN_CENTER),
+      final Element organizationCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                                 String.valueOf(si.getOrganization()));
       row.appendChild(organizationCell);
       FOPUtils.addBorders(organizationCell, topBorderWidth, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH,
                           STANDARD_BORDER_WIDTH);
 
-      final Element teamNameCell = FOPUtils.createTableCell(document, Optional.of(FOPUtils.TEXT_ALIGN_CENTER),
+      final Element teamNameCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                             String.valueOf(si.getTeamName()));
       row.appendChild(teamNameCell);
       FOPUtils.addBorders(teamNameCell, topBorderWidth, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH,
                           STANDARD_BORDER_WIDTH);
 
-      final Element timeCell = FOPUtils.createTableCell(document, Optional.of(FOPUtils.TEXT_ALIGN_CENTER),
+      final Element timeCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                         TournamentSchedule.formatTime(performanceTime));
       row.appendChild(timeCell);
       FOPUtils.addBorders(timeCell, topBorderWidth, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH,
                           STANDARD_BORDER_WIDTH);
 
-      final Element perfTableCell = FOPUtils.createTableCell(document, Optional.of(FOPUtils.TEXT_ALIGN_CENTER),
+      final Element perfTableCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                              performance.getTable()
                                                                  + " "
                                                                  + performance.getSide());
@@ -205,7 +203,7 @@ public final class ScheduleWriter {
       FOPUtils.addBorders(perfTableCell, topBorderWidth, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH,
                           STANDARD_BORDER_WIDTH);
 
-      final Element perfRoundCell = FOPUtils.createTableCell(document, Optional.of(FOPUtils.TEXT_ALIGN_CENTER),
+      final Element perfRoundCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                              si.getRoundName(performance));
       row.appendChild(perfRoundCell);
       FOPUtils.addBorders(perfRoundCell, topBorderWidth, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH,
@@ -232,7 +230,7 @@ public final class ScheduleWriter {
 
         stayingTableRow.setAttribute("background-color", "magenta");
 
-        final Element stayingTableCell = FOPUtils.createTableCell(document, Optional.of(FOPUtils.TEXT_ALIGN_CENTER),
+        final Element stayingTableCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
                                                                   String.format(formatString, si.getTeamNumber()));
         stayingTableRow.appendChild(stayingTableCell);
       }

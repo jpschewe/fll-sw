@@ -14,10 +14,8 @@ import java.sql.Types;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import fll.Utilities;
 
 /**
  * Methods to loading and storing {@link AwardWinner} and
@@ -99,7 +97,7 @@ public final class SubjectiveAwardWinners {
         while (rs.next()) {
           final String name = rs.getString(1);
           final int teamNumber = rs.getInt(2);
-          final Optional<String> description = Utilities.convertEmptyStringToNull(rs.getString(3));
+          final String description = rs.getString(3);
           final String awardGroup = rs.getString(4);
 
           final AwardWinner winner = new AwardWinner(name, awardGroup, teamNumber, description);
@@ -133,9 +131,9 @@ public final class SubjectiveAwardWinners {
       for (final AwardWinner winner : winners) {
         prep.setString(2, winner.getName());
         prep.setInt(3, winner.getTeamNumber());
-        if (winner.getDescription().isPresent()
-            && !winner.getDescription().get().trim().isEmpty()) {
-          prep.setString(4, winner.getDescription().get());
+        if (null != winner.getDescription()
+            && !winner.getDescription().trim().isEmpty()) {
+          prep.setString(4, winner.getDescription().trim());
         } else {
           prep.setNull(4, Types.LONGVARCHAR);
         }
@@ -165,7 +163,7 @@ public final class SubjectiveAwardWinners {
         while (rs.next()) {
           final String name = rs.getString(1);
           final int teamNumber = rs.getInt(2);
-          final Optional<String> description = Utilities.convertEmptyStringToNull(rs.getString(3));
+          final String description = rs.getString(3);
 
           final OverallAwardWinner winner = new OverallAwardWinner(name, teamNumber, description);
           result.add(winner);
@@ -203,9 +201,9 @@ public final class SubjectiveAwardWinners {
       for (final OverallAwardWinner winner : winners) {
         prep.setString(2, winner.getName());
         prep.setInt(3, winner.getTeamNumber());
-        if (winner.getDescription().isPresent()
-            && !winner.getDescription().get().trim().isEmpty()) {
-          prep.setString(4, winner.getDescription().get());
+        if (null != winner.getDescription()
+            && !winner.getDescription().trim().isEmpty()) {
+          prep.setString(4, winner.getDescription().trim());
         } else {
           prep.setNull(4, Types.LONGVARCHAR);
         }

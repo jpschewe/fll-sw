@@ -233,20 +233,20 @@ public class AwardsReport extends BaseFLLServlet {
       final Element row = FOPUtils.createXslFoElement(document, "table-row");
       tableBody.appendChild(row);
 
-      row.appendChild(FOPUtils.createTableCell(document, Optional.empty(), "Winner:"));
+      row.appendChild(FOPUtils.createTableCell(document, null, "Winner:"));
 
-      row.appendChild(FOPUtils.createTableCell(document, Optional.empty(), String.valueOf(winner.getTeamNumber())));
+      row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(winner.getTeamNumber())));
 
       final int teamNumber = winner.getTeamNumber();
       final Team team = Team.getTeamFromDatabase(connection, teamNumber);
-      row.appendChild(FOPUtils.createTableCell(document, Optional.empty(), String.valueOf(team.getTeamName())));
+      row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(team.getTeamName())));
 
-      if (winner.getDescription().isPresent()) {
+      if (null != winner.getDescription()) {
         final Element descriptionRow = FOPUtils.createXslFoElement(document, "table-row");
         tableBody.appendChild(descriptionRow);
 
-        final Element descriptionCell = FOPUtils.createTableCell(document, Optional.empty(), "\u00A0\u00A0"
-            + winner.getDescription().get());
+        final Element descriptionCell = FOPUtils.createTableCell(document, null, "\u00A0\u00A0"
+            + winner.getDescription());
         descriptionRow.appendChild(descriptionCell);
 
         descriptionCell.setAttribute("number-columns-spanned", String.valueOf(3));
@@ -295,25 +295,25 @@ public class AwardsReport extends BaseFLLServlet {
         boolean first = true;
         for (final AwardWinner winner : agWinners) {
           if (first) {
-            row.appendChild(FOPUtils.createTableCell(document, Optional.empty(), String.format("Winner %s:", group)));
+            row.appendChild(FOPUtils.createTableCell(document, null, String.format("Winner %s:", group)));
 
             first = false;
           } else {
-            row.appendChild(FOPUtils.createTableCell(document, Optional.empty(), ""));
+            row.appendChild(FOPUtils.createTableCell(document, null, ""));
           }
 
-          row.appendChild(FOPUtils.createTableCell(document, Optional.empty(), String.valueOf(winner.getTeamNumber())));
+          row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(winner.getTeamNumber())));
 
           final int teamNumber = winner.getTeamNumber();
           final Team team = Team.getTeamFromDatabase(connection, teamNumber);
-          row.appendChild(FOPUtils.createTableCell(document, Optional.empty(), String.valueOf(team.getTeamName())));
+          row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(team.getTeamName())));
 
-          if (winner.getDescription().isPresent()) {
+          if (null != winner.getDescription()) {
             final Element descriptionRow = FOPUtils.createXslFoElement(document, "table-row");
             tableBody.appendChild(descriptionRow);
 
-            final Element descriptionCell = FOPUtils.createTableCell(document, Optional.empty(), "\u00A0\u00A0"
-                + winner.getDescription().get());
+            final Element descriptionCell = FOPUtils.createTableCell(document, null, "\u00A0\u00A0"
+                + winner.getDescription());
             descriptionRow.appendChild(descriptionCell);
 
             descriptionCell.setAttribute("number-columns-spanned", String.valueOf(3));
@@ -360,18 +360,15 @@ public class AwardsReport extends BaseFLLServlet {
         final Element row = FOPUtils.createXslFoElement(document, "table-row");
         tableBody.appendChild(row);
 
-        row.appendChild(FOPUtils.createTableCell(document, Optional.empty(), String.format("Winner %s:", group)));
+        row.appendChild(FOPUtils.createTableCell(document, null, String.format("Winner %s:", group)));
 
-        row.appendChild(FOPUtils.createTableCell(document, Optional.empty(),
-                                                 String.valueOf(winner.get().getTeamNumber())));
+        row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(winner.get().getTeamNumber())));
 
-        row.appendChild(FOPUtils.createTableCell(document, Optional.empty(),
-                                                 String.valueOf(winner.get().getTeamName())));
+        row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(winner.get().getTeamName())));
 
-        row.appendChild(FOPUtils.createTableCell(document, Optional.empty(), "With a score of:"));
+        row.appendChild(FOPUtils.createTableCell(document, null, "With a score of:"));
 
-        row.appendChild(FOPUtils.createTableCell(document, Optional.empty(),
-                                                 String.valueOf(winner.get().getFormattedScore())));
+        row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(winner.get().getFormattedScore())));
       }
     }
 
@@ -403,8 +400,8 @@ public class AwardsReport extends BaseFLLServlet {
     final String tournamentName = null == tournament.getDescription() ? tournament.getName()
         : tournament.getDescription();
     final String tournamentTitle;
-    if (tournament.getLevel().isPresent()) {
-      tournamentTitle = String.format("%s: %s", tournament.getLevel().get(), tournamentName);
+    if (null != tournament.getLevel()) {
+      tournamentTitle = String.format("%s: %s", tournament.getLevel(), tournamentName);
     } else {
       tournamentTitle = tournamentName;
     }
@@ -440,9 +437,9 @@ public class AwardsReport extends BaseFLLServlet {
     final StringBuilder titleBuilder = new StringBuilder();
     titleBuilder.append(description.getTitle());
 
-    if (tournament.getLevel().isPresent()) {
+    if (null != tournament.getLevel()) {
       titleBuilder.append(" ");
-      titleBuilder.append(tournament.getLevel().get());
+      titleBuilder.append(tournament.getLevel());
     }
 
     titleBuilder.append(" Award Winners");
@@ -461,12 +458,12 @@ public class AwardsReport extends BaseFLLServlet {
     final Element categoryTitleBlock = FOPUtils.createXslFoElement(document, "block");
     container.appendChild(categoryTitleBlock);
     categoryTitleBlock.setAttribute("font-weight", "bold");
-    if (tournament.getNextLevel().isPresent()) {
+    if (null != tournament.getNextLevel()) {
       categoryTitleBlock.appendChild(document.createTextNode(String.format("Teams advancing to %ss",
-                                                                           tournament.getNextLevel().get())));
+                                                                           tournament.getNextLevel())));
     } else {
       categoryTitleBlock.appendChild(document.createTextNode(String.format("Teams advancing to the next tournament",
-                                                                           tournament.getNextLevel().get())));
+                                                                           tournament.getNextLevel())));
     }
 
     final Element table = FOPUtils.createBasicTable(document);
@@ -519,24 +516,24 @@ public class AwardsReport extends BaseFLLServlet {
       tableBody.appendChild(row);
 
       if (first) {
-        row.appendChild(FOPUtils.createTableCell(document, Optional.empty(), String.format("%s:", group)));
+        row.appendChild(FOPUtils.createTableCell(document, null, String.format("%s:", group)));
         first = false;
       } else {
-        row.appendChild(FOPUtils.createTableCell(document, Optional.empty(), ""));
+        row.appendChild(FOPUtils.createTableCell(document, null, ""));
       }
 
-      row.appendChild(FOPUtils.createTableCell(document, Optional.empty(), String.valueOf(winner.getTeamNumber())));
+      row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(winner.getTeamNumber())));
 
       final int teamNumber = winner.getTeamNumber();
       final Team team = Team.getTeamFromDatabase(connection, teamNumber);
-      row.appendChild(FOPUtils.createTableCell(document, Optional.empty(), String.valueOf(team.getTeamName())));
+      row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(team.getTeamName())));
 
     } // foreach advancing
 
     // add some spacing
     final Element emptyRow = FOPUtils.createXslFoElement(document, "table-row");
     tableBody.appendChild(emptyRow);
-    final Element emptyCell = FOPUtils.createTableCell(document, Optional.empty(), "\u00A0");
+    final Element emptyCell = FOPUtils.createTableCell(document, null, "\u00A0");
     emptyRow.appendChild(emptyCell);
     emptyCell.setAttribute("number-columns-spanned", String.valueOf(3));
 

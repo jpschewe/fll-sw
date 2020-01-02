@@ -16,7 +16,6 @@ import java.sql.Types;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -41,8 +40,8 @@ public final class Tournament implements Serializable {
                      @JsonProperty("name") final String name,
                      @JsonProperty("description") final String description,
                      @JsonProperty("date") final LocalDate date,
-                     @JsonProperty("level") final Optional<String> level,
-                     @JsonProperty("nextLevel") final Optional<String> nextLevel) {
+                     @JsonProperty("level") final String level,
+                     @JsonProperty("nextLevel") final String nextLevel) {
     this.tournamentID = tournamentID;
     this.name = name;
     this.description = description;
@@ -93,52 +92,22 @@ public final class Tournament implements Serializable {
     return null == date ? null : StoreTournamentData.DATE_FORMATTER.format(date);
   }
 
-  private final Optional<String> level;
+  private final String level;
 
   /**
-   * @return the level of the tournament
+   * @return the level of the tournament, may be null
    */
-  public Optional<String> getLevel() {
+  public String getLevel() {
     return level;
   }
 
-  /**
-   * Used by JSP's.
-   * 
-   * @return the level as a string, the empty string if there is no value
-   * @see #getLevel()
-   */
-  @JsonIgnore
-  public String getLevelAsString() {
-    if (level.isPresent()) {
-      return level.get();
-    } else {
-      return "";
-    }
-  }
-
-  private final Optional<String> nextLevel;
+  private final String nextLevel;
 
   /**
-   * @return the level of the tournament after this one
+   * @return the level of the tournament after this one, may be null
    */
-  public Optional<String> getNextLevel() {
+  public String getNextLevel() {
     return nextLevel;
-  }
-
-  /**
-   * Used by JSP's.
-   * 
-   * @return the next level as a string, the empty string if there is no value
-   * @see #getNextLevel()
-   */
-  @JsonIgnore
-  public String getNextLevelAsString() {
-    if (nextLevel.isPresent()) {
-      return nextLevel.get();
-    } else {
-      return "";
-    }
   }
 
   /**
@@ -148,8 +117,8 @@ public final class Tournament implements Serializable {
                                       final String tournamentName,
                                       final String description,
                                       final LocalDate date,
-                                      final Optional<String> level,
-                                      final Optional<String> nextLevel)
+                                      final String level,
+                                      final String nextLevel)
       throws SQLException {
     try (
         PreparedStatement prep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location, tournament_date, level, next_level) VALUES (?, ?, ?, ?, ?)")) {
@@ -160,15 +129,15 @@ public final class Tournament implements Serializable {
       } else {
         prep.setDate(3, java.sql.Date.valueOf(date));
       }
-      if (level.isPresent()
-          && !level.get().trim().isEmpty()) {
-        prep.setString(4, level.get());
+      if (null != level
+          && !level.trim().isEmpty()) {
+        prep.setString(4, level.trim());
       } else {
         prep.setNull(4, Types.LONGVARCHAR);
       }
-      if (nextLevel.isPresent()
-          && !nextLevel.get().trim().isEmpty()) {
-        prep.setString(5, nextLevel.get());
+      if (null != nextLevel
+          && !nextLevel.trim().isEmpty()) {
+        prep.setString(5, nextLevel.trim());
       } else {
         prep.setNull(5, Types.LONGVARCHAR);
       }
@@ -196,8 +165,8 @@ public final class Tournament implements Serializable {
           final java.sql.Date d = rs.getDate(4);
           final LocalDate date = null == d ? null : d.toLocalDate();
 
-          final Optional<String> level = Utilities.convertEmptyStringToNull(rs.getString(5));
-          final Optional<String> nextLevel = Utilities.convertEmptyStringToNull(rs.getString(6));
+          final String level = rs.getString(5);
+          final String nextLevel = rs.getString(6);
 
           final Tournament tournament = new Tournament(tournamentID, name, location, date, level, nextLevel);
           retval.add(tournament);
@@ -238,8 +207,8 @@ public final class Tournament implements Serializable {
           final String location = rs.getString(2);
           final java.sql.Date d = rs.getDate(3);
           final LocalDate date = null == d ? null : d.toLocalDate();
-          final Optional<String> level = Utilities.convertEmptyStringToNull(rs.getString(4));
-          final Optional<String> nextLevel = Utilities.convertEmptyStringToNull(rs.getString(5));
+          final String level = rs.getString(4);
+          final String nextLevel = rs.getString(5);
 
           return new Tournament(id, name, location, date, level, nextLevel);
         } else {
@@ -269,8 +238,8 @@ public final class Tournament implements Serializable {
           final String location = rs.getString(2);
           final java.sql.Date d = rs.getDate(3);
           final LocalDate date = null == d ? null : d.toLocalDate();
-          final Optional<String> level = Utilities.convertEmptyStringToNull(rs.getString(4));
-          final Optional<String> nextLevel = Utilities.convertEmptyStringToNull(rs.getString(5));
+          final String level = rs.getString(4);
+          final String nextLevel = rs.getString(5);
           return new Tournament(tournamentID, name, location, date, level, nextLevel);
         } else {
           return null;
@@ -478,8 +447,8 @@ public final class Tournament implements Serializable {
                                       final String name,
                                       final String location,
                                       final LocalDate date,
-                                      final Optional<String> level,
-                                      final Optional<String> nextLevel)
+                                      final String level,
+                                      final String nextLevel)
       throws SQLException {
     try (PreparedStatement updatePrep = connection.prepareStatement("UPDATE Tournaments SET" //
         + " Name = ?" //
@@ -495,15 +464,15 @@ public final class Tournament implements Serializable {
       } else {
         updatePrep.setDate(3, java.sql.Date.valueOf(date));
       }
-      if (level.isPresent()
-          && !level.get().trim().isEmpty()) {
-        updatePrep.setString(4, level.get());
+      if (null != level
+          && !level.trim().isEmpty()) {
+        updatePrep.setString(4, level.trim());
       } else {
         updatePrep.setNull(4, Types.VARCHAR);
       }
-      if (nextLevel.isPresent()
-          && !nextLevel.get().trim().isEmpty()) {
-        updatePrep.setString(5, nextLevel.get());
+      if (null != nextLevel
+          && !nextLevel.trim().isEmpty()) {
+        updatePrep.setString(5, nextLevel.trim());
       } else {
         updatePrep.setNull(5, Types.VARCHAR);
       }

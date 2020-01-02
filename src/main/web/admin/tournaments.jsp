@@ -102,14 +102,14 @@
                     <td>
                         <input type="text"
                             name="level${loopStatus.index}"
-                            value="${tournament.levelAsString}"
+                            value="${tournament.level}"
                             size="20" maxlength="128" />
                     </td>
 
                     <td>
                         <input type="text"
                             name="nextLevel${loopStatus.index}"
-                            value="${tournament.nextLevelAsString}"
+                            value="${tournament.nextLevel}"
                             size="20" maxlength="128" />
                     </td>
 
