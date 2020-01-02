@@ -21,6 +21,7 @@ import javax.sql.DataSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import fll.Utilities;
 import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
 import fll.web.ApplicationAttributes;
@@ -39,7 +40,7 @@ public class ScheduleServlet extends HttpServlet {
     try {
       connection = datasource.getConnection();
 
-      final ObjectMapper jsonMapper = new ObjectMapper();
+      final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
       response.reset();
       response.setContentType("application/json");

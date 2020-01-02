@@ -239,7 +239,7 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
           Tournament tournament = Tournament.findTournamentByName(connection, tournamentName);
           if (null == tournament) {
             // create the tournament
-            Tournament.createTournament(connection, tournamentName, tournamentName, null);
+            Tournament.createTournament(connection, tournamentName, tournamentName, null, null, null);
             tournament = Tournament.findTournamentByName(connection, tournamentName);
             if (null == tournament) {
               throw new FLLInternalException("Created tournament '"

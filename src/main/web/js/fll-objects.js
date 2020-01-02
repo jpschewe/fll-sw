@@ -34,3 +34,30 @@ function NonNumericNominees(categoryName, teamNumbers) {
   this.categoryName = categoryName;
   this.teamNumbers = teamNumbers;
 }
+
+/**
+ * Javascript parallel of fll.db.AwardWinner.
+ */
+function AwardWinner(name, awardGroup, teamNumber, description) {
+  this.name = name;
+  this.awardGroup = awardGroup;
+  this.teamNumber = teamNumber;
+  this.description = description;
+}
+
+/**
+ * Javascript parallel of fll.db.OverallAwardWinner.
+ */
+function OverallAwardWinner(name, teamNumber, description) {
+  this.name = name;
+  this.teamNumber = teamNumber;
+  this.description = description;
+}
+
+/**
+ * Javascript parallel of fll.db.AdvancingTeam.
+ */
+function AdvancingTeam(teamNumber, group) {
+  this.teamNumber = teamNumber;
+  this.group = group;
+}

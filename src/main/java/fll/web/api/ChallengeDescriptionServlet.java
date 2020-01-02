@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import fll.Utilities;
 import fll.web.ApplicationAttributes;
 import fll.xml.ChallengeDescription;
 
@@ -33,7 +34,7 @@ public class ChallengeDescriptionServlet extends HttpServlet {
     response.setContentType("application/json");
     final PrintWriter writer = response.getWriter();
 
-    final ObjectMapper jsonMapper = new ObjectMapper();
+    final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 

@@ -39,6 +39,8 @@ import javax.sql.DataSource;
 
 import org.hsqldb.jdbc.JDBCDataSource;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.opencsv.CSVReader;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -821,6 +823,15 @@ public final class Utilities {
       }
     }
     return index;
+  }
+
+  /**
+   * Create a standard JSON object mapper that understands our classes.
+   * 
+   * @return a new instance
+   */
+  public static ObjectMapper createJsonMapper() {
+    return new ObjectMapper().registerModule(new Jdk8Module());
   }
 
 }

@@ -91,7 +91,7 @@ public class JsonBracketDataTests {
     // Ask for round 1 leaf 1
     int dbLine = 3;
     query.put(dbLine, 1);
-    final ObjectMapper jsonMapper = new ObjectMapper();
+    final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
     List<BracketLeafResultSet> leaves = JsonUtilities.generateJsonBracketInfo(playoff.getDivision(), query, 0,
                                                                               playoff.getConnection(),
@@ -280,7 +280,7 @@ public class JsonBracketDataTests {
     GenerateDB.generateDB(document, connection);
 
     final int tournament = 2;
-    Tournament.createTournament(connection, "Playoff Test Tournament", "Test", null);
+    Tournament.createTournament(connection, "Playoff Test Tournament", "Test", null, null, null);
     Queries.setCurrentTournament(connection, tournament); // 2 is tournament ID
     TournamentParameters.setNumSeedingRounds(connection, tournament, 0);
     // make teams

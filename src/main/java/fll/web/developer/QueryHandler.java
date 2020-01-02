@@ -99,7 +99,7 @@ public class QueryHandler extends BaseFLLServlet {
     response.setCharacterEncoding(Utilities.DEFAULT_CHARSET.name());
 
     final ResultData result = new ResultData(columnNames, data, error);
-    final ObjectMapper jsonMapper = new ObjectMapper();
+    final ObjectMapper jsonMapper = Utilities.createJsonMapper();
     final Writer writer = response.getWriter();
 
     jsonMapper.writeValue(writer, result);

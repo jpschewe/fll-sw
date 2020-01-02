@@ -1,3 +1,4 @@
+* #795 - add report for awards
 * #400 - turn on strict mode in all javascript files
 * #804 - Remove decimal points from displays where the scores are clearly integers
 * #722 - Fix splitting of times across pages in the performance schedule

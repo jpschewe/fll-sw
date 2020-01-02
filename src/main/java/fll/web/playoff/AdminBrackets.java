@@ -20,6 +20,7 @@ import javax.sql.DataSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
 
@@ -97,7 +98,7 @@ public class AdminBrackets {
       pageContext.setAttribute("bracketInfo", bracketInfo);
 
       // expose all bracketInfo to the javascript
-      final ObjectMapper jsonMapper = new ObjectMapper();
+      final ObjectMapper jsonMapper = Utilities.createJsonMapper();
       final StringWriter writer = new StringWriter();
       try {
         jsonMapper.writeValue(writer, bracketInfo);

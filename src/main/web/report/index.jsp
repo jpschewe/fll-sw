@@ -92,6 +92,17 @@
             ceremony.
         </li>
 
+        <li>
+            <a href="edit-award-winners.jsp" target="_blank">Enter
+                the winners of awards for use in the awards report</a>
+        </li>
+
+        <li>
+            <a href="AwardsReport" target="_blank">Report of winners
+                for the tournament.</a> This can be published on the web or
+            used for the awards ceremony.
+        </li>
+
     </ol>
 
 

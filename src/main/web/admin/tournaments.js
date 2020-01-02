@@ -35,6 +35,18 @@ function addTournament() {
   td3Element.append(descriptionElement);
   trElement.append(td3Element);
 
+  var td4Element = $("<td></td>");
+  var levelElement = $("<input type=\"text\" name=\"level" + numRows
+      + "\" size=\"64\" maxlength=\"128\" />");
+  td4Element.append(levelElement);
+  trElement.append(td4Element);
+
+  var td5Element = $("<td></td>");
+  var nextLevelElement = $("<input type=\"text\" name=\"nextLevel" + numRows
+      + "\" size=\"64\" maxlength=\"128\" />");
+  td5Element.append(nextLevelElement);
+  trElement.append(td5Element);
+
   $('#tournamentsTable tbody').append(trElement);
 
   $('#numRows').val(numRows + 1);
@@ -46,7 +58,7 @@ function checkTournamentNames() {
   var tournamentsSeen = [];
   for (var idx = 0; idx < numRows; ++idx) {
     var name = $('#name' + idx).val();
-    console.log("Checking index: " + idx + " name: " + name + " against: "
+    _log("Checking index: " + idx + " name: " + name + " against: "
         + tournamentsSeen);
     if (name) {
       if (tournamentsSeen.includes(name)) {

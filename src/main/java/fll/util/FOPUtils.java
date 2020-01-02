@@ -9,7 +9,6 @@ package fll.util;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Paths;
-import java.util.Optional;
 
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
@@ -140,7 +139,7 @@ public final class FOPUtils {
     simplePageMaster.setAttribute("margin-right", String.format("%fin", rightMargin));
 
     final Element body = createXslFoElement(document, "region-body");
-    body.setAttribute("margin-top", "0in");
+    body.setAttribute("margin-top", String.format("%fin", headerHeight));
     simplePageMaster.appendChild(body);
 
     final Element header = createXslFoElement(document, "region-before");
@@ -268,7 +267,7 @@ public final class FOPUtils {
    * @return the table cell
    */
   public static Element createTableCell(final Document document,
-                                        final Optional<String> textAlignment,
+                                        final String textAlignment,
                                         final String text) {
     final Element cell = createXslFoElement(document, "table-cell");
 
@@ -278,8 +277,8 @@ public final class FOPUtils {
 
     final Element block = createXslFoElement(document, "block");
     blockContainer.appendChild(block);
-    if (textAlignment.isPresent()) {
-      block.setAttribute("text-align", textAlignment.get());
+    if (null != textAlignment) {
+      block.setAttribute("text-align", textAlignment);
     }
     block.appendChild(document.createTextNode(text));
 
@@ -392,5 +391,35 @@ public final class FOPUtils {
 
     // Start XSLT transformation and FOP processing
     transformer.transform(src, res);
+  }
+
+  /**
+   * @param document used to create elements
+   * @return block containing a blank line
+   */
+  public static Element createBlankLine(final Document document) {
+    final Element block = createXslFoElement(document, "block");
+    final Element leader = createXslFoElement(document, "leader");
+    block.appendChild(leader);
+    return block;
+  }
+
+  /**
+   * @param document used to create elements
+   * @param thickness the thickness of the line in points
+   * @return block containing the horizontal line
+   */
+  public static Element createHorizontalLine(final Document document,
+                                             final int thickness) {
+    final Element lineBlock = FOPUtils.createXslFoElement(document, "block");
+
+    final Element line = FOPUtils.createXslFoElement(document, "leader");
+    line.setAttribute("leader-pattern", "rule");
+    line.setAttribute("leader-length", "100%");
+    line.setAttribute("rule-style", "solid");
+    line.setAttribute("rule-thickness", String.format("%dpt", thickness));
+    lineBlock.appendChild(line);
+
+    return lineBlock;
   }
 }

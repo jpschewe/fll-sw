@@ -548,7 +548,7 @@ public final class UploadTeams extends BaseFLLServlet {
           final String tournamentName = rs.getString(2);
           Tournament tournament = Tournament.findTournamentByName(connection, tournamentName);
           if (null == tournament) {
-            Tournament.createTournament(connection, tournamentName, tournamentName, null);
+            Tournament.createTournament(connection, tournamentName, tournamentName, null, null, null);
             tournament = Tournament.findTournamentByName(connection, tournamentName);
           }
 

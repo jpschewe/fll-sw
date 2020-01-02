@@ -64,7 +64,7 @@ import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
- * database, otherwise need to map... Import scores from a tournament database
+ * Import scores from a tournament database
  * into a master score database.
  * <p>
  * Example arguments: jdbc:hsqldb:file:/source;shutdown=true "Centennial Dec10"
@@ -287,7 +287,8 @@ public final class ImportDB {
     final Tournament destTournament = Tournament.findTournamentByName(destConnection, sourceTournament.getName());
     if (null == destTournament) {
       Tournament.createTournament(destConnection, sourceTournament.getName(), sourceTournament.getDescription(),
-                                  sourceTournament.getDate());
+                                  sourceTournament.getDate(), sourceTournament.getLevel(),
+                                  sourceTournament.getNextLevel());
     }
   }
 
@@ -624,6 +625,11 @@ public final class ImportDB {
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 20) {
+      upgrade19To20(connection);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < GenerateDB.DATABASE_VERSION) {
       throw new RuntimeException("Internal error, database version not updated to current instead was: "
           + dbVersion);
@@ -835,6 +841,29 @@ public final class ImportDB {
     GenerateDB.createOverallScoresTable(connection, false);
 
     setDBVersion(connection, 19);
+  }
+
+  private static void upgrade19To20(final Connection connection) throws SQLException {
+    LOGGER.trace("Upgrading database from 19 to 20");
+
+    GenerateDB.createSubjectiveAwardWinnerTables(connection, false);
+    GenerateDB.createAdvancingTeamsTable(connection, false);
+
+    // add level and next_level to Tournaments
+    try (Statement stmt = connection.createStatement()) {
+      // need to check if practice column exists as this can be added in the upgrade
+      // from 0 to 1
+      if (!checkForColumnInTable(connection, "tournaments", "level")) {
+        stmt.executeUpdate("ALTER TABLE tournaments ADD COLUMN level VARCHAR(128) DEFAULT NULL");
+      }
+      // need to check if practice column exists as this can be added in the upgrade
+      // from 0 to 1
+      if (!checkForColumnInTable(connection, "tournaments", "next_level")) {
+        stmt.executeUpdate("ALTER TABLE tournaments ADD COLUMN next_level VARCHAR(128) DEFAULT NULL");
+      }
+    }
+
+    setDBVersion(connection, 20);
   }
 
   /**
@@ -1199,7 +1228,7 @@ public final class ImportDB {
         if (!GenerateDB.INTERNAL_TOURNAMENT_NAME.equals(entry.getKey())) {
           final Tournament tournament = Tournament.findTournamentByName(connection, entry.getKey());
           if (null == tournament) {
-            Tournament.createTournament(connection, entry.getKey(), entry.getValue(), null);
+            Tournament.createTournament(connection, entry.getKey(), entry.getValue(), null, null, null);
           }
         }
       }
@@ -1336,6 +1365,8 @@ public final class ImportDB {
     importJudges(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
     importSubjective(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID, description);
     importSubjectiveNominees(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+    importAdvancingTeams(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+    importAwardWinners(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
   }
 
   /**
@@ -2169,6 +2200,130 @@ public final class ImportDB {
       SQLFunctions.close(sourcePrep);
     }
     return differences;
+  }
+
+  private static void importAdvancingTeams(final Connection sourceConnection,
+                                           final Connection destinationConnection,
+                                           final int sourceTournamentID,
+                                           final int destTournamentID)
+      throws SQLException {
+    try (
+        PreparedStatement destDelete = destinationConnection.prepareStatement("DELETE FROM advancing_teams WHERE tournament_id = ?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO advancing_teams (tournament_id, team_number, award_group) VALUES(?, ?, ?)");
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT team_number, award_group FROM advancing_teams WHERE tournament_id = ?")) {
+      LOGGER.debug("Importing advancing teams");
+
+      // do drops first
+      destDelete.setInt(1, destTournamentID);
+      destDelete.executeUpdate();
+
+      // insert
+      destPrep.setInt(1, destTournamentID);
+
+      sourcePrep.setInt(1, sourceTournamentID);
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          destPrep.setInt(2, sourceRS.getInt(1));
+          destPrep.setString(3, sourceRS.getString(2));
+          destPrep.executeUpdate();
+        }
+      }
+    }
+  }
+
+  private static void importAwardWinners(final Connection sourceConnection,
+                                         final Connection destinationConnection,
+                                         final int sourceTournamentID,
+                                         final int destTournamentID)
+      throws SQLException {
+    importSubjectiveOverallWinners(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+    importSubjectiveExtraWinners(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+    importSubjectiveChallengeWinners(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+  }
+
+  private static void importSubjectiveOverallWinners(final Connection sourceConnection,
+                                                     final Connection destinationConnection,
+                                                     final int sourceTournamentID,
+                                                     final int destTournamentID)
+      throws SQLException {
+    try (
+        PreparedStatement destDelete = destinationConnection.prepareStatement("DELETE FROM subjective_overall_award WHERE tournament_id = ?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO subjective_overall_award (tournament_id, name, team_number, description) VALUES(?, ?, ?, ?)");
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT name, team_number, description FROM subjective_overall_award WHERE tournament_id = ?")) {
+      LOGGER.debug("Importing subjective overall award");
+
+      // do drops first
+      destDelete.setInt(1, destTournamentID);
+      destDelete.executeUpdate();
+
+      // insert
+      destPrep.setInt(1, destTournamentID);
+
+      sourcePrep.setInt(1, sourceTournamentID);
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          destPrep.setString(2, sourceRS.getString(1));
+          destPrep.setInt(3, sourceRS.getInt(2));
+          destPrep.setString(4, sourceRS.getString(3));
+          destPrep.executeUpdate();
+        }
+      }
+    }
+  }
+
+  private static void importSubjectiveExtraWinners(final Connection sourceConnection,
+                                                   final Connection destinationConnection,
+                                                   final int sourceTournamentID,
+                                                   final int destTournamentID)
+      throws SQLException {
+    importSubjectiveAwardGroupWinners("subjective_extra_award", sourceConnection, destinationConnection,
+                                      sourceTournamentID, destTournamentID);
+  }
+
+  private static void importSubjectiveChallengeWinners(final Connection sourceConnection,
+                                                       final Connection destinationConnection,
+                                                       final int sourceTournamentID,
+                                                       final int destTournamentID)
+      throws SQLException {
+    importSubjectiveAwardGroupWinners("subjective_challenge_award", sourceConnection, destinationConnection,
+                                      sourceTournamentID, destTournamentID);
+  }
+
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Table name is passed in")
+  private static void importSubjectiveAwardGroupWinners(final String tablename,
+                                                        final Connection sourceConnection,
+                                                        final Connection destinationConnection,
+                                                        final int sourceTournamentID,
+                                                        final int destTournamentID)
+      throws SQLException {
+    try (PreparedStatement destDelete = destinationConnection.prepareStatement("DELETE FROM "
+        + tablename
+        + " WHERE tournament_id = ?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO "
+            + tablename
+            + " (tournament_id, name, team_number, description, award_group) VALUES(?, ?, ?, ?, ?)");
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT name, team_number, description, award_group FROM "
+            + tablename
+            + " WHERE tournament_id = ?")) {
+
+      // do drops first
+      destDelete.setInt(1, destTournamentID);
+      destDelete.executeUpdate();
+
+      // insert
+      destPrep.setInt(1, destTournamentID);
+
+      sourcePrep.setInt(1, sourceTournamentID);
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          destPrep.setString(2, sourceRS.getString(1));
+          destPrep.setInt(3, sourceRS.getInt(2));
+          destPrep.setString(4, sourceRS.getString(3));
+          destPrep.setString(5, sourceRS.getString(4));
+          destPrep.executeUpdate();
+        }
+      }
+    }
   }
 
   /**

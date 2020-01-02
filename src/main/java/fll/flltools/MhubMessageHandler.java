@@ -156,7 +156,7 @@ public class MhubMessageHandler extends Thread {
       final List<Session> toRemove = new LinkedList<>();
 
       final StringWriter writer = new StringWriter();
-      final ObjectMapper mapper = new ObjectMapper();
+      final ObjectMapper mapper = Utilities.createJsonMapper();
       try {
         mapper.writeValue(writer, msg);
       } catch (final IOException e) {
@@ -415,7 +415,7 @@ public class MhubMessageHandler extends Thread {
     }
 
     try {
-      final ObjectMapper mapper = new ObjectMapper();
+      final ObjectMapper mapper = Utilities.createJsonMapper();
       final JsonNode parsed = mapper.readTree(msg);
       final String messageType = parsed.get("type").asText();
       if (MhubMessageType.PUB_ACK_RESPONSE.getType().equals(messageType)) {
