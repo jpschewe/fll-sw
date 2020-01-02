@@ -852,8 +852,16 @@ public final class ImportDB {
 
     // add level and next_level to Tournaments
     try (Statement stmt = connection.createStatement()) {
-      stmt.executeUpdate("ALTER TABLE tournaments ADD COLUMN level VARCHAR(128) DEFAULT NULL");
-      stmt.executeUpdate("ALTER TABLE tournaments ADD COLUMN next_level VARCHAR(128) DEFAULT NULL");
+      // need to check if practice column exists as this can be added in the upgrade
+      // from 0 to 1
+      if (!checkForColumnInTable(connection, "tournaments", "level")) {
+        stmt.executeUpdate("ALTER TABLE tournaments ADD COLUMN level VARCHAR(128) DEFAULT NULL");
+      }
+      // need to check if practice column exists as this can be added in the upgrade
+      // from 0 to 1
+      if (!checkForColumnInTable(connection, "tournaments", "next_level")) {
+        stmt.executeUpdate("ALTER TABLE tournaments ADD COLUMN next_level VARCHAR(128) DEFAULT NULL");
+      }
     }
 
     setDBVersion(connection, 20);
