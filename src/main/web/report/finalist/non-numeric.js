@@ -4,6 +4,8 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
+"use-strict";
+
 function handleDivisionChange() {
   var divIndex = $("#divisions").val();
   var div = $.finalist.getDivisionByIndex(divIndex);

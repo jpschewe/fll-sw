@@ -1,5 +1,7 @@
 // autoscroll a page and when the end of page is reached reload the page
 
+"use-strict";
+
 var scrollTimer;
 var scrollAmount = 2; // scroll by 100 pixels each time
 var documentYposition = 0;

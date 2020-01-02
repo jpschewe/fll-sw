@@ -4,6 +4,8 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
+"use-strict";
+
 $(document).ready(function() {
 
   $("#total_num_rows").val(maxIndex);

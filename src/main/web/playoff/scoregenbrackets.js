@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2019 INSciTE.  All rights reserved
+ * INSciTE is on the web at: http://www.hightechkids.org
+ * This code is released under GPL; see LICENSE.txt for details.
+ */
+
 "use strict";
 
 function checkSomethingToPrint() {

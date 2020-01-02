@@ -1,8 +1,10 @@
 /*
- * Copyright (c) 2012INSciTE.  All rights reserved
+ * Copyright (c) 2012 INSciTE.  All rights reserved
  * INSciTE is on the web at: http://www.hightechkids.org
  * This code is released under GPL; see LICENSE.txt for details.
  */
+
+"use-strict";
 
 $(document).ready(function() {
   $("#categories").empty();
