@@ -4,6 +4,8 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
+"use-strict";
+
 function setTimeField(field, value) {
   if (-1 == value) {
     field.val("");
