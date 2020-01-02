@@ -4,6 +4,8 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
+"use-strict";
+
 $(document).ready(function() {
   $("#execute_query").click(function() {
     executeQuery();

@@ -4,6 +4,8 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
+"use-strict";
+
 (function($) {
   if (!$) {
     throw new Error("jQuery needs to be loaded!");
