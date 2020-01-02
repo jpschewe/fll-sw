@@ -9,7 +9,6 @@ package fll.db;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -37,7 +36,7 @@ public class AwardWinner extends OverallAwardWinner implements Serializable {
   public AwardWinner(@JsonProperty("name") final String name,
                      @JsonProperty("awardGroup") final String awardGroup,
                      @JsonProperty("teamNumber") final int teamNumber,
-                     @JsonProperty("description") final Optional<String> description) {
+                     @JsonProperty("description") final String description) {
     super(name, teamNumber, description);
     this.awardGroup = Objects.requireNonNull(awardGroup);
   }

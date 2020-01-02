@@ -9,7 +9,6 @@ package fll.db;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -35,7 +34,7 @@ public class OverallAwardWinner implements Serializable {
    */
   public OverallAwardWinner(@JsonProperty("name") final String name,
                             @JsonProperty("teamNumber") final int teamNumber,
-                            @JsonProperty("description") final Optional<String> description) {
+                            @JsonProperty("description") final String description) {
     this.name = Objects.requireNonNull(name);
     this.teamNumber = teamNumber;
     this.description = Objects.requireNonNull(description);
@@ -64,16 +63,16 @@ public class OverallAwardWinner implements Serializable {
     return teamNumber;
   }
 
-  private final Optional<String> description;
+  private final String description;
 
   /**
    * If the award has a description, this is populated. This can be a description
    * of what the requirements of the award are or a description of what the team
    * did to receive the award.
    * 
-   * @return the description of the award
+   * @return the description of the award, may be null
    */
-  public final Optional<String> getDescription() {
+  public final String getDescription() {
     return description;
   }
 

@@ -31,7 +31,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -1229,8 +1228,7 @@ public final class ImportDB {
         if (!GenerateDB.INTERNAL_TOURNAMENT_NAME.equals(entry.getKey())) {
           final Tournament tournament = Tournament.findTournamentByName(connection, entry.getKey());
           if (null == tournament) {
-            Tournament.createTournament(connection, entry.getKey(), entry.getValue(), null, Optional.empty(),
-                                        Optional.empty());
+            Tournament.createTournament(connection, entry.getKey(), entry.getValue(), null, null, null);
           }
         }
       }

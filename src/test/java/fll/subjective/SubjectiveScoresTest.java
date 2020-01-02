@@ -19,7 +19,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.sql.DataSource;
 
@@ -85,7 +84,7 @@ public class SubjectiveScoresTest {
 
       // setup the database with a team and some judges
       GenerateDB.generateDB(challengeDocument, connection);
-      Tournament.createTournament(connection, tournamentName, tournamentName, null, Optional.empty(), Optional.empty());
+      Tournament.createTournament(connection, tournamentName, tournamentName, null, null, null);
       Tournament tournament = Tournament.findTournamentByName(connection, tournamentName);
       assertNull(Queries.addTeam(connection, teamNumber, "team"
           + teamNumber, "org"));

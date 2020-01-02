@@ -9,7 +9,6 @@ package fll.util;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Paths;
-import java.util.Optional;
 
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
@@ -268,7 +267,7 @@ public final class FOPUtils {
    * @return the table cell
    */
   public static Element createTableCell(final Document document,
-                                        final Optional<String> textAlignment,
+                                        final String textAlignment,
                                         final String text) {
     final Element cell = createXslFoElement(document, "table-cell");
 
@@ -278,8 +277,8 @@ public final class FOPUtils {
 
     final Element block = createXslFoElement(document, "block");
     blockContainer.appendChild(block);
-    if (textAlignment.isPresent()) {
-      block.setAttribute("text-align", textAlignment.get());
+    if (null != textAlignment) {
+      block.setAttribute("text-align", textAlignment);
     }
     block.appendChild(document.createTextNode(text));
 

@@ -11,7 +11,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Arrays;
-import java.util.Optional;
 
 import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
@@ -240,8 +239,7 @@ public final class ProcessTeamTournamentAssignmentsUpload extends BaseFLLServlet
           Tournament tournament = Tournament.findTournamentByName(connection, tournamentName);
           if (null == tournament) {
             // create the tournament
-            Tournament.createTournament(connection, tournamentName, tournamentName, null, Optional.empty(),
-                                        Optional.empty());
+            Tournament.createTournament(connection, tournamentName, tournamentName, null, null, null);
             tournament = Tournament.findTournamentByName(connection, tournamentName);
             if (null == tournament) {
               throw new FLLInternalException("Created tournament '"

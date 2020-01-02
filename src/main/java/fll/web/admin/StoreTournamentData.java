@@ -13,7 +13,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
-import java.util.Optional;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -114,8 +113,7 @@ public class StoreTournamentData extends BaseFLLServlet {
         if (null != name
             && !"".equals(name)) {
           // new tournament
-          Tournament.createTournament(connection, name, description, date, Optional.ofNullable(level),
-                                      Optional.ofNullable(nextLevel));
+          Tournament.createTournament(connection, name, description, date, level, nextLevel);
           if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Adding a new tournament "
                 + " name: "
@@ -152,8 +150,7 @@ public class StoreTournamentData extends BaseFLLServlet {
       } else {
         // update with new values
 
-        Tournament.updateTournament(connection, key, name, description, date, Optional.ofNullable(level),
-                                    Optional.ofNullable(nextLevel));
+        Tournament.updateTournament(connection, key, name, description, date, level, nextLevel);
 
         LOGGER.debug("Updating a tournament {} name: {} description: {} date: {} level: {} nextLevel: {}", key, name,
                      description, date, level, nextLevel);
