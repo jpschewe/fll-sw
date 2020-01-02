@@ -94,6 +94,10 @@ public class StoreTournamentData extends BaseFLLServlet {
         + row);
     String dateStr = request.getParameter("date"
         + row);
+    String level = request.getParameter("level"
+        + row);
+    String nextLevel = request.getParameter("nextLevel"
+        + row);
     while (null != keyStr) {
       final int key = Integer.parseInt(keyStr);
 
@@ -109,7 +113,7 @@ public class StoreTournamentData extends BaseFLLServlet {
         if (null != name
             && !"".equals(name)) {
           // new tournament
-          Tournament.createTournament(connection, name, description, date);
+          Tournament.createTournament(connection, name, description, date, level, nextLevel);
           if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Adding a new tournament "
                 + " name: "
@@ -146,17 +150,10 @@ public class StoreTournamentData extends BaseFLLServlet {
       } else {
         // update with new values
 
-        Tournament.updateTournament(connection, key, name, description, date);
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Updating a tournament "
-              + key
-              + " name: "
-              + name
-              + " description: "
-              + description
-              + " date: "
-              + date);
-        }
+        Tournament.updateTournament(connection, key, name, description, date, level, nextLevel);
+
+        LOGGER.debug("Updating a tournament {} name: {} description: {} date: {} level: {} nextLevel: {}", key, name,
+                     description, date, level, nextLevel);
       }
 
       row++;
@@ -167,6 +164,10 @@ public class StoreTournamentData extends BaseFLLServlet {
       description = request.getParameter("description"
           + row);
       dateStr = request.getParameter("date"
+          + row);
+      level = request.getParameter("level"
+          + row);
+      nextLevel = request.getParameter("nextLevel"
           + row);
     }
   }

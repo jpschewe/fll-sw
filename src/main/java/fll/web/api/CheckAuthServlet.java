@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import fll.Utilities;
 import fll.web.WebUtils;
 
 /**
@@ -33,7 +34,7 @@ public class CheckAuthServlet extends HttpServlet {
     final boolean authenticated = WebUtils.checkAuthenticated(request, application);
     final AuthResult result = new AuthResult(authenticated);
 
-    final ObjectMapper jsonMapper = new ObjectMapper();
+    final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
     response.reset();
     response.setContentType("application/json");

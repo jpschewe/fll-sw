@@ -22,7 +22,6 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Document;
@@ -35,7 +34,6 @@ import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.db.Queries;
-
 import fll.web.admin.DownloadSubjectiveData;
 import fll.web.admin.UploadSubjectiveData;
 import fll.xml.ChallengeDescription;
@@ -86,7 +84,7 @@ public class SubjectiveScoresTest {
 
       // setup the database with a team and some judges
       GenerateDB.generateDB(challengeDocument, connection);
-      Tournament.createTournament(connection, tournamentName, tournamentName, null);
+      Tournament.createTournament(connection, tournamentName, tournamentName, null, null, null);
       Tournament tournament = Tournament.findTournamentByName(connection, tournamentName);
       assertNull(Queries.addTeam(connection, teamNumber, "team"
           + teamNumber, "org"));

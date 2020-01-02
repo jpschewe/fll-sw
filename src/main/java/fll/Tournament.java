@@ -17,19 +17,15 @@ import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 
-
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.GenerateDB;
 import fll.db.Queries;
-
 import fll.web.admin.StoreTournamentData;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * The representation of a tournament. If someone changes the database, this
@@ -43,11 +39,15 @@ public final class Tournament implements Serializable {
   private Tournament(@JsonProperty("tournamentID") final int tournamentID,
                      @JsonProperty("name") final String name,
                      @JsonProperty("description") final String description,
-                     @JsonProperty("date") final LocalDate date) {
+                     @JsonProperty("date") final LocalDate date,
+                     @JsonProperty("level") final String level,
+                     @JsonProperty("nextLevel") final String nextLevel) {
     this.tournamentID = tournamentID;
     this.name = name;
     this.description = description;
     this.date = date;
+    this.level = level;
+    this.nextLevel = nextLevel;
   }
 
   private final int tournamentID;
@@ -92,22 +92,54 @@ public final class Tournament implements Serializable {
     return null == date ? null : StoreTournamentData.DATE_FORMATTER.format(date);
   }
 
+  private final String level;
+
   /**
-   * Create a tournament without a next tournament.
+   * @return the level of the tournament, may be null
+   */
+  public String getLevel() {
+    return level;
+  }
+
+  private final String nextLevel;
+
+  /**
+   * @return the level of the tournament after this one, may be null
+   */
+  public String getNextLevel() {
+    return nextLevel;
+  }
+
+  /**
+   * Create a tournament.
    */
   public static void createTournament(final Connection connection,
                                       final String tournamentName,
                                       final String description,
-                                      final LocalDate date)
+                                      final LocalDate date,
+                                      final String level,
+                                      final String nextLevel)
       throws SQLException {
     try (
-        PreparedStatement prep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location, tournament_date) VALUES (?, ?, ?)")) {
+        PreparedStatement prep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location, tournament_date, level, next_level) VALUES (?, ?, ?, ?, ?)")) {
       prep.setString(1, tournamentName);
       prep.setString(2, description);
       if (null == date) {
         prep.setNull(3, Types.DATE);
       } else {
         prep.setDate(3, java.sql.Date.valueOf(date));
+      }
+      if (null != level
+          && !level.trim().isEmpty()) {
+        prep.setString(4, level.trim());
+      } else {
+        prep.setNull(4, Types.LONGVARCHAR);
+      }
+      if (null != nextLevel
+          && !nextLevel.trim().isEmpty()) {
+        prep.setString(5, nextLevel.trim());
+      } else {
+        prep.setNull(5, Types.LONGVARCHAR);
       }
       prep.executeUpdate();
     }
@@ -123,7 +155,7 @@ public final class Tournament implements Serializable {
   public static List<Tournament> getTournaments(final Connection connection) throws SQLException {
     final List<Tournament> retval = new LinkedList<Tournament>();
     try (
-        PreparedStatement prep = connection.prepareStatement("SELECT tournament_id, Name, Location, tournament_date FROM Tournaments WHERE tournament_id <> ? ORDER BY tournament_date, location ")) {
+        PreparedStatement prep = connection.prepareStatement("SELECT tournament_id, Name, Location, tournament_date, level, next_level FROM Tournaments WHERE tournament_id <> ? ORDER BY tournament_date, location ")) {
       prep.setInt(1, GenerateDB.INTERNAL_TOURNAMENT_ID);
       try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {
@@ -133,7 +165,10 @@ public final class Tournament implements Serializable {
           final java.sql.Date d = rs.getDate(4);
           final LocalDate date = null == d ? null : d.toLocalDate();
 
-          final Tournament tournament = new Tournament(tournamentID, name, location, date);
+          final String level = rs.getString(5);
+          final String nextLevel = rs.getString(6);
+
+          final Tournament tournament = new Tournament(tournamentID, name, location, date, level, nextLevel);
           retval.add(tournament);
         }
       }
@@ -164,7 +199,7 @@ public final class Tournament implements Serializable {
                                                 final String name)
       throws SQLException {
     try (
-        PreparedStatement prep = connection.prepareStatement("SELECT tournament_id, Location, tournament_date FROM Tournaments WHERE Name = ?")) {
+        PreparedStatement prep = connection.prepareStatement("SELECT tournament_id, Location, tournament_date, level, next_level FROM Tournaments WHERE Name = ?")) {
       prep.setString(1, name);
       try (ResultSet rs = prep.executeQuery()) {
         if (rs.next()) {
@@ -172,7 +207,10 @@ public final class Tournament implements Serializable {
           final String location = rs.getString(2);
           final java.sql.Date d = rs.getDate(3);
           final LocalDate date = null == d ? null : d.toLocalDate();
-          return new Tournament(id, name, location, date);
+          final String level = rs.getString(4);
+          final String nextLevel = rs.getString(5);
+
+          return new Tournament(id, name, location, date, level, nextLevel);
         } else {
           return null;
         }
@@ -192,7 +230,7 @@ public final class Tournament implements Serializable {
                                               final int tournamentID)
       throws SQLException {
     try (
-        PreparedStatement prep = connection.prepareStatement("SELECT Name, Location, tournament_date FROM Tournaments WHERE tournament_id = ?")) {
+        PreparedStatement prep = connection.prepareStatement("SELECT Name, Location, tournament_date, level, next_level FROM Tournaments WHERE tournament_id = ?")) {
       prep.setInt(1, tournamentID);
       try (ResultSet rs = prep.executeQuery()) {
         if (rs.next()) {
@@ -200,7 +238,9 @@ public final class Tournament implements Serializable {
           final String location = rs.getString(2);
           final java.sql.Date d = rs.getDate(3);
           final LocalDate date = null == d ? null : d.toLocalDate();
-          return new Tournament(tournamentID, name, location, date);
+          final String level = rs.getString(4);
+          final String nextLevel = rs.getString(5);
+          return new Tournament(tournamentID, name, location, date, level, nextLevel);
         } else {
           return null;
         }
@@ -395,20 +435,28 @@ public final class Tournament implements Serializable {
    * Update the information for a tournament.
    * 
    * @param tournamentID which tournament to modify
-   * @param name new name
-   * @param location new location
-   * @param date the new tournament date
-   * @throws SQLException
+   * @param name see {@link #getName()}
+   * @param location see {@link #getDescription()}
+   * @param date see {@link #getDate()}
+   * @param level see {@link #getLevel()}
+   * @param nextLevel see {@link #getNextLevel()}
+   * @throws SQLException on a database error
    */
   public static void updateTournament(final Connection connection,
                                       final int tournamentID,
                                       final String name,
                                       final String location,
-                                      final LocalDate date)
+                                      final LocalDate date,
+                                      final String level,
+                                      final String nextLevel)
       throws SQLException {
-    PreparedStatement updatePrep = null;
-    try {
-      updatePrep = connection.prepareStatement("UPDATE Tournaments SET Name = ?, Location = ?, tournament_date = ? WHERE tournament_id = ?");
+    try (PreparedStatement updatePrep = connection.prepareStatement("UPDATE Tournaments SET" //
+        + " Name = ?" //
+        + ", Location = ?" //
+        + ", tournament_date = ?" //
+        + ", level = ?" //
+        + ", next_level = ?" //
+        + " WHERE tournament_id = ?")) {
       updatePrep.setString(1, name);
       updatePrep.setString(2, location);
       if (null == date) {
@@ -416,10 +464,20 @@ public final class Tournament implements Serializable {
       } else {
         updatePrep.setDate(3, java.sql.Date.valueOf(date));
       }
-      updatePrep.setInt(4, tournamentID);
+      if (null != level
+          && !level.trim().isEmpty()) {
+        updatePrep.setString(4, level.trim());
+      } else {
+        updatePrep.setNull(4, Types.VARCHAR);
+      }
+      if (null != nextLevel
+          && !nextLevel.trim().isEmpty()) {
+        updatePrep.setString(5, nextLevel.trim());
+      } else {
+        updatePrep.setNull(5, Types.VARCHAR);
+      }
+      updatePrep.setInt(6, tournamentID);
       updatePrep.executeUpdate();
-    } finally {
-      SQLFunctions.close(updatePrep);
     }
   }
 

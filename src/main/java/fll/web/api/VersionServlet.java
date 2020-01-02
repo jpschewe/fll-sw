@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import fll.Utilities;
 import fll.Version;
 
 /**
@@ -28,7 +29,7 @@ public class VersionServlet extends HttpServlet {
   @Override
   protected final void doGet(final HttpServletRequest request,
                              final HttpServletResponse response) throws IOException, ServletException {
-    final ObjectMapper jsonMapper = new ObjectMapper();
+    final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
     response.reset();
     response.setContentType("application/json");

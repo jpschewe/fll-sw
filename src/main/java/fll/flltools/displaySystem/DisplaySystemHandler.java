@@ -16,8 +16,6 @@ import javax.annotation.concurrent.ThreadSafe;
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
-
-
 import fll.Utilities;
 import fll.db.GlobalParameters;
 import fll.db.Queries;
@@ -29,6 +27,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.DisplayInfo;
 import fll.web.scoreboard.Last8;
 import fll.web.scoreboard.Top10;
+import fll.xml.ChallengeDescription;
 
 /**
  * Handle updating the display system based on the what is show on the default
@@ -88,6 +87,8 @@ public class DisplaySystemHandler extends Thread {
     while (running) {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       if (null != datasource) {
+        final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
+
         try (Connection connection = datasource.getConnection()) {
           if (Utilities.testDatabaseInitialized(connection)) {
 
@@ -156,7 +157,7 @@ public class DisplaySystemHandler extends Thread {
 
                   final String awardGroupName = awardGroups.get(currentAwardGroupIndex);
 
-                  payload = Top10.getTableAsList(application, awardGroupName);
+                  payload = Top10.getTableAsList(connection, description, awardGroupName);
 
                   showingMostRecent = false;
                 }

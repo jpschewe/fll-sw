@@ -36,7 +36,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 19;
+  public static final int DATABASE_VERSION = 20;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -292,6 +292,9 @@ public final class GenerateDB {
       createFinalScoresTable(connection, true);
       createOverallScoresTable(connection, true);
 
+      createSubjectiveAwardWinnerTables(connection, true);
+      createAdvancingTeamsTable(connection, true);
+
       // --------------- create views ---------------
 
       // max seeding round score for the current tournament
@@ -507,11 +510,14 @@ public final class GenerateDB {
           + " ,subjective_modified TIMESTAMP DEFAULT NULL" //
           + " ,summary_computed TIMESTAMP DEFAULT NULL" //
           + " ,tournament_date DATE DEFAULT NULL" //
+          + " ,level VARCHAR(128) DEFAULT NULL" //
+          + " ,next_level VARCHAR(128) DEFAULT NULL" //
           + " ,CONSTRAINT tournaments_pk PRIMARY KEY (tournament_id)" //
           + " ,CONSTRAINT name_unique UNIQUE(Name)" //
           + ")");
-      Tournament.createTournament(connection, DUMMY_TOURNAMENT_NAME, "Default dummy tournament", null);
-      Tournament.createTournament(connection, DROP_TOURNAMENT_NAME, "Dummy tournament for teams that drop out", null);
+      Tournament.createTournament(connection, DUMMY_TOURNAMENT_NAME, "Default dummy tournament", null, null, null);
+      Tournament.createTournament(connection, DROP_TOURNAMENT_NAME, "Dummy tournament for teams that drop out", null,
+                                  null, null);
 
       // add internal tournament for default values and such
       createInternalTournament(connection);
@@ -585,9 +591,12 @@ public final class GenerateDB {
    * Put the default parameters (global and tournament) in the database if they
    * don't already exist.
    *
-   * @param headToHead what to set running head to head to, if upgrading this is true, otherwise it's the default value
+   * @param headToHead what to set running head to head to, if upgrading this is
+   *          true, otherwise it's the default value
    */
-  /* package */static void setDefaultParameters(final Connection connection, final boolean headToHead) throws SQLException {
+  /* package */static void setDefaultParameters(final Connection connection,
+                                                final boolean headToHead)
+      throws SQLException {
     createInternalTournament(connection);
 
     PreparedStatement globalInsert = null;
@@ -982,4 +991,82 @@ public final class GenerateDB {
       stmt = null;
     }
   }
+
+  /* package */ static void createSubjectiveAwardWinnerTables(final Connection connection,
+                                                              final boolean createConstraints)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+      stmt.executeUpdate("DROP TABLE IF EXISTS subjective_overall_award CASCADE");
+
+      final StringBuilder subjectiveOverallAward = new StringBuilder();
+      subjectiveOverallAward.append("CREATE TABLE subjective_overall_award (");
+      subjectiveOverallAward.append("  tournament_id INTEGER NOT NULL");
+      subjectiveOverallAward.append(" ,name LONGVARCHAR NOT NULL");
+      subjectiveOverallAward.append(" ,team_number INTEGER NOT NULL");
+      subjectiveOverallAward.append(" ,description LONGVARCHAR");
+      if (createConstraints) {
+        subjectiveOverallAward.append(" ,CONSTRAINT subjective_overall_award_pk PRIMARY KEY (tournament_id, name, team_number)");
+        subjectiveOverallAward.append(" ,CONSTRAINT subjective_overall_award_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
+        subjectiveOverallAward.append(" ,CONSTRAINT subjective_overall_award_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
+      }
+      subjectiveOverallAward.append(")");
+      stmt.executeUpdate(subjectiveOverallAward.toString());
+
+      stmt.executeUpdate("DROP TABLE IF EXISTS subjective_extra_award CASCADE");
+
+      final StringBuilder subjectiveExtraAward = new StringBuilder();
+      subjectiveExtraAward.append("CREATE TABLE subjective_extra_award (");
+      subjectiveExtraAward.append("  tournament_id INTEGER NOT NULL");
+      subjectiveExtraAward.append(" ,name LONGVARCHAR NOT NULL");
+      subjectiveExtraAward.append(" ,team_number INTEGER NOT NULL");
+      subjectiveExtraAward.append(" ,description LONGVARCHAR");
+      subjectiveExtraAward.append(" ,award_group LONGVARCHAR NOT NULL");
+      if (createConstraints) {
+        subjectiveExtraAward.append(" ,CONSTRAINT subjective_extra_award_pk PRIMARY KEY (tournament_id, name, team_number)");
+        subjectiveExtraAward.append(" ,CONSTRAINT subjective_extra_award_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
+        subjectiveExtraAward.append(" ,CONSTRAINT subjective_extra_award_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
+      }
+      subjectiveExtraAward.append(")");
+      stmt.executeUpdate(subjectiveExtraAward.toString());
+
+      stmt.executeUpdate("DROP TABLE IF EXISTS subjective_challenge_award CASCADE");
+
+      final StringBuilder subjectiveChallengeAward = new StringBuilder();
+      subjectiveChallengeAward.append("CREATE TABLE subjective_challenge_award (");
+      subjectiveChallengeAward.append("  tournament_id INTEGER NOT NULL");
+      subjectiveChallengeAward.append(" ,name LONGVARCHAR NOT NULL");
+      subjectiveChallengeAward.append(" ,team_number INTEGER NOT NULL");
+      subjectiveChallengeAward.append(" ,description LONGVARCHAR");
+      subjectiveChallengeAward.append(" ,award_group LONGVARCHAR NOT NULL");
+      if (createConstraints) {
+        subjectiveChallengeAward.append(" ,CONSTRAINT subjective_challenge_award_pk PRIMARY KEY (tournament_id, name, team_number)");
+        subjectiveChallengeAward.append(" ,CONSTRAINT subjective_challenge_award_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
+        subjectiveChallengeAward.append(" ,CONSTRAINT subjective_challenge_award_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
+      }
+      subjectiveChallengeAward.append(")");
+      stmt.executeUpdate(subjectiveChallengeAward.toString());
+    }
+  }
+
+  /* package */ static void createAdvancingTeamsTable(final Connection connection,
+                                                      final boolean createConstraints)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+      stmt.executeUpdate("DROP TABLE IF EXISTS advancing_teams CASCADE");
+
+      final StringBuilder sql = new StringBuilder();
+      sql.append("CREATE TABLE advancing_teams (");
+      sql.append("  tournament_id INTEGER NOT NULL");
+      sql.append(" ,team_number INTEGER NOT NULL");
+      sql.append(" ,award_group LONGVARCHAR");
+      if (createConstraints) {
+        sql.append(" ,CONSTRAINT advancing_teams_pk PRIMARY KEY (tournament_id, team_number)");
+        sql.append(" ,CONSTRAINT advancing_teams_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
+        sql.append(" ,CONSTRAINT advancing_teams_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
+      }
+      sql.append(")");
+      stmt.executeUpdate(sql.toString());
+    }
+  }
+
 }

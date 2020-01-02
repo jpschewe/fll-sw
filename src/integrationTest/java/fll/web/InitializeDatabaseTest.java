@@ -17,8 +17,6 @@ import fll.TestUtils;
 @ExtendWith(IntegrationTestUtils.TomcatRequired.class)
 public class InitializeDatabaseTest {
 
-  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
-
   /**
    * @param selenium browser driver
    * @param seleniumWait wait for elements

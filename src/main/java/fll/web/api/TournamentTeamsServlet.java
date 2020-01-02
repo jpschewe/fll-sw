@@ -28,6 +28,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.TournamentTeam;
+import fll.Utilities;
 import fll.db.Queries;
 
 import fll.web.ApplicationAttributes;
@@ -48,7 +49,7 @@ public class TournamentTeamsServlet extends HttpServlet {
       connection = datasource.getConnection();
 
       final Map<Integer, TournamentTeam> teamMap = Queries.getTournamentTeams(connection);
-      final ObjectMapper jsonMapper = new ObjectMapper();
+      final ObjectMapper jsonMapper = Utilities.createJsonMapper();
 
       response.reset();
       response.setContentType("application/json");
