@@ -10,6 +10,8 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Objects;
 
+import javax.annotation.Nonnull;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -33,8 +35,8 @@ public class AwardWinner extends OverallAwardWinner implements Serializable {
    * @param teamNumber see {@link #getTeamNumber()}
    * @param description see {@link #getDescription()}
    */
-  public AwardWinner(@JsonProperty("name") final String name,
-                     @JsonProperty("awardGroup") final String awardGroup,
+  public AwardWinner(@Nonnull @JsonProperty("name") final String name,
+                     @Nonnull @JsonProperty("awardGroup") final String awardGroup,
                      @JsonProperty("teamNumber") final int teamNumber,
                      @JsonProperty("description") final String description) {
     super(name, teamNumber, description);
@@ -46,6 +48,7 @@ public class AwardWinner extends OverallAwardWinner implements Serializable {
   /**
    * @return the award group
    */
+  @Nonnull
   public final String getAwardGroup() {
     return awardGroup;
   }
