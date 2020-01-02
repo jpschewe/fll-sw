@@ -4,6 +4,8 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
+"use-strict";
+
 /**
  * Used for packaging up and sending to the server to put in the database. Needs
  * to match fll.web.report.finalist.FinalistDBRow.
