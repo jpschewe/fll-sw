@@ -25,7 +25,7 @@ function addTournament() {
 
   var td2Element = $("<td></td>");
   var nameElement = $("<input type=\"text\" id=\"name" + numRows
-      + "\" name=\"name" + numRows + "\" maxlength=\"128\" size=\"32\" />");
+      + "\" name=\"name" + numRows + "\" maxlength=\"128\" size=\"20\" />");
   td2Element.append(nameElement);
   trElement.append(td2Element);
 
@@ -37,13 +37,13 @@ function addTournament() {
 
   var td4Element = $("<td></td>");
   var levelElement = $("<input type=\"text\" name=\"level" + numRows
-      + "\" size=\"64\" maxlength=\"128\" />");
+      + "\" size=\"20\" maxlength=\"128\" />");
   td4Element.append(levelElement);
   trElement.append(td4Element);
 
   var td5Element = $("<td></td>");
   var nextLevelElement = $("<input type=\"text\" name=\"nextLevel" + numRows
-      + "\" size=\"64\" maxlength=\"128\" />");
+      + "\" size=\"20\" maxlength=\"128\" />");
   td5Element.append(nextLevelElement);
   trElement.append(td5Element);
 
