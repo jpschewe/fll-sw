@@ -108,7 +108,7 @@ repositories {
 ext {
     jackson_version = "2.9.8"
     slf4j_version = "1.7.26"
-    tomcat_version = "9.0.17"
+    tomcat_version = "9.0.30"
     itext_version = "5.5.13.1"
     poi_version = "4.0.1"
     junit_version = "5.5.2"
@@ -151,6 +151,8 @@ dependencies {
   implementation(group: "org.apache.tomcat", name: "tomcat-jasper", version: project.tomcat_version)
   implementation(group: "org.apache.tomcat", name: "tomcat-jasper-el", version: project.tomcat_version)
   implementation(group: "org.apache.tomcat", name: "tomcat-jsp-api", version: project.tomcat_version)
+  implementation(group: "javax.servlet", name: "javax.servlet-api", version: "4.0.1")
+  runtimeOnly(group: "javax.servlet", name: "jstl", version: "1.2")
 
   implementation(group: "org.apache.commons", name: "commons-lang3", version: "3.8.1")
   implementation(group: "commons-cli", name: "commons-cli", version: "1.4")
@@ -190,9 +192,7 @@ dependencies {
   implementation(group: "com.googlecode.log4jdbc", name: "log4jdbc", version: "1.2")
     
   implementation(group: "net.java.linoleum", name: "jlfgr", version: "1_0")
-    
-  runtimeOnly(group: "javax.servlet", name: "jstl", version: "1.2")
-    
+        
   implementation(group: "com.opencsv", name: "opencsv", version: "4.5")
     
   implementation(group: "net.mtu.eggplant", name: "JonsInfra", version: "2.0.1"   )
@@ -202,6 +202,9 @@ dependencies {
   implementation(group: "org.apache.xmlgraphics", name: "fop", version: "2.4") {
     // only needed for BMP and TIFF formats
     exclude(group: "com.sun.media", module: "jai-codec")
+    
+    // references old version of the servlet API
+    exclude(group: "javax.servlet", module: "servlet-api")
   }
     
   testImplementation(group: "org.junit.jupiter", name: "junit-jupiter-api", version: project.junit_version)
