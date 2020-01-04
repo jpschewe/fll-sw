@@ -422,15 +422,17 @@ public class AwardsReport extends BaseFLLServlet {
     return staticContent;
   }
 
-  private static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendValue(ChronoField.MONTH_OF_YEAR,
-                                                                                                     2)
-                                                                                        .appendLiteral('/')
-                                                                                        .appendValue(ChronoField.DAY_OF_MONTH,
-                                                                                                     2)
-                                                                                        .appendLiteral('/')
-                                                                                        .appendValue(ChronoField.YEAR,
-                                                                                                     4)
-                                                                                        .toFormatter();
+  /**
+   * Date format for reports.
+   */
+  public static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendValue(ChronoField.MONTH_OF_YEAR,
+                                                                                                    2)
+                                                                                       .appendLiteral('/')
+                                                                                       .appendValue(ChronoField.DAY_OF_MONTH,
+                                                                                                    2)
+                                                                                       .appendLiteral('/')
+                                                                                       .appendValue(ChronoField.YEAR, 4)
+                                                                                       .toFormatter();
 
   private static String createTitle(final ChallengeDescription description,
                                     final Tournament tournament) {
