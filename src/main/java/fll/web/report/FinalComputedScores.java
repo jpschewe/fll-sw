@@ -199,8 +199,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
   private static final Font TIMES_12PT_NORMAL = FontFactory.getFont(FontFactory.TIMES, 12, Font.NORMAL);
 
   private static final BaseColor TOP_SCORE_BACKGROUND = new BaseColor(BaseColor.LIGHT_GRAY.getRed(),
-                                                                    BaseColor.LIGHT_GRAY.getGreen(),
-                                                                    BaseColor.LIGHT_GRAY.getBlue());
+                                                                      BaseColor.LIGHT_GRAY.getGreen(),
+                                                                      BaseColor.LIGHT_GRAY.getBlue());
 
   /**
    * Generate the actual report.
@@ -263,7 +263,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
         divTable.getDefaultCell().setBorder(0);
         divTable.setWidthPercentage(100);
 
-        final PdfPTable header = createHeader(challengeTitle, tournament.getDescription(), awardGroup);
+        final PdfPTable header = createHeader(challengeTitle, tournament, awardGroup);
         final PdfPCell headerCell = new PdfPCell(header);
         headerCell.setColspan(relativeWidths.length);
         divTable.addCell(headerCell);
@@ -993,7 +993,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
   }
 
   private PdfPTable createHeader(final String challengeTitle,
-                                 final String tournamentName,
+                                 final Tournament tournament,
                                  final String division) {
     // initialization of the header table
     final PdfPTable header = new PdfPTable(2);
@@ -1007,8 +1007,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
     header.getDefaultCell().setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
 
     final Phrase p2 = new Phrase();
-    p2.add(new Chunk("Tournament: "
-        + tournamentName, TIMES_12PT_NORMAL));
+    p2.add(new Chunk(AwardsReport.DATE_FORMATTER.format(tournament.getDate())
+        + " - "
+        + tournament.getDescription(), TIMES_12PT_NORMAL));
     p2.add(Chunk.NEWLINE);
     p2.add(new Chunk("Award Group: "
         + division, TIMES_12PT_NORMAL));
