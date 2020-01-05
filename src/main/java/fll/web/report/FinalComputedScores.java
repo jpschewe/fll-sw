@@ -1006,10 +1006,15 @@ public final class FinalComputedScores extends BaseFLLServlet {
     header.addCell(p);
     header.getDefaultCell().setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
 
+    final StringBuilder title = new StringBuilder();
+    if (null != tournament.getDate()) {
+      title.append(AwardsReport.DATE_FORMATTER.format(tournament.getDate())
+          + " - ");
+    }
+    title.append(tournament.getDescription());
+
     final Phrase p2 = new Phrase();
-    p2.add(new Chunk(AwardsReport.DATE_FORMATTER.format(tournament.getDate())
-        + " - "
-        + tournament.getDescription(), TIMES_12PT_NORMAL));
+    p2.add(new Chunk(title.toString(), TIMES_12PT_NORMAL));
     p2.add(Chunk.NEWLINE);
     p2.add(new Chunk("Award Group: "
         + division, TIMES_12PT_NORMAL));
