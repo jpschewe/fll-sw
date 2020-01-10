@@ -1,3 +1,5 @@
+* link to awards report from judges page
+
 Release 14.3.0
 ==============
 * #795 - add report for awards
