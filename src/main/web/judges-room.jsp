@@ -173,6 +173,19 @@
         </li>
 
         <li>
+            <a href="<c:url value='/report/edit-award-winners.jsp' />"
+                target="_blank">Enter the winners of awards for use
+                in the awards report</a>
+        </li>
+
+        <li>
+            <a href="<c:url value='/report/AwardsReport' />"
+                target="_blank">Report of winners for the
+                tournament.</a> This can be published on the web or used for
+            the awards ceremony.
+        </li>
+
+        <li>
             <a target="_report"
                 href="<c:url value='/report/index.jsp' />">Generate
                 reports</a> - this is done once all of the subjective scores
