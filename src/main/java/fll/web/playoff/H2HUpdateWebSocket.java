@@ -148,7 +148,7 @@ public class H2HUpdateWebSocket {
                                                            .get(GetHttpSessionConfigurator.HTTP_SESSION_KEY);
       final ServletContext httpApplication = httpSession.getServletContext();
       final DataSource datasource = ApplicationAttributes.getDataSource(httpApplication);
-      try (final Connection connection = datasource.getConnection()) {
+      try (Connection connection = datasource.getConnection()) {
         final int currentTournament = Queries.getCurrentTournament(connection);
         addSession(session, allBracketInfo, connection, currentTournament);
       }
@@ -186,7 +186,7 @@ public class H2HUpdateWebSocket {
 
         // expose all bracketInfo to the javascript
         final ObjectMapper jsonMapper = Utilities.createJsonMapper();
-        try (final StringWriter writer = new StringWriter()) {
+        try (StringWriter writer = new StringWriter()) {
           jsonMapper.writeValue(writer, message);
           final String allBracketInfoJson = writer.toString();
 
@@ -377,6 +377,7 @@ public class H2HUpdateWebSocket {
                   performanceScoreType, noShow, verified, table);
   }
 
+  // CHECKSTYLE:OFF - data class for websocket
   /**
    * Message sent on the WebSocket.
    */
@@ -401,6 +402,7 @@ public class H2HUpdateWebSocket {
     public List<BracketInfo> allBracketInfo = new LinkedList<>();
 
   }
+  // CHECKSTYLE:ON
 
   private static final class BracketInfoTypeInformation extends TypeReference<Collection<BracketInfo>> {
     public static final BracketInfoTypeInformation INSTANCE = new BracketInfoTypeInformation();
