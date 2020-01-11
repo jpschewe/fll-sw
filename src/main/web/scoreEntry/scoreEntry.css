@@ -32,3 +32,8 @@ td .goal-title {
 	font-weight: bold;
 	text-align: right;
 }
+
+.goal-group-spacer {
+    background-color: black;
+    line-height: 2px;    
+}
