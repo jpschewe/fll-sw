@@ -492,7 +492,7 @@ public final class ScoreEntry {
       try {
 
         if (!StringUtils.equals(prevCategory, category)) {
-          writer.println("<tr><td colspan='4'>&nbsp;</td></tr>");
+          writer.println("<tr><td colspan='4' class='goal-group-spacer'>&nbsp;</td></tr>");
           if (!StringUtils.isEmpty(category)) {
             writer.println("<tr>");
             writer.println("<td colspan='2' class='center truncate'><b>"
