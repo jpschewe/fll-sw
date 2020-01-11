@@ -22,7 +22,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Document;
@@ -166,11 +165,13 @@ public class ScoreTest {
   @Test
   public void testScheduleFinalists() {
     final Map<String, Collection<Integer>> finalists = new HashMap<String, Collection<Integer>>();
-    // using data from division 1 of State from teh 2007 season.
+    // CHECKSTYLE:OFF - test data
+    // using data from division 1 of State from the2007 season.
     finalists.put("programming", Arrays.asList(2682, 533, 3564, 6162));
     finalists.put("design", Arrays.asList(6162, 2682, 3564, 533));
     finalists.put("teamwork", Arrays.asList(2682, 4706, 5890, 1452));
     finalists.put("research", Arrays.asList(5568, 1452, 2683, 3517));
+    // CHECKSTYLE:ON
 
     final List<Map<String, Integer>> schedule = ScoreUtils.scheduleFinalists(finalists);
     if (LOG.isDebugEnabled()) {
