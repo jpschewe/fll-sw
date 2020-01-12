@@ -372,7 +372,7 @@ public class Launcher extends JFrame {
    */
   private void checkWebserver() {
     boolean newServerOnline = false;
-    try (final Socket s = new Socket("localhost", WEB_PORT)) {
+    try (Socket s = new Socket("localhost", WEB_PORT)) {
       newServerOnline = true;
     } catch (final IOException ex) {
       if (LOGGER.isTraceEnabled()) {
@@ -672,6 +672,8 @@ public class Launcher extends JFrame {
     return null;
   }
 
+  private static final int[] ICON_SIZES = new int[] { 8, 16, 32, 64, 128, 256, 512, 1024 };
+
   private static void setApplicationIcon(final Window window) {
     try {
       // get images from small to large
@@ -679,7 +681,7 @@ public class Launcher extends JFrame {
       final BufferedImage original = ImageIO.read(imageURL);
 
       final List<BufferedImage> images = new LinkedList<>();
-      for (final int size : new int[] { 8, 16, 32, 64, 128, 256, 512, 1024 }) {
+      for (final int size : ICON_SIZES) {
         final double scaleWidth = (double) size
             / original.getWidth();
         final double scaleHeight = (double) size
