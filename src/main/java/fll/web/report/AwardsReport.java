@@ -122,6 +122,8 @@ public class AwardsReport extends BaseFLLServlet {
 
     addPerformance(connection, document, documentBody, description);
 
+    addHeadToHead(connection, document, documentBody);
+    
     addSubjectiveChallengeWinners(connection, document, documentBody, tournament);
     addSubjectiveExtraWinners(connection, document, documentBody, tournament);
     addSubjectiveOverallWinners(connection, document, documentBody, tournament);
@@ -130,6 +132,14 @@ public class AwardsReport extends BaseFLLServlet {
     documentBody.appendChild(advancingElement);
 
     return document;
+  }
+
+  private void addHeadToHead(final Connection connection,
+                             final Document document,
+                             final Element documentBody) {
+    // TODO Auto-generated method stub
+    //FIXME
+    throw new RuntimeException("Not implemented");
   }
 
   private void addSubjectiveChallengeWinners(final Connection connection,
