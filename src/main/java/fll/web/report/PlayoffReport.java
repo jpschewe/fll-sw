@@ -24,8 +24,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-
-
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
@@ -38,13 +36,11 @@ import com.itextpdf.text.pdf.PdfWriter;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
-
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.playoff.Playoff;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreType;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Report displaying which teams won each playoff bracket.
@@ -59,15 +55,13 @@ public class PlayoffReport extends BaseFLLServlet {
   private static final Font HEADER_FONT = TITLE_FONT;
 
   @Override
-  protected void processRequest(HttpServletRequest request,
-                                HttpServletResponse response,
-                                ServletContext application,
-                                HttpSession session)
+  protected void processRequest(final HttpServletRequest request,
+                                final HttpServletResponse response,
+                                final ServletContext application,
+                                final HttpSession session)
       throws IOException, ServletException {
-    Connection connection = null;
-    try {
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
-      connection = datasource.getConnection();
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
       final Tournament tournament = Tournament.findTournamentByID(connection, Queries.getCurrentTournament(connection));
@@ -113,8 +107,6 @@ public class PlayoffReport extends BaseFLLServlet {
     } catch (final DocumentException e) {
       LOGGER.error(e, e);
       throw new RuntimeException(e);
-    } finally {
-      SQLFunctions.close(connection);
     }
   }
 
@@ -128,39 +120,34 @@ public class PlayoffReport extends BaseFLLServlet {
                                     final String division,
                                     final ScoreType performanceScoreType)
       throws SQLException {
-    PreparedStatement teamPrep = null;
-    ResultSet teamResult = null;
-    PreparedStatement scorePrep = null;
-    ResultSet scoreResult = null;
-    try {
-      final Paragraph para = new Paragraph();
-      para.add(Chunk.NEWLINE);
-      para.add(new Chunk("Results for head to head bracket "
-          + division, TITLE_FONT));
-      para.add(Chunk.NEWLINE);
+    final Paragraph para = new Paragraph();
+    para.add(Chunk.NEWLINE);
+    para.add(new Chunk("Results for head to head bracket "
+        + division, TITLE_FONT));
+    para.add(Chunk.NEWLINE);
 
-      final int maxRun = Playoff.getMaxPerformanceRound(connection, tournament.getTournamentID(), division);
+    final int maxRun = Playoff.getMaxPerformanceRound(connection, tournament.getTournamentID(), division);
 
-      if (maxRun < 1) {
-        para.add("Cannot determine max run number for this playoff bracket. This is an internal error");
-      } else {
-        teamPrep = connection.prepareStatement("SELECT Teams.TeamNumber, Teams.TeamName, Teams.Organization" //
-            + " FROM PlayoffData, Teams" //
-            + " WHERE PlayoffData.Tournament = ?" //
-            + " AND PlayoffData.event_division = ?" //
-            + " AND PlayoffData.run_number = ?" //
-            + " AND Teams.TeamNumber = PlayoffData.team"//
-            + " ORDER BY PlayoffData.linenumber" //
-        );
+    if (maxRun < 1) {
+      para.add("Cannot determine max run number for this playoff bracket. This is an internal error");
+    } else {
+      try (
+          PreparedStatement teamPrep = connection.prepareStatement("SELECT Teams.TeamNumber, Teams.TeamName, Teams.Organization" //
+              + " FROM PlayoffData, Teams" //
+              + " WHERE PlayoffData.Tournament = ?" //
+              + " AND PlayoffData.event_division = ?" //
+              + " AND PlayoffData.run_number = ?" //
+              + " AND Teams.TeamNumber = PlayoffData.team"//
+              + " ORDER BY PlayoffData.linenumber" //
+          );
+          PreparedStatement scorePrep = connection.prepareStatement("SELECT ComputedTotal" //
+              + " FROM Performance" //
+              + " WHERE Tournament = ?" //
+              + " AND TeamNumber = ?" //
+              + " AND RunNumber = ?"//
+          )) {
         teamPrep.setInt(1, tournament.getTournamentID());
         teamPrep.setString(2, division);
-
-        scorePrep = connection.prepareStatement("SELECT ComputedTotal" //
-            + " FROM Performance" //
-            + " WHERE Tournament = ?" //
-            + " AND TeamNumber = ?" //
-            + " AND RunNumber = ?"//
-        );
 
         // figure out the last teams
         final List<String> lastTeams = new LinkedList<>();
@@ -170,71 +157,64 @@ public class PlayoffReport extends BaseFLLServlet {
         scorePrep.setInt(1, tournament.getTournamentID());
         scorePrep.setInt(3, maxRun
             - 1);
-        teamResult = teamPrep.executeQuery();
-        while (teamResult.next()) {
-          final int teamNumber = teamResult.getInt(1);
-          final String teamName = teamResult.getString(2);
-          final String organization = teamResult.getString(3);
+        try (ResultSet team1Result = teamPrep.executeQuery()) {
+          while (team1Result.next()) {
+            final int teamNumber = team1Result.getInt(1);
+            final String teamName = team1Result.getString(2);
+            final String organization = team1Result.getString(3);
 
-          scorePrep.setInt(2, teamNumber);
-          scoreResult = scorePrep.executeQuery();
-          final String scoreStr;
-          if (scoreResult.next()) {
-            scoreStr = Utilities.getFormatForScoreType(performanceScoreType).format(scoreResult.getDouble(1));
-          } else {
-            scoreStr = "unknown";
+            scorePrep.setInt(2, teamNumber);
+            try (ResultSet scoreResult = scorePrep.executeQuery()) {
+              final String scoreStr;
+              if (scoreResult.next()) {
+                scoreStr = Utilities.getFormatForScoreType(performanceScoreType).format(scoreResult.getDouble(1));
+              } else {
+                scoreStr = "unknown";
+              }
+
+              lastTeams.add(String.format("Team %d from %s - %s with a score of %s", teamNumber, organization, teamName,
+                                          scoreStr));
+            } // scoreResult
           }
-
-          lastTeams.add(String.format("Team %d from %s - %s with a score of %s", teamNumber, organization, teamName,
-                                      scoreStr));
-
-          SQLFunctions.close(scoreResult);
-          scoreResult = null;
-        }
-        SQLFunctions.close(teamResult);
-        teamResult = null;
+        } // teamResult
 
         // determine the winners
         int lastTeamsIndex = 0;
         teamPrep.setInt(3, maxRun);
-        teamResult = teamPrep.executeQuery();
-        while (teamResult.next()) {
-          final int teamNumber = teamResult.getInt(1);
-          final String teamName = teamResult.getString(2);
+        try (ResultSet team2Result = teamPrep.executeQuery()) {
+          while (team2Result.next()) {
+            final int teamNumber = team2Result.getInt(1);
+            final String teamName = team2Result.getString(2);
 
-          para.add(String.format("Competing for places %d and %d", lastTeamsIndex
-              + 1, lastTeamsIndex
-                  + 2));
-          para.add(Chunk.NEWLINE);
-          if (lastTeamsIndex < lastTeams.size()) {
-            para.add(lastTeams.get(lastTeamsIndex));
-          } else {
-            para.add("Internal error, unknown team competing");
-          }
-          para.add(Chunk.NEWLINE);
-          ++lastTeamsIndex;
+            para.add(String.format("Competing for places %d and %d", lastTeamsIndex
+                + 1, lastTeamsIndex
+                    + 2));
+            para.add(Chunk.NEWLINE);
+            if (lastTeamsIndex < lastTeams.size()) {
+              para.add(lastTeams.get(lastTeamsIndex));
+            } else {
+              para.add("Internal error, unknown team competing");
+            }
+            para.add(Chunk.NEWLINE);
+            ++lastTeamsIndex;
 
-          if (lastTeamsIndex < lastTeams.size()) {
-            para.add(lastTeams.get(lastTeamsIndex));
-          } else {
-            para.add("Internal error, unknown team competing");
-          }
-          para.add(Chunk.NEWLINE);
-          ++lastTeamsIndex;
+            if (lastTeamsIndex < lastTeams.size()) {
+              para.add(lastTeams.get(lastTeamsIndex));
+            } else {
+              para.add("Internal error, unknown team competing");
+            }
+            para.add(Chunk.NEWLINE);
+            ++lastTeamsIndex;
 
-          para.add(String.format("The winner is team %d - %s", teamNumber, teamName));
-          para.add(Chunk.NEWLINE);
-          para.add(Chunk.NEWLINE);
-        }
-      }
+            para.add(String.format("The winner is team %d - %s", teamNumber, teamName));
+            para.add(Chunk.NEWLINE);
+            para.add(Chunk.NEWLINE);
+          } // foreach result
+        } // teamResult
+      } // prepared statements
+    } // finished playoff
 
-      return para;
-    } finally {
-      SQLFunctions.close(teamResult);
-      SQLFunctions.close(teamPrep);
-      SQLFunctions.close(scoreResult);
-      SQLFunctions.close(scorePrep);
-    }
+    return para;
   }
 
 }
