@@ -234,10 +234,38 @@ public final class FOPUtils {
    * @return the table element
    */
   public static Element createBasicTable(final Document document) {
-    final Element table = createXslFoElement(document, "table");
+    final Element table = createXslFoElement(document, TABLE_TAG);
     table.setAttribute("table-layout", "fixed");
     table.setAttribute("width", "100%");
     return table;
+  }
+
+  /**
+   * Tag name for table columns.
+   */
+  public static final String TABLE_COLUMN_TAG = "table-column";
+
+  /**
+   * Tag name for table element.
+   */
+  public static final String TABLE_TAG = "table";
+
+  /**
+   * Count the number of columns in the table.
+   * 
+   * @param table the table element
+   * @return the number of columns
+   * @throws IllegalArgumentException if the element is not a table
+   * @see #TABLE_TAG
+   */
+  public static int columnsInTable(final Element table) {
+    if (!TABLE_TAG.equals(table.getLocalName())) {
+      throw new IllegalArgumentException("Not a table: "
+          + table.getTagName());
+    }
+
+    final int columnCount = table.getElementsByTagNameNS(XSL_FO_NAMESPACE, FOPUtils.TABLE_COLUMN_TAG).getLength();
+    return columnCount;
   }
 
   /**
@@ -249,7 +277,7 @@ public final class FOPUtils {
    */
   public static Element createTableColumn(final Document document,
                                           final int proportionalWidth) {
-    final Element ele = createXslFoElement(document, "table-column");
+    final Element ele = createXslFoElement(document, TABLE_COLUMN_TAG);
     ele.setAttribute("column-width", String.format("proportional-column-width(%d)", proportionalWidth));
     return ele;
   }
