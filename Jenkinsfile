@@ -106,7 +106,6 @@ pipeline {
     stage('Mac Distribution') {
       agent { label "linux" }
       steps {
-        throttle(['fll-sw']) { 
           timestamps {
             unstash name: 'build_data'
             catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE', message: 'Assuming distribution failed because a new version of OpenJDK was released') {
@@ -114,7 +113,6 @@ pipeline {
             }
             stash name: 'mac_distribution', includes: 'build/distributions/*'
           } // timestamps
-        } // throttle
       } // steps           
     } // Linux Distribution stage
         
@@ -133,23 +131,29 @@ pipeline {
     }
     */
     
+    stage('Gather results') {
+        steps {
+            timestamps {
+                unstash name: 'build_data'
+                unstash name: 'windows_distribution'
+                unstash name: 'linux_distribution'
+                unstash name: 'mac_distribution'
+          
+                archiveArtifacts artifacts: 'logs/,screenshots/,build/distributions/'
+                
+                recordIssues tool: taskScanner(includePattern: '**/*.java,**/*.jsp,**/*.jspf,**/*.xml', excludePattern: 'checkstyle*.xml', highTags: 'FIXME,HACK', normalTags: 'TODO')
+                
+                recordIssues tool: java()  
+
+                recordIssues tool: javaDoc()                                            
+            }            
+        }
+    }
+    
   } // stages
     
   post {
-    always {
-      unstash name: 'build_data'
-      unstash name: 'windows_distribution'
-      unstash name: 'linux_distribution'
-      unstash name: 'mac_distribution'
-      
-      archiveArtifacts artifacts: 'logs/,screenshots/,build/distributions/'
-                        
-      recordIssues tool: taskScanner(includePattern: '**/*.java,**/*.jsp,**/*.jspf,**/*.xml', excludePattern: 'checkstyle*.xml', highTags: 'FIXME,HACK', normalTags: 'TODO')
-                
-      recordIssues tool: java()  
-
-      recordIssues tool: javaDoc()
-
+    always {      
       emailext recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']], 
           to: 'jpschewe@mtu.net',
           subject: '${PROJECT_NAME} - Build # ${BUILD_NUMBER} - ${BUILD_STATUS}!', 
