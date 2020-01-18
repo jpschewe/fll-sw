@@ -66,7 +66,7 @@ public class UpdateUnverifiedRuns extends BaseFLLServlet {
 
           response.getWriter()
                   .println(String.format("document.verify.TeamNumber.options[%d]=new Option(\"Run %d - %d [%s]\", \"%d-%d\", true, false);",
-                                         index, teamNumber, runNumber, escapedName, teamNumber, runNumber));
+                                         index, runNumber, teamNumber, escapedName, teamNumber, runNumber));
 
           ++index;
         } // foreach result
