@@ -30,6 +30,7 @@ import javax.xml.transform.TransformerException;
 
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FopFactory;
+import org.apache.xmlgraphics.java2d.Dimension2DDouble;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -105,8 +106,17 @@ public class AwardsReport extends BaseFLLServlet {
     final Element layoutMasterSet = FOPUtils.createXslFoElement(document, "layout-master-set");
     rootElement.appendChild(layoutMasterSet);
 
+    final double leftMargin = 0.5;
+    final double rightMargin = leftMargin;
+    final double topMargin = 1;
+    final double bottomMargin = 0.5;
+    final double headerHeight = topMargin;
+    final double footerHeight = 0.3;
+
     final String pageMasterName = "simple";
-    FOPUtils.createSimplePageMaster(document, layoutMasterSet, pageMasterName, 8.5, 11, 0.5, 0.5, 1, 0.5, 1, 0.3);
+    FOPUtils.createSimplePageMaster(document, layoutMasterSet, pageMasterName, FOPUtils.PAGE_LETTER_SIZE,
+                                    new FOPUtils.Margins(topMargin, bottomMargin, leftMargin, rightMargin),
+                                    headerHeight, footerHeight);
 
     final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
     rootElement.appendChild(pageSequence);
@@ -123,7 +133,7 @@ public class AwardsReport extends BaseFLLServlet {
     addPerformance(connection, document, documentBody, description);
 
     addHeadToHead(connection, document, documentBody);
-    
+
     addSubjectiveChallengeWinners(connection, document, documentBody, tournament);
     addSubjectiveExtraWinners(connection, document, documentBody, tournament);
     addSubjectiveOverallWinners(connection, document, documentBody, tournament);
@@ -138,7 +148,7 @@ public class AwardsReport extends BaseFLLServlet {
                              final Document document,
                              final Element documentBody) {
     // TODO Auto-generated method stub
-    //FIXME
+    // FIXME
     throw new RuntimeException("Not implemented");
   }
 

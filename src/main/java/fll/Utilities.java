@@ -834,4 +834,17 @@ public final class Utilities {
     return new ObjectMapper().registerModule(new Jdk8Module());
   }
 
+  /**
+   * Check if two doubles are exactly equal.
+   * 
+   * @param one first value to compare
+   * @param two second value to compare
+   * @return if the two doubles are exactly equal
+   * @see Double#doubleToLongBits(double)
+   */
+  public static boolean doubleExactEquals(final double one,
+                                          final double two) {
+    return Double.doubleToLongBits(one) == Double.doubleToLongBits(two);
+  }
+
 }
