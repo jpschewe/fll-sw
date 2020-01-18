@@ -67,7 +67,7 @@
 					<form name='check' action='CheckSeedingRounds' method='POST'>
 						Check to make sure all teams have scores entered for each regular
 						match play round. <input type='submit' id='check_seeding_rounds'
-							value='Check Seeding Rounds' />
+							value='Check Missing Rounds' />
 
 					</form>
 				</li>
