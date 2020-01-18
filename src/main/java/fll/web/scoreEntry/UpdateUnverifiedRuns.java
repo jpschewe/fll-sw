@@ -42,8 +42,8 @@ public class UpdateUnverifiedRuns extends BaseFLLServlet {
                                 final HttpSession session)
       throws IOException, ServletException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    try (final Connection connection = datasource.getConnection();
-        final PreparedStatement prep = connection.prepareStatement("SELECT"
+    try (Connection connection = datasource.getConnection();
+        PreparedStatement prep = connection.prepareStatement("SELECT"
             + "     Performance.TeamNumber"
             + "    ,Performance.RunNumber"
             + "    ,Teams.TeamName"
@@ -55,7 +55,7 @@ public class UpdateUnverifiedRuns extends BaseFLLServlet {
 
       prep.setInt(1, Queries.getCurrentTournament(connection));
 
-      try (final ResultSet rs = prep.executeQuery()) {
+      try (ResultSet rs = prep.executeQuery()) {
         int index = 0;
         while (rs.next()) {
           final int teamNumber = rs.getInt(1);
