@@ -31,9 +31,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import javax.sql.DataSource;
 
@@ -68,9 +73,10 @@ public final class Utilities {
   };
 
   /**
-   * Single instance of the floating point NumberFormat instance to save on
-   * overhead
-   * and to use for consistency of formatting.
+   * @return Single instance of the floating point NumberFormat instance to save
+   *         on
+   *         overhead
+   *         and to use for consistency of formatting.
    */
   public static NumberFormat getFloatingPointNumberFormat() {
     return FLOATING_POINT_NUMBER_FORMAT_INSTANCE.get();
@@ -89,10 +95,12 @@ public final class Utilities {
   };
 
   /**
-   * Single instance of the floating point NumberFormat instance to save on
-   * overhead
-   * and to use for consistency of formatting. Compatible with XML floating point
-   * fields.
+   * @return Single instance of the floating point NumberFormat instance to save
+   *         on
+   *         overhead
+   *         and to use for consistency of formatting. Compatible with XML
+   *         floating point
+   *         fields.
    */
   public static NumberFormat getXmlFloatingPointNumberFormat() {
     return XML_FLOATING_POINT_NUMBER_FORMAT_INSTANCE.get();
@@ -106,8 +114,9 @@ public final class Utilities {
   };
 
   /**
-   * Single instance of the integer NumberFormat instance to save on overhead
-   * and to use for consistency of formatting.
+   * @return Single instance of the integer NumberFormat instance to save on
+   *         overhead
+   *         and to use for consistency of formatting.
    */
   public static NumberFormat getIntegerNumberFormat() {
     return INTEGER_NUMBER_FORMAT_INSTANCE.get();
@@ -122,6 +131,9 @@ public final class Utilities {
    */
   public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
+  /**
+   * Unicode character for a non-breaking space.
+   */
   public static final char NON_BREAKING_SPACE = '\u00a0';
 
   private Utilities() {
@@ -138,6 +150,7 @@ public final class Utilities {
    * @param tablename name of the table to create
    * @param reader where to read the data from, a {@link CSVReader} will be
    *          created from this
+   * @param types column name to sql type mapping
    * @throws SQLException if there is an error putting data in the database
    * @throws IOException if there is an error reading the data
    * @throws RuntimeException if the first line cannot be read
@@ -391,7 +404,7 @@ public final class Utilities {
   }
 
   /**
-   * Create a datasource for the specified database
+   * Create a datasource for the specified database.
    *
    * @param database the database to connect to, assumed to be a filename
    * @return a datasource
@@ -408,7 +421,7 @@ public final class Utilities {
   }
 
   /**
-   * Create a datasource for the specified memory database
+   * Create a datasource for the specified memory database.
    *
    * @param database the database to connect to, assumed to be a filename
    * @return a datasource
@@ -451,29 +464,21 @@ public final class Utilities {
   private static final FilenameFilter GRAPHICS_FILTER = (dir,
                                                          name) -> {
     final String lowerName = name.toLowerCase();
-    if (lowerName.endsWith(".png")
+    return (lowerName.endsWith(".png")
         || lowerName.endsWith(".jpg")
         || lowerName.endsWith(".jpeg")
-        || lowerName.endsWith(".gif")) {
-      return true;
-    } else {
-      return false;
-    }
+        || lowerName.endsWith(".gif"));
   };
 
   /**
    * Filter used to select only directories
    */
   private static final FileFilter DIRFILTER = f -> {
-    if (f.isDirectory()) {
-      return true;
-    } else {
-      return false;
-    }
+    return f.isDirectory();
   };
 
   /**
-   * Find all graphic files in the specified directory
+   * Find all graphic files in the specified directory.
    *
    * @param directory which directory to search in
    * @return paths to all files, sorted
@@ -544,7 +549,7 @@ public final class Utilities {
   }
 
   /**
-   * Determine the extension given a filename
+   * Determine the extension given a filename.
    *
    * @param filename the filename
    * @return the extension, or null if there isn't one
@@ -560,32 +565,9 @@ public final class Utilities {
     return extension;
   }
 
-  public static final int MINUTES_PER_HOUR = 60;
-
   /**
-   * Convert hours to minutes.
-   */
-  public static int convertHoursToMinutes(final int hours) {
-    return hours
-        * MINUTES_PER_HOUR;
-  }
-
-  public static final long SECONDS_PER_MINUTE = 60;
-
-  public static final long MILLISECONDS_PER_SECOND = 1000;
-
-  public static long convertMinutesToSeconds(final long minutes) {
-    return minutes
-        * SECONDS_PER_MINUTE;
-  }
-
-  public static long convertMinutesToMilliseconds(final long minutes) {
-    return convertMinutesToSeconds(minutes)
-        * MILLISECONDS_PER_SECOND;
-  }
-
-  /**
-   * Get the name of the file without the extension (if there is one).
+   * @param selectedFile the file to analyze
+   * @return the name of the file without the extension (if there is one).
    */
   public static String extractBasename(final File selectedFile) {
     final String name;
@@ -600,7 +582,9 @@ public final class Utilities {
   }
 
   /**
-   * Get the absolute name of the file without the extension (if there is one).
+   * @param selectedFile the file to analyze
+   * @return the absolute name of the file without the extension (if there is
+   *         one).
    */
   public static String extractAbsoluteBasename(final File selectedFile) {
     final String name;
@@ -847,4 +831,20 @@ public final class Utilities {
     return Double.doubleToLongBits(one) == Double.doubleToLongBits(two);
   }
 
+  /**
+   * Get a stream from an iterator. From
+   * https://www.geeksforgeeks.org/convert-an-iterator-to-stream-in-java/.
+   * 
+   * @param <T> the object type in the iterator
+   * @param iterator the iterator
+   * @return a stream over the iterator
+   */
+  public static <T> Stream<T> getStreamFromIterator(final Iterator<T> iterator) {
+
+    // Convert the iterator to Spliterator
+    final Spliterator<T> spliterator = Spliterators.spliteratorUnknownSize(iterator, 0);
+
+    // Get a Sequential Stream from spliterator
+    return StreamSupport.stream(spliterator, false);
+  }
 }
