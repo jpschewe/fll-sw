@@ -102,6 +102,13 @@ public class UninitializePlayoff extends BaseFLLServlet {
         deletePlayoff.executeUpdate();
       }
 
+      try (
+          PreparedStatement deleteAutoFinish = connection.prepareStatement("DELETE FROM automatic_finished_playoff WHERE tournament_id = ? and bracket_name = ?")) {
+        deleteAutoFinish.setInt(1, tournamentID);
+        deleteAutoFinish.setString(2, division);
+        deleteAutoFinish.executeUpdate();
+      }
+
       connection.commit();
 
       connection.setAutoCommit(oldAutocommit);

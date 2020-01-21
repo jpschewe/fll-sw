@@ -75,7 +75,7 @@ public final class ImportDB {
   private static final Logger LOGGER = LoggerFactory.getLogger(ImportDB.class);
 
   /**
-   * Import tournament data from one database to another database
+   * Import tournament data from one database to another database.
    *
    * @param args source tournament destination
    */
@@ -630,6 +630,11 @@ public final class ImportDB {
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 21) {
+      upgrade20To21(connection);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < GenerateDB.DATABASE_VERSION) {
       throw new RuntimeException("Internal error, database version not updated to current instead was: "
           + dbVersion);
@@ -864,6 +869,14 @@ public final class ImportDB {
     }
 
     setDBVersion(connection, 20);
+  }
+
+  private static void upgrade20To21(final Connection connection) throws SQLException {
+    LOGGER.trace("Upgrading database from 20 to 21");
+
+    GenerateDB.createAutomaticFinishedPlayoffTable(connection, false);
+
+    setDBVersion(connection, 21);
   }
 
   /**
