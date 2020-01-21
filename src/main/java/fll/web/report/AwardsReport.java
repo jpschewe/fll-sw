@@ -131,7 +131,7 @@ public class AwardsReport extends BaseFLLServlet {
 
     addPerformance(connection, document, documentBody, description);
 
-    // addHeadToHead(connection, document, documentBody);
+    addHeadToHead(connection, tournament, description, document, documentBody);
 
     addSubjectiveChallengeWinners(connection, document, documentBody, tournament);
     addSubjectiveExtraWinners(connection, document, documentBody, tournament);
@@ -147,11 +147,19 @@ public class AwardsReport extends BaseFLLServlet {
   }
 
   private void addHeadToHead(final Connection connection,
+                             final Tournament tournament,
+                             final ChallengeDescription challengeDescription,
                              final Document document,
-                             final Element documentBody) {
-    // TODO Auto-generated method stub
-    // FIXME
-    // throw new RuntimeException("Not implemented");
+                             final Element documentBody)
+      throws SQLException {
+    final Element container = FOPUtils.createXslFoElement(document, "block-container");
+    documentBody.appendChild(container);
+
+    container.setAttribute("keep-together.within-page", "always");
+
+    container.appendChild(FOPUtils.createHorizontalLine(document, 2));
+
+    PlayoffReport.populateBody(connection, tournament, challengeDescription, document, container);
   }
 
   private void addSubjectiveChallengeWinners(final Connection connection,

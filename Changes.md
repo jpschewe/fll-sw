@@ -1,3 +1,4 @@
+* #811 - Add head to head winners to the awards report
 * add horizontal lines separating the goal groups on the score entry page to match the lines on the score sheets
 * link to awards report from judges page
 
