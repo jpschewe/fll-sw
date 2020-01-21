@@ -300,6 +300,16 @@ public final class FOPUtils {
   public static final String TEXT_ALIGN_CENTER = "center";
 
   /**
+   * Block container tag.
+   */
+  public static final String BLOCK_CONTAINER_TAG = "block-container";
+
+  /**
+   * Block tag.
+   */
+  public static final String BLOCK_TAG = "block";
+
+  /**
    * Create a basic table cell that hides text that is too long for the cell.
    * Borders are not set.
    * 
@@ -313,7 +323,7 @@ public final class FOPUtils {
                                         final String text) {
     final Element cell = createXslFoElement(document, "table-cell");
 
-    final Element blockContainer = createXslFoElement(document, "block-container");
+    final Element blockContainer = createXslFoElement(document, BLOCK_CONTAINER_TAG);
     blockContainer.setAttribute("overflow", "hidden");
     cell.appendChild(blockContainer);
 

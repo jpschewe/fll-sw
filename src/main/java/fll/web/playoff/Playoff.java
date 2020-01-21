@@ -839,6 +839,7 @@ public final class Playoff {
    * @param connection the database connection
    * @param tournamentId the tournament
    * @param bracketName the bracket to check
+   * @return true if the bracket is finished
    */
   public static boolean isPlayoffBracketUnfinished(final Connection connection,
                                                    final int tournamentId,
