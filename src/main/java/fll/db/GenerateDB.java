@@ -29,7 +29,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**
- * Generate tables for tournament from XML document
+ * Generate tables for tournament from challenge description.
  */
 public final class GenerateDB {
 
@@ -44,18 +44,39 @@ public final class GenerateDB {
     // no instances
   }
 
+  /**
+   * Default team name.
+   */
   public static final String DEFAULT_TEAM_NAME = "<No Name>";
 
+  /**
+   * Default team division.
+   */
   public static final String DEFAULT_TEAM_DIVISION = "1";
 
+  /**
+   * Name of the default tournament.
+   */
   public static final String DUMMY_TOURNAMENT_NAME = "DUMMY";
 
+  /**
+   * Name of tournament for teams that dropped.
+   */
   public static final String DROP_TOURNAMENT_NAME = "DROP";
 
+  /**
+   * Internal tournament ID.
+   */
   public static final int INTERNAL_TOURNAMENT_ID = -1;
 
+  /**
+   * Internal tournament name.
+   */
   public static final String INTERNAL_TOURNAMENT_NAME = "INTERNAL";
 
+  /**
+   * Name of the performance table.
+   */
   public static final String PERFORMANCE_TABLE_NAME = "Performance";
 
   /**
@@ -437,6 +458,8 @@ public final class GenerateDB {
 
   /**
    * Create the 'authentication' table. Drops the table if it exists.
+   * 
+   * @param connection database connection
    */
   public static void createAuthentication(final Connection connection) throws SQLException {
     Statement stmt = null;
@@ -457,6 +480,8 @@ public final class GenerateDB {
 
   /**
    * Create the 'valid_login' table. Drops the table if it exists.
+   * 
+   * @param connection database connection
    */
   public static void createValidLogin(final Connection connection) throws SQLException {
     Statement stmt = null;
@@ -721,6 +746,9 @@ public final class GenerateDB {
 
   /**
    * Get SQL type for a given goal.
+   * 
+   * @param goalElement the goal to get it's SQL type for
+   * @return SQL type
    */
   public static String getTypeForGoalColumn(final AbstractGoal goalElement) {
     if (goalElement.isEnumerated()) {
