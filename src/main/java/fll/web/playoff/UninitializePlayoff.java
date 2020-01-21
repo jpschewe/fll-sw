@@ -26,7 +26,6 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.WebUtils;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Uninitialize a playoff division.
@@ -44,13 +43,7 @@ public class UninitializePlayoff extends BaseFLLServlet {
       throws IOException, ServletException {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    PreparedStatement getMinMaxRunPrep = null;
-    ResultSet getMinMaxRunResult = null;
-    PreparedStatement deletePerformance = null;
-    PreparedStatement deletePlayoff = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
 
       final boolean oldAutocommit = connection.getAutoCommit();
       connection.setAutoCommit(false);
@@ -65,43 +58,49 @@ public class UninitializePlayoff extends BaseFLLServlet {
         return;
       }
 
-      getMinMaxRunPrep = connection.prepareStatement("SELECT MIN(run_number), MAX(run_number) FROM PlayoffData" //
-          + " WHERE tournament = ?" //
-          + " AND event_division = ?");
-      getMinMaxRunPrep.setInt(1, tournamentID);
-      getMinMaxRunPrep.setString(2, division);
-      getMinMaxRunResult = getMinMaxRunPrep.executeQuery();
       final int minRun;
       final int maxRun;
-      if (getMinMaxRunResult.next()) {
-        minRun = getMinMaxRunResult.getInt(1);
-        maxRun = getMinMaxRunResult.getInt(2);
-      } else {
-        minRun = -1;
-        maxRun = -1;
+      try (
+          PreparedStatement getMinMaxRunPrep = connection.prepareStatement("SELECT MIN(run_number), MAX(run_number) FROM PlayoffData" //
+              + " WHERE tournament = ?" //
+              + " AND event_division = ?")) {
+        getMinMaxRunPrep.setInt(1, tournamentID);
+        getMinMaxRunPrep.setString(2, division);
+        try (ResultSet getMinMaxRunResult = getMinMaxRunPrep.executeQuery()) {
+          if (getMinMaxRunResult.next()) {
+            minRun = getMinMaxRunResult.getInt(1);
+            maxRun = getMinMaxRunResult.getInt(2);
+          } else {
+            minRun = -1;
+            maxRun = -1;
+          }
+        }
       }
 
       if (minRun != -1
           && maxRun != -1) {
-        deletePerformance = connection.prepareStatement("DELETE FROM Performance" //
+        try (PreparedStatement deletePerformance = connection.prepareStatement("DELETE FROM Performance" //
             + " WHERE runNumber >= ?"//
             + " AND runNumber <= ?" //
             + " AND tournament = ?" //
             + " AND teamnumber IN (" //
             + "  SELECT DISTINCT team" //
             + "    FROM PlayoffData" //
-            + "    WHERE event_division = ? )");
-        deletePerformance.setInt(1, minRun);
-        deletePerformance.setInt(2, maxRun);
-        deletePerformance.setInt(3, tournamentID);
-        deletePerformance.setString(4, division);
-        deletePerformance.executeUpdate();
+            + "    WHERE event_division = ? )")) {
+          deletePerformance.setInt(1, minRun);
+          deletePerformance.setInt(2, maxRun);
+          deletePerformance.setInt(3, tournamentID);
+          deletePerformance.setString(4, division);
+          deletePerformance.executeUpdate();
+        }
       }
 
-      deletePlayoff = connection.prepareStatement("DELETE FROM PlayoffData WHERE event_division = ? AND tournament = ?");
-      deletePlayoff.setString(1, division);
-      deletePlayoff.setInt(2, tournamentID);
-      deletePlayoff.executeUpdate();
+      try (
+          PreparedStatement deletePlayoff = connection.prepareStatement("DELETE FROM PlayoffData WHERE event_division = ? AND tournament = ?")) {
+        deletePlayoff.setString(1, division);
+        deletePlayoff.setInt(2, tournamentID);
+        deletePlayoff.executeUpdate();
+      }
 
       connection.commit();
 
@@ -117,12 +116,6 @@ public class UninitializePlayoff extends BaseFLLServlet {
     } catch (final SQLException e) {
       LOGGER.error(e.getMessage(), e);
       throw new FLLRuntimeException("Database error uninitializing playoffs", e);
-    } finally {
-      SQLFunctions.close(getMinMaxRunResult);
-      SQLFunctions.close(getMinMaxRunPrep);
-      SQLFunctions.close(deletePerformance);
-      SQLFunctions.close(deletePlayoff);
-      SQLFunctions.close(connection);
     }
   }
 }
