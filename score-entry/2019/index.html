@@ -1,0 +1,2327 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+
+  
+  
+    <title>Score Entry</title>
+  
+
+
+<link rel="stylesheet" type="text/css" href="Score%20Entry_files/fll-sw.css">
+
+<link rel="stylesheet" type="text/css" href="Score%20Entry_files/scoreEntry.css">
+
+<!-- a couple of things come from the JSP, so need to be inline -->
+<style type="text/css">
+table#top_info {
+	background-color: #e0e0e0;
+
+}
+body {
+	background-color: transparent;
+}
+</style>
+
+<script type="text/javascript" src="Score%20Entry_files/jquery-1.js"></script>
+
+<link rel="stylesheet" type="text/css" href="Score%20Entry_files/jquery-ui.css">
+
+<script type="text/javascript" src="Score%20Entry_files/jquery-ui.js"></script>
+
+<script type="text/javascript" src="Score%20Entry_files/scoreEntry.js"></script>
+
+<script type="text/javascript">
+var EditFlag = false;
+
+
+    
+
+function init() {
+  // disable text selection
+  document.onselectstart=new Function ("return false")
+
+    small_inspection_area_raw = 0.0;
+  m01_robot_bridge_raw = 0.0;
+  m01_flags_raw = 0.0;
+  m02_crane_lowered_raw = 0.0;
+  m02_independent_supported_raw = 0.0;
+  m02_blue_circle_raw = 0.0;
+  m03_inspection_drone_raw = 0.0;
+  m04_crater_crossing_raw = 0.0;
+  m05_treehouse_large_branches_raw = 0.0;
+  m05_treehouse_small_branches_raw = 0.0;
+  m06_traffic_jam_raw = 0.0;
+  m07_swing_raw = 0.0;
+  m08_elevator_raw = "neither";
+  m09_safety_factor_raw = 0.0;
+  m10_steel_construction_raw = 0.0;
+  m11_innovative_structure_raw = "no";
+  m12_circles_red_raw = 0.0;
+  m12_circles_tan_raw = 0.0;
+  m12_circles_white_raw = 0.0;
+  m12_levels_raw = 0.0;
+  m13_sustainability_upgrades_raw = 0.0;
+  m14_precision_raw = "six";
+  Verified = 0;
+
+
+  refresh();
+  
+  /* Saves total score for smarter notification popups */
+  savedTotalScore = document.scoreEntry.totalScore.value;
+}
+
+function refresh() { 
+  var score = 0;
+
+  // small_inspection_area
+if(small_inspection_area_raw == 0) {
+  document.scoreEntry.small_inspection_area[0].checked = true
+  document.scoreEntry.small_inspection_area_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.small_inspection_area[1].checked = true
+  document.scoreEntry.small_inspection_area_radioValue.value = 'YES'
+}
+small_inspection_area_computed = small_inspection_area_raw * 0.0;
+score += small_inspection_area_computed;
+document.scoreEntry.score_small_inspection_area.value = small_inspection_area_computed;
+
+// m01_robot_bridge
+if(m01_robot_bridge_raw == 0) {
+  document.scoreEntry.m01_robot_bridge[0].checked = true
+  document.scoreEntry.m01_robot_bridge_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m01_robot_bridge[1].checked = true
+  document.scoreEntry.m01_robot_bridge_radioValue.value = 'YES'
+}
+m01_robot_bridge_computed = m01_robot_bridge_raw * 20.0;
+score += m01_robot_bridge_computed;
+document.scoreEntry.score_m01_robot_bridge.value = m01_robot_bridge_computed;
+
+// m01_flags
+document.scoreEntry.m01_flags.value = m01_flags_raw;
+m01_flags_computed = m01_flags_raw * 15.0;
+score += m01_flags_computed;
+document.scoreEntry.score_m01_flags.value = m01_flags_computed;
+
+// m02_crane_lowered
+if(m02_crane_lowered_raw == 0) {
+  document.scoreEntry.m02_crane_lowered[0].checked = true
+  document.scoreEntry.m02_crane_lowered_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m02_crane_lowered[1].checked = true
+  document.scoreEntry.m02_crane_lowered_radioValue.value = 'YES'
+}
+m02_crane_lowered_computed = m02_crane_lowered_raw * 20.0;
+score += m02_crane_lowered_computed;
+document.scoreEntry.score_m02_crane_lowered.value = m02_crane_lowered_computed;
+
+// m02_independent_supported
+if(m02_independent_supported_raw == 0) {
+  document.scoreEntry.m02_independent_supported[0].checked = true
+  document.scoreEntry.m02_independent_supported_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m02_independent_supported[1].checked = true
+  document.scoreEntry.m02_independent_supported_radioValue.value = 'YES'
+}
+m02_independent_supported_computed = m02_independent_supported_raw * 15.0;
+score += m02_independent_supported_computed;
+document.scoreEntry.score_m02_independent_supported.value = m02_independent_supported_computed;
+
+// m02_blue_circle
+if(m02_blue_circle_raw == 0) {
+  document.scoreEntry.m02_blue_circle[0].checked = true
+  document.scoreEntry.m02_blue_circle_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m02_blue_circle[1].checked = true
+  document.scoreEntry.m02_blue_circle_radioValue.value = 'YES'
+}
+m02_blue_circle_computed = m02_blue_circle_raw * 15.0;
+score += m02_blue_circle_computed;
+document.scoreEntry.score_m02_blue_circle.value = m02_blue_circle_computed;
+
+// m03_inspection_drone
+if(m03_inspection_drone_raw == 0) {
+  document.scoreEntry.m03_inspection_drone[0].checked = true
+  document.scoreEntry.m03_inspection_drone_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m03_inspection_drone[1].checked = true
+  document.scoreEntry.m03_inspection_drone_radioValue.value = 'YES'
+}
+m03_inspection_drone_computed = m03_inspection_drone_raw * 10.0;
+score += m03_inspection_drone_computed;
+document.scoreEntry.score_m03_inspection_drone.value = m03_inspection_drone_computed;
+
+// m04_crater_crossing
+if(m04_crater_crossing_raw == 0) {
+  document.scoreEntry.m04_crater_crossing[0].checked = true
+  document.scoreEntry.m04_crater_crossing_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m04_crater_crossing[1].checked = true
+  document.scoreEntry.m04_crater_crossing_radioValue.value = 'YES'
+}
+m04_crater_crossing_computed = m04_crater_crossing_raw * 10.0;
+score += m04_crater_crossing_computed;
+document.scoreEntry.score_m04_crater_crossing.value = m04_crater_crossing_computed;
+
+// m05_treehouse_large_branches
+document.scoreEntry.m05_treehouse_large_branches.value = m05_treehouse_large_branches_raw;
+m05_treehouse_large_branches_computed = m05_treehouse_large_branches_raw * 10.0;
+score += m05_treehouse_large_branches_computed;
+document.scoreEntry.score_m05_treehouse_large_branches.value = m05_treehouse_large_branches_computed;
+
+// m05_treehouse_small_branches
+document.scoreEntry.m05_treehouse_small_branches.value = m05_treehouse_small_branches_raw;
+m05_treehouse_small_branches_computed = m05_treehouse_small_branches_raw * 15.0;
+score += m05_treehouse_small_branches_computed;
+document.scoreEntry.score_m05_treehouse_small_branches.value = m05_treehouse_small_branches_computed;
+
+// m06_traffic_jam
+if(m06_traffic_jam_raw == 0) {
+  document.scoreEntry.m06_traffic_jam[0].checked = true
+  document.scoreEntry.m06_traffic_jam_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m06_traffic_jam[1].checked = true
+  document.scoreEntry.m06_traffic_jam_radioValue.value = 'YES'
+}
+m06_traffic_jam_computed = m06_traffic_jam_raw * 10.0;
+score += m06_traffic_jam_computed;
+document.scoreEntry.score_m06_traffic_jam.value = m06_traffic_jam_computed;
+
+// m07_swing
+if(m07_swing_raw == 0) {
+  document.scoreEntry.m07_swing[0].checked = true
+  document.scoreEntry.m07_swing_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m07_swing[1].checked = true
+  document.scoreEntry.m07_swing_radioValue.value = 'YES'
+}
+m07_swing_computed = m07_swing_raw * 20.0;
+score += m07_swing_computed;
+document.scoreEntry.score_m07_swing.value = m07_swing_computed;
+
+// m08_elevator
+if(m08_elevator_raw == "neither") {
+  document.scoreEntry.m08_elevator[0].checked = true;
+  m08_elevator_computed = 0.000000 * 1.0;
+  document.scoreEntry.m08_elevator_radioValue.value = 'NEITHER'
+} else if(m08_elevator_raw == "blue_car_down") {
+  document.scoreEntry.m08_elevator[1].checked = true;
+  m08_elevator_computed = 15.000000 * 1.0;
+  document.scoreEntry.m08_elevator_radioValue.value = 'BLUE_CAR_DOWN'
+} else if(m08_elevator_raw == "balanced") {
+  document.scoreEntry.m08_elevator[2].checked = true;
+  m08_elevator_computed = 20.000000 * 1.0;
+  document.scoreEntry.m08_elevator_radioValue.value = 'BALANCED'
+}
+score += m08_elevator_computed;
+document.scoreEntry.score_m08_elevator.value = m08_elevator_computed;
+
+// m09_safety_factor
+document.scoreEntry.m09_safety_factor.value = m09_safety_factor_raw;
+m09_safety_factor_computed = m09_safety_factor_raw * 10.0;
+score += m09_safety_factor_computed;
+document.scoreEntry.score_m09_safety_factor.value = m09_safety_factor_computed;
+
+// m10_steel_construction
+if(m10_steel_construction_raw == 0) {
+  document.scoreEntry.m10_steel_construction[0].checked = true
+  document.scoreEntry.m10_steel_construction_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m10_steel_construction[1].checked = true
+  document.scoreEntry.m10_steel_construction_radioValue.value = 'YES'
+}
+m10_steel_construction_computed = m10_steel_construction_raw * 20.0;
+score += m10_steel_construction_computed;
+document.scoreEntry.score_m10_steel_construction.value = m10_steel_construction_computed;
+
+// m11_innovative_structure
+if(m11_innovative_structure_raw == "no") {
+  document.scoreEntry.m11_innovative_structure[0].checked = true;
+  m11_innovative_structure_computed = 0.000000 * 1.0;
+  document.scoreEntry.m11_innovative_structure_radioValue.value = 'NO'
+} else if(m11_innovative_structure_raw == "partly") {
+  document.scoreEntry.m11_innovative_structure[1].checked = true;
+  m11_innovative_structure_computed = 10.000000 * 1.0;
+  document.scoreEntry.m11_innovative_structure_radioValue.value = 'PARTLY'
+} else if(m11_innovative_structure_raw == "completely") {
+  document.scoreEntry.m11_innovative_structure[2].checked = true;
+  m11_innovative_structure_computed = 15.000000 * 1.0;
+  document.scoreEntry.m11_innovative_structure_radioValue.value = 'COMPLETELY'
+}
+score += m11_innovative_structure_computed;
+document.scoreEntry.score_m11_innovative_structure.value = m11_innovative_structure_computed;
+
+// m12_circles_red
+if(m12_circles_red_raw == 0) {
+  document.scoreEntry.m12_circles_red[0].checked = true
+  document.scoreEntry.m12_circles_red_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m12_circles_red[1].checked = true
+  document.scoreEntry.m12_circles_red_radioValue.value = 'YES'
+}
+m12_circles_red_computed = m12_circles_red_raw * 10.0;
+score += m12_circles_red_computed;
+document.scoreEntry.score_m12_circles_red.value = m12_circles_red_computed;
+
+// m12_circles_tan
+if(m12_circles_tan_raw == 0) {
+  document.scoreEntry.m12_circles_tan[0].checked = true
+  document.scoreEntry.m12_circles_tan_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m12_circles_tan[1].checked = true
+  document.scoreEntry.m12_circles_tan_radioValue.value = 'YES'
+}
+m12_circles_tan_computed = m12_circles_tan_raw * 10.0;
+score += m12_circles_tan_computed;
+document.scoreEntry.score_m12_circles_tan.value = m12_circles_tan_computed;
+
+// m12_circles_white
+if(m12_circles_white_raw == 0) {
+  document.scoreEntry.m12_circles_white[0].checked = true
+  document.scoreEntry.m12_circles_white_radioValue.value = 'NO'
+} else {
+  document.scoreEntry.m12_circles_white[1].checked = true
+  document.scoreEntry.m12_circles_white_radioValue.value = 'YES'
+}
+m12_circles_white_computed = m12_circles_white_raw * 10.0;
+score += m12_circles_white_computed;
+document.scoreEntry.score_m12_circles_white.value = m12_circles_white_computed;
+
+// m12_levels
+document.scoreEntry.m12_levels.value = m12_levels_raw;
+m12_levels_computed = m12_levels_raw * 5.0;
+score += m12_levels_computed;
+document.scoreEntry.score_m12_levels.value = m12_levels_computed;
+
+// m13_sustainability_upgrades
+document.scoreEntry.m13_sustainability_upgrades.value = m13_sustainability_upgrades_raw;
+m13_sustainability_upgrades_computed = m13_sustainability_upgrades_raw * 10.0;
+score += m13_sustainability_upgrades_computed;
+document.scoreEntry.score_m13_sustainability_upgrades.value = m13_sustainability_upgrades_computed;
+
+// m14_precision
+if(m14_precision_raw == "zero") {
+  document.scoreEntry.m14_precision[0].checked = true;
+  m14_precision_computed = 0.000000 * 1.0;
+  document.scoreEntry.m14_precision_radioValue.value = 'ZERO'
+} else if(m14_precision_raw == "one") {
+  document.scoreEntry.m14_precision[1].checked = true;
+  m14_precision_computed = 5.000000 * 1.0;
+  document.scoreEntry.m14_precision_radioValue.value = 'ONE'
+} else if(m14_precision_raw == "two") {
+  document.scoreEntry.m14_precision[2].checked = true;
+  m14_precision_computed = 10.000000 * 1.0;
+  document.scoreEntry.m14_precision_radioValue.value = 'TWO'
+} else if(m14_precision_raw == "three") {
+  document.scoreEntry.m14_precision[3].checked = true;
+  m14_precision_computed = 20.000000 * 1.0;
+  document.scoreEntry.m14_precision_radioValue.value = 'THREE'
+} else if(m14_precision_raw == "four") {
+  document.scoreEntry.m14_precision[4].checked = true;
+  m14_precision_computed = 30.000000 * 1.0;
+  document.scoreEntry.m14_precision_radioValue.value = 'FOUR'
+} else if(m14_precision_raw == "five") {
+  document.scoreEntry.m14_precision[5].checked = true;
+  m14_precision_computed = 45.000000 * 1.0;
+  document.scoreEntry.m14_precision_radioValue.value = 'FIVE'
+} else if(m14_precision_raw == "six") {
+  document.scoreEntry.m14_precision[6].checked = true;
+  m14_precision_computed = 60.000000 * 1.0;
+  document.scoreEntry.m14_precision_radioValue.value = 'SIX'
+}
+score += m14_precision_computed;
+document.scoreEntry.score_m14_precision.value = m14_precision_computed;
+
+compute_small_area_bonus_m01();
+score += small_area_bonus_m01_computed;
+
+compute_small_area_bonus_m02();
+score += small_area_bonus_m02_computed;
+
+compute_small_area_bonus_m03();
+score += small_area_bonus_m03_computed;
+
+compute_small_area_bonus_m04();
+score += small_area_bonus_m04_computed;
+
+compute_small_area_bonus_m05();
+score += small_area_bonus_m05_computed;
+
+compute_small_area_bonus_m06();
+score += small_area_bonus_m06_computed;
+
+compute_small_area_bonus_m07();
+score += small_area_bonus_m07_computed;
+
+compute_small_area_bonus_m08();
+score += small_area_bonus_m08_computed;
+
+compute_small_area_bonus_m09();
+score += small_area_bonus_m09_computed;
+
+compute_small_area_bonus_m10();
+score += small_area_bonus_m10_computed;
+
+compute_small_area_bonus_m11();
+score += small_area_bonus_m11_computed;
+
+compute_small_area_bonus_m12();
+score += small_area_bonus_m12_computed;
+
+compute_small_area_bonus_m13();
+score += small_area_bonus_m13_computed;
+
+if(Verified == 0) {
+  document.scoreEntry.Verified[0].checked = true
+} else {
+  document.scoreEntry.Verified[1].checked = true
+}
+
+
+  //check for minimum total score
+  if(score < 0.0) {
+    score = 0.0;
+  }
+
+  document.scoreEntry.totalScore.value = score;
+
+  check_restrictions();
+}
+
+function check_restrictions() {
+  var error_found = false;
+  $("#score-errors").empty();
+  
+  var restriction_0_value = parseInt(2.000000* m01_robot_bridge_raw + -1.000000* m01_flags_raw);
+  if(restriction_0_value > 2.000000 || restriction_0_value < 0.000000) {
+    $('#score-errors').append('<div>Cannot score flags without bridge</div>');
+    error_found = true;
+  }
+  var restriction_1_value = parseInt(1.000000* m02_independent_supported_raw + -1.000000* m02_blue_circle_raw);
+  if(restriction_1_value > 2.000000 || restriction_1_value < 0.000000) {
+    $('#score-errors').append('<div>Cannot score in the blue circle if not supported by another unit</div>');
+    error_found = true;
+  }
+  var restriction_2_value = parseInt(1.000000* m05_treehouse_large_branches_raw + 1.000000* m05_treehouse_small_branches_raw);
+  if(restriction_2_value > 16.000000 || restriction_2_value < 0.000000) {
+    $('#score-errors').append('<div>There are only 16 units</div>');
+    error_found = true;
+  }
+
+
+  if(error_found) {
+    $("#submit_score").attr('disabled', true);
+    $("#score-errors").show();
+  } else {
+    $("#submit_score").attr('disabled', false);
+    $("#score-errors").hide();
+  }
+}
+
+function isConsistent() {
+  //small_inspection_area
+  if(small_inspection_area_raw < 0.0 || small_inspection_area_raw > 1.0) {
+    return false;
+  }
+
+  //m01_robot_bridge
+  if(m01_robot_bridge_raw < 0.0 || m01_robot_bridge_raw > 1.0) {
+    return false;
+  }
+
+  //m01_flags
+  if(m01_flags_raw < 0.0 || m01_flags_raw > 2.0) {
+    return false;
+  }
+
+  //m02_crane_lowered
+  if(m02_crane_lowered_raw < 0.0 || m02_crane_lowered_raw > 1.0) {
+    return false;
+  }
+
+  //m02_independent_supported
+  if(m02_independent_supported_raw < 0.0 || m02_independent_supported_raw > 1.0) {
+    return false;
+  }
+
+  //m02_blue_circle
+  if(m02_blue_circle_raw < 0.0 || m02_blue_circle_raw > 1.0) {
+    return false;
+  }
+
+  //m03_inspection_drone
+  if(m03_inspection_drone_raw < 0.0 || m03_inspection_drone_raw > 1.0) {
+    return false;
+  }
+
+  //m04_crater_crossing
+  if(m04_crater_crossing_raw < 0.0 || m04_crater_crossing_raw > 1.0) {
+    return false;
+  }
+
+  //m05_treehouse_large_branches
+  if(m05_treehouse_large_branches_raw < 0.0 || m05_treehouse_large_branches_raw > 16.0) {
+    return false;
+  }
+
+  //m05_treehouse_small_branches
+  if(m05_treehouse_small_branches_raw < 0.0 || m05_treehouse_small_branches_raw > 16.0) {
+    return false;
+  }
+
+  //m06_traffic_jam
+  if(m06_traffic_jam_raw < 0.0 || m06_traffic_jam_raw > 1.0) {
+    return false;
+  }
+
+  //m07_swing
+  if(m07_swing_raw < 0.0 || m07_swing_raw > 1.0) {
+    return false;
+  }
+
+  //m08_elevator
+  // nothing to check
+
+  //m09_safety_factor
+  if(m09_safety_factor_raw < 0.0 || m09_safety_factor_raw > 6.0) {
+    return false;
+  }
+
+  //m10_steel_construction
+  if(m10_steel_construction_raw < 0.0 || m10_steel_construction_raw > 1.0) {
+    return false;
+  }
+
+  //m11_innovative_structure
+  // nothing to check
+
+  //m12_circles_red
+  if(m12_circles_red_raw < 0.0 || m12_circles_red_raw > 1.0) {
+    return false;
+  }
+
+  //m12_circles_tan
+  if(m12_circles_tan_raw < 0.0 || m12_circles_tan_raw > 1.0) {
+    return false;
+  }
+
+  //m12_circles_white
+  if(m12_circles_white_raw < 0.0 || m12_circles_white_raw > 1.0) {
+    return false;
+  }
+
+  //m12_levels
+  if(m12_levels_raw < 0.0 || m12_levels_raw > 28.0) {
+    return false;
+  }
+
+  //m13_sustainability_upgrades
+  if(m13_sustainability_upgrades_raw < 0.0 || m13_sustainability_upgrades_raw > 3.0) {
+    return false;
+  }
+
+  //m14_precision
+  // nothing to check
+
+  return true;
+}
+
+
+
+// small_inspection_area
+var small_inspection_area_raw;
+var small_inspection_area_computed;
+function set_small_inspection_area(newValue) {
+  var temp = small_inspection_area_raw;
+  small_inspection_area_raw = newValue;
+  if(!isConsistent()) {
+    small_inspection_area_raw = temp;
+  }
+  refresh();
+}
+function check_small_inspection_area() {
+  var str = document.scoreEntry.small_inspection_area.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_small_inspection_area(num);
+  }
+  refresh();
+}
+
+
+// m01_robot_bridge
+var m01_robot_bridge_raw;
+var m01_robot_bridge_computed;
+function set_m01_robot_bridge(newValue) {
+  var temp = m01_robot_bridge_raw;
+  m01_robot_bridge_raw = newValue;
+  if(!isConsistent()) {
+    m01_robot_bridge_raw = temp;
+  }
+  refresh();
+}
+function check_m01_robot_bridge() {
+  var str = document.scoreEntry.m01_robot_bridge.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m01_robot_bridge(num);
+  }
+  refresh();
+}
+
+
+// m01_flags
+var m01_flags_raw;
+var m01_flags_computed;
+function set_m01_flags(newValue) {
+  var temp = m01_flags_raw;
+  m01_flags_raw = newValue;
+  if(!isConsistent()) {
+    m01_flags_raw = temp;
+  }
+  refresh();
+}
+function check_m01_flags() {
+  var str = document.scoreEntry.m01_flags.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m01_flags(num);
+  }
+  refresh();
+}
+function increment_m01_flags(increment) {
+  var temp = m01_flags_raw
+  m01_flags_raw += increment;
+  if(m01_flags_raw > 2.0) {
+    m01_flags_raw = 2.0;
+   }
+  if(m01_flags_raw < 0.0) {
+    m01_flags_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m01_flags_raw = temp;
+  }
+  refresh();
+}
+
+
+// m02_crane_lowered
+var m02_crane_lowered_raw;
+var m02_crane_lowered_computed;
+function set_m02_crane_lowered(newValue) {
+  var temp = m02_crane_lowered_raw;
+  m02_crane_lowered_raw = newValue;
+  if(!isConsistent()) {
+    m02_crane_lowered_raw = temp;
+  }
+  refresh();
+}
+function check_m02_crane_lowered() {
+  var str = document.scoreEntry.m02_crane_lowered.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m02_crane_lowered(num);
+  }
+  refresh();
+}
+
+
+// m02_independent_supported
+var m02_independent_supported_raw;
+var m02_independent_supported_computed;
+function set_m02_independent_supported(newValue) {
+  var temp = m02_independent_supported_raw;
+  m02_independent_supported_raw = newValue;
+  if(!isConsistent()) {
+    m02_independent_supported_raw = temp;
+  }
+  refresh();
+}
+function check_m02_independent_supported() {
+  var str = document.scoreEntry.m02_independent_supported.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m02_independent_supported(num);
+  }
+  refresh();
+}
+
+
+// m02_blue_circle
+var m02_blue_circle_raw;
+var m02_blue_circle_computed;
+function set_m02_blue_circle(newValue) {
+  var temp = m02_blue_circle_raw;
+  m02_blue_circle_raw = newValue;
+  if(!isConsistent()) {
+    m02_blue_circle_raw = temp;
+  }
+  refresh();
+}
+function check_m02_blue_circle() {
+  var str = document.scoreEntry.m02_blue_circle.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m02_blue_circle(num);
+  }
+  refresh();
+}
+
+
+// m03_inspection_drone
+var m03_inspection_drone_raw;
+var m03_inspection_drone_computed;
+function set_m03_inspection_drone(newValue) {
+  var temp = m03_inspection_drone_raw;
+  m03_inspection_drone_raw = newValue;
+  if(!isConsistent()) {
+    m03_inspection_drone_raw = temp;
+  }
+  refresh();
+}
+function check_m03_inspection_drone() {
+  var str = document.scoreEntry.m03_inspection_drone.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m03_inspection_drone(num);
+  }
+  refresh();
+}
+
+
+// m04_crater_crossing
+var m04_crater_crossing_raw;
+var m04_crater_crossing_computed;
+function set_m04_crater_crossing(newValue) {
+  var temp = m04_crater_crossing_raw;
+  m04_crater_crossing_raw = newValue;
+  if(!isConsistent()) {
+    m04_crater_crossing_raw = temp;
+  }
+  refresh();
+}
+function check_m04_crater_crossing() {
+  var str = document.scoreEntry.m04_crater_crossing.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m04_crater_crossing(num);
+  }
+  refresh();
+}
+
+
+// m05_treehouse_large_branches
+var m05_treehouse_large_branches_raw;
+var m05_treehouse_large_branches_computed;
+function set_m05_treehouse_large_branches(newValue) {
+  var temp = m05_treehouse_large_branches_raw;
+  m05_treehouse_large_branches_raw = newValue;
+  if(!isConsistent()) {
+    m05_treehouse_large_branches_raw = temp;
+  }
+  refresh();
+}
+function check_m05_treehouse_large_branches() {
+  var str = document.scoreEntry.m05_treehouse_large_branches.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m05_treehouse_large_branches(num);
+  }
+  refresh();
+}
+function increment_m05_treehouse_large_branches(increment) {
+  var temp = m05_treehouse_large_branches_raw
+  m05_treehouse_large_branches_raw += increment;
+  if(m05_treehouse_large_branches_raw > 16.0) {
+    m05_treehouse_large_branches_raw = 16.0;
+   }
+  if(m05_treehouse_large_branches_raw < 0.0) {
+    m05_treehouse_large_branches_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m05_treehouse_large_branches_raw = temp;
+  }
+  refresh();
+}
+
+
+// m05_treehouse_small_branches
+var m05_treehouse_small_branches_raw;
+var m05_treehouse_small_branches_computed;
+function set_m05_treehouse_small_branches(newValue) {
+  var temp = m05_treehouse_small_branches_raw;
+  m05_treehouse_small_branches_raw = newValue;
+  if(!isConsistent()) {
+    m05_treehouse_small_branches_raw = temp;
+  }
+  refresh();
+}
+function check_m05_treehouse_small_branches() {
+  var str = document.scoreEntry.m05_treehouse_small_branches.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m05_treehouse_small_branches(num);
+  }
+  refresh();
+}
+function increment_m05_treehouse_small_branches(increment) {
+  var temp = m05_treehouse_small_branches_raw
+  m05_treehouse_small_branches_raw += increment;
+  if(m05_treehouse_small_branches_raw > 16.0) {
+    m05_treehouse_small_branches_raw = 16.0;
+   }
+  if(m05_treehouse_small_branches_raw < 0.0) {
+    m05_treehouse_small_branches_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m05_treehouse_small_branches_raw = temp;
+  }
+  refresh();
+}
+
+
+// m06_traffic_jam
+var m06_traffic_jam_raw;
+var m06_traffic_jam_computed;
+function set_m06_traffic_jam(newValue) {
+  var temp = m06_traffic_jam_raw;
+  m06_traffic_jam_raw = newValue;
+  if(!isConsistent()) {
+    m06_traffic_jam_raw = temp;
+  }
+  refresh();
+}
+function check_m06_traffic_jam() {
+  var str = document.scoreEntry.m06_traffic_jam.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m06_traffic_jam(num);
+  }
+  refresh();
+}
+
+
+// m07_swing
+var m07_swing_raw;
+var m07_swing_computed;
+function set_m07_swing(newValue) {
+  var temp = m07_swing_raw;
+  m07_swing_raw = newValue;
+  if(!isConsistent()) {
+    m07_swing_raw = temp;
+  }
+  refresh();
+}
+function check_m07_swing() {
+  var str = document.scoreEntry.m07_swing.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m07_swing(num);
+  }
+  refresh();
+}
+
+
+// m08_elevator
+var m08_elevator_raw;
+var m08_elevator_computed;
+function set_m08_elevator(newValue) {
+  var temp = m08_elevator_raw;
+  m08_elevator_raw = newValue;
+  if(!isConsistent()) {
+    m08_elevator_raw = temp;
+  }
+  refresh();
+}
+function check_m08_elevator() {
+  var str = document.scoreEntry.m08_elevator.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m08_elevator(num);
+  }
+  refresh();
+}
+
+
+// m09_safety_factor
+var m09_safety_factor_raw;
+var m09_safety_factor_computed;
+function set_m09_safety_factor(newValue) {
+  var temp = m09_safety_factor_raw;
+  m09_safety_factor_raw = newValue;
+  if(!isConsistent()) {
+    m09_safety_factor_raw = temp;
+  }
+  refresh();
+}
+function check_m09_safety_factor() {
+  var str = document.scoreEntry.m09_safety_factor.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m09_safety_factor(num);
+  }
+  refresh();
+}
+function increment_m09_safety_factor(increment) {
+  var temp = m09_safety_factor_raw
+  m09_safety_factor_raw += increment;
+  if(m09_safety_factor_raw > 6.0) {
+    m09_safety_factor_raw = 6.0;
+   }
+  if(m09_safety_factor_raw < 0.0) {
+    m09_safety_factor_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m09_safety_factor_raw = temp;
+  }
+  refresh();
+}
+
+
+// m10_steel_construction
+var m10_steel_construction_raw;
+var m10_steel_construction_computed;
+function set_m10_steel_construction(newValue) {
+  var temp = m10_steel_construction_raw;
+  m10_steel_construction_raw = newValue;
+  if(!isConsistent()) {
+    m10_steel_construction_raw = temp;
+  }
+  refresh();
+}
+function check_m10_steel_construction() {
+  var str = document.scoreEntry.m10_steel_construction.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m10_steel_construction(num);
+  }
+  refresh();
+}
+
+
+// m11_innovative_structure
+var m11_innovative_structure_raw;
+var m11_innovative_structure_computed;
+function set_m11_innovative_structure(newValue) {
+  var temp = m11_innovative_structure_raw;
+  m11_innovative_structure_raw = newValue;
+  if(!isConsistent()) {
+    m11_innovative_structure_raw = temp;
+  }
+  refresh();
+}
+function check_m11_innovative_structure() {
+  var str = document.scoreEntry.m11_innovative_structure.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m11_innovative_structure(num);
+  }
+  refresh();
+}
+
+
+// m12_circles_red
+var m12_circles_red_raw;
+var m12_circles_red_computed;
+function set_m12_circles_red(newValue) {
+  var temp = m12_circles_red_raw;
+  m12_circles_red_raw = newValue;
+  if(!isConsistent()) {
+    m12_circles_red_raw = temp;
+  }
+  refresh();
+}
+function check_m12_circles_red() {
+  var str = document.scoreEntry.m12_circles_red.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m12_circles_red(num);
+  }
+  refresh();
+}
+
+
+// m12_circles_tan
+var m12_circles_tan_raw;
+var m12_circles_tan_computed;
+function set_m12_circles_tan(newValue) {
+  var temp = m12_circles_tan_raw;
+  m12_circles_tan_raw = newValue;
+  if(!isConsistent()) {
+    m12_circles_tan_raw = temp;
+  }
+  refresh();
+}
+function check_m12_circles_tan() {
+  var str = document.scoreEntry.m12_circles_tan.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m12_circles_tan(num);
+  }
+  refresh();
+}
+
+
+// m12_circles_white
+var m12_circles_white_raw;
+var m12_circles_white_computed;
+function set_m12_circles_white(newValue) {
+  var temp = m12_circles_white_raw;
+  m12_circles_white_raw = newValue;
+  if(!isConsistent()) {
+    m12_circles_white_raw = temp;
+  }
+  refresh();
+}
+function check_m12_circles_white() {
+  var str = document.scoreEntry.m12_circles_white.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m12_circles_white(num);
+  }
+  refresh();
+}
+
+
+// m12_levels
+var m12_levels_raw;
+var m12_levels_computed;
+function set_m12_levels(newValue) {
+  var temp = m12_levels_raw;
+  m12_levels_raw = newValue;
+  if(!isConsistent()) {
+    m12_levels_raw = temp;
+  }
+  refresh();
+}
+function check_m12_levels() {
+  var str = document.scoreEntry.m12_levels.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m12_levels(num);
+  }
+  refresh();
+}
+function increment_m12_levels(increment) {
+  var temp = m12_levels_raw
+  m12_levels_raw += increment;
+  if(m12_levels_raw > 28.0) {
+    m12_levels_raw = 28.0;
+   }
+  if(m12_levels_raw < 0.0) {
+    m12_levels_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m12_levels_raw = temp;
+  }
+  refresh();
+}
+
+
+// m13_sustainability_upgrades
+var m13_sustainability_upgrades_raw;
+var m13_sustainability_upgrades_computed;
+function set_m13_sustainability_upgrades(newValue) {
+  var temp = m13_sustainability_upgrades_raw;
+  m13_sustainability_upgrades_raw = newValue;
+  if(!isConsistent()) {
+    m13_sustainability_upgrades_raw = temp;
+  }
+  refresh();
+}
+function check_m13_sustainability_upgrades() {
+  var str = document.scoreEntry.m13_sustainability_upgrades.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m13_sustainability_upgrades(num);
+  }
+  refresh();
+}
+function increment_m13_sustainability_upgrades(increment) {
+  var temp = m13_sustainability_upgrades_raw
+  m13_sustainability_upgrades_raw += increment;
+  if(m13_sustainability_upgrades_raw > 3.0) {
+    m13_sustainability_upgrades_raw = 3.0;
+   }
+  if(m13_sustainability_upgrades_raw < 0.0) {
+    m13_sustainability_upgrades_raw = 0.0;
+   }
+  if(!isConsistent()) {
+    m13_sustainability_upgrades_raw = temp;
+  }
+  refresh();
+}
+
+
+// m14_precision
+var m14_precision_raw;
+var m14_precision_computed;
+function set_m14_precision(newValue) {
+  var temp = m14_precision_raw;
+  m14_precision_raw = newValue;
+  if(!isConsistent()) {
+    m14_precision_raw = temp;
+  }
+  refresh();
+}
+function check_m14_precision() {
+  var str = document.scoreEntry.m14_precision.value;
+  var num = parseInt(str);
+  if(!isNaN(num)) {
+    set_m14_precision(num);
+  }
+  refresh();
+}
+
+
+// small_area_bonus_m01
+var small_area_bonus_m01_computed;
+function compute_small_area_bonus_m01() {
+  if(parseInt(1.000000* small_inspection_area_raw) > parseInt(0.000000)) {
+    if(parseInt(1.000000* m01_robot_bridge_computed + 1.000000* m01_flags_computed) > parseInt(0.000000)) {
+      small_area_bonus_m01_computed = parseInt(5.000000);
+    } else {
+      small_area_bonus_m01_computed = parseInt(0.000000);
+    }
+  } else {
+    small_area_bonus_m01_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_small_area_bonus_m01.value = small_area_bonus_m01_computed;
+}
+// small_area_bonus_m02
+var small_area_bonus_m02_computed;
+function compute_small_area_bonus_m02() {
+  if(parseInt(1.000000* small_inspection_area_raw) > parseInt(0.000000)) {
+    if(parseInt(1.000000* m02_crane_lowered_computed + 1.000000* m02_independent_supported_computed + 1.000000* m02_blue_circle_computed) > parseInt(0.000000)) {
+      small_area_bonus_m02_computed = parseInt(10.000000);
+    } else {
+      small_area_bonus_m02_computed = parseInt(0.000000);
+    }
+  } else {
+    small_area_bonus_m02_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_small_area_bonus_m02.value = small_area_bonus_m02_computed;
+}
+// small_area_bonus_m03
+var small_area_bonus_m03_computed;
+function compute_small_area_bonus_m03() {
+  if(parseInt(1.000000* small_inspection_area_raw) > parseInt(0.000000)) {
+    if(parseInt(1.000000* m03_inspection_drone_computed) > parseInt(0.000000)) {
+      small_area_bonus_m03_computed = parseInt(5.000000);
+    } else {
+      small_area_bonus_m03_computed = parseInt(0.000000);
+    }
+  } else {
+    small_area_bonus_m03_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_small_area_bonus_m03.value = small_area_bonus_m03_computed;
+}
+// small_area_bonus_m04
+var small_area_bonus_m04_computed;
+function compute_small_area_bonus_m04() {
+  if(parseInt(1.000000* small_inspection_area_raw) > parseInt(0.000000)) {
+    if(parseInt(1.000000* m04_crater_crossing_computed) > parseInt(0.000000)) {
+      small_area_bonus_m04_computed = parseInt(5.000000);
+    } else {
+      small_area_bonus_m04_computed = parseInt(0.000000);
+    }
+  } else {
+    small_area_bonus_m04_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_small_area_bonus_m04.value = small_area_bonus_m04_computed;
+}
+// small_area_bonus_m05
+var small_area_bonus_m05_computed;
+function compute_small_area_bonus_m05() {
+  if(parseInt(1.000000* small_inspection_area_raw) > parseInt(0.000000)) {
+    if(parseInt(1.000000* m05_treehouse_large_branches_computed + 1.000000* m05_treehouse_small_branches_computed) > parseInt(0.000000)) {
+      small_area_bonus_m05_computed = parseInt(5.000000);
+    } else {
+      small_area_bonus_m05_computed = parseInt(0.000000);
+    }
+  } else {
+    small_area_bonus_m05_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_small_area_bonus_m05.value = small_area_bonus_m05_computed;
+}
+// small_area_bonus_m06
+var small_area_bonus_m06_computed;
+function compute_small_area_bonus_m06() {
+  if(parseInt(1.000000* small_inspection_area_raw) > parseInt(0.000000)) {
+    if(parseInt(1.000000* m06_traffic_jam_computed) > parseInt(0.000000)) {
+      small_area_bonus_m06_computed = parseInt(5.000000);
+    } else {
+      small_area_bonus_m06_computed = parseInt(0.000000);
+    }
+  } else {
+    small_area_bonus_m06_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_small_area_bonus_m06.value = small_area_bonus_m06_computed;
+}
+// small_area_bonus_m07
+var small_area_bonus_m07_computed;
+function compute_small_area_bonus_m07() {
+  if(parseInt(1.000000* small_inspection_area_raw) > parseInt(0.000000)) {
+    if(parseInt(1.000000* m07_swing_computed) > parseInt(0.000000)) {
+      small_area_bonus_m07_computed = parseInt(5.000000);
+    } else {
+      small_area_bonus_m07_computed = parseInt(0.000000);
+    }
+  } else {
+    small_area_bonus_m07_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_small_area_bonus_m07.value = small_area_bonus_m07_computed;
+}
+// small_area_bonus_m08
+var small_area_bonus_m08_computed;
+function compute_small_area_bonus_m08() {
+  if(parseInt(1.000000* small_inspection_area_raw) > parseInt(0.000000)) {
+    if(parseInt(1.000000* m08_elevator_computed) > parseInt(0.000000)) {
+      small_area_bonus_m08_computed = parseInt(5.000000);
+    } else {
+      small_area_bonus_m08_computed = parseInt(0.000000);
+    }
+  } else {
+    small_area_bonus_m08_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_small_area_bonus_m08.value = small_area_bonus_m08_computed;
+}
+// small_area_bonus_m09
+var small_area_bonus_m09_computed;
+function compute_small_area_bonus_m09() {
+  if(parseInt(1.000000* small_inspection_area_raw) > parseInt(0.000000)) {
+    if(parseInt(1.000000* m09_safety_factor_computed) > parseInt(0.000000)) {
+      small_area_bonus_m09_computed = parseInt(5.000000);
+    } else {
+      small_area_bonus_m09_computed = parseInt(0.000000);
+    }
+  } else {
+    small_area_bonus_m09_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_small_area_bonus_m09.value = small_area_bonus_m09_computed;
+}
+// small_area_bonus_m10
+var small_area_bonus_m10_computed;
+function compute_small_area_bonus_m10() {
+  if(parseInt(1.000000* small_inspection_area_raw) > parseInt(0.000000)) {
+    if(parseInt(1.000000* m10_steel_construction_computed) > parseInt(0.000000)) {
+      small_area_bonus_m10_computed = parseInt(5.000000);
+    } else {
+      small_area_bonus_m10_computed = parseInt(0.000000);
+    }
+  } else {
+    small_area_bonus_m10_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_small_area_bonus_m10.value = small_area_bonus_m10_computed;
+}
+// small_area_bonus_m11
+var small_area_bonus_m11_computed;
+function compute_small_area_bonus_m11() {
+  if(parseInt(1.000000* small_inspection_area_raw) > parseInt(0.000000)) {
+    if(parseInt(1.000000* m11_innovative_structure_computed) > parseInt(0.000000)) {
+      small_area_bonus_m11_computed = parseInt(5.000000);
+    } else {
+      small_area_bonus_m11_computed = parseInt(0.000000);
+    }
+  } else {
+    small_area_bonus_m11_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_small_area_bonus_m11.value = small_area_bonus_m11_computed;
+}
+// small_area_bonus_m12
+var small_area_bonus_m12_computed;
+function compute_small_area_bonus_m12() {
+  if(parseInt(1.000000* small_inspection_area_raw) > parseInt(0.000000)) {
+    if(parseInt(1.000000* m12_circles_red_computed + 1.000000* m12_circles_tan_computed + 1.000000* m12_circles_white_computed + 1.000000* m12_levels_computed) > parseInt(0.000000)) {
+      small_area_bonus_m12_computed = parseInt(5.000000);
+    } else {
+      small_area_bonus_m12_computed = parseInt(0.000000);
+    }
+  } else {
+    small_area_bonus_m12_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_small_area_bonus_m12.value = small_area_bonus_m12_computed;
+}
+// small_area_bonus_m13
+var small_area_bonus_m13_computed;
+function compute_small_area_bonus_m13() {
+  if(parseInt(1.000000* small_inspection_area_raw) > parseInt(0.000000)) {
+    if(parseInt(1.000000* m13_sustainability_upgrades_computed) > parseInt(0.000000)) {
+      small_area_bonus_m13_computed = parseInt(5.000000);
+    } else {
+      small_area_bonus_m13_computed = parseInt(0.000000);
+    }
+  } else {
+    small_area_bonus_m13_computed = parseInt(0.000000);
+  }
+  document.scoreEntry.score_small_area_bonus_m13.value = small_area_bonus_m13_computed;
+}
+// Verified 
+var Verified;
+function set_Verified(newValue) {
+  Verified = newValue;
+  if (newValue == 1) {    $('#verification-warning').show();  } else if (newValue == 0) {    $('#verification-warning').hide();  }  refresh();
+}
+
+
+
+ <!-- end check for bye -->
+
+</script>
+
+</head>
+
+<body>
+
+  <div id="floating-messages">
+    <div id="score-errors" style="display: none;"></div>
+    <div id="verification-warning" style="display: none;">Are you sure this score has
+      been Verified? Normally scores are not verified on the initial
+      entry.</div>
+  </div>
+
+  <form action="SubmitScoreEntry" method="POST" name="scoreEntry" id="scoreEntry">
+    <input type="hidden" id="NoShow" name="NoShow" value="false">
+    <input type="hidden" id="delete" name="delete" value="false">
+
+      <input type="hidden" name="EditFlag" id="EditFlag" value="false" readonly="readonly">
+    
+    <input type="hidden" name="RunNumber" value="1" readonly="readonly"> <input type="hidden" name="TeamNumber" value="2244" readonly="readonly">
+
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
+      <!-- info bar -->
+      <tbody><tr>
+        <td valign="middle" align="center">
+          <!-- top info bar (team name etc) -->
+          <table id="top_info" width="100%" cellspacing="0" cellpadding="0" border="1">
+            <tbody><tr valign="middle" align="center">
+              <td>
+
+                <table width="90%" cellspacing="0" cellpadding="5" border="0">
+                  <!--  inner box on title -->
+                  <tbody><tr>
+                    <td valign="middle" align="center">
+                        
+                        
+                          <font size="4" face="Arial">Score Entry</font>
+                        
+                      </td>
+                  </tr>
+                </tbody></table> <!--  end inner box on title -->
+
+              </td>
+            </tr>
+            <!-- team info -->
+
+            
+
+          </tbody></table> <!--  end info bar -->
+
+        </td>
+      </tr>
+
+
+      <!-- score entry -->
+      <tr>
+        <td valign="middle" align="center">
+
+          <table class="score-entry" bordercolor="#808080" border="1">
+            <colgroup>
+              <!--  goal -->
+              <col width="50%">
+              <!-- buttons -->
+              <col width="30%">
+              <!-- count -->
+              <col width="10%">
+              <!--  score -->
+              <col width="10%">
+            </colgroup>
+            <tbody><tr>
+              <td colspan="2"><font size="4"><u>Goal</u></font></td>
+              <td align="right"><font size="4"><u>Count</u></font>
+              </td>
+              <td align="right"><font size="4"><u>Score</u></font>
+              </td>
+            </tr>
+
+            
+              
+              
+                
+                <!-- small_inspection_area -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Fit in Small Inspection Area:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input type="radio" id="small_inspection_area_no" name="small_inspection_area" value="0" onclick="set_small_inspection_area(0)" checked="checked">
+          <label for="small_inspection_area_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="small_inspection_area_yes" name="small_inspection_area" value="1" onclick="set_small_inspection_area(1)">
+          <label for="small_inspection_area_yes">Yes</label>
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="small_inspection_area_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_small_inspection_area" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end small_inspection_area -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>M01</b></td>
+<td colspan="2" class="center truncate"><b>M01</b></td>
+</tr>
+<!-- m01_robot_bridge -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M01 - Elevated places - Robot is Supported by the Bridge:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input type="radio" id="m01_robot_bridge_no" name="m01_robot_bridge" value="0" onclick="set_m01_robot_bridge(0)" checked="checked">
+          <label for="m01_robot_bridge_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="m01_robot_bridge_yes" name="m01_robot_bridge" value="1" onclick="set_m01_robot_bridge(1)">
+          <label for="m01_robot_bridge_yes">Yes</label>
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m01_robot_bridge_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m01_robot_bridge" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m01_robot_bridge -->
+
+<!-- m01_flags -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M01 - Elevated places - Number of 
+flags that are clearly raised any distance, only by the Robot:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input id="dec_m01_flags_2" type="button" value="-2" onclick="increment_m01_flags(-2)">
+        </td>
+        <td>
+          <input id="dec_m01_flags_1" type="button" value="-1" onclick="increment_m01_flags(-1)">
+        </td>
+        <td>
+          <input id="inc_m01_flags_1" type="button" value="+1" onclick="increment_m01_flags(1)">
+        </td>
+        <td>
+          <input id="inc_m01_flags_2" type="button" value="+2" onclick="increment_m01_flags(2)">
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m01_flags" size="3" onchange="check_m01_flags()" value="0" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m01_flags" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m01_flags -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>M02</b></td>
+<td colspan="2" class="center truncate"><b>M02</b></td>
+</tr>
+<!-- m02_crane_lowered -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M02 - Crane - Hooked Blue Unit Lowered from the Guide Hole:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input type="radio" id="m02_crane_lowered_no" name="m02_crane_lowered" value="0" onclick="set_m02_crane_lowered(0)" checked="checked">
+          <label for="m02_crane_lowered_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="m02_crane_lowered_yes" name="m02_crane_lowered" value="1" onclick="set_m02_crane_lowered(1)">
+          <label for="m02_crane_lowered_yes">Yes</label>
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m02_crane_lowered_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m02_crane_lowered" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m02_crane_lowered -->
+
+<!-- m02_independent_supported -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M02 - HBU Independent and Supported by another Blue unit:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input type="radio" id="m02_independent_supported_no" name="m02_independent_supported" value="0" onclick="set_m02_independent_supported(0)" checked="checked">
+          <label for="m02_independent_supported_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="m02_independent_supported_yes" name="m02_independent_supported" value="1" onclick="set_m02_independent_supported(1)">
+          <label for="m02_independent_supported_yes">Yes</label>
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m02_independent_supported_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m02_independent_supported" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m02_independent_supported -->
+
+<!-- m02_blue_circle -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M02 - HBU Supported by Blue Unit AND Level 1 Completely in Blue Circle:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input type="radio" id="m02_blue_circle_no" name="m02_blue_circle" value="0" onclick="set_m02_blue_circle(0)" checked="checked">
+          <label for="m02_blue_circle_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="m02_blue_circle_yes" name="m02_blue_circle" value="1" onclick="set_m02_blue_circle(1)">
+          <label for="m02_blue_circle_yes">Yes</label>
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m02_blue_circle_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m02_blue_circle" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m02_blue_circle -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>M03</b></td>
+<td colspan="2" class="center truncate"><b>M03</b></td>
+</tr>
+<!-- m03_inspection_drone -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M03 - Inspection Drone - supported by Axel A:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input type="radio" id="m03_inspection_drone_no" name="m03_inspection_drone" value="0" onclick="set_m03_inspection_drone(0)" checked="checked">
+          <label for="m03_inspection_drone_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="m03_inspection_drone_yes" name="m03_inspection_drone" value="1" onclick="set_m03_inspection_drone(1)">
+          <label for="m03_inspection_drone_yes">Yes</label>
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m03_inspection_drone_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m03_inspection_drone" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m03_inspection_drone -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>M04</b></td>
+<td colspan="2" class="center truncate"><b>M04</b></td>
+</tr>
+<!-- m04_crater_crossing -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M04 - Design for Wildlife - Bat supported by Branch B:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input type="radio" id="m04_crater_crossing_no" name="m04_crater_crossing" value="0" onclick="set_m04_crater_crossing(0)" checked="checked">
+          <label for="m04_crater_crossing_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="m04_crater_crossing_yes" name="m04_crater_crossing" value="1" onclick="set_m04_crater_crossing(1)">
+          <label for="m04_crater_crossing_yes">Yes</label>
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m04_crater_crossing_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m04_crater_crossing" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m04_crater_crossing -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>M05</b></td>
+<td colspan="2" class="center truncate"><b>M05</b></td>
+</tr>
+<!-- m05_treehouse_large_branches -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M05 - Treehouse - # Units in Large Branches:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input id="dec_m05_treehouse_large_branches_16" type="button" value="-16" onclick="increment_m05_treehouse_large_branches(-16)">
+        </td>
+        <td>
+          <input id="dec_m05_treehouse_large_branches_5" type="button" value="-5" onclick="increment_m05_treehouse_large_branches(-5)">
+        </td>
+        <td>
+          <input id="dec_m05_treehouse_large_branches_1" type="button" value="-1" onclick="increment_m05_treehouse_large_branches(-1)">
+        </td>
+        <td>
+          <input id="inc_m05_treehouse_large_branches_1" type="button" value="+1" onclick="increment_m05_treehouse_large_branches(1)">
+        </td>
+        <td>
+          <input id="inc_m05_treehouse_large_branches_5" type="button" value="+5" onclick="increment_m05_treehouse_large_branches(5)">
+        </td>
+        <td>
+          <input id="inc_m05_treehouse_large_branches_16" type="button" value="+16" onclick="increment_m05_treehouse_large_branches(16)">
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m05_treehouse_large_branches" size="3" onchange="check_m05_treehouse_large_branches()" value="0" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m05_treehouse_large_branches" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m05_treehouse_large_branches -->
+
+<!-- m05_treehouse_small_branches -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M05 - Treehouse - # Units in Small Branches:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input id="dec_m05_treehouse_small_branches_16" type="button" value="-16" onclick="increment_m05_treehouse_small_branches(-16)">
+        </td>
+        <td>
+          <input id="dec_m05_treehouse_small_branches_5" type="button" value="-5" onclick="increment_m05_treehouse_small_branches(-5)">
+        </td>
+        <td>
+          <input id="dec_m05_treehouse_small_branches_1" type="button" value="-1" onclick="increment_m05_treehouse_small_branches(-1)">
+        </td>
+        <td>
+          <input id="inc_m05_treehouse_small_branches_1" type="button" value="+1" onclick="increment_m05_treehouse_small_branches(1)">
+        </td>
+        <td>
+          <input id="inc_m05_treehouse_small_branches_5" type="button" value="+5" onclick="increment_m05_treehouse_small_branches(5)">
+        </td>
+        <td>
+          <input id="inc_m05_treehouse_small_branches_16" type="button" value="+16" onclick="increment_m05_treehouse_small_branches(16)">
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m05_treehouse_small_branches" size="3" onchange="check_m05_treehouse_small_branches()" value="0" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m05_treehouse_small_branches" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m05_treehouse_small_branches -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>M06</b></td>
+<td colspan="2" class="center truncate"><b>M06</b></td>
+</tr>
+<!-- m06_traffic_jam -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M06 - Traffic Jam - Lifted and Independent:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input type="radio" id="m06_traffic_jam_no" name="m06_traffic_jam" value="0" onclick="set_m06_traffic_jam(0)" checked="checked">
+          <label for="m06_traffic_jam_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="m06_traffic_jam_yes" name="m06_traffic_jam" value="1" onclick="set_m06_traffic_jam(1)">
+          <label for="m06_traffic_jam_yes">Yes</label>
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m06_traffic_jam_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m06_traffic_jam" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m06_traffic_jam -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>M07</b></td>
+<td colspan="2" class="center truncate"><b>M07</b></td>
+</tr>
+<!-- m07_swing -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M07 - Swing Released:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input type="radio" id="m07_swing_no" name="m07_swing" value="0" onclick="set_m07_swing(0)" checked="checked">
+          <label for="m07_swing_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="m07_swing_yes" name="m07_swing" value="1" onclick="set_m07_swing(1)">
+          <label for="m07_swing_yes">Yes</label>
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m07_swing_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m07_swing" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m07_swing -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>M08</b></td>
+<td colspan="2" class="center truncate"><b>M08</b></td>
+</tr>
+<!-- m08_elevator -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M08 - Elevator:
+  </td>
+  <td>
+    <table width="100%" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr>
+        <td class="right">
+          <input type="radio" name="m08_elevator" value="neither" id="m08_elevator_neither" '="" onclick='set_m08_elevator("neither")' checked="checked">
+        </td>
+        <td><label for="m08_elevator_neither">
+          Neither
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m08_elevator" value="blue_car_down" id="m08_elevator_blue_car_down" '="" onclick='set_m08_elevator("blue_car_down")'>
+        </td>
+        <td><label for="m08_elevator_blue_car_down">
+          Blue Car Down
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m08_elevator" value="balanced" id="m08_elevator_balanced" '="" onclick='set_m08_elevator("balanced")'>
+        </td>
+        <td><label for="m08_elevator_balanced">
+          Balanced
+        </label></td>
+      </tr>
+        </tbody></table>
+  </td><td align="right">
+    <input type="text" name="m08_elevator_radioValue" size="10" readonly="readonly" tabindex="-1" value="NEITHER" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m08_elevator" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m08_elevator -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>M09</b></td>
+<td colspan="2" class="center truncate"><b>M09</b></td>
+</tr>
+<!-- m09_safety_factor -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M09 - Safety Factor - # of Beams Knocked at least 1/2 way down:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input id="dec_m09_safety_factor_6" type="button" value="-6" onclick="increment_m09_safety_factor(-6)">
+        </td>
+        <td>
+          <input id="dec_m09_safety_factor_3" type="button" value="-3" onclick="increment_m09_safety_factor(-3)">
+        </td>
+        <td>
+          <input id="dec_m09_safety_factor_1" type="button" value="-1" onclick="increment_m09_safety_factor(-1)">
+        </td>
+        <td>
+          <input id="inc_m09_safety_factor_1" type="button" value="+1" onclick="increment_m09_safety_factor(1)">
+        </td>
+        <td>
+          <input id="inc_m09_safety_factor_3" type="button" value="+3" onclick="increment_m09_safety_factor(3)">
+        </td>
+        <td>
+          <input id="inc_m09_safety_factor_6" type="button" value="+6" onclick="increment_m09_safety_factor(6)">
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m09_safety_factor" size="3" onchange="check_m09_safety_factor()" value="0" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m09_safety_factor" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m09_safety_factor -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>M10</b></td>
+<td colspan="2" class="center truncate"><b>M10</b></td>
+</tr>
+<!-- m10_steel_construction -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M10 - Steel Construction - standing independent:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input type="radio" id="m10_steel_construction_no" name="m10_steel_construction" value="0" onclick="set_m10_steel_construction(0)" checked="checked">
+          <label for="m10_steel_construction_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="m10_steel_construction_yes" name="m10_steel_construction" value="1" onclick="set_m10_steel_construction(1)">
+          <label for="m10_steel_construction_yes">Yes</label>
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m10_steel_construction_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m10_steel_construction" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m10_steel_construction -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>M11</b></td>
+<td colspan="2" class="center truncate"><b>M11</b></td>
+</tr>
+<!-- m11_innovative_structure -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M11 - Innovative Structure:
+  </td>
+  <td>
+    <table width="100%" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr>
+        <td class="right">
+          <input type="radio" name="m11_innovative_structure" value="no" id="m11_innovative_structure_no" '="" onclick='set_m11_innovative_structure("no")' checked="checked">
+        </td>
+        <td><label for="m11_innovative_structure_no">
+          No
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m11_innovative_structure" value="partly" id="m11_innovative_structure_partly" '="" onclick='set_m11_innovative_structure("partly")'>
+        </td>
+        <td><label for="m11_innovative_structure_partly">
+          Partly in any Circle
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m11_innovative_structure" value="completely" id="m11_innovative_structure_completely" '="" onclick='set_m11_innovative_structure("completely")'>
+        </td>
+        <td><label for="m11_innovative_structure_completely">
+          Completely in any Circle
+        </label></td>
+      </tr>
+        </tbody></table>
+  </td><td align="right">
+    <input type="text" name="m11_innovative_structure_radioValue" size="10" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m11_innovative_structure" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m11_innovative_structure -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>M12</b></td>
+<td colspan="2" class="center truncate"><b>M12</b></td>
+</tr>
+<!-- m12_circles_red -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M12 - Color Matching Unit Completely In &amp; Flatdown in Circle Red:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input type="radio" id="m12_circles_red_no" name="m12_circles_red" value="0" onclick="set_m12_circles_red(0)" checked="checked">
+          <label for="m12_circles_red_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="m12_circles_red_yes" name="m12_circles_red" value="1" onclick="set_m12_circles_red(1)">
+          <label for="m12_circles_red_yes">Yes</label>
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m12_circles_red_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m12_circles_red" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m12_circles_red -->
+
+<!-- m12_circles_tan -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M12 - Color Matching Unit Completely In &amp; Flatdown in Circle Tan:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input type="radio" id="m12_circles_tan_no" name="m12_circles_tan" value="0" onclick="set_m12_circles_tan(0)" checked="checked">
+          <label for="m12_circles_tan_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="m12_circles_tan_yes" name="m12_circles_tan" value="1" onclick="set_m12_circles_tan(1)">
+          <label for="m12_circles_tan_yes">Yes</label>
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m12_circles_tan_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m12_circles_tan" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m12_circles_tan -->
+
+<!-- m12_circles_white -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M12 - Color Matching Unit Completely In &amp; Flatdown in Circle White:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input type="radio" id="m12_circles_white_no" name="m12_circles_white" value="0" onclick="set_m12_circles_white(0)" checked="checked">
+          <label for="m12_circles_white_no">No</label>
+          &nbsp;&nbsp;
+          <input type="radio" id="m12_circles_white_yes" name="m12_circles_white" value="1" onclick="set_m12_circles_white(1)">
+          <label for="m12_circles_white_yes">Yes</label>
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m12_circles_white_radioValue" size="3" readonly="readonly" tabindex="-1" value="NO" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m12_circles_white" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m12_circles_white -->
+
+<!-- m12_levels -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M12 - Levels:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input id="dec_m12_levels_28" type="button" value="-28" onclick="increment_m12_levels(-28)">
+        </td>
+        <td>
+          <input id="dec_m12_levels_5" type="button" value="-5" onclick="increment_m12_levels(-5)">
+        </td>
+        <td>
+          <input id="dec_m12_levels_1" type="button" value="-1" onclick="increment_m12_levels(-1)">
+        </td>
+        <td>
+          <input id="inc_m12_levels_1" type="button" value="+1" onclick="increment_m12_levels(1)">
+        </td>
+        <td>
+          <input id="inc_m12_levels_5" type="button" value="+5" onclick="increment_m12_levels(5)">
+        </td>
+        <td>
+          <input id="inc_m12_levels_28" type="button" value="+28" onclick="increment_m12_levels(28)">
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m12_levels" size="3" onchange="check_m12_levels()" value="0" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m12_levels" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m12_levels -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>M13</b></td>
+<td colspan="2" class="center truncate"><b>M13</b></td>
+</tr>
+<!-- m13_sustainability_upgrades -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M13 - Sustainability Upgrades:
+  </td>
+  <td>
+    <table width="150" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr align="center">
+        <td>
+          <input id="dec_m13_sustainability_upgrades_3" type="button" value="-3" onclick="increment_m13_sustainability_upgrades(-3)">
+        </td>
+        <td>
+          <input id="dec_m13_sustainability_upgrades_1" type="button" value="-1" onclick="increment_m13_sustainability_upgrades(-1)">
+        </td>
+        <td>
+          <input id="inc_m13_sustainability_upgrades_1" type="button" value="+1" onclick="increment_m13_sustainability_upgrades(1)">
+        </td>
+        <td>
+          <input id="inc_m13_sustainability_upgrades_3" type="button" value="+3" onclick="increment_m13_sustainability_upgrades(3)">
+        </td>
+       </tr>
+    </tbody></table>
+  </td>
+  <td align="right">
+    <input type="text" name="m13_sustainability_upgrades" size="3" onchange="check_m13_sustainability_upgrades()" value="0" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m13_sustainability_upgrades" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end m13_sustainability_upgrades -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<!-- m14_precision -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M14 - Precision - Remaining Tokens on Field:
+  </td>
+  <td>
+    <table width="100%" cellspacing="0" cellpadding="0" border="0">
+      <tbody><tr>
+        <td class="right">
+          <input type="radio" name="m14_precision" value="zero" id="m14_precision_zero" '="" onclick='set_m14_precision("zero")'>
+        </td>
+        <td><label for="m14_precision_zero">
+          0
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m14_precision" value="one" id="m14_precision_one" '="" onclick='set_m14_precision("one")'>
+        </td>
+        <td><label for="m14_precision_one">
+          1
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m14_precision" value="two" id="m14_precision_two" '="" onclick='set_m14_precision("two")'>
+        </td>
+        <td><label for="m14_precision_two">
+          2
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m14_precision" value="three" id="m14_precision_three" '="" onclick='set_m14_precision("three")'>
+        </td>
+        <td><label for="m14_precision_three">
+          3
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m14_precision" value="four" id="m14_precision_four" '="" onclick='set_m14_precision("four")'>
+        </td>
+        <td><label for="m14_precision_four">
+          4
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m14_precision" value="five" id="m14_precision_five" '="" onclick='set_m14_precision("five")'>
+        </td>
+        <td><label for="m14_precision_five">
+          5
+        </label></td>
+      </tr>
+      <tr>
+        <td class="right">
+          <input type="radio" name="m14_precision" value="six" id="m14_precision_six" '="" onclick='set_m14_precision("six")' checked="checked">
+        </td>
+        <td><label for="m14_precision_six">
+          6
+        </label></td>
+      </tr>
+        </tbody></table>
+  </td><td align="right">
+    <input type="text" name="m14_precision_radioValue" size="10" readonly="readonly" tabindex="-1" value="SIX" align="right">
+  </td>
+  <td align="right">
+    <input type="text" name="score_m14_precision" size="3" readonly="readonly" tabindex="-1" value="60" align="right">
+  </td>
+</tr>
+<!-- end m14_precision -->
+
+<tr><td colspan="4" class="goal-group-spacer">&nbsp;</td></tr>
+<tr>
+<td colspan="2" class="center truncate"><b>Bonus</b></td>
+<td colspan="2" class="center truncate"><b>Bonus</b></td>
+</tr>
+<!-- small_area_bonus_m01 -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Small Inspection Area Bonus - M01:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td align="right">
+    <input type="text" name="score_small_area_bonus_m01" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end small_area_bonus_m01 -->
+
+<!-- small_area_bonus_m02 -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Small Inspection Area Bonus - M02:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td align="right">
+    <input type="text" name="score_small_area_bonus_m02" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end small_area_bonus_m02 -->
+
+<!-- small_area_bonus_m03 -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Small Inspection Area Bonus - M03:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td align="right">
+    <input type="text" name="score_small_area_bonus_m03" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end small_area_bonus_m03 -->
+
+<!-- small_area_bonus_m04 -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Small Inspection Area Bonus - M04:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td align="right">
+    <input type="text" name="score_small_area_bonus_m04" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end small_area_bonus_m04 -->
+
+<!-- small_area_bonus_m05 -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Small Inspection Area Bonus - M05:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td align="right">
+    <input type="text" name="score_small_area_bonus_m05" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end small_area_bonus_m05 -->
+
+<!-- small_area_bonus_m06 -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Small Inspection Area Bonus - M06:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td align="right">
+    <input type="text" name="score_small_area_bonus_m06" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end small_area_bonus_m06 -->
+
+<!-- small_area_bonus_m07 -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Small Inspection Area Bonus - M07:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td align="right">
+    <input type="text" name="score_small_area_bonus_m07" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end small_area_bonus_m07 -->
+
+<!-- small_area_bonus_m08 -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Small Inspection Area Bonus - M08:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td align="right">
+    <input type="text" name="score_small_area_bonus_m08" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end small_area_bonus_m08 -->
+
+<!-- small_area_bonus_m09 -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Small Inspection Area Bonus - M09:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td align="right">
+    <input type="text" name="score_small_area_bonus_m09" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end small_area_bonus_m09 -->
+
+<!-- small_area_bonus_m10 -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Small Inspection Area Bonus - M10:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td align="right">
+    <input type="text" name="score_small_area_bonus_m10" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end small_area_bonus_m10 -->
+
+<!-- small_area_bonus_m11 -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Small Inspection Area Bonus - M11:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td align="right">
+    <input type="text" name="score_small_area_bonus_m11" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end small_area_bonus_m11 -->
+
+<!-- small_area_bonus_m12 -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Small Inspection Area Bonus - M12:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td align="right">
+    <input type="text" name="score_small_area_bonus_m12" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end small_area_bonus_m12 -->
+
+<!-- small_area_bonus_m13 -->
+<tr>
+  <td class="goal-title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Small Inspection Area Bonus - M13:
+  </td>
+  <td colspan="2" align="center"><b>Computed Goal</b></td>
+  <td align="right">
+    <input type="text" name="score_small_area_bonus_m13" size="3" readonly="readonly" tabindex="-1" value="0" align="right">
+  </td>
+</tr>
+<!-- end small_area_bonus_m13 -->
+
+
+
+                <!-- Total Score -->
+                <tr>
+                  <td colspan="3"><font size="4"><u>Total
+                        Score:</u></font></td>
+                  <td align="right"><input type="text" name="totalScore" size="3" readonly="readonly" tabindex="-1" value="60"></td>
+                </tr>
+              
+            
+            <!-- end check for bye -->
+
+          </tbody></table> <!-- end score entry table  -->
+
+        </td>
+      </tr>
+    </tbody></table>
+    <!-- end table to center everything -->
+  </form>
+  <!-- end score entry form -->
+
+	
+
+<div style="display: none; position: absolute;" tabindex="-1" role="dialog" class="ui-dialog ui-corner-all ui-widget ui-widget-content ui-front ui-dialog-buttons ui-draggable ui-resizable" aria-describedby="yesno-dialog" aria-labelledby="ui-id-1"><div class="ui-dialog-titlebar ui-corner-all ui-widget-header ui-helper-clearfix ui-draggable-handle"><span id="ui-id-1" class="ui-dialog-title">&nbsp;</span><button type="button" class="ui-button ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close" title="Close"><span class="ui-button-icon ui-icon ui-icon-closethick"></span><span class="ui-button-icon-space"> </span>Close</button></div><div id="yesno-dialog" class="ui-dialog-content ui-widget-content">
+		<p id="yesno-dialog_text"></p>
+	</div><div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix"><div class="ui-dialog-buttonset"><button type="button" id="yesno-dialog_yes" class="ui-button ui-corner-all ui-widget">Yes</button><button type="button" id="yesno-dialog_no" class="ui-button ui-corner-all ui-widget">No</button></div></div><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-e" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-s" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-se ui-icon ui-icon-gripsmall-diagonal-se" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-sw" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-ne" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90;"></div></div></body></html>
