@@ -36,7 +36,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 20;
+  public static final int DATABASE_VERSION = 21;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -180,6 +180,9 @@ public final class GenerateDB {
 
       // table to track which teams are in which playoff bracket
       createPlayoffBracketTeams(connection);
+      
+      // track which brackets are automatically finished
+      createAutomaticFinishedPlayoffTable(connection, true);
 
       // table to hold team numbers of teams in this tournament
       stmt.executeUpdate("DROP TABLE IF EXISTS TournamentTeams CASCADE");
@@ -1091,6 +1094,24 @@ public final class GenerateDB {
         sql.append(" ,CONSTRAINT advancing_teams_pk PRIMARY KEY (tournament_id, team_number)");
         sql.append(" ,CONSTRAINT advancing_teams_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
         sql.append(" ,CONSTRAINT advancing_teams_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
+      }
+      sql.append(")");
+      stmt.executeUpdate(sql.toString());
+    }
+  }
+
+  /* package */ static void createAutomaticFinishedPlayoffTable(final Connection connection,
+                                                                final boolean createConstraints)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+      stmt.executeUpdate("DROP TABLE IF EXISTS automatic_finished_playoff CASCADE");
+
+      final StringBuilder sql = new StringBuilder();
+      sql.append("CREATE TABLE automatic_finished_playoff (");
+      sql.append("  tournament_id INTEGER NOT NULL");
+      sql.append(" ,bracket_name LONGVARCHAR NOT NULL");
+      if (createConstraints) {
+        sql.append(" ,CONSTRAINT automatic_finished_playoff PRIMARY KEY (tournament_id, bracket_name)");
       }
       sql.append(")");
       stmt.executeUpdate(sql.toString());

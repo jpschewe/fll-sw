@@ -144,12 +144,15 @@ public class PlayoffReport extends BaseFLLServlet {
                                   final Element parentElement)
       throws SQLException {
 
-    // TODO: limit to brackets that have really been completed
-    final List<String> playoffDivisions = Playoff.getPlayoffBrackets(connection, tournament.getTournamentID());
-    for (final String division : playoffDivisions) {
-
-      final Element paragraph = processDivision(connection, tournament, document, division,
-                                                challengeDescription.getPerformance().getScoreType());
+    final List<String> playoffDivisions = Playoff.getCompletedBrackets(connection, tournament.getTournamentID());
+    if (!playoffDivisions.isEmpty()) {
+      for (final String division : playoffDivisions) {
+        final Element paragraph = processDivision(connection, tournament, document, division,
+                                                  challengeDescription.getPerformance().getScoreType());
+        parentElement.appendChild(paragraph);
+      }
+    } else {
+      final Element paragraph = FOPUtils.createBlankLine(document);
       parentElement.appendChild(paragraph);
     }
 
