@@ -84,9 +84,9 @@ public class PlayoffReport extends BaseFLLServlet {
     }
   }
 
-  private Document createReport(final Connection connection,
-                                final Tournament tournament,
-                                final ChallengeDescription challengeDescription)
+  private static Document createReport(final Connection connection,
+                                       final Tournament tournament,
+                                       final ChallengeDescription challengeDescription)
       throws SQLException {
 
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
@@ -121,26 +121,48 @@ public class PlayoffReport extends BaseFLLServlet {
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
 
+    populateBody(connection, tournament, challengeDescription, document, documentBody);
+
+    return document;
+  }
+
+  /**
+   * Populate the body of the report. This function is used by
+   * {@link AwardsReport} to add the head to head winners to that report.
+   * 
+   * @param connection database connection
+   * @param tournament tournament
+   * @param challengeDescription challenge information
+   * @param document used to create elements
+   * @param parentElement the element to add the data to
+   * @throws SQLException if a database error occurs
+   */
+  public static void populateBody(final Connection connection,
+                                  final Tournament tournament,
+                                  final ChallengeDescription challengeDescription,
+                                  final Document document,
+                                  final Element parentElement)
+      throws SQLException {
+
     // TODO: limit to brackets that have really been completed
     final List<String> playoffDivisions = Playoff.getPlayoffBrackets(connection, tournament.getTournamentID());
     for (final String division : playoffDivisions) {
 
       final Element paragraph = processDivision(connection, tournament, document, division,
                                                 challengeDescription.getPerformance().getScoreType());
-      documentBody.appendChild(paragraph);
+      parentElement.appendChild(paragraph);
     }
 
-    return document;
   }
 
   /**
    * Create the paragraph for the specified division.
    */
-  private Element processDivision(final Connection connection,
-                                  final Tournament tournament,
-                                  final Document document,
-                                  final String division,
-                                  final ScoreType performanceScoreType)
+  private static Element processDivision(final Connection connection,
+                                         final Tournament tournament,
+                                         final Document document,
+                                         final String division,
+                                         final ScoreType performanceScoreType)
       throws SQLException {
 
     final Element paragraph = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
@@ -256,9 +278,9 @@ public class PlayoffReport extends BaseFLLServlet {
     return paragraph;
   }
 
-  private Element createHeader(final Document document,
-                               final ChallengeDescription description,
-                               final Tournament tournament) {
+  private static Element createHeader(final Document document,
+                                      final ChallengeDescription description,
+                                      final Tournament tournament) {
     final Element staticContent = FOPUtils.createXslFoElement(document, "static-content");
     staticContent.setAttribute("flow-name", "xsl-region-before");
     staticContent.setAttribute("font-size", "10pt");
