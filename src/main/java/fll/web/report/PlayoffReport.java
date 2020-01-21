@@ -6,8 +6,8 @@
 
 package fll.web.report;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,30 +17,29 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
+import javax.xml.transform.TransformerException;
 
-import com.itextpdf.text.Chunk;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.FontFactory;
-import com.itextpdf.text.PageSize;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.pdf.PdfWriter;
+import org.apache.fop.apps.FOPException;
+import org.apache.fop.apps.FopFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
+import fll.util.FLLInternalException;
+import fll.util.FOPUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.playoff.Playoff;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreType;
+import net.mtu.eggplant.xml.XMLUtils;
 
 /**
  * Report displaying which teams won each playoff bracket.
@@ -49,10 +48,6 @@ import fll.xml.ScoreType;
 public class PlayoffReport extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
-
-  private static final Font TITLE_FONT = FontFactory.getFont(FontFactory.TIMES, 12, Font.BOLD);
-
-  private static final Font HEADER_FONT = TITLE_FONT;
 
   @Override
   protected void processRequest(final HttpServletRequest request,
@@ -66,66 +61,102 @@ public class PlayoffReport extends BaseFLLServlet {
 
       final Tournament tournament = Tournament.findTournamentByID(connection, Queries.getCurrentTournament(connection));
 
-      // create simple doc and write to a ByteArrayOutputStream
-      final Document document = new Document(PageSize.LETTER);
-      final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      final PdfWriter writer = PdfWriter.getInstance(document, baos);
-      writer.setPageEvent(new ReportPageEventHandler(HEADER_FONT, "Head to Head Winners",
-                                                     challengeDescription.getTitle(), tournament.getDescription()));
+      final Document doc = createReport(connection, tournament, challengeDescription);
+      final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
-      document.open();
-
-      document.addTitle("Head to Head Report");
-
-      final List<String> playoffDivisions = Playoff.getPlayoffBrackets(connection, tournament.getTournamentID());
-      for (final String division : playoffDivisions) {
-
-        Paragraph para = processDivision(connection, tournament, division,
-                                         challengeDescription.getPerformance().getScoreType());
-        document.add(para);
+      if (LOGGER.isTraceEnabled()) {
+        try (StringWriter writer = new StringWriter()) {
+          XMLUtils.writeXML(doc, writer);
+          LOGGER.trace(writer.toString());
+        }
       }
 
-      document.close();
-
-      // setting the content type
+      response.reset();
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=playoffReport.pdf");
-      // the content length is needed for MSIE!!!
-      response.setContentLength(baos.size());
-      // write ByteArrayOutputStream to the ServletOutputStream
-      final ServletOutputStream out = response.getOutputStream();
-      baos.writeTo(out);
-      out.flush();
 
+      FOPUtils.renderPdf(fopFactory, doc, response.getOutputStream());
     } catch (final SQLException e) {
       LOGGER.error(e, e);
       throw new RuntimeException(e);
-    } catch (final DocumentException e) {
-      LOGGER.error(e, e);
-      throw new RuntimeException(e);
+    } catch (FOPException | TransformerException e) {
+      throw new FLLInternalException("Error creating the playoff report", e);
     }
+  }
+
+  private Document createReport(final Connection connection,
+                                final Tournament tournament,
+                                final ChallengeDescription challengeDescription)
+      throws SQLException {
+
+    final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
+
+    final Element rootElement = FOPUtils.createRoot(document);
+    document.appendChild(rootElement);
+
+    final Element layoutMasterSet = FOPUtils.createXslFoElement(document, "layout-master-set");
+    rootElement.appendChild(layoutMasterSet);
+
+    final double leftMargin = 0.5;
+    final double rightMargin = leftMargin;
+    final double topMargin = 1;
+    final double bottomMargin = 0.5;
+    final double headerHeight = topMargin;
+    final double footerHeight = 0.3;
+
+    final String pageMasterName = "simple";
+    FOPUtils.createSimplePageMaster(document, layoutMasterSet, pageMasterName, FOPUtils.PAGE_LETTER_SIZE,
+                                    new FOPUtils.Margins(topMargin, bottomMargin, leftMargin, rightMargin),
+                                    headerHeight, footerHeight);
+
+    final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
+    rootElement.appendChild(pageSequence);
+
+    final Element header = createHeader(document, challengeDescription, tournament);
+    pageSequence.appendChild(header);
+
+    final Element footer = FOPUtils.createSimpleFooter(document);
+    pageSequence.appendChild(footer);
+
+    final Element documentBody = FOPUtils.createBody(document);
+    pageSequence.appendChild(documentBody);
+
+    // TODO: limit to brackets that have really been completed
+    final List<String> playoffDivisions = Playoff.getPlayoffBrackets(connection, tournament.getTournamentID());
+    for (final String division : playoffDivisions) {
+
+      final Element paragraph = processDivision(connection, tournament, document, division,
+                                                challengeDescription.getPerformance().getScoreType());
+      documentBody.appendChild(paragraph);
+    }
+
+    return document;
   }
 
   /**
    * Create the paragraph for the specified division.
-   * 
-   * @throws SQLException
    */
-  private Paragraph processDivision(final Connection connection,
-                                    final Tournament tournament,
-                                    final String division,
-                                    final ScoreType performanceScoreType)
+  private Element processDivision(final Connection connection,
+                                  final Tournament tournament,
+                                  final Document document,
+                                  final String division,
+                                  final ScoreType performanceScoreType)
       throws SQLException {
-    final Paragraph para = new Paragraph();
-    para.add(Chunk.NEWLINE);
-    para.add(new Chunk("Results for head to head bracket "
-        + division, TITLE_FONT));
-    para.add(Chunk.NEWLINE);
+
+    final Element paragraph = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+
+    final Element title = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    paragraph.appendChild(title);
+    title.setAttribute("font-weight", "bold");
+    title.appendChild(document.createTextNode("Results for head to head bracket "
+        + division));
 
     final int maxRun = Playoff.getMaxPerformanceRound(connection, tournament.getTournamentID(), division);
 
     if (maxRun < 1) {
-      para.add("Cannot determine max run number for this playoff bracket. This is an internal error");
+      final Element e1 = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      paragraph.appendChild(e1);
+      e1.appendChild(document.createTextNode("Cannot determine max run number for this playoff bracket. This is an internal error"));
     } else {
       try (
           PreparedStatement teamPrep = connection.prepareStatement("SELECT Teams.TeamNumber, Teams.TeamName, Teams.Organization" //
@@ -182,35 +213,109 @@ public class PlayoffReport extends BaseFLLServlet {
             final int teamNumber = team2Result.getInt(1);
             final String teamName = team2Result.getString(2);
 
-            para.add(String.format("Competing for places %d and %d", lastTeamsIndex
+            final Element e1 = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+            paragraph.appendChild(e1);
+            e1.appendChild(document.createTextNode(String.format("Competing for places %d and %d", lastTeamsIndex
                 + 1, lastTeamsIndex
-                    + 2));
-            para.add(Chunk.NEWLINE);
+                    + 2)));
+
             if (lastTeamsIndex < lastTeams.size()) {
-              para.add(lastTeams.get(lastTeamsIndex));
+              final Element teamEle = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+              paragraph.appendChild(teamEle);
+              teamEle.appendChild(document.createTextNode(lastTeams.get(lastTeamsIndex)));
             } else {
-              para.add("Internal error, unknown team competing");
+              final Element teamEle = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+              paragraph.appendChild(teamEle);
+              teamEle.appendChild(document.createTextNode("Internal error, unknown team competing"));
             }
-            para.add(Chunk.NEWLINE);
             ++lastTeamsIndex;
 
             if (lastTeamsIndex < lastTeams.size()) {
-              para.add(lastTeams.get(lastTeamsIndex));
+              final Element teamEle = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+              paragraph.appendChild(teamEle);
+              teamEle.appendChild(document.createTextNode(lastTeams.get(lastTeamsIndex)));
             } else {
-              para.add("Internal error, unknown team competing");
+              final Element teamEle = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+              paragraph.appendChild(teamEle);
+              teamEle.appendChild(document.createTextNode("Internal error, unknown team competing"));
             }
-            para.add(Chunk.NEWLINE);
             ++lastTeamsIndex;
 
-            para.add(String.format("The winner is team %d - %s", teamNumber, teamName));
-            para.add(Chunk.NEWLINE);
-            para.add(Chunk.NEWLINE);
+            final Element winnerEle = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+            paragraph.appendChild(winnerEle);
+            winnerEle.appendChild(document.createTextNode(String.format("The winner is team %d - %s", teamNumber,
+                                                                        teamName)));
+
+            paragraph.appendChild(FOPUtils.createBlankLine(document));
+
           } // foreach result
         } // teamResult
       } // prepared statements
     } // finished playoff
 
-    return para;
+    return paragraph;
+  }
+
+  private Element createHeader(final Document document,
+                               final ChallengeDescription description,
+                               final Tournament tournament) {
+    final Element staticContent = FOPUtils.createXslFoElement(document, "static-content");
+    staticContent.setAttribute("flow-name", "xsl-region-before");
+    staticContent.setAttribute("font-size", "10pt");
+
+    final Element titleBlock = FOPUtils.createXslFoElement(document, "block");
+    staticContent.appendChild(titleBlock);
+    titleBlock.setAttribute("text-align", "center");
+    titleBlock.setAttribute("font-size", "16pt");
+    titleBlock.setAttribute("font-weight", "bold");
+
+    final String reportTitle = createTitle(description, tournament);
+    titleBlock.appendChild(document.createTextNode(reportTitle));
+
+    staticContent.appendChild(FOPUtils.createBlankLine(document));
+
+    final Element subtitleBlock = FOPUtils.createXslFoElement(document, "block");
+    staticContent.appendChild(subtitleBlock);
+    subtitleBlock.setAttribute("text-align-last", "justify");
+    subtitleBlock.setAttribute("font-weight", "bold");
+
+    final String tournamentName = null == tournament.getDescription() ? tournament.getName()
+        : tournament.getDescription();
+    final String tournamentTitle;
+    if (null != tournament.getLevel()) {
+      tournamentTitle = String.format("%s: %s", tournament.getLevel(), tournamentName);
+    } else {
+      tournamentTitle = tournamentName;
+    }
+    subtitleBlock.appendChild(document.createTextNode(tournamentTitle));
+
+    final Element subtitleCenter = FOPUtils.createXslFoElement(document, "leader");
+    subtitleBlock.appendChild(subtitleCenter);
+    subtitleCenter.setAttribute("leader-pattern", "space");
+
+    if (null != tournament.getDate()) {
+      final String dateString = String.format("Date: %s", AwardsReport.DATE_FORMATTER.format(tournament.getDate()));
+
+      subtitleBlock.appendChild(document.createTextNode(dateString));
+    }
+
+    staticContent.appendChild(FOPUtils.createHorizontalLine(document, 1));
+
+    return staticContent;
+  }
+
+  private static String createTitle(final ChallengeDescription description,
+                                    final Tournament tournament) {
+    final StringBuilder titleBuilder = new StringBuilder();
+    titleBuilder.append(description.getTitle());
+
+    if (null != tournament.getLevel()) {
+      titleBuilder.append(" ");
+      titleBuilder.append(tournament.getLevel());
+    }
+
+    titleBuilder.append(" Head to Head Winners");
+    return titleBuilder.toString();
   }
 
 }
