@@ -85,16 +85,7 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
     if (0 != tableCompare) {
       return tableCompare;
     } else {
-      return compareSide(other);
-    }
-  }
-
-  private int compareSide(final PerformanceTime other) {
-    final int cmp = Integer.compare(this.side, other.side);
-    if (0 == cmp) {
-      return Boolean.compare(this.practice, other.practice);
-    } else {
-      return cmp;
+      return Integer.compare(this.side, other.side);
     }
   }
 
@@ -105,7 +96,12 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
       if (0 != timeCompare) {
         return timeCompare;
       } else {
-        return compareTable(other);
+        final int tableCompare = compareTable(other);
+        if (0 == tableCompare) {
+          return Boolean.compare(this.practice, other.practice);
+        } else {
+          return tableCompare;
+        }
       }
     } else if (null == other.time) {
       return compareTable(other);
