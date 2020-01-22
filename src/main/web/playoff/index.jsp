@@ -220,7 +220,7 @@
 				<li>
 					<%-- uninitialize bracket --%>
 					<form name="uninitialize_playoff" method="POST"
-						action="FinishBracket">
+						action="UninitializePlayoff">
 						Select bracket to uninitialize: <select id='uninitialize-division'
 							name='division'>
 							<c:forEach items="${playoff_data.initializedBrackets }"

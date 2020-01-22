@@ -6,9 +6,12 @@
 
 package fll.util;
 
+import java.awt.geom.Dimension2D;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.nio.file.Paths;
+import java.util.Objects;
 
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
@@ -22,8 +25,11 @@ import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.Fop;
 import org.apache.fop.apps.FopFactory;
 import org.apache.fop.apps.MimeConstants;
+import org.apache.xmlgraphics.java2d.Dimension2DDouble;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import fll.Utilities;
 
 /**
  * Utilities for working with Apache FOP.
@@ -74,9 +80,21 @@ public final class FOPUtils {
   }
 
   /**
-   * Create 8.5" x 11" page with half inch margins and 0.3 inch footer and no
-   * header.
-   * 
+   * 8.5" x 11" page.
+   */
+  public static final Dimension2D PAGE_LETTER_SIZE = new Dimension2DDouble(8.5, 11);
+
+  /**
+   * 0.5" on each side.
+   */
+  public static final Margins STANDARD_MARGINS = new Margins(0.5, 0.5, 0.5, 0.5);
+
+  /**
+   * Footer with enough room to put the page number.
+   */
+  public static final double STANDARD_FOOTER_HEIGHT = 0.3;
+
+  /**
    * @param document used to create the elements
    * @param layoutMasterSet the master set element
    * @param name the name of the page master
@@ -84,24 +102,24 @@ public final class FOPUtils {
    *      double, double, double, double, double, double)
    * @throws IllegalArgumentException see {#link
    *           {@link #createSimplePageMaster(Document, Element, String, double, double, double, double, double, double, double, double)}
+   * @see #STANDARD_MARGINS
+   * @see #PAGE_LETTER_SIZE
+   * @see #STANDARD_FOOTER_HEIGHT
    */
   public static void createSimplePageMaster(final Document document,
                                             final Element layoutMasterSet,
                                             final String name)
       throws IllegalArgumentException {
-    createSimplePageMaster(document, layoutMasterSet, name, 8.5, 11, 0.5, 0.5, 0.5, 0.5, 0, 0.3);
+    createSimplePageMaster(document, layoutMasterSet, name, PAGE_LETTER_SIZE, STANDARD_MARGINS, 0,
+                           STANDARD_FOOTER_HEIGHT);
   }
 
   /**
    * @param document used to create the elements
    * @param layoutMasterSet the master set element
    * @param name the name of the page master
-   * @param pageWidth width in inches
-   * @param pageHeight height in inches
-   * @param leftMargin margin in inches
-   * @param rightMargin margin in inches
-   * @param topMargin margin in inches
-   * @param bottomMargin margin in inches
+   * @param pageSize page size in inches
+   * @param margins margins in inches
    * @param headerHeight height in inches
    * @param footerHeight height in inches
    * @throws IllegalArgumentException if there is not enough room for the header
@@ -110,33 +128,29 @@ public final class FOPUtils {
   public static void createSimplePageMaster(final Document document,
                                             final Element layoutMasterSet,
                                             final String name,
-                                            final double pageWidth,
-                                            final double pageHeight,
-                                            final double leftMargin,
-                                            final double rightMargin,
-                                            final double topMargin,
-                                            final double bottomMargin,
+                                            final Dimension2D pageSize,
+                                            final Margins margins,
                                             final double headerHeight,
                                             final double footerHeight)
       throws IllegalArgumentException {
-    if (headerHeight > topMargin) {
+    if (headerHeight > margins.getTop()) {
       throw new IllegalArgumentException(String.format("Header height (%f) cannot be greater than the top margin (%f)",
-                                                       headerHeight, topMargin));
+                                                       headerHeight, margins.getTop()));
     }
-    if (footerHeight > bottomMargin) {
+    if (footerHeight > margins.getBottom()) {
       throw new IllegalArgumentException(String.format("Footer height (%f) cannot be greater than the bottom margin (%f)",
-                                                       footerHeight, bottomMargin));
+                                                       footerHeight, margins.getBottom()));
     }
 
     final Element simplePageMaster = createXslFoElement(document, "simple-page-master");
     simplePageMaster.setAttribute("master-name", name);
-    simplePageMaster.setAttribute("page-height", String.format("%fin", pageHeight));
-    simplePageMaster.setAttribute("page-width", String.format("%fin", pageWidth));
+    simplePageMaster.setAttribute("page-height", String.format("%fin", pageSize.getHeight()));
+    simplePageMaster.setAttribute("page-width", String.format("%fin", pageSize.getWidth()));
 
-    simplePageMaster.setAttribute("margin-top", String.format("%fin", topMargin));
-    simplePageMaster.setAttribute("margin-bottom", String.format("%fin", bottomMargin));
-    simplePageMaster.setAttribute("margin-left", String.format("%fin", leftMargin));
-    simplePageMaster.setAttribute("margin-right", String.format("%fin", rightMargin));
+    simplePageMaster.setAttribute("margin-top", String.format("%fin", margins.getTop()));
+    simplePageMaster.setAttribute("margin-bottom", String.format("%fin", margins.getBottom()));
+    simplePageMaster.setAttribute("margin-left", String.format("%fin", margins.getLeft()));
+    simplePageMaster.setAttribute("margin-right", String.format("%fin", margins.getRight()));
 
     final Element body = createXslFoElement(document, "region-body");
     body.setAttribute("margin-top", String.format("%fin", headerHeight));
@@ -220,10 +234,38 @@ public final class FOPUtils {
    * @return the table element
    */
   public static Element createBasicTable(final Document document) {
-    final Element table = createXslFoElement(document, "table");
+    final Element table = createXslFoElement(document, TABLE_TAG);
     table.setAttribute("table-layout", "fixed");
     table.setAttribute("width", "100%");
     return table;
+  }
+
+  /**
+   * Tag name for table columns.
+   */
+  public static final String TABLE_COLUMN_TAG = "table-column";
+
+  /**
+   * Tag name for table element.
+   */
+  public static final String TABLE_TAG = "table";
+
+  /**
+   * Count the number of columns in the table.
+   * 
+   * @param table the table element
+   * @return the number of columns
+   * @throws IllegalArgumentException if the element is not a table
+   * @see #TABLE_TAG
+   */
+  public static int columnsInTable(final Element table) {
+    if (!TABLE_TAG.equals(table.getLocalName())) {
+      throw new IllegalArgumentException("Not a table: "
+          + table.getTagName());
+    }
+
+    final int columnCount = table.getElementsByTagNameNS(XSL_FO_NAMESPACE, FOPUtils.TABLE_COLUMN_TAG).getLength();
+    return columnCount;
   }
 
   /**
@@ -235,7 +277,7 @@ public final class FOPUtils {
    */
   public static Element createTableColumn(final Document document,
                                           final int proportionalWidth) {
-    final Element ele = createXslFoElement(document, "table-column");
+    final Element ele = createXslFoElement(document, TABLE_COLUMN_TAG);
     ele.setAttribute("column-width", String.format("proportional-column-width(%d)", proportionalWidth));
     return ele;
   }
@@ -258,6 +300,16 @@ public final class FOPUtils {
   public static final String TEXT_ALIGN_CENTER = "center";
 
   /**
+   * Block container tag.
+   */
+  public static final String BLOCK_CONTAINER_TAG = "block-container";
+
+  /**
+   * Block tag.
+   */
+  public static final String BLOCK_TAG = "block";
+
+  /**
    * Create a basic table cell that hides text that is too long for the cell.
    * Borders are not set.
    * 
@@ -271,7 +323,7 @@ public final class FOPUtils {
                                         final String text) {
     final Element cell = createXslFoElement(document, "table-cell");
 
-    final Element blockContainer = createXslFoElement(document, "block-container");
+    final Element blockContainer = createXslFoElement(document, BLOCK_CONTAINER_TAG);
     blockContainer.setAttribute("overflow", "hidden");
     cell.appendChild(blockContainer);
 
@@ -421,5 +473,86 @@ public final class FOPUtils {
     lineBlock.appendChild(line);
 
     return lineBlock;
+  }
+
+  /**
+   * Page margins.
+   */
+  public static final class Margins implements Serializable {
+
+    /**
+     * @param top see {@link #getTop()}
+     * @param bottom see {@link #getBottom()}
+     * @param left see {@link #getLeft()}
+     * @param right see {@link #getRight()}
+     */
+    public Margins(final double top,
+                   final double bottom,
+                   final double left,
+                   final double right) {
+      this.top = top;
+      this.bottom = bottom;
+      this.left = left;
+      this.right = right;
+    }
+
+    private final double top;
+
+    /**
+     * @return top margin
+     */
+    public double getTop() {
+      return top;
+    }
+
+    private final double bottom;
+
+    /**
+     * @return bottom margin
+     */
+    public double getBottom() {
+      return bottom;
+    }
+
+    private final double left;
+
+    /**
+     * @return left margin
+     */
+    public double getLeft() {
+      return left;
+    }
+
+    private final double right;
+
+    /**
+     * @return right margin
+     */
+    public double getRight() {
+      return right;
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(top, bottom, left, right);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+      if (this == o) {
+        return true;
+      } else if (null == o) {
+        return false;
+      } else if (o.getClass().equals(this.getClass())) {
+        final Margins other = (Margins) o;
+        return Utilities.doubleExactEquals(this.getTop(), other.getTop())
+            && Utilities.doubleExactEquals(this.getBottom(), other.getBottom())
+            && Utilities.doubleExactEquals(this.getLeft(), other.getLeft())
+            && Utilities.doubleExactEquals(this.getRight(), other.getRight());
+      } else {
+        return false;
+      }
+    }
+
   }
 }

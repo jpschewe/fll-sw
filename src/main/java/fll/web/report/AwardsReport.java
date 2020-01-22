@@ -105,8 +105,17 @@ public class AwardsReport extends BaseFLLServlet {
     final Element layoutMasterSet = FOPUtils.createXslFoElement(document, "layout-master-set");
     rootElement.appendChild(layoutMasterSet);
 
+    final double leftMargin = 0.5;
+    final double rightMargin = leftMargin;
+    final double topMargin = 1;
+    final double bottomMargin = 0.5;
+    final double headerHeight = topMargin;
+    final double footerHeight = 0.3;
+
     final String pageMasterName = "simple";
-    FOPUtils.createSimplePageMaster(document, layoutMasterSet, pageMasterName, 8.5, 11, 0.5, 0.5, 1, 0.5, 1, 0.3);
+    FOPUtils.createSimplePageMaster(document, layoutMasterSet, pageMasterName, FOPUtils.PAGE_LETTER_SIZE,
+                                    new FOPUtils.Margins(topMargin, bottomMargin, leftMargin, rightMargin),
+                                    headerHeight, footerHeight);
 
     final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
     rootElement.appendChild(pageSequence);
@@ -122,14 +131,35 @@ public class AwardsReport extends BaseFLLServlet {
 
     addPerformance(connection, document, documentBody, description);
 
+    addHeadToHead(connection, tournament, description, document, documentBody);
+
     addSubjectiveChallengeWinners(connection, document, documentBody, tournament);
     addSubjectiveExtraWinners(connection, document, documentBody, tournament);
     addSubjectiveOverallWinners(connection, document, documentBody, tournament);
 
-    final Element advancingElement = addAdvancingTeams(connection, document, tournament);
-    documentBody.appendChild(advancingElement);
+    final List<AdvancingTeam> advancing = AdvancingTeam.loadAdvancingTeams(connection, tournament.getTournamentID());
+    if (!advancing.isEmpty()) {
+      final Element advancingElement = addAdvancingTeams(advancing, connection, document, tournament);
+      documentBody.appendChild(advancingElement);
+    }
 
     return document;
+  }
+
+  private void addHeadToHead(final Connection connection,
+                             final Tournament tournament,
+                             final ChallengeDescription challengeDescription,
+                             final Document document,
+                             final Element documentBody)
+      throws SQLException {
+    final Element container = FOPUtils.createXslFoElement(document, "block-container");
+    documentBody.appendChild(container);
+
+    container.setAttribute("keep-together.within-page", "always");
+
+    container.appendChild(FOPUtils.createHorizontalLine(document, 2));
+
+    PlayoffReport.populateBody(connection, tournament, challengeDescription, document, container);
   }
 
   private void addSubjectiveChallengeWinners(final Connection connection,
@@ -222,9 +252,10 @@ public class AwardsReport extends BaseFLLServlet {
     final Element table = FOPUtils.createBasicTable(document);
     container.appendChild(table);
 
-    table.appendChild(FOPUtils.createTableColumn(document, 2));
-    table.appendChild(FOPUtils.createTableColumn(document, 1));
-    table.appendChild(FOPUtils.createTableColumn(document, 6));
+    table.appendChild(FOPUtils.createTableColumn(document, AWARD_DESCRIPTION_WIDTH));
+    table.appendChild(FOPUtils.createTableColumn(document, TEAM_NUMBER_WIDTH));
+    table.appendChild(FOPUtils.createTableColumn(document, SUBJECTIVE_TEAM_NAME_WIDTH));
+    final int columnsInTable = FOPUtils.columnsInTable(table);
 
     final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
     table.appendChild(tableBody);
@@ -249,7 +280,7 @@ public class AwardsReport extends BaseFLLServlet {
             + winner.getDescription());
         descriptionRow.appendChild(descriptionCell);
 
-        descriptionCell.setAttribute("number-columns-spanned", String.valueOf(3));
+        descriptionCell.setAttribute("number-columns-spanned", String.valueOf(columnsInTable));
       }
     } // foreach winner
 
@@ -277,9 +308,10 @@ public class AwardsReport extends BaseFLLServlet {
     final Element table = FOPUtils.createBasicTable(document);
     container.appendChild(table);
 
-    table.appendChild(FOPUtils.createTableColumn(document, 2));
-    table.appendChild(FOPUtils.createTableColumn(document, 1));
-    table.appendChild(FOPUtils.createTableColumn(document, 6));
+    table.appendChild(FOPUtils.createTableColumn(document, AWARD_DESCRIPTION_WIDTH));
+    table.appendChild(FOPUtils.createTableColumn(document, TEAM_NUMBER_WIDTH));
+    table.appendChild(FOPUtils.createTableColumn(document, SUBJECTIVE_TEAM_NAME_WIDTH));
+    final int columnsInTable = FOPUtils.columnsInTable(table);
 
     final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
     table.appendChild(tableBody);
@@ -316,7 +348,7 @@ public class AwardsReport extends BaseFLLServlet {
                 + winner.getDescription());
             descriptionRow.appendChild(descriptionCell);
 
-            descriptionCell.setAttribute("number-columns-spanned", String.valueOf(3));
+            descriptionCell.setAttribute("number-columns-spanned", String.valueOf(columnsInTable));
           }
         } // foreach winner
       } // have winners in award group
@@ -324,6 +356,20 @@ public class AwardsReport extends BaseFLLServlet {
 
     return container;
   }
+
+  private static final int AWARD_DESCRIPTION_WIDTH = 2;
+
+  private static final int TEAM_NUMBER_WIDTH = 1;
+
+  private static final int TEAM_NAME_WIDTH = 3;
+
+  private static final int SCORE_DESCRIPTION_WIDTH = 2;
+
+  private static final int SCORE_WIDTH = 1;
+
+  private static final int SUBJECTIVE_TEAM_NAME_WIDTH = TEAM_NAME_WIDTH
+      + SCORE_DESCRIPTION_WIDTH
+      + SCORE_WIDTH;
 
   private void addPerformance(final Connection connection,
                               final Document document,
@@ -343,11 +389,11 @@ public class AwardsReport extends BaseFLLServlet {
     final Element table = FOPUtils.createBasicTable(document);
     documentBody.appendChild(table);
 
-    table.appendChild(FOPUtils.createTableColumn(document, 2));
-    table.appendChild(FOPUtils.createTableColumn(document, 1));
-    table.appendChild(FOPUtils.createTableColumn(document, 3));
-    table.appendChild(FOPUtils.createTableColumn(document, 2));
-    table.appendChild(FOPUtils.createTableColumn(document, 1));
+    table.appendChild(FOPUtils.createTableColumn(document, AWARD_DESCRIPTION_WIDTH));
+    table.appendChild(FOPUtils.createTableColumn(document, TEAM_NUMBER_WIDTH));
+    table.appendChild(FOPUtils.createTableColumn(document, TEAM_NAME_WIDTH));
+    table.appendChild(FOPUtils.createTableColumn(document, SCORE_DESCRIPTION_WIDTH));
+    table.appendChild(FOPUtils.createTableColumn(document, SCORE_WIDTH));
 
     final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
     table.appendChild(tableBody);
@@ -448,10 +494,12 @@ public class AwardsReport extends BaseFLLServlet {
     return titleBuilder.toString();
   }
 
-  private Element addAdvancingTeams(final Connection connection,
+  private Element addAdvancingTeams(final List<AdvancingTeam> advancing,
+                                    final Connection connection,
                                     final Document document,
                                     final Tournament tournament)
       throws SQLException {
+
     final Element container = FOPUtils.createXslFoElement(document, "block-container");
     container.setAttribute("keep-together.within-page", "always");
 
@@ -471,14 +519,14 @@ public class AwardsReport extends BaseFLLServlet {
     final Element table = FOPUtils.createBasicTable(document);
     container.appendChild(table);
 
-    table.appendChild(FOPUtils.createTableColumn(document, 2));
-    table.appendChild(FOPUtils.createTableColumn(document, 1));
-    table.appendChild(FOPUtils.createTableColumn(document, 6));
+    table.appendChild(FOPUtils.createTableColumn(document, AWARD_DESCRIPTION_WIDTH));
+    table.appendChild(FOPUtils.createTableColumn(document, TEAM_NUMBER_WIDTH));
+    table.appendChild(FOPUtils.createTableColumn(document, SUBJECTIVE_TEAM_NAME_WIDTH));
+    final int columnsInTable = FOPUtils.columnsInTable(table);
 
     final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
     table.appendChild(tableBody);
 
-    final List<AdvancingTeam> advancing = AdvancingTeam.loadAdvancingTeams(connection, tournament.getTournamentID());
     final Map<String, List<AdvancingTeam>> organizedAdvancing = new HashMap<>();
     for (final AdvancingTeam advance : advancing) {
       final List<AdvancingTeam> agAdvancing = organizedAdvancing.computeIfAbsent(advance.getGroup(),
@@ -492,14 +540,14 @@ public class AwardsReport extends BaseFLLServlet {
       final String group = entry.getKey();
       if (awardGroups.contains(group)) {
         final List<AdvancingTeam> groupAdvancing = entry.getValue();
-        outputAdvancingTeams(connection, document, tableBody, group, groupAdvancing);
+        outputAdvancingTeams(connection, document, tableBody, group, groupAdvancing, columnsInTable);
       }
     }
     for (final Map.Entry<String, List<AdvancingTeam>> entry : organizedAdvancing.entrySet()) {
       final String group = entry.getKey();
       if (!awardGroups.contains(group)) {
         final List<AdvancingTeam> groupAdvancing = entry.getValue();
-        outputAdvancingTeams(connection, document, tableBody, group, groupAdvancing);
+        outputAdvancingTeams(connection, document, tableBody, group, groupAdvancing, columnsInTable);
       }
     }
 
@@ -510,8 +558,10 @@ public class AwardsReport extends BaseFLLServlet {
                                     final Document document,
                                     final Element tableBody,
                                     final String group,
-                                    final List<AdvancingTeam> groupAdvancing)
+                                    final List<AdvancingTeam> groupAdvancing,
+                                    final int columnsInTable)
       throws SQLException {
+
     boolean first = true;
     for (final AdvancingTeam winner : groupAdvancing) {
       final Element row = FOPUtils.createXslFoElement(document, "table-row");
@@ -537,7 +587,7 @@ public class AwardsReport extends BaseFLLServlet {
     tableBody.appendChild(emptyRow);
     final Element emptyCell = FOPUtils.createTableCell(document, null, "\u00A0");
     emptyRow.appendChild(emptyCell);
-    emptyCell.setAttribute("number-columns-spanned", String.valueOf(3));
+    emptyCell.setAttribute("number-columns-spanned", String.valueOf(columnsInTable));
 
   }
 
