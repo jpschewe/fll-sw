@@ -9,8 +9,6 @@ package fll.scheduler;
 import java.io.Serializable;
 import java.time.Duration;
 
-import fll.Utilities;
-
 /**
  * This is general information for a particular judging station.
  * A {@link SubjectiveTime} the use of a {@link SubjectiveStation} at a
@@ -26,7 +24,7 @@ public final class SubjectiveStation implements Serializable {
   private final String name;
 
   /**
-   * Name of what is being judged.
+   * @return Name of what is being judged.
    */
   public String getName() {
     return name;
@@ -35,14 +33,14 @@ public final class SubjectiveStation implements Serializable {
   private final int durationMinutes;
 
   /**
-   * Duration of the judging session.
+   * @return Duration of the judging session.
    */
   public long getDurationInMillis() {
-    return Utilities.convertMinutesToMilliseconds(durationMinutes);
+    return Duration.ofMinutes(durationMinutes).toMillis();
   }
 
   /**
-   * Duration of the judging session.
+   * @return Duration of the judging session.
    */
   public int getDurationMinutes() {
     return durationMinutes;

@@ -20,6 +20,8 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.diffplug.common.base.Errors;
@@ -839,6 +841,7 @@ public final class Playoff {
    * @param connection the database connection
    * @param tournamentId the tournament
    * @param bracketName the bracket to check
+   * @return true if the bracket is finished
    */
   public static boolean isPlayoffBracketUnfinished(final Connection connection,
                                                    final int tournamentId,
@@ -1316,6 +1319,14 @@ public final class Playoff {
       finishRound(connection, challenge, tournament, simpleGoals, enumGoals, bracketName, info);
     }
 
+    // mark bracket as automatically finished
+    try (
+        PreparedStatement prep = connection.prepareStatement("INSERT INTO automatic_finished_playoff (tournament_id, bracket_name) VALUES (?, ?)")) {
+      prep.setInt(1, tournament.getTournamentID());
+      prep.setString(2, bracketName);
+      prep.executeUpdate();
+    }
+
     return true;
   }
 
@@ -1474,6 +1485,64 @@ public final class Playoff {
 
     Collections.sort(unfinishedRounds);
     return unfinishedRounds;
+  }
+
+  /**
+   * Get the list of brackets that are finished and have not been automatically
+   * completed.
+   * 
+   * @param connection database connection
+   * @param tournamentId tournament identifier
+   * @return non-null list of brackets, may be empty
+   * @throws SQLException on a database error
+   * @see #isPlayoffBracketUnfinished(Connection, int, String)
+   * @see #finishBracket(Connection, ChallengeDescription, Tournament, String)
+   */
+  @Nonnull
+  public static List<String> getCompletedBrackets(final Connection connection,
+                                                  final int tournamentId)
+      throws SQLException {
+
+    return getPlayoffBrackets(connection,
+                              tournamentId).stream()
+                                           .filter(Errors.rethrow()
+                                                         .wrapPredicate(bracket -> !isAutomaticallyFinished(connection,
+                                                                                                            tournamentId,
+                                                                                                            bracket)))
+                                           .filter(Errors.rethrow()
+                                                         .wrapPredicate(bracket -> !isPlayoffBracketUnfinished(connection,
+                                                                                                               tournamentId,
+                                                                                                               bracket)))
+                                           .collect(Collectors.toList());
+  }
+
+  /**
+   * Check if a bracket has been automatically finished.
+   * 
+   * @param connection database connection
+   * @param tournamentId tournament id
+   * @param bracketName name of bracket to check
+   * @return true if automatically finished, false otherwise (including
+   *         unfinished)
+   * @throws SQLException on a database error
+   * @see #finishBracket(Connection, ChallengeDescription, Tournament, String)
+   */
+  public static boolean isAutomaticallyFinished(final Connection connection,
+                                                final int tournamentId,
+                                                final String bracketName)
+      throws SQLException {
+    try (
+        PreparedStatement prep = connection.prepareStatement("SELECT COUNT(*) FROM automatic_finished_playoff WHERE bracket_name = ? and tournament_id = ?")) {
+      prep.setString(1, bracketName);
+      prep.setInt(2, tournamentId);
+      try (ResultSet rs = prep.executeQuery()) {
+        if (rs.next()) {
+          return rs.getInt(1) > 0;
+        } else {
+          return false;
+        }
+      }
+    }
   }
 
   /**
