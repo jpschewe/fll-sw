@@ -62,7 +62,7 @@ public class AwardsReport extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
-    if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session, "/report/FinalComputedScores")) {
+    if (PromptSummarizeScores.checkIfSummaryUpdated(response, application, session, "/report/AwardsReport")) {
       return;
     }
 
