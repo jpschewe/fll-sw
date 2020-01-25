@@ -38,7 +38,7 @@ public class NonNumericNominees {
   private final String mCategoryName;
 
   /**
-   * Name of the category for these nominees.
+   * @return Name of the category for these nominees.
    */
   public String getCategoryName() {
     return mCategoryName;
@@ -51,10 +51,12 @@ public class NonNumericNominees {
    * for the category.
    * 
    * @param connection database connection
-   * @throws SQLException
+   * @param tournamentId the tournament to store the nominees with
+   * @throws SQLException on a database error
    */
   public void store(final Connection connection,
-                    final int tournamentId) throws SQLException {
+                    final int tournamentId)
+      throws SQLException {
     clearNominees(connection, tournamentId, mCategoryName);
     addNominees(connection, tournamentId, mCategoryName, mTeamNumbers);
   }
@@ -78,7 +80,8 @@ public class NonNumericNominees {
    */
   public static void clearNominees(final Connection connection,
                                    final int tournamentId,
-                                   final String category) throws SQLException {
+                                   final String category)
+      throws SQLException {
     PreparedStatement delete = null;
     try {
       delete = connection.prepareStatement("DELETE FROM non_numeric_nominees"//
@@ -96,12 +99,18 @@ public class NonNumericNominees {
    * Add a nominee to the database. If they already are a nominee, this function
    * does nothing.
    * 
-   * @throws SQLException
+   * @param connection database connection
+   * @param tournamentId passed through
+   * @param category passed through
+   * @param teamNumber passed as a singleton set
+   * @throws SQLException on a database error
+   * @see #addNominees(Connection, int, String, Set)
    */
   public static void addNominee(final Connection connection,
                                 final int tournamentId,
                                 final String category,
-                                final int teamNumber) throws SQLException {
+                                final int teamNumber)
+      throws SQLException {
     addNominees(connection, tournamentId, category, Collections.singleton(teamNumber));
   }
 
@@ -109,12 +118,17 @@ public class NonNumericNominees {
    * Add a set of nominees to the database. If the nominee already exsts, there
    * is no error.
    * 
-   * @throws SQLException
+   * @param connection database to add the nominees to
+   * @param tournamentId the tournament to add the nominees to
+   * @param category the category the nominees are for
+   * @param teamNumbers the teams that are nominees
+   * @throws SQLException on a database error
    */
   public static void addNominees(final Connection connection,
                                  final int tournamentId,
                                  final String category,
-                                 final Set<Integer> teamNumbers) throws SQLException {
+                                 final Set<Integer> teamNumbers)
+      throws SQLException {
     PreparedStatement check = null;
     ResultSet checkResult = null;
     PreparedStatement insert = null;
@@ -157,10 +171,14 @@ public class NonNumericNominees {
   /**
    * Get all subjective categories know for the specified tournament.
    * 
-   * @throws SQLException
+   * @param connection the database to get the categories from
+   * @param tournamentId the tournament to get the categories for
+   * @return the non-numeric categories
+   * @throws SQLException on a database error
    */
   public static Set<String> getCategories(final Connection connection,
-                                          final int tournamentId) throws SQLException {
+                                          final int tournamentId)
+      throws SQLException {
     final Set<String> result = new HashSet<>();
     PreparedStatement get = null;
     ResultSet rs = null;
@@ -182,11 +200,16 @@ public class NonNumericNominees {
   /**
    * Get all nominees in the specified category.
    * 
-   * @throws SQLException
+   * @param connection database connection
+   * @param tournamentId the tournament
+   * @param category the category
+   * @return teams that are nominees in the category
+   * @throws SQLException on a database error
    */
   public static Set<Integer> getNominees(final Connection connection,
                                          final int tournamentId,
-                                         final String category) throws SQLException {
+                                         final String category)
+      throws SQLException {
     final Set<Integer> result = new HashSet<>();
     PreparedStatement get = null;
     ResultSet rs = null;
