@@ -30,8 +30,6 @@ import fll.util.FLLRuntimeException;
  */
 public class ScheduleChecker {
 
-  private Duration specialPerformanceChangetime = Duration.ofMinutes(30);
-
   private final TournamentSchedule schedule;
 
   private final SchedParams params;
@@ -479,16 +477,17 @@ public class ScheduleChecker {
    *
    * @return the performanceDuration
    */
-  public Duration getPerformanceDuration() {
+  private Duration getPerformanceDuration() {
     return Duration.ofMinutes(params.getPerformanceMinutes());
   }
 
   /**
    * Time to allocate for either subjective judging.
    *
+   * @param name the station to get the duration for
    * @return the subjectiveDuration (milliseconds)
    */
-  public Duration getSubjectiveDuration(final String name) {
+  private Duration getSubjectiveDuration(final String name) {
     final SubjectiveStation station = params.getStationByName(name);
     return station.getDuration();
   }
@@ -498,33 +497,15 @@ public class ScheduleChecker {
    *
    * @return the changetime
    */
-  public Duration getChangetime() {
+  private Duration getChangetime() {
     return Duration.ofMinutes(params.getChangetimeMinutes());
   }
 
   /**
    * The time required between performance runs.
    */
-  public Duration getPerformanceChangetime() {
+  private Duration getPerformanceChangetime() {
     return Duration.ofMinutes(params.getPerformanceChangetimeMinutes());
-  }
-
-  /**
-   * This is the time required between performance runs for the two teams in
-   * involved in the performance run that crosses round 1 and round 2 when there
-   * is an odd number of teams.
-   *
-   * @return the specialPerformanceChangetime
-   */
-  public Duration getSpecialPerformanceChangetime() {
-    return specialPerformanceChangetime;
-  }
-
-  /**
-   * @param specialPerformanceChangetime the specialPerformanceChangetime to set
-   */
-  public void setSpecialPerformanceChangetime(final Duration specialPerformanceChangetime) {
-    this.specialPerformanceChangetime = specialPerformanceChangetime;
   }
 
 }
