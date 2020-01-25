@@ -18,16 +18,17 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 /**
  * Table model for constraint violations.
  */
-/*package*/class ViolationTableModel extends AbstractTableModel {
+/* package */class ViolationTableModel extends AbstractTableModel {
 
   @SuppressFBWarnings(value = { "SE_BAD_FIELD" }, justification = "Not serializing these classes")
   private final List<ConstraintViolation> violations;
 
   private static final Comparator<ConstraintViolation> TEAM_NUMBER_COMPARATOR = new Comparator<ConstraintViolation>() {
-    public int compare(final ConstraintViolation one, final ConstraintViolation two) {
-      if(one.getTeam() < two.getTeam()) {
+    public int compare(final ConstraintViolation one,
+                       final ConstraintViolation two) {
+      if (one.getTeam() < two.getTeam()) {
         return -1;
-      } else if(one.getTeam() > two.getTeam()) {
+      } else if (one.getTeam() > two.getTeam()) {
         return 1;
       } else {
         return 0;
@@ -35,7 +36,10 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
     }
   };
 
-  public ViolationTableModel(final List<ConstraintViolation> violations) {
+  /**
+   * @param violations the constraint violations to display
+   */
+  /* package */ ViolationTableModel(final List<ConstraintViolation> violations) {
     this.violations = new ArrayList<ConstraintViolation>(violations);
     Collections.sort(this.violations, TEAM_NUMBER_COMPARATOR);
   }
@@ -57,7 +61,8 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
   /**
    * @see javax.swing.table.TableModel#getValueAt(int, int)
    */
-  public Object getValueAt(final int rowIndex, final int columnIndex) {
+  public Object getValueAt(final int rowIndex,
+                           final int columnIndex) {
     final ConstraintViolation violation = violations.get(rowIndex);
     switch (columnIndex) {
     case 0:
@@ -92,7 +97,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
   }
 
   /**
-   * 
    * @return Unmodifiable version of the constraint violations
    */
   public List<ConstraintViolation> getViolations() {
