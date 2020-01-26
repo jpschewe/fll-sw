@@ -20,6 +20,15 @@
 
 <script type='text/javascript' src="edit-award-winners.js"></script>
 
+<!-- short term hack to get non-numeric nominee categories loaded, intend to have permanent fix with #810 -->
+<%
+fll.web.report.EditAwardWinners.populateContext(application, pageContext);
+%>
+<script type='text/javascript'>
+var nonNumericCategories = ${nonNumericCategories};
+</script>
+<!-- end hack -->
+
 </head>
 
 <body>
