@@ -343,6 +343,14 @@ function initExtraWinners() {
     }
   });
 
+  if (nonNumericCategories) {
+    $.each(nonNumericCategories, function(i, categoryName) {
+      if (!knownCategories.includes(categoryName)) {
+        knownCategories.push(categoryName);
+      }
+    });
+  }
+
   $.each(knownCategories, function(i, category) {
     addExtraCategory(category);
   });
@@ -788,7 +796,7 @@ function addAdvancingTeam(advancing, dataList, groupNameFunc, teamList) {
 
   var orgEle = $("<input readonly disabled />");
   teamEle.append(orgEle);
-  
+
   var agEle = $("<input readonly disabled />");
   teamEle.append(agEle);
 
