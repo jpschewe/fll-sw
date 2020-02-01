@@ -657,6 +657,12 @@ function loadFromServer(doneCallback, failCallback) {
   });
   waitList.push(loadAdvancingTeamsPromise);
 
+  var loadSortedGroupsPromise = loadSortedGroups();
+  loadSortedGroupsPromise.fail(function() {
+    failCallback("Sorted groups");
+  });
+  waitList.push(loadSortedGroupsPromise);
+
   $.when.apply($, waitList).done(function() {
     doneCallback();
   });
@@ -725,6 +731,7 @@ function addAdvancingGroup(group, editable) {
         alert("All groups must have non-empty names");
         $(this).val(oldValue);
       } else {
+        renameGroupToSort(oldValue, newName);
         $(this).data('oldVal', newName);
       }
     });
@@ -768,6 +775,8 @@ function addAdvancingGroup(group, editable) {
     // add an empty team if there weren't any loaded from the server
     addAdvancingTeam(null, _advancingTeamData, nameFunc, teamList);
   }
+  
+  addGroupToSort(nameFunc());
 }
 
 /**
@@ -846,4 +855,75 @@ function addAdvancingTeam(advancing, dataList, groupNameFunc, teamList) {
     numEle.change();
   }
 
+}
+
+function loadSortedGroups() {
+  return $.getJSON("/api/AwardsReportSortedGroups", function(data) {
+    initSortedGroups(data);
+  });
+}
+
+function initSortedGroups(sortedGroups) {
+  $("#award-group-order").empty();
+  if (sortedGroups) {
+    $.each(sortedGroups, function(i, group) {
+      addGroupToSort(group);
+    });
+  }
+
+}
+
+function addGroupToSort(group) {
+  var numGroups = 0;
+  var addGroup = true;
+  $("#award-group-order").children("li").each(function(i, le) {
+    var leGroup = $(le).attr("data-group-name");
+    if (leGroup == group) {
+      addGroup = false;
+    }
+    numGroups = numGroups + 1;
+  })
+
+  if (addGroup) {
+    var listElement = $("<li data-group-name='" + group + "'></li>");
+    $("#award-group-order").append(listElement);
+
+    var indexElement = $("<input type='number' step='1' value='"
+        + (numGroups + 1) + "'></input>");
+    listElement.append(indexElement);
+
+    var nameElement = $("<span>" + group + "</span>");
+    listElement.append(nameElement);
+  }
+}
+
+function removeGroupToSort(group) {
+  var toRemove = null;
+  $("#award-group-order").children("li").each(function(i, le) {
+    var leGroup = $(le).attr("data-group-name");
+    if (leGroup == group) {
+      toRemove = le;
+    }
+  })
+
+  if (toRemove) {
+    toRemove.parentNode.removeChild(toRemove);
+  }
+}
+
+function renameGroupToSort(oldName, newName) {
+  var element = null;
+  $("#award-group-order").children("li").each(function(i, le) {
+    var leGroup = $(le).attr("data-group-name");
+    if (leGroup == oldName) {
+      element = le;
+    }
+  })
+
+  if (element) {
+    $(element).attr("data-group-name", newName);
+    $(element).children("span").each(function(i, span) {
+      span.innerText = newName;
+    });
+  }
 }
