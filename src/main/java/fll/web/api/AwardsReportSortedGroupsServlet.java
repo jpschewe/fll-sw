@@ -30,7 +30,6 @@ import javax.sql.DataSource;
 import org.apache.commons.io.IOUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Utilities;
@@ -105,8 +104,7 @@ public class AwardsReportSortedGroupsServlet extends HttpServlet {
 
       final int tournamentId = Queries.getCurrentTournament(connection);
 
-      final List<String> groups = jsonMapper.readValue(reader, new TypeReference<List<String>>() {
-      });
+      final List<String> groups = jsonMapper.readValue(reader, Utilities.ListOfStringTypeInformation.INSTANCE);
 
       setAwardGroupsSort(connection, tournamentId, groups);
 
