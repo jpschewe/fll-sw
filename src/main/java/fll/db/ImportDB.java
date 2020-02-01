@@ -888,7 +888,7 @@ public final class ImportDB {
     LOGGER.trace("Upgrading database from 21 to 22");
 
     GenerateDB.createAwardGroupOrder(connection, false);
-    
+
     setDBVersion(connection, 22);
   }
 
@@ -1393,6 +1393,7 @@ public final class ImportDB {
     importSubjectiveNominees(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
     importAdvancingTeams(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
     importAwardWinners(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+    importAwardReportGroupSort(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
   }
 
   /**
@@ -2346,6 +2347,35 @@ public final class ImportDB {
           destPrep.setInt(3, sourceRS.getInt(2));
           destPrep.setString(4, sourceRS.getString(3));
           destPrep.setString(5, sourceRS.getString(4));
+          destPrep.executeUpdate();
+        }
+      }
+    }
+  }
+
+  private static void importAwardReportGroupSort(final Connection sourceConnection,
+                                                 final Connection destinationConnection,
+                                                 final int sourceTournamentID,
+                                                 final int destTournamentID)
+      throws SQLException {
+    try (
+        PreparedStatement destDelete = destinationConnection.prepareStatement("DELETE FROM award_group_order WHERE tournament_id = ?");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO award_group_order (tournament_id, award_group, sort_order) VALUES(?, ?, ?, ?)");
+        PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT award_group, sort_order FROM subjective_overall_award WHERE tournament_id = ?")) {
+      LOGGER.debug("Importing award report group sort");
+
+      // do drops first
+      destDelete.setInt(1, destTournamentID);
+      destDelete.executeUpdate();
+
+      // insert
+      destPrep.setInt(1, destTournamentID);
+
+      sourcePrep.setInt(1, sourceTournamentID);
+      try (ResultSet sourceRS = sourcePrep.executeQuery()) {
+        while (sourceRS.next()) {
+          destPrep.setString(2, sourceRS.getString("award_group"));
+          destPrep.setInt(3, sourceRS.getInt("sort_order"));
           destPrep.executeUpdate();
         }
       }
