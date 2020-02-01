@@ -2360,7 +2360,7 @@ public final class ImportDB {
       throws SQLException {
     try (
         PreparedStatement destDelete = destinationConnection.prepareStatement("DELETE FROM award_group_order WHERE tournament_id = ?");
-        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO award_group_order (tournament_id, award_group, sort_order) VALUES(?, ?, ?, ?)");
+        PreparedStatement destPrep = destinationConnection.prepareStatement("INSERT INTO award_group_order (tournament_id, award_group, sort_order) VALUES(?, ?, ?)");
         PreparedStatement sourcePrep = sourceConnection.prepareStatement("SELECT award_group, sort_order FROM subjective_overall_award WHERE tournament_id = ?")) {
       LOGGER.debug("Importing award report group sort");
 
