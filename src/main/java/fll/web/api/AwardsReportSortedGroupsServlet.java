@@ -166,8 +166,12 @@ public class AwardsReportSortedGroupsServlet extends HttpServlet {
                                         final List<String> awardGroups)
       throws SQLException {
     try (
+        PreparedStatement delete = connection.prepareStatement("DELETE FROM award_group_order WHERE tournament_id = ?");
         PreparedStatement prep = connection.prepareStatement("INSERT INTO award_group_order (tournament_id, award_group, sort_order)" //
             + " VALUES(?, ?, ?)")) {
+      delete.setInt(1, tournamentId);
+      delete.executeUpdate();
+
       prep.setInt(1, tournamentId);
       int index = 0;
       for (final String group : awardGroups) {
