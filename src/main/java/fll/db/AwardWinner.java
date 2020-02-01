@@ -26,6 +26,7 @@ public class AwardWinner extends OverallAwardWinner implements Serializable {
    * Used for JSON deserialization.
    */
   public static final class AwardWinnerCollectionTypeInformation extends TypeReference<Collection<AwardWinner>> {
+    /** single instance. */
     public static final AwardWinnerCollectionTypeInformation INSTANCE = new AwardWinnerCollectionTypeInformation();
   }
 

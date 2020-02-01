@@ -68,5 +68,12 @@ var nonNumericCategories = ${nonNumericCategories};
     <button id="advancing-teams_add-group">Add Group</button>
     <ul id="advancing-teams"></ul>
 
+
+    <h2>Order of award groups</h2>
+    <p>Specify the sort order for the award groups when printing.
+        Put a number next to each group name. The groups will be output
+        from lowest number to highest.</p>
+    <ul id="award-group-order"></ul>
+
     <button id="store_winners">Store Data</button>
 </html>
