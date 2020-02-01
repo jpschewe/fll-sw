@@ -166,7 +166,7 @@ public class AwardsReportSortedGroupsServlet extends HttpServlet {
                                         final List<String> awardGroups)
       throws SQLException {
     try (
-        PreparedStatement prep = connection.prepareStatement("INSERT INTO award_group (tournament_id, award_group, sort_order)" //
+        PreparedStatement prep = connection.prepareStatement("INSERT INTO award_group_order (tournament_id, award_group, sort_order)" //
             + " VALUES(?, ?, ?)")) {
       prep.setInt(1, tournamentId);
       int index = 0;

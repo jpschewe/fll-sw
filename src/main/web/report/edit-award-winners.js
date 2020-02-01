@@ -95,6 +95,7 @@ $(document).ready(function() {
     storeExtraWinners();
     storeOverallWinners();
     storeAdvancingTeams();
+    storeSortedGroups();
   });
 
   var extraCategoryCount = 1;
@@ -775,7 +776,7 @@ function addAdvancingGroup(group, editable) {
     // add an empty team if there weren't any loaded from the server
     addAdvancingTeam(null, _advancingTeamData, nameFunc, teamList);
   }
-  
+
   addGroupToSort(nameFunc());
 }
 
@@ -926,4 +927,35 @@ function renameGroupToSort(oldName, newName) {
       span.innerText = newName;
     });
   }
+}
+
+function storeSortedGroups() {
+  // gather list elements that have the group sort information
+  var groupElements = [];
+  $("#award-group-order").children("li").each(function(i, le) {
+    groupElements.push(le);
+  });
+
+  // sort the elements
+  groupElements.sort(function(a, b) {
+    var aIndex = $(a.getElementsByTagName("input")[0]).val();
+    var bIndex = $(b.getElementsByTagName("input")[0]).val();
+    return aIndex - bIndex;
+  });
+
+  // convert to a list of strings
+  var groups = [];
+  $.each(groupElements, function(i, le) {
+    var group = $(le).attr("data-group-name");
+    groups.push(group);
+  });
+
+  // send to server
+  var jsonData = JSON.stringify(groups);
+  $.post("/api/AwardsReportSortedGroups", jsonData, function(response) {
+    if (!response.success) {
+      alert("Error sending group sort information: " + response.message);
+    }
+  }, 'json');
+
 }
