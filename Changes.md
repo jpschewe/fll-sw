@@ -1,3 +1,4 @@
+* #813 - Allow the user to specify the order that the awards groups appear in the awards report
 * #806 - Short term fix to add categories from non-numeric nominees to the award winners entry page. Long term fix is #810
 * #811 - Add head to head winners to the awards report
 * add horizontal lines separating the goal groups on the score entry page to match the lines on the score sheets
