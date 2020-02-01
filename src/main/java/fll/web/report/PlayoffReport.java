@@ -36,6 +36,7 @@ import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.web.api.AwardsReportSortedGroupsServlet;
 import fll.web.playoff.Playoff;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreType;
@@ -121,7 +122,9 @@ public class PlayoffReport extends BaseFLLServlet {
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
 
-    populateBody(connection, tournament, challengeDescription, document, documentBody);
+    final List<String> sortedGroups = AwardsReportSortedGroupsServlet.getAwardGroupsSorted(connection,
+                                                                                           tournament.getTournamentID());
+    populateBody(connection, tournament, challengeDescription, document, documentBody, sortedGroups);
 
     return document;
   }
@@ -135,21 +138,28 @@ public class PlayoffReport extends BaseFLLServlet {
    * @param challengeDescription challenge information
    * @param document used to create elements
    * @param parentElement the element to add the data to
+   * @param sortedGroups the groups in sorted order
    * @throws SQLException if a database error occurs
    */
   public static void populateBody(final Connection connection,
                                   final Tournament tournament,
                                   final ChallengeDescription challengeDescription,
                                   final Document document,
-                                  final Element parentElement)
+                                  final Element parentElement,
+                                  final List<String> sortedGroups)
       throws SQLException {
 
     final List<String> playoffDivisions = Playoff.getCompletedBrackets(connection, tournament.getTournamentID());
     if (!playoffDivisions.isEmpty()) {
-      for (final String division : playoffDivisions) {
-        final Element paragraph = processDivision(connection, tournament, document, division,
-                                                  challengeDescription.getPerformance().getScoreType());
-        parentElement.appendChild(paragraph);
+      final List<String> sortedDivisions = new LinkedList<>(sortedGroups);
+      playoffDivisions.stream().filter(e -> !sortedGroups.contains(e)).forEach(sortedDivisions::add);
+
+      for (final String division : sortedDivisions) {
+        if (playoffDivisions.contains(division)) {
+          final Element paragraph = processDivision(connection, tournament, document, division,
+                                                    challengeDescription.getPerformance().getScoreType());
+          parentElement.appendChild(paragraph);
+        }
       }
     } else {
       final Element paragraph = FOPUtils.createBlankLine(document);
