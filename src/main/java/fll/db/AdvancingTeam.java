@@ -27,6 +27,7 @@ public class AdvancingTeam implements Serializable {
    * Used for JSON deserialization.
    */
   public static final class AdvancingTeamCollectionTypeInformation extends TypeReference<Collection<AdvancingTeam>> {
+    /** single instance. */
     public static final AdvancingTeamCollectionTypeInformation INSTANCE = new AdvancingTeamCollectionTypeInformation();
   }
 

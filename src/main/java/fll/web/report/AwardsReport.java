@@ -38,12 +38,12 @@ import fll.Tournament;
 import fll.db.AdvancingTeam;
 import fll.db.AwardWinner;
 import fll.db.OverallAwardWinner;
-import fll.db.Queries;
 import fll.db.SubjectiveAwardWinners;
 import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.web.api.AwardsReportSortedGroupsServlet;
 import fll.web.scoreboard.Top10;
 import fll.xml.ChallengeDescription;
 import net.mtu.eggplant.xml.XMLUtils;
@@ -129,17 +129,21 @@ public class AwardsReport extends BaseFLLServlet {
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
 
-    addPerformance(connection, document, documentBody, description);
+    final List<String> sortedAwardGroups = AwardsReportSortedGroupsServlet.getAwardGroupsSorted(connection,
+                                                                                                tournament.getTournamentID());
 
-    addHeadToHead(connection, tournament, description, document, documentBody);
+    addPerformance(connection, document, documentBody, description, sortedAwardGroups);
 
-    addSubjectiveChallengeWinners(connection, document, documentBody, tournament);
-    addSubjectiveExtraWinners(connection, document, documentBody, tournament);
+    addHeadToHead(connection, tournament, description, document, documentBody, sortedAwardGroups);
+
+    addSubjectiveChallengeWinners(connection, document, documentBody, tournament, sortedAwardGroups);
+    addSubjectiveExtraWinners(connection, document, documentBody, tournament, sortedAwardGroups);
     addSubjectiveOverallWinners(connection, document, documentBody, tournament);
 
     final List<AdvancingTeam> advancing = AdvancingTeam.loadAdvancingTeams(connection, tournament.getTournamentID());
     if (!advancing.isEmpty()) {
-      final Element advancingElement = addAdvancingTeams(advancing, connection, document, tournament);
+      final Element advancingElement = addAdvancingTeams(advancing, connection, document, tournament,
+                                                         sortedAwardGroups);
       documentBody.appendChild(advancingElement);
     }
 
@@ -150,7 +154,8 @@ public class AwardsReport extends BaseFLLServlet {
                              final Tournament tournament,
                              final ChallengeDescription challengeDescription,
                              final Document document,
-                             final Element documentBody)
+                             final Element documentBody,
+                             final List<String> sortedGroups)
       throws SQLException {
     final Element container = FOPUtils.createXslFoElement(document, "block-container");
     documentBody.appendChild(container);
@@ -159,35 +164,38 @@ public class AwardsReport extends BaseFLLServlet {
 
     container.appendChild(FOPUtils.createHorizontalLine(document, 2));
 
-    PlayoffReport.populateBody(connection, tournament, challengeDescription, document, container);
+    PlayoffReport.populateBody(connection, tournament, challengeDescription, document, container, sortedGroups);
   }
 
   private void addSubjectiveChallengeWinners(final Connection connection,
                                              final Document document,
                                              final Element documentBody,
-                                             final Tournament tournament)
+                                             final Tournament tournament,
+                                             final List<String> sortedAwardGroups)
       throws SQLException {
     final List<AwardWinner> winners = SubjectiveAwardWinners.getChallengeAwardWinners(connection,
                                                                                       tournament.getTournamentID());
 
-    addSubjectiveWinners(connection, document, documentBody, winners);
+    addSubjectiveWinners(connection, document, documentBody, winners, sortedAwardGroups);
   }
 
   private void addSubjectiveExtraWinners(final Connection connection,
                                          final Document document,
                                          final Element documentBody,
-                                         final Tournament tournament)
+                                         final Tournament tournament,
+                                         final List<String> sortedAwardGroups)
       throws SQLException {
     final List<AwardWinner> winners = SubjectiveAwardWinners.getExtraAwardWinners(connection,
                                                                                   tournament.getTournamentID());
 
-    addSubjectiveWinners(connection, document, documentBody, winners);
+    addSubjectiveWinners(connection, document, documentBody, winners, sortedAwardGroups);
   }
 
   private void addSubjectiveWinners(final Connection connection,
                                     final Document document,
                                     final Element documentBody,
-                                    final List<AwardWinner> winners)
+                                    final List<AwardWinner> winners,
+                                    final List<String> sortedAwardGroups)
       throws SQLException {
     final Map<String, Map<String, List<AwardWinner>>> organizedWinners = new HashMap<>();
     for (final AwardWinner winner : winners) {
@@ -201,7 +209,8 @@ public class AwardsReport extends BaseFLLServlet {
     for (final Map.Entry<String, Map<String, List<AwardWinner>>> agEntry : organizedWinners.entrySet()) {
       final String categoryName = agEntry.getKey();
       final Map<String, List<AwardWinner>> categoryWinners = agEntry.getValue();
-      final Element container = addSubjectiveAwardGroupWinners(connection, document, categoryName, categoryWinners);
+      final Element container = addSubjectiveAwardGroupWinners(connection, document, categoryName, categoryWinners,
+                                                               sortedAwardGroups);
       documentBody.appendChild(container);
     }
   }
@@ -289,11 +298,13 @@ public class AwardsReport extends BaseFLLServlet {
 
   /**
    * @param categoryWinners awardGroup to list of winners
+   * @param sortedGroups TODO
    */
   private Element addSubjectiveAwardGroupWinners(final Connection connection,
                                                  final Document document,
                                                  final String categoryName,
-                                                 final Map<String, List<AwardWinner>> categoryWinners)
+                                                 final Map<String, List<AwardWinner>> categoryWinners,
+                                                 final List<String> sortedGroups)
       throws SQLException {
     final Element container = FOPUtils.createXslFoElement(document, "block-container");
     container.setAttribute("keep-together.within-page", "always");
@@ -316,42 +327,47 @@ public class AwardsReport extends BaseFLLServlet {
     final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
     table.appendChild(tableBody);
 
-    for (final Map.Entry<String, List<AwardWinner>> entry : categoryWinners.entrySet()) {
-      final String group = entry.getKey();
-      final List<AwardWinner> agWinners = entry.getValue();
+    final List<String> localSortedGroups = new LinkedList<>(sortedGroups);
+    categoryWinners.entrySet().stream().map(Map.Entry::getKey).filter(e -> !localSortedGroups.contains(e))
+                   .forEach(localSortedGroups::add);
 
-      if (!agWinners.isEmpty()) {
-        final Element row = FOPUtils.createXslFoElement(document, "table-row");
-        tableBody.appendChild(row);
+    for (final String group : localSortedGroups) {
+      if (categoryWinners.containsKey(group)) {
+        final List<AwardWinner> agWinners = categoryWinners.get(group);
 
-        boolean first = true;
-        for (final AwardWinner winner : agWinners) {
-          if (first) {
-            row.appendChild(FOPUtils.createTableCell(document, null, String.format("Winner %s:", group)));
+        if (!agWinners.isEmpty()) {
+          final Element row = FOPUtils.createXslFoElement(document, "table-row");
+          tableBody.appendChild(row);
 
-            first = false;
-          } else {
-            row.appendChild(FOPUtils.createTableCell(document, null, ""));
-          }
+          boolean first = true;
+          for (final AwardWinner winner : agWinners) {
+            if (first) {
+              row.appendChild(FOPUtils.createTableCell(document, null, String.format("Winner %s:", group)));
 
-          row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(winner.getTeamNumber())));
+              first = false;
+            } else {
+              row.appendChild(FOPUtils.createTableCell(document, null, ""));
+            }
 
-          final int teamNumber = winner.getTeamNumber();
-          final Team team = Team.getTeamFromDatabase(connection, teamNumber);
-          row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(team.getTeamName())));
+            row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(winner.getTeamNumber())));
 
-          if (null != winner.getDescription()) {
-            final Element descriptionRow = FOPUtils.createXslFoElement(document, "table-row");
-            tableBody.appendChild(descriptionRow);
+            final int teamNumber = winner.getTeamNumber();
+            final Team team = Team.getTeamFromDatabase(connection, teamNumber);
+            row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(team.getTeamName())));
 
-            final Element descriptionCell = FOPUtils.createTableCell(document, null, "\u00A0\u00A0"
-                + winner.getDescription());
-            descriptionRow.appendChild(descriptionCell);
+            if (null != winner.getDescription()) {
+              final Element descriptionRow = FOPUtils.createXslFoElement(document, "table-row");
+              tableBody.appendChild(descriptionRow);
 
-            descriptionCell.setAttribute("number-columns-spanned", String.valueOf(columnsInTable));
-          }
-        } // foreach winner
-      } // have winners in award group
+              final Element descriptionCell = FOPUtils.createTableCell(document, null, "\u00A0\u00A0"
+                  + winner.getDescription());
+              descriptionRow.appendChild(descriptionCell);
+
+              descriptionCell.setAttribute("number-columns-spanned", String.valueOf(columnsInTable));
+            }
+          } // foreach winner
+        } // have winners in award group
+      } // group exists
     } // foreach award group
 
     return container;
@@ -374,7 +390,8 @@ public class AwardsReport extends BaseFLLServlet {
   private void addPerformance(final Connection connection,
                               final Document document,
                               final Element documentBody,
-                              final ChallengeDescription description)
+                              final ChallengeDescription description,
+                              final List<String> sortedAwardGroups)
       throws SQLException {
     documentBody.appendChild(FOPUtils.createHorizontalLine(document, 2));
 
@@ -398,25 +415,32 @@ public class AwardsReport extends BaseFLLServlet {
     final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
     table.appendChild(tableBody);
 
-    for (final Map.Entry<String, List<Top10.ScoreEntry>> entry : scores.entrySet()) {
-      final String group = entry.getKey();
+    // make sure all groups are in the sort
+    final List<String> localSortedAwardGroups = new LinkedList<>(sortedAwardGroups);
+    scores.entrySet().stream().map(Map.Entry::getKey).filter(e -> !localSortedAwardGroups.contains(e))
+          .forEach(localSortedAwardGroups::add);
 
-      final Optional<Top10.ScoreEntry> winner = entry.getValue().stream().findFirst();
-      if (winner.isPresent()) {
-        final Element row = FOPUtils.createXslFoElement(document, "table-row");
-        tableBody.appendChild(row);
+    for (final String group : localSortedAwardGroups) {
+      if (scores.containsKey(group)) {
+        final List<Top10.ScoreEntry> scoreList = scores.get(group);
 
-        row.appendChild(FOPUtils.createTableCell(document, null, String.format("Winner %s:", group)));
+        final Optional<Top10.ScoreEntry> winner = scoreList.stream().findFirst();
+        if (winner.isPresent()) {
+          final Element row = FOPUtils.createXslFoElement(document, "table-row");
+          tableBody.appendChild(row);
 
-        row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(winner.get().getTeamNumber())));
+          row.appendChild(FOPUtils.createTableCell(document, null, String.format("Winner %s:", group)));
 
-        row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(winner.get().getTeamName())));
+          row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(winner.get().getTeamNumber())));
 
-        row.appendChild(FOPUtils.createTableCell(document, null, "With a score of:"));
+          row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(winner.get().getTeamName())));
 
-        row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(winner.get().getFormattedScore())));
-      }
-    }
+          row.appendChild(FOPUtils.createTableCell(document, null, "With a score of:"));
+
+          row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(winner.get().getFormattedScore())));
+        } // have a winner
+      } // group has scores
+    } // foreach group
 
   }
 
@@ -497,7 +521,8 @@ public class AwardsReport extends BaseFLLServlet {
   private Element addAdvancingTeams(final List<AdvancingTeam> advancing,
                                     final Connection connection,
                                     final Document document,
-                                    final Tournament tournament)
+                                    final Tournament tournament,
+                                    final List<String> sortedGroups)
       throws SQLException {
 
     final Element container = FOPUtils.createXslFoElement(document, "block-container");
@@ -534,22 +559,15 @@ public class AwardsReport extends BaseFLLServlet {
       agAdvancing.add(advance);
     }
 
-    final List<String> awardGroups = Queries.getAwardGroups(connection, tournament.getTournamentID());
-    // twice to get the regular award groups first
-    for (final Map.Entry<String, List<AdvancingTeam>> entry : organizedAdvancing.entrySet()) {
-      final String group = entry.getKey();
-      if (awardGroups.contains(group)) {
-        final List<AdvancingTeam> groupAdvancing = entry.getValue();
+    final List<String> localSortedGroups = new LinkedList<>(sortedGroups);
+    organizedAdvancing.entrySet().stream().map(Map.Entry::getKey).filter(e -> !localSortedGroups.contains(e))
+                      .forEach(localSortedGroups::add);
+    for (final String group : localSortedGroups) {
+      if (organizedAdvancing.containsKey(group)) {
+        final List<AdvancingTeam> groupAdvancing = organizedAdvancing.get(group);
         outputAdvancingTeams(connection, document, tableBody, group, groupAdvancing, columnsInTable);
-      }
-    }
-    for (final Map.Entry<String, List<AdvancingTeam>> entry : organizedAdvancing.entrySet()) {
-      final String group = entry.getKey();
-      if (!awardGroups.contains(group)) {
-        final List<AdvancingTeam> groupAdvancing = entry.getValue();
-        outputAdvancingTeams(connection, document, tableBody, group, groupAdvancing, columnsInTable);
-      }
-    }
+      } // group exists
+    } // foreach group
 
     return container;
   }

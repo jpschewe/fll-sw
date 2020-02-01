@@ -44,6 +44,7 @@ import javax.sql.DataSource;
 
 import org.hsqldb.jdbc.JDBCDataSource;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.opencsv.CSVReader;
@@ -847,4 +848,13 @@ public final class Utilities {
     // Get a Sequential Stream from spliterator
     return StreamSupport.stream(spliterator, false);
   }
+
+  /**
+   * Used by JSON deserialization.
+   */
+  public static final class ListOfStringTypeInformation extends TypeReference<List<String>> {
+    /** single instance. */
+    public static final ListOfStringTypeInformation INSTANCE = new ListOfStringTypeInformation();
+  }
+
 }

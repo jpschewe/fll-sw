@@ -36,7 +36,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 21;
+  public static final int DATABASE_VERSION = 22;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -180,7 +180,7 @@ public final class GenerateDB {
 
       // table to track which teams are in which playoff bracket
       createPlayoffBracketTeams(connection);
-      
+
       // track which brackets are automatically finished
       createAutomaticFinishedPlayoffTable(connection, true);
 
@@ -318,6 +318,8 @@ public final class GenerateDB {
 
       createSubjectiveAwardWinnerTables(connection, true);
       createAdvancingTeamsTable(connection, true);
+
+      createAwardGroupOrder(connection, true);
 
       // --------------- create views ---------------
 
@@ -1111,7 +1113,29 @@ public final class GenerateDB {
       sql.append("  tournament_id INTEGER NOT NULL");
       sql.append(" ,bracket_name LONGVARCHAR NOT NULL");
       if (createConstraints) {
-        sql.append(" ,CONSTRAINT automatic_finished_playoff PRIMARY KEY (tournament_id, bracket_name)");
+        sql.append(" ,CONSTRAINT automatic_finished_playoff_pk PRIMARY KEY (tournament_id, bracket_name)");
+        sql.append(" ,CONSTRAINT automatic_finished_playoff_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
+
+      }
+      sql.append(")");
+      stmt.executeUpdate(sql.toString());
+    }
+  }
+
+  /* package */ static void createAwardGroupOrder(final Connection connection,
+                                                  final boolean createConstraints)
+      throws SQLException {
+    try (Statement stmt = connection.createStatement()) {
+      stmt.executeUpdate("DROP TABLE IF EXISTS award_group_order CASCADE");
+
+      final StringBuilder sql = new StringBuilder();
+      sql.append("CREATE TABLE award_group_order (");
+      sql.append("  tournament_id INTEGER NOT NULL");
+      sql.append(" ,award_group LONGVARCHAR NOT NULL");
+      sql.append(" ,sort_order INTEGER NOT NULL");
+      if (createConstraints) {
+        sql.append(" ,CONSTRAINT award_group_order_pk PRIMARY KEY (tournament_id, award_group)");
+        sql.append(" ,CONSTRAINT award_group_order_fk1 FOREIGN KEY(tournament_id) REFERENCES Tournaments(tournament_id)");
       }
       sql.append(")");
       stmt.executeUpdate(sql.toString());
