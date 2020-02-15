@@ -534,7 +534,7 @@ public class AwardsReport extends BaseFLLServlet {
     container.appendChild(categoryTitleBlock);
     categoryTitleBlock.setAttribute("font-weight", "bold");
     if (null != tournament.getNextLevel()) {
-      categoryTitleBlock.appendChild(document.createTextNode(String.format("Teams advancing to %ss",
+      categoryTitleBlock.appendChild(document.createTextNode(String.format("Teams advancing to %s",
                                                                            tournament.getNextLevel())));
     } else {
       categoryTitleBlock.appendChild(document.createTextNode(String.format("Teams advancing to the next tournament",
