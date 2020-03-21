@@ -25,7 +25,6 @@ import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Commit the changes from edit_event_division.jsp.
@@ -48,10 +47,7 @@ public class CommitAwardGroups extends BaseFLLServlet {
     final StringBuilder message = new StringBuilder();
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
-
+    try (Connection connection = datasource.getConnection()) {
       final int currentTournamentID = Queries.getCurrentTournament(connection);
 
       pageContext.setAttribute("divisions", Queries.getAwardGroups(connection, currentTournamentID));
@@ -65,8 +61,6 @@ public class CommitAwardGroups extends BaseFLLServlet {
           + "</p>");
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error saving team data into the database", sqle);
-    } finally {
-      SQLFunctions.close(connection);
     }
 
     SessionAttributes.appendToMessage(session, message.toString());
@@ -83,9 +77,7 @@ public class CommitAwardGroups extends BaseFLLServlet {
     final StringBuilder message = new StringBuilder();
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
+    try (Connection connection = datasource.getConnection()) {
 
       final int currentTournamentID = Queries.getCurrentTournament(connection);
 
@@ -124,8 +116,6 @@ public class CommitAwardGroups extends BaseFLLServlet {
           + "</p>");
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error saving award group data into the database", sqle);
-    } finally {
-      SQLFunctions.close(connection);
     }
 
     SessionAttributes.appendToMessage(session, message.toString());
