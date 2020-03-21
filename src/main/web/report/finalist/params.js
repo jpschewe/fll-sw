@@ -110,8 +110,6 @@ function populateHeadToHeadTimes() {
 
 $(document).ready(
     function() {
-      $.finalist.setupAppCache();
-
       $("#divisions").empty();
 
       var teams = $.finalist.getAllTeams();
