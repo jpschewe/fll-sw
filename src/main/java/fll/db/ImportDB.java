@@ -2078,17 +2078,16 @@ public final class ImportDB {
 
       SQLFunctions.close(destPrep);
       // insert categories next
-      destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_categories (tournament, category, is_public, division, room) VALUES(?, ?, ?, ?, ?)");
+      destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_categories (tournament, category, division, room) VALUES(?, ?, ?, ?, ?)");
       destPrep.setInt(1, destTournamentID);
 
-      sourcePrep = sourceConnection.prepareStatement("SELECT category, is_public, division, room FROM finalist_categories WHERE tournament = ?");
+      sourcePrep = sourceConnection.prepareStatement("SELECT category, division, room FROM finalist_categories WHERE tournament = ?");
       sourcePrep.setInt(1, sourceTournamentID);
       sourceRS = sourcePrep.executeQuery();
       while (sourceRS.next()) {
         destPrep.setString(2, sourceRS.getString(1));
-        destPrep.setBoolean(3, sourceRS.getBoolean(2));
+        destPrep.setString(3, sourceRS.getString(2));
         destPrep.setString(4, sourceRS.getString(3));
-        destPrep.setString(5, sourceRS.getString(4));
         destPrep.executeUpdate();
       }
 
@@ -2119,6 +2118,9 @@ public final class ImportDB {
   /**
    * Check for differences between two tournaments in team information.
    *
+   * @param sourceConnection the incoming database
+   * @param destConnection the database to insert the data into
+   * @param tournament the name of the tournament to import
    * @return true if there are differences
    */
   public static boolean checkForDifferences(final Connection sourceConnection,

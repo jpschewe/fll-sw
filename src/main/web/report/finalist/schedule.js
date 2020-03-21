@@ -422,7 +422,7 @@ function updatePage() {
 
   var categoryRows = [];
   $.each($.finalist.getAllCategories(), function(i, category) {
-    var cat = new FinalistCategory(category.name, category.isPublic, $.finalist
+    var cat = new FinalistCategory(category.name, $.finalist
         .getRoom(category, $.finalist.getCurrentDivision()));
     categoryRows.push(cat);
   }); // foreach category

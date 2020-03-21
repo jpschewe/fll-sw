@@ -294,8 +294,7 @@ public final class FinalistLoad {
 
         final FinalistSchedule schedule = new FinalistSchedule(connection, tournament, division);
 
-        for (final Map.Entry<String, Boolean> entry : schedule.getCategories().entrySet()) {
-          final String categoryTitle = entry.getKey();
+        for (final String categoryTitle : schedule.getCategories()) {
           final String quotedCatTitle = WebUtils.quoteJavascriptString(categoryTitle);
 
           output.format("{%n"); // scope so that variable names are easy
@@ -304,7 +303,6 @@ public final class FinalistLoad {
           // will be non-numeric because all numeric categories were added earlier
           output.format("    category = $.finalist.addCategory(%s, false);%n", quotedCatTitle);
           output.format("  }%n");
-          output.format("  $.finalist.setCategoryPublic(category, %b);%n", entry.getValue());
           output.format("}%n");
         }
 

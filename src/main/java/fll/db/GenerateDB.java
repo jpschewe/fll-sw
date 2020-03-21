@@ -429,7 +429,6 @@ public final class GenerateDB {
       sql.append("CREATE TABLE finalist_categories (");
       sql.append("  tournament INTEGER NOT NULL");
       sql.append(" ,category LONGVARCHAR NOT NULL");
-      sql.append(" ,is_public BOOLEAN NOT NULL");
       sql.append(" ,division VARCHAR(32) NOT NULL");
       sql.append(" ,room VARCHAR(32) DEFAULT NULL");
       sql.append(" ,CONSTRAINT finalist_categories_pk PRIMARY KEY (tournament, category, division)");
