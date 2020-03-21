@@ -1,3 +1,5 @@
+* #826 - Remove application cache from finalist scheduling workflow
+
 Release 14.4.0
 ==============
 * #813 - Allow the user to specify the order that the awards groups appear in the awards report
