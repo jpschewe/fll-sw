@@ -92,8 +92,8 @@ public class CommitAwardGroups extends BaseFLLServlet {
               && !newAwardGroup.isEmpty()) {
             if ("text".equals(newAwardGroup)) {
               // get from text box
-              newAwardGroup = request.getParameter("text_"
-                  + teamNumberStr);
+              newAwardGroup = request.getParameter(teamNumberStr
+                  + "_text");
             }
             if (null != newAwardGroup
                 && !newAwardGroup.trim().isEmpty()) {
