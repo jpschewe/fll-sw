@@ -1,3 +1,5 @@
+* #828 Remove the concept of public finalist categories
+
 Release 14.4.0
 ==============
 * #813 - Allow the user to specify the order that the awards groups appear in the awards report

@@ -13,13 +13,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Mirrors javascript class in fll-objects.js. Property names need to match the
  * javascript/JSON.
  */
-final class FinalistCategory {
+/* package */ final class FinalistCategory {
 
-  public FinalistCategory(@JsonProperty("categoryName") final String categoryName,
-                          @JsonProperty("isPublic") final boolean isPublic,
-                          @JsonProperty("room") final String room) {
+  /**
+   * @param categoryName name of the category
+   * @param room the room that the category is being judged in
+   */
+  FinalistCategory(@JsonProperty("categoryName") final String categoryName,
+                   @JsonProperty("room") final String room) {
     this.categoryName = categoryName;
-    this.isPublic = isPublic;
     this.room = room;
   }
 
@@ -27,12 +29,6 @@ final class FinalistCategory {
 
   public String getCategoryName() {
     return categoryName;
-  }
-
-  private final boolean isPublic;
-
-  public boolean getIsPublic() {
-    return isPublic;
   }
 
   private final String room;

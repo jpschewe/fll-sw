@@ -225,7 +225,6 @@
     this.numeric = numeric;
     this.catId = category_id;
     this.teams = []; // all teams reguardless of division
-    this.isPublic = true;
     this.room = {}; // division -> room
 
     _categories[this.catId] = this;
@@ -926,15 +925,6 @@
       return found;
     },
 
-    setCategoryPublic : function(category, value) {
-      category.isPublic = value;
-      _save();
-    },
-
-    isCategoryPublic : function(category) {
-      return category.isPublic;
-    },
-
     /**
      * Get the schedule for the specified division. If no schedule exists, one
      * is created.
@@ -1226,16 +1216,6 @@
         });
       }
       element.text($.finalist.CHAMPIONSHIP_NAME);
-      $("#navbar").append(element);
-
-      $("#navbar").append($("<span> - </span>"));
-
-      if (window.location.pathname.match(/\/choose-public-categories.html$/)) {
-        element = $("<span></span>");
-      } else {
-        element = $("<a href='choose-public-categories.html'></a>");
-      }
-      element.text("Public Categories");
       $("#navbar").append(element);
 
       $("#navbar").append($("<span> - </span>"));
