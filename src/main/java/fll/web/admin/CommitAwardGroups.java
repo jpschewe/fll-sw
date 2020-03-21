@@ -37,6 +37,10 @@ public class CommitAwardGroups extends BaseFLLServlet {
 
   /**
    * Put the needed variables into the page context for the page to use.
+   * 
+   * @param application used for application variables
+   * @param session used for session variables
+   * @param pageContext used to populate page variables
    */
   public static void populateContext(final ServletContext application,
                                      final HttpSession session,
