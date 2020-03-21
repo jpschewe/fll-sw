@@ -70,10 +70,6 @@ public class DisplayQueryServlet extends BaseFLLServlet {
     } else if (displayInfo.isHeadToHead()) {
       return contextPath
           + "/playoff/remoteMain.jsp";
-    } else if (displayInfo.isFinalistSchedule()
-        && null != displayInfo.getFinalistScheduleAwardGroup()) {
-      return String.format("%s/report/finalist/PublicFinalistDisplaySchedule.jsp?finalistScheduleScroll=true",
-                           contextPath);
     } else if (displayInfo.isFinalistTeams()) {
       return contextPath
           + "/report/finalist/FinalistTeams.jsp?finalistTeamsScroll=true";

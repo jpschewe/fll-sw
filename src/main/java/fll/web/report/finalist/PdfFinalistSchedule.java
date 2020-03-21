@@ -17,12 +17,11 @@ import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
-
-import net.mtu.eggplant.util.sql.SQLFunctions;
-
-
 
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -42,7 +41,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.Team;
 import fll.db.Queries;
-
+import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.xml.ChallengeDescription;
@@ -50,7 +49,8 @@ import fll.xml.ChallengeDescription;
 /**
  * Outputs the PDF showing times of finalist categories.
  */
-abstract public class AbstractFinalistSchedule extends BaseFLLServlet {
+@WebServlet("/report/finalist/PdfFinalistSchedule")
+public class PdfFinalistSchedule extends BaseFLLServlet {
 
   private static final Font TITLE_FONT = FontFactory.getFont(FontFactory.TIMES, 12, Font.BOLD);
 
@@ -62,14 +62,21 @@ abstract public class AbstractFinalistSchedule extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
-  protected void processRequest(final String division,
-                                final boolean showPrivate,
+  @Override
+  protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
-                                final ServletContext application) throws IOException, ServletException {
-    Connection connection = null;
-    try {
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
-      connection = datasource.getConnection();
+                                final ServletContext application,
+                                final HttpSession session)
+      throws IOException, ServletException {
+
+    final String division = request.getParameter("division");
+    if (null == division
+        || "".equals(division)) {
+      throw new FLLRuntimeException("Parameter 'division' cannot be null");
+    }
+
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
 
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
@@ -82,19 +89,15 @@ abstract public class AbstractFinalistSchedule extends BaseFLLServlet {
                                                              division);
 
       writer.setPageEvent(new PageEventHandler(challengeDescription.getTitle(),
-                                               Queries.getCurrentTournamentName(connection), schedule.getDivision(),
-                                               showPrivate));
+                                               Queries.getCurrentTournamentName(connection), schedule.getDivision()));
 
       document.open();
 
       document.addTitle("Finalist Schedule");
 
       final Map<String, String> rooms = schedule.getRooms();
-      for (final Map.Entry<String, Boolean> entry : schedule.getCategories().entrySet()) {
-        if (showPrivate
-            || entry.getValue()) {
-          createCategoryPage(document, connection, entry.getKey(), rooms.get(entry.getKey()), schedule);
-        }
+      for (final String categoryTitle : schedule.getCategories()) {
+        createCategoryPage(document, connection, categoryTitle, rooms.get(categoryTitle), schedule);
       }
 
       document.close();
@@ -119,8 +122,6 @@ abstract public class AbstractFinalistSchedule extends BaseFLLServlet {
     } catch (final DocumentException e) {
       LOGGER.error(e, e);
       throw new RuntimeException(e);
-    } finally {
-      SQLFunctions.close(connection);
     }
 
   }
@@ -135,7 +136,8 @@ abstract public class AbstractFinalistSchedule extends BaseFLLServlet {
                                   final Connection connection,
                                   final String category,
                                   final String room,
-                                  final FinalistSchedule schedule) throws DocumentException, SQLException {
+                                  final FinalistSchedule schedule)
+      throws DocumentException, SQLException {
     // header name
     final Paragraph para = new Paragraph();
     para.add(Chunk.NEWLINE);
@@ -184,20 +186,16 @@ abstract public class AbstractFinalistSchedule extends BaseFLLServlet {
    * Be able to initialize the header table at the end of a page.
    */
   private static final class PageEventHandler extends PdfPageEventHelper {
-    public PageEventHandler(final String challengeTitle,
-                            final String tournament,
-                            final String division,
-                            final boolean showPrivate) {
+    /* package */ PageEventHandler(final String challengeTitle,
+                                   final String tournament,
+                                   final String division) {
       mTournament = tournament;
       mDivision = division;
       mChallengeTitle = challengeTitle;
       mFormattedDate = DateFormat.getDateInstance().format(new Date());
-      mShowPrivate = showPrivate;
     }
 
     private final String mDivision;
-
-    private final boolean mShowPrivate;
 
     private final String mFormattedDate;
 
@@ -211,9 +209,10 @@ abstract public class AbstractFinalistSchedule extends BaseFLLServlet {
                           final Document document) {
       final PdfPTable header = new PdfPTable(2);
       final Phrase p = new Phrase();
-      final Chunk ck = new Chunk(String.format("%s%n %s Finalist Schedule - Award Group: %s", //
+      final Chunk ck = new Chunk(String.format("%s%nFinalist Schedule - Award Group: %s", //
                                                mChallengeTitle, //
-                                               mShowPrivate ? "Private" : "", mDivision), HEADER_FONT);
+                                               mDivision),
+                                 HEADER_FONT);
       p.add(ck);
       header.getDefaultCell().setBorderWidth(0);
       header.addCell(p);
@@ -230,7 +229,8 @@ abstract public class AbstractFinalistSchedule extends BaseFLLServlet {
       cb.saveState();
       header.setTotalWidth(document.right()
           - document.left());
-      header.writeSelectedRows(0, -1, document.left(), document.getPageSize().getHeight() - 10, cb);
+      header.writeSelectedRows(0, -1, document.left(), document.getPageSize().getHeight()
+          - 10, cb);
       cb.restoreState();
     }
 
