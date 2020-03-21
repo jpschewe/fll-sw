@@ -27,7 +27,6 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Commit the changes from edit_judging_groups.jsp.
@@ -39,6 +38,10 @@ public class CommitJudgingGroups extends BaseFLLServlet {
 
   /**
    * Put the needed variables into the page context for the page to use.
+   * 
+   * @param application used for application variables
+   * @param session used for session variables
+   * @param pageContext used to set variables for the page
    */
   public static void populateContext(final ServletContext application,
                                      final HttpSession session,
@@ -46,10 +49,7 @@ public class CommitJudgingGroups extends BaseFLLServlet {
     final StringBuilder message = new StringBuilder();
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
-
+    try (Connection connection = datasource.getConnection()) {
       final int currentTournamentID = Queries.getCurrentTournament(connection);
 
       pageContext.setAttribute("judgingGroups", Queries.getJudgingStations(connection, currentTournamentID));
@@ -63,8 +63,6 @@ public class CommitJudgingGroups extends BaseFLLServlet {
           + "</p>");
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error saving team data into the database", sqle);
-    } finally {
-      SQLFunctions.close(connection);
     }
 
     SessionAttributes.appendToMessage(session, message.toString());
@@ -83,10 +81,7 @@ public class CommitJudgingGroups extends BaseFLLServlet {
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    Connection connection = null;
-    try {
-      connection = datasource.getConnection();
-
+    try (Connection connection = datasource.getConnection()) {
       final int currentTournamentID = Queries.getCurrentTournament(connection);
 
       if ("Commit".equals(request.getParameter("submit_data"))) {
@@ -100,8 +95,8 @@ public class CommitJudgingGroups extends BaseFLLServlet {
               && !newJudgingGroup.isEmpty()) {
             if ("text".equals(newJudgingGroup)) {
               // get from text box
-              newJudgingGroup = request.getParameter("text_"
-                  + teamNumberStr);
+              newJudgingGroup = request.getParameter(teamNumberStr
+                  + "_text");
             }
             if (null != newJudgingGroup
                 && !newJudgingGroup.trim().isEmpty()) {
@@ -129,8 +124,6 @@ public class CommitJudgingGroups extends BaseFLLServlet {
           + "</p>");
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error saving judging group data into the database", sqle);
-    } finally {
-      SQLFunctions.close(connection);
     }
 
     SessionAttributes.appendToMessage(session, message.toString());
