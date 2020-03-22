@@ -2078,7 +2078,7 @@ public final class ImportDB {
 
       SQLFunctions.close(destPrep);
       // insert categories next
-      destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_categories (tournament, category, division, room) VALUES(?, ?, ?, ?, ?)");
+      destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_categories (tournament, category, division, room) VALUES(?, ?, ?, ?)");
       destPrep.setInt(1, destTournamentID);
 
       sourcePrep = sourceConnection.prepareStatement("SELECT category, division, room FROM finalist_categories WHERE tournament = ?");
