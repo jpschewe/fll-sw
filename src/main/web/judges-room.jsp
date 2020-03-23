@@ -272,23 +272,6 @@
         </li>
 
         <li>
-            <form
-                ACTION="<c:url value='/report/finalist/PublicFinalistDisplaySchedule.jsp' />"
-                METHOD='POST' target="_blank">
-                <select name='division'>
-                    <c:forEach var="division"
-                        items="${finalistDivisions }">
-                        <option value='${division }'>${division }</option>
-                    </c:forEach>
-                </select>
-                <input type='submit'
-                    value='Public Finalist Schedule (HTML)' />
-                This displays the finalist schedule for public
-                categories.
-            </form>
-        </li>
-
-        <li>
             <a
                 href="<c:url value='/report/finalist/TeamFinalistSchedule' />"
                 target="_blank">Finalist Schedule for each team</a>

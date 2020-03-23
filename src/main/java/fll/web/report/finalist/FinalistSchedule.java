@@ -17,9 +17,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import fll.db.Queries;
 import net.mtu.eggplant.util.sql.SQLFunctions;
@@ -47,7 +49,7 @@ public class FinalistSchedule implements Serializable {
     this.mSchedule = Collections.unmodifiableCollection(new LinkedList<>(schedule));
 
     for (final FinalistCategory row : categories) {
-      mCategories.put(row.getCategoryName(), row.getIsPublic());
+      mCategories.add(row.getCategoryName());
       mRooms.put(row.getCategoryName(), row.getRoom());
     }
   }
@@ -73,15 +75,14 @@ public class FinalistSchedule implements Serializable {
     PreparedStatement getSchedule = null;
     ResultSet schedule = null;
     try {
-      getCategories = connection.prepareStatement("SELECT category, is_public, room FROM finalist_categories WHERE tournament = ? AND division = ?");
+      getCategories = connection.prepareStatement("SELECT category, room FROM finalist_categories WHERE tournament = ? AND division = ?");
       getCategories.setInt(1, mTournament);
       getCategories.setString(2, mDivision);
       categories = getCategories.executeQuery();
       while (categories.next()) {
         final String name = categories.getString(1);
-        final boolean isPublic = categories.getBoolean(2);
-        final String room = categories.getString(3);
-        mCategories.put(name, isPublic);
+        final String room = categories.getString(2);
+        mCategories.add(name);
         mRooms.put(name, room);
       }
 
@@ -114,15 +115,15 @@ public class FinalistSchedule implements Serializable {
     }
   }
 
-  private final Map<String, Boolean> mCategories = new HashMap<>();
+  private final Set<String> mCategories = new HashSet<>();
 
   /**
-   * Unmodifiable version of the categories and which ones are public.
+   * Unmodifiable version of the categories.
    *
-   * @return key=category name, value=is public
+   * @return set of category names
    */
-  public Map<String, Boolean> getCategories() {
-    return Collections.unmodifiableMap(mCategories);
+  public Set<String> getCategories() {
+    return Collections.unmodifiableSet(mCategories);
   }
 
   private final Map<String, String> mRooms = new HashMap<>();
@@ -220,14 +221,13 @@ public class FinalistSchedule implements Serializable {
       deleteCategoriesPrep.setString(2, getDivision());
       deleteCategoriesPrep.executeUpdate();
 
-      insertCategoriesPrep = connection.prepareStatement("INSERT INTO finalist_categories (tournament, division, category, is_public, room) VALUES(?, ?, ?, ?, ?)");
+      insertCategoriesPrep = connection.prepareStatement("INSERT INTO finalist_categories (tournament, division, category, room) VALUES(?, ?, ?, ?, ?)");
       insertCategoriesPrep.setInt(1, getTournament());
       insertCategoriesPrep.setString(2, getDivision());
 
-      for (final Map.Entry<String, Boolean> entry : mCategories.entrySet()) {
-        insertCategoriesPrep.setString(3, entry.getKey());
-        insertCategoriesPrep.setBoolean(4, entry.getValue());
-        insertCategoriesPrep.setString(5, mRooms.get(entry.getKey()));
+      for (final String categoryName : mCategories) {
+        insertCategoriesPrep.setString(3, categoryName);
+        insertCategoriesPrep.setString(4, mRooms.get(categoryName));
         insertCategoriesPrep.executeUpdate();
       }
 
