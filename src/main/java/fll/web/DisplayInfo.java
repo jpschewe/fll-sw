@@ -62,11 +62,6 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
   public static final String HEAD_TO_HEAD_REMOTE_PAGE = "playoffs";
 
   /**
-   * Constant for displaying the finalist schedule.
-   */
-  public static final String FINALIST_SCHEDULE_REMOTE_PAGE = "finalistSchedule";
-
-  /**
    * Constant for displaying the finalist teams.
    */
   public static final String FINALIST_TEAMS_REMOTE_PAGE = "finalistTeams";
@@ -523,13 +518,6 @@ public final class DisplayInfo implements Serializable, Comparable<DisplayInfo> 
    */
   public boolean isHeadToHead() {
     return HEAD_TO_HEAD_REMOTE_PAGE.equals(mRemotePage);
-  }
-
-  /**
-   * @return is the finalist schedule being displayed
-   */
-  public boolean isFinalistSchedule() {
-    return FINALIST_SCHEDULE_REMOTE_PAGE.equals(mRemotePage);
   }
 
   /**

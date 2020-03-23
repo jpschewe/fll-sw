@@ -24,7 +24,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import fll.Version;
 
-
 /**
  * Ensure that all HTML pages get the same footer.
  */
@@ -48,7 +47,8 @@ public class FooterFilter implements Filter {
   @Override
   public void doFilter(final ServletRequest request,
                        final ServletResponse response,
-                       final FilterChain chain) throws IOException, ServletException {
+                       final FilterChain chain)
+      throws IOException, ServletException {
     if (response instanceof HttpServletResponse
         && request instanceof HttpServletRequest) {
       final HttpServletResponse httpResponse = (HttpServletResponse) response;
@@ -142,9 +142,7 @@ public class FooterFilter implements Filter {
       return true;
     } else if (url.indexOf("report/finalist/FinalistTeams.jsp") != -1) {
       return true;
-    } else if (url.indexOf("report/finalist/PublicFinalistDisplaySchedule.jsp") != -1) {
-      return true;
-    } else if(url.indexOf("slideshow.jsp") != -1) {
+    } else if (url.indexOf("slideshow.jsp") != -1) {
       return true;
     } else {
       return false;
@@ -155,13 +153,15 @@ public class FooterFilter implements Filter {
    * Writer the footer to the char array writer.
    */
   private static void addFooter(final CharArrayWriter caw,
-                                final HttpServletRequest request) throws IOException {
+                                final HttpServletRequest request)
+      throws IOException {
     final String contextPath = request.getContextPath();
     final Formatter formatter = new Formatter(caw);
     formatter.format("<hr />");
     formatter.format("<table>");
     formatter.format("  <tr>");
-    formatter.format("    <td><a href='%s/admin/performance-area.jsp' target='_top'>Scoring Coordinator</a></td>", contextPath);
+    formatter.format("    <td><a href='%s/admin/performance-area.jsp' target='_top'>Scoring Coordinator</a></td>",
+                     contextPath);
     formatter.format("    <td><a href='%s/judges-room.jsp' target='_top'>Judges Room</a></td>", contextPath);
     formatter.format("    <td><a href='%s/index.jsp' target='_top'>Main Index</a></td>", contextPath);
     formatter.format("    <td><a href='%s/admin/index.jsp' target='_top'>Admin Index</a></td>", contextPath);
@@ -175,7 +175,8 @@ public class FooterFilter implements Filter {
    * Writer the footer for public pages to the char array writer.
    */
   private static void addPublicFooter(final CharArrayWriter caw,
-                                      final HttpServletRequest request) throws IOException {
+                                      final HttpServletRequest request)
+      throws IOException {
     final String contextPath = request.getContextPath();
     final Formatter formatter = new Formatter(caw);
     formatter.format("<hr />");
