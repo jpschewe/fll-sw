@@ -98,7 +98,6 @@
                         <!-- scoreboard: ${displayInfo.scoreboard} -->
                         <!-- remotePageFormParamName: ${displayInfo.remotePageFormParamName} -->
                         <!-- headToHead: ${displayInfo.headToHead} -->
-                        <!-- finalistSchedule: ${displayInfo.finalistSchedule} -->
                         <!-- finalistTeams: ${displayInfo.finalistTeams} -->
                         <!-- slideshow: ${displayInfo.slideshow} -->
                         <!-- special: ${displayInfo.special} -->
