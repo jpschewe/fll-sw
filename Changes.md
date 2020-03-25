@@ -1,3 +1,4 @@
+* #826 - Remove application cache from finalist scheduling workflow
 * #828 Remove the concept of public finalist categories
 * #818 - Fix setting of custom judging and award groups
 

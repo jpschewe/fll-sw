@@ -1,64 +1,54 @@
 <!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>
-<html manifest='finalist.appcache'>
+<html>
 <head>
 <title>Finalist Scheduling</title>
 
 <script type="text/javascript" src='../../scripts/appcache-support.js'></script>
 
-<script
-  type='text/javascript'
-  src='../../extlib/jquery-1.11.1.min.js'></script>
-<script
-  type='text/javascript'
-  src='../../extlib/jquery.json-2.5-pre.min.js'></script>
-<script
-  type='text/javascript'
-  src='../../extlib/jstorage-0.4.11.min.js'></script>
-<script
-  type='text/javascript'
-  src='finalist.js'></script>
-<script
-  type='text/javascript'
-  src='params.js'></script>
+<script type='text/javascript' src='../../extlib/jquery-1.11.1.min.js'></script>
+<script type='text/javascript'
+    src='../../extlib/jquery.json-2.5-pre.min.js'></script>
+<script type='text/javascript' src='../../extlib/jstorage-0.4.11.min.js'></script>
+<script type='text/javascript' src='finalist.js'></script>
+<script type='text/javascript' src='params.js'></script>
 </head>
 
 <body>
-  <div id='navbar'></div>
-  <hr />
+    <div id='navbar'></div>
+    <hr />
 
-  <h1>Finalist Schedule Parameters</h1>
+    <h1>Finalist Schedule Parameters</h1>
 
-  <div id='cache-ready'>All data for finalist scheduling is now
-    cached. You may now disconnect from the network and continue
-    scheduling.</div>
+    <div id='cache-ready'>All data for finalist scheduling is now
+        cached. You may now disconnect from the network and continue
+        scheduling.</div>
 
-  <p>
-    Select the appropriate award group: <select id='divisions'></select>
-  </p>
+    <p>
+        Select the appropriate award group:
+        <select id='divisions'></select>
+    </p>
 
-  <p>
-    Choose the start time for the finalist scheduling and the duration
-    in minutes. Changing the start time or duration will modify any
-    existing schedules. The duration must be at least 5 minutes.<br />
-    Start time (hour and minute): <input
-      type="text"
-      id="hour"
-      size="2"
-      maxlength="2" /> : <input
-      type="text"
-      id="minute"
-      size="2"
-      maxlength="2" /><br /> Interval (minutes): <input
-      type="text"
-      id="duration"
-      size="4" /><br />
-  </p>
+    <p>
+        Choose the start time for the finalist scheduling and the
+        duration in minutes. Changing the start time or duration will
+        modify any existing schedules. The duration must be at least 5
+        minutes.
+        <br />
+        Start time (hour and minute):
+        <input type="text" id="hour" size="2" maxlength="2" />
+        :
+        <input type="text" id="minute" size="2" maxlength="2" />
+        <br />
+        Interval (minutes):
+        <input type="text" id="duration" size="4" />
+        <br />
+    </p>
 
-  <p>Choose the start and end time for each head to head bracket. This
-    ensures that teams aren't scheduled for finalist judging when they
-    are to be competing. You can leave the times blank if you don't want
-    to consider them when scheduling.
-  <div id='head_head_times'></div>
+    <p>Choose the start and end time for each head to head bracket.
+        This ensures that teams aren't scheduled for finalist judging
+        when they are to be competing. You can leave the times blank if
+        you don't want to consider them when scheduling.
+    <div id='head_head_times'></div>
 
 
 
