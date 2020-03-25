@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html manifest='finalist.appcache'>
+<html>
 <head>
 <title>Finalist Scheduling</title>
 
@@ -7,7 +7,7 @@
 
 <script type='text/javascript' src='../../extlib/jquery-1.11.1.min.js'></script>
 <script type='text/javascript'
-	src='../../extlib/jquery.json-2.5-pre.min.js'></script>
+    src='../../extlib/jquery.json-2.5-pre.min.js'></script>
 <script type='text/javascript' src='../../extlib/jstorage-0.4.11.min.js'></script>
 <script type='text/javascript' src='../../extlib/string-functions.js'></script>
 <script type='text/javascript' src='../../js/fll-objects.js'></script>
@@ -21,94 +21,98 @@
 /* Prevent the text contents of draggable elements from being selectable 
 and mark draggable things as movable. */
 [draggable] {
-	-moz-user-select: none;
-	-khtml-user-select: none;
-	-webkit-user-select: none;
-	user-select: none;
-	/* Required to make elements draggable in old WebKit */
-	-khtml-user-drag: element;
-	-webkit-user-drag: element;
-	cursor: move;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+    /* Required to make elements draggable in old WebKit */
+    -khtml-user-drag: element;
+    -webkit-user-drag: element;
+    cursor: move;
 }
 
 .overlap-schedule {
-	background-color: yellow;
+    background-color: yellow;
 }
 
 .overlap-playoff {
-	background-color: orange;
+    background-color: orange;
 }
 </style>
 
 </head>
 
 <body>
-	<div id='navbar'></div>
-	<hr />
+    <div id='navbar'></div>
+    <hr />
 
-	<h1>Finalist schedule</h1>
+    <h1>Finalist schedule</h1>
 
-	<h2>
-		Award Group: <select id='divisions'></select>
-	</h2>
+    <h2>
+        Award Group:
+        <select id='divisions'></select>
+    </h2>
 
-	<div class='rTable' id='schedule'>
+    <div class='rTable' id='schedule'>
 
-		<div class='rTableHeading' id='schedule_header'></div>
+        <div class='rTableHeading' id='schedule_header'></div>
 
-		<div class='rTableBody' id='schedule_body'></div>
-
-	</div>
-	<button type="button" id="add_timeslot">Add time slot</button>
-	<br />
-
-	<br />
-
-	<!--  legend -->
-	<div class='rTable'>
-
-		<div class='rTableHeading'>
-			<div class='rTableHead'>Legend</div>
-		</div>
-
-		<div class='rTableBody'>
-
-			<div class='rTableRow'>
-				<div class='rTableCell, overlap-schedule'>Team is being judged
-					in 2 categories at the same time</div>
-			</div>
-
-			<div class='rTableRow'>
-				<div class='rTableCell, overlap-playoff'>Team is scheduled to
-					be in head to head</div>
-			</div>
-
-      <div class='rTableRow'>
-        <div class='rTableCell'>The number after the award group
-          is the number of categories that a team is being judged in.</div>
-      </div>
+        <div class='rTableBody' id='schedule_body'></div>
 
     </div>
+    <button type="button" id="add_timeslot">Add time slot</button>
+    <br />
 
-	</div>
-	<!--  end legend -->
+    <br />
 
-	<br />
+    <!--  legend -->
+    <div class='rTable'>
 
-	<button type="button" id="regenerate_schedule">Regenerate
-		Schedule</button>
-	<br />
+        <div class='rTableHeading'>
+            <div class='rTableHead'>Legend</div>
+        </div>
 
-	<form id='get_sched_data' method='POST' action='StoreFinalistSchedule'>
+        <div class='rTableBody'>
 
-		<input type='hidden' id='sched_data' name='sched_data' /> <input
-			type='hidden' id='category_data' name='category_data' /> <input
-			type='hidden' id='division_data' name='division_data' /> <input
-			type='hidden' id='non-numeric-nominees_data'
-			name='non-numeric-nominees_data' /> <input type='submit'
-			value='Send Data To Server' /> once the schedule is finished and you
-		are connected to the network.
-	</form>
+            <div class='rTableRow'>
+                <div class='rTableCell, overlap-schedule'>Team is
+                    being judged in 2 categories at the same time</div>
+            </div>
+
+            <div class='rTableRow'>
+                <div class='rTableCell, overlap-playoff'>Team is
+                    scheduled to be in head to head</div>
+            </div>
+
+            <div class='rTableRow'>
+                <div class='rTableCell'>The number after the award
+                    group is the number of categories that a team is
+                    being judged in.</div>
+            </div>
+
+        </div>
+
+    </div>
+    <!--  end legend -->
+
+    <br />
+
+    <button type="button" id="regenerate_schedule">Regenerate
+        Schedule</button>
+    <br />
+
+    <form id='get_sched_data' method='POST'
+        action='StoreFinalistSchedule'>
+
+        <input type='hidden' id='sched_data' name='sched_data' />
+        <input type='hidden' id='category_data' name='category_data' />
+        <input type='hidden' id='division_data' name='division_data' />
+        <input type='hidden' id='non-numeric-nominees_data'
+            name='non-numeric-nominees_data' />
+        <input type='submit' value='Send Data To Server' />
+        once the schedule is finished and you are connected to the
+        network.
+    </form>
 
 </body>
 </html>
