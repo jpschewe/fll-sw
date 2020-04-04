@@ -20,10 +20,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.prefs.Preferences;
 
@@ -41,14 +46,24 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileFilter;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.w3c.dom.Document;
 
+import com.itextpdf.text.DocumentException;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.Tournament;
 import fll.Utilities;
+import fll.db.Queries;
+import fll.documents.elements.SheetElement;
+import fll.documents.writers.SubjectivePdfWriter;
+import fll.scheduler.TeamScheduleInfo;
 import fll.util.GuiExceptionHandler;
+import fll.web.playoff.ScoresheetGenerator;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.ChallengeXMLException;
+import fll.xml.SubjectiveScoreCategory;
 import net.mtu.eggplant.util.BasicFileFilter;
 import net.mtu.eggplant.util.gui.GraphicsUtils;
 import net.mtu.eggplant.xml.XMLUtils;
@@ -84,7 +99,7 @@ public class ChallengeDescriptionFrame extends JFrame {
         // final InputStream stream =
         // ChallengeDescriptionEditor.class.getResourceAsStream("/fll/resources/challenge-descriptors/fll-2015_trash-trek.xml"))
         // {
-        final InputStream stream = ChallengeDescriptionEditor.class.getResourceAsStream("/fll/resources/challenge-descriptors/fll-2014-world_class.xml")) {
+        InputStream stream = ChallengeDescriptionEditor.class.getResourceAsStream("/fll/resources/challenge-descriptors/fll-2014-world_class.xml")) {
 
       final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(stream,
                                                                                      Utilities.DEFAULT_CHARSET));
@@ -126,6 +141,12 @@ public class ChallengeDescriptionFrame extends JFrame {
 
   private ChallengeDescriptionEditor editor = null;
 
+  private static final int VERTICAL_SCROLL_INCREMENT = 20;
+
+  private static final int DEFAULT_WIDTH = 800;
+
+  private static final int DEFAULT_HEIGHT = 600;
+
   public ChallengeDescriptionFrame() {
     super("Challenge Description Editor");
 
@@ -139,10 +160,10 @@ public class ChallengeDescriptionFrame extends JFrame {
     cpane.add(createToolBar(), BorderLayout.PAGE_START);
 
     scroller = new JScrollPane();
-    scroller.getVerticalScrollBar().setUnitIncrement(20);
+    scroller.getVerticalScrollBar().setUnitIncrement(VERTICAL_SCROLL_INCREMENT);
     cpane.add(scroller, BorderLayout.CENTER);
 
-    setSize(800, 600);
+    setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
     // initial state
     setCurrentFile(mCurrentFile, null);
@@ -176,6 +197,10 @@ public class ChallengeDescriptionFrame extends JFrame {
     menu.add(mSaveAsAction);
 
     menu.add(validateAction);
+
+    menu.addSeparator();
+
+    menu.add(generateScoreSheetsAction);
 
     menu.addSeparator();
 
@@ -383,6 +408,101 @@ public class ChallengeDescriptionFrame extends JFrame {
     return valid;
   }
 
+  private final Action generateScoreSheetsAction = new AbstractAction("Generate Score Sheets...") {
+    {
+      putValue(SHORT_DESCRIPTION, "Write out blank score sheets");
+    }
+
+    @Override
+    public void actionPerformed(final ActionEvent ae) {
+      writeScoreSheets();
+    }
+  };
+
+  private static final String SCORE_SHEET_STARTING_DIRECTORY_PREF = "scoreSheetStartingDirectory";
+
+  /**
+   * @return the path chosen by the user or null if the action is canceled
+   */
+  private Path chooseScoreSheetOutputDirectory() {
+    final String startingDirectory = PREFS.get(SCORE_SHEET_STARTING_DIRECTORY_PREF, ".");
+    final Path startingPath = Paths.get(startingDirectory);
+
+    final JFileChooser chooser = new JFileChooser();
+    chooser.setCurrentDirectory(startingPath.toFile());
+    chooser.setDialogTitle("Choose a directory to write the score sheets");
+    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+    chooser.setAcceptAllFileFilterUsed(false);
+
+    if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+      final File selected = chooser.getSelectedFile();
+
+      final Path selectedPath = selected.toPath().toAbsolutePath();
+
+      PREFS.put(SCORE_SHEET_STARTING_DIRECTORY_PREF, selectedPath.toString());
+      return selectedPath;
+
+    } else {
+      return null;
+    }
+  }
+
+  private void writeScoreSheets() {
+    final Path outputDirectory = chooseScoreSheetOutputDirectory();
+    if (null != outputDirectory) {
+      final boolean valid = validateChallengeDescription();
+      if (!valid) {
+        JOptionPane.showMessageDialog(this, "The current challenge description is not valid.", "Error",
+                                      JOptionPane.ERROR_MESSAGE);
+
+        return;
+      }
+
+      final ChallengeDescription challengeDescription = editor.getDescription();
+
+      final String tournamentName = "Example";
+
+      try (OutputStream out = Files.newOutputStream(outputDirectory.resolve("performance-scoresheet.pdf"))) {
+        final Pair<Boolean, Float> orientationResult = ScoresheetGenerator.guessOrientation(challengeDescription);
+        final boolean orientationIsPortrait = orientationResult.getLeft();
+        final float pagesPerScoreSheet = orientationResult.getRight();
+
+        final ScoresheetGenerator gen = new ScoresheetGenerator(challengeDescription);
+        gen.writeFile(out, orientationIsPortrait, pagesPerScoreSheet);
+      } catch (DocumentException | IOException e) {
+        LOGGER.error("Error writing performance score sheet", e);
+        JOptionPane.showMessageDialog(this, "Error writing the performance score sheet: "
+            + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+      }
+
+      for (SubjectiveScoreCategory category : challengeDescription.getSubjectiveCategories()) {
+        final SheetElement sheetElement = new SheetElement(category);
+
+        final TeamScheduleInfo dummy = new TeamScheduleInfo(111111);
+        dummy.setTeamName("Really long team name, something that is really really long");
+        dummy.setOrganization("Some organization");
+        dummy.setDivision("State");
+        dummy.setJudgingGroup("Lakes");
+
+        final String filename = "subjective-"
+            + category.getName()
+            + ".pdf";
+
+        try (OutputStream out = Files.newOutputStream(outputDirectory.resolve(filename))) {
+          SubjectivePdfWriter.createDocument(out, challengeDescription, tournamentName, sheetElement, null,
+                                             Collections.singletonList(dummy));
+        } catch (IOException | DocumentException e) {
+          LOGGER.error("Error writing subjective score sheet {}", category.getName(), e);
+          JOptionPane.showMessageDialog(this, "Error writing the subjective score sheet "
+              + category.getName()
+              + ": "
+              + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+      }
+
+    }
+  }
+
   private static final Preferences PREFS = Preferences.userNodeForPackage(ChallengeDescriptionEditor.class);
 
   private static final String DESCRIPTION_STARTING_DIRECTORY_PREF = "descriptionStartingDirectory";
@@ -404,7 +524,7 @@ public class ChallengeDescriptionFrame extends JFrame {
       return;
     }
 
-    try (final Writer writer = new OutputStreamWriter(new FileOutputStream(mCurrentFile), Utilities.DEFAULT_CHARSET)) {
+    try (Writer writer = new OutputStreamWriter(new FileOutputStream(mCurrentFile), Utilities.DEFAULT_CHARSET)) {
       final Document saveDoc = editor.getDescription().toXml();
       XMLUtils.writeXML(saveDoc, writer, Utilities.DEFAULT_CHARSET.name());
     } catch (final IOException e) {
@@ -458,7 +578,7 @@ public class ChallengeDescriptionFrame extends JFrame {
         }
       }
 
-      try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file), Utilities.DEFAULT_CHARSET)) {
+      try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), Utilities.DEFAULT_CHARSET)) {
         final Document saveDoc = editor.getDescription().toXml();
         XMLUtils.writeXML(saveDoc, writer, Utilities.DEFAULT_CHARSET.name());
 

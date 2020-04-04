@@ -100,6 +100,33 @@ public class ScoresheetGenerator {
   }
 
   /**
+   * Generate blank score sheets. One is regular and one is practice.
+   * 
+   * @param description the challenge description
+   */
+  public ScoresheetGenerator(final ChallengeDescription description) {
+    this.tournamentName = "Example";
+
+    // must have been called asking for blank
+    m_numSheets = 2;
+    initializeArrays();
+
+    setPageTitle("");
+    for (int i = 0; i < m_numSheets; i++) {
+      m_table[i] = SHORT_BLANK;
+      m_name[i] = LONG_BLANK;
+      m_round[i] = Utilities.isOdd(i) ? "Practice" : SHORT_BLANK;
+      m_divisionLabel[i] = AWARD_GROUP_LABEL;
+      m_division[i] = SHORT_BLANK;
+      m_number[i] = null;
+      m_time[i] = null;
+      m_isPractice[i] = Utilities.isOdd(i);
+    }
+
+    setChallengeInfo(description);
+  }
+
+  /**
    * Create a new ScoresheetGenerator object populated with form header data
    * provided in the given Map. The map should contain String[] objects, each of
    * length 1, keyed by the String objects listed below (this matches the
@@ -136,138 +163,116 @@ public class ScoresheetGenerator {
     final ScoreType performanceScoreType = description.getPerformance().getScoreType();
 
     final String numMatchesStr = request.getParameter("numMatches");
-    if (null == numMatchesStr) {
-      // must have been called asking for blank
-      m_numSheets = 2;
-      initializeArrays();
 
-      setPageTitle("");
-      for (int i = 0; i < m_numSheets; i++) {
-        m_table[i] = SHORT_BLANK;
-        m_name[i] = LONG_BLANK;
-        m_round[i] = Utilities.isOdd(i) ? "Practice" : SHORT_BLANK;
-        m_divisionLabel[i] = AWARD_GROUP_LABEL;
-        m_division[i] = SHORT_BLANK;
-        m_number[i] = null;
-        m_time[i] = null;
-        m_isPractice[i] = Utilities.isOdd(i);
-      }
-    } else {
-      final String division = request.getParameter("division");
+    final String division = request.getParameter("division");
 
-      // called with specific sheets to print
-      final int numMatches = Integer.parseInt(numMatchesStr);
-      final boolean[] checkedMatches = new boolean[numMatches
-          + 1]; // ignore
-      // slot
-      // index 0
-      int checkedMatchCount = 0;
-      // Build array of out how many matches we are printing
-      for (int i = 1; i <= numMatches; i++) {
-        final String checkX = "print"
-            + i;
-        checkedMatches[i] = null != request.getParameter(checkX);
-        if (checkedMatches[i]) {
-          checkedMatchCount++;
-        }
-      }
-
-      if (checkedMatchCount == 0) {
-        throw new FLLRuntimeException("No matches were found checked. Please go back and select the checkboxes for the scoresheets that you want to print");
-      }
-
-      m_numSheets = checkedMatchCount
-          * 2;
-
-      initializeArrays();
-      setPageTitle(m_pageTitle);
-
-      // Loop through checked matches, populate data, and update database to
-      // track
-      // printed status and remember assigned tables.
-      PreparedStatement updatePrep = null;
-      try {
-        // build up the SQL
-        updatePrep = connection.prepareStatement("UPDATE PlayoffData SET Printed=true, AssignedTable=?"
-            + " WHERE event_division=? AND Tournament=? AND PlayoffRound=? AND Team=?");
-        // could do division here, too, but since getting it from Team object,
-        // will defer to same place as other
-        updatePrep.setInt(3, tournament);
-
-        int j = 0;
-        for (int i = 1; i <= numMatches; i++) {
-          if (checkedMatches[i]) {
-            final String round = request.getParameter("round"
-                + i);
-            final int playoffRound = Integer.parseInt(round);
-
-            // Get teamA info
-            final Team teamA = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("teamA"
-                + i)));
-            m_name[j] = teamA.getTrimmedTeamName();
-            m_number[j] = teamA.getTeamNumber();
-            m_round[j] = "Round P"
-                + round;
-            m_table[j] = request.getParameter("tableA"
-                + i);
-
-            final int performanceRunA = Playoff.getRunNumber(connection, division, teamA.getTeamNumber(), playoffRound);
-            m_divisionLabel[j] = HEAD_TO_HEAD_LABEL;
-            m_division[j] = division;
-            final int bracketA = Playoff.getBracketNumber(connection, tournament, teamA.getTeamNumber(),
-                                                          performanceRunA);
-            final String bracketALabel = String.format("Match %d", bracketA);
-            m_time[j] = bracketALabel;
-
-            updatePrep.setString(1, m_table[j]);
-            updatePrep.setString(2, division);
-            updatePrep.setInt(4, playoffRound);
-            updatePrep.setInt(5, teamA.getTeamNumber());
-            if (updatePrep.executeUpdate() < 1) {
-              LOGGER.warn(String.format("Could not update playoff table and print flags for team: %s playoff round: %s playoff bracket: %s",
-                                        teamA.getTeamNumber(), playoffRound, division));
-            } else {
-              // update the brackets with the table name
-              H2HUpdateWebSocket.updateBracket(connection, performanceScoreType, division, teamA, performanceRunA);
-            }
-            j++;
-
-            // Get teamB info
-            final Team teamB = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("teamB"
-                + i)));
-            m_name[j] = teamB.getTrimmedTeamName();
-            m_number[j] = teamB.getTeamNumber();
-            m_round[j] = "Round P"
-                + round;
-            m_table[j] = request.getParameter("tableB"
-                + i);
-
-            final int performanceRunB = Playoff.getRunNumber(connection, division, teamB.getTeamNumber(), playoffRound);
-            m_divisionLabel[j] = HEAD_TO_HEAD_LABEL;
-            m_division[j] = division;
-            final int bracketB = Playoff.getBracketNumber(connection, tournament, teamB.getTeamNumber(),
-                                                          performanceRunB);
-            final String bracketBLabel = String.format("Match %d", bracketB);
-            m_time[j] = bracketBLabel;
-
-            updatePrep.setString(1, m_table[j]);
-            updatePrep.setString(2, division);
-            updatePrep.setInt(4, playoffRound);
-            updatePrep.setInt(5, teamB.getTeamNumber());
-            if (updatePrep.executeUpdate() < 1) {
-              LOGGER.warn(String.format("Could not update playoff table and print flags for team: %s playoff round: %s playoff bracket: %s",
-                                        teamB.getTeamNumber(), playoffRound, division));
-            } else {
-              // update the brackets with the table name
-              H2HUpdateWebSocket.updateBracket(connection, performanceScoreType, division, teamB, performanceRunB);
-            }
-            j++;
-          }
-        }
-      } finally {
-        SQLFunctions.close(updatePrep);
+    // called with specific sheets to print
+    final int numMatches = Integer.parseInt(numMatchesStr);
+    final boolean[] checkedMatches = new boolean[numMatches
+        + 1]; // ignore
+    // slot
+    // index 0
+    int checkedMatchCount = 0;
+    // Build array of out how many matches we are printing
+    for (int i = 1; i <= numMatches; i++) {
+      final String checkX = "print"
+          + i;
+      checkedMatches[i] = null != request.getParameter(checkX);
+      if (checkedMatches[i]) {
+        checkedMatchCount++;
       }
     }
+
+    if (checkedMatchCount == 0) {
+      throw new FLLRuntimeException("No matches were found checked. Please go back and select the checkboxes for the scoresheets that you want to print");
+    }
+
+    m_numSheets = checkedMatchCount
+        * 2;
+
+    initializeArrays();
+    setPageTitle(m_pageTitle);
+
+    // Loop through checked matches, populate data, and update database to
+    // track
+    // printed status and remember assigned tables.
+    try (
+        PreparedStatement updatePrep = connection.prepareStatement("UPDATE PlayoffData SET Printed=true, AssignedTable=?"
+            + " WHERE event_division=? AND Tournament=? AND PlayoffRound=? AND Team=?")) {
+      // could do division here, too, but since getting it from Team object,
+      // will defer to same place as other
+      updatePrep.setInt(3, tournament);
+
+      int j = 0;
+      for (int i = 1; i <= numMatches; i++) {
+        if (checkedMatches[i]) {
+          final String round = request.getParameter("round"
+              + i);
+          final int playoffRound = Integer.parseInt(round);
+
+          // Get teamA info
+          final Team teamA = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("teamA"
+              + i)));
+          m_name[j] = teamA.getTrimmedTeamName();
+          m_number[j] = teamA.getTeamNumber();
+          m_round[j] = "Round P"
+              + round;
+          m_table[j] = request.getParameter("tableA"
+              + i);
+
+          final int performanceRunA = Playoff.getRunNumber(connection, division, teamA.getTeamNumber(), playoffRound);
+          m_divisionLabel[j] = HEAD_TO_HEAD_LABEL;
+          m_division[j] = division;
+          final int bracketA = Playoff.getBracketNumber(connection, tournament, teamA.getTeamNumber(), performanceRunA);
+          final String bracketALabel = String.format("Match %d", bracketA);
+          m_time[j] = bracketALabel;
+
+          updatePrep.setString(1, m_table[j]);
+          updatePrep.setString(2, division);
+          updatePrep.setInt(4, playoffRound);
+          updatePrep.setInt(5, teamA.getTeamNumber());
+          if (updatePrep.executeUpdate() < 1) {
+            LOGGER.warn(String.format("Could not update playoff table and print flags for team: %s playoff round: %s playoff bracket: %s",
+                                      teamA.getTeamNumber(), playoffRound, division));
+          } else {
+            // update the brackets with the table name
+            H2HUpdateWebSocket.updateBracket(connection, performanceScoreType, division, teamA, performanceRunA);
+          }
+          j++;
+
+          // Get teamB info
+          final Team teamB = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("teamB"
+              + i)));
+          m_name[j] = teamB.getTrimmedTeamName();
+          m_number[j] = teamB.getTeamNumber();
+          m_round[j] = "Round P"
+              + round;
+          m_table[j] = request.getParameter("tableB"
+              + i);
+
+          final int performanceRunB = Playoff.getRunNumber(connection, division, teamB.getTeamNumber(), playoffRound);
+          m_divisionLabel[j] = HEAD_TO_HEAD_LABEL;
+          m_division[j] = division;
+          final int bracketB = Playoff.getBracketNumber(connection, tournament, teamB.getTeamNumber(), performanceRunB);
+          final String bracketBLabel = String.format("Match %d", bracketB);
+          m_time[j] = bracketBLabel;
+
+          updatePrep.setString(1, m_table[j]);
+          updatePrep.setString(2, division);
+          updatePrep.setInt(4, playoffRound);
+          updatePrep.setInt(5, teamB.getTeamNumber());
+          if (updatePrep.executeUpdate() < 1) {
+            LOGGER.warn(String.format("Could not update playoff table and print flags for team: %s playoff round: %s playoff bracket: %s",
+                                      teamB.getTeamNumber(), playoffRound, division));
+          } else {
+            // update the brackets with the table name
+            H2HUpdateWebSocket.updateBracket(connection, performanceScoreType, division, teamB, performanceRunB);
+          }
+          j++;
+        }
+      }
+    }
+
     setChallengeInfo(description);
   }
 

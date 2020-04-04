@@ -1,5 +1,6 @@
+* #778 - Add the abililty to write blank score sheets from the challenge editor
 * #826 - Remove application cache from finalist scheduling workflow
-* #828 Remove the concept of public finalist categories
+* #828 - Remove the concept of public finalist categories
 * #818 - Fix setting of custom judging and award groups
 
 Release 14.4.0
