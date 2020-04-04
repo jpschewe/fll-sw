@@ -20,9 +20,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.prefs.Preferences;
@@ -41,11 +45,15 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileFilter;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.w3c.dom.Document;
+
+import com.itextpdf.text.DocumentException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.util.GuiExceptionHandler;
+import fll.web.playoff.ScoresheetGenerator;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.ChallengeXMLException;
@@ -182,6 +190,10 @@ public class ChallengeDescriptionFrame extends JFrame {
     menu.add(mSaveAsAction);
 
     menu.add(validateAction);
+
+    menu.addSeparator();
+
+    menu.add(generateScoreSheetsAction);
 
     menu.addSeparator();
 
@@ -387,6 +399,74 @@ public class ChallengeDescriptionFrame extends JFrame {
     }
 
     return valid;
+  }
+
+  private final Action generateScoreSheetsAction = new AbstractAction("Generate Score Sheets...") {
+    {
+      putValue(SHORT_DESCRIPTION, "Write out blank score sheets");
+    }
+
+    @Override
+    public void actionPerformed(final ActionEvent ae) {
+      writeScoreSheets();
+    }
+  };
+
+  private static final String SCORE_SHEET_STARTING_DIRECTORY_PREF = "scoreSheetStartingDirectory";
+
+  /**
+   * @return the path chosen by the user or null if the action is canceled
+   */
+  private Path chooseScoreSheetOutputDirectory() {
+    final String startingDirectory = PREFS.get(SCORE_SHEET_STARTING_DIRECTORY_PREF, ".");
+    final Path startingPath = Paths.get(startingDirectory);
+
+    final JFileChooser chooser = new JFileChooser();
+    chooser.setCurrentDirectory(startingPath.toFile());
+    chooser.setDialogTitle("Choose a directory to write the score sheets");
+    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+    chooser.setAcceptAllFileFilterUsed(false);
+
+    if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+      final File selected = chooser.getSelectedFile();
+
+      final Path selectedPath = selected.toPath().toAbsolutePath();
+
+      PREFS.put(SCORE_SHEET_STARTING_DIRECTORY_PREF, selectedPath.toString());
+      return selectedPath;
+
+    } else {
+      return null;
+    }
+  }
+
+  private void writeScoreSheets() {
+    final Path outputDirectory = chooseScoreSheetOutputDirectory();
+    if (null != outputDirectory) {
+      final boolean valid = validateChallengeDescription();
+      if (!valid) {
+        JOptionPane.showMessageDialog(this, "The current challenge description is not valid.", "Error",
+                                      JOptionPane.ERROR_MESSAGE);
+
+        return;
+      }
+
+      final ChallengeDescription challengeDescription = editor.getDescription();
+
+      try (OutputStream out = Files.newOutputStream(outputDirectory.resolve("performance-scoresheet.pdf"))) {
+        final Pair<Boolean, Float> orientationResult = ScoresheetGenerator.guessOrientation(challengeDescription);
+        final boolean orientationIsPortrait = orientationResult.getLeft();
+        final float pagesPerScoreSheet = orientationResult.getRight();
+
+        final ScoresheetGenerator gen = new ScoresheetGenerator(challengeDescription);
+        gen.writeFile(out, orientationIsPortrait, pagesPerScoreSheet);
+      } catch (DocumentException | IOException e) {
+        LOGGER.error("Error writing performance score sheet", e);
+        JOptionPane.showMessageDialog(this, "Error writing the performance score sheet: "
+            + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+      }
+
+    }
   }
 
   private static final Preferences PREFS = Preferences.userNodeForPackage(ChallengeDescriptionEditor.class);
