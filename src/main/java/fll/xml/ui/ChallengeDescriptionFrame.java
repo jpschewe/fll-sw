@@ -84,7 +84,7 @@ public class ChallengeDescriptionFrame extends JFrame {
         // final InputStream stream =
         // ChallengeDescriptionEditor.class.getResourceAsStream("/fll/resources/challenge-descriptors/fll-2015_trash-trek.xml"))
         // {
-        final InputStream stream = ChallengeDescriptionEditor.class.getResourceAsStream("/fll/resources/challenge-descriptors/fll-2014-world_class.xml")) {
+        InputStream stream = ChallengeDescriptionEditor.class.getResourceAsStream("/fll/resources/challenge-descriptors/fll-2014-world_class.xml")) {
 
       final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(stream,
                                                                                      Utilities.DEFAULT_CHARSET));
@@ -126,6 +126,12 @@ public class ChallengeDescriptionFrame extends JFrame {
 
   private ChallengeDescriptionEditor editor = null;
 
+  private static final int VERTICAL_SCROLL_INCREMENT = 20;
+
+  private static final int DEFAULT_WIDTH = 800;
+
+  private static final int DEFAULT_HEIGHT = 600;
+
   public ChallengeDescriptionFrame() {
     super("Challenge Description Editor");
 
@@ -139,10 +145,10 @@ public class ChallengeDescriptionFrame extends JFrame {
     cpane.add(createToolBar(), BorderLayout.PAGE_START);
 
     scroller = new JScrollPane();
-    scroller.getVerticalScrollBar().setUnitIncrement(20);
+    scroller.getVerticalScrollBar().setUnitIncrement(VERTICAL_SCROLL_INCREMENT);
     cpane.add(scroller, BorderLayout.CENTER);
 
-    setSize(800, 600);
+    setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
     // initial state
     setCurrentFile(mCurrentFile, null);
@@ -404,7 +410,7 @@ public class ChallengeDescriptionFrame extends JFrame {
       return;
     }
 
-    try (final Writer writer = new OutputStreamWriter(new FileOutputStream(mCurrentFile), Utilities.DEFAULT_CHARSET)) {
+    try (Writer writer = new OutputStreamWriter(new FileOutputStream(mCurrentFile), Utilities.DEFAULT_CHARSET)) {
       final Document saveDoc = editor.getDescription().toXml();
       XMLUtils.writeXML(saveDoc, writer, Utilities.DEFAULT_CHARSET.name());
     } catch (final IOException e) {
@@ -458,7 +464,7 @@ public class ChallengeDescriptionFrame extends JFrame {
         }
       }
 
-      try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file), Utilities.DEFAULT_CHARSET)) {
+      try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), Utilities.DEFAULT_CHARSET)) {
         final Document saveDoc = editor.getDescription().toXml();
         XMLUtils.writeXML(saveDoc, writer, Utilities.DEFAULT_CHARSET.name());
 
