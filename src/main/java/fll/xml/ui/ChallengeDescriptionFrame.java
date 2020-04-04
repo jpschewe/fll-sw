@@ -28,6 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.prefs.Preferences;
 
@@ -51,12 +52,18 @@ import org.w3c.dom.Document;
 import com.itextpdf.text.DocumentException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.Tournament;
 import fll.Utilities;
+import fll.db.Queries;
+import fll.documents.elements.SheetElement;
+import fll.documents.writers.SubjectivePdfWriter;
+import fll.scheduler.TeamScheduleInfo;
 import fll.util.GuiExceptionHandler;
 import fll.web.playoff.ScoresheetGenerator;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.ChallengeXMLException;
+import fll.xml.SubjectiveScoreCategory;
 import net.mtu.eggplant.util.BasicFileFilter;
 import net.mtu.eggplant.util.gui.GraphicsUtils;
 import net.mtu.eggplant.xml.XMLUtils;
@@ -453,6 +460,8 @@ public class ChallengeDescriptionFrame extends JFrame {
 
       final ChallengeDescription challengeDescription = editor.getDescription();
 
+      final String tournamentName = "Example";
+
       try (OutputStream out = Files.newOutputStream(outputDirectory.resolve("performance-scoresheet.pdf"))) {
         final Pair<Boolean, Float> orientationResult = ScoresheetGenerator.guessOrientation(challengeDescription);
         final boolean orientationIsPortrait = orientationResult.getLeft();
@@ -464,6 +473,31 @@ public class ChallengeDescriptionFrame extends JFrame {
         LOGGER.error("Error writing performance score sheet", e);
         JOptionPane.showMessageDialog(this, "Error writing the performance score sheet: "
             + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+      }
+
+      for (SubjectiveScoreCategory category : challengeDescription.getSubjectiveCategories()) {
+        final SheetElement sheetElement = new SheetElement(category);
+
+        final TeamScheduleInfo dummy = new TeamScheduleInfo(111111);
+        dummy.setTeamName("Really long team name, something that is really really long");
+        dummy.setOrganization("Some organization");
+        dummy.setDivision("State");
+        dummy.setJudgingGroup("Lakes");
+
+        final String filename = "subjective-"
+            + category.getName()
+            + ".pdf";
+
+        try (OutputStream out = Files.newOutputStream(outputDirectory.resolve(filename))) {
+          SubjectivePdfWriter.createDocument(out, challengeDescription, tournamentName, sheetElement, null,
+                                             Collections.singletonList(dummy));
+        } catch (IOException | DocumentException e) {
+          LOGGER.error("Error writing subjective score sheet {}", category.getName(), e);
+          JOptionPane.showMessageDialog(this, "Error writing the subjective score sheet "
+              + category.getName()
+              + ": "
+              + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
       }
 
     }
