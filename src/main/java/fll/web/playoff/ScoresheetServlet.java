@@ -27,7 +27,6 @@ import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.xml.ChallengeDescription;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 @WebServlet("/playoff/ScoresheetServlet")
 public class ScoresheetServlet extends BaseFLLServlet {
@@ -40,10 +39,9 @@ public class ScoresheetServlet extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
-    Connection connection = null;
-    try {
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
-      connection = datasource.getConnection();
+
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    try (Connection connection = datasource.getConnection()) {
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
       final int tournament = Queries.getCurrentTournament(connection);
       response.reset();
@@ -68,8 +66,6 @@ public class ScoresheetServlet extends BaseFLLServlet {
       final String errorMessage = "There was an error creating the PDF document - perhaps you didn't select any scoresheets to print?";
       LOGGER.error(errorMessage, e);
       throw new FLLRuntimeException(errorMessage, e);
-    } finally {
-      SQLFunctions.close(connection);
     }
   }
 
