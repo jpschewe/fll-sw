@@ -4,7 +4,7 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
-package fll.web.playoff;
+package fll.web;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -22,14 +22,15 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.itextpdf.text.DocumentException;
 
-import fll.db.Queries;
 import fll.util.FLLRuntimeException;
-import fll.web.ApplicationAttributes;
-import fll.web.BaseFLLServlet;
+import fll.web.playoff.ScoresheetGenerator;
 import fll.xml.ChallengeDescription;
 
-@WebServlet("/playoff/ScoresheetServlet")
-public class ScoresheetServlet extends BaseFLLServlet {
+/**
+ * Generate a blank score sheet.
+ */
+@WebServlet("/playoff/BlankScoresheet")
+public class BlankScoresheet extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -39,23 +40,18 @@ public class ScoresheetServlet extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session)
       throws IOException, ServletException {
-
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
-      final int tournament = Queries.getCurrentTournament(connection);
       response.reset();
       response.setContentType("application/pdf");
-      response.setHeader("Content-Disposition", "filename=scoreSheet.pdf");
+      response.setHeader("Content-Disposition", "filename=blank-scoreSheet.pdf");
 
       final Pair<Boolean, Float> orientationResult = ScoresheetGenerator.guessOrientation(challengeDescription);
       final boolean orientationIsPortrait = orientationResult.getLeft();
       final float pagesPerScoreSheet = orientationResult.getRight();
 
-      // Create the scoresheet generator - must provide correct number of
-      // scoresheets
-      final ScoresheetGenerator gen = new ScoresheetGenerator(request, connection, tournament, challengeDescription);
-
+      final ScoresheetGenerator gen = new ScoresheetGenerator(challengeDescription);
       gen.writeFile(response.getOutputStream(), orientationIsPortrait, pagesPerScoreSheet);
 
     } catch (final SQLException e) {

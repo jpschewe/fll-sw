@@ -87,7 +87,7 @@
 
 		<li><a href='scoreboard/index.jsp'>Score board</a></li>
 
-		<li><a href='playoff/ScoresheetServlet'>Blank score sheet,
+		<li><a href='BlankScoresheet'>Blank score sheet,
 				one regular match play and one practice (PDF)</a></li>
 
 		<c:forEach items="${challengeDescription.subjectiveCategories}"
