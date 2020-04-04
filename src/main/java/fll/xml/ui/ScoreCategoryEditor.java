@@ -288,7 +288,8 @@ public abstract class ScoreCategoryEditor extends JPanel implements Validatable 
     String prevGoalGroupName = null;
     for (final AbstractGoal ag : mCategory.getGoals()) {
       final String goalGroupName = ag.getCategory();
-      if (!goalGroupName.trim().isEmpty()) {
+      if (null != goalGroupName
+          && !goalGroupName.trim().isEmpty()) {
 
         if (!Objects.equals(prevGoalGroupName, goalGroupName)) {
           // start of a goal group
