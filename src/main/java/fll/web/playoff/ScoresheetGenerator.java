@@ -128,10 +128,9 @@ public class ScoresheetGenerator {
 
   /**
    * Create a new ScoresheetGenerator object populated with form header data
-   * provided in the given Map. The map should contain String[] objects, each of
-   * length 1, keyed by the String objects listed below (this matches the
-   * expected format of the Map returned by
-   * javax.servlet.ServletRequest.getParameterMap):
+   * provided in the given servlet request. The request should contain the
+   * attributes listed below (this matches the
+   * expected format of the request returned):
    * <ul>
    * <li><b>"numMatches"</b> - The number of matches in the form.
    * <li><b>"checkX"</b> - Present only for matches that should be printed.
@@ -174,10 +173,10 @@ public class ScoresheetGenerator {
 
     // called with specific sheets to print
     final int numMatches = Integer.parseInt(numMatchesStr);
+
+    // ignore slot index 0 since the parameters are 1-based
     final boolean[] checkedMatches = new boolean[numMatches
-        + 1]; // ignore
-    // slot
-    // index 0
+        + 1];
     int checkedMatchCount = 0;
     // Build array of out how many matches we are printing
     for (int i = 1; i <= numMatches; i++) {
