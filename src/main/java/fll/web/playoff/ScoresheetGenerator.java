@@ -48,12 +48,12 @@ import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.util.FP;
 import fll.util.PdfUtils;
+import fll.web.report.FinalComputedScores;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.EnumeratedValue;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreType;
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * @author Dan Churchill
@@ -68,7 +68,7 @@ public class ScoresheetGenerator {
 
   private final Font f6i = new Font(Font.FontFamily.HELVETICA, 6, Font.ITALIC);
 
-  private String m_copyright;
+  private String copyright;
 
   private final String tournamentName;
 
@@ -152,6 +152,12 @@ public class ScoresheetGenerator {
    * printed, so table assignments are stored into the database and the match is
    * marked as printed. It is very questionable whether this is where this
    * should happen, but I don't feel like breaking it out.
+   * 
+   * @param request used to get information about award group and number of
+   *          matches
+   * @param connection where to find database information
+   * @param tournament the tournament ID
+   * @param description description of the challenge
    */
   public ScoresheetGenerator(final HttpServletRequest request,
                              final Connection connection,
@@ -307,6 +313,7 @@ public class ScoresheetGenerator {
    *
    * @return true if it should be portrait, number of pages per score sheet (0.5,
    *         1 or greater)
+   * @param description description of the challenge
    * @throws DocumentException
    * @throws IOException
    */
@@ -566,9 +573,9 @@ public class ScoresheetGenerator {
       scoreSheet.addCell(desC);
       scoreSheet.addCell(sciC);
 
-      if (null != m_copyright) {
+      if (null != copyright) {
         final Phrase copyright = new Phrase("\u00A9"
-            + m_copyright, f6i);
+            + this.copyright, f6i);
         final PdfPCell copyrightC = new PdfPCell(scoreSheet.getDefaultCell());
         copyrightC.addElement(copyright);
         copyrightC.setBorder(0);
@@ -631,9 +638,9 @@ public class ScoresheetGenerator {
     }
 
     if (null != description.getCopyright()) {
-      m_copyright = description.getCopyright();
+      copyright = description.getCopyright();
     } else {
-      m_copyright = null;
+      copyright = null;
     }
 
     final PerformanceScoreCategory performanceElement = description.getPerformance();
@@ -715,9 +722,13 @@ public class ScoresheetGenerator {
 
         // define the value cell
         final double min = goal.getMin();
-        final String minStr = FP.equals(min, Math.round(min), 1E-6) ? String.valueOf((int) min) : String.valueOf(min);
+        final String minStr = FP.equals(min, Math.round(min), FinalComputedScores.TIE_TOLERANCE)
+            ? String.valueOf((int) min)
+            : String.valueOf(min);
         final double max = goal.getMax();
-        final String maxStr = FP.equals(max, Math.round(max), 1E-6) ? String.valueOf((int) max) : String.valueOf(max);
+        final String maxStr = FP.equals(max, Math.round(max), FinalComputedScores.TIE_TOLERANCE)
+            ? String.valueOf((int) max)
+            : String.valueOf(max);
 
         // If element has child nodes, then we have an enumerated list
         // of choices. Otherwise it is either yes/no or a numeric field.
