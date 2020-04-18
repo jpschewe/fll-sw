@@ -29,7 +29,7 @@ import fll.xml.ChallengeDescription;
 /**
  * Generate a blank score sheet.
  */
-@WebServlet("/playoff/BlankScoresheet")
+@WebServlet("/BlankScoresheet")
 public class BlankScoresheet extends BaseFLLServlet {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
