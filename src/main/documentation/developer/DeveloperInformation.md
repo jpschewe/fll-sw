@@ -41,11 +41,11 @@ To see how what other tasks depend on a task, for example `assemble`, execute `.
 
 # Copyright
 
-All of the code is currently Copyrighted by INSciTE.
+All of the code is currently Copyrighted by HighTechKids.
 Please make sure anything you add has the following sort of header:
 
     Copyright (c) ${year} INSciTE.  All rights reserved
-    INSciTE is on the web at: http://www.hightechkids.org
+    HighTechKids is on the web at: http://www.hightechkids.org
     This code is released under GPL; see LICENSE.txt for details.
 
 
