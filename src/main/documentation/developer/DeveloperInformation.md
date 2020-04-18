@@ -1,8 +1,8 @@
 # Latest Development Releases
 
-If you want to test out the latest code you can do so by [downloading the most recent automated packaged development release](https://mtu.net/jenkins/job/FLL-SW/job/master/lastSuccessfulBuild/artifact). These are built automatically by our continuous integration system. They are a good place to see what features are coming up in the next release and a relatively easy way for people to test if a bug has been fixed as they'd like it.
+If you want to test out the latest code you can do so by [downloading the most recent automated packaged development release](https://jenkins.mtu.net/job/FLL-SW/job/master/lastSuccessfulBuild/artifact). These are built automatically by our continuous integration system. They are a good place to see what features are coming up in the next release and a relatively easy way for people to test if a bug has been fixed as they'd like it.
 
-Documentation on the database schema, API, workflows, etc. for the [current release are available on the continuous integration server](https://mtu.net/jenkins/job/FLL-SW/job/current-release/Documentation/). You can also view the documentation in your working directory by running the ant task `docs` and then looking in `docs/index.html`. 
+Documentation on the database schema, API, workflows, etc. for the [current release are available on the continuous integration server](https://jenkins.mtu.net/job/FLL-SW/job/current-release/Documentation/). You can also view the documentation in your working directory by running the ant task `docs` and then looking in `docs/index.html`. 
 
 
 # Getting started as a developer
@@ -18,7 +18,7 @@ Documentation on the database schema, API, workflows, etc. for the [current rele
     * Start the webserver right away with `./rgadlew run --args="--start-web"`
   1. Run tests with `./gradlew test`
     * integration tests are `./gradlew integrationTest`
-  1. We have a continuous integration server running using [Jenkins](http://jenkins-ci.org/). You can access it at [http://mtu.net/jenkins/job/FLL-SW/](http://mtu.net/jenkins/job/FLL-SW/). There is a job for each active branch.
+  1. We have a continuous integration server running using [Jenkins](http://jenkins-ci.org/). You can access it at [http://jenkins.mtu.net/job/FLL-SW/](http://jenkins.mtu.net/job/FLL-SW/). There is a job for each active branch.
 
 You can edit using your favorite Java IDE. We provide project files for Eclipse. See the eclipse folder for the launchers and the code formatter profile.
 
