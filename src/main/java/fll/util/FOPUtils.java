@@ -300,6 +300,16 @@ public final class FOPUtils {
   public static final String TEXT_ALIGN_CENTER = "center";
 
   /**
+   * Right text alignment.
+   */
+  public static final String TEXT_ALIGN_RIGHT = "right";
+
+  /**
+   * Left text alignment.
+   */
+  public static final String TEXT_ALIGN_LEFT = "left";
+
+  /**
    * Block container tag.
    */
   public static final String BLOCK_CONTAINER_TAG = "block-container";
@@ -310,12 +320,12 @@ public final class FOPUtils {
   public static final String BLOCK_TAG = "block";
 
   /**
-   * Create a basic table cell that hides text that is too long for the cell.
+   * Create a basic table cell.
    * Borders are not set.
    * 
    * @param document used to create elements
    * @param text the text to put in the cell
-   * @param textAlignment CSS text alignment attribute
+   * @param textAlignment CSS text alignment attribute, may be null
    * @return the table cell
    */
   public static Element createTableCell(final Document document,
@@ -324,7 +334,35 @@ public final class FOPUtils {
     final Element cell = createXslFoElement(document, "table-cell");
 
     final Element blockContainer = createXslFoElement(document, BLOCK_CONTAINER_TAG);
+    cell.appendChild(blockContainer);
+
+    final Element block = createXslFoElement(document, "block");
+    blockContainer.appendChild(block);
+    if (null != textAlignment) {
+      block.setAttribute("text-align", textAlignment);
+    }
+    block.appendChild(document.createTextNode(text));
+
+    return cell;
+  }
+
+  /**
+   * Create a table cell that hides text that is too long for the cell.
+   * Borders are not set.
+   * 
+   * @param document used to create elements
+   * @param text the text to put in the cell
+   * @param textAlignment CSS text alignment attribute, may be null
+   * @return the table cell
+   */
+  public static Element createNoWrapTableCell(final Document document,
+                                              final String textAlignment,
+                                              final String text) {
+    final Element cell = createXslFoElement(document, "table-cell");
+
+    final Element blockContainer = createXslFoElement(document, BLOCK_CONTAINER_TAG);
     blockContainer.setAttribute("overflow", "hidden");
+    blockContainer.setAttribute("wrap-option", "no-wrap");
     cell.appendChild(blockContainer);
 
     final Element block = createXslFoElement(document, "block");
