@@ -94,6 +94,8 @@ public class ScoresheetGenerator {
       m_round[i] = SHORT_BLANK;
       m_number[i] = null;
       m_time[i] = null;
+      m_divisionLabel[i] = AWARD_GROUP_LABEL;
+      m_division[i] = SHORT_BLANK;
     }
 
     setChallengeInfo(description);
@@ -378,7 +380,7 @@ public class ScoresheetGenerator {
   }
 
   private Element createCopyrightBlock(final Document document) {
-    final Element block = FOPUtils.createXslFoElement(document, "block");
+    final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     block.setAttribute("font-size", "6pt");
     block.setAttribute("font-style", "italic");
     block.setAttribute("text-align", "center");
@@ -413,7 +415,6 @@ public class ScoresheetGenerator {
     document.appendChild(rootElement);
     rootElement.setAttribute("font-family", "Helvetica");
 
-
     final Element layoutMasterSet = FOPUtils.createXslFoElement(document, "layout-master-set");
     rootElement.appendChild(layoutMasterSet);
 
@@ -441,16 +442,16 @@ public class ScoresheetGenerator {
 
   private Element createScoreSheet(final Document document,
                                    final int sheetIndex) {
-    final Element sheet = FOPUtils.createXslFoElement(document, "block");
+    final Element sheet = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     // TODO may need to change this page break based on odd/even and rotation
     sheet.setAttribute("page-break-after", "always");
 
-    // FIXME implement
     final Element titleHeader = createTitleBlock(document);
     sheet.appendChild(titleHeader);
-    //
-    // final Element teamInfo = createTeamInfoBlock(document);
-    // sheet.appendChild(teamInfo);
+
+    // FIXME implement
+    final Element teamInfo = createTeamInfoBlock(document, sheetIndex);
+    sheet.appendChild(teamInfo);
     //
     // final Element goals = createGoalsBlock(document);
     // sheet.appendChild(goals);
@@ -461,11 +462,111 @@ public class ScoresheetGenerator {
     return sheet;
   }
 
+  private Element createTeamInfoBlock(final Document document,
+                                      final int sheetIndex) {
+    final Element table = FOPUtils.createBasicTable(document);
+    table.setAttribute("font-size", "10pt");
+
+    table.appendChild(FOPUtils.createTableColumn(document, 10));
+    table.appendChild(FOPUtils.createTableColumn(document, 10));
+    table.appendChild(FOPUtils.createTableColumn(document, 10));
+    table.appendChild(FOPUtils.createTableColumn(document, 10));
+    table.appendChild(FOPUtils.createTableColumn(document, 10));
+    table.appendChild(FOPUtils.createTableColumn(document, 10));
+    table.appendChild(FOPUtils.createTableColumn(document, 9));
+
+    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    table.appendChild(tableBody);
+
+    final Element row1 = FOPUtils.createXslFoElement(document, "table-row");
+    tableBody.appendChild(row1);
+
+    final Element timeLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Time:");
+    row1.appendChild(timeLabel);
+
+    final Element timeValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
+                                                       null == m_time[sheetIndex] ? SHORT_BLANK : m_time[sheetIndex]);
+    timeValue.setAttribute("font-family", "Courier");
+    row1.appendChild(timeValue);
+
+    final Element tableLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Table:");
+    row1.appendChild(tableLabel);
+
+    final Element tableValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
+                                                        null == m_table[sheetIndex] ? SHORT_BLANK
+                                                            : m_table[sheetIndex]);
+    tableValue.setAttribute("font-family", "Courier");
+    row1.appendChild(tableValue);
+
+    final Element roundLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Round:");
+    row1.appendChild(roundLabel);
+
+    final Element roundValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
+                                                        null == m_round[sheetIndex] ? SHORT_BLANK
+                                                            : m_round[sheetIndex]);
+    roundValue.setAttribute("font-family", "Courier");
+    row1.appendChild(roundValue);
+
+    final Element refSig = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Ref ____");
+    row1.appendChild(refSig);
+    refSig.setAttribute("font-size", "8pt");
+
+    final Element row2 = FOPUtils.createXslFoElement(document, "table-row");
+    tableBody.appendChild(row2);
+
+    final Element teamNumberLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Team #:");
+    row2.appendChild(teamNumberLabel);
+
+    final Element teamNumberValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
+                                                             null == m_number[sheetIndex] ? SHORT_BLANK
+                                                                 : String.valueOf(m_number[sheetIndex]));
+    teamNumberValue.setAttribute("font-family", "Courier");
+    row2.appendChild(teamNumberValue);
+
+    final Element awardGroupLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT,
+                                                             m_divisionLabel[sheetIndex]);
+    awardGroupLabel.setAttribute("number-columns-spanned", "2");
+    row2.appendChild(awardGroupLabel);
+
+    final Element awardGroupValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
+                                                             null == m_division[sheetIndex] ? SHORT_BLANK
+                                                                 : m_division[sheetIndex]);
+    awardGroupValue.setAttribute("font-family", "Courier");
+    awardGroupValue.setAttribute("number-columns-spanned", "2");
+    row2.appendChild(awardGroupValue);
+
+    final Element teamSig = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Team ____");
+    row2.appendChild(teamSig);
+    teamSig.setAttribute("font-size", "8pt");
+
+    final Element row3 = FOPUtils.createXslFoElement(document, "table-row");
+    tableBody.appendChild(row3);
+
+    final Element teamNameLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Team Name:");
+    row3.appendChild(teamNameLabel);
+    teamNameLabel.setAttribute("number-columns-spanned", "2");
+
+    final Element teamNameValue = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
+                                                                 null == m_name[sheetIndex] ? LONG_BLANK
+                                                                     : m_name[sheetIndex]);
+    row3.appendChild(teamNameValue);
+    teamNameValue.setAttribute("number-columns-spanned", "4");
+    teamNameValue.setAttribute("font-family", "Courier");
+
+    final Element tournament = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT,
+                                                              null == tournamentName ? "___" : tournamentName);
+    row3.appendChild(tournament);
+    tournament.setAttribute("font-size", "6pt");
+    tournament.setAttribute("font-style", "italic");
+
+    return table;
+  }
+
   private Element createTitleBlock(final Document document) {
-    final Element block = FOPUtils.createXslFoElement(document, "block");
+    final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     block.setAttribute("background-color", "black");
 
-    final Element title = FOPUtils.createXslFoElement(document, "block");
+    final Element title = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     block.appendChild(title);
     title.setAttribute("font-size", "14pt");
     title.setAttribute("font-weight", "bold");
@@ -473,7 +574,7 @@ public class ScoresheetGenerator {
     title.setAttribute("color", "white");
     title.appendChild(document.createTextNode(m_pageTitle));
 
-    final Element version = FOPUtils.createXslFoElement(document, "block");
+    final Element version = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     block.appendChild(version);
     version.setAttribute("font-size", "8pt");
     version.setAttribute("text-align", "center");
@@ -492,7 +593,7 @@ public class ScoresheetGenerator {
   }
 
   private Element createCheckBlock(final Document document) {
-    final Element block = FOPUtils.createXslFoElement(document, "block");
+    final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     block.setAttribute("font-size", "8pt");
     block.setAttribute("text-align", "center");
     // ensure that the text takes up the whole line
@@ -738,7 +839,6 @@ public class ScoresheetGenerator {
       scoreSheet.addCell(desC);
       scoreSheet.addCell(sciC);
 
-      // FIXME may need the copyright in the document, depending on what Jeannie says
       if (null != copyright) {
         final com.itextpdf.text.Phrase copyright = new com.itextpdf.text.Phrase("\u00A9"
             + this.copyright, f6i);
