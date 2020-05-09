@@ -67,9 +67,9 @@ public class ScoresheetGenerator {
   private final com.itextpdf.text.Font f6i = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 6,
                                                                         com.itextpdf.text.Font.ITALIC);
 
-  private String copyright;
-
   private final String tournamentName;
+
+  private final ChallengeDescription description;
 
   /**
    * Create com.itextpdf.text.Document with the specified number of sheets.
@@ -85,9 +85,9 @@ public class ScoresheetGenerator {
                              final String tournamentName) {
     this.tournamentName = tournamentName;
     m_numSheets = numSheets;
+    this.description = Objects.requireNonNull(description);
     initializeArrays();
 
-    setPageTitle("");
     for (int i = 0; i < m_numSheets; i++) {
       m_table[i] = SHORT_BLANK;
       m_name[i] = LONG_BLANK;
@@ -97,8 +97,6 @@ public class ScoresheetGenerator {
       m_divisionLabel[i] = AWARD_GROUP_LABEL;
       m_division[i] = SHORT_BLANK;
     }
-
-    setChallengeInfo(description);
   }
 
   /**
@@ -108,12 +106,12 @@ public class ScoresheetGenerator {
    */
   public ScoresheetGenerator(final ChallengeDescription description) {
     this.tournamentName = "Example";
+    this.description = Objects.requireNonNull(description);
 
     // must have been called asking for blank
     m_numSheets = 2;
     initializeArrays();
 
-    setPageTitle("");
     for (int i = 0; i < m_numSheets; i++) {
       m_table[i] = SHORT_BLANK;
       m_name[i] = LONG_BLANK;
@@ -124,8 +122,6 @@ public class ScoresheetGenerator {
       m_time[i] = null;
       m_isPractice[i] = Utilities.isOdd(i);
     }
-
-    setChallengeInfo(description);
   }
 
   /**
@@ -165,6 +161,7 @@ public class ScoresheetGenerator {
                              final int tournament,
                              final ChallengeDescription description)
       throws SQLException {
+    this.description = Objects.requireNonNull(description);
     final Tournament tournamentObj = Tournament.findTournamentByID(connection, tournament);
     this.tournamentName = tournamentObj.getName();
     final ScoreType performanceScoreType = description.getPerformance().getScoreType();
@@ -198,7 +195,6 @@ public class ScoresheetGenerator {
         * 2;
 
     initializeArrays();
-    setPageTitle(m_pageTitle);
 
     // Loop through checked matches, populate data, and update database to
     // track
@@ -279,8 +275,6 @@ public class ScoresheetGenerator {
         }
       }
     }
-
-    setChallengeInfo(description);
   }
 
   /**
@@ -386,7 +380,7 @@ public class ScoresheetGenerator {
     block.setAttribute("text-align", "center");
 
     block.appendChild(document.createTextNode("\u00A9"
-        + this.copyright));
+        + this.description.getCopyright()));
 
     return block;
   }
@@ -424,7 +418,7 @@ public class ScoresheetGenerator {
     final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
     rootElement.appendChild(pageSequence);
 
-    if (null != copyright) {
+    if (null != description.getCopyright()) {
       final Element footer = createCopyrightFooter(document);
       pageSequence.appendChild(footer);
     }
@@ -432,8 +426,12 @@ public class ScoresheetGenerator {
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
 
+    final Element titleHeader = createTitleBlock(document);
+    final Element goalsTable = createGoalsTable(document);
+    final Element checkBlock = createCheckBlock(document);
+
     for (int sheetIndex = 0; sheetIndex < m_numSheets; sheetIndex++) {
-      final Element sheet = createScoreSheet(document, sheetIndex);
+      final Element sheet = createScoreSheet(document, titleHeader, goalsTable, checkBlock, sheetIndex);
       documentBody.appendChild(sheet);
     }
 
@@ -441,23 +439,32 @@ public class ScoresheetGenerator {
   }
 
   private Element createScoreSheet(final Document document,
+                                   final Element titleHeader,
+                                   final Element goalsTable,
+                                   final Element checkBlock,
                                    final int sheetIndex) {
     final Element sheet = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     // TODO may need to change this page break based on odd/even and rotation
     sheet.setAttribute("page-break-after", "always");
 
-    final Element titleHeader = createTitleBlock(document);
-    sheet.appendChild(titleHeader);
+    sheet.appendChild(titleHeader.cloneNode(true));
 
-    // FIXME implement
+    final Element teamInfoContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+    sheet.appendChild(teamInfoContainer);
+    teamInfoContainer.setAttribute("padding-bottom", "10pt");
+    teamInfoContainer.setAttribute("padding-top", "10pt");
+    FOPUtils.addBottomBorder(teamInfoContainer, 1.0);
+
     final Element teamInfo = createTeamInfoBlock(document, sheetIndex);
-    sheet.appendChild(teamInfo);
-    //
-    // final Element goals = createGoalsBlock(document);
-    // sheet.appendChild(goals);
+    teamInfoContainer.appendChild(teamInfo);
 
-    final Element check = createCheckBlock(document);
-    sheet.appendChild(check);
+    final Element goalsTableContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+    sheet.appendChild(goalsTableContainer);
+    goalsTableContainer.setAttribute("padding-bottom", "10pt");
+
+    goalsTableContainer.appendChild(goalsTable.cloneNode(true));
+
+    sheet.appendChild(checkBlock.cloneNode(true));
 
     return sheet;
   }
@@ -483,49 +490,70 @@ public class ScoresheetGenerator {
 
     final Element timeLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Time:");
     row1.appendChild(timeLabel);
+    timeLabel.setAttribute("padding-top", "2pt");
+    timeLabel.setAttribute("padding-bottom", "2pt");
+
 
     final Element timeValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
                                                        null == m_time[sheetIndex] ? SHORT_BLANK : m_time[sheetIndex]);
-    timeValue.setAttribute("font-family", "Courier");
     row1.appendChild(timeValue);
+    timeValue.setAttribute("font-family", "Courier");
+    timeValue.setAttribute("padding-top", "2pt");
+    timeValue.setAttribute("padding-bottom", "2pt");
 
     final Element tableLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Table:");
     row1.appendChild(tableLabel);
+    tableLabel.setAttribute("padding-top", "2pt");
+    tableLabel.setAttribute("padding-bottom", "2pt");
 
     final Element tableValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
                                                         null == m_table[sheetIndex] ? SHORT_BLANK
                                                             : m_table[sheetIndex]);
     tableValue.setAttribute("font-family", "Courier");
+    tableValue.setAttribute("padding-top", "2pt");
+    tableValue.setAttribute("padding-bottom", "2pt");
     row1.appendChild(tableValue);
 
     final Element roundLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Round:");
     row1.appendChild(roundLabel);
+    roundLabel.setAttribute("padding-top", "2pt");
+    roundLabel.setAttribute("padding-bottom", "2pt");
 
     final Element roundValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
                                                         null == m_round[sheetIndex] ? SHORT_BLANK
                                                             : m_round[sheetIndex]);
     roundValue.setAttribute("font-family", "Courier");
-    row1.appendChild(roundValue);
+    roundValue.setAttribute("padding-top", "2pt");
+    roundValue.setAttribute("padding-bottom", "2pt");
+ row1.appendChild(roundValue);
 
     final Element refSig = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Ref ____");
     row1.appendChild(refSig);
     refSig.setAttribute("font-size", "8pt");
+    refSig.setAttribute("padding-top", "2pt");
+    refSig.setAttribute("padding-bottom", "2pt");
 
     final Element row2 = FOPUtils.createXslFoElement(document, "table-row");
     tableBody.appendChild(row2);
 
     final Element teamNumberLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Team #:");
     row2.appendChild(teamNumberLabel);
+    teamNumberLabel.setAttribute("padding-top", "2pt");
+    teamNumberLabel.setAttribute("padding-bottom", "2pt");
 
     final Element teamNumberValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
                                                              null == m_number[sheetIndex] ? SHORT_BLANK
                                                                  : String.valueOf(m_number[sheetIndex]));
     teamNumberValue.setAttribute("font-family", "Courier");
     row2.appendChild(teamNumberValue);
+    teamNumberValue.setAttribute("padding-top", "2pt");
+    teamNumberValue.setAttribute("padding-bottom", "2pt");
 
     final Element awardGroupLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT,
                                                              m_divisionLabel[sheetIndex]);
     awardGroupLabel.setAttribute("number-columns-spanned", "2");
+    awardGroupLabel.setAttribute("padding-top", "2pt");
+    awardGroupLabel.setAttribute("padding-bottom", "2pt");
     row2.appendChild(awardGroupLabel);
 
     final Element awardGroupValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
@@ -533,11 +561,15 @@ public class ScoresheetGenerator {
                                                                  : m_division[sheetIndex]);
     awardGroupValue.setAttribute("font-family", "Courier");
     awardGroupValue.setAttribute("number-columns-spanned", "2");
+    awardGroupValue.setAttribute("padding-top", "2pt");
+    awardGroupValue.setAttribute("padding-bottom", "2pt");
     row2.appendChild(awardGroupValue);
 
     final Element teamSig = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Team ____");
     row2.appendChild(teamSig);
     teamSig.setAttribute("font-size", "8pt");
+    teamSig.setAttribute("padding-top", "2pt");
+    teamSig.setAttribute("padding-bottom", "2pt");
 
     final Element row3 = FOPUtils.createXslFoElement(document, "table-row");
     tableBody.appendChild(row3);
@@ -545,6 +577,8 @@ public class ScoresheetGenerator {
     final Element teamNameLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Team Name:");
     row3.appendChild(teamNameLabel);
     teamNameLabel.setAttribute("number-columns-spanned", "2");
+    teamNameLabel.setAttribute("padding-top", "2pt");
+    teamNameLabel.setAttribute("padding-bottom", "2pt");
 
     final Element teamNameValue = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
                                                                  null == m_name[sheetIndex] ? LONG_BLANK
@@ -552,12 +586,16 @@ public class ScoresheetGenerator {
     row3.appendChild(teamNameValue);
     teamNameValue.setAttribute("number-columns-spanned", "4");
     teamNameValue.setAttribute("font-family", "Courier");
+    teamNameValue.setAttribute("padding-top", "2pt");
+    teamNameValue.setAttribute("padding-bottom", "2pt");
 
     final Element tournament = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT,
                                                               null == tournamentName ? "___" : tournamentName);
     row3.appendChild(tournament);
     tournament.setAttribute("font-size", "6pt");
     tournament.setAttribute("font-style", "italic");
+    tournament.setAttribute("padding-top", "2pt");
+    tournament.setAttribute("padding-bottom", "2pt");
 
     return table;
   }
@@ -572,7 +610,7 @@ public class ScoresheetGenerator {
     title.setAttribute("font-weight", "bold");
     title.setAttribute("text-align", "center");
     title.setAttribute("color", "white");
-    title.appendChild(document.createTextNode(m_pageTitle));
+    title.appendChild(document.createTextNode(description.getTitle()));
 
     final Element version = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     block.appendChild(version);
@@ -583,9 +621,9 @@ public class ScoresheetGenerator {
     final StringBuilder versionText = new StringBuilder();
     versionText.append("SW version: ");
     versionText.append(Version.getVersion());
-    if (null != m_revision) {
+    if (null != description.getRevision()) {
       versionText.append(" Descriptor revision: ");
-      versionText.append(m_revision);
+      versionText.append(description.getRevision());
     }
     version.appendChild(document.createTextNode(versionText.toString()));
 
@@ -642,7 +680,7 @@ public class ScoresheetGenerator {
 
     // Header cell with challenge title to add to both scoresheets
     final com.itextpdf.text.Paragraph titleParagraph = new com.itextpdf.text.Paragraph();
-    final com.itextpdf.text.Chunk titleChunk = new com.itextpdf.text.Chunk(m_pageTitle,
+    final com.itextpdf.text.Chunk titleChunk = new com.itextpdf.text.Chunk(description.getTitle(),
                                                                            com.itextpdf.text.FontFactory.getFont(com.itextpdf.text.FontFactory.HELVETICA_BOLD,
                                                                                                                  14,
                                                                                                                  com.itextpdf.text.Font.NORMAL,
@@ -654,13 +692,16 @@ public class ScoresheetGenerator {
     final com.itextpdf.text.Chunk swVersionChunk = new com.itextpdf.text.Chunk("SW version: "
         + Version.getVersion(), com.itextpdf.text.FontFactory.getFont(com.itextpdf.text.FontFactory.HELVETICA, 8, com.itextpdf.text.Font.NORMAL, com.itextpdf.text.BaseColor.WHITE));
     titleParagraph.add(swVersionChunk);
-    if (null != m_revision) {
-
-      final com.itextpdf.text.Chunk revisionChunk = new com.itextpdf.text.Chunk(" Descriptor revision: "
-          + m_revision, com.itextpdf.text.FontFactory.getFont(com.itextpdf.text.FontFactory.HELVETICA, 8, com.itextpdf.text.Font.NORMAL, com.itextpdf.text.BaseColor.WHITE));
-
-      titleParagraph.add(revisionChunk);
-    }
+    // if (null != m_revision) {
+    //
+    // final com.itextpdf.text.Chunk revisionChunk = new com.itextpdf.text.Chunk("
+    // Descriptor revision: "
+    // + m_revision,
+    // com.itextpdf.text.FontFactory.getFont(com.itextpdf.text.FontFactory.HELVETICA,
+    // 8, com.itextpdf.text.Font.NORMAL, com.itextpdf.text.BaseColor.WHITE));
+    //
+    // titleParagraph.add(revisionChunk);
+    // }
 
     final PdfPCell head = new PdfPCell();
     head.setColspan(2);
@@ -828,28 +869,29 @@ public class ScoresheetGenerator {
       spacerCell.setColspan(2);
       scoreSheet.addCell(spacerCell);
 
-      if (null != m_goalsTable) {
-        final PdfPCell goalCell = new PdfPCell(m_goalsTable);
-        goalCell.setBorder(0);
-        goalCell.setPadding(0);
-        goalCell.setColspan(2);
-        scoreSheet.addCell(goalCell);
-      }
+      // if (null != m_goalsTable) {
+      // final PdfPCell goalCell = new PdfPCell(/* m_goalsTable */);
+      // goalCell.setBorder(0);
+      // goalCell.setPadding(0);
+      // goalCell.setColspan(2);
+      // scoreSheet.addCell(goalCell);
+      // }
 
       scoreSheet.addCell(desC);
       scoreSheet.addCell(sciC);
 
-      if (null != copyright) {
-        final com.itextpdf.text.Phrase copyright = new com.itextpdf.text.Phrase("\u00A9"
-            + this.copyright, f6i);
-        final PdfPCell copyrightC = new PdfPCell(scoreSheet.getDefaultCell());
-        copyrightC.addElement(copyright);
-        copyrightC.setBorder(0);
-        copyrightC.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-        copyrightC.setColspan(2);
-
-        scoreSheet.addCell(copyrightC);
-      }
+      // if (null != copyright) {
+      // final com.itextpdf.text.Phrase copyright = new
+      // com.itextpdf.text.Phrase("\u00A9"
+      // + this.copyright, f6i);
+      // final PdfPCell copyrightC = new PdfPCell(scoreSheet.getDefaultCell());
+      // copyrightC.addElement(copyright);
+      // copyrightC.setBorder(0);
+      // copyrightC.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+      // copyrightC.setColspan(2);
+      //
+      // scoreSheet.addCell(copyrightC);
+      // }
 
       // the cell in the wholePage table that will contain the single score
       // sheet
@@ -891,42 +933,32 @@ public class ScoresheetGenerator {
     pdfDoc.close();
   }
 
-  /**
-   * Stores the goal cells that are inserted into the output after the team name
-   * headers and before the scoring/initials blanks at the bottom of the
-   * scoresheet.
-   */
-  private void setChallengeInfo(final ChallengeDescription description) {
-    setPageTitle(description.getTitle());
-
-    if (null != description.getRevision()) {
-      setRevisionInfo(description.getRevision());
-    }
-
-    if (null != description.getCopyright()) {
-      copyright = description.getCopyright();
-    } else {
-      copyright = null;
-    }
+  private Element createGoalsTable(final Document document) {
 
     final PerformanceScoreCategory performanceElement = description.getPerformance();
     // use ArrayList as we will be doing indexed access in the loop
     final List<AbstractGoal> goals = new ArrayList<>(performanceElement.getGoals());
 
-    final float[] relativeWidths = new float[3];
-    relativeWidths[0] = 4;
-    relativeWidths[1] = 48;
-    relativeWidths[2] = 48;
-    m_goalsTable = new PdfPTable(relativeWidths);
+    final Element goalsTable = FOPUtils.createBasicTable(document);
+    goalsTable.setAttribute("font-size", "10pt");
+    goalsTable.setAttribute("font-family", "Helvetica");
+    goalsTable.appendChild(FOPUtils.createTableColumn(document, 4));
+    goalsTable.appendChild(FOPUtils.createTableColumn(document, 48));
+    goalsTable.appendChild(FOPUtils.createTableColumn(document, 48));
+
+    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    goalsTable.appendChild(tableBody);
 
     String prevCategory = null;
     for (int goalIndex = 0; goalIndex < goals.size(); ++goalIndex) {
       final AbstractGoal goal = goals.get(goalIndex);
       if (!goal.isComputed()) {
+        final Element row = FOPUtils.createXslFoElement(document, "table-row");
+        tableBody.appendChild(row);
+
         final String category = goal.getCategory();
 
         // add category cell if needed
-        boolean firstRowInCategory = false;
         if (!StringUtils.equals(prevCategory, category)) {
           if (!StringUtils.isEmpty(category)) {
 
@@ -944,47 +976,27 @@ public class ScoresheetGenerator {
               }
             }
 
-            final com.itextpdf.text.Paragraph catPara = new com.itextpdf.text.Paragraph(category, ARIAL_10PT_NORMAL);
-            final PdfPCell categoryCell = new PdfPCell(catPara);
-            categoryCell.setBorderWidthTop(1);
-            categoryCell.setBorderWidthBottom(0);
-            categoryCell.setBorderWidthLeft(0);
-            categoryCell.setBorderWidthRight(0);
-            categoryCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-            categoryCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-            categoryCell.setRotation(90);
-            categoryCell.setRowspan(categoryRowSpan);
-            m_goalsTable.addCell(categoryCell);
+            final Element categoryCell = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, category,
+                                                                        90);
+            row.appendChild(categoryCell);
+            categoryCell.setAttribute("number-rows-spanned", String.valueOf(categoryRowSpan));
           }
 
           // first row in a new category, which may be empty
-          firstRowInCategory = true;
+          FOPUtils.addTopBorder(row, 1);
         }
 
         // This is the text for the left hand "label" cell
-        final String title = goal.getTitle();
-        final com.itextpdf.text.Paragraph p = new com.itextpdf.text.Paragraph(title, ARIAL_10PT_NORMAL);
-        final PdfPCell goalLabel = new PdfPCell(p);
-        goalLabel.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
-        // align bottom, otherwise we don't line up with the goalValues. For some reason
-        // the vertical alignment isn't used when adding elements to a PdfPCell, so the
-        // goal values end up always aligned to the bottom of the cell.
-        goalLabel.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_BOTTOM);
-        if (firstRowInCategory) {
-          goalLabel.setBorderWidthTop(1);
-          goalLabel.setBorderWidthBottom(0);
-          goalLabel.setBorderWidthLeft(0);
-          goalLabel.setBorderWidthRight(0);
-        } else {
-          goalLabel.setBorder(0);
-        }
-        goalLabel.setPaddingRight(9);
+        final Element goalLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, goal.getTitle());
+        row.appendChild(goalLabel);
+        goalLabel.setAttribute("padding-top", "2pt");
+        goalLabel.setAttribute("padding-bottom", "2pt");
+        goalLabel.setAttribute("padding-right", "9pt");
+
         if (StringUtils.isEmpty(category)) {
           // category column and goal label column
-          goalLabel.setColspan(2);
+          goalLabel.setAttribute("number-columns-spanned", "2");
         }
-
-        m_goalsTable.addCell(goalLabel);
 
         // define the value cell
         final double min = goal.getMin();
@@ -998,10 +1010,10 @@ public class ScoresheetGenerator {
 
         // If element has child nodes, then we have an enumerated list
         // of choices. Otherwise it is either yes/no or a numeric field.
-        final PdfPCell goalValue = new PdfPCell();
-
-        final com.itextpdf.text.Chunk choices = new com.itextpdf.text.Chunk("", COURIER_10PT_NORMAL);
+        final Element goalValue;
         if (goal.isEnumerated()) {
+          final StringBuilder choices = new StringBuilder();
+
           // replace spaces with "no-break" spaces
           boolean first = true;
           final List<EnumeratedValue> values = goal.getSortedValues();
@@ -1014,44 +1026,45 @@ public class ScoresheetGenerator {
             }
             choices.append(value.getTitle().toUpperCase().replace(' ', Utilities.NON_BREAKING_SPACE));
           }
-          goalValue.addElement(choices);
-
+          goalValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT, choices.toString());
         } else {
           if (goal.isYesNo()) {
             // order of yes/no needs to match ScoreEntry.generateYesNoButtons
-            final com.itextpdf.text.Paragraph q = new com.itextpdf.text.Paragraph("NO / YES", COURIER_10PT_NORMAL);
-            goalValue.addElement(q);
-
+            goalValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT, "NO / YES");
           } else {
+            goalValue = FOPUtils.createXslFoElement(document, "table-cell");
+
             final String range = "("
                 + minStr
                 + " - "
                 + maxStr
                 + ")";
-            final PdfPTable t = new PdfPTable(2);
-            t.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_LEFT);
-            t.setTotalWidth(1
-                * POINTS_PER_INCH);
-            t.setLockedWidth(true);
-            final com.itextpdf.text.Phrase r = new com.itextpdf.text.Phrase("", ARIAL_8PT_NORMAL);
-            t.addCell(new PdfPCell(r));
-            final com.itextpdf.text.Phrase q = new com.itextpdf.text.Phrase(range, ARIAL_8PT_NORMAL);
-            t.addCell(new PdfPCell(q));
-            goalValue.setPaddingTop(9);
-            goalValue.addElement(t);
+            final Element t = FOPUtils.createBasicTable(document);
+            goalValue.appendChild(t);
+            t.setAttribute("width", "100pt");
+            t.setAttribute("font-size", "8pt");
+            t.appendChild(FOPUtils.createTableColumn(document, 1));
+            t.appendChild(FOPUtils.createTableColumn(document, 1));
+
+            final Element tBody = FOPUtils.createXslFoElement(document, "table-body");
+            t.appendChild(tBody);
+
+            final Element tRow = FOPUtils.createXslFoElement(document, "table-row");
+            tBody.appendChild(tRow);
+
+            final Element r = FOPUtils.createTableCell(document, null, "");
+            tRow.appendChild(r);
+            FOPUtils.addBorders(r, 1, 1, 1, 1);
+
+            final Element q = FOPUtils.createTableCell(document, null, range);
+            tRow.appendChild(q);
+            FOPUtils.addBorders(q, 1, 1, 1, 1);
           }
         }
-
-        if (firstRowInCategory) {
-          goalValue.setBorderWidthTop(1);
-          goalValue.setBorderWidthBottom(0);
-          goalValue.setBorderWidthLeft(0);
-          goalValue.setBorderWidthRight(0);
-        } else {
-          goalValue.setBorder(0);
-        }
-
-        m_goalsTable.addCell(goalValue);
+        goalValue.setAttribute("font-family", "Courier");
+        goalValue.setAttribute("padding-top", "2pt");
+        goalValue.setAttribute("padding-bottom", "2pt");
+        row.appendChild(goalValue);
 
         // setup for next loop
         prevCategory = category;
@@ -1059,13 +1072,10 @@ public class ScoresheetGenerator {
 
     } // foreach goal
 
+    return goalsTable;
   }
 
   private final int m_numSheets;
-
-  private String m_revision;
-
-  private String m_pageTitle;
 
   private String[] m_table;
 
@@ -1086,16 +1096,6 @@ public class ScoresheetGenerator {
   private String[] m_time;
 
   private boolean[] m_isPractice;
-
-  private PdfPTable m_goalsTable;
-
-  private void setPageTitle(final String title) {
-    m_pageTitle = title;
-  }
-
-  private void setRevisionInfo(final String revision) {
-    m_revision = revision;
-  }
 
   /**
    * Sets the table label for scoresheet with index i.
