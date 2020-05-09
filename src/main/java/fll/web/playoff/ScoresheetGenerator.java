@@ -411,6 +411,8 @@ public class ScoresheetGenerator {
 
     final Element rootElement = FOPUtils.createRoot(document);
     document.appendChild(rootElement);
+    rootElement.setAttribute("font-family", "Helvetica");
+
 
     final Element layoutMasterSet = FOPUtils.createXslFoElement(document, "layout-master-set");
     rootElement.appendChild(layoutMasterSet);
