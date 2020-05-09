@@ -445,19 +445,50 @@ public class ScoresheetGenerator {
     // TODO may need to change this page break based on odd/even and rotation
     sheet.setAttribute("page-break-after", "always");
 
-//    final Element titleHeader = createTitleBlock(document);
-//    sheet.appendChild(titleHeader);
-//
-//    final Element teamInfo = createTeamInfoBlock(document);
-//    sheet.appendChild(teamInfo);
-//
-//    final Element goals = createGoalsBlock(document);
-//    sheet.appendChild(goals);
+    // FIXME implement
+    final Element titleHeader = createTitleBlock(document);
+    sheet.appendChild(titleHeader);
+    //
+    // final Element teamInfo = createTeamInfoBlock(document);
+    // sheet.appendChild(teamInfo);
+    //
+    // final Element goals = createGoalsBlock(document);
+    // sheet.appendChild(goals);
 
     final Element check = createCheckBlock(document);
     sheet.appendChild(check);
 
     return sheet;
+  }
+
+  private Element createTitleBlock(final Document document) {
+    final Element block = FOPUtils.createXslFoElement(document, "block");
+    block.setAttribute("background-color", "black");
+
+    final Element title = FOPUtils.createXslFoElement(document, "block");
+    block.appendChild(title);
+    title.setAttribute("font-size", "14pt");
+    title.setAttribute("font-weight", "bold");
+    title.setAttribute("text-align", "center");
+    title.setAttribute("color", "white");
+    title.appendChild(document.createTextNode(m_pageTitle));
+
+    final Element version = FOPUtils.createXslFoElement(document, "block");
+    block.appendChild(version);
+    version.setAttribute("font-size", "8pt");
+    version.setAttribute("text-align", "center");
+    version.setAttribute("color", "white");
+
+    final StringBuilder versionText = new StringBuilder();
+    versionText.append("SW version: ");
+    versionText.append(Version.getVersion());
+    if (null != m_revision) {
+      versionText.append(" Descriptor revision: ");
+      versionText.append(m_revision);
+    }
+    version.appendChild(document.createTextNode(versionText.toString()));
+
+    return block;
   }
 
   private Element createCheckBlock(final Document document) {
@@ -481,7 +512,8 @@ public class ScoresheetGenerator {
 
   @Deprecated
   private void oldCode(final boolean orientationIsPortrait,
-                       final float pagesPerScoreSheet) throws com.itextpdf.text.DocumentException {
+                       final float pagesPerScoreSheet)
+      throws com.itextpdf.text.DocumentException {
 
     // FIXME old code below here
     com.itextpdf.text.Document pdfDoc;
