@@ -335,19 +335,7 @@ public final class FOPUtils {
   public static Element createTableCell(final Document document,
                                         final String textAlignment,
                                         final String text) {
-    final Element cell = createXslFoElement(document, "table-cell");
-
-    final Element blockContainer = createXslFoElement(document, BLOCK_CONTAINER_TAG);
-    cell.appendChild(blockContainer);
-
-    final Element block = createXslFoElement(document, BLOCK_TAG);
-    blockContainer.appendChild(block);
-    if (null != textAlignment) {
-      block.setAttribute("text-align", textAlignment);
-    }
-    block.appendChild(document.createTextNode(text));
-
-    return cell;
+    return createTableCell(document, textAlignment, text, 0, false);
   }
 
   /**
@@ -380,12 +368,31 @@ public final class FOPUtils {
    *          -180, -270
    * @return the table cell
    * @throws IllegalArgumentException if the rotation is invalid
+   * @see #createTableCell(Document, String, String, int, boolean)
    */
   public static Element createNoWrapTableCell(final Document document,
                                               final String textAlignment,
                                               final String text,
                                               final int rotation)
       throws IllegalArgumentException {
+    return createTableCell(document, textAlignment, text, rotation, true);
+  }
+
+  /**
+   * @param document used to create elements
+   * @param textAlign CSS text alignment attribute, may be null
+   * @param text the text to put in the cell
+   * @param rotation rotation in degrees, must be one of 0, 90, 180, 270, -90,
+   *          -180, -270
+   * @param noWrap true if the text should not be wrapped, overflow is hidden
+   * @return the table cell
+   * @throws IllegalArgumentException if the rotation is invalid
+   */
+  public static Element createTableCell(final Document document,
+                                        final String textAlign,
+                                        final String text,
+                                        final int rotation,
+                                        final boolean noWrap) {
     if (!VALID_ROTATIONS.contains(rotation)) {
       throw new IllegalArgumentException(String.format("%d is not a valid rotation. Valid rotations are %s", rotation,
                                                        VALID_ROTATIONS.stream().map(String::valueOf)
@@ -395,15 +402,32 @@ public final class FOPUtils {
     final Element cell = createXslFoElement(document, "table-cell");
 
     final Element blockContainer = createXslFoElement(document, BLOCK_CONTAINER_TAG);
-    blockContainer.setAttribute("overflow", "hidden");
-    blockContainer.setAttribute("wrap-option", "no-wrap");
-    blockContainer.setAttribute("reference-orientation", String.valueOf(rotation));
+    if (noWrap) {
+      blockContainer.setAttribute("overflow", "hidden");
+      blockContainer.setAttribute("wrap-option", "no-wrap");
+    }
+
+    if (rotation != 0) {
+      // width and height are relative to the orientation
+      // when rotated by 90 degrees, the height is left to right
+      blockContainer.setAttribute("reference-orientation", String.valueOf(rotation));
+//      blockContainer.setAttribute("display-align", "center");
+//      blockContainer.setAttribute("height", "auto");
+//      blockContainer.setAttribute("width", "50");
+      blockContainer.setAttribute("border-top", "1pt solid red");
+      blockContainer.setAttribute("border-bottom", "1pt solid red");
+      blockContainer.setAttribute("border-left", "1pt solid red");
+      blockContainer.setAttribute("border-right", "1pt solid red");
+      // blockContainer.setAttribute("inline-progression-dimension.minimum", "5mm");
+      // blockContainer.setAttribute("inline-progression-dimension.optimum", "30mm");
+      // blockContainer.setAttribute("inline-progression-dimension.maximum", "auto");
+    }
     cell.appendChild(blockContainer);
 
     final Element block = createXslFoElement(document, BLOCK_TAG);
     blockContainer.appendChild(block);
-    if (null != textAlignment) {
-      block.setAttribute("text-align", textAlignment);
+    if (null != textAlign) {
+      block.setAttribute("text-align", textAlign);
     }
     block.appendChild(document.createTextNode(text));
 
