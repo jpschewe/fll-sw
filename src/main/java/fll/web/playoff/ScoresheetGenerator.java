@@ -5,10 +5,13 @@
  */
 package fll.web.playoff;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -365,6 +368,9 @@ public class ScoresheetGenerator {
 
     try {
       final Document performanceDoc = createDocument(orientationIsPortrait, pagesPerScoreSheet);
+      try (BufferedWriter writer = Files.newBufferedWriter(Paths.get("test.pdf"))) {
+        XMLUtils.writeXML(performanceDoc, writer);
+      }
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
       FOPUtils.renderPdf(fopFactory, performanceDoc, out);
@@ -493,7 +499,6 @@ public class ScoresheetGenerator {
     timeLabel.setAttribute("padding-top", "2pt");
     timeLabel.setAttribute("padding-bottom", "2pt");
 
-
     final Element timeValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
                                                        null == m_time[sheetIndex] ? SHORT_BLANK : m_time[sheetIndex]);
     row1.appendChild(timeValue);
@@ -525,7 +530,7 @@ public class ScoresheetGenerator {
     roundValue.setAttribute("font-family", "Courier");
     roundValue.setAttribute("padding-top", "2pt");
     roundValue.setAttribute("padding-bottom", "2pt");
- row1.appendChild(roundValue);
+    row1.appendChild(roundValue);
 
     final Element refSig = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Ref ____");
     row1.appendChild(refSig);
@@ -976,10 +981,11 @@ public class ScoresheetGenerator {
               }
             }
 
-            final Element categoryCell = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, category,
-                                                                        90);
+            final Element categoryCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, category, 90,
+                                                                  false);
             row.appendChild(categoryCell);
             categoryCell.setAttribute("number-rows-spanned", String.valueOf(categoryRowSpan));
+            FOPUtils.addBorders(categoryCell, 1, 1, 1, 1);
           }
 
           // first row in a new category, which may be empty
