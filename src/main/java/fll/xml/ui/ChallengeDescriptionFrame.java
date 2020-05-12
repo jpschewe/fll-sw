@@ -46,15 +46,12 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileFilter;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.w3c.dom.Document;
 
 import com.itextpdf.text.DocumentException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import fll.Tournament;
 import fll.Utilities;
-import fll.db.Queries;
 import fll.documents.elements.SheetElement;
 import fll.documents.writers.SubjectivePdfWriter;
 import fll.scheduler.TeamScheduleInfo;
@@ -463,13 +460,9 @@ public class ChallengeDescriptionFrame extends JFrame {
       final String tournamentName = "Example";
 
       try (OutputStream out = Files.newOutputStream(outputDirectory.resolve("performance-scoresheet.pdf"))) {
-        final Pair<Boolean, Float> orientationResult = ScoresheetGenerator.guessOrientation(challengeDescription);
-        final boolean orientationIsPortrait = orientationResult.getLeft();
-        final float pagesPerScoreSheet = orientationResult.getRight();
-
         final ScoresheetGenerator gen = new ScoresheetGenerator(challengeDescription);
-        gen.writeFile(out, orientationIsPortrait, pagesPerScoreSheet);
-      } catch (DocumentException | IOException e) {
+        gen.writeFile(out);
+      } catch (final IOException e) {
         LOGGER.error("Error writing performance score sheet", e);
         JOptionPane.showMessageDialog(this, "Error writing the performance score sheet: "
             + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

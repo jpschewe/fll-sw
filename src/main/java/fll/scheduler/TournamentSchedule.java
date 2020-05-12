@@ -49,7 +49,6 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import com.diffplug.common.base.Errors;
@@ -1219,10 +1218,7 @@ public class TournamentSchedule implements Serializable {
       ++sheetIndex;
     }
 
-    final Pair<Boolean, Float> orientationResult = ScoresheetGenerator.guessOrientation(description);
-    final boolean orientationIsPortrait = orientationResult.getLeft();
-    final float pagesPerScoreSheet = orientationResult.getRight();
-    scoresheets.writeFile(output, orientationIsPortrait, pagesPerScoreSheet);
+    scoresheets.writeFile(output);
   }
 
   private void outputSubjectiveScheduleByDivision(final Document detailedSchedules,
@@ -1378,7 +1374,7 @@ public class TournamentSchedule implements Serializable {
    * group, then team
    * number.
    * 
-   * @param detailedSchedules
+   * @param stream where to write the document
    * @throws DocumentException
    */
   public void outputSubjectiveSchedulesByTimeOnly(final OutputStream stream) throws DocumentException {
