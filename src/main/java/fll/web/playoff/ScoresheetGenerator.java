@@ -6,8 +6,6 @@
 package fll.web.playoff;
 
 import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -24,7 +22,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.xml.transform.TransformerException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FopFactory;
 import org.w3c.dom.Document;
@@ -35,7 +32,6 @@ import com.itextpdf.text.pdf.PdfGState;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfPageEventHelper;
-import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.Team;
@@ -315,59 +311,13 @@ public class ScoresheetGenerator {
   private static final int POINTS_PER_INCH = 72;
 
   /**
-   * Guess the orientation that the com.itextpdf.text.Document should be.
-   *
-   * @return true if it should be portrait, number of pages per score sheet (0.5,
-   *         1 or greater)
-   * @param description description of the challenge
-   * @throws com.itextpdf.text.DocumentException
-   * @throws IOException
-   */
-  public static Pair<Boolean, Float> guessOrientation(final ChallengeDescription description)
-      throws com.itextpdf.text.DocumentException, IOException {
-    final ScoresheetGenerator gen = new ScoresheetGenerator(1, description, "dummy");
-    final ByteArrayOutputStream outLandscape = new ByteArrayOutputStream();
-    // Using landscape, so set pages per sheet to 0.5
-    gen.writeFile(outLandscape, false, 0.5f);
-    final ByteArrayInputStream inLandscape = new ByteArrayInputStream(outLandscape.toByteArray());
-    final PdfReader readerLandscape = new PdfReader(inLandscape);
-    final int numPagesLandscape = readerLandscape.getNumberOfPages();
-    readerLandscape.close();
-
-    if (numPagesLandscape > 1) {
-      // doesn't fit landscape
-
-      // need to run again to compute pages per score sheet
-      final ByteArrayOutputStream outPortrait = new ByteArrayOutputStream();
-      // Using portrait, so set pages per sheet to 1
-      gen.writeFile(outPortrait, true, 1f);
-      final ByteArrayInputStream inPortrait = new ByteArrayInputStream(outPortrait.toByteArray());
-      final PdfReader readerPortrait = new PdfReader(inPortrait);
-      final int numPagesPortrait = readerPortrait.getNumberOfPages();
-      readerPortrait.close();
-
-      return Pair.of(true, (float) numPagesPortrait);
-    } else {
-      return Pair.of(false, 0.5f);
-    }
-  }
-
-  /**
    * @param out where to write the PDF
-   * @param orientationIsPortrait true if the com.itextpdf.text.Document is in
-   *          portrait mode, false
-   *          if landscape (2 score sheets per page)
-   * @param pagesPerScoreSheet number of pages each score sheet takes, used to get
-   *          the practice watermark in the right places
    * @throws IOException if there is a problem writing to the output
    */
-  public void writeFile(final OutputStream out,
-                        final boolean orientationIsPortrait,
-                        final float pagesPerScoreSheet)
-      throws IOException {
+  public void writeFile(final OutputStream out) throws IOException {
 
     try {
-      final Document performanceDoc = createDocument(orientationIsPortrait, pagesPerScoreSheet);
+      final Document performanceDoc = createDocument();
       try (BufferedWriter writer = Files.newBufferedWriter(Paths.get("test.pdf"))) {
         XMLUtils.writeXML(performanceDoc, writer);
       }
@@ -401,14 +351,7 @@ public class ScoresheetGenerator {
     return staticContent;
   }
 
-  private Document createDocument(final boolean orientationIsPortrait,
-                                  final float pagesPerScoreSheet) {
-    // FIXME need to rotate page when landscape - use reference-orientation
-    // https://stackoverflow.com/questions/15523020/what-does-reference-orientation-really-do
-
-    // TODO decide if we still want to support rotating the score sheet - 5/9/2020
-    // sent email to Jeannie for opinion
-
+  private Document createDocument() {
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
 
     final Element rootElement = FOPUtils.createRoot(document);
