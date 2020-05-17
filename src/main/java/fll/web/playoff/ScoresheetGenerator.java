@@ -292,9 +292,6 @@ public class ScoresheetGenerator {
 
     try {
       final Document performanceDoc = createDocument();
-      try (BufferedWriter writer = Files.newBufferedWriter(Paths.get("test.xml"))) {
-        XMLUtils.writeXML(performanceDoc, writer);
-      }
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
       FOPUtils.renderPdf(fopFactory, performanceDoc, out);
