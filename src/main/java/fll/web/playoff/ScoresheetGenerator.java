@@ -27,13 +27,6 @@ import org.apache.fop.apps.FopFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.itextpdf.text.pdf.PdfContentByte;
-import com.itextpdf.text.pdf.PdfGState;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfPageEventHelper;
-import com.itextpdf.text.pdf.PdfWriter;
-
 import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
@@ -43,7 +36,6 @@ import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.FOPUtils;
 import fll.util.FP;
-import fll.util.PdfUtils;
 import fll.web.report.FinalComputedScores;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
@@ -63,9 +55,6 @@ public class ScoresheetGenerator {
 
   private static final String SHORT_BLANK = "______";
 
-  private final com.itextpdf.text.Font f6i = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 6,
-                                                                        com.itextpdf.text.Font.ITALIC);
-
   private static final float WATERMARK_OPACITY = 0.2f;
 
   private final String tournamentName;
@@ -73,7 +62,7 @@ public class ScoresheetGenerator {
   private final ChallengeDescription description;
 
   /**
-   * Create com.itextpdf.text.Document with the specified number of sheets.
+   * Create PDF with the specified number of sheets.
    * Initially all sheets
    * are empty. They should be filled in using the set methods.
    *
@@ -294,23 +283,6 @@ public class ScoresheetGenerator {
     m_time = new String[m_numSheets];
     m_isPractice = new boolean[m_numSheets];
   }
-
-  private static final com.itextpdf.text.Font ARIAL_8PT_NORMAL = com.itextpdf.text.FontFactory.getFont(com.itextpdf.text.FontFactory.HELVETICA,
-                                                                                                       8,
-                                                                                                       com.itextpdf.text.Font.NORMAL,
-                                                                                                       new com.itextpdf.text.BaseColor(0,
-                                                                                                                                       0,
-                                                                                                                                       0));
-
-  private static final com.itextpdf.text.Font ARIAL_10PT_NORMAL = com.itextpdf.text.FontFactory.getFont(com.itextpdf.text.FontFactory.HELVETICA,
-                                                                                                        10,
-                                                                                                        com.itextpdf.text.Font.NORMAL);
-
-  private static final com.itextpdf.text.Font COURIER_10PT_NORMAL = com.itextpdf.text.FontFactory.getFont(com.itextpdf.text.FontFactory.COURIER,
-                                                                                                          10,
-                                                                                                          com.itextpdf.text.Font.NORMAL);
-
-  private static final int POINTS_PER_INCH = 72;
 
   /**
    * @param out where to write the PDF
@@ -654,290 +626,6 @@ public class ScoresheetGenerator {
     block.appendChild(document.createTextNode("2nd Check Initials _______"));
 
     return block;
-  }
-
-  @Deprecated
-  private void oldCode(final boolean orientationIsPortrait,
-                       final float pagesPerScoreSheet)
-      throws com.itextpdf.text.DocumentException {
-
-    // FIXME old code below here
-    com.itextpdf.text.Document pdfDoc;
-    if (orientationIsPortrait) {
-      pdfDoc = new com.itextpdf.text.Document(com.itextpdf.text.PageSize.LETTER); // portrait
-    } else {
-      pdfDoc = new com.itextpdf.text.Document(com.itextpdf.text.PageSize.LETTER.rotate()); // landscape
-    }
-    final OutputStream out = null;
-    final PdfWriter writer = PdfWriter.getInstance(pdfDoc, out);
-    writer.setPageEvent(new WatermarkHandler(this, pagesPerScoreSheet));
-
-    // Measurements are always in points (72 per inch)
-    // This sets up 1/2 inch margins side margins and 0.35in top and bottom
-    // margins
-    pdfDoc.setMargins(0.5f
-        * POINTS_PER_INCH,
-                      0.5f
-                          * POINTS_PER_INCH,
-                      0.35f
-                          * POINTS_PER_INCH,
-                      0.35f
-                          * POINTS_PER_INCH);
-    pdfDoc.open();
-
-    // Header cell with challenge title to add to both scoresheets
-    final com.itextpdf.text.Paragraph titleParagraph = new com.itextpdf.text.Paragraph();
-    final com.itextpdf.text.Chunk titleChunk = new com.itextpdf.text.Chunk(description.getTitle(),
-                                                                           com.itextpdf.text.FontFactory.getFont(com.itextpdf.text.FontFactory.HELVETICA_BOLD,
-                                                                                                                 14,
-                                                                                                                 com.itextpdf.text.Font.NORMAL,
-                                                                                                                 com.itextpdf.text.BaseColor.WHITE));
-    titleParagraph.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-    titleParagraph.add(titleChunk);
-
-    titleParagraph.add(com.itextpdf.text.Chunk.NEWLINE);
-    final com.itextpdf.text.Chunk swVersionChunk = new com.itextpdf.text.Chunk("SW version: "
-        + Version.getVersion(), com.itextpdf.text.FontFactory.getFont(com.itextpdf.text.FontFactory.HELVETICA, 8, com.itextpdf.text.Font.NORMAL, com.itextpdf.text.BaseColor.WHITE));
-    titleParagraph.add(swVersionChunk);
-    // if (null != m_revision) {
-    //
-    // final com.itextpdf.text.Chunk revisionChunk = new com.itextpdf.text.Chunk("
-    // Descriptor revision: "
-    // + m_revision,
-    // com.itextpdf.text.FontFactory.getFont(com.itextpdf.text.FontFactory.HELVETICA,
-    // 8, com.itextpdf.text.Font.NORMAL, com.itextpdf.text.BaseColor.WHITE));
-    //
-    // titleParagraph.add(revisionChunk);
-    // }
-
-    final PdfPCell head = new PdfPCell();
-    head.setColspan(2);
-    head.setBorder(1);
-    head.setPaddingTop(0);
-    head.setPaddingBottom(3);
-    head.setBackgroundColor(new com.itextpdf.text.BaseColor(64, 64, 64));
-    head.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_TOP);
-    head.addElement(titleParagraph);
-
-    // Cells for score field, and 2nd check initials
-    final com.itextpdf.text.Phrase des = new com.itextpdf.text.Phrase("Data Entry Score _______", ARIAL_8PT_NORMAL);
-    final PdfPCell desC = new PdfPCell(des);
-    desC.setBorder(0);
-    desC.setPaddingTop(9);
-    desC.setPaddingRight(36);
-    desC.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
-    final com.itextpdf.text.Phrase sci = new com.itextpdf.text.Phrase("2nd Check Initials _______", ARIAL_8PT_NORMAL);
-    final PdfPCell sciC = new PdfPCell(sci);
-    sciC.setBorder(0);
-    sciC.setPaddingTop(9);
-    sciC.setPaddingRight(36);
-    sciC.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
-
-    // Create a table with a grid cell for each score sheet on the page
-    PdfPTable wholePage = getTableForPage(orientationIsPortrait);
-    wholePage.setWidthPercentage(100);
-    for (int sheetIndex = 0; sheetIndex < m_numSheets; sheetIndex++) {
-      if (sheetIndex > 0
-          && (orientationIsPortrait
-              || Utilities.isEven(sheetIndex))) {
-        pdfDoc.newPage();
-        wholePage = getTableForPage(orientationIsPortrait);
-        wholePage.setWidthPercentage(100);
-      }
-
-      // This table is a single score sheet
-      final PdfPTable scoreSheet = new PdfPTable(2);
-      scoreSheet.getDefaultCell().setBorder(com.itextpdf.text.Rectangle.NO_BORDER);
-      scoreSheet.getDefaultCell().setPaddingRight(1);
-      scoreSheet.getDefaultCell().setPaddingLeft(0);
-
-      scoreSheet.addCell(head);
-
-      final PdfPTable teamInfo = new PdfPTable(7);
-      teamInfo.setWidthPercentage(100);
-      teamInfo.setWidths(new float[] { 1f, 1f, 1f, 1f, 1f, 1f, .9f });
-
-      // Time label cell
-      final com.itextpdf.text.Paragraph timeP = new com.itextpdf.text.Paragraph("Time:", ARIAL_10PT_NORMAL);
-      timeP.setAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
-      final PdfPCell timeLc = new PdfPCell(scoreSheet.getDefaultCell());
-      timeLc.addElement(timeP);
-      teamInfo.addCell(timeLc);
-      // Time value cell
-      final com.itextpdf.text.Paragraph timeV = new com.itextpdf.text.Paragraph(null == m_time[sheetIndex] ? SHORT_BLANK
-          : m_time[sheetIndex], COURIER_10PT_NORMAL);
-      final PdfPCell timeVc = new PdfPCell(scoreSheet.getDefaultCell());
-      timeVc.addElement(timeV);
-      teamInfo.addCell(timeVc);
-
-      // Table label cell
-      final com.itextpdf.text.Paragraph tblP = new com.itextpdf.text.Paragraph("Table:", ARIAL_10PT_NORMAL);
-      tblP.setAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
-      final PdfPCell tblLc = new PdfPCell(scoreSheet.getDefaultCell());
-      tblLc.addElement(tblP);
-      teamInfo.addCell(tblLc);
-      // Table value cell
-      final com.itextpdf.text.Paragraph tblV = new com.itextpdf.text.Paragraph(m_table[sheetIndex],
-                                                                               COURIER_10PT_NORMAL);
-      final PdfPCell tblVc = new PdfPCell(scoreSheet.getDefaultCell());
-      tblVc.addElement(tblV);
-      teamInfo.addCell(tblVc);
-
-      // Round number label cell
-      final com.itextpdf.text.Paragraph rndP = new com.itextpdf.text.Paragraph("Round:", ARIAL_10PT_NORMAL);
-      rndP.setAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
-      final PdfPCell rndlc = new PdfPCell(scoreSheet.getDefaultCell());
-      rndlc.addElement(rndP);
-      teamInfo.addCell(rndlc);
-      // Round number value cell
-      final com.itextpdf.text.Paragraph rndV = new com.itextpdf.text.Paragraph(m_round[sheetIndex],
-                                                                               COURIER_10PT_NORMAL);
-      final PdfPCell rndVc = new PdfPCell(scoreSheet.getDefaultCell());
-      // rndVc.setColspan(2);
-      rndVc.addElement(rndV);
-      teamInfo.addCell(rndVc);
-
-      final PdfPCell temp1 = new PdfPCell(scoreSheet.getDefaultCell());
-      // temp1.setColspan(2);
-      temp1.addElement(new com.itextpdf.text.Paragraph("Ref ____", ARIAL_8PT_NORMAL));
-      teamInfo.addCell(temp1);
-
-      // Team number label cell
-      final com.itextpdf.text.Paragraph nbrP = new com.itextpdf.text.Paragraph("Team #:", ARIAL_10PT_NORMAL);
-      nbrP.setAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
-      final PdfPCell nbrlc = new PdfPCell(scoreSheet.getDefaultCell());
-      nbrlc.addElement(nbrP);
-      teamInfo.addCell(nbrlc);
-      // Team number value cell
-      final com.itextpdf.text.Paragraph nbrV = new com.itextpdf.text.Paragraph(null == m_number[sheetIndex]
-          ? SHORT_BLANK
-          : String.valueOf(m_number[sheetIndex]), COURIER_10PT_NORMAL);
-      final PdfPCell nbrVc = new PdfPCell(scoreSheet.getDefaultCell());
-      nbrVc.addElement(nbrV);
-      teamInfo.addCell(nbrVc);
-
-      // Team division label cell
-      final com.itextpdf.text.Paragraph divP = new com.itextpdf.text.Paragraph(m_divisionLabel[sheetIndex],
-                                                                               ARIAL_10PT_NORMAL);
-      divP.setAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
-      final PdfPCell divlc = new PdfPCell(scoreSheet.getDefaultCell());
-      divlc.addElement(divP);
-      divlc.setColspan(2);
-      teamInfo.addCell(divlc);
-      // Team division value cell
-      final com.itextpdf.text.Paragraph divV = new com.itextpdf.text.Paragraph(m_division[sheetIndex],
-                                                                               COURIER_10PT_NORMAL);
-      final PdfPCell divVc = new PdfPCell(scoreSheet.getDefaultCell());
-      divVc.setColspan(2);
-      divVc.addElement(divV);
-      teamInfo.addCell(divVc);
-
-      final PdfPCell temp2 = new PdfPCell(scoreSheet.getDefaultCell());
-      // temp2.setColspan(2);
-      temp2.addElement(new com.itextpdf.text.Paragraph("Team ____", ARIAL_8PT_NORMAL));
-      teamInfo.addCell(temp2);
-
-      // Team name label cell
-      final com.itextpdf.text.Paragraph nameP = new com.itextpdf.text.Paragraph("Team Name:", ARIAL_10PT_NORMAL);
-      nameP.setAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
-      final PdfPCell namelc = new PdfPCell(scoreSheet.getDefaultCell());
-      namelc.setColspan(2);
-      namelc.addElement(nameP);
-      teamInfo.addCell(namelc);
-      // Team name value cell
-      final PdfPCell nameVc = new PdfPCell(scoreSheet.getDefaultCell());
-      nameVc.setColspan(4);
-      nameVc.setCellEvent(new PdfUtils.TruncateContent(m_name[sheetIndex], COURIER_10PT_NORMAL));
-      teamInfo.addCell(nameVc);
-
-      // add tournament name
-      final com.itextpdf.text.Paragraph tournamentNameV = new com.itextpdf.text.Paragraph(tournamentName, f6i);
-      tournamentNameV.setAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
-      final PdfPCell tournamentNameVc = new PdfPCell(scoreSheet.getDefaultCell());
-      tournamentNameVc.addElement(tournamentNameV);
-      teamInfo.addCell(tournamentNameVc);
-
-      // add team info cell to the team table
-      final PdfPCell teamInfoCell = new PdfPCell(scoreSheet.getDefaultCell());
-      teamInfoCell.addElement(teamInfo);
-      teamInfoCell.setColspan(2);
-
-      scoreSheet.addCell(teamInfoCell);
-
-      // space and horizontal line
-      final PdfPCell spacerCell = new PdfPCell(scoreSheet.getDefaultCell());
-      spacerCell.setMinimumHeight(10);
-      spacerCell.setBorderWidthTop(0);
-      spacerCell.setBorderWidthBottom(1);
-      spacerCell.setBorderWidthLeft(0);
-      spacerCell.setBorderWidthRight(0);
-      spacerCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-      spacerCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-      spacerCell.setColspan(2);
-      scoreSheet.addCell(spacerCell);
-
-      // if (null != m_goalsTable) {
-      // final PdfPCell goalCell = new PdfPCell(/* m_goalsTable */);
-      // goalCell.setBorder(0);
-      // goalCell.setPadding(0);
-      // goalCell.setColspan(2);
-      // scoreSheet.addCell(goalCell);
-      // }
-
-      scoreSheet.addCell(desC);
-      scoreSheet.addCell(sciC);
-
-      // if (null != copyright) {
-      // final com.itextpdf.text.Phrase copyright = new
-      // com.itextpdf.text.Phrase("\u00A9"
-      // + this.copyright, f6i);
-      // final PdfPCell copyrightC = new PdfPCell(scoreSheet.getDefaultCell());
-      // copyrightC.addElement(copyright);
-      // copyrightC.setBorder(0);
-      // copyrightC.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-      // copyrightC.setColspan(2);
-      //
-      // scoreSheet.addCell(copyrightC);
-      // }
-
-      // the cell in the wholePage table that will contain the single score
-      // sheet
-      final PdfPCell scoresheetCell = new PdfPCell(scoreSheet);
-      scoresheetCell.setBorder(0);
-      scoresheetCell.setPadding(0);
-
-      // Interior borders between scoresheets on a page
-      if (!orientationIsPortrait) {
-        if (Utilities.isEven(sheetIndex)) {
-          scoresheetCell.setPaddingRight(0.1f
-              * POINTS_PER_INCH);
-        } else {
-          scoresheetCell.setPaddingLeft(0.1f
-              * POINTS_PER_INCH);
-        }
-      }
-
-      // Add the current scoresheet to the page
-      wholePage.addCell(scoresheetCell);
-
-      // Add the current table of scoresheets to the com.itextpdf.text.Document
-      if (orientationIsPortrait
-          || (Utilities.isOdd(sheetIndex))) {
-        pdfDoc.add(wholePage);
-      }
-    }
-
-    // Add a blank cells to complete the table of the last page
-    if (!orientationIsPortrait
-        && m_numSheets
-            % 2 != 0) {
-      final PdfPCell blank = new PdfPCell();
-      blank.setBorder(0);
-      wholePage.addCell(blank);
-      pdfDoc.add(wholePage);
-    }
-
-    pdfDoc.close();
   }
 
   private Element createGoalsTable(final Document document) {
@@ -1320,121 +1008,6 @@ public class ScoresheetGenerator {
     } else {
       return m_isPractice[index];
     }
-  }
-
-  /**
-   * Create table for page given number of sheets per page.
-   *
-   * @param nup
-   * @return
-   */
-  private static PdfPTable getTableForPage(final boolean orientationIsPortrait) {
-    final PdfPTable wholePage;
-    if (orientationIsPortrait) {
-      wholePage = new PdfPTable(1); // 1 column
-    } else {
-      wholePage = new PdfPTable(2); // 2 columns
-    }
-    return wholePage;
-  }
-
-  private static class WatermarkHandler extends PdfPageEventHelper {
-
-    private final PdfGState gstate;
-
-    private final com.itextpdf.text.Font font;
-
-    private final com.itextpdf.text.BaseColor color;
-
-    private final float pagesPerScoreSheet;
-
-    private static final double PAGES_PER_SHEET_TOLERANCE = 1E-6;
-
-    private final ScoresheetGenerator generator;
-
-    /**
-     * @param pagesPerScoreSheet number of pages per score sheet, 0.5 and values
-     *          greater than or equal to 1 are supported
-     */
-    public WatermarkHandler(final ScoresheetGenerator generator,
-                            final float pagesPerScoreSheet) {
-      if (!FP.equals(pagesPerScoreSheet, 0.5, PAGES_PER_SHEET_TOLERANCE)
-          && !FP.greaterThanOrEqual(pagesPerScoreSheet, 1, PAGES_PER_SHEET_TOLERANCE)) {
-        throw new IllegalArgumentException("Allowed values for pages per score sheet are 0.5 and 1 or greater. Value is: "
-            + pagesPerScoreSheet);
-      }
-      this.pagesPerScoreSheet = pagesPerScoreSheet;
-      this.generator = generator;
-
-      font = com.itextpdf.text.FontFactory.getFont(com.itextpdf.text.FontFactory.HELVETICA, 52,
-                                                   com.itextpdf.text.Font.NORMAL);
-      color = com.itextpdf.text.BaseColor.BLACK;
-
-      gstate = new PdfGState();
-      gstate.setFillOpacity(WATERMARK_OPACITY);
-      gstate.setStrokeOpacity(WATERMARK_OPACITY);
-
-    }
-
-    @Override
-    public void onEndPage(final PdfWriter writer,
-                          final com.itextpdf.text.Document document) {
-      // Need to determine which score sheet we are on based on page number and pages
-      // per sheet.
-
-      final com.itextpdf.text.Rectangle pageSize = document.getPageSize();
-      final float y = pageSize.getHeight()
-          / 2;
-
-      final int currentPageNumber = writer.getCurrentPageNumber();
-      final int indexOfFirstScoreSheetOnPage;
-      if (pagesPerScoreSheet < 1) {
-        indexOfFirstScoreSheetOnPage = (int) Math.floor(currentPageNumber
-            / pagesPerScoreSheet)
-            - 2;
-
-        if (generator.isPractice(indexOfFirstScoreSheetOnPage)) {
-          final float x = pageSize.getWidth()
-              / 4;
-          addWatermark(writer, x, y);
-        }
-
-        // check the second sheet on the page
-        if (generator.isPractice(indexOfFirstScoreSheetOnPage
-            + 1)) {
-          final float x = pageSize.getWidth()
-              * 3
-              / 4;
-          addWatermark(writer, x, y);
-        }
-
-      } else {
-        indexOfFirstScoreSheetOnPage = (int) Math.ceil(currentPageNumber
-            / pagesPerScoreSheet)
-            - 1;
-        if (generator.isPractice(indexOfFirstScoreSheetOnPage)) {
-          final float x = pageSize.getWidth()
-              / 2;
-          addWatermark(writer, x, y);
-        }
-      }
-
-    }
-
-    private void addWatermark(final PdfWriter writer,
-                              final float x,
-                              final float y) {
-      final PdfContentByte contentunder = writer.getDirectContentUnder();
-      contentunder.saveState();
-      contentunder.setGState(gstate);
-      contentunder.beginText();
-      contentunder.setFontAndSize(font.getBaseFont(), font.getSize());
-      contentunder.setColorFill(color);
-      contentunder.showTextAligned(com.itextpdf.text.Element.ALIGN_CENTER, "PRACTICE", x, y, 45);
-      contentunder.endText();
-      contentunder.restoreState();
-    }
-
   }
 
 }
