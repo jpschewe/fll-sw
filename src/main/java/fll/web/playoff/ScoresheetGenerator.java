@@ -74,18 +74,18 @@ public class ScoresheetGenerator {
                              final ChallengeDescription description,
                              final String tournamentName) {
     this.tournamentName = tournamentName;
-    m_numSheets = numSheets;
+    this.numSheets = numSheets;
     this.description = Objects.requireNonNull(description);
     initializeArrays();
 
-    for (int i = 0; i < m_numSheets; i++) {
-      m_table[i] = SHORT_BLANK;
-      m_name[i] = LONG_BLANK;
-      m_round[i] = SHORT_BLANK;
-      m_number[i] = null;
-      m_time[i] = null;
-      m_divisionLabel[i] = AWARD_GROUP_LABEL;
-      m_division[i] = SHORT_BLANK;
+    for (int i = 0; i < this.numSheets; i++) {
+      this.table[i] = SHORT_BLANK;
+      this.name[i] = LONG_BLANK;
+      this.round[i] = SHORT_BLANK;
+      this.number[i] = null;
+      this.time[i] = null;
+      this.divisionLabel[i] = AWARD_GROUP_LABEL;
+      this.division[i] = SHORT_BLANK;
     }
   }
 
@@ -99,18 +99,18 @@ public class ScoresheetGenerator {
     this.description = Objects.requireNonNull(description);
 
     // must have been called asking for blank
-    m_numSheets = 2;
+    this.numSheets = 2;
     initializeArrays();
 
-    for (int i = 0; i < m_numSheets; i++) {
-      m_table[i] = SHORT_BLANK;
-      m_name[i] = LONG_BLANK;
-      m_round[i] = Utilities.isOdd(i) ? "Practice" : SHORT_BLANK;
-      m_divisionLabel[i] = AWARD_GROUP_LABEL;
-      m_division[i] = SHORT_BLANK;
-      m_number[i] = null;
-      m_time[i] = null;
-      m_isPractice[i] = Utilities.isOdd(i);
+    for (int i = 0; i < numSheets; i++) {
+      this.table[i] = SHORT_BLANK;
+      this.name[i] = LONG_BLANK;
+      this.round[i] = Utilities.isOdd(i) ? "Practice" : SHORT_BLANK;
+      this.divisionLabel[i] = AWARD_GROUP_LABEL;
+      this.division[i] = SHORT_BLANK;
+      this.number[i] = null;
+      this.time[i] = null;
+      this.isPractice[i] = Utilities.isOdd(i);
     }
   }
 
@@ -181,7 +181,7 @@ public class ScoresheetGenerator {
       throw new FLLRuntimeException("No matches were found checked. Please go back and select the checkboxes for the scoresheets that you want to print");
     }
 
-    m_numSheets = checkedMatchCount
+    this.numSheets = checkedMatchCount
         * 2;
 
     initializeArrays();
@@ -206,21 +206,21 @@ public class ScoresheetGenerator {
           // Get teamA info
           final Team teamA = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("teamA"
               + i)));
-          m_name[j] = teamA.getTrimmedTeamName();
-          m_number[j] = teamA.getTeamNumber();
-          m_round[j] = "Round P"
+          this.name[j] = teamA.getTrimmedTeamName();
+          this.number[j] = teamA.getTeamNumber();
+          this.round[j] = "Round P"
               + round;
-          m_table[j] = request.getParameter("tableA"
+          this.table[j] = request.getParameter("tableA"
               + i);
 
           final int performanceRunA = Playoff.getRunNumber(connection, division, teamA.getTeamNumber(), playoffRound);
-          m_divisionLabel[j] = HEAD_TO_HEAD_LABEL;
-          m_division[j] = division;
+          this.divisionLabel[j] = HEAD_TO_HEAD_LABEL;
+          this.division[j] = division;
           final int bracketA = Playoff.getBracketNumber(connection, tournament, teamA.getTeamNumber(), performanceRunA);
           final String bracketALabel = String.format("Match %d", bracketA);
-          m_time[j] = bracketALabel;
+          this.time[j] = bracketALabel;
 
-          updatePrep.setString(1, m_table[j]);
+          updatePrep.setString(1, table[j]);
           updatePrep.setString(2, division);
           updatePrep.setInt(4, playoffRound);
           updatePrep.setInt(5, teamA.getTeamNumber());
@@ -236,21 +236,21 @@ public class ScoresheetGenerator {
           // Get teamB info
           final Team teamB = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("teamB"
               + i)));
-          m_name[j] = teamB.getTrimmedTeamName();
-          m_number[j] = teamB.getTeamNumber();
-          m_round[j] = "Round P"
+          this.name[j] = teamB.getTrimmedTeamName();
+          this.number[j] = teamB.getTeamNumber();
+          this.round[j] = "Round P"
               + round;
-          m_table[j] = request.getParameter("tableB"
+          this.table[j] = request.getParameter("tableB"
               + i);
 
           final int performanceRunB = Playoff.getRunNumber(connection, division, teamB.getTeamNumber(), playoffRound);
-          m_divisionLabel[j] = HEAD_TO_HEAD_LABEL;
-          m_division[j] = division;
+          this.divisionLabel[j] = HEAD_TO_HEAD_LABEL;
+          this.division[j] = division;
           final int bracketB = Playoff.getBracketNumber(connection, tournament, teamB.getTeamNumber(), performanceRunB);
           final String bracketBLabel = String.format("Match %d", bracketB);
-          m_time[j] = bracketBLabel;
+          this.time[j] = bracketBLabel;
 
-          updatePrep.setString(1, m_table[j]);
+          updatePrep.setString(1, table[j]);
           updatePrep.setString(2, division);
           updatePrep.setInt(4, playoffRound);
           updatePrep.setInt(5, teamB.getTeamNumber());
@@ -269,19 +269,19 @@ public class ScoresheetGenerator {
 
   /**
    * Private support function to create new data arrays for the scoresheet
-   * information. IMPORTANT!!! The value of {@link #m_numSheets} must be set
+   * information. IMPORTANT!!! The value of {@link #numSheets} must be set
    * before the
    * call to this method is made.
    */
   private void initializeArrays() {
-    m_table = new String[m_numSheets];
-    m_name = new String[m_numSheets];
-    m_round = new String[m_numSheets];
-    m_number = new Integer[m_numSheets];
-    m_divisionLabel = new String[m_numSheets];
-    m_division = new String[m_numSheets];
-    m_time = new String[m_numSheets];
-    m_isPractice = new boolean[m_numSheets];
+    table = new String[numSheets];
+    name = new String[numSheets];
+    round = new String[numSheets];
+    number = new Integer[numSheets];
+    divisionLabel = new String[numSheets];
+    division = new String[numSheets];
+    time = new String[numSheets];
+    isPractice = new boolean[numSheets];
   }
 
   /**
@@ -354,7 +354,7 @@ public class ScoresheetGenerator {
     final Element checkBlock = createCheckBlock(document);
     final Element practiceWatermark = createPracticeWatermark(document);
 
-    for (int sheetIndex = 0; sheetIndex < m_numSheets; sheetIndex++) {
+    for (int sheetIndex = 0; sheetIndex < numSheets; sheetIndex++) {
       final Element sheet = createScoreSheet(document, titleHeader, goalsTable, checkBlock, practiceWatermark,
                                              sheetIndex);
       documentBody.appendChild(sheet);
@@ -373,7 +373,7 @@ public class ScoresheetGenerator {
     // TODO may need to change this page break based on odd/even and rotation
     sheet.setAttribute("page-break-after", "always");
 
-    if (m_isPractice[sheetIndex]) {
+    if (isPractice[sheetIndex]) {
       sheet.appendChild(practiceWatermark.cloneNode(true));
     }
 
@@ -474,7 +474,7 @@ public class ScoresheetGenerator {
     timeLabel.setAttribute("padding-bottom", "2pt");
 
     final Element timeValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
-                                                       null == m_time[sheetIndex] ? SHORT_BLANK : m_time[sheetIndex]);
+                                                       null == time[sheetIndex] ? SHORT_BLANK : time[sheetIndex]);
     row1.appendChild(timeValue);
     timeValue.setAttribute("font-family", "Courier");
     timeValue.setAttribute("padding-top", "2pt");
@@ -486,8 +486,8 @@ public class ScoresheetGenerator {
     tableLabel.setAttribute("padding-bottom", "2pt");
 
     final Element tableValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
-                                                        null == m_table[sheetIndex] ? SHORT_BLANK
-                                                            : m_table[sheetIndex]);
+                                                        null == this.table[sheetIndex] ? SHORT_BLANK
+                                                            : this.table[sheetIndex]);
     tableValue.setAttribute("font-family", "Courier");
     tableValue.setAttribute("padding-top", "2pt");
     tableValue.setAttribute("padding-bottom", "2pt");
@@ -499,8 +499,7 @@ public class ScoresheetGenerator {
     roundLabel.setAttribute("padding-bottom", "2pt");
 
     final Element roundValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
-                                                        null == m_round[sheetIndex] ? SHORT_BLANK
-                                                            : m_round[sheetIndex]);
+                                                        null == round[sheetIndex] ? SHORT_BLANK : round[sheetIndex]);
     roundValue.setAttribute("font-family", "Courier");
     roundValue.setAttribute("padding-top", "2pt");
     roundValue.setAttribute("padding-bottom", "2pt");
@@ -521,23 +520,23 @@ public class ScoresheetGenerator {
     teamNumberLabel.setAttribute("padding-bottom", "2pt");
 
     final Element teamNumberValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
-                                                             null == m_number[sheetIndex] ? SHORT_BLANK
-                                                                 : String.valueOf(m_number[sheetIndex]));
+                                                             null == number[sheetIndex] ? SHORT_BLANK
+                                                                 : String.valueOf(number[sheetIndex]));
     teamNumberValue.setAttribute("font-family", "Courier");
     row2.appendChild(teamNumberValue);
     teamNumberValue.setAttribute("padding-top", "2pt");
     teamNumberValue.setAttribute("padding-bottom", "2pt");
 
     final Element awardGroupLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT,
-                                                             m_divisionLabel[sheetIndex]);
+                                                             divisionLabel[sheetIndex]);
     awardGroupLabel.setAttribute("number-columns-spanned", "2");
     awardGroupLabel.setAttribute("padding-top", "2pt");
     awardGroupLabel.setAttribute("padding-bottom", "2pt");
     row2.appendChild(awardGroupLabel);
 
     final Element awardGroupValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
-                                                             null == m_division[sheetIndex] ? SHORT_BLANK
-                                                                 : m_division[sheetIndex]);
+                                                             null == division[sheetIndex] ? SHORT_BLANK
+                                                                 : division[sheetIndex]);
     awardGroupValue.setAttribute("font-family", "Courier");
     awardGroupValue.setAttribute("number-columns-spanned", "2");
     awardGroupValue.setAttribute("padding-top", "2pt");
@@ -560,8 +559,8 @@ public class ScoresheetGenerator {
     teamNameLabel.setAttribute("padding-bottom", "2pt");
 
     final Element teamNameValue = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
-                                                                 null == m_name[sheetIndex] ? LONG_BLANK
-                                                                     : m_name[sheetIndex]);
+                                                                 null == name[sheetIndex] ? LONG_BLANK
+                                                                     : name[sheetIndex]);
     row3.appendChild(teamNameValue);
     teamNameValue.setAttribute("number-columns-spanned", "4");
     teamNameValue.setAttribute("font-family", "Courier");
@@ -811,27 +810,30 @@ public class ScoresheetGenerator {
     return goalsTable;
   }
 
-  private final int m_numSheets;
+  private final int numSheets;
 
-  private String[] m_table;
+  private String[] table;
 
-  private String[] m_name;
+  private String[] name;
 
-  private String[] m_round;
+  private String[] round;
 
-  private Integer[] m_number;
+  private Integer[] number;
 
-  public static final String HEAD_TO_HEAD_LABEL = "Head to head Bracket:";
+  private static final String HEAD_TO_HEAD_LABEL = "Head to head Bracket:";
 
+  /**
+   * Label used for award groups.
+   */
   public static final String AWARD_GROUP_LABEL = "Award Group:";
 
-  private String[] m_divisionLabel;
+  private String[] divisionLabel;
 
-  private String[] m_division;
+  private String[] division;
 
-  private String[] m_time;
+  private String[] time;
 
-  private boolean[] m_isPractice;
+  private boolean[] isPractice;
 
   /**
    * Sets the table label for scoresheet with index i.
@@ -847,11 +849,11 @@ public class ScoresheetGenerator {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
-    if (i >= m_numSheets) {
+    if (i >= numSheets) {
       throw new IllegalArgumentException("Index must be < "
-          + m_numSheets);
+          + numSheets);
     }
-    m_table[i] = table;
+    this.table[i] = table;
   }
 
   /**
@@ -872,12 +874,12 @@ public class ScoresheetGenerator {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
-    if (i >= m_numSheets) {
+    if (i >= numSheets) {
       throw new IllegalArgumentException("Index must be < "
-          + m_numSheets);
+          + numSheets);
     }
-    m_divisionLabel[i] = divisionLabel;
-    m_division[i] = division;
+    this.divisionLabel[i] = divisionLabel;
+    this.division[i] = division;
   }
 
   /**
@@ -894,11 +896,11 @@ public class ScoresheetGenerator {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
-    if (i >= m_numSheets) {
+    if (i >= numSheets) {
       throw new IllegalArgumentException("Index must be < "
-          + m_numSheets);
+          + numSheets);
     }
-    m_name[i] = name;
+    this.name[i] = name;
   }
 
   /**
@@ -915,11 +917,11 @@ public class ScoresheetGenerator {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
-    if (i >= m_numSheets) {
+    if (i >= numSheets) {
       throw new IllegalArgumentException("Index must be < "
-          + m_numSheets);
+          + numSheets);
     }
-    m_number[i] = number;
+    this.number[i] = number;
   }
 
   /**
@@ -948,11 +950,11 @@ public class ScoresheetGenerator {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
-    if (i >= m_numSheets) {
+    if (i >= numSheets) {
       throw new IllegalArgumentException("Index must be < "
-          + m_numSheets);
+          + numSheets);
     }
-    m_time[i] = time;
+    this.time[i] = time;
   }
 
   /**
@@ -970,11 +972,11 @@ public class ScoresheetGenerator {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
-    if (i >= m_numSheets) {
+    if (i >= numSheets) {
       throw new IllegalArgumentException("Index must be < "
-          + m_numSheets);
+          + numSheets);
     }
-    m_round[i] = round;
+    this.round[i] = round;
   }
 
   /**
@@ -990,11 +992,11 @@ public class ScoresheetGenerator {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
-    if (i >= m_numSheets) {
+    if (i >= numSheets) {
       throw new IllegalArgumentException("Index must be < "
-          + m_numSheets);
+          + numSheets);
     }
-    m_isPractice[i] = isPractice;
+    this.isPractice[i] = isPractice;
   }
 
   /**
@@ -1003,10 +1005,10 @@ public class ScoresheetGenerator {
    * @return If index is out of bounds, return false.
    */
   /* package */ boolean isPractice(final int index) {
-    if (index >= m_isPractice.length) {
+    if (index >= isPractice.length) {
       return false;
     } else {
-      return m_isPractice[index];
+      return isPractice[index];
     }
   }
 
