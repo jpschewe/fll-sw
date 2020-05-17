@@ -983,11 +983,51 @@ public class ScoresheetGenerator {
               }
             }
 
-            final Element categoryCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, category, 90,
-                                                                  false);
+            // One should be able to just use the reference-orientation property on the
+            // text cell. However when this is done the cells aren't properly sized and the
+            // text gets put in the wrong place.
+            //
+            // Jon Schewe sent an email to the Apache FOP list 5/9/2020 and didn't find an
+            // answer.
+            // http://mail-archives.apache.org/mod_mbox/xmlgraphics-fop-users/202005.mbox/%3Cd8da02c550c0271943a651c13d7218377efc7137.camel%40mtu.net%3E
+            final Element categoryCell = FOPUtils.createXslFoElement(document, "table-cell");
             row.appendChild(categoryCell);
             categoryCell.setAttribute("number-rows-spanned", String.valueOf(categoryRowSpan));
-            FOPUtils.addBorders(categoryCell, 1, 1, 1, 1);
+
+            final Element categoryCellContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+            categoryCell.appendChild(categoryCellContainer);
+            final Element categoryCellBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+            categoryCellContainer.appendChild(categoryCellBlock);
+            final Element categoryCellForeign = FOPUtils.createXslFoElement(document, "instream-foreign-object");
+            categoryCellBlock.appendChild(categoryCellForeign);
+            categoryCellForeign.setAttribute("content-height", "scale-to-fit");
+            categoryCellForeign.setAttribute("content-width", "scale-to-fit");
+            categoryCellForeign.setAttribute("height", "100%");
+            categoryCellForeign.setAttribute("width", "100%");
+
+            final Element svg = document.createElementNS(SVG_NAMESPACE, "svg");
+            categoryCellForeign.appendChild(svg);
+            final int svgWidth = 25;
+            final int svgHeight = 25;
+            svg.setAttribute("width", String.valueOf(svgWidth));
+            svg.setAttribute("height", String.valueOf(svgHeight));
+            svg.setAttribute("viewBox", String.format("0 0 %d %d", svgWidth, svgHeight));
+
+            final Element text = document.createElementNS(SVG_NAMESPACE, "text");
+            svg.appendChild(text);
+            text.setAttribute("style", "fill: black; font-family:Helvetica; font-size: 12px; font-style:normal;");
+            text.setAttribute("x", String.valueOf(svgWidth
+                / 2));
+            text.setAttribute("y", String.valueOf(svgHeight
+                / 2));
+            text.setAttribute("transform", String.format("rotate(-90, %d, %d)", svgWidth
+                / 2, svgHeight
+                    / 2));
+
+            final Element tspan = document.createElementNS(SVG_NAMESPACE, "tspan");
+            text.appendChild(tspan);
+            tspan.setAttribute("text-anchor", "middle");
+            tspan.appendChild(document.createTextNode(category));
           }
 
           // first row in a new category, which may be empty

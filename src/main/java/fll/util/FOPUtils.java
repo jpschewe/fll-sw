@@ -408,19 +408,12 @@ public final class FOPUtils {
     }
 
     if (rotation != 0) {
+      throw new UnsupportedOperationException("Rotations aren't properly supported. One needs to create an SVG and rotate the text there.");
+
       // width and height are relative to the orientation
       // when rotated by 90 degrees, the height is left to right
-      blockContainer.setAttribute("reference-orientation", String.valueOf(rotation));
-//      blockContainer.setAttribute("display-align", "center");
-//      blockContainer.setAttribute("height", "auto");
-//      blockContainer.setAttribute("width", "50");
-      blockContainer.setAttribute("border-top", "1pt solid red");
-      blockContainer.setAttribute("border-bottom", "1pt solid red");
-      blockContainer.setAttribute("border-left", "1pt solid red");
-      blockContainer.setAttribute("border-right", "1pt solid red");
-      // blockContainer.setAttribute("inline-progression-dimension.minimum", "5mm");
-      // blockContainer.setAttribute("inline-progression-dimension.optimum", "30mm");
-      // blockContainer.setAttribute("inline-progression-dimension.maximum", "auto");
+      // blockContainer.setAttribute("reference-orientation",
+      // String.valueOf(rotation));
     }
     cell.appendChild(blockContainer);
 
