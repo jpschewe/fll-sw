@@ -66,6 +66,8 @@ public class ScoresheetGenerator {
   private final com.itextpdf.text.Font f6i = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 6,
                                                                         com.itextpdf.text.Font.ITALIC);
 
+  private static final float WATERMARK_OPACITY = 0.2f;
+
   private final String tournamentName;
 
   private final ChallengeDescription description;
@@ -318,7 +320,7 @@ public class ScoresheetGenerator {
 
     try {
       final Document performanceDoc = createDocument();
-      try (BufferedWriter writer = Files.newBufferedWriter(Paths.get("test.pdf"))) {
+      try (BufferedWriter writer = Files.newBufferedWriter(Paths.get("test.xml"))) {
         XMLUtils.writeXML(performanceDoc, writer);
       }
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
@@ -378,9 +380,11 @@ public class ScoresheetGenerator {
     final Element titleHeader = createTitleBlock(document);
     final Element goalsTable = createGoalsTable(document);
     final Element checkBlock = createCheckBlock(document);
+    final Element practiceWatermark = createPracticeWatermark(document);
 
     for (int sheetIndex = 0; sheetIndex < m_numSheets; sheetIndex++) {
-      final Element sheet = createScoreSheet(document, titleHeader, goalsTable, checkBlock, sheetIndex);
+      final Element sheet = createScoreSheet(document, titleHeader, goalsTable, checkBlock, practiceWatermark,
+                                             sheetIndex);
       documentBody.appendChild(sheet);
     }
 
@@ -391,10 +395,15 @@ public class ScoresheetGenerator {
                                    final Element titleHeader,
                                    final Element goalsTable,
                                    final Element checkBlock,
+                                   final Element practiceWatermark,
                                    final int sheetIndex) {
     final Element sheet = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     // TODO may need to change this page break based on odd/even and rotation
     sheet.setAttribute("page-break-after", "always");
+
+    if (m_isPractice[sheetIndex]) {
+      sheet.appendChild(practiceWatermark.cloneNode(true));
+    }
 
     sheet.appendChild(titleHeader.cloneNode(true));
 
@@ -416,6 +425,56 @@ public class ScoresheetGenerator {
     sheet.appendChild(checkBlock.cloneNode(true));
 
     return sheet;
+  }
+
+  private static final String SVG_NAMESPACE = "http://www.w3.org/2000/svg";
+
+  private Element createPracticeWatermark(final Document document) {
+    final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+    container.setAttribute("absolute-position", "fixed");
+    container.setAttribute("height", String.format("%fin", FOPUtils.PAGE_LETTER_SIZE.getHeight()));
+    container.setAttribute("width", String.format("%fin", FOPUtils.PAGE_LETTER_SIZE.getWidth()));
+
+    final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    container.appendChild(block);
+
+    final Element foreignObject = FOPUtils.createXslFoElement(document, "instream-foreign-object");
+    block.appendChild(foreignObject);
+    foreignObject.setAttribute("height", String.format("%fin", FOPUtils.PAGE_LETTER_SIZE.getHeight()));
+    foreignObject.setAttribute("width", String.format("%fin", FOPUtils.PAGE_LETTER_SIZE.getWidth()));
+    foreignObject.setAttribute("content-width", "scale-to-fit");
+    foreignObject.setAttribute("content-height", "scale-to-fit");
+
+    // Practice text rotated as an SVG
+    // Found an example of rotated text online and then modified the text and
+    // attributes to get the desired text
+    final Element svg = document.createElementNS(SVG_NAMESPACE, "svg");
+    foreignObject.appendChild(svg);
+    final int svgWidth = 200;
+    final int svgHeight = 200;
+    svg.setAttribute("width", String.valueOf(svgWidth));
+    svg.setAttribute("height", String.valueOf(svgHeight));
+    svg.setAttribute("viewBox", String.format("0 0 %d %d", svgWidth, svgHeight));
+
+    final Element text = document.createElementNS(SVG_NAMESPACE, "text");
+    svg.appendChild(text);
+    text.setAttribute("style",
+                      String.format("fill: black; fill-opacity: %f; font-family:Helvetica; font-size: 25px; font-style:normal;",
+                                    WATERMARK_OPACITY));
+    text.setAttribute("x", String.valueOf(svgWidth
+        / 2));
+    text.setAttribute("y", String.valueOf(svgHeight
+        / 2));
+    text.setAttribute("transform", String.format("rotate(-45, %d, %d)", svgWidth
+        / 2, svgHeight
+            / 2));
+
+    final Element tspan = document.createElementNS(SVG_NAMESPACE, "tspan");
+    text.appendChild(tspan);
+    tspan.setAttribute("text-anchor", "middle");
+    tspan.appendChild(document.createTextNode("PRACTICE"));
+
+    return container;
   }
 
   private Element createTeamInfoBlock(final Document document,
@@ -1248,8 +1307,6 @@ public class ScoresheetGenerator {
     private final com.itextpdf.text.BaseColor color;
 
     private final float pagesPerScoreSheet;
-
-    private static final float WATERMARK_OPACITY = 0.2f;
 
     private static final double PAGES_PER_SHEET_TOLERANCE = 1E-6;
 
