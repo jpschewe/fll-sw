@@ -5,55 +5,44 @@
  */
 package fll.web.playoff;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.xml.transform.TransformerException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-
-import com.itextpdf.text.BaseColor;
-import com.itextpdf.text.Chunk;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Element;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.FontFactory;
-import com.itextpdf.text.PageSize;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.Phrase;
-import com.itextpdf.text.Rectangle;
-import com.itextpdf.text.pdf.PdfContentByte;
-import com.itextpdf.text.pdf.PdfGState;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfPageEventHelper;
-import com.itextpdf.text.pdf.PdfReader;
-import com.itextpdf.text.pdf.PdfWriter;
+import org.apache.fop.apps.FOPException;
+import org.apache.fop.apps.FopFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
 import fll.Version;
 import fll.scheduler.TournamentSchedule;
+import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
+import fll.util.FOPUtils;
 import fll.util.FP;
-import fll.util.PdfUtils;
+import fll.web.report.FinalComputedScores;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.EnumeratedValue;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreType;
-import net.mtu.eggplant.util.sql.SQLFunctions;
+import net.mtu.eggplant.xml.XMLUtils;
 
 /**
  * @author Dan Churchill
@@ -66,14 +55,15 @@ public class ScoresheetGenerator {
 
   private static final String SHORT_BLANK = "______";
 
-  private final Font f6i = new Font(Font.FontFamily.HELVETICA, 6, Font.ITALIC);
-
-  private String m_copyright;
+  private static final float WATERMARK_OPACITY = 0.2f;
 
   private final String tournamentName;
 
+  private final ChallengeDescription description;
+
   /**
-   * Create document with the specified number of sheets. Initially all sheets
+   * Create PDF with the specified number of sheets.
+   * Initially all sheets
    * are empty. They should be filled in using the set methods.
    *
    * @param numSheets the number of sheets on a page
@@ -84,19 +74,19 @@ public class ScoresheetGenerator {
                              final ChallengeDescription description,
                              final String tournamentName) {
     this.tournamentName = tournamentName;
-    m_numSheets = numSheets;
+    this.numSheets = numSheets;
+    this.description = Objects.requireNonNull(description);
     initializeArrays();
 
-    setPageTitle("");
-    for (int i = 0; i < m_numSheets; i++) {
-      m_table[i] = SHORT_BLANK;
-      m_name[i] = LONG_BLANK;
-      m_round[i] = SHORT_BLANK;
-      m_number[i] = null;
-      m_time[i] = null;
+    for (int i = 0; i < this.numSheets; i++) {
+      this.table[i] = SHORT_BLANK;
+      this.name[i] = LONG_BLANK;
+      this.round[i] = SHORT_BLANK;
+      this.number[i] = null;
+      this.time[i] = null;
+      this.divisionLabel[i] = AWARD_GROUP_LABEL;
+      this.division[i] = SHORT_BLANK;
     }
-
-    setChallengeInfo(description);
   }
 
   /**
@@ -106,32 +96,29 @@ public class ScoresheetGenerator {
    */
   public ScoresheetGenerator(final ChallengeDescription description) {
     this.tournamentName = "Example";
+    this.description = Objects.requireNonNull(description);
 
     // must have been called asking for blank
-    m_numSheets = 2;
+    this.numSheets = 2;
     initializeArrays();
 
-    setPageTitle("");
-    for (int i = 0; i < m_numSheets; i++) {
-      m_table[i] = SHORT_BLANK;
-      m_name[i] = LONG_BLANK;
-      m_round[i] = Utilities.isOdd(i) ? "Practice" : SHORT_BLANK;
-      m_divisionLabel[i] = AWARD_GROUP_LABEL;
-      m_division[i] = SHORT_BLANK;
-      m_number[i] = null;
-      m_time[i] = null;
-      m_isPractice[i] = Utilities.isOdd(i);
+    for (int i = 0; i < numSheets; i++) {
+      this.table[i] = SHORT_BLANK;
+      this.name[i] = LONG_BLANK;
+      this.round[i] = Utilities.isOdd(i) ? "Practice" : SHORT_BLANK;
+      this.divisionLabel[i] = AWARD_GROUP_LABEL;
+      this.division[i] = SHORT_BLANK;
+      this.number[i] = null;
+      this.time[i] = null;
+      this.isPractice[i] = Utilities.isOdd(i);
     }
-
-    setChallengeInfo(description);
   }
 
   /**
    * Create a new ScoresheetGenerator object populated with form header data
-   * provided in the given Map. The map should contain String[] objects, each of
-   * length 1, keyed by the String objects listed below (this matches the
-   * expected format of the Map returned by
-   * javax.servlet.ServletRequest.getParameterMap):
+   * provided in the given servlet request. The request should contain the
+   * attributes listed below (this matches the
+   * expected format of the request returned):
    * <ul>
    * <li><b>"numMatches"</b> - The number of matches in the form.
    * <li><b>"checkX"</b> - Present only for matches that should be printed.
@@ -152,12 +139,19 @@ public class ScoresheetGenerator {
    * printed, so table assignments are stored into the database and the match is
    * marked as printed. It is very questionable whether this is where this
    * should happen, but I don't feel like breaking it out.
+   * 
+   * @param request used to get information about award group and number of
+   *          matches
+   * @param connection where to find database information
+   * @param tournament the tournament ID
+   * @param description description of the challenge
    */
   public ScoresheetGenerator(final HttpServletRequest request,
                              final Connection connection,
                              final int tournament,
                              final ChallengeDescription description)
       throws SQLException {
+    this.description = Objects.requireNonNull(description);
     final Tournament tournamentObj = Tournament.findTournamentByID(connection, tournament);
     this.tournamentName = tournamentObj.getName();
     final ScoreType performanceScoreType = description.getPerformance().getScoreType();
@@ -168,10 +162,10 @@ public class ScoresheetGenerator {
 
     // called with specific sheets to print
     final int numMatches = Integer.parseInt(numMatchesStr);
+
+    // ignore slot index 0 since the parameters are 1-based
     final boolean[] checkedMatches = new boolean[numMatches
-        + 1]; // ignore
-    // slot
-    // index 0
+        + 1];
     int checkedMatchCount = 0;
     // Build array of out how many matches we are printing
     for (int i = 1; i <= numMatches; i++) {
@@ -187,11 +181,10 @@ public class ScoresheetGenerator {
       throw new FLLRuntimeException("No matches were found checked. Please go back and select the checkboxes for the scoresheets that you want to print");
     }
 
-    m_numSheets = checkedMatchCount
+    this.numSheets = checkedMatchCount
         * 2;
 
     initializeArrays();
-    setPageTitle(m_pageTitle);
 
     // Loop through checked matches, populate data, and update database to
     // track
@@ -213,21 +206,21 @@ public class ScoresheetGenerator {
           // Get teamA info
           final Team teamA = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("teamA"
               + i)));
-          m_name[j] = teamA.getTrimmedTeamName();
-          m_number[j] = teamA.getTeamNumber();
-          m_round[j] = "Round P"
+          this.name[j] = teamA.getTrimmedTeamName();
+          this.number[j] = teamA.getTeamNumber();
+          this.round[j] = "Round P"
               + round;
-          m_table[j] = request.getParameter("tableA"
+          this.table[j] = request.getParameter("tableA"
               + i);
 
           final int performanceRunA = Playoff.getRunNumber(connection, division, teamA.getTeamNumber(), playoffRound);
-          m_divisionLabel[j] = HEAD_TO_HEAD_LABEL;
-          m_division[j] = division;
+          this.divisionLabel[j] = HEAD_TO_HEAD_LABEL;
+          this.division[j] = division;
           final int bracketA = Playoff.getBracketNumber(connection, tournament, teamA.getTeamNumber(), performanceRunA);
           final String bracketALabel = String.format("Match %d", bracketA);
-          m_time[j] = bracketALabel;
+          this.time[j] = bracketALabel;
 
-          updatePrep.setString(1, m_table[j]);
+          updatePrep.setString(1, table[j]);
           updatePrep.setString(2, division);
           updatePrep.setInt(4, playoffRound);
           updatePrep.setInt(5, teamA.getTeamNumber());
@@ -243,21 +236,21 @@ public class ScoresheetGenerator {
           // Get teamB info
           final Team teamB = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("teamB"
               + i)));
-          m_name[j] = teamB.getTrimmedTeamName();
-          m_number[j] = teamB.getTeamNumber();
-          m_round[j] = "Round P"
+          this.name[j] = teamB.getTrimmedTeamName();
+          this.number[j] = teamB.getTeamNumber();
+          this.round[j] = "Round P"
               + round;
-          m_table[j] = request.getParameter("tableB"
+          this.table[j] = request.getParameter("tableB"
               + i);
 
           final int performanceRunB = Playoff.getRunNumber(connection, division, teamB.getTeamNumber(), playoffRound);
-          m_divisionLabel[j] = HEAD_TO_HEAD_LABEL;
-          m_division[j] = division;
+          this.divisionLabel[j] = HEAD_TO_HEAD_LABEL;
+          this.division[j] = division;
           final int bracketB = Playoff.getBracketNumber(connection, tournament, teamB.getTeamNumber(), performanceRunB);
           final String bracketBLabel = String.format("Match %d", bracketB);
-          m_time[j] = bracketBLabel;
+          this.time[j] = bracketBLabel;
 
-          updatePrep.setString(1, m_table[j]);
+          updatePrep.setString(1, table[j]);
           updatePrep.setString(2, division);
           updatePrep.setInt(4, playoffRound);
           updatePrep.setInt(5, teamB.getTeamNumber());
@@ -272,388 +265,391 @@ public class ScoresheetGenerator {
         }
       }
     }
-
-    setChallengeInfo(description);
   }
 
   /**
    * Private support function to create new data arrays for the scoresheet
-   * information. IMPORTANT!!! The value of {@link #m_numSheets} must be set
+   * information. IMPORTANT!!! The value of {@link #numSheets} must be set
    * before the
    * call to this method is made.
    */
   private void initializeArrays() {
-    m_table = new String[m_numSheets];
-    m_name = new String[m_numSheets];
-    m_round = new String[m_numSheets];
-    m_number = new Integer[m_numSheets];
-    m_divisionLabel = new String[m_numSheets];
-    m_division = new String[m_numSheets];
-    m_time = new String[m_numSheets];
-    m_isPractice = new boolean[m_numSheets];
-  }
-
-  private static final Font ARIAL_8PT_NORMAL = FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL,
-                                                                   new BaseColor(0, 0, 0));
-
-  private static final Font ARIAL_10PT_NORMAL = FontFactory.getFont(FontFactory.HELVETICA, 10, Font.NORMAL);
-
-  private static final Font COURIER_10PT_NORMAL = FontFactory.getFont(FontFactory.COURIER, 10, Font.NORMAL);
-
-  private static final int POINTS_PER_INCH = 72;
-
-  /**
-   * Guess the orientation that the document should be.
-   *
-   * @return true if it should be portrait, number of pages per score sheet (0.5,
-   *         1 or greater)
-   * @throws DocumentException
-   * @throws IOException
-   */
-  public static Pair<Boolean, Float> guessOrientation(final ChallengeDescription description)
-      throws DocumentException, IOException {
-    final ScoresheetGenerator gen = new ScoresheetGenerator(1, description, "dummy");
-    final ByteArrayOutputStream outLandscape = new ByteArrayOutputStream();
-    // Using landscape, so set pages per sheet to 0.5
-    gen.writeFile(outLandscape, false, 0.5f);
-    final ByteArrayInputStream inLandscape = new ByteArrayInputStream(outLandscape.toByteArray());
-    final PdfReader readerLandscape = new PdfReader(inLandscape);
-    final int numPagesLandscape = readerLandscape.getNumberOfPages();
-    readerLandscape.close();
-
-    if (numPagesLandscape > 1) {
-      // doesn't fit landscape
-
-      // need to run again to compute pages per score sheet
-      final ByteArrayOutputStream outPortrait = new ByteArrayOutputStream();
-      // Using portrait, so set pages per sheet to 1
-      gen.writeFile(outPortrait, true, 1f);
-      final ByteArrayInputStream inPortrait = new ByteArrayInputStream(outPortrait.toByteArray());
-      final PdfReader readerPortrait = new PdfReader(inPortrait);
-      final int numPagesPortrait = readerPortrait.getNumberOfPages();
-      readerPortrait.close();
-
-      return Pair.of(true, (float) numPagesPortrait);
-    } else {
-      return Pair.of(false, 0.5f);
-    }
+    table = new String[numSheets];
+    name = new String[numSheets];
+    round = new String[numSheets];
+    number = new Integer[numSheets];
+    divisionLabel = new String[numSheets];
+    division = new String[numSheets];
+    time = new String[numSheets];
+    isPractice = new boolean[numSheets];
   }
 
   /**
    * @param out where to write the PDF
-   * @param orientationIsPortrait true if the document is in portrait mode, false
-   *          if landscape (2 score sheets per page)
-   * @param pagesPerScoreSheet number of pages each score sheet takes, used to get
-   *          the practice watermark in the right places
-   * @throws DocumentException
+   * @throws IOException if there is a problem writing to the output
    */
-  public void writeFile(final OutputStream out,
-                        final boolean orientationIsPortrait,
-                        final float pagesPerScoreSheet)
-      throws DocumentException {
+  public void writeFile(final OutputStream out) throws IOException {
 
-    // This creates our new PDF document and declares its orientation
-    Document pdfDoc;
-    if (orientationIsPortrait) {
-      pdfDoc = new Document(PageSize.LETTER); // portrait
-    } else {
-      pdfDoc = new Document(PageSize.LETTER.rotate()); // landscape
+    try {
+      final Document performanceDoc = createDocument();
+      final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
+
+      FOPUtils.renderPdf(fopFactory, performanceDoc, out);
+    } catch (FOPException | TransformerException e) {
+      throw new FLLInternalException("Error creating the performance schedule PDF", e);
     }
-    final PdfWriter writer = PdfWriter.getInstance(pdfDoc, out);
-    writer.setPageEvent(new WatermarkHandler(this, pagesPerScoreSheet));
-
-    // Measurements are always in points (72 per inch)
-    // This sets up 1/2 inch margins side margins and 0.35in top and bottom
-    // margins
-    pdfDoc.setMargins(0.5f
-        * POINTS_PER_INCH,
-                      0.5f
-                          * POINTS_PER_INCH,
-                      0.35f
-                          * POINTS_PER_INCH,
-                      0.35f
-                          * POINTS_PER_INCH);
-    pdfDoc.open();
-
-    // Header cell with challenge title to add to both scoresheets
-    final Paragraph titleParagraph = new Paragraph();
-    final Chunk titleChunk = new Chunk(m_pageTitle, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, Font.NORMAL,
-                                                                        BaseColor.WHITE));
-    titleParagraph.setAlignment(Element.ALIGN_CENTER);
-    titleParagraph.add(titleChunk);
-
-    titleParagraph.add(Chunk.NEWLINE);
-    final Chunk swVersionChunk = new Chunk("SW version: "
-        + Version.getVersion(), FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL, BaseColor.WHITE));
-    titleParagraph.add(swVersionChunk);
-    if (null != m_revision) {
-
-      final Chunk revisionChunk = new Chunk(" Descriptor revision: "
-          + m_revision, FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL, BaseColor.WHITE));
-
-      titleParagraph.add(revisionChunk);
-    }
-
-    final PdfPCell head = new PdfPCell();
-    head.setColspan(2);
-    head.setBorder(1);
-    head.setPaddingTop(0);
-    head.setPaddingBottom(3);
-    head.setBackgroundColor(new BaseColor(64, 64, 64));
-    head.setVerticalAlignment(Element.ALIGN_TOP);
-    head.addElement(titleParagraph);
-
-    // Cells for score field, and 2nd check initials
-    final Phrase des = new Phrase("Data Entry Score _______", ARIAL_8PT_NORMAL);
-    final PdfPCell desC = new PdfPCell(des);
-    desC.setBorder(0);
-    desC.setPaddingTop(9);
-    desC.setPaddingRight(36);
-    desC.setHorizontalAlignment(Element.ALIGN_RIGHT);
-    final Phrase sci = new Phrase("2nd Check Initials _______", ARIAL_8PT_NORMAL);
-    final PdfPCell sciC = new PdfPCell(sci);
-    sciC.setBorder(0);
-    sciC.setPaddingTop(9);
-    sciC.setPaddingRight(36);
-    sciC.setHorizontalAlignment(Element.ALIGN_RIGHT);
-
-    // Create a table with a grid cell for each score sheet on the page
-    PdfPTable wholePage = getTableForPage(orientationIsPortrait);
-    wholePage.setWidthPercentage(100);
-    for (int sheetIndex = 0; sheetIndex < m_numSheets; sheetIndex++) {
-      if (sheetIndex > 0
-          && (orientationIsPortrait
-              || Utilities.isEven(sheetIndex))) {
-        pdfDoc.newPage();
-        wholePage = getTableForPage(orientationIsPortrait);
-        wholePage.setWidthPercentage(100);
-      }
-
-      // This table is a single score sheet
-      final PdfPTable scoreSheet = new PdfPTable(2);
-      scoreSheet.getDefaultCell().setBorder(Rectangle.NO_BORDER);
-      scoreSheet.getDefaultCell().setPaddingRight(1);
-      scoreSheet.getDefaultCell().setPaddingLeft(0);
-
-      scoreSheet.addCell(head);
-
-      final PdfPTable teamInfo = new PdfPTable(7);
-      teamInfo.setWidthPercentage(100);
-      teamInfo.setWidths(new float[] { 1f, 1f, 1f, 1f, 1f, 1f, .9f });
-
-      // Time label cell
-      final Paragraph timeP = new Paragraph("Time:", ARIAL_10PT_NORMAL);
-      timeP.setAlignment(Element.ALIGN_RIGHT);
-      final PdfPCell timeLc = new PdfPCell(scoreSheet.getDefaultCell());
-      timeLc.addElement(timeP);
-      teamInfo.addCell(timeLc);
-      // Time value cell
-      final Paragraph timeV = new Paragraph(null == m_time[sheetIndex] ? SHORT_BLANK : m_time[sheetIndex],
-                                            COURIER_10PT_NORMAL);
-      final PdfPCell timeVc = new PdfPCell(scoreSheet.getDefaultCell());
-      timeVc.addElement(timeV);
-      teamInfo.addCell(timeVc);
-
-      // Table label cell
-      final Paragraph tblP = new Paragraph("Table:", ARIAL_10PT_NORMAL);
-      tblP.setAlignment(Element.ALIGN_RIGHT);
-      final PdfPCell tblLc = new PdfPCell(scoreSheet.getDefaultCell());
-      tblLc.addElement(tblP);
-      teamInfo.addCell(tblLc);
-      // Table value cell
-      final Paragraph tblV = new Paragraph(m_table[sheetIndex], COURIER_10PT_NORMAL);
-      final PdfPCell tblVc = new PdfPCell(scoreSheet.getDefaultCell());
-      tblVc.addElement(tblV);
-      teamInfo.addCell(tblVc);
-
-      // Round number label cell
-      final Paragraph rndP = new Paragraph("Round:", ARIAL_10PT_NORMAL);
-      rndP.setAlignment(Element.ALIGN_RIGHT);
-      final PdfPCell rndlc = new PdfPCell(scoreSheet.getDefaultCell());
-      rndlc.addElement(rndP);
-      teamInfo.addCell(rndlc);
-      // Round number value cell
-      final Paragraph rndV = new Paragraph(m_round[sheetIndex], COURIER_10PT_NORMAL);
-      final PdfPCell rndVc = new PdfPCell(scoreSheet.getDefaultCell());
-      // rndVc.setColspan(2);
-      rndVc.addElement(rndV);
-      teamInfo.addCell(rndVc);
-
-      final PdfPCell temp1 = new PdfPCell(scoreSheet.getDefaultCell());
-      // temp1.setColspan(2);
-      temp1.addElement(new Paragraph("Ref ____", ARIAL_8PT_NORMAL));
-      teamInfo.addCell(temp1);
-
-      // Team number label cell
-      final Paragraph nbrP = new Paragraph("Team #:", ARIAL_10PT_NORMAL);
-      nbrP.setAlignment(Element.ALIGN_RIGHT);
-      final PdfPCell nbrlc = new PdfPCell(scoreSheet.getDefaultCell());
-      nbrlc.addElement(nbrP);
-      teamInfo.addCell(nbrlc);
-      // Team number value cell
-      final Paragraph nbrV = new Paragraph(null == m_number[sheetIndex] ? SHORT_BLANK
-          : String.valueOf(m_number[sheetIndex]), COURIER_10PT_NORMAL);
-      final PdfPCell nbrVc = new PdfPCell(scoreSheet.getDefaultCell());
-      nbrVc.addElement(nbrV);
-      teamInfo.addCell(nbrVc);
-
-      // Team division label cell
-      final Paragraph divP = new Paragraph(m_divisionLabel[sheetIndex], ARIAL_10PT_NORMAL);
-      divP.setAlignment(Element.ALIGN_RIGHT);
-      final PdfPCell divlc = new PdfPCell(scoreSheet.getDefaultCell());
-      divlc.addElement(divP);
-      divlc.setColspan(2);
-      teamInfo.addCell(divlc);
-      // Team division value cell
-      final Paragraph divV = new Paragraph(m_division[sheetIndex], COURIER_10PT_NORMAL);
-      final PdfPCell divVc = new PdfPCell(scoreSheet.getDefaultCell());
-      divVc.setColspan(2);
-      divVc.addElement(divV);
-      teamInfo.addCell(divVc);
-
-      final PdfPCell temp2 = new PdfPCell(scoreSheet.getDefaultCell());
-      // temp2.setColspan(2);
-      temp2.addElement(new Paragraph("Team ____", ARIAL_8PT_NORMAL));
-      teamInfo.addCell(temp2);
-
-      // Team name label cell
-      final Paragraph nameP = new Paragraph("Team Name:", ARIAL_10PT_NORMAL);
-      nameP.setAlignment(Element.ALIGN_RIGHT);
-      final PdfPCell namelc = new PdfPCell(scoreSheet.getDefaultCell());
-      namelc.setColspan(2);
-      namelc.addElement(nameP);
-      teamInfo.addCell(namelc);
-      // Team name value cell
-      final PdfPCell nameVc = new PdfPCell(scoreSheet.getDefaultCell());
-      nameVc.setColspan(4);
-      nameVc.setCellEvent(new PdfUtils.TruncateContent(m_name[sheetIndex], COURIER_10PT_NORMAL));
-      teamInfo.addCell(nameVc);
-
-      // add tournament name
-      final Paragraph tournamentNameV = new Paragraph(tournamentName, f6i);
-      tournamentNameV.setAlignment(Element.ALIGN_RIGHT);
-      final PdfPCell tournamentNameVc = new PdfPCell(scoreSheet.getDefaultCell());
-      tournamentNameVc.addElement(tournamentNameV);
-      teamInfo.addCell(tournamentNameVc);
-
-      // add team info cell to the team table
-      final PdfPCell teamInfoCell = new PdfPCell(scoreSheet.getDefaultCell());
-      teamInfoCell.addElement(teamInfo);
-      teamInfoCell.setColspan(2);
-
-      scoreSheet.addCell(teamInfoCell);
-
-      // space and horizontal line
-      final PdfPCell spacerCell = new PdfPCell(scoreSheet.getDefaultCell());
-      spacerCell.setMinimumHeight(10);
-      spacerCell.setBorderWidthTop(0);
-      spacerCell.setBorderWidthBottom(1);
-      spacerCell.setBorderWidthLeft(0);
-      spacerCell.setBorderWidthRight(0);
-      spacerCell.setVerticalAlignment(Element.ALIGN_CENTER);
-      spacerCell.setHorizontalAlignment(Element.ALIGN_CENTER);
-      spacerCell.setColspan(2);
-      scoreSheet.addCell(spacerCell);
-
-      if (null != m_goalsTable) {
-        final PdfPCell goalCell = new PdfPCell(m_goalsTable);
-        goalCell.setBorder(0);
-        goalCell.setPadding(0);
-        goalCell.setColspan(2);
-        scoreSheet.addCell(goalCell);
-      }
-
-      scoreSheet.addCell(desC);
-      scoreSheet.addCell(sciC);
-
-      if (null != m_copyright) {
-        final Phrase copyright = new Phrase("\u00A9"
-            + m_copyright, f6i);
-        final PdfPCell copyrightC = new PdfPCell(scoreSheet.getDefaultCell());
-        copyrightC.addElement(copyright);
-        copyrightC.setBorder(0);
-        copyrightC.setHorizontalAlignment(Element.ALIGN_CENTER);
-        copyrightC.setColspan(2);
-
-        scoreSheet.addCell(copyrightC);
-      }
-
-      // the cell in the wholePage table that will contain the single score
-      // sheet
-      final PdfPCell scoresheetCell = new PdfPCell(scoreSheet);
-      scoresheetCell.setBorder(0);
-      scoresheetCell.setPadding(0);
-
-      // Interior borders between scoresheets on a page
-      if (!orientationIsPortrait) {
-        if (Utilities.isEven(sheetIndex)) {
-          scoresheetCell.setPaddingRight(0.1f
-              * POINTS_PER_INCH);
-        } else {
-          scoresheetCell.setPaddingLeft(0.1f
-              * POINTS_PER_INCH);
-        }
-      }
-
-      // Add the current scoresheet to the page
-      wholePage.addCell(scoresheetCell);
-
-      // Add the current table of scoresheets to the document
-      if (orientationIsPortrait
-          || (Utilities.isOdd(sheetIndex))) {
-        pdfDoc.add(wholePage);
-      }
-    }
-
-    // Add a blank cells to complete the table of the last page
-    if (!orientationIsPortrait
-        && m_numSheets
-            % 2 != 0) {
-      final PdfPCell blank = new PdfPCell();
-      blank.setBorder(0);
-      wholePage.addCell(blank);
-      pdfDoc.add(wholePage);
-    }
-
-    pdfDoc.close();
   }
 
-  /**
-   * Stores the goal cells that are inserted into the output after the team name
-   * headers and before the scoring/initials blanks at the bottom of the
-   * scoresheet.
-   */
-  private void setChallengeInfo(final ChallengeDescription description) {
-    setPageTitle(description.getTitle());
+  private Element createCopyrightBlock(final Document document) {
+    final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    block.setAttribute("font-size", "6pt");
+    block.setAttribute("font-style", "italic");
+    block.setAttribute("text-align", "center");
 
-    if (null != description.getRevision()) {
-      setRevisionInfo(description.getRevision());
-    }
+    block.appendChild(document.createTextNode("\u00A9"
+        + this.description.getCopyright()));
+
+    return block;
+  }
+
+  private Element createCopyrightFooter(final Document document) {
+    final Element staticContent = FOPUtils.createXslFoElement(document, "static-content");
+    staticContent.setAttribute("flow-name", "xsl-region-after");
+
+    final Element block = createCopyrightBlock(document);
+    staticContent.appendChild(block);
+
+    return staticContent;
+  }
+
+  private Document createDocument() {
+    final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
+
+    final Element rootElement = FOPUtils.createRoot(document);
+    document.appendChild(rootElement);
+    rootElement.setAttribute("font-family", "Helvetica");
+
+    final Element layoutMasterSet = FOPUtils.createXslFoElement(document, "layout-master-set");
+    rootElement.appendChild(layoutMasterSet);
+
+    final String pageMasterName = "simple";
+    FOPUtils.createSimplePageMaster(document, layoutMasterSet, pageMasterName);
+
+    final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
+    rootElement.appendChild(pageSequence);
 
     if (null != description.getCopyright()) {
-      m_copyright = description.getCopyright();
-    } else {
-      m_copyright = null;
+      final Element footer = createCopyrightFooter(document);
+      pageSequence.appendChild(footer);
     }
+
+    final Element documentBody = FOPUtils.createBody(document);
+    pageSequence.appendChild(documentBody);
+
+    final Element titleHeader = createTitleBlock(document);
+    final Element goalsTable = createGoalsTable(document);
+    final Element checkBlock = createCheckBlock(document);
+    final Element practiceWatermark = createPracticeWatermark(document);
+
+    for (int sheetIndex = 0; sheetIndex < numSheets; sheetIndex++) {
+      final Element sheet = createScoreSheet(document, titleHeader, goalsTable, checkBlock, practiceWatermark,
+                                             sheetIndex);
+      documentBody.appendChild(sheet);
+    }
+
+    return document;
+  }
+
+  private Element createScoreSheet(final Document document,
+                                   final Element titleHeader,
+                                   final Element goalsTable,
+                                   final Element checkBlock,
+                                   final Element practiceWatermark,
+                                   final int sheetIndex) {
+    final Element sheet = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    // TODO may need to change this page break based on odd/even and rotation
+    sheet.setAttribute("page-break-after", "always");
+
+    if (isPractice[sheetIndex]) {
+      sheet.appendChild(practiceWatermark.cloneNode(true));
+    }
+
+    sheet.appendChild(titleHeader.cloneNode(true));
+
+    final Element teamInfoContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+    sheet.appendChild(teamInfoContainer);
+    teamInfoContainer.setAttribute("padding-bottom", "10pt");
+    teamInfoContainer.setAttribute("padding-top", "10pt");
+    FOPUtils.addBottomBorder(teamInfoContainer, 1.0);
+
+    final Element teamInfo = createTeamInfoBlock(document, sheetIndex);
+    teamInfoContainer.appendChild(teamInfo);
+
+    final Element goalsTableContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+    sheet.appendChild(goalsTableContainer);
+    goalsTableContainer.setAttribute("padding-bottom", "10pt");
+
+    goalsTableContainer.appendChild(goalsTable.cloneNode(true));
+
+    sheet.appendChild(checkBlock.cloneNode(true));
+
+    return sheet;
+  }
+
+  private static final String SVG_NAMESPACE = "http://www.w3.org/2000/svg";
+
+  private Element createPracticeWatermark(final Document document) {
+    final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+    container.setAttribute("absolute-position", "fixed");
+    container.setAttribute("height", String.format("%fin", FOPUtils.PAGE_LETTER_SIZE.getHeight()));
+    container.setAttribute("width", String.format("%fin", FOPUtils.PAGE_LETTER_SIZE.getWidth()));
+
+    final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    container.appendChild(block);
+
+    final Element foreignObject = FOPUtils.createXslFoElement(document, "instream-foreign-object");
+    block.appendChild(foreignObject);
+    foreignObject.setAttribute("height", String.format("%fin", FOPUtils.PAGE_LETTER_SIZE.getHeight()));
+    foreignObject.setAttribute("width", String.format("%fin", FOPUtils.PAGE_LETTER_SIZE.getWidth()));
+    foreignObject.setAttribute("content-width", "scale-to-fit");
+    foreignObject.setAttribute("content-height", "scale-to-fit");
+
+    // Practice text rotated as an SVG
+    // Found an example of rotated text online and then modified the text and
+    // attributes to get the desired text
+    final Element svg = document.createElementNS(SVG_NAMESPACE, "svg");
+    foreignObject.appendChild(svg);
+    final int svgWidth = 200;
+    final int svgHeight = 200;
+    svg.setAttribute("width", String.valueOf(svgWidth));
+    svg.setAttribute("height", String.valueOf(svgHeight));
+    svg.setAttribute("viewBox", String.format("0 0 %d %d", svgWidth, svgHeight));
+
+    final Element text = document.createElementNS(SVG_NAMESPACE, "text");
+    svg.appendChild(text);
+    text.setAttribute("style",
+                      String.format("fill: black; fill-opacity: %f; font-family:Helvetica; font-size: 25px; font-style:normal;",
+                                    WATERMARK_OPACITY));
+    text.setAttribute("x", String.valueOf(svgWidth
+        / 2));
+    text.setAttribute("y", String.valueOf(svgHeight
+        / 2));
+    text.setAttribute("transform", String.format("rotate(-45, %d, %d)", svgWidth
+        / 2, svgHeight
+            / 2));
+
+    final Element tspan = document.createElementNS(SVG_NAMESPACE, "tspan");
+    text.appendChild(tspan);
+    tspan.setAttribute("text-anchor", "middle");
+    tspan.appendChild(document.createTextNode("PRACTICE"));
+
+    return container;
+  }
+
+  private Element createTeamInfoBlock(final Document document,
+                                      final int sheetIndex) {
+    final Element table = FOPUtils.createBasicTable(document);
+    table.setAttribute("font-size", "10pt");
+
+    table.appendChild(FOPUtils.createTableColumn(document, 10));
+    table.appendChild(FOPUtils.createTableColumn(document, 10));
+    table.appendChild(FOPUtils.createTableColumn(document, 10));
+    table.appendChild(FOPUtils.createTableColumn(document, 10));
+    table.appendChild(FOPUtils.createTableColumn(document, 10));
+    table.appendChild(FOPUtils.createTableColumn(document, 10));
+    table.appendChild(FOPUtils.createTableColumn(document, 9));
+
+    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    table.appendChild(tableBody);
+
+    final Element row1 = FOPUtils.createXslFoElement(document, "table-row");
+    tableBody.appendChild(row1);
+
+    final Element timeLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Time:");
+    row1.appendChild(timeLabel);
+    timeLabel.setAttribute("padding-top", "2pt");
+    timeLabel.setAttribute("padding-bottom", "2pt");
+
+    final Element timeValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
+                                                       null == time[sheetIndex] ? SHORT_BLANK : time[sheetIndex]);
+    row1.appendChild(timeValue);
+    timeValue.setAttribute("font-family", "Courier");
+    timeValue.setAttribute("padding-top", "2pt");
+    timeValue.setAttribute("padding-bottom", "2pt");
+
+    final Element tableLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Table:");
+    row1.appendChild(tableLabel);
+    tableLabel.setAttribute("padding-top", "2pt");
+    tableLabel.setAttribute("padding-bottom", "2pt");
+
+    final Element tableValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
+                                                        null == this.table[sheetIndex] ? SHORT_BLANK
+                                                            : this.table[sheetIndex]);
+    tableValue.setAttribute("font-family", "Courier");
+    tableValue.setAttribute("padding-top", "2pt");
+    tableValue.setAttribute("padding-bottom", "2pt");
+    row1.appendChild(tableValue);
+
+    final Element roundLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Round:");
+    row1.appendChild(roundLabel);
+    roundLabel.setAttribute("padding-top", "2pt");
+    roundLabel.setAttribute("padding-bottom", "2pt");
+
+    final Element roundValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
+                                                        null == round[sheetIndex] ? SHORT_BLANK : round[sheetIndex]);
+    roundValue.setAttribute("font-family", "Courier");
+    roundValue.setAttribute("padding-top", "2pt");
+    roundValue.setAttribute("padding-bottom", "2pt");
+    row1.appendChild(roundValue);
+
+    final Element refSig = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Ref ____");
+    row1.appendChild(refSig);
+    refSig.setAttribute("font-size", "8pt");
+    refSig.setAttribute("padding-top", "2pt");
+    refSig.setAttribute("padding-bottom", "2pt");
+
+    final Element row2 = FOPUtils.createXslFoElement(document, "table-row");
+    tableBody.appendChild(row2);
+
+    final Element teamNumberLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Team #:");
+    row2.appendChild(teamNumberLabel);
+    teamNumberLabel.setAttribute("padding-top", "2pt");
+    teamNumberLabel.setAttribute("padding-bottom", "2pt");
+
+    final Element teamNumberValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
+                                                             null == number[sheetIndex] ? SHORT_BLANK
+                                                                 : String.valueOf(number[sheetIndex]));
+    teamNumberValue.setAttribute("font-family", "Courier");
+    row2.appendChild(teamNumberValue);
+    teamNumberValue.setAttribute("padding-top", "2pt");
+    teamNumberValue.setAttribute("padding-bottom", "2pt");
+
+    final Element awardGroupLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT,
+                                                             divisionLabel[sheetIndex]);
+    awardGroupLabel.setAttribute("number-columns-spanned", "2");
+    awardGroupLabel.setAttribute("padding-top", "2pt");
+    awardGroupLabel.setAttribute("padding-bottom", "2pt");
+    row2.appendChild(awardGroupLabel);
+
+    final Element awardGroupValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
+                                                             null == division[sheetIndex] ? SHORT_BLANK
+                                                                 : division[sheetIndex]);
+    awardGroupValue.setAttribute("font-family", "Courier");
+    awardGroupValue.setAttribute("number-columns-spanned", "2");
+    awardGroupValue.setAttribute("padding-top", "2pt");
+    awardGroupValue.setAttribute("padding-bottom", "2pt");
+    row2.appendChild(awardGroupValue);
+
+    final Element teamSig = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Team ____");
+    row2.appendChild(teamSig);
+    teamSig.setAttribute("font-size", "8pt");
+    teamSig.setAttribute("padding-top", "2pt");
+    teamSig.setAttribute("padding-bottom", "2pt");
+
+    final Element row3 = FOPUtils.createXslFoElement(document, "table-row");
+    tableBody.appendChild(row3);
+
+    final Element teamNameLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Team Name:");
+    row3.appendChild(teamNameLabel);
+    teamNameLabel.setAttribute("number-columns-spanned", "2");
+    teamNameLabel.setAttribute("padding-top", "2pt");
+    teamNameLabel.setAttribute("padding-bottom", "2pt");
+
+    final Element teamNameValue = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
+                                                                 null == name[sheetIndex] ? LONG_BLANK
+                                                                     : name[sheetIndex]);
+    row3.appendChild(teamNameValue);
+    teamNameValue.setAttribute("number-columns-spanned", "4");
+    teamNameValue.setAttribute("font-family", "Courier");
+    teamNameValue.setAttribute("padding-top", "2pt");
+    teamNameValue.setAttribute("padding-bottom", "2pt");
+
+    final Element tournament = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT,
+                                                              null == tournamentName ? "___" : tournamentName);
+    row3.appendChild(tournament);
+    tournament.setAttribute("font-size", "6pt");
+    tournament.setAttribute("font-style", "italic");
+    tournament.setAttribute("padding-top", "2pt");
+    tournament.setAttribute("padding-bottom", "2pt");
+
+    return table;
+  }
+
+  private Element createTitleBlock(final Document document) {
+    final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    block.setAttribute("background-color", "black");
+
+    final Element title = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    block.appendChild(title);
+    title.setAttribute("font-size", "14pt");
+    title.setAttribute("font-weight", "bold");
+    title.setAttribute("text-align", "center");
+    title.setAttribute("color", "white");
+    title.appendChild(document.createTextNode(description.getTitle()));
+
+    final Element version = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    block.appendChild(version);
+    version.setAttribute("font-size", "8pt");
+    version.setAttribute("text-align", "center");
+    version.setAttribute("color", "white");
+
+    final StringBuilder versionText = new StringBuilder();
+    versionText.append("SW version: ");
+    versionText.append(Version.getVersion());
+    if (null != description.getRevision()) {
+      versionText.append(" Descriptor revision: ");
+      versionText.append(description.getRevision());
+    }
+    version.appendChild(document.createTextNode(versionText.toString()));
+
+    return block;
+  }
+
+  private Element createCheckBlock(final Document document) {
+    final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    block.setAttribute("font-size", "8pt");
+    block.setAttribute("text-align", "center");
+    // ensure that the text takes up the whole line
+    block.setAttribute("text-align-last", "justify");
+
+    block.appendChild(document.createTextNode("Data Entry Score _______"));
+
+    // add leader to take up the space between the 2 blocks of text
+    final Element space = FOPUtils.createXslFoElement(document, "leader");
+    space.setAttribute("leader-pattern", "space");
+    block.appendChild(space);
+
+    block.appendChild(document.createTextNode("2nd Check Initials _______"));
+
+    return block;
+  }
+
+  private Element createGoalsTable(final Document document) {
 
     final PerformanceScoreCategory performanceElement = description.getPerformance();
     // use ArrayList as we will be doing indexed access in the loop
     final List<AbstractGoal> goals = new ArrayList<>(performanceElement.getGoals());
 
-    final float[] relativeWidths = new float[3];
-    relativeWidths[0] = 4;
-    relativeWidths[1] = 48;
-    relativeWidths[2] = 48;
-    m_goalsTable = new PdfPTable(relativeWidths);
+    final Element goalsTable = FOPUtils.createBasicTable(document);
+    goalsTable.setAttribute("font-size", "10pt");
+    goalsTable.setAttribute("font-family", "Helvetica");
+    goalsTable.appendChild(FOPUtils.createTableColumn(document, 4));
+    goalsTable.appendChild(FOPUtils.createTableColumn(document, 48));
+    goalsTable.appendChild(FOPUtils.createTableColumn(document, 48));
+
+    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    goalsTable.appendChild(tableBody);
 
     String prevCategory = null;
     for (int goalIndex = 0; goalIndex < goals.size(); ++goalIndex) {
       final AbstractGoal goal = goals.get(goalIndex);
       if (!goal.isComputed()) {
+        final Element row = FOPUtils.createXslFoElement(document, "table-row");
+        tableBody.appendChild(row);
+
         final String category = goal.getCategory();
 
         // add category cell if needed
-        boolean firstRowInCategory = false;
         if (!StringUtils.equals(prevCategory, category)) {
           if (!StringUtils.isEmpty(category)) {
 
@@ -671,60 +667,85 @@ public class ScoresheetGenerator {
               }
             }
 
-            final Paragraph catPara = new Paragraph(category, ARIAL_10PT_NORMAL);
-            final PdfPCell categoryCell = new PdfPCell(catPara);
-            categoryCell.setBorderWidthTop(1);
-            categoryCell.setBorderWidthBottom(0);
-            categoryCell.setBorderWidthLeft(0);
-            categoryCell.setBorderWidthRight(0);
-            categoryCell.setVerticalAlignment(Element.ALIGN_CENTER);
-            categoryCell.setHorizontalAlignment(Element.ALIGN_CENTER);
-            categoryCell.setRotation(90);
-            categoryCell.setRowspan(categoryRowSpan);
-            m_goalsTable.addCell(categoryCell);
+            // One should be able to just use the reference-orientation property on the
+            // text cell. However when this is done the cells aren't properly sized and the
+            // text gets put in the wrong place.
+            //
+            // Jon Schewe sent an email to the Apache FOP list 5/9/2020 and didn't find an
+            // answer.
+            // http://mail-archives.apache.org/mod_mbox/xmlgraphics-fop-users/202005.mbox/%3Cd8da02c550c0271943a651c13d7218377efc7137.camel%40mtu.net%3E
+            final Element categoryCell = FOPUtils.createXslFoElement(document, "table-cell");
+            row.appendChild(categoryCell);
+            categoryCell.setAttribute("number-rows-spanned", String.valueOf(categoryRowSpan));
+
+            final Element categoryCellContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+            categoryCell.appendChild(categoryCellContainer);
+            final Element categoryCellBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+            categoryCellContainer.appendChild(categoryCellBlock);
+            final Element categoryCellForeign = FOPUtils.createXslFoElement(document, "instream-foreign-object");
+            categoryCellBlock.appendChild(categoryCellForeign);
+            categoryCellForeign.setAttribute("content-height", "scale-to-fit");
+            categoryCellForeign.setAttribute("content-width", "scale-to-fit");
+            categoryCellForeign.setAttribute("height", "100%");
+            categoryCellForeign.setAttribute("width", "100%");
+
+            final Element svg = document.createElementNS(SVG_NAMESPACE, "svg");
+            categoryCellForeign.appendChild(svg);
+            final int svgWidth = 25;
+            final int svgHeight = 25;
+            svg.setAttribute("width", String.valueOf(svgWidth));
+            svg.setAttribute("height", String.valueOf(svgHeight));
+            svg.setAttribute("viewBox", String.format("0 0 %d %d", svgWidth, svgHeight));
+
+            final Element text = document.createElementNS(SVG_NAMESPACE, "text");
+            svg.appendChild(text);
+            text.setAttribute("style", "fill: black; font-family:Helvetica; font-size: 12px; font-style:normal;");
+            text.setAttribute("x", String.valueOf(svgWidth
+                / 2));
+            text.setAttribute("y", String.valueOf(svgHeight
+                / 2));
+            text.setAttribute("transform", String.format("rotate(-90, %d, %d)", svgWidth
+                / 2, svgHeight
+                    / 2));
+
+            final Element tspan = document.createElementNS(SVG_NAMESPACE, "tspan");
+            text.appendChild(tspan);
+            tspan.setAttribute("text-anchor", "middle");
+            tspan.appendChild(document.createTextNode(category));
           }
 
           // first row in a new category, which may be empty
-          firstRowInCategory = true;
+          FOPUtils.addTopBorder(row, 1);
         }
 
         // This is the text for the left hand "label" cell
-        final String title = goal.getTitle();
-        final Paragraph p = new Paragraph(title, ARIAL_10PT_NORMAL);
-        final PdfPCell goalLabel = new PdfPCell(p);
-        goalLabel.setHorizontalAlignment(Element.ALIGN_RIGHT);
-        // align bottom, otherwise we don't line up with the goalValues. For some reason
-        // the vertical alignment isn't used when adding elements to a PdfPCell, so the
-        // goal values end up always aligned to the bottom of the cell.
-        goalLabel.setVerticalAlignment(Element.ALIGN_BOTTOM);
-        if (firstRowInCategory) {
-          goalLabel.setBorderWidthTop(1);
-          goalLabel.setBorderWidthBottom(0);
-          goalLabel.setBorderWidthLeft(0);
-          goalLabel.setBorderWidthRight(0);
-        } else {
-          goalLabel.setBorder(0);
-        }
-        goalLabel.setPaddingRight(9);
+        final Element goalLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, goal.getTitle());
+        row.appendChild(goalLabel);
+        goalLabel.setAttribute("padding-top", "2pt");
+        goalLabel.setAttribute("padding-bottom", "2pt");
+        goalLabel.setAttribute("padding-right", "9pt");
+
         if (StringUtils.isEmpty(category)) {
           // category column and goal label column
-          goalLabel.setColspan(2);
+          goalLabel.setAttribute("number-columns-spanned", "2");
         }
-
-        m_goalsTable.addCell(goalLabel);
 
         // define the value cell
         final double min = goal.getMin();
-        final String minStr = FP.equals(min, Math.round(min), 1E-6) ? String.valueOf((int) min) : String.valueOf(min);
+        final String minStr = FP.equals(min, Math.round(min), FinalComputedScores.TIE_TOLERANCE)
+            ? String.valueOf((int) min)
+            : String.valueOf(min);
         final double max = goal.getMax();
-        final String maxStr = FP.equals(max, Math.round(max), 1E-6) ? String.valueOf((int) max) : String.valueOf(max);
+        final String maxStr = FP.equals(max, Math.round(max), FinalComputedScores.TIE_TOLERANCE)
+            ? String.valueOf((int) max)
+            : String.valueOf(max);
 
         // If element has child nodes, then we have an enumerated list
         // of choices. Otherwise it is either yes/no or a numeric field.
-        final PdfPCell goalValue = new PdfPCell();
-
-        final Chunk choices = new Chunk("", COURIER_10PT_NORMAL);
+        final Element goalValue;
         if (goal.isEnumerated()) {
+          final StringBuilder choices = new StringBuilder();
+
           // replace spaces with "no-break" spaces
           boolean first = true;
           final List<EnumeratedValue> values = goal.getSortedValues();
@@ -737,44 +758,45 @@ public class ScoresheetGenerator {
             }
             choices.append(value.getTitle().toUpperCase().replace(' ', Utilities.NON_BREAKING_SPACE));
           }
-          goalValue.addElement(choices);
-
+          goalValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT, choices.toString());
         } else {
           if (goal.isYesNo()) {
             // order of yes/no needs to match ScoreEntry.generateYesNoButtons
-            final Paragraph q = new Paragraph("NO / YES", COURIER_10PT_NORMAL);
-            goalValue.addElement(q);
-
+            goalValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT, "NO / YES");
           } else {
+            goalValue = FOPUtils.createXslFoElement(document, "table-cell");
+
             final String range = "("
                 + minStr
                 + " - "
                 + maxStr
                 + ")";
-            final PdfPTable t = new PdfPTable(2);
-            t.setHorizontalAlignment(Element.ALIGN_LEFT);
-            t.setTotalWidth(1
-                * POINTS_PER_INCH);
-            t.setLockedWidth(true);
-            final Phrase r = new Phrase("", ARIAL_8PT_NORMAL);
-            t.addCell(new PdfPCell(r));
-            final Phrase q = new Phrase(range, ARIAL_8PT_NORMAL);
-            t.addCell(new PdfPCell(q));
-            goalValue.setPaddingTop(9);
-            goalValue.addElement(t);
+            final Element t = FOPUtils.createBasicTable(document);
+            goalValue.appendChild(t);
+            t.setAttribute("width", "100pt");
+            t.setAttribute("font-size", "8pt");
+            t.appendChild(FOPUtils.createTableColumn(document, 1));
+            t.appendChild(FOPUtils.createTableColumn(document, 1));
+
+            final Element tBody = FOPUtils.createXslFoElement(document, "table-body");
+            t.appendChild(tBody);
+
+            final Element tRow = FOPUtils.createXslFoElement(document, "table-row");
+            tBody.appendChild(tRow);
+
+            final Element r = FOPUtils.createTableCell(document, null, "");
+            tRow.appendChild(r);
+            FOPUtils.addBorders(r, 1, 1, 1, 1);
+
+            final Element q = FOPUtils.createTableCell(document, null, range);
+            tRow.appendChild(q);
+            FOPUtils.addBorders(q, 1, 1, 1, 1);
           }
         }
-
-        if (firstRowInCategory) {
-          goalValue.setBorderWidthTop(1);
-          goalValue.setBorderWidthBottom(0);
-          goalValue.setBorderWidthLeft(0);
-          goalValue.setBorderWidthRight(0);
-        } else {
-          goalValue.setBorder(0);
-        }
-
-        m_goalsTable.addCell(goalValue);
+        goalValue.setAttribute("font-family", "Courier");
+        goalValue.setAttribute("padding-top", "2pt");
+        goalValue.setAttribute("padding-bottom", "2pt");
+        row.appendChild(goalValue);
 
         // setup for next loop
         prevCategory = category;
@@ -782,43 +804,33 @@ public class ScoresheetGenerator {
 
     } // foreach goal
 
+    return goalsTable;
   }
 
-  private final int m_numSheets;
+  private final int numSheets;
 
-  private String m_revision;
+  private String[] table;
 
-  private String m_pageTitle;
+  private String[] name;
 
-  private String[] m_table;
+  private String[] round;
 
-  private String[] m_name;
+  private Integer[] number;
 
-  private String[] m_round;
+  private static final String HEAD_TO_HEAD_LABEL = "Head to head Bracket:";
 
-  private Integer[] m_number;
-
-  public static final String HEAD_TO_HEAD_LABEL = "Head to head Bracket:";
-
+  /**
+   * Label used for award groups.
+   */
   public static final String AWARD_GROUP_LABEL = "Award Group:";
 
-  private String[] m_divisionLabel;
+  private String[] divisionLabel;
 
-  private String[] m_division;
+  private String[] division;
 
-  private String[] m_time;
+  private String[] time;
 
-  private boolean[] m_isPractice;
-
-  private PdfPTable m_goalsTable;
-
-  private void setPageTitle(final String title) {
-    m_pageTitle = title;
-  }
-
-  private void setRevisionInfo(final String revision) {
-    m_revision = revision;
-  }
+  private boolean[] isPractice;
 
   /**
    * Sets the table label for scoresheet with index i.
@@ -834,11 +846,11 @@ public class ScoresheetGenerator {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
-    if (i >= m_numSheets) {
+    if (i >= numSheets) {
       throw new IllegalArgumentException("Index must be < "
-          + m_numSheets);
+          + numSheets);
     }
-    m_table[i] = table;
+    this.table[i] = table;
   }
 
   /**
@@ -859,12 +871,12 @@ public class ScoresheetGenerator {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
-    if (i >= m_numSheets) {
+    if (i >= numSheets) {
       throw new IllegalArgumentException("Index must be < "
-          + m_numSheets);
+          + numSheets);
     }
-    m_divisionLabel[i] = divisionLabel;
-    m_division[i] = division;
+    this.divisionLabel[i] = divisionLabel;
+    this.division[i] = division;
   }
 
   /**
@@ -881,11 +893,11 @@ public class ScoresheetGenerator {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
-    if (i >= m_numSheets) {
+    if (i >= numSheets) {
       throw new IllegalArgumentException("Index must be < "
-          + m_numSheets);
+          + numSheets);
     }
-    m_name[i] = name;
+    this.name[i] = name;
   }
 
   /**
@@ -902,11 +914,11 @@ public class ScoresheetGenerator {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
-    if (i >= m_numSheets) {
+    if (i >= numSheets) {
       throw new IllegalArgumentException("Index must be < "
-          + m_numSheets);
+          + numSheets);
     }
-    m_number[i] = number;
+    this.number[i] = number;
   }
 
   /**
@@ -935,11 +947,11 @@ public class ScoresheetGenerator {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
-    if (i >= m_numSheets) {
+    if (i >= numSheets) {
       throw new IllegalArgumentException("Index must be < "
-          + m_numSheets);
+          + numSheets);
     }
-    m_time[i] = time;
+    this.time[i] = time;
   }
 
   /**
@@ -957,11 +969,11 @@ public class ScoresheetGenerator {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
-    if (i >= m_numSheets) {
+    if (i >= numSheets) {
       throw new IllegalArgumentException("Index must be < "
-          + m_numSheets);
+          + numSheets);
     }
-    m_round[i] = round;
+    this.round[i] = round;
   }
 
   /**
@@ -977,11 +989,11 @@ public class ScoresheetGenerator {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
-    if (i >= m_numSheets) {
+    if (i >= numSheets) {
       throw new IllegalArgumentException("Index must be < "
-          + m_numSheets);
+          + numSheets);
     }
-    m_isPractice[i] = isPractice;
+    this.isPractice[i] = isPractice;
   }
 
   /**
@@ -990,127 +1002,11 @@ public class ScoresheetGenerator {
    * @return If index is out of bounds, return false.
    */
   /* package */ boolean isPractice(final int index) {
-    if (index >= m_isPractice.length) {
+    if (index >= isPractice.length) {
       return false;
     } else {
-      return m_isPractice[index];
+      return isPractice[index];
     }
-  }
-
-  /**
-   * Create table for page given number of sheets per page.
-   *
-   * @param nup
-   * @return
-   */
-  private static PdfPTable getTableForPage(final boolean orientationIsPortrait) {
-    final PdfPTable wholePage;
-    if (orientationIsPortrait) {
-      wholePage = new PdfPTable(1); // 1 column
-    } else {
-      wholePage = new PdfPTable(2); // 2 columns
-    }
-    return wholePage;
-  }
-
-  private static class WatermarkHandler extends PdfPageEventHelper {
-
-    private final PdfGState gstate;
-
-    private final Font font;
-
-    private final BaseColor color;
-
-    private final float pagesPerScoreSheet;
-
-    private static final float WATERMARK_OPACITY = 0.2f;
-
-    private static final double PAGES_PER_SHEET_TOLERANCE = 1E-6;
-
-    private final ScoresheetGenerator generator;
-
-    /**
-     * @param pagesPerScoreSheet number of pages per score sheet, 0.5 and values
-     *          greater than or equal to 1 are supported
-     */
-    public WatermarkHandler(final ScoresheetGenerator generator,
-                            final float pagesPerScoreSheet) {
-      if (!FP.equals(pagesPerScoreSheet, 0.5, PAGES_PER_SHEET_TOLERANCE)
-          && !FP.greaterThanOrEqual(pagesPerScoreSheet, 1, PAGES_PER_SHEET_TOLERANCE)) {
-        throw new IllegalArgumentException("Allowed values for pages per score sheet are 0.5 and 1 or greater. Value is: "
-            + pagesPerScoreSheet);
-      }
-      this.pagesPerScoreSheet = pagesPerScoreSheet;
-      this.generator = generator;
-
-      font = FontFactory.getFont(FontFactory.HELVETICA, 52, Font.NORMAL);
-      color = BaseColor.BLACK;
-
-      gstate = new PdfGState();
-      gstate.setFillOpacity(WATERMARK_OPACITY);
-      gstate.setStrokeOpacity(WATERMARK_OPACITY);
-
-    }
-
-    @Override
-    public void onEndPage(final PdfWriter writer,
-                          final Document document) {
-      // Need to determine which score sheet we are on based on page number and pages
-      // per sheet.
-
-      final Rectangle pageSize = document.getPageSize();
-      final float y = pageSize.getHeight()
-          / 2;
-
-      final int currentPageNumber = writer.getCurrentPageNumber();
-      final int indexOfFirstScoreSheetOnPage;
-      if (pagesPerScoreSheet < 1) {
-        indexOfFirstScoreSheetOnPage = (int) Math.floor(currentPageNumber
-            / pagesPerScoreSheet)
-            - 2;
-
-        if (generator.isPractice(indexOfFirstScoreSheetOnPage)) {
-          final float x = pageSize.getWidth()
-              / 4;
-          addWatermark(writer, x, y);
-        }
-
-        // check the second sheet on the page
-        if (generator.isPractice(indexOfFirstScoreSheetOnPage
-            + 1)) {
-          final float x = pageSize.getWidth()
-              * 3
-              / 4;
-          addWatermark(writer, x, y);
-        }
-
-      } else {
-        indexOfFirstScoreSheetOnPage = (int) Math.ceil(currentPageNumber
-            / pagesPerScoreSheet)
-            - 1;
-        if (generator.isPractice(indexOfFirstScoreSheetOnPage)) {
-          final float x = pageSize.getWidth()
-              / 2;
-          addWatermark(writer, x, y);
-        }
-      }
-
-    }
-
-    private void addWatermark(final PdfWriter writer,
-                              final float x,
-                              final float y) {
-      final PdfContentByte contentunder = writer.getDirectContentUnder();
-      contentunder.saveState();
-      contentunder.setGState(gstate);
-      contentunder.beginText();
-      contentunder.setFontAndSize(font.getBaseFont(), font.getSize());
-      contentunder.setColorFill(color);
-      contentunder.showTextAligned(Element.ALIGN_CENTER, "PRACTICE", x, y, 45);
-      contentunder.endText();
-      contentunder.restoreState();
-    }
-
   }
 
 }
