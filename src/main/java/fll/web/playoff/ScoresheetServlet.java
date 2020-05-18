@@ -18,10 +18,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import org.apache.commons.lang3.tuple.Pair;
-
-import com.itextpdf.text.DocumentException;
-
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
@@ -48,22 +44,14 @@ public class ScoresheetServlet extends BaseFLLServlet {
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=scoreSheet.pdf");
 
-      final Pair<Boolean, Float> orientationResult = ScoresheetGenerator.guessOrientation(challengeDescription);
-      final boolean orientationIsPortrait = orientationResult.getLeft();
-      final float pagesPerScoreSheet = orientationResult.getRight();
-
       // Create the scoresheet generator - must provide correct number of
       // scoresheets
       final ScoresheetGenerator gen = new ScoresheetGenerator(request, connection, tournament, challengeDescription);
 
-      gen.writeFile(response.getOutputStream(), orientationIsPortrait, pagesPerScoreSheet);
+      gen.writeFile(response.getOutputStream());
 
     } catch (final SQLException e) {
       final String errorMessage = "There was an error talking to the database";
-      LOGGER.error(errorMessage, e);
-      throw new FLLRuntimeException(errorMessage, e);
-    } catch (final DocumentException e) {
-      final String errorMessage = "There was an error creating the PDF document - perhaps you didn't select any scoresheets to print?";
       LOGGER.error(errorMessage, e);
       throw new FLLRuntimeException(errorMessage, e);
     }

@@ -199,7 +199,7 @@ dependencies {
     
   implementation(group: "com.google.guava", name: "guava", version: "23.5-jre")
     
-  implementation(group: "org.apache.xmlgraphics", name: "fop", version: "2.4") {
+  implementation(group: "org.apache.xmlgraphics", name: "fop", version: "2.5") {
     // only needed for BMP and TIFF formats
     exclude(group: "com.sun.media", module: "jai-codec")
     
