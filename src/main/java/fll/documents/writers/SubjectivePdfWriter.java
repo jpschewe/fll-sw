@@ -47,27 +47,27 @@ public class SubjectivePdfWriter {
 
   private final String tournamentName;
 
-  private final static int NO_BORDERS = 0;
+  private static final int NO_BORDERS = 0;
 
-  private final static int NO_LEFT_RIGHT = 1;
+  private static final int NO_LEFT_RIGHT = 1;
 
-  private final static int NO_TOP_BOTTOM = 2;
+  private static final int NO_TOP_BOTTOM = 2;
 
-  private final static int NO_LEFT = 3;
+  private static final int NO_LEFT = 3;
 
-  private final static int NO_TOP = 4;
+  private static final int NO_TOP = 4;
 
-  private final static int NO_TOP_LEFT = 5;
+  private static final int NO_TOP_LEFT = 5;
 
-  private final static int TOP_ONLY = 6;
+  private static final int TOP_ONLY = 6;
 
   private static final int ALL_BORDERS = 7;
 
-  private static final BaseColor rowBlue = new BaseColor(0xB4, 0xCD, 0xED);
+  private static final BaseColor ROW_BLUE = new BaseColor(0xB4, 0xCD, 0xED);
 
-  private static final BaseColor rowYellow = new BaseColor(0xFF, 0xFF, 0xC8);
+  private static final BaseColor ROW_YELLOW = new BaseColor(0xFF, 0xFF, 0xC8);
 
-  private static final BaseColor rowRed = new BaseColor(0xF7, 0x98, 0x85);
+  private static final BaseColor ROW_RED = new BaseColor(0xF7, 0x98, 0x85);
 
   private final Font f8bRed = new Font(Font.FontFamily.HELVETICA, 8, Font.BOLD, BaseColor.RED);
 
@@ -94,6 +94,7 @@ public class SubjectivePdfWriter {
   private final String scheduleColumn;
 
   /**
+   * @param description the challenge description
    * @param sheet information about the rubric
    * @param scheduleColumn the column in the schedule used to find the times,
    *          may be null
@@ -113,15 +114,15 @@ public class SubjectivePdfWriter {
     // to red.
     switch (scoreCategory.getName()) {
     case SubjectiveConstants.CORE_VALUES_NAME:
-      sheetColor = rowRed;
+      sheetColor = ROW_RED;
       break;
     case SubjectiveConstants.PROJECT_NAME:
-      sheetColor = rowYellow;
+      sheetColor = ROW_YELLOW;
       break;
     case SubjectiveConstants.ROBOT_DESIGN_NAME:
     case SubjectiveConstants.PROGRAMMING_NAME:
     default:
-      sheetColor = rowBlue;
+      sheetColor = ROW_BLUE;
       break;
     }
 
@@ -596,8 +597,10 @@ public class SubjectivePdfWriter {
   }
 
   /**
-   * Create the document
+   * Create the document with all sheets for the specified schedule and the
+   * category specified by {@code sheetElement}.
    *
+   * @param description the challenge description
    * @param stream where to write the document
    * @param sheetElement describes the category to write
    * @param schedulerColumn used to determine the schedule information to output
