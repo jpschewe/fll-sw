@@ -1,6 +1,5 @@
 package fll.documents.writers;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -13,6 +12,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.pdfbox.pdmodel.PDDocument;
 
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
@@ -26,7 +26,6 @@ import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.documents.elements.RowElement;
@@ -584,10 +583,10 @@ public class SubjectivePdfWriter {
 
         pdf.close();
 
-        final ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-        final PdfReader reader = new PdfReader(in);
-        if (reader.getNumberOfPages() == 1) {
-          return Pair.of(font, commentHeight);
+        try (PDDocument testPdf = PDDocument.load(out.toByteArray())) {
+          if (testPdf.getNumberOfPages() == 1) {
+            return Pair.of(font, commentHeight);
+          }
         }
       } // font size
     } // comment height
