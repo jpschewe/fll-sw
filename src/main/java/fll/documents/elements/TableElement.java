@@ -5,7 +5,7 @@ import java.util.List;
 
 /**
  * This class represents a single table of the many tables on a subjective score
- * sheet
+ * sheet.
  * The single table consists of n-rows, each one being a RowElement
  * 
  * @see fll.documents.elements.RowElement
