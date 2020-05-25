@@ -35,6 +35,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.Utilities;
+import fll.xml.ChallengeDescription;
 
 /**
  * Utilities for working with Apache FOP.
@@ -861,6 +862,41 @@ public final class FOPUtils {
     addBottomPadding(element, bottomWidth);
     addLeftPadding(element, leftWidth);
     addRightPadding(element, rightWidth);
+  }
+
+  private static Element createCopyrightBlock(final Document document,
+                                              final ChallengeDescription description) {
+    final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    block.setAttribute("font-size", "6pt");
+    block.setAttribute("font-style", "italic");
+    block.setAttribute("text-align", "center");
+
+    block.appendChild(document.createTextNode("\u00A9"
+        + description.getCopyright()));
+
+    return block;
+  }
+
+  /**
+   * Create a block containing the copyright in the challenge description.
+   * 
+   * @param document used to create elements
+   * @param description the challenge description
+   * @return the content or null if there is no copyright
+   */
+  public static Element createCopyrightFooter(final Document document,
+                                              final ChallengeDescription description) {
+    if (null == description.getCopyright()) {
+      return null;
+    }
+
+    final Element staticContent = FOPUtils.createXslFoElement(document, "static-content");
+    staticContent.setAttribute("flow-name", "xsl-region-after");
+
+    final Element block = createCopyrightBlock(document, description);
+    staticContent.appendChild(block);
+
+    return staticContent;
   }
 
 }
