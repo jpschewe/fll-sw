@@ -297,28 +297,6 @@ public class ScoresheetGenerator {
     }
   }
 
-  private Element createCopyrightBlock(final Document document) {
-    final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-    block.setAttribute("font-size", "6pt");
-    block.setAttribute("font-style", "italic");
-    block.setAttribute("text-align", "center");
-
-    block.appendChild(document.createTextNode("\u00A9"
-        + this.description.getCopyright()));
-
-    return block;
-  }
-
-  private Element createCopyrightFooter(final Document document) {
-    final Element staticContent = FOPUtils.createXslFoElement(document, "static-content");
-    staticContent.setAttribute("flow-name", "xsl-region-after");
-
-    final Element block = createCopyrightBlock(document);
-    staticContent.appendChild(block);
-
-    return staticContent;
-  }
-
   private Document createDocument() {
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
 
@@ -336,8 +314,8 @@ public class ScoresheetGenerator {
     final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
     rootElement.appendChild(pageSequence);
 
-    if (null != description.getCopyright()) {
-      final Element footer = createCopyrightFooter(document);
+    final Element footer = FOPUtils.createCopyrightFooter(document, description);
+    if (null != footer) {
       pageSequence.appendChild(footer);
     }
 
@@ -365,7 +343,6 @@ public class ScoresheetGenerator {
                                    final Element practiceWatermark,
                                    final int sheetIndex) {
     final Element sheet = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-    // TODO may need to change this page break based on odd/even and rotation
     sheet.setAttribute("page-break-after", "always");
 
     if (isPractice[sheetIndex]) {
