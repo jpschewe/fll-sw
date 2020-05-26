@@ -447,6 +447,8 @@ public class SubjectivePdfWriter {
     return rubric;
   }
 
+  private static final String RUBRIC_TABLE_PADDING = "2pt";
+
   private Element createGoalGroupCell(final Document document,
                                       final String goalGroup) {
     // One should be able to just use the reference-orientation property on the
@@ -534,10 +536,11 @@ public class SubjectivePdfWriter {
       FOPUtils.addBottomBorder(topicCell, 1);
       topicCell.setAttribute("background-color", backgroundColor);
       topicCell.setAttribute("number-columns-spanned", "2");
+      topicCell.setAttribute("padding-left", RUBRIC_TABLE_PADDING);
+      topicCell.setAttribute("padding-top", RUBRIC_TABLE_PADDING);
 
       final Element topicBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
       topicCell.appendChild(topicBlock);
-      topicBlock.setAttribute("font-size", "8pt");
       topicBlock.setAttribute("font-weight", "bold");
 
       final Element topicArea = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
@@ -557,6 +560,8 @@ public class SubjectivePdfWriter {
       topicInstructions.setAttribute("background-color", backgroundColor);
       topicInstructions.setAttribute("number-columns-spanned", String.valueOf(sortedRubricRanges.size()
           - 2));
+      topicInstructions.setAttribute("padding-top", RUBRIC_TABLE_PADDING);
+      topicInstructions.setAttribute("padding-left", RUBRIC_TABLE_PADDING);
       FOPUtils.addBottomBorder(topicInstructions, 1);
       FOPUtils.addRightBorder(topicInstructions, 1);
 
@@ -575,6 +580,8 @@ public class SubjectivePdfWriter {
           rangeCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, shortDescription);
         }
         rubricRow.appendChild(rangeCell);
+        rangeCell.setAttribute("padding-top", RUBRIC_TABLE_PADDING);
+        rangeCell.setAttribute("padding-left", RUBRIC_TABLE_PADDING);
         FOPUtils.addBottomBorder(rangeCell, 1);
         FOPUtils.addRightBorder(rangeCell, 1);
 
