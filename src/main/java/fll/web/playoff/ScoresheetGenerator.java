@@ -371,8 +371,6 @@ public class ScoresheetGenerator {
     return sheet;
   }
 
-  private static final String SVG_NAMESPACE = "http://www.w3.org/2000/svg";
-
   private Element createPracticeWatermark(final Document document) {
     final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
     container.setAttribute("absolute-position", "fixed");
@@ -392,7 +390,7 @@ public class ScoresheetGenerator {
     // Practice text rotated as an SVG
     // Found an example of rotated text online and then modified the text and
     // attributes to get the desired text
-    final Element svg = document.createElementNS(SVG_NAMESPACE, "svg");
+    final Element svg = document.createElementNS(FOPUtils.SVG_NAMESPACE, "svg");
     foreignObject.appendChild(svg);
     final int svgWidth = 200;
     final int svgHeight = 200;
@@ -400,7 +398,7 @@ public class ScoresheetGenerator {
     svg.setAttribute("height", String.valueOf(svgHeight));
     svg.setAttribute("viewBox", String.format("0 0 %d %d", svgWidth, svgHeight));
 
-    final Element text = document.createElementNS(SVG_NAMESPACE, "text");
+    final Element text = document.createElementNS(FOPUtils.SVG_NAMESPACE, "text");
     svg.appendChild(text);
     text.setAttribute("style",
                       String.format("fill: black; fill-opacity: %f; font-family:Helvetica; font-size: 25px; font-style:normal;",
@@ -413,7 +411,7 @@ public class ScoresheetGenerator {
         / 2, svgHeight
             / 2));
 
-    final Element tspan = document.createElementNS(SVG_NAMESPACE, "tspan");
+    final Element tspan = document.createElementNS(FOPUtils.SVG_NAMESPACE, "tspan");
     text.appendChild(tspan);
     tspan.setAttribute("text-anchor", "middle");
     tspan.appendChild(document.createTextNode("PRACTICE"));
@@ -648,7 +646,7 @@ public class ScoresheetGenerator {
             // Jon Schewe sent an email to the Apache FOP list 5/9/2020 and didn't find an
             // answer.
             // http://mail-archives.apache.org/mod_mbox/xmlgraphics-fop-users/202005.mbox/%3Cd8da02c550c0271943a651c13d7218377efc7137.camel%40mtu.net%3E
-            final Element categoryCell = FOPUtils.createXslFoElement(document, "table-cell");
+            final Element categoryCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
             row.appendChild(categoryCell);
             categoryCell.setAttribute("number-rows-spanned", String.valueOf(categoryRowSpan));
 
@@ -663,7 +661,7 @@ public class ScoresheetGenerator {
             categoryCellForeign.setAttribute("height", "100%");
             categoryCellForeign.setAttribute("width", "100%");
 
-            final Element svg = document.createElementNS(SVG_NAMESPACE, "svg");
+            final Element svg = document.createElementNS(FOPUtils.SVG_NAMESPACE, "svg");
             categoryCellForeign.appendChild(svg);
             final int svgWidth = 25;
             final int svgHeight = 25;
@@ -671,7 +669,7 @@ public class ScoresheetGenerator {
             svg.setAttribute("height", String.valueOf(svgHeight));
             svg.setAttribute("viewBox", String.format("0 0 %d %d", svgWidth, svgHeight));
 
-            final Element text = document.createElementNS(SVG_NAMESPACE, "text");
+            final Element text = document.createElementNS(FOPUtils.SVG_NAMESPACE, "text");
             svg.appendChild(text);
             text.setAttribute("style", "fill: black; font-family:Helvetica; font-size: 12px; font-style:normal;");
             text.setAttribute("x", String.valueOf(svgWidth
@@ -682,7 +680,7 @@ public class ScoresheetGenerator {
                 / 2, svgHeight
                     / 2));
 
-            final Element tspan = document.createElementNS(SVG_NAMESPACE, "tspan");
+            final Element tspan = document.createElementNS(FOPUtils.SVG_NAMESPACE, "tspan");
             text.appendChild(tspan);
             tspan.setAttribute("text-anchor", "middle");
             tspan.appendChild(document.createTextNode(category));
@@ -738,7 +736,7 @@ public class ScoresheetGenerator {
             // order of yes/no needs to match ScoreEntry.generateYesNoButtons
             goalValue = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT, "NO / YES");
           } else {
-            goalValue = FOPUtils.createXslFoElement(document, "table-cell");
+            goalValue = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
 
             final String range = "("
                 + minStr

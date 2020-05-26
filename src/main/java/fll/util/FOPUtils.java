@@ -42,13 +42,18 @@ import fll.xml.ChallengeDescription;
  */
 public final class FOPUtils {
 
+  private FOPUtils() {
+  }
+
   /**
    * Standard padding for most report tables.
    */
   public static final double TABLE_CELL_STANDARD_PADDING = 2;
 
-  private FOPUtils() {
-  }
+  /**
+   * Namespace for SVG elements. This is used when embedding SVG graphics.
+   */
+  public static final String SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 
   /**
    * Namespace for XSL-FO.
@@ -273,6 +278,11 @@ public final class FOPUtils {
   public static final String TABLE_TAG = "table";
 
   /**
+   * Tag name for inline element.
+   */
+  public static final String INLINE_TAG = "inline";
+
+  /**
    * Count the number of columns in the table.
    * 
    * @param table the table element
@@ -335,6 +345,21 @@ public final class FOPUtils {
    * Block container tag.
    */
   public static final String BLOCK_CONTAINER_TAG = "block-container";
+
+  /**
+   * Table cell tag.
+   */
+  public static final String TABLE_CELL_TAG = "table-cell";
+
+  /**
+   * Table body tag.
+   */
+  public static final String TABLE_BODY_TAG = "table-body";
+
+  /**
+   * Table row tag.
+   */
+  public static final String TABLE_ROW_TAG = "table-row";
 
   /**
    * Block tag.
@@ -417,7 +442,7 @@ public final class FOPUtils {
                                                                       .collect(Collectors.joining(","))));
     }
 
-    final Element cell = createXslFoElement(document, "table-cell");
+    final Element cell = createXslFoElement(document, TABLE_CELL_TAG);
 
     final Element blockContainer = createXslFoElement(document, BLOCK_CONTAINER_TAG);
     if (noWrap) {

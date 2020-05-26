@@ -210,7 +210,7 @@ public class SubjectivePdfWriter {
     final Element row1 = FOPUtils.createXslFoElement(document, "table-row");
     tableBody.appendChild(row1);
 
-    final Element imageCell = FOPUtils.createXslFoElement(document, "table-cell");
+    final Element imageCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
     row1.appendChild(imageCell);
     imageCell.setAttribute("number-rows-spanned", "2");
 
@@ -232,7 +232,7 @@ public class SubjectivePdfWriter {
     imageGraphic.setAttribute("src", String.format("url('data:image/png;base64,%s')", imageBase64));
 
     // Combine category title and team number to make better use of space
-    final Element categoryTeamNumberCell = FOPUtils.createXslFoElement(document, "table-cell");
+    final Element categoryTeamNumberCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
     row1.appendChild(categoryTeamNumberCell);
     categoryTeamNumberCell.setAttribute("font-weight", "bold");
     categoryTeamNumberCell.setAttribute("number-columns-spanned", "2");
@@ -245,12 +245,12 @@ public class SubjectivePdfWriter {
     final Element categoryTeamNumberBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     categoryTeamNumberContainer.appendChild(categoryTeamNumberBlock);
 
-    final Element categoryTitle = FOPUtils.createXslFoElement(document, "inline");
+    final Element categoryTitle = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
     categoryTeamNumberBlock.appendChild(categoryTitle);
     categoryTitle.setAttribute("font-size", "20pt");
     categoryTitle.appendChild(document.createTextNode(scoreCategory.getTitle()));
 
-    final Element teamNumber = FOPUtils.createXslFoElement(document, "inline");
+    final Element teamNumber = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
     categoryTeamNumberBlock.appendChild(teamNumber);
     teamNumber.setAttribute("font-size", "12pt");
     teamNumber.appendChild(document.createTextNode(String.format("    Team Number: %d", teamInfo.getTeamNumber())));
@@ -718,7 +718,148 @@ public class SubjectivePdfWriter {
 
     tableBody.appendChild(createRubricHeaderRow(document, tableBody));
 
+    for (final String category : sheetElement.getCategories()) {
+      addRubricCategory(document, tableBody, sheetElement.getTableElement(category));
+    }
+
     return rubric;
+  }
+
+  private Element createGoalGroupCell(final Document document,
+                                      final String goalGroup) {
+    // One should be able to just use the reference-orientation property on the
+    // text cell. However when this is done the cells aren't properly sized and the
+    // text gets put in the wrong place.
+    //
+    // Jon Schewe sent an email to the Apache FOP list 5/9/2020 and didn't find an
+    // answer.
+    // http://mail-archives.apache.org/mod_mbox/xmlgraphics-fop-users/202005.mbox/%3Cd8da02c550c0271943a651c13d7218377efc7137.camel%40mtu.net%3E
+    final Element goalGroupCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
+
+    final Element categoryCellContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+    goalGroupCell.appendChild(categoryCellContainer);
+    final Element categoryCellBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    categoryCellContainer.appendChild(categoryCellBlock);
+
+    final Element categoryCellForeign = FOPUtils.createXslFoElement(document, "instream-foreign-object");
+    categoryCellBlock.appendChild(categoryCellForeign);
+    categoryCellForeign.setAttribute("content-height", "scale-to-fit");
+    categoryCellForeign.setAttribute("content-width", "scale-to-fit");
+    categoryCellForeign.setAttribute("height", "100%");
+    categoryCellForeign.setAttribute("width", "100%");
+
+    final Element svg = document.createElementNS(FOPUtils.SVG_NAMESPACE, "svg");
+    categoryCellForeign.appendChild(svg);
+    final int svgWidth = 25;
+    final int svgHeight = 25;
+    svg.setAttribute("width", String.valueOf(svgWidth));
+    svg.setAttribute("height", String.valueOf(svgHeight));
+    svg.setAttribute("viewBox", String.format("0 0 %d %d", svgWidth, svgHeight));
+
+    final Element text = document.createElementNS(FOPUtils.SVG_NAMESPACE, "text");
+    svg.appendChild(text);
+    text.setAttribute("style",
+                      "fill: black; font-family:Helvetica; font-size: 8pt; font-weight: bold; font-style:normal;");
+    text.setAttribute("x", String.valueOf(svgWidth
+        / 2));
+    text.setAttribute("y", String.valueOf(svgHeight
+        / 2));
+    text.setAttribute("transform", String.format("rotate(-90, %d, %d)", svgWidth
+        / 2, svgHeight
+            / 2));
+
+    final Element tspan = document.createElementNS(FOPUtils.SVG_NAMESPACE, "tspan");
+    text.appendChild(tspan);
+    tspan.setAttribute("text-anchor", "middle");
+    tspan.appendChild(document.createTextNode(goalGroup));
+
+    return goalGroupCell;
+  }
+
+  private void addRubricCategory(final Document document,
+                                 final Element tableBody,
+                                 final TableElement tableData) {
+
+    // This is the 90 degree turned title for the left side of the table
+    final Element goalGroupCell = createGoalGroupCell(document, tableData.getSubjectiveCatetory());
+    FOPUtils.addBottomBorder(goalGroupCell, 1);
+    FOPUtils.addRightBorder(goalGroupCell, 1);
+    // This is the total number of columns for this table. Each subsection of
+    // the table is 2 rows (colored title row, description row)
+    goalGroupCell.setAttribute("number-rows-spanned", String.valueOf(tableData.getRowElements().size()
+        * 2));
+
+    boolean firstRow = true;
+    final List<RowElement> rows = tableData.getRowElements();
+    for (final RowElement rowElement : rows) {
+      final Element instructionsRow = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
+      tableBody.appendChild(instructionsRow);
+
+      final List<RubricRange> sortedRubricRanges = rowElement.getSortedRubricRanges();
+
+      if (firstRow) {
+        // need to put the goal group name in the first row
+        instructionsRow.appendChild(goalGroupCell);
+        firstRow = false;
+      }
+
+      final String backgroundColor = String.format("#%02x%02x%02x", sheetColor.getRed(), sheetColor.getGreen(),
+                                                   sheetColor.getBlue());
+
+      // This is the title row with the background color
+      final Element topicCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
+      instructionsRow.appendChild(topicCell);
+      FOPUtils.addBottomBorder(topicCell, 1);
+      topicCell.setAttribute("background-color", backgroundColor);
+      topicCell.setAttribute("number-columns-spanned", "2");
+
+      final Element topicBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      topicCell.appendChild(topicBlock);
+      topicBlock.setAttribute("font-size", "8pt");
+      topicBlock.setAttribute("font-weight", "bold");
+
+      final Element topicArea = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
+      topicBlock.appendChild(topicArea);
+      topicArea.appendChild(document.createTextNode(rowElement.getRowTitle()));
+
+      if (rowElement.getGoal().isRequired()) {
+        final Element required = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
+        topicBlock.appendChild(required);
+        required.setAttribute("color", "red");
+        required.appendChild(document.createTextNode(" *"));
+      }
+
+      final Element topicInstructions = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
+                                                                 rowElement.getDescription());
+      instructionsRow.appendChild(topicInstructions);
+      topicInstructions.setAttribute("background-color", backgroundColor);
+      topicInstructions.setAttribute("number-columns-spanned", String.valueOf(sortedRubricRanges.size()
+          - 2));
+      FOPUtils.addBottomBorder(topicInstructions, 1);
+      FOPUtils.addRightBorder(topicInstructions, 1);
+
+      // These are the cells with the descriptions for each level of
+      // accomplishment
+      final Element rubricRow = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
+      tableBody.appendChild(rubricRow);
+
+      for (final RubricRange rubricRange : sortedRubricRanges) {
+        final Element rangeCell;
+        final String rawShortDescription = rubricRange.getShortDescription();
+        if (null == rawShortDescription) {
+          rangeCell = FOPUtils.createTableCell(document, null, "");
+        } else {
+          final String shortDescription = rawShortDescription.trim().replaceAll("\\s+", " ");
+          rangeCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, shortDescription);
+        }
+        rubricRow.appendChild(rangeCell);
+        FOPUtils.addBottomBorder(rangeCell, 1);
+        FOPUtils.addRightBorder(rangeCell, 1);
+
+      }
+
+    } // foreach row
+
   }
 
   private Element createRubricHeaderRow(final Document document,
