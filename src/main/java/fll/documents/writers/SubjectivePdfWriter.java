@@ -5,6 +5,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalTime;
 import java.util.Base64;
 import java.util.Collections;
@@ -283,9 +286,9 @@ public class SubjectivePdfWriter {
    * @param tournamentName displayed on the sheets
    * @return point size to use and the number of rows for the comment sheet
    */
-  private static Pair<Integer, Integer> determineParameters(@Nonnull final ChallengeDescription description,
-                                                            @Nonnull final String tournamentName,
-                                                            @Nonnull final SheetElement sheetElement) {
+  private static Pair<Integer, Double> determineParameters(@Nonnull final ChallengeDescription description,
+                                                           @Nonnull final String tournamentName,
+                                                           @Nonnull final SheetElement sheetElement) {
 
     final TeamScheduleInfo teamInfo = new TeamScheduleInfo(1);
     teamInfo.setDivision("dummy");
@@ -296,8 +299,8 @@ public class SubjectivePdfWriter {
     final List<TeamScheduleInfo> schedule = Collections.singletonList(teamInfo);
 
     // FIXME think about how to balance point size and comment height
-    for (int commentHeight = 40; commentHeight > 2; --commentHeight) {
-      for (int pointSize = 9; pointSize >= 6; --pointSize) {
+    for (int pointSize = 9; pointSize >= 6; --pointSize) {
+      for (double commentHeight = 5; commentHeight > 1; commentHeight -= 0.1) {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
           final SubjectivePdfWriter writer = new SubjectivePdfWriter(description, tournamentName, sheetElement, null);
@@ -320,11 +323,11 @@ public class SubjectivePdfWriter {
           throw new FLLInternalException("Internal error determining parameters for subjective sheets", e);
         }
 
-      } // point size
-    } // comment height
+      } // comment height
+    } // point size
 
-    // no font size fit, just use 10 with comment height 2
-    return Pair.of(10, 2);
+    // no font size fit, just use 10 with comment height 0.1
+    return Pair.of(10, 0.2);
   }
 
   /**
@@ -349,9 +352,9 @@ public class SubjectivePdfWriter {
                                     @Nonnull final List<TeamScheduleInfo> schedule)
       throws IOException {
 
-    final Pair<Integer, Integer> parameters = determineParameters(description, tournamentName, sheetElement);
+    final Pair<Integer, Double> parameters = determineParameters(description, tournamentName, sheetElement);
     final int pointSize = parameters.getLeft();
-    final int commentHeight = parameters.getRight();
+    final double commentHeight = parameters.getRight();
 
     LOGGER.debug("Point size: {} comment height: {}", pointSize, commentHeight);
 
@@ -360,6 +363,11 @@ public class SubjectivePdfWriter {
 
     try {
       final Document document = writer.createDocument(schedule, pointSize, commentHeight);
+      try (Writer w = Files.newBufferedWriter(Paths.get("subjective.fo"))) {
+        XMLUtils.writeXML(document, w);
+      } catch (final IOException e) {
+        throw new RuntimeException(e);
+      }
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
       FOPUtils.renderPdf(fopFactory, document, stream);
@@ -371,11 +379,11 @@ public class SubjectivePdfWriter {
 
   private static final double FOOTER_HEIGHT = 0.1;
 
-  private static final Margins MARGINS = new Margins(0.5, 0.5, 0.25, 0.1);
+  private static final Margins MARGINS = new Margins(0.20, FOOTER_HEIGHT, 0.45, 0.45);
 
   private Document createDocument(final List<TeamScheduleInfo> schedule,
                                   final int pointSize,
-                                  final int commentHeight) {
+                                  final double commentHeight) {
     final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
 
     final Element rootElement = FOPUtils.createRoot(document);
@@ -414,7 +422,7 @@ public class SubjectivePdfWriter {
 
   private Element createSheet(final Document document,
                               final TeamScheduleInfo teamInfo,
-                              final int commentHeight,
+                              final double commentHeight,
                               final int[] columnWidths) {
     final Element sheet = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     sheet.setAttribute("page-break-after", "always");
@@ -626,7 +634,7 @@ public class SubjectivePdfWriter {
   }
 
   private Element createCommentsBlock(final Document document,
-                                      final int height) {
+                                      final double height) {
     final Element commentsTable = FOPUtils.createBasicTable(document);
 
     commentsTable.appendChild(FOPUtils.createTableColumn(document, 1));
@@ -667,19 +675,16 @@ public class SubjectivePdfWriter {
     thinkAbout.setAttribute("color", lightGray);
 
     // empty space
-    for (int row = 0; row < height; ++row) {
-      final Element rowElement = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
-      tableBody.appendChild(rowElement);
+    final Element rowElement = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
+    tableBody.appendChild(rowElement);
+    rowElement.setAttribute("height", String.format("%fin", height));
 
-      final Element left = FOPUtils.createTableCell(document, null, String.valueOf(Utilities.NON_BREAKING_SPACE));
-      rowElement.appendChild(left);
-      FOPUtils.addRightBorder(left, 1);
-      left.setAttribute("font-size", "6pt");
+    final Element left = FOPUtils.createTableCell(document, null, String.valueOf(Utilities.NON_BREAKING_SPACE));
+    rowElement.appendChild(left);
+    FOPUtils.addRightBorder(left, 1);
 
-      final Element right = FOPUtils.createTableCell(document, null, String.valueOf(Utilities.NON_BREAKING_SPACE));
-      rowElement.appendChild(right);
-      right.setAttribute("font-size", "6pt");
-    }
+    final Element right = FOPUtils.createTableCell(document, null, String.valueOf(Utilities.NON_BREAKING_SPACE));
+    rowElement.appendChild(right);
 
     // use back if needed
     final Element useBackRow = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
