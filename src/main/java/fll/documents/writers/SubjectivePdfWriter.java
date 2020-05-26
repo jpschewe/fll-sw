@@ -37,6 +37,7 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
+import fll.Utilities;
 import fll.documents.elements.RowElement;
 import fll.documents.elements.SheetElement;
 import fll.documents.elements.TableElement;
@@ -700,7 +701,9 @@ public class SubjectivePdfWriter {
     final Element rubric = createRubric(document, columnWidths);
     sheet.appendChild(rubric);
 
-    // FIXME comments
+    final Element comments = createCommentsBlock(document, commentHeight);
+    sheet.appendChild(comments);
+    comments.setAttribute("space-before", "3");
 
     return sheet;
   }
@@ -888,6 +891,77 @@ public class SubjectivePdfWriter {
     }
 
     return headerRow;
+  }
+
+  private Element createCommentsBlock(final Document document,
+                                      final int height) {
+    final Element commentsTable = FOPUtils.createBasicTable(document);
+
+    commentsTable.appendChild(FOPUtils.createTableColumn(document, 1));
+    commentsTable.appendChild(FOPUtils.createTableColumn(document, 1));
+
+    final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
+    commentsTable.appendChild(tableBody);
+
+    final Element commentsLabelRow = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
+    tableBody.appendChild(commentsLabelRow);
+
+    final Element commentsLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "Comments");
+    commentsLabelRow.appendChild(commentsLabel);
+    commentsLabel.setAttribute("font-size", "10pt");
+    commentsLabel.setAttribute("font-weight", "bold");
+    commentsLabel.setAttribute("number-columns-spanned", "2");
+
+    // great job and think about labels
+    final Element labelsRow = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
+    tableBody.appendChild(labelsRow);
+
+    final String lightGray = String.format("#%02x%02x%02x", Color.LIGHT_GRAY.getRed(), Color.LIGHT_GRAY.getGreen(),
+                                           Color.LIGHT_GRAY.getBlue());
+
+    final Element greatJob = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "Great job...");
+    labelsRow.appendChild(greatJob);
+    FOPUtils.addRightBorder(greatJob, 1);
+    greatJob.setAttribute("font-size", "12pt");
+    greatJob.setAttribute("font-weight", "bold");
+    greatJob.setAttribute("font-style", "italic");
+    greatJob.setAttribute("color", lightGray);
+
+    final Element thinkAbout = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "Think about...");
+    labelsRow.appendChild(thinkAbout);
+    thinkAbout.setAttribute("font-size", "12pt");
+    thinkAbout.setAttribute("font-weight", "bold");
+    thinkAbout.setAttribute("font-style", "italic");
+    thinkAbout.setAttribute("color", lightGray);
+
+    // empty space
+    for (int row = 0; row < height; ++row) {
+      final Element rowElement = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
+      tableBody.appendChild(rowElement);
+
+      final Element left = FOPUtils.createTableCell(document, null, String.valueOf(Utilities.NON_BREAKING_SPACE));
+      rowElement.appendChild(left);
+      FOPUtils.addRightBorder(left, 1);
+      left.setAttribute("font-size", "6pt");
+
+      final Element right = FOPUtils.createTableCell(document, null, String.valueOf(Utilities.NON_BREAKING_SPACE));
+      rowElement.appendChild(right);
+      right.setAttribute("font-size", "6pt");
+    }
+
+    // use back if needed
+    final Element useBackRow = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
+    tableBody.appendChild(useBackRow);
+
+    final Element useBackCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                         "Judges: Use the back for additional comments if needed!");
+    useBackRow.appendChild(useBackCell);
+    useBackCell.setAttribute("number-columns-spanned", "2");
+    useBackCell.setAttribute("font-size", "8pt");
+    useBackCell.setAttribute("font-style", "italic");
+    useBackCell.setAttribute("color", lightGray);
+
+    return commentsTable;
   }
 
 }
