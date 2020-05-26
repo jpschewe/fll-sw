@@ -32,6 +32,7 @@ import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
+import fll.util.FOPUtils.Margins;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.Goal;
@@ -368,6 +369,10 @@ public class SubjectivePdfWriter {
 
   }
 
+  private static final double FOOTER_HEIGHT = 0.1;
+
+  private static final Margins MARGINS = new Margins(0.5, 0.5, 0.25, 0.1);
+
   private Document createDocument(final List<TeamScheduleInfo> schedule,
                                   final int pointSize,
                                   final int commentHeight) {
@@ -382,7 +387,8 @@ public class SubjectivePdfWriter {
     rootElement.appendChild(layoutMasterSet);
 
     final String pageMasterName = "simple";
-    FOPUtils.createSimplePageMaster(document, layoutMasterSet, pageMasterName);
+    FOPUtils.createSimplePageMaster(document, layoutMasterSet, pageMasterName, FOPUtils.PAGE_LETTER_SIZE, MARGINS, 0,
+                                    FOOTER_HEIGHT);
 
     final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
     rootElement.appendChild(pageSequence);
