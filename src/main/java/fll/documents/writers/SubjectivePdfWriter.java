@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalTime;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -35,7 +36,6 @@ import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.Utilities;
 import fll.documents.elements.RowElement;
@@ -560,14 +560,10 @@ public class SubjectivePdfWriter {
    * @param sheetElement describes the subjective category to output
    * @param tournamentName displayed on the sheets
    * @return point size to use and the number of rows for the comment sheet
-   * @throws MalformedURLException
-   * @throws IOException
-   * @throws DocumentException
    */
   private static Pair<Integer, Integer> determineParameters(@Nonnull final ChallengeDescription description,
                                                             @Nonnull final String tournamentName,
-                                                            @Nonnull final SheetElement sheetElement)
-      throws MalformedURLException, IOException, DocumentException {
+                                                            @Nonnull final SheetElement sheetElement) {
 
     final TeamScheduleInfo teamInfo = new TeamScheduleInfo(1);
     teamInfo.setDivision("dummy");
@@ -575,30 +571,34 @@ public class SubjectivePdfWriter {
     teamInfo.setOrganization("Dummy");
     teamInfo.setTeamName("Dummy");
 
-    for (int commentHeight = 20; commentHeight > 2; --commentHeight) {
+    final List<TeamScheduleInfo> schedule = Collections.singletonList(teamInfo);
+
+    //FIXME think about how to balance point size and comment height
+    for (int commentHeight = 40; commentHeight > 2; --commentHeight) {
       for (int pointSize = 9; pointSize >= 6; --pointSize) {
-        final Font font = new Font(Font.FontFamily.HELVETICA, pointSize);
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
-        final com.itextpdf.text.Document pdf = SubjectivePdfWriter.createStandardDocument();
+          final SubjectivePdfWriter writer = new SubjectivePdfWriter(description, tournamentName, sheetElement, null);
 
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+          try {
+            final Document document = writer.createDocument(schedule, pointSize, commentHeight);
+            final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
 
-        PdfWriter.getInstance(pdf, out);
-
-        pdf.open();
-
-        final SubjectivePdfWriter writer = new SubjectivePdfWriter(description, tournamentName, sheetElement, null);
-
-        writer.writeTeamSubjectivePdf(pdf, teamInfo, font, commentHeight);
-
-        pdf.close();
-
-        try (PDDocument testPdf = PDDocument.load(out.toByteArray())) {
-          if (testPdf.getNumberOfPages() == 1) {
-            return Pair.of(pointSize, commentHeight);
+            FOPUtils.renderPdf(fopFactory, document, out);
+          } catch (FOPException | TransformerException e) {
+            throw new FLLInternalException("Error creating the subjective schedule PDF", e);
           }
+
+          try (PDDocument testPdf = PDDocument.load(out.toByteArray())) {
+            if (testPdf.getNumberOfPages() == 1) {
+              return Pair.of(pointSize, commentHeight);
+            }
+          }
+        } catch (final IOException e) {
+          throw new FLLInternalException("Internal error determining parameters for subjective sheets", e);
         }
-      } // font size
+
+      } // point size
     } // comment height
 
     // no font size fit, just use 10 with comment height 2
