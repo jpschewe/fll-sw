@@ -155,9 +155,9 @@ public class SubjectivePdfWriter {
                                       final Font font,
                                       final int commentHeight)
       throws MalformedURLException, IOException, DocumentException {
-    final Pair<Integer, int[]> headerInfo = getTableColumnInformation(sheetElement.getRubricRangeTitles());
+    final int[] columnWidths = getTableColumnInformation(sheetElement.getRubricRangeTitles());
 
-    final PdfPTable table = createStandardRubricTable(headerInfo.getLeft(), headerInfo.getRight());
+    final PdfPTable table = createStandardRubricTable(columnWidths.length, columnWidths);
     // writeHeader(doc, teamInfo, headerInfo.getLeft(), headerInfo.getRight());
     for (final String category : sheetElement.getCategories()) {
       writeRubricTable(table, sheetElement.getTableElement(category), font);
@@ -192,9 +192,7 @@ public class SubjectivePdfWriter {
   }
 
   private Element createHeader(final Document document,
-                               final TeamScheduleInfo teamInfo,
-                               final int numColumns,
-                               final int[] colWidths) {
+                               final TeamScheduleInfo teamInfo) {
     final Element header = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
 
     final Element pageHeaderTable = FOPUtils.createBasicTable(document);
@@ -314,43 +312,14 @@ public class SubjectivePdfWriter {
       requiredBlock.setAttribute("font-size", "9pt");
       requiredBlock.setAttribute("font-weight", "bold");
       requiredBlock.setAttribute("color", "red");
+      requiredBlock.setAttribute("space-before", "5");
       requiredBlock.appendChild(document.createTextNode("* Required for Award Consideration"));
     }
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // TOP TITLE BAR START
-    //
-    // This is the top of the comment sheet where the titles from left to right
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////// are
-    // Beginning, Developing, Accomplished, Exemplary
-    // This is the same title bar across the tops of all the comment sheet
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////// tables.
-    //
-    // FIXME this should be combined into the table used for the score sheet
-    //
-    // final List<String> rubricRangeTitles = sheetElement.getRubricRangeTitles();
-    //
-    // final PdfPTable columnTitlesTable = new PdfPTable(numColumns);
-    //
-    // columnTitlesTable.setSpacingBefore(5);
-    // columnTitlesTable.setWidthPercentage(100f);
-    // columnTitlesTable.setWidths(colWidths);
-    // columnTitlesTable.addCell(createCell("", f10b, borders)); // goal group
-    //
-    // for (final String title : rubricRangeTitles) {
-    // if (null == title) {
-    // columnTitlesTable.addCell(createCell("", f10b, borders));
-    // } else {
-    // columnTitlesTable.addCell(createCell(title, f10b, borders));
-    // }
-    // }
-    // columnTitlesTable.setSpacingAfter(3);
-    //
 
     return header;
   }
 
-  private static Pair<Integer, int[]> getTableColumnInformation(final List<String> rubricTitles) {
+  private static int[] getTableColumnInformation(final List<String> rubricTitles) {
     final List<Integer> colWidthsList = new LinkedList<>();
     colWidthsList.add(4); // goal group
 
@@ -365,7 +334,7 @@ public class SubjectivePdfWriter {
 
     final int[] colWidths = colWidthsList.stream().mapToInt(Integer::intValue).toArray();
 
-    return Pair.of(colWidths.length, colWidths);
+    return colWidths;
   }
 
   private void writeCommentsBlock(final com.itextpdf.text.Document doc,
@@ -706,11 +675,11 @@ public class SubjectivePdfWriter {
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
 
-    final Pair<Integer, int[]> headerInfo = getTableColumnInformation(sheetElement.getRubricRangeTitles());
+    final int[] columnWidths = getTableColumnInformation(sheetElement.getRubricRangeTitles());
 
     // Go through all of the team schedules and put them all into a pdf
     for (final TeamScheduleInfo teamInfo : schedule) {
-      final Element sheet = createSheet(document, teamInfo, commentHeight, headerInfo);
+      final Element sheet = createSheet(document, teamInfo, commentHeight, columnWidths);
       documentBody.appendChild(sheet);
     }
 
@@ -720,14 +689,64 @@ public class SubjectivePdfWriter {
   private Element createSheet(final Document document,
                               final TeamScheduleInfo teamInfo,
                               final int commentHeight,
-                              final Pair<Integer, int[]> headerInfo) {
+                              final int[] columnWidths) {
     final Element sheet = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     sheet.setAttribute("page-break-after", "always");
 
-    final Element header = createHeader(document, teamInfo, headerInfo.getLeft(), headerInfo.getRight());
+    final Element header = createHeader(document, teamInfo);
     sheet.appendChild(header);
+    header.setAttribute("space-after", "5");
+
+    final Element rubric = createRubric(document, columnWidths);
+    sheet.appendChild(rubric);
+
+    // FIXME comments
 
     return sheet;
+  }
+
+  private Element createRubric(final Document document,
+                               final int[] columnWidths) {
+    final Element rubric = FOPUtils.createBasicTable(document);
+
+    for (final int width : columnWidths) {
+      rubric.appendChild(FOPUtils.createTableColumn(document, width));
+    }
+
+    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    rubric.appendChild(tableBody);
+
+    tableBody.appendChild(createRubricHeaderRow(document, tableBody));
+
+    return rubric;
+  }
+
+  private Element createRubricHeaderRow(final Document document,
+                                        final Element tableBody) {
+    final Element headerRow = FOPUtils.createXslFoElement(document, "table-row");
+    tableBody.appendChild(headerRow);
+    headerRow.setAttribute("font-size", "10pt");
+    headerRow.setAttribute("font-weight", "bold");
+
+    final List<String> rubricRangeTitles = sheetElement.getRubricRangeTitles();
+
+    // goal group
+    final Element goalGroup = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "");
+    headerRow.appendChild(goalGroup);
+    FOPUtils.addBottomBorder(goalGroup, 1);
+
+    for (final String title : rubricRangeTitles) {
+      final Element titleCell;
+      if (null == title) {
+        titleCell = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "");
+      } else {
+        titleCell = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, title);
+      }
+      FOPUtils.addBottomBorder(titleCell, 1);
+      headerRow.appendChild(titleCell);
+    }
+
+    return headerRow;
   }
 
 }
