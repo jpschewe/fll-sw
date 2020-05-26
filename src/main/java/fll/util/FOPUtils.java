@@ -167,11 +167,11 @@ public final class FOPUtils {
     simplePageMaster.appendChild(body);
 
     final Element header = createXslFoElement(document, "region-before");
-    header.setAttribute("extent", String.format("%sin", headerHeight));
+    header.setAttribute("extent", String.format("%fin", headerHeight));
     simplePageMaster.appendChild(header);
 
     final Element footer = createXslFoElement(document, "region-after");
-    footer.setAttribute("extent", String.format("%sin", footerHeight));
+    footer.setAttribute("extent", String.format("%fin", footerHeight));
     simplePageMaster.appendChild(footer);
 
     return simplePageMaster;
@@ -688,11 +688,6 @@ public final class FOPUtils {
   public static String renderColor(final Color c) {
     return String.format("#%02x%02x%02x", c.getRed(), c.getGreen(), c.getBlue());
   }
-
-  /**
-   * Tag used to create a table row.
-   */
-  public static final String TABLE_ROW_TAG = "table-row";
 
   /**
    * Create a table row that cannot span pages.
