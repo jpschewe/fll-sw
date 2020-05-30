@@ -422,7 +422,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
       throws SQLException {
 
     try (
-        final PreparedStatement prep = connection.prepareStatement("SELECT final_scores.team_number, final_scores.final_score"//
+        PreparedStatement prep = connection.prepareStatement("SELECT final_scores.team_number, final_scores.final_score"//
             + " FROM final_scores, TournamentTeams" //
             + " WHERE final_scores.tournament = ?" //
             + " AND TournamentTeams.Tournament = final_scores.tournament" //
@@ -443,7 +443,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
       int numTied = 1;
       int rank = 0;
       double prevScore = Double.NaN;
-      try (final ResultSet rs = prep.executeQuery()) {
+      try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {
           final int teamNumber = rs.getInt(1);
           double score = rs.getDouble(2);
