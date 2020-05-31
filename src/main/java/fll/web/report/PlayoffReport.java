@@ -115,6 +115,7 @@ public class PlayoffReport extends BaseFLLServlet {
 
     final Element header = createHeader(document, challengeDescription, tournament);
     pageSequence.appendChild(header);
+    pageSequence.setAttribute("id", FOPUtils.PAGE_SEQUENCE_NAME);
 
     final Element footer = FOPUtils.createSimpleFooter(document);
     pageSequence.appendChild(footer);

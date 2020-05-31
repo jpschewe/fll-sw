@@ -615,8 +615,7 @@ public class ScoresheetGenerator {
     block.appendChild(document.createTextNode("Data Entry Score _______"));
 
     // add leader to take up the space between the 2 blocks of text
-    final Element space = FOPUtils.createXslFoElement(document, "leader");
-    space.setAttribute("leader-pattern", "space");
+    final Element space = FOPUtils.createHorizontalSpace(document);
     block.appendChild(space);
 
     block.appendChild(document.createTextNode("2nd Check Initials _______"));

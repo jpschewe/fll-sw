@@ -125,6 +125,7 @@ public class AwardsReport extends BaseFLLServlet {
 
     final Element footer = FOPUtils.createSimpleFooter(document);
     pageSequence.appendChild(footer);
+    pageSequence.setAttribute("id", FOPUtils.PAGE_SEQUENCE_NAME);
 
     final Element documentBody = FOPUtils.createBody(document);
     pageSequence.appendChild(documentBody);
