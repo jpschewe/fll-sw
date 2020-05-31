@@ -5,11 +5,8 @@
  */
 package fll.web.playoff;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -615,8 +612,7 @@ public class ScoresheetGenerator {
     block.appendChild(document.createTextNode("Data Entry Score _______"));
 
     // add leader to take up the space between the 2 blocks of text
-    final Element space = FOPUtils.createXslFoElement(document, "leader");
-    space.setAttribute("leader-pattern", "space");
+    final Element space = FOPUtils.createHorizontalSpace(document);
     block.appendChild(space);
 
     block.appendChild(document.createTextNode("2nd Check Initials _______"));

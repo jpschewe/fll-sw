@@ -87,6 +87,7 @@ public final class ScheduleWriter {
 
     final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
     rootElement.appendChild(pageSequence);
+    pageSequence.setAttribute("id", FOPUtils.PAGE_SEQUENCE_NAME);
 
     final Element footer = FOPUtils.createSimpleFooter(document);
     pageSequence.appendChild(footer);

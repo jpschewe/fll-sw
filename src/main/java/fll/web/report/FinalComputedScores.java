@@ -5,13 +5,12 @@
  */
 package fll.web.report;
 
+import java.awt.Color;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -27,17 +26,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
+import javax.xml.transform.TransformerException;
 
-import com.itextpdf.text.BaseColor;
-import com.itextpdf.text.Chunk;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.FontFactory;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.Phrase;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
+import org.apache.fop.apps.FOPException;
+import org.apache.fop.apps.FopFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
@@ -45,9 +39,10 @@ import fll.Utilities;
 import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.db.TournamentParameters;
+import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
+import fll.util.FOPUtils;
 import fll.util.FP;
-import fll.util.PdfUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.playoff.DatabaseTeamScore;
@@ -59,6 +54,7 @@ import fll.xml.ScoreType;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.WinnerType;
 import net.mtu.eggplant.util.sql.SQLFunctions;
+import net.mtu.eggplant.xml.XMLUtils;
 
 /**
  * Final computed scores report.
@@ -72,7 +68,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
    */
   public static final double TIE_TOLERANCE = 1E-6;
 
-  private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+  private static final double HEADER_MARGIN_INCHES = 0.8;
+
+  private static final double FOOTER_MARGIN_INCHES = 0.5;
 
   @Override
   protected void processRequest(final HttpServletRequest request,
@@ -85,10 +83,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
       return;
     }
 
-    Connection connection = null;
-    try {
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
-      connection = datasource.getConnection();
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+
+    try (Connection connection = datasource.getConnection()) {
 
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
       final int tournamentID = Queries.getCurrentTournament(connection);
@@ -117,13 +114,18 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
       final String challengeTitle = challengeDescription.getTitle();
 
-      generateReport(connection, response.getOutputStream(), challengeDescription, challengeTitle, tournament,
-                     bestTeams, percentageHurdle, standardMean, standardSigma);
+      try {
+        final Document document = generateReport(connection, challengeDescription, challengeTitle, tournament,
+                                                 bestTeams, percentageHurdle, standardMean, standardSigma);
+        final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
+
+        FOPUtils.renderPdf(fopFactory, document, response.getOutputStream());
+      } catch (FOPException | TransformerException e) {
+        throw new FLLInternalException("Error creating the final scoresPDF", e);
+      }
 
     } catch (final SQLException e) {
       throw new RuntimeException(e);
-    } finally {
-      SQLFunctions.close(connection);
     }
   }
 
@@ -189,31 +191,19 @@ public final class FinalComputedScores extends BaseFLLServlet {
     return bestTeams;
   }
 
-  private static final Font ARIAL_8PT_BOLD = FontFactory.getFont(FontFactory.HELVETICA, 8, Font.BOLD);
-
-  private static final Font ARIAL_8PT_NORMAL = FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL);
-
-  private static final Font ARIAL_8PT_NORMAL_RED = FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL,
-                                                                       BaseColor.RED);
-
-  private static final Font TIMES_12PT_NORMAL = FontFactory.getFont(FontFactory.TIMES, 12, Font.NORMAL);
-
-  private static final BaseColor TOP_SCORE_BACKGROUND = new BaseColor(BaseColor.LIGHT_GRAY.getRed(),
-                                                                      BaseColor.LIGHT_GRAY.getGreen(),
-                                                                      BaseColor.LIGHT_GRAY.getBlue());
+  private static final Color TOP_SCORE_BACKGROUND = Color.LIGHT_GRAY;
 
   /**
    * Generate the actual report.
    */
-  private void generateReport(final Connection connection,
-                              final OutputStream out,
-                              final ChallengeDescription challengeDescription,
-                              final String challengeTitle,
-                              final Tournament tournament,
-                              final Set<Integer> bestTeams,
-                              final int percentageHurdle,
-                              final double standardMean,
-                              final double standardSigma)
+  private Document generateReport(final Connection connection,
+                                  final ChallengeDescription challengeDescription,
+                                  final String challengeTitle,
+                                  final Tournament tournament,
+                                  final Set<Integer> bestTeams,
+                                  final int percentageHurdle,
+                                  final double standardMean,
+                                  final double standardSigma)
       throws SQLException, IOException {
     if (tournament.getTournamentID() != Queries.getCurrentTournament(connection)) {
       throw new FLLRuntimeException("Cannot generate final score report for a tournament other than the current tournament");
@@ -221,106 +211,120 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
     final WinnerType winnerCriteria = challengeDescription.getWinner();
 
-    try {
-      // This creates our new PDF document and declares it to be in portrait
-      // orientation
-      final Document pdfDoc = PdfUtils.createPortraitPdfDoc(out, null);
+    final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
 
-      final Iterator<String> agIter = Queries.getAwardGroups(connection).iterator();
-      while (agIter.hasNext()) {
-        final String awardGroup = agIter.next();
+    final Element rootElement = FOPUtils.createRoot(document);
+    document.appendChild(rootElement);
 
-        final SubjectiveScoreCategory[] subjectiveCategories = challengeDescription.getSubjectiveCategories()
-                                                                                   .toArray(new SubjectiveScoreCategory[0]);
+    final Element layoutMasterSet = FOPUtils.createXslFoElement(document, "layout-master-set");
+    rootElement.appendChild(layoutMasterSet);
 
-        // Figure out how many subjective categories have weights > 0.
-        final int nonZeroWeights = (int) challengeDescription.getSubjectiveCategories().stream()
-                                                             .filter(c -> c.getWeight() > 0).count();
+    final String pageMasterName = "simple";
+    FOPUtils.createSimplePageMaster(document, layoutMasterSet, pageMasterName, FOPUtils.PAGE_LETTER_SIZE,
+                                    FOPUtils.STANDARD_MARGINS, HEADER_MARGIN_INCHES, FOOTER_MARGIN_INCHES);
 
-        // Array of relative widths for the columns of the score page
-        // Array length varies with the number of subjective scores weighted >
-        // 0.
-        final int numColumnsLeftOfSubjective = 3;
-        final int numColumnsRightOfSubjective = 2;
-        final float[] relativeWidths = new float[numColumnsLeftOfSubjective
-            + nonZeroWeights
-            + numColumnsRightOfSubjective];
-        relativeWidths[0] = 3f;
-        relativeWidths[1] = 1.0f;
-        relativeWidths[2] = 1.0f;
-        relativeWidths[relativeWidths.length
-            - numColumnsRightOfSubjective] = 1.5f;
-        relativeWidths[relativeWidths.length
-            - numColumnsRightOfSubjective
-            + 1] = 1.5f;
-        for (int i = numColumnsLeftOfSubjective; i < numColumnsLeftOfSubjective
-            + nonZeroWeights; i++) {
-          relativeWidths[i] = 1.5f;
-        }
+    final Element legend = createLegend(document, percentageHurdle, standardMean, standardSigma);
 
-        // Create a table to hold all the scores for this division
-        final PdfPTable divTable = new PdfPTable(relativeWidths);
-        divTable.getDefaultCell().setBorder(0);
-        divTable.setWidthPercentage(100);
+    for (final String awardGroup : Queries.getAwardGroups(connection)) {
+      final Element pageSequence = createAwardGroupPageSequence(connection, document, challengeDescription,
+                                                                challengeTitle, winnerCriteria, tournament,
+                                                                pageMasterName, legend, bestTeams, awardGroup);
+      rootElement.appendChild(pageSequence);
 
-        final PdfPTable header = createHeader(challengeTitle, tournament, awardGroup);
-        final PdfPCell headerCell = new PdfPCell(header);
-        headerCell.setColspan(relativeWidths.length);
-        divTable.addCell(headerCell);
-
-        if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("num relative widths: "
-              + relativeWidths.length);
-          for (int i = 0; i < relativeWidths.length; ++i) {
-            LOGGER.trace("\twidth["
-                + i
-                + "] = "
-                + relativeWidths[i]);
-          }
-        }
-
-        writeColumnHeaders(subjectiveCategories, relativeWidths, challengeDescription, divTable);
-
-        writeScores(connection, subjectiveCategories, challengeDescription.getPerformance(), relativeWidths, awardGroup,
-                    winnerCriteria, tournament, divTable, bestTeams);
-
-        // Add the division table to the document
-        pdfDoc.add(divTable);
-
-        // If there is another division to process, start it on a new page
-        if (agIter.hasNext()) {
-          pdfDoc.newPage();
-        }
-      }
-
-      addLegend(pdfDoc, percentageHurdle, standardMean, standardSigma);
-
-      pdfDoc.close();
-    } catch (final ParseException pe) {
-      throw new RuntimeException("Error parsing category weight!", pe);
-    } catch (final DocumentException de) {
-      throw new RuntimeException("Error creating PDF document!", de);
     }
+
+    return document;
   }
 
-  @SuppressFBWarnings(value = { "VA_FORMAT_STRING_USES_NEWLINE" }, justification = "Need carriage returns in strings for Pdf library")
-  private void addLegend(final Document pdf,
-                         final int percentageHurdle,
-                         final double standardMean,
-                         final double standardSigma)
-      throws DocumentException {
-    final String hurdleText;
-    if (percentageHurdle > 0
-        && percentageHurdle < 100) {
-      hurdleText = String.format("* - teams in the top %d%% of performance scores\n", percentageHurdle);
-    } else {
-      hurdleText = "";
+  private Element createAwardGroupPageSequence(final Connection connection,
+                                               final Document document,
+                                               final ChallengeDescription challengeDescription,
+                                               final String challengeTitle,
+                                               final WinnerType winnerCriteria,
+                                               final Tournament tournament,
+                                               final String pageMasterName,
+                                               final Element legend,
+                                               final Set<Integer> bestTeams,
+                                               final String awardGroup)
+      throws SQLException {
+    final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
+
+    final Element headerContent = createAwardGroupHeader(document, challengeTitle, tournament, awardGroup);
+
+    final Element header = FOPUtils.createXslFoElement(document, FOPUtils.STATIC_CONTENT_TAG);
+    pageSequence.appendChild(header);
+    header.setAttribute("flow-name", "xsl-region-before");
+    header.appendChild(headerContent);
+
+    pageSequence.appendChild(legend.cloneNode(true));
+
+    final Element documentBody = FOPUtils.createBody(document);
+    pageSequence.appendChild(documentBody);
+    final SubjectiveScoreCategory[] subjectiveCategories = challengeDescription.getSubjectiveCategories()
+                                                                               .toArray(new SubjectiveScoreCategory[0]);
+
+    // Figure out how many subjective categories have weights > 0.
+    final int nonZeroWeights = (int) challengeDescription.getSubjectiveCategories().stream()
+                                                         .filter(c -> c.getWeight() > 0).count();
+
+    final Element divTable = FOPUtils.createBasicTable(document);
+    documentBody.appendChild(divTable);
+    divTable.setAttribute("font-size", "8pt");
+
+    divTable.appendChild(FOPUtils.createTableColumn(document, 30)); // org / team
+    divTable.appendChild(FOPUtils.createTableColumn(document, 10)); // judging group
+    divTable.appendChild(FOPUtils.createTableColumn(document, 10)); // weight
+
+    for (int i = 0; i < nonZeroWeights; i++) {
+      divTable.appendChild(FOPUtils.createTableColumn(document, 15));
     }
 
-    final String legendText = String.format("%sbold score - top team in a category & judging group (rank)\n%.2f == average ; %.2f = 1 standard deviation\n@ - zero score on required goal",
-                                            hurdleText, standardMean, standardSigma);
-    final Phrase phrase = new Phrase(legendText, TIMES_12PT_NORMAL);
-    pdf.add(phrase);
+    divTable.appendChild(FOPUtils.createTableColumn(document, 15)); // performance
+    divTable.appendChild(FOPUtils.createTableColumn(document, 15)); // overall
+
+    final Element tableHeader = createTableHeader(document, subjectiveCategories, challengeDescription);
+    divTable.appendChild(tableHeader);
+
+    final Element tableBody = writeScores(connection, document, subjectiveCategories,
+                                          challengeDescription.getPerformance(), awardGroup, winnerCriteria, tournament,
+                                          bestTeams);
+    divTable.appendChild(tableBody);
+
+    return pageSequence;
+  }
+
+  private Element createLegend(Document document,
+                               final int percentageHurdle,
+                               final double standardMean,
+                               final double standardSigma) {
+    final Element staticContent = FOPUtils.createXslFoElement(document, FOPUtils.STATIC_CONTENT_TAG);
+    staticContent.setAttribute("flow-name", "xsl-region-after");
+
+    staticContent.setAttribute("text-align", FOPUtils.TEXT_ALIGN_RIGHT);
+    staticContent.setAttribute("font-size", "10pt");
+
+    if (percentageHurdle > 0
+        && percentageHurdle < 100) {
+      final Element hurdleBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      final String hurdleText = String.format("* - teams in the top %d%% of performance scores", percentageHurdle);
+      hurdleBlock.appendChild(document.createTextNode(hurdleText));
+      staticContent.appendChild(hurdleBlock);
+    }
+
+    final Element block1 = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    staticContent.appendChild(block1);
+    block1.appendChild(document.createTextNode("bold score - top team in a category & judging group (rank)"));
+
+    final Element block2 = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    staticContent.appendChild(block2);
+    block2.appendChild(document.createTextNode(String.format("%.2f == average ; %.2f = 1 standard deviation",
+                                                             standardMean, standardSigma)));
+
+    final Element block3 = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    staticContent.appendChild(block3);
+    block3.appendChild(document.createTextNode("@ - zero score on required goal"));
+
+    return staticContent;
   }
 
   /**
@@ -422,7 +426,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
       throws SQLException {
 
     try (
-        final PreparedStatement prep = connection.prepareStatement("SELECT final_scores.team_number, final_scores.final_score"//
+        PreparedStatement prep = connection.prepareStatement("SELECT final_scores.team_number, final_scores.final_score"//
             + " FROM final_scores, TournamentTeams" //
             + " WHERE final_scores.tournament = ?" //
             + " AND TournamentTeams.Tournament = final_scores.tournament" //
@@ -443,7 +447,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
       int numTied = 1;
       int rank = 0;
       double prevScore = Double.NaN;
-      try (final ResultSet rs = prep.executeQuery()) {
+      try (ResultSet rs = prep.executeQuery()) {
         while (rs.next()) {
           final int teamNumber = rs.getInt(1);
           double score = rs.getDouble(2);
@@ -507,16 +511,17 @@ public final class FinalComputedScores extends BaseFLLServlet {
   }
 
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table name")
-  private void writeScores(final Connection connection,
-                           final SubjectiveScoreCategory[] subjectiveCategories,
-                           final PerformanceScoreCategory performanceCategory,
-                           final float[] relativeWidths,
-                           final String awardGroup,
-                           final WinnerType winnerCriteria,
-                           final Tournament tournament,
-                           final PdfPTable divTable,
-                           final Set<Integer> bestTeams)
+  private Element writeScores(final Connection connection,
+                              Document document,
+                              final SubjectiveScoreCategory[] subjectiveCategories,
+                              final PerformanceScoreCategory performanceCategory,
+                              final String awardGroup,
+                              final WinnerType winnerCriteria,
+                              final Tournament tournament,
+                              final Set<Integer> bestTeams)
       throws SQLException {
+
+    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
 
     final Map<ScoreCategory, Map<String, Map<Integer, Integer>>> teamSubjectiveRanks = gatherRankedSubjectiveTeams(connection,
                                                                                                                    subjectiveCategories,
@@ -555,54 +560,48 @@ public final class FinalComputedScores extends BaseFLLServlet {
             overallScore = ts;
           }
 
-          // ///////////////////////////////////////////////////////////////////
-          // Build a table of data for this team
-          // ///////////////////////////////////////////////////////////////////
-          final PdfPTable curteam = new PdfPTable(relativeWidths);
-          curteam.getDefaultCell().setBorder(0);
+          final Element row1 = FOPUtils.createXslFoElement(document, "table-row");
+          tableBody.appendChild(row1);
+          row1.setAttribute("keep-with-next", "always");
 
           // The first row of the team table...
           // First column is organization name
-          final PdfPCell teamCol = new PdfPCell(new Phrase(organization, ARIAL_8PT_NORMAL));
-          teamCol.setBorder(0);
-          teamCol.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_LEFT);
-          curteam.addCell(teamCol);
-          curteam.getDefaultCell().setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
+          row1.appendChild(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT, organization));
 
-          final PdfPCell judgeGroupCell = new PdfPCell(new Phrase(judgingGroup, ARIAL_8PT_NORMAL));
-          judgeGroupCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-          judgeGroupCell.setBorder(0);
-          curteam.addCell(judgeGroupCell);
+          row1.appendChild(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, judgingGroup));
 
-          // Second column is "Raw:"
-          final PdfPCell rawLabel = new PdfPCell(new Phrase("Raw:", ARIAL_8PT_NORMAL));
-          rawLabel.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
-          rawLabel.setBorder(0);
-          curteam.addCell(rawLabel);
+          row1.appendChild(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Raw:"));
 
-          insertRawSubjectiveScoreColumns(connection, tournament, winnerCriteria.getSortString(), subjectiveCategories,
-                                          teamNumber, curteam);
+          insertRawSubjectiveScoreColumns(connection, tournament, winnerCriteria.getSortString(), document,
+                                          subjectiveCategories, teamNumber, row1);
 
-          insertRawPerformanceScore(connection, performanceCategory.getScoreType(), teamNumber, curteam);
+          insertRawPerformanceScore(connection, performanceCategory.getScoreType(), document, teamNumber, row1);
 
           // The "Overall score" column is not filled in for raw scores
-          curteam.addCell("");
+          row1.appendChild(FOPUtils.createTableCell(document, null, ""));
 
           // The second row of the team table...
-          // First column contains the team # and name
-          final PdfPCell teamNameCol = new PdfPCell(new Phrase(Integer.toString(teamNumber)
-              + " "
-              + teamName, ARIAL_8PT_NORMAL));
-          teamNameCol.setBorder(0);
-          teamNameCol.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_LEFT);
-          curteam.addCell(teamNameCol);
+          final Element row2 = FOPUtils.createXslFoElement(document, "table-row");
+          tableBody.appendChild(row2);
 
-          // Second column contains "Scaled:"
-          final PdfPCell scaledCell = new PdfPCell(new Phrase("Scaled:", ARIAL_8PT_NORMAL));
-          scaledCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
-          scaledCell.setBorder(0);
-          scaledCell.setColspan(2);
-          curteam.addCell(scaledCell);
+          // First column contains the team # and name
+          final String row2BorderColor = "gray";
+          final double row2BorderWidth = 0.5;
+
+          final Element teamNameCol = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
+                                                               String.format("%d %s", teamNumber, teamName));
+          row2.appendChild(teamNameCol);
+          FOPUtils.addBottomBorder(teamNameCol, row2BorderWidth, row2BorderColor);
+
+          /// judging group is empty in the second row
+          final Element blankCell = FOPUtils.createTableCell(document, null, "");
+          row2.appendChild(blankCell);
+          FOPUtils.addBottomBorder(blankCell, row2BorderWidth, row2BorderColor);
+
+          // "Scaled:"
+          final Element scaledCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Scaled:");
+          row2.appendChild(scaledCell);
+          FOPUtils.addBottomBorder(scaledCell, row2BorderWidth, row2BorderColor);
 
           // Next, one column containing the scaled score for each subjective
           // category with weight > 0
@@ -612,55 +611,48 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
             final double catWeight = category.getWeight();
             if (catWeight > 0.0) {
-              insertCategoryScaledScore(connection, tournament, teamNumber, curteam, category, judgingRanks);
+              insertCategoryScaledScore(connection, tournament, document, teamNumber, row2, row2BorderWidth,
+                                        row2BorderColor, category, judgingRanks);
             } // non-zero category weight
           } // foreach category
 
           // 2nd to last column has the scaled performance score
-          insertCategoryScaledScore(connection, tournament, teamNumber, curteam, performanceCategory,
-                                    teamPerformanceRanks);
+          insertCategoryScaledScore(connection, tournament, document, teamNumber, row2, row2BorderWidth,
+                                    row2BorderColor, performanceCategory, teamPerformanceRanks);
 
           // Last column contains the overall scaled score
-          final String overallScoreSuffix;
-          if (bestTeams.contains(teamNumber)) {
-            overallScoreSuffix = String.format("%1$s*", Utilities.NON_BREAKING_SPACE);
+          final Element overallCell;
+          if (Double.isNaN(overallScore)) {
+            overallCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "No Score");
+            overallCell.setAttribute("color", "red");
           } else {
-            overallScoreSuffix = String.format("%1$s%1$s", Utilities.NON_BREAKING_SPACE);
+            final String overallScoreSuffix;
+            if (bestTeams.contains(teamNumber)) {
+              overallScoreSuffix = String.format("%1$s*", Utilities.NON_BREAKING_SPACE);
+            } else {
+              overallScoreSuffix = String.format("%1$s%1$s", Utilities.NON_BREAKING_SPACE);
+            }
+
+            overallCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                   Utilities.getFloatingPointNumberFormat().format(overallScore)
+                                                       + overallScoreSuffix);
           }
-
-          final PdfPCell pCell = new PdfPCell((Double.isNaN(overallScore) ? new Phrase("No Score"
-              + overallScoreSuffix, ARIAL_8PT_NORMAL_RED)
-              : new Phrase(Utilities.getFloatingPointNumberFormat().format(overallScore)
-                  + overallScoreSuffix, ARIAL_8PT_NORMAL)));
-          pCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-          pCell.setBorder(0);
-          curteam.addCell(pCell);
-
-          // This is an empty row in the team table that is added to put a
-          // horizontal rule under the team's score in the display
-          final PdfPCell blankCell = new PdfPCell();
-          blankCell.setBorder(0);
-          blankCell.setBorderWidthBottom(0.5f);
-          blankCell.setBorderColorBottom(BaseColor.GRAY);
-          blankCell.setColspan(relativeWidths.length);
-          curteam.addCell(blankCell);
-
-          // Create a new cell and add it to the division table - this cell will
-          // contain the entire team table we just built above
-          final PdfPCell curteamCell = new PdfPCell(curteam);
-          curteamCell.setBorder(0);
-          curteamCell.setColspan(relativeWidths.length);
-          divTable.addCell(curteamCell);
+          row2.appendChild(overallCell);
+          FOPUtils.addBottomBorder(overallCell, row2BorderWidth, row2BorderColor);
         } // foreach score result
       } // ResultSet
     } // PreparedStatement
 
+    return tableBody;
   }
 
   private void insertCategoryScaledScore(final Connection connection,
                                          final Tournament tournament,
+                                         final Document document,
                                          final int teamNumber,
-                                         final PdfPTable curteam,
+                                         final Element row,
+                                         final double borderWidth,
+                                         final String borderColor,
                                          final ScoreCategory category,
                                          final Map<Integer, Integer> rankInCategory)
       throws SQLException {
@@ -691,13 +683,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
           rank = -1;
         }
 
-        final Font scoreFont;
-        if (1 == rank) {
-          scoreFont = ARIAL_8PT_BOLD;
-        } else {
-          scoreFont = ARIAL_8PT_NORMAL;
-        }
-
         final String rankText;
         if (-1 == rank) {
           rankText = String.format("%1$s%1$s%1$s%1$s%1$s", Utilities.NON_BREAKING_SPACE);
@@ -715,21 +700,26 @@ public final class FinalComputedScores extends BaseFLLServlet {
         final String scoreText = overallScoreText
             + rankText;
 
-        final PdfPCell subjCell = new PdfPCell(new Phrase(scoreText, scoreFont));
-        subjCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-        subjCell.setBorder(0);
+        final Element subjCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, scoreText);
+        row.appendChild(subjCell);
         if (1 == rank) {
-          subjCell.setBackgroundColor(TOP_SCORE_BACKGROUND);
+          subjCell.setAttribute("font-weight", "bold");
+          subjCell.setAttribute("background-color", FOPUtils.renderColor(TOP_SCORE_BACKGROUND));
         }
-        curteam.addCell(subjCell);
+        FOPUtils.addBottomBorder(subjCell, borderWidth, borderColor);
+        if (Double.isNaN(scaledScore)) {
+          subjCell.setAttribute("color", "red");
+        }
+
       } // finalScoreResult
     } // finalScorePrep
   }
 
   private void insertRawPerformanceScore(final Connection connection,
                                          final ScoreType performanceScoreType,
+                                         final Document document,
                                          final int teamNumber,
-                                         final PdfPTable curteam)
+                                         final Element row)
       throws SQLException {
     try (PreparedStatement scorePrep = connection.prepareStatement("SELECT score FROM performance_seeding_max"
         + " WHERE TeamNumber = ?")) {
@@ -749,139 +739,103 @@ public final class FinalComputedScores extends BaseFLLServlet {
         } else {
           rawScore = Double.NaN;
         }
-        final Phrase scorePhrase;
+
+        final String text;
         if (Double.isNaN(rawScore)) {
-          scorePhrase = new Phrase("No Score", ARIAL_8PT_NORMAL_RED);
+          text = "No Score";
         } else {
-          scorePhrase = new Phrase(Utilities.getFormatForScoreType(performanceScoreType).format(rawScore),
-                                   ARIAL_8PT_NORMAL);
+          text = Utilities.getFormatForScoreType(performanceScoreType).format(rawScore);
         }
-        final PdfPCell pCell = new PdfPCell(scorePhrase);
-        pCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-        pCell.setBorder(0);
-        curteam.addCell(pCell);
+
+        final Element cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, text);
+        row.appendChild(cell);
+        if (Double.isNaN(rawScore)) {
+          cell.setAttribute("color", "red");
+        }
+
       } // ResultSet
     } // PreparedStatement
   }
 
-  /**
-   * @throws ParseException
-   */
-  private void writeColumnHeaders(final SubjectiveScoreCategory[] subjectiveCategories,
-                                  final float[] relativeWidths,
-                                  final ChallengeDescription challengeDescription,
-                                  final PdfPTable divTable)
-      throws ParseException {
+  private Element createTableHeader(final Document document,
+                                    final SubjectiveScoreCategory[] subjectiveCategories,
+                                    final ChallengeDescription challengeDescription) {
 
-    // /////////////////////////////////////////////////////////////////////
-    // Write the table column headers
-    // /////////////////////////////////////////////////////////////////////
-    // team information
-    final PdfPCell organizationCell = new PdfPCell(new Phrase("Organization", ARIAL_8PT_BOLD));
-    organizationCell.setBorder(0);
-    organizationCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
-    divTable.addCell(organizationCell);
+    final Element tableHeader = FOPUtils.createXslFoElement(document, "table-header");
 
-    // judging group
-    final Paragraph judgingGroup = new Paragraph("Judging", ARIAL_8PT_BOLD);
-    judgingGroup.add(Chunk.NEWLINE);
-    judgingGroup.add(new Chunk("Group"));
-    final PdfPCell judgeGroupCell = new PdfPCell(judgingGroup);
-    judgeGroupCell.setBorder(0);
-    judgeGroupCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-    judgeGroupCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
-    divTable.addCell(judgeGroupCell);
+    final Element row1 = FOPUtils.createXslFoElement(document, "table-row");
+    tableHeader.appendChild(row1);
+    row1.setAttribute("font-weight", "bold");
+    row1.setAttribute("keep-with-next", "always");
 
-    divTable.addCell(""); // weight/raw&scaled
+    row1.appendChild(FOPUtils.createTableCell(document, null, "Organization"));
+
+    row1.appendChild(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "Judging Group"));
+
+    row1.appendChild(FOPUtils.createTableCell(document, null, "")); // weight/raw&scaled
 
     for (final SubjectiveScoreCategory category : subjectiveCategories) {
       final double weight = category.getWeight();
       if (weight > 0.0) {
         final String catTitle = category.getTitle();
 
-        final Paragraph catPar = new Paragraph(catTitle, ARIAL_8PT_BOLD);
-        final PdfPCell catCell = new PdfPCell(catPar);
-        catCell.setBorder(0);
-        catCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-        catCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
-        divTable.addCell(catCell);
+        row1.appendChild(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, catTitle));
       }
     }
 
-    final Paragraph perfPar = new Paragraph("Performance", ARIAL_8PT_BOLD);
-    final PdfPCell perfCell = new PdfPCell(perfPar);
-    perfCell.setBorder(0);
-    perfCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-    perfCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
-    divTable.addCell(perfCell);
+    row1.appendChild(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "Performance"));
 
-    final Paragraph overallScore = new Paragraph("Overall", ARIAL_8PT_BOLD);
-    overallScore.add(Chunk.NEWLINE);
-    overallScore.add(new Chunk("Score"));
-    final PdfPCell osCell = new PdfPCell(overallScore);
-    osCell.setBorder(0);
-    osCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-    osCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
-    divTable.addCell(osCell);
+    row1.appendChild(FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "Overall Score"));
 
-    // /////////////////////////////////////////////////////////////////////
-    // Write a table row with the relative weights of the subjective scores
-    // /////////////////////////////////////////////////////////////////////
+    // row 2 needs a bottom border, the border is added to each cell
 
-    final PdfPCell teamCell = new PdfPCell(new Phrase("Team # / Team Name", ARIAL_8PT_BOLD));
-    teamCell.setBorder(0);
-    teamCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
-    divTable.addCell(teamCell);
+    final Element row2 = FOPUtils.createXslFoElement(document, "table-row");
+    tableHeader.appendChild(row2);
 
-    final Paragraph wPar = new Paragraph("Weight:", ARIAL_8PT_NORMAL);
-    final PdfPCell wCell = new PdfPCell(wPar);
-    wCell.setColspan(2);
-    wCell.setBorder(0);
-    wCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
-    divTable.addCell(wCell);
+    final Element teamNumCell = FOPUtils.createTableCell(document, null, "Team # / Team Name");
+    row2.appendChild(teamNumCell);
+    FOPUtils.addBottomBorder(teamNumCell, 1);
+    teamNumCell.setAttribute("font-weight", "bold");
 
-    final PdfPCell[] wCells = new PdfPCell[subjectiveCategories.length];
-    final Paragraph[] wPars = new Paragraph[subjectiveCategories.length];
+    final Element blankCell1 = FOPUtils.createTableCell(document, null, "");
+    row2.appendChild(blankCell1);
+    FOPUtils.addBottomBorder(blankCell1, 1);
+
+    final Element weightCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Weight:");
+    FOPUtils.addBottomBorder(weightCell, 1);
+    row2.appendChild(weightCell);
+
     for (int cat = 0; cat < subjectiveCategories.length; cat++) {
       final ScoreCategory category = subjectiveCategories[cat];
       if (category.getWeight() > 0.0) {
-        wPars[cat] = new Paragraph(Double.toString(category.getWeight()), ARIAL_8PT_NORMAL);
-        wCells[cat] = new PdfPCell(wPars[cat]);
-        wCells[cat].setBorder(0);
-        wCells[cat].setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-        divTable.addCell(wCells[cat]);
+        final Element catCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                         Double.toString(category.getWeight()));
+        FOPUtils.addBottomBorder(catCell, 1);
+        row2.appendChild(catCell);
       }
     }
 
     final PerformanceScoreCategory performanceElement = challengeDescription.getPerformance();
-    final double perfWeight = performanceElement.getWeight();
-    final Paragraph perfWeightPar = new Paragraph(Double.toString(perfWeight), ARIAL_8PT_NORMAL);
-    final PdfPCell perfWeightCell = new PdfPCell(perfWeightPar);
-    perfWeightCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-    perfWeightCell.setBorder(0);
-    divTable.addCell(perfWeightCell);
+    final Element perfCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                      Double.toString(performanceElement.getWeight()));
+    FOPUtils.addBottomBorder(perfCell, 1);
+    row2.appendChild(perfCell);
 
-    divTable.addCell("");
+    final Element blankCell2 = FOPUtils.createTableCell(document, null, "");
+    FOPUtils.addBottomBorder(blankCell2, 1);
+    row2.appendChild(blankCell2); // under overall score
 
-    final PdfPCell blankCell = new PdfPCell();
-    blankCell.setBorder(0);
-    blankCell.setBorderWidthBottom(1.0f);
-    blankCell.setColspan(relativeWidths.length);
-    divTable.addCell(blankCell);
-
-    // Cause the first 4 rows to be repeated on
-    // each page - 1 row for box header, 2 rows text headers and 1 for
-    // the horizontal line.
-    divTable.setHeaderRows(4);
+    return tableHeader;
   }
 
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Winner type is used to determine sort order")
   private void insertRawSubjectiveScoreColumns(final Connection connection,
                                                final Tournament tournament,
                                                final String ascDesc,
+                                               final Document document,
                                                final SubjectiveScoreCategory[] subjectiveCategories,
                                                final int teamNumber,
-                                               final PdfPTable curteam)
+                                               final Element row)
       throws SQLException {
     try (PreparedStatement prep = connection.prepareStatement("SELECT computed_total"
         + " FROM subjective_computed_scores"
@@ -913,10 +867,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
               }
             }
 
-            final Font scoreFont;
             final String scoreText;
             if (!scoreSeen) {
-              scoreFont = ARIAL_8PT_NORMAL_RED;
               scoreText = "No Score";
             } else {
               final boolean zeroInRequiredGoal = checkZeroInRequiredGoal(connection, tournament, catElement,
@@ -924,13 +876,15 @@ public final class FinalComputedScores extends BaseFLLServlet {
               if (zeroInRequiredGoal) {
                 rawScoreText.append(" @");
               }
-              scoreFont = ARIAL_8PT_NORMAL;
               scoreText = rawScoreText.toString();
             }
-            final PdfPCell subjCell = new PdfPCell(new Phrase(scoreText, scoreFont));
-            subjCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-            subjCell.setBorder(0);
-            curteam.addCell(subjCell);
+
+            final Element subjCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, scoreText);
+            if (!scoreSeen) {
+              subjCell.setAttribute("color", "red");
+            }
+            row.appendChild(subjCell);
+
           } // ResultSet
         } // category weight greater than 0
       } // foreach subjective category
@@ -992,19 +946,31 @@ public final class FinalComputedScores extends BaseFLLServlet {
     }
   }
 
-  private PdfPTable createHeader(final String challengeTitle,
-                                 final Tournament tournament,
-                                 final String division) {
-    // initialization of the header table
-    final PdfPTable header = new PdfPTable(2);
+  private Element createAwardGroupHeader(final Document document,
+                                         final String challengeTitle,
+                                         final Tournament tournament,
+                                         final String division) {
+    final String sidePadding = "3pt";
+    final double borderWidth = 0.5;
 
-    final Phrase p = new Phrase();
-    p.add(new Chunk(challengeTitle, TIMES_12PT_NORMAL));
-    p.add(Chunk.NEWLINE);
-    p.add(new Chunk("Final Computed Scores", TIMES_12PT_NORMAL));
-    header.getDefaultCell().setBorderWidth(0);
-    header.addCell(p);
-    header.getDefaultCell().setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
+    final Element header = FOPUtils.createBasicTable(document);
+    header.appendChild(FOPUtils.createTableColumn(document, 1));
+    header.appendChild(FOPUtils.createTableColumn(document, 1));
+    FOPUtils.addBorders(header, borderWidth, borderWidth, borderWidth, borderWidth);
+
+    header.setAttribute("font-family", "Times");
+    header.setAttribute("font-size", "12pt");
+
+    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    header.appendChild(tableBody);
+
+    final Element row1 = FOPUtils.createXslFoElement(document, "table-row");
+    tableBody.appendChild(row1);
+    row1.setAttribute("keep-with-next", "always");
+
+    final Element challengeTitleCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT, challengeTitle);
+    row1.appendChild(challengeTitleCell);
+    challengeTitleCell.setAttribute("padding-left", sidePadding);
 
     final StringBuilder title = new StringBuilder();
     if (null != tournament.getDate()) {
@@ -1012,13 +978,22 @@ public final class FinalComputedScores extends BaseFLLServlet {
           + " - ");
     }
     title.append(tournament.getDescription());
+    final Element titleCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, title.toString());
+    row1.appendChild(titleCell);
+    titleCell.setAttribute("padding-right", sidePadding);
 
-    final Phrase p2 = new Phrase();
-    p2.add(new Chunk(title.toString(), TIMES_12PT_NORMAL));
-    p2.add(Chunk.NEWLINE);
-    p2.add(new Chunk("Award Group: "
-        + division, TIMES_12PT_NORMAL));
-    header.addCell(p2);
+    final Element row2 = FOPUtils.createXslFoElement(document, "table-row");
+    tableBody.appendChild(row2);
+
+    final Element finalScoresCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
+                                                             "Final Computed Scores");
+    row2.appendChild(finalScoresCell);
+    finalScoresCell.setAttribute("padding-left", sidePadding);
+
+    final Element awardGroupCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Award Group: "
+        + division);
+    row2.appendChild(awardGroupCell);
+    awardGroupCell.setAttribute("padding-right", sidePadding);
 
     return header;
   }
