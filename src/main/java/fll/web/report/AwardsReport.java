@@ -113,9 +113,11 @@ public class AwardsReport extends BaseFLLServlet {
     final double footerHeight = 0.3;
 
     final String pageMasterName = "simple";
-    FOPUtils.createSimplePageMaster(document, layoutMasterSet, pageMasterName, FOPUtils.PAGE_LETTER_SIZE,
-                                    new FOPUtils.Margins(topMargin, bottomMargin, leftMargin, rightMargin),
-                                    headerHeight, footerHeight);
+    final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName, FOPUtils.PAGE_LETTER_SIZE,
+                                                               new FOPUtils.Margins(topMargin, bottomMargin, leftMargin,
+                                                                                    rightMargin),
+                                                               headerHeight, footerHeight);
+    layoutMasterSet.appendChild(pageMaster);
 
     final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
     rootElement.appendChild(pageSequence);
