@@ -94,7 +94,7 @@ public class TournamentSchedule implements Serializable {
    * How wide to make the line between time separations in the "by time" schedule
    * outputs.
    */
-  private static final float TIME_SEPARATOR_LINE_WIDTH = 2f;
+  public static final float TIME_SEPARATOR_LINE_WIDTH = 2f;
 
   /**
    * Header on team number column.
@@ -932,15 +932,10 @@ public class TournamentSchedule implements Serializable {
    * by time.
    *
    * @param pdfFos where to write the schedule
-   * @throws DocumentException
+   * @throws IOException if there is an error writing to the stream
    */
-  public void outputSubjectiveSchedulesByCategory(final OutputStream pdfFos) throws DocumentException {
-    final Document detailedSchedulesByTime = PdfUtils.createPortraitPdfDoc(pdfFos, new SimpleFooterHandler());
-    for (final String subjectiveStation : subjectiveStations) {
-      outputSubjectiveScheduleByCategory(detailedSchedulesByTime, subjectiveStation);
-      detailedSchedulesByTime.add(Chunk.NEXTPAGE);
-    }
-    detailedSchedulesByTime.close();
+  public void outputSubjectiveSchedulesByCategory(final OutputStream pdfFos) throws IOException {
+    ScheduleWriter.outputSubjectiveSchedulesByCategory(this, pdfFos);
   }
 
   /**
@@ -1007,7 +1002,7 @@ public class TournamentSchedule implements Serializable {
       // sort the schedule by the category we're working with
       final String subjectiveStation = categoryToSchedule.get(category);
       if (null != subjectiveStation) {
-        Collections.sort(schedule, getComparatorForSubjectiveByDivision(subjectiveStation));
+        Collections.sort(schedule, new SubjectiveComparatorByAwardGroup(subjectiveStation));
       }
 
       final ScoreCategory scoreCategory = sheetElement.getSheetData();
@@ -1090,7 +1085,7 @@ public class TournamentSchedule implements Serializable {
     table.addCell(PdfUtils.createHeaderCell(JUDGE_GROUP_HEADER));
     table.setHeaderRows(2);
 
-    Collections.sort(schedule, getComparatorForSubjectiveByDivision(subjectiveStation));
+    Collections.sort(schedule, new SubjectiveComparatorByAwardGroup(subjectiveStation));
     String prevAwardGroup = null;
     for (final TeamScheduleInfo si : schedule) {
       final LocalTime time = si.getSubjectiveTimeByName(subjectiveStation).getTime();
@@ -1133,85 +1128,6 @@ public class TournamentSchedule implements Serializable {
 
     // make sure the last row isn't by itself
     table.getRow(table.getLastCompletedRowIndex()).setMayNotBreak(true);
-
-    detailedSchedules.add(table);
-
-  }
-
-  private void outputSubjectiveScheduleByCategory(final Document detailedSchedules,
-                                                  final String subjectiveStation)
-      throws DocumentException {
-    final PdfPTable table = PdfUtils.createTable(6);
-    int currentRow = 0;
-    table.setWidths(new float[] { 2, 1, 3, 3, 2, 2 });
-
-    final PdfPCell tournamentCell = PdfUtils.createHeaderCell("Tournament: "
-        + getName()
-        + " - "
-        + subjectiveStation);
-    tournamentCell.setColspan(6);
-    table.addCell(tournamentCell);
-    table.completeRow();
-    currentRow++;
-
-    table.addCell(PdfUtils.createHeaderCell(TEAM_NUMBER_HEADER));
-    table.addCell(PdfUtils.createHeaderCell(AWARD_GROUP_HEADER));
-    table.addCell(PdfUtils.createHeaderCell(ORGANIZATION_HEADER));
-    table.addCell(PdfUtils.createHeaderCell(TEAM_NAME_HEADER));
-    table.addCell(PdfUtils.createHeaderCell(subjectiveStation));
-    table.addCell(PdfUtils.createHeaderCell(JUDGE_GROUP_HEADER));
-    table.completeRow();
-    currentRow++;
-    table.setHeaderRows(2);
-
-    Collections.sort(schedule, getComparatorForSubjectiveByTime(subjectiveStation));
-    LocalTime prevTime = null;
-    for (final TeamScheduleInfo si : schedule) {
-      final LocalTime time = si.getSubjectiveTimeByName(subjectiveStation).getTime();
-
-      final float topBorderWidth;
-      if (Objects.equals(time, prevTime)) {
-        topBorderWidth = Rectangle.UNDEFINED;
-
-        // keep the rows with the same times together
-        table.getRow(currentRow
-            - 1).setMayNotBreak(true);
-      } else {
-        topBorderWidth = TIME_SEPARATOR_LINE_WIDTH;
-      }
-
-      PdfPCell cell = PdfUtils.createCell(String.valueOf(si.getTeamNumber()));
-      cell.setBorderWidthTop(topBorderWidth);
-      table.addCell(cell);
-
-      cell = PdfUtils.createCell(si.getAwardGroup());
-      cell.setBorderWidthTop(topBorderWidth);
-      table.addCell(cell);
-
-      cell = PdfUtils.createCell(si.getOrganization());
-      cell.setBorderWidthTop(topBorderWidth);
-      table.addCell(cell);
-
-      cell = PdfUtils.createCell(si.getTeamName());
-      cell.setBorderWidthTop(topBorderWidth);
-      table.addCell(cell);
-
-      cell = PdfUtils.createCell(formatTime(time));
-      cell.setBorderWidthTop(topBorderWidth);
-      table.addCell(cell);
-
-      cell = PdfUtils.createCell(si.getJudgingGroup());
-      cell.setBorderWidthTop(topBorderWidth);
-      table.addCell(cell);
-      table.completeRow();
-
-      currentRow++;
-      prevTime = time;
-    }
-
-    // make sure the last row isn't by itself
-    table.getRow(currentRow
-        - 1).setMayNotBreak(true);
 
     detailedSchedules.add(table);
 
@@ -1319,28 +1235,15 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
-   * Get the comparator for outputting the schedule for the specified subjective
-   * station. Sort by division, then judge, then by time.
+   * Comparator for for sorting by the specified award group.
    */
-  private Comparator<TeamScheduleInfo> getComparatorForSubjectiveByDivision(final String name) {
-    return new SubjectiveComparatorByDivision(name);
-  }
-
-  /**
-   * Get the comparator for outputting the schedule for the specified subjective
-   * station. Sort by time, division, then judge.
-   */
-  private Comparator<TeamScheduleInfo> getComparatorForSubjectiveByTime(final String name) {
-    return new SubjectiveComparatorByTime(name);
-  }
-
-  /**
-   * Comparator for for sorting by the specified subjective station.
-   */
-  private static class SubjectiveComparatorByDivision implements Comparator<TeamScheduleInfo>, Serializable {
+  public static class SubjectiveComparatorByAwardGroup implements Comparator<TeamScheduleInfo>, Serializable {
     private final String name;
 
-    /* package */ SubjectiveComparatorByDivision(final String name) {
+    /**
+     * @param name the award group to sort by
+     */
+    public SubjectiveComparatorByAwardGroup(final String name) {
       this.name = name;
     }
 
@@ -1380,10 +1283,13 @@ public class TournamentSchedule implements Serializable {
   /**
    * Comparator for for sorting by the specified subjective station.
    */
-  private static class SubjectiveComparatorByTime implements Comparator<TeamScheduleInfo>, Serializable {
+  public static class SubjectiveComparatorByTime implements Comparator<TeamScheduleInfo>, Serializable {
     private final String name;
 
-    /* package */ SubjectiveComparatorByTime(final String name) {
+    /**
+     * @param name the subjective category to sort by time
+     */
+    public SubjectiveComparatorByTime(final String name) {
       this.name = name;
     }
 
