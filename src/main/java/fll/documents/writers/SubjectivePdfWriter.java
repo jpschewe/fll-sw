@@ -21,6 +21,11 @@ import javax.xml.transform.TransformerException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FopFactory;
+import org.apache.fop.fonts.Font;
+import org.apache.fop.fonts.FontInfo;
+import org.apache.fop.fonts.FontMetrics;
+import org.apache.fop.fonts.FontTriplet;
+import org.apache.fop.fonts.base14.Helvetica;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -413,7 +418,7 @@ public class SubjectivePdfWriter {
 
     // Go through all of the team schedules and put them all into a pdf
     for (final TeamScheduleInfo teamInfo : schedule) {
-      final Element sheet = createSheet(document, teamInfo, commentHeight, columnWidths);
+      final Element sheet = createSheet(document, teamInfo, pointSize, commentHeight, columnWidths);
       documentBody.appendChild(sheet);
     }
 
@@ -422,6 +427,7 @@ public class SubjectivePdfWriter {
 
   private Element createSheet(final Document document,
                               final TeamScheduleInfo teamInfo,
+                              final int fontSize,
                               final double commentHeight,
                               final int[] columnWidths) {
     final Element sheet = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
@@ -431,7 +437,7 @@ public class SubjectivePdfWriter {
     sheet.appendChild(header);
     header.setAttribute("space-after", "5");
 
-    final Element rubric = createRubric(document, columnWidths);
+    final Element rubric = createRubric(document, fontSize, columnWidths);
     sheet.appendChild(rubric);
 
     final Element comments = createCommentsBlock(document, commentHeight);
@@ -442,6 +448,7 @@ public class SubjectivePdfWriter {
   }
 
   private Element createRubric(final Document document,
+                               final int fontSize,
                                final int[] columnWidths) {
     final Element rubric = FOPUtils.createBasicTable(document);
 
@@ -455,7 +462,7 @@ public class SubjectivePdfWriter {
     tableBody.appendChild(createRubricHeaderRow(document, tableBody));
 
     for (final String category : sheetElement.getCategories()) {
-      addRubricCategory(document, tableBody, sheetElement.getTableElement(category));
+      addRubricCategory(document, tableBody, fontSize, sheetElement.getTableElement(category));
     }
 
     return rubric;
@@ -464,6 +471,7 @@ public class SubjectivePdfWriter {
   private static final String RUBRIC_TABLE_PADDING = "2pt";
 
   private Element createGoalGroupCell(final Document document,
+                                      final int fontSize,
                                       final String goalGroup) {
     // One should be able to just use the reference-orientation property on the
     // text cell. However when this is done the cells aren't properly sized and the
@@ -476,50 +484,81 @@ public class SubjectivePdfWriter {
 
     final Element categoryCellContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
     goalGroupCell.appendChild(categoryCellContainer);
+    categoryCellContainer.setAttribute("reference-orientation", "90");
+    final int containerWidth = determineStringWidth(goalGroup, fontSize)
+        + determineStringWidth("m", fontSize);
+    categoryCellContainer.setAttribute("inline-progression-dimension", String.format("%dpx", containerWidth));
+
     final Element categoryCellBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     categoryCellContainer.appendChild(categoryCellBlock);
+    categoryCellBlock.setAttribute("text-align", FOPUtils.TEXT_ALIGN_CENTER);
+    categoryCellBlock.setAttribute("font-weight", "bold");
 
-    final Element categoryCellForeign = FOPUtils.createXslFoElement(document, "instream-foreign-object");
-    categoryCellBlock.appendChild(categoryCellForeign);
-    categoryCellForeign.setAttribute("content-height", "scale-to-fit");
-    categoryCellForeign.setAttribute("content-width", "scale-to-fit");
-    categoryCellForeign.setAttribute("height", "100%");
-    categoryCellForeign.setAttribute("width", "100%");
+    categoryCellBlock.appendChild(document.createTextNode(goalGroup));
 
-    final Element svg = document.createElementNS(FOPUtils.SVG_NAMESPACE, "svg");
-    categoryCellForeign.appendChild(svg);
-    final int svgWidth = 25;
-    final int svgHeight = 25;
-    svg.setAttribute("width", String.valueOf(svgWidth));
-    svg.setAttribute("height", String.valueOf(svgHeight));
-    svg.setAttribute("viewBox", String.format("0 0 %d %d", svgWidth, svgHeight));
-
-    final Element text = document.createElementNS(FOPUtils.SVG_NAMESPACE, "text");
-    svg.appendChild(text);
-    text.setAttribute("style",
-                      "fill: black; font-family:Helvetica; font-size: 8pt; font-weight: bold; font-style:normal;");
-    text.setAttribute("x", String.valueOf(svgWidth
-        / 2));
-    text.setAttribute("y", String.valueOf(svgHeight
-        / 2));
-    text.setAttribute("transform", String.format("rotate(-90, %d, %d)", svgWidth
-        / 2, svgHeight
-            / 2));
-
-    final Element tspan = document.createElementNS(FOPUtils.SVG_NAMESPACE, "tspan");
-    text.appendChild(tspan);
-    tspan.setAttribute("text-anchor", "middle");
-    tspan.appendChild(document.createTextNode(goalGroup));
+    // final Element categoryCellForeign = FOPUtils.createXslFoElement(document,
+    // "instream-foreign-object");
+    // categoryCellBlock.appendChild(categoryCellForeign);
+    // categoryCellForeign.setAttribute("content-height", "scale-to-fit");
+    // categoryCellForeign.setAttribute("content-width", "scale-to-fit");
+    // categoryCellForeign.setAttribute("height", "100%");
+    // categoryCellForeign.setAttribute("width", "100%");
+    //
+    // final Element svg = document.createElementNS(FOPUtils.SVG_NAMESPACE, "svg");
+    // categoryCellForeign.appendChild(svg);
+    // final int svgWidth = 25;
+    // final int svgHeight = 25;
+    // svg.setAttribute("width", String.valueOf(svgWidth));
+    // svg.setAttribute("height", String.valueOf(svgHeight));
+    // svg.setAttribute("viewBox", String.format("0 0 %d %d", svgWidth, svgHeight));
+    //
+    // final Element text = document.createElementNS(FOPUtils.SVG_NAMESPACE,
+    // "text");
+    // svg.appendChild(text);
+    // text.setAttribute("style",
+    // "fill: black; font-family:Helvetica; font-size: 8pt; font-weight: bold;
+    // font-style:normal;");
+    // text.setAttribute("x", String.valueOf(svgWidth
+    // / 2));
+    // text.setAttribute("y", String.valueOf(svgHeight
+    // / 2));
+    // text.setAttribute("transform", String.format("rotate(-90, %d, %d)", svgWidth
+    // / 2, svgHeight
+    // / 2));
+    //
+    // final Element tspan = document.createElementNS(FOPUtils.SVG_NAMESPACE,
+    // "tspan");
+    // text.appendChild(tspan);
+    // tspan.setAttribute("text-anchor", "middle");
+    // tspan.appendChild(document.createTextNode(goalGroup));
 
     return goalGroupCell;
   }
 
+  private int determineStringWidth(final String text,
+                                   final int fontSize) {
+    final FontTriplet triplet = new FontTriplet("Helvetica", Font.STYLE_NORMAL, Font.WEIGHT_BOLD,
+                                                Font.PRIORITY_DEFAULT);
+    final FontInfo fontInfo = new FontInfo();
+
+    final String key = fontInfo.getInternalFontKey(triplet);
+
+    final FontMetrics metrics = new Helvetica();
+
+    final Font font = new Font(key, triplet, metrics, fontSize);
+
+    final int textWidth = font.getWordWidth(text);
+
+    return textWidth;
+  }
+
   private void addRubricCategory(final Document document,
                                  final Element tableBody,
+                                 final int fontSize,
                                  final TableElement tableData) {
 
     // This is the 90 degree turned title for the left side of the table
-    final Element goalGroupCell = createGoalGroupCell(document, tableData.getSubjectiveCatetory());
+    final Element goalGroupCell = createGoalGroupCell(document, fontSize, tableData.getSubjectiveCatetory());
     FOPUtils.addBottomBorder(goalGroupCell, 1);
     FOPUtils.addRightBorder(goalGroupCell, 1);
     // This is the total number of columns for this table. Each subsection of
