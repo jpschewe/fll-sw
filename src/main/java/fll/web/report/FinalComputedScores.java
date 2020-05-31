@@ -306,17 +306,23 @@ public final class FinalComputedScores extends BaseFLLServlet {
     if (percentageHurdle > 0
         && percentageHurdle < 100) {
       final Element hurdleBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-      final String hurdleText = String.format("* - teams in the top %d%% of performance scores\n", percentageHurdle);
+      final String hurdleText = String.format("* - teams in the top %d%% of performance scores", percentageHurdle);
       hurdleBlock.appendChild(document.createTextNode(hurdleText));
       staticContent.appendChild(hurdleBlock);
     }
 
-    final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
-    staticContent.appendChild(block);
+    final Element block1 = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    staticContent.appendChild(block1);
+    block1.appendChild(document.createTextNode("bold score - top team in a category & judging group (rank)"));
 
-    final String legendText = String.format("bold score - top team in a category & judging group (rank)\n%.2f == average ; %.2f = 1 standard deviation\n@ - zero score on required goal",
-                                            standardMean, standardSigma);
-    block.appendChild(document.createTextNode(legendText));
+    final Element block2 = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    staticContent.appendChild(block2);
+    block2.appendChild(document.createTextNode(String.format("%.2f == average ; %.2f = 1 standard deviation",
+                                                             standardMean, standardSigma)));
+
+    final Element block3 = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    staticContent.appendChild(block3);
+    block3.appendChild(document.createTextNode("@ - zero score on required goal"));
 
     return staticContent;
   }
