@@ -484,59 +484,62 @@ public class SubjectivePdfWriter {
 
     final Element categoryCellContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
     goalGroupCell.appendChild(categoryCellContainer);
-    categoryCellContainer.setAttribute("reference-orientation", "90");
-    final int containerWidth = determineStringWidth(goalGroup, fontSize)
-        + determineStringWidth("m", fontSize);
-    categoryCellContainer.setAttribute("inline-progression-dimension", String.format("%dpx", containerWidth));
+//    categoryCellContainer.setAttribute("reference-orientation", "90");
+    final Pair<Integer, Integer> stringParameters = determineStringParameters(goalGroup, fontSize);
+    LOGGER.trace("String '{}' width: {} height: {}", goalGroup, stringParameters.getLeft(),
+                 stringParameters.getRight());
 
+    // final int containerWidth = determineStringWidth(goalGroup, fontSize)
+    // + (2
+    // * determineStringWidth("m", fontSize));
+    // categoryCellContainer.setAttribute("inline-progression-dimension",
+    // String.format("%dpx", containerWidth));
+    //
     final Element categoryCellBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     categoryCellContainer.appendChild(categoryCellBlock);
-    categoryCellBlock.setAttribute("text-align", FOPUtils.TEXT_ALIGN_CENTER);
-    categoryCellBlock.setAttribute("font-weight", "bold");
+    // categoryCellBlock.setAttribute("text-align", FOPUtils.TEXT_ALIGN_CENTER);
+    // categoryCellBlock.setAttribute("font-weight", "bold");
+    //
+    // categoryCellBlock.appendChild(document.createTextNode(goalGroup));
 
-    categoryCellBlock.appendChild(document.createTextNode(goalGroup));
+    final Element categoryCellForeign = FOPUtils.createXslFoElement(document, "instream-foreign-object");
+    categoryCellBlock.appendChild(categoryCellForeign);
+    categoryCellForeign.setAttribute("content-height", "scale-to-fit");
+    categoryCellForeign.setAttribute("content-width", "scale-to-fit");
+    categoryCellForeign.setAttribute("height", "100%");
+    categoryCellForeign.setAttribute("width", "100%");
 
-    // final Element categoryCellForeign = FOPUtils.createXslFoElement(document,
-    // "instream-foreign-object");
-    // categoryCellBlock.appendChild(categoryCellForeign);
-    // categoryCellForeign.setAttribute("content-height", "scale-to-fit");
-    // categoryCellForeign.setAttribute("content-width", "scale-to-fit");
-    // categoryCellForeign.setAttribute("height", "100%");
-    // categoryCellForeign.setAttribute("width", "100%");
-    //
-    // final Element svg = document.createElementNS(FOPUtils.SVG_NAMESPACE, "svg");
-    // categoryCellForeign.appendChild(svg);
-    // final int svgWidth = 25;
-    // final int svgHeight = 25;
-    // svg.setAttribute("width", String.valueOf(svgWidth));
-    // svg.setAttribute("height", String.valueOf(svgHeight));
-    // svg.setAttribute("viewBox", String.format("0 0 %d %d", svgWidth, svgHeight));
-    //
-    // final Element text = document.createElementNS(FOPUtils.SVG_NAMESPACE,
-    // "text");
-    // svg.appendChild(text);
-    // text.setAttribute("style",
-    // "fill: black; font-family:Helvetica; font-size: 8pt; font-weight: bold;
-    // font-style:normal;");
-    // text.setAttribute("x", String.valueOf(svgWidth
-    // / 2));
-    // text.setAttribute("y", String.valueOf(svgHeight
-    // / 2));
-    // text.setAttribute("transform", String.format("rotate(-90, %d, %d)", svgWidth
-    // / 2, svgHeight
-    // / 2));
-    //
-    // final Element tspan = document.createElementNS(FOPUtils.SVG_NAMESPACE,
-    // "tspan");
-    // text.appendChild(tspan);
-    // tspan.setAttribute("text-anchor", "middle");
-    // tspan.appendChild(document.createTextNode(goalGroup));
+    final Element svg = document.createElementNS(FOPUtils.SVG_NAMESPACE, "svg");
+    categoryCellForeign.appendChild(svg);
+    // swap height and width because of the rotation
+    final int svgWidth = stringParameters.getRight();// 25;
+    final int svgHeight = stringParameters.getLeft();// 25;
+    svg.setAttribute("width", String.valueOf(svgWidth));
+    svg.setAttribute("height", String.valueOf(svgHeight));
+    svg.setAttribute("viewBox", String.format("0 0 %d %d", svgWidth, svgHeight));
+
+    final Element text = document.createElementNS(FOPUtils.SVG_NAMESPACE, "text");
+    svg.appendChild(text);
+    text.setAttribute("style",
+                      "fill: black; font-family:Helvetica; font-size: 8pt; font-weight: bold; font-style:normal;");
+    text.setAttribute("x", String.valueOf(svgWidth
+        / 2));
+    text.setAttribute("y", String.valueOf(svgHeight
+        / 2));
+    text.setAttribute("transform", String.format("rotate(-90, %d, %d)", svgWidth
+        / 2, svgHeight
+            / 2));
+
+    final Element tspan = document.createElementNS(FOPUtils.SVG_NAMESPACE, "tspan");
+    text.appendChild(tspan);
+    tspan.setAttribute("text-anchor", "middle");
+    tspan.appendChild(document.createTextNode(goalGroup));
 
     return goalGroupCell;
   }
 
-  private int determineStringWidth(final String text,
-                                   final int fontSize) {
+  private Pair<Integer, Integer> determineStringParameters(final String text,
+                                                           final int fontSize) {
     final FontTriplet triplet = new FontTriplet("Helvetica", Font.STYLE_NORMAL, Font.WEIGHT_BOLD,
                                                 Font.PRIORITY_DEFAULT);
     final FontInfo fontInfo = new FontInfo();
@@ -548,8 +551,9 @@ public class SubjectivePdfWriter {
     final Font font = new Font(key, triplet, metrics, fontSize);
 
     final int textWidth = font.getWordWidth(text);
+    final int textHeight = font.getXHeight();
 
-    return textWidth;
+    return Pair.of(textWidth, textHeight);
   }
 
   private void addRubricCategory(final Document document,
