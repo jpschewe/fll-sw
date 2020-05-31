@@ -6,6 +6,7 @@
 
 package fll.util;
 
+import java.awt.Color;
 import java.awt.geom.Dimension2D;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -52,6 +53,11 @@ public final class FOPUtils {
    * Prefix with colon.
    */
   public static final String XSL_FO_PREFIX = "fo:";
+
+  /**
+   * Static content tag.
+   */
+  public static final String STATIC_CONTENT_TAG = "static-content";
 
   /**
    * Create the root element for an XSL-FO document.
@@ -137,15 +143,6 @@ public final class FOPUtils {
                                             final double headerHeight,
                                             final double footerHeight)
       throws IllegalArgumentException {
-    if (headerHeight > margins.getTop()) {
-      throw new IllegalArgumentException(String.format("Header height (%f) cannot be greater than the top margin (%f)",
-                                                       headerHeight, margins.getTop()));
-    }
-    if (footerHeight > margins.getBottom()) {
-      throw new IllegalArgumentException(String.format("Footer height (%f) cannot be greater than the bottom margin (%f)",
-                                                       footerHeight, margins.getBottom()));
-    }
-
     final Element simplePageMaster = createXslFoElement(document, "simple-page-master");
     simplePageMaster.setAttribute("master-name", name);
     simplePageMaster.setAttribute("page-height", String.format("%fin", pageSize.getHeight()));
@@ -158,6 +155,7 @@ public final class FOPUtils {
 
     final Element body = createXslFoElement(document, "region-body");
     body.setAttribute("margin-top", String.format("%fin", headerHeight));
+    body.setAttribute("margin-bottom", String.format("%fin", footerHeight));
     simplePageMaster.appendChild(body);
 
     final Element header = createXslFoElement(document, "region-before");
@@ -178,8 +176,17 @@ public final class FOPUtils {
   public static final String PAGE_SEQUENCE_NAME = "seq1";
 
   /**
-   * Creates a page sequence with the id {@link #PAGE_SEQUENCE_NAME} for putting
-   * page numbers in the footer.
+   * Tag for a page sequence element.
+   */
+  public static final String PAGE_SEQUENCE_TAG = "page-sequence";
+
+  /**
+   * Attribute to use in a page sequence to reference a page master.
+   */
+  public static final String MASTER_REFERENCE_ATTR = "master-reference";
+
+  /**
+   * Creates a page sequence.
    * 
    * @param document used to create elements
    * @param pageMasterName the name of the page master from
@@ -188,18 +195,17 @@ public final class FOPUtils {
    */
   public static Element createPageSequence(final Document document,
                                            final String pageMasterName) {
-    final Element ele = createXslFoElement(document, "page-sequence");
-    ele.setAttribute("master-reference", pageMasterName);
-    ele.setAttribute("id", PAGE_SEQUENCE_NAME);
+    final Element ele = createXslFoElement(document, PAGE_SEQUENCE_TAG);
+    ele.setAttribute(MASTER_REFERENCE_ATTR, pageMasterName);
     return ele;
   }
 
   /**
    * Simple footer with page numbers. Font size is set to 10pt.
+   * This needs the id {@link #PAGE_SEQUENCE_NAME} in the page sequence.
    * 
    * @param document used to create elements
    * @return the element to be added to the page sequence
-   * @see #createPageSequence(Document, String)
    * @see #PAGE_SEQUENCE_NAME
    */
   public static Element createSimpleFooter(final Document document) {
@@ -435,7 +441,20 @@ public final class FOPUtils {
    */
   public static void addTopBorder(final Element element,
                                   final double width) {
-    addBorder(element, width, "top");
+    addTopBorder(element, width, "black");
+  }
+
+  /**
+   * Set a top solid border with the specified width and color.
+   * 
+   * @param element the element to set the border on
+   * @param width width in points
+   * @param color a valid color string
+   */
+  public static void addTopBorder(final Element element,
+                                  final double width,
+                                  final String color) {
+    addBorder(element, width, color, "top");
   }
 
   /**
@@ -446,7 +465,20 @@ public final class FOPUtils {
    */
   public static void addBottomBorder(final Element element,
                                      final double width) {
-    addBorder(element, width, "bottom");
+    addBottomBorder(element, width, "black");
+  }
+
+  /**
+   * Set a top solid border with the specified width and color.
+   * 
+   * @param element the element to set the border on
+   * @param width width in points
+   * @param color a valid color string
+   */
+  public static void addBottomBorder(final Element element,
+                                     final double width,
+                                     final String color) {
+    addBorder(element, width, color, "bottom");
   }
 
   /**
@@ -457,7 +489,20 @@ public final class FOPUtils {
    */
   public static void addLeftBorder(final Element element,
                                    final double width) {
-    addBorder(element, width, "left");
+    addLeftBorder(element, width, "black");
+  }
+
+  /**
+   * Set a left solid border with the specified width and color.
+   * 
+   * @param element the element to set the border on
+   * @param width width in points
+   * @param color a valid color string
+   */
+  public static void addLeftBorder(final Element element,
+                                   final double width,
+                                   final String color) {
+    addBorder(element, width, color, "left");
   }
 
   /**
@@ -468,13 +513,27 @@ public final class FOPUtils {
    */
   public static void addRightBorder(final Element element,
                                     final double width) {
-    addBorder(element, width, "right");
+    addRightBorder(element, width, "black");
+  }
+
+  /**
+   * Set a right solid border with the specified width and color.
+   * 
+   * @param element the element to set the border on
+   * @param width width in points
+   * @param color a valid color string
+   */
+  public static void addRightBorder(final Element element,
+                                    final double width,
+                                    final String color) {
+    addBorder(element, width, color, "right");
   }
 
   private static void addBorder(final Element element,
                                 final double width,
+                                final String color,
                                 final String side) {
-    element.setAttribute(String.format("border-%s", side), String.format("%fpt solid black", width));
+    element.setAttribute(String.format("border-%s", side), String.format("%fpt solid %s", width, color));
   }
 
   /**
@@ -563,6 +622,34 @@ public final class FOPUtils {
     lineBlock.appendChild(line);
 
     return lineBlock;
+  }
+
+  /**
+   * Tag for leader.
+   */
+  public static final String LEADER_TAG = "leader";
+
+  /**
+   * Add space between elements in a block. This is done by adding a
+   * {@link #LEADER_TAG} with spaces.
+   *
+   * @param document used to create elements
+   * @return the space
+   */
+  public static Element createHorizontalSpace(final Document document) {
+    final Element space = FOPUtils.createXslFoElement(document, FOPUtils.LEADER_TAG);
+    space.setAttribute("leader-pattern", "space");
+    return space;
+  }
+
+  /**
+   * Convert {@code c} to a value that is meant to be used inside XSL-FO.
+   * 
+   * @param c color
+   * @return string
+   */
+  public static String renderColor(final Color c) {
+    return String.format("#%02x%02x%02x", c.getRed(), c.getGreen(), c.getBlue());
   }
 
   /**
