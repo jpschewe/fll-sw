@@ -558,6 +558,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
           final Element row1 = FOPUtils.createXslFoElement(document, "table-row");
           tableBody.appendChild(row1);
+          row1.setAttribute("keep-with-next", "always");
 
           // The first row of the team table...
           // First column is organization name
@@ -761,6 +762,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
     final Element row1 = FOPUtils.createXslFoElement(document, "table-row");
     tableHeader.appendChild(row1);
     row1.setAttribute("font-weight", "bold");
+    row1.setAttribute("keep-with-next", "always");
 
     row1.appendChild(FOPUtils.createTableCell(document, null, "Organization"));
 
@@ -960,6 +962,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
     final Element row1 = FOPUtils.createXslFoElement(document, "table-row");
     tableBody.appendChild(row1);
+    row1.setAttribute("keep-with-next", "always");
 
     final Element challengeTitleCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT, challengeTitle);
     row1.appendChild(challengeTitleCell);
