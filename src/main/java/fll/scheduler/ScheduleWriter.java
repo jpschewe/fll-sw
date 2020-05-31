@@ -28,6 +28,7 @@ import org.w3c.dom.Element;
 
 import com.diffplug.common.base.Errors;
 
+import fll.scheduler.TournamentSchedule.SubjectiveComparatorByTime;
 import fll.util.FLLInternalException;
 import fll.util.FOPUtils;
 import net.mtu.eggplant.xml.XMLUtils;
@@ -641,6 +642,177 @@ public final class ScheduleWriter {
     container.appendChild(FOPUtils.createBlankLine(document));
 
     return container;
+  }
+
+  /**
+   * Output the subjective schedules with a table for each category and sorted
+   * by time.
+   *
+   * @param schedule the schedule to write
+   * @param pdfFos where to write the schedule
+   * @throws IOException if there is an error writing to the stream
+   */
+  public static void outputSubjectiveSchedulesByCategory(final TournamentSchedule schedule,
+                                                         final OutputStream pdfFos)
+      throws IOException {
+    try {
+      final Document performanceDoc = createSubjectiveSchedulesByCategory(schedule);
+      final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
+
+      FOPUtils.renderPdf(fopFactory, performanceDoc, pdfFos);
+    } catch (FOPException | TransformerException e) {
+      throw new FLLInternalException("Error creating the performance schedule PDF", e);
+    }
+  }
+
+  private static Document createSubjectiveSchedulesByCategory(final TournamentSchedule schedule) {
+    final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
+
+    final Element rootElement = FOPUtils.createRoot(document);
+    document.appendChild(rootElement);
+
+    final Element layoutMasterSet = FOPUtils.createXslFoElement(document, "layout-master-set");
+    rootElement.appendChild(layoutMasterSet);
+
+    final String pageMasterName = "simple";
+    final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName);
+    layoutMasterSet.appendChild(pageMaster);
+    // pageMaster.setAttribute("reference-orientation", "90");
+
+    final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
+    rootElement.appendChild(pageSequence);
+    pageSequence.setAttribute("id", FOPUtils.PAGE_SEQUENCE_NAME);
+
+    final Element footer = FOPUtils.createSimpleFooter(document);
+    pageSequence.appendChild(footer);
+
+    final Element documentBody = FOPUtils.createBody(document);
+    pageSequence.appendChild(documentBody);
+
+    for (final String subjectiveStation : schedule.getSubjectiveStations()) {
+      final Element table = outputSubjectiveScheduleByCategory(document, schedule, subjectiveStation);
+      documentBody.appendChild(table);
+      table.setAttribute("page-break-after", "always");
+    }
+
+    return document;
+  }
+
+  private static Element outputSubjectiveScheduleByCategory(final Document document,
+                                                            final TournamentSchedule schedule,
+                                                            final String subjectiveStation) {
+    final Element table = FOPUtils.createBasicTable(document);
+
+    table.appendChild(FOPUtils.createTableColumn(document, 2));
+    table.appendChild(FOPUtils.createTableColumn(document, 1));
+    table.appendChild(FOPUtils.createTableColumn(document, 3));
+    table.appendChild(FOPUtils.createTableColumn(document, 3));
+    table.appendChild(FOPUtils.createTableColumn(document, 2));
+    table.appendChild(FOPUtils.createTableColumn(document, 2));
+
+    final Element header = FOPUtils.createTableHeader(document);
+    table.appendChild(header);
+
+    final String[] headerNames = new String[] { TournamentSchedule.TEAM_NUMBER_HEADER,
+                                                TournamentSchedule.AWARD_GROUP_HEADER,
+                                                TournamentSchedule.ORGANIZATION_HEADER,
+                                                TournamentSchedule.TEAM_NAME_HEADER, subjectiveStation,
+                                                TournamentSchedule.JUDGE_GROUP_HEADER };
+
+    final Element headerRow1 = FOPUtils.createXslFoElement(document, "table-row");
+    header.appendChild(headerRow1);
+
+    final Element tournamentHeader = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                              String.format("Tournament: %s - %s", schedule.getName(),
+                                                                            subjectiveStation));
+    headerRow1.appendChild(tournamentHeader);
+    tournamentHeader.setAttribute("number-columns-spanned", String.valueOf(headerNames.length));
+    FOPUtils.addBorders(tournamentHeader, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH,
+                        STANDARD_BORDER_WIDTH);
+
+    final Element headerRow2 = FOPUtils.createXslFoElement(document, "table-row");
+    header.appendChild(headerRow2);
+
+    for (final String headerName : headerNames) {
+      final Element headerCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, headerName);
+      headerRow2.appendChild(headerCell);
+      FOPUtils.addBorders(headerCell, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH, STANDARD_BORDER_WIDTH,
+                          STANDARD_BORDER_WIDTH);
+    }
+
+    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    table.appendChild(tableBody);
+
+    final List<TeamScheduleInfo> scheduleEntries = new LinkedList<>(schedule.getSchedule());
+    Collections.sort(scheduleEntries, new SubjectiveComparatorByTime(subjectiveStation));
+    LocalTime prevTime = null;
+    Element lastRow = null;
+    for (final TeamScheduleInfo si : scheduleEntries) {
+      final Element row = FOPUtils.createXslFoElement(document, "table-row");
+      tableBody.appendChild(row);
+
+      final LocalTime time = si.getSubjectiveTimeByName(subjectiveStation).getTime();
+
+      final double topBorderWidth;
+      if (Objects.equals(time, prevTime)) {
+        topBorderWidth = STANDARD_BORDER_WIDTH;
+
+        // keep the rows with the same times together
+        row.setAttribute("keep-with-previous", "always");
+      } else {
+        topBorderWidth = TournamentSchedule.TIME_SEPARATOR_LINE_WIDTH;
+      }
+
+      Element cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, String.valueOf(si.getTeamNumber()));
+      row.appendChild(cell);
+      FOPUtils.addBottomBorder(cell, STANDARD_BORDER_WIDTH);
+      FOPUtils.addLeftBorder(cell, STANDARD_BORDER_WIDTH);
+      FOPUtils.addRightBorder(cell, STANDARD_BORDER_WIDTH);
+      FOPUtils.addTopBorder(cell, topBorderWidth);
+
+      cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, si.getAwardGroup());
+      row.appendChild(cell);
+      FOPUtils.addBottomBorder(cell, STANDARD_BORDER_WIDTH);
+      FOPUtils.addLeftBorder(cell, STANDARD_BORDER_WIDTH);
+      FOPUtils.addRightBorder(cell, STANDARD_BORDER_WIDTH);
+      FOPUtils.addTopBorder(cell, topBorderWidth);
+
+      cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, si.getOrganization());
+      row.appendChild(cell);
+      FOPUtils.addBottomBorder(cell, STANDARD_BORDER_WIDTH);
+      FOPUtils.addLeftBorder(cell, STANDARD_BORDER_WIDTH);
+      FOPUtils.addRightBorder(cell, STANDARD_BORDER_WIDTH);
+      FOPUtils.addTopBorder(cell, topBorderWidth);
+
+      cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, si.getTeamName());
+      row.appendChild(cell);
+      FOPUtils.addBottomBorder(cell, STANDARD_BORDER_WIDTH);
+      FOPUtils.addLeftBorder(cell, STANDARD_BORDER_WIDTH);
+      FOPUtils.addRightBorder(cell, STANDARD_BORDER_WIDTH);
+      FOPUtils.addTopBorder(cell, topBorderWidth);
+
+      cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, TournamentSchedule.formatTime(time));
+      row.appendChild(cell);
+      FOPUtils.addBottomBorder(cell, STANDARD_BORDER_WIDTH);
+      FOPUtils.addLeftBorder(cell, STANDARD_BORDER_WIDTH);
+      FOPUtils.addRightBorder(cell, STANDARD_BORDER_WIDTH);
+      FOPUtils.addTopBorder(cell, topBorderWidth);
+
+      cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, si.getJudgingGroup());
+      row.appendChild(cell);
+      FOPUtils.addBottomBorder(cell, STANDARD_BORDER_WIDTH);
+      FOPUtils.addLeftBorder(cell, STANDARD_BORDER_WIDTH);
+      FOPUtils.addRightBorder(cell, STANDARD_BORDER_WIDTH);
+      FOPUtils.addTopBorder(cell, topBorderWidth);
+
+      prevTime = time;
+      lastRow = row;
+    }
+
+    // make sure the last row isn't by itself
+    lastRow.setAttribute("keep-with-previous", "always");
+
+    return table;
   }
 
 }

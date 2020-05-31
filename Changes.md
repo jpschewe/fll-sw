@@ -1,3 +1,4 @@
+* #800 - Convert category schedules to Apache FOP
 * #800 - Convert team schedules to Apache FOP
 * #800 - Convert tournament schedule to Apache FOP
 * #801 - Convert final computed scores to Apache FOP
