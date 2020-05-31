@@ -37,6 +37,7 @@ public final class ScheduleWriter {
   /**
    * Output the performance schedule, sorted by time.
    *
+   * @param schedule the schedule to write
    * @param pdfFos where to write the schedule
    * @throws IOException error writing to the stream
    */

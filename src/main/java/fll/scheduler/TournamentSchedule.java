@@ -20,9 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -107,8 +105,14 @@ public class TournamentSchedule implements Serializable {
    */
   public static final String TEAM_NUMBER_HEADER = "Team #";
 
+  /**
+   * Table header text for team name.
+   */
   public static final String TEAM_NAME_HEADER = "Team Name";
 
+  /**
+   * Table header text for organization.
+   */
   public static final String ORGANIZATION_HEADER = "Organization";
 
   /**
@@ -117,15 +121,27 @@ public class TournamentSchedule implements Serializable {
   @Deprecated
   private static final String DIVISION_HEADER = "Div";
 
+  /**
+   * Table header for award group.
+   */
   public static final String AWARD_GROUP_HEADER = "Award Group";
 
+  /**
+   * Table header for judging group.
+   */
   public static final String JUDGE_GROUP_HEADER = "Judging Group";
 
+  /**
+   * Performance round header without the number.
+   */
   public static final String BASE_PERF_HEADER = "Perf #";
 
-  public static final String BASE_PRACTICE_HEADER = "Practice #";
+  /**
+   * Practice round header without the number.
+   */
+  private static final String BASE_PRACTICE_HEADER = "Practice #";
 
-  public static final String BASE_PRACTICE_HEADER_SHORT = "Practice";
+  private static final String BASE_PRACTICE_HEADER_SHORT = "Practice";
 
   /**
    * Used with {@link String#format(String, Object...)} to create a performance
@@ -138,7 +154,7 @@ public class TournamentSchedule implements Serializable {
    * Used with {@link String#format(String, Object...)} to create a practice
    * round header.
    */
-  public static final String PRACTICE_HEADER_FORMAT = BASE_PRACTICE_HEADER
+  private static final String PRACTICE_HEADER_FORMAT = BASE_PRACTICE_HEADER
       + "%d";
 
   /**
@@ -147,9 +163,9 @@ public class TournamentSchedule implements Serializable {
    */
   public static final String TABLE_HEADER_FORMAT = "Perf %d Table";
 
-  public static final String PRACTICE_TABLE_HEADER_FORMAT = "Practice %d Table";
+  private static final String PRACTICE_TABLE_HEADER_FORMAT = "Practice %d Table";
 
-  public static final String PRACTICE_TABLE_HEADER_FORMAT_SHORT = "Practice Table";
+  private static final String PRACTICE_TABLE_HEADER_FORMAT_SHORT = "Practice Table";
 
   /**
    * @return Number of rounds in this schedule (practice and regular match play).
@@ -258,40 +274,33 @@ public class TournamentSchedule implements Serializable {
     }
   }
 
-  public static final ThreadLocal<DateFormat> DATE_FORMAT_AM_PM_SS = new ThreadLocal<DateFormat>() {
-    @Override
-    protected DateFormat initialValue() {
-      return new SimpleDateFormat("hh:mm:ss a");
-    }
-  };
-
   // time->table->team
-  private final HashMap<LocalTime, Map<String, List<TeamScheduleInfo>>> _matches = new HashMap<>();
+  private final HashMap<LocalTime, Map<String, List<TeamScheduleInfo>>> matches = new HashMap<>();
 
   /* package */Map<LocalTime, Map<String, List<TeamScheduleInfo>>> getMatches() {
     // TODO should make read-only somehow
-    return _matches;
+    return matches;
   }
 
-  private final HashSet<String> _tableColors = new HashSet<>();
+  private final HashSet<String> tableColors = new HashSet<>();
 
   public Set<String> getTableColors() {
-    return Collections.unmodifiableSet(_tableColors);
+    return Collections.unmodifiableSet(tableColors);
   }
 
-  private final HashSet<String> _awardGroups = new HashSet<>();
+  private final HashSet<String> awardGroups = new HashSet<>();
 
   public Set<String> getAwardGroups() {
-    return Collections.unmodifiableSet(_awardGroups);
+    return Collections.unmodifiableSet(awardGroups);
   }
 
-  private final HashSet<String> _judgingGroups = new HashSet<>();
+  private final HashSet<String> judgingGroups = new HashSet<>();
 
   public Set<String> getJudgingGroups() {
-    return Collections.unmodifiableSet(_judgingGroups);
+    return Collections.unmodifiableSet(judgingGroups);
   }
 
-  private final LinkedList<TeamScheduleInfo> _schedule = new LinkedList<>();
+  private final LinkedList<TeamScheduleInfo> schedule = new LinkedList<>();
 
   private final HashSet<String> subjectiveStations = new HashSet<>();
 
@@ -305,7 +314,7 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
-   * The list of subjective stations for this schedule.
+   * @return The list of subjective stations for this schedule.
    */
   public Set<String> getSubjectiveStations() {
     return Collections.unmodifiableSet(subjectiveStations);
@@ -315,16 +324,17 @@ public class TournamentSchedule implements Serializable {
    * @return An unmodifiable copy of the schedule.
    */
   public List<TeamScheduleInfo> getSchedule() {
-    return Collections.unmodifiableList(_schedule);
+    return Collections.unmodifiableList(schedule);
   }
 
   /**
    * Get the {@link TeamScheduleInfo} for the specified team number.
    *
+   * @param teamNumber the team to get the schedule info for
    * @return null if cannot be found
    */
   public TeamScheduleInfo getSchedInfoForTeam(final int teamNumber) {
-    for (final TeamScheduleInfo si : _schedule) {
+    for (final TeamScheduleInfo si : schedule) {
       if (si.getTeamNumber() == teamNumber) {
         return si;
       }
@@ -352,6 +362,7 @@ public class TournamentSchedule implements Serializable {
   /**
    * Read the tournament schedule from a CSV file.
    *
+   * @param name see {@link #getName()}
    * @param csvFile where to read the schedule from
    * @param subjectiveHeaders the headers for the subjective columns
    * @throws ScheduleParseException
@@ -476,9 +487,9 @@ public class TournamentSchedule implements Serializable {
 
     } // allocate prepared statements
 
-    if (!_schedule.isEmpty()) {
-      this.numRegularMatchPlayRounds = _schedule.get(0).getNumRegularMatchPlayRounds();
-      this.numPracticeRounds = _schedule.get(0).getNumPracticeRounds();
+    if (!schedule.isEmpty()) {
+      this.numRegularMatchPlayRounds = schedule.get(0).getNumRegularMatchPlayRounds();
+      this.numPracticeRounds = schedule.get(0).getNumPracticeRounds();
       validateRounds();
     } else {
       this.numRegularMatchPlayRounds = 0;
@@ -488,7 +499,7 @@ public class TournamentSchedule implements Serializable {
   }
 
   private void validateRounds() {
-    for (final TeamScheduleInfo si : _schedule) {
+    for (final TeamScheduleInfo si : schedule) {
       if (this.numRegularMatchPlayRounds != si.getNumRegularMatchPlayRounds()) {
         throw new RuntimeException("Should have "
             + this.numRegularMatchPlayRounds
@@ -529,6 +540,8 @@ public class TournamentSchedule implements Serializable {
    * Find the index of the columns. Reads lines until the headers are found or
    * EOF is reached.
    *
+   * @param reader where to read the columns from
+   * @param subjectiveHeaders the known subjective headers
    * @return the column information
    * @throws IOException
    * @throws RuntimeException if a header row cannot be found
@@ -820,8 +833,8 @@ public class TournamentSchedule implements Serializable {
    * schedule.
    */
   private void addToSchedule(final TeamScheduleInfo ti) {
-    if (!_schedule.contains(ti)) {
-      _schedule.add(ti);
+    if (!schedule.contains(ti)) {
+      schedule.add(ti);
     } else {
       LOGGER.warn("Attempting to add the same team to the schedule twice: "
           + ti.getTeamNumber());
@@ -837,17 +850,18 @@ public class TournamentSchedule implements Serializable {
 
     // keep track of some meta information
     ti.allPerformances().forEach(performance -> {
-      _tableColors.add(performance.getTable());
+      tableColors.add(performance.getTable());
       addToMatches(ti, performance);
     });
 
-    _awardGroups.add(ti.getAwardGroup());
-    _judgingGroups.add(ti.getJudgingGroup());
+    awardGroups.add(ti.getAwardGroup());
+    judgingGroups.add(ti.getJudgingGroup());
   }
 
   /**
    * Output the detailed schedule.
    *
+   * @param params schedule parameters
    * @param directory the directory to put the files in
    * @param baseFilename the base filename
    * @throws DocumentException
@@ -910,9 +924,9 @@ public class TournamentSchedule implements Serializable {
   public void outputTeamSchedules(final SchedParams params,
                                   final OutputStream pdfFos)
       throws DocumentException {
-    Collections.sort(_schedule, ComparatorByTeam.INSTANCE);
+    Collections.sort(schedule, ComparatorByTeam.INSTANCE);
     final Document teamDoc = PdfUtils.createPortraitPdfDoc(pdfFos, new SimpleFooterHandler());
-    for (final TeamScheduleInfo si : _schedule) {
+    for (final TeamScheduleInfo si : schedule) {
       outputTeamSchedule(params, teamDoc, si);
     }
     teamDoc.close();
@@ -1025,8 +1039,8 @@ public class TournamentSchedule implements Serializable {
     }
     table.setHeaderRows(2);
 
-    Collections.sort(_schedule, ComparatorByTeam.INSTANCE);
-    for (final TeamScheduleInfo si : _schedule) {
+    Collections.sort(schedule, ComparatorByTeam.INSTANCE);
+    for (final TeamScheduleInfo si : schedule) {
       table.addCell(PdfUtils.createCell(String.valueOf(si.getTeamNumber())));
       table.addCell(PdfUtils.createCell(si.getTeamName()));
       table.addCell(PdfUtils.createCell(si.getOrganization()));
@@ -1159,7 +1173,7 @@ public class TournamentSchedule implements Serializable {
       // sort the schedule by the category we're working with
       final String subjectiveStation = categoryToSchedule.get(category);
       if (null != subjectiveStation) {
-        Collections.sort(_schedule, getComparatorForSubjectiveByDivision(subjectiveStation));
+        Collections.sort(schedule, getComparatorForSubjectiveByDivision(subjectiveStation));
       }
 
       final ScoreCategory scoreCategory = sheetElement.getSheetData();
@@ -1167,7 +1181,7 @@ public class TournamentSchedule implements Serializable {
 
       try (OutputStream stream = new FileOutputStream(filename)) {
         SubjectivePdfWriter.createDocument(stream, description, tournamentName, sheetElement, schedulerColumn,
-                                           _schedule);
+                                           schedule);
       }
     }
   }
@@ -1194,9 +1208,9 @@ public class TournamentSchedule implements Serializable {
                                       @Nonnull final ChallengeDescription description)
       throws DocumentException, SQLException, IOException {
     final ScoresheetGenerator scoresheets = new ScoresheetGenerator(getTotalNumberOfRounds()
-        * _schedule.size(), description, tournamentName);
+        * schedule.size(), description, tournamentName);
     final SortedMap<PerformanceTime, TeamScheduleInfo> performanceTimes = new TreeMap<>(PerformanceTime.ByTableThenTime.INSTANCE);
-    for (final TeamScheduleInfo si : _schedule) {
+    for (final TeamScheduleInfo si : schedule) {
       for (final PerformanceTime pt : si.getAllPerformances()) {
         performanceTimes.put(pt, si);
       }
@@ -1242,9 +1256,9 @@ public class TournamentSchedule implements Serializable {
     table.addCell(PdfUtils.createHeaderCell(JUDGE_GROUP_HEADER));
     table.setHeaderRows(2);
 
-    Collections.sort(_schedule, getComparatorForSubjectiveByDivision(subjectiveStation));
+    Collections.sort(schedule, getComparatorForSubjectiveByDivision(subjectiveStation));
     String prevAwardGroup = null;
-    for (final TeamScheduleInfo si : _schedule) {
+    for (final TeamScheduleInfo si : schedule) {
       final LocalTime time = si.getSubjectiveTimeByName(subjectiveStation).getTime();
       final String awardGroup = si.getAwardGroup();
       final float topBorderWidth;
@@ -1316,9 +1330,9 @@ public class TournamentSchedule implements Serializable {
     currentRow++;
     table.setHeaderRows(2);
 
-    Collections.sort(_schedule, getComparatorForSubjectiveByTime(subjectiveStation));
+    Collections.sort(schedule, getComparatorForSubjectiveByTime(subjectiveStation));
     LocalTime prevTime = null;
-    for (final TeamScheduleInfo si : _schedule) {
+    for (final TeamScheduleInfo si : schedule) {
       final LocalTime time = si.getSubjectiveTimeByName(subjectiveStation).getTime();
 
       final float topBorderWidth;
@@ -1405,7 +1419,7 @@ public class TournamentSchedule implements Serializable {
     currentRow++;
     table.setHeaderRows(2);
 
-    final Stream<TeamScheduleInfo> s1 = _schedule.stream();
+    final Stream<TeamScheduleInfo> s1 = schedule.stream();
     final Stream<List<TeamAtSubjectiveTime>> s2 = s1.map(ti -> ti.getSubjectiveTimes().stream()
                                                                  .map(st -> new TeamAtSubjectiveTime(ti, st))
                                                                  .collect(Collectors.toList()));
@@ -1492,7 +1506,7 @@ public class TournamentSchedule implements Serializable {
   private static class SubjectiveComparatorByDivision implements Comparator<TeamScheduleInfo>, Serializable {
     private final String name;
 
-    public SubjectiveComparatorByDivision(final String name) {
+    /* package */ SubjectiveComparatorByDivision(final String name) {
       this.name = name;
     }
 
@@ -1535,7 +1549,7 @@ public class TournamentSchedule implements Serializable {
   private static class SubjectiveComparatorByTime implements Comparator<TeamScheduleInfo>, Serializable {
     private final String name;
 
-    public SubjectiveComparatorByTime(final String name) {
+    /* package */ SubjectiveComparatorByTime(final String name) {
       this.name = name;
     }
 
@@ -1575,7 +1589,7 @@ public class TournamentSchedule implements Serializable {
   /**
    * Comparator for for sorting by team number.
    */
-  private static class ComparatorByTeam implements Comparator<TeamScheduleInfo>, Serializable {
+  private static final class ComparatorByTeam implements Comparator<TeamScheduleInfo>, Serializable {
 
     public static final ComparatorByTeam INSTANCE = new ComparatorByTeam();
 
@@ -1591,7 +1605,7 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
-   * Compute the general schedule and return it as a string
+   * @return the general schedule as a string.
    */
   public String computeGeneralSchedule() {
     LocalTime minPerf = null;
@@ -1600,7 +1614,7 @@ public class TournamentSchedule implements Serializable {
     final Map<String, LocalTime> minSubjectiveTimes = new HashMap<>();
     final Map<String, LocalTime> maxSubjectiveTimes = new HashMap<>();
 
-    for (final TeamScheduleInfo si : _schedule) {
+    for (final TeamScheduleInfo si : schedule) {
       final String judgingStation = si.getJudgingGroup();
       for (final SubjectiveTime stime : si.getSubjectiveTimes()) {
         final LocalTime currentMin = minSubjectiveTimes.get(judgingStation);
@@ -1673,11 +1687,11 @@ public class TournamentSchedule implements Serializable {
   private void addToMatches(final TeamScheduleInfo ti,
                             final PerformanceTime performance) {
     final Map<String, List<TeamScheduleInfo>> timeMatches;
-    if (_matches.containsKey(performance.getTime())) {
-      timeMatches = _matches.get(performance.getTime());
+    if (matches.containsKey(performance.getTime())) {
+      timeMatches = matches.get(performance.getTime());
     } else {
       timeMatches = new HashMap<>();
-      _matches.put(performance.getTime(), timeMatches);
+      matches.put(performance.getTime(), timeMatches);
     }
 
     final List<TeamScheduleInfo> tableMatches;
@@ -1694,12 +1708,12 @@ public class TournamentSchedule implements Serializable {
   private void removeFromMatches(final TeamScheduleInfo ti,
                                  final PerformanceTime performance) {
 
-    if (!_matches.containsKey(performance.getTime())) {
+    if (!matches.containsKey(performance.getTime())) {
       throw new IllegalArgumentException("Cannot find time info for "
           + performance.getTime()
           + " in matches");
     }
-    final Map<String, List<TeamScheduleInfo>> timeMatches = _matches.get(performance.getTime());
+    final Map<String, List<TeamScheduleInfo>> timeMatches = matches.get(performance.getTime());
     if (!timeMatches.containsKey(performance.getTable())) {
       throw new IllegalArgumentException("Cannot find table info for "
           + performance.getTime()
@@ -1726,7 +1740,7 @@ public class TournamentSchedule implements Serializable {
                                        final PerformanceTime performance) {
     final LocalTime performanceTime = performance.getTime();
     final String table = performance.getTable();
-    final List<TeamScheduleInfo> tableMatches = _matches.get(performanceTime).get(table);
+    final List<TeamScheduleInfo> tableMatches = matches.get(performanceTime).get(table);
     if (tableMatches.size() > 1) {
       if (tableMatches.get(0).equals(tableMatches.get(1))) {
         throw new FLLRuntimeException("Internal error, _matches is inconsistent. Has team competing against itself");
@@ -1888,6 +1902,7 @@ public class TournamentSchedule implements Serializable {
    * Store a tournament schedule in the database. This will delete any previous
    * schedule for the same tournament.
    *
+   * @param connection where to store the schedule
    * @param tournamentID the ID of the tournament
    */
   public void storeSchedule(final Connection connection,
@@ -1967,7 +1982,7 @@ public class TournamentSchedule implements Serializable {
     final Collection<TeamScheduleInfo> missingTeams = new LinkedList<>();
     final Map<Integer, TournamentTeam> dbTeams = Queries.getTournamentTeams(connection, tournamentID);
 
-    for (final TeamScheduleInfo si : _schedule) {
+    for (final TeamScheduleInfo si : schedule) {
       if (!dbTeams.containsKey(si.getTeamNumber())) {
         missingTeams.add(si);
       }
@@ -1990,7 +2005,7 @@ public class TournamentSchedule implements Serializable {
     final Collection<ConstraintViolation> violations = new LinkedList<>();
     final Map<Integer, TournamentTeam> dbTeams = Queries.getTournamentTeams(connection, tournamentID);
     final Set<Integer> scheduleTeamNumbers = new HashSet<>();
-    for (final TeamScheduleInfo si : _schedule) {
+    for (final TeamScheduleInfo si : schedule) {
       scheduleTeamNumbers.add(si.getTeamNumber());
       if (!dbTeams.containsKey(si.getTeamNumber())) {
         violations.add(new ConstraintViolation(ConstraintViolation.Type.HARD, si.getTeamNumber(), null, null, null,
@@ -2025,8 +2040,8 @@ public class TournamentSchedule implements Serializable {
     private final List<String> headerLine;
 
     /**
-     * The columns that were parsed into the headers in the same order that they
-     * appear in the schedule.
+     * @return The columns that were parsed into the headers in the same order that
+     *         they appear in the schedule.
      */
     public List<String> getHeaderLine() {
       return headerLine;
@@ -2189,10 +2204,11 @@ public class TournamentSchedule implements Serializable {
   /**
    * Find the {@link TeamScheduleInfo} object for the specified team number.
    *
+   * @param team the team to get the schedule information for
    * @return the schedule info or null if not found
    */
   public TeamScheduleInfo findScheduleInfo(final int team) {
-    for (final TeamScheduleInfo si : _schedule) {
+    for (final TeamScheduleInfo si : schedule) {
       if (si.getTeamNumber() == team) {
         return si;
       }
@@ -2230,7 +2246,7 @@ public class TournamentSchedule implements Serializable {
    * @throws IOException
    */
   public void writeToCSV(final Writer outputWriter) throws IOException {
-    try (final CSVWriter csv = new CSVWriter(outputWriter)) {
+    try (CSVWriter csv = new CSVWriter(outputWriter)) {
 
       final List<String> line = new ArrayList<>();
       line.add(TournamentSchedule.TEAM_NUMBER_HEADER);
@@ -2299,7 +2315,7 @@ public class TournamentSchedule implements Serializable {
    * @throws IOException
    */
   public void writeToCSV(final File outputFile) throws IOException {
-    try (final Writer writer = new OutputStreamWriter(new FileOutputStream(outputFile), Utilities.DEFAULT_CHARSET)) {
+    try (Writer writer = new OutputStreamWriter(new FileOutputStream(outputFile), Utilities.DEFAULT_CHARSET)) {
       writeToCSV(writer);
     }
   }
