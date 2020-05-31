@@ -72,8 +72,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
   private static final double FOOTER_MARGIN_INCHES = 0.5;
 
-  private static final FOPUtils.Margins PAGE_MARGINS = new FOPUtils.Margins(0.2, 0.2, 0.5, 0.5);
-
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -222,8 +220,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
     rootElement.appendChild(layoutMasterSet);
 
     final String pageMasterName = "simple";
-    FOPUtils.createSimplePageMaster(document, layoutMasterSet, pageMasterName, FOPUtils.PAGE_LETTER_SIZE, PAGE_MARGINS,
-                                    HEADER_MARGIN_INCHES, FOOTER_MARGIN_INCHES);
+    FOPUtils.createSimplePageMaster(document, layoutMasterSet, pageMasterName, FOPUtils.PAGE_LETTER_SIZE,
+                                    FOPUtils.STANDARD_MARGINS, HEADER_MARGIN_INCHES, FOOTER_MARGIN_INCHES);
 
     final Element legend = createLegend(document, percentageHurdle, standardMean, standardSigma);
 

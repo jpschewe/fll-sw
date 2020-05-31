@@ -97,7 +97,7 @@ public final class FOPUtils {
   /**
    * 0.5" on each side.
    */
-  public static final Margins STANDARD_MARGINS = new Margins(0.5, 0.5, 0.5, 0.5);
+  public static final Margins STANDARD_MARGINS = new Margins(0.2, 0.2, 0.5, 0.5);
 
   /**
    * Footer with enough room to put the page number.
