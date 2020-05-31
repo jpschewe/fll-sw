@@ -8,6 +8,7 @@ package fll.scheduler;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.Duration;
 import java.time.LocalTime;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -86,12 +87,11 @@ public final class ScheduleWriter {
     rootElement.appendChild(layoutMasterSet);
 
     final String pageMasterName = "simple";
-    final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName,
-                                                               FOPUtils.PAGE_LETTER_SIZE,
+    final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName, FOPUtils.PAGE_LETTER_SIZE,
                                                                FOPUtils.STANDARD_MARGINS, 0.2,
                                                                FOPUtils.STANDARD_FOOTER_HEIGHT);
     layoutMasterSet.appendChild(pageMaster);
-     pageMaster.setAttribute("reference-orientation", "90");
+    pageMaster.setAttribute("reference-orientation", "90");
 
     final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
     rootElement.appendChild(pageSequence);
@@ -491,6 +491,156 @@ public final class ScheduleWriter {
     }
 
     return document;
+  }
+
+  /**
+   * Output the schedule for each team.
+   *
+   * @param schedule the tournament schedule
+   * @param params schedule parameters
+   * @param stream where to write the schedule
+   * @throws IOException if there is an error writing to the stream
+   */
+  public static void outputTeamSchedules(final TournamentSchedule schedule,
+                                         final SchedParams params,
+                                         final OutputStream stream)
+      throws IOException {
+
+    try {
+      final Document document = createTeamSchedules(schedule, params);
+
+      final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
+
+      FOPUtils.renderPdf(fopFactory, document, stream);
+    } catch (FOPException | TransformerException e) {
+      throw new FLLInternalException("Error creating the performance schedule PDF", e);
+    }
+  }
+
+  private static Document createTeamSchedules(final TournamentSchedule schedule,
+                                              final SchedParams params) {
+    final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
+
+    final Element rootElement = FOPUtils.createRoot(document);
+    document.appendChild(rootElement);
+
+    final Element layoutMasterSet = FOPUtils.createXslFoElement(document, "layout-master-set");
+    rootElement.appendChild(layoutMasterSet);
+
+    final String pageMasterName = "simple";
+    final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName);
+    layoutMasterSet.appendChild(pageMaster);
+
+    final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
+    rootElement.appendChild(pageSequence);
+    pageSequence.setAttribute("id", FOPUtils.PAGE_SEQUENCE_NAME);
+
+    final Element footer = FOPUtils.createSimpleFooter(document);
+    pageSequence.appendChild(footer);
+
+    final Element documentBody = FOPUtils.createBody(document);
+    pageSequence.appendChild(documentBody);
+
+    final List<TeamScheduleInfo> scheduleEntries = new LinkedList<>(schedule.getSchedule());
+    Collections.sort(scheduleEntries, TournamentSchedule.ComparatorByTeam.INSTANCE);
+    for (final TeamScheduleInfo si : scheduleEntries) {
+      final Element teamSchedule = outputTeamSchedule(document, schedule, params, si);
+      documentBody.appendChild(teamSchedule);
+    }
+
+    return document;
+  }
+
+  /**
+   * Output the detailed schedule for a team for the day.
+   */
+  private static Element outputTeamSchedule(final Document document,
+                                            final TournamentSchedule schedule,
+                                            final SchedParams params,
+                                            final TeamScheduleInfo si) {
+    final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+    container.setAttribute("keep-together.within-page", "always");
+    container.setAttribute("font-size", "10pt");
+
+    final Element header1 = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    container.appendChild(header1);
+    header1.setAttribute("font-size", "12pt");
+    header1.setAttribute("font-weight", "bold");
+    header1.appendChild(document.createTextNode(String.format("Detailed schedule for Team #%d - %s", si.getTeamNumber(),
+                                                              si.getTeamName())));
+
+    final Element header2 = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    container.appendChild(header2);
+    header2.setAttribute("font-size", "12pt");
+    header2.setAttribute("font-weight", "bold");
+    header2.appendChild(document.createTextNode(String.format("Organization: %s", si.getOrganization())));
+
+    final Element division = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    container.appendChild(division);
+
+    final Element divisionHeader = FOPUtils.createXslFoElement(document, "inline");
+    division.appendChild(divisionHeader);
+    divisionHeader.setAttribute("font-weight", "bold");
+    divisionHeader.appendChild(document.createTextNode("Award Group: "));
+
+    final Element divisionValue = FOPUtils.createXslFoElement(document, "inline");
+    division.appendChild(divisionValue);
+    divisionValue.appendChild(document.createTextNode(si.getAwardGroup()));
+
+    for (final String subjectiveStation : schedule.getSubjectiveStations()) {
+      final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      container.appendChild(block);
+
+      final Element header = FOPUtils.createXslFoElement(document, "inline");
+      block.appendChild(header);
+      header.setAttribute("font-weight", "bold");
+      header.appendChild(document.createTextNode(subjectiveStation
+          + ": "));
+
+      final Element value = FOPUtils.createXslFoElement(document, "inline");
+      block.appendChild(value);
+      final LocalTime start = si.getSubjectiveTimeByName(subjectiveStation).getTime();
+      final LocalTime end = start.plus(params.getStationByName(subjectiveStation).getDuration());
+      value.appendChild(document.createTextNode(String.format("%s - %s", TournamentSchedule.formatTime(start),
+                                                              TournamentSchedule.formatTime(end))));
+    }
+
+    for (final PerformanceTime performance : si.getAllPerformances()) {
+      final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      container.appendChild(block);
+
+      final String roundName = si.getRoundName(performance);
+      final Element header = FOPUtils.createXslFoElement(document, "inline");
+      block.appendChild(header);
+      header.setAttribute("font-weight", "bold");
+      header.appendChild(document.createTextNode(roundName
+          + ": "));
+
+      final Element value = FOPUtils.createXslFoElement(document, "inline");
+      block.appendChild(value);
+      final LocalTime start = performance.getTime();
+      final LocalTime end = start.plus(Duration.ofMinutes(params.getPerformanceMinutes()));
+      value.appendChild(document.createTextNode(String.format("%s - %s %s %d", TournamentSchedule.formatTime(start),
+                                                              TournamentSchedule.formatTime(end),
+                                                              performance.getTable(), performance.getSide())));
+    }
+
+    container.appendChild(FOPUtils.createBlankLine(document));
+
+    final Element instructions1 = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    container.appendChild(instructions1);
+    instructions1.setAttribute("font-weight", "bold");
+    instructions1.appendChild(document.createTextNode("Performance rounds must start on time, and will start without you. Please ensure your team arrives at least 5 minutes ahead of scheduled time, and checks in."));
+
+    final Element instructions2 = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    container.appendChild(instructions2);
+    instructions2.setAttribute("font-weight", "bold");
+    instructions2.appendChild(document.createTextNode("Note that there may be more judging and a head to head round after this judging, please see the main tournament schedule for these details."));
+
+    container.appendChild(FOPUtils.createBlankLine(document));
+    container.appendChild(FOPUtils.createBlankLine(document));
+
+    return container;
   }
 
 }
