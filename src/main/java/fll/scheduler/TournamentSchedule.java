@@ -52,9 +52,6 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.FontFactory;
-import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
@@ -922,17 +919,12 @@ public class TournamentSchedule implements Serializable {
    *
    * @param params schedule parameters
    * @param pdfFos where to write the schedule
-   * @throws DocumentException
+   * @throws IOException if there is an error writing to the stream
    */
   public void outputTeamSchedules(final SchedParams params,
                                   final OutputStream pdfFos)
-      throws DocumentException {
-    Collections.sort(schedule, ComparatorByTeam.INSTANCE);
-    final Document teamDoc = PdfUtils.createPortraitPdfDoc(pdfFos, new SimpleFooterHandler());
-    for (final TeamScheduleInfo si : schedule) {
-      outputTeamSchedule(params, teamDoc, si);
-    }
-    teamDoc.close();
+      throws IOException {
+    ScheduleWriter.outputTeamSchedules(this, params, pdfFos);
   }
 
   /**
@@ -976,69 +968,6 @@ public class TournamentSchedule implements Serializable {
    */
   public void outputScheduleByTeam(final OutputStream stream) throws IOException {
     ScheduleWriter.outputScheduleByTeam(this, stream);
-  }
-
-  private static final Font TEAM_TITLE_FONT = FontFactory.getFont(FontFactory.TIMES, 12, Font.BOLD);
-
-  private static final Font TEAM_HEADER_FONT = FontFactory.getFont(FontFactory.HELVETICA, 10, Font.BOLD);
-
-  private static final Font TEAM_VALUE_FONT = FontFactory.getFont(FontFactory.HELVETICA, 10, Font.NORMAL);
-
-  /**
-   * Output the detailed schedule for a team for the day.
-   *
-   * @throws DocumentException
-   */
-  private void outputTeamSchedule(final SchedParams params,
-                                  final Document detailedSchedules,
-                                  final TeamScheduleInfo si)
-      throws DocumentException {
-    final Paragraph para = new Paragraph();
-    para.add(new Chunk(String.format("Detailed schedule for Team #%d - %s", si.getTeamNumber(), si.getTeamName()),
-                       TEAM_TITLE_FONT));
-    para.add(Chunk.NEWLINE);
-
-    para.add(new Chunk(String.format("Organization: %s", si.getOrganization()), TEAM_TITLE_FONT));
-    para.add(Chunk.NEWLINE);
-
-    para.add(new Chunk("Division: ", TEAM_HEADER_FONT));
-    para.add(new Chunk(si.getAwardGroup(), TEAM_VALUE_FONT));
-    para.add(Chunk.NEWLINE);
-
-    for (final String subjectiveStation : subjectiveStations) {
-      para.add(new Chunk(subjectiveStation
-          + ": ", TEAM_HEADER_FONT));
-      final LocalTime start = si.getSubjectiveTimeByName(subjectiveStation).getTime();
-      final LocalTime end = start.plus(params.getStationByName(subjectiveStation).getDuration());
-      para.add(new Chunk(String.format("%s - %s", formatTime(start), formatTime(end)), TEAM_VALUE_FONT));
-      para.add(Chunk.NEWLINE);
-    }
-
-    for (final PerformanceTime performance : si.getAllPerformances()) {
-      final String roundName = si.getRoundName(performance);
-      para.add(new Chunk(roundName
-          + ": ", TEAM_HEADER_FONT));
-      final LocalTime start = performance.getTime();
-      final LocalTime end = start.plus(Duration.ofMinutes(params.getPerformanceMinutes()));
-      para.add(new Chunk(String.format("%s - %s %s %d", formatTime(start), formatTime(end), performance.getTable(),
-                                       performance.getSide()),
-                         TEAM_VALUE_FONT));
-      para.add(Chunk.NEWLINE);
-    }
-
-    para.add(Chunk.NEWLINE);
-    para.add(new Chunk("Performance rounds must start on time, and will start without you. Please ensure your team arrives at least 5 minutes ahead of scheduled time, and checks in.",
-                       TEAM_HEADER_FONT));
-
-    para.add(Chunk.NEWLINE);
-    para.add(new Chunk("Note that there may be more judging and a head to head round after this judging, please see the main tournament schedule for these details.",
-                       TEAM_HEADER_FONT));
-    para.add(Chunk.NEWLINE);
-    para.add(Chunk.NEWLINE);
-    para.add(Chunk.NEWLINE);
-
-    para.setKeepTogether(true);
-    detailedSchedules.add(para);
   }
 
   /**
