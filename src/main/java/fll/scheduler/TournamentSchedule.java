@@ -49,7 +49,6 @@ import javax.annotation.Nonnull;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
-import com.diffplug.common.base.Errors;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
@@ -154,7 +153,7 @@ public class TournamentSchedule implements Serializable {
    * Used with {@link String#format(String, Object...)} to create a practice
    * round header.
    */
-  private static final String PRACTICE_HEADER_FORMAT = BASE_PRACTICE_HEADER
+  public static final String PRACTICE_HEADER_FORMAT = BASE_PRACTICE_HEADER
       + "%d";
 
   /**
@@ -163,7 +162,11 @@ public class TournamentSchedule implements Serializable {
    */
   public static final String TABLE_HEADER_FORMAT = "Perf %d Table";
 
-  private static final String PRACTICE_TABLE_HEADER_FORMAT = "Practice %d Table";
+  /**
+   * Used with {@link String#format(String, Object...)} to create a practice
+   * table header.
+   */
+  public static final String PRACTICE_TABLE_HEADER_FORMAT = "Practice %d Table";
 
   private static final String PRACTICE_TABLE_HEADER_FORMAT_SHORT = "Practice Table";
 
@@ -969,108 +972,10 @@ public class TournamentSchedule implements Serializable {
    * the input spreadsheet.
    *
    * @param stream where to write the schedule
-   * @throws DocumentException
+   * @throws IOException if there is an error writing to the stream
    */
-  public void outputScheduleByTeam(final OutputStream stream) throws DocumentException {
-    final Document pdf = PdfUtils.createLandscapePdfDoc(stream, new SimpleFooterHandler());
-
-    final int numColumns = 5
-        + subjectiveStations.size()
-        + (getNumberOfRegularMatchPlayRounds()
-            * 2)
-        + (getNumberOfPracticeRounds()
-            * 2);
-    final PdfPTable table = PdfUtils.createTable(numColumns);
-    final float[] columnWidths = new float[numColumns];
-    int idx = 0;
-    columnWidths[idx] = 2; // team number
-    ++idx;
-    columnWidths[idx] = 3; // team name
-    ++idx;
-    columnWidths[idx] = 3; // organization
-    ++idx;
-    columnWidths[idx] = 2; // judging group
-    ++idx;
-    columnWidths[idx] = 2; // division
-    ++idx;
-    for (int i = 0; i < subjectiveStations.size(); ++i) {
-      columnWidths[idx] = 2; // time
-      ++idx;
-    }
-    for (int i = 0; i < getNumberOfPracticeRounds(); ++i) {
-      columnWidths[idx] = 2; // time
-      ++idx;
-      columnWidths[idx] = 2; // table
-      ++idx;
-    }
-    for (int i = 0; i < getNumberOfRegularMatchPlayRounds(); ++i) {
-      columnWidths[idx] = 2; // time
-      ++idx;
-      columnWidths[idx] = 2; // table
-      ++idx;
-    }
-    table.setWidths(columnWidths);
-
-    final PdfPCell tournamentCell = PdfUtils.createHeaderCell("Tournament: "
-        + getName());
-    tournamentCell.setColspan(numColumns);
-
-    table.addCell(tournamentCell);
-
-    table.addCell(PdfUtils.createHeaderCell(TEAM_NUMBER_HEADER));
-    table.addCell(PdfUtils.createHeaderCell(TEAM_NAME_HEADER));
-    table.addCell(PdfUtils.createHeaderCell(ORGANIZATION_HEADER));
-    table.addCell(PdfUtils.createHeaderCell(JUDGE_GROUP_HEADER));
-    table.addCell(PdfUtils.createHeaderCell(AWARD_GROUP_HEADER));
-    for (final String subjectiveStation : subjectiveStations) {
-      table.addCell(PdfUtils.createHeaderCell(subjectiveStation));
-    }
-    for (int round = 0; round < getNumberOfPracticeRounds(); ++round) {
-      table.addCell(PdfUtils.createHeaderCell(String.format(PRACTICE_HEADER_FORMAT, round
-          + 1)));
-      table.addCell(PdfUtils.createHeaderCell(String.format(PRACTICE_TABLE_HEADER_FORMAT, round
-          + 1)));
-    }
-    for (int round = 0; round < getNumberOfRegularMatchPlayRounds(); ++round) {
-      table.addCell(PdfUtils.createHeaderCell(String.format(PERF_HEADER_FORMAT, round
-          + 1)));
-      table.addCell(PdfUtils.createHeaderCell(String.format(TABLE_HEADER_FORMAT, round
-          + 1)));
-    }
-    table.setHeaderRows(2);
-
-    Collections.sort(schedule, ComparatorByTeam.INSTANCE);
-    for (final TeamScheduleInfo si : schedule) {
-      table.addCell(PdfUtils.createCell(String.valueOf(si.getTeamNumber())));
-      table.addCell(PdfUtils.createCell(si.getTeamName()));
-      table.addCell(PdfUtils.createCell(si.getOrganization()));
-      table.addCell(PdfUtils.createCell(si.getJudgingGroup()));
-      table.addCell(PdfUtils.createCell(si.getAwardGroup()));
-
-      for (final String subjectiveStation : subjectiveStations) {
-        table.addCell(PdfUtils.createCell(formatTime(si.getSubjectiveTimeByName(subjectiveStation).getTime())));
-      }
-
-      si.enumeratePracticePerformances().forEachOrdered(Errors.rethrow().wrap(pair -> {
-        final PerformanceTime perf = pair.getLeft();
-        table.addCell(PdfUtils.createCell(formatTime(perf.getTime())));
-
-        table.addCell(PdfUtils.createCell(String.format("%s %s", perf.getTable(), perf.getSide())));
-      }));
-
-      si.enumerateRegularMatchPlayPerformances().forEachOrdered(Errors.rethrow().wrap(pair -> {
-        final PerformanceTime perf = pair.getLeft();
-
-        table.addCell(PdfUtils.createCell(formatTime(perf.getTime())));
-
-        table.addCell(PdfUtils.createCell(String.format("%s %s", perf.getTable(), perf.getSide())));
-      }));
-
-    }
-
-    pdf.add(table);
-
-    pdf.close();
+  public void outputScheduleByTeam(final OutputStream stream) throws IOException {
+    ScheduleWriter.outputScheduleByTeam(this, stream);
   }
 
   private static final Font TEAM_TITLE_FONT = FontFactory.getFont(FontFactory.TIMES, 12, Font.BOLD);
@@ -1589,8 +1494,11 @@ public class TournamentSchedule implements Serializable {
   /**
    * Comparator for for sorting by team number.
    */
-  private static final class ComparatorByTeam implements Comparator<TeamScheduleInfo>, Serializable {
+  public static final class ComparatorByTeam implements Comparator<TeamScheduleInfo>, Serializable {
 
+    /**
+     * Singleton instance.
+     */
     public static final ComparatorByTeam INSTANCE = new ComparatorByTeam();
 
     private ComparatorByTeam() {

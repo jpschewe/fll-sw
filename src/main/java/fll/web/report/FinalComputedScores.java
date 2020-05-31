@@ -220,8 +220,10 @@ public final class FinalComputedScores extends BaseFLLServlet {
     rootElement.appendChild(layoutMasterSet);
 
     final String pageMasterName = "simple";
-    FOPUtils.createSimplePageMaster(document, layoutMasterSet, pageMasterName, FOPUtils.PAGE_LETTER_SIZE,
-                                    FOPUtils.STANDARD_MARGINS, HEADER_MARGIN_INCHES, FOOTER_MARGIN_INCHES);
+    final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName, FOPUtils.PAGE_LETTER_SIZE,
+                                                               FOPUtils.STANDARD_MARGINS, HEADER_MARGIN_INCHES,
+                                                               FOOTER_MARGIN_INCHES);
+    layoutMasterSet.appendChild(pageMaster);
 
     final Element legend = createLegend(document, percentageHurdle, standardMean, standardSigma);
 

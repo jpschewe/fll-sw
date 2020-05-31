@@ -106,7 +106,6 @@ public final class FOPUtils {
 
   /**
    * @param document used to create the elements
-   * @param layoutMasterSet the master set element
    * @param name the name of the page master
    * @see #createSimplePageMaster(Document, Element, String, double, double,
    *      double, double, double, double, double, double)
@@ -115,33 +114,31 @@ public final class FOPUtils {
    * @see #STANDARD_MARGINS
    * @see #PAGE_LETTER_SIZE
    * @see #STANDARD_FOOTER_HEIGHT
+   * @return the page master element
    */
-  public static void createSimplePageMaster(final Document document,
-                                            final Element layoutMasterSet,
-                                            final String name)
+  public static Element createSimplePageMaster(final Document document,
+                                               final String name)
       throws IllegalArgumentException {
-    createSimplePageMaster(document, layoutMasterSet, name, PAGE_LETTER_SIZE, STANDARD_MARGINS, 0,
-                           STANDARD_FOOTER_HEIGHT);
+    return createSimplePageMaster(document, name, PAGE_LETTER_SIZE, STANDARD_MARGINS, 0, STANDARD_FOOTER_HEIGHT);
   }
 
   /**
    * @param document used to create the elements
-   * @param layoutMasterSet the master set element
    * @param name the name of the page master
    * @param pageSize page size in inches
    * @param margins margins in inches
    * @param headerHeight height in inches
    * @param footerHeight height in inches
+   * @return the page master element
    * @throws IllegalArgumentException if there is not enough room for the header
    *           or footer
    */
-  public static void createSimplePageMaster(final Document document,
-                                            final Element layoutMasterSet,
-                                            final String name,
-                                            final Dimension2D pageSize,
-                                            final Margins margins,
-                                            final double headerHeight,
-                                            final double footerHeight)
+  public static Element createSimplePageMaster(final Document document,
+                                               final String name,
+                                               final Dimension2D pageSize,
+                                               final Margins margins,
+                                               final double headerHeight,
+                                               final double footerHeight)
       throws IllegalArgumentException {
     final Element simplePageMaster = createXslFoElement(document, "simple-page-master");
     simplePageMaster.setAttribute("master-name", name);
@@ -166,8 +163,7 @@ public final class FOPUtils {
     footer.setAttribute("extent", String.format("%sin", footerHeight));
     simplePageMaster.appendChild(footer);
 
-    layoutMasterSet.appendChild(simplePageMaster);
-
+    return simplePageMaster;
   }
 
   /**
