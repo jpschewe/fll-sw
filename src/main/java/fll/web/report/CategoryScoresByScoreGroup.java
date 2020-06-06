@@ -159,7 +159,6 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
           for (final String division : eventDivisions) {
             for (final String judgingGroup : judgingGroups) {
               final Element table = FOPUtils.createBasicTable(document);
-              documentBody.appendChild(table);
               table.setAttribute("page-break-after", "always");
 
               table.appendChild(FOPUtils.createTableColumn(document, 1));
@@ -177,8 +176,11 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
               prep.setString(5, division);
               prep.setString(6, judgingGroup);
 
+              boolean haveData = false;
               try (ResultSet rs = prep.executeQuery()) {
                 while (rs.next()) {
+                  haveData = true;
+                  
                   final Element tableRow = FOPUtils.createTableRow(document);
                   tableBody.appendChild(tableRow);
                   FOPUtils.keepWithPrevious(tableRow);
@@ -241,6 +243,11 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
                 } // foreach result
               } // allocate rs
 
+              if(haveData) {
+                // only add the table if there is data
+                documentBody.appendChild(table);
+              }
+              
             } // foreach station
           } // foreach division
         } // foreach goal group
