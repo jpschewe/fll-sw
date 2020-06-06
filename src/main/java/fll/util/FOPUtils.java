@@ -777,4 +777,75 @@ public final class FOPUtils {
   public static void keepWithPreviousAlways(final Element ele) {
     ele.setAttribute("keep-with-previous", "always");
   }
+
+  private static void addPadding(final Element element,
+                                 final double width,
+                                 final String side) {
+    element.setAttribute(String.format("padding-%s", side), String.format("%fpt", width));
+  }
+
+  /**
+   * Set a top padding with the specified width.
+   * 
+   * @param element the element to set the padding on
+   * @param width width in points
+   */
+  public static void addTopPadding(final Element element,
+                                   final double width) {
+    addPadding(element, width, "top");
+  }
+
+  /**
+   * Set a bottom padding with the specified width.
+   * 
+   * @param element the element to set the padding on
+   * @param width width in points
+   */
+  public static void addBottomPadding(final Element element,
+                                      final double width) {
+    addPadding(element, width, "bottom");
+  }
+
+  /**
+   * Set a left padding with the specified width.
+   * 
+   * @param element the element to set the padding on
+   * @param width width in points
+   */
+  public static void addLeftPadding(final Element element,
+                                    final double width) {
+    addPadding(element, width, "left");
+  }
+
+  /**
+   * Set a right padding with the specified width.
+   * 
+   * @param element the element to set the padding on
+   * @param width width in points
+   */
+  public static void addRightPadding(final Element element,
+                                     final double width) {
+    addPadding(element, width, "right");
+  }
+
+  /**
+   * Set all padding.
+   * 
+   * @param element element to add the borders to
+   * @param topWidth {@link #addTopPadding(Element, double)}
+   * @param bottomWidth {@link #addBottomPadding(Element, double)}
+   * @param leftWidth {@link #addLeftPadding(Element, double)}
+   * @param rightWidth {@link #addRightPadding(Element, double)}
+   */
+  public static void addPadding(final Element element,
+                                final double topWidth,
+                                final double bottomWidth,
+                                final double leftWidth,
+                                final double rightWidth) {
+    addTopPadding(element, topWidth);
+    addBottomPadding(element, bottomWidth);
+    addLeftPadding(element, leftWidth);
+    addRightPadding(element, rightWidth);
+  }
+
 }
