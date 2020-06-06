@@ -1,7 +1,8 @@
+* #802 - Convert miscellaneous reports to Apache FOP
 * #800 - Convert detailed schedules to Apache FOP
 * #801 - Convert final computed scores to Apache FOP
 * #798 - Convert score sheet PDF to use Apache FOP instead of iText
-* #778 - Add the abililty to write blank score sheets from the challenge editor
+* #778 - Add the ability to write blank score sheets from the challenge editor
 * #826 - Remove application cache from finalist scheduling workflow
 * #828 - Remove the concept of public finalist categories
 * #818 - Fix setting of custom judging and award groups
