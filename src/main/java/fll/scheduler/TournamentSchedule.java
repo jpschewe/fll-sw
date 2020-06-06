@@ -42,8 +42,6 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -898,7 +896,7 @@ public class TournamentSchedule implements Serializable {
     final File byTime = new File(directory, baseFilename
         + "-subjective-by-time.pdf");
     try (OutputStream pdfFos = new FileOutputStream(byTime)) {
-      outputSubjectiveSchedulesByTimeOnly(pdfFos);
+      ScheduleWriter.outputSubjectiveSchedulesByTimeOnly(this, pdfFos);
     }
 
     final File performance = new File(directory, baseFilename
@@ -1093,107 +1091,6 @@ public class TournamentSchedule implements Serializable {
 
     // make sure the last row isn't by itself
     table.getRow(table.getLastCompletedRowIndex()).setMayNotBreak(true);
-
-    detailedSchedules.add(table);
-
-  }
-
-  /**
-   * Output the subjective schedule sorted by time, then station, then award
-   * group, then team
-   * number.
-   * 
-   * @param stream where to write the document
-   * @throws DocumentException
-   */
-  public void outputSubjectiveSchedulesByTimeOnly(final OutputStream stream) throws DocumentException {
-    final Document detailedSchedulesByTime = PdfUtils.createPortraitPdfDoc(stream, new SimpleFooterHandler());
-    outputSubjectiveSchedulesByTimeOnly(detailedSchedulesByTime);
-    detailedSchedulesByTime.close();
-  }
-
-  private void outputSubjectiveSchedulesByTimeOnly(final Document detailedSchedules) throws DocumentException {
-    final String[] headers = new String[] { TEAM_NUMBER_HEADER, AWARD_GROUP_HEADER, ORGANIZATION_HEADER,
-                                            TEAM_NAME_HEADER, "Station", JUDGE_GROUP_HEADER, "Time" };
-
-    final PdfPTable table = PdfUtils.createTable(headers.length);
-    int currentRow = 0;
-    table.setWidths(new float[] { 2, 2, 3, 3, 2, 2, 2 });
-
-    final PdfPCell tournamentCell = PdfUtils.createHeaderCell("Tournament: "
-        + getName());
-    tournamentCell.setColspan(headers.length);
-    table.addCell(tournamentCell);
-    table.completeRow();
-    currentRow++;
-
-    for (final String header : headers) {
-      table.addCell(PdfUtils.createHeaderCell(header));
-    }
-    table.completeRow();
-    currentRow++;
-    table.setHeaderRows(2);
-
-    final Stream<TeamScheduleInfo> s1 = schedule.stream();
-    final Stream<List<TeamAtSubjectiveTime>> s2 = s1.map(ti -> ti.getSubjectiveTimes().stream()
-                                                                 .map(st -> new TeamAtSubjectiveTime(ti, st))
-                                                                 .collect(Collectors.toList()));
-    final Stream<TeamAtSubjectiveTime> s3 = s2.flatMap(Collection::stream);
-    final List<TeamAtSubjectiveTime> times = s3.collect(Collectors.toList());
-    Collections.sort(times);
-
-    LocalTime prevTime = null;
-    for (final TeamAtSubjectiveTime teamAtTime : times) {
-      final LocalTime time = teamAtTime.getSubjTime().getTime();
-
-      final float topBorderWidth;
-      if (Objects.equals(time, prevTime)) {
-        topBorderWidth = Rectangle.UNDEFINED;
-
-        // keep the rows with the same times together
-        table.getRow(currentRow
-            - 1).setMayNotBreak(true);
-      } else {
-        topBorderWidth = TIME_SEPARATOR_LINE_WIDTH;
-      }
-
-      PdfPCell cell = PdfUtils.createCell(String.valueOf(teamAtTime.getTeamInfo().getTeamNumber()));
-      cell.setBorderWidthTop(topBorderWidth);
-      table.addCell(cell);
-
-      cell = PdfUtils.createCell(teamAtTime.getTeamInfo().getAwardGroup());
-      cell.setBorderWidthTop(topBorderWidth);
-      table.addCell(cell);
-
-      cell = PdfUtils.createCell(teamAtTime.getTeamInfo().getOrganization());
-      cell.setBorderWidthTop(topBorderWidth);
-      table.addCell(cell);
-
-      cell = PdfUtils.createCell(teamAtTime.getTeamInfo().getTeamName());
-      cell.setBorderWidthTop(topBorderWidth);
-      table.addCell(cell);
-
-      cell = PdfUtils.createCell(teamAtTime.getSubjTime().getName());
-      cell.setBorderWidthTop(topBorderWidth);
-      table.addCell(cell);
-
-      cell = PdfUtils.createCell(teamAtTime.getTeamInfo().getJudgingGroup());
-      cell.setBorderWidthTop(topBorderWidth);
-      table.addCell(cell);
-
-      cell = PdfUtils.createCell(formatTime(time));
-      cell.setBorderWidthTop(topBorderWidth);
-      table.addCell(cell);
-
-      table.completeRow();
-
-      currentRow++;
-      prevTime = time;
-    }
-
-    // make sure the last row isn't by itself
-    table.getRow(currentRow
-        - 1).setMayNotBreak(true);
 
     detailedSchedules.add(table);
 

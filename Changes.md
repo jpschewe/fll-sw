@@ -1,3 +1,4 @@
+* #800 - Convert subjective schedule by time to Apache FOP
 * #800 - Convert category schedules to Apache FOP
 * #800 - Convert team schedules to Apache FOP
 * #800 - Convert tournament schedule to Apache FOP
