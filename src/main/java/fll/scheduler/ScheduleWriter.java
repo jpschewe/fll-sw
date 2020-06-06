@@ -308,12 +308,12 @@ public final class ScheduleWriter {
   /**
    * Standard border for table cells in points.
    */
-  private static final double STANDARD_BORDER_WIDTH = 0.5;
+  public static final double STANDARD_BORDER_WIDTH = 0.5;
 
   /**
    * Think border for table cells in points.
    */
-  private static final double THICK_BORDER_WIDTH = 2;
+  public static final double THICK_BORDER_WIDTH = 2;
 
   private static Document createPerformanceSchedule(final TournamentSchedule schedule) {
     final SortedMap<PerformanceTime, TeamScheduleInfo> performanceTimes = new TreeMap<>();
