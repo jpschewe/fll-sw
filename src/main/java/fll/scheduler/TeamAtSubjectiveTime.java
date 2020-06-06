@@ -34,8 +34,8 @@ import com.google.common.collect.ComparisonChain;
 
   private final SubjectiveTime subjTime;
 
-  public TeamAtSubjectiveTime(final TeamScheduleInfo teamInfo,
-                              final SubjectiveTime subjTime) {
+  /* package */ TeamAtSubjectiveTime(final TeamScheduleInfo teamInfo,
+                                     final SubjectiveTime subjTime) {
     this.teamInfo = teamInfo;
     this.subjTime = subjTime;
   }
