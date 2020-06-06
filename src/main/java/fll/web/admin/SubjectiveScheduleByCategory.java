@@ -19,6 +19,7 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import fll.db.Queries;
+import fll.scheduler.ScheduleWriter;
 import fll.scheduler.TournamentSchedule;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
@@ -58,8 +59,7 @@ public class SubjectiveScheduleByCategory extends BaseFLLServlet {
       response.reset();
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=subjectiveByCategoryAndTime.pdf");
-      schedule.outputSubjectiveSchedulesByCategory(response.getOutputStream());
-
+      ScheduleWriter.outputSubjectiveSchedulesByCategory(schedule, response.getOutputStream());
     } catch (final SQLException sqle) {
       LOGGER.error(sqle.getMessage(), sqle);
       throw new RuntimeException("Error saving team data into the database", sqle);

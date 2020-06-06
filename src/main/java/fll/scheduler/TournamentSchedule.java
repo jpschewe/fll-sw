@@ -892,7 +892,7 @@ public class TournamentSchedule implements Serializable {
     final File byCategory = new File(directory, baseFilename
         + "-subjective-by-category.pdf");
     try (OutputStream pdfFos = new FileOutputStream(byCategory)) {
-      outputSubjectiveSchedulesByCategory(pdfFos);
+      ScheduleWriter.outputSubjectiveSchedulesByCategory(this, pdfFos);
     }
 
     final File byTime = new File(directory, baseFilename
@@ -910,32 +910,8 @@ public class TournamentSchedule implements Serializable {
     final File teamSchedules = new File(directory, baseFilename
         + "-team-schedules.pdf");
     try (OutputStream pdfFos = new FileOutputStream(teamSchedules)) {
-      outputTeamSchedules(params, pdfFos);
+      ScheduleWriter.outputTeamSchedules(this, params, pdfFos);
     }
-  }
-
-  /**
-   * Output the schedule for each team.
-   *
-   * @param params schedule parameters
-   * @param pdfFos where to write the schedule
-   * @throws IOException if there is an error writing to the stream
-   */
-  public void outputTeamSchedules(final SchedParams params,
-                                  final OutputStream pdfFos)
-      throws IOException {
-    ScheduleWriter.outputTeamSchedules(this, params, pdfFos);
-  }
-
-  /**
-   * Output the subjective schedules with a table for each category and sorted
-   * by time.
-   *
-   * @param pdfFos where to write the schedule
-   * @throws IOException if there is an error writing to the stream
-   */
-  public void outputSubjectiveSchedulesByCategory(final OutputStream pdfFos) throws IOException {
-    ScheduleWriter.outputSubjectiveSchedulesByCategory(this, pdfFos);
   }
 
   /**
@@ -952,17 +928,6 @@ public class TournamentSchedule implements Serializable {
       detailedSchedulesByDivision.add(Chunk.NEXTPAGE);
     }
     detailedSchedulesByDivision.close();
-  }
-
-  /**
-   * Output the schedule sorted by team number. This schedule looks much like
-   * the input spreadsheet.
-   *
-   * @param stream where to write the schedule
-   * @throws IOException if there is an error writing to the stream
-   */
-  public void outputScheduleByTeam(final OutputStream stream) throws IOException {
-    ScheduleWriter.outputScheduleByTeam(this, stream);
   }
 
   /**
