@@ -273,7 +273,7 @@ public class AwardsReport extends BaseFLLServlet {
     table.appendChild(tableBody);
 
     for (final OverallAwardWinner winner : categoryWinners) {
-      final Element row = FOPUtils.createXslFoElement(document, "table-row");
+      final Element row = FOPUtils.createTableRow(document);
       tableBody.appendChild(row);
 
       row.appendChild(FOPUtils.createTableCell(document, null, "Winner:"));
@@ -285,7 +285,7 @@ public class AwardsReport extends BaseFLLServlet {
       row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(team.getTeamName())));
 
       if (null != winner.getDescription()) {
-        final Element descriptionRow = FOPUtils.createXslFoElement(document, "table-row");
+        final Element descriptionRow = FOPUtils.createTableRow(document);
         tableBody.appendChild(descriptionRow);
 
         final Element descriptionCell = FOPUtils.createTableCell(document, null, "\u00A0\u00A0"
@@ -339,7 +339,7 @@ public class AwardsReport extends BaseFLLServlet {
         final List<AwardWinner> agWinners = categoryWinners.get(group);
 
         if (!agWinners.isEmpty()) {
-          final Element row = FOPUtils.createXslFoElement(document, "table-row");
+          final Element row = FOPUtils.createTableRow(document);
           tableBody.appendChild(row);
 
           boolean first = true;
@@ -359,7 +359,7 @@ public class AwardsReport extends BaseFLLServlet {
             row.appendChild(FOPUtils.createTableCell(document, null, String.valueOf(team.getTeamName())));
 
             if (null != winner.getDescription()) {
-              final Element descriptionRow = FOPUtils.createXslFoElement(document, "table-row");
+              final Element descriptionRow = FOPUtils.createTableRow(document);
               tableBody.appendChild(descriptionRow);
 
               final Element descriptionCell = FOPUtils.createTableCell(document, null, "\u00A0\u00A0"
@@ -429,7 +429,7 @@ public class AwardsReport extends BaseFLLServlet {
 
         final Optional<Top10.ScoreEntry> winner = scoreList.stream().findFirst();
         if (winner.isPresent()) {
-          final Element row = FOPUtils.createXslFoElement(document, "table-row");
+          final Element row = FOPUtils.createTableRow(document);
           tableBody.appendChild(row);
 
           row.appendChild(FOPUtils.createTableCell(document, null, String.format("Winner %s:", group)));
@@ -585,7 +585,7 @@ public class AwardsReport extends BaseFLLServlet {
 
     boolean first = true;
     for (final AdvancingTeam winner : groupAdvancing) {
-      final Element row = FOPUtils.createXslFoElement(document, "table-row");
+      final Element row = FOPUtils.createTableRow(document);
       tableBody.appendChild(row);
 
       if (first) {
@@ -604,7 +604,7 @@ public class AwardsReport extends BaseFLLServlet {
     } // foreach advancing
 
     // add some spacing
-    final Element emptyRow = FOPUtils.createXslFoElement(document, "table-row");
+    final Element emptyRow = FOPUtils.createTableRow(document);
     tableBody.appendChild(emptyRow);
     final Element emptyCell = FOPUtils.createTableCell(document, null, "\u00A0");
     emptyRow.appendChild(emptyCell);

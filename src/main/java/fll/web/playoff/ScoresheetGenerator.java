@@ -460,7 +460,7 @@ public class ScoresheetGenerator {
     final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
     table.appendChild(tableBody);
 
-    final Element row1 = FOPUtils.createXslFoElement(document, "table-row");
+    final Element row1 = FOPUtils.createTableRow(document);
     tableBody.appendChild(row1);
 
     final Element timeLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Time:");
@@ -506,7 +506,7 @@ public class ScoresheetGenerator {
     refSig.setAttribute("padding-top", "2pt");
     refSig.setAttribute("padding-bottom", "2pt");
 
-    final Element row2 = FOPUtils.createXslFoElement(document, "table-row");
+    final Element row2 = FOPUtils.createTableRow(document);
     tableBody.appendChild(row2);
 
     final Element teamNumberLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Team #:");
@@ -544,7 +544,7 @@ public class ScoresheetGenerator {
     teamSig.setAttribute("padding-top", "2pt");
     teamSig.setAttribute("padding-bottom", "2pt");
 
-    final Element row3 = FOPUtils.createXslFoElement(document, "table-row");
+    final Element row3 = FOPUtils.createTableRow(document);
     tableBody.appendChild(row3);
 
     final Element teamNameLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, "Team Name:");
@@ -641,7 +641,7 @@ public class ScoresheetGenerator {
     for (int goalIndex = 0; goalIndex < goals.size(); ++goalIndex) {
       final AbstractGoal goal = goals.get(goalIndex);
       if (!goal.isComputed()) {
-        final Element row = FOPUtils.createXslFoElement(document, "table-row");
+        final Element row = FOPUtils.createTableRow(document);
         tableBody.appendChild(row);
 
         final String category = goal.getCategory();
@@ -778,7 +778,7 @@ public class ScoresheetGenerator {
             final Element tBody = FOPUtils.createXslFoElement(document, "table-body");
             t.appendChild(tBody);
 
-            final Element tRow = FOPUtils.createXslFoElement(document, "table-row");
+            final Element tRow = FOPUtils.createTableRow(document);
             tBody.appendChild(tRow);
 
             final Element r = FOPUtils.createTableCell(document, null, "");

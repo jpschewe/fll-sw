@@ -562,7 +562,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
             overallScore = ts;
           }
 
-          final Element row1 = FOPUtils.createXslFoElement(document, "table-row");
+          final Element row1 = FOPUtils.createTableRow(document);
           tableBody.appendChild(row1);
           row1.setAttribute("keep-with-next", "always");
 
@@ -583,7 +583,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           row1.appendChild(FOPUtils.createTableCell(document, null, ""));
 
           // The second row of the team table...
-          final Element row2 = FOPUtils.createXslFoElement(document, "table-row");
+          final Element row2 = FOPUtils.createTableRow(document);
           tableBody.appendChild(row2);
 
           // First column contains the team # and name
@@ -765,7 +765,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
     final Element tableHeader = FOPUtils.createXslFoElement(document, "table-header");
 
-    final Element row1 = FOPUtils.createXslFoElement(document, "table-row");
+    final Element row1 = FOPUtils.createTableRow(document);
     tableHeader.appendChild(row1);
     row1.setAttribute("font-weight", "bold");
     row1.setAttribute("keep-with-next", "always");
@@ -791,7 +791,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
     // row 2 needs a bottom border, the border is added to each cell
 
-    final Element row2 = FOPUtils.createXslFoElement(document, "table-row");
+    final Element row2 = FOPUtils.createTableRow(document);
     tableHeader.appendChild(row2);
 
     final Element teamNumCell = FOPUtils.createTableCell(document, null, "Team # / Team Name");
@@ -966,7 +966,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
     final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
     header.appendChild(tableBody);
 
-    final Element row1 = FOPUtils.createXslFoElement(document, "table-row");
+    final Element row1 = FOPUtils.createTableRow(document);
     tableBody.appendChild(row1);
     row1.setAttribute("keep-with-next", "always");
 
@@ -984,7 +984,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
     row1.appendChild(titleCell);
     titleCell.setAttribute("padding-right", sidePadding);
 
-    final Element row2 = FOPUtils.createXslFoElement(document, "table-row");
+    final Element row2 = FOPUtils.createTableRow(document);
     tableBody.appendChild(row2);
 
     final Element finalScoresCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
