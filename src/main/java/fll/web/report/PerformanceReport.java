@@ -22,26 +22,27 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
+import javax.xml.transform.TransformerException;
 
-import com.itextpdf.text.BadElementException;
-import com.itextpdf.text.Chunk;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
+import org.apache.fop.apps.FOPException;
+import org.apache.fop.apps.FopFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
+import fll.scheduler.ScheduleWriter;
 import fll.scheduler.TournamentSchedule;
-import fll.util.PdfUtils;
-import fll.util.SimpleFooterHandler;
+import fll.util.FLLInternalException;
+import fll.util.FOPUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreType;
 import fll.xml.WinnerType;
+import net.mtu.eggplant.xml.XMLUtils;
 
 /**
  * Display the report of performance scores per team and per award group.
@@ -70,15 +71,18 @@ public class PerformanceReport extends BaseFLLServlet {
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=performanceScoreReport.pdf");
 
-      final Document pdfDoc = PdfUtils.createPortraitPdfDoc(response.getOutputStream(), new SimpleFooterHandler());
+      try {
 
-      generateReport(connection, pdfDoc, challengeDescription, tournament);
+        final Document document = createReport(connection, challengeDescription, tournament);
 
-      pdfDoc.close();
+        final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
+
+        FOPUtils.renderPdf(fopFactory, document, response.getOutputStream());
+      } catch (FOPException | TransformerException e) {
+        throw new FLLInternalException("Error creating the performance schedule PDF", e);
+      }
 
     } catch (final SQLException e) {
-      throw new RuntimeException(e);
-    } catch (final DocumentException e) {
       throw new RuntimeException(e);
     }
   }
@@ -86,11 +90,33 @@ public class PerformanceReport extends BaseFLLServlet {
   private static final int NUM_COLMNS = 8;
 
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "winner criteria determines sort")
-  private void generateReport(final Connection connection,
-                              final Document pdfDoc,
-                              final ChallengeDescription challengeDescription,
-                              final Tournament tournament)
-      throws SQLException, DocumentException {
+  private Document createReport(final Connection connection,
+                                final ChallengeDescription challengeDescription,
+                                final Tournament tournament)
+      throws SQLException {
+    final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
+
+    final Element rootElement = FOPUtils.createRoot(document);
+    document.appendChild(rootElement);
+
+    final Element layoutMasterSet = FOPUtils.createXslFoElement(document, "layout-master-set");
+    rootElement.appendChild(layoutMasterSet);
+
+    final String pageMasterName = "simple";
+    final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName, FOPUtils.PAGE_LETTER_SIZE,
+                                                               FOPUtils.STANDARD_MARGINS, 0,
+                                                               FOPUtils.STANDARD_FOOTER_HEIGHT);
+    layoutMasterSet.appendChild(pageMaster);
+
+    final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
+    rootElement.appendChild(pageSequence);
+    pageSequence.setAttribute("id", FOPUtils.PAGE_SEQUENCE_NAME);
+
+    final Element footer = FOPUtils.createSimpleFooter(document);
+    pageSequence.appendChild(footer);
+
+    final Element documentBody = FOPUtils.createBody(document);
+    pageSequence.appendChild(documentBody);
 
     final String challengeTitle = challengeDescription.getTitle();
     final WinnerType winnerCriteria = challengeDescription.getWinner();
@@ -128,10 +154,23 @@ public class PerformanceReport extends BaseFLLServlet {
       prep.setInt(2, tournament.getTournamentID());
 
       for (final String awardGroup : awardGroups) {
-        final PdfPTable table = PdfUtils.createTable(NUM_COLMNS);
-        table.setWidths(new float[] { 1, 2, 2, 2, 1, 1, 1, 1});
+        final Element table = FOPUtils.createBasicTable(document);
+        table.setAttribute("page-break-after", "always");
 
-        createHeader(table, challengeTitle, awardGroup, tournament);
+        table.appendChild(FOPUtils.createTableColumn(document, 1));
+        table.appendChild(FOPUtils.createTableColumn(document, 2));
+        table.appendChild(FOPUtils.createTableColumn(document, 2));
+        table.appendChild(FOPUtils.createTableColumn(document, 2));
+        table.appendChild(FOPUtils.createTableColumn(document, 1));
+        table.appendChild(FOPUtils.createTableColumn(document, 1));
+        table.appendChild(FOPUtils.createTableColumn(document, 1));
+        table.appendChild(FOPUtils.createTableColumn(document, 1));
+
+        final Element header = createHeader(document, challengeTitle, awardGroup, tournament);
+        table.appendChild(header);
+
+        final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+        table.appendChild(tableBody);
 
         prep.setString(3, awardGroup);
 
@@ -139,6 +178,10 @@ public class PerformanceReport extends BaseFLLServlet {
         try (ResultSet rs = prep.executeQuery()) {
           while (rs.next()) {
             haveData = true;
+
+            final Element row = FOPUtils.createTableRow(document);
+            tableBody.appendChild(row);
+            FOPUtils.keepWithPrevious(row);
 
             final int teamNumber = rs.getInt(1);
             final String teamName = rs.getString(2);
@@ -149,30 +192,29 @@ public class PerformanceReport extends BaseFLLServlet {
             final double average = rs.getDouble(7);
             final double stdev = rs.getDouble(8);
 
-            table.addCell(PdfUtils.createCell(String.valueOf(teamNumber)));
-            table.addCell(PdfUtils.createCell(null == teamName ? "" : teamName));
-            table.addCell(PdfUtils.createCell(null == organization ? "" : organization));
+            row.appendChild(createCell(document, String.valueOf(teamNumber)));
+            row.appendChild(createCell(document, null == teamName ? "" : teamName));
+            row.appendChild(createCell(document, null == organization ? "" : organization));
 
             final String scoresText = scoresToText(rawScoreFormat, scores);
-            table.addCell(PdfUtils.createCell(scoresText));
+            row.appendChild(createCell(document, scoresText));
 
-            table.addCell(PdfUtils.createCell(Utilities.getFloatingPointNumberFormat().format(minScore)));
-            table.addCell(PdfUtils.createCell(Utilities.getFloatingPointNumberFormat().format(maxScore)));
-            table.addCell(PdfUtils.createCell(Utilities.getFloatingPointNumberFormat().format(average)));
-            table.addCell(PdfUtils.createCell(Utilities.getFloatingPointNumberFormat().format(stdev)));
+            row.appendChild(createCell(document, Utilities.getFloatingPointNumberFormat().format(minScore)));
+            row.appendChild(createCell(document, Utilities.getFloatingPointNumberFormat().format(maxScore)));
+            row.appendChild(createCell(document, Utilities.getFloatingPointNumberFormat().format(average)));
+            row.appendChild(createCell(document, Utilities.getFloatingPointNumberFormat().format(stdev)));
           } // foreach result
         } // allocate rs
 
         if (haveData) {
-          table.keepRowsTogether(0);
-          pdfDoc.add(table);
-
-          pdfDoc.add(Chunk.NEXTPAGE);
+          // only add the table if there is data
+          documentBody.appendChild(table);
         }
 
       } // foreach division
     } // allocate prep
 
+    return document;
   }
 
   private String scoresToText(final NumberFormat format,
@@ -189,31 +231,49 @@ public class PerformanceReport extends BaseFLLServlet {
     return String.join(", ", values);
   }
 
-  private void createHeader(final PdfPTable table,
-                            final String challengeTitle,
-                            final String awardGroup,
-                            final Tournament tournament)
-      throws BadElementException {
-    final PdfPCell tournamentCell = PdfUtils.createHeaderCell(String.format("%s - %s", challengeTitle,
-                                                                            tournament.getDescription()));
-    tournamentCell.setColspan(NUM_COLMNS);
-    table.addCell(tournamentCell);
+  private Element createHeader(final Document document,
+                               final String challengeTitle,
+                               final String awardGroup,
+                               final Tournament tournament) {
+    final Element tableHeader = FOPUtils.createTableHeader(document);
+    tableHeader.setAttribute("font-weight", "bold");
 
-    final PdfPCell categoryHeader = PdfUtils.createHeaderCell(String.format("Award Group: %s", awardGroup));
+    final Element row1 = FOPUtils.createTableRow(document);
+    tableHeader.appendChild(row1);
 
-    categoryHeader.setColspan(NUM_COLMNS);
-    table.addCell(categoryHeader);
+    Element cell = createCell(document, String.format("%s - %s", challengeTitle, tournament.getDescription()));
+    row1.appendChild(cell);
+    cell.setAttribute("number-columns-spanned", String.valueOf(NUM_COLMNS));
 
-    table.addCell(PdfUtils.createHeaderCell(TournamentSchedule.TEAM_NUMBER_HEADER));
-    table.addCell(PdfUtils.createHeaderCell(TournamentSchedule.TEAM_NAME_HEADER));
-    table.addCell(PdfUtils.createHeaderCell(TournamentSchedule.ORGANIZATION_HEADER));
-    table.addCell(PdfUtils.createHeaderCell("Scores"));
-    table.addCell(PdfUtils.createHeaderCell("Min"));
-    table.addCell(PdfUtils.createHeaderCell("Max"));
-    table.addCell(PdfUtils.createHeaderCell("Avg"));
-    table.addCell(PdfUtils.createHeaderCell("Std Dev"));
+    final Element row2 = FOPUtils.createTableRow(document);
+    tableHeader.appendChild(row2);
+    cell = createCell(document, String.format("Award Group: %s", awardGroup));
+    row2.appendChild(cell);
+    cell.setAttribute("number-columns-spanned", String.valueOf(NUM_COLMNS));
 
-    table.setHeaderRows(3);
+    final Element row3 = FOPUtils.createTableRow(document);
+    tableHeader.appendChild(row3);
+
+    row3.appendChild(createCell(document, TournamentSchedule.TEAM_NUMBER_HEADER));
+    row3.appendChild(createCell(document, TournamentSchedule.TEAM_NAME_HEADER));
+    row3.appendChild(createCell(document, TournamentSchedule.ORGANIZATION_HEADER));
+    row3.appendChild(createCell(document, "Scores"));
+    row3.appendChild(createCell(document, "Min"));
+    row3.appendChild(createCell(document, "Max"));
+    row3.appendChild(createCell(document, "Avg"));
+    row3.appendChild(createCell(document, "Std Dev"));
+
+    return tableHeader;
   }
 
+  private Element createCell(final Document document,
+                             final String text) {
+    final Element cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, text);
+    FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
+                        ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
+    FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                        FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
+
+    return cell;
+  }
 }
