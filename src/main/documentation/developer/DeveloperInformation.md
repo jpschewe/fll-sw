@@ -117,7 +117,7 @@ ensure your code is correct.
   * [WebsSocket - 1.0](http://docs.oracle.com/javaee/7/api/javax/websocket/package-summary.html)
   * [JSTL - core tag library](http://download.oracle.com/docs/cd/E17802_01/products/products/jsp/jstl/1.1/docs/tlddocs/index.html)
   * [HSQL - embedded database](http://www.hsqldb.org/web/hsqlDocsFrame.html)
-  * [iText - PDF library](http://api.itextpdf.com/itext/)
+  * [Apache FOP - PDF library](https://xmlgraphics.apache.org/fop/)
 
 # Project goals
 
