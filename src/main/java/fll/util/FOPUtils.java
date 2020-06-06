@@ -649,6 +649,37 @@ public final class FOPUtils {
   }
 
   /**
+   * Tag used to create a table row.
+   */
+  public static final String TABLE_ROW_TAG = "table-row";
+
+  /**
+   * Create a table row that cannot span pages.
+   * 
+   * @param document used to create elements
+   * @return the row element
+   */
+  public static Element createTableRow(final Document document) {
+    return createTableRow(document, false);
+  }
+
+  /**
+   * Create a table row.
+   * 
+   * @param document used to create elements
+   * @param allowPageBreak if true, allow the row to span pages
+   * @return the row element
+   */
+  public static Element createTableRow(final Document document,
+                                       final boolean allowPageBreak) {
+    final Element row = FOPUtils.createXslFoElement(document, TABLE_ROW_TAG);
+    if (!allowPageBreak) {
+      row.setAttribute("keep-together.within-page", "always");
+    }
+    return row;
+  }
+
+  /**
    * Page margins.
    */
   public static final class Margins implements Serializable {
