@@ -210,6 +210,16 @@ public final class FOPUtils {
    * @see #PAGE_SEQUENCE_NAME
    */
   public static Element createSimpleFooter(final Document document) {
+    return createSimpleFooter(document, PAGE_SEQUENCE_NAME);
+  }
+
+  /**
+   * @param document used to create elements
+   * @param pageSequenceId the id to reference for counting pages
+   * @return the footer element
+   */
+  public static Element createSimpleFooter(final Document document,
+                                           final String pageSequenceId) {
     final Element staticContent = createXslFoElement(document, "static-content");
     staticContent.setAttribute("flow-name", "xsl-region-after");
     staticContent.setAttribute("font-size", "10pt");
@@ -220,7 +230,7 @@ public final class FOPUtils {
     block.appendChild(createXslFoElement(document, "page-number"));
     block.appendChild(document.createTextNode(" of "));
     final Element lastPage = createXslFoElement(document, "page-number-citation-last");
-    lastPage.setAttribute("ref-id", PAGE_SEQUENCE_NAME);
+    lastPage.setAttribute("ref-id", pageSequenceId);
     block.appendChild(lastPage);
 
     staticContent.appendChild(block);
