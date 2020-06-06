@@ -759,4 +759,22 @@ public final class FOPUtils {
     }
 
   }
+
+  /**
+   * Keep {@code ele} with the previous element on the same page when possible.
+   * 
+   * @param ele the element to keep with previous
+   */
+  public static void keepWithPrevious(final Element ele) {
+    ele.setAttribute("keep-with-previous", "50");
+  }
+
+  /**
+   * Force {@code ele} to be kept with the previous element on the same page.
+   * 
+   * @param ele the elemnt to keep with previous
+   */
+  public static void keepWithPreviousAlways(final Element ele) {
+    ele.setAttribute("keep-with-previous", "always");
+  }
 }

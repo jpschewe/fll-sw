@@ -18,9 +18,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import com.itextpdf.text.DocumentException;
-
 import fll.db.Queries;
+import fll.scheduler.ScheduleWriter;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
@@ -61,9 +60,8 @@ public class SubjectiveScheduleByJudgingStation extends BaseFLLServlet {
       response.reset();
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=subjectiveByJudgingStation.pdf");
-      schedule.outputSubjectiveSchedulesByJudgingStation(response.getOutputStream());
-
-    } catch (final DocumentException e) {
+      ScheduleWriter.outputSubjectiveSchedulesByJudgingStation(schedule, response.getOutputStream());
+    } catch (final IOException e) {
       LOGGER.error(e.getMessage(), e);
       throw new FLLInternalException("Got error writing schedule", e);
     } catch (final SQLException sqle) {
