@@ -64,8 +64,6 @@ public class TeamFinalistSchedule extends BaseFLLServlet {
 
   private static final String VALUE_FONT_FAMILY = "Helvetica";
 
-  private static final double CELL_PADDING = 2;
-
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -159,7 +157,6 @@ public class TeamFinalistSchedule extends BaseFLLServlet {
 
   private void outputSchedule(final OutputStream stream,
                               final Connection connection,
-
                               final ChallengeDescription challengeDescription,
                               final Collection<FinalistSchedule> schedules)
       throws IOException, SQLException {
@@ -259,19 +256,22 @@ public class TeamFinalistSchedule extends BaseFLLServlet {
           tableHeaderRow.appendChild(cell);
           FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
                               ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
-          FOPUtils.addPadding(cell, CELL_PADDING, CELL_PADDING, CELL_PADDING, CELL_PADDING);
+          FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                              FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
 
           cell = FOPUtils.createTableCell(document, null, "Room");
           tableHeaderRow.appendChild(cell);
           FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
                               ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
-          FOPUtils.addPadding(cell, CELL_PADDING, CELL_PADDING, CELL_PADDING, CELL_PADDING);
+          FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                              FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
 
           cell = FOPUtils.createTableCell(document, null, "Category");
           tableHeaderRow.appendChild(cell);
           FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
                               ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
-          FOPUtils.addPadding(cell, CELL_PADDING, CELL_PADDING, CELL_PADDING, CELL_PADDING);
+          FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                              FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
 
           final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
           table.appendChild(tableBody);
@@ -290,19 +290,22 @@ public class TeamFinalistSchedule extends BaseFLLServlet {
             tableRow.appendChild(cell);
             FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
                                 ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
-            FOPUtils.addPadding(cell, CELL_PADDING, CELL_PADDING, CELL_PADDING, CELL_PADDING);
+            FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                                FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
 
             cell = FOPUtils.createTableCell(document, null, room);
             tableRow.appendChild(cell);
             FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
                                 ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
-            FOPUtils.addPadding(cell, CELL_PADDING, CELL_PADDING, CELL_PADDING, CELL_PADDING);
+            FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                                FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
 
             cell = FOPUtils.createTableCell(document, null, categoryName);
             tableRow.appendChild(cell);
             FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
                                 ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
-            FOPUtils.addPadding(cell, CELL_PADDING, CELL_PADDING, CELL_PADDING, CELL_PADDING);
+            FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                                FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
 
           } // foreach row
           table.setAttribute("page-break-after", "always");

@@ -41,6 +41,11 @@ import fll.Utilities;
  */
 public final class FOPUtils {
 
+  /**
+   * Standard padding for most report tables.
+   */
+  public static final double TABLE_CELL_STANDARD_PADDING = 2;
+
   private FOPUtils() {
   }
 
