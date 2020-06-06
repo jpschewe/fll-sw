@@ -35,6 +35,7 @@ import org.w3c.dom.Element;
 
 import fll.Team;
 import fll.Tournament;
+import fll.Utilities;
 import fll.db.AdvancingTeam;
 import fll.db.AwardWinner;
 import fll.db.OverallAwardWinner;
@@ -288,8 +289,11 @@ public class AwardsReport extends BaseFLLServlet {
         final Element descriptionRow = FOPUtils.createTableRow(document);
         tableBody.appendChild(descriptionRow);
 
-        final Element descriptionCell = FOPUtils.createTableCell(document, null, "\u00A0\u00A0"
-            + winner.getDescription());
+        final Element descriptionCell = FOPUtils.createTableCell(document, null,
+                                                                 String.format("%s%s%s",
+                                                                               Utilities.NON_BREAKING_SPACE_CODE,
+                                                                               Utilities.NON_BREAKING_SPACE_CODE,
+                                                                               winner.getDescription()));
         descriptionRow.appendChild(descriptionCell);
 
         descriptionCell.setAttribute("number-columns-spanned", String.valueOf(columnsInTable));
@@ -362,8 +366,11 @@ public class AwardsReport extends BaseFLLServlet {
               final Element descriptionRow = FOPUtils.createTableRow(document);
               tableBody.appendChild(descriptionRow);
 
-              final Element descriptionCell = FOPUtils.createTableCell(document, null, "\u00A0\u00A0"
-                  + winner.getDescription());
+              final Element descriptionCell = FOPUtils.createTableCell(document, null,
+                                                                       String.format("%s%s%s",
+                                                                                     Utilities.NON_BREAKING_SPACE_CODE,
+                                                                                     Utilities.NON_BREAKING_SPACE_CODE,
+                                                                                     winner.getDescription()));
               descriptionRow.appendChild(descriptionCell);
 
               descriptionCell.setAttribute("number-columns-spanned", String.valueOf(columnsInTable));
@@ -606,7 +613,7 @@ public class AwardsReport extends BaseFLLServlet {
     // add some spacing
     final Element emptyRow = FOPUtils.createTableRow(document);
     tableBody.appendChild(emptyRow);
-    final Element emptyCell = FOPUtils.createTableCell(document, null, "\u00A0");
+    final Element emptyCell = FOPUtils.createTableCell(document, null, Utilities.NON_BREAKING_SPACE_CODE);
     emptyRow.appendChild(emptyCell);
     emptyCell.setAttribute("number-columns-spanned", String.valueOf(columnsInTable));
 
