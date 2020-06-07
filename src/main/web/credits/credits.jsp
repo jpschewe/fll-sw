@@ -46,9 +46,7 @@
 		<li><a href="http://jakarta.apache.org/commons/lang/">Jakarta
 				Commons Lang</a> - <a href="commons-lang-LICENSE.txt">License</a></li>
 
-		<li><a href="http://www.lowagie.com/iText/">iText (PDF
-				generation library)</a> - <a href="iText-license.txt">License
-				Information</a></li>
+      <li><a href="https://xmlgraphics.apache.org/fop/">Apache FOP - PDF library</a></li>
 
 		<li><a href="http://jakarta.apache.org/commons/io/">Jakarta
 				Commons IO</a> - <a href="commons-io-LICENSE.txt">License</a></li>

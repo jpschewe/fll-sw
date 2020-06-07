@@ -18,8 +18,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import com.itextpdf.text.DocumentException;
-
 import fll.Tournament;
 import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
@@ -66,7 +64,7 @@ public class PerformanceSheets extends BaseFLLServlet {
       response.setHeader("Content-Disposition", "filename=performance-sheets.pdf");
       schedule.outputPerformanceSheets(tournament.getName(), response.getOutputStream(), description);
 
-    } catch (final DocumentException e) {
+    } catch (final IOException e) {
       LOGGER.error(e.getMessage(), e);
       throw new FLLInternalException("Got error writing schedule", e);
     } catch (final SQLException sqle) {

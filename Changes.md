@@ -1,3 +1,4 @@
+* #800 - Convert detailed schedules to Apache FOP
 * #801 - Convert final computed scores to Apache FOP
 * #798 - Convert score sheet PDF to use Apache FOP instead of iText
 * #778 - Add the abililty to write blank score sheets from the challenge editor

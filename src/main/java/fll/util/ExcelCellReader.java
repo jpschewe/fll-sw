@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.nio.file.Path;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,7 +36,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.tika.Tika;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import fll.scheduler.TournamentSchedule;
 
 /**
  * Read Excel files.
@@ -42,6 +43,13 @@ import fll.scheduler.TournamentSchedule;
 public class ExcelCellReader extends CellFileReader {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
+
+  private static final ThreadLocal<DateFormat> DATE_FORMAT_AM_PM_SS = new ThreadLocal<DateFormat>() {
+    @Override
+    protected DateFormat initialValue() {
+      return new SimpleDateFormat("hh:mm:ss a");
+    }
+  };
 
   private final DataFormatter formatter;
 
@@ -209,7 +217,7 @@ public class ExcelCellReader extends CellFileReader {
           if (HSSFDateUtil.isCellDateFormatted(cell)) {
             // make sure to format times like we expect them
             final Date date = HSSFDateUtil.getJavaDate(d);
-            str = TournamentSchedule.DATE_FORMAT_AM_PM_SS.get().format(date);
+            str = DATE_FORMAT_AM_PM_SS.get().format(date);
           } else {
             // check for integer
             if (FP.equals(d, Math.round(d), INTEGER_FP_CHECK)) {
