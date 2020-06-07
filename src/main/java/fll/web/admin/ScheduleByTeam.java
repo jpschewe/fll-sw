@@ -18,11 +18,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import com.itextpdf.text.DocumentException;
-
 import fll.db.Queries;
+import fll.scheduler.ScheduleWriter;
 import fll.scheduler.TournamentSchedule;
-import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -57,11 +55,8 @@ public class ScheduleByTeam extends BaseFLLServlet {
       response.reset();
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=schedule.pdf");
-      schedule.outputScheduleByTeam(response.getOutputStream());
+      ScheduleWriter.outputScheduleByTeam(schedule, response.getOutputStream());
 
-    } catch (final DocumentException e) {
-      LOGGER.error(e.getMessage(), e);
-      throw new FLLInternalException("Got error writing schedule", e);
     } catch (final SQLException sqle) {
       LOGGER.error(sqle.getMessage(), sqle);
       throw new RuntimeException(sqle);

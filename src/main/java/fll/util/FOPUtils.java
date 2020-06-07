@@ -41,6 +41,11 @@ import fll.Utilities;
  */
 public final class FOPUtils {
 
+  /**
+   * Standard padding for most report tables.
+   */
+  public static final double TABLE_CELL_STANDARD_PADDING = 2;
+
   private FOPUtils() {
   }
 
@@ -106,7 +111,6 @@ public final class FOPUtils {
 
   /**
    * @param document used to create the elements
-   * @param layoutMasterSet the master set element
    * @param name the name of the page master
    * @see #createSimplePageMaster(Document, Element, String, double, double,
    *      double, double, double, double, double, double)
@@ -115,33 +119,31 @@ public final class FOPUtils {
    * @see #STANDARD_MARGINS
    * @see #PAGE_LETTER_SIZE
    * @see #STANDARD_FOOTER_HEIGHT
+   * @return the page master element
    */
-  public static void createSimplePageMaster(final Document document,
-                                            final Element layoutMasterSet,
-                                            final String name)
+  public static Element createSimplePageMaster(final Document document,
+                                               final String name)
       throws IllegalArgumentException {
-    createSimplePageMaster(document, layoutMasterSet, name, PAGE_LETTER_SIZE, STANDARD_MARGINS, 0,
-                           STANDARD_FOOTER_HEIGHT);
+    return createSimplePageMaster(document, name, PAGE_LETTER_SIZE, STANDARD_MARGINS, 0, STANDARD_FOOTER_HEIGHT);
   }
 
   /**
    * @param document used to create the elements
-   * @param layoutMasterSet the master set element
    * @param name the name of the page master
    * @param pageSize page size in inches
    * @param margins margins in inches
    * @param headerHeight height in inches
    * @param footerHeight height in inches
+   * @return the page master element
    * @throws IllegalArgumentException if there is not enough room for the header
    *           or footer
    */
-  public static void createSimplePageMaster(final Document document,
-                                            final Element layoutMasterSet,
-                                            final String name,
-                                            final Dimension2D pageSize,
-                                            final Margins margins,
-                                            final double headerHeight,
-                                            final double footerHeight)
+  public static Element createSimplePageMaster(final Document document,
+                                               final String name,
+                                               final Dimension2D pageSize,
+                                               final Margins margins,
+                                               final double headerHeight,
+                                               final double footerHeight)
       throws IllegalArgumentException {
     final Element simplePageMaster = createXslFoElement(document, "simple-page-master");
     simplePageMaster.setAttribute("master-name", name);
@@ -166,8 +168,7 @@ public final class FOPUtils {
     footer.setAttribute("extent", String.format("%sin", footerHeight));
     simplePageMaster.appendChild(footer);
 
-    layoutMasterSet.appendChild(simplePageMaster);
-
+    return simplePageMaster;
   }
 
   /**
@@ -653,6 +654,37 @@ public final class FOPUtils {
   }
 
   /**
+   * Tag used to create a table row.
+   */
+  public static final String TABLE_ROW_TAG = "table-row";
+
+  /**
+   * Create a table row that cannot span pages.
+   * 
+   * @param document used to create elements
+   * @return the row element
+   */
+  public static Element createTableRow(final Document document) {
+    return createTableRow(document, false);
+  }
+
+  /**
+   * Create a table row.
+   * 
+   * @param document used to create elements
+   * @param allowPageBreak if true, allow the row to span pages
+   * @return the row element
+   */
+  public static Element createTableRow(final Document document,
+                                       final boolean allowPageBreak) {
+    final Element row = FOPUtils.createXslFoElement(document, TABLE_ROW_TAG);
+    if (!allowPageBreak) {
+      row.setAttribute("keep-together.within-page", "always");
+    }
+    return row;
+  }
+
+  /**
    * Page margins.
    */
   public static final class Margins implements Serializable {
@@ -732,4 +764,93 @@ public final class FOPUtils {
     }
 
   }
+
+  /**
+   * Keep {@code ele} with the previous element on the same page when possible.
+   * 
+   * @param ele the element to keep with previous
+   */
+  public static void keepWithPrevious(final Element ele) {
+    ele.setAttribute("keep-with-previous", "50");
+  }
+
+  /**
+   * Force {@code ele} to be kept with the previous element on the same page.
+   * 
+   * @param ele the elemnt to keep with previous
+   */
+  public static void keepWithPreviousAlways(final Element ele) {
+    ele.setAttribute("keep-with-previous", "always");
+  }
+
+  private static void addPadding(final Element element,
+                                 final double width,
+                                 final String side) {
+    element.setAttribute(String.format("padding-%s", side), String.format("%fpt", width));
+  }
+
+  /**
+   * Set a top padding with the specified width.
+   * 
+   * @param element the element to set the padding on
+   * @param width width in points
+   */
+  public static void addTopPadding(final Element element,
+                                   final double width) {
+    addPadding(element, width, "top");
+  }
+
+  /**
+   * Set a bottom padding with the specified width.
+   * 
+   * @param element the element to set the padding on
+   * @param width width in points
+   */
+  public static void addBottomPadding(final Element element,
+                                      final double width) {
+    addPadding(element, width, "bottom");
+  }
+
+  /**
+   * Set a left padding with the specified width.
+   * 
+   * @param element the element to set the padding on
+   * @param width width in points
+   */
+  public static void addLeftPadding(final Element element,
+                                    final double width) {
+    addPadding(element, width, "left");
+  }
+
+  /**
+   * Set a right padding with the specified width.
+   * 
+   * @param element the element to set the padding on
+   * @param width width in points
+   */
+  public static void addRightPadding(final Element element,
+                                     final double width) {
+    addPadding(element, width, "right");
+  }
+
+  /**
+   * Set all padding.
+   * 
+   * @param element element to add the borders to
+   * @param topWidth {@link #addTopPadding(Element, double)}
+   * @param bottomWidth {@link #addBottomPadding(Element, double)}
+   * @param leftWidth {@link #addLeftPadding(Element, double)}
+   * @param rightWidth {@link #addRightPadding(Element, double)}
+   */
+  public static void addPadding(final Element element,
+                                final double topWidth,
+                                final double bottomWidth,
+                                final double leftWidth,
+                                final double rightWidth) {
+    addTopPadding(element, topWidth);
+    addBottomPadding(element, bottomWidth);
+    addLeftPadding(element, leftWidth);
+    addRightPadding(element, rightWidth);
+  }
+
 }
