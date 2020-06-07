@@ -138,10 +138,10 @@ public class SubjectivePdfWriter {
 
     pageHeaderTable.setAttribute("space-after", "5");
 
-    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
     pageHeaderTable.appendChild(tableBody);
 
-    final Element row1 = FOPUtils.createXslFoElement(document, "table-row");
+    final Element row1 = FOPUtils.createTableRow(document);
     tableBody.appendChild(row1);
 
     final Element imageCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
@@ -202,7 +202,7 @@ public class SubjectivePdfWriter {
     timeCell.setAttribute("font-size", "12pt");
     timeCell.setAttribute("font-weight", "bold");
 
-    final Element row2 = FOPUtils.createXslFoElement(document, "table-row");
+    final Element row2 = FOPUtils.createTableRow(document);
     tableBody.appendChild(row2);
 
     final Element roomCell = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
@@ -457,7 +457,7 @@ public class SubjectivePdfWriter {
       rubric.appendChild(FOPUtils.createTableColumn(document, width));
     }
 
-    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
     rubric.appendChild(tableBody);
 
     tableBody.appendChild(createRubricHeaderRow(document, tableBody));
@@ -651,7 +651,7 @@ public class SubjectivePdfWriter {
 
   private Element createRubricHeaderRow(final Document document,
                                         final Element tableBody) {
-    final Element headerRow = FOPUtils.createXslFoElement(document, "table-row");
+    final Element headerRow = FOPUtils.createTableRow(document);
     tableBody.appendChild(headerRow);
     headerRow.setAttribute("font-size", "10pt");
     headerRow.setAttribute("font-weight", "bold");
