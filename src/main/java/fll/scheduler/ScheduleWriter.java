@@ -71,7 +71,7 @@ public final class ScheduleWriter {
     final Element staticContent = FOPUtils.createXslFoElement(document, "static-content");
     staticContent.setAttribute("flow-name", "xsl-region-before");
 
-    final Element block = FOPUtils.createXslFoElement(document, "block");
+    final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     staticContent.appendChild(block);
 
     block.setAttribute("text-align", FOPUtils.TEXT_ALIGN_CENTER);
@@ -207,7 +207,7 @@ public final class ScheduleWriter {
                           STANDARD_BORDER_WIDTH);
     }
 
-    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
     table.appendChild(tableBody);
 
     final List<TeamScheduleInfo> scheduleEntries = new ArrayList<>(schedule.getSchedule());
@@ -390,7 +390,7 @@ public final class ScheduleWriter {
                           STANDARD_BORDER_WIDTH);
     }
 
-    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
     table.appendChild(tableBody);
 
     LocalTime prevTime = null;
@@ -475,7 +475,7 @@ public final class ScheduleWriter {
 
       stayingTable.appendChild(FOPUtils.createTableColumn(document, 1));
 
-      final Element stayingTableBody = FOPUtils.createXslFoElement(document, "table-body");
+      final Element stayingTableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
       stayingTable.appendChild(stayingTableBody);
 
       for (final TeamScheduleInfo si : teamsMissingOpponents) {
@@ -745,7 +745,7 @@ public final class ScheduleWriter {
                           STANDARD_BORDER_WIDTH);
     }
 
-    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
     table.appendChild(tableBody);
 
     final List<TeamScheduleInfo> scheduleEntries = new ArrayList<>(schedule.getSchedule());
@@ -905,7 +905,7 @@ public final class ScheduleWriter {
                           STANDARD_BORDER_WIDTH);
     }
 
-    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
     table.appendChild(tableBody);
 
     final Stream<TeamScheduleInfo> s1 = schedule.getSchedule().stream();
@@ -1089,7 +1089,7 @@ public final class ScheduleWriter {
                           STANDARD_BORDER_WIDTH);
     }
 
-    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
     table.appendChild(tableBody);
 
     final List<TeamScheduleInfo> scheduleEntries = new ArrayList<>(schedule.getSchedule());

@@ -230,7 +230,7 @@ public final class FOPUtils {
     staticContent.setAttribute("flow-name", "xsl-region-after");
     staticContent.setAttribute("font-size", "10pt");
 
-    final Element block = createXslFoElement(document, "block");
+    final Element block = createXslFoElement(document, FOPUtils.BLOCK_TAG);
     block.setAttribute("text-align", "end");
     block.appendChild(document.createTextNode("Page "));
     block.appendChild(createXslFoElement(document, "page-number"));
@@ -636,7 +636,7 @@ public final class FOPUtils {
    * @return block containing a blank line
    */
   public static Element createBlankLine(final Document document) {
-    final Element block = createXslFoElement(document, "block");
+    final Element block = createXslFoElement(document, FOPUtils.BLOCK_TAG);
     final Element leader = createXslFoElement(document, "leader");
     block.appendChild(leader);
     return block;
@@ -649,7 +649,7 @@ public final class FOPUtils {
    */
   public static Element createHorizontalLine(final Document document,
                                              final int thickness) {
-    final Element lineBlock = FOPUtils.createXslFoElement(document, "block");
+    final Element lineBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
 
     final Element line = FOPUtils.createXslFoElement(document, "leader");
     line.setAttribute("leader-pattern", "rule");

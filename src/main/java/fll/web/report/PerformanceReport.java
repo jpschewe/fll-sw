@@ -169,7 +169,7 @@ public class PerformanceReport extends BaseFLLServlet {
         final Element header = createHeader(document, challengeTitle, awardGroup, tournament);
         table.appendChild(header);
 
-        final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+        final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
         table.appendChild(tableBody);
 
         prep.setString(3, awardGroup);

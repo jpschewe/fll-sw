@@ -301,7 +301,7 @@ public class PlayoffReport extends BaseFLLServlet {
     staticContent.setAttribute("flow-name", "xsl-region-before");
     staticContent.setAttribute("font-size", "10pt");
 
-    final Element titleBlock = FOPUtils.createXslFoElement(document, "block");
+    final Element titleBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     staticContent.appendChild(titleBlock);
     titleBlock.setAttribute("text-align", "center");
     titleBlock.setAttribute("font-size", "16pt");
@@ -312,7 +312,7 @@ public class PlayoffReport extends BaseFLLServlet {
 
     staticContent.appendChild(FOPUtils.createBlankLine(document));
 
-    final Element subtitleBlock = FOPUtils.createXslFoElement(document, "block");
+    final Element subtitleBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     staticContent.appendChild(subtitleBlock);
     subtitleBlock.setAttribute("text-align-last", "justify");
     subtitleBlock.setAttribute("font-weight", "bold");

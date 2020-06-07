@@ -432,7 +432,7 @@ public class ScoresheetGenerator {
     table.appendChild(FOPUtils.createTableColumn(document, 10));
     table.appendChild(FOPUtils.createTableColumn(document, 9));
 
-    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
     table.appendChild(tableBody);
 
     final Element row1 = FOPUtils.createTableRow(document);
@@ -609,7 +609,7 @@ public class ScoresheetGenerator {
     goalsTable.appendChild(FOPUtils.createTableColumn(document, 48));
     goalsTable.appendChild(FOPUtils.createTableColumn(document, 48));
 
-    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
     goalsTable.appendChild(tableBody);
 
     String prevCategory = null;
@@ -750,7 +750,7 @@ public class ScoresheetGenerator {
             t.appendChild(FOPUtils.createTableColumn(document, 1));
             t.appendChild(FOPUtils.createTableColumn(document, 1));
 
-            final Element tBody = FOPUtils.createXslFoElement(document, "table-body");
+            final Element tBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
             t.appendChild(tBody);
 
             final Element tRow = FOPUtils.createTableRow(document);

@@ -170,7 +170,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
                                                             judgingGroup, tournament);
               table.appendChild(tableHeader);
 
-              final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+              final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
               table.appendChild(tableBody);
 
               prep.setString(5, division);
