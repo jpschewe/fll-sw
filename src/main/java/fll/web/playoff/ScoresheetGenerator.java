@@ -407,8 +407,11 @@ public class ScoresheetGenerator {
 
     final Element foreignObject = FOPUtils.createXslFoElement(document, "instream-foreign-object");
     block.appendChild(foreignObject);
-    foreignObject.setAttribute("height", String.format("%fin", FOPUtils.PAGE_LETTER_SIZE.getHeight()));
-    foreignObject.setAttribute("width", String.format("%fin", FOPUtils.PAGE_LETTER_SIZE.getWidth()));
+    // shrink the size a bit to keep from overflowing
+    foreignObject.setAttribute("height", String.format("%fin", FOPUtils.PAGE_LETTER_SIZE.getHeight()
+        - 1));
+    foreignObject.setAttribute("width", String.format("%fin", FOPUtils.PAGE_LETTER_SIZE.getWidth()
+        - 1));
     foreignObject.setAttribute("content-width", "scale-to-fit");
     foreignObject.setAttribute("content-height", "scale-to-fit");
 
