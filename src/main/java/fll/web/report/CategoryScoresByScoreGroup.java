@@ -6,6 +6,7 @@
 package fll.web.report;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -23,27 +24,27 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
+import javax.xml.transform.TransformerException;
 
-import com.itextpdf.text.BadElementException;
-import com.itextpdf.text.Chunk;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Phrase;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
+import org.apache.fop.apps.FOPException;
+import org.apache.fop.apps.FopFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
+import fll.scheduler.ScheduleWriter;
 import fll.scheduler.TournamentSchedule;
-import fll.util.PdfUtils;
-import fll.util.SimpleFooterHandler;
+import fll.util.FLLInternalException;
+import fll.util.FOPUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.xml.ChallengeDescription;
 import fll.xml.SubjectiveScoreCategory;
 import fll.xml.WinnerType;
+import net.mtu.eggplant.xml.XMLUtils;
 
 /**
  * Display the report for scores by score group.
@@ -73,33 +74,43 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=categoryScoresByJudgingStation.pdf");
 
-      final Document pdfDoc = PdfUtils.createPortraitPdfDoc(response.getOutputStream(), new SimpleFooterHandler());
-
-      addLegend(pdfDoc);
-
-      generateReport(connection, pdfDoc, challengeDescription, tournament);
-
-      pdfDoc.close();
-
+      outputReport(response.getOutputStream(), connection, challengeDescription, tournament);
     } catch (final SQLException e) {
-      throw new RuntimeException(e);
-    } catch (final DocumentException e) {
       throw new RuntimeException(e);
     }
   }
 
-  private void addLegend(final Document pdf) throws DocumentException {
-    final String legendText = String.format("@ - zero score on required goal");
-    final Phrase phrase = new Phrase(legendText);
-    pdf.add(phrase);
-  }
-
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "winner criteria determines sort")
-  private void generateReport(final Connection connection,
-                              final Document pdfDoc,
-                              final ChallengeDescription challengeDescription,
-                              final Tournament tournament)
-      throws SQLException, DocumentException {
+  private Document createDocument(final Connection connection,
+                                  final ChallengeDescription challengeDescription,
+                                  final Tournament tournament)
+      throws SQLException {
+    final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
+
+    final Element rootElement = FOPUtils.createRoot(document);
+    document.appendChild(rootElement);
+
+    final Element layoutMasterSet = FOPUtils.createXslFoElement(document, "layout-master-set");
+    rootElement.appendChild(layoutMasterSet);
+
+    final String pageMasterName = "simple";
+    final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName, FOPUtils.PAGE_LETTER_SIZE,
+                                                               FOPUtils.STANDARD_MARGINS, 0.2,
+                                                               FOPUtils.STANDARD_FOOTER_HEIGHT);
+    layoutMasterSet.appendChild(pageMaster);
+
+    final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
+    rootElement.appendChild(pageSequence);
+    pageSequence.setAttribute("id", FOPUtils.PAGE_SEQUENCE_NAME);
+
+    final Element header = createLegend(document);
+    pageSequence.appendChild(header);
+
+    final Element footer = FOPUtils.createSimpleFooter(document);
+    pageSequence.appendChild(footer);
+
+    final Element documentBody = FOPUtils.createBody(document);
+    pageSequence.appendChild(documentBody);
 
     final String challengeTitle = challengeDescription.getTitle();
     final WinnerType winnerCriteria = challengeDescription.getWinner();
@@ -147,9 +158,21 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
 
           for (final String division : eventDivisions) {
             for (final String judgingGroup : judgingGroups) {
-              final PdfPTable table = PdfUtils.createTable(4);
+              final Element table = FOPUtils.createBasicTable(document);
+              table.setAttribute("page-break-after", "always");
 
-              createHeader(table, challengeTitle, catTitle, goalGroup, division, judgingGroup, tournament);
+              table.appendChild(FOPUtils.createTableColumn(document, 1));
+              table.appendChild(FOPUtils.createTableColumn(document, 1));
+              table.appendChild(FOPUtils.createTableColumn(document, 1));
+              table.appendChild(FOPUtils.createTableColumn(document, 1));
+
+              final Element tableHeader = createTableHeader(document, challengeTitle, catTitle, goalGroup, division,
+                                                            judgingGroup, tournament);
+              table.appendChild(tableHeader);
+
+              final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+              table.appendChild(tableBody);
+
               prep.setString(5, division);
               prep.setString(6, judgingGroup);
 
@@ -157,83 +180,187 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
               try (ResultSet rs = prep.executeQuery()) {
                 while (rs.next()) {
                   haveData = true;
+                  
+                  final Element tableRow = FOPUtils.createTableRow(document);
+                  tableBody.appendChild(tableRow);
+                  FOPUtils.keepWithPrevious(tableRow);
 
                   final int teamNumber = rs.getInt(1);
                   final String teamName = rs.getString(2);
                   final String organization = rs.getString(3);
 
-                  table.addCell(PdfUtils.createCell(String.valueOf(teamNumber)));
-                  table.addCell(PdfUtils.createCell(null == teamName ? "" : teamName));
-                  table.addCell(PdfUtils.createCell(null == organization ? "" : organization));
+                  Element cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                          String.valueOf(teamNumber));
+                  tableRow.appendChild(cell);
+                  FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
+                                      ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
+                  FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                                      FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
+
+                  cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                  null == teamName ? "" : teamName);
+                  tableRow.appendChild(cell);
+                  FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
+                                      ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
+                  FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                                      FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
+
+                  cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                  null == organization ? "" : organization);
+                  tableRow.appendChild(cell);
+                  FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
+                                      ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
+                  FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                                      FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
+
                   double score = rs.getDouble(4);
                   if (rs.wasNull()) {
                     score = Double.NaN;
                   }
+                  final StringBuilder scoreText = new StringBuilder();
                   if (Double.isNaN(score)) {
-                    table.addCell(PdfUtils.createCell("No Score"));
+                    scoreText.append("No Score");
+
                   } else {
                     final boolean zeroInRequiredGoal = FinalComputedScores.checkZeroInRequiredGoal(connection,
                                                                                                    tournament,
                                                                                                    catElement,
                                                                                                    teamNumber);
 
-                    final StringBuilder scoreText = new StringBuilder();
                     scoreText.append(Utilities.getFloatingPointNumberFormat().format(score));
                     if (zeroInRequiredGoal) {
                       scoreText.append(" @");
                     }
-                    table.addCell(PdfUtils.createCell(scoreText.toString()));
                   }
+
+                  cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, scoreText.toString());
+                  tableRow.appendChild(cell);
+                  FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
+                                      ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
+                  FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                                      FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
+
                 } // foreach result
               } // allocate rs
 
-              if (haveData) {
-                table.keepRowsTogether(0);
-                pdfDoc.add(table);
-
-                pdfDoc.add(Chunk.NEXTPAGE);
+              if(haveData) {
+                // only add the table if there is data
+                documentBody.appendChild(table);
               }
-
+              
             } // foreach station
           } // foreach division
         } // foreach goal group
       } // allocate prep
     } // foreach category
 
+    return document;
   }
 
-  private void createHeader(final PdfPTable table,
-                            final String challengeTitle,
-                            final String catTitle,
-                            final String goalGroup,
-                            final String division,
-                            final String judgingGroup,
+  private void outputReport(final OutputStream stream,
+                            final Connection connection,
+                            final ChallengeDescription challengeDescription,
                             final Tournament tournament)
-      throws BadElementException {
-    final PdfPCell tournamentCell = PdfUtils.createHeaderCell(String.format("%s - %s", challengeTitle,
-                                                                            tournament.getDescription()));
-    tournamentCell.setColspan(4);
-    table.addCell(tournamentCell);
+      throws IOException, SQLException {
+    try {
 
-    final PdfPCell categoryHeader;
+      final Document document = createDocument(connection, challengeDescription, tournament);
+
+      final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
+
+      FOPUtils.renderPdf(fopFactory, document, stream);
+    } catch (FOPException | TransformerException e) {
+      throw new FLLInternalException("Error creating the performance schedule PDF", e);
+    }
+  }
+
+  private Element createLegend(final Document document) {
+
+    final Element staticContent = FOPUtils.createXslFoElement(document, "static-content");
+    staticContent.setAttribute("flow-name", "xsl-region-before");
+
+    final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    staticContent.appendChild(block);
+    block.appendChild(document.createTextNode("@ - zero score on required goal"));
+
+    return staticContent;
+
+  }
+
+  private Element createTableHeader(final Document document,
+                                    final String challengeTitle,
+                                    final String catTitle,
+                                    final String goalGroup,
+                                    final String division,
+                                    final String judgingGroup,
+                                    final Tournament tournament) {
+    final Element tableHeader = FOPUtils.createTableHeader(document);
+    tableHeader.setAttribute("font-weight", "bold");
+
+    final Element row1 = FOPUtils.createTableRow(document);
+    tableHeader.appendChild(row1);
+
+    Element cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                            String.format("%s - %s", challengeTitle, tournament.getDescription()));
+    row1.appendChild(cell);
+    cell.setAttribute("number-columns-spanned", "4");
+    FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
+                        ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
+    FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                        FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
+
+    final Element row2 = FOPUtils.createTableRow(document);
+    tableHeader.appendChild(row2);
+
+    final String categoryText;
     if (null == goalGroup
         || goalGroup.trim().isEmpty()) {
-      categoryHeader = PdfUtils.createHeaderCell(String.format("Category: %s - Award Group: %s - JudgingGroup: %s",
-                                                               catTitle, division, judgingGroup));
+      categoryText = String.format("Category: %s - Award Group: %s - JudgingGroup: %s", catTitle, division,
+                                   judgingGroup);
     } else {
-      categoryHeader = PdfUtils.createHeaderCell(String.format("Category: %s - Goal Group - %s - Award Group: %s - JudgingGroup: %s",
-                                                               catTitle, goalGroup, division, judgingGroup));
+      categoryText = String.format("Category: %s - Goal Group - %s - Award Group: %s - JudgingGroup: %s", catTitle,
+                                   goalGroup, division, judgingGroup);
     }
+    cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, categoryText);
+    row2.appendChild(cell);
+    cell.setAttribute("number-columns-spanned", "4");
+    FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
+                        ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
+    FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                        FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
 
-    categoryHeader.setColspan(4);
-    table.addCell(categoryHeader);
+    final Element row3 = FOPUtils.createTableRow(document);
+    tableHeader.appendChild(row3);
 
-    table.addCell(PdfUtils.createHeaderCell(TournamentSchedule.TEAM_NUMBER_HEADER));
-    table.addCell(PdfUtils.createHeaderCell(TournamentSchedule.TEAM_NAME_HEADER));
-    table.addCell(PdfUtils.createHeaderCell(TournamentSchedule.ORGANIZATION_HEADER));
-    table.addCell(PdfUtils.createHeaderCell("Scaled Score"));
+    cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, TournamentSchedule.TEAM_NUMBER_HEADER);
+    row3.appendChild(cell);
+    FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
+                        ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
+    FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                        FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
 
-    table.setHeaderRows(3);
+    cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, TournamentSchedule.TEAM_NAME_HEADER);
+    row3.appendChild(cell);
+    FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
+                        ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
+    FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                        FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
+
+    cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, TournamentSchedule.ORGANIZATION_HEADER);
+    row3.appendChild(cell);
+    FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
+                        ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
+    FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                        FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
+
+    cell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "Scaled Score");
+    row3.appendChild(cell);
+    FOPUtils.addBorders(cell, ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH,
+                        ScheduleWriter.STANDARD_BORDER_WIDTH, ScheduleWriter.STANDARD_BORDER_WIDTH);
+    FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
+                        FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
+
+    return tableHeader;
   }
 
 }
