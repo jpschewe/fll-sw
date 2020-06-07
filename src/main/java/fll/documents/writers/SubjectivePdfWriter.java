@@ -400,8 +400,9 @@ public class SubjectivePdfWriter {
     rootElement.appendChild(layoutMasterSet);
 
     final String pageMasterName = "simple";
-    FOPUtils.createSimplePageMaster(document, layoutMasterSet, pageMasterName, FOPUtils.PAGE_LETTER_SIZE, MARGINS, 0,
-                                    FOOTER_HEIGHT);
+    final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName, FOPUtils.PAGE_LETTER_SIZE,
+                                                               MARGINS, 0, FOOTER_HEIGHT);
+    layoutMasterSet.appendChild(pageMaster);
 
     final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
     rootElement.appendChild(pageSequence);
@@ -484,7 +485,7 @@ public class SubjectivePdfWriter {
 
     final Element categoryCellContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
     goalGroupCell.appendChild(categoryCellContainer);
-//    categoryCellContainer.setAttribute("reference-orientation", "90");
+    // categoryCellContainer.setAttribute("reference-orientation", "90");
     final Pair<Integer, Integer> stringParameters = determineStringParameters(goalGroup, fontSize);
     LOGGER.trace("String '{}' width: {} height: {}", goalGroup, stringParameters.getLeft(),
                  stringParameters.getRight());
