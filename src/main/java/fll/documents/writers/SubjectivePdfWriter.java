@@ -286,6 +286,34 @@ public class SubjectivePdfWriter {
     public static final String PROGRAMMING_NAME = "robot_programming";
   }
 
+  private static boolean checkPages(final ChallengeDescription description,
+                                    final String tournamentName,
+                                    final SheetElement sheetElement,
+                                    final List<TeamScheduleInfo> schedule,
+                                    final int pointSize,
+                                    final double commentHeight) {
+    try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+
+      final SubjectivePdfWriter writer = new SubjectivePdfWriter(description, tournamentName, sheetElement, null);
+
+      try {
+        final Document document = writer.createDocument(schedule, pointSize, commentHeight);
+        final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
+
+        FOPUtils.renderPdf(fopFactory, document, out);
+      } catch (FOPException | TransformerException e) {
+        throw new FLLInternalException("Error creating the subjective schedule PDF", e);
+      }
+
+      try (PDDocument testPdf = PDDocument.load(out.toByteArray())) {
+        return testPdf.getNumberOfPages() == 1;
+      }
+    } catch (final IOException e) {
+      throw new FLLInternalException("Internal error determining parameters for subjective sheets", e);
+    }
+
+  }
+
   /**
    * @param sheetElement describes the subjective category to output
    * @param tournamentName displayed on the sheets
@@ -303,35 +331,26 @@ public class SubjectivePdfWriter {
 
     final List<TeamScheduleInfo> schedule = Collections.singletonList(teamInfo);
 
-    // FIXME think about how to balance point size and comment height
-    for (int pointSize = 9; pointSize >= 6; --pointSize) {
-      for (double commentHeight = 5; commentHeight > 1; commentHeight -= 0.1) {
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-
-          final SubjectivePdfWriter writer = new SubjectivePdfWriter(description, tournamentName, sheetElement, null);
-
-          try {
-            final Document document = writer.createDocument(schedule, pointSize, commentHeight);
-            final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
-
-            FOPUtils.renderPdf(fopFactory, document, out);
-          } catch (FOPException | TransformerException e) {
-            throw new FLLInternalException("Error creating the subjective schedule PDF", e);
-          }
-
-          try (PDDocument testPdf = PDDocument.load(out.toByteArray())) {
-            if (testPdf.getNumberOfPages() == 1) {
-              return Pair.of(pointSize, commentHeight);
-            }
-          }
-        } catch (final IOException e) {
-          throw new FLLInternalException("Internal error determining parameters for subjective sheets", e);
+    // The 2 sets of loops are setup to balance comments and point size. We want to
+    // have more comment space, but not have too small of a font.
+    for (int pointSize = 10; pointSize >= 8; --pointSize) {
+      for (double commentHeight = 5; commentHeight > 3; commentHeight -= 0.2) {
+        if (checkPages(description, tournamentName, sheetElement, schedule, pointSize, commentHeight)) {
+          return Pair.of(pointSize, commentHeight);
         }
+      }
+    }
 
-      } // comment height
-    } // point size
+    for (int pointSize = 8; pointSize >= 6; --pointSize) {
+      for (double commentHeight = 3; commentHeight > 1; commentHeight -= 0.2) {
+        if (checkPages(description, tournamentName, sheetElement, schedule, pointSize, commentHeight)) {
+          return Pair.of(pointSize, commentHeight);
+        }
+      }
+    }
 
-    // no font size fit, just use 10 with comment height 0.1
+    // no font size fit, just use 10 with comment height 0.2
+    LOGGER.warn("Unable to find a point size and comment height that fits on 1 page. Subjective sheets will be multiple pages.");
     return Pair.of(10, 0.2);
   }
 
