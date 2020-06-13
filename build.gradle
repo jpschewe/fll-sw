@@ -108,7 +108,7 @@ repositories {
 ext {
     jackson_version = "2.9.8"
     slf4j_version = "1.7.26"
-    tomcat_version = "9.0.30"
+    tomcat_version = "9.0.35"
     poi_version = "4.0.1"
     junit_version = "5.5.2"
     log4j_version = "2.11.2"
