@@ -1,3 +1,4 @@
+* #799 - Convert subjective sheets to Apache FOP
 * #802 - Convert miscellaneous reports to Apache FOP
 * #800 - Convert detailed schedules to Apache FOP
 * #801 - Convert final computed scores to Apache FOP
