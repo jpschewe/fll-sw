@@ -471,77 +471,55 @@ public class SubjectivePdfWriter {
 
   private static final String RUBRIC_TABLE_PADDING = "2pt";
 
+  // ideally the width of the string should be used, but for some reason that is
+  // too small
+  private static final double STRING_WIDTH_MULTIPLIER = 1.25;
+
   private Element createGoalGroupCell(final Document document,
                                       final int fontSize,
                                       final String goalGroup) {
-    // One should be able to just use the reference-orientation property on the
-    // text cell. However when this is done the cells aren't properly sized and the
-    // text gets put in the wrong place.
-    //
-    // Jon Schewe sent an email to the Apache FOP list 5/9/2020 and didn't find an
-    // answer.
-    // http://mail-archives.apache.org/mod_mbox/xmlgraphics-fop-users/202005.mbox/%3Cd8da02c550c0271943a651c13d7218377efc7137.camel%40mtu.net%3E
+    // Ideally we should not need to determine how big to make the block-container.
+    // Bug https://issues.apache.org/jira/browse/FOP-2946 is open for this
     final Element goalGroupCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
 
     final Element categoryCellContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
     goalGroupCell.appendChild(categoryCellContainer);
-    // categoryCellContainer.setAttribute("reference-orientation", "90");
-    final Pair<Integer, Integer> stringParameters = determineStringParameters(goalGroup, fontSize);
-    LOGGER.trace("String '{}' width: {} height: {}", goalGroup, stringParameters.getLeft(),
-                 stringParameters.getRight());
+    categoryCellContainer.setAttribute("reference-orientation", "90");
+    final Pair<Integer, Integer> stringParameters = determineStringParameters(goalGroup, "Helvetica", true, false,
+                                                                              fontSize);
+    LOGGER.trace("String '{}' width: {} height: {} font-size: {}", goalGroup, stringParameters.getLeft(),
+                 stringParameters.getRight(), fontSize);
 
-    // final int containerWidth = determineStringWidth(goalGroup, fontSize)
-    // + (2
-    // * determineStringWidth("m", fontSize));
-    // categoryCellContainer.setAttribute("inline-progression-dimension",
-    // String.format("%dpx", containerWidth));
-    //
+    final int containerWidth = (int) Math.ceil(stringParameters.getLeft()
+        * STRING_WIDTH_MULTIPLIER);
+    categoryCellContainer.setAttribute("inline-progression-dimension", String.format("%dpx", containerWidth));
+
     final Element categoryCellBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     categoryCellContainer.appendChild(categoryCellBlock);
-    // categoryCellBlock.setAttribute("text-align", FOPUtils.TEXT_ALIGN_CENTER);
-    // categoryCellBlock.setAttribute("font-weight", "bold");
-    //
-    // categoryCellBlock.appendChild(document.createTextNode(goalGroup));
+    categoryCellBlock.setAttribute("text-align", FOPUtils.TEXT_ALIGN_CENTER);
+    categoryCellBlock.setAttribute("font-weight", "bold");
 
-    final Element categoryCellForeign = FOPUtils.createXslFoElement(document, "instream-foreign-object");
-    categoryCellBlock.appendChild(categoryCellForeign);
-    categoryCellForeign.setAttribute("content-height", "scale-to-fit");
-    categoryCellForeign.setAttribute("content-width", "scale-to-fit");
-    categoryCellForeign.setAttribute("height", "100%");
-    categoryCellForeign.setAttribute("width", "100%");
-
-    final Element svg = document.createElementNS(FOPUtils.SVG_NAMESPACE, "svg");
-    categoryCellForeign.appendChild(svg);
-    // swap height and width because of the rotation
-    final int svgWidth = stringParameters.getRight();// 25;
-    final int svgHeight = stringParameters.getLeft();// 25;
-    svg.setAttribute("width", String.valueOf(svgWidth));
-    svg.setAttribute("height", String.valueOf(svgHeight));
-    svg.setAttribute("viewBox", String.format("0 0 %d %d", svgWidth, svgHeight));
-
-    final Element text = document.createElementNS(FOPUtils.SVG_NAMESPACE, "text");
-    svg.appendChild(text);
-    text.setAttribute("style",
-                      "fill: black; font-family:Helvetica; font-size: 8pt; font-weight: bold; font-style:normal;");
-    text.setAttribute("x", String.valueOf(svgWidth
-        / 2));
-    text.setAttribute("y", String.valueOf(svgHeight
-        / 2));
-    text.setAttribute("transform", String.format("rotate(-90, %d, %d)", svgWidth
-        / 2, svgHeight
-            / 2));
-
-    final Element tspan = document.createElementNS(FOPUtils.SVG_NAMESPACE, "tspan");
-    text.appendChild(tspan);
-    tspan.setAttribute("text-anchor", "middle");
-    tspan.appendChild(document.createTextNode(goalGroup));
+    categoryCellBlock.appendChild(document.createTextNode(goalGroup));
 
     return goalGroupCell;
   }
 
-  private Pair<Integer, Integer> determineStringParameters(final String text,
-                                                           final int fontSize) {
-    final FontTriplet triplet = new FontTriplet("Helvetica", Font.STYLE_NORMAL, Font.WEIGHT_BOLD,
+  /**
+   * @param text the text to get the width and height of
+   * @param fontFamily the family of the font
+   * @param bold true if a bold font
+   * @param italic true if an italic font
+   * @param fontSize the size of the font in points
+   * @return (width, height) in pixels
+   */
+  public static Pair<Integer, Integer> determineStringParameters(final String text,
+                                                                 final String fontFamily,
+                                                                 final boolean bold,
+                                                                 final boolean italic,
+                                                                 final int fontSize) {
+    final FontTriplet triplet = new FontTriplet(fontFamily, //
+                                                italic ? Font.STYLE_ITALIC : Font.STYLE_NORMAL, //
+                                                bold ? Font.WEIGHT_NORMAL : Font.WEIGHT_BOLD, //
                                                 Font.PRIORITY_DEFAULT);
     final FontInfo fontInfo = new FontInfo();
 
