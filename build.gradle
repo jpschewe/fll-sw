@@ -400,7 +400,7 @@ task renderWorkflows(dependsOn: [markdownToHtml]) {
     def ioMap = [:]
 
     fileTree("src/main/documentation/workflows").matching{include "**/*.dot"}.visit{FileVisitDetails details ->
-        if(!details.isDirectory) {
+        if(!details.directory) {
             def inFile = details.file.path
             def outFile = project.documentation_build_dir.path + "/workflows/" + details.file.name + ".pdf"
             inputFiles << inFile
