@@ -646,6 +646,7 @@ public class ScoresheetGenerator {
             // Jon Schewe sent an email to the Apache FOP list 5/9/2020 and didn't find an
             // answer.
             // http://mail-archives.apache.org/mod_mbox/xmlgraphics-fop-users/202005.mbox/%3Cd8da02c550c0271943a651c13d7218377efc7137.camel%40mtu.net%3E
+            // Bug https://issues.apache.org/jira/browse/FOP-2946 is open for this
             final Element categoryCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
             row.appendChild(categoryCell);
             categoryCell.setAttribute("number-rows-spanned", String.valueOf(categoryRowSpan));
