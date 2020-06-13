@@ -109,7 +109,6 @@ ext {
     jackson_version = "2.9.8"
     slf4j_version = "1.7.26"
     tomcat_version = "9.0.30"
-    itext_version = "5.5.13.1"
     poi_version = "4.0.1"
     junit_version = "5.5.2"
     log4j_version = "2.11.2"
@@ -157,8 +156,6 @@ dependencies {
   implementation(group: "org.apache.commons", name: "commons-lang3", version: "3.8.1")
   implementation(group: "commons-cli", name: "commons-cli", version: "1.4")
   implementation(group: "org.hsqldb", name: "hsqldb", version: "2.5.0")
-    
-  implementation(group: "com.itextpdf", name: "itextpdf", version: project.itext_version)
     
   runtimeOnly(group: "org.apache.logging.log4j", name: "log4j-slf4j-impl", version: project.log4j_version)
   runtimeOnly(group: "org.apache.logging.log4j", name: "log4j-jcl", version: project.log4j_version)
