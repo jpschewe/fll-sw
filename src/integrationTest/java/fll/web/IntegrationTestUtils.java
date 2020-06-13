@@ -80,8 +80,8 @@ import fll.tomcat.TomcatLauncher;
 import fll.util.FLLInternalException;
 import fll.web.api.TournamentsServlet;
 import fll.xml.BracketSortType;
-import io.github.bonigarcia.wdm.DriverManagerType;
 import io.github.bonigarcia.wdm.WebDriverManager;
+import io.github.bonigarcia.wdm.config.DriverManagerType;
 import net.mtu.eggplant.xml.XMLUtils;
 
 /**

@@ -15,6 +15,7 @@ import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
+import com.opencsv.exceptions.CsvValidationException;
 
 import fll.Utilities;
 
@@ -35,7 +36,9 @@ public class CSVCellReader extends CellFileReader {
   }
 
   /**
-   * @throws IOException
+   * @param file the file to read
+   * @param separator the column separator
+   * @throws IOException if there is an error opening the file
    */
   public CSVCellReader(final Path file,
                        final char separator)
@@ -46,25 +49,28 @@ public class CSVCellReader extends CellFileReader {
   }
 
   /**
-   * @throws IOException
+   * @param file the file to read
+   * @throws IOException if there is an error opening the file
    */
   public CSVCellReader(final Path file) throws IOException {
     delegate = new CSVReaderBuilder(Files.newBufferedReader(file, Utilities.DEFAULT_CHARSET)).build();
   }
 
-  /**
-   * @see fll.util.CellFileReader#getLineNumber()
-   */
+  @Override
   public long getLineNumber() {
     return delegate.getLinesRead();
   }
 
   /**
-   * @throws IOException
-   * @see fll.util.CellFileReader#readNext()
+   * @throws IOException if there is an error reading from the file
    */
+  @Override
   public String[] readNext() throws IOException {
-    return delegate.readNext();
+    try {
+      return delegate.readNext();
+    } catch (final CsvValidationException e) {
+      throw new IOException("Invalid line in CSV file", e);
+    }
   }
 
   public void close() throws IOException {
