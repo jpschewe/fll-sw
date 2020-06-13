@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvValidationException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
@@ -299,22 +300,26 @@ public final class ImportDB {
    * @return key is column name, value is type
    */
   public static Map<String, String> loadTypeInfo(final Reader reader) throws IOException {
-    final CSVReader csvreader = new CSVReader(reader);
-    final Map<String, String> columnTypes = new HashMap<>();
+    try {
+      final CSVReader csvreader = new CSVReader(reader);
+      final Map<String, String> columnTypes = new HashMap<>();
 
-    String[] line;
-    while (null != (line = csvreader.readNext())) {
-      if (line.length != 2) {
-        throw new RuntimeException("Typeinfo file has incorrect number of columns, should be 2");
+      String[] line;
+      while (null != (line = csvreader.readNext())) {
+        if (line.length != 2) {
+          throw new RuntimeException("Typeinfo file has incorrect number of columns, should be 2");
+        }
+        if ("character".equalsIgnoreCase(line[1])) {
+          // handle broken dumps from version 7.0
+          columnTypes.put(line[0].toLowerCase(), "character(64)");
+        } else {
+          columnTypes.put(line[0].toLowerCase(), line[1]);
+        }
       }
-      if ("character".equalsIgnoreCase(line[1])) {
-        // handle broken dumps from version 7.0
-        columnTypes.put(line[0].toLowerCase(), "character(64)");
-      } else {
-        columnTypes.put(line[0].toLowerCase(), line[1]);
-      }
+      return columnTypes;
+    } catch (final CsvValidationException e) {
+      throw new IOException("Error parsing line", e);
     }
-    return columnTypes;
   }
 
   /**
