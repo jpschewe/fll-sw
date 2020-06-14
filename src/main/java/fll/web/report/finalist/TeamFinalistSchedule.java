@@ -128,7 +128,7 @@ public class TeamFinalistSchedule extends BaseFLLServlet {
     table.appendChild(FOPUtils.createTableColumn(document, 2));
     table.appendChild(FOPUtils.createTableColumn(document, 1));
 
-    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
     table.appendChild(tableBody);
 
     final Element row1 = FOPUtils.createTableRow(document);
@@ -273,7 +273,7 @@ public class TeamFinalistSchedule extends BaseFLLServlet {
           FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
                               FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
 
-          final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+          final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
           table.appendChild(tableBody);
 
           for (final FinalistDBRow row : finalistTimes) {

@@ -176,7 +176,7 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
     FOPUtils.addPadding(cell, FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING,
                         FOPUtils.TABLE_CELL_STANDARD_PADDING, FOPUtils.TABLE_CELL_STANDARD_PADDING);
 
-    final Element schedTableBody = FOPUtils.createXslFoElement(document, "table-body");
+    final Element schedTableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
     schedTable.appendChild(schedTableBody);
     schedTableBody.setAttribute("font-family", SCHEDULE_FONT_FAMILY);
     schedTableBody.setAttribute("font-size", SCHEDULE_FONT_SIZE);
@@ -234,7 +234,7 @@ public class PdfFinalistSchedule extends BaseFLLServlet {
     table.appendChild(FOPUtils.createTableColumn(document, 2));
     table.appendChild(FOPUtils.createTableColumn(document, 1));
 
-    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
     table.appendChild(tableBody);
 
     final Element row1 = FOPUtils.createTableRow(document);

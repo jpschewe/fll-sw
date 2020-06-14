@@ -161,7 +161,7 @@ public class AwardsReport extends BaseFLLServlet {
                              final Element documentBody,
                              final List<String> sortedGroups)
       throws SQLException {
-    final Element container = FOPUtils.createXslFoElement(document, "block-container");
+    final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
     documentBody.appendChild(container);
 
     container.setAttribute("keep-together.within-page", "always");
@@ -252,12 +252,12 @@ public class AwardsReport extends BaseFLLServlet {
                                               final String categoryName,
                                               final List<OverallAwardWinner> categoryWinners)
       throws SQLException {
-    final Element container = FOPUtils.createXslFoElement(document, "block-container");
+    final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
     container.setAttribute("keep-together.within-page", "always");
 
     container.appendChild(FOPUtils.createHorizontalLine(document, 2));
 
-    final Element categoryTitleBlock = FOPUtils.createXslFoElement(document, "block");
+    final Element categoryTitleBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     container.appendChild(categoryTitleBlock);
     categoryTitleBlock.setAttribute("font-weight", "bold");
     categoryTitleBlock.appendChild(document.createTextNode(String.format("%s Award", categoryName)));
@@ -270,7 +270,7 @@ public class AwardsReport extends BaseFLLServlet {
     table.appendChild(FOPUtils.createTableColumn(document, SUBJECTIVE_TEAM_NAME_WIDTH));
     final int columnsInTable = FOPUtils.columnsInTable(table);
 
-    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
     table.appendChild(tableBody);
 
     for (final OverallAwardWinner winner : categoryWinners) {
@@ -313,12 +313,12 @@ public class AwardsReport extends BaseFLLServlet {
                                                  final Map<String, List<AwardWinner>> categoryWinners,
                                                  final List<String> sortedGroups)
       throws SQLException {
-    final Element container = FOPUtils.createXslFoElement(document, "block-container");
+    final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
     container.setAttribute("keep-together.within-page", "always");
 
     container.appendChild(FOPUtils.createHorizontalLine(document, 2));
 
-    final Element categoryTitleBlock = FOPUtils.createXslFoElement(document, "block");
+    final Element categoryTitleBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     container.appendChild(categoryTitleBlock);
     categoryTitleBlock.setAttribute("font-weight", "bold");
     categoryTitleBlock.appendChild(document.createTextNode(String.format("%s Award", categoryName)));
@@ -331,7 +331,7 @@ public class AwardsReport extends BaseFLLServlet {
     table.appendChild(FOPUtils.createTableColumn(document, SUBJECTIVE_TEAM_NAME_WIDTH));
     final int columnsInTable = FOPUtils.columnsInTable(table);
 
-    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
     table.appendChild(tableBody);
 
     final List<String> localSortedGroups = new LinkedList<>(sortedGroups);
@@ -405,7 +405,7 @@ public class AwardsReport extends BaseFLLServlet {
       throws SQLException {
     documentBody.appendChild(FOPUtils.createHorizontalLine(document, 2));
 
-    final Element categoryTitleBlock = FOPUtils.createXslFoElement(document, "block");
+    final Element categoryTitleBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     documentBody.appendChild(categoryTitleBlock);
     categoryTitleBlock.setAttribute("font-weight", "bold");
 
@@ -422,7 +422,7 @@ public class AwardsReport extends BaseFLLServlet {
     table.appendChild(FOPUtils.createTableColumn(document, SCORE_DESCRIPTION_WIDTH));
     table.appendChild(FOPUtils.createTableColumn(document, SCORE_WIDTH));
 
-    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
     table.appendChild(tableBody);
 
     // make sure all groups are in the sort
@@ -461,7 +461,7 @@ public class AwardsReport extends BaseFLLServlet {
     staticContent.setAttribute("flow-name", "xsl-region-before");
     staticContent.setAttribute("font-size", "10pt");
 
-    final Element titleBlock = FOPUtils.createXslFoElement(document, "block");
+    final Element titleBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     staticContent.appendChild(titleBlock);
     titleBlock.setAttribute("text-align", "center");
     titleBlock.setAttribute("font-size", "16pt");
@@ -472,7 +472,7 @@ public class AwardsReport extends BaseFLLServlet {
 
     staticContent.appendChild(FOPUtils.createBlankLine(document));
 
-    final Element subtitleBlock = FOPUtils.createXslFoElement(document, "block");
+    final Element subtitleBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     staticContent.appendChild(subtitleBlock);
     subtitleBlock.setAttribute("text-align-last", "justify");
     subtitleBlock.setAttribute("font-weight", "bold");
@@ -535,12 +535,12 @@ public class AwardsReport extends BaseFLLServlet {
                                     final List<String> sortedGroups)
       throws SQLException {
 
-    final Element container = FOPUtils.createXslFoElement(document, "block-container");
+    final Element container = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
     container.setAttribute("keep-together.within-page", "always");
 
     container.appendChild(FOPUtils.createHorizontalLine(document, 2));
 
-    final Element categoryTitleBlock = FOPUtils.createXslFoElement(document, "block");
+    final Element categoryTitleBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
     container.appendChild(categoryTitleBlock);
     categoryTitleBlock.setAttribute("font-weight", "bold");
     if (null != tournament.getNextLevel()) {
@@ -559,7 +559,7 @@ public class AwardsReport extends BaseFLLServlet {
     table.appendChild(FOPUtils.createTableColumn(document, SUBJECTIVE_TEAM_NAME_WIDTH));
     final int columnsInTable = FOPUtils.columnsInTable(table);
 
-    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
     table.appendChild(tableBody);
 
     final Map<String, List<AdvancingTeam>> organizedAdvancing = new HashMap<>();

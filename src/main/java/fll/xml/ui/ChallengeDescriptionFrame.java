@@ -48,8 +48,6 @@ import javax.swing.filechooser.FileFilter;
 
 import org.w3c.dom.Document;
 
-import com.itextpdf.text.DocumentException;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.documents.elements.SheetElement;
@@ -484,7 +482,7 @@ public class ChallengeDescriptionFrame extends JFrame {
         try (OutputStream out = Files.newOutputStream(outputDirectory.resolve(filename))) {
           SubjectivePdfWriter.createDocument(out, challengeDescription, tournamentName, sheetElement, null,
                                              Collections.singletonList(dummy));
-        } catch (IOException | DocumentException e) {
+        } catch (final IOException e) {
           LOGGER.error("Error writing subjective score sheet {}", category.getName(), e);
           JOptionPane.showMessageDialog(this, "Error writing the subjective score sheet "
               + category.getName()
