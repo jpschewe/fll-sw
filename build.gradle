@@ -502,11 +502,8 @@ tasks.withType(SpotBugsTask) {
         }
     }
     it.finalizedBy("${it.name}HtmlReport")
+    distributionDependencies.dependsOn("${it.name}HtmlReport")
 }
-// these tasks are created in the loop above
-distributionDependencies.dependsOn(spotbugsMainHtmlReport)
-distributionDependencies.dependsOn(spotbugsTestHtmlReport)
-distributionDependencies.dependsOn(spotbugsIntegrationTestHtmlReport)
 
 gitProperties {
     gitPropertiesDir = "${buildDir}/resources/main/fll/resources"
