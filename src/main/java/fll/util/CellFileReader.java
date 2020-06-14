@@ -32,7 +32,7 @@ public abstract class CellFileReader implements Closeable {
   public abstract long getLineNumber();
 
   /**
-   * Read the next line
+   * Read the next line.
    *
    * @return the line as an array of Strings
    * @throws IOException
@@ -59,7 +59,7 @@ public abstract class CellFileReader implements Closeable {
   }
 
   /**
-   * Read either an Excel file or a CSV file
+   * Read either an Excel file or a CSV file.
    *
    * @param file the file to read
    * @param sheetName the sheet in an Excel file to read, null if reading a CSV
@@ -72,7 +72,7 @@ public abstract class CellFileReader implements Closeable {
                                                 final String sheetName)
       throws InvalidFormatException, IOException {
     if (ExcelCellReader.isExcelFile(file)) {
-      try (final InputStream fis = Files.newInputStream(file)) {
+      try (InputStream fis = Files.newInputStream(file)) {
         Objects.requireNonNull(sheetName, "Sheet name cannot be null when reading an Excel file");
 
         return new ExcelCellReader(fis, sheetName);
@@ -81,7 +81,7 @@ public abstract class CellFileReader implements Closeable {
       // determine if the file is tab separated or comma separated, check the
       // first line for tabs and if they aren't found, assume it's comma
       // separated
-      try (final BufferedReader breader = Files.newBufferedReader(file, Utilities.DEFAULT_CHARSET)) {
+      try (BufferedReader breader = Files.newBufferedReader(file, Utilities.DEFAULT_CHARSET)) {
         final String firstLine = breader.readLine();
         if (null == firstLine) {
           LOGGER.warn("Empty file");

@@ -48,6 +48,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvValidationException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.ImportDB;
@@ -233,7 +234,8 @@ public final class Utilities {
         }
         prep.executeUpdate();
       }
-
+    } catch (final CsvValidationException e) {
+      throw new IOException("Error reading line of file", e);
     } finally {
       SQLFunctions.close(stmt);
       SQLFunctions.close(prep);
