@@ -230,7 +230,7 @@ javadoc {
     failOnError = false
 }
 
-task distributionDependencies {
+tasks.register("distributionDependencies") {
     doFirst {
       println("Distribution dependnecies")
     }
@@ -240,7 +240,7 @@ distZip.dependsOn(distributionDependencies)
 installDist.dependsOn(distributionDependencies)
 
 // copy webapp files
-task copyWeb(type: Copy) {
+tasks.register("copyWeb", Copy) {
   from("src/main/web")
   into(project.web_build_dir)
 }
@@ -304,10 +304,13 @@ distributions {
 }
 
 // create run task since we aren't using the application plugin
-task run(type: JavaExec, dependsOn: [copyWeb, classes]) {
-        classpath = sourceSets.main.runtimeClasspath
+tasks.register("run", JavaExec) {
+    dependsOn(copyWeb)
+    dependsOn(classes)
+    
+    classpath = sourceSets.main.runtimeClasspath
         
-        main = project.mainClassName
+    main = project.mainClassName
 }
 
 
@@ -324,7 +327,7 @@ distributionDependencies.dependsOn(markdownToHtml)
 
 
 // write log4j config for JspC
-task writeJspcProperties(type: WriteProperties) {
+tasks.register("writeJspcProperties", WriteProperties) {
     outputFile = new File(project.buildDir, "log4j.jspc.properties")
     property("log4j.rootLogger", "WARN, stdout")
     property("log4j.logger.org.apache", "INFO, stdout")
@@ -336,7 +339,10 @@ task writeJspcProperties(type: WriteProperties) {
 
 // call JspC to test compile the JSP files
 // the output isn't used other than to check if there are errors in the build
-task jspToJava(type: JavaExec, dependsOn: [compileJava, writeJspcProperties]) {
+tasks.register("jspToJava", JavaExec) {
+    dependsOn(compileJava)
+    dependsOn(writeJspcProperties)
+
     group = "Build"
     description = "Convert JSP files to Java"
 
@@ -379,14 +385,16 @@ cpdCheck {
     ignoreFailures = true
 }
 
-task sloccount(type: Exec) {
+tasks.register("sloccount", Exec) {
     group = "Documentation"
     description = "Count number of lines of code"
 
     commandLine("cloc", "--by-file", "--xml", "--out", "$buildDir/reports/sloccount/cloc.xml", "src")
 }
 
-task renderWorkflows(dependsOn: [markdownToHtml]) {
+tasks.register("renderWorkflows") {
+    dependsOn(markdownToHtml)
+
     group = "Documentation"
     description = "Render workflows as PDFs"
 
@@ -417,7 +425,9 @@ task renderWorkflows(dependsOn: [markdownToHtml]) {
 }
 distributionDependencies.dependsOn(renderWorkflows)
 
-task createDatabaseDiagram(type: JavaExec, dependsOn: [markdownToHtml]) {
+tasks.register("createDatabaseDiagram", JavaExec) {
+    dependsOn(markdownToHtml)
+    
     group = "Documentation"
     description = "Creates a diagram of the database"
     
@@ -481,7 +491,7 @@ tasks.withType(SpotBugsTask) {
     it.finalizedBy("transform")
     distributionDependencies.dependsOn("${it.name}")
 }
-spotbugsMain.finalizedBy 'transform'
+spotbugsMain.finalizedBy("transform")
 
 transform {
     def stylesheetName = 'fancy-hist.xsl'
@@ -509,7 +519,7 @@ tasks.withType(SpotBugsTask) {
         html.stylesheet = resources.text.fromArchiveEntry(configurations.spotbugsStylesheets, "color.xsl")
     }
 
-    task "${it.name}HtmlReport" {
+    tasks.register("${it.name}HtmlReport") {
         def stylesheetFile = reports.html.stylesheet.asFile()
         
         // specify the input
@@ -537,7 +547,7 @@ gitProperties {
     gitPropertiesDir = "${buildDir}/resources/main/fll/resources"
 }
 
-task writeLaunchJar(type: Jar) {
+tasks.register("writeLaunchJar", Jar) {
     destinationDir = project.buildDir
     archiveFileName = "fll-sw.jar"
     manifest {
@@ -580,7 +590,7 @@ distributions {
     }
 }
 
-task windowsDistributionDependencies {
+tasks.register("windowsDistributionDependencies") {
     doLast {
       println("Windows distribution dependnecies")
     }
@@ -590,17 +600,20 @@ windowsDistTar.dependsOn(windowsDistributionDependencies)
 windowsDistZip.dependsOn(windowsDistributionDependencies)
   installWindowsDist.dependsOn(windowsDistributionDependencies)
 
-task downloadJavaWindows(type: Download) {
+tasks.register("downloadJavaWindows", Download) {
     src(project.java_windows_url)
     dest(project.java_download_base.resolve("windows-java.zip").toFile())
     overwrite(false)
 }
-task verifyJavaWindows(type: Verify, dependsOn: downloadJavaWindows) {
+tasks.register("verifyJavaWindows", Verify) {
+    dependsOn(downloadJavaWindows)
+
     src(downloadJavaWindows.dest)
     algorithm("SHA-256")
     checksum(project.java_windows_checksum)
 }
-task uncompressJavaWindows(type: Copy, dependsOn: verifyJavaWindows) {    
+tasks.register("uncompressJavaWindows", Copy) {
+    dependsOn(verifyJavaWindows)    
     from(zipTree(downloadJavaWindows.dest))
     into(project.java_download_base.resolve("windows"))
 } 
@@ -633,7 +646,7 @@ distributions {
     }
 }
 
-task linuxDistributionDependencies {
+tasks.register("linuxDistributionDependencies") {
     doFirst {
         println("Linux distribution dependnecies")
     }
@@ -643,17 +656,19 @@ linuxDistTar.dependsOn(linuxDistributionDependencies)
 linuxDistZip.dependsOn(linuxDistributionDependencies)
 installLinuxDist.dependsOn(linuxDistributionDependencies)
 
-task downloadJavaLinux(type: Download) {
+tasks.register("downloadJavaLinux", Download) {
     src(project.java_linux_url)
     dest(project.java_download_base.resolve("linux-java.tar.gz").toFile())
     overwrite(false)
 }
-task verifyJavaLinux(type: Verify, dependsOn: downloadJavaLinux) {
+tasks.register("verifyJavaLinux", Verify) {
+    dependsOn(downloadJavaLinux)
     src(downloadJavaLinux.dest)
     algorithm("SHA-256")
     checksum(project.java_linux_checksum)
 }
-task uncompressJavaLinux(type: Copy, dependsOn: verifyJavaLinux) {    
+tasks.register("uncompressJavaLinux", Copy) {
+    dependsOn(verifyJavaLinux)    
     from(tarTree(downloadJavaLinux.dest))
     into(project.java_download_base.resolve("linux"))
 } 
@@ -689,7 +704,7 @@ distributions {
     }
 }
 
-task macDistributionDependencies {
+tasks.register("macDistributionDependencies") {
     doFirst {
       println("Mac distribution dependnecies")
     }
@@ -699,17 +714,19 @@ macDistTar.dependsOn(macDistributionDependencies)
 macDistZip.dependsOn(macDistributionDependencies)
 installMacDist.dependsOn(macDistributionDependencies)
 
-task downloadJavaMac(type: Download) {
+tasks.register("downloadJavaMac", Download) {
     src(project.java_mac_url)
     dest(project.java_download_base.resolve("mac-java.tar.gz").toFile())
     overwrite(false)
 }
-task verifyJavaMac(type: Verify, dependsOn: downloadJavaMac) {
+tasks.register("verifyJavaMac", Verify) {
+    dependsOn(downloadJavaMac)
     src(downloadJavaMac.dest)
     algorithm("SHA-256")
     checksum(project.java_mac_checksum)
 }
-task uncompressJavaMac(type: Copy, dependsOn: verifyJavaMac) {    
+tasks.register("uncompressJavaMac", Copy) {
+    dependsOn(verifyJavaMac)      
     from(tarTree(downloadJavaMac.dest))
     into(project.java_download_base.resolve("mac"))
 } 
