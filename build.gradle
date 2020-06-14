@@ -1,6 +1,6 @@
 // -*- java -*-
 
-import com.github.spotbugs.SpotBugsTask
+import com.github.spotbugs.snom.SpotBugsTask
 
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.stream.StreamResult
@@ -20,7 +20,7 @@ buildscript {
       classpath(group: "com.cinnober.gradle", name: "semver-git", version: "3.0.0")
         classpath("org.unbroken-dome.gradle-plugins:gradle-testsets-plugin:3.0.1")
         classpath("org.kordamp:markdown-gradle-plugin:1.2.0")
-        classpath("net.sf.saxon:Saxon-HE:9.9.1-3")
+        //classpath("net.sf.saxon:Saxon-HE:9.9.1-3")
     }
     configurations.classpath {
       exclude(group: "com.google.guava", module: "guava")
@@ -34,7 +34,8 @@ plugins {
     id "org.unbroken-dome.test-sets" version "3.0.1"
     id "eclipse"
     id "org.kordamp.markdown.convert" version "1.2.0"       
-    id "com.github.spotbugs" version "2.0.1"
+    id "com.github.spotbugs" version "4.3.0"
+    id 'org.myire.munge' version '1.0' // transformer for spotbugs XML
     id "de.aaschmid.cpd" version "3.1"
     id "edu.sc.seis.launch4j" version "2.4.6"
     id "net.saliman.cobertura" version "3.0.0"
@@ -463,7 +464,7 @@ configurations {
 }
 
 dependencies {
-  spotbugsStylesheets("com.github.spotbugs:spotbugs:$spotbugs.toolVersion")
+  spotbugsStylesheets("com.github.spotbugs:spotbugs:$project.spotbugs_version")
 }
 
 spotbugs {
@@ -476,6 +477,31 @@ spotbugs {
     excludeFilter = file("spotbugs-filters.xml")
 }
 
+tasks.withType(SpotBugsTask) {
+    it.finalizedBy("transform")
+    distributionDependencies.dependsOn("${it.name}")
+}
+spotbugsMain.finalizedBy 'transform'
+
+transform {
+    def stylesheetName = 'fancy-hist.xsl'
+    saxon {
+        source "$buildDir/reports/spotbugs/main.xml"
+        template resources.text.fromArchiveEntry(configurations.spotbugsStylesheets, stylesheetName)
+        outputFile = "$buildDir/reports/spotbugs/main.html"
+    }
+    saxon {
+        source "$buildDir/reports/spotbugs/test.xml"
+        template resources.text.fromArchiveEntry(configurations.spotbugsStylesheets, stylesheetName)
+        outputFile = "$buildDir/reports/spotbugs/test.html"
+    }
+    saxon {
+        source "$buildDir/reports/spotbugs/integrationTest.xml"
+        template resources.text.fromArchiveEntry(configurations.spotbugsStylesheets, stylesheetName)
+        outputFile = "$buildDir/reports/spotbugs/integrationTest.html"
+    }
+}
+/*
 // some extra tasks so that we can generate html AND xml
 tasks.withType(SpotBugsTask) {
     reports {
@@ -505,6 +531,7 @@ tasks.withType(SpotBugsTask) {
     it.finalizedBy("${it.name}HtmlReport")
     distributionDependencies.dependsOn("${it.name}HtmlReport")
 }
+*/
 
 gitProperties {
     gitPropertiesDir = "${buildDir}/resources/main/fll/resources"
