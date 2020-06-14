@@ -490,11 +490,18 @@ tasks.withType(SpotBugsTask) {
     }
 
     task "${it.name}HtmlReport" {
+        def stylesheetFile = reports.html.stylesheet.asFile()
+        
+        // specify the input
         def input = reports.xml.destination
-        inputs.file(reports.html.stylesheet.asFile()).withPropertyName("spotbugsStylesheet").withPathSensitivity(PathSensitivity.NONE)
+        inputs.file(stylesheetFile).withPropertyName("spotbugsStylesheet").withPathSensitivity(PathSensitivity.NONE)
         inputs.files(fileTree(input)).withPropertyName("input").withPathSensitivity(PathSensitivity.NONE) skipWhenEmpty()
+        
+        // specify the output
         def output = file(input.absolutePath.replaceFirst(/\.xml$/, ".html"))
         outputs.file(output).withPropertyName("output")
+        
+        // do the work
         doLast {
             def factory = TransformerFactory.newInstance("net.sf.saxon.TransformerFactoryImpl", getClass().classLoader)
             def transformer = factory.newTransformer(new StreamSource(reports.html.stylesheet.asFile()));
