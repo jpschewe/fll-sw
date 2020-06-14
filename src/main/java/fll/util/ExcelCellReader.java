@@ -19,12 +19,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
@@ -214,9 +214,9 @@ public class ExcelCellReader extends CellFileReader {
         if (CellType.NUMERIC.equals(cell.getCellType())) {
           final double d = cell.getNumericCellValue();
           // test if a date!
-          if (HSSFDateUtil.isCellDateFormatted(cell)) {
+          if (DateUtil.isCellDateFormatted(cell)) {
             // make sure to format times like we expect them
-            final Date date = HSSFDateUtil.getJavaDate(d);
+            final Date date = DateUtil.getJavaDate(d);
             str = DATE_FORMAT_AM_PM_SS.get().format(date);
           } else {
             // check for integer
