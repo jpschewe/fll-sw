@@ -225,7 +225,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     // add the table header to the table after all of the columns are created
     table.appendChild(tableHeader);
 
-    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
     table.appendChild(tableBody);
 
     final PerformanceScoreCategory performance = challenge.getPerformance();
@@ -417,7 +417,7 @@ public class PerformanceScoreReport extends BaseFLLServlet {
     table.appendChild(FOPUtils.createTableColumn(document, 1));
     table.appendChild(FOPUtils.createTableColumn(document, 1));
 
-    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
     table.appendChild(tableBody);
 
     final Element row1 = FOPUtils.createTableRow(document);

@@ -14,7 +14,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.io.Writer;
-import java.net.MalformedURLException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -46,7 +45,6 @@ import javax.annotation.Nonnull;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
-import com.itextpdf.text.DocumentException;
 import com.opencsv.CSVWriter;
 
 import fll.Team;
@@ -911,9 +909,7 @@ public class TournamentSchedule implements Serializable {
    * @param tournamentName the name of the tournament to display on the sheets
    * @param filenameSuffixes map score category to output filename suffixes, may
    *          be empty
-   * @throws DocumentException
-   * @throws MalformedURLException
-   * @throws IOException
+   * @throws IOException if there is an error writing the files
    */
   public void outputSubjectiveSheets(@Nonnull final String tournamentName,
                                      final String dir,
@@ -921,7 +917,7 @@ public class TournamentSchedule implements Serializable {
                                      final ChallengeDescription description,
                                      @Nonnull final Map<ScoreCategory, String> categoryToSchedule,
                                      @Nonnull final Map<ScoreCategory, String> filenameSuffixes)
-      throws DocumentException, MalformedURLException, IOException {
+      throws IOException {
 
     // setup the sheets from the sucked in xml
     for (final SubjectiveScoreCategory category : description.getSubjectiveCategories()) {

@@ -523,7 +523,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
                               final Set<Integer> bestTeams)
       throws SQLException {
 
-    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
 
     final Map<ScoreCategory, Map<String, Map<Integer, Integer>>> teamSubjectiveRanks = gatherRankedSubjectiveTeams(connection,
                                                                                                                    subjectiveCategories,
@@ -963,7 +963,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
     header.setAttribute("font-family", "Times");
     header.setAttribute("font-size", "12pt");
 
-    final Element tableBody = FOPUtils.createXslFoElement(document, "table-body");
+    final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
     header.appendChild(tableBody);
 
     final Element row1 = FOPUtils.createTableRow(document);

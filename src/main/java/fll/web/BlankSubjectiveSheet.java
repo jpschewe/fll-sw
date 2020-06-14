@@ -19,8 +19,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
-import com.itextpdf.text.DocumentException;
-
 import fll.Tournament;
 import fll.db.Queries;
 import fll.documents.elements.SheetElement;
@@ -75,7 +73,7 @@ public class BlankSubjectiveSheet extends HttpServlet {
       } else {
         throw new FLLRuntimeException("You must specify a subjective category name in the URL");
       }
-    } catch (final SQLException | DocumentException e) {
+    } catch (final SQLException e) {
       throw new FLLRuntimeException(e);
     }
 

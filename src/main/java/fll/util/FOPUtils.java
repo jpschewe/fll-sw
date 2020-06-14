@@ -35,19 +35,25 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.Utilities;
+import fll.xml.ChallengeDescription;
 
 /**
  * Utilities for working with Apache FOP.
  */
 public final class FOPUtils {
 
+  private FOPUtils() {
+  }
+
   /**
    * Standard padding for most report tables.
    */
   public static final double TABLE_CELL_STANDARD_PADDING = 2;
 
-  private FOPUtils() {
-  }
+  /**
+   * Namespace for SVG elements. This is used when embedding SVG graphics.
+   */
+  public static final String SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 
   /**
    * Namespace for XSL-FO.
@@ -161,11 +167,11 @@ public final class FOPUtils {
     simplePageMaster.appendChild(body);
 
     final Element header = createXslFoElement(document, "region-before");
-    header.setAttribute("extent", String.format("%sin", headerHeight));
+    header.setAttribute("extent", String.format("%fin", headerHeight));
     simplePageMaster.appendChild(header);
 
     final Element footer = createXslFoElement(document, "region-after");
-    footer.setAttribute("extent", String.format("%sin", footerHeight));
+    footer.setAttribute("extent", String.format("%fin", footerHeight));
     simplePageMaster.appendChild(footer);
 
     return simplePageMaster;
@@ -224,7 +230,7 @@ public final class FOPUtils {
     staticContent.setAttribute("flow-name", "xsl-region-after");
     staticContent.setAttribute("font-size", "10pt");
 
-    final Element block = createXslFoElement(document, "block");
+    final Element block = createXslFoElement(document, FOPUtils.BLOCK_TAG);
     block.setAttribute("text-align", "end");
     block.appendChild(document.createTextNode("Page "));
     block.appendChild(createXslFoElement(document, "page-number"));
@@ -270,6 +276,11 @@ public final class FOPUtils {
    * Tag name for table element.
    */
   public static final String TABLE_TAG = "table";
+
+  /**
+   * Tag name for inline element.
+   */
+  public static final String INLINE_TAG = "inline";
 
   /**
    * Count the number of columns in the table.
@@ -334,6 +345,21 @@ public final class FOPUtils {
    * Block container tag.
    */
   public static final String BLOCK_CONTAINER_TAG = "block-container";
+
+  /**
+   * Table cell tag.
+   */
+  public static final String TABLE_CELL_TAG = "table-cell";
+
+  /**
+   * Table body tag.
+   */
+  public static final String TABLE_BODY_TAG = "table-body";
+
+  /**
+   * Table row tag.
+   */
+  public static final String TABLE_ROW_TAG = "table-row";
 
   /**
    * Block tag.
@@ -416,7 +442,7 @@ public final class FOPUtils {
                                                                       .collect(Collectors.joining(","))));
     }
 
-    final Element cell = createXslFoElement(document, "table-cell");
+    final Element cell = createXslFoElement(document, TABLE_CELL_TAG);
 
     final Element blockContainer = createXslFoElement(document, BLOCK_CONTAINER_TAG);
     if (noWrap) {
@@ -610,7 +636,7 @@ public final class FOPUtils {
    * @return block containing a blank line
    */
   public static Element createBlankLine(final Document document) {
-    final Element block = createXslFoElement(document, "block");
+    final Element block = createXslFoElement(document, FOPUtils.BLOCK_TAG);
     final Element leader = createXslFoElement(document, "leader");
     block.appendChild(leader);
     return block;
@@ -623,7 +649,7 @@ public final class FOPUtils {
    */
   public static Element createHorizontalLine(final Document document,
                                              final int thickness) {
-    final Element lineBlock = FOPUtils.createXslFoElement(document, "block");
+    final Element lineBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
 
     final Element line = FOPUtils.createXslFoElement(document, "leader");
     line.setAttribute("leader-pattern", "rule");
@@ -662,11 +688,6 @@ public final class FOPUtils {
   public static String renderColor(final Color c) {
     return String.format("#%02x%02x%02x", c.getRed(), c.getGreen(), c.getBlue());
   }
-
-  /**
-   * Tag used to create a table row.
-   */
-  public static final String TABLE_ROW_TAG = "table-row";
 
   /**
    * Create a table row that cannot span pages.
@@ -861,6 +882,41 @@ public final class FOPUtils {
     addBottomPadding(element, bottomWidth);
     addLeftPadding(element, leftWidth);
     addRightPadding(element, rightWidth);
+  }
+
+  private static Element createCopyrightBlock(final Document document,
+                                              final ChallengeDescription description) {
+    final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    block.setAttribute("font-size", "6pt");
+    block.setAttribute("font-style", "italic");
+    block.setAttribute("text-align", "center");
+
+    block.appendChild(document.createTextNode("\u00A9"
+        + description.getCopyright()));
+
+    return block;
+  }
+
+  /**
+   * Create a block containing the copyright in the challenge description.
+   * 
+   * @param document used to create elements
+   * @param description the challenge description
+   * @return the content or null if there is no copyright
+   */
+  public static Element createCopyrightFooter(final Document document,
+                                              final ChallengeDescription description) {
+    if (null == description.getCopyright()) {
+      return null;
+    }
+
+    final Element staticContent = FOPUtils.createXslFoElement(document, "static-content");
+    staticContent.setAttribute("flow-name", "xsl-region-after");
+
+    final Element block = createCopyrightBlock(document, description);
+    staticContent.appendChild(block);
+
+    return staticContent;
   }
 
 }

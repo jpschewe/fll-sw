@@ -20,8 +20,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import com.itextpdf.text.DocumentException;
-
 import fll.Tournament;
 import fll.db.CategoryColumnMapping;
 import fll.db.Queries;
@@ -98,9 +96,6 @@ public class SubjectiveSheets extends BaseFLLServlet {
                                              sheetElement, categoryMapping.get().getScheduleColumn(),
                                              schedule.getSchedule());
         }
-      } catch (final DocumentException e) {
-        LOGGER.error(e.getMessage(), e);
-        throw new FLLInternalException("Got error writing schedule", e);
       } catch (final SQLException sqle) {
         LOGGER.error(sqle.getMessage(), sqle);
         throw new RuntimeException(sqle);

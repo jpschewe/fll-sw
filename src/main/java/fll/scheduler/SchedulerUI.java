@@ -79,8 +79,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.w3c.dom.Document;
 
-import com.itextpdf.text.DocumentException;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.Utilities;
@@ -856,12 +854,6 @@ public class SchedulerUI extends JFrame {
             } // tournament name
           } // valid descriptor location
         } // yes to write score sheets
-      } catch (final DocumentException e) {
-        final Formatter errorFormatter = new Formatter();
-        errorFormatter.format("Error writing detailed schedules: %s", e.getMessage());
-        LOGGER.error(errorFormatter, e);
-        JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error", JOptionPane.ERROR_MESSAGE);
-        return;
       } catch (final IOException e) {
         final Formatter errorFormatter = new Formatter();
         errorFormatter.format("Error writing detailed schedules: %s", e.getMessage());

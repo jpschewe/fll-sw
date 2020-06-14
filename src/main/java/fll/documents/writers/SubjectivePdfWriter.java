@@ -1,45 +1,52 @@
 package fll.documents.writers;
 
-import java.io.ByteArrayInputStream;
+import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalTime;
+import java.util.Base64;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.annotation.Nonnull;
+import javax.xml.transform.TransformerException;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.fop.apps.FOPException;
+import org.apache.fop.apps.FopFactory;
+import org.apache.fop.fonts.Font;
+import org.apache.fop.fonts.FontInfo;
+import org.apache.fop.fonts.FontMetrics;
+import org.apache.fop.fonts.FontTriplet;
+import org.apache.fop.fonts.base14.Helvetica;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-import com.itextpdf.text.BaseColor;
-import com.itextpdf.text.Chunk;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Element;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.Image;
-import com.itextpdf.text.PageSize;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.Phrase;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfReader;
-import com.itextpdf.text.pdf.PdfWriter;
+import com.google.common.io.ByteStreams;
 
+import fll.Utilities;
 import fll.documents.elements.RowElement;
 import fll.documents.elements.SheetElement;
 import fll.documents.elements.TableElement;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
-import fll.util.PdfUtils;
+import fll.util.FLLInternalException;
+import fll.util.FOPUtils;
+import fll.util.FOPUtils.Margins;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.Goal;
 import fll.xml.RubricRange;
 import fll.xml.SubjectiveScoreCategory;
+import net.mtu.eggplant.xml.XMLUtils;
 
 public class SubjectivePdfWriter {
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
@@ -48,45 +55,13 @@ public class SubjectivePdfWriter {
 
   private final String tournamentName;
 
-  private final static int NO_BORDERS = 0;
+  private static final Color ROW_BLUE = new Color(0xB4, 0xCD, 0xED);
 
-  private final static int NO_LEFT_RIGHT = 1;
+  private static final Color ROW_YELLOW = new Color(0xFF, 0xFF, 0xC8);
 
-  private final static int NO_TOP_BOTTOM = 2;
+  private static final Color ROW_RED = new Color(0xF7, 0x98, 0x85);
 
-  private final static int NO_LEFT = 3;
-
-  private final static int NO_TOP = 4;
-
-  private final static int NO_TOP_LEFT = 5;
-
-  private final static int TOP_ONLY = 6;
-
-  private static final int ALL_BORDERS = 7;
-
-  private static final BaseColor rowBlue = new BaseColor(0xB4, 0xCD, 0xED);
-
-  private static final BaseColor rowYellow = new BaseColor(0xFF, 0xFF, 0xC8);
-
-  private static final BaseColor rowRed = new BaseColor(0xF7, 0x98, 0x85);
-
-  private final Font f8bRed = new Font(Font.FontFamily.HELVETICA, 8, Font.BOLD, BaseColor.RED);
-
-  private final Font f9bRed = new Font(Font.FontFamily.HELVETICA, 9, Font.BOLD, BaseColor.RED);
-
-  private final Font f6i = new Font(Font.FontFamily.HELVETICA, 6, Font.ITALIC);
-
-  private final Font f8b = new Font(Font.FontFamily.HELVETICA, 8, Font.BOLD);
-
-  private final Font f9b = new Font(Font.FontFamily.HELVETICA, 9, Font.BOLD);
-
-  private final Font f10b = new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD);
-
-  private final Font f12b = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
-
-  private final Font f20b = new Font(Font.FontFamily.HELVETICA, 20, Font.BOLD);
-
-  private final BaseColor sheetColor;
+  private final Color sheetColor;
 
   private final SubjectiveScoreCategory scoreCategory;
 
@@ -95,6 +70,7 @@ public class SubjectivePdfWriter {
   private final String scheduleColumn;
 
   /**
+   * @param description the challenge description
    * @param sheet information about the rubric
    * @param scheduleColumn the column in the schedule used to find the times,
    *          may be null
@@ -110,122 +86,108 @@ public class SubjectivePdfWriter {
     this.scoreCategory = sheetElement.getSheetData();
     this.scheduleColumn = scheduleColumn;
 
-    // uses hard coded constants to make the folors look like FIRST and default
-    // to red.
+    // uses hard coded constants to make the colors look like FIRST and default
+    // to blue.
     switch (scoreCategory.getName()) {
     case SubjectiveConstants.CORE_VALUES_NAME:
-      sheetColor = rowRed;
+      sheetColor = ROW_RED;
       break;
     case SubjectiveConstants.PROJECT_NAME:
-      sheetColor = rowYellow;
+      sheetColor = ROW_YELLOW;
       break;
     case SubjectiveConstants.ROBOT_DESIGN_NAME:
     case SubjectiveConstants.PROGRAMMING_NAME:
     default:
-      sheetColor = rowBlue;
+      sheetColor = ROW_BLUE;
       break;
     }
 
   }
 
-  /**
-   * Write out a subjective sheet for the specified team.
-   *
-   * @param doc where to write to
-   * @param teamInfo the team information to use when writing
-   * @param font the font to use for comments and the rubric
-   * @param commentHeight number of rows to put in the comment section
-   * @throws MalformedURLException
-   * @throws IOException
-   * @throws DocumentException
-   */
-  private void writeTeamSubjectivePdf(final Document doc,
-                                      final TeamScheduleInfo teamInfo,
-                                      final Font font,
-                                      final int commentHeight)
-      throws MalformedURLException, IOException, DocumentException {
-    final Pair<Integer, int[]> headerInfo = getTableColumnInformation(sheetElement.getRubricRangeTitles());
+  private String getHeaderImageAsBase64() {
 
-    final PdfPTable table = createStandardRubricTable(headerInfo.getLeft(), headerInfo.getRight());
-    writeHeader(doc, teamInfo, headerInfo.getLeft(), headerInfo.getRight());
-    for (final String category : sheetElement.getCategories()) {
-      writeRubricTable(table, sheetElement.getTableElement(category), font);
+    final Base64.Encoder encoder = Base64.getEncoder();
+
+    try (
+        InputStream input = this.getClass().getClassLoader()
+                                .getResourceAsStream("fll/resources/documents/FLLHeader.png");
+        ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+      Objects.requireNonNull(input);
+      // TODO JDK 9 has StreamsTransfer.transferTo, so can use
+      // input.transferTo(output)
+      ByteStreams.copy(input, output);
+
+      final String encoded = encoder.encodeToString(output.toByteArray());
+      return encoded;
+    } catch (final IOException e) {
+      throw new FLLInternalException("Unable to read subjective header image", e);
     }
 
-    doc.add(table);
-
-    writeCommentsBlock(doc, commentHeight);
-
-    writeEndOfPageRow(doc);
   }
 
-  private void writeHeader(final Document doc,
-                           final TeamScheduleInfo teamInfo,
-                           final int numColumns,
-                           final int[] colWidths)
-      throws MalformedURLException, IOException, DocumentException {
-    Image image = null;
-    PdfPTable pageHeaderTable = null;
-    PdfPTable columnTitlesTable = null;
-    PdfPCell headerCell = null;
-    Phrase text = null;
+  private Element createHeader(final Document document,
+                               final TeamScheduleInfo teamInfo) {
+    final Element header = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
 
-    // set up the header for proper spacing
-    final float[] headerRelativeWidths = new float[4];
-    headerRelativeWidths[0] = 1f; // image
-    headerRelativeWidths[1] = 1.3f; // title/room
-    headerRelativeWidths[2] = 2f; // team number/name
-    headerRelativeWidths[3] = 0.75f; // time/tournament
-    pageHeaderTable = new PdfPTable(headerRelativeWidths);
-    pageHeaderTable.setSpacingAfter(5f);
-    pageHeaderTable.setWidthPercentage(100f);
-    pageHeaderTable.setSpacingBefore(0f);
+    final Element pageHeaderTable = FOPUtils.createBasicTable(document);
+    header.appendChild(pageHeaderTable);
+    pageHeaderTable.appendChild(FOPUtils.createTableColumn(document, 100)); // image
+    pageHeaderTable.appendChild(FOPUtils.createTableColumn(document, 130)); // title/room
+    pageHeaderTable.appendChild(FOPUtils.createTableColumn(document, 200)); // team number / name
+    pageHeaderTable.appendChild(FOPUtils.createTableColumn(document, 75)); // time/tournament
 
-    final int borders;
-    if (LOGGER.isTraceEnabled()) {
-      borders = ALL_BORDERS;
-    } else {
-      borders = NO_BORDERS;
-    }
+    pageHeaderTable.setAttribute("space-after", "5");
+
+    final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
+    pageHeaderTable.appendChild(tableBody);
+
+    final Element row1 = FOPUtils.createTableRow(document);
+    tableBody.appendChild(row1);
+
+    final Element imageCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
+    row1.appendChild(imageCell);
+    imageCell.setAttribute("number-rows-spanned", "2");
+
+    final Element imageBlockContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+    imageCell.appendChild(imageBlockContainer);
+
+    final Element imageBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    imageBlockContainer.appendChild(imageBlock);
 
     // get the FLL image to put on the document
-    final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-    final URL imageUrl = classLoader.getResource("fll/resources/documents/FLLHeader.png");
-    image = Image.getInstance(imageUrl);
+    final String imageBase64 = getHeaderImageAsBase64();
 
+    final Element imageGraphic = FOPUtils.createXslFoElement(document, "external-graphic");
+    imageBlock.appendChild(imageGraphic);
     // make it a little smaller
-    image.scaleToFit(115, 60);
+    imageGraphic.setAttribute("content-width", "115px");
+    imageGraphic.setAttribute("content-height", "100px");
+    imageGraphic.setAttribute("scaling", "uniform");
+    imageGraphic.setAttribute("src", String.format("url('data:image/png;base64,%s')", imageBase64));
 
-    // put the image in the header cell
-    headerCell = new PdfPCell(image, false);
-    headerCell.setRowspan(2);
-    if (LOGGER.isTraceEnabled()) {
-      headerCell.setBorder(1);
-    } else {
-      headerCell.setBorder(0);
-    }
-    headerCell.setVerticalAlignment(Element.ALIGN_TOP);
-    // make sure there is enough height for the team number and the team name
-    headerCell.setMinimumHeight(45);
-    pageHeaderTable.addCell(headerCell);
+    // Combine category title and team number to make better use of space
+    final Element categoryTeamNumberCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
+    row1.appendChild(categoryTeamNumberCell);
+    categoryTeamNumberCell.setAttribute("font-weight", "bold");
+    categoryTeamNumberCell.setAttribute("number-columns-spanned", "2");
 
-    // put the rest of the header cells on the table
-    final Chunk categoryTitle = new Chunk(scoreCategory.getTitle(), f20b);
-    final Chunk teamNumberTitle = new Chunk("    Team Number: "
-        + teamInfo.getTeamNumber(), f12b);
-    final Paragraph titlePara = new Paragraph();
-    titlePara.add(categoryTitle);
-    titlePara.add(teamNumberTitle);
-    final PdfPCell titleCell = new PdfPCell(titlePara);
-    if (LOGGER.isTraceEnabled()) {
-      titleCell.setBorder(1);
-    } else {
-      titleCell.setBorder(0);
-    }
-    titleCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+    final Element categoryTeamNumberContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+    categoryTeamNumberCell.appendChild(categoryTeamNumberContainer);
+    categoryTeamNumberContainer.setAttribute("overflow", "hidden");
+    categoryTeamNumberContainer.setAttribute("wrap-option", "no-wrap");
 
-    titleCell.setColspan(2);
-    pageHeaderTable.addCell(titleCell);
+    final Element categoryTeamNumberBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    categoryTeamNumberContainer.appendChild(categoryTeamNumberBlock);
+
+    final Element categoryTitle = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
+    categoryTeamNumberBlock.appendChild(categoryTitle);
+    categoryTitle.setAttribute("font-size", "20pt");
+    categoryTitle.appendChild(document.createTextNode(scoreCategory.getTitle()));
+
+    final Element teamNumber = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
+    categoryTeamNumberBlock.appendChild(teamNumber);
+    teamNumber.setAttribute("font-size", "12pt");
+    teamNumber.appendChild(document.createTextNode(String.format("    Team Number: %d", teamInfo.getTeamNumber())));
 
     final String scheduledTimeStr;
     if (null == scheduleColumn) {
@@ -234,28 +196,39 @@ public class SubjectivePdfWriter {
       final LocalTime scheduledTime = teamInfo.getSubjectiveTimeByName(scheduleColumn).getTime();
       scheduledTimeStr = TournamentSchedule.formatTime(scheduledTime);
     }
-    pageHeaderTable.addCell(createCell("Time: "
-        + scheduledTimeStr, f12b, borders, Element.ALIGN_RIGHT));
+    final Element timeCell = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT,
+                                                            String.format("Time: %s", scheduledTimeStr));
+    row1.appendChild(timeCell);
+    timeCell.setAttribute("font-size", "12pt");
+    timeCell.setAttribute("font-weight", "bold");
 
-    final PdfPCell roomCell = createCell("Judging Room: "
-        + teamInfo.getAwardGroup(), f10b, borders, Element.ALIGN_LEFT);
-    roomCell.setHorizontalAlignment(Element.ALIGN_CENTER);
-    pageHeaderTable.addCell(roomCell);
+    final Element row2 = FOPUtils.createTableRow(document);
+    tableBody.appendChild(row2);
 
-    final PdfPCell teamNameCell = createCell(null, f12b, borders, Element.ALIGN_LEFT);
-    final String teamNameText = "Name: "
-        + teamInfo.getTeamName();
-    teamNameCell.setCellEvent(new PdfUtils.TruncateContent(teamNameText, f12b));
-    pageHeaderTable.addCell(teamNameCell);
+    final Element roomCell = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                            String.format("Judging Room: %s",
+                                                                          teamInfo.getAwardGroup()));
+    row2.appendChild(roomCell);
+    roomCell.setAttribute("font-size", "10pt");
+    roomCell.setAttribute("font-weight", "bold");
 
-    pageHeaderTable.addCell(createCell(tournamentName, f6i, borders, Element.ALIGN_RIGHT));
+    final Element teamNameCell = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
+                                                                String.format("Name: %s", teamInfo.getTeamName()));
+    row2.appendChild(teamNameCell);
+    teamNameCell.setAttribute("font-size", "12pt");
+    teamNameCell.setAttribute("font-weight", "bold");
+
+    final Element tournamentCell = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_RIGHT, tournamentName);
+    row2.appendChild(tournamentCell);
+    tournamentCell.setAttribute("font-size", "6pt");
+    tournamentCell.setAttribute("font-style", "italic");
 
     // add the instructions to the header
-    final String dirText = scoreCategory.getScoreSheetInstructions();
-    text = new Phrase(dirText, f9b);
-    final Paragraph directions = new Paragraph();
-    directions.add(text);
-    directions.setLeading(10f);
+    final Element directionsBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    header.appendChild(directionsBlock);
+    directionsBlock.setAttribute("font-size", "9pt");
+    directionsBlock.setAttribute("font-weight", "bold");
+    directionsBlock.appendChild(document.createTextNode(scoreCategory.getScoreSheetInstructions()));
 
     boolean somethingRequired = false;
     for (final AbstractGoal agoal : sheetElement.getSheetData().getGoals()) {
@@ -267,52 +240,20 @@ public class SubjectivePdfWriter {
       }
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // TOP TITLE BAR START
-    //
-    // This is the top of the comment sheet where the titles from left to right
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////// are
-    // Beginning, Developing, Accomplished, Exemplary
-    // This is the same title bar across the tops of all the comment sheet
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////// tables.
-    //
-
-    final List<String> rubricRangeTitles = sheetElement.getRubricRangeTitles();
-
-    columnTitlesTable = new PdfPTable(numColumns);
-
-    columnTitlesTable.setSpacingBefore(5);
-    columnTitlesTable.setWidthPercentage(100f);
-    columnTitlesTable.setWidths(colWidths);
-    columnTitlesTable.addCell(createCell("", f10b, borders)); // goal group
-
-    for (final String title : rubricRangeTitles) {
-      if (null == title) {
-        columnTitlesTable.addCell(createCell("", f10b, borders));
-      } else {
-        columnTitlesTable.addCell(createCell(title, f10b, borders));
-      }
+    if (somethingRequired) {
+      final Element requiredBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      header.appendChild(requiredBlock);
+      requiredBlock.setAttribute("font-size", "9pt");
+      requiredBlock.setAttribute("font-weight", "bold");
+      requiredBlock.setAttribute("color", "red");
+      requiredBlock.setAttribute("space-before", "5");
+      requiredBlock.appendChild(document.createTextNode("* Required for Award Consideration"));
     }
-    columnTitlesTable.setSpacingAfter(3);
 
-    // add the header, instructions and section column titles to the document
-    try {
-      doc.add(pageHeaderTable);
-      doc.add(directions);
-
-      if (somethingRequired) {
-        final Paragraph requiredPara = new Paragraph();
-        requiredPara.add(new Phrase("* Required for Award Consideration", f9bRed));
-        doc.add(requiredPara);
-      }
-
-      doc.add(columnTitlesTable);
-    } catch (final DocumentException de) {
-      LOGGER.error("Unable to write out the document.", de);
-    }
+    return header;
   }
 
-  private static Pair<Integer, int[]> getTableColumnInformation(final List<String> rubricTitles) {
+  private static int[] getTableColumnInformation(final List<String> rubricTitles) {
     final List<Integer> colWidthsList = new LinkedList<>();
     colWidthsList.add(4); // goal group
 
@@ -327,209 +268,7 @@ public class SubjectivePdfWriter {
 
     final int[] colWidths = colWidthsList.stream().mapToInt(Integer::intValue).toArray();
 
-    return Pair.of(colWidths.length, colWidths);
-  }
-
-  private void writeCommentsBlock(final Document doc,
-                                  final int height)
-      throws DocumentException {
-    final PdfPTable commentsTable = new PdfPTable(2);
-    commentsTable.setWidthPercentage(100f);
-
-    final PdfPCell commentsLabel = createCell("Comments", f10b, TOP_ONLY);
-    commentsLabel.setColspan(2);
-    commentsLabel.setHorizontalAlignment(Element.ALIGN_CENTER);
-    commentsTable.addCell(commentsLabel);
-
-    // great job and think about labels
-    final Font sectionFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD
-        | Font.ITALIC, BaseColor.LIGHT_GRAY);
-
-    final PdfPCell greatJob = createCell("Great job...", sectionFont, NO_BORDERS);
-    greatJob.setBorderWidthRight(1);
-    commentsTable.addCell(greatJob);
-
-    final PdfPCell thinkAboutLabel = createCell("Think about...", sectionFont, NO_BORDERS);
-    commentsTable.addCell(thinkAboutLabel);
-
-    // empty space
-    final PdfPCell emptySpaceLeft = createCell(" ", f6i, NO_BORDERS);
-    emptySpaceLeft.setBorderWidthRight(1);
-    final PdfPCell emptySpaceRight = createCell(" ", f6i, NO_BORDERS);
-    for (int row = 0; row < height; ++row) {
-      commentsTable.addCell(emptySpaceLeft);
-      commentsTable.addCell(emptySpaceRight);
-    }
-
-    // use back if needed
-    final Font useBackFont = new Font(Font.FontFamily.HELVETICA, 8, Font.ITALIC, BaseColor.LIGHT_GRAY);
-    final PdfPCell useBackLabel = createCell("Judges: Use the back for additional comments if needed!", useBackFont,
-                                             NO_BORDERS);
-    useBackLabel.setHorizontalAlignment(Element.ALIGN_CENTER);
-    useBackLabel.setColspan(2);
-    commentsTable.addCell(useBackLabel);
-
-    doc.add(commentsTable);
-  }
-
-  private void writeEndOfPageRow(final Document doc) throws DocumentException {
-    final PdfPTable closingTable = new PdfPTable(1);
-
-    closingTable.setWidthPercentage(100f);
-
-    if (null != description.getCopyright()) {
-      // add the copy right statement
-      final PdfPCell copyrightC = createCell("\u00A9"
-          + description.getCopyright(), f6i, NO_BORDERS);
-      closingTable.addCell(copyrightC);
-    }
-
-    doc.add(closingTable);
-
-    doc.newPage();
-  }
-
-  private static Document createStandardDocument() {
-    return new Document(PageSize.LETTER, 36, 36, 20, 0);
-  }
-
-  private PdfPTable createStandardRubricTable(final int numColumns,
-                                              final int[] colWidths)
-      throws DocumentException {
-    final PdfPTable table = new PdfPTable(numColumns);
-    table.setWidths(colWidths);
-    table.setWidthPercentage(100f);
-    return table;
-  }
-
-  private void writeRubricTable(final PdfPTable table,
-                                final TableElement tableData,
-                                final Font font) {
-    PdfPCell focusArea = null;
-    PdfPCell topicArea = null;
-    PdfPCell topicInstructions = null;
-
-    // This is the 90 degree turned title for the left side of the table
-    focusArea = createCell(tableData.getSubjectiveCatetory(), f8b, NO_TOP_LEFT);
-    focusArea.setRotation(90);
-    // This is the total number of columns for this table. Each subsection of
-    // the table is 2 rows (colored title row, description row)
-    focusArea.setRowspan(tableData.getRowElements().size()
-        * 2);
-    table.addCell(focusArea);
-
-    final List<RowElement> rows = tableData.getRowElements();
-    for (final RowElement rowElement : rows) {
-      // This is the title row with the background color
-      final Chunk topicAreaC = new Chunk(rowElement.getRowTitle(), f8b);
-
-      final Phrase topicAreaP = new Phrase();
-      topicAreaP.add(topicAreaC);
-
-      if (rowElement.getGoal().isRequired()) {
-        final Chunk required = new Chunk(" *", f8bRed);
-        topicAreaP.add(required);
-      }
-
-      topicArea = new PdfPCell(topicAreaP);
-      topicArea.setVerticalAlignment(Element.ALIGN_CENTER);
-      topicArea.setBorderWidthRight(0);
-      topicArea.setBorderWidthLeft(0);
-      topicArea.setBackgroundColor(sheetColor);
-
-      topicArea.setColspan(2);
-      topicInstructions = createCell(rowElement.getDescription(), font, NO_LEFT, sheetColor);
-      topicInstructions.setColspan(3);
-
-      // Add the title row to the table
-      table.addCell(topicArea);
-      table.addCell(topicInstructions);
-
-      // These are the cells with the descriptions for each level of
-      // accomplishment
-      for (final RubricRange rubricRange : rowElement.getSortedRubricRanges()) {
-        final String rawShortDescription = rubricRange.getShortDescription();
-        if (null == rawShortDescription) {
-          table.addCell(createCell("", font, NO_TOP_BOTTOM));
-        } else {
-          final String shortDescription = rawShortDescription.trim().replaceAll("\\s+", " ");
-          table.addCell(createCell(shortDescription, font, NO_TOP_BOTTOM));
-        }
-      }
-    }
-  }
-
-  private PdfPCell createCell(final String text,
-                              final Font f,
-                              final int borders,
-                              final BaseColor color) {
-    final PdfPCell result = createCell(text, f, borders);
-    result.setBackgroundColor(color);
-    return result;
-  }
-
-  private PdfPCell createCell(final String text,
-                              final Font f,
-                              final int borders,
-                              final int alignment) {
-    final PdfPCell result = createCell(text, f, borders);
-    result.setHorizontalAlignment(alignment);
-    return result;
-  }
-
-  private PdfPCell createCell(final String text,
-                              final Font f,
-                              final int borders) {
-    final PdfPCell result;
-    if (null == text) {
-      result = new PdfPCell();
-    } else {
-      result = new PdfPCell(new Paragraph(text, f));
-    }
-    switch (borders) {
-    case NO_BORDERS:
-      result.setBorder(0);
-      result.setHorizontalAlignment(Element.ALIGN_CENTER);
-      break;
-    case NO_LEFT:
-      result.setBorderWidthLeft(0);
-      break;
-    case NO_LEFT_RIGHT:
-      result.setVerticalAlignment(Element.ALIGN_CENTER);
-      result.setBorderWidthRight(0);
-      result.setBorderWidthLeft(0);
-      break;
-    case NO_TOP_BOTTOM:
-      result.setBorderWidthTop(0);
-      result.setBorderWidthBottom(0);
-      result.setVerticalAlignment(Element.ALIGN_CENTER);
-      result.setHorizontalAlignment(Element.ALIGN_CENTER);
-      break;
-    case NO_TOP:
-      result.setBorderWidthTop(0);
-      result.setVerticalAlignment(Element.ALIGN_CENTER);
-      result.setHorizontalAlignment(Element.ALIGN_CENTER);
-      break;
-    case NO_TOP_LEFT:
-      result.setBorderWidthLeft(0);
-      result.setBorderWidthBottom(0);
-      result.setHorizontalAlignment(Element.ALIGN_CENTER);
-      result.setVerticalAlignment(Element.ALIGN_CENTER);
-      break;
-    case TOP_ONLY:
-      result.setBorderWidth(0);
-      result.setBorderWidthTop(1);
-      break;
-    case ALL_BORDERS:
-      result.setBorderWidthTop(1);
-      result.setBorderWidthBottom(1);
-      result.setBorderWidthLeft(1);
-      result.setBorderWidthRight(1);
-      break;
-    default:
-      break;
-    }
-    return result;
+    return colWidths;
   }
 
   private static final class SubjectiveConstants {
@@ -547,18 +286,42 @@ public class SubjectivePdfWriter {
     public static final String PROGRAMMING_NAME = "robot_programming";
   }
 
+  private static boolean checkPages(final ChallengeDescription description,
+                                    final String tournamentName,
+                                    final SheetElement sheetElement,
+                                    final List<TeamScheduleInfo> schedule,
+                                    final int pointSize,
+                                    final double commentHeight) {
+    try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+
+      final SubjectivePdfWriter writer = new SubjectivePdfWriter(description, tournamentName, sheetElement, null);
+
+      try {
+        final Document document = writer.createDocument(schedule, pointSize, commentHeight);
+        final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
+
+        FOPUtils.renderPdf(fopFactory, document, out);
+      } catch (FOPException | TransformerException e) {
+        throw new FLLInternalException("Error creating the subjective schedule PDF", e);
+      }
+
+      try (PDDocument testPdf = PDDocument.load(out.toByteArray())) {
+        return testPdf.getNumberOfPages() == 1;
+      }
+    } catch (final IOException e) {
+      throw new FLLInternalException("Internal error determining parameters for subjective sheets", e);
+    }
+
+  }
+
   /**
    * @param sheetElement describes the subjective category to output
    * @param tournamentName displayed on the sheets
-   * @return Font to use and the number of rows for the comment sheet
-   * @throws MalformedURLException
-   * @throws IOException
-   * @throws DocumentException
+   * @return point size to use and the number of rows for the comment sheet
    */
-  private static Pair<Font, Integer> determineParameters(@Nonnull final ChallengeDescription description,
-                                                         @Nonnull final String tournamentName,
-                                                         @Nonnull final SheetElement sheetElement)
-      throws MalformedURLException, IOException, DocumentException {
+  private static Pair<Integer, Double> determineParameters(@Nonnull final ChallengeDescription description,
+                                                           @Nonnull final String tournamentName,
+                                                           @Nonnull final SheetElement sheetElement) {
 
     final TeamScheduleInfo teamInfo = new TeamScheduleInfo(1);
     teamInfo.setDivision("dummy");
@@ -566,76 +329,417 @@ public class SubjectivePdfWriter {
     teamInfo.setOrganization("Dummy");
     teamInfo.setTeamName("Dummy");
 
-    for (int commentHeight = 20; commentHeight > 2; --commentHeight) {
-      for (int pointSize = 9; pointSize >= 6; --pointSize) {
-        final Font font = new Font(Font.FontFamily.HELVETICA, pointSize);
+    final List<TeamScheduleInfo> schedule = Collections.singletonList(teamInfo);
 
-        final com.itextpdf.text.Document pdf = SubjectivePdfWriter.createStandardDocument();
-
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-        PdfWriter.getInstance(pdf, out);
-
-        pdf.open();
-
-        final SubjectivePdfWriter writer = new SubjectivePdfWriter(description, tournamentName, sheetElement, null);
-
-        writer.writeTeamSubjectivePdf(pdf, teamInfo, font, commentHeight);
-
-        pdf.close();
-
-        final ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-        final PdfReader reader = new PdfReader(in);
-        if (reader.getNumberOfPages() == 1) {
-          return Pair.of(font, commentHeight);
+    // The 2 sets of loops are setup to balance comments and point size. We want to
+    // have more comment space, but not have too small of a font.
+    for (int pointSize = 10; pointSize >= 8; --pointSize) {
+      for (double commentHeight = 5; commentHeight > 3; commentHeight -= 0.2) {
+        if (checkPages(description, tournamentName, sheetElement, schedule, pointSize, commentHeight)) {
+          return Pair.of(pointSize, commentHeight);
         }
-      } // font size
-    } // comment height
+      }
+    }
 
-    // no font size fit, just use 10 with comment height 2
-    return Pair.of(new Font(Font.FontFamily.HELVETICA, 10), 2);
+    for (int pointSize = 8; pointSize >= 6; --pointSize) {
+      for (double commentHeight = 3; commentHeight > 1; commentHeight -= 0.2) {
+        if (checkPages(description, tournamentName, sheetElement, schedule, pointSize, commentHeight)) {
+          return Pair.of(pointSize, commentHeight);
+        }
+      }
+    }
+
+    // no font size fit, just use 10 with comment height 0.2
+    LOGGER.warn("Unable to find a point size and comment height that fits on 1 page. Subjective sheets will be multiple pages.");
+    return Pair.of(10, 0.2);
   }
 
   /**
-   * Create the document
+   * Create the PDF document with all sheets for the specified schedule and the
+   * category specified by {@code sheetElement}.
    *
+   * @param description the challenge description
    * @param stream where to write the document
    * @param sheetElement describes the category to write
    * @param schedulerColumn used to determine the schedule information to output
    * @param schedule the schedule to get team information and time information
    *          from
    * @param tournamentName tournament name to display on the sheets
-   * @throws DocumentException
-   * @throws IOException
-   * @throws MalformedURLException
+   * @throws IOException if there is an error writing the document to
+   *           {@code stream}
    */
   public static void createDocument(@Nonnull final OutputStream stream,
                                     @Nonnull final ChallengeDescription description,
                                     @Nonnull final String tournamentName,
                                     @Nonnull final SheetElement sheetElement,
                                     final String schedulerColumn,
-                                    final List<TeamScheduleInfo> schedule)
-      throws DocumentException, MalformedURLException, IOException {
+                                    @Nonnull final List<TeamScheduleInfo> schedule)
+      throws IOException {
 
-    final Pair<Font, Integer> parameters = determineParameters(description, tournamentName, sheetElement);
-    final Font font = parameters.getLeft();
-    final int commentHeight = parameters.getRight();
+    final Pair<Integer, Double> parameters = determineParameters(description, tournamentName, sheetElement);
+    final int pointSize = parameters.getLeft();
+    final double commentHeight = parameters.getRight();
 
-    final com.itextpdf.text.Document pdf = SubjectivePdfWriter.createStandardDocument();
-
-    PdfWriter.getInstance(pdf, stream);
-
-    pdf.open();
+    LOGGER.debug("Point size: {} comment height: {}", pointSize, commentHeight);
 
     final SubjectivePdfWriter writer = new SubjectivePdfWriter(description, tournamentName, sheetElement,
                                                                schedulerColumn);
 
-    // Go through all of the team schedules and put them all into a pdf
-    for (final TeamScheduleInfo teamInfo : schedule) {
-      writer.writeTeamSubjectivePdf(pdf, teamInfo, font, commentHeight);
+    try {
+      final Document document = writer.createDocument(schedule, pointSize, commentHeight);
+      try (Writer w = Files.newBufferedWriter(Paths.get("subjective.fo"))) {
+        XMLUtils.writeXML(document, w);
+      } catch (final IOException e) {
+        throw new RuntimeException(e);
+      }
+      final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
+
+      FOPUtils.renderPdf(fopFactory, document, stream);
+    } catch (FOPException | TransformerException e) {
+      throw new FLLInternalException("Error creating the subjective schedule PDF", e);
     }
 
-    pdf.close();
+  }
+
+  private static final double FOOTER_HEIGHT = 0.1;
+
+  private static final Margins MARGINS = new Margins(0.20, FOOTER_HEIGHT, 0.45, 0.45);
+
+  private Document createDocument(final List<TeamScheduleInfo> schedule,
+                                  final int pointSize,
+                                  final double commentHeight) {
+    final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
+
+    final Element rootElement = FOPUtils.createRoot(document);
+    document.appendChild(rootElement);
+    rootElement.setAttribute("font-family", "Helvetica");
+    rootElement.setAttribute("font-size", String.format("%dpt", pointSize));
+
+    final Element layoutMasterSet = FOPUtils.createXslFoElement(document, "layout-master-set");
+    rootElement.appendChild(layoutMasterSet);
+
+    final String pageMasterName = "simple";
+    final Element pageMaster = FOPUtils.createSimplePageMaster(document, pageMasterName, FOPUtils.PAGE_LETTER_SIZE,
+                                                               MARGINS, 0, FOOTER_HEIGHT);
+    layoutMasterSet.appendChild(pageMaster);
+
+    final Element pageSequence = FOPUtils.createPageSequence(document, pageMasterName);
+    rootElement.appendChild(pageSequence);
+
+    final Element footer = FOPUtils.createCopyrightFooter(document, this.description);
+    if (null != footer) {
+      pageSequence.appendChild(footer);
+    }
+
+    final Element documentBody = FOPUtils.createBody(document);
+    pageSequence.appendChild(documentBody);
+
+    final int[] columnWidths = getTableColumnInformation(sheetElement.getRubricRangeTitles());
+
+    // Go through all of the team schedules and put them all into a pdf
+    for (final TeamScheduleInfo teamInfo : schedule) {
+      final Element sheet = createSheet(document, teamInfo, pointSize, commentHeight, columnWidths);
+      documentBody.appendChild(sheet);
+    }
+
+    return document;
+  }
+
+  private Element createSheet(final Document document,
+                              final TeamScheduleInfo teamInfo,
+                              final int fontSize,
+                              final double commentHeight,
+                              final int[] columnWidths) {
+    final Element sheet = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    sheet.setAttribute("page-break-after", "always");
+
+    final Element header = createHeader(document, teamInfo);
+    sheet.appendChild(header);
+    header.setAttribute("space-after", "5");
+
+    final Element rubric = createRubric(document, fontSize, columnWidths);
+    sheet.appendChild(rubric);
+
+    final Element comments = createCommentsBlock(document, commentHeight);
+    sheet.appendChild(comments);
+    comments.setAttribute("space-before", "3");
+
+    return sheet;
+  }
+
+  private Element createRubric(final Document document,
+                               final int fontSize,
+                               final int[] columnWidths) {
+    final Element rubric = FOPUtils.createBasicTable(document);
+
+    for (final int width : columnWidths) {
+      rubric.appendChild(FOPUtils.createTableColumn(document, width));
+    }
+
+    final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
+    rubric.appendChild(tableBody);
+
+    tableBody.appendChild(createRubricHeaderRow(document, tableBody));
+
+    for (final String category : sheetElement.getCategories()) {
+      addRubricCategory(document, tableBody, fontSize, sheetElement.getTableElement(category));
+    }
+
+    return rubric;
+  }
+
+  private static final String RUBRIC_TABLE_PADDING = "2pt";
+
+  // ideally the width of the string should be used, but for some reason that is
+  // too small
+  private static final double STRING_WIDTH_MULTIPLIER = 1.25;
+
+  private Element createGoalGroupCell(final Document document,
+                                      final int fontSize,
+                                      final String goalGroup) {
+    // Ideally we should not need to determine how big to make the block-container.
+    // Bug https://issues.apache.org/jira/browse/FOP-2946 is open for this
+    final Element goalGroupCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
+
+    final Element categoryCellContainer = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_CONTAINER_TAG);
+    goalGroupCell.appendChild(categoryCellContainer);
+    categoryCellContainer.setAttribute("reference-orientation", "90");
+    final Pair<Integer, Integer> stringParameters = determineStringParameters(goalGroup, "Helvetica", true, false,
+                                                                              fontSize);
+    LOGGER.trace("String '{}' width: {} height: {} font-size: {}", goalGroup, stringParameters.getLeft(),
+                 stringParameters.getRight(), fontSize);
+
+    final int containerWidth = (int) Math.ceil(stringParameters.getLeft()
+        * STRING_WIDTH_MULTIPLIER);
+    categoryCellContainer.setAttribute("inline-progression-dimension", String.format("%dpx", containerWidth));
+
+    final Element categoryCellBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    categoryCellContainer.appendChild(categoryCellBlock);
+    categoryCellBlock.setAttribute("text-align", FOPUtils.TEXT_ALIGN_CENTER);
+    categoryCellBlock.setAttribute("font-weight", "bold");
+
+    categoryCellBlock.appendChild(document.createTextNode(goalGroup));
+
+    return goalGroupCell;
+  }
+
+  /**
+   * @param text the text to get the width and height of
+   * @param fontFamily the family of the font
+   * @param bold true if a bold font
+   * @param italic true if an italic font
+   * @param fontSize the size of the font in points
+   * @return (width, height) in pixels
+   */
+  public static Pair<Integer, Integer> determineStringParameters(final String text,
+                                                                 final String fontFamily,
+                                                                 final boolean bold,
+                                                                 final boolean italic,
+                                                                 final int fontSize) {
+    final FontTriplet triplet = new FontTriplet(fontFamily, //
+                                                italic ? Font.STYLE_ITALIC : Font.STYLE_NORMAL, //
+                                                bold ? Font.WEIGHT_NORMAL : Font.WEIGHT_BOLD, //
+                                                Font.PRIORITY_DEFAULT);
+    final FontInfo fontInfo = new FontInfo();
+
+    final String key = fontInfo.getInternalFontKey(triplet);
+
+    final FontMetrics metrics = new Helvetica();
+
+    final Font font = new Font(key, triplet, metrics, fontSize);
+
+    final int textWidth = font.getWordWidth(text);
+    final int textHeight = font.getXHeight();
+
+    return Pair.of(textWidth, textHeight);
+  }
+
+  private void addRubricCategory(final Document document,
+                                 final Element tableBody,
+                                 final int fontSize,
+                                 final TableElement tableData) {
+
+    // This is the 90 degree turned title for the left side of the table
+    final Element goalGroupCell = createGoalGroupCell(document, fontSize, tableData.getSubjectiveCatetory());
+    FOPUtils.addBottomBorder(goalGroupCell, 1);
+    FOPUtils.addRightBorder(goalGroupCell, 1);
+    // This is the total number of columns for this table. Each subsection of
+    // the table is 2 rows (colored title row, description row)
+    goalGroupCell.setAttribute("number-rows-spanned", String.valueOf(tableData.getRowElements().size()
+        * 2));
+
+    boolean firstRow = true;
+    final List<RowElement> rows = tableData.getRowElements();
+    for (final RowElement rowElement : rows) {
+      final Element instructionsRow = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
+      tableBody.appendChild(instructionsRow);
+
+      final List<RubricRange> sortedRubricRanges = rowElement.getSortedRubricRanges();
+
+      if (firstRow) {
+        // need to put the goal group name in the first row
+        instructionsRow.appendChild(goalGroupCell);
+        firstRow = false;
+      }
+
+      final String backgroundColor = String.format("#%02x%02x%02x", sheetColor.getRed(), sheetColor.getGreen(),
+                                                   sheetColor.getBlue());
+
+      // This is the title row with the background color
+      final Element topicCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
+      instructionsRow.appendChild(topicCell);
+      FOPUtils.addBottomBorder(topicCell, 1);
+      topicCell.setAttribute("background-color", backgroundColor);
+      topicCell.setAttribute("number-columns-spanned", "2");
+      topicCell.setAttribute("padding-left", RUBRIC_TABLE_PADDING);
+      topicCell.setAttribute("padding-top", RUBRIC_TABLE_PADDING);
+
+      final Element topicBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      topicCell.appendChild(topicBlock);
+      topicBlock.setAttribute("font-weight", "bold");
+
+      final Element topicArea = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
+      topicBlock.appendChild(topicArea);
+      topicArea.appendChild(document.createTextNode(rowElement.getRowTitle()));
+
+      if (rowElement.getGoal().isRequired()) {
+        final Element required = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
+        topicBlock.appendChild(required);
+        required.setAttribute("color", "red");
+        required.appendChild(document.createTextNode(" *"));
+      }
+
+      final Element topicInstructions = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_LEFT,
+                                                                 rowElement.getDescription());
+      instructionsRow.appendChild(topicInstructions);
+      topicInstructions.setAttribute("background-color", backgroundColor);
+      topicInstructions.setAttribute("number-columns-spanned", String.valueOf(sortedRubricRanges.size()
+          - 2));
+      topicInstructions.setAttribute("padding-top", RUBRIC_TABLE_PADDING);
+      topicInstructions.setAttribute("padding-left", RUBRIC_TABLE_PADDING);
+      FOPUtils.addBottomBorder(topicInstructions, 1);
+      FOPUtils.addRightBorder(topicInstructions, 1);
+
+      // These are the cells with the descriptions for each level of
+      // accomplishment
+      final Element rubricRow = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
+      tableBody.appendChild(rubricRow);
+
+      for (final RubricRange rubricRange : sortedRubricRanges) {
+        final Element rangeCell;
+        final String rawShortDescription = rubricRange.getShortDescription();
+        if (null == rawShortDescription) {
+          rangeCell = FOPUtils.createTableCell(document, null, "");
+        } else {
+          final String shortDescription = rawShortDescription.trim().replaceAll("\\s+", " ");
+          rangeCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, shortDescription);
+        }
+        rubricRow.appendChild(rangeCell);
+        rangeCell.setAttribute("padding-top", RUBRIC_TABLE_PADDING);
+        rangeCell.setAttribute("padding-left", RUBRIC_TABLE_PADDING);
+        FOPUtils.addBottomBorder(rangeCell, 1);
+        FOPUtils.addRightBorder(rangeCell, 1);
+
+      }
+
+    } // foreach row
+
+  }
+
+  private Element createRubricHeaderRow(final Document document,
+                                        final Element tableBody) {
+    final Element headerRow = FOPUtils.createTableRow(document);
+    tableBody.appendChild(headerRow);
+    headerRow.setAttribute("font-size", "10pt");
+    headerRow.setAttribute("font-weight", "bold");
+
+    final List<String> rubricRangeTitles = sheetElement.getRubricRangeTitles();
+
+    // goal group
+    final Element goalGroup = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "");
+    headerRow.appendChild(goalGroup);
+    FOPUtils.addBottomBorder(goalGroup, 1);
+
+    for (final String title : rubricRangeTitles) {
+      final Element titleCell;
+      if (null == title) {
+        titleCell = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "");
+      } else {
+        titleCell = FOPUtils.createNoWrapTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, title);
+      }
+      FOPUtils.addBottomBorder(titleCell, 1);
+      headerRow.appendChild(titleCell);
+    }
+
+    return headerRow;
+  }
+
+  private Element createCommentsBlock(final Document document,
+                                      final double height) {
+    final Element commentsTable = FOPUtils.createBasicTable(document);
+
+    commentsTable.appendChild(FOPUtils.createTableColumn(document, 1));
+    commentsTable.appendChild(FOPUtils.createTableColumn(document, 1));
+
+    final Element tableBody = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_BODY_TAG);
+    commentsTable.appendChild(tableBody);
+
+    final Element commentsLabelRow = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
+    tableBody.appendChild(commentsLabelRow);
+
+    final Element commentsLabel = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "Comments");
+    commentsLabelRow.appendChild(commentsLabel);
+    commentsLabel.setAttribute("font-size", "10pt");
+    commentsLabel.setAttribute("font-weight", "bold");
+    commentsLabel.setAttribute("number-columns-spanned", "2");
+
+    // great job and think about labels
+    final Element labelsRow = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
+    tableBody.appendChild(labelsRow);
+
+    final String lightGray = String.format("#%02x%02x%02x", Color.LIGHT_GRAY.getRed(), Color.LIGHT_GRAY.getGreen(),
+                                           Color.LIGHT_GRAY.getBlue());
+
+    final Element greatJob = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "Great job...");
+    labelsRow.appendChild(greatJob);
+    FOPUtils.addRightBorder(greatJob, 1);
+    greatJob.setAttribute("font-size", "12pt");
+    greatJob.setAttribute("font-weight", "bold");
+    greatJob.setAttribute("font-style", "italic");
+    greatJob.setAttribute("color", lightGray);
+
+    final Element thinkAbout = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, "Think about...");
+    labelsRow.appendChild(thinkAbout);
+    thinkAbout.setAttribute("font-size", "12pt");
+    thinkAbout.setAttribute("font-weight", "bold");
+    thinkAbout.setAttribute("font-style", "italic");
+    thinkAbout.setAttribute("color", lightGray);
+
+    // empty space
+    final Element rowElement = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
+    tableBody.appendChild(rowElement);
+    rowElement.setAttribute("height", String.format("%fin", height));
+
+    final Element left = FOPUtils.createTableCell(document, null, String.valueOf(Utilities.NON_BREAKING_SPACE));
+    rowElement.appendChild(left);
+    FOPUtils.addRightBorder(left, 1);
+
+    final Element right = FOPUtils.createTableCell(document, null, String.valueOf(Utilities.NON_BREAKING_SPACE));
+    rowElement.appendChild(right);
+
+    // use back if needed
+    final Element useBackRow = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_ROW_TAG);
+    tableBody.appendChild(useBackRow);
+
+    final Element useBackCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER,
+                                                         "Judges: Use the back for additional comments if needed!");
+    useBackRow.appendChild(useBackCell);
+    useBackCell.setAttribute("number-columns-spanned", "2");
+    useBackCell.setAttribute("font-size", "8pt");
+    useBackCell.setAttribute("font-style", "italic");
+    useBackCell.setAttribute("color", lightGray);
+
+    return commentsTable;
   }
 
 }
