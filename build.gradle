@@ -2,13 +2,7 @@
 
 import com.github.spotbugs.snom.SpotBugsTask
 
-import javax.xml.transform.TransformerFactory
-import javax.xml.transform.stream.StreamResult
-import javax.xml.transform.stream.StreamSource
-
-import org.gradle.api.tasks.PathSensitivity
-
-import java.nio.file.Paths
+import org.myire.munge.TransformTask
 
 import org.apache.tools.ant.filters.FixCrLfFilter;
 
@@ -20,7 +14,6 @@ buildscript {
       classpath(group: "com.cinnober.gradle", name: "semver-git", version: "3.0.0")
         classpath("org.unbroken-dome.gradle-plugins:gradle-testsets-plugin:3.0.1")
         classpath("org.kordamp:markdown-gradle-plugin:1.2.0")
-        //classpath("net.sf.saxon:Saxon-HE:9.9.1-3")
     }
     configurations.classpath {
       exclude(group: "com.google.guava", module: "guava")
@@ -488,60 +481,22 @@ spotbugs {
 }
 
 tasks.withType(SpotBugsTask) {
-    it.finalizedBy("transform")
-    distributionDependencies.dependsOn("${it.name}")
-}
-spotbugsMain.finalizedBy("transform")
-
-transform {
     def stylesheetName = 'fancy-hist.xsl'
-    saxon {
-        source "$buildDir/reports/spotbugs/main.xml"
-        template resources.text.fromArchiveEntry(configurations.spotbugsStylesheets, stylesheetName)
-        outputFile = "$buildDir/reports/spotbugs/main.html"
-    }
-    saxon {
-        source "$buildDir/reports/spotbugs/test.xml"
-        template resources.text.fromArchiveEntry(configurations.spotbugsStylesheets, stylesheetName)
-        outputFile = "$buildDir/reports/spotbugs/test.html"
-    }
-    saxon {
-        source "$buildDir/reports/spotbugs/integrationTest.xml"
-        template resources.text.fromArchiveEntry(configurations.spotbugsStylesheets, stylesheetName)
-        outputFile = "$buildDir/reports/spotbugs/integrationTest.html"
-    }
-}
-/*
-// some extra tasks so that we can generate html AND xml
-tasks.withType(SpotBugsTask) {
-    reports {
-        xml.withMessages = true
-        html.stylesheet = resources.text.fromArchiveEntry(configurations.spotbugsStylesheets, "color.xsl")
-    }
 
-    tasks.register("${it.name}HtmlReport") {
-        def stylesheetFile = reports.html.stylesheet.asFile()
-        
-        // specify the input
-        def input = reports.xml.destination
-        inputs.file(stylesheetFile).withPropertyName("spotbugsStylesheet").withPathSensitivity(PathSensitivity.NONE)
-        inputs.files(fileTree(input)).withPropertyName("input").withPathSensitivity(PathSensitivity.NONE) skipWhenEmpty()
-        
-        // specify the output
-        def output = file(input.absolutePath.replaceFirst(/\.xml$/, ".html"))
-        outputs.file(output).withPropertyName("output")
-        
-        // do the work
-        doLast {
-            def factory = TransformerFactory.newInstance("net.sf.saxon.TransformerFactoryImpl", getClass().classLoader)
-            def transformer = factory.newTransformer(new StreamSource(reports.html.stylesheet.asFile()));
-            transformer.transform(new StreamSource(input), new StreamResult(output))
-        }
+    distributionDependencies.dependsOn("${it.name}")
+    
+    def xmlOutput = it.outputs.files.singleFile
+    def htmlOutput = file(xmlOutput.absolutePath.replaceFirst(/\.xml$/, ".html"))
+    
+    tasks.register("${it.name}HtmlReport", TransformTask) {
+        saxon {
+            source(xmlOutput)
+            template(resources.text.fromArchiveEntry(configurations.spotbugsStylesheets, stylesheetName))
+            outputFile = htmlOutput
+        }       
     }
     it.finalizedBy("${it.name}HtmlReport")
-    distributionDependencies.dependsOn("${it.name}HtmlReport")
 }
-*/
 
 gitProperties {
     gitPropertiesDir = "${buildDir}/resources/main/fll/resources"
