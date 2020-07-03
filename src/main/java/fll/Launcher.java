@@ -69,9 +69,11 @@ public class Launcher extends JFrame {
   private static final String OPEN_MSG = "open";
 
   /**
-   * Port that the web server runs on.
+   * The default port that the web server runs on.
    */
-  public static final int WEB_PORT = 9080;
+  public static final int DEFAULT_WEB_PORT = 9080;
+
+  private final int port;
 
   /**
    * Check that no other instance is running. If one is, send a message to bring
@@ -81,7 +83,7 @@ public class Launcher extends JFrame {
    */
   @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "Exiting when another instance is running is OK")
   private static void ensureSingleInstance(final Launcher thisLauncher) {
-    final String id = Launcher.class.getName();
+    final String id = String.format("%s_%d", Launcher.class.getName(), thisLauncher.port);
     boolean start;
     try {
       JUnique.acquireLock(id, message -> {
@@ -90,7 +92,7 @@ public class Launcher extends JFrame {
             thisLauncher.toFront();
             thisLauncher.setVisible(true);
           } else {
-            LOGGER.error("Unknow message received from other launcher: '"
+            LOGGER.error("Unknown message received from other launcher: '"
                 + message
                 + "'");
           }
@@ -100,7 +102,7 @@ public class Launcher extends JFrame {
       start = true;
     } catch (final AlreadyLockedException e) {
       // Application already running.
-      LOGGER.info("Launcher already running, bringing to the front and then exiting");
+      LOGGER.info("Launcher already running on web port {}, bringing to the front and then exiting", thisLauncher.port);
       start = false;
     }
     if (!start) {
@@ -114,9 +116,13 @@ public class Launcher extends JFrame {
 
   private static final String OPT_HELP = "help";
 
+  private static final String OPT_PORT = "port";
+
   private static Options buildOptions() {
     final Options options = new Options();
     options.addOption(null, OPT_START_WEB, false, "immediately start the webserver");
+    options.addOption(null, OPT_PORT, true, "The port to use for the web server. Deafult is "
+        + DEFAULT_WEB_PORT);
     options.addOption("h", OPT_HELP, false, "help");
 
     return options;
@@ -146,6 +152,7 @@ public class Launcher extends JFrame {
 
     final Options options = buildOptions();
     // parse options
+    int port = DEFAULT_WEB_PORT;
     boolean startWeb = false;
     try {
       final CommandLineParser parser = new DefaultParser();
@@ -153,6 +160,14 @@ public class Launcher extends JFrame {
 
       if (cmd.hasOption(OPT_START_WEB)) {
         startWeb = true;
+      }
+      if (cmd.hasOption(OPT_PORT)) {
+        try {
+          port = Integer.parseInt(cmd.getOptionValue(OPT_PORT));
+        } catch (final NumberFormatException e) {
+          LOGGER.fatal("Unable to parse port number {}", cmd.getOptionValue(OPT_PORT), e);
+          System.exit(1);
+        }
       }
       if (cmd.hasOption(OPT_HELP)) {
         usage(options);
@@ -166,7 +181,7 @@ public class Launcher extends JFrame {
     }
 
     try {
-      final Launcher frame = new Launcher();
+      final Launcher frame = new Launcher(port);
 
       ensureSingleInstance(frame);
 
@@ -203,8 +218,13 @@ public class Launcher extends JFrame {
 
   private final JButton mainPage;
 
-  public Launcher() {
+  /**
+   * @param port the port to use for the web server
+   */
+  public Launcher(final int port) {
     super();
+    this.port = port;
+
     // allow us to prevent closing the window
     setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
@@ -227,7 +247,8 @@ public class Launcher extends JFrame {
     mServerStatus.setOpaque(true);
     mServerStatus.setBackground(OFFLINE_COLOR);
     topPanel.add(mServerStatus);
-
+    topPanel.add(new JLabel("port "
+        + this.port));
     final JPanel buttonBox = new JPanel(new GridLayout(0, 2));
     cpane.add(buttonBox, BorderLayout.CENTER);
 
@@ -372,7 +393,7 @@ public class Launcher extends JFrame {
    */
   private void checkWebserver() {
     boolean newServerOnline = false;
-    try (Socket s = new Socket("localhost", WEB_PORT)) {
+    try (Socket s = new Socket("localhost", port)) {
       newServerOnline = true;
     } catch (final IOException ex) {
       if (LOGGER.isTraceEnabled()) {
@@ -507,7 +528,7 @@ public class Launcher extends JFrame {
 
   private void startWebserver(final boolean loadFrontPage) {
     if (null == webserverLauncher) {
-      webserverLauncher = new TomcatLauncher();
+      webserverLauncher = new TomcatLauncher(port);
     }
     try {
       webserverLauncher.start();
@@ -535,6 +556,20 @@ public class Launcher extends JFrame {
     }
   }
 
+  private Path createFllFileWithPort(final Path sourceFllHtml,
+                                     final int port)
+      throws IOException {
+    final String content = new String(Files.readAllBytes(sourceFllHtml));
+    final String newContent = content.replaceAll(":9080", String.format(":%d", port));
+    final Path temp = Files.createTempFile("fll-sw", ".html");
+    Files.write(temp, newContent.getBytes());
+
+    // make sure the file is cleaned up
+    temp.toFile().deleteOnExit();
+
+    return temp;
+  }
+
   /**
    * Open up the main page.
    */
@@ -544,8 +579,11 @@ public class Launcher extends JFrame {
       JOptionPane.showMessageDialog(this, "Cannot find fll-sw.html, you will need to open this is your browser.");
       return;
     }
+    // FIXME how to pass parameter?
+    // ?port={port}
     try {
-      Desktop.getDesktop().browse(fllHtml.toUri());
+      final Path modifiedForPort = createFllFileWithPort(fllHtml, port);
+      Desktop.getDesktop().browse(modifiedForPort.toUri());
     } catch (final IOException e) {
       LOGGER.error("Unable to open web browser", e);
       JOptionPane.showMessageDialog(this, "Cannot open fll-sw.html, you will need to open this is your browser.");
