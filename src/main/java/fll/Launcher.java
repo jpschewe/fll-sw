@@ -559,10 +559,10 @@ public class Launcher extends JFrame {
   private Path createFllFileWithPort(final Path sourceFllHtml,
                                      final int port)
       throws IOException {
-    final String content = new String(Files.readAllBytes(sourceFllHtml));
+    final String content = new String(Files.readAllBytes(sourceFllHtml), Utilities.DEFAULT_CHARSET);
     final String newContent = content.replaceAll(":9080", String.format(":%d", port));
     final Path temp = Files.createTempFile("fll-sw", ".html");
-    Files.write(temp, newContent.getBytes());
+    Files.write(temp, newContent.getBytes(Utilities.DEFAULT_CHARSET));
 
     // make sure the file is cleaned up
     temp.toFile().deleteOnExit();
