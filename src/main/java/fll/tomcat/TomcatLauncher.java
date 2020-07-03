@@ -27,8 +27,6 @@ import org.apache.catalina.webresources.StandardRoot;
 import org.apache.tomcat.JarScanner;
 import org.apache.tomcat.util.scan.StandardJarScanner;
 
-import fll.Launcher;
-
 /**
  * Launcher for embedded tomcat.
  */
@@ -40,13 +38,15 @@ public class TomcatLauncher {
 
   /**
    * Create Tomcat launcher.
+   * 
+   * @param port the port to run the web server on
    */
-  public TomcatLauncher() {
+  public TomcatLauncher(final int port) {
     tomcat = new Tomcat();
 
     configureTomcat(tomcat);
 
-    tomcat.setPort(Launcher.WEB_PORT);
+    tomcat.setPort(port);
 
     // trigger the creation of the default connector
     tomcat.getConnector();
