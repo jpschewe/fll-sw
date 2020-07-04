@@ -73,6 +73,7 @@ import org.w3c.dom.Document;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import fll.Launcher;
 import fll.TestUtils;
 import fll.Tournament;
 import fll.Utilities;
@@ -884,7 +885,7 @@ public final class IntegrationTestUtils {
 
     @Override
     public void beforeTestExecution(final ExtensionContext context) throws Exception {
-      final TomcatLauncher launcher = new TomcatLauncher();
+      final TomcatLauncher launcher = new TomcatLauncher(Launcher.DEFAULT_WEB_PORT);
       try {
         launcher.start();
       } catch (final LifecycleException e) {
@@ -951,7 +952,10 @@ public final class IntegrationTestUtils {
     }
   }
 
-  public static final ScreenshotTaker SCREENSHOT_TAKER = new ScreenshotTaker();
+  /**
+   * Used to take screen shots.
+   */
+  private static final ScreenshotTaker SCREENSHOT_TAKER = new ScreenshotTaker();
 
   /**
    * Save a screen shot. Used for UI tests.
