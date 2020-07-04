@@ -8,19 +8,16 @@ package fll.util;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 
-import javax.swing.JOptionPane;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
- * Display exception information in a dialog and then exit when the dialog is
- * closed.
+ * Log exeption information and then exit.
  */
-public class GuiExceptionHandler implements UncaughtExceptionHandler {
+public class ConsoleExceptionHandler implements UncaughtExceptionHandler {
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
-  public GuiExceptionHandler() {
+  public ConsoleExceptionHandler() {
   }
 
   /**
@@ -39,7 +36,6 @@ public class GuiExceptionHandler implements UncaughtExceptionHandler {
     final String message = String.format("An unexpected error occurred. Please send the log, this message and a description of what you were doing to the developer. Thread %s: %s",
                                          t.getName(), ex.getMessage());
     LOGGER.fatal(message, ex);
-    JOptionPane.showMessageDialog(null, message, "Unexpected Error", JOptionPane.ERROR_MESSAGE);
     System.exit(1);
   }
 
@@ -47,8 +43,8 @@ public class GuiExceptionHandler implements UncaughtExceptionHandler {
    * Register this class to handle all uncaught exceptions.
    */
   public static void registerExceptionHandler() {
-    Thread.setDefaultUncaughtExceptionHandler(new GuiExceptionHandler());
-    System.setProperty("sun.awt.exception.handler", GuiExceptionHandler.class.getName());
+    Thread.setDefaultUncaughtExceptionHandler(new ConsoleExceptionHandler());
+    System.setProperty("sun.awt.exception.handler", ConsoleExceptionHandler.class.getName());
   }
 
 }

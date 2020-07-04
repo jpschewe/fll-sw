@@ -52,6 +52,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.scheduler.SchedulerUI;
 import fll.subjective.SubjectiveFrame;
 import fll.tomcat.TomcatLauncher;
+import fll.util.ConsoleExceptionHandler;
 import fll.util.GuiExceptionHandler;
 import fll.xml.ui.ChallengeDescriptionFrame;
 import it.sauronsoftware.junique.AlreadyLockedException;
@@ -118,11 +119,15 @@ public class Launcher extends JFrame {
 
   private static final String OPT_PORT = "port";
 
+  private static final String OPT_HEADLESS = "headless";
+
   private static Options buildOptions() {
     final Options options = new Options();
-    options.addOption(null, OPT_START_WEB, false, "immediately start the webserver");
+    options.addOption(null, OPT_START_WEB, false, "Immediately start the webserver");
     options.addOption(null, OPT_PORT, true, "The port to use for the web server. Deafult is "
         + DEFAULT_WEB_PORT);
+    options.addOption(null, OPT_HEADLESS, false, "Run without the GUI and immediately start the webserver");
+
     options.addOption("h", OPT_HELP, false, "help");
 
     return options;
@@ -133,7 +138,7 @@ public class Launcher extends JFrame {
     formatter.printHelp("Launcher", options);
   }
 
-  public static void main(final String[] args) {
+  private static void setupGui() {
     GuiExceptionHandler.registerExceptionHandler();
 
     // Use cross platform look and feel so that things look right all of the
@@ -149,11 +154,14 @@ public class Launcher extends JFrame {
     } catch (final UnsupportedLookAndFeelException e) {
       LOGGER.warn("Cross platform look and feel unsupported?", e);
     }
+  }
 
+  public static void main(final String[] args) {
     final Options options = buildOptions();
     // parse options
     int port = DEFAULT_WEB_PORT;
     boolean startWeb = false;
+    boolean headless = false;
     try {
       final CommandLineParser parser = new DefaultParser();
       final CommandLine cmd = parser.parse(options, args);
@@ -169,6 +177,10 @@ public class Launcher extends JFrame {
           System.exit(1);
         }
       }
+      if (cmd.hasOption(OPT_HEADLESS)) {
+        startWeb = true;
+        headless = true;
+      }
       if (cmd.hasOption(OPT_HELP)) {
         usage(options);
         System.exit(0);
@@ -180,23 +192,29 @@ public class Launcher extends JFrame {
       System.exit(1);
     }
 
-    try {
-      final Launcher frame = new Launcher(port);
+    if (headless) {
+      runHeadless(port);
+    } else {
+      setupGui();
 
-      ensureSingleInstance(frame);
+      try {
+        final Launcher frame = new Launcher(port);
 
-      GraphicsUtils.centerWindow(frame);
+        ensureSingleInstance(frame);
 
-      frame.setVisible(true);
+        GraphicsUtils.centerWindow(frame);
 
-      if (startWeb) {
-        frame.startWebserver(false);
+        frame.setVisible(true);
+
+        if (startWeb) {
+          frame.startWebserver(false);
+        }
+      } catch (final Exception e) {
+        LOGGER.fatal("Unexpected error", e);
+        JOptionPane.showMessageDialog(null, "Unexpected error: "
+            + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        System.exit(1);
       }
-    } catch (final Exception e) {
-      LOGGER.fatal("Unexpected error", e);
-      JOptionPane.showMessageDialog(null, "Unexpected error: "
-          + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-      System.exit(1);
     }
   }
 
@@ -735,6 +753,30 @@ public class Launcher extends JFrame {
     } catch (final IOException e) {
       LOGGER.error("Unable to get application icon, not setting icon", e);
     }
+  }
+
+  @SuppressFBWarnings(value = { "DM_EXIT" }, justification = "This method is ment to close the application")
+  private static void runHeadless(final int port) {
+    ConsoleExceptionHandler.registerExceptionHandler();
+
+    final TomcatLauncher webserverLauncher = new TomcatLauncher(port);
+    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+      if (null != webserverLauncher) {
+        try {
+          webserverLauncher.stop();
+        } catch (final LifecycleException e) {
+          LOGGER.error("Exception stopping webserver", e);
+        }
+      }
+    }));
+
+    try {
+      webserverLauncher.start();
+    } catch (final LifecycleException e) {
+      LOGGER.fatal("Unable to start webserver", e);
+      System.exit(1);
+    }
+
   }
 
 }
