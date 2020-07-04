@@ -1,3 +1,4 @@
+* #839 - Allow the application to run headless
 * #838 - Allow one to specify the port for the web server
 * #799 - Convert subjective sheets to Apache FOP
 * #802 - Convert miscellaneous reports to Apache FOP
