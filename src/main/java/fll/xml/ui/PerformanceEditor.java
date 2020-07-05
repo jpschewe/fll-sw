@@ -40,8 +40,19 @@ public class PerformanceEditor extends ScoreCategoryEditor {
   @Override
   protected void gatherValidityMessages(final Collection<String> messages) {
     super.gatherValidityMessages(messages);
-    restrictions.checkValidity(messages);
-    tiebreaker.checkValidity(messages);
+  }
+
+  @Override
+  public boolean checkValidity(final Collection<String> messagesToDisplay) {
+    boolean valid = super.checkValidity(messagesToDisplay);
+
+    boolean localValid = restrictions.checkValidity(messagesToDisplay);
+    valid &= localValid;
+
+    localValid = tiebreaker.checkValidity(messagesToDisplay);
+    valid &= localValid;
+
+    return valid;
   }
 
 }

@@ -14,8 +14,6 @@ import javax.swing.Box;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 
-
-
 import fll.util.FormatterUtils;
 
 import fll.xml.GoalScope;
@@ -102,6 +100,12 @@ public class RestrictionEditor extends PolynomialEditor {
 
     if (restriction.getLowerBound() > restriction.getUpperBound()) {
       messages.add("Lower bound must be less than or equal to upper bound");
+    }
+    if (!Double.isFinite(restriction.getLowerBound())) {
+      messages.add("Lower bound must be a finite number");
+    }
+    if (!Double.isFinite(restriction.getUpperBound())) {
+      messages.add("Upper bound must be a finite number");
     }
 
   }
