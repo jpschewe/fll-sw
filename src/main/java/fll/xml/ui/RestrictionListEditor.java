@@ -80,6 +80,7 @@ public class RestrictionListEditor extends JPanel implements Validatable {
     delete.addActionListener(e -> {
       editorContainer.remove(panel);
       GuiUtils.removeFromContainer(editorContainer, editor);
+      editors.remove(editor);
     });
 
     panel.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.BLACK));

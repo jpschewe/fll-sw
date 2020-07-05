@@ -1,3 +1,4 @@
+* #837 - Fix errors around editing restrictions in the challenge description editor
 * #839 - Allow the application to run headless
 * #838 - Allow one to specify the port for the web server
 * #799 - Convert subjective sheets to Apache FOP
