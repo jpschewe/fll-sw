@@ -7,6 +7,7 @@
 package fll.xml.ui;
 
 import java.awt.GridBagConstraints;
+import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -65,7 +66,15 @@ public class ComputedGoalEditor extends AbstractGoalEditor {
     super.gatherValidityMessages(messages);
 
     variableListEditor.gatherValidityMessages(messages);
-    switchStatementEditor.checkValidity(messages);
   }
 
+  @Override
+  public boolean checkValidity(final Collection<String> messagesToDisplay) {
+    boolean valid = super.checkValidity(messagesToDisplay);
+
+    boolean localValid = switchStatementEditor.checkValidity(messagesToDisplay);
+    valid &= localValid;
+
+    return valid;
+  }
 }
