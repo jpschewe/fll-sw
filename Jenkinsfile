@@ -5,7 +5,7 @@ pipeline {
   options { buildDiscarder(logRotator(numToKeepStr: '5')) }
 
   agent {
-    label 'fll-build'
+    label 'fll-sw_windows'
   }
 
   stages {
@@ -89,7 +89,7 @@ pipeline {
     } // Windows Distribution stage
     
     stage('Linux Distribution') {
-      agent { label "linux" }
+      agent { label "fll-sw_linux" }
       steps {
         throttle(['fll-sw']) { 
           timestamps {
@@ -104,7 +104,7 @@ pipeline {
     } // Linux Distribution stage
 
     stage('Mac Distribution') {
-      agent { label "linux" }
+      agent { label "fll-sw_linux" }
       steps {
           timestamps {
             unstash name: 'build_data'
