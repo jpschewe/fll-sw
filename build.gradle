@@ -28,7 +28,7 @@ plugins {
     id "eclipse"
     id "org.kordamp.markdown.convert" version "1.2.0"       
     id "com.github.spotbugs" version "4.3.0"
-    id 'org.myire.munge' version '1.0' // transformer for spotbugs XML
+    id "org.myire.munge" version "1.0" // transformer for spotbugs XML
     id "de.aaschmid.cpd" version "3.1"
     id "edu.sc.seis.launch4j" version "2.4.6"
     id "net.saliman.cobertura" version "3.0.0"
@@ -481,7 +481,7 @@ spotbugs {
 }
 
 tasks.withType(SpotBugsTask) {
-    def stylesheetName = 'fancy-hist.xsl'
+    def stylesheetName = "fancy-hist.xsl"
 
     distributionDependencies.dependsOn("${it.name}")
     
