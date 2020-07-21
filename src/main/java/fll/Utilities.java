@@ -42,6 +42,7 @@ import java.util.stream.StreamSupport;
 
 import javax.sql.DataSource;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hsqldb.jdbc.JDBCDataSource;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -252,7 +253,7 @@ public final class Utilities {
    * @throws SQLException
    * @throws ParseException
    */
-  private static void coerceData(final String data,
+  private static void coerceData(final @Nullable String data,
                                  final String type,
                                  final PreparedStatement prep,
                                  final int index)
@@ -724,7 +725,7 @@ public final class Utilities {
    * @return array of integers
    * @throws FLLRuntimeException if the string cannot be parsed
    */
-  public static int[] parseListOfIntegers(final String str) {
+  public static int[] parseListOfIntegers(final @Nullable String str) {
     if (null == str
         || str.isEmpty()) {
       return new int[0];
@@ -766,7 +767,7 @@ public final class Utilities {
    * @return array of strings
    * @throws FLLRuntimeException if the string cannot be parsed
    */
-  public static String[] parseListOfStrings(final String str) {
+  public static String[] parseListOfStrings(final @Nullable String str) {
     if (null == str
         || str.isEmpty()) {
       return new String[0];

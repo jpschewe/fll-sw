@@ -7,6 +7,8 @@ package fll.web;
 
 import javax.servlet.http.HttpSession;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * Keys for session variables. Each key has an associated accessor function as
  * well that helps with type safety.
@@ -61,7 +63,7 @@ public final class SessionAttributes {
    * @param session where to get the information
    * @return the URL to send the user to after the current operation completes
    */
-  public static String getRedirectURL(final HttpSession session) {
+  public static @Nullable String getRedirectURL(final HttpSession session) {
     return getAttribute(session, REDIRECT_URL, String.class);
   }
 
@@ -92,9 +94,9 @@ public final class SessionAttributes {
    * @param <T> the expected type
    * @return the attribute value
    */
-  public static <T> T getAttribute(final HttpSession session,
-                                   final String attribute,
-                                   final Class<T> clazz) {
+  public static <T> @Nullable T getAttribute(final HttpSession session,
+                                             final String attribute,
+                                             final Class<T> clazz) {
     final Object o = session.getAttribute(attribute);
     if (o == null
         || clazz.isInstance(o)) {

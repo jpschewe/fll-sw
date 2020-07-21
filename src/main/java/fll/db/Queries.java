@@ -29,6 +29,7 @@ import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -2773,7 +2774,7 @@ public final class Queries {
    */
   public static boolean performanceScoreExists(final Connection connection,
                                                final int tournament,
-                                               final Team team,
+                                               final @Nullable Team team,
                                                final int runNumber)
       throws SQLException {
     if (null == team) {
@@ -2786,7 +2787,7 @@ public final class Queries {
   /**
    * Convert {@link java.util.Date} to {@link java.sql.Time}.
    */
-  public static Time dateToTime(final Date date) {
+  public static Time dateToTime(final @Nullable Date date) {
     if (null == date) {
       return null;
     } else {
@@ -2797,7 +2798,7 @@ public final class Queries {
   /**
    * Convert {@link java.sql.Time} to {@link java.util.Date}.
    */
-  public static Date timeToDate(final Time t) {
+  public static Date timeToDate(final @Nullable Time t) {
     if (null == t) {
       return null;
     } else {
@@ -2923,8 +2924,8 @@ public final class Queries {
    * @param keys the keys to check
    * @return the username that the key matches, null otherwise
    */
-  public static String checkValidLogin(final Connection connection,
-                                       final Collection<String> keys)
+  public static @Nullable String checkValidLogin(final Connection connection,
+                                                 final Collection<String> keys)
       throws SQLException {
     // not doing the comparison with SQL to avoid SQL injection attack
     Statement stmt = null;

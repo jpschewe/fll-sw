@@ -77,6 +77,7 @@ import javax.swing.table.TableCellRenderer;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -914,7 +915,7 @@ public class SchedulerUI extends JFrame {
    *          otherwise prompt the user for the subjective stations
    */
   private void loadScheduleFile(final File selectedFile,
-                                final List<SubjectiveStation> subjectiveStations) {
+                                final @Nullable List<SubjectiveStation> subjectiveStations) {
     FileInputStream fis = null;
     try {
       final boolean csv = !ExcelCellReader.isExcelFile(selectedFile);
@@ -1079,7 +1080,8 @@ public class SchedulerUI extends JFrame {
    * @throws IOException
    * @throws InvalidFormatException
    */
-  public static String promptForSheetName(final File selectedFile) throws InvalidFormatException, IOException {
+  public static @Nullable String promptForSheetName(final File selectedFile)
+      throws InvalidFormatException, IOException {
     final List<String> sheetNames = ExcelCellReader.getAllSheetNames(selectedFile);
     if (sheetNames.size() == 1) {
       return sheetNames.get(0);
@@ -1343,15 +1345,15 @@ public class SchedulerUI extends JFrame {
     }
   };
 
-  private File mScheduleDescriptionFile = null;
+  private @Nullable File mScheduleDescriptionFile = null;
 
-  private File mScheduleFile;
+  private @Nullable File mScheduleFile;
 
-  protected File getScheduleFile() {
+  protected @Nullable File getScheduleFile() {
     return mScheduleFile;
   }
 
-  private String mScheduleSheetName;
+  private @Nullable String mScheduleSheetName;
 
   protected String getCurrentSheetName() {
     return mScheduleSheetName;

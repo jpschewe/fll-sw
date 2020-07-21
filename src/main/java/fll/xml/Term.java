@@ -12,6 +12,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.checkerframework.checker.initialization.qual.UnderInitialization;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -49,8 +51,8 @@ public class Term extends Object implements Evaluatable, Serializable {
    *           variable reference is found
    */
   public Term(final Element ele,
-              final GoalScope goalScope,
-              final VariableScope variableScope)
+              final @UnderInitialization GoalScope goalScope,
+              final @Nullable VariableScope variableScope)
       throws VariableRefNotAllowedException {
     super();
 
@@ -183,8 +185,7 @@ public class Term extends Object implements Evaluatable, Serializable {
 
   private Element createConstantElement(final Document doc) {
     final Element ele = doc.createElement(CONSTANT_TAG_NAME);
-    ele.setAttribute(CONSTANT_VALUE_ATTRIBUTE,
-                     Utilities.getXmlFloatingPointNumberFormat().format(mCoefficient));
+    ele.setAttribute(CONSTANT_VALUE_ATTRIBUTE, Utilities.getXmlFloatingPointNumberFormat().format(mCoefficient));
     return ele;
   }
 

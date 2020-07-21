@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.Utilities;
 
@@ -37,7 +38,7 @@ public abstract class CellFileReader implements Closeable {
    * @return the line as an array of Strings
    * @throws IOException
    */
-  public abstract String[] readNext() throws IOException;
+  public abstract @Nullable String[] readNext() throws IOException;
 
   @Override
   public abstract void close() throws IOException;

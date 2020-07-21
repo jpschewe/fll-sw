@@ -43,6 +43,7 @@ import java.util.zip.ZipInputStream;
 import javax.swing.table.TableModel;
 
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.fest.swing.edt.FailOnThreadViolationRepaintManager;
 import org.fest.swing.security.NoExitSecurityManagerInstaller;
 import org.junit.jupiter.api.AfterAll;
@@ -1202,7 +1203,7 @@ public class FullTournamentTest {
   /**
    * Create a string that's a valid file name.
    */
-  private static String sanitizeFilename(final String str) {
+  private static String sanitizeFilename(final @Nullable String str) {
     if (null == str
         || "".equals(str)) {
       return "NULL";

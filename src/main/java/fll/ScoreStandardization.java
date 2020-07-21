@@ -13,6 +13,8 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
@@ -252,7 +254,7 @@ public final class ScoreStandardization {
   public static void updateTeamTotalScores(final Connection connection,
                                            final ChallengeDescription description,
                                            final int tournament)
-      throws SQLException  {
+      throws SQLException {
     final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection, tournament);
 
     final Map<String, Double> categoryWeights = new HashMap<>();
@@ -311,7 +313,7 @@ public final class ScoreStandardization {
    * @return null if the data is consistent, otherwise an error message
    * @throws SQLException on an error talking to the database
    */
-  public static String checkDataConsistency(final Connection connection) throws SQLException {
+  public static @Nullable String checkDataConsistency(final Connection connection) throws SQLException {
     // Statement stmt = null;
     // ResultSet rs = null;
     // ResultSet rs2 = null;

@@ -22,6 +22,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
 import fll.Utilities;
@@ -69,8 +71,7 @@ public class VerifyJudges extends BaseFLLServlet {
       // Set. Use set so there are no duplicates
       final List<SubjectiveScoreCategory> subjectiveCategories = challengeDescription.getSubjectiveCategories();
 
-      final int numRows = Utilities.getIntegerNumberFormat().parse(request.getParameter("total_num_rows"))
-                                                                  .intValue();
+      final int numRows = Utilities.getIntegerNumberFormat().parse(request.getParameter("total_num_rows")).intValue();
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Found num rows: "
             + numRows);
@@ -163,7 +164,7 @@ public class VerifyJudges extends BaseFLLServlet {
    * Make sure that judge ID's don't contain characters that
    * will give us problems.
    */
-  private String sanitizeJudgeId(final String id) {
+  private String sanitizeJudgeId(final @Nullable String id) {
     if (null == id) {
       return null;
     } else {

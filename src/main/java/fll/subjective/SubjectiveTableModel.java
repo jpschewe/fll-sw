@@ -14,6 +14,7 @@ import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -185,8 +186,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
                            final int column) {
     try {
       final Element scoreEle = getScoreElement(row);
-      final int teamNumber = Utilities.getIntegerNumberFormat().parse(scoreEle.getAttribute("teamNumber"))
-                                                                     .intValue();
+      final int teamNumber = Utilities.getIntegerNumberFormat().parse(scoreEle.getAttribute("teamNumber")).intValue();
       switch (column) {
       case 0:
         if (scoreEle.hasAttribute("teamNumber")) {
@@ -571,7 +571,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
     return -1;
   }
 
-  private final TournamentSchedule _schedule;
+  private final @Nullable TournamentSchedule _schedule;
 
   private final Collection<CategoryColumnMapping> _scheduleColumnMappings = new LinkedList<>();
 

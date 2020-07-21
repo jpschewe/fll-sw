@@ -32,6 +32,7 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import org.apache.commons.io.IOUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 
 import com.opencsv.CSVWriter;
@@ -91,7 +92,7 @@ public final class DumpDB extends BaseFLLServlet {
    */
   public static void exportDatabase(final HttpServletResponse response,
                                     final ServletContext application,
-                                    final String label,
+                                    final @Nullable String label,
                                     final Document challengeDocument,
                                     final Connection connection)
       throws SQLException, IOException {
@@ -175,8 +176,8 @@ public final class DumpDB extends BaseFLLServlet {
 
     final File fllWebInfDir = new File(application.getRealPath("/WEB-INF"));
     final File[] bugReports = fllWebInfDir.listFiles((FilenameFilter) (dir,
-                      name) -> name.startsWith("bug_")
-                          && name.endsWith(".zip"));
+                                                                       name) -> name.startsWith("bug_")
+                                                                           && name.endsWith(".zip"));
 
     if (null != bugReports) {
       for (final File f : bugReports) {

@@ -8,6 +8,8 @@ package fll.web.playoff;
 
 import java.io.Serializable;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import fll.Team;
 import fll.xml.ScoreType;
 
@@ -50,7 +52,7 @@ public final class BracketUpdate implements Serializable {
                        final int maxPlayoffRound,
                        final Integer teamNumber,
                        final String teamName,
-                       final Double score,
+                       final @Nullable Double score,
                        final ScoreType performanceScoreType,
                        final boolean noShow,
                        final boolean verified,

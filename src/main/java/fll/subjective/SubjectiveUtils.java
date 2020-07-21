@@ -18,13 +18,12 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
-
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import fll.Utilities;
-
 import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.ChallengeParser;
 import net.mtu.eggplant.util.ComparisonUtils;
@@ -55,8 +54,8 @@ public final class SubjectiveUtils {
    *           documents
    * @see #compareScoreDocuments(Document, Document, Document)
    */
-  public static Collection<SubjectiveScoreDifference> compareSubjectiveFiles(final File masterFile,
-                                                                             final File compareFile)
+  public static @Nullable Collection<SubjectiveScoreDifference> compareSubjectiveFiles(final File masterFile,
+                                                                                       final File compareFile)
       throws ZipException, IOException, SAXException {
     ZipFile masterZipfile = null;
     ZipFile compareZipfile = null;
@@ -89,8 +88,7 @@ public final class SubjectiveUtils {
 
       final InputStream compareChallengeStream = compareZipfile.getInputStream(compareZipfile.getEntry("challenge.xml"));
       final Document compareChallengeDoc = ChallengeParser.parse(new InputStreamReader(compareChallengeStream,
-                                                                                       Utilities.DEFAULT_CHARSET))
-;
+                                                                                       Utilities.DEFAULT_CHARSET));
       compareChallengeStream.close();
 
       compareZipfile.close();
@@ -129,8 +127,7 @@ public final class SubjectiveUtils {
    */
   public static Element getSubjectiveElement(final Document challengeDocument,
                                              final String name) {
-    for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
-                                                                                challengeDocument.getDocumentElement()
+    for (final Element subjectiveElement : new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement()
                                                                                                  .getElementsByTagName("subjectiveCategory"))) {
       if (name.equals(subjectiveElement.getAttribute("name"))) {
         return subjectiveElement;
@@ -173,21 +170,18 @@ public final class SubjectiveUtils {
           + categoryName);
     }
 
-    final Element categoryDescription = fll.xml.ChallengeParser.getSubjectiveCategoryByName(challengeDocument, categoryName);
+    final Element categoryDescription = fll.xml.ChallengeParser.getSubjectiveCategoryByName(challengeDocument,
+                                                                                            categoryName);
     if (null == categoryDescription) {
-      throw new RuntimeException(
-                                 "Cannot find subjective category description for category in score document category: "
-                                     + categoryName);
+      throw new RuntimeException("Cannot find subjective category description for category in score document category: "
+          + categoryName);
     }
 
-    final List<Element> goalDescriptions = new NodelistElementCollectionAdapter(
-                                                                                categoryDescription.getElementsByTagName("goal")).asList();
+    final List<Element> goalDescriptions = new NodelistElementCollectionAdapter(categoryDescription.getElementsByTagName("goal")).asList();
 
     // for each score element
-    final List<Element> masterScores = new NodelistElementCollectionAdapter(
-                                                                            masterScoreCategory.getElementsByTagName("score")).asList();
-    final List<Element> compareScores = new NodelistElementCollectionAdapter(
-                                                                             compareScoreCategory.getElementsByTagName("score")).asList();
+    final List<Element> masterScores = new NodelistElementCollectionAdapter(masterScoreCategory.getElementsByTagName("score")).asList();
+    final List<Element> compareScores = new NodelistElementCollectionAdapter(compareScoreCategory.getElementsByTagName("score")).asList();
     if (masterScores.size() != compareScores.size()) {
       throw new RuntimeException("Score documents have different number of score elements");
     }
@@ -200,11 +194,12 @@ public final class SubjectiveUtils {
   private static Element findCorrespondingScoreElement(final Element masterScore,
                                                        final List<Element> compareScores) {
     try {
-      final int teamNumber = Utilities.getIntegerNumberFormat().parse(masterScore.getAttribute("teamNumber")).intValue();
+      final int teamNumber = Utilities.getIntegerNumberFormat().parse(masterScore.getAttribute("teamNumber"))
+                                      .intValue();
       final String judge = masterScore.getAttribute("judge");
       for (final Element compareScore : compareScores) {
         final int compareTeamNumber = Utilities.getIntegerNumberFormat().parse(compareScore.getAttribute("teamNumber"))
-                                                                      .intValue();
+                                               .intValue();
         final String compareJudge = compareScore.getAttribute("judge");
         if (teamNumber == compareTeamNumber
             && judge.equals(compareJudge)) {
@@ -225,7 +220,8 @@ public final class SubjectiveUtils {
     final String categoryTitle = categoryDescription.getAttribute("title");
 
     try {
-      final int teamNumber = Utilities.getIntegerNumberFormat().parse(masterScore.getAttribute("teamNumber")).intValue();
+      final int teamNumber = Utilities.getIntegerNumberFormat().parse(masterScore.getAttribute("teamNumber"))
+                                      .intValue();
       final String judge = masterScore.getAttribute("judge");
 
       final Boolean masterNoShow = XMLUtils.getBooleanAttributeValue(masterScore, "NoShow");
@@ -270,8 +266,8 @@ public final class SubjectiveUtils {
    * @param categoryName the name of the category to find
    * @return null if not found
    */
-  public static Element getCategoryNode(final Element scoresElement,
-                                        final String categoryName) {
+  public static @Nullable Element getCategoryNode(final Element scoresElement,
+                                                  final String categoryName) {
     for (final Element scoreCategory : new NodelistElementCollectionAdapter(scoresElement.getChildNodes())) {
       final String name = scoreCategory.getAttribute("name");
       if (categoryName.equals(name)) {
@@ -289,10 +285,9 @@ public final class SubjectiveUtils {
    * @param goalName the name of the goal to find
    * @return the element or null if not found
    */
-  public static Element getSubscoreElement(final Element scoreElement,
-                                           final String goalName) {
-    for (final Element subEle : new NodelistElementCollectionAdapter(
-                                                                     scoreElement.getElementsByTagName(DownloadSubjectiveData.SUBSCORE_NODE_NAME))) {
+  public static @Nullable Element getSubscoreElement(final Element scoreElement,
+                                                     final String goalName) {
+    for (final Element subEle : new NodelistElementCollectionAdapter(scoreElement.getElementsByTagName(DownloadSubjectiveData.SUBSCORE_NODE_NAME))) {
       final String name = subEle.getAttribute("name");
       if (goalName.equals(name)) {
         return subEle;

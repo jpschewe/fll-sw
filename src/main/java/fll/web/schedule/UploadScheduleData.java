@@ -15,6 +15,8 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import fll.db.CategoryColumnMapping;
 import fll.scheduler.ConstraintViolation;
 import fll.scheduler.SchedParams;
@@ -126,12 +128,12 @@ public class UploadScheduleData implements Serializable {
     categoryColumnMappings.addAll(v);
   }
 
-  private LinkedList<SubjectiveStation> subjectiveStations = null;
+  private @Nullable LinkedList<SubjectiveStation> subjectiveStations = null;
 
   /**
    * @return the subjective stations for the schedule, initially null
    */
-  public List<SubjectiveStation> getSubjectiveStations() {
+  public @Nullable List<SubjectiveStation> getSubjectiveStations() {
     return subjectiveStations;
   }
 

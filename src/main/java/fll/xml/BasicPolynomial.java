@@ -13,6 +13,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+import org.checkerframework.checker.initialization.qual.UnderInitialization;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -34,8 +35,8 @@ public class BasicPolynomial implements Evaluatable, Serializable {
    * @param ele XM element holding the polynomial
    * @param goalScope used to lookup goals referenced by the polynomial
    */
-  public BasicPolynomial(@Nonnull final Element ele,
-                         @Nonnull final GoalScope goalScope) {
+  public BasicPolynomial(final Element ele,
+                         final @UnderInitialization GoalScope goalScope) {
     this(ele, goalScope, null);
   }
 
@@ -46,9 +47,9 @@ public class BasicPolynomial implements Evaluatable, Serializable {
    * @param goalScope used to lookup goals
    * @param variableScope used to lookup variables
    */
-  protected BasicPolynomial(@Nonnull final Element ele,
-                            @Nonnull final GoalScope goalScope,
-                            final VariableScope variableScope) {
+  protected BasicPolynomial(final Element ele,
+                            final @UnderInitialization GoalScope goalScope,
+                            final @UnderInitialization VariableScope variableScope) {
     mTerms = new LinkedList<>();
     for (final Element termEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName(Term.TAG_NAME))) {
       final Term term = new Term(termEle, goalScope, variableScope);

@@ -18,6 +18,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -106,7 +107,7 @@ public abstract class AbstractGoal implements Serializable {
   /**
    * @return the category of the goal, may be null
    */
-  public String getCategory() {
+  public @Nullable String getCategory() {
     return mCategory;
   }
 
@@ -159,7 +160,7 @@ public abstract class AbstractGoal implements Serializable {
     this.propChangeSupport.firePropertyChange("title", old, v);
   }
 
-  private String mDescription;
+  private @Nullable String mDescription;
 
   /**
    * @return the description, may be null

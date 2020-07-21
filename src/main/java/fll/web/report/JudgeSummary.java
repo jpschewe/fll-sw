@@ -11,6 +11,8 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * Information about how many teams a judge has seen. Used for display when
  * summarizing scores.
@@ -30,7 +32,7 @@ public final class JudgeSummary implements Serializable, Comparable<JudgeSummary
   /**
    * @return the judge, may be null
    */
-  public String getJudge() {
+  public @Nullable String getJudge() {
     return mJudge;
   }
 

@@ -30,6 +30,7 @@ import javax.servlet.jsp.JspWriter;
 import javax.sql.DataSource;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
@@ -587,7 +588,7 @@ public final class UploadTeams extends BaseFLLServlet {
    * Create a string that's a valid column name.
    * </ul>
    */
-  private static String sanitizeColumnName(final String str) {
+  private static String sanitizeColumnName(final @Nullable String str) {
     if (null == str
         || "".equals(str)) {
       return "EMPTYHEADER_"

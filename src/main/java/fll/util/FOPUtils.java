@@ -31,6 +31,7 @@ import org.apache.fop.apps.Fop;
 import org.apache.fop.apps.FopFactory;
 import org.apache.fop.apps.MimeConstants;
 import org.apache.xmlgraphics.java2d.Dimension2DDouble;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -376,7 +377,7 @@ public final class FOPUtils {
    * @return the table cell
    */
   public static Element createTableCell(final Document document,
-                                        final String textAlignment,
+                                        @Nullable final String textAlignment,
                                         final String text) {
     return createTableCell(document, textAlignment, text, 0, false);
   }

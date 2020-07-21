@@ -17,6 +17,8 @@ import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -70,7 +72,7 @@ public final class Tournament implements Serializable {
   /**
    * @return a longer description of the tournament
    */
-  public String getDescription() {
+  public @Nullable String getDescription() {
     return description;
   }
 
@@ -88,7 +90,7 @@ public final class Tournament implements Serializable {
    * @see StoreTournamentData#DATE_FORMATTER
    */
   @JsonIgnore
-  public String getDateString() {
+  public @Nullable String getDateString() {
     return null == date ? null : StoreTournamentData.DATE_FORMATTER.format(date);
   }
 
@@ -116,9 +118,9 @@ public final class Tournament implements Serializable {
   public static void createTournament(final Connection connection,
                                       final String tournamentName,
                                       final String description,
-                                      final LocalDate date,
-                                      final String level,
-                                      final String nextLevel)
+                                      final @Nullable LocalDate date,
+                                      final @Nullable String level,
+                                      final @Nullable String nextLevel)
       throws SQLException {
     try (
         PreparedStatement prep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location, tournament_date, level, next_level) VALUES (?, ?, ?, ?, ?)")) {
@@ -195,8 +197,8 @@ public final class Tournament implements Serializable {
    * @return the Tournament, or null if it cannot be found
    * @throws SQLException
    */
-  public static Tournament findTournamentByName(final Connection connection,
-                                                final String name)
+  public static @Nullable Tournament findTournamentByName(final Connection connection,
+                                                          final String name)
       throws SQLException {
     try (
         PreparedStatement prep = connection.prepareStatement("SELECT tournament_id, Location, tournament_date, level, next_level FROM Tournaments WHERE Name = ?")) {
@@ -226,8 +228,8 @@ public final class Tournament implements Serializable {
    * @return the Tournament, or null if it cannot be found
    * @throws SQLException
    */
-  public static Tournament findTournamentByID(final Connection connection,
-                                              final int tournamentID)
+  public static @Nullable Tournament findTournamentByID(final Connection connection,
+                                                        final int tournamentID)
       throws SQLException {
     try (
         PreparedStatement prep = connection.prepareStatement("SELECT Name, Location, tournament_date, level, next_level FROM Tournaments WHERE tournament_id = ?")) {
@@ -446,9 +448,9 @@ public final class Tournament implements Serializable {
                                       final int tournamentID,
                                       final String name,
                                       final String location,
-                                      final LocalDate date,
-                                      final String level,
-                                      final String nextLevel)
+                                      final @Nullable LocalDate date,
+                                      final @Nullable String level,
+                                      final @Nullable String nextLevel)
       throws SQLException {
     try (PreparedStatement updatePrep = connection.prepareStatement("UPDATE Tournaments SET" //
         + " Name = ?" //

@@ -44,6 +44,7 @@ import java.util.TreeSet;
 import javax.annotation.Nonnull;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.opencsv.CSVWriter;
 
@@ -219,7 +220,7 @@ public class TournamentSchedule implements Serializable {
    * @throws DateTimeParseException if the string could not be parsed as a time
    *           for a schedule
    */
-  public static LocalTime parseTime(final String str) throws DateTimeParseException {
+  public static LocalTime parseTime(final @Nullable String str) throws DateTimeParseException {
     if (null == str
         || str.trim().isEmpty()) {
       return null;
@@ -254,7 +255,7 @@ public class TournamentSchedule implements Serializable {
    * @param time the time to format, may be null
    * @return the formatted time, null converts to ""
    */
-  public static String formatTime(final LocalTime time) {
+  public static String formatTime(final @Nullable LocalTime time) {
     if (null == time) {
       return "";
     } else {
@@ -321,7 +322,7 @@ public class TournamentSchedule implements Serializable {
    * @param teamNumber the team to get the schedule info for
    * @return null if cannot be found
    */
-  public TeamScheduleInfo getSchedInfoForTeam(final int teamNumber) {
+  public @Nullable TeamScheduleInfo getSchedInfoForTeam(final int teamNumber) {
     for (final TeamScheduleInfo si : schedule) {
       if (si.getTeamNumber() == teamNumber) {
         return si;
@@ -680,8 +681,8 @@ public class TournamentSchedule implements Serializable {
    *
    * @return the column, null if not found
    */
-  private static Integer columnForHeader(final String[] line,
-                                         final String header) {
+  private static @Nullable Integer columnForHeader(final String[] line,
+                                                   final String header) {
     for (int i = 0; i < line.length; ++i) {
       if (header.equals(line[i])) {
         return i;
@@ -1242,8 +1243,8 @@ public class TournamentSchedule implements Serializable {
    *          for
    * @return the team number or null if no opponent
    */
-  public TeamScheduleInfo findOpponent(final TeamScheduleInfo ti,
-                                       final PerformanceTime performance) {
+  public @Nullable TeamScheduleInfo findOpponent(final TeamScheduleInfo ti,
+                                                 final PerformanceTime performance) {
     final LocalTime performanceTime = performance.getTime();
     final String table = performance.getTable();
     final List<TeamScheduleInfo> tableMatches = matches.get(performanceTime).get(table);

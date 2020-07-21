@@ -14,6 +14,7 @@ import java.sql.SQLException;
 
 import javax.annotation.Nonnull;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 
 import fll.Utilities;
@@ -179,7 +180,8 @@ public final class GlobalParameters {
    * @throws FLLRuntimeException if the document cannot be found
    * @throws SQLException on a database error
    */
-  public static Document getChallengeDocument(final Connection connection) throws SQLException, RuntimeException {
+  public static @Nullable Document getChallengeDocument(final Connection connection)
+      throws SQLException, RuntimeException {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {

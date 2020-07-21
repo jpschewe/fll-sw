@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.diffplug.common.base.Errors;
 
@@ -894,9 +895,9 @@ public final class Playoff {
    * @return null if no teams are involved in an unfinished playoff
    */
   @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate query from list of teams")
-  public static String involvedInUnfinishedPlayoff(final Connection connection,
-                                                   final int tournament,
-                                                   final List<Integer> teamNumbers)
+  public static @Nullable String involvedInUnfinishedPlayoff(final Connection connection,
+                                                             final int tournament,
+                                                             final List<Integer> teamNumbers)
       throws SQLException {
     final StringBuilder message = new StringBuilder();
 

@@ -13,6 +13,7 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -24,12 +25,24 @@ import net.mtu.eggplant.xml.XMLUtils;
  */
 public class ChallengeDescription implements Serializable {
 
+  /**
+   * XML attribute for title.
+   */
   public static final String TITLE_ATTRIBUTE = "title";
 
+  /**
+   * XML attribute for revision.
+   */
   public static final String REVISION_ATTRIBUTE = "revision";
 
+  /**
+   * XML attribute for copyright.
+   */
   public static final String COPYRIGHT_ATTRIBUTE = "copyright";
 
+  /**
+   * XML attribute for schema version.
+   */
   public static final String SCHEMA_VERSION_ATTRIBUTE = "schemaVersion";
 
   /**
@@ -83,7 +96,7 @@ public class ChallengeDescription implements Serializable {
    *
    * @return the statement or null if there is no copyright
    */
-  public String getCopyright() {
+  public @Nullable String getCopyright() {
     return mCopyright;
   }
 
@@ -261,11 +274,10 @@ public class ChallengeDescription implements Serializable {
   }
 
   /**
-   *
    * @param str remove carriage returns and multiple spaces
    * @return string without the line endings and multiple spaces in a row
    */
-  /*package*/ static String removeExtraWhitespace(final String str) {
+  /* package */ static String removeExtraWhitespace(final @Nullable String str) {
     if (null == str) {
       return str;
     }

@@ -9,6 +9,7 @@ package fll.xml;
 import java.io.Serializable;
 import java.util.Objects;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -104,7 +105,7 @@ public class CaseStatement implements Evaluatable, Serializable {
    *
    * @return the polynomial that defines the result
    */
-  public ComplexPolynomial getResultPoly() {
+  public @Nullable ComplexPolynomial getResultPoly() {
     return mResultPoly;
   }
 
@@ -123,7 +124,7 @@ public class CaseStatement implements Evaluatable, Serializable {
    *
    * @return the switch statement that defines the result
    */
-  public SwitchStatement getResultSwitch() {
+  public @Nullable SwitchStatement getResultSwitch() {
     return mResultSwitch;
   }
 

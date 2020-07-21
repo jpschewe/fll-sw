@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -255,7 +256,7 @@ public final class WebUtils {
    * @param str the string to quote
    * @return a string suitable to be used in javascript
    */
-  public static String quoteJavascriptString(final String str) {
+  public static String quoteJavascriptString(final @Nullable String str) {
     if (null == str
         || "".equals(str)) {
       return "\"\"";
@@ -341,7 +342,7 @@ public final class WebUtils {
    * @param str the string that needs to be escaped
    * @return A string suitable to be used in a form field
    */
-  public static String escapeForHtmlFormValue(final String str) {
+  public static String escapeForHtmlFormValue(final @Nullable String str) {
     if (null == str) {
       return str;
     } else {
@@ -357,8 +358,8 @@ public final class WebUtils {
    * @return the parameter value, null if the parameter isn't present OR the
    *         parameter value is the empty string
    */
-  public static String getParameterOrNull(@Nonnull final ServletRequest request,
-                                          @Nonnull final String parameterName) {
+  public static @Nullable String getParameterOrNull(@Nonnull final ServletRequest request,
+                                                    @Nonnull final String parameterName) {
     final String rawValue = request.getParameter(parameterName);
     if (null == rawValue) {
       return null;

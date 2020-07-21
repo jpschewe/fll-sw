@@ -18,6 +18,9 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
  */
 public class SubjectiveScoreCategory extends ScoreCategory {
 
+  /**
+   * Name of tag for a subjective category XML element.
+   */
   public static final String TAG_NAME = "subjectiveCategory";
 
   private static final String NAME_ATTRIBUTE = "name";

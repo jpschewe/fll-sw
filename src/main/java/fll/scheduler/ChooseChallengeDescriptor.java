@@ -32,6 +32,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.util.FLLInternalException;
 import fll.web.setup.SetupIndex.DescriptionInfo;
@@ -181,7 +182,7 @@ public class ChooseChallengeDescriptor extends JDialog {
 
     @Override
     public Component getListCellRendererComponent(final JList<? extends DescriptionInfo> list,
-                                                  final DescriptionInfo descriptionInfo,
+                                                  final @Nullable DescriptionInfo descriptionInfo,
                                                   final int index,
                                                   final boolean isSelected,
                                                   final boolean cellHasFocus) {
