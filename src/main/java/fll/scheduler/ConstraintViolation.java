@@ -46,7 +46,7 @@ public final class ConstraintViolation implements Serializable {
     return team;
   }
 
-  private final LocalTime performance;
+  private final @Nullable LocalTime performance;
 
   /**
    * @return if a performance problem, the time of the performance,
@@ -86,9 +86,9 @@ public final class ConstraintViolation implements Serializable {
    */
   public ConstraintViolation(final Type type,
                              final int team,
-                             final SubjectiveTime subjective1,
-                             final SubjectiveTime subjective2,
-                             final LocalTime performance,
+                             final @Nullable SubjectiveTime subjective1,
+                             final @Nullable SubjectiveTime subjective2,
+                             final @Nullable LocalTime performance,
                              final String message) {
     this.type = type;
     this.team = team;

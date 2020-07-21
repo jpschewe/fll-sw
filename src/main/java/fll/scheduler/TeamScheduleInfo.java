@@ -12,6 +12,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.google.common.collect.Streams;
@@ -23,13 +24,13 @@ public final class TeamScheduleInfo implements Serializable {
 
   private final int teamNumber;
 
-  private @Nullable String teamName;
+  private @MonotonicNonNull String teamName;
 
-  private @Nullable String organization;
+  private @MonotonicNonNull String organization;
 
-  private @Nullable String awardGroup;
+  private @MonotonicNonNull String awardGroup;
 
-  private @Nullable String judgingGroup;
+  private @MonotonicNonNull String judgingGroup;
 
   private final SortedSet<PerformanceTime> performances = new TreeSet<>();
 
@@ -132,7 +133,7 @@ public final class TeamScheduleInfo implements Serializable {
   }
 
   @Override
-  public boolean equals(final Object o) {
+  public boolean equals(final @Nullable Object o) {
     if (o == this) {
       return true;
     } else if (o instanceof TeamScheduleInfo) {
@@ -283,12 +284,17 @@ public final class TeamScheduleInfo implements Serializable {
    * Compute a display name for the specified performance round.
    *
    * @param performance the performance information
-   * @return the name to display, null on error
+   * @return the name to display
+   * @throws IndexOutOfBoundsException if the computed round index is less than
+   *           zero
    */
   public String getRoundName(final PerformanceTime performance) {
     final int roundIndex = computeRound(performance);
     if (roundIndex < 0) {
-      return null;
+      throw new IndexOutOfBoundsException("Computed round index for "
+          + performance
+          + " is "
+          + roundIndex);
     } else {
       if (performance.isPractice()) {
         return String.format("Practice %d", roundIndex

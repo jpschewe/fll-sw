@@ -5,6 +5,8 @@
  */
 package fll.scheduler;
 
+import static org.checkerframework.checker.nullness.util.NullnessUtil.castNonNull;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -44,7 +46,10 @@ import java.util.TreeSet;
 import javax.annotation.Nonnull;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.checkerframework.checker.initialization.qual.UnderInitialization;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.RequiresNonNull;
 
 import com.opencsv.CSVWriter;
 
@@ -219,7 +224,7 @@ public class TournamentSchedule implements Serializable {
    * @throws DateTimeParseException if the string could not be parsed as a time
    *           for a schedule
    */
-  public static LocalTime parseTime(final @Nullable String str) throws DateTimeParseException {
+  public static @Nullable LocalTime parseTime(final @Nullable String str) throws DateTimeParseException {
     if (null == str
         || str.trim().isEmpty()) {
       return null;
@@ -408,6 +413,11 @@ public class TournamentSchedule implements Serializable {
                             final int tournamentID)
       throws SQLException {
     final Tournament currentTournament = Tournament.findTournamentByID(connection, tournamentID);
+    if (null == currentTournament) {
+      throw new IllegalArgumentException("Unable to find tournament with id: "
+          + tournamentID);
+    }
+
     name = currentTournament.getName();
 
     try (
@@ -415,7 +425,7 @@ public class TournamentSchedule implements Serializable {
       getSubjectiveStations.setInt(1, tournamentID);
       try (ResultSet stations = getSubjectiveStations.executeQuery()) {
         while (stations.next()) {
-          final String name = stations.getString(1);
+          final String name = castNonNull(stations.getString(1));
           subjectiveStations.add(name);
         }
       }
@@ -441,7 +451,7 @@ public class TournamentSchedule implements Serializable {
       try (ResultSet sched = getSched.executeQuery()) {
         while (sched.next()) {
           final int teamNumber = sched.getInt(1);
-          final String judgingStation = sched.getString(2);
+          final String judgingStation = castNonNull(sched.getString(2));
 
           final TeamScheduleInfo ti = new TeamScheduleInfo(teamNumber);
           ti.setJudgingGroup(judgingStation);
@@ -449,8 +459,8 @@ public class TournamentSchedule implements Serializable {
           getSubjective.setInt(2, teamNumber);
           try (ResultSet subjective = getSubjective.executeQuery()) {
             while (subjective.next()) {
-              final String name = subjective.getString(1);
-              final Time subjTime = subjective.getTime(2);
+              final String name = castNonNull(subjective.getString(1));
+              final Time subjTime = castNonNull(subjective.getTime(2));
               ti.addSubjectiveTime(new SubjectiveTime(name, subjTime.toLocalTime()));
             }
           }
@@ -458,8 +468,8 @@ public class TournamentSchedule implements Serializable {
           getPerfRounds.setInt(2, teamNumber);
           try (ResultSet perfRounds = getPerfRounds.executeQuery()) {
             while (perfRounds.next()) {
-              final LocalTime perfTime = perfRounds.getTime(1).toLocalTime();
-              final String tableColor = perfRounds.getString(2);
+              final LocalTime perfTime = castNonNull(perfRounds.getTime(1)).toLocalTime();
+              final String tableColor = castNonNull(perfRounds.getString(2));
               final int tableSide = perfRounds.getInt(3);
               if (tableSide != 1
                   && tableSide != 2) {
@@ -499,7 +509,7 @@ public class TournamentSchedule implements Serializable {
 
   }
 
-  private void validateRounds() {
+  private void validateRounds(@UnderInitialization(fll.scheduler.TournamentSchedule.class) TournamentSchedule this) {
     for (final TeamScheduleInfo si : schedule) {
       if (this.numRegularMatchPlayRounds != si.getNumRegularMatchPlayRounds()) {
         throw new RuntimeException("Should have "
@@ -820,7 +830,8 @@ public class TournamentSchedule implements Serializable {
    * @throws IOException
    * @throws ScheduleParseException if there is an error with the schedule
    */
-  private void parseData(final CellFileReader reader,
+  private void parseData(@UnderInitialization(TournamentSchedule.class) TournamentSchedule this,
+                         final CellFileReader reader,
                          final ColumnInformation ci)
       throws IOException, ParseException, ScheduleParseException {
     TeamScheduleInfo ti;
@@ -833,7 +844,8 @@ public class TournamentSchedule implements Serializable {
    * Add a team to the schedule. Check that the team isn't already in the
    * schedule.
    */
-  private void addToSchedule(final TeamScheduleInfo ti) {
+  private void addToSchedule(@UnderInitialization(TournamentSchedule.class) TournamentSchedule this,
+                             final TeamScheduleInfo ti) {
     if (!schedule.contains(ti)) {
       schedule.add(ti);
     } else {
@@ -846,7 +858,8 @@ public class TournamentSchedule implements Serializable {
    * Populate internal caches with the data from this newly created
    * {@link TeamScheduleInfo}.
    */
-  private void cacheTeamScheduleInformation(final TeamScheduleInfo ti) {
+  private void cacheTeamScheduleInformation(@UnderInitialization(TournamentSchedule.class) TournamentSchedule this,
+                                            final TeamScheduleInfo ti) {
     addToSchedule(ti);
 
     // keep track of some meta information
@@ -1171,7 +1184,7 @@ public class TournamentSchedule implements Serializable {
       final LocalTime earliestStart = minSubjectiveTimes.get(station);
       final LocalTime latestStart = maxSubjectiveTimes.get(station);
       final Duration subjectiveDuration = Duration.ofMinutes(SolverParams.DEFAULT_SUBJECTIVE_MINUTES);
-      final LocalTime latestEnd = latestStart.plus(subjectiveDuration);
+      final LocalTime latestEnd = null == latestStart ? null : latestStart.plus(subjectiveDuration);
 
       output.format("Subjective times for judging station %s: %s - %s (assumes default subjective time of %d minutes)%n",
                     station, formatTime(earliestStart), formatTime(latestEnd), SolverParams.DEFAULT_SUBJECTIVE_MINUTES);
@@ -1194,11 +1207,13 @@ public class TournamentSchedule implements Serializable {
    * @param ti the schedule info
    * @param performance the performance to add
    */
-  private void addToMatches(final TeamScheduleInfo ti,
+  @RequiresNonNull("this.matches")
+  private void addToMatches(@UnknownInitialization TournamentSchedule this,
+                            final TeamScheduleInfo ti,
                             final PerformanceTime performance) {
     final Map<String, List<TeamScheduleInfo>> timeMatches;
     if (matches.containsKey(performance.getTime())) {
-      timeMatches = matches.get(performance.getTime());
+      timeMatches = castNonNull(matches.get(performance.getTime()));
     } else {
       timeMatches = new HashMap<>();
       matches.put(performance.getTime(), timeMatches);
@@ -1206,7 +1221,7 @@ public class TournamentSchedule implements Serializable {
 
     final List<TeamScheduleInfo> tableMatches;
     if (timeMatches.containsKey(performance.getTable())) {
-      tableMatches = timeMatches.get(performance.getTable());
+      tableMatches = castNonNull(timeMatches.get(performance.getTable()));
     } else {
       tableMatches = new LinkedList<>();
       timeMatches.put(performance.getTable(), tableMatches);
@@ -1223,13 +1238,13 @@ public class TournamentSchedule implements Serializable {
           + performance.getTime()
           + " in matches");
     }
-    final Map<String, List<TeamScheduleInfo>> timeMatches = matches.get(performance.getTime());
+    final Map<String, List<TeamScheduleInfo>> timeMatches = castNonNull(matches.get(performance.getTime()));
     if (!timeMatches.containsKey(performance.getTable())) {
       throw new IllegalArgumentException("Cannot find table info for "
           + performance.getTime()
           + " in matches");
     }
-    final List<TeamScheduleInfo> tableMatches = timeMatches.get(performance.getTable());
+    final List<TeamScheduleInfo> tableMatches = castNonNull(timeMatches.get(performance.getTable()));
     if (!tableMatches.remove(ti)) {
       throw new IllegalArgumentException("Cannot find team "
           + ti.getTeamNumber()
@@ -1250,10 +1265,11 @@ public class TournamentSchedule implements Serializable {
                                                  final PerformanceTime performance) {
     final LocalTime performanceTime = performance.getTime();
     final String table = performance.getTable();
-    final List<TeamScheduleInfo> tableMatches = matches.get(performanceTime).get(table);
+    final List<TeamScheduleInfo> tableMatches = matches.getOrDefault(performanceTime, Collections.emptyMap())
+                                                       .getOrDefault(table, Collections.emptyList());
     if (tableMatches.size() > 1) {
       if (tableMatches.get(0).equals(tableMatches.get(1))) {
-        throw new FLLRuntimeException("Internal error, _matches is inconsistent. Has team competing against itself");
+        throw new FLLRuntimeException("Internal error, matches is inconsistent. Has team competing against itself");
       }
       if (tableMatches.get(0).equals(ti)) {
         return tableMatches.get(1);
@@ -1270,8 +1286,9 @@ public class TournamentSchedule implements Serializable {
    * @throws ScheduleParseException if there is an error with the schedule being
    *           read
    */
-  private TeamScheduleInfo parseLine(final CellFileReader reader,
-                                     final ColumnInformation ci)
+  private @Nullable TeamScheduleInfo parseLine(@UnderInitialization(TournamentSchedule.class) TournamentSchedule this,
+                                               final CellFileReader reader,
+                                               final ColumnInformation ci)
       throws IOException, ParseException, ScheduleParseException {
     final String[] line = reader.readNext();
     if (null == line) {
@@ -1304,7 +1321,8 @@ public class TournamentSchedule implements Serializable {
           // If we got an empty string, then we must have hit the end
           return null;
         }
-        final LocalTime time = parseTime(str);
+        // str is not null or empty, so parseTime cannot return null
+        final LocalTime time = castNonNull(parseTime(str));
         ti.addSubjectiveTime(new SubjectiveTime(station, time));
       }
 
@@ -1323,7 +1341,7 @@ public class TournamentSchedule implements Serializable {
           throw new RuntimeException("Error parsing table information from: "
               + table);
         }
-        final LocalTime perf1Time = parseTime(perf1Str);
+        final LocalTime perf1Time = castNonNull(parseTime(perf1Str));
 
         final String tableName = tablePieces[0];
         final int tableSide = Utilities.getIntegerNumberFormat().parse(tablePieces[1]).intValue();
@@ -1357,6 +1375,9 @@ public class TournamentSchedule implements Serializable {
               + table);
         }
         final LocalTime perf1Time = parseTime(perf1Str);
+        if (null == perf1Time) {
+          return null;
+        }
 
         final String tableName = tablePieces[0];
         final int tableSide = Utilities.getIntegerNumberFormat().parse(tablePieces[1]).intValue();
@@ -1772,7 +1793,7 @@ public class TournamentSchedule implements Serializable {
    * @param team the team to get the schedule information for
    * @return the schedule info or null if not found
    */
-  public TeamScheduleInfo findScheduleInfo(final int team) {
+  public @Nullable TeamScheduleInfo findScheduleInfo(final int team) {
     for (final TeamScheduleInfo si : schedule) {
       if (si.getTeamNumber() == team) {
         return si;

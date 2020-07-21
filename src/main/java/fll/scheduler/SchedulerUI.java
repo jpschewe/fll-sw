@@ -77,6 +77,7 @@ import javax.swing.table.TableCellRenderer;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.checkerframework.checker.initialization.qual.UnderInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -624,7 +625,7 @@ public class SchedulerUI extends JFrame {
     return toolbar;
   }
 
-  private JToolBar createScheduleToolbar() {
+  private JToolBar createScheduleToolbar(@UnderInitialization(JFrame.class) SchedulerUI this) {
     final JToolBar toolbar = new JToolBar("Schedule Toolbar");
     toolbar.setFloatable(false);
 
@@ -1131,7 +1132,8 @@ public class SchedulerUI extends JFrame {
     return mSchedParams;
   }
 
-  private void setSchedParams(final SchedParams params) {
+  private void setSchedParams(@UnderInitialization(JFrame.class) SchedulerUI this,
+                              final SchedParams params) {
     mSchedParams = params;
     changeDuration.setValue(mSchedParams.getChangetimeMinutes());
     performanceChangeDuration.setValue(mSchedParams.getPerformanceChangetimeMinutes());
