@@ -129,17 +129,18 @@ public class UploadScheduleData implements Serializable {
   private LinkedList<SubjectiveStation> subjectiveStations = null;
 
   /**
-   * @return the subjective stations for the schedule, initially null
+   * @return the subjective stations for the schedule.
+   * @see SchedParams#getSubjectiveStations()
    */
   public List<SubjectiveStation> getSubjectiveStations() {
-    return subjectiveStations;
+    return schedParams.getSubjectiveStations();
   }
 
   /**
    * @param v see {@link #getSubjectiveStations()}
    */
   public void setSubjectiveStations(final List<SubjectiveStation> v) {
-    subjectiveStations = null == v ? null : new LinkedList<>(v);
+    schedParams.setSubjectiveStations(v);
   }
 
   private final LinkedList<String> unusedHeaders = new LinkedList<>();
