@@ -36,6 +36,9 @@ plugins {
     id "com.github.ben-manes.versions" version "0.28.0" // adds dependencyUpdates task
     id "de.undercouch.download" version "4.0.4" // file download
     id "checkstyle"
+        
+    // Checker Framework pluggable type-checking
+    id "org.checkerframework" version "0.5.5"
 }
 
 // needs to use old plugin mechanism otherwise I can't set the extra properties
@@ -712,3 +715,16 @@ checkstyle {
     ignoreFailures = true
     toolVersion = "8.18"
 }
+
+checkerFramework {
+    checkers = [
+        "org.checkerframework.checker.nullness.NullnessChecker"
+    ]
+    extraJavacArgs = [
+        "-AonlyDefs=^fll\\.documents",
+        "-Awarns",  
+        "-Xmaxwarns", "10000",
+        "-AstubWarnIfNotFound"
+    ]
+}
+

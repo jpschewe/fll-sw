@@ -6,6 +6,7 @@
 
 package fll.xml;
 
+import org.checkerframework.checker.initialization.qual.UnderInitialization;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -17,7 +18,7 @@ public class TiebreakerTest extends BasicPolynomial {
   public static final String TAG_NAME = "test";
 
   public TiebreakerTest(final Element ele,
-                        final GoalScope goalScope) {
+                        final @UnderInitialization GoalScope goalScope) {
     super(ele, goalScope);
     mWinner = ChallengeParser.getWinnerCriteria(ele);
   }

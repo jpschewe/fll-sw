@@ -11,6 +11,7 @@ import java.util.TreeSet;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.google.common.collect.Streams;
 
@@ -21,13 +22,13 @@ public final class TeamScheduleInfo implements Serializable {
 
   private final int teamNumber;
 
-  private String teamName;
+  private @Nullable String teamName;
 
-  private String organization;
+  private @Nullable String organization;
 
-  private String awardGroup;
+  private @Nullable String awardGroup;
 
-  private String judgingGroup;
+  private @Nullable String judgingGroup;
 
   private final SortedSet<PerformanceTime> performances = new TreeSet<>();
 
@@ -108,7 +109,7 @@ public final class TeamScheduleInfo implements Serializable {
    * @param time the time to find a performance at
    * @return the performance or null if not found
    */
-  public PerformanceTime getPerformanceAtTime(final LocalTime time) {
+  public @Nullable PerformanceTime getPerformanceAtTime(final LocalTime time) {
     return allPerformances().filter(pt -> pt.getTime().equals(time)).findFirst().orElse(null);
   }
 

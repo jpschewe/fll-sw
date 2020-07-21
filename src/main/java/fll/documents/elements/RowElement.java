@@ -2,6 +2,8 @@ package fll.documents.elements;
 
 import java.util.List;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import fll.xml.Goal;
 import fll.xml.RubricRange;
 
@@ -66,7 +68,7 @@ public class RowElement {
    * @return the goal group, for example "Inspiration" (90 degrees on the left
    *         side of the table)
    */
-  public String getCategory() {
+  public @Nullable String getCategory() {
     return goal.getCategory();
   }
 

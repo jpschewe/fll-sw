@@ -8,6 +8,7 @@ package fll.web;
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 
 import fll.xml.ChallengeDescription;
@@ -48,7 +49,7 @@ public final class ApplicationAttributes {
    * @param application application variable store
    * @return the stored challenge description XML
    */
-  public static Document getChallengeDocument(final ServletContext application) {
+  public static @Nullable Document getChallengeDocument(final ServletContext application) {
     return getAttribute(application, CHALLENGE_DOCUMENT, Document.class);
   }
 
@@ -98,9 +99,9 @@ public final class ApplicationAttributes {
    * @param <T> the expected type
    * @return the value
    */
-  public static <T> T getAttribute(final ServletContext application,
-                                   final String attribute,
-                                   final Class<T> clazz) {
+  public static <T> @Nullable T getAttribute(final ServletContext application,
+                                             final String attribute,
+                                             final Class<T> clazz) {
     final Object o = application.getAttribute(attribute);
     if (o == null
         || clazz.isInstance(o)) {
@@ -115,7 +116,7 @@ public final class ApplicationAttributes {
    * @param application application variable store
    * @return the database connection
    */
-  public static DataSource getDataSource(final ServletContext application) {
+  public static @Nullable DataSource getDataSource(final ServletContext application) {
     return getAttribute(application, ApplicationAttributes.DATASOURCE, DataSource.class);
   }
 

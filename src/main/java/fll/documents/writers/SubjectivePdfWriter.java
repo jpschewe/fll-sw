@@ -1,5 +1,7 @@
 package fll.documents.writers;
 
+import static org.checkerframework.checker.nullness.NullnessUtil.castNonNull;
+
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -15,7 +17,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
 import javax.xml.transform.TransformerException;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -27,6 +28,8 @@ import org.apache.fop.fonts.FontMetrics;
 import org.apache.fop.fonts.FontTriplet;
 import org.apache.fop.fonts.base14.Helvetica;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -67,7 +70,7 @@ public class SubjectivePdfWriter {
 
   private final SheetElement sheetElement;
 
-  private final String scheduleColumn;
+  private final @Nullable String scheduleColumn;
 
   /**
    * @param description the challenge description
@@ -76,10 +79,10 @@ public class SubjectivePdfWriter {
    *          may be null
    * @param tournamentName the name of the tournament to display on the sheets
    */
-  public SubjectivePdfWriter(@Nonnull final ChallengeDescription description,
-                             @Nonnull final String tournamentName,
-                             @Nonnull final SheetElement sheet,
-                             final String scheduleColumn) {
+  public SubjectivePdfWriter(final @NonNull ChallengeDescription description,
+                             final @NonNull String tournamentName,
+                             final @NonNull SheetElement sheet,
+                             final @Nullable String scheduleColumn) {
     this.description = description;
     this.tournamentName = tournamentName;
     this.sheetElement = sheet;
@@ -108,11 +111,13 @@ public class SubjectivePdfWriter {
 
     final Base64.Encoder encoder = Base64.getEncoder();
 
-    try (
-        InputStream input = this.getClass().getClassLoader()
-                                .getResourceAsStream("fll/resources/documents/FLLHeader.png");
+    final ClassLoader loader = castNonNull(this.getClass().getClassLoader());
+    try (InputStream input = loader.getResourceAsStream("fll/resources/documents/FLLHeader.png");
         ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-      Objects.requireNonNull(input);
+      if (null == input) {
+        throw new FLLInternalException("Cannot find FLLHeader.png");
+      }
+
       // TODO JDK 9 has StreamsTransfer.transferTo, so can use
       // input.transferTo(output)
       ByteStreams.copy(input, output);
@@ -319,9 +324,9 @@ public class SubjectivePdfWriter {
    * @param tournamentName displayed on the sheets
    * @return point size to use and the number of rows for the comment sheet
    */
-  private static Pair<Integer, Double> determineParameters(@Nonnull final ChallengeDescription description,
-                                                           @Nonnull final String tournamentName,
-                                                           @Nonnull final SheetElement sheetElement) {
+  private static Pair<Integer, Double> determineParameters(final ChallengeDescription description,
+                                                           final String tournamentName,
+                                                           final SheetElement sheetElement) {
 
     final TeamScheduleInfo teamInfo = new TeamScheduleInfo(1);
     teamInfo.setDivision("dummy");
@@ -368,12 +373,12 @@ public class SubjectivePdfWriter {
    * @throws IOException if there is an error writing the document to
    *           {@code stream}
    */
-  public static void createDocument(@Nonnull final OutputStream stream,
-                                    @Nonnull final ChallengeDescription description,
-                                    @Nonnull final String tournamentName,
-                                    @Nonnull final SheetElement sheetElement,
-                                    final String schedulerColumn,
-                                    @Nonnull final List<TeamScheduleInfo> schedule)
+  public static void createDocument(final OutputStream stream,
+                                    final ChallengeDescription description,
+                                    final String tournamentName,
+                                    final SheetElement sheetElement,
+                                    final @Nullable String schedulerColumn,
+                                    final List<TeamScheduleInfo> schedule)
       throws IOException {
 
     final Pair<Integer, Double> parameters = determineParameters(description, tournamentName, sheetElement);
@@ -481,9 +486,9 @@ public class SubjectivePdfWriter {
 
     tableBody.appendChild(createRubricHeaderRow(document, tableBody));
 
-    for (final String category : sheetElement.getCategories()) {
-      addRubricCategory(document, tableBody, fontSize, sheetElement.getTableElement(category));
-    }
+    sheetElement.forEachGoalCategory(table -> {
+      addRubricCategory(document, tableBody, fontSize, table);
+    });
 
     return rubric;
   }

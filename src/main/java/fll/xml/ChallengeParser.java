@@ -46,6 +46,7 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
 import org.apache.commons.io.IOUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -387,7 +388,7 @@ public final class ChallengeParser {
       boolean foundMatch = false;
       for (final Element valueEle : new NodelistElementCollectionAdapter(goalElement.getChildNodes())) {
         final double score = Utilities.getXmlFloatingPointNumberFormat().parse(valueEle.getAttribute("score"))
-                                                                                .doubleValue();
+                                      .doubleValue();
         if (FP.equals(score, initialValue, INITIAL_VALUE_TOLERANCE)) {
           foundMatch = true;
         }
@@ -461,7 +462,7 @@ public final class ChallengeParser {
    * @return the set of dependencies, will return the names of all goals
    *         referenced
    */
-  private static Set<String> getImmediateComputedGoalDependencies(final Element computedGoalElement) {
+  private static Set<String> getImmediateComputedGoalDependencies(final @Nullable Element computedGoalElement) {
     if (null == computedGoalElement) {
       return Collections.emptySet();
     } else {
@@ -476,8 +477,8 @@ public final class ChallengeParser {
     }
   }
 
-  public static String compareStructure(final Document curDoc,
-                                        final Document newDoc) {
+  public static @Nullable String compareStructure(final Document curDoc,
+                                                  final Document newDoc) {
     return compareStructure(new ChallengeDescription(curDoc.getDocumentElement()),
                             new ChallengeDescription(newDoc.getDocumentElement()));
   }
@@ -800,8 +801,8 @@ public final class ChallengeParser {
    * @param name the name to look for
    * @return the element or null if one is not found
    */
-  public static Element getSubjectiveCategoryByName(final Document challengeDocument,
-                                                    final String name) {
+  public static @Nullable Element getSubjectiveCategoryByName(final Document challengeDocument,
+                                                              final String name) {
     for (final Element categoryElement : new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement()
                                                                                                .getElementsByTagName("subjectiveCategory"))) {
       final String categoryName = categoryElement.getAttribute("name");

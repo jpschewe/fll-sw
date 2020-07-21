@@ -1,10 +1,13 @@
 package fll.documents.elements;
 
 import java.util.Collections;
-import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import fll.util.FLLRuntimeException;
 import fll.xml.AbstractGoal;
@@ -31,22 +34,17 @@ public class SheetElement {
   private final String sheetName;
 
   /**
-   * Category -> TableElement
+   * Category -> TableElement in the order that the goal categories are found.
    */
-  private final Hashtable<String, TableElement> tables = new Hashtable<String, TableElement>();
-
-  /**
-   * The categories for this ScoreCategory in order found.
-   */
-  private final List<String> categories = new LinkedList<>();
+  private final Map<String, TableElement> tables = new LinkedHashMap<String, TableElement>();
 
   private final SubjectiveScoreCategory sheetData;
 
-  private List<String> mMasterRubricRangeTitles = null;
-  
+  private List<String> mMasterRubricRangeTitles;
+
   /**
-   * 
-   * @return The titles of all ranges in the rubric sorted from lowest range to highest range
+   * @return The titles of all ranges in the rubric sorted from lowest range to
+   *         highest range
    */
   public List<String> getRubricRangeTitles() {
     return mMasterRubricRangeTitles;
@@ -56,26 +54,21 @@ public class SheetElement {
     return this.sheetData;
   }
 
+  /**
+   * Used to ensure that {@code tables} does not have any null keys.
+   */
+  private static final String NULL_GOAL_CATEGORY = "";
+
+  /**
+   * @param sheetData the sheet data to process
+   * @throws FLLRuntimeException if all goals in the ScoreCategory don't have
+   *           the same rubric titles
+   */
   public SheetElement(final SubjectiveScoreCategory sheetData) {
     // Sheet name will be Programming, Project, Robot Design or Core Values
     this.sheetName = sheetData.getName();
     this.sheetData = sheetData;
-    
-    processSheet();
-  }
 
-  /**
-   * A Goal is a single row in a table.
-   * It has the title, the description and the 4 levels of textual description
-   * of
-   * what it takes to meet that level of success<br>
-   * <code>beginning, developing, accomplished, exemplary </code><br>
-   * There is no guarantee the abstractGoals are in order for the tables
-   * 
-   * @throws FLLRuntimeException if all goals in the ScoreCategory don't have
-   *           the same rubric titles
-   */
-  private void processSheet() {
     final List<AbstractGoal> goalsList = sheetData.getGoals();
 
     // Go thru the sheet (ScoreCategory) and put all the rows (abstractGoal)
@@ -99,9 +92,9 @@ public class SheetElement {
               + sheetData.getTitle());
         }
 
-        final String tableCategory = goal.getCategory();
-        if (!this.categories.contains(tableCategory)) {
-          categories.add(tableCategory);
+        String tableCategory = goal.getCategory();
+        if (null == tableCategory) {
+          tableCategory = NULL_GOAL_CATEGORY;
         }
 
         TableElement tableElement = tables.get(tableCategory);
@@ -112,8 +105,8 @@ public class SheetElement {
         tableElement.addRowElement(new RowElement(goal));
       }
     }
-    
-    if(null == mMasterRubricRangeTitles) {
+
+    if (null == mMasterRubricRangeTitles) {
       mMasterRubricRangeTitles = new LinkedList<>();
     }
   }
@@ -122,25 +115,24 @@ public class SheetElement {
     return this.sheetName;
   }
 
-  public TableElement getTableElement(String table) {
-    return tables.get(table);
-  }
-
   /**
-   * The categories in this ScoreCategory in the order they were found in the
-   * challenge description.
-   * 
-   * @return unmodifiable list
+   * @param visitor called with each {@link TableElement} in the order seen in the
+   *          challenge description
    */
-  public List<String> getCategories() {
-    return Collections.unmodifiableList(this.categories);
+  public void forEachGoalCategory(final Consumer<TableElement> visitor) {
+    tables.forEach((category,
+                    table) -> {
+      visitor.accept(table);
+    });
   }
 
   public String toString() {
     final StringBuilder str = new StringBuilder();
     for (final Map.Entry<String, TableElement> entry : tables.entrySet()) {
       str.append("Table["
-          + entry.getKey() + "]: " + entry.getValue());
+          + entry.getKey()
+          + "]: "
+          + entry.getValue());
       str.append(System.lineSeparator());
     }
     str.append("Subjective Category: "

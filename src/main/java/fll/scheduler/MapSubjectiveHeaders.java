@@ -25,6 +25,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreCategory;
 import fll.xml.SubjectiveScoreCategory;
@@ -134,7 +136,7 @@ import fll.xml.SubjectiveScoreCategory;
    * @param category what to find
    * @return null if not found
    */
-  public String getSubjectiveHeaderForCategory(final ScoreCategory category) {
+  public @Nullable String getSubjectiveHeaderForCategory(final ScoreCategory category) {
     final JComboBox<String> combo = comboBoxes.get(category);
     if (null != combo) {
       return (String) combo.getSelectedItem();

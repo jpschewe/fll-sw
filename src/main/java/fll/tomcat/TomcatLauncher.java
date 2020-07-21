@@ -26,6 +26,7 @@ import org.apache.catalina.webresources.DirResourceSet;
 import org.apache.catalina.webresources.StandardRoot;
 import org.apache.tomcat.JarScanner;
 import org.apache.tomcat.util.scan.StandardJarScanner;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Launcher for embedded tomcat.
@@ -152,7 +153,7 @@ public class TomcatLauncher {
    * @param classesPath where the root of the classes are
    * @return where the root of the web files are, null if it cannot be found
    */
-  public static Path findWebappRoot(final Path classesPath) {
+  public static @Nullable Path findWebappRoot(final Path classesPath) {
     // where to look relative to classesPath
     final String[] possibleWebLocations = {
 
