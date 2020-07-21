@@ -12,6 +12,8 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * Base class for all publish messages
  */
@@ -46,7 +48,7 @@ public abstract class PublishCommand extends BaseMessage implements SequenceNumb
    * 
    * @return the payload of the message
    */
-  public abstract Object getData();
+  public abstract @Nullable Object getData();
 
   private final String node;
 
