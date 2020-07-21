@@ -6,6 +6,8 @@
 
 package fll.flltools;
 
+import static org.checkerframework.checker.nullness.NullnessUtil.castNonNull;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URI;
@@ -34,7 +36,8 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
-
+import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,7 +45,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fll.Utilities;
 import fll.flltools.displaySystem.DisplaySystemHandler;
 import fll.util.FLLInternalException;
-
 import fll.web.ApplicationAttributes;
 
 /**
@@ -61,7 +63,7 @@ public class MhubMessageHandler extends Thread {
 
   private boolean running = false;
 
-  private DisplaySystemHandler displayHandler = null;
+  private @Nullable DisplaySystemHandler displayHandler = null;
 
   private final ServletContext application;
 
@@ -224,7 +226,7 @@ public class MhubMessageHandler extends Thread {
     }
   }
 
-  private URI currentUri = null;
+  private @Nullable URI currentUri = null;
 
   /**
    * Create the websocket if the parameters are different.
@@ -240,7 +242,7 @@ public class MhubMessageHandler extends Thread {
             + hostname
             + ":"
             + port);
-        
+
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("Checking if need to create websocket current: "
               + currentUri
@@ -261,7 +263,8 @@ public class MhubMessageHandler extends Thread {
           }
 
           final WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-          container.connectToServer(this, currentUri);
+          // at this point currentUri is guaranteed to not be null
+          container.connectToServer(this, castNonNull(currentUri));
 
           displayHandler = new DisplaySystemHandler(this, application);
           displayHandler.start();
@@ -402,7 +405,11 @@ public class MhubMessageHandler extends Thread {
   private void handleErrorResponse(final ErrorResponse response) {
     LOGGER.error("Got error message: "
         + response.getMessage());
-    removeFromPendingSequenceNumbers(response.getSeq());
+
+    final Integer sequenceNumber = response.getSeq();
+    if (null != sequenceNumber) {
+      removeFromPendingSequenceNumbers(sequenceNumber);
+    }
   }
 
   @OnMessage
@@ -442,7 +449,7 @@ public class MhubMessageHandler extends Thread {
   // Inner classes
   private static final class SequenceNumberEntry {
 
-    public SequenceNumberEntry(@Nonnull final SequenceNumberCommand message) {
+    private SequenceNumberEntry(@Nonnull final SequenceNumberCommand message) {
       this.message = message;
       timeSent = LocalTime.now();
     }

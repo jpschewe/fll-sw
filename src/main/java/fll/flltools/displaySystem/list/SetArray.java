@@ -8,6 +8,8 @@ package fll.flltools.displaySystem.list;
 
 import java.util.List;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -23,17 +25,17 @@ public class SetArray extends BaseListMessage {
    * @return {@link SetArray#getPayload()}
    */
   @Override
-  public Object getData() {
+  public @Nullable Object getData() {
     return getPayload();
   }
 
-  private Payload payload = null;
+  private @Nullable Payload payload = null;
 
   /**
    * @param payload the payload for the message
    */
   @JsonIgnore
-  public void setPayload(final Payload payload) {
+  public void setPayload(final @Nullable Payload payload) {
     this.payload = payload;
   }
 
@@ -41,7 +43,7 @@ public class SetArray extends BaseListMessage {
    * @return the payload for the message
    */
   @JsonIgnore
-  public Payload getPayload() {
+  public @Nullable Payload getPayload() {
     return payload;
   }
 
@@ -51,7 +53,8 @@ public class SetArray extends BaseListMessage {
    * @see SetArray#getData()
    */
   public static final class Payload {
-    public Payload(final String header, final List<List<String>> data) {
+    public Payload(final String header,
+                   final List<List<String>> data) {
       this.header = header;
       this.data = data;
     }
@@ -64,15 +67,16 @@ public class SetArray extends BaseListMessage {
     public String getHeader() {
       return header;
     }
-    
+
     private final List<List<String>> data;
+
     /**
      * @return the data to be displayed, 2-dimensional array
      */
     public List<List<String>> getData() {
       return data;
     }
-    
+
   }
 
 }

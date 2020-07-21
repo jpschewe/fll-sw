@@ -8,6 +8,8 @@ package fll.flltools.displaySystem.list;
 
 import javax.annotation.Nonnull;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * A message to tell the list module to hide.
  */
@@ -20,7 +22,7 @@ public class Hide extends BaseListMessage {
    * @return null as there is no data for this message
    */
   @Override
-  public Object getData() {
+  public @Nullable Object getData() {
     return null;
   }
 

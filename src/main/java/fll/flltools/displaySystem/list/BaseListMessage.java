@@ -8,6 +8,8 @@ package fll.flltools.displaySystem.list;
 
 import javax.annotation.Nonnull;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import fll.flltools.PublishCommand;
 
 /**
@@ -16,12 +18,12 @@ import fll.flltools.PublishCommand;
 public abstract class BaseListMessage extends PublishCommand {
 
   public BaseListMessage(@Nonnull final String node,
-                     @Nonnull final String action) {
+                         @Nonnull final String action) {
     super("list:"
         + action, node);
   }
 
   @Override
-  public abstract Object getData();
+  public abstract @Nullable Object getData();
 
 }

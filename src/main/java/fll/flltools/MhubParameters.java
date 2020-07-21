@@ -31,7 +31,7 @@ public final class MhubParameters {
    * Default value for the host property. This is null, meaning don't talk to
    * mhub.
    */
-  public static final String DEFAULT_HOST = null;
+  public static final @Nullable String DEFAULT_HOST = null;
 
   /**
    * Key for {@link GlobalParameters} for the mhub port.
@@ -57,7 +57,7 @@ public final class MhubParameters {
    * @return the hostname to talk to mhub at, or null to not talk to mhub
    * @param connection the connection to the database
    */
-  public static String getHostname(final Connection connection) throws SQLException {
+  public static @Nullable String getHostname(final Connection connection) throws SQLException {
     if (GlobalParameters.globalParameterExists(connection, HOST_KEY)) {
       final String value = GlobalParameters.getStringGlobalParameter(connection, HOST_KEY);
       if (StringUtils.isBlank(value)) {
