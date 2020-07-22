@@ -21,26 +21,35 @@ import fll.Utilities;
  */
 public class SchedParams implements Serializable {
 
-  public static final String SUBJ_MINUTES_KEY = "subj_minutes";
+  private static final String SUBJ_MINUTES_KEY = "subj_minutes";
 
-  public static final String SUBJ_NAMES_KEY = "subj_names";
+  private static final String SUBJ_NAMES_KEY = "subj_names";
 
-  public static final String ALPHA_PERF_MINUTES_KEY = "alpha_perf_minutes";
+  private static final String ALPHA_PERF_MINUTES_KEY = "alpha_perf_minutes";
 
-  public static final String CT_MINUTES_KEY = "ct_minutes";
+  private static final String CT_MINUTES_KEY = "ct_minutes";
 
-  public static final String PCT_MINUTES_KEY = "pct_minutes";
+  private static final String PCT_MINUTES_KEY = "pct_minutes";
 
-  public static final int DEFAULT_TINC = 5;
-
-  public static final int DEFAULT_MAX_HOURS = 8;
-
+  /**
+   * Default number of minutes for a subjective judging session.
+   */
   public static final int DEFAULT_SUBJECTIVE_MINUTES = 20;
 
+  /**
+   * Default number of minutes for a performance session.
+   */
   public static final int DEFAULT_PERFORMANCE_MINUTES = 5;
 
+  /**
+   * Default number of minutes for a team to get from one session to another.
+   */
   public static final int MINIMUM_CHANGETIME_MINUTES = 15;
 
+  /**
+   * Default number of minutes that a team should have between performance
+   * sessions.
+   */
   public static final int MINIMUM_PERFORMANCE_CHANGETIME_MINUTES = 30;
 
   /**
@@ -138,16 +147,16 @@ public class SchedParams implements Serializable {
   private int mPerformanceMinutes = DEFAULT_PERFORMANCE_MINUTES;
 
   /**
-   * Number of minutes per performance run. This is how long the team is
-   * expected to be at the table.
-   * Defaults to {@link #DEFAULT_PERFORMANCE_MINUTES}
+   * @return Number of minutes per performance run. This is how long the team is
+   *         expected to be at the table.
+   *         Defaults to {@link #DEFAULT_PERFORMANCE_MINUTES}
    */
   public final int getPerformanceMinutes() {
     return mPerformanceMinutes;
   }
 
   /**
-   * @see #getPerformanceMinutes()
+   * @param v see {@link #getPerformanceMinutes()}
    */
   public final void setPerformanceMinutes(final int v) {
     mPerformanceMinutes = v;
@@ -156,15 +165,15 @@ public class SchedParams implements Serializable {
   private int mChangetimeMinutes = MINIMUM_CHANGETIME_MINUTES;
 
   /**
-   * Number of minutes between judging stations for each team.
-   * Default is {@link #MINIMUM_CHANGETIME_MINUTES}
+   * @return Number of minutes between judging stations for each team.
+   *         Default is {@link #MINIMUM_CHANGETIME_MINUTES}
    */
   public final int getChangetimeMinutes() {
     return mChangetimeMinutes;
   }
 
   /**
-   * @see #getChangetimeMinutes()
+   * @param v see {@link #getChangetimeMinutes()}
    */
   public final void setChangetimeMinutes(final int v) {
     mChangetimeMinutes = v;
@@ -173,15 +182,15 @@ public class SchedParams implements Serializable {
   private int mPerformanceChangetimeMinutes = MINIMUM_PERFORMANCE_CHANGETIME_MINUTES;
 
   /**
-   * Number of minutes between performance rounds for a team.
-   * Default value is {@link #MINIMUM_PERFORMANCE_CHANGETIME_MINUTES}.
+   * @return Number of minutes between performance rounds for a team.
+   *         Default value is {@link #MINIMUM_PERFORMANCE_CHANGETIME_MINUTES}.
    */
   public final int getPerformanceChangetimeMinutes() {
     return mPerformanceChangetimeMinutes;
   }
 
   /**
-   * @see #getPerformanceChangetimeMinutes()
+   * @param v see {@link #getPerformanceChangetimeMinutes()}
    */
   public final void setPerformanceChangetimeMinutes(final int v) {
     mPerformanceChangetimeMinutes = v;
@@ -190,8 +199,8 @@ public class SchedParams implements Serializable {
   private ArrayList<SubjectiveStation> mSubjectiveStations = new ArrayList<>();
 
   /**
-   * Number of subjective judging stations.
-   * Defaults to 0.
+   * @return Number of subjective judging stations.
+   *         Defaults to 0.
    */
   public final int getNSubjective() {
     return mSubjectiveStations.size();
@@ -219,12 +228,17 @@ public class SchedParams implements Serializable {
   /**
    * @param v new value for subjective stations
    */
-  protected final void setSubjectiveStations(final List<SubjectiveStation> v) {
-    mSubjectiveStations = new ArrayList<>(v);
+  public final void setSubjectiveStations(final List<SubjectiveStation> v) {
+    if (null == v) {
+      mSubjectiveStations = new ArrayList<>();
+    } else {
+      mSubjectiveStations = new ArrayList<>(v);
+    }
   }
 
   /**
-   * Number of minutes for a subjective judging.
+   * @param station the subjective station to get the time for
+   * @return Number of minutes for a subjective judging.
    */
   public final int getSubjectiveMinutes(final int station) {
     return mSubjectiveStations.get(station).getDurationMinutes();
@@ -240,6 +254,7 @@ public class SchedParams implements Serializable {
   /**
    * Find a station by name.
    * 
+   * @param name thename of the station to find
    * @return the station, null if no station by name found
    */
   public final SubjectiveStation getStationByName(final String name) {
@@ -261,12 +276,14 @@ public class SchedParams implements Serializable {
 
     if (getChangetimeMinutes() < SchedParams.MINIMUM_CHANGETIME_MINUTES) {
       errors.add("Change time between events is too short, cannot be less than "
-          + SchedParams.MINIMUM_CHANGETIME_MINUTES + " minutes");
+          + SchedParams.MINIMUM_CHANGETIME_MINUTES
+          + " minutes");
     }
 
     if (getPerformanceChangetimeMinutes() < SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES) {
       errors.add("Change time between performance rounds is too short, cannot be less than "
-          + SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES + " minutes");
+          + SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES
+          + " minutes");
     }
 
     return errors;
