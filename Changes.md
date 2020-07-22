@@ -1,3 +1,4 @@
+* #840 - Fix use of user provided constraint change times
 * #837 - Fix errors around editing restrictions in the challenge description editor
 * #839 - Allow the application to run headless
 * #838 - Allow one to specify the port for the web server
