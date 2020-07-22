@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -76,10 +77,9 @@ public final class TeamScheduleInfo implements Serializable {
    *         practice rounds
    */
   public Stream<Pair<PerformanceTime, Long>> enumerateRegularMatchPlayPerformances() {
-    // TODO use Predicate::not when moving to Java 11+
-    return Streams.mapWithIndex(allPerformances().filter(pt -> !pt.isPractice()), (performance,
-                                                                                   index) -> Pair.of(performance,
-                                                                                                     index));
+    return Streams.mapWithIndex(allPerformances().filter(Predicate.not(PerformanceTime::isPractice)), (performance,
+                                                                                                       index) -> Pair.of(performance,
+                                                                                                                         index));
   }
 
   /**

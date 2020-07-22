@@ -127,9 +127,11 @@ ext {
 
 group = "fll"
 
-// set version of Java that the source confirms to. 
-// The bytecode will be for this version of Java as well, unless targetCompatibility is specified.
-sourceCompatibility = 1.8
+java {
+    // set version of Java that the source confirms to. 
+    // The bytecode will be for this version of Java as well, unless targetCompatibility is specified.
+    sourceCompatibility = JavaVersion.VERSION_11
+}
 
 dependencies {
   implementation(group: "org.apache.tomcat.embed", name: "tomcat-embed-core", version: project.tomcat_version)
@@ -164,7 +166,7 @@ dependencies {
 
   implementation(group: "net.sourceforge.schemaspy", name: "schemaspy", version: "5.0.0")
             
-  implementation(group: "dnsjava", name: "dnsjava", version: "3.1.0")
+  implementation(group: "dnsjava", name: "dnsjava", version: "3.2.2")
     
   implementation(group: "commons-fileupload", name: "commons-fileupload", version: "1.4")
     
