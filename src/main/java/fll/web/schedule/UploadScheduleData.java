@@ -126,8 +126,6 @@ public class UploadScheduleData implements Serializable {
     categoryColumnMappings.addAll(v);
   }
 
-  private LinkedList<SubjectiveStation> subjectiveStations = null;
-
   /**
    * @return the subjective stations for the schedule.
    * @see SchedParams#getSubjectiveStations()
