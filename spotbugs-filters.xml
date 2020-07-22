@@ -22,5 +22,11 @@ https://github.com/spotbugs/spotbugs/issues/756 -->
     <Bug pattern="RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE" />
   </Match>
 
+  <!-- spotbugs issue https://github.com/spotbugs/spotbugs/issues/811
+-->
+  <Match>
+    <Bug pattern="UPM_UNCALLED_PRIVATE_METHOD" />
+  </Match>
+
 </FindBugsFilter>
 
