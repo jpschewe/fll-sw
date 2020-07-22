@@ -139,7 +139,17 @@ public class UploadScheduleData implements Serializable {
    */
   public void setSubjectiveStations(final List<SubjectiveStation> v) {
     schedParams.setSubjectiveStations(v);
+    subjectiveStationsSet = true;
   }
+
+  /**
+   * @return if {@link #setSubjectiveStations(List)} has been called
+   */
+  public boolean isSubjectiveStationsSet() {
+    return subjectiveStationsSet;
+  }
+
+  private boolean subjectiveStationsSet = false;
 
   private final LinkedList<String> unusedHeaders = new LinkedList<>();
 

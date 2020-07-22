@@ -59,14 +59,13 @@ public class LoadSchedule extends BaseFLLServlet {
                                                                                         UploadScheduleData.class);
 
     try {
-      final List<SubjectiveStation> subjectiveStations = uploadScheduleData.getSubjectiveStations();
-      if (null == subjectiveStations) {
+      if (!uploadScheduleData.isSubjectiveStationsSet()) {
         final File scheduleFile = uploadScheduleData.getScheduleFile();
         Objects.requireNonNull(scheduleFile);
 
         final String sheetName = uploadScheduleData.getSelectedSheet();
 
-        try (final CellFileReader reader = CellFileReader.createCellReader(scheduleFile, sheetName)) {
+        try (CellFileReader reader = CellFileReader.createCellReader(scheduleFile, sheetName)) {
           final ColumnInformation columnInfo = TournamentSchedule.findColumns(reader, new LinkedList<String>());
           if (!columnInfo.getUnusedColumns().isEmpty()) {
             uploadScheduleData.setUnusedHeaders(columnInfo.getUnusedColumns());
@@ -121,7 +120,7 @@ public class LoadSchedule extends BaseFLLServlet {
       if (isCsvFile) {
         schedule = new TournamentSchedule(name, scheduleFile, subjectiveHeaders);
       } else {
-        try (final InputStream stream = new FileInputStream(scheduleFile)) {
+        try (InputStream stream = new FileInputStream(scheduleFile)) {
           schedule = new TournamentSchedule(name, stream, sheetName, subjectiveHeaders);
         }
       }
