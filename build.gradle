@@ -62,6 +62,12 @@ eclipse {
                 // add web as resource entry
                 node.appendNode( "classpathentry", [ kind: "src", path: "src/main/web", output: "bin/web"]) 
             }
+                                                                                                                                    
+            // remove entries added due to issue with testsets                                                                      
+            // https://github.com/unbroken-dome/gradle-testsets-plugin/issues/77                                                    
+            whenMerged {                                                                                                            
+                entries.removeAll{it.kind == "lib" && (it.path.endsWith("build/classes/java/test") || it.path.endsWith("build/resources/test"))}
+            }                                                                                                                       
         }
     }
 }
