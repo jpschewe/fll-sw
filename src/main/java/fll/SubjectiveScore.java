@@ -11,6 +11,7 @@ import java.util.Map;
 
 /**
  * A subjective score from the database.
+ * Primarily used to exchange data with the subjective web application.
  */
 public class SubjectiveScore {
 
@@ -49,8 +50,8 @@ public class SubjectiveScore {
   private boolean mModified;
 
   /**
-   * Has the score been modified since being pulled
-   * from the database?
+   * @return Has the score been modified since being pulled
+   *         from the database?
    */
   public boolean getModified() {
     return mModified;
@@ -63,7 +64,7 @@ public class SubjectiveScore {
   private boolean mDeleted;
 
   /**
-   * Should the score be deleted from the database?
+   * @return Should the score be deleted from the database?
    */
   public boolean getDeleted() {
     return mDeleted;
@@ -76,7 +77,7 @@ public class SubjectiveScore {
   private String mJudge;
 
   /**
-   * ID of the judge that created the scores.
+   * @return ID of the judge that created the scores.
    */
   public String getJudge() {
     return mJudge;

@@ -48,6 +48,8 @@ import fll.xml.SubjectiveScoreCategory;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
+ * Access to subjective scores.
+ * 
  * GET: {category, {judge, {teamNumber, SubjectiveScore}}}
  * POST: expects the data from GET and returns UploadResult
  */
@@ -197,7 +199,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
         noShowPrep.setInt(2, currentTournament);
         noShowPrep.setBoolean(4, true);
 
-        final int NUM_COLUMNS_BEFORE_GOALS = 6;
+        final int numColumnsBeforeGoals = 6;
         insertPrep = createInsertStatement(connection, categoryDescription);
         insertPrep.setInt(2, currentTournament);
         insertPrep.setBoolean(4, false);
@@ -249,19 +251,19 @@ public class SubjectiveScoresServlet extends HttpServlet {
                       final String value = score.getEnumSubScores().get(goalName);
                       if (null == value) {
                         insertPrep.setNull(goalIndex
-                            + NUM_COLUMNS_BEFORE_GOALS, Types.VARCHAR);
+                            + numColumnsBeforeGoals, Types.VARCHAR);
                       } else {
                         insertPrep.setString(goalIndex
-                            + NUM_COLUMNS_BEFORE_GOALS, value.trim());
+                            + numColumnsBeforeGoals, value.trim());
                       }
                     } else {
                       final Double value = score.getStandardSubScores().get(goalName);
                       if (null == value) {
                         insertPrep.setNull(goalIndex
-                            + NUM_COLUMNS_BEFORE_GOALS, Types.DOUBLE);
+                            + numColumnsBeforeGoals, Types.DOUBLE);
                       } else {
                         insertPrep.setDouble(goalIndex
-                            + NUM_COLUMNS_BEFORE_GOALS, value);
+                            + numColumnsBeforeGoals, value);
                       }
                     }
                     ++goalIndex;
