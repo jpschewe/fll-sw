@@ -198,6 +198,9 @@ dependencies {
     
     // references old version of the servlet API
     exclude(group: "javax.servlet", module: "servlet-api")
+    
+    // xml APIs are part of the JDK
+    exclude(group: "xml-apis", module: "xml-apis")
   }
     
   implementation(group: "org.apache.pdfbox", name: "pdfbox", version: "2.0.19")
@@ -212,7 +215,11 @@ dependencies {
   integrationTestImplementation(sourceSets.test.output)
         
   integrationTestImplementation(group: "org.easytesting", name: "fest-swing", version: "1.2.1")
-  integrationTestImplementation(group: "net.sourceforge.htmlunit", name: "htmlunit", version: "2.40.0")
+  integrationTestImplementation(group: "net.sourceforge.htmlunit", name: "htmlunit", version: "2.40.0") {
+      
+    // xml APIs are part of the JDK
+    exclude(group: "xml-apis", module: "xml-apis")
+  }
   integrationTestImplementation(group: "org.seleniumhq.selenium", name: "selenium-server", version: "3.141.59")
   integrationTestImplementation(group: "io.github.bonigarcia", name: "webdrivermanager", version: "4.0.0")
   
