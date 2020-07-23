@@ -645,6 +645,11 @@ public final class ImportDB {
     }
 
     dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 23) {
+      upgrade22To23(connection, description);
+    }
+
+    dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < GenerateDB.DATABASE_VERSION) {
       throw new RuntimeException("Internal error, database version not updated to current instead was: "
           + dbVersion);
@@ -895,6 +900,36 @@ public final class ImportDB {
     GenerateDB.createAwardGroupOrder(connection, false);
 
     setDBVersion(connection, 22);
+  }
+
+  private static void upgrade22To23(final Connection connection,
+                                    final ChallengeDescription description)
+      throws SQLException {
+    LOGGER.trace("Upgrading database from 22 to 23");
+
+    try (Statement stmt = connection.createStatement()) {
+      for (final SubjectiveScoreCategory categoryElement : description.getSubjectiveCategories()) {
+
+        String tableName = categoryElement.getName();
+
+        // add _comment for each goal
+        for (final AbstractGoal element : categoryElement.getGoals()) {
+          final String goalName = element.getName();
+
+          stmt.executeUpdate(String.format("ALTER TABLE %s ADD COLUMN %s_comment longvarchar DEFAULT NULL", tableName,
+                                           goalName));
+        }
+
+        // add comment_great_job
+        stmt.executeUpdate(String.format("ALTER TABLE %s ADD COLUMN comment_great_job longvarchar DEFAULT NULL",
+                                         tableName));
+        // add comment_think_about
+        stmt.executeUpdate(String.format("ALTER TABLE %s ADD COLUMN comment_think_about longvarchar DEFAULT NULL",
+                                         tableName));
+      } // foreach category
+    } // allocate statement
+
+    setDBVersion(connection, 23);
   }
 
   /**
