@@ -36,7 +36,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 22;
+  public static final int DATABASE_VERSION = 23;
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
@@ -297,8 +297,14 @@ public final class GenerateDB {
           createStatement.append(" "
               + columnDefinition
               + ",");
+
+          createStatement.append(String.format(" %s_comment longvarchar DEFAULT NULL,", element.getName()));
         }
         createStatement.append(" note longvarchar DEFAULT NULL,");
+
+        createStatement.append(" comment_great_job longvarchar DEFAULT NULL,");
+        createStatement.append(" comment_think_about longvarchar DEFAULT NULL,");
+
         createStatement.append(" CONSTRAINT "
             + tableName
             + "_pk PRIMARY KEY (TeamNumber, Tournament, Judge)");
