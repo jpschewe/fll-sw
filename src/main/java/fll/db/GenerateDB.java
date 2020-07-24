@@ -298,7 +298,7 @@ public final class GenerateDB {
               + columnDefinition
               + ",");
 
-          createStatement.append(String.format(" %s_comment longvarchar DEFAULT NULL,", element.getName()));
+          createStatement.append(String.format(" %s longvarchar DEFAULT NULL,", getGoalCommentColumnName(element)));
         }
         createStatement.append(" note longvarchar DEFAULT NULL,");
 
@@ -385,6 +385,15 @@ public final class GenerateDB {
       SQLFunctions.close(prep);
     }
 
+  }
+
+  /**
+   * @param goal the goal to get the column name for
+   * @return the name of the column that stores the comments for this goal
+   */
+  public static String getGoalCommentColumnName(final AbstractGoal goal) {
+    return goal.getName()
+        + "_comment";
   }
 
   /* package */static void createNonNumericNomineesTables(final Connection connection,
