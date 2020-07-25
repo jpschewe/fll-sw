@@ -28,8 +28,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
-import org.apache.commons.io.IOUtils;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -160,12 +158,13 @@ public class SubjectiveScoresServlet extends HttpServlet {
       final int currentTournament = Queries.getCurrentTournament(connection);
 
       final StringWriter debugWriter = new StringWriter();
-      IOUtils.copy(request.getReader(), debugWriter);
+      request.getReader().transferTo(debugWriter);
 
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Read data: "
             + debugWriter.toString());
       }
+      System.out.println("Read: " + debugWriter.toString());
 
       final Reader reader = new StringReader(debugWriter.toString());
 
@@ -279,6 +278,12 @@ public class SubjectiveScoresServlet extends HttpServlet {
 
                       // goal comment
                       final String goalComment = goalComments.get(goalName);
+                      System.out.println("Team "
+                          + teamNumber
+                          + " goal: "
+                          + goalName
+                          + " comment: "
+                          + goalComment);
                       if (null == goalComment) {
                         insertPrep.setNull(goalIndex
                             + columnIndexOfFirstGoal, Types.LONGVARCHAR);
