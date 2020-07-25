@@ -20,7 +20,8 @@ import fll.web.SessionAttributes;
  * Populate page context for selectTournament.jsp.
  */
 public final class SelectTournament {
-  private SelectTournament();
+  private SelectTournament() {
+  }
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
