@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -24,7 +23,6 @@ import fll.db.Queries;
 import fll.scheduler.ConstraintViolation;
 import fll.scheduler.SchedParams;
 import fll.scheduler.ScheduleChecker;
-import fll.scheduler.SubjectiveStation;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;

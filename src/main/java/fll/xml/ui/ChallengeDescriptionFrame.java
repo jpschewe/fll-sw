@@ -480,7 +480,7 @@ public class ChallengeDescriptionFrame extends JFrame {
             + ".pdf";
 
         try (OutputStream out = Files.newOutputStream(outputDirectory.resolve(filename))) {
-          SubjectivePdfWriter.createDocument(out, challengeDescription, tournamentName, sheetElement, null,
+          SubjectivePdfWriter.createDocumentForSchedule(out, challengeDescription, tournamentName, sheetElement, null,
                                              Collections.singletonList(dummy));
         } catch (final IOException e) {
           LOGGER.error("Error writing subjective score sheet {}", category.getName(), e);
