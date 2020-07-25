@@ -290,9 +290,8 @@ public class AwardsReport extends BaseFLLServlet {
         tableBody.appendChild(descriptionRow);
 
         final Element descriptionCell = FOPUtils.createTableCell(document, null,
-                                                                 String.format("%s%s%s",
-                                                                               Utilities.NON_BREAKING_SPACE_CODE,
-                                                                               Utilities.NON_BREAKING_SPACE_CODE,
+                                                                 String.format("%c%c%s", Utilities.NON_BREAKING_SPACE,
+                                                                               Utilities.NON_BREAKING_SPACE,
                                                                                winner.getDescription()));
         descriptionRow.appendChild(descriptionCell);
 
@@ -367,9 +366,9 @@ public class AwardsReport extends BaseFLLServlet {
               tableBody.appendChild(descriptionRow);
 
               final Element descriptionCell = FOPUtils.createTableCell(document, null,
-                                                                       String.format("%s%s%s",
-                                                                                     Utilities.NON_BREAKING_SPACE_CODE,
-                                                                                     Utilities.NON_BREAKING_SPACE_CODE,
+                                                                       String.format("%c%c%s",
+                                                                                     Utilities.NON_BREAKING_SPACE,
+                                                                                     Utilities.NON_BREAKING_SPACE,
                                                                                      winner.getDescription()));
               descriptionRow.appendChild(descriptionCell);
 
@@ -613,7 +612,7 @@ public class AwardsReport extends BaseFLLServlet {
     // add some spacing
     final Element emptyRow = FOPUtils.createTableRow(document);
     tableBody.appendChild(emptyRow);
-    final Element emptyCell = FOPUtils.createTableCell(document, null, Utilities.NON_BREAKING_SPACE_CODE);
+    final Element emptyCell = FOPUtils.createTableCell(document, null, String.valueOf(Utilities.NON_BREAKING_SPACE));
     emptyRow.appendChild(emptyCell);
     emptyCell.setAttribute("number-columns-spanned", String.valueOf(columnsInTable));
 

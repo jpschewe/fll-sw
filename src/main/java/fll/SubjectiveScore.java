@@ -6,13 +6,23 @@
 
 package fll;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fll.db.GenerateDB;
+import fll.xml.AbstractGoal;
 import fll.xml.Goal;
+import fll.xml.SubjectiveScoreCategory;
 
 /**
  * A subjective score from the database.
@@ -244,6 +254,73 @@ public class SubjectiveScore {
     if (null != v) {
       goalComments.putAll(v);
     }
+  }
+
+  /**
+   * Load the scores for a team from the database.
+   * 
+   * @param connection the database connection
+   * @param category the subjective score category to load the scores for
+   * @param tournament the tournament
+   * @param team the team
+   * @return the scores found on the server, possibly an empty list
+   * @throws SQLException if there is a problem talking to the database
+   */
+  @SuppressFBWarnings(value = "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING", justification = "Table name is determined by the category")
+  public static Collection<SubjectiveScore> getScoresForTeam(final Connection connection,
+                                                             final SubjectiveScoreCategory category,
+                                                             final Tournament tournament,
+                                                             final Team team)
+      throws SQLException {
+    final Collection<SubjectiveScore> scores = new LinkedList<>();
+
+    try (PreparedStatement prep = connection.prepareStatement("SELECT * FROM "
+        + category.getName()
+        + " WHERE Tournament = ? AND teamnumber = ?")) {
+      prep.setInt(1, tournament.getTournamentID());
+      prep.setInt(2, team.getTeamNumber());
+
+      try (ResultSet rs = prep.executeQuery()) {
+        while (rs.next()) {
+          final SubjectiveScore score = new SubjectiveScore();
+          score.setScoreOnServer(true);
+
+          final String judge = rs.getString("Judge");
+
+          score.setTeamNumber(rs.getInt("TeamNumber"));
+          score.setJudge(judge);
+          score.setNoShow(rs.getBoolean("NoShow"));
+          score.setNote(rs.getString("note"));
+          score.setCommentGreatJob(rs.getString("comment_great_job"));
+          score.setCommentThinkAbout(rs.getString("comment_think_about"));
+
+          final Map<String, Double> standardSubScores = new HashMap<>();
+          final Map<String, String> enumSubScores = new HashMap<>();
+          final Map<String, String> goalComments = new HashMap<>();
+          for (final AbstractGoal goal : category.getGoals()) {
+            if (goal.isEnumerated()) {
+              final String value = rs.getString(goal.getName());
+              enumSubScores.put(goal.getName(), value);
+            } else {
+              final double value = rs.getDouble(goal.getName());
+              standardSubScores.put(goal.getName(), value);
+            }
+
+            final String commentColumn = GenerateDB.getGoalCommentColumnName(goal);
+            final String comment = rs.getString(commentColumn);
+            goalComments.put(goal.getName(), comment);
+          } // foreach goal
+          score.setStandardSubScores(standardSubScores);
+          score.setEnumSubScores(enumSubScores);
+          score.setGoalComments(goalComments);
+
+          scores.add(score);
+        } // foreach result
+
+      } // allocate result set
+    } // allocate prep
+
+    return scores;
   }
 
 }

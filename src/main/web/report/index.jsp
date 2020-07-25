@@ -103,6 +103,32 @@
             used for the awards ceremony.
         </li>
 
+        <li>
+            <a href="TeamResults" target="_blank">Team Results</a>. This
+            is a zip file containing the results to return to the teams.
+            This will take some time to generate, be patient.
+            <ul>
+                <li>
+                    <form action='TeamResults' method='post'
+                        target="_blank">
+                        Results for a single team
+                        <select name='TeamNumber'>
+                            <c:forEach items="${tournamentTeams}"
+                                var="team">
+                                <option
+                                    value='<c:out value="${team.teamNumber}"/>'>
+                                    <c:out value="${team.teamNumber}" />
+                                    -
+                                    <c:out value="${team.teamName}" />
+                                </option>
+                            </c:forEach>
+                        </select>
+                        <input type='submit' value='Get Results' />
+                    </form>
+                </li>
+            </ul>
+        </li>
+
     </ol>
 
 

@@ -92,7 +92,7 @@ public class SubjectiveSheets extends BaseFLLServlet {
           response.setHeader("Content-Disposition",
                              String.format("filename=\"subjective-%s.pdf\"", subjectiveCategoryName));
 
-          SubjectivePdfWriter.createDocument(response.getOutputStream(), description, tournament.getName(),
+          SubjectivePdfWriter.createDocumentForSchedule(response.getOutputStream(), description, tournament.getName(),
                                              sheetElement, categoryMapping.get().getScheduleColumn(),
                                              schedule.getSchedule());
         }

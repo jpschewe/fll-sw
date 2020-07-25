@@ -327,6 +327,11 @@ public final class FOPUtils {
   }
 
   /**
+   * Attribute used to set text alignment.
+   */
+  public static final String TEXT_ALIGN_ATTRIBUTE = "text-align";
+
+  /**
    * Center text alignment.
    */
   public static final String TEXT_ALIGN_CENTER = "center";
@@ -463,7 +468,7 @@ public final class FOPUtils {
     final Element block = createXslFoElement(document, BLOCK_TAG);
     blockContainer.appendChild(block);
     if (null != textAlign) {
-      block.setAttribute("text-align", textAlign);
+      block.setAttribute(TEXT_ALIGN_ATTRIBUTE, textAlign);
     }
     block.appendChild(document.createTextNode(text));
 
