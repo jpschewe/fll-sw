@@ -67,7 +67,7 @@ public class BlankSubjectiveSheet extends HttpServlet {
         final Tournament tournament = Tournament.findTournamentByID(connection,
                                                                     Queries.getCurrentTournament(connection));
 
-        SubjectivePdfWriter.createDocument(response.getOutputStream(), challengeDescription, tournament.getName(),
+        SubjectivePdfWriter.createDocumentForSchedule(response.getOutputStream(), challengeDescription, tournament.getName(),
                                            sheetElement, null, Collections.singletonList(dummy));
 
       } else {

@@ -943,7 +943,7 @@ public class TournamentSchedule implements Serializable {
       final String schedulerColumn = categoryToSchedule.get(scoreCategory);
 
       try (OutputStream stream = new FileOutputStream(filename)) {
-        SubjectivePdfWriter.createDocument(stream, description, tournamentName, sheetElement, schedulerColumn,
+        SubjectivePdfWriter.createDocumentForSchedule(stream, description, tournamentName, sheetElement, schedulerColumn,
                                            schedule);
       }
     }
