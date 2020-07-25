@@ -622,24 +622,47 @@ public class SubjectivePdfWriter {
       tableBody.appendChild(rubricRow);
 
       for (final RubricRange rubricRange : sortedRubricRanges) {
-        final Element rangeCell;
-        final String rawShortDescription = rubricRange.getShortDescription();
-        if (null == rawShortDescription) {
-          rangeCell = FOPUtils.createTableCell(document, null, "");
-        } else {
-          final String shortDescription = rawShortDescription.trim().replaceAll("\\s+", " ");
-          rangeCell = FOPUtils.createTableCell(document, FOPUtils.TEXT_ALIGN_CENTER, shortDescription);
-        }
+        final Element rangeCell = createRubricRangeCell(document, rubricRange);
+
         rubricRow.appendChild(rangeCell);
         rangeCell.setAttribute("padding-top", RUBRIC_TABLE_PADDING);
         rangeCell.setAttribute("padding-left", RUBRIC_TABLE_PADDING);
         FOPUtils.addBottomBorder(rangeCell, 1);
         FOPUtils.addRightBorder(rangeCell, 1);
-
       }
 
     } // foreach row
 
+  }
+
+  private Element createRubricRangeCell(final Document document,
+                                        final RubricRange rubricRange) {
+
+    final Element rangeCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
+
+    final Element block = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+    rangeCell.appendChild(block);
+    block.setAttribute(FOPUtils.TEXT_ALIGN_ATTRIBUTE, FOPUtils.TEXT_ALIGN_CENTER);
+
+    // add checkbox
+    final Element inlineCheckbox = FOPUtils.createXslFoElement(document, FOPUtils.INLINE_TAG);
+    block.appendChild(inlineCheckbox);
+    FOPUtils.addBorders(inlineCheckbox, 1, 1, 1, 1);
+    inlineCheckbox.appendChild(document.createTextNode(String.valueOf(Utilities.NON_BREAKING_SPACE).repeat(4)));
+
+    // add rubric description, if there is one
+    final String rawShortDescription = rubricRange.getShortDescription();
+    if (null != rawShortDescription) {
+      final String shortDescription = rawShortDescription.trim().replaceAll("\\s+", " ");
+      if (!shortDescription.isEmpty()) {
+        final StringBuilder rubricDescription = new StringBuilder();
+        rubricDescription.append(" ");
+        rubricDescription.append(shortDescription);
+        block.appendChild(document.createTextNode(rubricDescription.toString()));
+      }
+    }
+
+    return rangeCell;
   }
 
   private Element createRubricHeaderRow(final Document document,
