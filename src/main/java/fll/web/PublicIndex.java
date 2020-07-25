@@ -14,6 +14,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
+import fll.Tournament;
 import fll.db.Queries;
 import fll.web.report.finalist.FinalistSchedule;
 import net.mtu.eggplant.util.sql.SQLFunctions;
@@ -39,7 +40,7 @@ public final class PublicIndex {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
 
-      final String tournamentName = Queries.getCurrentTournamentName(connection);
+      final String tournamentName = Tournament.getCurrentTournament(connection).getName();
       pageContext.setAttribute("tournamentName", tournamentName);
 
       final int tournament = Queries.getCurrentTournament(connection);

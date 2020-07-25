@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -47,7 +48,19 @@ public class SubmitScoreEntry extends BaseFLLServlet {
     try (Connection connection = datasource.getConnection()) {
       final boolean deleteScore = Boolean.valueOf(request.getParameter("delete"));
       if (deleteScore) {
-        Queries.deletePerformanceScore(connection, request);
+        final String teamNumberStr = request.getParameter("TeamNumber");
+        if (null == teamNumberStr) {
+          throw new RuntimeException("Missing parameter: TeamNumber");
+        }
+        final int teamNumber = Utilities.getIntegerNumberFormat().parse(teamNumberStr).intValue();
+
+        final String runNumber = request.getParameter("RunNumber");
+        if (null == runNumber) {
+          throw new RuntimeException("Missing parameter: RunNumber");
+        }
+        final int irunNumber = Utilities.getIntegerNumberFormat().parse(runNumber).intValue();
+
+        Queries.deletePerformanceScore(connection, teamNumber, irunNumber);
       } else if (Boolean.valueOf(request.getParameter("EditFlag"))) {
         final int rowsUpdated = Queries.updatePerformanceScore(challengeDescription, connection, request);
         if (0 == rowsUpdated) {

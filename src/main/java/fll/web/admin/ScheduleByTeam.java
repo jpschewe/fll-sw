@@ -27,7 +27,8 @@ import fll.web.SessionAttributes;
 import fll.web.WebUtils;
 
 /**
- * @see TournamentSchedule#outputScheduleByTeam(java.io.OutputStream)
+ * @see ScheduleWriter#outputScheduleByTeam(TournamentSchedule,
+ *      java.io.OutputStream)
  */
 @WebServlet("/admin/ScheduleByTeam")
 public class ScheduleByTeam extends BaseFLLServlet {

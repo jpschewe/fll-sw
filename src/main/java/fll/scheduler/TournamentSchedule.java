@@ -859,7 +859,7 @@ public class TournamentSchedule implements Serializable {
   public void outputDetailedSchedules(final SchedParams params,
                                       final File directory,
                                       final String baseFilename)
-      throws IOException {
+      throws IOException, IllegalArgumentException {
     if (!directory.exists()) {
       if (!directory.mkdirs()) {
         throw new IllegalArgumentException("Unable to create "
@@ -943,8 +943,8 @@ public class TournamentSchedule implements Serializable {
       final String schedulerColumn = categoryToSchedule.get(scoreCategory);
 
       try (OutputStream stream = new FileOutputStream(filename)) {
-        SubjectivePdfWriter.createDocumentForSchedule(stream, description, tournamentName, sheetElement, schedulerColumn,
-                                           schedule);
+        SubjectivePdfWriter.createDocumentForSchedule(stream, description, tournamentName, sheetElement,
+                                                      schedulerColumn, schedule);
       }
     }
   }

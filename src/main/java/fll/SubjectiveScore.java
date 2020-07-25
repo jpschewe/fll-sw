@@ -55,7 +55,7 @@ public class SubjectiveScore {
   }
 
   /**
-   * @param v see {@Link #getScoreOnServer()}
+   * @param v see {@link #getScoreOnServer()}
    */
   public void setScoreOnServer(final boolean v) {
     scoreOnServer = v;
@@ -120,7 +120,7 @@ public class SubjectiveScore {
   }
 
   /**
-   * @param v see {@Link #getJudge()}
+   * @param v see {@link #getJudge()}
    */
   public void setJudge(final @Nullable String v) {
     judge = v;
@@ -213,7 +213,7 @@ public class SubjectiveScore {
   }
 
   /**
-   * @param v see {@Link #getCommentGreatJob()}
+   * @param v see {@link #getCommentGreatJob()}
    */
   public void setCommentGreatJob(final @Nullable String v) {
     commentGreatJob = v;

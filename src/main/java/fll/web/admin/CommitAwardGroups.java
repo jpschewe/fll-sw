@@ -101,7 +101,7 @@ public class CommitAwardGroups extends BaseFLLServlet {
 
               final String currentAwardGroup = Queries.getEventDivision(connection, teamNumber, currentTournamentID);
               if (!newAwardGroup.equals(currentAwardGroup)) {
-                Queries.setEventDivision(connection, teamNumber, currentTournamentID, newAwardGroup);
+                Queries.updateTeamEventDivision(connection, teamNumber, currentTournamentID, newAwardGroup);
               }
             }
           }

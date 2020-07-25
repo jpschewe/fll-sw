@@ -143,7 +143,7 @@ public final class FinalistLoad {
   public static String currentTournament(final ServletContext application) throws SQLException {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     try (Connection connection = datasource.getConnection()) {
-      final String name = Queries.getCurrentTournamentName(connection);
+      final String name = Tournament.getCurrentTournament(connection).getName();
       return WebUtils.quoteJavascriptString(name);
     }
   }
