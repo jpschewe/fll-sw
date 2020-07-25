@@ -34,15 +34,24 @@ import net.mtu.eggplant.util.ComparisonUtils;
 /**
  * Utilities for /setup/index.jsp.
  */
-public class SetupIndex {
+public final class SetupIndex {
+
+  private SetupIndex() {
+  }
 
   private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger();
 
   /**
    * Populate the page context with information for the jsp.
-   * pageContext:
-   * descriptions - List<DescriptionInfo> (sorted by title)
-   * dbinitialized - boolean if the database has been initialized
+   * Variables added to the pageContext:
+   * <ul>
+   * <li>descriptions - {@link List} of {@link DescriptionInfo} (sorted by
+   * title)</li>
+   * <li>dbinitialized - boolean if the database has been initialized</li>
+   * </ul>
+   * 
+   * @param application application variable access
+   * @param pageContext page variable access
    */
   public static void populateContext(final ServletContext application,
                                      final PageContext pageContext) {
@@ -52,7 +61,7 @@ public class SetupIndex {
     pageContext.setAttribute("descriptions", descriptions);
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    try (final Connection connection = datasource.getConnection()) {
+    try (Connection connection = datasource.getConnection()) {
       pageContext.setAttribute("dbinitialized", Utilities.testDatabaseInitialized(connection));
     } catch (final SQLException sqle) {
       LOGGER.error(sqle, sqle);
@@ -75,8 +84,8 @@ public class SetupIndex {
 
       final Collection<URL> urls = ChallengeParser.getAllKnownChallengeDescriptorURLs();
       for (final URL url : urls) {
-        try (final InputStream stream = url.openStream()) {
-          try (final Reader reader = new InputStreamReader(stream, Utilities.DEFAULT_CHARSET)) {
+        try (InputStream stream = url.openStream()) {
+          try (Reader reader = new InputStreamReader(stream, Utilities.DEFAULT_CHARSET)) {
             final Document document = ChallengeParser.parse(reader);
 
             final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());

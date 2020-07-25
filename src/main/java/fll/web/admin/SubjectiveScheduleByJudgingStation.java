@@ -29,7 +29,8 @@ import fll.web.WebUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
- * @see TournamentSchedule#outputSubjectiveSchedulesByJudgingStation(java.io.OutputStream)
+ * @see ScheduleWriter#outputSubjectiveSchedulesByJudgingStation(TournamentSchedule,
+ *      java.io.OutputStream)
  */
 @WebServlet("/admin/SubjectiveScheduleByJudgingStation")
 public class SubjectiveScheduleByJudgingStation extends BaseFLLServlet {

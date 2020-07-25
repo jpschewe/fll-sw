@@ -120,8 +120,8 @@ public final class FOPUtils {
    * @param name the name of the page master
    * @see #createSimplePageMaster(Document, Element, String, double, double,
    *      double, double, double, double, double, double)
-   * @throws IllegalArgumentException see {#link
-   *           {@link #createSimplePageMaster(Document, Element, String, double, double, double, double, double, double, double, double)}
+   * @throws IllegalArgumentException see
+   *           {@link #createSimplePageMaster(Document, String, Dimension2D, Margins, double, double)}
    * @see #STANDARD_MARGINS
    * @see #PAGE_LETTER_SIZE
    * @see #STANDARD_FOOTER_HEIGHT
@@ -197,7 +197,7 @@ public final class FOPUtils {
    * 
    * @param document used to create elements
    * @param pageMasterName the name of the page master from
-   *          {@link #createSimplePageMaster(Document, Element, String, double, double, double, double, double, double, double, double)}.
+   *          {@link #createSimplePageMaster(Document, String)}
    * @return the page sequence element to be added to the root element
    */
   public static Element createPageSequence(final Document document,
@@ -390,11 +390,11 @@ public final class FOPUtils {
    * Rotation is set to 0.
    * 
    * @param document see
-   *          {@link #createNoWrapTableCell(Document, String, String, int)
+   *          {@link #createNoWrapTableCell(Document, String, String, int)}
    * @param textAlignment see
-   *          {@link #createNoWrapTableCell(Document, String, String, int)
-   * @param text see {@link #createNoWrapTableCell(Document, String, String, int)
-   * @return see {@link #createNoWrapTableCell(Document, String, String, int)
+   *          {@link #createNoWrapTableCell(Document, String, String, int)}
+   * @param text see {@link #createNoWrapTableCell(Document, String, String, int)}
+   * @return see {@link #createNoWrapTableCell(Document, String, String, int)}
    */
   public static Element createNoWrapTableCell(final Document document,
                                               final String textAlignment,

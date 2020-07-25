@@ -124,6 +124,8 @@ public final class DumpDB extends BaseFLLServlet {
    * @param challengeDocument the challenge document to write out
    * @param application if not null, then add the log files and bug reports to the
    *          database
+   * @throws SQLException on a database error
+   * @throws IOException on an error writing to the stream
    */
   public static void dumpDatabase(final ZipOutputStream output,
                                   final Connection connection,
@@ -175,8 +177,8 @@ public final class DumpDB extends BaseFLLServlet {
 
     final File fllWebInfDir = new File(application.getRealPath("/WEB-INF"));
     final File[] bugReports = fllWebInfDir.listFiles((FilenameFilter) (dir,
-                      name) -> name.startsWith("bug_")
-                          && name.endsWith(".zip"));
+                                                                       name) -> name.startsWith("bug_")
+                                                                           && name.endsWith(".zip"));
 
     if (null != bugReports) {
       for (final File f : bugReports) {
