@@ -497,6 +497,9 @@ function saveToScoreObject(score) {
     } else {
       var subscore = Number($("#" + getScoreItemName(goal)).val());
       score.standardSubScores[goal.name] = subscore;
+
+      var goalComment = $("#enter-score-comment-" + goal.name + "-text").val();
+      score.goalComments[goal.name] = goalComment;
     }
   });
 }
@@ -550,21 +553,54 @@ function addRubricToScoreEntry(table, goal, ranges) {
 
   var row = $("<tr></tr>");
 
-  $.each(ranges, function(index, range) {
-    // skip the right border on the last cell
-    var borderClass;
-    if (index >= ranges.length - 1) {
-      borderClass = "";
-    } else {
-      borderClass = "border-right";
-    }
+  $
+      .each(
+          ranges,
+          function(index, range) {
+            var borderClass;
+            var commentButton;
+            if (index >= ranges.length - 1) {
+              // skip the right border on the last cell
+              borderClass = "";
 
-    var numColumns = range.max - range.min + 1;
-    var cell = $("<td colspan='" + numColumns + "' class='" + borderClass
-        + " center' id='" + getRubricCellId(goal, index) + "'>"
-        + range.shortDescription + "</td>");
-    row.append(cell);
-  });
+              commentButton = "<a id='enter-score-comment-"
+                  + goal.name
+                  + "-button'"
+                  + " href='#enter-score-comment-"
+                  + goal.name
+                  + "'"
+                  + " data-rel='popup' data-position-to='window'" // 
+                  + " class='ui-btn ui-mini ui-corner-all ui-shadow ui-btn-inline'>Comment</a>";
+
+              var popup = $("<div id='enter-score-comment-"
+                  + goal.name
+                  + "'"
+                  + " class='ui-content' data-role='popup' data-dismissible='false'>"
+                  + " </div>");
+
+              var textarea = $("<textarea id='enter-score-comment-" + goal.name
+                  + "-text'" + " rows='20' cols='60'></textarea>");
+              popup.append(textarea);
+
+              var link = $(" <a href='#' data-rel='back' id='enter-score-"
+                  + goal.name
+                  + "-save'"
+                  + " class='ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b'>Save</a>");
+              popup.append(link);
+
+              $("#enter-score-goal-comments").append(popup);
+
+            } else {
+              borderClass = "border-right";
+              commentButton = "";
+            }
+
+            var numColumns = range.max - range.min + 1;
+            var cell = $("<td colspan='" + numColumns + "' class='"
+                + borderClass + " center' id='" + getRubricCellId(goal, index)
+                + "'>" + range.shortDescription + commentButton + "</td>");
+            row.append(cell);
+          });
 
   table.append(row);
 
@@ -731,6 +767,8 @@ $(document)
           var table = $("#enter-score_score-table");
           table.empty();
 
+          $("#enter-score-goal-comments").empty();
+
           var totalColumns = populateEnterScoreRubricTitles(table, true);
 
           // put rubric titles in the top header
@@ -773,6 +811,14 @@ $(document)
           $.each($.subjective.getCurrentCategory().goals,
               function(index, goal) {
                 addEventsToSlider(goal);
+
+                if (null != score) {
+                  $("#enter-score-comment-" + goal.name + "-text").val(
+                      score.goalComments[goal.name]);
+                } else {
+                  $("#enter-score-comment-" + goal.name + "-text").val("");
+                }
+
               });
 
         });
