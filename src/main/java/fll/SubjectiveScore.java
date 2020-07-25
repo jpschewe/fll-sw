@@ -18,6 +18,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.GenerateDB;
 import fll.xml.AbstractGoal;
 import fll.xml.Goal;
@@ -265,6 +266,7 @@ public class SubjectiveScore {
    * @return the scores found on the server, possibly an empty list
    * @throws SQLException if there is a problem talking to the database
    */
+  @SuppressFBWarnings(value = "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING", justification = "Table name is determined by the category")
   public static Collection<SubjectiveScore> getScoresForTeam(final Connection connection,
                                                              final SubjectiveScoreCategory category,
                                                              final Tournament tournament,
