@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
@@ -636,6 +637,9 @@ public class SubjectivePdfWriter {
                                  final TableElement tableData,
                                  final @Nullable SubjectiveScore score) {
 
+    final Map<String, Double> standardSubScores = null == score ? Collections.emptyMap() : score.getStandardSubScores();
+    final Map<String, String> goalComments = null == score ? Collections.emptyMap() : score.getGoalComments();
+
     // This is the 90 degree turned title for the left side of the table
     final Element goalGroupCell = createGoalGroupCell(document, fontSize, tableData.getSubjectiveCatetory());
     FOPUtils.addBottomBorder(goalGroupCell, 1);
@@ -712,14 +716,34 @@ public class SubjectivePdfWriter {
         // will compare to false for all ranges
         goalScore = Double.NaN;
       } else {
-        goalScore = score.getStandardSubScores().get(goal.getName());
+        goalScore = standardSubScores.get(goal.getName());
       }
 
       for (final RubricRange rubricRange : sortedRubricRanges) {
         final boolean checked = rubricRange.getMin() <= goalScore
             && goalScore <= rubricRange.getMax();
 
-        final Element rangeCell = createRubricRangeCell(document, rubricRange, checked);
+        final String goalComment;
+        if (null != score
+            && sortedRubricRanges.get(sortedRubricRanges.size()
+                - 1).equals(rubricRange)) {
+          // last range is where the goal comment is output
+          final String rawComment = goalComments.get(goal.getName());
+          if (null != rawComment) {
+            final String trimmed = rawComment.trim();
+            if (trimmed.isBlank()) {
+              goalComment = null;
+            } else {
+              goalComment = trimmed;
+            }
+          } else {
+            goalComment = null;
+          }
+        } else {
+          goalComment = null;
+        }
+
+        final Element rangeCell = createRubricRangeCell(document, rubricRange, checked, goalComment);
 
         rubricRow.appendChild(rangeCell);
         rangeCell.setAttribute("padding-top", RUBRIC_TABLE_PADDING);
@@ -734,7 +758,8 @@ public class SubjectivePdfWriter {
 
   private Element createRubricRangeCell(final Document document,
                                         final RubricRange rubricRange,
-                                        final boolean checked) {
+                                        final boolean checked,
+                                        final @Nullable String goalComment) {
 
     final Element rangeCell = FOPUtils.createXslFoElement(document, FOPUtils.TABLE_CELL_TAG);
 
@@ -762,6 +787,15 @@ public class SubjectivePdfWriter {
         rubricDescription.append(shortDescription);
         block.appendChild(document.createTextNode(rubricDescription.toString()));
       }
+    }
+
+    if (null != goalComment) {
+      // add judges comments
+      final Element commentBlock = FOPUtils.createXslFoElement(document, FOPUtils.BLOCK_TAG);
+      block.appendChild(commentBlock);
+      commentBlock.setAttribute("font-style", "italic");
+      commentBlock.setAttribute("font-weight", "bold");
+      commentBlock.appendChild(document.createTextNode(goalComment));
     }
 
     return rangeCell;
@@ -856,6 +890,7 @@ public class SubjectivePdfWriter {
       commentThinkAbout = score.getCommentThinkAbout();
 
       rowElement.setAttribute("font-style", "italic");
+      rowElement.setAttribute("font-weight", "bold");
     }
 
     final Element left = FOPUtils.createTableCell(document, null, commentGreatJob == null ? "" : commentGreatJob);
