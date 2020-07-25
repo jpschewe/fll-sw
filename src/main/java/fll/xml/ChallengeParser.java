@@ -63,7 +63,7 @@ import net.mtu.eggplant.xml.XMLUtils;
 public final class ChallengeParser {
 
   /**
-   * The expected namespace for FLL documents
+   * The expected namespace for FLL documents.
    */
   public static final String FLL_NAMESPACE = "http://www.hightechkids.org";
 
@@ -117,10 +117,19 @@ public final class ChallengeParser {
    */
   public static final double INITIAL_VALUE_TOLERANCE = 1E-4;
 
+  /**
+   * Current version of the schema.
+   */
   public static final int CURRENT_SCHEMA_VERSION = 2;
 
+  /**
+   * The XML attribute used to store the {@link ScoreType}.
+   */
   public static final String SCORE_TYPE_ATTRIBUTE = "scoreType";
 
+  /**
+   * The XML attribute used to store the {@link WinnerType}.
+   */
   public static final String WINNER_ATTRIBUTE = "winner";
 
   private ChallengeParser() {
@@ -387,7 +396,7 @@ public final class ChallengeParser {
       boolean foundMatch = false;
       for (final Element valueEle : new NodelistElementCollectionAdapter(goalElement.getChildNodes())) {
         final double score = Utilities.getXmlFloatingPointNumberFormat().parse(valueEle.getAttribute("score"))
-                                                                                .doubleValue();
+                                      .doubleValue();
         if (FP.equals(score, initialValue, INITIAL_VALUE_TOLERANCE)) {
           foundMatch = true;
         }
