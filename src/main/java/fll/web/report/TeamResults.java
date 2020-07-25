@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalTime;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.zip.ZipEntry;
@@ -23,6 +24,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
+import javax.xml.transform.TransformerException;
+
+import org.apache.fop.apps.FOPException;
+import org.apache.fop.apps.FopFactory;
+import org.w3c.dom.Document;
 
 import fll.SubjectiveScore;
 import fll.Team;
@@ -35,6 +41,7 @@ import fll.documents.writers.SubjectivePdfWriter;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
+import fll.util.FOPUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.xml.ChallengeDescription;
@@ -131,6 +138,34 @@ public class TeamResults extends BaseFLLServlet {
                                                   scheduledTime);
 
       zipOut.closeEntry();
+    } // foreach subjective category
+
+    writePerformance(zipOut, description, connection, tournament, team, directory);
+  }
+
+  private void writePerformance(final ZipOutputStream zipOut,
+                                final ChallengeDescription description,
+                                final Connection connection,
+                                final Tournament tournament,
+                                final TournamentTeam team,
+                                final String directory)
+      throws SQLException, IOException {
+    try {
+      final Document document = PerformanceScoreReport.createDocument(connection, description, tournament,
+                                                                      Collections.singleton(team));
+
+      final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
+
+      final String filename = String.format("%s/Performance.pdf", directory);
+
+      zipOut.putNextEntry(new ZipEntry(filename));
+
+      FOPUtils.renderPdf(fopFactory, document, zipOut);
+
+      zipOut.closeEntry();
+
+    } catch (FOPException | TransformerException e) {
+      throw new FLLInternalException("Error creating the performance schedule PDF", e);
     }
   }
 
