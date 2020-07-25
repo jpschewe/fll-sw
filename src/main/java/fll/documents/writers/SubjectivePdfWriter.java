@@ -5,9 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Writer;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.LocalTime;
 import java.util.Base64;
 import java.util.Collections;
@@ -383,13 +380,7 @@ public class SubjectivePdfWriter {
 
     try {
       final Document document = writer.createDocument(schedule, pointSize, commentHeight);
-      try (Writer w = Files.newBufferedWriter(Paths.get("subjective.fo"))) {
-        XMLUtils.writeXML(document, w);
-      } catch (final IOException e) {
-        throw new RuntimeException(e);
-      }
       final FopFactory fopFactory = FOPUtils.createSimpleFopFactory();
-
       FOPUtils.renderPdf(fopFactory, document, stream);
     } catch (FOPException | TransformerException e) {
       throw new FLLInternalException("Error creating the subjective schedule PDF", e);
