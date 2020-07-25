@@ -1,3 +1,4 @@
+* #842 - Add the ability to enter comments in the subjective web application.
 * #840 - Fix use of user provided constraint change times
 * #837 - Fix errors around editing restrictions in the challenge description editor
 * #839 - Allow the application to run headless
