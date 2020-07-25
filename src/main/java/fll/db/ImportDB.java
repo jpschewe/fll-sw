@@ -259,7 +259,7 @@ public final class ImportDB {
         importDatabase(sourceConnection, destConnection, tournament, true, true, true);
       }
 
-      final String sourceSelectedTournamentName = Queries.getCurrentTournamentName(sourceConnection);
+      final String sourceSelectedTournamentName = Tournament.getCurrentTournament(sourceConnection).getName();
       final Tournament destSelectedTournament = Tournament.findTournamentByName(destConnection,
                                                                                 sourceSelectedTournamentName);
       Queries.setCurrentTournament(destConnection, destSelectedTournament.getTournamentID());
