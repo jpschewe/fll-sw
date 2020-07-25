@@ -902,6 +902,7 @@ public final class ImportDB {
     setDBVersion(connection, 22);
   }
 
+  @SuppressFBWarnings(value = "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE", justification = "Category name determines the table name")
   private static void upgrade22To23(final Connection connection,
                                     final ChallengeDescription description)
       throws SQLException {
