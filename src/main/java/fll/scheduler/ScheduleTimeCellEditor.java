@@ -21,14 +21,14 @@ import javax.swing.table.TableCellEditor;
 
   private final ScheduleTimeField delegate;
 
-  private transient final ScheduleTimeField.TimeVerifier verifier;
+  private final transient ScheduleTimeField.TimeVerifier verifier;
 
   /**
    * Create a cell editor for schedule times.
    * 
    * @param allowNull if true, allow null values
    */
-  public ScheduleTimeCellEditor(final boolean allowNull) {
+  /* package */ ScheduleTimeCellEditor(final boolean allowNull) {
     super();
     delegate = new ScheduleTimeField();
     verifier = new ScheduleTimeField.TimeVerifier(allowNull);
